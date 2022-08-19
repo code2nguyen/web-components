@@ -1,0 +1,63 @@
+{
+  "name": "@c2n/checkbox",
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "npm run lint:lit-analyzer && npm run lint:eslint",
+    "lint:eslint": "eslint 'src/**/*.ts'",
+    "lint:lit-analyzer": "lit-analyzer"
+  },
+  "dependencies": {
+    "lit": "2.3.0"
+  },
+  "devDependencies": {
+    "typescript": "4.7.4",
+    "eslint": "8.22.0",
+    "prettier": "2.7.1",
+    "vite": "3.0.8"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 160,
+    "tabWidth": 2,
+    "semi": false
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true,
+      "browser": true,
+      "es6": true
+    },
+    "extends": [
+      "plugin:vue/vue3-recommended",
+      "prettier"
+    ],
+    "parserOptions": {
+      "parser": "@typescript-eslint/parser",
+      "ecmaVersion": 2020,
+      "sourceType": "module"
+    },
+    "plugins": [
+      "@typescript-eslint",
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": [
+        "error"
+      ],
+      "vue/require-default-prop": 0,
+      "vue/html-indent": [
+        "error",
+        2
+      ],
+      "vue/multi-word-component-names": 0,
+      "vue/v-on-event-hyphenation": 0,
+      "vue/singleline-html-element-content-newline": 0,
+      "vue/no-multiple-template-root": "off",
+      "vue/component-name-in-template-casing": [
+        "error",
+        "PascalCase"
+      ]
+    }
+  }
+}
