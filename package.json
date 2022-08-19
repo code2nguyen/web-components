@@ -12,6 +12,6 @@
     "packages/*"
   ],
   "lint-staged": {
-    "*.ts": "npm run lint:fix --workspaces --if-present"
+    "*.ts": "npm run lint --workspaces --if-present"
   }
 }

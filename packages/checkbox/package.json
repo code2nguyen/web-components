@@ -10,7 +10,10 @@
     "lit": "2.3.0"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.33.1",
+    "@typescript-eslint/parser": "5.33.1",
     "typescript": "4.7.4",
+    "lit-analyzer": "1.2.1",
     "eslint": "8.22.0",
     "prettier": "2.7.1",
     "vite": "3.0.8"
@@ -23,41 +26,58 @@
   },
   "eslintConfig": {
     "root": true,
-    "env": {
-      "node": true,
-      "browser": true,
-      "es6": true
-    },
     "extends": [
-      "plugin:vue/vue3-recommended",
-      "prettier"
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
     ],
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
-      "parser": "@typescript-eslint/parser",
       "ecmaVersion": 2020,
       "sourceType": "module"
     },
     "plugins": [
-      "@typescript-eslint",
-      "prettier"
+      "@typescript-eslint"
     ],
+    "env": {
+      "browser": true
+    },
     "rules": {
-      "prettier/prettier": [
-        "error"
-      ],
-      "vue/require-default-prop": 0,
-      "vue/html-indent": [
-        "error",
-        2
-      ],
-      "vue/multi-word-component-names": 0,
-      "vue/v-on-event-hyphenation": 0,
-      "vue/singleline-html-element-content-newline": 0,
-      "vue/no-multiple-template-root": "off",
-      "vue/component-name-in-template-casing": [
-        "error",
-        "PascalCase"
+      "no-prototype-builtins": "off",
+      "@typescript-eslint/ban-types": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          "argsIgnorePattern": "^_"
+        }
       ]
-    }
+    },
+    "overrides": [
+      {
+        "files": [
+          "rollup.config.js",
+          "web-test-runner.config.js"
+        ],
+        "env": {
+          "node": true
+        }
+      },
+      {
+        "files": [
+          "*_test.ts",
+          "**/custom_typings/*.ts",
+          "packages/labs/ssr/src/test/integration/tests/**",
+          "packages/labs/ssr/src/lib/util/parse5-utils.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/no-explicit-any": "off"
+        }
+      }
+    ]
   }
 }
