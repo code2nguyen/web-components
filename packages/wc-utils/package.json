@@ -1,22 +1,11 @@
 {
-  "name": "@c2n/checkbox",
-  "version": "0.0.1",
+  "name": "@c2n/wc-utils",
+  "version": "1.0.0",
   "type": "module",
-  "main": "dist/checkbox.js",
-  "exports": {
-    ".": "./dist/checkbox.js"
-  },
-  "types": "types/src/index.d.ts",
   "files": [
     "dist",
     "types"
   ],
-  "keywords": [
-    "checkbox",
-    "web component",
-    "lit"
-  ],
-  "author": "code2nguyen@gmail.com",
   "scripts": {
     "lint": "npm run lint:lit-analyzer && npm run lint:eslint",
     "lint:eslint": "eslint 'src/**/*.ts'",
@@ -24,9 +13,9 @@
     "dev": "vite",
     "build": "tsc && vite build"
   },
+  "author": "code2nguyen@gmail.com",
   "dependencies": {
-    "lit": "2.3.0",
-    "@c2n/wc-utils": "0.0.1"
+    "lit": "2.3.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.33.1",

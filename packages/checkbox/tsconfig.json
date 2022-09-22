@@ -19,7 +19,8 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "outDir": "./dist",
+    "outDir": "./types",
+    "rootDir": ".",
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "plugins": [

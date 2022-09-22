@@ -1,0 +1,15 @@
+@use 'sass:map';
+
+/* ex : var((width: 24px), width, c2-checkbox)  returns var(--c2-checkbox-width, 24px) */
+@function cssVar($theme, $property, $prefix) {
+  @return var(--#{$prefix}-#{$property}, map.get($theme, $property));
+}
+
+// State Opacity
+$state-layer-dragged-opacity: 0.16;
+$state-layer-focus-opacity: 0.12;
+$state-layer-hover-opacity: 0.08;
+$state-layer-pressed-opacity: 0.12;
+
+$disabled-content-opacity: 0.38;
+$disabled-container-opacity: 0.12;

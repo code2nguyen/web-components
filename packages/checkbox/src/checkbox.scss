@@ -1,0 +1,384 @@
+@use 'sass:math';
+@use '@c2n/wc-utils/animation';
+@use '@c2n/wc-utils/css-variable';
+
+$prefix: c2-checkbox;
+
+$_transition-duration: 90ms;
+
+$_container-size: 18px;
+$_outline-width: 1.5px;
+$_outline-radius: 5px;
+$_state_layer_size: 40px;
+$_touch-target-size: 48px;
+
+$_checkmark-size: 14px;
+$_mixedmark-size: 14px;
+
+$_primary-color: #476ef9;
+// $error-color: #b3261e;
+// $on-surface-color: #1c1b1f;
+$_surface-color: #bcbcc6;
+// $on-error-color: #fff;
+$_on-primary-color: #fff;
+$_outline-color: #bcbcc6;
+
+// Selector
+$_unselected-selector: '.c2-checkbox-input:not(:checked):not(:indeterminate)';
+$_unselected-enabled-selector: '#{$_unselected-selector}:enabled';
+$_unselected-disabled-selector: '#{$_unselected-selector}:disabled';
+
+$_selected-selector: '.c2-checkbox-input:checked';
+$_selected-enabled-selector: '#{$_selected-selector}:enabled';
+$_selected-disabled-selector: '#{$_selected-selector}:disabled';
+
+$_indeterminate-selector: '.c2-checkbox-input:indeterminate';
+$_indeterminate-enabled-selector: '#{$_indeterminate-selector}:enabled';
+$_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
+
+$theme: (
+  container-height: $_container-size,
+  container-width: $_container-size,
+
+  container-border-radius: $_outline-radius,
+  container-border-width: $_outline-width,
+  container-border-color: $_outline-color,
+
+  container-enabled-selected-color: $_primary-color,
+
+  checkmark-size: $_checkmark-size,
+  checkmark-color: $_on-primary-color,
+
+  mixedmark-size: $_mixedmark-size,
+  mixedmark-color: $_on-primary-color,
+
+  touch-target-size: $_touch-target-size,
+  state-layer-border-radius: 9999px,
+  state-layer-size: $_state_layer_size,
+
+  state-layer-hover-opacity: css-variable.$state-layer-hover-opacity,
+  state-layer-hover-unselected-color: $_surface-color,
+  state-layer-hover-indeterminate-color: $_primary-color,
+
+  disabled-opacity: css-variable.$disabled-content-opacity,
+);
+
+:host {
+  display: inline-flex;
+}
+
+.c2-checkbox {
+  display: inline-flex;
+  position: relative;
+  line-height: 0;
+  white-space: nowrap;
+  cursor: pointer;
+  vertical-align: bottom;
+  z-index: 0;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: css-variable.cssVar($theme, touch-target-size, $prefix);
+  height: css-variable.cssVar($theme, touch-target-size, $prefix);
+}
+
+.c2-checkbox-input {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: inherit;
+  width: css-variable.cssVar($theme, touch-target-size, $prefix);
+  height: css-variable.cssVar($theme, touch-target-size, $prefix);
+}
+
+.c2-checkbox__background {
+  display: inline-flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-style: solid;
+  background-color: transparent;
+  pointer-events: none;
+  will-change: background-color, border-color;
+  transition: transition-exit(background-color), transition-exit(border-color);
+
+  width: css-variable.cssVar($theme, container-width, $prefix);
+  height: css-variable.cssVar($theme, container-height, $prefix);
+  border-radius: css-variable.cssVar($theme, container-border-radius, $prefix);
+}
+
+::slotted(svg[slot='checkmark']),
+.c2-checkbox__checkmark {
+  position: absolute;
+  width: css-variable.cssVar($theme, checkmark-size, $prefix);
+  height: css-variable.cssVar($theme, checkmark-size, $prefix);
+  transition: transition-exit(opacity, 0ms, $_transition-duration * 2);
+  opacity: 0;
+}
+
+::slotted(svg[slot='mixedmark']),
+.c2-checkbox__mixedmark {
+  position: absolute;
+  width: css-variable.cssVar($theme, mixedmark-size, $prefix);
+  height: css-variable.cssVar($theme, mixedmark-size, $prefix);
+  transform: scaleX(0) rotate(0deg);
+  opacity: 0;
+  transition: transition-exit(opacity), transition-exit(transform);
+}
+
+.c2-checkbox-state-layer {
+  position: absolute;
+  width: css-variable.cssVar($theme, state-layer-size, $prefix);
+  height: css-variable.cssVar($theme, state-layer-size, $prefix);
+  border-radius: css-variable.cssVar($theme, state-layer-border-radius, $prefix);
+  background-color: transparent;
+  opacity: 0;
+  pointer-events: none;
+  will-change: background-color, opacity;
+}
+
+// Enabled
+#{$_unselected-enabled-selector} ~ {
+  .c2-checkbox__background {
+    border-width: css-variable.cssVar($theme, container-border-width, $prefix);
+    border-color: css-variable.cssVar($theme, container-border-color, $prefix);
+  }
+}
+
+#{$_indeterminate-enabled-selector} ~ {
+  .c2-checkbox__background {
+    border-width: 0;
+    background-color: css-variable.cssVar($theme, container-enabled-selected-color, $prefix);
+    ::slotted(svg[slot='checkmark']),
+    .c2-checkbox__checkmark {
+      opacity: 0;
+    }
+    ::slotted(svg[slot='mixedmark']),
+    .c2-checkbox__mixedmark {
+      opacity: 1;
+      transform: scaleX(1) rotate(0deg);
+      color: css-variable.cssVar($theme, mixedmark-color, $prefix);
+    }
+  }
+}
+
+#{$_selected-enabled-selector} ~ {
+  .c2-checkbox__background {
+    border-width: 0;
+    background-color: css-variable.cssVar($theme, container-enabled-selected-color, $prefix);
+    ::slotted(svg[slot='checkmark']),
+    .c2-checkbox__checkmark {
+      opacity: 1;
+      color: css-variable.cssVar($theme, checkmark-color, $prefix);
+    }
+  }
+}
+
+// Disabled
+#{$_unselected-disabled-selector} ~ {
+  .c2-checkbox__background {
+    border-width: css-variable.cssVar($theme, container-border-width, $prefix);
+    border-color: css-variable.cssVar($theme, container-border-color, $prefix);
+    opacity: css-variable.cssVar($theme, disabled-opacity, $prefix);
+  }
+}
+
+#{$_indeterminate-disabled-selector} ~ {
+  .c2-checkbox__background {
+    border-width: 0;
+    background-color: css-variable.cssVar($theme, container-enabled-selected-color, $prefix);
+    opacity: css-variable.cssVar($theme, disabled-opacity, $prefix);
+    ::slotted(svg[slot='checkmark']),
+    .c2-checkbox__checkmark {
+      opacity: 0;
+    }
+    ::slotted(svg[slot='mixedmark']),
+    .c2-checkbox__mixedmark {
+      opacity: 1;
+      transform: scaleX(1) rotate(0deg);
+      color: css-variable.cssVar($theme, mixedmark-color, $prefix);
+    }
+  }
+}
+
+#{$_selected-disabled-selector} ~ {
+  .c2-checkbox__background {
+    border-width: 0;
+    background-color: css-variable.cssVar($theme, container-enabled-selected-color, $prefix);
+    opacity: css-variable.cssVar($theme, disabled-opacity, $prefix);
+    ::slotted(svg[slot='checkmark']),
+    .c2-checkbox__checkmark {
+      opacity: 1;
+      color: css-variable.cssVar($theme, checkmark-color, $prefix);
+    }
+  }
+}
+
+// Hover
+#{$_unselected-enabled-selector}:hover ~ {
+  .c2-checkbox-state-layer {
+    background-color: css-variable.cssVar($theme, state-layer-hover-unselected-color, $prefix);
+    opacity: css-variable.cssVar($theme, state-layer-hover-opacity, $prefix);
+  }
+}
+#{$_indeterminate-enabled-selector}:hover ~ {
+  .c2-checkbox-state-layer {
+    background-color: css-variable.cssVar($theme, state-layer-hover-indeterminate-color, $prefix);
+    opacity: css-variable.cssVar($theme, state-layer-hover-opacity, $prefix);
+  }
+}
+
+#{$_selected-enabled-selector}:hover ~ {
+  .c2-checkbox-state-layer {
+    background-color: css-variable.cssVar($theme, state-layer-hover-indeterminate-color, $prefix);
+    opacity: css-variable.cssVar($theme, state-layer-hover-opacity, $prefix);
+  }
+}
+
+// Focus
+#{$_unselected-enabled-selector}:focus ~ {
+  .c2-checkbox-state-layer {
+    background-color: css-variable.cssVar($theme, state-layer-hover-unselected-color, $prefix);
+    opacity: css-variable.cssVar($theme, state-layer-hover-opacity, $prefix);
+  }
+}
+#{$_indeterminate-enabled-selector}:focus ~ {
+  .c2-checkbox-state-layer {
+    background-color: css-variable.cssVar($theme, state-layer-hover-indeterminate-color, $prefix);
+    opacity: css-variable.cssVar($theme, state-layer-hover-opacity, $prefix);
+  }
+}
+
+#{$_selected-enabled-selector}:focus ~ {
+  .c2-checkbox-state-layer {
+    background-color: css-variable.cssVar($theme, state-layer-hover-indeterminate-color, $prefix);
+    opacity: css-variable.cssVar($theme, state-layer-hover-opacity, $prefix);
+  }
+}
+
+// Pressed
+
+// Error
+
+.c2-checkbox__background--marked {
+  // transition deceleration
+  transition: background-color 90ms cubic-bezier(0, 0, 0.2, 1), border-color 90ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@mixin _mark-keyframes() {
+  @keyframes md3-checkbox-unchecked-checked-checkmark-path {
+    0%,
+    50% {
+      stroke-dashoffset: $_mark-path-length;
+    }
+
+    50% {
+      animation-timing-function: animation.$deceleration-easing;
+    }
+
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes md3-checkbox-unchecked-indeterminate-mixedmark {
+    0%,
+    68.2% {
+      transform: scaleX(0);
+    }
+
+    68.2% {
+      animation-timing-function: cubic-bezier(0, 0, 0, 1);
+    }
+
+    100% {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes md3-checkbox-checked-unchecked-checkmark-path {
+    from {
+      animation-timing-function: animation.$acceleration-easing;
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+
+    to {
+      opacity: 0;
+      stroke-dashoffset: $_mark-path-length * -1;
+    }
+  }
+
+  @keyframes md3-checkbox-checked-indeterminate-checkmark {
+    from {
+      animation-timing-function: animation.$deceleration-easing;
+      transform: rotate(0deg);
+      opacity: 1;
+    }
+
+    to {
+      transform: rotate(45deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes md3-checkbox-indeterminate-checked-checkmark {
+    from {
+      animation-timing-function: $_indeterminate-checked-easing-function;
+      transform: rotate(45deg);
+      opacity: 0;
+    }
+
+    to {
+      transform: rotate(360deg);
+      opacity: 1;
+    }
+  }
+
+  @keyframes md3-checkbox-checked-indeterminate-mixedmark {
+    from {
+      animation-timing-function: md3-animation-deceleration-curve-timing-function;
+      transform: rotate(-45deg);
+      opacity: 0;
+    }
+
+    to {
+      transform: rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  @keyframes md3-checkbox-indeterminate-checked-mixedmark {
+    from {
+      animation-timing-function: $_indeterminate-checked-easing-function;
+      transform: rotate(0deg);
+      opacity: 1;
+    }
+
+    to {
+      transform: rotate(315deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes md3-checkbox-indeterminate-unchecked-mixedmark {
+    0% {
+      animation-timing-function: linear;
+      transform: scaleX(1);
+      opacity: 1;
+    }
+
+    32.8%,
+    100% {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+  }
+}
+
+@mixin _mixedmark--indeterminate() {
+  transform: scaleX(1) rotate(0deg);
+  opacity: 1;
+}

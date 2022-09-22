@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div>States</div>
+    <div class="flex gap-24">
+      <div class="flex flex-col gap-8">
+        <div class="demo">
+          <span>---------</span>
+          <c2-checkbox> </c2-checkbox>
+          <span>---------</span>
+        </div>
+        <div class="demo">
+          <span>---------</span>
+          <c2-checkbox indeterminate> </c2-checkbox>
+          <span>---------</span>
+        </div>
+        <div class="demo">
+          <span>---------</span>
+          <c2-checkbox checked> </c2-checkbox>
+          <span>---------</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-8">
+        <div class="demo">
+          <span>---------</span>
+          <c2-checkbox disabled> </c2-checkbox>
+          <span>---------</span>
+        </div>
+        <div class="demo">
+          <span>---------</span>
+          <c2-checkbox indeterminate disabled> </c2-checkbox>
+          <span>---------</span>
+        </div>
+        <div class="demo">
+          <span>---------</span>
+          <c2-checkbox checked disabled> </c2-checkbox>
+          <span>---------</span>
+        </div>
+      </div>
+    </div>
+    <hr />
+    <div class="demo">
+      <span>---------</span>
+      <c2-checkbox indeterminate style="--c2-checkbox-mixedmark-size: 8px">
+        <svg slot="mixedmark" width="10" height="2" viewBox="0 0 10 2">
+          <rect width="10" height="2" rx="1" fill="currentColor" />
+        </svg>
+      </c2-checkbox>
+      <span>---------</span>
+    </div>
+
+    <div class="demo">
+      <span>---------</span>
+      <c2-checkbox checked style="--c2-checkbox-mixedmark-size: 8px; --c2-checkbox-checkmark-size: 10px">
+        <svg slot="checkmark" width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 1L3.5 6L1 3.72727" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+
+        <svg slot="mixedmark" width="10" height="2" viewBox="0 0 10 2">
+          <rect width="10" height="2" rx="1" fill="currentColor" />
+        </svg>
+      </c2-checkbox>
+      <span>---------</span>
+    </div>
+
+    <div class="demo">
+      <span>---------</span>
+      <c2-checkbox style="--c2-checkbox-mixedmark-size: 8px; --c2-checkbox-checkmark-size: 10px">
+        <svg slot="checkmark" width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 1L3.5 6L1 3.72727" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+
+        <svg slot="mixedmark" width="10" height="2" viewBox="0 0 10 2">
+          <rect width="10" height="2" rx="1" fill="currentColor" />
+        </svg>
+      </c2-checkbox>
+      <span>---------</span>
+    </div>
+  </body>
+</html>

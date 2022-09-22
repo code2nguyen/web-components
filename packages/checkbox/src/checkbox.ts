@@ -1,7 +1,7 @@
-import { LitElement, css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
-import litLogo from './assets/lit.svg'
-
+import { LitElement, html, unsafeCSS } from 'lit'
+import { customElement, property, query, state } from 'lit/decorators.js'
+import { ifDefined } from 'lit/directives/if-defined.js'
+import styles from './checkbox.scss?inline'
 /**
  * An example element.
  *
@@ -10,110 +10,91 @@ import litLogo from './assets/lit.svg'
  */
 @customElement('c2-checkbox')
 export class Checkbox extends LitElement {
-  /**
-   * Copy for the read the docs hint.
-   */
-  @property()
-  docsHint = 'Click on the Vite and Lit logos to learn more'
+  @query('input') protected formElement!: HTMLInputElement
 
-  /**
-   * The number of times the button has been clicked.
-   */
-  @property({ type: Number })
-  count = 0
+  @property({ type: Boolean, reflect: true }) checked = false
+
+  @property({ type: Boolean, reflect: true }) indeterminate = false
+
+  @property({ type: Boolean, reflect: true }) disabled = false
+
+  @property({ type: String }) name = ''
+
+  @property({ type: String, attribute: 'aria-label' })
+  override ariaLabel!: string
+
+  @property({ type: String, attribute: 'aria-labelledby' })
+  ariaLabelledBy!: undefined | string
+
+  @property({ type: String, attribute: 'aria-describedby' })
+  ariaDescribedBy!: undefined | string
+
+  @state() protected showFocusRing = false
 
   override render() {
+    const ariaChecked = this.indeterminate ? 'mixed' : undefined
+
     return html`
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://lit.dev" target="_blank">
-          <img src=${litLogo} class="logo lit" alt="Lit logo" />
-        </a>
+      <div class="c2-checkbox">
+        ${this.renderStateLayer()}
+        <input
+          class="c2-checkbox-input"
+          type="checkbox"
+          name="${ifDefined(this.name)}"
+          aria-checked="${ifDefined(ariaChecked)}"
+          aria-label="${ifDefined(this.ariaLabel)}"
+          aria-labelledby="${ifDefined(this.ariaLabelledBy)}"
+          aria-describedby="${ifDefined(this.ariaDescribedBy)}"
+          ?disabled="${this.disabled}"
+          .indeterminate="${this.indeterminate}"
+          ?checked="${this.checked}"
+          @change="${this.handleChange}"
+          @focus="${this.handleFocus}"
+          @blur="${this.handleBlur}"
+        />
+        <div class="c2-checkbox__background">
+          <slot name="checkmark">
+            <svg class="c2-checkbox__checkmark" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+            </svg>
+          </slot>
+          <slot name="mixedmark">
+            <svg class="c2-checkbox__mixedmark" c2-checkbox__mixedmark viewBox="0 0 24 24">
+              <path fill="currentColor" d="M19 13H5v-2h14v2z" />
+            </svg>
+          </slot>
+        </div>
+        <div class="c2-checkbox-state-layer"></div>
       </div>
-      <slot></slot>
-      <div class="card">
-        <button @click=${this._onClick} part="button">count is ${this.count}</button>
-      </div>
-      <p class="read-the-docs">${this.docsHint}</p>
     `
   }
 
-  private _onClick() {
-    this.count++
+  protected renderCheckBox() {}
+
+  protected renderStateLayer() {
+    return html``
   }
 
-  static override styles = css`
-    :host {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2rem;
-      text-align: center;
-    }
+  protected handleChange() {
+    this.checked = this.formElement.checked
+    this.indeterminate = this.formElement.indeterminate
+    this.dispatchEvent(
+      new Event('change', {
+        bubbles: true,
+        composed: true,
+      })
+    )
+  }
 
-    .logo {
-      height: 6em;
-      padding: 1.5em;
-      will-change: filter;
-    }
-    .logo:hover {
-      filter: drop-shadow(0 0 2em #646cffaa);
-    }
-    .logo.lit:hover {
-      filter: drop-shadow(0 0 2em #325cffaa);
-    }
+  protected handleFocus() {
+    this.showFocusRing = true
+  }
 
-    .card {
-      padding: 2em;
-    }
+  protected handleBlur() {
+    this.showFocusRing = false
+  }
 
-    .read-the-docs {
-      color: #888;
-    }
-
-    h1 {
-      font-size: 3.2em;
-      line-height: 1.1;
-    }
-
-    a {
-      font-weight: 500;
-      color: #646cff;
-      text-decoration: inherit;
-    }
-    a:hover {
-      color: #535bf2;
-    }
-
-    button {
-      border-radius: 8px;
-      border: 1px solid transparent;
-      padding: 0.6em 1.2em;
-      font-size: 1em;
-      font-weight: 500;
-      font-family: inherit;
-      background-color: #1a1a1a;
-      cursor: pointer;
-      transition: border-color 0.25s;
-    }
-    button:hover {
-      border-color: #646cff;
-    }
-    button:focus,
-    button:focus-visible {
-      outline: 4px auto -webkit-focus-ring-color;
-    }
-
-    @media (prefers-color-scheme: light) {
-      a:hover {
-        color: #747bff;
-      }
-      button {
-        background-color: #f9f9f9;
-      }
-    }
-  `
+  static override styles = unsafeCSS(styles)
 }
 
 declare global {

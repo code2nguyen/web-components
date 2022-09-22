@@ -9,4 +9,6 @@ Develop components
 
 ```
 npm run dev
+
+npm run dev -w packages/checkbox
 ```

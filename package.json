@@ -2,11 +2,13 @@
   "name": "@c2n/web-components",
   "private": true,
   "scripts": {
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "release": ""
   },
   "devDependencies": {
     "husky": "8.0.1",
-    "lint-staged": "13.0.3"
+    "lint-staged": "13.0.3",
+    "sass": "^1.54.8"
   },
   "workspaces": [
     "packages/*"
