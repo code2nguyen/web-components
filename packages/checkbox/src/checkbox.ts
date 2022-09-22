@@ -1,5 +1,5 @@
-import { LitElement, html, unsafeCSS } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { LitElement, html, unsafeCSS, PropertyValues } from 'lit'
+import { customElement, property, query } from 'lit/decorators.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './checkbox.scss?inline'
 /**
@@ -29,14 +29,10 @@ export class Checkbox extends LitElement {
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 
-  @state() protected showFocusRing = false
-
   override render() {
     const ariaChecked = this.indeterminate ? 'mixed' : undefined
-
     return html`
       <div class="c2-checkbox">
-        ${this.renderStateLayer()}
         <input
           class="c2-checkbox-input"
           type="checkbox"
@@ -49,8 +45,6 @@ export class Checkbox extends LitElement {
           .indeterminate="${this.indeterminate}"
           ?checked="${this.checked}"
           @change="${this.handleChange}"
-          @focus="${this.handleFocus}"
-          @blur="${this.handleBlur}"
         />
         <div class="c2-checkbox__background">
           <slot name="checkmark">
@@ -69,10 +63,11 @@ export class Checkbox extends LitElement {
     `
   }
 
-  protected renderCheckBox() {}
-
-  protected renderStateLayer() {
-    return html``
+  protected override update(changedProperties: PropertyValues) {
+    if (changedProperties.has('checked') && this.formElement) {
+      this.formElement.checked = this.checked
+    }
+    super.update(changedProperties)
   }
 
   protected handleChange() {
@@ -84,14 +79,6 @@ export class Checkbox extends LitElement {
         composed: true,
       })
     )
-  }
-
-  protected handleFocus() {
-    this.showFocusRing = true
-  }
-
-  protected handleBlur() {
-    this.showFocusRing = false
   }
 
   static override styles = unsafeCSS(styles)
