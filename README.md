@@ -17,7 +17,7 @@ npm run dev -w packages/checkbox
 
 ```
 npm run build -ws --if-present
-npx lerna publish patch  --no-private --exact --yes --no-push
+npx lerna publish patch  --no-private --exact --yes
 
 # patch | major | minor | premajor | preminor | prepatch | prerelease
 ```
