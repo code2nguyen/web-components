@@ -4,7 +4,12 @@
   "scripts": {},
   "author": "code2nguyen@gmail.com",
   "publishConfig": {
+    "registry": "https://registry.npmjs.org",
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
   },
   "dependencies": {
     "lit": "2.3.0"
