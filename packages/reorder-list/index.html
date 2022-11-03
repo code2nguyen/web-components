@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+      }
+      .item {
+        padding: 8px 16px;
+        width: 180px;
+      }
+      .scrollable {
+        --c2-reorder-list-container-gap: 4px;
+        --c2-reorder-list-divider-height: 1px;
+        --c2-reorder-list-container-border-width: 1px;
+        --c2-reorder-list-container-margin: 18px;
+        --c2-reorder-list-container-padding: 2px;
+        --c2-reorder-list-placeholder-background: #ff9900;
+        --c2-reorder-list-dragging-item-background: red;
+        overflow: auto;
+        height: 250px;
+        width: 450px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scrollable">
+      <c2-reorder-list editable>
+        <div class="item">Item 0 <button>Delete</button></div>
+        <div class="item">Item 1 <button>Delete</button></div>
+        <div class="item">Item 2 <button>Delete</button></div>
+        <div class="item">Item 3 <button>Delete</button></div>
+        <div class="item">Item 4 <button>Delete</button></div>
+        <div class="item">Item 5 <button>Delete</button></div>
+        <div class="item">Item 6 <button>Delete</button></div>
+        <div class="item">Item 7 <button>Delete</button></div>
+        <div class="item">Item 8 <button>Delete</button></div>
+        <div class="item">Item 9 <button>Delete</button></div>
+        <div class="item">Item 10 <button>Delete</button></div>
+      </c2-reorder-list>
+    </div>
+    <!-- <c2-reorder-list editable>
+      <div class="item">Item 0 <button>Delete</button></div>
+      <div class="item">Item 1 <button>Delete</button></div>
+      <div class="item">Item 2 <button>Delete</button></div>
+      <div class="item">Item 3 <button>Delete</button></div>
+      <div class="item">Item 4 <button>Delete</button></div>
+      <div class="item">Item 5 <button>Delete</button></div>
+      <div class="item">Item 6 <button>Delete</button></div>
+      <div slot="placeholder" class="item">Placeholder</div>
+    </c2-reorder-list> -->
+  </body>
+</html>

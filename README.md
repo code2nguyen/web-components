@@ -8,10 +8,14 @@
 Develop components
 
 ```
-npm run dev
+npm run dev ???
 
 npm run dev -w packages/checkbox
 ```
+
+# Documentation
+
+Documentation app was build by 11ty.
 
 # Release
 
