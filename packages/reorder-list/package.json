@@ -1,6 +1,6 @@
 {
   "name": "@c2n/reorder-list",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "main": "dist/reorder-list.js",
   "exports": {
@@ -33,9 +33,9 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
-    "@c2n/wc-utils": "0.0.2",
-    "lit": "2.3.0",
-    "@lit-labs/motion": "1.0.3"
+    "@c2n/wc-utils": "0.0.3",
+    "@lit-labs/motion": "1.0.3",
+    "lit": "2.3.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.33.1",

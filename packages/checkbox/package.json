@@ -1,6 +1,6 @@
 {
   "name": "@c2n/checkbox",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "main": "dist/checkbox.js",
   "exports": {
@@ -33,7 +33,7 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
-    "@c2n/wc-utils": "0.0.2",
+    "@c2n/wc-utils": "0.0.3",
     "lit": "2.3.0"
   },
   "devDependencies": {
