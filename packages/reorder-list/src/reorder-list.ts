@@ -36,7 +36,7 @@ export class ReorderList extends LitElement {
   private scrollableParent: HTMLElement | null = null
   private scrollableParentRect: DOMRect | undefined = undefined
   private pickupPosition: Point = { x: 0, y: 0 }
-  private itemPositions: DOMRect[] = []
+  private itemPositions: Array<DOMRect & { isFixed?: boolean }> = []
 
   private currentDraggingItem: Element | null = null
   private currentDraggingSlotIndex = -1
@@ -45,14 +45,11 @@ export class ReorderList extends LitElement {
   private hasStartedDragging = false
   private scrollingTimer = 0
   private cacheMouseEvent: MutateMouseEvent | null = null
-  /** Cached positions of scrollable parent elements. */
-  // private parentPositions!: ParentPositionTracker
 
   override connectedCallback(): void {
     super.connectedCallback()
     this.observeChildList()
     this.updateSlotMapping()
-    // this.parentPositions = new ParentPositionTracker(document)
   }
 
   override disconnectedCallback(): void {
@@ -121,12 +118,16 @@ export class ReorderList extends LitElement {
 
     const target = event.composedPath()[targetIndex] as HTMLElement
     const slot = target.getAttribute('slot')
-    if (slot) {
+    if (slot && !this.isFixedItem(target)) {
       this.hostBoundingClientRect = this.getBoundingClientRect()
       this.pickupPosition = this.getPointerPosition(event)
       document.addEventListener('mousemove', this.handleMouseMove, { passive: true })
       document.addEventListener('mouseup', this.handleMouseUp, { passive: true })
     }
+  }
+
+  private isFixedItem(item: HTMLElement) {
+    return !!item && !!item.dataset.fixed
   }
 
   handleMouseMove = async (event: MouseEvent) => {
@@ -180,9 +181,6 @@ export class ReorderList extends LitElement {
 
   handleScroll = () => {
     if (this.cacheMouseEvent) {
-      //this.pickupPosition.y += diff
-      // this.updateItemPositions()
-      // const mouseEvent = { ...this.cacheMouseEvent, pageY: this.cacheMouseEvent.pageY + diff }
       this.updateItemPositions()
       this.applyTransform(this.cacheMouseEvent)
       const newSlotIndex = this.getItemIndexFromPointerPosition(this.cacheMouseEvent)
@@ -197,6 +195,7 @@ export class ReorderList extends LitElement {
   private getItemIndexFromPointerPosition(event: MutateMouseEvent) {
     const padding = 5
     const index = this.itemPositions.findIndex((item) => {
+      if (item.isFixed) return false
       const x = item.x + padding
       const y = item.y + padding
       const width = item.width - padding
@@ -309,7 +308,7 @@ export class ReorderList extends LitElement {
 
   private updateSlotMapping() {
     const items = this.getChildItems()
-    let internalSlotMapping = new Map<number, number>()
+    const internalSlotMapping = new Map<number, number>()
     let index = 0
     let needToUpdate = false
     for (const item of items) {
@@ -351,8 +350,13 @@ export class ReorderList extends LitElement {
   private updateItemPositions() {
     this.itemPositions = []
     this.listItemElements.forEach((item) => {
-      this.itemPositions.push(item.getBoundingClientRect())
+      const slot = item.querySelector('slot') as HTMLSlotElement
+      this.itemPositions.push({
+        ...getMutableClientRect(item),
+        isFixed: slot ? this.isFixedItem(slot.assignedNodes()[0] as HTMLElement) : false,
+      })
     })
+    console.log(this.itemPositions)
   }
 
   private applyTransform(event: MutateMouseEvent) {
@@ -411,4 +415,18 @@ declare global {
   interface HTMLElementTagNameMap {
     'c2-reorder-list': ReorderList
   }
+}
+
+export function getMutableClientRect(element: Element): DOMRect {
+  const clientRect = element.getBoundingClientRect()
+  return {
+    top: clientRect.top,
+    right: clientRect.right,
+    bottom: clientRect.bottom,
+    left: clientRect.left,
+    width: clientRect.width,
+    height: clientRect.height,
+    x: clientRect.x,
+    y: clientRect.y,
+  } as DOMRect
 }

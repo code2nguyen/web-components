@@ -57,8 +57,8 @@ $theme: (
     }
   }
   .list-item--reorderable {
-    cursor: pointer;
-    ::slotted(*) {
+    ::slotted(:not([data-fixed])) {
+      cursor: pointer;
       touch-action: none;
       -webkit-user-drag: none;
       -webkit-tap-highlight-color: transparent;
