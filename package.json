@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "prepare": "husky install",
-    "release": ""
+    "release": "",
+    "lint": "eslint . --ext .ts --fix --ignore-path .gitignore"
   },
   "devDependencies": {
     "husky": "8.0.1",
