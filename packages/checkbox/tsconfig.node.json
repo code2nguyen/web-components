@@ -1,10 +1,4 @@
 {
-    "compilerOptions": {
-      "composite": true,
-      "module": "ESNext",
-      "moduleResolution": "Node",
-      "allowSyntheticDefaultImports": true
-    },
-    "include": ["vite.config.ts"]
-  }
-  
+  "extends": "@c2n/config/tsconfig.node.json",
+  "include": ["vite.config.ts"]
+}
