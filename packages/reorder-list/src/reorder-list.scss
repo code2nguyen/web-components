@@ -1,6 +1,6 @@
 @use 'sass:math';
-@use '@c2n/wc-utils/animation';
-@use '@c2n/wc-utils/css-variable';
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable';
 
 $prefix: c2-reorder-list;
 
