@@ -1,0 +1,18 @@
+{
+  "name": "@c2n/playground",
+  "version": "0.0.4",
+  "scripts": {},
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/json-schema": "7.0.11"
+  }
+}
