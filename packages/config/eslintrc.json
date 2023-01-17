@@ -27,9 +27,13 @@
   },
   "overrides": [
     {
-      "files": ["rollup.config.js", "web-test-runner.config.js"],
+      "files": ["rollup.config.js", "web-test-runner.config.js", "plopfile.js"],
+      "extends": ["eslint:recommended"],
       "env": {
         "node": true
+      },
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
       }
     },
     {

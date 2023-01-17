@@ -11,6 +11,7 @@
     "husky": "8.0.1",
     "lerna": "^5.5.2",
     "lint-staged": "13.0.3",
+    "plop": "^3.1.1",
     "prettier": "2.8.2"
   },
   "workspaces": [

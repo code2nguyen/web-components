@@ -11,7 +11,9 @@
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "custom-elements-manifest": "^2.0.0"
+  },
   "devDependencies": {
     "@types/json-schema": "7.0.11"
   }
