@@ -1,0 +1,10 @@
+{
+  "extends": "@c2n/config/tsconfig.lib.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "outDir": "./types",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  }
+}

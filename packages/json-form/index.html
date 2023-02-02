@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+
+    <style>
+      body {
+        padding: 24px;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-json-form id="jsonForm"></c2-json-form>
+    <script>
+      const jsonForm = document.getElementById('jsonForm')
+      jsonForm.formData = {
+        isSameBillAddress: true,
+        size: 'Small',
+        billingAddress: {
+          address: '8 rue de la Chine',
+          city: 'Paris',
+        },
+      }
+      jsonForm.json = {
+        isSameBillAddress: {
+          value: {
+            type: 'boolean',
+          },
+          ui: {
+            componentName: 'checkbox',
+            data: true,
+          },
+          wrapperUI: {
+            componentName: 'label',
+            data: 'Use the same bill address ',
+            attributes: {
+              formItemIdAttribute: 'for',
+            },
+          },
+        },
+        size: {
+          value: {
+            type: 'string',
+          },
+          ui: {
+            componentName: 'radioBox',
+            enumData: ['Small', 'Medium', 'Large'],
+          },
+          wrapperUI: {
+            componentName: 'label',
+            attributes: {
+              valueAttribute: 'for',
+            },
+          },
+        },
+        billingAddress: {
+          address: {
+            value: {
+              type: 'string',
+            },
+            ui: {
+              componentName: 'input',
+              attributes: {
+                check: true,
+              },
+              css: 'billing-address',
+            },
+            wrapperUI: {
+              componentName: 'label',
+              data: 'Address',
+              attributes: {
+                formItemIdAttribute: 'for',
+              },
+              slotBeforeChildren: true,
+            },
+          },
+          city: {
+            value: {
+              type: 'string',
+            },
+            ui: {
+              componentName: 'select',
+              css: 'billing-city',
+              enumData: ['Paris', 'Antony', 'Nice'],
+            },
+            wrapperUI: {
+              componentName: 'label',
+              data: 'City',
+              attributes: {
+                formItemIdAttribute: 'for',
+              },
+              slotBeforeChildren: true,
+            },
+          },
+        },
+      }
+    </script>
+  </body>
+</html>

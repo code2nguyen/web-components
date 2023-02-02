@@ -1,0 +1,46 @@
+{
+  "author": "code2nguyen@gmail.com",
+  "customElements": "custom-elements.json",
+  "dependencies": {
+    "lit": "2.3.0"
+  },
+  "devDependencies": {
+    "@c2n/checkbox": "*",
+    "@c2n/config": "*",
+    "custom-elements-manifest": "^2.0.0"
+  },
+  "exports": {
+    "./c2-webcomponents.js": "./dist/lib/c2-webcomponents.js",
+    "./json-form.js": "./dist/json-form.js"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "json form",
+    "json schema",
+    "json schema form",
+    "dynamic form",
+    "web component",
+    "lit"
+  ],
+  "main": "dist/index.js",
+  "name": "@c2n/json-form",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "build": "npm run type-check && vite build",
+    "dev": "vite",
+    "type-check": "tsc -p tsconfig.lib.json --composite false"
+  },
+  "type": "module",
+  "types": "types/src/index.d.ts",
+  "version": "0.0.4"
+}
