@@ -8,6 +8,7 @@ import COMPONENT_REGISTRY from './component-registry'
 type UnionGroupPropertyTypes = JsonFormGroup | JsonFormItem | UIDefinition | string[] | undefined | JsonUI
 
 export const FORM_ITEM_DATA_CHANGE = 'formItemDataChange'
+export const FORM_DATA_CHANGE = 'formDataChange'
 
 export function isUIDefinition(item: UnionGroupPropertyTypes): item is UIDefinition {
   return !!(item as UIDefinition).componentName

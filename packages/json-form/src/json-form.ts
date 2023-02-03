@@ -2,7 +2,7 @@ import { LitElement, html, TemplateResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import COMPONENT_REGISTRY from './component-registry'
 import { JsonFormGroup, JsonFormItem, UIDefinition } from './types'
-import { FORM_ITEM_DATA_CHANGE, isJsonFormGroup, isJsonFormItem, renderUI } from './utils'
+import { FORM_DATA_CHANGE, FORM_ITEM_DATA_CHANGE, isJsonFormGroup, isJsonFormItem, renderUI } from './utils'
 
 interface RenderFormItemParams {
   formItem: JsonFormItem
@@ -26,7 +26,7 @@ export class JsonForm extends LitElement {
   public set formData(value: unknown) {
     const oldVal = this._formData
     this._formData = value
-    this.internalFormData = value
+    this.internalFormData = value || {}
     this.requestUpdate('formData', oldVal)
   }
 
@@ -154,11 +154,29 @@ export class JsonForm extends LitElement {
 
   private handleFormItemDataChange(event: Event) {
     const { value, valuePath } = (event as CustomEvent).detail as { value: unknown; valuePath: string[] }
-    console.log(value)
-    if (!valuePath) return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let jsonCursor = this.internalFormData as any
+    for (let i = 0; i < valuePath.length - 1; i++) {
+      const path = valuePath[i]
+      if (!jsonCursor[path]) jsonCursor[path] = {}
+      jsonCursor = jsonCursor[path]
+    }
+    const formItemId = valuePath[valuePath.length - 1]
+    jsonCursor[formItemId] = value
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.internalFormData = { ...(this.internalFormData as any) }
+    this.dispatchFormDataChange()
   }
 
+  private dispatchFormDataChange() {
+    const event = new CustomEvent(FORM_DATA_CHANGE, {
+      cancelable: true,
+      bubbles: true,
+      detail: this.internalFormData,
+    })
+    this.dispatchEvent(event)
+  }
   override render() {
-    return this.renderFormGround(this.json, this.formData, [])
+    return this.renderFormGround(this.json, this.internalFormData, [])
   }
 }

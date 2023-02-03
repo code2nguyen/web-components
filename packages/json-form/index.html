@@ -23,6 +23,9 @@
     <c2-json-form id="jsonForm"></c2-json-form>
     <script>
       const jsonForm = document.getElementById('jsonForm')
+      jsonForm.addEventListener('formDataChange', (event) => {
+        console.log(event)
+      })
       jsonForm.formData = {
         isSameBillAddress: true,
         size: 'Small',
