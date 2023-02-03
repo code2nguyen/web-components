@@ -26,11 +26,9 @@
     "url": "https://github.com/code2nguyen/web-components.git"
   },
   "scripts": {
-    "lint": "npm run lint:lit-analyzer && npm run lint:eslint",
-    "lint:eslint": "eslint 'src/**/*.ts'",
-    "lint:lit-analyzer": "lit-analyzer",
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "npm run type-check && vite build",
+    "type-check": "tsc -p tsconfig.lib.json --composite false"
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
@@ -38,74 +36,6 @@
     "lit": "2.3.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "5.33.1",
-    "@typescript-eslint/parser": "5.33.1",
-    "eslint": "8.22.0",
-    "lit-analyzer": "1.2.1",
-    "prettier": "2.7.1",
-    "typescript": "4.7.4",
-    "vite": "3.0.8"
-  },
-  "prettier": {
-    "singleQuote": true,
-    "printWidth": 160,
-    "tabWidth": 2,
-    "semi": false
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/eslint-recommended",
-      "plugin:@typescript-eslint/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": 2020,
-      "sourceType": "module"
-    },
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "env": {
-      "browser": true
-    },
-    "rules": {
-      "no-prototype-builtins": "off",
-      "@typescript-eslint/ban-types": "off",
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/no-non-null-assertion": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          "argsIgnorePattern": "^_"
-        }
-      ]
-    },
-    "overrides": [
-      {
-        "files": [
-          "rollup.config.js",
-          "web-test-runner.config.js"
-        ],
-        "env": {
-          "node": true
-        }
-      },
-      {
-        "files": [
-          "*_test.ts",
-          "**/custom_typings/*.ts",
-          "packages/labs/ssr/src/test/integration/tests/**",
-          "packages/labs/ssr/src/lib/util/parse5-utils.ts"
-        ],
-        "rules": {
-          "@typescript-eslint/no-explicit-any": "off"
-        }
-      }
-    ]
+    "@c2n/config": "*"
   }
 }

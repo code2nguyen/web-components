@@ -1,0 +1,24 @@
+{
+  "name": "@c2n/config",
+  "version": "0.0.0",
+  "scripts": {},
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "5.48.0",
+    "@typescript-eslint/parser": "5.48.0",
+    "@types/node": "18.11.18",
+    "eslint": "8.31.0",
+    "lit-analyzer": "1.2.1",
+    "typescript": "4.9.4",
+    "vite": "4.0.4",
+    "vite-plugin-cem": "0.4.0"
+  }
+}

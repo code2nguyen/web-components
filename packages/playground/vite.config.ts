@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite'
-import VitePluginCustomElementsManifest from 'vite-plugin-cem'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,16 +7,8 @@ export default defineConfig({
       entry: 'src/index.ts',
       formats: ['es'],
     },
-    minify: false,
     rollupOptions: {
       external: /^lit|@c2n/,
     },
   },
-  plugins: [
-    VitePluginCustomElementsManifest({
-      files: ['src/checkbox.ts'],
-      lit: true,
-      output: '../custom-elements.json',
-    }),
-  ],
 })

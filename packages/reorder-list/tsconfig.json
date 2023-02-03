@@ -1,38 +1,11 @@
 {
-  "compilerOptions": {
-    "composite": true,
-    "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "inlineSources": true,
-    "isolatedModules": true,
-    "lib": ["es2020", "DOM", "DOM.Iterable"],
-    "module": "es2020",
-    "moduleResolution": "node",
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "outDir": "./types",
-    "rootDir": ".",
-    "incremental": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "plugins": [
-      {
-        "name": "ts-lit-plugin",
-        "strict": true
-      }
-    ],
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2019"
-  },
-  "include": ["src/**/*.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }
