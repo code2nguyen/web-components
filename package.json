@@ -8,6 +8,7 @@
     "lint": "eslint . --ext .ts --fix --ignore-path .gitignore"
   },
   "devDependencies": {
+    "@spectrum-web-components/bundle": "^0.28.7",
     "husky": "8.0.1",
     "lerna": "^5.5.2",
     "lint-staged": "13.0.3",
