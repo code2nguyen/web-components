@@ -9,6 +9,7 @@
     "demo:dev": "npm run dev -w demo",
     "build": "npm run build --workspace=packages --if-present",
     "build:generator": "npm run build --workspace=scripts/generator",
+    "pregenerate": "npm run build:generator",
     "generate": "npm run plop --workspace=scripts/generator"
   },
   "devDependencies": {

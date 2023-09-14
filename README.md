@@ -15,6 +15,12 @@ All packages have `@c2n/config` as dev dependencies and maybe link with `@c2n/wc
 - npm workspace:
 - each package uses vitejs as a build tool
 
+# Generate empty web component
+
+```
+npm run generate
+``
+
 # Demo
 
 Demo application is a static web using [Astro Framework](https://astro.build/)
