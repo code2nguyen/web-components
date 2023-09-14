@@ -1,0 +1,41 @@
+{
+  "name": "@c2n/{{ dashCase name }}",
+  "version": "{{ pkg 'version' }}",
+  "type": "module",
+  "main": "dist/{{ dashCase name }}.js",
+  "exports": {
+    ".": "./dist/{{ dashCase name }}.js"
+  },
+  "types": "types/src/index.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "{{ dashCase name }}",
+    "web component",
+    "lit"
+  ],
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run type-check && vite build",
+    "type-check": "tsc -p tsconfig.lib.json --composite false"
+  },
+  "dependencies": {
+    "@c2n/wc-utils": "{{ pkg 'version' }}",
+    "lit": "2.3.0"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

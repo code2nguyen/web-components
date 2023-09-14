@@ -1,0 +1,31 @@
+import { LitElement, html, unsafeCSS } from 'lit'
+import { customElement, property } from 'lit/decorators.js'
+import styles from './{{ dashCase name}}.scss?inline'
+/**
+ * {{ pascalCase name }} component
+ *
+ * @slot 
+ * @csspart 
+ */
+@customElement('c2-{{ dashCase name }}')
+export class {{ pascalCase name }} extends LitElement {
+
+  static override styles = unsafeCSS(styles)
+
+  @property({ type: String }) name = 'Example property'
+
+  override render() {
+    return html`
+      <div class="c2-{{ dashCase name }}">
+        ${name}
+      </div>
+    `
+  }
+
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'c2-{{ dashCase name }}': {{ pascalCase name }}
+  }
+}

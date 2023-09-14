@@ -1,0 +1,51 @@
+---
+import '../assets/styles.css';
+
+interface Props {
+	title: string;
+	componentId: string
+	pageTitle: string
+}
+
+const { title, componentId, pageTitle } = Astro.props;
+
+import ListComponents from '../components/ListComponents.astro';
+import TopNav from '../components/TopNav.astro';
+
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<main>
+			<TopNav class="main-nav" pageTitle={pageTitle}/>
+			<ListComponents componentId={componentId}/>
+			<div class="p-4 pl-10">
+				<slot />
+			</div>
+		</main>
+		
+	</body>
+</html>
+<style>
+	main {
+		display: grid;
+		grid-template-columns: fit-content(280px) 1fr;
+		grid-template-rows: fit-content(64px) 1fr;
+	}
+	.main-nav {
+		grid-column: 1/-1;
+	}
+</style>

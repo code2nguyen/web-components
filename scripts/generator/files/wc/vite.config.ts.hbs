@@ -12,5 +12,12 @@ export default defineConfig({
     rollupOptions: {
       external: /^lit|@c2n/,
     },
-  }  
+  },
+  plugins: [
+    VitePluginCustomElementsManifest({
+      files: ['src/{{ dashCase name }}.ts'],
+      lit: true,
+      output: '../custom-elements.json',
+    }),
+  ],
 })

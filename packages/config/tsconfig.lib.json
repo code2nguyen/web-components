@@ -9,6 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "inlineSources": true,
     "isolatedModules": true,
+    "skipLibCheck": true,
     "lib": ["es2020", "DOM", "DOM.Iterable"],
     "module": "es2020",
     "moduleResolution": "node",

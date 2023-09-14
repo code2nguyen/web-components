@@ -4,19 +4,25 @@
   "private": true,
   "scripts": {
     "prepare": "husky install",
-    "release": "",
-    "lint": "eslint . --ext .ts --fix --ignore-path .gitignore"
+    "lint": "eslint . --ext .ts --fix --ignore-path .gitignore",
+    "demo": "npm run start -w demo",
+    "demo:dev": "npm run dev -w demo",
+    "build": "npm run build --workspace=packages --if-present",
+    "build:generator": "npm run build --workspace=scripts/generator",
+    "generate": "npm run plop --workspace=scripts/generator"
   },
   "devDependencies": {
-    "@spectrum-web-components/bundle": "^0.28.7",
     "husky": "8.0.1",
     "lerna": "^5.5.2",
     "lint-staged": "13.0.3",
-    "plop": "^3.1.1",
-    "prettier": "2.8.2"
+
+    "prettier": "2.8.2",
+    "prettier-plugin-astro": "0.12.0"
   },
   "workspaces": [
-    "packages/**/*"
+    "packages/**/*",
+    "demo",
+    "scripts/generator"
   ],
   "lint-staged": {
     "*.ts": "npm run lint"

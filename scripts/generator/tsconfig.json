@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {            
+      "strict": true,
+      "esModuleInterop": true,
+      "inlineSourceMap": true,
+      "noImplicitAny": false,
+      "skipLibCheck": true,
+      "module": "es2020",
+      "moduleResolution": "node",
+      "target": "es2019",      
+    },
+    "include": ["**/*"]
+  }
+  

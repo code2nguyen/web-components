@@ -1,6 +1,7 @@
 {
   "name": "@c2n/config",
   "version": "0.0.0",
+  "private": "true",
   "scripts": {},
   "author": "code2nguyen@gmail.com",
   "publishConfig": {

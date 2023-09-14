@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+	componentId: string;
+}
+
+const allComponents = await getCollection('components');
+const hoverClass = "hover:bg-sky-100  hover:backdrop-blur-lg"
+const { componentId } = Astro.props
+---
+
+<ul class="flex flex-col ml-14 max-w-fit">
+    {allComponents.map(component => (
+        <a href={`/components/${component.slug}`}>
+            <li class=`nav-item ${componentId == component.slug ? 'bg-sky-300': hoverClass}`>
+                {component.data.title}
+            </li>
+        </a>
+      ))}
+    <!-- <li class=`nav-item ${componentId =='checkbox' ? 'bg-sky-300': ''}`>
+        Checkbox
+    </li>
+    <li class="nav-item">
+        Dropdown List
+    </li>
+    <li class="nav-item">
+        Expansion Panel
+    </li>
+    <li class="nav-item">
+        Radiobox
+    </li>
+    <li class="nav-item">
+        Reorder List
+    </li> -->
+</ul>
+
+<style>
+    .nav-item {
+        @apply transition-colors cursor-pointer pt-4 pl-4 pb-4 pr-8  rounded-r-full
+    }
+</style>

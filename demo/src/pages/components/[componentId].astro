@@ -1,0 +1,29 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { requireNotNull } from '../../utils/assertion';
+
+export function getStaticPaths() {
+  return [
+    {params: {componentId: 'checkbox'}},
+    {params: {componentId: 'dropdown-list'}},
+    {params: {componentId: 'expansion-panel'}},
+    {params: {componentId: 'radio-button'}},
+    {params: {componentId: 'reorder-list'}},
+  ];
+}
+
+let { componentId } = Astro.params;
+componentId = requireNotNull(componentId)
+
+let component = await getEntry('components', componentId);
+component = requireNotNull(component)
+const { Content: ComponentContent } = await component.render();
+
+---
+
+<Layout title="CW Library" componentId={componentId} pageTitle={component.data.title}>
+  <article class="prose prose-slate max-w-full">
+    <ComponentContent/>
+  </article>
+</Layout>
