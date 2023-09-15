@@ -22,6 +22,12 @@ export default function (plop: NodePlopAPI) {
 				path: '../../demo/src/content/components/{{dashCase name}}.mdx',
 				templateFile: 'files/demo-doc.mdx.hbs',
 				skipIfExists: true
+			},
+			{
+				type: 'append',
+				path: '../../demo/src/layouts/Layout.astro',
+				pattern: "<script>",
+				template: "			import '@c2n/{{ dashCase name }}';"
 			}
 		]
 	});
