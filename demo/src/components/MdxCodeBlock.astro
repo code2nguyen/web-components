@@ -1,0 +1,15 @@
+---
+import { Code } from 'astro:components';
+
+const {
+    code,
+    lang
+} = Astro.props;
+
+const props = Astro.props
+---
+
+<div set:html={code} />
+
+
+<Code code={code} lang={lang} /> 

@@ -1,13 +1,21 @@
 ---
-    
     title: "Checkbox"
     slug: "checkbox"
 ---
-import { Checkbox } from '@c2n/checkbox';
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+
 
 # Checkbox
 
 `c2n-checkbox` provides the same functionality as a native `<input type="checkbox">` enhanced with Material Design styling and animations.
 
-<div class="flex items-center"><Checkbox /><label>check me</label> </div>
 
+```html tag=MdxCodeBlock,link=http://xyz.com
+<div>
+    <div class="flex items-center">
+        <c2-checkbox></c2-checkbox>
+        <label>check me</label> 
+    </div>
+<div>
+```
