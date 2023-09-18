@@ -11,51 +11,64 @@ import styles from './expansion-panel.scss?inline'
 export class ExpansionPanel extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  @property({ type: Boolean }) expanded = false
+  @property({ type: Boolean, reflect: true }) expanded = false
+
+  @property({ type: Boolean, reflect: true, attribute: 'header-clickable' }) headerClickable = false
 
   protected renderDefaultIcon() {
-    return html`<slot name="icon">
-      <svg viewBox="0 -960 960 960" >
-        <path d="M479.8-371.077q-5.662 0-10.423-2.115-4.762-2.116-8.992-6.346l-181.2-181.2q-5.954-5.954-5.839-11.608.115-5.654 6.5-12.039 6.385-6.384 11.654-6.384t11.654 6.384L480-406.539l177.846-177.846q5.615-5.615 11.269-5.5 5.654.116 12.039 6.5 6.385 6.385 6.385 11.654 0 5.27-6.724 11.936l-181.2 180.257q-4.63 4.23-9.392 6.346-4.761 2.115-10.423 2.115Z"/>
+    return html`<slot name="icon" @click=${this.handleIconClick}>
+      <svg class="default-icon" viewBox="0 -960 960 960">
+        <path
+          d="M479.8-371.077q-5.662 0-10.423-2.115-4.762-2.116-8.992-6.346l-181.2-181.2q-5.954-5.954-5.839-11.608.115-5.654 6.5-12.039 6.385-6.384 11.654-6.384t11.654 6.384L480-406.539l177.846-177.846q5.615-5.615 11.269-5.5 5.654.116 12.039 6.5 6.385 6.385 6.385 11.654 0 5.27-6.724 11.936l-181.2 180.257q-4.63 4.23-9.392 6.346-4.761 2.115-10.423 2.115Z"
+        />
       </svg>
     </slot>`
   }
 
-
   protected renderExpanedIcon() {
-    return html`<slot name="expanded-icon">
-        ${this.renderDefaultIcon()}
-      </slot>`
+    return html`<slot name="expanded-icon" @click=${this.handleIconClick}> ${this.renderDefaultIcon()} </slot>`
   }
 
   protected renderIcon() {
-    return html`
-      <div class="c2-expansion-panel-title">
-        ${this.expanded  ? this.renderDefaultIcon() : this.renderExpanedIcon()}
-      </div>
-    `
+    return html` ${this.expanded ? this.renderExpanedIcon() : this.renderDefaultIcon()} `
   }
 
   protected renderHeader() {
     return html`
       <div class="c2-expansion-panel-title">
         <slot name="title">${this.title}</slot>
+        <div></div>
         ${this.renderIcon()}
       </div>
     `
   }
 
+  protected handleDetailsToggle(event: Event) {
+    console.log("handleDetailsToggle", event)
+    if (!this.headerClickable) {
+      event.preventDefault()
+      return
+    }
+    this.expanded = !this.expanded
+  }
+
+  protected handleIconClick(event:Event) {
+    console.log('handleIconClick', event)
+    this.expanded = !this.expanded
+    event.stopImmediatePropagation();
+  }
+  
   override render() {
     return html`
-      <details class="c2-expansion-panel">
-        <summary>
+      <details class="c2-expansion-panel" ?open=${this.expanded}>
+        <summary @click=${this.handleDetailsToggle}>
           ${this.renderHeader()}
           <div class="c2-expansion-panel-summary-content">
             <slot name="summary-content"></slot>
           </div>
         </summary>
         <div class="c2-expansion-panel-content">
-          <slot>No content</slot>
+          <slot></slot>
         </div>
       </details>
     `
