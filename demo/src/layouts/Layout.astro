@@ -28,12 +28,15 @@ import TopNav from '../components/TopNav.astro';
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<script>
+			import '@c2n/mat-icon';
 			import '@c2n/expansion-panel';
 			import '@c2n/checkbox'
+			import '@c2n/mat-icon'
 		</script>
 	</head>
 	<body>
 		<main>
+			<c2-mat-icon>home</c2-mat-icon>
 			<TopNav class="main-nav" pageTitle={pageTitle}/>
 			<ListComponents componentId={componentId}/>
 			<div class="p-4 pl-10">

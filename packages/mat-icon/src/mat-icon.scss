@@ -1,0 +1,33 @@
+$prefix: c2-mat-icon;
+@use '@c2n/sass/css-variable';
+
+$prefix: c2-mat-icon;
+$icon-size: 24px;
+$icon-font: 'Material Symbols Outlined';
+$icon-color: inherit;
+
+$theme: (
+    icon-size: $icon-size,
+    icon-font: $icon-font,
+    icon-color: $icon-color,
+);
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: css-variable.cssVar(icon-color, $theme, $prefix);
+
+  font-family: css-variable.cssVar(icon-font, $theme, $prefix);
+  font-weight: normal;
+  font-style: normal;
+  font-size: css-variable.cssVar(icon-size, $theme, $prefix);;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
