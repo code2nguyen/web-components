@@ -45,7 +45,7 @@ $theme: (
     box-sizing: border-box;
     position: relative;
     &:not(:last-child) {
-      border-bottom: css-variable.cssVar(divider-height, $prefix) solid css-variable.cssVar(divider-color, $theme, $prefix);
+      border-bottom: css-variable.cssVar(divider-height, $theme, $prefix) solid css-variable.cssVar(divider-color, $theme, $prefix);
     }
     &:first-child {
       border-top-left-radius: inherit;

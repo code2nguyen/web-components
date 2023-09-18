@@ -104,16 +104,16 @@ $theme: (
   will-change: background-color, border-color;
   transition: transition-exit(background-color), transition-exit(border-color);
 
-  width: css-variable.cssVa($container-width, $theme, $prefix);
-  height: css-variable.cssVa($container-height, $theme, $prefix);
+  width: css-variable.cssVar(container-width, $theme, $prefix);
+  height: css-variable.cssVar(container-height, $theme, $prefix);
   border-radius: css-variable.cssVar(container-border-radius, $theme, $prefix);
 }
 
 ::slotted(svg[slot='checkmark']),
 .c2-checkbox__checkmark {
   position: absolute;
-  width: css-variable.cssVa($checkmark-size, $theme, $prefix);
-  height: css-variable.cssVa($checkmark-size, $theme, $prefix);
+  width: css-variable.cssVar(checkmark-size, $theme, $prefix);
+  height: css-variable.cssVar(checkmark-size, $theme, $prefix);
   transition: transition-exit(opacity, 0ms, $_transition-duration * 2);
   opacity: 0;
 }
@@ -121,8 +121,8 @@ $theme: (
 ::slotted(svg[slot='mixedmark']),
 .c2-checkbox__mixedmark {
   position: absolute;
-  width: css-variable.cssVa($mixedmark-size, $theme, $prefix);
-  height: css-variable.cssVa($mixedmark-size, $theme, $prefix);
+  width: css-variable.cssVar(mixedmark-size, $theme, $prefix);
+  height: css-variable.cssVar(mixedmark-size, $theme, $prefix);
   transform: scaleX(0) rotate(0deg);
   opacity: 0;
   transition: transition-exit(opacity), transition-exit(transform);
@@ -132,7 +132,7 @@ $theme: (
   position: absolute;
   width: css-variable.cssVar(state-layer-size, $theme, $prefix);
   height: css-variable.cssVar(state-layer-size, $theme, $prefix);
-  border-radius: css-variable.cssVar($statelayer-border-radius, $theme, $prefix);
+  border-radius: css-variable.cssVar(statelayer-border-radius, $theme, $prefix);
   background-color: transparent;
   opacity: 0;
   pointer-events: none;
@@ -150,7 +150,7 @@ $theme: (
 #{$_indeterminate-enabled-selector} ~ {
   .c2-checkbox__background {
     border-width: 0;
-    background-color: css-variable.cssVar($containerenabled-selected-color, $theme, $prefix);
+    background-color: css-variable.cssVar(containerenabled-selected-color, $theme, $prefix);
     ::slotted(svg[slot='checkmark']),
     .c2-checkbox__checkmark {
       opacity: 0;
@@ -159,7 +159,7 @@ $theme: (
     .c2-checkbox__mixedmark {
       opacity: 1;
       transform: scaleX(1) rotate(0deg);
-      color: css-variable.cssVa($mixedmark-color, $theme, $prefix);
+      color: css-variable.cssVar(mixedmark-color, $theme, $prefix);
     }
   }
 }
@@ -167,11 +167,11 @@ $theme: (
 #{$_selected-enabled-selector} ~ {
   .c2-checkbox__background {
     border-width: 0;
-    background-color: css-variable.cssVar($containerenabled-selected-color, $theme, $prefix);
+    background-color: css-variable.cssVar(containerenabled-selected-color, $theme, $prefix);
     ::slotted(svg[slot='checkmark']),
     .c2-checkbox__checkmark {
       opacity: 1;
-      color: css-variable.cssVa($checkmark-color, $theme, $prefix);
+      color: css-variable.cssVar(checkmark-color, $theme, $prefix);
     }
   }
 }
@@ -181,15 +181,15 @@ $theme: (
   .c2-checkbox__background {
     border-width: css-variable.cssVar(container-border-width, $theme, $prefix);
     border-color: css-variable.cssVar(container-border-color, $theme, $prefix);
-    opacity: css-variable.cssVa($disabled-opacity, $theme, $prefix);
+    opacity: css-variable.cssVar(disabled-opacity, $theme, $prefix);
   }
 }
 
 #{$_indeterminate-disabled-selector} ~ {
   .c2-checkbox__background {
     border-width: 0;
-    background-color: css-variable.cssVar($containerenabled-selected-color, $theme, $prefix);
-    opacity: css-variable.cssVa($disabled-opacity, $theme, $prefix);
+    background-color: css-variable.cssVar(containerenabled-selected-color, $theme, $prefix);
+    opacity: css-variable.cssVar(disabled-opacity, $theme, $prefix);
     ::slotted(svg[slot='checkmark']),
     .c2-checkbox__checkmark {
       opacity: 0;
@@ -198,7 +198,7 @@ $theme: (
     .c2-checkbox__mixedmark {
       opacity: 1;
       transform: scaleX(1) rotate(0deg);
-      color: css-variable.cssVa($mixedmark-color, $theme, $prefix);
+      color: css-variable.cssVar(mixedmark-color, $theme, $prefix);
     }
   }
 }
@@ -206,12 +206,12 @@ $theme: (
 #{$_selected-disabled-selector} ~ {
   .c2-checkbox__background {
     border-width: 0;
-    background-color: css-variable.cssVar($containerenabled-selected-color, $theme, $prefix);
-    opacity: css-variable.cssVa($disabled-opacity, $theme, $prefix);
+    background-color: css-variable.cssVar(containerenabled-selected-color, $theme, $prefix);
+    opacity: css-variable.cssVar(disabled-opacity, $theme, $prefix);
     ::slotted(svg[slot='checkmark']),
     .c2-checkbox__checkmark {
       opacity: 1;
-      color: css-variable.cssVa($checkmark-color, $theme, $prefix);
+      color: css-variable.cssVar(checkmark-color, $theme, $prefix);
     }
   }
 }
@@ -219,42 +219,42 @@ $theme: (
 // Hover
 #{$_unselected-enabled-selector}:hover ~ {
   .c2-checkbox-state-layer {
-    background-color: css-variable.cssVar($state-layerhover-unselected-color, $theme, $prefix);
-    opacity: css-variable.cssVar($statelayer-hover-opacity, $theme, $prefix);
+    background-color: css-variable.cssVar(state-layerhover-unselected-color, $theme, $prefix);
+    opacity: css-variable.cssVar(statelayer-hover-opacity, $theme, $prefix);
   }
 }
 #{$_indeterminate-enabled-selector}:hover ~ {
   .c2-checkbox-state-layer {
-    background-color: css-variable.cssVar($state-layerhover-indeterminate-color, $theme, $prefix);
-    opacity: css-variable.cssVar($statelayer-hover-opacity, $theme, $prefix);
+    background-color: css-variable.cssVar(state-layerhover-indeterminate-color, $theme, $prefix);
+    opacity: css-variable.cssVar(statelayer-hover-opacity, $theme, $prefix);
   }
 }
 
 #{$_selected-enabled-selector}:hover ~ {
   .c2-checkbox-state-layer {
-    background-color: css-variable.cssVar($state-layerhover-indeterminate-color, $theme, $prefix);
-    opacity: css-variable.cssVar($statelayer-hover-opacity, $theme, $prefix);
+    background-color: css-variable.cssVar(state-layerhover-indeterminate-color, $theme, $prefix);
+    opacity: css-variable.cssVar(statelayer-hover-opacity, $theme, $prefix);
   }
 }
 
 // Focus
 #{$_unselected-enabled-selector}:focus ~ {
   .c2-checkbox-state-layer {
-    background-color: css-variable.cssVar($state-layerhover-unselected-color, $theme, $prefix);
-    opacity: css-variable.cssVar($statelayer-hover-opacity, $theme, $prefix);
+    background-color: css-variable.cssVar(state-layerhover-unselected-color, $theme, $prefix);
+    opacity: css-variable.cssVar(statelayer-hover-opacity, $theme, $prefix);
   }
 }
 #{$_indeterminate-enabled-selector}:focus ~ {
   .c2-checkbox-state-layer {
-    background-color: css-variable.cssVar($state-layerhover-indeterminate-color, $theme, $prefix);
-    opacity: css-variable.cssVar($statelayer-hover-opacity, $theme, $prefix);
+    background-color: css-variable.cssVar(state-layerhover-indeterminate-color, $theme, $prefix);
+    opacity: css-variable.cssVar(statelayer-hover-opacity, $theme, $prefix);
   }
 }
 
 #{$_selected-enabled-selector}:focus ~ {
   .c2-checkbox-state-layer {
-    background-color: css-variable.cssVar($state-layerhover-indeterminate-color, $theme, $prefix);
-    opacity: css-variable.cssVar($statelayer-hover-opacity, $theme, $prefix);
+    background-color: css-variable.cssVar(state-layerhover-indeterminate-color, $theme, $prefix);
+    opacity: css-variable.cssVar(statelayer-hover-opacity, $theme, $prefix);
   }
 }
 
