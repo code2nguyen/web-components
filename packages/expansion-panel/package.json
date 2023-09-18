@@ -1,10 +1,10 @@
 {
-  "name": "@c2n/checkbox",
+  "name": "@c2n/expansion-panel",
   "version": "0.0.4",
   "type": "module",
-  "main": "dist/checkbox.js",  
+  "main": "dist/expansion-panel.js",
   "exports": {
-    ".": "./dist/checkbox.js"
+    ".": "./dist/expansion-panel.js"
   },
   "types": "types/src/index.d.ts",
   "files": [
@@ -12,7 +12,7 @@
     "types"
   ],
   "keywords": [
-    "checkbox",
+    "expansion-panel",
     "web component",
     "lit"
   ],

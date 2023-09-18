@@ -1,0 +1,24 @@
+@use '@c2n/sass/css-variable';
+
+$prefix: c2-expansion-panel;
+$icon-width: 20px;
+
+$theme: (
+  icon-width: $icon-width
+);
+
+
+:host {
+  display: inline-flex;  
+}
+
+.c2-expansion-panel {
+  display: inline-flex;
+
+  ::slotted([slot="icon"]) {
+    svg {
+      width: css-variable.cssVar(icon-width, $theme, $prefix);
+    }
+  }
+
+}
