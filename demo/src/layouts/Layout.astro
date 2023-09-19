@@ -24,7 +24,7 @@ import TopNav from '../components/TopNav.astro';
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<script>
@@ -36,6 +36,7 @@ import TopNav from '../components/TopNav.astro';
 	</head>
 	<body>
 		<main>
+			<span class="material-symbols-rounded">expand_more</span>
 			<c2-mat-icon>home</c2-mat-icon>
 			<TopNav class="main-nav" pageTitle={pageTitle}/>
 			<ListComponents componentId={componentId}/>
