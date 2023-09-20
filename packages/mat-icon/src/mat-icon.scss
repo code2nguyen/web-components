@@ -16,6 +16,7 @@ $theme: (
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: inherit;
   color: css-variable.cssVar(icon-color, $theme, $prefix);
 
   font-family: css-variable.cssVar(icon-font, $theme, $prefix);
