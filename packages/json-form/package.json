@@ -31,7 +31,7 @@
     "type-check": "tsc -p tsconfig.lib.json --composite false"
   },
   "dependencies": {
-    "lit": "2.3.0"
+    "lit": "2.8.0"
   },
   "devDependencies": {
     "@c2n/checkbox": "*",

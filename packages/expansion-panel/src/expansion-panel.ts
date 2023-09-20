@@ -26,11 +26,11 @@ export class ExpansionPanel extends LitElement {
   }
 
   protected renderExpanedIcon() {
-    return html`<slot name="expanded-icon" @click=${this.handleIconClick}> ${this.renderDefaultIcon()} </slot>`
+    return html`<slot name="expanded-icon" @click=${this.handleIconClick} @slotchange=${this.handleExpandedSlotSlotChange}></slot>`
   }
 
   protected renderIcon() {
-    return html` ${this.expanded ? this.renderExpanedIcon() : this.renderDefaultIcon()} `
+    return html` ${this.renderExpanedIcon()} ${this.renderDefaultIcon()}`
   }
 
   protected renderHeader() {
@@ -43,21 +43,30 @@ export class ExpansionPanel extends LitElement {
     `
   }
 
+  private handleExpandedSlotSlotChange(e: Event) {
+      const slotElement = e.target as HTMLSlotElement;
+      const childNodes = slotElement.assignedNodes({ flatten: true })
+      if (childNodes.length > 0) {
+        slotElement.dataset.filled = 'filled'
+      }
+  }
+
   protected handleDetailsToggle(event: Event) {
-    console.log("handleDetailsToggle", event)
+    console.log('handleDetailsToggle', event)
     if (!this.headerClickable) {
       event.preventDefault()
       return
     }
     this.expanded = !this.expanded
+    console.log(this.expanded)
   }
 
-  protected handleIconClick(event:Event) {
+  protected handleIconClick(event: Event) {
     console.log('handleIconClick', event)
     this.expanded = !this.expanded
-    event.stopImmediatePropagation();
+    event.stopImmediatePropagation()
   }
-  
+
   override render() {
     return html`
       <details class="c2-expansion-panel" ?open=${this.expanded}>

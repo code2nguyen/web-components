@@ -78,20 +78,33 @@ $theme: (
 
     border-radius: css-variable.cssVar(border-radius, $theme, $prefix);
 
-    slot[name='icon'], slot[name='expanded-icon'] {
+    slot[name='icon'] {
       cursor: pointer;
+
+      &::slotted(svg) {
+        width: css-variable.cssVar(icon-width, $theme, $prefix);
+        height: css-variable.cssVar(icon-height, $theme, $prefix);
+        transform: rotate(0deg);
+        transition: rotate css-variable.$state-layer-focus-opacity animation.$sharp-easing;
+      }
     }
-    
-    slot[name='icon']::slotted(svg),
+
+    slot[name='expanded-icon'] {
+      display: none;
+      cursor: pointer;
+
+      &::slotted(svg) {
+        width: css-variable.cssVar(icon-width, $theme, $prefix);
+        height: css-variable.cssVar(icon-height, $theme, $prefix);
+      }
+    }
+
     .default-icon {
       width: css-variable.cssVar(icon-width, $theme, $prefix);
       height: css-variable.cssVar(icon-height, $theme, $prefix);
+      transform: rotate(0deg);
+      transition: rotate css-variable.$state-layer-focus-opacity animation.$sharp-easing;
     }
-
-    slot[name='expanded-icon'] slot[name='icon']::slotted(svg), slot[name='expanded-icon'] .default-icon {
-      transform: rotate(180deg);
-    }
-
 
     .c2-expansion-panel-title {
       border-radius: inherit;
@@ -122,6 +135,31 @@ $theme: (
       border-bottom: none;
       border-bottom-right-radius: 0px;
       border-bottom-left-radius: 0px;
+
+      slot[name='expanded-icon'][data-filled] {
+        display: contents;
+      }
+      // has expanded icon
+      slot[name='expanded-icon'][data-filled] + slot[name='icon'] {
+        display: none;
+      }
+
+      // slot[name='expanded-icon'] {
+      //   display: none;
+      //   cursor: pointer;
+
+      //   &::slotted(svg) {
+      //     width: css-variable.cssVar(icon-width, $theme, $prefix);
+      //     height: css-variable.cssVar(icon-height, $theme, $prefix);
+      //   }
+      // }
+
+      // .default-icon {
+      //   width: css-variable.cssVar(icon-width, $theme, $prefix);
+      //   height: css-variable.cssVar(icon-height, $theme, $prefix);
+      //   transform: rotate(0deg);
+      //   transition: rotate css-variable.$state-layer-focus-opacity animation.$sharp-easing;
+      // }
     }
     .c2-expansion-panel-content {
       border-bottom: css-variable.cssVar(border-bottom, $theme, $prefix);
