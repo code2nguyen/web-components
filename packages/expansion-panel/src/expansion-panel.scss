@@ -20,6 +20,9 @@ $box-shadow: none;
 $title-icon-gap: 16px;
 
 $hover-title-bg-color: rgb(230, 230, 230);
+$icon-rotate: 180deg;
+
+$animation-transform-duration: 150ms;
 
 $theme: (
   icon-width: $icon-width,
@@ -40,6 +43,8 @@ $theme: (
 
   title-icon-gap: $title-icon-gap,
   hover-title-bg-color: $hover-title-bg-color,
+  icon-rotate: $icon-rotate,
+  animation-transform-duration: $animation-transform-duration
 );
 
 :host {
@@ -50,7 +55,7 @@ $theme: (
   .c2-expansion-panel {
     summary {
       .c2-expansion-panel-title {
-        transition: background-color css-variable.$state-layer-pressed-opacity animation.$acceleration-easing;
+        transition: animation.acceleration(background-color, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
         cursor: pointer;
         &:hover {
           background-color: css-variable.cssVar(hover-title-bg-color, $theme, $prefix);
@@ -74,7 +79,7 @@ $theme: (
     border-bottom: css-variable.cssVar(border-bottom, $theme, $prefix);
     border-left: css-variable.cssVar(border-left, $theme, $prefix);
 
-    transition: border-radius css-variable.$state-layer-hover-opacity animation.$sharp-easing;
+    transition: animation.sharp(border-radius, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
 
     border-radius: css-variable.cssVar(border-radius, $theme, $prefix);
 
@@ -85,7 +90,7 @@ $theme: (
         width: css-variable.cssVar(icon-width, $theme, $prefix);
         height: css-variable.cssVar(icon-height, $theme, $prefix);
         transform: rotate(0deg);
-        transition: rotate css-variable.$state-layer-focus-opacity animation.$sharp-easing;
+        transition: animation.sharp(transform, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
       }
     }
 
@@ -103,7 +108,7 @@ $theme: (
       width: css-variable.cssVar(icon-width, $theme, $prefix);
       height: css-variable.cssVar(icon-height, $theme, $prefix);
       transform: rotate(0deg);
-      transition: rotate css-variable.$state-layer-focus-opacity animation.$sharp-easing;
+      transition: animation.sharp(transform, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
     }
 
     .c2-expansion-panel-title {
@@ -143,23 +148,14 @@ $theme: (
       slot[name='expanded-icon'][data-filled] + slot[name='icon'] {
         display: none;
       }
-
-      // slot[name='expanded-icon'] {
-      //   display: none;
-      //   cursor: pointer;
-
-      //   &::slotted(svg) {
-      //     width: css-variable.cssVar(icon-width, $theme, $prefix);
-      //     height: css-variable.cssVar(icon-height, $theme, $prefix);
-      //   }
-      // }
-
-      // .default-icon {
-      //   width: css-variable.cssVar(icon-width, $theme, $prefix);
-      //   height: css-variable.cssVar(icon-height, $theme, $prefix);
-      //   transform: rotate(0deg);
-      //   transition: rotate css-variable.$state-layer-focus-opacity animation.$sharp-easing;
-      // }
+      slot[name='icon'] {
+        &::slotted(svg) {
+          transform: rotate(css-variable.cssVar(icon-rotate, $theme, $prefix));
+        }
+      }
+      .default-icon {
+        transform: rotate(css-variable.cssVar(icon-rotate, $theme, $prefix));
+      }
     }
     .c2-expansion-panel-content {
       border-bottom: css-variable.cssVar(border-bottom, $theme, $prefix);

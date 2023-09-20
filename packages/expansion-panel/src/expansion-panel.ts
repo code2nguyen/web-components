@@ -52,19 +52,16 @@ export class ExpansionPanel extends LitElement {
   }
 
   protected handleDetailsToggle(event: Event) {
-    console.log('handleDetailsToggle', event)
-    if (!this.headerClickable) {
-      event.preventDefault()
-      return
-    }
-    this.expanded = !this.expanded
-    console.log(this.expanded)
+    event.preventDefault()
+    if (this.headerClickable) {
+      this.expanded = !this.expanded        
+    }    
   }
 
   protected handleIconClick(event: Event) {
-    console.log('handleIconClick', event)
-    this.expanded = !this.expanded
+    event.preventDefault()
     event.stopImmediatePropagation()
+    this.expanded = !this.expanded    
   }
 
   override render() {
