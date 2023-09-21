@@ -1,8 +1,12 @@
 @use 'sass:map';
 
+$prefix: c2 !default;;
+$theme: () !default;;
+
+
 /* ex : var((width: 24px), width, c2-checkbox)  returns var(--c2-checkbox-width, 24px) */
-@function cssVar($property, $theme, $prefix) {
-  @return var(--#{$prefix}-#{$property}, map.get($theme, $property));
+@function cssVar($property, $custom-theme: $theme, $custom-prefix: $prefix) {
+  @return var(--#{$custom-prefix}-#{$property}, map.get($custom-theme, $property));  
 }
 
 // State Opacity

@@ -1,55 +1,30 @@
-@use '@c2n/sass/css-variable';
-@use '@c2n/sass/animation';
-$prefix: c2-expansion-panel;
-$icon-width: 24px;
-$icon-height: 24px;
+@use '@c2n/sass/animation'; 
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-expansion-panel,
+  $theme: (
+    icon-width: 24px,
+    icon-height: 24px,
 
-$border-top: 1px solid rgb(213, 213, 213);
-$border-right: 0px;
-$border-bottom: 1px solid rgb(213, 213, 213);
-$border-left: 0px;
+    border-top: 1px solid rgb(213, 213, 213),
+    border-right: 0px,
+    border-bottom: 1px solid rgb(213, 213, 213),
+    border-left: 0px,
 
-$border-radius: 0px;
+    border-radius: 0px,
 
-$padding-top: 16px;
-$padding-right: 16px;
-$padding-bottom: 16px;
-$padding-left: 16px;
+    padding-top: 16px,
+    padding-right: 16px,
+    padding-bottom: 16px,
+    padding-left: 16px,
+    box-shadow: none,
 
-$box-shadow: none;
-
-$title-icon-gap: 16px;
-
-$hover-title-bg-color: rgb(230, 230, 230);
-$title-bg-color: transparent;
-
-$icon-rotate: 180deg;
-
-$animation-transform-duration: 150ms;
-
-$theme: (
-  icon-width: $icon-width,
-  icon-height: $icon-height,
-
-  border-top: $border-top,
-  border-right: $border-right,
-  border-bottom: $border-bottom,
-  border-left: $border-left,
-
-  border-radius: $border-radius,
-
-  padding-top: $padding-top,
-  padding-right: $padding-right,
-  padding-bottom: $padding-bottom,
-  padding-left: $padding-left,
-  box-shadow: $box-shadow,
-
-  title-icon-gap: $title-icon-gap,
-  hover-title-bg-color: $hover-title-bg-color,
-  title-bg-color: $title-bg-color,
-  icon-rotate: $icon-rotate,
-  animation-transform-duration: $animation-transform-duration
+    title-icon-gap: 16px,
+    hover-title-bg-color: rgb(230, 230, 230),
+    title-bg-color: transparent,
+    icon-rotate: 180deg,
+  )
 );
+
 
 :host {
   display: flex;
@@ -60,9 +35,9 @@ $theme: (
     summary {
       .c2-expansion-panel-title {
         cursor: pointer;
-        transition: animation.acceleration(background-color, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
+        transition: animation.standard(background-color);
         &:hover {
-          background-color: css-variable.cssVar(hover-title-bg-color, $theme, $prefix);
+          background-color: css.cssVar(hover-title-bg-color);
         }
       }
     }
@@ -73,29 +48,29 @@ $theme: (
   flex: 1;
   align-self: stretch;
   display: flex;
-  box-shadow: css-variable.cssVar(box-shadow, $theme, $prefix);
-  border-radius: css-variable.cssVar(border-radius, $theme, $prefix);
+  box-shadow: css.cssVar(box-shadow);
+  border-radius: css.cssVar(border-radius);
   summary {
     list-style: none;
     display: flex;
     flex-direction: column;
-    border-top: css-variable.cssVar(border-top, $theme, $prefix);
-    border-right: css-variable.cssVar(border-right, $theme, $prefix);
-    border-bottom: css-variable.cssVar(border-bottom, $theme, $prefix);
-    border-left: css-variable.cssVar(border-left, $theme, $prefix);
+    border-top: css.cssVar(border-top);
+    border-right: css.cssVar(border-right);
+    border-bottom: css.cssVar(border-bottom);
+    border-left: css.cssVar(border-left);
 
-    transition: animation.sharp(border-radius, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
+    transition: animation.standard(border-radius);
 
-    border-radius: css-variable.cssVar(border-radius, $theme, $prefix);
+    border-radius: css.cssVar(border-radius);
 
     slot[name='icon'] {
       cursor: pointer;
 
       &::slotted(svg) {
-        width: css-variable.cssVar(icon-width, $theme, $prefix);
-        height: css-variable.cssVar(icon-height, $theme, $prefix);
+        width: css.cssVar(icon-width);
+        height: css.cssVar(icon-height);
         transform: rotate(0deg);
-        transition: animation.sharp(transform, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
+        transition: animation.standard(transform);
       }
     }
 
@@ -104,16 +79,16 @@ $theme: (
       cursor: pointer;
 
       &::slotted(svg) {
-        width: css-variable.cssVar(icon-width, $theme, $prefix);
-        height: css-variable.cssVar(icon-height, $theme, $prefix);
+        width: css.cssVar(icon-width);
+        height: css.cssVar(icon-height);
       }
     }
 
     .default-icon {
-      width: css-variable.cssVar(icon-width, $theme, $prefix);
-      height: css-variable.cssVar(icon-height, $theme, $prefix);
+      width: css.cssVar(icon-width);
+      height: css.cssVar(icon-height);
       transform: rotate(0deg);
-      transition: animation.sharp(transform, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
+      transition: animation.standard(transform);
     }
 
     .c2-expansion-panel-title {
@@ -121,24 +96,24 @@ $theme: (
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: css-variable.cssVar(title-icon-gap, $theme, $prefix);
-      background-color: css-variable.cssVar(title-bg-color, $theme, $prefix);      
-      padding-top: css-variable.cssVar(padding-top, $theme, $prefix);
-      padding-right: css-variable.cssVar(padding-right, $theme, $prefix);
-      padding-bottom: css-variable.cssVar(padding-bottom, $theme, $prefix);
-      padding-left: css-variable.cssVar(padding-left, $theme, $prefix);
+      gap: css.cssVar(title-icon-gap);
+      background-color: css.cssVar(title-bg-color);      
+      padding-top: css.cssVar(padding-top);
+      padding-right: css.cssVar(padding-right);
+      padding-bottom: css.cssVar(padding-bottom);
+      padding-left: css.cssVar(padding-left);
       position: relative;
     }
   }
 
   .c2-expansion-panel-content {
-    border-right: css-variable.cssVar(border-right, $theme, $prefix);
-    border-left: css-variable.cssVar(border-left, $theme, $prefix);
+    border-right: css.cssVar(border-right);
+    border-left: css.cssVar(border-left);
 
-    padding-top: css-variable.cssVar(padding-top, $theme, $prefix);
-    padding-right: css-variable.cssVar(padding-right, $theme, $prefix);
-    padding-bottom: css-variable.cssVar(padding-bottom, $theme, $prefix);
-    padding-left: css-variable.cssVar(padding-left, $theme, $prefix);
+    padding-top: css.cssVar(padding-top);
+    padding-right: css.cssVar(padding-right);
+    padding-bottom: css.cssVar(padding-bottom);
+    padding-left: css.cssVar(padding-left);
     position: relative;
   }
 
@@ -157,16 +132,16 @@ $theme: (
       }
       slot[name='icon'] {
         &::slotted(svg) {
-          transform: rotate(css-variable.cssVar(icon-rotate, $theme, $prefix));
+          transform: rotate(css.cssVar(icon-rotate));
         }
       }
       .default-icon {
-        transform: rotate(css-variable.cssVar(icon-rotate, $theme, $prefix));
+        transform: rotate(css.cssVar(icon-rotate));
       }
     }
     .c2-expansion-panel-content {
-      border-bottom: css-variable.cssVar(border-bottom, $theme, $prefix);
-      border-radius: css-variable.cssVar(border-radius, $theme, $prefix);
+      border-bottom: css.cssVar(border-bottom);
+      border-radius: css.cssVar(border-radius);
       border-top-right-radius: 0px;
       border-top-left-radius: 0px;
     }

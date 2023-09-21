@@ -1,0 +1,32 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-icon-button,
+  $theme: (
+    icon-width: 24px,
+    icon-height: 24px,
+    border-radius: 50%,
+
+    padding-top: 4px,
+    padding-right: 4px,
+    padding-bottom: 4px,
+    padding-left: 4px,
+
+    bg-color: transparent,
+    hover-bg-color: rgb(230, 230, 230),
+    icon-color: transparent,
+    icon-bg-color: transparent,
+  )
+);
+
+:host {
+  display: inline-flex;
+}
+
+.c2-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  ::slotted(svg) {
+  }
+}

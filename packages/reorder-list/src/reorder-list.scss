@@ -1,26 +1,26 @@
-@use 'sass:math';
 @use '@c2n/sass/animation';
-@use '@c2n/sass/css-variable';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-reorder-list,
+  $theme: (
+    container-border-width: 0px,
+    container-border-color: #bcbcc6,
+    container-border-radius: 8px,
+    container-padding: 0px,
+    container-margin: 0px,
+    container-gap: 0px,
+    item-background: transparent,
+    item-padding: 0px,
 
-$prefix: c2-reorder-list;
+    divider-height: 0px,
+    divider-color: #bcbcc6,
 
-$theme: (
-  container-border-width: 0px,
-  container-border-color: #bcbcc6,
-  container-border-radius: 8px,
-  container-padding: 0px,
-  container-margin: 0px,
-  container-gap: 0px,
-  item-background: transparent,
-  item-padding: 0px,
+    placeholder-background: transparent,
 
-  divider-height: 0px,
-  divider-color: #bcbcc6,
+    dragging-item-background: transparent,
+  )
 
-  placeholder-background: transparent,
-
-  dragging-item-background: transparent,
 );
+
 
 :host {
   position: relative;
@@ -30,22 +30,22 @@ $theme: (
   display: flex;
   flex-direction: column;
   position: relative;
-  gap: css-variable.cssVar(container-gap, $theme, $prefix);
-  border-width: css-variable.cssVar(container-border-width, $theme, $prefix);
-  border-color: css-variable.cssVar(container-border-color, $theme, $prefix);
+  gap: css.cssVar(container-gap);
+  border-width: css.cssVar(container-border-width);
+  border-color: css.cssVar(container-border-color);
   border-style: solid;
-  border-radius: css-variable.cssVar(container-border-radius, $theme, $prefix);
-  padding: css-variable.cssVar(container-padding, $theme, $prefix);
-  margin: css-variable.cssVar(container-margin, $theme, $prefix);
+  border-radius: css.cssVar(container-border-radius);
+  padding: css.cssVar(container-padding);
+  margin: css.cssVar(container-margin);
   .list-item {
-    background: css-variable.cssVar(item-background, $theme, $prefix);
-    padding: css-variable.cssVar(item-padding, $theme, $prefix);
+    background: css.cssVar(item-background);
+    padding: css.cssVar(item-padding);
 
     border-radius: initial;
     box-sizing: border-box;
     position: relative;
     &:not(:last-child) {
-      border-bottom: css-variable.cssVar(divider-height, $theme, $prefix) solid css-variable.cssVar(divider-color, $theme, $prefix);
+      border-bottom: css.cssVar(divider-height) solid css.cssVar(divider-color);
     }
     &:first-child {
       border-top-left-radius: inherit;
@@ -66,7 +66,7 @@ $theme: (
     }
   }
   .dragging-placeholder {
-    background-color: css-variable.cssVar(placeholder-background, $theme, $prefix);
+    background-color: css.cssVar(placeholder-background);
     z-index: 1;
   }
 }
@@ -74,7 +74,7 @@ $theme: (
 .dragging-item {
   box-sizing: border-box;
   position: fixed;
-  background-color: css-variable.cssVar(dragging-item-background, $theme, $prefix);
+  background-color: css.cssVar(dragging-item-background);
   cursor: pointer;
   z-index: 100000;
   display: none;

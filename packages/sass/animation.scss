@@ -1,22 +1,63 @@
-$standard-easing: cubic-bezier(0.4, 0, 0.2, 1);
-$acceleration-easing: cubic-bezier(0.4, 0, 1, 1);
-$deceleration-easing: cubic-bezier(0, 0, 0.2, 1);
-$sharp-easing: cubic-bezier(0.4, 0, 0.6, 1);
+$emphasized-easing: cubic-bezier(0.2, 0, 0, 1);
+$emphasized-acceleration-easing: cubic-bezier(0.3, 0, 0.8, 0.15);
+$emphasized-deceleration-easing: cubic-bezier(0.05, 0.7, 0.1, 1);
 
-@function standard($name, $duration, $delay: null) {
+$standard-easing: cubic-bezier(0.2, 0, 0, 1);
+$standard-acceleration-easing: cubic-bezier(0.3, 0, 1, 1);
+$standard-deceleration-easing: cubic-bezier(0, 0, 0, 1);
+
+$emphasized-duration: 500ms;
+$emphasized-acceleration-duration: 200ms;
+$emphasized-deceleration-duration: 400ms;
+
+$standard-duration: 300ms;
+$standard-acceleration-duration: 200ms;
+$standard-deceleration-duration: 250ms;
+
+
+
+@function standard($name, $duration: null, $delay: null) {
+  @if not $duration {
+    @return _animation($name, $standard-duration, $standard-easing, $delay);
+  }
   @return _animation($name, $duration, $standard-easing, $delay);
 }
 
-@function acceleration($name, $duration, $delay: null) {
-  @return _animation($name, $duration, $acceleration-easing, $delay);
+@function standard-deceleration($name, $duration: null, $delay: null) {
+  @if not $duration {
+    @return _animation($name, $standard-deceleration-duration, $standard-deceleration-easing, $delay);
+  }
+  @return _animation($name, $duration, $standard-deceleration-easing, $delay);
 }
 
-@function deceleration($name, $duration, $delay: null) {
-  @return _animation($name, $duration, $deceleration-easing, $delay);
+
+@function standard-acceleration($name, $duration: null, $delay: null) {
+  @if not $duration {
+    @return _animation($name, $standard-acceleration-duration, $standard-acceleration-easing, $delay);
+  }
+  @return _animation($name, $duration, $standard-acceleration-easing, $delay);
 }
 
-@function sharp($name, $duration, $delay: null) {
-  @return _animation($name, $duration, $sharp-easing, $delay);
+
+@function emphasized($name, $duration: null, $delay: null) {
+  @if not $duration {
+    @return _animation($name, $emphasized-duration, $emphasized-easing, $delay);
+  }
+  @return _animation($name, $duration, $emphasized-easing, $delay);
+}
+
+@function emphasized-deceleration($name, $duration: null, $delay: null) {
+  @if not $duration {
+    @return _animation($name, $emphasized-deceleration-duration, $emphasized-deceleration-easing, $delay);
+  }
+  @return _animation($name, $duration, $emphasized-deceleration-easing, $delay);
+}
+
+@function emphasized-acceleration($name, $duration: null, $delay: null) {
+  @if not $duration {
+    @return _animation($name, $emphasized-acceleration-duration, $emphasized-acceleration-easing, $delay);
+  }
+  @return _animation($name, $duration, $emphasized-acceleration-easing, $delay);
 }
 
 @function _animation($name, $duration, $easing, $delay) {

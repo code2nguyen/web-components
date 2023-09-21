@@ -1,4 +1,9 @@
-$prefix: c2-{{ dashCase name }};
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-{{ dashCase name }},
+  $theme: ()
+);
+
 
 :host {
   display: inline-flex;

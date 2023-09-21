@@ -1,15 +1,10 @@
-$prefix: c2-mat-icon;
-@use '@c2n/sass/css-variable';
-
-$prefix: c2-mat-icon;
-$icon-size: 24px;
-$icon-font: "Material Symbols Rounded", "Material Symbols Outlined", "Material Symbols Sharp" ;
-$icon-color: inherit;
-
-$theme: (
-    icon-size: $icon-size,
-    icon-font: $icon-font,
-    icon-color: $icon-color,
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-mat-icon,
+  $theme: (
+    icon-size: 24px,
+    icon-font: ('Material Symbols Rounded', 'Material Symbols Outlined', 'Material Symbols Sharp'),
+    icon-color: inherit,
+  )
 );
 
 :host {
@@ -17,12 +12,12 @@ $theme: (
   align-items: center;
   justify-content: center;
   border-radius: inherit;
-  color: css-variable.cssVar(icon-color, $theme, $prefix);
+  color: css.cssVar(icon-color);
 
-  font-family: css-variable.cssVar(icon-font, $theme, $prefix);
+  font-family: css.cssVar(icon-font);
   font-weight: normal;
   font-style: normal;
-  font-size: css-variable.cssVar(icon-size, $theme, $prefix);;
+  font-size: css.cssVar(icon-size);
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
