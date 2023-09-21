@@ -44,6 +44,7 @@ export class Checkbox extends LitElement {
           ?disabled="${this.disabled}"
           .indeterminate="${this.indeterminate}"
           ?checked="${this.checked}"
+          @click="${this.clickChange}"
           @change="${this.handleChange}"
         />
         <div class="c2-checkbox__background">
@@ -70,6 +71,9 @@ export class Checkbox extends LitElement {
     super.update(changedProperties)
   }
 
+  protected clickChange(event: Event) {
+    console.log(event)
+  }
   protected handleChange() {
     this.checked = this.formElement.checked
     this.indeterminate = this.formElement.indeterminate

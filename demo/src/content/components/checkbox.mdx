@@ -12,8 +12,15 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
 
 
 ```html tag=MdxCodeBlock,link=http://xyz.com
-    <div class="flex items-center">
-        <c2-checkbox></c2-checkbox>
-        <label>check me</label> 
-    </div>
+<div class="container">
+    <c2-checkbox></c2-checkbox>
+    <label>check me</label> 
+</div>
+<style>
+    .container {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+</style>
 ```

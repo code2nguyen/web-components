@@ -34,24 +34,27 @@ export class ExpansionPanel extends LitElement {
   }
 
   private handleExpandedSlotSlotChange(e: Event) {
-      const slotElement = e.target as HTMLSlotElement;
-      const childNodes = slotElement.assignedNodes({ flatten: true })
-      if (childNodes.length > 0) {
-        slotElement.dataset.filled = 'filled'
-      }
+    const slotElement = e.target as HTMLSlotElement
+    const childNodes = slotElement.assignedNodes({ flatten: true })
+    if (childNodes.length > 0) {
+      slotElement.dataset.filled = 'filled'
+    }
   }
 
   protected handleDetailsToggle(event: Event) {
     event.preventDefault()
     if (this.headerClickable) {
-      this.expanded = !this.expanded        
-    }    
+      this.expanded = !this.expanded
+    }
   }
 
   protected handleIconClick(event: Event) {
     event.preventDefault()
+    this.expanded = !this.expanded
+  }
+  
+  private skipSlotClick(event: Event) {
     event.stopImmediatePropagation()
-    this.expanded = !this.expanded    
   }
 
   override render() {
@@ -59,7 +62,7 @@ export class ExpansionPanel extends LitElement {
       <details class="c2-expansion-panel" ?open=${this.expanded}>
         <summary @click=${this.handleDetailsToggle}>
           <div class="c2-expansion-panel-title">
-            <slot name="title">${this.title}</slot>
+            <slot name="title" @click=${this.skipSlotClick}>${this.title}</slot>
             <div></div>
             ${this.renderIcon()}
           </div>

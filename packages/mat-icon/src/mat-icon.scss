@@ -13,7 +13,7 @@
   justify-content: center;
   border-radius: inherit;
   color: css.cssVar(icon-color);
-
+  user-select: none;
   font-family: css.cssVar(icon-font);
   font-weight: normal;
   font-style: normal;
