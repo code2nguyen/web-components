@@ -2,19 +2,14 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-icon-button,
   $theme: (
-    icon-width: 24px,
-    icon-height: 24px,
+    icon-size: 24px,
+    icon-color: inherit,
+    hover-icon-color: inherit,
+
     border-radius: 50%,
-
-    padding-top: 4px,
-    padding-right: 4px,
-    padding-bottom: 4px,
-    padding-left: 4px,
-
+    state-layer-size: 48px,
     bg-color: transparent,
-    hover-bg-color: rgb(230, 230, 230),
-    icon-color: transparent,
-    icon-bg-color: transparent,
+    hover-bg-color: rgb(230, 230, 230),    
   )
 );
 
@@ -26,7 +21,25 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  ::slotted(svg) {
+  cursor: pointer;
+  user-select: none;
+  width: css.cssVar(state-layer-size);
+  height: css.cssVar(state-layer-size);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(bg-color);
+  will-change: background-color;
+  transition: animation.standard(background-color);
+  &:hover {
+    background-color: css.cssVar(hover-bg-color);
+     ::slotted(*) {
+        color: css.cssVar(hover-icon-color);
+     }
   }
+
 }
+  ::slotted(*) {
+    width: css.cssVar(icon-size);
+    height: css.cssVar(icon-size);
+    color: css.cssVar(icon-color);
+    transition: animation.standard(color);
+  }
