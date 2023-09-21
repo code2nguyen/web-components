@@ -1,5 +1,5 @@
 ---
-import '../assets/styles.css';
+import '../assets/styles.scss';
 
 interface Props {
 	title: string;
@@ -36,8 +36,6 @@ import TopNav from '../components/TopNav.astro';
 	</head>
 	<body>
 		<main>
-			<span class="material-symbols-rounded">expand_more</span>
-			<c2-mat-icon>home</c2-mat-icon>
 			<TopNav class="main-nav" pageTitle={pageTitle}/>
 			<ListComponents componentId={componentId}/>
 			<div class="p-4 pl-10">

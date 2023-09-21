@@ -33,16 +33,6 @@ export class ExpansionPanel extends LitElement {
     return html` ${this.renderExpanedIcon()} ${this.renderDefaultIcon()}`
   }
 
-  protected renderHeader() {
-    return html`
-      <div class="c2-expansion-panel-title">
-        <slot name="title">${this.title}</slot>
-        <div></div>
-        ${this.renderIcon()}
-      </div>
-    `
-  }
-
   private handleExpandedSlotSlotChange(e: Event) {
       const slotElement = e.target as HTMLSlotElement;
       const childNodes = slotElement.assignedNodes({ flatten: true })
@@ -68,9 +58,10 @@ export class ExpansionPanel extends LitElement {
     return html`
       <details class="c2-expansion-panel" ?open=${this.expanded}>
         <summary @click=${this.handleDetailsToggle}>
-          ${this.renderHeader()}
-          <div class="c2-expansion-panel-summary-content">
-            <slot name="summary-content"></slot>
+          <div class="c2-expansion-panel-title">
+            <slot name="title">${this.title}</slot>
+            <div></div>
+            ${this.renderIcon()}
           </div>
         </summary>
         <div class="c2-expansion-panel-content">

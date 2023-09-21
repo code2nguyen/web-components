@@ -5,11 +5,17 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
 
 # Expansion Panel
+The `c2-expansion-panel` represents data inform of details/summary. Behind the sence it uses details/summary html tag.
+
+
 
 ```html tag=MdxCodeBlock,link=http://xyz.com
-    <div class="flex items-center">
-        <c2-expansion-panel>
-            this is content
-        </c2-expansion-panel>
+<c2-expansion-panel>    
+    <c2-mat-icon slot="icon">code</c2-mat-icon>
+    <div slot="summary-content">
+        <c2-expansion-panel>    
+            <div slot="title">This is the expansion title</div>
+        c2-expansion-panel>
     </div>
+</c2-expansion-panel>
 ```

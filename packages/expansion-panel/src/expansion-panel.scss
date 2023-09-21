@@ -15,11 +15,14 @@ $padding-top: 16px;
 $padding-right: 16px;
 $padding-bottom: 16px;
 $padding-left: 16px;
+
 $box-shadow: none;
 
 $title-icon-gap: 16px;
 
 $hover-title-bg-color: rgb(230, 230, 230);
+$title-bg-color: transparent;
+
 $icon-rotate: 180deg;
 
 $animation-transform-duration: 150ms;
@@ -43,6 +46,7 @@ $theme: (
 
   title-icon-gap: $title-icon-gap,
   hover-title-bg-color: $hover-title-bg-color,
+  title-bg-color: $title-bg-color,
   icon-rotate: $icon-rotate,
   animation-transform-duration: $animation-transform-duration
 );
@@ -55,8 +59,8 @@ $theme: (
   .c2-expansion-panel {
     summary {
       .c2-expansion-panel-title {
-        transition: animation.acceleration(background-color, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
         cursor: pointer;
+        transition: animation.acceleration(background-color, css-variable.cssVar(animation-transform-duration, $theme, $prefix));
         &:hover {
           background-color: css-variable.cssVar(hover-title-bg-color, $theme, $prefix);
         }
@@ -70,10 +74,11 @@ $theme: (
   align-self: stretch;
   display: flex;
   box-shadow: css-variable.cssVar(box-shadow, $theme, $prefix);
-
+  border-radius: css-variable.cssVar(border-radius, $theme, $prefix);
   summary {
     list-style: none;
     display: flex;
+    flex-direction: column;
     border-top: css-variable.cssVar(border-top, $theme, $prefix);
     border-right: css-variable.cssVar(border-right, $theme, $prefix);
     border-bottom: css-variable.cssVar(border-bottom, $theme, $prefix);
@@ -117,11 +122,12 @@ $theme: (
       align-items: center;
       justify-content: space-between;
       gap: css-variable.cssVar(title-icon-gap, $theme, $prefix);
-      width: 100%;
+      background-color: css-variable.cssVar(title-bg-color, $theme, $prefix);      
       padding-top: css-variable.cssVar(padding-top, $theme, $prefix);
       padding-right: css-variable.cssVar(padding-right, $theme, $prefix);
       padding-bottom: css-variable.cssVar(padding-bottom, $theme, $prefix);
       padding-left: css-variable.cssVar(padding-left, $theme, $prefix);
+      position: relative;
     }
   }
 
@@ -133,6 +139,7 @@ $theme: (
     padding-right: css-variable.cssVar(padding-right, $theme, $prefix);
     padding-bottom: css-variable.cssVar(padding-bottom, $theme, $prefix);
     padding-left: css-variable.cssVar(padding-left, $theme, $prefix);
+    position: relative;
   }
 
   &[open] {

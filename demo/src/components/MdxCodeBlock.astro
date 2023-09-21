@@ -1,15 +1,51 @@
 ---
 import { Code } from 'astro:components';
+import type * as shiki from 'shiki';
+
+interface Props {
+	code: string;
+	lang: shiki.Lang;
+	github?: string;
+}
 
 const {
     code,
-    lang
+    lang,
+    github,
 } = Astro.props;
 
 const props = Astro.props
 ---
 
-<div set:html={code} />
+
+<c2-expansion-panel class="demo-code">    
+    <c2-mat-icon slot="icon">code</c2-mat-icon>
+    <c2-mat-icon slot="expanded-icon">expand_less</c2-mat-icon>
+
+    <div slot="title">        
+        <Fragment set:html={code} />       
+    </div>
+    <Code code={code} lang={lang} />
+    <c2-mat-icon class="content-copy-icon">content_copy</c2-mat-icon> 
+</c2-expansion-panel>
+
+<script>
+    const copyBtns = document.querySelectorAll('.content-copy-icon');
+    copyBtns.forEach((button) => {
+        button.addEventListener('click', async (e) => {
+            const icon = (e.target as HTMLElement)
+            const codeElement = icon.previousElementSibling;
+            if (codeElement && codeElement.nodeName === "PRE") {
+                const code = codeElement.querySelector("code");
+                const text = code!.innerText;
+                await navigator.clipboard.writeText(text);
+                icon.innerText="done"
+                setTimeout(() => {
+                    icon.innerText = "content_copy";
+                }, 1000);
+            }            
+        })        
+    });
+</script>
 
 
-<Code code={code} lang={lang} /> 

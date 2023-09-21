@@ -9,11 +9,32 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
 
 # Mat Icon
 
-`c2-mat-icon` is a simple wrapper for Material Icon font component.
 
-```html tag=MdxCodeBlock,link=http://xyz.com
-    <div class="flex items-center">
-        <c2-mat-icon>home</c2-mat-icon>        
-    </div>
+```html tag=MdxCodeBlock,github=packages/mat-icon/src/mat-icon.ts
+<div class="container">
+    <c2-mat-icon>home</c2-mat-icon>        
+    <c2-mat-icon class="sentiment_dissatisfied">sentiment_dissatisfied</c2-mat-icon>        
+    <c2-mat-icon class="local_cafe">local_cafe</c2-mat-icon>        
+</div>        
+<style>
+    .container {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+    .sentiment_dissatisfied {
+        --c2-mat-icon-icon-color: rgb(247, 92, 70);
+    }
+
+    .local_cafe {
+        --c2-mat-icon-icon-color: rgb(56, 146, 243);
+        --c2-mat-icon-icon-size: 32px;
+    }
+</style>
 ```
+<span class="material-symbols-outlined">
 
+</span>
+
+
+`c2-mat-icon` is a simple wrapper for Material Icon font component.
