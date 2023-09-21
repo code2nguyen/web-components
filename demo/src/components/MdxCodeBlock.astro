@@ -19,8 +19,12 @@ const props = Astro.props
 
 
 <c2-expansion-panel class="demo-code">    
-    <c2-mat-icon slot="icon">code</c2-mat-icon>
-    <c2-mat-icon slot="expanded-icon">expand_less</c2-mat-icon>
+    <c2-icon-button slot="icon">
+        <c2-mat-icon >code</c2-mat-icon>
+    </c2-icon-button>    
+    <c2-icon-button slot="expanded-icon">
+        <c2-mat-icon>expand_less</c2-mat-icon>
+    </c2-icon-button>
 
     <div slot="title">        
         <Fragment set:html={code} />       
