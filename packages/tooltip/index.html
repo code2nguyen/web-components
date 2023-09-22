@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: 1px solid gray;
+        display: flex;
+        padding: 10px;
+        width: 200px;
+        height: 100px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+      }
+      .small {
+        width: 80px;
+        height: 30px;
+      }
+    </style>
+  </head>
+  <body class="demo">
+    <button type="button">
+      Hover me
+      <c2-tooltip>Hello tooltip</c2-tooltip>
+    </button>
+
+    <button type="button" class="small">
+      Hover me
+      <c2-tooltip>Hello tooltip over size</c2-tooltip>
+    </button>
+
+
+    <button type="button" >
+      Hover me
+      <c2-tooltip hide-arrow>Hello tooltip</c2-tooltip>
+    </button>
+
+    <button type="button">
+      targetStrategy previousElement
+    </button>
+    <c2-tooltip target-strategy="previousElement">Hello tooltip</c2-tooltip>
+
+    <button type="button">
+      position Left righ
+      <c2-tooltip position="left,right">Hello tooltip</c2-tooltip>
+    </button>
+    <button type="button" data-tooltip="This is tooltip">
+      Tooltip data
+      <c2-tooltip></c2-tooltip>
+    </button>
+    <button type="button">
+      Hover me
+      <c2-tooltip>Hello tooltip</c2-tooltip>
+    </button>
+    <button type="button">
+      Hover me
+      <c2-tooltip>Hello tooltip</c2-tooltip>
+    </button>
+    <button type="button">
+      Hover me
+      <c2-tooltip>Hello tooltip</c2-tooltip>
+    </button>
+    <button type="button">
+      Hover me
+      <c2-tooltip>Hello tooltip</c2-tooltip>
+    </button>
+    <button type="button">
+      Hover me
+      <c2-tooltip>Hello tooltip</c2-tooltip>
+    </button>
+    <button type="button">
+      Hover me
+      <c2-tooltip>Hello tooltip</c2-tooltip>
+    </button>
+    <button type="button">
+      Hover me
+      <c2-tooltip>Hello tooltip</c2-tooltip>
+    </button>
+  </body>
+</html>

@@ -8,10 +8,18 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
 
 # {{ titleCase name}}
 
-TODO
 
 ```html tag=MdxCodeBlock
-<div class="flex items-center">
+<div class="container">
     <c2-{{ dashCase name}}></c2-{{ dashCase name}}>    
 </div>
+<style>
+    .container {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+</style>
 ```
+
+TODO

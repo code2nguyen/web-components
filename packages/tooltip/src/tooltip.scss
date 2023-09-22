@@ -1,0 +1,46 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tooltip,
+  $theme: (
+    bg-color: #322F35,
+  )
+);
+
+:host {
+  display: inline-flex;
+  position: absolute;
+  background: css.cssVar(bg-color);
+  border-radius: 4px;
+  display: inline-block;
+  pointer-events: none;
+  user-select: none;
+
+  /* Animate in */
+  opacity: 0;
+  transform: scale(0.75);
+  transition: animation.standard-deceleration(opacity), animation.standard-deceleration(transform);
+  
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  
+  color: #F5EFF7;
+}
+
+:host([showing]) {
+  opacity: 1;
+  transform: scale(1);
+}
+.c2-tooltip {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  padding: 4px 8px;  
+  max-width: 160px;
+  width: max-content;
+  ::slotted(svg), .arrow {
+    position: absolute;
+    background-color: transparent;
+    color: css.cssVar(bg-color);
+  }
+}

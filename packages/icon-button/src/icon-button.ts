@@ -1,6 +1,9 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import styles from './icon-button.scss?inline'
+
+import '@c2n/tooltip';
+
 /**
  * IconButton component
  *
@@ -12,11 +15,11 @@ export class IconButton extends LitElement {
 
   static override styles = unsafeCSS(styles)
 
-
   override render() {
     return html`
-      <div class="c2-icon-button">
+      <div class="c2-icon-button" data-tooltip=${this.dataset.tooltip}>
         <slot></slot>
+        ${this.dataset.tooltip ? html`<c2-tooltip></c2-tooltip>` : nothing}
       </div>
     `
   }

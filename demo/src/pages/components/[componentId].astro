@@ -5,6 +5,7 @@ import { requireNotNull } from '../../utils/assertion';
 
 export function getStaticPaths() {
   return [
+    {params: {componentId: 'tooltip'}},
     {params: {componentId: 'icon-button'}},
     {params: {componentId: 'checkbox'}},
     {params: {componentId: 'dropdown-list'}},
