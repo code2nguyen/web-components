@@ -19,14 +19,17 @@ const props = Astro.props
 
 
 <c2-expansion-panel class="demo-code" title-not-clickable>    
-    <c2-icon-button slot="icon" data-tooltip="show code">
+    <c2-icon-button slot="icon" class="open-close-icon" data-tooltip="show code">
         <c2-mat-icon >code</c2-mat-icon>
     </c2-icon-button>    
-    <c2-icon-button slot="expanded-icon">
+    <c2-icon-button slot="expanded-icon"  class="open-close-icon" >
         <c2-mat-icon>expand_less</c2-mat-icon>
     </c2-icon-button>
 
-    <div slot="title" class="reset">        
+    <div slot="title" class="reset">     
+        <a href={"https://github.com/code2nguyen/web-components/tree/main/" + github} target="_blank">
+            <c2-text-button class="source-btn">Source</c2-text-button> 
+        </a>  
         <Fragment set:html={code} />       
     </div>
     <Code code={code} lang={lang} wrap/>

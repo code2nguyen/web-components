@@ -2,9 +2,10 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-text-button,
   $theme: (
-    color: rgb(150, 206, 253),
-    hover-color: rgb(150, 206, 253),
-
+    color: #bcbcc6,
+    hover-color: #476ef9,
+    hover-text-decoration: underline,
+    state-layer-padding: 4px
   )
 );
 
@@ -18,8 +19,17 @@
   align-items: center;
   justify-content: center;
   color: css.cssVar(color);
+  cursor: pointer;
+  user-select: none;
+  will-change: color, text-decoration;
+  transition: animation.standard(color), animation.standard(text-decoration);
+  padding: css.cssVar(state-layer-padding);
   &:hover {
     color: css.cssVar(hover-color);
+    text-decoration: css.cssVar(hover-text-decoration);
+  }
+  &::slotted(a) {
+    text-decoration: inherit;
   }
   
 }

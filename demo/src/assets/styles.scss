@@ -22,6 +22,18 @@
     --c2-expansion-panel-border-radius: '';
     --c2-expansion-panel-border-right: '';
     --c2-expansion-panel-border-left: '';
+    min-height: 64px;
+  }
+  .open-close-icon {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+  .source-btn {
+    position: absolute;
+    font-size: 12px;
+    top: 26px;
+    right: 64px;
   }
   .content-copy-icon {
     position: absolute;
