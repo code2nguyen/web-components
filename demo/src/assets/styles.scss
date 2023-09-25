@@ -18,6 +18,11 @@
   --c2-expansion-panel-border-right: 1px solid rgb(213, 213, 213);
   --c2-expansion-panel-border-left: 1px solid rgb(213, 213, 213);
 
+  .reset {
+    --c2-expansion-panel-border-radius: '';
+    --c2-expansion-panel-border-right: '';
+    --c2-expansion-panel-border-left: '';
+  }
   .content-copy-icon {
     position: absolute;
     top: 24px;

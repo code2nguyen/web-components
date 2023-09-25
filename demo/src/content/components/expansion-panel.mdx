@@ -10,12 +10,19 @@ The `c2-expansion-panel` represents data inform of details/summary. Behind the s
 
 
 ```html tag=MdxCodeBlock,link=http://xyz.com
-<c2-expansion-panel>    
-    <c2-mat-icon slot="icon">code</c2-mat-icon>
-    <div slot="summary-content">
-        <c2-expansion-panel>    
-            <div slot="title">This is the expansion title</div>
-        c2-expansion-panel>
+<c2-expansion-panel class="basic">    
+    <div slot="title" class="title">Section 1</div>
+    <div class="content">
+        The content can be toggled visible.
     </div>
 </c2-expansion-panel>
+<style>
+    .basic {
+        width: 500px;
+        background: white;
+    }
+    .title {        
+        font-weight: 600;
+    }
+</style>
 ```

@@ -10,14 +10,19 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
 
 
 ```html tag=MdxCodeBlock
-<div class="container">
-    <c2-details></c2-details>    
-</div>
+<c2-details class="basic">    
+    <div slot="title" class="title">Section 1</div>
+    <div class="content">
+        The content can be toggled visible.
+    </div>
+</c2-details>
 <style>
-    .container {
-        display: flex;
-        gap: 16px;
-        align-items: center;
+    .basic {
+        width: 500px;
+        background: white;
+    }
+    .title {        
+        font-weight: 600;
     }
 </style>
 ```

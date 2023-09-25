@@ -26,7 +26,7 @@ const props = Astro.props
         <c2-mat-icon>expand_less</c2-mat-icon>
     </c2-icon-button>
 
-    <div slot="title">        
+    <div slot="title" class="reset">        
         <Fragment set:html={code} />       
     </div>
     <Code code={code} lang={lang} wrap/>
