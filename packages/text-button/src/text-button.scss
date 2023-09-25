@@ -1,0 +1,25 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-text-button,
+  $theme: (
+    color: rgb(150, 206, 253),
+    hover-color: rgb(150, 206, 253),
+
+  )
+);
+
+
+:host {
+  display: inline-flex;
+}
+
+.c2-text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: css.cssVar(color);
+  &:hover {
+    color: css.cssVar(hover-color);
+  }
+  
+}

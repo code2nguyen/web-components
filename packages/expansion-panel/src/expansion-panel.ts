@@ -1,5 +1,5 @@
-import { LitElement, html, unsafeCSS } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { customElement, property, query } from 'lit/decorators.js'
 import styles from './expansion-panel.scss?inline'
 /**
  * ExpansionPanel component
@@ -13,7 +13,10 @@ export class ExpansionPanel extends LitElement {
 
   @property({ type: Boolean, reflect: true }) expanded = false
 
-  @property({ type: Boolean, reflect: true, attribute: 'header-clickable' }) headerClickable = false
+  @property({ type: Boolean, reflect: true, attribute: 'title-not-clickable' }) titleNotClickable = false
+
+  @query('.c2-expansion-panel-content') contentElement?: HTMLElement
+  @query('.c2-expansion-panel-content__detect-height') contentHeightDetectElement?: HTMLElement
 
   protected renderDefaultIcon() {
     return html`<slot name="icon" @click=${this.handleIconClick}>
@@ -26,51 +29,74 @@ export class ExpansionPanel extends LitElement {
   }
 
   protected renderExpanedIcon() {
-    return html`<slot name="expanded-icon" @click=${this.handleIconClick} @slotchange=${this.handleExpandedSlotSlotChange}></slot>`
+    return html`<slot name="expanded-icon" @click=${this.handleIconClick} @slotchange=${this.addFilledData}></slot>`
   }
 
   protected renderIcon() {
     return html` ${this.renderExpanedIcon()} ${this.renderDefaultIcon()}`
   }
 
-  private handleExpandedSlotSlotChange(e: Event) {
+  private addFilledData(e: Event) {
     const slotElement = e.target as HTMLSlotElement
     const childNodes = slotElement.assignedNodes({ flatten: true })
     if (childNodes.length > 0) {
       slotElement.dataset.filled = 'filled'
+      if (slotElement.parentElement) {
+        slotElement.parentElement.dataset.filled = 'filled'
+      }
     }
   }
 
-  protected handleDetailsToggle(event: Event) {
-    event.preventDefault()
-    if (this.headerClickable) {
-      this.expanded = !this.expanded
-    }
+  protected handleTitleToggle() {
+    this.toggleExpand()
   }
 
   protected handleIconClick(event: Event) {
-    event.preventDefault()
-    this.expanded = !this.expanded
-  }
-  
-  private skipSlotClick(event: Event) {
     event.stopImmediatePropagation()
+    this.toggleExpand()
   }
+
+  private toggleExpand() {
+    this.expanded = !this.expanded
+    // Try to add animation, but it hurts the performance. So remove it for now.
+    // if (this.contentElement && this.contentHeightDetectElement) {
+    //   this.style.setProperty('--c2-expansion-panel-content-height', `${this.contentHeightDetectElement.clientHeight}px`)
+
+    //   if (this.expanded) {
+    //     this.contentHeightDetectElement.children[0].setAttribute('name', 'internalSlot')
+    //     this.contentElement.children[0].removeAttribute('name')
+    //     // this.contentElement.classList.add('expanding')
+    //   } else {
+    //     // this.contentElement.classList.add('collapsing')
+    //     this.contentElement.children[0].setAttribute('name', 'internalSlot')
+    //     this.contentHeightDetectElement.children[0].removeAttribute('name')
+    //   }
+    // }
+  }
+
 
   override render() {
     return html`
-      <details class="c2-expansion-panel" ?open=${this.expanded}>
-        <summary @click=${this.handleDetailsToggle}>
-          <div class="c2-expansion-panel-title">
-            <slot name="title" @click=${this.skipSlotClick}>${this.title}</slot>
-            <div></div>
+      <div class="c2-expansion-panel">
+        <div class="c2-expansion-panel-header">
+          <div class="c2-expansion-panel-header-title" @click=${this.titleNotClickable ? nothing : this.handleTitleToggle}>
+            <div class="c2-expansion-panel-header-title-content">
+              <slot name="title">${this.title}</slot>
+            </div>
             ${this.renderIcon()}
           </div>
-        </summary>
+          <div class="c2-expansion-panel-header-content">
+            <slot name="header-content" @slotchange=${this.addFilledData}></slot>
+          </div>
+        </div>
         <div class="c2-expansion-panel-content">
           <slot></slot>
+          <!-- <slot name="internalSlot"></slot> -->
         </div>
-      </details>
+      </div>
+      <!-- <div class="c2-expansion-panel-content__detect-height">
+        <slot></slot>
+      </div> -->
     `
   }
 }

@@ -30,39 +30,38 @@
   <body class="demo">
 
     <div>Basic </div>
-    <c2-expansion-panel title="Hello title" header-clickable>
+    <c2-details title="Hello title">
       <div>This content can be toggle visible</div>    
-      <div>This content can be toggle visible</div>    
-      <div>This content can be toggle visible</div>    
-      <div>This content can be toggle visible</div>    
-      <div>This content can be toggle visible</div>    
-      <div>This content can be toggle visible</div>    
-      <div>This content can be toggle visible</div>    
-      <div>This content can be toggle visible</div>    
-    </c2-expansion-panel>
+    </c2-details>
 
-    <div> Basic with header contente </div>
-    <c2-expansion-panel header-clickable>
-      <div slot="title">Custome title</div>    
-      <div slot="header-content">This is header content</div>    
+    <div>Basic Row Inverse</div>
+    <c2-details title="Hello title" style="--c2-details-title-flex-direction:row-reverse">
       <div>This content can be toggle visible</div>    
-    </c2-expansion-panel>
+    </c2-details>
+
+
+    <div> Customize Title </div>
+    <c2-details >
+      <div slot="title">Custome title</div>    
+      <div>This content can be toggle visible</div>    
+    </c2-details>
 
     <div> Customize Title bg color </div>
-    <c2-expansion-panel header-clickable style="--c2-expansion-panel-title-bg-color: red;">
+    <c2-details style="--c2-details-title-bg-color: red;">
       <div slot="title">Custome title</div>    
       <div>This content can be toggle visible</div>    
-    </c2-expansion-panel>
+    </c2-details>
 
 
     <div> Customize border-radius </div>
-    <c2-expansion-panel header-clickable style="--c2-expansion-panel-border-radius: 16px 16px 16px 16px; --c2-expansion-panel-border-right: 1px solid rgb(213, 213, 213); --c2-expansion-panel-border-left: 1px solid rgb(213, 213, 213); --c2-expansion-panel-box-shadow: 1px solid rgb(213, 213, 213);">
+    <c2-details style="--c2-details-border-radius: 16px 16px 16px 16px; --c2-details-border-right: 1px solid rgb(213, 213, 213); --c2-details-border-left: 1px solid rgb(213, 213, 213); --c2-details-box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 3px -2px, rgba(0, 0, 0, 0.14) 0px 3px 4px 0px, rgba(0, 0, 0, 0.12) 0px 1px 8px 0px
+;">
       <div slot="title">Custome title</div>    
       <div>This content can be toggle visible</div>    
-    </c2-expansion-panel>
+    </c2-details>
 
     <div> Customize Title larges + icon position absolute</div>
-    <c2-expansion-panel title-not-clickable>
+    <c2-details>
       <div slot="title" >
         <div>Select</div>
         <ol>
@@ -73,30 +72,30 @@
       </div>    
       <svg style="position: absolute; top:16px; right: 16px;" slot="icon" viewBox="0 -960 960 960"><path d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"/></svg>
       <div>This content can be toggle visible</div>    
-    </c2-expansion-panel>
+    </c2-details>
 
 
     <div> Customize Icon </div>
-    <c2-expansion-panel>
+    <c2-details>
       <svg slot="icon" viewBox="0 -960 960 960"><path d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"/></svg>
       <svg slot="expanded-icon" viewBox="0 -960 960 960"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"/></svg>    
-    </c2-expansion-panel>
+    </c2-details>
 
-    <div> Customize </div>
-    <c2-expansion-panel>
+    <div> Customize without content</div>
+    <c2-details>
       <svg slot="icon" viewBox="0 -960 960 960"><path d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"/></svg>
-    </c2-expansion-panel>
+    </c2-details>
 
-        <div> Customize </div>
-    <c2-expansion-panel>
+    <div> Customize add padding for content</div>
+    <c2-details>
       <svg slot="icon" viewBox="0 -960 960 960"><path d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"/></svg>
       <div slot="title"> 
-          Example title
+          Example title add padding for content
       </div>
       <div slot="summary-content" style="padding-bottom: 16px;">
           Summary content
       </div>
       Content
-    </c2-expansion-panel>
+    </c2-details>
   </body>
 </html>

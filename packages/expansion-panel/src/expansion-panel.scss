@@ -1,4 +1,4 @@
-@use '@c2n/sass/animation'; 
+@use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-expansion-panel,
   $theme: (
@@ -6,11 +6,10 @@
     icon-height: 24px,
 
     border-top: 1px solid rgb(213, 213, 213),
-    border-right: 0px,
     border-bottom: 1px solid rgb(213, 213, 213),
-    border-left: 0px,
-
-    border-radius: 0px,
+    border-right: 1px solid rgb(213, 213, 213),
+    border-left: 1px solid rgb(213, 213, 213),
+    border-radius: 16px,
 
     padding-top: 16px,
     padding-right: 16px,
@@ -25,100 +24,133 @@
   )
 );
 
-
 :host {
   display: flex;
-}
 
-:host([header-clickable]) {
   .c2-expansion-panel {
-    summary {
-      .c2-expansion-panel-title {
+    flex: 1;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    box-shadow: css.cssVar(box-shadow);
+    border-radius: css.cssVar(border-radius);
+    position: relative;
+    .c2-expansion-panel-header {
+      display: flex;
+      flex-direction: column;
+      border-top: css.cssVar(border-top);
+      border-bottom: css.cssVar(border-bottom);
+      border-right: css.cssVar(border-right);
+      border-left: css.cssVar(border-left);
+      border-radius: css.cssVar(border-radius);
+
+      will-change: border-radius;
+      transition: animation.standard-acceleration(border-radius, 50ms);
+
+      slot[name='icon'] {
+        cursor: pointer;
+        &::slotted(svg) {
+          width: css.cssVar(icon-width);
+          height: css.cssVar(icon-height);
+          transform: rotate(0deg);
+          will-change: transform;
+          transition: animation.standard(transform);
+        }
+      }
+
+      slot[name='expanded-icon'] {
+        display: none;
+        cursor: pointer;
+        &::slotted(svg) {
+          width: css.cssVar(icon-width);
+          height: css.cssVar(icon-height);
+        }
+      }
+
+      .default-icon {
+        width: css.cssVar(icon-width);
+        height: css.cssVar(icon-height);
+        transform: rotate(0deg);
+        will-change: transform;
+        transition: animation.standard(transform);
+      }
+
+      .c2-expansion-panel-header-title {
+        border-radius: inherit;
+        display: flex;
+        align-items: center;
+        gap: css.cssVar(title-icon-gap);
+        background-color: css.cssVar(title-bg-color);
+        padding-top: css.cssVar(padding-top);
+        padding-right: css.cssVar(padding-right);
+        padding-bottom: css.cssVar(padding-bottom);
+        padding-left: css.cssVar(padding-left);
+        position: relative;
         cursor: pointer;
         transition: animation.standard(background-color);
         &:hover {
           background-color: css.cssVar(hover-title-bg-color);
         }
+        .c2-expansion-panel-header-title-content {
+          flex: 1;
+          display: flex;
+          align-items: center;
+        }
+      }
+      .c2-expansion-panel-header-title:has(+ .c2-expansion-panel-header-content[data-filled]) {
+        border-bottom-left-radius: 0px;
+        border-bottom-right-radius: 0px;
+      }
+
+      .c2-expansion-panel-header-content {
+        padding-right: css.cssVar(padding-right);
+        padding-left: css.cssVar(padding-left);
+        &:has(slot[data-filled]) {
+          border-top-right-radius: 0px;
+          border-top-left-radius: 0px;
+          border-bottom-left-radius: inherit;
+          border-bottom-right-radius: inherit;
+        }
       }
     }
+
+    .c2-expansion-panel-content {
+      display: none;
+      box-sizing: border-box;
+      border-right: css.cssVar(border-right);
+      border-left: css.cssVar(border-left);
+
+      padding-right: css.cssVar(padding-right);
+      padding-left: css.cssVar(padding-left);
+      padding-top: css.cssVar(padding-top);
+      padding-bottom: css.cssVar(padding-bottom);
+
+      position: relative;
+      will-change: height, opacity, display;
+      transition: animation.standard(max-height);
+
+      animation-duration: 150ms;
+      animation-timing-function: ease;
+      text-transform: none;
+
+      overflow: hidden;
+    }
   }
+  // .c2-expansion-panel-content__detect-height {
+  //   position: absolute;
+  //   visibility: hidden;
+  //   opacity: 0;
+  //   z-index: -1;
+  //   padding-right: css.cssVar(padding-right);
+  //   padding-left: css.cssVar(padding-left);
+  //   padding-top: css.cssVar(padding-top);
+  //   padding-bottom: css.cssVar(padding-bottom);
+  // }
 }
 
-.c2-expansion-panel {
-  flex: 1;
-  align-self: stretch;
-  display: flex;
-  box-shadow: css.cssVar(box-shadow);
-  border-radius: css.cssVar(border-radius);
-  summary {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    border-top: css.cssVar(border-top);
-    border-right: css.cssVar(border-right);
-    border-bottom: css.cssVar(border-bottom);
-    border-left: css.cssVar(border-left);
-
-    transition: animation.standard(border-radius);
-
-    border-radius: css.cssVar(border-radius);
-
-    slot[name='icon'] {
-      cursor: pointer;
-
-      &::slotted(svg) {
-        width: css.cssVar(icon-width);
-        height: css.cssVar(icon-height);
-        transform: rotate(0deg);
-        transition: animation.standard(transform);
-      }
-    }
-
-    slot[name='expanded-icon'] {
-      display: none;
-      cursor: pointer;
-
-      &::slotted(svg) {
-        width: css.cssVar(icon-width);
-        height: css.cssVar(icon-height);
-      }
-    }
-
-    .default-icon {
-      width: css.cssVar(icon-width);
-      height: css.cssVar(icon-height);
-      transform: rotate(0deg);
-      transition: animation.standard(transform);
-    }
-
-    .c2-expansion-panel-title {
-      border-radius: inherit;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: css.cssVar(title-icon-gap);
-      background-color: css.cssVar(title-bg-color);      
-      padding-top: css.cssVar(padding-top);
-      padding-right: css.cssVar(padding-right);
-      padding-bottom: css.cssVar(padding-bottom);
-      padding-left: css.cssVar(padding-left);
-      position: relative;
-    }
-  }
-
-  .c2-expansion-panel-content {
-    border-right: css.cssVar(border-right);
-    border-left: css.cssVar(border-left);
-
-    padding-top: css.cssVar(padding-top);
-    padding-right: css.cssVar(padding-right);
-    padding-bottom: css.cssVar(padding-bottom);
-    padding-left: css.cssVar(padding-left);
-    position: relative;
-  }
-
-  &[open] {
-    summary {
+:host([expanded]) {
+  .c2-expansion-panel {
+    .c2-expansion-panel-header {
       border-bottom: none;
       border-bottom-right-radius: 0px;
       border-bottom-left-radius: 0px;
@@ -144,6 +176,21 @@
       border-radius: css.cssVar(border-radius);
       border-top-right-radius: 0px;
       border-top-left-radius: 0px;
+      display: block;
+      // height: var(--c2-expansion-panel-content-height, 0px);
+      // max-height: var(--c2-expansion-panel-content-height, 0px);
+    }
+  }
+}
+
+:host([title-not-clickable]) {
+  .c2-expansion-panel {
+    .c2-expansion-panel-header {
+       .c2-expansion-panel-header-title {
+         &:hover {
+            background-color: inherit
+          }
+       }
     }
   }
 }
