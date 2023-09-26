@@ -8,6 +8,7 @@
     "lint": "eslint . --ext .ts --fix --ignore-path .gitignore",
     "demo": "npm run start -w demo",
     "demo:dev": "npm run dev -w demo",
+    "demo:build": "npm run build -w demo",
     "build": "npm run build --workspace=packages --if-present",
     "build:generator": "npm run build --workspace=scripts/generator",
     "pregenerate": "npm run build:generator",

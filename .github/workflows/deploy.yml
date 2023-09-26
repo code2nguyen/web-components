@@ -30,10 +30,14 @@ jobs:
         shell: "bash"
         run: npm ci
       
-      - name: Build
+      - name: Build components
         shell: "bash"
         run: npm run build
-      
+
+      - name: Build demo
+        shell: "bash"
+        run: npm run demo:build
+
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v2
         with:
