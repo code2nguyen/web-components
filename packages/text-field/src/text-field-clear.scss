@@ -1,0 +1,17 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-text-field-clear,
+  $theme: (
+    clear-icon-size: 24px,
+    clear-icon-color: variables.$color-icon-light,
+  )
+);
+
+.clear-icon {
+  cursor: pointer;
+  width: css.cssVar(clear-icon-size);
+  color: css.cssVar(clear-icon-color);
+  display: flex;
+  align-items: center;  
+}

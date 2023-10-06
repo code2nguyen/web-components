@@ -1,9 +1,10 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-text-button,
   $theme: (
-    color: #bcbcc6,
-    hover-color: #476ef9,
+    color: variables.$color-text-subtitle,
+    hover-color: variables.$color-blue,
     hover-text-decoration: underline,
     state-layer-padding: 4px
   )

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.ts"></script>
+    <script type="module" src="/src/text-field-clear.ts"></script>
+    <script type="module">
+      import '@c2n/mat-icon'
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+      body {
+        padding: 24px;
+      }
+      .demo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+      }
+    </style>
+  </head>
+  <body class="demo">
+    <div>Basic: <c2-text-field placeholder="placeholder"></c2-text-field></div>
+    <div>Basic with value: <c2-text-field placeholder="placeholder" value="Hello input"></c2-text-field></div>
+
+    <div>Basic with color: <c2-text-field style="--c2-text-field-color: red" placeholder="placeholder" value="Hello input"></c2-text-field></div>
+    <div>
+      Basic with color and focus:
+      <c2-text-field style="--c2-text-field-color: red; --c2-text-field-focus-color: blue" placeholder="placeholder" value="Hello input"></c2-text-field>
+    </div>
+
+    <div>Error: <c2-text-field error placeholder="placeholder" value="Hello input"></c2-text-field></div>
+
+    <div>
+      Error background:
+      <c2-text-field
+        error
+        style="--c2-text-field-error-background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%)"
+        placeholder="Hello"
+        value="Hello input"
+      ></c2-text-field>
+    </div>
+
+    <div>disabled: <c2-text-field disabled placeholder="placeholder" value="Hello input"></c2-text-field></div>
+
+    <div>readonly: <c2-text-field readOnly placeholder="placeholder" value="Hello input"></c2-text-field></div>
+
+    <div>
+      <span>basic with icons: </span>
+      <c2-text-field placeholder="placeholder" value="Hello input">
+        <svg id="suffix-icon" width="24px" height="24px" slot="suffix-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+      </c2-text-field>
+    </div>
+
+    <div>
+      <span>basic with support text </span>
+      <c2-text-field placeholder="placeholder" value="Hello input">
+        <svg id="suffix-icon" width="24px" height="24px" slot="suffix-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <div slot="supporting-text">
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sapiente alias similique molestias expedita, sit dolorum suscipit animi nemo fuga ratione
+          quas voluptas sunt ad. Esse perspiciatis itaque tenetur harum nam!
+        </div>
+      </c2-text-field>
+    </div>
+
+    <div>
+      <span>basic with support text + icon </span>
+      <c2-text-field placeholder="placeholder" value="Hello input">
+        <svg id="suffix-icon" width="24px" height="24px" slot="suffix-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <svg id="prefix-icon" width="24px" height="24px" slot="prefix-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <div slot="supporting-text">
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sapiente alias similique molestias expedita, sit dolorum suscipit animi nemo fuga ratione
+          quas voluptas sunt ad. Esse perspiciatis itaque tenetur harum nam!
+        </div>
+      </c2-text-field>
+    </div>
+
+    <div>
+      <span>basic with support text + icon + help</span>
+      <c2-text-field placeholder="placeholder" value="Hello input">
+        <svg id="suffix-icon" width="24px" height="24px" slot="suffix-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <svg id="prefix-icon" width="24px" height="24px" slot="prefix-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <svg id="help-icon" width="24px" height="24px" slot="help-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <div slot="supporting-text">
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sapiente alias similique molestias expedita, sit dolorum suscipit animi nemo fuga ratione
+          quas voluptas sunt ad. Esse perspiciatis itaque tenetur harum nam!
+        </div>
+      </c2-text-field>
+    </div>
+
+
+
+    <div class="flex items-center gap-2 flex-1" >
+      <span class="flex-1">Clear text input with support text + icon + help</span>
+      <c2-text-field-clear placeholder="placeholder" value="Hello input" style="width: 250px" >
+        <svg id="suffix-icon" width="24px" height="24px" slot="suffix-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <svg id="prefix-icon" width="24px" height="24px" slot="prefix-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <svg id="help-icon" width="24px" height="24px" slot="help-icon" viewBox="0 -960 960 960">
+          <path
+            d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+          />
+        </svg>
+        <div slot="supporting-text">
+          <!-- Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sapiente alias similique molestias expedita, sit dolorum suscipit animi nemo fuga ratione
+          quas voluptas sunt ad. Esse perspiciatis itaque tenetur harum nam! -->
+        </div>
+      </c2-text-field-clear>
+    </div>
+    <script>
+      document.querySelectorAll('#suffix-icon').forEach((icon) => {
+        icon.addEventListener('click', (e) => {
+          console.log('clicked')
+          //e.preventDefault()
+        })
+      })
+    </script>
+  </body>
+</html>

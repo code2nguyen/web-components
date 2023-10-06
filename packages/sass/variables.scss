@@ -1,0 +1,39 @@
+
+// State Opacity
+$state-layer-dragged-opacity: 0.16;
+$state-layer-focus-opacity: 0.12;
+$state-layer-hover-opacity: 0.08;
+$state-layer-pressed-opacity: 0.12;
+
+// Disbale opacity
+$disabled-content-opacity: 0.38;
+$disabled-container-opacity: 0.12;
+
+
+// Color
+$color-bg-lighter: rgb(255, 255, 255);
+$color-bg-light: rgb(253, 253, 253);
+$color-bg: rgb(248, 248, 248);
+$color-bg-dark: rgb(230, 230, 230);
+
+$color-border-lighter: rgb(230, 230, 230);
+$color-border-light: rgb(213, 213, 213);
+$color-border: rgb(177, 177, 177);
+$color-border-dark: rgb(109, 109, 109);
+
+$color-text-disabled: rgb(144, 144, 144);
+$color-text-subtitle: rgb(70, 70, 70);
+$color-text: rgb(34, 34, 34);
+$color-text-title: rgb(0, 0, 0);
+
+
+$color-icon-disabled: rgb(177, 177, 177);
+$color-icon-lighter: rgb(144, 144, 144);
+$color-icon-light: rgb(70, 70, 70);
+$color-icon: rgb(34, 34, 34);
+
+
+$color-red: rgb(211, 21, 16);
+$color-orange: rgb(177, 76, 0);
+$color-green: rgb(0, 122, 77);
+$color-blue: rgb(2, 101, 220);

@@ -1,4 +1,5 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-icon-button,
   $theme: (
@@ -9,7 +10,7 @@
     border-radius: 50%,
     state-layer-size: 48px,
     bg-color: transparent,
-    hover-bg-color: rgb(230, 230, 230),    
+    hover-bg-color: variables.$color-bg-dark,    
   )
 );
 

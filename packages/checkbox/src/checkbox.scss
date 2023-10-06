@@ -1,4 +1,5 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-checkbox,
   $theme: (
@@ -158,7 +159,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   .c2-checkbox__background {
     border-width: css.cssVar(container-border-width);
     border-color: css.cssVar(container-border-color);
-    opacity: css.$disabled-content-opacity;
+    opacity: variables.$disabled-content-opacity;
   }
 }
 
@@ -166,7 +167,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   .c2-checkbox__background {
     border-width: 0;
     background-color: css.cssVar(container-enabled-selected-color);
-    opacity: css.$disabled-content-opacity;
+    opacity: variables.$disabled-content-opacity;
     ::slotted(svg[slot='checkmark']),
     .c2-checkbox__checkmark {
       opacity: 0;
@@ -184,7 +185,7 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
   .c2-checkbox__background {
     border-width: 0;
     background-color: css.cssVar(container-enabled-selected-color);
-    opacity: css.$disabled-content-opacity;
+    opacity: variables.$disabled-content-opacity;
     ::slotted(svg[slot='checkmark']),
     .c2-checkbox__checkmark {
       opacity: 1;
@@ -197,27 +198,27 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
 #{$_unselected-enabled-selector}:hover ~ {
   .c2-checkbox-state-layer {
     background-color: css.cssVar(state-layer-hover-unselected-color);
-    opacity: css.$state-layer-hover-opacity;
+    opacity: variables.$state-layer-hover-opacity;
   }
 }
 
 #{$_unselected-enabled-selector}:hover ~ {
   .c2-checkbox-state-layer {
     background-color: css.cssVar(state-layer-hover-unselected-color);
-    opacity: css.$state-layer-hover-opacity;
+    opacity: variables.$state-layer-hover-opacity;
   }
 }
 #{$_indeterminate-enabled-selector}:hover ~ {
   .c2-checkbox-state-layer {
     background-color: css.cssVar(state-layer-hover-indeterminate-color);
-    opacity: css.$state-layer-hover-opacity;
+    opacity: variables.$state-layer-hover-opacity;
   }
 }
 
 #{$_selected-enabled-selector}:hover ~ {
   .c2-checkbox-state-layer {
     background-color: css.cssVar(state-layer-hover-indeterminate-color);
-    opacity: css.$state-layer-hover-opacity;
+    opacity: variables.$state-layer-hover-opacity;
   }
 }
 
@@ -225,20 +226,20 @@ $_indeterminate-disabled-selector: '#{$_indeterminate-selector}:disabled';
 #{$_unselected-enabled-selector}:focus ~ {
   .c2-checkbox-state-layer {
     background-color: css.cssVar(state-layer-hover-unselected-color);
-    opacity: css.$state-layer-focus-opacity;
+    opacity: variables.$state-layer-focus-opacity;
   }
 }
 #{$_indeterminate-enabled-selector}:focus ~ {
   .c2-checkbox-state-layer {
     background-color: css.cssVar(state-layer-hover-indeterminate-color);
-    opacity: css.$state-layer-focus-opacity;
+    opacity: variables.$state-layer-focus-opacity;
   }
 }
 
 #{$_selected-enabled-selector}:focus ~ {
   .c2-checkbox-state-layer {
     background-color: css.cssVar(state-layer-hover-indeterminate-color);
-    opacity: css.$state-layer-focus-opacity;
+    opacity: variables.$state-layer-focus-opacity;
   }
 }
 
