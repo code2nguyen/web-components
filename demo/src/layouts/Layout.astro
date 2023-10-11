@@ -28,6 +28,7 @@ import TopNav from '../components/TopNav.astro';
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<script>
+			import '@c2n/hyperlink-list';
 			import '@c2n/text-field';
 			import '@c2n/details';
 			import '@c2n/text-button';
@@ -35,15 +36,21 @@ import TopNav from '../components/TopNav.astro';
 			import '@c2n/icon-button';
 			import '@c2n/mat-icon';
 			import '@c2n/expansion-panel';
-			import '@c2n/checkbox'
-			import '@c2n/mat-icon'
+			import '@c2n/checkbox'			
 		</script>
 	</head>
 	<body>
 		<main>
-			<TopNav class="main-nav" pageTitle={pageTitle}/>
-			<ListComponents componentId={componentId}/>
-			<div class="p-4 pl-10">
+			<div class="main-nav bg-gray-50">
+				<div class="flex items-center justify-between">
+					<TopNav  pageTitle={pageTitle}/>
+					<c2-icon-button class="menu-button">
+						<c2-mat-icon>menu</c2-mat-icon>
+					</c2-icon-button>
+				</div>
+				<ListComponents class='list-comps' componentId={componentId}/>
+			</div>
+			<div class="p-10 pt-14">
 				<slot />
 			</div>
 		</main>
@@ -53,10 +60,43 @@ import TopNav from '../components/TopNav.astro';
 <style>
 	main {
 		display: grid;
-		grid-template-columns: fit-content(280px) 1fr;
-		grid-template-rows: fit-content(64px) 1fr;
+		grid-template-columns: 280px 1fr;		
 	}
 	.main-nav {
-		grid-column: 1/-1;
+		height: 100vh;
+		position: relative;;
+		border-right: 1px solid rgb(230, 230, 230);
+
+	}
+	.menu-button {
+		margin-bottom: 8px;
+		margin-right: 8px;
+		display: none;
+	}
+	@media (max-width: 768px) {
+		main {			
+			grid-template-columns: 1fr;		
+		}
+		.menu-button {
+			display: block;
+		}
+		.main-nav {
+			height: fit-content;
+			border-bottom: 1px solid rgb(230, 230, 230);
+		}
+		.list-comps {
+			display:none;			
+		}
+		.list-comps.show {
+			display: block;
+		}
 	}
 </style>
+
+<script>
+	const menuBtn = document.querySelector('.menu-button');
+	const listComps = document.querySelector('.list-comps');
+	menuBtn?.addEventListener('click', () => {
+		listComps?.classList.toggle('show')
+	})
+</script>

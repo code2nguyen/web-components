@@ -1,14 +1,15 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-expansion-panel,
   $theme: (
     icon-width: 24px,
     icon-height: 24px,
 
-    border-top: 1px solid rgb(213, 213, 213),
-    border-bottom: 1px solid rgb(213, 213, 213),
-    border-right: 1px solid rgb(213, 213, 213),
-    border-left: 1px solid rgb(213, 213, 213),
+    border-top: 1px solid variables.$color-border-light,
+    border-bottom: 1px solid variables.$color-border-light,
+    border-right: 1px solid variables.$color-border-light,
+    border-left: 1px solid variables.$color-border-light,
     border-radius: 16px,
 
     padding-top: 16px,
@@ -18,7 +19,7 @@
     box-shadow: none,
 
     title-icon-gap: 16px,
-    hover-title-bg-color: rgb(230, 230, 230),
+    hover-title-bg-color: variables.$color-bg-dark,
     title-bg-color: transparent,
     icon-rotate: 180deg,
   )
@@ -186,11 +187,11 @@
 :host([title-not-clickable]) {
   .c2-expansion-panel {
     .c2-expansion-panel-header {
-       .c2-expansion-panel-header-title {
-         &:hover {
-            background-color: inherit
-          }
-       }
+      .c2-expansion-panel-header-title {
+        &:hover {
+          background-color: inherit;
+        }
+      }
     }
   }
 }

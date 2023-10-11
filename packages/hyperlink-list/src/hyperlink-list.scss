@@ -1,0 +1,77 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-hyperlink-list,
+  $theme: (
+    item-gap: 0px,
+    item-padding: 8px 24px 8px 16px,
+    item-border-top: 0px solid transparent,
+    item-border-bottom: 0px solid transparent,
+    item-border-right: 0px solid transparent,
+    item-border-left: 0px solid transparent,
+    item-border-radius: none,
+    item-text-decoration: none,
+
+    hover-item-bg-color: inherit,
+    hover-item-color: none,
+    hover-item-border-top: inherit,
+    hover-item-border-bottom: inherit,
+    hover-item-border-right: inherit,
+    hover-item-border-left: inherit,
+    hover-item-border-radius: inherit,
+    hover-item-text-decoration: inherit,
+
+    selected-item-bg-color: inherit,
+    selected-item-color: inherit,
+    selected-item-border-top: inherit,
+    selected-item-border-bottom: inherit,
+    selected-item-border-right: inherit,
+    selected-item-border-left: inherit,
+    selected-item-border-radius: inherit,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(item-gap);
+  ::slotted(a) {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    padding: css.cssVar(item-padding) !important;
+    background-color: transparent;
+
+    border-top: css.cssVar(item-border-top) !important;
+    border-bottom: css.cssVar(item-border-bottom) !important;
+    border-right: css.cssVar(item-border-right) !important;
+    border-left: css.cssVar(item-border-left) !important;
+    border-radius: css.cssVar(item-border-radius) !important;
+    color: inherit;
+    text-decoration: css.cssVar(item-text-decoration) !important;
+    text-wrap: nowrap;
+    transition: animation.standard-acceleration(background-color), animation.standard(color), animation.standard(border), animation.standard(border-radius);
+  }
+
+  ::slotted(a:hover) {
+    background-color: css.cssVar(hover-item-bg-color) !important;
+    color: css.cssVar(hover-item-color) !important;
+    border-top: css.cssVar(hover-item-border-top) !important;
+    border-bottom: css.cssVar(hover-item-border-bottom) !important;
+    border-right: css.cssVar(hover-item-border-right) !important;
+    border-left: css.cssVar(hover-item-border-left) !important;
+    border-radius: css.cssVar(hover-item-border-radius) !important;
+    text-decoration: css.cssVar(hover-item-text-decoration) !important;
+  }
+
+  ::slotted(a[data-selected]) {
+    background-color: css.cssVar(selected-item-bg-color, hover-item-bg-color) !important;
+    color: css.cssVar(selected-item-color, hover-item-color) !important;
+    border-top: css.cssVar(selected-item-border-top, hover-item-border-top) !important;
+    border-bottom: css.cssVar(selected-item-border-bottom, hover-item-border-bottom) !important;
+    border-right: css.cssVar(selected-item-border-right, hover-item-border-right) !important;
+    border-left: css.cssVar(selected-item-border-left, hover-item-border-left) !important;
+    border-radius: css.cssVar(selected-item-border-radius, hover-item-border-radius) !important;
+    text-decoration: css.cssVar(selected-item-border-radius, hover-item-text-decoration) !important;
+  }
+}

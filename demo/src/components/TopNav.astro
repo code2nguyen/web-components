@@ -9,8 +9,7 @@ interface Props {
 const { class: className, pageTitle } = Astro.props;
 
 ---
-<nav class={`${className} flex items-center gap-2 mx-auto ml-14 mr-14 pt-4 pb-4 mb-6 border-b-gray-300 border-b`} >
+<nav class={`${className} flex items-center gap-2 pt-4 pb-6 ml-6`} >
     <Fragment set:html={logoRef} /> 
     <span class="text-lg font-medium">CW Library</span>
-    <!-- <span class="pl-6 text-sm font-semibold">{pageTitle}</span> -->
 </nav>

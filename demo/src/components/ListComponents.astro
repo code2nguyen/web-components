@@ -3,41 +3,26 @@ import { getCollection } from 'astro:content';
 
 interface Props {
 	componentId: string;
+    class: string
 }
 
 const base = import.meta.env.BASE_URL
 const allComponents = await getCollection('components');
 const hoverClass = "hover:bg-sky-100  hover:backdrop-blur-lg"
-const { componentId } = Astro.props
+const { componentId, class: className  } = Astro.props
 ---
 
-<ul class="flex flex-col ml-14 max-w-fit">
+<c2-hyperlink-list class={`list-component ml-6 ${className}`}>
     {allComponents.map(component => (
-        <a href={`${base}/components/${component.slug}`}>
-            <li class=`nav-item ${componentId == component.slug ? 'bg-sky-300': hoverClass}`>
-                {component.data.title}
-            </li>
+        <a href={`${base}/components/${component.slug}`}  data-selected={componentId == component.slug}>
+            {component.data.title}
         </a>
-      ))}
-    <!-- <li class=`nav-item ${componentId =='checkbox' ? 'bg-sky-300': ''}`>
-        Checkbox
-    </li>
-    <li class="nav-item">
-        Dropdown List
-    </li>
-    <li class="nav-item">
-        Expansion Panel
-    </li>
-    <li class="nav-item">
-        Radiobox
-    </li>
-    <li class="nav-item">
-        Reorder List
-    </li> -->
-</ul>
+      ))
+    }
+</c2-hyperlink-list>
 
 <style>
-    .nav-item {
-        @apply transition-colors cursor-pointer pt-4 pl-4 pb-4 pr-8  rounded-r-full
+    .list-component {
+        --c2-hyperlink-list-hover-item-color: rgb(2, 101, 220);        
     }
 </style>

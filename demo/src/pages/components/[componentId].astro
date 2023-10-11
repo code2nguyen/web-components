@@ -5,6 +5,7 @@ import { requireNotNull } from '../../utils/assertion';
 
 export function getStaticPaths() {
   return [
+    {params: {componentId: 'hyperlink-list'}},
     {params: {componentId: 'text-field'}},
     {params: {componentId: 'details'}},
     {params: {componentId: 'text-button'}},
@@ -29,7 +30,7 @@ const { Content: ComponentContent } = await component.render();
 ---
 
 <Layout title="CW Library" componentId={componentId} pageTitle={component.data.title}>
-  <article class="prose prose-slate max-w-full">
+  <article class="prose prose-slate main-content">
     <ComponentContent/>
   </article>
 </Layout>
