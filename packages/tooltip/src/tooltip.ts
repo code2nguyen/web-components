@@ -97,7 +97,6 @@ export class Tooltip extends LitElement {
 
         if (arrowEl && middlewareData.arrow) {
           const { x, y } = middlewareData.arrow
-          console.log(middlewareData.arrow)
           const arrowHeight = arrowEl.offsetHeight ?? arrowEl.clientHeight
           const side = placement.split('-')[0]
           const staticSide = {
@@ -137,7 +136,7 @@ export class Tooltip extends LitElement {
   }
 
   private hide = () => {
-    this.clearTimeout();
+    this.clearTimeout()
     this.showing = false
   }
 
@@ -157,7 +156,7 @@ export class Tooltip extends LitElement {
   private clearTimeout() {
     if (this.delayTimeout) {
       clearTimeout(this.delayTimeout)
-      this.delayTimeout = null;
+      this.delayTimeout = null
     }
   }
 
