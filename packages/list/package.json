@@ -1,0 +1,42 @@
+{
+  "name": "@c2n/list",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "dist/list.js",
+  "exports": {
+    ".": "./dist/list.js"
+  },
+  "types": "types/src/index.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "list",
+    "web component",
+    "lit"
+  ],
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run type-check && vite build",
+    "type-check": "tsc -p tsconfig.lib.json --composite false"
+  },
+  "dependencies": {
+    "@c2n/wc-utils": "0.0.4",
+    "@c2n/list-item": "0.0.4",
+    "lit": "2.8.0"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

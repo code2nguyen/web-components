@@ -1,0 +1,45 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-list,
+  $theme: (
+    border-radius-top-left: 0px,
+    border-radius-top-right: 0px,
+    border-radius-bottom-left: 0px,
+    border-radius-bottom-right: 0px,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+
+  &[compact] {
+  }
+
+  &:not([compact]) {
+    ::slotted(c2-list-item:first-child) {
+      --c2-list-item-border-radius: #{css.cssVar(border-radius-top-left)} #{css.cssVar(border-radius-top-right)} 0px 0px;
+    }
+    ::slotted(c2-list-item:last-child) {
+      --c2-list-item-border-radius: 0px 0px #{css.cssVar(border-radius-bottom-right)} #{css.cssVar(border-radius-bottom-left)};
+    }
+  }
+}
+
+:host([compact]) {
+  ::slotted(c2-list-item:first-child) {
+    --c2-list-item-border-radius: #{css.cssVar(border-radius-top-left)} #{css.cssVar(border-radius-top-right)} 0px 0px;
+  }
+  ::slotted(c2-list-item:last-child) {
+    --c2-list-item-border-radius: 0px 0px #{css.cssVar(border-radius-bottom-right)} #{css.cssVar(border-radius-bottom-left)};
+  }
+}
+
+:host(:not([compact])) {
+  ::slotted(c2-list-item) {
+    --c2-list-item-border-radius: #{css.cssVar(border-radius-top-left)} #{css.cssVar(border-radius-top-right)} #{css.cssVar(border-radius-bottom-right)} #{css.cssVar(
+        border-radius-bottom-left
+      )};
+  }
+}
