@@ -9,7 +9,7 @@
     padding-right: 8px,
     padding-bottom: 8px,
     padding-left: 8px,
-    background: field,
+    bg-color: field,
     border-top: 1px solid variables.$color-border,
     border-bottom: 1px solid variables.$color-border,
     border-right: 1px solid variables.$color-border,
@@ -20,27 +20,27 @@
     focus-border-right: 1px solid variables.$color-blue,
     focus-border-left: 1px solid variables.$color-blue,
     focus-color: inherit,
-    focus-background: field,
+    focus-bg-color: field,
 
     error-border-top: 1px solid variables.$color-red,
     error-border-bottom: 1px solid variables.$color-red,
     error-border-right: 1px solid variables.$color-red,
     error-border-left: 1px solid variables.$color-red,
-    error-background: field,
+    error-bg-color: field,
     error-color: variables.$color-red,
 
     disabled-border-top: 1px solid variables.$color-border-light,
     disabled-border-bottom: 1px solid variables.$color-border-light,
     disabled-border-right: 1px solid variables.$color-border-light,
     disabled-border-left: 1px solid variables.$color-border-light,
-    disabled-background: field,
+    disabled-bg-color: field,
     disabled-color: inherit,
 
     read-only-border-top: unset,
     read-only-border-bottom: unset,
     read-only-border-right: unset,
     read-only-border-left: unset,
-    read-only-background: transparent,
+    read-only-bg-color: transparent,
     read-only-color: inherit,
   )
 );
@@ -64,7 +64,7 @@
   border-left: css.cssVar(border-left);
   border-radius: css.cssVar(border-radius);
   color: css.cssVar(color);
-  background: css.cssVar(background);
+  background-color: css.cssVar(bg-color);
   position: relative;
   will-change: border;
   box-sizing: border-box;
@@ -83,7 +83,7 @@
     text-align: inherit;
     border-radius: inherit;
     color: inherit;
-    background: transparent;
+    background-color: transparent;
     padding-top: css.cssVar(padding-top);
     padding-bottom: css.cssVar(padding-bottom);
     padding-right: css.cssVar(padding-right);
@@ -95,7 +95,7 @@
     }
 
     @media (forced-colors: active) {
-      background: Field; // Remove white background in Firefox HCM
+      background-color: Field; // Remove white background in Firefox HCM
     }
   }
   // Focus
@@ -105,7 +105,7 @@
     border-right: css.cssVar(focus-border-right, border-right);
     border-left: css.cssVar(focus-border-left, border-left);
     color: css.cssVar(focus-color, color);
-    background: css.cssVar(focus-background);
+    background-color: css.cssVar(focus-bg-color);
   }
 
   &.error {
@@ -114,7 +114,7 @@
     border-right: css.cssVar(error-border-right);
     border-left: css.cssVar(error-border-left);
     color: css.cssVar(error-color, color);
-    background: css.cssVar(error-background);
+    background-color: css.cssVar(error-bg-color);
   }
 
   &.disabled {
@@ -123,8 +123,9 @@
     border-right: css.cssVar(disabled-border-right, border-right);
     border-left: css.cssVar(disabled-border-left, border-left);
     color: css.cssVar(disabled-color, color);
-    background: css.cssVar(disabled-background, background);
+    background-color: css.cssVar(disabled-bg-color, bg-color);
     opacity: variables.$disabled-content-opacity;
+    pointer-events: none;
   }
 
   &.read-only {
@@ -133,7 +134,7 @@
     border-right: css.cssVar(read-only-border-right);
     border-left: css.cssVar(read-only-border-left);
     color: css.cssVar(read-only-color, color);
-    background: css.cssVar(read-only-background);
+    background-color: css.cssVar(read-only-bg-color);
   }
   .prefix-icon,
   .suffix-icon {
