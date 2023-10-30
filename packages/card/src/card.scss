@@ -1,0 +1,39 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-card,
+  $theme: (
+    padding-top: 8px,
+    padding-right: 8px,
+    padding-bottom: 8px,
+    padding-left: 8px,
+    border-radius: 4px,
+
+    border-top: 1px solid variables.$color-border,
+    border-bottom: 1px solid variables.$color-border,
+    border-right: 1px solid variables.$color-border,
+    border-left: 1px solid variables.$color-border,
+    bg-color: variables.$color-bg-lighter,
+    box-shadow: none,
+  )
+);
+
+:host {
+  display: inline-flex;
+}
+.c2-card {
+  flex: 1;
+  border-radius: css.cssVar(border-radius);
+  padding-top: css.cssVar(padding-top);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-right: css.cssVar(padding-right);
+  padding-left: css.cssVar(padding-left);
+
+  border-top: css.cssVar(border-top);
+  border-bottom: css.cssVar(border-bottom);
+  border-right: css.cssVar(border-right);
+  border-left: css.cssVar(border-left);
+  background-color: css.cssVar(bg-color);
+
+  box-shadow: css.cssVar(box-shadow);
+}
