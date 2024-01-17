@@ -24,7 +24,6 @@ import TopNav from '../components/TopNav.astro';
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<script>
@@ -46,7 +45,7 @@ import TopNav from '../components/TopNav.astro';
 	</head>
 	<body>
 		<main>
-			<div class="main-nav bg-gray-50">
+			<div class="main-nav">
 				<div class="flex items-center justify-between">
 					<TopNav  pageTitle={pageTitle}/>
 					<c2-icon-button class="menu-button">
@@ -63,6 +62,10 @@ import TopNav from '../components/TopNav.astro';
 	</body>
 </html>
 <style>
+	:root {
+		--nav-bg-color: rgb(249 250 251);
+		--nav-border-color: rgb(230 230 230);
+	}
 	main {
 		display: grid;
 		grid-template-columns: 280px 1fr;		
@@ -70,7 +73,8 @@ import TopNav from '../components/TopNav.astro';
 	.main-nav {
 		height: 100vh;
 		position: relative;;
-		border-right: 1px solid rgb(230, 230, 230);
+		border-right: 1px solid var(--nav-border-color);
+		background-color: var(--nav-bg-color);
 
 	}
 	.menu-button {
@@ -87,7 +91,7 @@ import TopNav from '../components/TopNav.astro';
 		}
 		.main-nav {
 			height: fit-content;
-			border-bottom: 1px solid rgb(230, 230, 230);
+			border-bottom: 1px solid var(--nav-border-color);
 		}
 		.list-comps {
 			display:none;			

@@ -1,21 +1,14 @@
 import { defineConfig } from 'astro/config'
-import tailwind from '@astrojs/tailwind'
-import mdx from '@astrojs/mdx';
-import lit from '@astrojs/lit';
-import { MDXCodeBlockRemark } from './plugin/mdx-codeblock-remark.mjs';
+import mdx from '@astrojs/mdx'
+import lit from '@astrojs/lit'
+import { MDXCodeBlockRemark } from './plugin/mdx-codeblock-remark.mjs'
 
 export default defineConfig({
   site: 'https://code2nguyen.github.io',
   base: '/web-components',
   markdown: {
-    remarkPlugins: [MDXCodeBlockRemark]
+    remarkPlugins: [MDXCodeBlockRemark],
   },
-  integrations: [
-    tailwind({
-      applyBaseStyles: false,
-    }),
-    mdx(),
-    lit()
-  ],
+  integrations: [mdx(), lit()],
   scopedStyleStrategy: 'class',
 })

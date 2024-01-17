@@ -13,10 +13,11 @@ export class DesignBoardItem extends LitElement {
 
   @property({ type: Number, attribute: true }) x: number = 0
   @property({ type: Number, attribute: true }) columnEnd: number = 0
+  @property({ type: Number, attribute: true }) columnStart: number = 0
   @property({ type: Number, attribute: true }) rowStart: number = 0
   @property({ type: Number, attribute: true }) rowEnd: number = 0
 
-  private layoutProperties = ['columnStart', 'columnEnd', 'rowStart', 'rowEnd']
+  // private layoutProperties = ['columnStart', 'columnEnd', 'rowStart', 'rowEnd']
 
   override connectedCallback(): void {
     super.connectedCallback()
