@@ -1,10 +1,10 @@
 {
-  "name": "@c2n/tooltip",
+  "name": "@c2n/design-board",
   "version": "0.0.4",
   "type": "module",
-  "main": "dist/tooltip.js",
+  "main": "dist/design-board.js",
   "exports": {
-    ".": "./dist/tooltip.js"
+    ".": "./dist/design-board.js"
   },
   "types": "types/src/index.d.ts",
   "files": [
@@ -12,7 +12,7 @@
     "types"
   ],
   "keywords": [
-    "tooltip",
+    "design-board",
     "web component",
     "lit"
   ],
@@ -32,8 +32,8 @@
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
-    "@floating-ui/dom": "1.5.3",
-    "lit": "3.1.0"
+    "lit": "3.1.0",
+    "@lit/context": "1.1.0"
   },
   "devDependencies": {
     "@c2n/config": "*"

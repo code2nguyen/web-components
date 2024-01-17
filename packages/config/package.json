@@ -13,13 +13,13 @@
     "url": "https://github.com/code2nguyen/web-components.git"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "6.7.2",
-    "@typescript-eslint/parser": "6.7.2",
-    "@types/node": "20.6.3",
-    "eslint": "8.49.0",
-    "lit-analyzer": "1.2.1",
+    "@typescript-eslint/eslint-plugin": "6.11.0",
+    "@typescript-eslint/parser": "6.11.0",
+    "@types/node": "20.9.2",
+    "eslint": "8.54.0",
+    "lit-analyzer": "2.0.1",
     "typescript": "5.2.2",
-    "vite": "4.4.9",
-    "vite-plugin-cem": "0.4.0"
+    "vite": "5.0.0",
+    "vite-plugin-cem": "0.5.0"
   }
 }

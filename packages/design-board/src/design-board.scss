@@ -1,0 +1,21 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-design-board,
+  $theme: ()
+);
+
+:host {
+  display: flex;
+  flex: 1;
+}
+
+.c2-design-board {
+  display: flex;
+  flex: 1;
+  position: relative;
+
+  .main {
+    position: absolute;
+  }
+}

@@ -2,7 +2,7 @@
   "name": "@c2n/checkbox",
   "version": "0.0.4",
   "type": "module",
-  "main": "dist/checkbox.js",  
+  "main": "dist/checkbox.js",
   "exports": {
     ".": "./dist/checkbox.js"
   },
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
-    "lit": "2.8.0"
+    "lit": "3.1.0"
   },
   "devDependencies": {
     "@c2n/config": "*"

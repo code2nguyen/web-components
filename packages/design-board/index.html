@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-design-board #design-board>
+      <div>Item 1</div>
+      <div>Item 2</div>
+      <div>Item 3</div>
+    </c2-design-board>
+
+
+
+  <c2-design-board #design-board>
+    <c2-design-board-item x="0" y="0" width="100" height="100">
+      <div >Item 1</div>
+    </c2-design-board-item>
+    <c2-design-board-item x="100" y="0" width="100" height="100">
+      <div x>Item 2</div>
+    </c2-design-board-item>        
+    <c2-design-board-item x="200" y="0" width="100" height="100">
+      <div>Item 3<div>
+    </c2-design-board-item>
+  </c2-design-board>
+
+  <script>
+      const designBoard = document.getElementById('design-board')
+  </script>
+  </body>
+</html>

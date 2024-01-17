@@ -1,10 +1,6 @@
 # c2n/web-components
 
-A monorepos contains all web components using lit. Each component is released in a separated package. Following is the list of components
-
-| Component                                 | Package                                                      | Status |
-| ----------------------------------------- | ------------------------------------------------------------ | ------ |
-| [Checkbox](./packages/checkbox/README.md) | [@c2n/checkbox](https://www.npmjs.com/package/@c2n/checkbox) | Stable |
+A monorepos contains all web components using lit. Each component is released in a separated package.
 
 ## Development mode
 

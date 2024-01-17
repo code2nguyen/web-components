@@ -4,7 +4,7 @@
   "type": "module",
   "main": "dist/text-field.js",
   "exports": {
-    ".": "./dist/text-field.js"    
+    ".": "./dist/text-field.js"
   },
   "types": "types/src/index.d.ts",
   "files": [
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
-    "lit": "2.8.0"
+    "lit": "3.1.0"
   },
   "devDependencies": {
     "@c2n/config": "*"
