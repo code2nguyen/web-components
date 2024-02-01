@@ -49,7 +49,7 @@
   display: inline-grid;
   grid-template-columns: 1fr min-content;
   grid-template-rows: fit-content, fit-content;
-  gap: 4px;
+  gap: 0px;
 }
 
 .c2-text-field {
@@ -106,6 +106,10 @@
     border-left: css.cssVar(focus-border-left, border-left);
     color: css.cssVar(focus-color, color);
     background-color: css.cssVar(focus-bg-color);
+
+    .prefix-icon, .suffix-icon {
+      opacity: 1;
+    }
   }
 
   &.error {
@@ -142,6 +146,7 @@
     display: flex;
     gap: 4px;
     align-items: center;
+    opacity: 0.5;
   }
 }
 .help-icon {

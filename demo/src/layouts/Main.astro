@@ -1,0 +1,189 @@
+---
+import logoRef from '../assets/logo.svg?raw'
+
+import '../assets/styles.scss'
+
+const base = import.meta.env.BASE_URL
+
+interface Props {
+  title: string
+  componentId?: string
+  pageTitle?: string
+}
+const { title, componentId, pageTitle } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="WC Library" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href=`${base}/favicon.svg` />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <script>
+      import '@c2n/design-board'
+      import '@c2n/card'
+      import '@c2n/list'
+      import '@c2n/list-item'
+      import '@c2n/single-select'
+      import '@c2n/hyperlink-list'
+      import '@c2n/text-field'
+      import '@c2n/details'
+      import '@c2n/text-button'
+      import '@c2n/tooltip'
+      import '@c2n/icon-button'
+      import '@c2n/mat-icon'
+      import '@c2n/expansion-panel'
+      import '@c2n/checkbox'
+    </script>
+  </head>
+  <body>
+    <div class="header-sticky-detector"></div>
+    <header>
+      <a href=`${base}` class="logo"><Fragment set:html={logoRef} /><span class="logo-text">CW Library</span></a>
+      <div class="space"></div>
+      <c2-text-field class="global-search" placeholder="Search">
+        <div slot="suffix-icon" class="search-icon">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 256 256"
+            ><path
+              d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
+            ></path></svg
+          >
+        </div>
+      </c2-text-field>
+      <a href="/web-components/docs" class="playground-link">
+        <c2-text-button>Documentations</c2-text-button>
+      </a>
+      <a href="/web-components/playground" class="playground-link">
+        <c2-text-button>Playground</c2-text-button>
+      </a>
+      <c2-icon-button class="github-button">
+        <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_2_2)">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12.2135 0C5.45975 0 0 5.5 0 12.3042C0 17.7432 3.49825 22.3472 8.35125 23.9767C8.958 24.0992 9.18025 23.712 9.18025 23.3862C9.18025 23.101 9.16025 22.1232 9.16025 21.1045C5.76275 21.838 5.05525 19.6378 5.05525 19.6378C4.50925 18.2118 3.70025 17.8452 3.70025 17.8452C2.58825 17.0915 3.78125 17.0915 3.78125 17.0915C5.01475 17.173 5.662 18.3545 5.662 18.3545C6.75375 20.2285 8.513 19.699 9.22075 19.373C9.32175 18.5785 9.6455 18.0285 9.98925 17.723C7.2795 17.4377 4.4285 16.3785 4.4285 11.6523C4.4285 10.3078 4.9135 9.20775 5.682 8.35225C5.56075 8.04675 5.136 6.7835 5.8035 5.09275C5.8035 5.09275 6.83475 4.76675 9.16 6.35575C10.1555 6.08642 11.1822 5.9494 12.2135 5.94825C13.2448 5.94825 14.296 6.091 15.2668 6.35575C17.5923 4.76675 18.6235 5.09275 18.6235 5.09275C19.291 6.7835 18.866 8.04675 18.7447 8.35225C19.5335 9.20775 19.9985 10.3078 19.9985 11.6523C19.9985 16.3785 17.1475 17.4172 14.4175 17.723C14.8625 18.11 15.2465 18.8432 15.2465 20.0045C15.2465 21.6545 15.2265 22.9787 15.2265 23.386C15.2265 23.712 15.449 24.0992 16.0555 23.977C20.9085 22.347 24.4067 17.7432 24.4067 12.3042C24.4267 5.5 18.947 0 12.2135 0Z"
+              fill="currentColor"></path>
+          </g>
+          <defs>
+            <clipPath id="clip0_2_2">
+              <rect width="24.5" height="24" fill="white"></rect>
+            </clipPath>
+          </defs>
+        </svg>
+      </c2-icon-button>
+      <!-- <TopNav  pageTitle={pageTitle}/> -->
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style lang="scss">
+  :root {
+    --nav-bg-color: rgb(249 250 251);
+    --nav-border-color: rgb(230 230 230);
+    --body-margin: 60px;
+  }
+  body {
+    position: relative;
+    > header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px var(--body-margin);
+      position: sticky;
+      background-color: white;
+      top: 0;
+      z-index: 9999;
+      transition:
+        background-color 500ms cubic-bezier(0.3, 0, 0.8, 0.15),
+        box-shadow 300ms cubic-bezier(0.2, 0, 0, 1);
+      &.is-scrolled {
+        box-shadow: 0px 1px 0px 0px var(--border-color);
+      }
+      &.is-scrolled-more {
+        background-color: var(--bg-color);
+      }
+      .global-search {
+        min-width: 280px;
+
+        .search-icon {
+          // Center icon
+          padding-top: 4px;
+          padding-right: 4px;
+          color: --;
+        }
+      }
+      .logo {
+        align-items: center;
+        display: flex;
+        text-decoration: none;
+        gap: 12px;
+        flex-wrap: nowrap;
+        .logo-text {
+          text-wrap: nowrap;
+        }
+      }
+      .github-button {
+        --c2-icon-button-icon-size: 20px;
+        --c2-icon-button-state-layer-size: 40px;
+        --c2-icon-button-icon-color: var(--theme-color);
+      }
+      .playground-link {
+        text-decoration: none;
+        --c2-text-button-hover-text-decoration: none;
+      }
+    }
+
+    > main {
+    }
+    .header-sticky-detector {
+      position: absolute;
+      left: 0;
+      right: 0;
+      visibility: hidden;
+      height: 90px;
+      top: 5px;
+    }
+  }
+  @media only screen and (max-width: 767px) {
+    :root {
+      --body-margin: 16px;
+    }
+    .logo-text {
+      display: none;
+    }
+    .global-search {
+      display: none;
+    }
+  }
+  @media only screen and (min-width: 768px) and (max-width: 1024px) {
+    :root {
+      --body-margin: 40px;
+    }
+  }
+</style>
+
+<script>
+  const header = document.querySelector('body header')
+  const detector = document.querySelector('body .header-sticky-detector')
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const detector = entries[0]
+      const isIntersectingRatio = detector.intersectionRatio
+      header?.classList.toggle('is-scrolled', isIntersectingRatio < 1)
+      header?.classList.toggle('is-scrolled-more', isIntersectingRatio < 0.9)
+    },
+    { threshold: [0, 0.9, 1] },
+  )
+
+  if (detector) observer.observe(detector)
+</script>

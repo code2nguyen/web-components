@@ -1,10 +1,99 @@
 ---
+import Main from '../layouts/Main.astro'
+import CodeBlock from '../components/CodeBlock.astro'
+
 const base = import.meta.env.BASE_URL
-const redirect = `${base}/components/checkbox`
+
+const customTextFieldCssCode = `
+<c2-text-field class="my-custom-text-field"></c2-text-field>
+
+<style>
+  .my-custom-text-field {
+    --c2-text-field-border-radius: 16px;
+    --c2-text-field-bg-color: rgb(226 232 240);
+    --c2-text-field-focus-bg-color: rgb(255 255 255);
+  }
+</style>
+`
+
+const customTextFieldSlotCode = `
+<c2-text-field class="my-custom-text-field">
+    <svg id="help-icon" width="24px" height="24px" slot="help-icon" viewBox="0 -960 960 960">
+      <path
+        d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
+      />
+    </svg>
+</c2-text-field>
+`
 ---
 
-<meta 
-    http-equiv="refresh" 
-    content={ `0; url=${ redirect }` } 
-  />
+<Main title="CW Library">
+  <div class="index-page">
+    <section class="title">Flexible and compact Web Component Library.</section>
+    <section class="text-section">
+      <h5 class="em-1">Getting started</h5>
+      <h2>Installation</h2>
+      <p>
+        Each component in <span class="em-2">WC Library</span> is published in a separated npm package.
+        <br />To install it, select the right component package name then run <span class="em-1">npm install</span> command
+        <br /><br />Example for installing Text Field component
+      </p>
+      <CodeBlock code="npm install @c2n/text-field" lang="bash" />
 
+      <h2>Import component in your project</h2>
+      <p>
+        To import components into your project. Uses <span class="em-1">import syntax </span> of javascript
+        <br /><br />Example for importing Text Field component
+        <CodeBlock code='import "@c2n/text-field"' />
+      </p>
+    </section>
+    <section class="text-section">
+      <h5 class="em-1">Usage</h5>
+      <h2>Customize components with CSS Variable</h2>
+      <p>
+        Each component has a separated set of css variables. The prefix of css variable name is the component tag.<br />
+        Example for <span class="em-1">c2-text-field</span> component, the css variables name will be <span class="em-1">--c2-text-field-*</span>
+        <br /><br />Example for customizing Text Field component
+      </p>
+      <CodeBlock code={customTextFieldCssCode} lang="html" />
+
+      <h2>Extend components with Slot</h2>
+      <p>
+        Another way to customize components is used <span class="em-1">slot</span>.
+        <br /><br />Example for Adding help icon for Text Field component
+      </p>
+      <CodeBlock code={customTextFieldSlotCode} lang="html" />
+    </section>
+  </div>
+</Main>
+
+<style lang="scss">
+  .index-page {
+    margin: 0 var(--body-margin);
+    display: flex;
+    flex-direction: column;
+    .title {
+      font-size: 2.25rem;
+      font-weight: 600;
+      max-width: 600px;
+      line-height: 1.4;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      align-self: center;
+      margin: 32px 0;
+    }
+    .text-section {
+      margin: 16px min(250px, 10vw);
+      p {
+        line-height: 1.5rem;
+      }
+    }
+
+    @media only screen and (max-width: 767px) {
+      .text-section {
+        margin: 8px 16px;
+      }
+    }
+  }
+</style>

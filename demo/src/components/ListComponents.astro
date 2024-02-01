@@ -1,28 +1,35 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection } from 'astro:content'
 
 interface Props {
-	componentId: string;
-    class: string
+  componentId: string
+  class?: string
 }
 
 const base = import.meta.env.BASE_URL
-const allComponents = await getCollection('components');
-const hoverClass = "hover:bg-sky-100  hover:backdrop-blur-lg"
-const { componentId, class: className  } = Astro.props
+const allComponents = await getCollection('components')
+const hoverClass = 'hover:bg-sky-100  hover:backdrop-blur-lg'
+const { componentId, class: className } = Astro.props
 ---
 
-<c2-hyperlink-list class={`list-component ml-6 ${className}`}>
-    {allComponents.map(component => (
-        <a href={`${base}/components/${component.slug}`}  data-selected={componentId == component.slug}>
-            {component.data.title}
-        </a>
-      ))
-    }
+<c2-hyperlink-list class={`list-component ${className}`}>
+  {
+    allComponents.map((component) => (
+      <a href={`${base}/components/${component.slug}`} data-selected={componentId == component.slug}>
+        {component.data.title}
+      </a>
+    ))
+  }
 </c2-hyperlink-list>
 
 <style>
-    .list-component {
-        --c2-hyperlink-list-hover-item-color: rgb(2, 101, 220);        
-    }
+  .list-component {
+    box-shadow: inset 1px 0px 0px 0px var(--border-color-100);
+    --c2-hyperlink-list-hover-item-color: inherit;
+    --c2-hyperlink-list-item-padding: 2px 0px 2px 24px;
+    --c2-hyperlink-list-item-gap: 16px;
+    --c2-hyperlink-list-item-border-left: 2px solid transparent;
+    --c2-hyperlink-list-hover-item-border-left: 2px solid var(--logo-color-1);
+    --c2-hyperlink-list-hover-item-border-left: 2px solid var(--logo-color-1);
+  }
 </style>

@@ -1,0 +1,15 @@
+{
+    "extends": "@c2n/config/tsconfig.lib.json",
+    "compilerOptions": {
+        "moduleResolution": "Node",
+        "forceConsistentCasingInFileNames": true,
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "noEmit": false,
+        "allowImportingTsExtensions": false,
+        "tsBuildInfoFile": "./dist/.tsbuildinfo"
+    },
+    "include": [
+        "**/*"
+    ]
+}

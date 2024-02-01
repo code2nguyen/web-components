@@ -15,14 +15,11 @@ export class IconButton extends LitElement {
 
   static override styles = unsafeCSS(styles)
 
-  handleClick = () => {
-    console.log("helo")
-  }
   override render() {
     return html`
-      <div class="c2-icon-button" data-tooltip=${this.dataset.tooltip} @click=${this.handleClick}>
+      <div class="c2-icon-button" data-tooltip=${this.dataset.tooltip}>
         <slot></slot>
-        ${this.dataset.tooltip ? html`<c2-tooltip></c2-tooltip>` : nothing}
+        ${this.dataset.tooltip ? html`<c2-tooltip delay="800"></c2-tooltip>` : nothing}
       </div>
     `
   }

@@ -1,5 +1,4 @@
 ---
-import logoRef from '../assets/logo.svg?raw'
 
 interface Props {
 	class: string;
@@ -10,6 +9,5 @@ const { class: className, pageTitle } = Astro.props;
 
 ---
 <nav class={`${className} flex items-center gap-2 pt-4 pb-6 ml-6`} >
-    <Fragment set:html={logoRef} /> 
     <span class="text-lg font-medium">CW Library</span>
 </nav>

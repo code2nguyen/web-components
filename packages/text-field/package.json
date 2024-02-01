@@ -35,7 +35,7 @@
     "lit": "3.1.0"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "*"   
   },
   "customElements": "custom-elements.json"
 }

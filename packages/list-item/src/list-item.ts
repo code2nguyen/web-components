@@ -2,6 +2,8 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './list-item.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
+import { addClasses } from '@c2n/wc-utils/css-helper.js'
+
 /**
  * ListItem component
  *
@@ -14,27 +16,7 @@ export class ListItem extends LitElement {
 
   @property({ type: Boolean, reflect: true }) selected = false
   @property({ type: Boolean, reflect: true }) disabled = false
-
-  private _value?: any
-
-  @property()
-  get value() {
-    return this._value
-  }
-
-  set value(val: any) {
-    let oldVal = this._value
-    this._value = this.convertValue(val)
-    this.requestUpdate('value', oldVal)
-  }
-
-  private convertValue(val: any) {
-    try {
-      return JSON.parse(val)
-    } catch {
-      return val
-    }
-  }
+  @property() value = ''
 
   handleClick = () => {
     this.selected = !this.selected
@@ -43,7 +25,7 @@ export class ListItem extends LitElement {
         bubbles: true,
         composed: true,
         detail: this.selected ? this.value : false,
-      })
+      }),
     )
   }
 
@@ -52,6 +34,7 @@ export class ListItem extends LitElement {
       selected: this.selected,
       disabled: this.disabled,
     }
+    addClasses(this, Object.keys(classes))
 
     return html`
       <div class="c2-list-item ${classMap(classes)}" @clicl="handleClick">

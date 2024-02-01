@@ -3,7 +3,7 @@ import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './text-field.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
-
+import {addClasses} from '@c2n/wc-utils/css-helper.js'
 /**
  * TextField component
  *
@@ -126,9 +126,9 @@ export class TextField extends LitElement {
       disabled: this.disabled,
       error: !this.disabled && this.error,
       'read-only': this.readOnly,
-      'focus-within': !!this.focused,
+      'focus-within': !!this.focused,      
     }
-
+    addClasses(this, Object.keys(classes))
     return html`<div class="c2-text-field ${classMap(classes)}">
         <div class="prefix-icon" @click=${this.forwardFocusin}>${this.renderPrefixSlot()}</div>
         <input

@@ -1,41 +1,41 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { getCollection, getEntry } from 'astro:content';
-import { requireNotNull } from '../../utils/assertion';
+import Main from '../../layouts/Main.astro'
+import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import { getCollection, getEntry } from 'astro:content'
+import { requireNotNull } from '../../utils/assertion'
 
 export function getStaticPaths() {
   return [
-    {params: {componentId: 'design-board'}},
-    {params: {componentId: 'card'}},
-    {params: {componentId: 'list'}},
-    {params: {componentId: 'list-item'}},
-    {params: {componentId: 'single-select'}},
-    {params: {componentId: 'hyperlink-list'}},
-    {params: {componentId: 'text-field'}},
-    {params: {componentId: 'details'}},
-    {params: {componentId: 'text-button'}},
-    {params: {componentId: 'tooltip'}},
-    {params: {componentId: 'icon-button'}},
-    {params: {componentId: 'checkbox'}},
-    {params: {componentId: 'dropdown-list'}},
-    {params: {componentId: 'expansion-panel'}},
-    {params: {componentId: 'radio-button'}},
-    {params: {componentId: 'reorder-list'}},
-    {params: {componentId: 'mat-icon'}},
-  ];
+    { params: { componentId: 'design-board' } },
+    { params: { componentId: 'card' } },
+    { params: { componentId: 'list' } },
+    { params: { componentId: 'list-item' } },
+    { params: { componentId: 'single-select' } },
+    { params: { componentId: 'hyperlink-list' } },
+    { params: { componentId: 'text-field' } },
+    { params: { componentId: 'details' } },
+    { params: { componentId: 'text-button' } },
+    { params: { componentId: 'tooltip' } },
+    { params: { componentId: 'icon-button' } },
+    { params: { componentId: 'checkbox' } },
+    { params: { componentId: 'dropdown-list' } },
+    { params: { componentId: 'expansion-panel' } },
+    { params: { componentId: 'radio-button' } },
+    { params: { componentId: 'reorder-list' } },
+    { params: { componentId: 'mat-icon' } },
+  ]
 }
 
-let { componentId } = Astro.params;
+let { componentId } = Astro.params
 componentId = requireNotNull(componentId)
 
-let component = await getEntry('components', componentId);
+let component = await getEntry('components', componentId)
 component = requireNotNull(component)
-const { Content: ComponentContent } = await component.render();
-
+const { Content: ComponentContent } = await component.render()
 ---
 
-<Layout title="CW Library" componentId={componentId} pageTitle={component.data.title}>
-  <article class="prose prose-slate main-content">
-    <ComponentContent/>
-  </article>
-</Layout>
+<Main title="CW Library" componentId={componentId} pageTitle={component.data.title}>
+  <DocComponentLayout componentId={componentId}>
+    <ComponentContent />
+  </DocComponentLayout>
+</Main>

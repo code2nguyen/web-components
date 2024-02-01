@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { customElement, property, query } from 'lit/decorators.js'
 import styles from './details.scss?inline'
 /**
  * Details component
@@ -10,6 +10,8 @@ import styles from './details.scss?inline'
 @customElement('c2-details')
 export class DetailsComponent extends LitElement {
   static override styles = unsafeCSS(styles)
+
+  @query('details') protected detailsElement!: HTMLDetailsElement
 
   @property({ type: Boolean, reflect: true }) expanded = false
 
@@ -40,7 +42,7 @@ export class DetailsComponent extends LitElement {
   }
 
   private handleDetailsToggle() {
-    this.expanded = !this.expanded
+    this.expanded = this.detailsElement.open
   }
 
   override render() {

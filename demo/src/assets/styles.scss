@@ -1,8 +1,31 @@
 :root {
+  --theme-color: #212121;
   --primary-text-color: #212121;
+  --logo-color-1: #3498db;
+  --logo-color-2: #ff726b;
+  --logo-color-3: #b280c1;
+  --logo-color-4: #efc94c;
+  --border-color: rgb(230 230 230);
+  --border-color-100: rgb(241 245 249);
+  --bg-color: rgb(249 250 251);
+  --bg-color-200: rgb(226 232 240);
+  --bg-color-100: rgb(241 245 249);
+  --bg-color-300: rgb(203 213 225);
+  --bg-color-400: rgb(148 163 184);
 }
 html {
-  font-family: Montserrat, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif;
+  font-family:
+    Montserrat,
+    -apple-system,
+    BlinkMacSystemFont,
+    Segoe UI,
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    Open Sans,
+    Helvetica Neue,
+    sans-serif;
   color: var(--primary-text-color);
   font-feature-settings: normal;
   font-variation-settings: normal;
@@ -17,48 +40,206 @@ body {
   line-height: inherit;
 }
 
-.demo-code {
-  background-color: rgb(248, 248, 248);
-  --c2-expansion-panel-border-radius: 16px 16px 16px 16px;
-  --c2-expansion-panel-border-right: 1px solid rgb(213, 213, 213);
-  --c2-expansion-panel-border-left: 1px solid rgb(213, 213, 213);
-
-  .reset {
-    --c2-expansion-panel-border-radius: '';
-    --c2-expansion-panel-border-right: '';
-    --c2-expansion-panel-border-left: '';
-    min-height: 64px;
-  }
-  .open-close-icon {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-  }
-  .source-btn {
-    position: absolute;
-    font-size: 12px;
-    top: 26px;
-    right: 64px;
-  }
-  .content-copy-icon {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    z-index: 100;
-    --c2-mat-icon-icon-size: 32px;
-    --c2-mat-icon-icon-color: rgba(248, 248, 248, 0.5);
-    cursor: pointer;
-    &:hover {
-      --c2-mat-icon-icon-color: rgba(248, 248, 248, 0.8);
-    }
-  }
-  pre {
-    margin-top: 0px;
-    margin-bottom: 0px;
-  }
-}
-
 .main-content {
   max-width: 1080px;
   margin: auto;
+}
+
+.space {
+  flex: 1;
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin: 8px 0px;
+  &:not(:first-of-type) {
+    margin-top: 16px;
+  }
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin: 8px 0px;
+  &:not(:first-of-type) {
+    margin-top: 16px;
+  }
+}
+
+h5 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--logo-color-1);
+  line-height: 1rem;
+  margin: 8px 0px;
+}
+
+.em-1 {
+  color: var(--logo-color-1);
+}
+.em-2 {
+  color: var(--logo-color-2);
+}
+hr {
+  margin: 0px;
+  border: none;
+  border-top: 1px solid var(--border-color);
+}
+.mdx-code-block {
+  &.compack {
+    --c2-expansion-panel-border-radius: 0px;
+    --c2-expansion-panel-border-top: none;
+    --c2-expansion-panel-border-bottom: none;
+    --c2-expansion-panel-border-left: none;
+    --c2-expansion-panel-border-right: none;
+
+    --c2-icon-button-icon-size: 20px;
+    --c2-icon-button-state-layer-size: 32px;
+  }
+  .mdx-code-block-setting-btn {
+    position: absolute;
+    top: 16px;
+    right: 50px;
+    --c2-icon-button-icon-color: var(--logo-color-1);
+  }
+}
+
+.component-content {
+  table {
+    margin: 16px 0px;
+    width: 100%;
+    border-spacing: 0px;
+    font-size: 0.9rem;
+    th,
+    td {
+      padding: 16px;
+      border: none;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    thead {
+      background-color: var(--bg-color-300);
+      > tr {
+        cursor: default;
+        &:hover {
+          background-color: var(--bg-color-300);
+        }
+      }
+    }
+
+    td:first-of-type {
+      color: var(--logo-color-1);
+      font-weight: 500;
+    }
+    .t-h1 {
+      font-weight: 600;
+      color: var(--primary-text-color);
+    }
+    tr.t-h1 {
+      background-color: var(--bg-color-200);
+      &:hover {
+        background-color: var(--bg-color-400);
+      }
+    }
+    tr.t-h2 {
+      background-color: var(--bg-color-100);
+      &:hover {
+        background-color: var(--bg-color-400);
+      }
+    }
+    tr[class*='t-h'] {
+      td:last-of-type {
+        position: relative;
+        &::after {
+          border-style: solid;
+          border-width: 0 1px 1px 0;
+          content: '';
+          display: inline-block;
+          padding: 3px;
+          transform: rotate(225deg);
+          vertical-align: middle;
+          color: var(--primary-text-color);
+          position: absolute;
+          right: 16px;
+          top: calc(50% - 4px);
+          transition: transform 200ms cubic-bezier(0, 0, 0, 1);
+        }
+      }
+
+      &.collapsed {
+        td:last-of-type {
+          position: relative;
+          &::after {
+            transform: rotate(45deg);
+          }
+        }
+      }
+    }
+
+    tr {
+      &:hover {
+        background-color: var(--bg-color);
+      }
+      cursor: pointer;
+      &.hide {
+        display: none;
+      }
+      &.collapsed {
+        td {
+          border-bottom: 1px solid var(--border-color-100);
+        }
+      }
+    }
+
+    tbody > tr:not([class*='t-h']) {
+      &:not(.copied):hover {
+        td:last-of-type {
+          position: relative;
+          &::after {
+            content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 256 256'%3E%3Cpath d='M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z'%3E%3C/path%3E%3C/svg%3E");
+            display: inline-block;
+            vertical-align: middle;
+            color: var(--primary-text-color);
+            position: absolute;
+            right: 16px;
+            top: calc(50% - 8px);
+          }
+        }
+      }
+      &.copied {
+        td:last-of-type {
+          position: relative;
+          &::after {
+            content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='currentColor' width='16' height='16' viewBox='0 0 256 256'%3E%3Cpath d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'%3E%3C/path%3E%3C/svg%3E");
+            display: inline-block;
+            vertical-align: middle;
+            color: var(--primary-text-color);
+            position: absolute;
+            right: 16px;
+            top: calc(50% - 8px);
+          }
+        }
+      }
+    }
+    .t-h2 {
+      font-weight: 500;
+      color: var(--primary-text-color);
+    }
+
+    code {
+      background-color: var(--bg-color-100);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .t-code {
+      background-color: var(--bg-color-200);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+  }
 }

@@ -1,0 +1,160 @@
+---
+import ListComponents from '../components/ListComponents.astro'
+import { ComponentConfigurationPanel } from '../components/configuration/ComponentConfigurationPanel'
+interface Props {
+  componentId: string
+}
+const { componentId } = Astro.props
+---
+
+<div class="document-page">
+  <section class="nav">
+    <c2-details expanded>
+      <div slot="title" class="nav-title">Component</div>
+      <ListComponents componentId={componentId} class="detail-content" />
+      <svg slot="icon" viewBox="0 0 256 256"
+        ><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg
+      >
+    </c2-details>
+    <c2-details>
+      <div slot="title" class="nav-title">Pens</div>
+      <ListComponents componentId="v" />
+      <svg slot="icon" viewBox="0 0 256 256"
+        ><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg
+      >
+    </c2-details>
+  </section>
+  <section class="component-content">
+    <slot />
+  </section>
+  <section class="component-configuration">
+    <ComponentConfigurationPanel client:load />
+  </section>
+</div>
+
+<style class="scss">
+  .document-page {
+    --nav-sidew-width: 240px;
+    --config-side-width: 280px;
+    display: flex;
+    justify-content: center;
+    margin-left: calc(var(--nav-sidew-width));
+    .component-content {
+      padding: 16px;
+      width: clamp(200px, 850px, calc(100vw - var(--nav-sidew-width)));
+    }
+    .nav {
+      --c2-details-border-right: none;
+      --c2-details-border-left: none;
+      --c2-details-border-top: none;
+      --c2-details-border-bottom: none;
+      --c2-details-title-flex-direction: row-reverse;
+      --c2-details-icon-rotate: 90deg;
+      --c2-details-icon-width: 12px;
+      --c2-details-title-icon-gap: 8px;
+      --c2-details-padding-top: 4px;
+      --c2-details-padding-left: 0px;
+      --c2-details-padding-right: 0px;
+      --c2-details-padding-bottom: 4px;
+      --c2-details-hover-title-bg-color: transparent;
+
+      position: fixed;
+      left: var(--body-margin);
+      width: var(--nav-sidew-width);
+      padding: 16px 0px;
+      height: calc(100vh - 72px);
+      overflow: auto;
+
+      display: flex;
+      justify-content: flex-start;
+      flex-direction: column;
+      height: calc(100vh - 72px);
+      overflow-y: auto;
+      font-size: 0.9rem;
+      gap: 10px;
+      .nav-title {
+        font-weight: 500;
+        user-select: none;
+      }
+      .detail-content {
+        margin-left: 5px;
+      }
+    }
+
+    .component-configuration {
+      display: none;
+      position: fixed;
+      width: var(--config-side-width);
+      padding: 16px 0px;
+      right: 0;
+      background-color: var(--bg-color-200);
+      height: calc(100vh - 104px);
+      margin: 16px;
+      border-radius: 16px;
+    }
+
+    &.show-configuration-panel {
+      margin-right: calc(var(--config-side-width));
+      overflow-x: hidden;
+      overflow-y: auto;
+      .component-content {
+        width: clamp(200px, 850px, calc(100vw - var(--nav-sidew-width) - var(--config-side-width)));
+      }
+      .component-configuration {
+        display: block;
+      }
+    }
+  }
+</style>
+
+<script>
+  import { $configStore } from '../store/config-store'
+
+  const tableRowHeader = document.querySelectorAll("tr[class*='t-h']")
+  for (const tableRow of tableRowHeader) {
+    tableRow.addEventListener('click', (event) => {
+      let tr = (event.target as HTMLElement).closest('tr')
+      const level = tr?.dataset.level
+      const collapsed = tr?.classList.toggle('collapsed')
+      if (tr && level) {
+        let finished = true
+        do {
+          const nextTr = tr.nextSibling as HTMLTableRowElement
+          finished = true
+          if (nextTr) {
+            const siblingLevel = nextTr.dataset.level
+            if (!siblingLevel || Number(level) < Number(siblingLevel)) {
+              nextTr.classList.toggle('hide', collapsed)
+              finished = false
+              tr = nextTr
+            }
+          }
+        } while (!finished)
+      }
+    })
+  }
+
+  const tableRows = document.querySelectorAll("tbody > tr:not([class*='t-h'])")
+  for (const tableRow of tableRows) {
+    tableRow.addEventListener('click', async (event) => {
+      let tr = (event.target as HTMLElement).closest('tr')
+      tr?.classList.toggle('copied', true)
+      const firstTd = tr?.firstChild as HTMLElement
+      const text = firstTd!.innerText
+      await navigator.clipboard.writeText(text)
+      setTimeout(() => {
+        tr?.classList.remove('copied')
+      }, 1000)
+    })
+  }
+
+  $configStore.subscribe((configState, key) => {
+    if (key === 'targetUID') {
+      if (configState[key]) {
+        document.querySelector('.document-page')?.classList.toggle('show-configuration-panel', true)
+      } else {
+        document.querySelector('.document-page')?.classList.remove('show-configuration-panel')
+      }
+    }
+  })
+</script>

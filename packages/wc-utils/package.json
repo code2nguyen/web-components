@@ -1,8 +1,21 @@
 {
   "name": "@c2n/wc-utils",
   "version": "0.0.4",
-  "scripts": {},
+  "scripts": {
+    "dev": "tsc -p tsconfig.json -w",
+    "build": "tsc -p tsconfig.json"
+  },
   "author": "code2nguyen@gmail.com",
+  "type": "module",
+  "exports": {
+    "./css-helper.js": {
+      "types": "./dist/css-helper.d.ts",
+      "default": "./dist/css-helper.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -12,5 +25,7 @@
     "url": "https://github.com/code2nguyen/web-components.git"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@c2n/config": "*"   
+  }
 }
