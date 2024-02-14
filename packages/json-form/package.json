@@ -26,12 +26,12 @@
     "types"
   ],
   "scripts": {
-    "build": "npm run type-check && vite build",
+    "--build": "npm run type-check && vite build",
     "dev": "vite",
     "type-check": "tsc -p tsconfig.lib.json --composite false"
   },
   "dependencies": {
-    "lit": "3.1.0"
+    "lit": "3.1.2"
   },
   "devDependencies": {
     "@c2n/checkbox": "*",

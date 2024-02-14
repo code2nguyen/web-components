@@ -4,9 +4,11 @@
   "type": "module",
   "main": "dist/tooltip.js",
   "exports": {
-    ".": "./dist/tooltip.js"
+    ".": {
+      "default": "./dist/tooltip.js",
+      "types": "./types/src/tooltip.d.ts"
+    }
   },
-  "types": "types/src/index.d.ts",
   "files": [
     "dist",
     "types"
@@ -32,8 +34,8 @@
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
-    "@floating-ui/dom": "1.5.3",
-    "lit": "3.1.0"
+    "@floating-ui/dom": "^1.6.1",
+    "lit": "3.1.2"
   },
   "devDependencies": {
     "@c2n/config": "*"

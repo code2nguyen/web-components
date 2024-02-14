@@ -1,41 +1,22 @@
 ---
 import Main from '../../layouts/Main.astro'
 import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
-import { getCollection, getEntry } from 'astro:content'
-import { requireNotNull } from '../../utils/assertion'
+import { getCollection } from 'astro:content'
 
-export function getStaticPaths() {
-  return [
-    { params: { componentId: 'design-board' } },
-    { params: { componentId: 'card' } },
-    { params: { componentId: 'list' } },
-    { params: { componentId: 'list-item' } },
-    { params: { componentId: 'single-select' } },
-    { params: { componentId: 'hyperlink-list' } },
-    { params: { componentId: 'text-field' } },
-    { params: { componentId: 'details' } },
-    { params: { componentId: 'text-button' } },
-    { params: { componentId: 'tooltip' } },
-    { params: { componentId: 'icon-button' } },
-    { params: { componentId: 'checkbox' } },
-    { params: { componentId: 'dropdown-list' } },
-    { params: { componentId: 'expansion-panel' } },
-    { params: { componentId: 'radio-button' } },
-    { params: { componentId: 'reorder-list' } },
-    { params: { componentId: 'mat-icon' } },
-  ]
+export async function getStaticPaths() {
+  const componentEntries = await getCollection('components')
+  return componentEntries.map((entry) => ({
+    params: { componentId: entry.slug },
+    props: { component: entry },
+  }))
 }
 
-let { componentId } = Astro.params
-componentId = requireNotNull(componentId)
-
-let component = await getEntry('components', componentId)
-component = requireNotNull(component)
+const { component } = Astro.props
 const { Content: ComponentContent } = await component.render()
 ---
 
-<Main title="CW Library" componentId={componentId} pageTitle={component.data.title}>
-  <DocComponentLayout componentId={componentId}>
+<Main title="CW Library" componentId={component.slug} pageTitle={component.data.title}>
+  <DocComponentLayout componentId={component.slug}>
     <ComponentContent />
   </DocComponentLayout>
 </Main>

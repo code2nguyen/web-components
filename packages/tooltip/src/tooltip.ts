@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property, queryAssignedElements } from 'lit/decorators.js'
+import { isServer } from 'lit-html/is-server.js'
+import { customElement, property, queryAssignedElements, state } from 'lit/decorators.js'
 import styles from './tooltip.scss?inline'
 import { computePosition, shift, offset, arrow, autoPlacement, type Placement } from '@floating-ui/dom'
 
@@ -31,6 +32,8 @@ export class Tooltip extends LitElement {
   private _target: HTMLElement | null = null
   private delayTimeout: NodeJS.Timeout | null = null
 
+  @state() tooltipText = ''
+
   get target() {
     return this._target
   }
@@ -53,7 +56,10 @@ export class Tooltip extends LitElement {
 
   constructor() {
     super()
-    this.addEventListener('transitionend', this.finishHide)
+    if (!isServer) {
+      this.addEventListener('transitionend', this.finishHide)
+      this.tooltipText = this.target?.dataset.tooltip ?? ''
+    }
   }
 
   public override connectedCallback(): void {
@@ -71,7 +77,7 @@ export class Tooltip extends LitElement {
     this.clearTimeout()
   }
 
-  private show = () => {
+  private show = async () => {
     if (this.delayTimeout) {
       return
     }
@@ -82,7 +88,7 @@ export class Tooltip extends LitElement {
         middleware.push(
           arrow({
             element: arrowEl,
-          })
+          }),
         )
       }
 
@@ -94,6 +100,7 @@ export class Tooltip extends LitElement {
       }).then(({ x, y, middlewareData, placement }) => {
         this.style.left = x != null ? `${x}px` : ''
         this.style.top = y != null ? `${y}px` : ''
+        this.tooltipText = this.target?.dataset.tooltip ?? ''
 
         if (arrowEl && middlewareData.arrow) {
           const { x, y } = middlewareData.arrow
@@ -161,12 +168,8 @@ export class Tooltip extends LitElement {
   }
 
   override render() {
-    let defaultTooltipText = ''
-    if (this.target) {
-      defaultTooltipText = this.target.dataset.tooltip ?? ''
-    }
     return html` <div class="c2-tooltip">
-      <slot>${defaultTooltipText}</slot>
+      <slot>${this.tooltipText}</slot>
       ${this.hideArrow
         ? nothing
         : html`

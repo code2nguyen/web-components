@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
-    "lit": "3.1.0"
+    "lit": "3.1.2"
   },
   "devDependencies": {
     "@c2n/config": "*"

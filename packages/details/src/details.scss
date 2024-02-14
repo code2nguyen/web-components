@@ -106,7 +106,7 @@
     border-right: css.cssVar(border-right);
     border-left: css.cssVar(border-left);
 
-    padding-top: css.cssVar(padding-top);
+    padding-top: 0px;
     padding-right: css.cssVar(padding-right);
     padding-bottom: css.cssVar(padding-bottom);
     padding-left: css.cssVar(padding-left);
@@ -118,7 +118,7 @@
       border-bottom: none;
       border-bottom-right-radius: 0px;
       border-bottom-left-radius: 0px;
-
+      padding-bottom: css.cssVar(padding-top);
       slot[name='expanded-icon'][data-filled] {
         display: contents;
       }

@@ -10,13 +10,18 @@
     "inlineSources": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "lib": ["es2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "es2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
+    "verbatimModuleSyntax": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,    
-    "noEmit": true,
-
+    "resolveJsonModule": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitOverride": true,

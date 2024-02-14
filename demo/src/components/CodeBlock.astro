@@ -1,10 +1,11 @@
 ---
 import { Code } from 'astro:components'
-import type * as shiki from 'shiki'
+import { IconButton } from '@c2n/icon-button'
+import type * as shiki from 'shikiji'
 
 interface Props {
   code: string
-  lang?: shiki.Lang
+  lang?: shiki.BuiltinLanguage
   github?: string
   uid?: string
 }
@@ -14,13 +15,13 @@ const { code, lang, github, uid } = Astro.props
 
 <div class="code" data-uid={uid} data-lang={lang}>
   <Code code={code} lang={lang ?? 'typescript'} wrap />
-  <c2-icon-button class="content-copy-icon" data-tooltip="Copy to clipboard">
+  <IconButton client:load class="content-copy-icon" tooltip="Copy to clipboard">
     <svg fill="currentColor" viewBox="0 0 256 256">
       <path
         d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"
       ></path>
     </svg>
-  </c2-icon-button>
+  </IconButton>
 </div>
 
 <style lang="scss" is:global>
@@ -28,8 +29,8 @@ const { code, lang, github, uid } = Astro.props
     position: relative;
     .content-copy-icon {
       position: absolute;
-      top: 0px;
-      right: 0px;
+      top: 5px;
+      right: 5px;
       z-index: 100;
       --c2-icon-button-icon-size: 18px;
       --c2-icon-button-icon-color: rgba(248, 248, 248, 0.5);
@@ -49,7 +50,7 @@ const { code, lang, github, uid } = Astro.props
   copyBtns.forEach((button) => {
     button.addEventListener('click', async (e) => {
       const icon = e.currentTarget as HTMLElement
-      const codeElement = icon.previousElementSibling
+      const codeElement = icon.parentElement?.previousElementSibling
       if (codeElement && codeElement.nodeName === 'PRE') {
         const code = codeElement.querySelector('code')
         const text = code!.innerText

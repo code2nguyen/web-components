@@ -1,5 +1,5 @@
-import { animate, Options } from '@lit-labs/motion'
-import { html, LitElement, PropertyValueMap, TemplateResult, unsafeCSS } from 'lit'
+import { animate, type Options } from '@lit-labs/motion'
+import { html, LitElement, type PropertyValueMap, type TemplateResult, unsafeCSS } from 'lit'
 import { customElement, eventOptions, property, query, queryAll, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -234,7 +234,7 @@ export class ReorderList extends LitElement {
         bubbles: true,
         cancelable: true,
         detail: data,
-      })
+      }),
     )
   }
 
@@ -323,7 +323,7 @@ export class ReorderList extends LitElement {
       index++
     }
     const sortedMapping = Array.from(internalSlotMapping.keys()).sort(
-      (itemIndex1, itemIndex2) => internalSlotMapping.get(itemIndex1)! - internalSlotMapping.get(itemIndex2)!
+      (itemIndex1, itemIndex2) => internalSlotMapping.get(itemIndex1)! - internalSlotMapping.get(itemIndex2)!,
     )
     sortedMapping.forEach((itemIndex, index) => {
       internalSlotMapping.get(itemIndex) !== index

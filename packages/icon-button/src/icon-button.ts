@@ -1,29 +1,30 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement } from 'lit/decorators.js'
+import { customElement, property } from 'lit/decorators.js'
+import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './icon-button.scss?inline'
 
-import '@c2n/tooltip';
+import '@c2n/tooltip'
 
 /**
  * IconButton component
  *
- * @slot 
- * @csspart 
+ * @slot
+ * @csspart
  */
 @customElement('c2-icon-button')
 export class IconButton extends LitElement {
-
   static override styles = unsafeCSS(styles)
+
+  @property() tooltip: string | undefined = undefined
 
   override render() {
     return html`
-      <div class="c2-icon-button" data-tooltip=${this.dataset.tooltip}>
+      <div class="c2-icon-button" data-tooltip=${ifDefined(this.tooltip)}>
         <slot></slot>
-        ${this.dataset.tooltip ? html`<c2-tooltip delay="800"></c2-tooltip>` : nothing}
+        ${this.tooltip ? html`<c2-tooltip delay="800"></c2-tooltip>` : nothing}
       </div>
     `
   }
-
 }
 
 declare global {

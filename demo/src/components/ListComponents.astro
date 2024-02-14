@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
+import { HyperlinkList } from '@c2n/hyperlink-list'
 
 interface Props {
   componentId: string
@@ -12,7 +13,7 @@ const hoverClass = 'hover:bg-sky-100  hover:backdrop-blur-lg'
 const { componentId, class: className } = Astro.props
 ---
 
-<c2-hyperlink-list class={`list-component ${className}`}>
+<HyperlinkList client:load class={`list-component ${className}`}>
   {
     allComponents.map((component) => (
       <a href={`${base}/components/${component.slug}`} data-selected={componentId == component.slug}>
@@ -20,7 +21,7 @@ const { componentId, class: className } = Astro.props
       </a>
     ))
   }
-</c2-hyperlink-list>
+</HyperlinkList>
 
 <style>
   .list-component {

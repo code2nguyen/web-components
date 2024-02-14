@@ -10,6 +10,6 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [MDXCodeBlockRemark, MDXTableExtends],
   },
-  integrations: [lit(), mdx()],
+  integrations: [mdx(), lit()],
   scopedStyleStrategy: 'class',
 })

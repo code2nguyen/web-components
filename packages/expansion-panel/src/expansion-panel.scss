@@ -121,9 +121,9 @@
       border-right: css.cssVar(border-right);
       border-left: css.cssVar(border-left);
 
-      padding-right: css.cssVar(padding-right);
+      padding-top: 0px;
       padding-left: css.cssVar(padding-left);
-      padding-top: css.cssVar(padding-top);
+      padding-right: css.cssVar(padding-right);
       padding-bottom: css.cssVar(padding-bottom);
 
       position: relative;
@@ -155,6 +155,10 @@
       border-bottom: none;
       border-bottom-right-radius: 0px;
       border-bottom-left-radius: 0px;
+
+      .c2-expansion-panel-header-title {
+        padding-bottom: css.cssVar(padding-top);
+      }
 
       slot[name='expanded-icon'][data-filled] {
         display: contents;

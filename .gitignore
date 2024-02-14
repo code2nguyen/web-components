@@ -6,3 +6,4 @@
 **/.DS_Store
 scripts/generator/plopfile.js
 scripts/generator/tsconfig.tsbuildinfo
+**/tsconfig.node.tsbuildinfo

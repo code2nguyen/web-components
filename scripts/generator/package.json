@@ -17,7 +17,7 @@
     "url": "https://github.com/code2nguyen/web-components.git"
   },
   "dependencies": {
-    "typescript": "5.2.2",
+    "typescript": "5.3.3",
     "plop": "^4.0.0"
   }
 }

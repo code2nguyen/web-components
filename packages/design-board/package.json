@@ -27,12 +27,12 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run type-check && vite build",
+    "--build": "npm run type-check && vite build",
     "type-check": "tsc -p tsconfig.lib.json --composite false"
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
-    "lit": "3.1.0",
+    "lit": "3.1.2",
     "@lit/context": "1.1.0"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, PropertyValues } from 'lit'
+import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './checkbox.scss?inline'
@@ -48,16 +48,20 @@ export class Checkbox extends LitElement {
           @change="${this.handleChange}"
         />
         <div class="c2-checkbox__background">
+          <!-- check state -->
           <slot name="checkmark">
             <svg class="c2-checkbox__checkmark" viewBox="0 0 24 24">
               <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
             </svg>
           </slot>
+          <!-- indeterminate state -->
           <slot name="mixedmark">
             <svg class="c2-checkbox__mixedmark" c2-checkbox__mixedmark viewBox="0 0 24 24">
               <path fill="currentColor" d="M19 13H5v-2h14v2z" />
             </svg>
           </slot>
+          <!-- unchecked state -->
+          <slot name="uncheckmark"> </slot>
         </div>
         <div class="c2-checkbox-state-layer"></div>
       </div>
@@ -81,7 +85,7 @@ export class Checkbox extends LitElement {
       new Event('change', {
         bubbles: true,
         composed: true,
-      })
+      }),
     )
   }
 

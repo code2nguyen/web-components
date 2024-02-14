@@ -4,9 +4,11 @@
   "type": "module",
   "main": "dist/{{ dashCase name }}.js",
   "exports": {
-    ".": "./dist/{{ dashCase name }}.js"
+    ".": {
+      "default": "./dist/{{ dashCase name }}.js",
+      "types": "./types/src/{{ dashCase name }}.d.ts"
+    }
   },
-  "types": "types/src/index.d.ts",
   "files": [
     "dist",
     "types"
@@ -32,7 +34,7 @@
   },
   "dependencies": {
     "@c2n/wc-utils": "{{ pkg 'version' }}",
-    "lit": "3.1.0"
+    "lit": "3.1.2"
   },
   "devDependencies": {
     "@c2n/config": "*"

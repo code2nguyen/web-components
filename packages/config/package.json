@@ -18,7 +18,7 @@
     "@types/node": "20.9.2",
     "eslint": "8.54.0",
     "lit-analyzer": "2.0.1",
-    "typescript": "5.2.2",
+    "typescript": "5.3.3",
     "vite": "^5.0.11",
     "vite-plugin-cem": "^0.6.0"
   }

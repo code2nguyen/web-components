@@ -1,6 +1,9 @@
 ---
+import type { visit } from 'unist-util-visit'
 import ListComponents from '../components/ListComponents.astro'
 import { ComponentConfigurationPanel } from '../components/configuration/ComponentConfigurationPanel'
+import { DetailsComponent } from '@c2n/details'
+
 interface Props {
   componentId: string
 }
@@ -9,20 +12,20 @@ const { componentId } = Astro.props
 
 <div class="document-page">
   <section class="nav">
-    <c2-details expanded>
+    <DetailsComponent expanded client:load>
       <div slot="title" class="nav-title">Component</div>
       <ListComponents componentId={componentId} class="detail-content" />
       <svg slot="icon" viewBox="0 0 256 256"
         ><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg
       >
-    </c2-details>
-    <c2-details>
+    </DetailsComponent>
+    <DetailsComponent client:load>
       <div slot="title" class="nav-title">Pens</div>
       <ListComponents componentId="v" />
       <svg slot="icon" viewBox="0 0 256 256"
         ><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg
       >
-    </c2-details>
+    </DetailsComponent>
   </section>
   <section class="component-content">
     <slot />
@@ -35,7 +38,7 @@ const { componentId } = Astro.props
 <style class="scss">
   .document-page {
     --nav-sidew-width: 240px;
-    --config-side-width: 280px;
+    --config-side-width: 320px;
     display: flex;
     justify-content: center;
     margin-left: calc(var(--nav-sidew-width));
@@ -85,12 +88,13 @@ const { componentId } = Astro.props
       display: none;
       position: fixed;
       width: var(--config-side-width);
-      padding: 16px 0px;
+      padding: 0px;
       right: 0;
-      background-color: var(--bg-color-200);
+      background-color: var(--bg-color-1);
       height: calc(100vh - 104px);
       margin: 16px;
-      border-radius: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
     }
 
     &.show-configuration-panel {
