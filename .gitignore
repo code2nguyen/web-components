@@ -7,3 +7,4 @@
 scripts/generator/plopfile.js
 scripts/generator/tsconfig.tsbuildinfo
 **/tsconfig.node.tsbuildinfo
+**/.wireit

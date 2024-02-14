@@ -9,7 +9,7 @@
     "demo": "npm run start -w demo",
     "demo:dev": "npm run dev -w demo",
     "demo:build": "npm run build -w demo",
-    "build": "npm run build --workspace=packages --if-present",
+    "build": "wireit",
     "build:generator": "npm run build --workspace=scripts/generator",
     "pregenerate": "npm run build:generator",
     "generate": "npm run plop --workspace=scripts/generator",
@@ -20,13 +20,22 @@
     "lerna": "7.3.0",
     "lint-staged": "13.0.3",
     "prettier": "3.2.5",
-    "prettier-plugin-astro": "^0.13.0"
+    "prettier-plugin-astro": "^0.13.0",
+    "wireit": "^0.14.4"
   },
   "workspaces": [
     "packages/**/*",
     "demo",
     "scripts/generator"
   ],
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "./packages/wc-utils:build"
+      ],
+      "command": "npm run build --workspace=packages --if-present"
+    }
+  },
   "lint-staged": {
     "*.ts": "npm run lint"
   }
