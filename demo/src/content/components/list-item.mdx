@@ -44,11 +44,13 @@ import '@c2n/list-item'
 ---
 
 ```html tag=MdxCodeBlock,compack=true
-<c2-list-item selected id="abc" class="custom-selected-state">
-  <div slot="test">test</div>
-  Selected list item 1
-</c2-list-item>
-
+<div class="custom-selected-state">
+  <c2-list-item selected id="abc">
+    <div slot="test">test</div>
+    Selected list item 1
+  </c2-list-item>
+  <div>testing</div>
+</div>
 <style>
   .custom-selected-state {
     --c2-list-item-selected-bg-color: red;

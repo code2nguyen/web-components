@@ -28,13 +28,14 @@ export default function (plop: NodePlopAPI) {
         type: 'append',
         path: '../../demo/src/store/component-manifests.ts',
         pattern: /\n/,
-        template: "import {{ camelCase name }} from '@c2n/{{ dashCase name }}/custom-elements.json',			
+        separator: '',
+        template: "import {{ camelCase name }} from '@c2n/{{ dashCase name }}/custom-elements.json'\n",
       },
       {
         type: 'append',
         path: '../../demo/src/store/component-manifests.ts',
         pattern: /export const componentManifests = {/,
-        template: "  [{{ camelCase name }}.modules[0].declarations[0].tagName]: normalizeManifest({{ camelCase name }}.modules[0].declarations[0]),"
+        template: '  [{{ camelCase name }}.modules[0].declarations[0].tagName]: normalizeManifest({{ camelCase name }}.modules[0].declarations[0]),',
       },
       // {
       //   type: 'append',

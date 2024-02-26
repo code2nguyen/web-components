@@ -26,7 +26,7 @@ export const MDXCodeBlockRemark = () => {
             const code = node.value
             const uid = 'c2n-' + crypto.randomUUID()
             const style = extractStyle(code, uid)
-            const compiledCode = compileComponentCode(code, uid)
+            const compiledCode = compileComponentCode(code, uid, metaAttributes.component)
             const props = {
               code,
               lang,
@@ -45,7 +45,7 @@ export const MDXCodeBlockRemark = () => {
               name: metaAttributes.tag,
               position: node.position,
               attributes,
-              children: [compiledCode],
+              children: compiledCode,
               data: { _mdxExplicitJsx: true },
             }
             parent.children.splice(index, 1, codeSnippetWrapper)
@@ -63,12 +63,14 @@ function extractStyle(code, uid) {
   const reg = /<style>([^<]*)<\/style>/g
   const result = reg.exec(code)
   let style = result ? result[1] : ''
-  return `<style>
+  return style
+    ? `<style>
   ${style.replace(/\s*([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/g, `.${uid}$1$2`)}
   </style>`
+    : ''
 }
 
-function compileComponentCode(code, uid) {
+function compileComponentCode(code, uid, componentName) {
   let ast
   compileSync(code.replace(/<style>([^<]*)<\/style>/g, ''), {
     format: 'mdx',
@@ -85,32 +87,26 @@ function compileComponentCode(code, uid) {
     }
   }
 
-  changeComponentName(ast.children[0])
-  const hostNode = ast.children[0]
-  hostNode.attributes = ast.children[0].attributes || []
-  const classAttributeIndex = hostNode.attributes.findIndex((item) => item.name == 'class')
-  let classAttribute = {
-    type: 'mdxJsxAttribute',
-    name: 'class',
-    value: uid,
-  }
-  if (classAttributeIndex > -1) {
-    classAttribute = hostNode.attributes[classAttributeIndex]
-    classAttribute.value = classAttribute.value + ` ${uid}`
-  } else {
-    hostNode.attributes.push(classAttribute)
+  const hostComponent = changeComponentName(ast, uid, componentName)
+  if (hostComponent) {
+    hostComponent.attributes = hostComponent.attributes || []
+    hostComponent.attributes.push({
+      type: 'mdxJsxAttribute',
+      name: 'id',
+      value: uid,
+    })
   }
 
-  hostNode.attributes.push({
-    type: 'mdxJsxAttribute',
-    name: 'client:only',
-    value: 'lit',
-  })
-
-  return hostNode
+  return ast.children
 }
 
-function changeComponentName(vnode) {
+function changeComponentName(vnode, uid, componentName) {
+  let mainComponent = componentName && vnode.name == componentName ? vnode : null
+  const classAttributeIndex = vnode.attributes?.findIndex((item) => item.name == 'class')
+  if (classAttributeIndex > -1) {
+    const classAttribute = vnode.attributes[classAttributeIndex]
+    classAttribute.value = classAttribute.value + ` ${uid}`
+  }
   if (vnode.name?.startsWith('c2-')) {
     vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
     vnode.attributes = vnode.attributes || []
@@ -119,10 +115,16 @@ function changeComponentName(vnode) {
       name: 'client:load',
       value: null,
     })
+
+    if (!componentName) mainComponent = vnode
   }
   if (vnode.children) {
     for (const item of vnode.children) {
-      changeComponentName(item)
+      const hostNode = changeComponentName(item, uid, componentName)
+      if (!mainComponent && hostNode) {
+        mainComponent = hostNode
+      }
     }
   }
+  return mainComponent
 }

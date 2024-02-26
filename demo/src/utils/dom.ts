@@ -40,7 +40,7 @@ export function getParent(currentElement: HTMLElement): HTMLElement {
 }
 
 export function getComponentByUid(uid: string): HTMLElement | null {
-  return document.querySelector(`.${uid}`)
+  return document.querySelector(`#${uid}`)
 }
 
 export function extractManifestData(element: HTMLElement): ManifestData {
