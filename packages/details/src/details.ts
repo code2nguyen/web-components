@@ -8,7 +8,7 @@ import styles from './details.scss?inline'
  * @csspart
  */
 @customElement('c2-details')
-export class DetailsComponent extends LitElement {
+export class Details extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @query('details') protected detailsElement!: HTMLDetailsElement
@@ -64,6 +64,6 @@ export class DetailsComponent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'c2-details': DetailsComponent
+    'c2-details': Details
   }
 }

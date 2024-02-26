@@ -6,6 +6,9 @@
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
+import { ListItem } from '@c2n/list-item'
 
 # List Item
 
@@ -28,23 +31,27 @@ import '@c2n/list-item'
 <br />
 ---
 
-```html tag=MdxCodeBlock compack
-<c2-list-item>Default list item</c2-list-item>
+```html tag=MdxCodeBlock,compack=true
+<c2-list-item data-style="width:100px; height: 100px; --test-v: 10px">Default list item</c2-list-item>
 ```
 
 ---
 
-```html tag=MdxCodeBlock compack
+```html tag=MdxCodeBlock,compack=true
 <c2-list-item selected>Selected list item</c2-list-item>
 ```
 
 ---
 
-```html tag=MdxCodeBlock compack
-<c2-list-item selected class="c2-list-item-selected-state-1">Selected list item 1</c2-list-item>
+```html tag=MdxCodeBlock,compack=true
+<c2-list-item selected id="abc" class="custom-selected-state">
+  <div slot="test">test</div>
+  Selected list item 1
+</c2-list-item>
+
 <style>
-  .c2-list-item-selected-state-1 {
-    --c2-list-item-selected-bg-color: transparent;
+  .custom-selected-state {
+    --c2-list-item-selected-bg-color: red;
   }
 </style>
 ```
@@ -54,37 +61,4 @@ import '@c2n/list-item'
 <br />
 ## API
 
-| Name                                   | Type         | Default                 | Description                                                                          |
-| -------------------------------------- | ------------ | ----------------------- | ------------------------------------------------------------------------------------ |
-| # Attribute                            |              |                         |                                                                                      |
-| selected                               | .bool        | `false`                 | If `true`, the component is selected                                                 |
-| disabled                               | .bool        | `false`                 | If `true`, the component is disabled                                                 |
-| value                                  | .string      | `''`                    | The `value` dispatch on selecting item                                               |
-| # Events                               |              |                         |                                                                                      |
-| selected-change                        | .CustomEvent | N/A                     | The `detail` attribute contains `value` if item is selected otherwhise it is `false` |
-| # CSS Variables                        |              |                         |                                                                                      |
-| --c2-text-field-border-radius          | .radius      | `inherit`               | `border-radius` value                                                                |
-| --c2-text-field-border-top             | .border      | `0px solid transparent` | `border-top`value                                                                    |
-| --c2-text-field-border-bottom          | .border      | `0px solid transparent` | `border-bottom`value                                                                 |
-| --c2-text-field-border-left            | .border      | `0px solid transparent` | `border-left`value                                                                   |
-| --c2-text-field-border-right           | .border      | `0px solid transparent` | `border-right`value                                                                  |
-| --c2-text-field-padding-top            | .padding     | `4px`                   | `padding-top`value                                                                   |
-| --c2-text-field-padding-right          | .padding     | `8px`                   | `padding-right`value                                                                 |
-| --c2-text-field-padding-bottom         | .padding     | `4px`                   | `padding-bottom`value                                                                |
-| --c2-text-field-padding-left           | .padding     | `8px`                   | `padding-left`value                                                                  |
-| --c2-text-field-color                  | .color       | `inherit`               | `color`value                                                                         |
-| --c2-text-field-bg-color               | .color       | `transparent`           | `background-color`value                                                              |
-| ## Hover state                         |              |                         |                                                                                      |
-| --c2-text-field-hover-border-top       | .border      | `inherit`               | `border-top`value of hover state                                                     |
-| --c2-text-field-hover-border-bottom    | .border      | `inherit`               | `border-bottom`value of hover state                                                  |
-| --c2-text-field-hover-border-left      | .border      | `inherit`               | `border-left`value of hover state                                                    |
-| --c2-text-field-hover-border-right     | .border      | `inherit`               | `border-right` value of hover state                                                  |
-| --c2-text-field-hover-color            | .color       | `inherit`               | `color`value of hover state                                                          |
-| --c2-text-field-hover-bg-color         | .color       | `rgb(230, 230, 230)`    | `background-color`value of hover state                                               |
-| ## Selected state                      |              |                         |                                                                                      |
-| --c2-text-field-selected-border-top    | .border      | `inherit`               | `border-top`value of selected state                                                  |
-| --c2-text-field-selected-border-bottom | .border      | `inherit`               | `border-bottom`value of selected state                                               |
-| --c2-text-field-selected-border-left   | .border      | `inherit`               | `border-left`value of selected state                                                 |
-| --c2-text-field-selected-border-right  | .border      | `inherit`               | `border-right` value of selected state                                               |
-| --c2-text-field-selected-color         | .color       | `inherit`               | `color`value of selected state                                                       |
-| --c2-text-field-selected-bg-color      | .color       | `rgb(230, 230, 230)`    | `background-color`value of hover state                                               |
+<ApiTable componentTag="c2-list-item"></ApiTable>

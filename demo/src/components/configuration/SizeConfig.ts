@@ -47,12 +47,35 @@ export class SizeConfig extends LitElement {
     `,
   ]
 
+  @property() width = 'auto'
+  @property() height = 'auto'
+
+  handleWdithChange(event: InputEvent) {
+    this.width = (event.target as HTMLInputElement).value
+    this.dispathChangeEvent()
+  }
+
+  handleHeightChange(event: InputEvent) {
+    this.height = (event.target as HTMLInputElement).value
+    this.dispathChangeEvent()
+  }
+
+  dispathChangeEvent() {
+    this.dispatchEvent(
+      new CustomEvent('change', {
+        bubbles: true,
+        cancelable: true,
+        detail: { w: this.width, h: this.height },
+      }),
+    )
+  }
+
   render() {
     return html` <div class="container">
-      <c2-text-field>
+      <c2-text-field .value=${this.width} @change=${this.handleWdithChange}>
         <span class="text-prefix" slot="prefix-icon">W</span>
       </c2-text-field>
-      <c2-text-field>
+      <c2-text-field .value=${this.height} @change=${this.handleHeightChange}>
         <span class="text-prefix" slot="prefix-icon">H</span>
       </c2-text-field>
       <c2-checkbox>

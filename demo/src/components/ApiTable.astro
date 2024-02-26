@@ -1,0 +1,175 @@
+---
+interface Props {
+  componentTag: string
+}
+
+const { componentTag } = Astro.props
+
+import { componentManifests } from '../store/component-manifests'
+
+const componentManifest = componentManifests[componentTag]
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      componentManifest.attributes && componentManifest.attributes.length > 0 && (
+        <>
+          <tr class="t-h1" data-level="1">
+            <>
+              <td>
+                <span class="t-h1">Attribute</span>
+              </td>
+              <td />
+              <td />
+              <td />
+            </>
+          </tr>
+          {componentManifest.attributes.map((attr) => (
+            <tr>
+              <td>{attr.name}</td>
+              <td>
+                <span class="t-code">{attr.type!.text}</span>
+              </td>
+              <td>
+                <code>{attr.default}</code>
+              </td>
+              <td>
+                <fragment set:html={attr.description} />
+              </td>
+            </tr>
+          ))}
+        </>
+      )
+    }
+    {
+      componentManifest.events && componentManifest.events.length > 0 && (
+        <>
+          <tr class="t-h1" data-level="1">
+            <>
+              <td>
+                <span class="t-h1">Events</span>
+              </td>
+              <td />
+              <td />
+              <td />
+            </>
+          </tr>
+          {componentManifest.events.map((event) => (
+            <tr>
+              <td>{event.name}</td>
+              <td>
+                <span class="t-code">{event.type!.text}</span>
+              </td>
+              <td>N/A</td>
+              <td>
+                <fragment set:html={event.description} />
+              </td>
+            </tr>
+          ))}
+        </>
+      )
+    }
+
+    {
+      componentManifest.slots && componentManifest.slots.length > 0 && (
+        <>
+          <tr class="t-h1" data-level="1">
+            <>
+              <td>
+                <span class="t-h1">Slots</span>
+              </td>
+              <td />
+              <td />
+              <td />
+            </>
+          </tr>
+          {componentManifest.slots.map((slot) => (
+            <tr>
+              <td>{slot.name}</td>
+              <td>
+                <span class="t-code">Slot</span>
+              </td>
+              <td>N/A</td>
+              <td>
+                <fragment set:html={slot.description} />
+              </td>
+            </tr>
+          ))}
+        </>
+      )
+    }
+
+    {
+      componentManifest.cssProperties && componentManifest.cssProperties.length > 0 && (
+        <>
+          <tr class="t-h1" data-level="1">
+            <>
+              <td>
+                <span class="t-h1">CSS Variables</span>
+              </td>
+              <td />
+              <td />
+              <td />
+            </>
+          </tr>
+          {componentManifest.cssProperties.map((cssVariable) => (
+            <tr>
+              <td>{cssVariable.name}</td>
+              <td>
+                <span class="t-code">{cssVariable.type!.text}</span>
+              </td>
+              <td>
+                <code>{cssVariable.default}</code>
+              </td>
+              <td>
+                <fragment set:html={cssVariable.description} />
+              </td>
+            </tr>
+          ))}
+        </>
+      )
+    }
+
+    {
+      componentManifest.stateCssProperties &&
+        Object.keys(componentManifest.stateCssProperties).length > 0 &&
+        Object.keys(componentManifest.stateCssProperties).map((state) => (
+          <>
+            <tr class="t-h2" data-level="2">
+              <>
+                <td>
+                  <span class="t-h2">{state} State</span>
+                </td>
+                <td />
+                <td />
+                <td />
+              </>
+            </tr>
+            {componentManifest.stateCssProperties![state].map((cssVariable) => (
+              <tr>
+                <td>{cssVariable.name}</td>
+                <td>
+                  <span class="t-code">{cssVariable.type!.text}</span>
+                </td>
+                <td>
+                  <code>{cssVariable.default}</code>
+                </td>
+                <td>
+                  <fragment set:html={cssVariable.description} />
+                </td>
+              </tr>
+            ))}
+          </>
+        ))
+    }
+  </tbody>
+</table>

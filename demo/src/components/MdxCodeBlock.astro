@@ -11,10 +11,11 @@ interface Props {
   lang: shiki.BuiltinLanguage
   uid: string
   github?: string
-  compack?: boolean
+  compack?: string
+  style: string
 }
 
-const { code, lang, github, compack, uid } = Astro.props
+const { code, lang, github, compack, uid, style } = Astro.props
 ---
 
 <ExpansionPanel client:load class={'mdx-code-block ' + (compack ? 'compack' : '')} title-not-clickable>
@@ -31,10 +32,10 @@ const { code, lang, github, compack, uid } = Astro.props
       ></path></svg
     >
   </IconButton>
-
-  <div slot="title" class="reset">
-    <Fragment set:html={code} />
-
+  <div slot="title" data-uid={uid}>
+    {style ? <Fragment set:html={style} /> : ''}
+    <Fragment set:html={`<!-- component-${uid} -->\n`} />
+    <slot />
     <IconButton client:load class="mdx-code-block-setting-btn" data-uid={uid} tooltip="Interacting">
       <svg fill="currentColor" viewBox="0 0 256 256"
         ><path
@@ -49,6 +50,10 @@ const { code, lang, github, compack, uid } = Astro.props
 <script>
   import { $configStore } from '../store/config-store'
   import { $configCodeStore } from '../store/config-code-store'
+  import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, extractManifestData } from '../utils/dom'
+  import { getComponentManifestData } from '../utils/manifest-utils'
+  import { componentManifests } from '../store/component-manifests'
+
   const settingBtns = document.querySelectorAll('.mdx-code-block-setting-btn')
 
   for (const settingBtn of settingBtns) {
@@ -56,12 +61,48 @@ const { code, lang, github, compack, uid } = Astro.props
       const btn = (event.target as HTMLElement).closest('c2-icon-button') as HTMLElement
       const uid = btn?.dataset.uid
       if (uid) {
-        const codeBlockElement = btn.parentElement!.parentElement!.nextElementSibling as HTMLElement
+        const codeBlockElement = closestElementSibling(getParent(btn), '.code')!
         const code = codeBlockElement.querySelector('code')?.innerText
         const lang = codeBlockElement.dataset.lang
-        $configStore.setKey('targetUID', $configStore.get()['targetUID'] == uid ? '' : uid)
+        console.log(componentManifests)
+        const targetComp = getComponentByUid(uid)
+        if (!targetComp) return
+        const manifestData = extractManifestData(targetComp)
+        const componentManifestData = getComponentManifestData(manifestData, componentManifests[targetComp.tagName.toLowerCase()])
+        const hideConfig = $configStore.get()['uid'] == uid
+        if (hideConfig) {
+          $configStore.setKey('showConfig', false)
+          $configStore.setKey('uid', '')
+          return
+        }
+        $configStore.set({
+          uid,
+          showConfig: !hideConfig,
+          ...componentManifestData,
+        })
         $configCodeStore.setKey(uid, { code: code ?? '', lang: lang ?? '' })
       }
     })
   }
+
+  // update config from configStore
+  $configStore.subscribe((componentConfig) => {
+    const targetUID = componentConfig.uid
+    let manifestStyleStr = ''
+    if (!targetUID) return
+    const targetComp = getComponentByUid(targetUID)
+    if (!targetComp) return
+
+    if (componentConfig.host?.w && componentConfig.host?.w !== 'auto') {
+      const width = normalizeCssValue(componentConfig.host.w)
+      manifestStyleStr += `width:${width};`
+      targetComp.style.width = width
+    }
+    if (componentConfig.host?.h && componentConfig.host?.h !== 'auto') {
+      const height = normalizeCssValue(componentConfig.host.h)
+      manifestStyleStr += `height:${height};`
+      targetComp.style.height = height
+    }
+    targetComp.dataset.style = manifestStyleStr
+  })
 </script>

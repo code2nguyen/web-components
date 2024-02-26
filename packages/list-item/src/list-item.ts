@@ -5,17 +5,57 @@ import { classMap } from 'lit/directives/class-map.js'
 import { addClasses } from '@c2n/wc-utils/css-helper.js'
 
 /**
- * ListItem component
+ * @tag c2-list-item
  *
- * @slot
- * @csspart
+ * @slot default - This is a default/unnamed slot
+ *
+ * @event {CustomEvent} selected-change - An Event emitted after selection state is changed
+ *
+ * @cssproperty {pixel} [--c2-list-item-border-radius=inherit] - <code>border-radius</code> value
+ * @cssproperty {pixel} [--c2-list-item-padding-top=4px] - <code>padding-top</code> value
+ * @cssproperty {pixel} [--c2-list-item-padding-right=8px] - <code>padding-right</code> value
+ * @cssproperty {pixel} [--c2-list-item-padding-bottom=4px] - <code>padding-bottom</code> value
+ * @cssproperty {pixel} [--c2-list-item-padding-left=8px] - <code>padding-left</code> value
+ *
+ * @cssproperty {border} [--c2-list-item-border-top=0px solid transparent] - <code>border-top</code> value
+ * @cssproperty {border} [--c2-list-item-border-bottom=0px solid transparent] - <code>border-bottom</code> value
+ * @cssproperty {border} [--c2-list-item-border-right=0px solid transparent] - <code>border-right</code> value
+ * @cssproperty {border} [--c2-list-item-border-left=0px solid transparent] - <code>border-left</code> value
+ * @cssproperty {color} [--c2-list-item-color=inherit] - <code>color<code> value
+ * @cssproperty {color} [--c2-list-item-bg-color=transparent] - <code>background-color</code> value
+ *
+ * @cssproperty {hover - border} [--c2-list-item-hover-border-top=inherit] - Hover <code>border-top</code> value
+ * @cssproperty {hover - border} [--c2-list-item-hover-border-bottom=inherit] - Hover <code>border-bottom</code> value
+ * @cssproperty {hover - border} [--c2-list-item-hover-border-right=inherit] - Hover <code>border-right</code> value
+ * @cssproperty {hover - border} [--c2-list-item-hover-border-left=inherit] - Hover <code>border-left</code> value
+ * @cssproperty {hover - color} [--c2-list-item-hover-color=inherit] - Hover <code>color</code> value
+ * @cssproperty {hover - color} [--c2-list-item-hover-bg-color=rgb(230, 230, 230)] - Hover <code>background-color</code> value
+ * 
+ * @cssproperty {selected - border} [--c2-list-item-selected-border-top=inherit] - Selected <code>border-top</code> value
+ * @cssproperty {selected - border} [--c2-list-item-selected-border-bottom=inherit] - Selected <code>border-bottom</code> value
+ * @cssproperty {selected - border} [--c2-list-item-selected-border-right=inherit] - Selected <code>border-right</code> value
+ * @cssproperty {selected - border} [--c2-list-item-selected-border-left=inherit] - Selected <code>border-left</code> value
+ * @cssproperty {selected - color} [--c2-list-item-selected-color=inherit] - Selected <code>color</code> value
+ * @cssproperty {selected - color} [--c2-list-item-selected-bg-color=rgb(230, 230, 230)] - Selected <code>background-color</code> value
+ 
  */
 @customElement('c2-list-item')
 export class ListItem extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /**
+   * If <code>true</code>, the component is selected
+   */
   @property({ type: Boolean, reflect: true }) selected = false
+
+  /**
+   * If <code>true</code>, the component is disabled
+   */
   @property({ type: Boolean, reflect: true }) disabled = false
+
+  /**
+   * The value dispatch on selecting item
+   */
   @property() value = ''
 
   handleClick = () => {

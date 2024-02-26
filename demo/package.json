@@ -14,17 +14,20 @@
   "dependencies": {
     "@astrojs/lit": "^4.0.1",
     "@astrojs/mdx": "^2.1.1",
-    "astro": "^4.3.5",
-    "mdast-util-mdx-jsx": "3.0.0",
-    "unist-util-visit": "5.0.0",
-    "sass": "1.70.0",
-    "nanostores": "0.9.5",
-    "@nanostores/lit": "0.2.0",
-    "lit": "3.1.2",
     "@lit/reactive-element": "2.0.4",
-    "@webcomponents/template-shadowroot": "^0.2.1"
+    "@nanostores/lit": "0.2.0",
+    "@webcomponents/template-shadowroot": "^0.2.1",
+    "astro": "^4.3.5",
+    "change-case": "^5.4.3",
+    "lit": "3.1.2",
+    "mdast-util-mdx-jsx": "3.0.0",
+    "nanostores": "0.9.5",
+    "sass": "1.70.0",
+    "unist-util-visit": "5.0.0",
+    "lodash-es": "4.17.21"
   },
   "devDependencies": {
+    "@types/lodash-es": "4.17.12",
     "typescript": "5.3.3"
   }
 }

@@ -1,4 +1,6 @@
 import { visit } from 'unist-util-visit'
+import { compileSync, nodeTypes } from '@mdx-js/mdx'
+import * as changeCase from 'change-case'
 
 // Inspiration from https://github.com/johnzanussi/astro-mdx-code-blocks/blob/main/src/remarkCodeBlock.ts
 export const MDXCodeBlockRemark = () => {
@@ -21,10 +23,15 @@ export const MDXCodeBlockRemark = () => {
           }, {})
 
           if (metaAttributes.tag) {
+            const code = node.value
+            const uid = 'c2n-' + crypto.randomUUID()
+            const style = extractStyle(code, uid)
+            const compiledCode = compileComponentCode(code, uid)
             const props = {
-              code: node.value,
+              code,
               lang,
-              uid: crypto.randomUUID(),
+              uid,
+              style,
               ...metaAttributes,
             }
             const attributes = Object.entries(props).map(([name, value]) => ({
@@ -37,8 +44,8 @@ export const MDXCodeBlockRemark = () => {
               type: 'mdxJsxFlowElement',
               name: metaAttributes.tag,
               position: node.position,
-              children: [],
               attributes,
+              children: [compiledCode],
               data: { _mdxExplicitJsx: true },
             }
             parent.children.splice(index, 1, codeSnippetWrapper)
@@ -49,5 +56,73 @@ export const MDXCodeBlockRemark = () => {
       }
     }
     visit(tree, 'code', visitor)
+  }
+}
+
+function extractStyle(code, uid) {
+  const reg = /<style>([^<]*)<\/style>/g
+  const result = reg.exec(code)
+  let style = result ? result[1] : ''
+  return `<style>
+  ${style.replace(/\s*([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/g, `.${uid}$1$2`)}
+  </style>`
+}
+
+function compileComponentCode(code, uid) {
+  let ast
+  compileSync(code.replace(/<style>([^<]*)<\/style>/g, ''), {
+    format: 'mdx',
+    outputFormat: 'program',
+    jsx: false,
+    development: false,
+    remarkPlugins: [captureEsast],
+  })
+
+  function captureEsast() {
+    return function (tree) {
+      const clone = structuredClone(tree)
+      ast = clone
+    }
+  }
+
+  changeComponentName(ast.children[0])
+  const hostNode = ast.children[0]
+  hostNode.attributes = ast.children[0].attributes || []
+  const classAttributeIndex = hostNode.attributes.findIndex((item) => item.name == 'class')
+  let classAttribute = {
+    type: 'mdxJsxAttribute',
+    name: 'class',
+    value: uid,
+  }
+  if (classAttributeIndex > -1) {
+    classAttribute = hostNode.attributes[classAttributeIndex]
+    classAttribute.value = classAttribute.value + ` ${uid}`
+  } else {
+    hostNode.attributes.push(classAttribute)
+  }
+
+  hostNode.attributes.push({
+    type: 'mdxJsxAttribute',
+    name: 'client:only',
+    value: 'lit',
+  })
+
+  return hostNode
+}
+
+function changeComponentName(vnode) {
+  if (vnode.name?.startsWith('c2-')) {
+    vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
+    vnode.attributes = vnode.attributes || []
+    vnode.attributes.push({
+      type: 'mdxJsxAttribute',
+      name: 'client:load',
+      value: null,
+    })
+  }
+  if (vnode.children) {
+    for (const item of vnode.children) {
+      changeComponentName(item)
+    }
   }
 }

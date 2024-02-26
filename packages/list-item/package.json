@@ -4,7 +4,8 @@
   "type": "module",
   "main": "dist/list-item.js",
   "exports": {
-    ".": "./dist/list-item.js"
+    ".": "./dist/list-item.js",
+    "./custom-elements.json": "./custom-elements.json"
   },
   "types": "types/src/index.d.ts",
   "files": [

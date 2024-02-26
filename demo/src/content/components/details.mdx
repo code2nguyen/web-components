@@ -4,26 +4,24 @@
     slug: "details"
 ---
 
-import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import { Details } from '@c2n/details'
 
 # Details
 
-
 ```html tag=MdxCodeBlock
-<c2-details class="basic">    
-    <div slot="title" class="title">Section 1</div>
-    <div class="content">
-        The content can be toggled visible.
-    </div>
+<c2-details class="basic">
+  <div slot="title" class="title">Section 1</div>
+  <div class="content">The content can be toggled visible.</div>
 </c2-details>
 <style>
-    .basic {
-        width: 500px;
-        background: white;
-    }
-    .title {        
-        font-weight: 600;
-    }
+  .basic {
+    width: 500px;
+    background: white;
+  }
+  .title {
+    font-weight: 600;
+  }
 </style>
 ```
 

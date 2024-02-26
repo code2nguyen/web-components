@@ -32,15 +32,24 @@ export class ComponentConfigurationPanel extends LitElement {
     return html`<demo-generate-code-block .componentUID=${componentUID}></demo-generate-code-block>`
   }
 
+  handleSizeConfigChange(event: CustomEvent) {
+    console.log(event)
+    $configStore.setKey('host', event.detail)
+  }
+
   render() {
-    const componentUID = this.configStore.value.targetUID
-    if (!componentUID) return nothing
+    const componentUID = this.configStore.value.uid
+    if (!componentUID || !this.configStore.value.showConfig) return nothing
 
     return html`<div>
       <c2-details expanded>
         <div slot="title">Host</div>
 
-        <demo-size-config></demo-size-config>
+        <demo-size-config
+          .width=${this.configStore.value.host?.w}
+          .height=${this.configStore.value.host?.h}
+          @change=${this.handleSizeConfigChange}
+        ></demo-size-config>
       </c2-details>
 
       <c2-details>

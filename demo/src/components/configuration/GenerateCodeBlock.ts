@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
-import type { ComponentCode } from '../../model/component-metadata'
 import { $configCodeStore } from '../../store/config-code-store'
 
 @customElement('demo-generate-code-block')

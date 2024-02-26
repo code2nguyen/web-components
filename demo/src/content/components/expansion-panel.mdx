@@ -2,27 +2,26 @@
     title: "Expansion Panel"
     slug: "expansion-panel"
 ---
-import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import { ExpansionPanel } from '@c2n/expansion-panel'
 
 # Expansion Panel
+
 The `c2-expansion-panel` represents data inform of details/summary. Behind the sence it uses details/summary html tag.
 
-
-
 ```html tag=MdxCodeBlock,link=http://xyz.com
-<c2-expansion-panel class="basic">    
-    <div slot="title" class="title">Section 1</div>
-    <div class="content">
-        The content can be toggled visible.
-    </div>
+<c2-expansion-panel class="basic">
+  <div slot="title" class="title">Section 1</div>
+  <div class="content">The content can be toggled visible.</div>
 </c2-expansion-panel>
 <style>
-    .basic {
-        width: 500px;
-        background: white;
-    }
-    .title {        
-        font-weight: 600;
-    }
+  .basic {
+    width: 500px;
+    background: white;
+  }
+  .title {
+    font-weight: 600;
+  }
 </style>
 ```

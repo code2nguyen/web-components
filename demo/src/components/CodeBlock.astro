@@ -46,11 +46,13 @@ const { code, lang, github, uid } = Astro.props
 </style>
 
 <script>
+  import { closestElementSibling } from '../utils/dom'
+
   const copyBtns = document.querySelectorAll('.code .content-copy-icon')
   copyBtns.forEach((button) => {
     button.addEventListener('click', async (e) => {
       const icon = e.currentTarget as HTMLElement
-      const codeElement = icon.parentElement?.previousElementSibling
+      const codeElement = closestElementSibling(icon, '.astro-code')
       if (codeElement && codeElement.nodeName === 'PRE') {
         const code = codeElement.querySelector('code')
         const text = code!.innerText
