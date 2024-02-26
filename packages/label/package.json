@@ -1,12 +1,12 @@
 {
-  "name": "@c2n/{{ dashCase name }}",
-  "version": "{{ pkg 'version' }}",
+  "name": "@c2n/label",
+  "version": "0.0.4",
   "type": "module",
-  "main": "dist/{{ dashCase name }}.js",
+  "main": "dist/label.js",
   "exports": {
     ".": {
-      "default": "./dist/{{ dashCase name }}.js",
-      "types": "./types/src/{{ dashCase name }}.d.ts"
+      "default": "./dist/label.js",
+      "types": "./types/src/label.d.ts"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
@@ -15,7 +15,7 @@
     "types"
   ],
   "keywords": [
-    "{{ dashCase name }}",
+    "label",
     "web component",
     "lit"
   ],
@@ -34,7 +34,7 @@
     "type-check": "tsc -p tsconfig.lib.json --composite false"
   },
   "dependencies": {
-    "@c2n/wc-utils": "{{ pkg 'version' }}",
+    "@c2n/wc-utils": "0.0.4",
     "lit": "3.1.2"
   },
   "devDependencies": {

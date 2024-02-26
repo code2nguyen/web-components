@@ -1,0 +1,41 @@
+---
+    
+    title: "Label"
+    slug: "label"
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
+import { Label } from '@c2n/label'
+
+# Label
+
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/label
+```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/label'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock
+<c2-label for="input">Sample input</c2-label> <input type="text" id="input" />
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-label"></ApiTable>

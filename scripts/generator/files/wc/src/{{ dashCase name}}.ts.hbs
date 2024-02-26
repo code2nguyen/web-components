@@ -2,10 +2,12 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './{{ dashCase name}}.scss?inline'
 /**
- * {{ pascalCase name }} component
+ * @tag c2-{{ dashCase name }}
  *
- * @slot 
- * @csspart 
+ * @slot default - This is a default/unnamed slot
+ *
+ * @event
+ * @cssproperty
  */
 @customElement('c2-{{ dashCase name }}')
 export class {{ pascalCase name }} extends LitElement {

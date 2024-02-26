@@ -5,21 +5,37 @@
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
+import { {{pascalCase name}} } from '@c2n/{{ dashCase name}}'
 
 # {{ titleCase name}}
 
+### Installation
 
-```html tag=MdxCodeBlock
-<div class="container">
-    <c2-{{ dashCase name}}></c2-{{ dashCase name}}>    
-</div>
-<style>
-    .container {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-    }
-</style>
+```bash tag=CodeBlock
+npm install @c2n/{{ dashCase name}}
 ```
 
-TODO
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/{{ dashCase name}}'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock
+<c2-{{ dashCase name}}></c2-{{ dashCase name}}>    
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-{{ dashCase name}}"></ApiTable>

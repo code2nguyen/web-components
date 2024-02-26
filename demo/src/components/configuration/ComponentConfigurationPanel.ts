@@ -37,6 +37,12 @@ export class ComponentConfigurationPanel extends LitElement {
     $configStore.setKey('host', event.detail)
   }
 
+  generateBooleanInput(name: string, value: string) {
+    return html` <div></div> `
+  }
+
+  generateAttribute(name: string, type: string, defaultValue: string, value: string) {}
+
   render() {
     const componentUID = this.configStore.value.uid
     if (!componentUID || !this.configStore.value.showConfig) return nothing
