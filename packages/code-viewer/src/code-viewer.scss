@@ -1,0 +1,15 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-code-viewer,
+  $theme: ()
+);
+
+
+:host {
+  display: inline-flex;
+}
+
+.c2-code-viewer {
+  display: inline-flex;
+}

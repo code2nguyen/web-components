@@ -1,0 +1,41 @@
+---
+    
+    title: "codeViewer"
+    slug: "code-viewer"
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
+import { CodeViewer } from '@c2n/code-viewer'
+
+# codeViewer
+
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/code-viewer
+```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/code-viewer'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true,component=c2-code-viewer
+<c2-code-viewer></c2-code-viewer>    
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-code-viewer"></ApiTable>
