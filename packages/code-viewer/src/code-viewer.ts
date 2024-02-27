@@ -1,6 +1,8 @@
 import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './code-viewer.scss?inline'
+import type { BuiltinLanguage, LanguageRegistration, SpecialLanguage } from 'shikiji'
+
 /**
  * @tag c2-code-viewer
  *
@@ -13,33 +15,11 @@ import styles from './code-viewer.scss?inline'
 export class CodeViewer extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  @property({ type: String }) name = 'Example property'
+  @property({ type: String }) code = ''
+  @property({ type: String }) lang: BuiltinLanguage | SpecialLanguage | LanguageRegistration = 'plaintext'
 
   override render() {
     return html` <div class="c2-code-viewer">${name}</div> `
-  }
-}
-
-export async function createShikiHighlighter({
-  langs = [],
-  theme = 'github-dark',
-  experimentalThemes = {},
-  wrap = false,
-  transformers = [],
-}: ShikiConfig = {}): Promise<ShikiHighlighter> {
-  const themes = experimentalThemes
-
-  theme = theme === 'css-variables' ? cssVariablesTheme() : theme
-
-  const highlighter = await getHighlighter({
-    langs: langs.length ? langs : Object.keys(bundledLanguages),
-    themes: Object.values(themes).length ? Object.values(themes) : [theme],
-  })
-
-  const loadedLanguages = highlighter.getLoadedLanguages()
-
-  return {
-    highlight(code, lang = 'plaintext', options) {},
   }
 }
 

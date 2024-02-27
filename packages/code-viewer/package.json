@@ -37,10 +37,12 @@
     "@c2n/wc-utils": "0.0.4",
     "lit": "3.1.2",
     "shikiji": "^0.9.19",
-    "shikiji-core": "^0.9.19"
+    "shikiji-core": "^0.9.19",
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "*",
+    "@types/hast": "^3.0.3"
   },
   "customElements": "custom-elements.json"
 }
