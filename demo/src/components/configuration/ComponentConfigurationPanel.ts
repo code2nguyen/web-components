@@ -4,9 +4,20 @@ import { StoreController } from '@nanostores/lit'
 
 import { $configStore } from '../../store/config-store'
 import './GenerateCodeBlock'
+import * as changeCase from 'change-case'
+import type { Checkbox } from '@c2n/checkbox'
 
 import '@c2n/details'
+import '@c2n/label'
+import '@c2n/checkbox'
+import '@c2n/text-field'
 import './SizeConfig'
+import type { ManifestDeclarationItem } from '../../store/manifest-declaration-item'
+
+interface UpdateValue {
+  name: string
+  value: string
+}
 
 @customElement('demo-component-configuration-panel')
 export class ComponentConfigurationPanel extends LitElement {
@@ -20,8 +31,20 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-details-hover-title-bg-color: transparent;
       }
 
-      c2-details:first-of-type {
+      c2-details:not(.sub-details):first-of-type {
         --c2-details-border-radius: 8px 8px 0px 0px;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .title {
+        font-weight: 500;
+      }
+      c2-label {
+        font-weight: 300;
       }
     `,
   ]
@@ -38,18 +61,95 @@ export class ComponentConfigurationPanel extends LitElement {
   }
 
   generateBooleanInput(name: string, value: string) {
-    return html` <div></div> `
+    return html` <div class="row">
+      <c2-label for=${name}>${this.getSettingName(name)}</c2-label>
+      <c2-checkbox @change=${this.handleCheckboxChange} id=${name} ?checked=${value !== 'false'}></c2-checked>
+    </div>`
   }
 
-  generateAttribute(name: string, type: string, defaultValue: string, value: string) {}
+  generateStringInput(name: string, value: string) {
+    return html` <div class="row">
+      <c2-label for=${name}>${this.getSettingName(name)}</c2-label>
+      <c2-text-field @change=${this.handleTextInputChange} id=${name} .value=${value}></c2-text-field>
+    </div>`
+  }
+
+  handleCheckboxChange(event: Event) {
+    const target = event.target as Checkbox
+
+    if (!$configStore.value) return
+    const updatedValue: UpdateValue = {
+      name: target.id,
+      value: target.checked ? 'true' : 'false',
+    }
+    this.updateStore(updatedValue)
+  }
+
+  handleTextInputChange(event: Event) {
+    const target = event.target as HTMLElement & { value: string }
+    if (!$configStore.value) return
+    const updatedValue: UpdateValue = {
+      name: target.id,
+      value: target.value,
+    }
+    this.updateStore(updatedValue)
+  }
+
+  private updateStore(updateValue: UpdateValue) {
+    if (!$configStore.value) return
+    const updateAttribute = $configStore.value.attributes.find((item) => item.name == updateValue.name)
+    if (updateAttribute) {
+      updateAttribute.value = updateValue.value
+      $configStore.setKey('attributes', [...$configStore.value.attributes])
+      return
+    }
+
+    const updateCssProperties = $configStore.value.cssProperties.find((item) => item.name == updateValue.name)
+    if (updateCssProperties) {
+      updateCssProperties.value = updateValue.value
+      $configStore.setKey('cssProperties', [...$configStore.value.cssProperties])
+      return
+    }
+
+    if ($configStore.value.stateCssProperties) {
+      for (const state of Object.keys($configStore.value.stateCssProperties)) {
+        const cssProperties = $configStore.value!.stateCssProperties![state]
+        const updateCssProperties = cssProperties.find((item) => item.name == updateValue.name)
+        if (updateCssProperties) {
+          updateCssProperties.value = updateValue.value
+          $configStore.setKey('stateCssProperties', { ...$configStore.value.stateCssProperties })
+          return
+        }
+      }
+    }
+  }
+
+  private getSettingName(name: string) {
+    const tagName = $configStore.value?.tagName ?? ''
+    const states = this.configStore.value.stateCssProperties ? Object.keys(this.configStore.value.stateCssProperties) : []
+    let settingName = name.replace(`--${tagName}`, '')
+    states.forEach((state) => {
+      settingName = settingName.replace(`-${changeCase.kebabCase(state)}`, '')
+    })
+    return changeCase.capitalCase(settingName)
+  }
+
+  generateConfigItem(setting: ManifestDeclarationItem) {
+    switch (setting.type?.text) {
+      case 'boolean':
+        return this.generateBooleanInput(setting.name, setting.value !== undefined ? setting.value : setting.default ?? 'false')
+      default:
+        return this.generateStringInput(setting.name, setting.value !== undefined ? setting.value : setting.default ?? '')
+    }
+  }
 
   render() {
     const componentUID = this.configStore.value.uid
     if (!componentUID || !this.configStore.value.showConfig) return nothing
-
+    const states = this.configStore.value.stateCssProperties ? Object.keys(this.configStore.value.stateCssProperties) : []
     return html`<div>
-      <c2-details expanded>
-        <div slot="title">Host</div>
+      <c2-details>
+        <div slot="title" class="title">Host</div>
 
         <demo-size-config
           .width=${this.configStore.value.host?.w}
@@ -59,10 +159,27 @@ export class ComponentConfigurationPanel extends LitElement {
       </c2-details>
 
       <c2-details>
-        <div slot="title">Attribute</div>
+        <div slot="title" class="title">Attribute</div>
+        ${this.configStore.value.attributes.map((attr) => {
+          return this.generateConfigItem(attr)
+        })}
       </c2-details>
       <c2-details>
-        <div slot="title">Css Variables</div>
+        <div slot="title" class="title">Css Variables</div>
+        ${this.configStore.value.cssProperties.map((cssVariable) => {
+          return this.generateConfigItem(cssVariable)
+        })}
+      </c2-details>
+      ${states.map((state) => {
+        return html` <c2-details>
+          <div slot="title" class="title">${state} state</div>
+          ${this.configStore.value.stateCssProperties![state]!.map((cssVariable) => {
+            return this.generateConfigItem(cssVariable)
+          })}
+        </c2-details>`
+      })}
+      <c2-details>
+        <div slot="title" class="title">Code</div>
       </c2-details>
     </div>`
   }

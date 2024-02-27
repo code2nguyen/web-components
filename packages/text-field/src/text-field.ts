@@ -3,7 +3,8 @@ import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './text-field.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
-import {addClasses} from '@c2n/wc-utils/css-helper.js'
+import { addClasses } from '@c2n/wc-utils/css-helper.js'
+import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 /**
  * TextField component
  *
@@ -80,7 +81,7 @@ export class TextField extends LitElement {
 
   protected handleFocusin(event: Event) {
     this.focused = true
-    this.redispatchEvent(event)
+    redispatchEvent(this, event)
   }
 
   protected forwardFocusin(event: Event) {
@@ -89,20 +90,7 @@ export class TextField extends LitElement {
 
   protected handleFocusout(event: Event) {
     this.focused = false
-    this.redispatchEvent(event)
-  }
-
-  redispatchEvent(event: Event) {
-    if (event.bubbles) {
-      event.stopPropagation()
-    }
-
-    const copy = Reflect.construct(event.constructor, [event.type, event])
-    const dispatched = this.dispatchEvent(copy)
-    if (!dispatched) {
-      event.preventDefault()
-    }
-    return dispatched
+    redispatchEvent(this, event)
   }
 
   protected renderPrefixSlot() {
@@ -121,12 +109,16 @@ export class TextField extends LitElement {
     return html`<slot name="supporting-icon"></slot>`
   }
 
+  private redispatchEvent(event: Event) {
+    redispatchEvent(this, event)
+  }
+
   override render() {
     const classes = {
       disabled: this.disabled,
       error: !this.disabled && this.error,
       'read-only': this.readOnly,
-      'focus-within': !!this.focused,      
+      'focus-within': !!this.focused,
     }
     addClasses(this, Object.keys(classes))
     return html`<div class="c2-text-field ${classMap(classes)}">

@@ -1,3 +1,4 @@
+import type { ComponentManifest, ManifestDeclarationItem } from '../store/manifest-declaration-item'
 import type { ManifestDataItem, ManifestData } from './types'
 
 export function closestElementSibling(currentElement: HTMLElement, selector: string): HTMLElement | null {
@@ -14,6 +15,16 @@ export function closestElementSibling(currentElement: HTMLElement, selector: str
     }
   }
   return null
+}
+
+export function updateDomCssValue(element: HTMLElement, cssProperties: ManifestDeclarationItem[]) {
+  cssProperties.forEach((cssVariable) => {
+    if (cssVariable.value && cssVariable.value !== cssVariable.default) {
+      element.style.setProperty(cssVariable.name, cssVariable.value)
+    } else {
+      element.style.removeProperty(cssVariable.name)
+    }
+  })
 }
 
 export function nextSibling(currentElement: HTMLElement, tagName: string): HTMLElement | null {
@@ -43,34 +54,34 @@ export function getComponentByUid(uid: string): HTMLElement | null {
   return document.querySelector(`#${uid}`)
 }
 
-export function extractManifestData(element: HTMLElement): ManifestData {
-  const styles =
-    element.dataset.style?.split(';').reduce((result, item) => {
-      if (!item) return result
-      const [key, value] = item.split(':')
-      result[key.trim()] = value.trim()
-      return result
-    }, {} as ManifestDataItem) ?? {}
+// export function extractManifestData(element: HTMLElement, componentManifest: ComponentManifest): ComponentManifest {
+//   const styles =
+//     element.dataset.style?.split(';').reduce((result, item) => {
+//       if (!item) return result
+//       const [key, value] = item.split(':')
+//       result[key.trim()] = value.trim()
+//       return result
+//     }, {} as ManifestDataItem) ?? {}
 
-  const attributes: ManifestDataItem = {}
-  for (const attr of element.attributes) {
-    attributes[attr.name] = attr.value
-  }
-  const slots: ManifestDataItem = {}
-  element.querySelectorAll('[slot]').forEach((slotItem) => {
-    slots[slotItem.slot] = slotItem.outerHTML
-  })
-  const defaultSlot = element.querySelector(':not([slot])')
-  if (defaultSlot) {
-    slots['default'] = defaultSlot.outerHTML
-  }
-  if (element.innerText) {
-    slots['default'] = slots['default'] ?? ''
-    slots['default'] += element.innerText
-  }
+//   const attributes: ManifestDataItem = {}
+//   for (const attr of element.attributes) {
+//     attributes[attr.name] = attr.value
+//   }
+//   const slots: ManifestDataItem = {}
+//   element.querySelectorAll('[slot]').forEach((slotItem) => {
+//     slots[slotItem.slot] = slotItem.outerHTML
+//   })
+//   const defaultSlot = element.querySelector(':not([slot])')
+//   if (defaultSlot) {
+//     slots['default'] = defaultSlot.outerHTML
+//   }
+//   if (element.innerText) {
+//     slots['default'] = slots['default'] ?? ''
+//     slots['default'] += element.innerText
+//   }
 
-  return { styles, attributes, slots }
-}
+//   return { styles, attributes, slots }
+// }
 
 export function normalizeCssValue(value: string | undefined): string {
   if (!value) return ''

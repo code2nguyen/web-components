@@ -68,13 +68,10 @@
     background-color: css.cssVar(hover-bg-color);
     color: css.cssVar(hover-color);
   }
+}
 
-  &.disabled {
-    pointer-events: none;
-    opacity: variables.$disabled-content-opacity;
-  }
-
-  &.selected {
+:host([selected]) {
+  .c2-list-item {
     border-top: css.cssVar(selected-border-top, hover-border-top);
     border-bottom: css.cssVar(selected-border-bottom, hover-border-bottom);
     border-right: css.cssVar(selected-border-right, hover-border-right);
@@ -82,5 +79,11 @@
 
     background-color: css.cssVar(selected-bg-color, hover-bg-color);
     color: css.cssVar(selected-color, hover-color);
+  }
+}
+:host([disabled]) {
+  .c2-list-item {
+    pointer-events: none;
+    opacity: variables.$disabled-content-opacity;
   }
 }

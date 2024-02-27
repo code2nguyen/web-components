@@ -8,16 +8,20 @@ export interface ManifestDeclarationItem {
   value?: string
 }
 
+export interface StateCssProperties {
+  [state: string]: ManifestDeclarationItem[]
+}
+
 export interface ComponentManifest {
   host?: {
     w?: string
     h?: string
   }
+  allCssProperties: ManifestDeclarationItem[]
   cssProperties: ManifestDeclarationItem[]
-  stateCssProperties?: {
-    [state: string]: ManifestDeclarationItem[]
-  }
+  stateCssProperties?: StateCssProperties
   attributes: ManifestDeclarationItem[]
   events: ManifestDeclarationItem[]
   slots: ManifestDeclarationItem[]
+  tagName: string
 }

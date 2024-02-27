@@ -8,3 +8,6 @@
 :host {
   display: inline-flex;
 }
+:host([for]) {
+  cursor: pointer;
+}

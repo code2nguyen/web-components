@@ -2,7 +2,7 @@ import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './label.scss?inline'
 /**
- * Label component
+ * @tag c2-label
  *
  * @slot
  * @csspart

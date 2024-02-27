@@ -2,6 +2,8 @@ import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './checkbox.scss?inline'
+import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
+
 /**
  * An example element.
  *
@@ -44,7 +46,6 @@ export class Checkbox extends LitElement {
           ?disabled="${this.disabled}"
           .indeterminate="${this.indeterminate}"
           ?checked="${this.checked}"
-          @click="${this.clickChange}"
           @change="${this.handleChange}"
         />
         <div class="c2-checkbox__background">
@@ -68,6 +69,10 @@ export class Checkbox extends LitElement {
     `
   }
 
+  override focus(options?: FocusOptions | undefined): void {
+    this.formElement?.focus(options)
+  }
+
   protected override update(changedProperties: PropertyValues) {
     if (changedProperties.has('checked') && this.formElement) {
       this.formElement.checked = this.checked
@@ -75,18 +80,10 @@ export class Checkbox extends LitElement {
     super.update(changedProperties)
   }
 
-  protected clickChange(event: Event) {
-    console.log(event)
-  }
-  protected handleChange() {
+  protected handleChange(event: Event) {
     this.checked = this.formElement.checked
     this.indeterminate = this.formElement.indeterminate
-    this.dispatchEvent(
-      new Event('change', {
-        bubbles: true,
-        composed: true,
-      }),
-    )
+    redispatchEvent(this, event)
   }
 
   static override styles = unsafeCSS(styles)

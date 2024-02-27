@@ -50,9 +50,10 @@ const { code, lang, github, compack, uid, style } = Astro.props
 <script>
   import { $configStore } from '../store/config-store'
   import { $configCodeStore } from '../store/config-code-store'
-  import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, extractManifestData } from '../utils/dom'
+  import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, updateDomCssValue } from '../utils/dom'
   import { getComponentManifestData } from '../utils/manifest-utils'
   import { componentManifests } from '../store/component-manifests'
+  import { css } from 'lit'
 
   const settingBtns = document.querySelectorAll('.mdx-code-block-setting-btn')
 
@@ -61,23 +62,24 @@ const { code, lang, github, compack, uid, style } = Astro.props
       const btn = (event.target as HTMLElement).closest('c2-icon-button') as HTMLElement
       const uid = btn?.dataset.uid
       if (uid) {
-        const codeBlockElement = closestElementSibling(getParent(btn), '.code')!
-        const code = codeBlockElement.querySelector('code')?.innerText
-        const lang = codeBlockElement.dataset.lang
-        console.log(componentManifests)
-        const targetComp = getComponentByUid(uid)
-        if (!targetComp) return
-        const manifestData = extractManifestData(targetComp)
-        const componentManifestData = getComponentManifestData(manifestData, componentManifests[targetComp.tagName.toLowerCase()])
         const hideConfig = $configStore.get()['uid'] == uid
         if (hideConfig) {
           $configStore.setKey('showConfig', false)
           $configStore.setKey('uid', '')
           return
         }
+
+        const codeBlockElement = closestElementSibling(getParent(btn), '.code')!
+        const code = codeBlockElement.querySelector('code')?.innerText
+        const lang = codeBlockElement.dataset.lang
+        const targetComp = getComponentByUid(uid)
+        if (!targetComp) return
+        const componentManifest = componentManifests[targetComp.tagName.toLowerCase()]
+        const componentManifestData = getComponentManifestData(targetComp, componentManifest)
+        console.log(componentManifestData)
         $configStore.set({
           uid,
-          showConfig: !hideConfig,
+          showConfig: true,
           ...componentManifestData,
         })
         $configCodeStore.setKey(uid, { code: code ?? '', lang: lang ?? '' })
@@ -104,5 +106,26 @@ const { code, lang, github, compack, uid, style } = Astro.props
       targetComp.style.height = height
     }
     targetComp.dataset.style = manifestStyleStr
+
+    updateDomCssValue(targetComp, componentConfig.cssProperties)
+    if (componentConfig.stateCssProperties) {
+      Object.keys(componentConfig.stateCssProperties).forEach((state) => {
+        updateDomCssValue(targetComp, componentConfig.stateCssProperties![state])
+      })
+    }
+
+    componentConfig.attributes.forEach((attr) => {
+      if (attr.value != undefined) {
+        if (attr.value == attr.default) {
+          targetComp.removeAttribute(attr.name)
+        } else {
+          if (attr.type?.text == 'boolean' && attr.value === 'false') {
+            targetComp.removeAttribute(attr.name)
+          } else {
+            targetComp.setAttribute(attr.name, attr.value!)
+          }
+        }
+      }
+    })
   })
 </script>

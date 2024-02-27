@@ -32,7 +32,7 @@ import '@c2n/list-item'
 ---
 
 ```html tag=MdxCodeBlock,compack=true
-<c2-list-item data-style="width:100px; height: 100px; --test-v: 10px">Default list item</c2-list-item>
+<c2-list-item>Default list item</c2-list-item>
 ```
 
 ---
@@ -44,16 +44,17 @@ import '@c2n/list-item'
 ---
 
 ```html tag=MdxCodeBlock,compack=true
-<div class="custom-selected-state">
-  <c2-list-item selected id="abc">
-    <div slot="test">test</div>
-    Selected list item 1
-  </c2-list-item>
-  <div>testing</div>
-</div>
+<c2-list-item selected id="abc" class="custom-item"> Custom list item </c2-list-item>
 <style>
-  .custom-selected-state {
-    --c2-list-item-selected-bg-color: red;
+  .custom-item {
+    --c2-list-item-padding-top: 8px;
+    --c2-list-item-padding-right: 16px;
+    --c2-list-item-padding-bottom: 8px;
+    --c2-list-item-padding-left: 16px;
+    --c2-list-item-border-left: 2px solid transparent;
+    --c2-list-item-hover-border-left: 2px solid #3498db;
+    --c2-list-item-border-radius: 0px 4px 4px 0px;
+    --c2-list-item-hover-bg-color: rgb(239, 245, 254);
   }
 </style>
 ```

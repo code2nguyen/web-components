@@ -1,8 +1,6 @@
 import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './list-item.scss?inline'
-import { classMap } from 'lit/directives/class-map.js'
-import { addClasses } from '@c2n/wc-utils/css-helper.js'
 
 /**
  * @tag c2-list-item
@@ -70,14 +68,8 @@ export class ListItem extends LitElement {
   }
 
   override render() {
-    const classes = {
-      selected: this.selected,
-      disabled: this.disabled,
-    }
-    addClasses(this, Object.keys(classes))
-
     return html`
-      <div class="c2-list-item ${classMap(classes)}" @clicl="handleClick">
+      <div class="c2-list-item" @clicl="handleClick">
         <slot></slot>
       </div>
     `

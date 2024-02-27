@@ -11,6 +11,10 @@
     "./css-helper.js": {
       "types": "./dist/css-helper.d.ts",
       "default": "./dist/css-helper.js"
+    },
+    "./dom-helper.js": {
+      "types": "./dist/dom-helper.d.ts",
+      "default": "./dist/dom-helper.js"
     }
   },
   "files": [
@@ -26,6 +30,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@c2n/config": "*"   
+    "@c2n/config": "*"
   }
 }
