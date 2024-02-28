@@ -1,12 +1,12 @@
 import { bundledLanguages, createCssVariablesTheme, getHighlighter } from 'shikiji'
-import type { BuiltinTheme, LanguageRegistration, ThemeRegistration, ThemeRegistrationRaw } from 'shikiji'
+import type { BuiltinLanguage, BuiltinTheme, SpecialLanguage, ThemeRegistration, ThemeRegistrationRaw } from 'shikiji'
 import { visit } from 'unist-util-visit'
 import type { Properties } from 'hast'
 
 export type ThemePresets = BuiltinTheme | 'css-variables'
 
 export interface ShikiConfig {
-  langs?: LanguageRegistration[]
+  langs?: Array<BuiltinLanguage | SpecialLanguage>
   theme?: ThemePresets | ThemeRegistration | ThemeRegistrationRaw
   wrap?: boolean | null
 }

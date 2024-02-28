@@ -10,7 +10,11 @@ interface Props {
   uid?: string
 }
 
-const { code, lang, github, uid } = Astro.props
+const { code: rawCode, lang, github, uid } = Astro.props
+let code = rawCode.replace(/\\\\/g, '\\')
+code = rawCode.replace(/\\n/g, '\n')
+code = code.replace(/\\"/g, '"')
+code = code.replace(/^"|"$/g, '')
 ---
 
 <div class="code" data-uid={uid} data-lang={lang}>

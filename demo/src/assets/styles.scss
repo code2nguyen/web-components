@@ -108,8 +108,9 @@ hr {
   }
   .mdx-code-block-setting-btn {
     position: absolute;
-    top: 16px;
+    top: 50%;
     right: 50px;
+    transform: translate(0px, -50%);
     --c2-icon-button-icon-color: var(--logo-color-1);
   }
 }

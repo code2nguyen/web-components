@@ -36,6 +36,7 @@
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
     "lit": "3.1.2",
+    "@lit/task": "1.0.0",
     "shikiji": "^0.9.19",
     "shikiji-core": "^0.9.19",
     "unist-util-visit": "^5.0.0"

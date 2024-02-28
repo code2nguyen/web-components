@@ -39,9 +39,7 @@ const componentManifest = componentManifests[componentTag]
               <td>
                 <span class="t-code">{attr.type!.text}</span>
               </td>
-              <td>
-                <code>{attr.default}</code>
-              </td>
+              <td>{attr.default && <code>{attr.default}</code>}</td>
               <td>
                 <fragment set:html={attr.description} />
               </td>
@@ -69,7 +67,7 @@ const componentManifest = componentManifests[componentTag]
               <td>
                 <span class="t-code">{event.type!.text}</span>
               </td>
-              <td>N/A</td>
+              <td />
               <td>
                 <fragment set:html={event.description} />
               </td>
@@ -98,7 +96,7 @@ const componentManifest = componentManifests[componentTag]
               <td>
                 <span class="t-code">Slot</span>
               </td>
-              <td>N/A</td>
+              <td />
               <td>
                 <fragment set:html={slot.description} />
               </td>
@@ -109,7 +107,7 @@ const componentManifest = componentManifests[componentTag]
     }
 
     {
-      componentManifest.cssProperties && componentManifest.cssProperties.length > 0 && (
+      componentManifest.cssProperties.length > 0 && (
         <>
           <tr class="t-h1" data-level="1">
             <>
@@ -127,9 +125,7 @@ const componentManifest = componentManifests[componentTag]
               <td>
                 <span class="t-code">{cssVariable.type!.text}</span>
               </td>
-              <td>
-                <code>{cssVariable.default}</code>
-              </td>
+              <td>{cssVariable.default && <code>{cssVariable.default}</code>}</td>
               <td>
                 <fragment set:html={cssVariable.description} />
               </td>
@@ -139,8 +135,7 @@ const componentManifest = componentManifests[componentTag]
       )
     }
     {
-      componentManifest.stateCssProperties &&
-        Object.keys(componentManifest.stateCssProperties).length > 0 &&
+      Object.keys(componentManifest.stateCssProperties).length > 0 &&
         Object.keys(componentManifest.stateCssProperties).map((state) => (
           <>
             <tr class="t-h2" data-level="2">
@@ -159,9 +154,7 @@ const componentManifest = componentManifests[componentTag]
                 <td>
                   <span class="t-code">{cssVariable.type!.text}</span>
                 </td>
-                <td>
-                  <code>{cssVariable.default}</code>
-                </td>
+                <td>{cssVariable.default && <code>{cssVariable.default}</code>}</td>
                 <td>
                   <fragment set:html={cssVariable.description} />
                 </td>

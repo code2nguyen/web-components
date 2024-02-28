@@ -132,6 +132,9 @@ const { componentId } = Astro.props
             if (!siblingLevel || Number(level) < Number(siblingLevel)) {
               nextTr.classList.toggle('hide', collapsed)
               finished = false
+              if (siblingLevel) {
+                nextTr?.classList.toggle('collapsed', collapsed)
+              }
               tr = nextTr
             }
           }

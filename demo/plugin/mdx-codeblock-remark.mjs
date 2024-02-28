@@ -28,7 +28,7 @@ export const MDXCodeBlockRemark = () => {
             const style = extractStyle(code, uid)
             const compiledCode = compileComponentCode(code, uid, metaAttributes.component)
             const props = {
-              code,
+              code: JSON.stringify(code),
               lang,
               uid,
               style,

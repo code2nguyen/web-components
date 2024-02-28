@@ -1,5 +1,4 @@
-import type { ComponentManifest, ManifestDeclarationItem } from '../store/manifest-declaration-item'
-import type { ManifestDataItem, ManifestData } from './types'
+import type { ManifestDeclarationItem } from '../store/manifest-declaration-item'
 
 export function closestElementSibling(currentElement: HTMLElement, selector: string): HTMLElement | null {
   const parent = getParent(currentElement)
@@ -25,6 +24,31 @@ export function updateDomCssValue(element: HTMLElement, cssProperties: ManifestD
       element.style.removeProperty(cssVariable.name)
     }
   })
+}
+
+export function updateDomAttribute(element: HTMLElement, manifestAttributes: ManifestDeclarationItem[]) {
+  manifestAttributes.forEach((attr) => {
+    setElemenetAttribute(element, attr)
+  })
+}
+
+export function getElemenetProperty(element: HTMLElement, propertyName: string): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const value = (element as any)[propertyName]
+
+  if (value == undefined || value == null) return undefined
+  if (typeof value === 'boolean') return value ? 'true' : 'false'
+  if (typeof value === 'string') return value
+
+  return JSON.stringify(value)
+}
+
+export function setElemenetAttribute(element: HTMLElement, attribute: ManifestDeclarationItem) {
+  if (attribute.value == null || attribute.value == undefined || (attribute.type?.text == 'boolean' && attribute.value === 'false')) {
+    element.removeAttribute(attribute.name)
+  } else {
+    element.setAttribute(attribute.name, attribute.value)
+  }
 }
 
 export function nextSibling(currentElement: HTMLElement, tagName: string): HTMLElement | null {

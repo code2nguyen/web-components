@@ -13,7 +13,7 @@
     "build:generator": "npm run build --workspace=scripts/generator",
     "pregenerate": "npm run build:generator",
     "generate": "npm run plop --workspace=scripts/generator",
-    "clean": "npx del-cli **/node_modules **/dist **/types package-lock.json -f"
+    "clean": "npx del-cli **/node_modules **/dist **/types **/custom-elements.json package-lock.json -f"
   },
   "devDependencies": {
     "husky": "8.0.1",

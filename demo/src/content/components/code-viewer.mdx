@@ -1,10 +1,10 @@
 ---
     
-    title: "codeViewer"
+    title: "Code Viewer"
     slug: "code-viewer"
 ---
 
-import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import ApiTable from '../../components/ApiTable.astro'
 
@@ -29,8 +29,29 @@ import '@c2n/code-viewer'
 <br />
 ---
 
-```html tag=MdxCodeBlock,compack=true,component=c2-code-viewer
-<c2-code-viewer></c2-code-viewer>    
+```html tag=MdxCodeBlock,compack=true
+<c2-code-viewer code="const message = 'Hello world'" langage="js"></c2-code-viewer>
+```
+
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-code-viewer
+  code="enum LogLevel { ERROR, WARN, INFO, DEBUG, }\n /**\n * This is equivalent to:\n * type LogLevelStrings = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';\n */\n type LogLevelStrings = keyof typeof LogLevel;\n\n\n function printImportant(key: LogLevelStrings, message: string) {\n    const num = LogLevel[key];\n    if (num <= LogLevel.WARN) {\n        console.log('Log level key is:', key);\n        console.log('Log level value is:', num);\n        console.log('Log level message is:', message);\n    }\n }\n\n printImportant('ERROR', 'This is a message');"
+  langage="typescript"
+>
+</c2-code-viewer>
+```
+
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-code-viewer
+  code="function resolveAfter2Seconds(x) {return new Promise((resolve) => { setTimeout(() => { resolve(x);}, 2000);});}"
+  langage="javascript"
+  wrap
+>
+</c2-code-viewer>
 ```
 
 ---
@@ -39,3 +60,4 @@ import '@c2n/code-viewer'
 ## API
 
 <ApiTable componentTag="c2-code-viewer"></ApiTable>
+```

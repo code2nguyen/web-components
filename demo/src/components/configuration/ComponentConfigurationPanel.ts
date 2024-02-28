@@ -111,15 +111,13 @@ export class ComponentConfigurationPanel extends LitElement {
       return
     }
 
-    if ($configStore.value.stateCssProperties) {
-      for (const state of Object.keys($configStore.value.stateCssProperties)) {
-        const cssProperties = $configStore.value!.stateCssProperties![state]
-        const updateCssProperties = cssProperties.find((item) => item.name == updateValue.name)
-        if (updateCssProperties) {
-          updateCssProperties.value = updateValue.value
-          $configStore.setKey('stateCssProperties', { ...$configStore.value.stateCssProperties })
-          return
-        }
+    for (const state of Object.keys($configStore.value.stateCssProperties)) {
+      const cssProperties = $configStore.value!.stateCssProperties![state]
+      const updateCssProperties = cssProperties.find((item) => item.name == updateValue.name)
+      if (updateCssProperties) {
+        updateCssProperties.value = updateValue.value
+        $configStore.setKey('stateCssProperties', { ...$configStore.value.stateCssProperties })
+        return
       }
     }
   }
@@ -129,7 +127,7 @@ export class ComponentConfigurationPanel extends LitElement {
     const states = this.configStore.value.stateCssProperties ? Object.keys(this.configStore.value.stateCssProperties) : []
     let settingName = name.replace(`--${tagName}`, '')
     states.forEach((state) => {
-      settingName = settingName.replace(`-${changeCase.kebabCase(state)}`, '')
+      settingName = settingName.replace(`-${changeCase.paramCase(state)}`, '')
     })
     return changeCase.capitalCase(settingName)
   }
@@ -143,44 +141,61 @@ export class ComponentConfigurationPanel extends LitElement {
     }
   }
 
+  renderCssProperties() {
+    return this.configStore.value.cssProperties.length > 0
+      ? html`<c2-details>
+          <div slot="title" class="title">Css Variables</div>
+          ${this.configStore.value.cssProperties.map((cssVariable) => {
+            return this.generateConfigItem(cssVariable)
+          })}
+        </c2-details>`
+      : nothing
+  }
+
+  renderStateCssProperties() {
+    return this.configStore.value.stateCssProperties
+      ? html`${Object.keys(this.configStore.value.stateCssProperties).map((state) => {
+          return html` <c2-details>
+            <div slot="title" class="title">${state} state</div>
+            ${this.configStore.value.stateCssProperties![state]!.map((cssVariable) => {
+              return this.generateConfigItem(cssVariable)
+            })}
+          </c2-details>`
+        })} `
+      : nothing
+  }
+
+  renderAttribues() {
+    return this.configStore.value.attributes.length > 0
+      ? html`<c2-details>
+          <div slot="title" class="title">Attribute</div>
+          ${this.configStore.value.attributes.map((attr) => {
+            return this.generateConfigItem(attr)
+          })}
+        </c2-details>`
+      : nothing
+  }
+
+  renderCode() {
+    return html`
+      <c2-details>
+        <div slot="title" class="title">Code</div>
+      </c2-details>
+    `
+  }
   render() {
     const componentUID = this.configStore.value.uid
     if (!componentUID || !this.configStore.value.showConfig) return nothing
-    const states = this.configStore.value.stateCssProperties ? Object.keys(this.configStore.value.stateCssProperties) : []
     return html`<div>
       <c2-details>
         <div slot="title" class="title">Host</div>
-
         <demo-size-config
           .width=${this.configStore.value.host?.w}
           .height=${this.configStore.value.host?.h}
           @change=${this.handleSizeConfigChange}
         ></demo-size-config>
       </c2-details>
-
-      <c2-details>
-        <div slot="title" class="title">Attribute</div>
-        ${this.configStore.value.attributes.map((attr) => {
-          return this.generateConfigItem(attr)
-        })}
-      </c2-details>
-      <c2-details>
-        <div slot="title" class="title">Css Variables</div>
-        ${this.configStore.value.cssProperties.map((cssVariable) => {
-          return this.generateConfigItem(cssVariable)
-        })}
-      </c2-details>
-      ${states.map((state) => {
-        return html` <c2-details>
-          <div slot="title" class="title">${state} state</div>
-          ${this.configStore.value.stateCssProperties![state]!.map((cssVariable) => {
-            return this.generateConfigItem(cssVariable)
-          })}
-        </c2-details>`
-      })}
-      <c2-details>
-        <div slot="title" class="title">Code</div>
-      </c2-details>
+      ${this.renderAttribues()} ${this.renderCssProperties()} ${this.renderStateCssProperties()} ${this.renderCode()}
     </div>`
   }
 }

@@ -1,7 +1,8 @@
 import type { ComponentManifest, ManifestDeclarationItem, StateCssProperties } from '../store/manifest-declaration-item'
 import * as changeCase from 'change-case'
-import type { ManifestData, ManifestDataItem } from './types'
+import type { ManifestDataItem } from './types'
 import { cloneDeep } from 'lodash-es'
+import { getElemenetProperty } from './dom'
 
 export function normalizeManifest(value: ComponentManifest): ComponentManifest {
   value.allCssProperties = value.cssProperties ? [...value.cssProperties] : []
@@ -15,9 +16,10 @@ export function normalizeManifest(value: ComponentManifest): ComponentManifest {
         result[stateName].push({ ...item, ...{ type: { text: type } } })
         return result
       }, {} as StateCssProperties) ?? {}
-  value.cssProperties = value.cssProperties?.filter((item) => item.type?.text.split(' - ').length == 1)
+  value.cssProperties = value.cssProperties?.filter((item) => item.type?.text.split(' - ').length == 1) ?? []
+  value.attributes = value.attributes ?? []
   value.attributes.forEach((attr) => {
-    if (attr.default == "''") attr.default = ''
+    if (attr.default) attr.default = attr.default.replace(/^'|'$/g, '')
   })
   return value
 }
@@ -30,6 +32,13 @@ export function updateManifestCssValue(element: HTMLElement, cssProperties: Mani
     } else {
       cssVariable.value = undefined
     }
+  })
+}
+
+export function updateManifestAttributes(element: HTMLElement, attributes: ManifestDeclarationItem[]) {
+  attributes.forEach((attr) => {
+    const attrValue = getElemenetProperty(element, attr.name)
+    attr.value = attrValue
   })
 }
 
@@ -50,20 +59,10 @@ export function getComponentManifestData(element: HTMLElement, defaultManifest: 
 
   updateManifestCssValue(element, computedManifest.cssProperties)
 
-  if (computedManifest.stateCssProperties) {
-    Object.keys(computedManifest.stateCssProperties).forEach((state) => {
-      updateManifestCssValue(element, computedManifest.stateCssProperties![state])
-    })
-  }
-
-  computedManifest.attributes.forEach((attr) => {
-    const attrValue = element.getAttribute(attr.name)
-    if (attrValue != null) {
-      attr.value = attrValue
-    } else {
-      attr.value = undefined
-    }
+  Object.keys(computedManifest.stateCssProperties).forEach((state) => {
+    updateManifestCssValue(element, computedManifest.stateCssProperties![state])
   })
+  updateManifestAttributes(element, computedManifest.attributes)
 
   return computedManifest
 }

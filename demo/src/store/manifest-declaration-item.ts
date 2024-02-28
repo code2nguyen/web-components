@@ -19,7 +19,7 @@ export interface ComponentManifest {
   }
   allCssProperties: ManifestDeclarationItem[]
   cssProperties: ManifestDeclarationItem[]
-  stateCssProperties?: StateCssProperties
+  stateCssProperties: StateCssProperties
   attributes: ManifestDeclarationItem[]
   events: ManifestDeclarationItem[]
   slots: ManifestDeclarationItem[]

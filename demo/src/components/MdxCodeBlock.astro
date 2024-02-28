@@ -15,7 +15,11 @@ interface Props {
   style: string
 }
 
-const { code, lang, github, compack, uid, style } = Astro.props
+const { code: rawCode, lang, github, compack, uid, style } = Astro.props
+let code = rawCode.replace(/\\\\/g, '\\')
+code = rawCode.replace(/\\n/g, '\n')
+code = code.replace(/\\"/g, '"')
+code = code.replace(/^"|"$/g, '')
 ---
 
 <ExpansionPanel client:load class={'mdx-code-block ' + (compack ? 'compack' : '')} title-not-clickable>
@@ -50,7 +54,7 @@ const { code, lang, github, compack, uid, style } = Astro.props
 <script>
   import { $configStore } from '../store/config-store'
   import { $configCodeStore } from '../store/config-code-store'
-  import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, updateDomCssValue } from '../utils/dom'
+  import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, updateDomCssValue, updateDomAttribute } from '../utils/dom'
   import { getComponentManifestData } from '../utils/manifest-utils'
   import { componentManifests } from '../store/component-manifests'
   import { css } from 'lit'
@@ -108,24 +112,9 @@ const { code, lang, github, compack, uid, style } = Astro.props
     targetComp.dataset.style = manifestStyleStr
 
     updateDomCssValue(targetComp, componentConfig.cssProperties)
-    if (componentConfig.stateCssProperties) {
-      Object.keys(componentConfig.stateCssProperties).forEach((state) => {
-        updateDomCssValue(targetComp, componentConfig.stateCssProperties![state])
-      })
-    }
-
-    componentConfig.attributes.forEach((attr) => {
-      if (attr.value != undefined) {
-        if (attr.value == attr.default) {
-          targetComp.removeAttribute(attr.name)
-        } else {
-          if (attr.type?.text == 'boolean' && attr.value === 'false') {
-            targetComp.removeAttribute(attr.name)
-          } else {
-            targetComp.setAttribute(attr.name, attr.value!)
-          }
-        }
-      }
+    Object.keys(componentConfig.stateCssProperties).forEach((state) => {
+      updateDomCssValue(targetComp, componentConfig.stateCssProperties![state])
     })
+    updateDomAttribute(targetComp, componentConfig.attributes)
   })
 </script>
