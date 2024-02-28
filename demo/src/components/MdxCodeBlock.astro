@@ -38,7 +38,6 @@ code = code.replace(/^"|"$/g, '')
   </IconButton>
   <div slot="title" data-uid={uid}>
     {style ? <Fragment set:html={style} /> : ''}
-    <Fragment set:html={`<!-- component-${uid} -->\n`} />
     <slot />
     <IconButton client:load class="mdx-code-block-setting-btn" data-uid={uid} tooltip="Interacting">
       <svg fill="currentColor" viewBox="0 0 256 256"
