@@ -9,7 +9,7 @@ import styles from './list-item.scss?inline'
  *
  * @event {CustomEvent} selected-change - An Event emitted after selection state is changed
  *
- * @cssproperty {pixel} [--c2-list-item-border-radius=inherit] - <code>border-radius</code> value
+  * @cssproperty {pixel} [--c2-list-item-border-radius=inherit] - <code>border-radius</code> value
  * @cssproperty {pixel} [--c2-list-item-padding-top=4px] - <code>padding-top</code> value
  * @cssproperty {pixel} [--c2-list-item-padding-right=8px] - <code>padding-right</code> value
  * @cssproperty {pixel} [--c2-list-item-padding-bottom=4px] - <code>padding-bottom</code> value
@@ -56,21 +56,33 @@ export class ListItem extends LitElement {
    */
   @property() value = ''
 
-  handleClick = () => {
-    this.selected = !this.selected
-    this.dispatchEvent(
+  private handleClick = () => {
+    const eventResult = this.dispatchEvent(
       new CustomEvent('selected-change', {
         bubbles: true,
         composed: true,
-        detail: this.selected ? this.value : false,
+        detail: {
+          selected: !this.selected,
+          value: this.value,
+          data: this.data,
+        },
       }),
     )
+    if (eventResult) {
+      this.selected = !this.selected
+    }
   }
+
+  /**
+   * <code>data</code> property
+   */
+  @property({ attribute: false }) data?: unknown
 
   override render() {
     return html`
-      <div class="c2-list-item" @clicl="handleClick">
+      <div class="c2-list-item" @click=${this.handleClick}>
         <slot></slot>
+        git
       </div>
     `
   }

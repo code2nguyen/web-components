@@ -2,37 +2,6 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, state } from 'lit/decorators.js'
 import styles from './single-select.scss?inline'
 
-function createProcessSelectItemEvent(menuItem: any) {
-  return new CustomEvent('process-select-item', {
-    bubbles: true,
-    composed: true,
-    detail: menuItem,
-  })
-}
-
-function createProcessValueEvent(value: any) {
-  return new CustomEvent('process-value', {
-    bubbles: true,
-    composed: true,
-    detail: value,
-  })
-}
-
-function createChangeEvent(value: any) {
-  return new CustomEvent('change', {
-    bubbles: true,
-    composed: true,
-    detail: value,
-  })
-}
-
-function createToggleMenuEvent() {
-  return new Event('toggleMenu', {
-    bubbles: true,
-    composed: true,
-  })
-}
-
 /**
  * @tag c2-single-select
  *
