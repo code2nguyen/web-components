@@ -34,7 +34,7 @@ function createToggleMenuEvent() {
 }
 
 /**
- * SingleSelect component
+ * @tag c2-single-select
  *
  * @slot
  * @csspart

@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './expansion-panel.scss?inline'
 /**
@@ -47,7 +47,11 @@ export class ExpansionPanel extends LitElement {
     }
   }
 
-  protected handleTitleToggle() {
+  protected handleTitleToggle(event: Event) {
+    if (this.titleNotClickable) {
+      event.preventDefault()
+      return
+    }
     this.toggleExpand()
   }
 
@@ -74,12 +78,11 @@ export class ExpansionPanel extends LitElement {
     // }
   }
 
-
   override render() {
     return html`
       <div class="c2-expansion-panel">
         <div class="c2-expansion-panel-header">
-          <div class="c2-expansion-panel-header-title" @click=${this.titleNotClickable ? nothing : this.handleTitleToggle}>
+          <div class="c2-expansion-panel-header-title" @click=${this.handleTitleToggle}>
             <div class="c2-expansion-panel-header-title-content">
               <slot name="title">${this.title}</slot>
             </div>

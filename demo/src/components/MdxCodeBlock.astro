@@ -23,14 +23,14 @@ code = code.replace(/^"|"$/g, '')
 ---
 
 <ExpansionPanel client:load class={'mdx-code-block ' + (compack ? 'compack' : '')} title-not-clickable>
-  <IconButton client:load slot="icon" class="open-close-icon" tooltip="Show code">
+  <IconButton slot="icon" class="open-close-icon" tooltip="Show code">
     <svg fill="currentColor" viewBox="0 0 256 256">
       <path
         d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.3Zm176,27.7-48-40a8,8,0,1,0-10.24,12.3L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"
       ></path>
     </svg>
   </IconButton>
-  <IconButton client:load slot="expanded-icon" class="open-close-icon">
+  <IconButton slot="expanded-icon" class="open-close-icon">
     <svg fill="currentColor" viewBox="0 0 256 256"
       ><path d="M213.66,165.66a8,8,0,0,1-11.32,0L128,91.31,53.66,165.66a8,8,0,0,1-11.32-11.32l80-80a8,8,0,0,1,11.32,0l80,80A8,8,0,0,1,213.66,165.66Z"
       ></path></svg
@@ -56,7 +56,6 @@ code = code.replace(/^"|"$/g, '')
   import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, updateDomCssValue, updateDomAttribute } from '../utils/dom'
   import { getComponentManifestData } from '../utils/manifest-utils'
   import { componentManifests } from '../store/component-manifests'
-  import { css } from 'lit'
 
   const settingBtns = document.querySelectorAll('.mdx-code-block-setting-btn')
 
