@@ -1,0 +1,90 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tabs,
+  $theme: (
+    tab-list-box-shadow: inset 0px -2px 0px 0px variables.$color-border-light,
+    tab-list-justify-content: flex-center,
+    tab-list-bg-color: transparent,
+    tab-list-height: auto,
+    tab-list-font-weight: inherit,
+
+    tab-padding: 8px 16px 8px 16px,
+    tab-color: inherit,
+    tab-bg-color: transparent,
+    tab-border-radius: inherit,
+
+    tab-hover-color: variables.$color-blue,
+    tab-hover-bg-color: transparent,
+
+    tab-selected-color: variables.$color-blue,
+    tab-selected-bg-color: transparent,
+
+    tab-disabled-color: inherit,
+    tab-disabled-bg-color: transparent,
+
+    selection-indicator-color: variables.$color-border-dark,
+    selection-indicator-border-radius: inherit,
+    selection-indicator-height: 2px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+.c2-tabs {
+  display: flex;
+  flex-direction: column;
+
+  .c2-tabs-header {
+    display: flex;
+    align-items: center;
+    box-shadow: css.cssVar(tab-list-box-shadow);
+    justify-content: css.cssVar(tab-list-justify-content);
+    background-color: css.cssVar(tab-list-bg-color);
+    height: css.cssVar(tab-list-height);
+    font-weight: css.cssVar(tab-list-font-weight);
+    position: relative;
+    padding-bottom: css.cssVar(selection-indicator-height);
+    .selection-indicator {
+      position: absolute;
+      will-change: transform;
+      transform-origin: top left;
+      left: 0;
+      bottom: 0;
+      width: 1px;
+      z-index: 1;
+      background-color: css.cssVar(selection-indicator-color);
+      border-radius: css.cssVar(selection-indicator-border-radius);
+      height: css.cssVar(selection-indicator-height);
+      transition: animation.standard-acceleration(transform);
+      &.first-position {
+        transition: none;
+      }
+    }
+    ::slotted(c2-tab) {
+      padding: css.cssVar(tab-padding);
+      color: css.cssVar(tab-color);
+      background-color: css.cssVar(tab-bg-color);
+      border-radius: css.cssVar(tab-border-radius);
+      will-change: color background-color;
+      transition: animation.standard(background-color), animation.standard(color);
+    }
+
+    ::slotted(c2-tab:hover) {
+      color: css.cssVar(tab-hover-color);
+      background-color: css.cssVar(tab-hover-bg-color);
+    }
+
+    ::slotted(c2-tab[selected]) {
+      color: css.cssVar(tab-selected-color, tab-hover-color);
+      background-color: css.cssVar(tab-selected-bg-color);
+    }
+
+    ::slotted(c2-tab[disabled]) {
+      opacity: variables.$disabled-content-opacity;
+      pointer-events: none;
+    }
+  }
+}

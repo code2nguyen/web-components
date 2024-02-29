@@ -6,15 +6,13 @@ $standard-easing: cubic-bezier(0.2, 0, 0, 1);
 $standard-acceleration-easing: cubic-bezier(0.3, 0, 1, 1);
 $standard-deceleration-easing: cubic-bezier(0, 0, 0, 1);
 
-$emphasized-duration: 500ms;
+$emphasized-duration: 400ms;
 $emphasized-acceleration-duration: 200ms;
-$emphasized-deceleration-duration: 400ms;
+$emphasized-deceleration-duration: 300ms;
 
-$standard-duration: 300ms;
-$standard-acceleration-duration: 200ms;
-$standard-deceleration-duration: 250ms;
-
-
+$standard-duration: 250ms;
+$standard-acceleration-duration: 150ms;
+$standard-deceleration-duration: 200ms;
 
 @function standard($name, $duration: null, $delay: null) {
   @if not $duration {
@@ -30,14 +28,12 @@ $standard-deceleration-duration: 250ms;
   @return _animation($name, $duration, $standard-deceleration-easing, $delay);
 }
 
-
 @function standard-acceleration($name, $duration: null, $delay: null) {
   @if not $duration {
     @return _animation($name, $standard-acceleration-duration, $standard-acceleration-easing, $delay);
   }
   @return _animation($name, $duration, $standard-acceleration-easing, $delay);
 }
-
 
 @function emphasized($name, $duration: null, $delay: null) {
   @if not $duration {

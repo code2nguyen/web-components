@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-tabs selected-tab="tab2">
+      <c2-tab label="tab1" for="tab1"></c2-tab>
+      <c2-tab for="tab2">tab 2</c2-tab>
+      <c2-tab for="tab2" disabled>tab 3</c2-tab>
+      <c2-tab for="tab2">tab 4</c2-tab>
+      <div id="tab1">tab1 content</div>
+      <div id="tab2">tab2 content</div>
+      <div id="tab4">tab4 content</div>
+    </c2-tabs>
+  </body>
+</html>

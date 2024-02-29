@@ -5,10 +5,7 @@
   $theme: (
     border-radius: inherit,
 
-    padding-top: 4px,
-    padding-right: 8px,
-    padding-bottom: 4px,
-    padding-left: 8px,
+    padding: 4px 8px 4px 8px,
 
     border-top: 0px solid transparent,
     border-bottom: 0px solid transparent,
@@ -35,6 +32,7 @@
 
 :host {
   display: inline-flex;
+  user-select: none;
 }
 
 .c2-list-item {
@@ -44,10 +42,7 @@
   flex: 1;
 
   border-radius: css.cssVar(border-radius);
-  padding-top: css.cssVar(padding-top);
-  padding-bottom: css.cssVar(padding-bottom);
-  padding-right: css.cssVar(padding-right);
-  padding-left: css.cssVar(padding-left);
+  padding: css.cssVar(padding);
 
   border-top: css.cssVar(border-top);
   border-bottom: css.cssVar(border-bottom);

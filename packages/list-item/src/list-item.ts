@@ -9,11 +9,8 @@ import styles from './list-item.scss?inline'
  *
  * @event {CustomEvent} selected-change - An Event emitted after selection state is changed
  *
-  * @cssproperty {pixel} [--c2-list-item-border-radius=inherit] - <code>border-radius</code> value
- * @cssproperty {pixel} [--c2-list-item-padding-top=4px] - <code>padding-top</code> value
- * @cssproperty {pixel} [--c2-list-item-padding-right=8px] - <code>padding-right</code> value
- * @cssproperty {pixel} [--c2-list-item-padding-bottom=4px] - <code>padding-bottom</code> value
- * @cssproperty {pixel} [--c2-list-item-padding-left=8px] - <code>padding-left</code> value
+ * @cssproperty {pixel} [--c2-list-item-border-radius=inherit] - <code>border-radius</code> value
+ * @cssproperty {pixel} [--c2-list-item-padding=4px 8px 4px 8px] - <code>padding</code> value
  *
  * @cssproperty {border} [--c2-list-item-border-top=0px solid transparent] - <code>border-top</code> value
  * @cssproperty {border} [--c2-list-item-border-bottom=0px solid transparent] - <code>border-bottom</code> value
