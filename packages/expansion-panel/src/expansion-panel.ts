@@ -47,9 +47,8 @@ export class ExpansionPanel extends LitElement {
     }
   }
 
-  protected handleTitleToggle(event: Event) {
+  protected handleTitleToggle() {
     if (this.titleNotClickable) {
-      event.preventDefault()
       return
     }
     this.toggleExpand()
