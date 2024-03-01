@@ -3,7 +3,10 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-list-item,
   $theme: (
-    border-radius: inherit,
+    border-top-left-radius: inherit,
+    border-top-right-radius: inherit,
+    border-bottom-left-radius: inherit,
+    border-bottom-right-radius: inherit,
 
     padding: 4px 8px 4px 8px,
 
@@ -12,20 +15,20 @@
     border-right: 0px solid transparent,
     border-left: 0px solid transparent,
     color: inherit,
-    bg-color: transparent,
+    background: transparent,
 
     hover-border-top: inherit,
     hover-border-bottom: inherit,
     hover-border-right: inherit,
     hover-border-left: inherit,
     hover-color: inherit,
-    hover-bg-color: variables.$color-bg-dark,
+    hover-background: variables.$color-bg-dark,
 
     selected-border-top: inherit,
     selected-border-bottom: inherit,
     selected-border-right: inherit,
     selected-border-left: inherit,
-    selected-bg-color: variables.$color-bg-dark,
+    selected-background: variables.$color-bg-dark,
     selected-color: inherit,
   )
 );
@@ -41,18 +44,22 @@
   cursor: pointer;
   flex: 1;
 
-  border-radius: css.cssVar(border-radius);
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
   padding: css.cssVar(padding);
 
   border-top: css.cssVar(border-top);
   border-bottom: css.cssVar(border-bottom);
   border-right: css.cssVar(border-right);
   border-left: css.cssVar(border-left);
-  background-color: css.cssVar(bg-color);
+  background: css.cssVar(background);
   color: css.cssVar(color);
 
-  will-change: background-color, color, border;
-  transition: animation.standard(background-color), animation.standard(color), animation.standard(border);
+  will-change: background, color, border;
+  transition: animation.standard(background), animation.standard(color), animation.standard(border);
 
   &:hover {
     border-top: css.cssVar(hover-border-top);
@@ -60,7 +67,7 @@
     border-right: css.cssVar(hover-border-right);
     border-left: css.cssVar(hover-border-left);
 
-    background-color: css.cssVar(hover-bg-color);
+    background: css.cssVar(hover-background);
     color: css.cssVar(hover-color);
   }
 }
@@ -72,7 +79,7 @@
     border-right: css.cssVar(selected-border-right, hover-border-right);
     border-left: css.cssVar(selected-border-left, hover-border-left);
 
-    background-color: css.cssVar(selected-bg-color, hover-bg-color);
+    background: css.cssVar(selected-background, hover-background);
     color: css.cssVar(selected-color, hover-color);
   }
 }

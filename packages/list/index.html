@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + Lit + TS</title>
-    <script type="module" src="/src/index.ts"></script>
+    <script type="module" src="/src/list.ts"></script>
     <script type="module">
       import '@c2n/list-item'
     </script>
@@ -18,16 +18,40 @@
         display: flex;
         align-items: center;
       }
-      .list {
-        gap: 16px;
-      }
     </style>
   </head>
   <body>
-    <c2-list class="list">
-      <c2-list-item>Item 1</c2-list-item>
-      <c2-list-item>Item 2</c2-list-item>
-      <c2-list-item>Item 3</c2-list-item>
+    <c2-list value="item2">
+      <c2-list-item value="item 1">Item 1</c2-list-item>
+      <c2-list-item value="item2">Item 2</c2-list-item>
+      <c2-list-item value="item 3">Item 3</c2-list-item>
     </c2-list>
+
+    <p>List multiple</p>
+    <c2-list value="item2;item1" multiple>
+      <c2-list-item value="item1">Item 1</c2-list-item>
+      <c2-list-item value="item2">Item 2</c2-list-item>
+      <c2-list-item value="item 3">Item 3</c2-list-item>
+    </c2-list>
+
+    <p>List disabled</p>
+    <c2-list value="item2" disabled>
+      <c2-list-item value="item 1">Item 1</c2-list-item>
+      <c2-list-item value="item2">Item 2</c2-list-item>
+      <c2-list-item value="item 3">Item 3</c2-list-item>
+    </c2-list>
+
+    <p>List autofocus</p>
+    <c2-list autofocus value="item2">
+      <c2-list-item value="item 1">Item 1</c2-list-item>
+      <c2-list-item value="item2">Item 2</c2-list-item>
+      <c2-list-item value="item 3">Item 3</c2-list-item>
+    </c2-list>
+
+    <script>
+      document.querySelectorAll('c2-list').forEach((listEl) => {
+        listEl.addEventListener('selection-change', (event) => console.log(event))
+      })
+    </script>
   </body>
 </html>

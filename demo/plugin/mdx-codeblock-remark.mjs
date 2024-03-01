@@ -110,12 +110,15 @@ function changeComponentName(vnode, uid, componentName) {
   if (vnode.name?.startsWith('c2-')) {
     vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
     vnode.attributes = vnode.attributes || []
-    vnode.attributes.push({
-      type: 'mdxJsxAttribute',
-      name: 'client:load',
-      value: null,
-    })
 
+    const hasClientDirective = vnode.attributes.findIndex((item) => item.name.startsWith('client:')) > -1
+    if (!hasClientDirective) {
+      vnode.attributes.push({
+        type: 'mdxJsxAttribute',
+        name: 'client:load',
+        value: null,
+      })
+    }
     if (!componentName) mainComponent = vnode
   }
   if (vnode.children) {

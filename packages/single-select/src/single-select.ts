@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { customElement, state } from 'lit/decorators.js'
+import { customElement, property, state } from 'lit/decorators.js'
 import styles from './single-select.scss?inline'
 
 /**
@@ -12,24 +12,23 @@ import styles from './single-select.scss?inline'
 export class SingleSelect extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  private _value: any = null
+  static instanceCount = 0
 
-  get value() {
-    return this._value
-  }
+  @property({ type: String, reflect: true }) value = ''
 
-  private set value(val: any) {
-    this._value = val
-    this.dispatchEvent(createChangeEvent(val))
-  }
+  /**
+   * <code>data</code> property
+   */
+  @property({ attribute: false }) data?: unknown
 
   @state() openMenu = false
+
   @state() inputText = ''
 
   constructor() {
     super()
 
-    this.addEventListener('toggle-open-menu', this.handleToggleOpenMenu)
+    // this.addEventListener('toggle-open-menu', this.handleToggleOpenMenu)
   }
 
   handleToggleOpenMenu = () => {
@@ -37,15 +36,13 @@ export class SingleSelect extends LitElement {
   }
 
   handleSelect = (event: CustomEvent) => {
-    const processSelectItemEvent = createProcessSelectItemEvent(event.detail)
-    this.dispatchEvent(processSelectItemEvent)
-    this.value = processSelectItemEvent.detail
-
-    const processValueEvent = createProcessValueEvent(this.value)
-    this.dispatchEvent(processValueEvent)
-    this.inputText = processValueEvent.detail
-
-    this.dispatchEvent(createToggleMenuEvent())
+    // const processSelectItemEvent = createProcessSelectItemEvent(event.detail)
+    // this.dispatchEvent(processSelectItemEvent)
+    // this.value = processSelectItemEvent.detail
+    // const processValueEvent = createProcessValueEvent(this.value)
+    // this.dispatchEvent(processValueEvent)
+    // this.inputText = processValueEvent.detail
+    // this.dispatchEvent(createToggleMenuEvent())
   }
 
   protected renderInputIcon() {
@@ -74,8 +71,8 @@ export class SingleSelect extends LitElement {
   override render() {
     return html`
       <div class="c2-single-select">
-        <div class="input-container" @click=${this.handleInputClick}>${this.renderInputSlot()}</div>
-        <div class="menu-container" @select-item=${this.handleSelect}>
+        <div class="input-container" popovertarget="single-select-menu" @click=${this.handleInputClick}>${this.renderInputSlot()}</div>
+        <div class="menu-container" id="single-select-menu" @select-item=${this.handleSelect}>
           <slot name="menu"></slot>
         </div>
       </div>

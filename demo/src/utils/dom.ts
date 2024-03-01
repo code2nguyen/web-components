@@ -39,6 +39,7 @@ export function getElemenetProperty(element: HTMLElement, propertyName: string):
   if (value == undefined || value == null) return undefined
   if (typeof value === 'boolean') return value ? 'true' : 'false'
   if (typeof value === 'string') return value
+  if (Array.isArray(value)) return value.join(';')
 
   return JSON.stringify(value)
 }

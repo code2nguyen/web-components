@@ -4,9 +4,12 @@
   "type": "module",
   "main": "dist/list.js",
   "exports": {
-    ".": "./dist/list.js"
+    ".": {
+      "default": "./dist/list.js",
+      "types": "./types/src/list.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
   },
-  "types": "types/src/index.d.ts",
   "files": [
     "dist",
     "types"

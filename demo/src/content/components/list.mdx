@@ -5,22 +5,43 @@
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
 
 import { List } from '@c2n/list'
+import { ListItem } from '@c2n/list-item'
 
 # List
 
-```html tag=MdxCodeBlock
-<div class="container">
-  <c2-list></c2-list>
-</div>
-<style>
-  .container {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-</style>
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/list-item
 ```
 
-TODO
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/list-item'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-list client:only="lit">
+  <c2-list-item value="item1">List Item 1</c2-list-item>
+  <c2-list-item value="item2">List Item 2</c2-list-item>
+  <c2-list-item value="item3">List Item 3</c2-list-item>
+  <c2-list-item value="item4">List Item 4</c2-list-item>
+</c2-list>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-list"></ApiTable>
