@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { customElement, property, query, queryAll, state } from 'lit/decorators.js'
+import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './tabs.scss?inline'
 import { selectedTabContext } from './tab-context'
 import { provide } from '@lit/context'
@@ -8,7 +8,6 @@ import { classMap } from 'lit/directives/class-map.js'
 /**
  * @tag c2-tabs
  *
- * @slot default - This is a default/unnamed slot
  *
  * @event
  * @cssproperty

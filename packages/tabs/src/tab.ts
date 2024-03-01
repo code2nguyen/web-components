@@ -1,6 +1,5 @@
 import { LitElement, html, unsafeCSS, isServer } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
-import { classMap } from 'lit/directives/class-map.js'
+import { customElement, property } from 'lit/decorators.js'
 import styles from './tab.scss?inline'
 import { selectedTabContext } from './tab-context'
 import { consume } from '@lit/context'
@@ -9,7 +8,8 @@ import { consume } from '@lit/context'
  *
  * @slot default - This is a default/unnamed slot
  *
- * @event
+ * @event tab-change
+ *
  * @cssproperty
  */
 @customElement('c2-tab')
@@ -17,7 +17,9 @@ export class Tab extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @property({ type: String }) label = ''
+
   @property({ type: String }) for = ''
+
   @property({ type: Boolean, reflect: true }) disabled = false
 
   @consume({ context: selectedTabContext, subscribe: true })

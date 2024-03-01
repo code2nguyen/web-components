@@ -15,7 +15,7 @@ export default defineConfig({
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/tabs.ts'],
+      files: ['src/tabs.ts', 'src/tab.ts'],
       lit: true,
       output: '../custom-elements.json',
     }),
