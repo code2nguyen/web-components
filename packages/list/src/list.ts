@@ -31,7 +31,6 @@ export class List extends LitElement {
 
   data: unknown[] = []
 
-  @property({ type: Boolean }) override autofocus: boolean = false
   @property({ type: Boolean }) disabled: boolean = false
   @property({ type: Boolean }) multiple: boolean = false
 
@@ -79,19 +78,6 @@ export class List extends LitElement {
     if (dispatched) {
       this.value = updatedValues
       this.data = updatedData
-    }
-  }
-
-  protected override willUpdate(_changedProperties: PropertyValueMap<this>): void {
-    if (_changedProperties.has('autofocus') && this.autofocus && this.value.length === 0) {
-      for (const slotItem of this.listItemSlot.assignedElements()) {
-        const listItem = slotItem instanceof ListItem ? slotItem : slotItem.firstChild
-
-        if (listItem instanceof ListItem) {
-          this.dispatchSelectionChangeEvent(listItem)
-          break
-        }
-      }
     }
   }
 
