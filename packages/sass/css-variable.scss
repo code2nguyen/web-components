@@ -1,13 +1,16 @@
 @use 'sass:map';
 
-$prefix: c2 !default;;
-$theme: () !default;;
-
+$prefix: c2 !default;
+$theme: () !default;
 
 /* ex : var((width: 24px), width, c2-checkbox)  returns var(--c2-checkbox-width, 24px) */
-@function cssVar($property, $fallback: null,  $custom-theme: $theme, $custom-prefix: $prefix) {
+@function cssVar($property, $fallback: null, $custom-theme: $theme, $custom-prefix: $prefix) {
   @if $fallback {
-    @return var(--#{$custom-prefix}-#{$property}, var(--#{$custom-prefix}-#{$fallback},  map.get($custom-theme, $property)));    
+    @return var(--#{$custom-prefix}-#{$property}, var(--#{$custom-prefix}-#{$fallback}, map.get($custom-theme, $property)));
   }
-  @return var(--#{$custom-prefix}-#{$property}, map.get($custom-theme, $property));  
+  @return var(--#{$custom-prefix}-#{$property}, map.get($custom-theme, $property));
+}
+
+@function get($property) {
+  @return map.get($theme, $property);
 }

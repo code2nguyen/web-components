@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/select.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+      }
+      .select1 {
+        /* --c2-list-border-top: none; */
+      }
+    </style>
+  </head>
+  <body>
+    <c2-select class="select1" value="item-1" style="border-radius: 4px">
+      <c2-list-item value="item1">item-1</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+    </c2-select>
+  </body>
+</html>

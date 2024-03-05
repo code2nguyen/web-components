@@ -1,10 +1,10 @@
-import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
+import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './list.scss?inline'
 import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
 import { ListItem } from '@c2n/list-item'
 import { provide } from '@lit/context'
-
+import { arrayPropertyConverter } from '@c2n/wc-utils/lit-helper.js'
 /**
  * @tag c2-list
  *
@@ -17,14 +17,7 @@ export class List extends LitElement {
 
   @provide({ context: selectedItemValueContext })
   @property({
-    converter: {
-      toAttribute: (value: string[]) => {
-        return Array.isArray(value) ? value.join(';') : ''
-      },
-      fromAttribute: (value: string) => {
-        return value ? value.split(';') : []
-      },
-    },
+    converter: arrayPropertyConverter,
     reflect: true,
   })
   value: string[] = []
@@ -38,7 +31,7 @@ export class List extends LitElement {
   private listItemSlot!: HTMLSlotElement
 
   private async handleSlotChange() {
-    for (const slotItem of this.listItemSlot.assignedElements()) {
+    for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
       const listItem = slotItem instanceof ListItem ? slotItem : slotItem.firstChild
       if (listItem instanceof ListItem && !listItem.applyContext) {
         listItem.applyContext = true

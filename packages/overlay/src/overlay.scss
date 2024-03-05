@@ -1,0 +1,20 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-overlay,
+  $theme: (
+    backdrop-background: transparent,
+  )
+);
+
+:host {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  left: 0;
+  border: none;
+  &::backdrop {
+    background: css.cssVar(backdrop-background);
+  }
+}

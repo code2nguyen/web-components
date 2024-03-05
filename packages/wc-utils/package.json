@@ -16,6 +16,10 @@
       "types": "./dist/dom-helper.d.ts",
       "default": "./dist/dom-helper.js"
     },
+    "./lit-helper.js": {
+      "types": "./dist/lit-helper.d.ts",
+      "default": "./dist/lit-helper.js"
+    },
     "./controllers/context-consumer.js": {
       "types": "./dist/controllers/context-consumer.d.ts",
       "default": "./dist/controllers/context-consumer.js"

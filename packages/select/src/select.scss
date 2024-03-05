@@ -1,0 +1,35 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use 'sass:map';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-select,
+  $theme: (
+    _list-border-top: 1px solid variables.$color-border,
+    _list-border-right: 1px solid variables.$color-border,
+    _list-border-bottom: 1px solid variables.$color-border,
+    _list-border-left: 1px solid variables.$color-border,
+
+    _list-border-top-left-radius: 4px,
+    _list-border-top-right-radius: 4px,
+    _list-border-bottom-left-radius: 4px,
+    _list-border-bottom-right-radius: 4px,
+  )
+);
+
+:host {
+  display: contents;
+  --c2-list-border-top: #{css.get(_list-border-top)};
+  --c2-list-border-right: #{css.get(_list-border-right)};
+  --c2-list-border-bottom: #{css.get(_list-border-bottom)};
+  --c2-list-border-left: #{css.get(_list-border-left)};
+
+  --c2-list-border-top-left-radius: #{css.get(_list-border-top-left-radius)};
+  --c2-list-border-top-right-radius: #{css.get(_list-border-top-right-radius)};
+  --c2-list-border-bottom-left-radius: #{css.get(_list-border-bottom-left-radius)};
+  --c2-list-border-bottom-right-radius: #{css.get(_list-border-bottom-right-radius)};
+  --c2-list-item-padding: 4px 8px 4px 32px;
+}
+
+.c2-select {
+  display: inline-flex;
+}

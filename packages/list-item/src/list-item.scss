@@ -34,7 +34,7 @@
 );
 
 :host {
-  display: inline-flex;
+  display: contents;
   user-select: none;
 }
 
@@ -83,6 +83,7 @@
     color: css.cssVar(selected-color, hover-color);
   }
 }
+
 :host([disabled]) {
   .c2-list-item {
     pointer-events: none;
