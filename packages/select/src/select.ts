@@ -19,7 +19,7 @@ import { arrayPropertyConverter } from '@c2n/wc-utils/lit-helper.js'
  * @cssproperty {pixel} [--c2-select__button--gap=4px]
  *
  * @cssproperty {font-size} [--c2-select__button--font-size=14]
- * @cssproperty {font-weigh} --c2-select__button--border-font-weigh
+ * @cssproperty {font-weight} --c2-select__button--border-font-weight
  * @cssproperty {font-style} [--c2-select__button--font-style=normal]
  * @cssproperty {font-family} --c2-select__button--font-family
  *

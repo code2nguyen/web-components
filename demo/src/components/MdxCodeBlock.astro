@@ -110,9 +110,6 @@ code = code.replace(/^"|"$/g, '')
     targetComp.dataset.style = manifestStyleStr
 
     updateDomCssValue(targetComp, componentConfig.cssProperties)
-    Object.keys(componentConfig.stateCssProperties).forEach((state) => {
-      updateDomCssValue(targetComp, componentConfig.stateCssProperties![state])
-    })
     updateDomAttribute(targetComp, componentConfig.attributes)
   })
 </script>

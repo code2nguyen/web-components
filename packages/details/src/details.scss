@@ -1,27 +1,35 @@
 @use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-details,
   $theme: (
-    border-top: 1px solid rgb(213, 213, 213),
-    border-right: 0px,
+    border-top: 1px solid variables.$color-border-light,
+    border-right: 1px solid variables.$color-border-light,
     border-bottom: 1px solid rgb(213, 213, 213),
-    border-left: 0px,
+    border-left: 1px solid variables.$color-border-light,
 
     border-radius: 0px,
-
-    padding-top: 16px,
-    padding-right: 16px,
-    padding-bottom: 16px,
-    padding-left: 16px,
     box-shadow: none,
 
-    title__icon--width: 24px,
-    title__icon--height: 24px,
-    title__hover--background: rgb(230, 230, 230),
-    title--background: transparent,
-    title__icon--rotate: 180deg,
-    title--gap: 16px,
-    title--flex-direction: row,
+    content--padding-top: 16px,
+    content--padding-right: 16px,
+    content--padding-bottom: 16px,
+    content--padding-left: 16px,
+
+    header--padding-top: 16px,
+    header--padding-right: 16px,
+    header--padding-bottom: 16px,
+    header--padding-left: 16px,
+
+    header--background: transparent,
+
+    header--gap: 16px,
+    header--flex-direction: row,
+
+    header__icon--width: 24px,
+    header__icon--height: 24px,
+    header__icon--rotate: 180deg,
+    header__hover--background: variables.$color-bg-dark,
   )
 );
 
@@ -38,41 +46,44 @@
   summary {
     list-style: none;
     display: flex;
-    flex-direction: css.cssVar(title--flex-direction);
+    flex-direction: css.cssVar(header--flex-direction);
     align-items: center;
-    gap: css.cssVar(title--gap);
+    user-select: none;
+    will-change: border-radius;
+    will-change: border-radius, background;
+    transition: animation.standard(background);
+    transition: animation.standard(border-radius);
+    position: relative;
+    cursor: pointer;
+
+    gap: css.cssVar(header--gap);
 
     border-top: css.cssVar(border-top);
     border-right: css.cssVar(border-right);
     border-bottom: css.cssVar(border-bottom);
     border-left: css.cssVar(border-left);
-    will-change: border-radius;
-    transition: animation.standard(border-radius);
+
     border-radius: css.cssVar(border-radius);
-    background: css.cssVar(title--background);
-    will-change: border-radius, background;
 
-    transition: animation.standard(background);
+    background: css.cssVar(header--background);
 
-    position: relative;
-    cursor: pointer;
-
-    padding-top: css.cssVar(padding-top);
-    padding-right: css.cssVar(padding-right);
-    padding-bottom: css.cssVar(padding-bottom);
-    padding-left: css.cssVar(padding-left);
+    padding-top: css.cssVar(header--padding-top);
+    padding-right: css.cssVar(header--padding-right);
+    padding-bottom: css.cssVar(header--padding-bottom);
+    padding-left: css.cssVar(header--padding-left);
 
     &:hover {
-      background: css.cssVar(hover-title--background);
+      background: css.cssVar(header__hover--background);
     }
     slot[name='icon'] {
       cursor: pointer;
 
       &::slotted(svg) {
-        width: css.cssVar(title__icon--width);
-        height: css.cssVar(title__icon--height);
-        transform: rotate(0deg);
         transition: animation.standard(transform);
+        transform: rotate(0deg);
+
+        width: css.cssVar(header__icon--width);
+        height: css.cssVar(header__icon--height);
       }
     }
 
@@ -81,16 +92,17 @@
       cursor: pointer;
 
       &::slotted(svg) {
-        width: css.cssVar(title__icon--width);
-        height: css.cssVar(title__icon--height);
+        width: css.cssVar(header__icon--width);
+        height: css.cssVar(header__icon--height);
       }
     }
 
     .default-icon {
-      width: css.cssVar(title__icon--width);
-      height: css.cssVar(title__icon--height);
       transform: rotate(0deg);
       transition: animation.standard(transform);
+
+      width: css.cssVar(header__icon--width);
+      height: css.cssVar(header__icon--height);
     }
 
     .c2-details-summary-content {
@@ -102,14 +114,15 @@
   }
 
   .c2-details-content {
+    padding-top: 0px;
+    position: relative;
+
     border-right: css.cssVar(border-right);
     border-left: css.cssVar(border-left);
 
-    padding-top: 0px;
-    padding-right: css.cssVar(padding-right);
-    padding-bottom: css.cssVar(padding-bottom);
-    padding-left: css.cssVar(padding-left);
-    position: relative;
+    padding-right: css.cssVar(content--padding-right, header--padding-right);
+    padding-bottom: css.cssVar(content--padding-bottom, header--padding-bottom);
+    padding-left: css.cssVar(content--padding-left, header--padding-left);
   }
 
   &[open] {
@@ -117,28 +130,34 @@
       border-bottom: none;
       border-bottom-right-radius: 0px;
       border-bottom-left-radius: 0px;
-      padding-bottom: css.cssVar(padding-top);
+
+      padding-bottom: css.cssVar(header--padding-top);
+
       slot[name='expanded-icon'][data-filled] {
         display: contents;
       }
+
       // has expanded icon
       slot[name='expanded-icon'][data-filled] + slot[name='icon'] {
         display: none;
       }
+
       slot[name='icon'] {
         &::slotted(svg) {
-          transform: rotate(css.cssVar(title__icon--rotate));
+          transform: rotate(css.cssVar(header__icon--rotate));
         }
       }
+
       .default-icon {
-        transform: rotate(css.cssVar(title__icon--rotate));
+        transform: rotate(css.cssVar(header__icon--rotate));
       }
     }
     .c2-details-content {
-      border-bottom: css.cssVar(border-bottom);
-      border-radius: css.cssVar(border-radius);
       border-top-right-radius: 0px;
       border-top-left-radius: 0px;
+
+      border-bottom: css.cssVar(border-bottom);
+      border-radius: css.cssVar(border-radius);
     }
   }
 }

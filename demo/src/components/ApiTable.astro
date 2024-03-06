@@ -1,5 +1,5 @@
 ---
-import { groupCssProperties, flatGroupCssProperties } from '../utils/manifest-utils'
+import { groupCssProperties, deepFlatGroupCssProperties } from '../utils/manifest-utils'
 interface Props {
   componentTag: string
 }
@@ -10,7 +10,7 @@ import { componentManifests } from '../store/component-manifests'
 
 const componentManifest = componentManifests[componentTag]
 const groupedCssProperties = groupCssProperties(componentManifest.cssProperties)
-const flattenGroupedCssProperties = flatGroupCssProperties(groupedCssProperties)
+const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssProperties)
 ---
 
 <table>

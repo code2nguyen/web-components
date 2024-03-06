@@ -17,7 +17,12 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
  * @cssproperty {pixel} --c2-list-item--border-bottom-right-radius - <code>border-bottom-right-radius</code> value
  * 
  * @cssproperty {pixel} [--c2-list-item--padding=4px 8px 4px 8px] - <code>padding</code> value
- *
+ * 
+ * @cssproperty {font-size} [--c2-list-item--font-size=14]
+ * @cssproperty {font-weight} --c2-list-item--border-font-weight
+ * @cssproperty {font-style} [--c2-list-item--font-style=normal]
+ * @cssproperty {font-family} --c2-list-item--font-family
+ * 
  * @cssproperty {border} [--c2-list-item--border-top=0px solid transparent] - <code>border-top</code> value
  * @cssproperty {border} [--c2-list-item--border-bottom=0px solid transparent] - <code>border-bottom</code> value
  * @cssproperty {border} [--c2-list-item--border-right=0px solid transparent] - <code>border-right</code> value

@@ -124,7 +124,7 @@ export function groupCssProperties(cssProperties: CSSDeclarationItem[]): Grouped
   return groupedCssProperties
 }
 
-export function flatGroupCssProperties(groupedCssProperties: GroupedCssVariables[]): FlattenGroupedCssVariable[] {
+export function deepFlatGroupCssProperties(groupedCssProperties: GroupedCssVariables[]): FlattenGroupedCssVariable[] {
   const result: FlattenGroupedCssVariable[] = []
 
   for (const group of groupedCssProperties) {
@@ -140,6 +140,21 @@ export function flatGroupCssProperties(groupedCssProperties: GroupedCssVariables
         level: group.level,
         cssProperty: cssProperty,
       })
+    }
+    if (group.subGroups.length > 0) {
+      const flattenSubGroup = deepFlatGroupCssProperties(group.subGroups)
+      result.push(...flattenSubGroup)
+    }
+  }
+  return result
+}
+
+export function flatGroupCssProperties(groupedCssProperties: GroupedCssVariables[]): GroupedCssVariables[] {
+  const result: GroupedCssVariables[] = []
+
+  for (const group of groupedCssProperties) {
+    if (group.cssProperties.length > 0) {
+      result.push(group)
     }
     if (group.subGroups.length > 0) {
       const flattenSubGroup = flatGroupCssProperties(group.subGroups)
