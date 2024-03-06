@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { customElement, property, query } from 'lit/decorators.js'
 import styles from './list-item.scss?inline'
 import { selectedItemValueContext } from './list-item-context'
 import { ContextConsumer } from '@c2n/wc-utils/controllers/context-consumer.js'
@@ -11,33 +11,33 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
  *
  * @event {CustomEvent} selected-change - An Event emitted after selection state is changed
  *
- * @cssproperty {pixel} [--c2-list-item-border-top-left-radius=inherit] - <code>border-top-left-radius</code> value
- * @cssproperty {pixel} [--c2-list-item-border-top-right-radius=inherit] - <code>border-top-right-radius</code> value
- * @cssproperty {pixel} [--c2-list-item-border-bottom-left-radius=inherit] - <code>border-bottom-left-radius</code> value
- * @cssproperty {pixel} [--c2-list-item-border-bottom-right-radius=inherit] - <code>border-bottom-right-radius</code> value
+ * @cssproperty {pixel} --c2-list-item--border-top-left-radius - <code>border-top-left-radius</code> value
+ * @cssproperty {pixel} --c2-list-item--border-top-right-radius - <code>border-top-right-radius</code> value
+ * @cssproperty {pixel} --c2-list-item--border-bottom-left-radius - <code>border-bottom-left-radius</code> value
+ * @cssproperty {pixel} --c2-list-item--border-bottom-right-radius - <code>border-bottom-right-radius</code> value
  * 
- * @cssproperty {pixel} [--c2-list-item-padding=4px 8px 4px 8px] - <code>padding</code> value
+ * @cssproperty {pixel} [--c2-list-item--padding=4px 8px 4px 8px] - <code>padding</code> value
  *
- * @cssproperty {border} [--c2-list-item-border-top=0px solid transparent] - <code>border-top</code> value
- * @cssproperty {border} [--c2-list-item-border-bottom=0px solid transparent] - <code>border-bottom</code> value
- * @cssproperty {border} [--c2-list-item-border-right=0px solid transparent] - <code>border-right</code> value
- * @cssproperty {border} [--c2-list-item-border-left=0px solid transparent] - <code>border-left</code> value
- * @cssproperty {color} [--c2-list-item-color=inherit] - <code>color<code> value
- * @cssproperty {color} [--c2-list-item-background=transparent] - <code>background-color</code> value
+ * @cssproperty {border} [--c2-list-item--border-top=0px solid transparent] - <code>border-top</code> value
+ * @cssproperty {border} [--c2-list-item--border-bottom=0px solid transparent] - <code>border-bottom</code> value
+ * @cssproperty {border} [--c2-list-item--border-right=0px solid transparent] - <code>border-right</code> value
+ * @cssproperty {border} [--c2-list-item--border-left=0px solid transparent] - <code>border-left</code> value
+ * @cssproperty {color} [--c2-list-item--color=initial] - <code>color<code> value
+ * @cssproperty {color} [--c2-list-item--background=transparent] - <code>background-color</code> value
  *
- * @cssproperty {hover - border} [--c2-list-item-hover-border-top=inherit] - Hover <code>border-top</code> value
- * @cssproperty {hover - border} [--c2-list-item-hover-border-bottom=inherit] - Hover <code>border-bottom</code> value
- * @cssproperty {hover - border} [--c2-list-item-hover-border-right=inherit] - Hover <code>border-right</code> value
- * @cssproperty {hover - border} [--c2-list-item-hover-border-left=inherit] - Hover <code>border-left</code> value
- * @cssproperty {hover - color} [--c2-list-item-hover-color=inherit] - Hover <code>color</code> value
- * @cssproperty {hover - color} [--c2-list-item-hover-background=rgb(230, 230, 230)] - Hover <code>background-color</code> value
+ * @cssproperty {border} --c2-list-item__hover--border-top - Hover <code>border-top</code> value
+ * @cssproperty {border} --c2-list-item__hover--border-bottom - Hover <code>border-bottom</code> value
+ * @cssproperty {border} --c2-list-item__hover--border-right - Hover <code>border-right</code> value
+ * @cssproperty {border} --c2-list-item__hover--border-left - Hover <code>border-left</code> value
+ * @cssproperty {color}  --c2-list-item__hover--color - Hover <code>color</code> value
+ * @cssproperty {color} [--c2-list-item__hover--background=rgb(230, 230, 230)] - Hover <code>background-color</code> value
  * 
- * @cssproperty {selected - border} [--c2-list-item-selected-border-top=inherit] - Selected <code>border-top</code> value
- * @cssproperty {selected - border} [--c2-list-item-selected-border-bottom=inherit] - Selected <code>border-bottom</code> value
- * @cssproperty {selected - border} [--c2-list-item-selected-border-right=inherit] - Selected <code>border-right</code> value
- * @cssproperty {selected - border} [--c2-list-item-selected-border-left=inherit] - Selected <code>border-left</code> value
- * @cssproperty {selected - color} [--c2-list-item-selected-color=inherit] - Selected <code>color</code> value
- * @cssproperty {selected - color} [--c2-list-item-selected-background=rgb(230, 230, 230)] - Selected <code>background-color</code> value
+ * @cssproperty {border} --c2-list-item__selected--border-top - Selected <code>border-top</code> value
+ * @cssproperty {border} --c2-list-item__selected--border-bottom - Selected <code>border-bottom</code> value
+ * @cssproperty {border} --c2-list-item__selected--border-right - Selected <code>border-right</code> value
+ * @cssproperty {border} --c2-list-item__selected--border-left - Selected <code>border-left</code> value
+ * @cssproperty {color} --c2-list-item__selected--color - Selected <code>color</code> value
+ * @cssproperty {color} [--c2-list-item__selected--background=rgb(230, 230, 230)] - Selected <code>background-color</code> value
  
  */
 @customElement('c2-list-item')
@@ -52,28 +52,32 @@ export class ListItem extends LitElement {
     },
   })
 
-  /**
-   * If <code>true</code>, the component is selected
-   */
-
   @property({ type: Boolean, reflect: true }) selected = false
-
-  /**
-   * If <code>true</code>, the component is disabled
-   */
   @property({ type: Boolean, reflect: true }) disabled = false
-
-  /**
-   * The value dispatch on selecting item
-   */
   @property() value = ''
-
-  /**
-   * <code>data</code> property
-   */
+  @property() label?: string
   @property({ attribute: false }) data?: unknown
 
+  /**
+   * Private property, it will use context value to setup selected state of component.
+   */
   @property({ attribute: false }) applyContext = false
+
+  @query('slot')
+  private contentSlot!: HTMLSlotElement
+
+  get displayText(): string {
+    if (this.label !== undefined) return this.label
+
+    return (
+      (this.contentSlot
+        .assignedNodes({ flatten: true })
+        .flatMap((item) => (item as HTMLElement).innerText ?? (item as HTMLElement).textContent)
+        .join(' ') ||
+        this.contentSlot.innerText) ??
+      this.contentSlot.textContent
+    )
+  }
 
   private handleClick = (event: Event) => {
     const dispatched = redispatchEvent(this, event)
@@ -96,7 +100,7 @@ export class ListItem extends LitElement {
   override render() {
     return html`
       <div class="c2-list-item" @click=${this.handleClick}>
-        <slot>${this.value}</slot>
+        <slot>${this.label ?? this.value}</slot>
       </div>
     `
   }

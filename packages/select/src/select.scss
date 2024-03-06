@@ -4,32 +4,126 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-select,
   $theme: (
-    _list-border-top: 1px solid variables.$color-border,
-    _list-border-right: 1px solid variables.$color-border,
-    _list-border-bottom: 1px solid variables.$color-border,
-    _list-border-left: 1px solid variables.$color-border,
+    _list--border-top: 1px solid variables.$color-border,
+    _list--border-right: 1px solid variables.$color-border,
+    _list--border-bottom: 1px solid variables.$color-border,
+    _list--border-left: 1px solid variables.$color-border,
 
-    _list-border-top-left-radius: 4px,
-    _list-border-top-right-radius: 4px,
-    _list-border-bottom-left-radius: 4px,
-    _list-border-bottom-right-radius: 4px,
+    _list--border-top-left-radius: 4px,
+    _list--border-top-right-radius: 4px,
+    _list--border-bottom-left-radius: 4px,
+    _list--border-bottom-right-radius: 4px,
+
+    button--font-size: 14px,
+    button--font-weight: null,
+    button--font-style: normal,
+    button--font-family: null,
+
+    default-icon--size: 24px,
+
+    button--padding: 4px 8px 4px 8px,
+    button--background: variables.$color-bg-light,
+    button--color: initial,
+    button--gap: 4px,
+    button--border-top: 1px solid variables.$color-border,
+    button--border-right: 1px solid variables.$color-border,
+    button--border-bottom: 1px solid variables.$color-border,
+    button--border-left: 1px solid variables.$color-border,
+
+    button--border-top-left-radius: 4px,
+    button--border-top-right-radius: 4px,
+    button--border-bottom-left-radius: 4px,
+    button--border-bottom-right-radius: 4px,
+
+    button__hover--border-top: 1px solid variables.$color-border,
+    button__hover--border-right: 1px solid variables.$color-border,
+    button__hover--border-bottom: 1px solid variables.$color-border,
+    button__hover--border-left: 1px solid variables.$color-border,
+    button__hover--background: variables.$color-bg-dark,
+    button__hover--color: initial,
+
+    place-holder--font-weight: null,
+    place-holder--font-style: null,
+    place-holder--color: null,
   )
 );
 
 :host {
-  display: contents;
-  --c2-list-border-top: #{css.get(_list-border-top)};
-  --c2-list-border-right: #{css.get(_list-border-right)};
-  --c2-list-border-bottom: #{css.get(_list-border-bottom)};
-  --c2-list-border-left: #{css.get(_list-border-left)};
-
-  --c2-list-border-top-left-radius: #{css.get(_list-border-top-left-radius)};
-  --c2-list-border-top-right-radius: #{css.get(_list-border-top-right-radius)};
-  --c2-list-border-bottom-left-radius: #{css.get(_list-border-bottom-left-radius)};
-  --c2-list-border-bottom-right-radius: #{css.get(_list-border-bottom-right-radius)};
-  --c2-list-item-padding: 4px 8px 4px 32px;
-}
-
-.c2-select {
   display: inline-flex;
+  --c2-list--border-top: #{css.get(_list--border-top)};
+  --c2-list--border-right: #{css.get(_list--border-right)};
+  --c2-list--border-bottom: #{css.get(_list--border-bottom)};
+  --c2-list--border-left: #{css.get(_list--border-left)};
+
+  --c2-list--border-top-left-radius: #{css.get(_list--border-top-left-radius)};
+  --c2-list--border-top-right-radius: #{css.get(_list--border-top-right-radius)};
+  --c2-list--border-bottom-left-radius: #{css.get(_list--border-bottom-left-radius)};
+  --c2-list--border-bottom-right-radius: #{css.get(_list--border-bottom-right-radius)};
+}
+.c2-select {
+  display: contents;
+}
+.button {
+  display: flex;
+  flex: 1;
+  position: relative;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  appearance: button;
+  user-select: none;
+  cursor: pointer;
+  text-transform: none;
+  vertical-align: middle;
+
+  font-size: css.cssVar(button--font-size);
+  font-weight: css.cssVar(button--font-weight);
+  font-style: css.cssVar(button--font-style);
+  font-family: css.cssVar(button--font-family);
+
+  background: css.cssVar(button--background);
+  gap: css.cssVar(button--gap);
+  border-top: css.cssVar(button--border-top);
+  border-bottom: css.cssVar(button--border-bottom);
+  border-right: css.cssVar(button--border-right);
+  border-left: css.cssVar(button--border-left);
+  color: css.cssVar(button--color);
+  padding: css.cssVar(button--padding);
+
+  border-top-left-radius: css.cssVar(button--border-top-left-radius);
+  border-top-right-radius: css.cssVar(button--border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(button--border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(button--border-bottom-right-radius);
+  will-change: background, color, border;
+  transition: animation.standard(background), animation.standard(color), animation.standard(border);
+
+  &:hover {
+    border-top: css.cssVar(button__hover--border-top);
+    border-bottom: css.cssVar(button__hover--border-bottom);
+    border-right: css.cssVar(button__hover--border-right);
+    border-left: css.cssVar(button__hover--border-left);
+
+    background: css.cssVar(button__hover--background);
+    color: css.cssVar(button__hover--color);
+  }
+
+  .default-icon {
+    width: css.cssVar(default-icon--size);
+    height: css.cssVar(default-icon--size);
+  }
+
+  .placeholder {
+    font-weight: css.cssVar(place-holder--font-weight);
+    font-style: css.cssVar(place-holder--font-style);
+    color: css.cssVar(place-holder--color);
+  }
+  .button-content {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: start;
+    flex: 1;
+  }
 }

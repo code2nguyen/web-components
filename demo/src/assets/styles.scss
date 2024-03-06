@@ -97,14 +97,14 @@ hr {
 }
 .mdx-code-block {
   &.compack {
-    --c2-expansion-panel-border-radius: 0px;
-    --c2-expansion-panel-border-top: none;
-    --c2-expansion-panel-border-bottom: none;
-    --c2-expansion-panel-border-left: none;
-    --c2-expansion-panel-border-right: none;
+    --c2-expansion-panel--border-radius: 0px;
+    --c2-expansion-panel--border-top: none;
+    --c2-expansion-panel--border-bottom: none;
+    --c2-expansion-panel--border-left: none;
+    --c2-expansion-panel--border-right: none;
 
-    --c2-icon-button-icon-size: 20px;
-    --c2-icon-button-state-layer-size: 32px;
+    --c2-icon-button__icon--size: 20px;
+    --c2-icon-button__state-layer--size: 32px;
   }
   .mdx-code-block-setting-btn {
     position: absolute;

@@ -4,11 +4,12 @@
     slug: "select"
 ---
 
-import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import ApiTable from '../../components/ApiTable.astro'
 
 import { Select } from '@c2n/select'
+import { ListItem } from '@c2n/list-item'
 
 # Select
 
@@ -30,7 +31,12 @@ import '@c2n/select'
 ---
 
 ```html tag=MdxCodeBlock,compack=true,component=c2-select
-<c2-select></c2-select>    
+<c2-select client:only="lit" placeholder="Select your country">
+  <c2-list-item value="US">United States</c2-list-item>
+  <c2-list-item value="CA">Canada</c2-list-item>
+  <c2-list-item value="FR">France</c2-list-item>
+  <c2-list-item value="CO">Colombia</c2-list-item>
+</c2-select>
 ```
 
 ---

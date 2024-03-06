@@ -3,7 +3,8 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-overlay,
   $theme: (
-    backdrop-background: transparent,
+    backdrop--background: transparent,
+    offset: 8px,
   )
 );
 
@@ -14,7 +15,21 @@
   top: 0;
   left: 0;
   border: none;
+  transition: animation.standard-deceleration(transform) allow-discrete;
   &::backdrop {
-    background: css.cssVar(backdrop-background);
+    background: css.cssVar(backdrop--background);
+  }
+}
+:host([placement^='bottom']:popover-open) {
+  transform: translateY(css.cssVar(offset));
+}
+
+:host([placement^='top']:popover-open) {
+  transform: translateY(calc(-1 * css.cssVar(offset)));
+}
+
+@starting-style {
+  :host([placement]:popover-open) {
+    transform: translateY(0);
   }
 }

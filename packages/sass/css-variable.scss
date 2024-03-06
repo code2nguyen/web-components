@@ -1,14 +1,32 @@
 @use 'sass:map';
+@use 'sass:string';
+@use 'sass:list';
 
 $prefix: c2 !default;
 $theme: () !default;
 
 /* ex : var((width: 24px), width, c2-checkbox)  returns var(--c2-checkbox-width, 24px) */
-@function cssVar($property, $fallback: null, $custom-theme: $theme, $custom-prefix: $prefix) {
-  @if $fallback {
-    @return var(--#{$custom-prefix}-#{$property}, var(--#{$custom-prefix}-#{$fallback}, map.get($custom-theme, $property)));
+@function cssVar($fallback...) {
+  $result: '';
+  @for $i from 1 through length($fallback) {
+    $item: nth($fallback, $i);
+    @if not str-index($item, '--') {
+      $result: $result + 'var(--#{$prefix}--#{$item},';
+    } @else if str-index($item, '--') == 1 {
+      $result: $result + 'var(#{$item},';
+    } @else {
+      $result: $result + 'var(--#{$prefix}__#{$item},';
+    }
   }
-  @return var(--#{$custom-prefix}-#{$property}, map.get($custom-theme, $property));
+  $property: nth($fallback, 1);
+  @if $property and map.get($theme, $property) {
+    $result: $result + '#{map.get($theme, $property)},';
+  }
+  $result: str-slice($result, 1, -2);
+  @for $i from 1 through length($fallback) {
+    $result: $result + ')';
+  }
+  @return string.unquote($result);
 }
 
 @function get($property) {

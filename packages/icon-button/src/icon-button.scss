@@ -3,14 +3,14 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-icon-button,
   $theme: (
-    icon-size: 24px,
-    icon-color: inherit,
-    hover-icon-color: inherit,
+    icon--size: 24px,
+    icon--color: inherit,
+    icon__hover--color: inherit,
 
     border-radius: 50%,
-    state-layer-size: 48px,
-    bg-color: transparent,
-    hover-bg-color: variables.$color-bg-dark,    
+    state-layer--size: 48px,
+    background-color: transparent,
+    hover--background-color: variables.$color-bg-dark,
   )
 );
 
@@ -25,23 +25,22 @@
   justify-content: center;
   cursor: pointer;
   user-select: none;
-  width: css.cssVar(state-layer-size);
-  height: css.cssVar(state-layer-size);
+  width: css.cssVar(state-layer--size);
+  height: css.cssVar(state-layer--size);
   border-radius: css.cssVar(border-radius);
-  background-color: css.cssVar(bg-color);
+  background-color: css.cssVar(background-color);
   will-change: background-color;
   transition: animation.standard(background-color);
   &:hover {
-    background-color: css.cssVar(hover-bg-color);
-     ::slotted(*) {
-        color: css.cssVar(hover-icon-color);
-     }
+    background-color: css.cssVar(hover--background-color);
+    ::slotted(*) {
+      color: css.cssVar(icon__hover--color);
+    }
   }
-
 }
-  ::slotted(*) {
-    width: css.cssVar(icon-size);
-    height: css.cssVar(icon-size);
-    color: css.cssVar(icon-color);
-    transition: animation.standard(color);
-  }
+::slotted(*) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  transition: animation.standard(color);
+}

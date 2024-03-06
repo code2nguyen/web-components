@@ -20,6 +20,6 @@
     "lit-analyzer": "2.0.1",
     "typescript": "5.3.3",
     "vite": "^5.0.11",
-    "vite-plugin-cem": "^0.6.0"
+    "vite-plugin-cem": "^0.7.0"
   }
 }

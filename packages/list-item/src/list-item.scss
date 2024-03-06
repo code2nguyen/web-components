@@ -3,46 +3,56 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-list-item,
   $theme: (
-    border-top-left-radius: inherit,
-    border-top-right-radius: inherit,
-    border-bottom-left-radius: inherit,
-    border-bottom-right-radius: inherit,
+    border-top-left-radius: null,
+    border-top-right-radius: null,
+    border-bottom-left-radius: null,
+    border-bottom-right-radius: null,
 
-    padding: 4px 8px 4px 8px,
+    padding: 8px 8px 8px 8px,
+
+    font-size: 14px,
+    font-weight: null,
+    font-style: normal,
+    font-family: null,
 
     border-top: 0px solid transparent,
     border-bottom: 0px solid transparent,
     border-right: 0px solid transparent,
     border-left: 0px solid transparent,
-    color: inherit,
+    color: initial,
     background: transparent,
 
-    hover-border-top: inherit,
-    hover-border-bottom: inherit,
-    hover-border-right: inherit,
-    hover-border-left: inherit,
-    hover-color: inherit,
-    hover-background: variables.$color-bg-dark,
+    hover--border-top: null,
+    hover--border-bottom: null,
+    hover--border-right: null,
+    hover--border-left: null,
+    hover--color: null,
+    hover--background: variables.$color-bg-dark,
 
-    selected-border-top: inherit,
-    selected-border-bottom: inherit,
-    selected-border-right: inherit,
-    selected-border-left: inherit,
-    selected-background: variables.$color-bg-dark,
-    selected-color: inherit,
+    selected--border-top: null,
+    selected--border-bottom: null,
+    selected--border-right: null,
+    selected--border-left: null,
+    selected--color: null,
+    selected--background: variables.$color-bg-dark,
   )
 );
 
 :host {
-  display: contents;
+  display: block;
+  flex: 1;
   user-select: none;
 }
 
 .c2-list-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   cursor: pointer;
   flex: 1;
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-style: css.cssVar(font-style);
+  font-family: css.cssVar(font-family);
 
   border-top-left-radius: css.cssVar(border-top-left-radius);
   border-top-right-radius: css.cssVar(border-top-right-radius);
@@ -62,25 +72,25 @@
   transition: animation.standard(background), animation.standard(color), animation.standard(border);
 
   &:hover {
-    border-top: css.cssVar(hover-border-top);
-    border-bottom: css.cssVar(hover-border-bottom);
-    border-right: css.cssVar(hover-border-right);
-    border-left: css.cssVar(hover-border-left);
+    border-top: css.cssVar(hover--border-top, border-top);
+    border-bottom: css.cssVar(hover--border-bottom, border-bottom);
+    border-right: css.cssVar(hover--border-right, border-right);
+    border-left: css.cssVar(hover--border-left, border-left);
 
-    background: css.cssVar(hover-background);
-    color: css.cssVar(hover-color);
+    background: css.cssVar(hover--background, background);
+    color: css.cssVar(hover--color, color);
   }
 }
 
 :host([selected]) {
   .c2-list-item {
-    border-top: css.cssVar(selected-border-top, hover-border-top);
-    border-bottom: css.cssVar(selected-border-bottom, hover-border-bottom);
-    border-right: css.cssVar(selected-border-right, hover-border-right);
-    border-left: css.cssVar(selected-border-left, hover-border-left);
+    border-top: css.cssVar(selected--border-top, hover--border-top, border-top);
+    border-bottom: css.cssVar(selected--border-bottom, hover--border-bottom, border-bottom);
+    border-right: css.cssVar(selected--border-right, hover--border-right, border-right);
+    border-left: css.cssVar(selected--border-left, hover--border-left, border-left);
 
-    background: css.cssVar(selected-background, hover-background);
-    color: css.cssVar(selected-color, hover-color);
+    background: css.cssVar(selected--background, hover--background, background);
+    color: css.cssVar(selected--color, hover--color, color);
   }
 }
 

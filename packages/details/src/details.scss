@@ -2,9 +2,6 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-details,
   $theme: (
-    icon-width: 24px,
-    icon-height: 24px,
-
     border-top: 1px solid rgb(213, 213, 213),
     border-right: 0px,
     border-bottom: 1px solid rgb(213, 213, 213),
@@ -18,11 +15,13 @@
     padding-left: 16px,
     box-shadow: none,
 
-    title-icon-gap: 16px,
-    hover-title-bg-color: rgb(230, 230, 230),
-    title-bg-color: transparent,
-    icon-rotate: 180deg,
-    title-flex-direction: row,
+    title__icon--width: 24px,
+    title__icon--height: 24px,
+    title__hover--background: rgb(230, 230, 230),
+    title--background: transparent,
+    title__icon--rotate: 180deg,
+    title--gap: 16px,
+    title--flex-direction: row,
   )
 );
 
@@ -39,9 +38,9 @@
   summary {
     list-style: none;
     display: flex;
-    flex-direction: css.cssVar(title-flex-direction);
+    flex-direction: css.cssVar(title--flex-direction);
     align-items: center;
-    gap: css.cssVar(title-icon-gap);
+    gap: css.cssVar(title--gap);
 
     border-top: css.cssVar(border-top);
     border-right: css.cssVar(border-right);
@@ -50,10 +49,10 @@
     will-change: border-radius;
     transition: animation.standard(border-radius);
     border-radius: css.cssVar(border-radius);
-    background-color: css.cssVar(title-bg-color);
-    will-change: border-radius, background-color;
+    background: css.cssVar(title--background);
+    will-change: border-radius, background;
 
-    transition: animation.standard(background-color);
+    transition: animation.standard(background);
 
     position: relative;
     cursor: pointer;
@@ -64,14 +63,14 @@
     padding-left: css.cssVar(padding-left);
 
     &:hover {
-      background-color: css.cssVar(hover-title-bg-color);
+      background: css.cssVar(hover-title--background);
     }
     slot[name='icon'] {
       cursor: pointer;
 
       &::slotted(svg) {
-        width: css.cssVar(icon-width);
-        height: css.cssVar(icon-height);
+        width: css.cssVar(title__icon--width);
+        height: css.cssVar(title__icon--height);
         transform: rotate(0deg);
         transition: animation.standard(transform);
       }
@@ -82,14 +81,14 @@
       cursor: pointer;
 
       &::slotted(svg) {
-        width: css.cssVar(icon-width);
-        height: css.cssVar(icon-height);
+        width: css.cssVar(title__icon--width);
+        height: css.cssVar(title__icon--height);
       }
     }
 
     .default-icon {
-      width: css.cssVar(icon-width);
-      height: css.cssVar(icon-height);
+      width: css.cssVar(title__icon--width);
+      height: css.cssVar(title__icon--height);
       transform: rotate(0deg);
       transition: animation.standard(transform);
     }
@@ -128,11 +127,11 @@
       }
       slot[name='icon'] {
         &::slotted(svg) {
-          transform: rotate(css.cssVar(icon-rotate));
+          transform: rotate(css.cssVar(title__icon--rotate));
         }
       }
       .default-icon {
-        transform: rotate(css.cssVar(icon-rotate));
+        transform: rotate(css.cssVar(title__icon--rotate));
       }
     }
     .c2-details-content {

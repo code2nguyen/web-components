@@ -36,7 +36,7 @@
   "devDependencies": {
     "@c2n/checkbox": "*",
     "@c2n/config": "*",
-    "custom-elements-manifest": "^2.0.0"
+    "custom-elements-manifest": "1.0.0"
   },
   "publishConfig": {
     "access": "public",

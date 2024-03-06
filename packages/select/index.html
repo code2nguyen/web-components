@@ -16,13 +16,69 @@
         display: flex;
         align-items: center;
       }
-      .select1 {
-        /* --c2-list-border-top: none; */
+      .top-left {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 150px;
+        --c2-list--max-height: 100px;
+      }
+
+      .top-right {
+        position: absolute;
+        top: 20px;
+        right: 0px;
+      }
+
+      .bottom-left {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+      }
+
+      .bottom-right {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+      }
+
+      .bottom {
+        position: absolute;
+        bottom: -200px;
+        right: 20px;
       }
     </style>
   </head>
   <body>
-    <c2-select class="select1" value="item-1" style="border-radius: 4px">
+    <c2-select placeholder="Select item abc xys" class="top-left" fittarget multiple value="item-1" style="border-radius: 4px">
+      <c2-list-item value="item1">item-1 very long test</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+    </c2-select>
+
+    <c2-select class="top-right" value="item-1" style="border-radius: 4px">
+      <c2-list-item value="item1">item-1 item-1 very long test</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+    </c2-select>
+
+    <c2-select class="bottom-left" value="item-1" fittarget style="border-radius: 4px">
+      <c2-list-item value="item1">item-1 very long test</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+    </c2-select>
+
+    <c2-select class="bottom-right" value="item-1" style="border-radius: 4px">
+      <c2-list-item value="item1">item-1</c2-list-item>
+      <c2-list-item value="item2">item-2</c2-list-item>
+    </c2-select>
+
+    <c2-select class="bottom" value="item-1" style="border-radius: 4px">
       <c2-list-item value="item1">item-1</c2-list-item>
       <c2-list-item value="item2">item-2</c2-list-item>
     </c2-select>

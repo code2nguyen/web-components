@@ -1,4 +1,4 @@
-import type { ManifestDeclarationItem } from '../store/manifest-declaration-item'
+import type { AttributeDeclarationItem, CSSDeclarationItem } from '../store/manifest-declaration-item'
 
 export function closestElementSibling(currentElement: HTMLElement, selector: string): HTMLElement | null {
   const parent = getParent(currentElement)
@@ -16,17 +16,17 @@ export function closestElementSibling(currentElement: HTMLElement, selector: str
   return null
 }
 
-export function updateDomCssValue(element: HTMLElement, cssProperties: ManifestDeclarationItem[]) {
+export function updateDomCssValue(element: HTMLElement, cssProperties: CSSDeclarationItem[]) {
   cssProperties.forEach((cssVariable) => {
     if (cssVariable.value && cssVariable.value !== cssVariable.default) {
-      element.style.setProperty(cssVariable.name, cssVariable.value)
+      element.style.setProperty(cssVariable.cssVariable, cssVariable.value)
     } else {
-      element.style.removeProperty(cssVariable.name)
+      element.style.removeProperty(cssVariable.cssVariable)
     }
   })
 }
 
-export function updateDomAttribute(element: HTMLElement, manifestAttributes: ManifestDeclarationItem[]) {
+export function updateDomAttribute(element: HTMLElement, manifestAttributes: AttributeDeclarationItem[]) {
   manifestAttributes.forEach((attr) => {
     setElemenetAttribute(element, attr)
   })
@@ -44,8 +44,8 @@ export function getElemenetProperty(element: HTMLElement, propertyName: string):
   return JSON.stringify(value)
 }
 
-export function setElemenetAttribute(element: HTMLElement, attribute: ManifestDeclarationItem) {
-  if (attribute.value == null || attribute.value == undefined || (attribute.type?.text == 'boolean' && attribute.value === 'false')) {
+export function setElemenetAttribute(element: HTMLElement, attribute: AttributeDeclarationItem) {
+  if (attribute.value == null || attribute.value == undefined || (attribute.type == 'boolean' && attribute.value === 'false')) {
     element.removeAttribute(attribute.name)
   } else {
     element.setAttribute(attribute.name, attribute.value)

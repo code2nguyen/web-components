@@ -5,6 +5,13 @@ import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
 import { ListItem } from '@c2n/list-item'
 import { provide } from '@lit/context'
 import { arrayPropertyConverter } from '@c2n/wc-utils/lit-helper.js'
+
+export interface SelectionChangeEventDetail {
+  value: string[]
+  dislayText: string
+  data: unknown[]
+}
+
 /**
  * @tag c2-list
  *
@@ -57,14 +64,22 @@ export class List extends LitElement {
       : this.multiple
         ? [...this.data, target.data]
         : [target.data]
+    const displayText: string[] = []
 
+    for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
+      const listItem = slotItem instanceof ListItem ? slotItem : slotItem.firstChild
+      if (listItem instanceof ListItem && updatedValues.includes(listItem.value)) {
+        displayText.push(listItem.displayText)
+      }
+    }
     const dispatched = this.dispatchEvent(
-      new CustomEvent('selection-change', {
+      new CustomEvent<SelectionChangeEventDetail>('selection-change', {
         bubbles: true,
         cancelable: true,
         detail: {
           value: updatedValues,
           data: updatedData,
+          dislayText: displayText.join(' '),
         },
       }),
     )

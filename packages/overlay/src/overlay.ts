@@ -1,26 +1,24 @@
 import { LitElement, html, unsafeCSS, isServer, type PropertyValueMap } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
-import { computePosition, autoUpdate, flip, offset } from '@floating-ui/dom'
+import { computePosition, autoUpdate, flip } from '@floating-ui/dom'
 
 import styles from './overlay.scss?inline'
 import { type StyleInfo } from 'lit/directives/style-map.js'
 /**
  * @tag c2-overlay
  *
- * @slot default - This is a default/unnamed slot
+ * @slot default - Content of the overlay
  *
- * @event
- * @cssproperty
+ * @cssproperty {pixel} - [--c2-overlay--offset=8px] - The offset position of content base on trigger component
+ * @cssproperty {background} - [--c2-overlay__backdrop--background=transparent] - The background value of backdrop
  */
 @customElement('c2-overlay')
 export class Overlay extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @property({ type: Boolean, reflect: true }) open = false
-
-  @property() positioning: 'absolute' | 'fixed' = 'absolute'
-
-  @property({ type: Number }) offset = 8
+  @property({ type: String, reflect: true }) placement = 'bottom-start'
+  @property({ type: Boolean }) fitTarget = false
 
   private _target: HTMLElement | null | undefined = null
 
@@ -54,15 +52,23 @@ export class Overlay extends LitElement {
   }
 
   private updatePosition = async () => {
+    this.style.minWidth = `${this.target!.offsetWidth}px`
     const position = await computePosition(this.target!, this, {
       placement: 'bottom-start',
-      middleware: [offset(this.offset), flip()],
+      middleware: [flip()],
     })
-    console.log(position)
-    this.overlayStyle = {
+    const style: StyleInfo = {
       top: `${position.y}px`,
       left: `${position.x}px`,
+      'min-width': `${this.target!.offsetWidth}px`,
     }
+    if (this.fitTarget) {
+      style.width = `${this.target!.offsetWidth}px`
+    }
+
+    this.placement = position.placement
+    await this.updateComplete
+    this.overlayStyle = style
   }
 
   private syncPosition() {
@@ -88,7 +94,7 @@ export class Overlay extends LitElement {
   }
 
   protected override willUpdate(_changedProperties: PropertyValueMap<this>): void {
-    if (_changedProperties.has('open')) {
+    if (_changedProperties.has('open') && !isServer) {
       if (this.open) {
         this.showPopover()
       } else {

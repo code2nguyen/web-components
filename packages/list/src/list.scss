@@ -4,21 +4,29 @@
   $prefix: c2-list,
   $theme: (
     background: variables.$color-bg-lighter,
-    border-top-left-radius: inherit,
-    border-top-right-radius: inherit,
-    border-bottom-left-radius: inherit,
-    border-bottom-right-radius: inherit,
+    border-top-left-radius: initial,
+    border-top-right-radius: initial,
+    border-bottom-left-radius: initial,
+    border-bottom-right-radius: initial,
 
-    border-top: none,
-    border-right: none,
-    border-bottom: none,
-    border-left: none,
+    border-top: null,
+    border-right: null,
+    border-bottom: null,
+    border-left: null,
+    max-height: null,
   )
 );
 
 :host {
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
+
+  overflow: auto;
+  overscroll-behavior: contain;
+  pointer-events: initial;
+  max-height: css.cssVar(max-height);
 
   border-top: css.cssVar(border-top);
   border-bottom: css.cssVar(border-bottom);
@@ -33,12 +41,12 @@
   border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 
   ::slotted(c2-list-item:first-child) {
-    --c2-list-item-border-top-left-radius: #{css.cssVar(border-top-left-radius)};
-    --c2-list-item-border-top-right-radius: #{css.cssVar(border-top-right-radius)};
+    --c2-list-item--border-top-left-radius: #{css.cssVar(border-top-left-radius)};
+    --c2-list-item--border-top-right-radius: #{css.cssVar(border-top-right-radius)};
   }
   ::slotted(c2-list-item:last-child) {
-    --c2-list-item-border-bottom-left-radius: #{css.cssVar(border-bottom-left-radius)};
-    --c2-list-item-border-bottom-right-radius: #{css.cssVar(border-bottom-right-radius)};
+    --c2-list-item--border-bottom-left-radius: #{css.cssVar(border-bottom-left-radius)};
+    --c2-list-item--border-bottom-right-radius: #{css.cssVar(border-bottom-right-radius)};
   }
 }
 

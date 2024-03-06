@@ -1,32 +1,73 @@
-import type { ComponentManifest, ManifestDeclarationItem, StateCssProperties } from '../store/manifest-declaration-item'
-import * as changeCase from 'change-case'
+import type { CustomElement } from 'custom-elements-manifest/schema'
+
+import type {
+  AttributeDeclarationItem,
+  CSSDeclarationItem,
+  ComponentManifest,
+  EventDeclarationItem,
+  FlattenGroupedCssVariable,
+  GroupedCssVariables,
+} from '../store/manifest-declaration-item'
 import type { ManifestDataItem } from './types'
 import { cloneDeep } from 'lodash-es'
 import { getElemenetProperty } from './dom'
 
-export function normalizeManifest(value: ComponentManifest): ComponentManifest {
-  value.allCssProperties = value.cssProperties ? [...value.cssProperties] : []
-  value.stateCssProperties =
-    value.cssProperties
-      ?.filter((item) => item.type?.text.split(' - ').length == 2)
-      .reduce((result, item) => {
-        const [state, type] = item.type!.text.split(' - ')
-        const stateName = changeCase.capitalCase(state)
-        result[stateName] = result[stateName] ?? []
-        result[stateName].push({ ...item, ...{ type: { text: type } } })
-        return result
-      }, {} as StateCssProperties) ?? {}
-  value.cssProperties = value.cssProperties?.filter((item) => item.type?.text.split(' - ').length == 1) ?? []
+export function normalizeManifest(value: CustomElement): ComponentManifest {
   value.attributes = value.attributes ?? []
   value.attributes.forEach((attr) => {
     if (attr.default) attr.default = attr.default.replace(/^'|'$/g, '')
+    attr.name = attr.name.toLowerCase()
   })
-  return value
+
+  const attributes: AttributeDeclarationItem[] = value.attributes
+    .filter((item) => item.name)
+    .map((item) => {
+      return {
+        name: item.name,
+        type: item.type?.text ?? 'CustomEvent',
+        default: item.default ?? '',
+        description: item.description,
+      }
+    })
+  const cssProperties: CSSDeclarationItem[] =
+    value.cssProperties
+      ?.filter((item) => item.name)
+      .map((item) => {
+        const items = item.name.split('--')
+        const blocks = items.length > 1 ? items[1].split('__') : []
+        const property = items.length > 2 ? items[2] : ''
+        return {
+          cssVariable: item.name,
+          type: item.type?.text ?? '',
+          default: item.default,
+          blocks,
+          property,
+          description: item.description,
+        }
+      }) ?? []
+  const events: EventDeclarationItem[] =
+    value.events
+      ?.filter((item) => item.name)
+      .map((item) => {
+        return {
+          name: item.name,
+          type: item.type?.text ?? '',
+          description: item.description,
+        }
+      }) ?? []
+
+  return {
+    host: {},
+    attributes,
+    cssProperties,
+    events,
+    tagName: value.tagName ?? '',
+  }
 }
 
-export function updateManifestCssValue(element: HTMLElement, cssProperties: ManifestDeclarationItem[]) {
+export function updateManifestCssValue(element: HTMLElement, cssProperties: CSSDeclarationItem[]) {
   cssProperties.forEach((cssVariable) => {
-    const cssVariableValue = element.computedStyleMap().get(cssVariable.name) as CSSUnparsedValue
+    const cssVariableValue = element.computedStyleMap().get(cssVariable.cssVariable) as CSSUnparsedValue
     if (cssVariableValue && cssVariableValue.length > 0) {
       cssVariable.value = [...cssVariableValue.values()][0].toString()
     } else {
@@ -35,7 +76,7 @@ export function updateManifestCssValue(element: HTMLElement, cssProperties: Mani
   })
 }
 
-export function updateManifestAttributes(element: HTMLElement, attributes: ManifestDeclarationItem[]) {
+export function updateManifestAttributes(element: HTMLElement, attributes: AttributeDeclarationItem[]) {
   attributes.forEach((attr) => {
     const attrValue = getElemenetProperty(element, attr.name)
     attr.value = attrValue
@@ -58,11 +99,52 @@ export function getComponentManifestData(element: HTMLElement, defaultManifest: 
   }
 
   updateManifestCssValue(element, computedManifest.cssProperties)
-
-  Object.keys(computedManifest.stateCssProperties).forEach((state) => {
-    updateManifestCssValue(element, computedManifest.stateCssProperties![state])
-  })
   updateManifestAttributes(element, computedManifest.attributes)
 
   return computedManifest
+}
+
+export function groupCssProperties(cssProperties: CSSDeclarationItem[]): GroupedCssVariables[] {
+  const groupedCssProperties: GroupedCssVariables[] = []
+  for (const item of cssProperties) {
+    let cursor = groupedCssProperties
+    for (const [index, groupName] of item.blocks.entries()) {
+      let group = cursor.find((iter) => iter.groupName == groupName)
+      if (!group) {
+        group = { groups: item.blocks.slice(0, index + 1), groupName, cssProperties: [], subGroups: [], level: index }
+        cursor.push(group)
+      }
+      if (index == item.blocks.length - 1) {
+        group.cssProperties.push(item)
+      } else {
+        cursor = group.subGroups
+      }
+    }
+  }
+  return groupedCssProperties
+}
+
+export function flatGroupCssProperties(groupedCssProperties: GroupedCssVariables[]): FlattenGroupedCssVariable[] {
+  const result: FlattenGroupedCssVariable[] = []
+
+  for (const group of groupedCssProperties) {
+    result.push({
+      groupName: group.groupName,
+      fullGroupName: group.groups.join(' > '),
+      level: group.level,
+    })
+    for (const cssProperty of group.cssProperties) {
+      result.push({
+        groupName: group.groupName,
+        fullGroupName: group.groups.join(' > '),
+        level: group.level,
+        cssProperty: cssProperty,
+      })
+    }
+    if (group.subGroups.length > 0) {
+      const flattenSubGroup = flatGroupCssProperties(group.subGroups)
+      result.push(...flattenSubGroup)
+    }
+  }
+  return result
 }

@@ -3,9 +3,6 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-expansion-panel,
   $theme: (
-    icon-width: 24px,
-    icon-height: 24px,
-
     border-top: 1px solid variables.$color-border-light,
     border-bottom: 1px solid variables.$color-border-light,
     border-right: 1px solid variables.$color-border-light,
@@ -18,10 +15,12 @@
     padding-left: 16px,
     box-shadow: none,
 
-    title-icon-gap: 16px,
-    hover-title-bg-color: variables.$color-bg-dark,
-    title-bg-color: transparent,
-    icon-rotate: 180deg,
+    title__icon--width: 24px,
+    title__title__icon--height: 24px,
+    title--gap: 16px,
+    title__hover--background: variables.$color-bg-dark,
+    title--background: transparent,
+    title__icon--rotate: 180deg,
   )
 );
 
@@ -51,8 +50,8 @@
       slot[name='icon'] {
         cursor: pointer;
         &::slotted(svg) {
-          width: css.cssVar(icon-width);
-          height: css.cssVar(icon-height);
+          width: css.cssVar(title__icon--width);
+          height: css.cssVar(title__icon--height);
           transform: rotate(0deg);
           will-change: transform;
           transition: animation.standard(transform);
@@ -63,14 +62,14 @@
         display: none;
         cursor: pointer;
         &::slotted(svg) {
-          width: css.cssVar(icon-width);
-          height: css.cssVar(icon-height);
+          width: css.cssVar(title__icon--width);
+          height: css.cssVar(title__icon--height);
         }
       }
 
       .default-icon {
-        width: css.cssVar(icon-width);
-        height: css.cssVar(icon-height);
+        width: css.cssVar(title__icon--width);
+        height: css.cssVar(title__icon--height);
         transform: rotate(0deg);
         will-change: transform;
         transition: animation.standard(transform);
@@ -80,17 +79,17 @@
         border-radius: inherit;
         display: flex;
         align-items: center;
-        gap: css.cssVar(title-icon-gap);
-        background-color: css.cssVar(title-bg-color);
+        gap: css.cssVar(title--gap);
+        background: css.cssVar(title--background);
         padding-top: css.cssVar(padding-top);
         padding-right: css.cssVar(padding-right);
         padding-bottom: css.cssVar(padding-bottom);
         padding-left: css.cssVar(padding-left);
         position: relative;
         cursor: pointer;
-        transition: animation.standard(background-color);
+        transition: animation.standard(background);
         &:hover {
-          background-color: css.cssVar(hover-title-bg-color);
+          background: css.cssVar(title__hover--background);
         }
         .c2-expansion-panel-header-title-content {
           flex: 1;
@@ -169,11 +168,11 @@
       }
       slot[name='icon'] {
         &::slotted(svg) {
-          transform: rotate(css.cssVar(icon-rotate));
+          transform: rotate(css.cssVar(title__icon--rotate));
         }
       }
       .default-icon {
-        transform: rotate(css.cssVar(icon-rotate));
+        transform: rotate(css.cssVar(title__icon--rotate));
       }
     }
     .c2-expansion-panel-content {
@@ -193,7 +192,7 @@
     .c2-expansion-panel-header {
       .c2-expansion-panel-header-title {
         &:hover {
-          background-color: inherit;
+          background: inherit;
         }
       }
     }
