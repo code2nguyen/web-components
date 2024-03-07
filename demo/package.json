@@ -24,7 +24,17 @@
     "nanostores": "0.9.5",
     "sass": "1.70.0",
     "unist-util-visit": "^5.0.0",
-    "lodash-es": "4.17.21"
+    "lodash-es": "4.17.21",
+    "@fontsource/anonymous-pro": "latest",
+    "@fontsource/caveat": "latest",
+    "@fontsource/crimson-text": "latest",
+    "@fontsource/ibm-plex-mono": "latest",
+    "@fontsource/inter": "latest",
+    "@fontsource/pacifico": "latest",
+    "@fontsource/playfair-display": "latest",
+    "@fontsource/roboto": "latest",
+    "@fontsource/roboto-mono": "latest",
+    "@fontsource/source-serif-pro": "latest"
   },
   "devDependencies": {
     "@types/lodash-es": "4.17.12",

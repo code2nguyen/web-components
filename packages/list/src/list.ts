@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './list.scss?inline'
 import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
@@ -49,11 +49,12 @@ export class List extends LitElement {
   private handleListItemClick(event: Event) {
     const target = event.target
     if (target instanceof ListItem) {
-      this.dispatchSelectionChangeEvent(target)
+      this.updateValueAndData(target)
+      this.dispatchSelectionChangeEvent()
     }
   }
 
-  private dispatchSelectionChangeEvent(target: ListItem) {
+  private updateValueAndData(target: ListItem) {
     const updatedValues = this.value.includes(target.value)
       ? this.value.filter((item) => item !== target.value)
       : this.multiple
@@ -64,28 +65,34 @@ export class List extends LitElement {
       : this.multiple
         ? [...this.data, target.data]
         : [target.data]
-    const displayText: string[] = []
+    this.value = updatedValues
+    this.data = updatedData
+  }
 
+  private dispatchSelectionChangeEvent() {
+    const displayText: string[] = []
     for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
       const listItem = slotItem instanceof ListItem ? slotItem : slotItem.firstChild
-      if (listItem instanceof ListItem && updatedValues.includes(listItem.value)) {
+      if (listItem instanceof ListItem && this.value.includes(listItem.value)) {
         displayText.push(listItem.displayText)
       }
     }
-    const dispatched = this.dispatchEvent(
+    this.dispatchEvent(
       new CustomEvent<SelectionChangeEventDetail>('selection-change', {
         bubbles: true,
         cancelable: true,
         detail: {
-          value: updatedValues,
-          data: updatedData,
+          value: this.value,
+          data: this.data,
           dislayText: displayText.join(' '),
         },
       }),
     )
-    if (dispatched) {
-      this.value = updatedValues
-      this.data = updatedData
+  }
+
+  protected override firstUpdated(_changedProperties: PropertyValueMap<this>): void {
+    if (this.value && this.value.length > 0) {
+      this.dispatchSelectionChangeEvent()
     }
   }
 

@@ -6,6 +6,7 @@ import '@c2n/overlay'
 import '@c2n/list'
 import type { SelectionChangeEventDetail } from '@c2n/list'
 import { arrayPropertyConverter } from '@c2n/wc-utils/lit-helper.js'
+import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 /**
  * @tag c2-select
  *
@@ -18,7 +19,7 @@ import { arrayPropertyConverter } from '@c2n/wc-utils/lit-helper.js'
  * @cssproperty {color} [--c2-select__button--color=initial]
  * @cssproperty {pixel} [--c2-select__button--gap=4px]
  *
- * @cssproperty {font-size} [--c2-select__button--font-size=14]
+ * @cssproperty {font-size} [--c2-select__button--font-size=14px]
  * @cssproperty {font-weight} --c2-select__button--font-weight
  * @cssproperty {font-style} [--c2-select__button--font-style=normal]
  * @cssproperty {font-family} --c2-select__button--font-family
@@ -131,6 +132,8 @@ export class Select extends LitElement {
     if (!this.multiple) {
       this.toggle(false)
     }
+
+    redispatchEvent(this, event)
   }
 
   private handleOverlayToggle(event: Event) {
@@ -162,7 +165,9 @@ export class Select extends LitElement {
         <slot name="button-icon">${this.renderButtonIcon()}</slot>
       </button>
       <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fittarget=${this.fitTarget}>
-        <c2-list id="list" class="list" ?multiple=${this.multiple} @selection-change=${this.handleSelectionChange}> <slot></slot> </c2-list>
+        <c2-list id="list" .value=${this.value} class="list" ?multiple=${this.multiple} @selection-change=${this.handleSelectionChange}>
+          <slot></slot>
+        </c2-list>
       </c2-overlay>
     </div> `
   }

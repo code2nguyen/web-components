@@ -16,9 +16,9 @@ import './PaddingConfig'
 import './BorderRadiusConfig'
 import './FontConfig'
 
-import type { AttributeDeclarationItem, CSSDeclarationItem, ComponentManifests, GroupedCssVariables } from '../../store/manifest-declaration-item'
+import type { AttributeDeclarationItem, CSSDeclarationItem } from '../../store/manifest-declaration-item'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils'
-import { BORDER_RADIUS_ORDER, PADDING_ORDER } from '../../utils/dom'
+import { BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER } from '../../utils/dom'
 
 interface UpdateValue {
   name: string
@@ -271,10 +271,29 @@ export class ComponentConfigurationPanel extends LitElement {
     return cssProperties
   }
 
+  renderFontConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const fontVariables = cssProperties.filter((item) => {
+      return FONT_PROPERTY.includes(item.property)
+    })
+    if (fontVariables.length > 0) {
+      result.push(html`
+        <demo-font-config
+          .names=${fontVariables.map((i) => i.cssVariable)}
+          .values=${fontVariables.map((i) => this.getValueOrDefaultValue(i))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-font-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !fontVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
   renderElementCssPropertiesContent(cssProperties: CSSDeclarationItem[]) {
     const result: TemplateResult[] = []
     cssProperties = this.renderPaddingConfig(cssProperties, result)
     cssProperties = this.renderBorderRadiusConfig(cssProperties, result)
+    cssProperties = this.renderFontConfig(cssProperties, result)
 
     return [
       ...result,
@@ -301,7 +320,6 @@ export class ComponentConfigurationPanel extends LitElement {
               </svg>
               <div class="css-input-group-content">
                 ${this.renderElementCssPropertiesContent(groupCssVariables.cssProperties)}
-                <demo-font-config></demo-font-config>
               <div>
             </c2-details>`
           })}
