@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
+import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './list.scss?inline'
 import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
@@ -8,7 +8,6 @@ import { arrayPropertyConverter } from '@c2n/wc-utils/lit-helper.js'
 
 export interface SelectionChangeEventDetail {
   value: string[]
-  dislayText: string
   data: unknown[]
 }
 
@@ -70,13 +69,6 @@ export class List extends LitElement {
   }
 
   private dispatchSelectionChangeEvent() {
-    const displayText: string[] = []
-    for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
-      const listItem = slotItem instanceof ListItem ? slotItem : slotItem.firstChild
-      if (listItem instanceof ListItem && this.value.includes(listItem.value)) {
-        displayText.push(listItem.displayText)
-      }
-    }
     this.dispatchEvent(
       new CustomEvent<SelectionChangeEventDetail>('selection-change', {
         bubbles: true,
@@ -84,16 +76,9 @@ export class List extends LitElement {
         detail: {
           value: this.value,
           data: this.data,
-          dislayText: displayText.join(' '),
         },
       }),
     )
-  }
-
-  protected override firstUpdated(_changedProperties: PropertyValueMap<this>): void {
-    if (this.value && this.value.length > 0) {
-      this.dispatchSelectionChangeEvent()
-    }
   }
 
   override render() {

@@ -2,11 +2,14 @@ import { LitElement, html, svg, unsafeCSS, type PropertyValueMap } from 'lit'
 import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './select.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
-import '@c2n/overlay'
-import '@c2n/list'
 import type { SelectionChangeEventDetail } from '@c2n/list'
+import { ListItem } from '@c2n/list-item'
 import { arrayPropertyConverter } from '@c2n/wc-utils/lit-helper.js'
 import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
+
+import '@c2n/overlay'
+import '@c2n/list'
+
 /**
  * @tag c2-select
  *
@@ -31,14 +34,16 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
  *
  * @cssproperty {border} [--c2-select__button--border-top=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-select__button--border-right=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-select__button--border-buttom=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-select__button--border-bottom=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-select__button--border-left=1px solid rgb(177, 177, 177)]
  *
  * @cssproperty {border} [--c2-select__button__hover--border-top=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-select__button__hover--border-right=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-select__button__hover--border-buttom=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-select__button__hover--border-bottom=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-select__button__hover--border-left=1px solid rgb(177, 177, 177)]
- *
+ * @cssproperty {background} [--c2-select__button__hover--background=rgb(253, 253, 253)]
+ * @cssproperty {color} [--c2-select__button__hover--color=initial]
+
  * @cssproperty {number} --c2-select__placeholder--font-weight
  * @cssproperty {font-style} --c2-select__placeholder--font-style
  * @cssproperty {color} --c2-select__placeholder--color
@@ -49,12 +54,12 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 export class Select extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  @property({ type: Boolean, reflect: true }) public open = false
-  @property({ type: Boolean, reflect: true }) public readonly = false
-  @property({ type: Boolean, reflect: true }) public disabled = false
-  @property({ type: Boolean, reflect: true }) public focused = false
+  @property({ type: Boolean, reflect: true }) open = false
+  @property({ type: Boolean, reflect: true }) readonly = false
+  @property({ type: Boolean, reflect: true }) disabled = false
+  @property({ type: Boolean, reflect: true }) focused = false
   @property({ type: Boolean }) fitTarget = false
-  @property({ type: String }) public placeholder = ''
+  @property({ type: String }) placeholder = ''
   @property({ type: Boolean }) multiple: boolean = false
 
   /**
@@ -64,22 +69,24 @@ export class Select extends LitElement {
     converter: arrayPropertyConverter,
     reflect: true,
   })
-  public value: string[] = []
+  value: string[] = []
 
-  @state()
-  private displayText?: string
+  @query('#button', true) public button!: HTMLButtonElement
+  @query('#menu-overlay', true) public menu!: HTMLElement
+  @query('slot:not([name])', true) public listItemSlot?: HTMLSlotElement
 
-  @query('#button') public button!: HTMLButtonElement
-  @query('#menu-overlay') public menu!: HTMLElement
+  @state() private displayText = ''
+
+  protected childItemsUpdated!: Promise<unknown[]>
 
   data: unknown[] = []
 
-  public onButtonBlur(): void {
+  private onButtonBlur(): void {
     this.focused = false
     this.button.removeEventListener('keydown', this.onKeydown)
   }
 
-  protected onKeydown = (event: KeyboardEvent): void => {
+  private onKeydown = (event: KeyboardEvent): void => {
     this.focused = true
     if (event.code !== 'ArrowDown' && event.code !== 'ArrowUp') {
       return
@@ -106,8 +113,36 @@ export class Select extends LitElement {
     }
   }
 
-  public onButtonFocus(): void {
+  private onButtonFocus(): void {
     this.button.addEventListener('keydown', this.onKeydown)
+  }
+
+  private prepareGetDisplayText() {
+    const updates: Promise<unknown>[] = [new Promise((res) => requestAnimationFrame(() => res(true)))]
+    if (this.listItemSlot) {
+      for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
+        const listItem = slotItem instanceof ListItem ? slotItem : (slotItem.firstChild as ListItem)
+        if (listItem instanceof ListItem && this.value.includes(listItem.value)) {
+          updates.push(listItem.updateComplete)
+        }
+      }
+    }
+    this.childItemsUpdated = Promise.all(updates)
+  }
+
+  private async updateDisplayText() {
+    this.prepareGetDisplayText()
+    await this.updateComplete
+    const displayText: string[] = []
+    if (this.listItemSlot) {
+      for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
+        const listItem = slotItem instanceof ListItem ? slotItem : (slotItem.firstChild as ListItem)
+        if (listItem instanceof ListItem && this.value.includes(listItem.value)) {
+          displayText.push(listItem.displayText)
+        }
+      }
+    }
+    this.displayText = displayText.join(' ')
   }
 
   private renderButtonContent() {
@@ -128,7 +163,6 @@ export class Select extends LitElement {
   private handleSelectionChange(event: CustomEvent<SelectionChangeEventDetail>) {
     this.value = event.detail.value
     this.data = event.detail.data
-    this.displayText = event.detail.dislayText
     if (!this.multiple) {
       this.toggle(false)
     }
@@ -145,6 +179,19 @@ export class Select extends LitElement {
     if (_changedProperties.has('open')) {
       this.toggle(this.open)
     }
+    if (_changedProperties.has('value')) {
+      this.updateDisplayText()
+    }
+  }
+
+  protected override async getUpdateComplete(): Promise<boolean> {
+    const complete = (await super.getUpdateComplete()) as boolean
+    await this.childItemsUpdated
+    return complete
+  }
+
+  private handleSlotChange() {
+    this.updateDisplayText()
   }
 
   override render() {
@@ -166,7 +213,7 @@ export class Select extends LitElement {
       </button>
       <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fittarget=${this.fitTarget}>
         <c2-list id="list" .value=${this.value} class="list" ?multiple=${this.multiple} @selection-change=${this.handleSelectionChange}>
-          <slot></slot>
+          <slot @slotchange=${this.handleSlotChange}></slot>
         </c2-list>
       </c2-overlay>
     </div> `

@@ -40,7 +40,6 @@ export class PaddingConfig extends LitElement {
         --c2-text-field--border-left: 1px solid transparent;
         --c2-text-field--border-bottom: 1px solid transparent;
         --c2-text-field--border-right: 1px solid transparent;
-        --c2-text-field--background: transparent;
 
         --c2-text-field__focus--border-top: 1px solid var(--logo-color-1);
         --c2-text-field__focus--border-left: 1px solid var(--logo-color-1);

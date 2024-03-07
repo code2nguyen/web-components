@@ -55,6 +55,9 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-checkbox__state-layer--size: 28px;
         --c2-checkbox__container--height: 16px;
         --c2-checkbox__container--width: 16px;
+
+        --c2-select__button--background: transparent;
+        --c2-text-field--background: transparent;
       }
 
       c2-text-field.number {
@@ -87,7 +90,7 @@ export class ComponentConfigurationPanel extends LitElement {
         padding-bottom: 4px;
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 8px;
       }
       .row {
         display: flex;

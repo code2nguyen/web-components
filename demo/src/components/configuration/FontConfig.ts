@@ -21,6 +21,7 @@ export class FontConfig extends LitElement {
         display: flex;
         flex-wrap: wrap;
         align-item: center;
+        justify-content: flex-end;
         padding: 0px 0px;
         gap: 4px;
         --c2-select__button--padding-left: 4px;
@@ -98,7 +99,7 @@ export class FontConfig extends LitElement {
 
   private handleSelectionChange(event: CustomEvent) {
     const selectEl = event.target as HTMLElement
-    const value = event.detail.value.length > 0 ? event.detail.value[0] : undefined
+    const value = event.detail.value.length > 0 ? event.detail.value[0] : null
     if (selectEl.id == 'font-family') {
       if (value) {
         selectEl.style.setProperty('--c2-select__button--font-family', value)
