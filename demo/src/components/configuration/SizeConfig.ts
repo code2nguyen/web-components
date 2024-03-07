@@ -11,36 +11,36 @@ export class SizeConfig extends LitElement {
       :host {
         display: block;
 
-        --c2-checkbox-uncheckmark-color: var(--primary-text-color);
-        --c2-checkbox-checkmark-color: var(--primary-text-color);
-        --c2-checkbox-container-border-width: 0px;
-        --c2-checkbox-state-layer-hover-unselected-color: transparent;
-        --c2-checkbox-container-enabled-selected-color: transparent;
-        --c2-checkbox-state-layer-hover-selected-color: transparent;
-        --c2-checkbox-touch-target-size: 16px;
-        --c2-checkbox-container-height: 16px;
-        --c2-checkbox-checkmark-size: 16px;
-        --c2-checkbox-uncheckmark-size: 16px;
-        --c2-checkbox-state-layer-size: 16px;
+        --c2-checkbox__uncheckmark--color: var(--primary-text-color);
+        --c2-checkbox__checkmark--color: var(--primary-text-color);
+        --c2-checkbox__container--border: none;
+        --c2-checkbox__container__selected--color: transparent;
+        --c2-checkbox__state-layer__hover__unselected--color: transparent;
+        --c2-checkbox__state-layer__hover__selected--color: transparent;
+        --c2-checkbox__touchable--size: 16px;
+        --c2-checkbox__container--height: 16px;
+        --c2-checkbox__checkmark--size: 16px;
+        --c2-checkbox__uncheckmark--size: 16px;
+        --c2-checkbox__state-layer--size: 16px;
 
-        --c2-text-field-padding-left: 0px;
-        --c2-text-field-border-top: 1px solid transparent;
-        --c2-text-field-border-left: 1px solid transparent;
-        --c2-text-field-border-bottom: 1px solid transparent;
-        --c2-text-field-border-right: 1px solid transparent;
-        --c2-text-field-bg-color: transparent;
+        --c2-text-field--padding-left: 0px;
+        --c2-text-field--border-top: 1px solid transparent;
+        --c2-text-field--border-left: 1px solid transparent;
+        --c2-text-field--border-bottom: 1px solid transparent;
+        --c2-text-field--border-right: 1px solid transparent;
+        --c2-text-field--background: transparent;
 
-        --c2-text-field-focus-border-top: 1px solid var(--logo-color-1);
-        --c2-text-field-focus-border-left: 1px solid var(--logo-color-1);
-        --c2-text-field-focus-border-bottom: 1px solid var(--logo-color-1);
-        --c2-text-field-focus-border-right: 1px solid var(--logo-color-1);
+        --c2-text-field__focus--border-top: 1px solid var(--logo-color-1);
+        --c2-text-field__focus--border-left: 1px solid var(--logo-color-1);
+        --c2-text-field__focus--border-bottom: 1px solid var(--logo-color-1);
+        --c2-text-field__focus--border-right: 1px solid var(--logo-color-1);
       }
       .text-prefix {
         padding: 0px 4px;
       }
       .container {
         display: grid;
-        grid-template-columns: 1fr 1fr 18px;
+        grid-template-columns: 1fr 1fr 28px;
         grid-auto-flow: column;
         align-items: center;
         gap: 4px;

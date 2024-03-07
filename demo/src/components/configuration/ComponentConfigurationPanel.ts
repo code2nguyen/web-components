@@ -32,6 +32,8 @@ export class ComponentConfigurationPanel extends LitElement {
         display: block;
         font-size: 0.7rem;
         --c2-details--border-top: none;
+        --c2-details--border-left: none;
+        --c2-details--border-right: none;
 
         --c2-details__header--padding-top: 12px;
         --c2-details__header--padding-right: 12px;
@@ -47,6 +49,11 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-text-field--font-size: 0.7rem;
         --c2-text-field--padding-top: 6px;
         --c2-text-field--padding-bottom: 6px;
+
+        --c2-checkbox__touchable--size: 24px;
+        --c2-checkbox__state-layer--size: 28px;
+        --c2-checkbox__container--height: 16px;
+        --c2-checkbox__container--width: 16px;
       }
 
       c2-text-field.number {
@@ -307,9 +314,11 @@ export class ComponentConfigurationPanel extends LitElement {
           <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
             <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
           </svg>
-          ${this.configStore.value.attributes.map((attr) => {
-            return this.generateAttributeInput(attr)
-          })}
+          <div class="css-input-group-content">
+            ${this.configStore.value.attributes.map((attr) => {
+              return this.generateAttributeInput(attr)
+            })}
+          </div>
         </c2-details>`
       : nothing
   }
