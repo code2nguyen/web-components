@@ -38,9 +38,10 @@ import { arrayPropertyConverter } from '@c2n/wc-utils/lit-helper.js'
  * @cssproperty {border} [--c2-select__button__hover--border-buttom=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-select__button__hover--border-left=1px solid rgb(177, 177, 177)]
  *
- * @cssproperty {number} --c2-select__place-holder--font-weight
- * @cssproperty {font-style} --c2-select__place-holder--font-style
- * @cssproperty {color} --c2-select__place-holder--color
+ * @cssproperty {number} --c2-select__placeholder--font-weight
+ * @cssproperty {font-style} --c2-select__placeholder--font-style
+ * @cssproperty {color} --c2-select__placeholder--color
+ * @cssproperty {number} --c2-select__placeholder--opacity
  *
  */
 @customElement('c2-select')

@@ -14,6 +14,7 @@ import '@c2n/text-field'
 import './SizeConfig'
 import './PaddingConfig'
 import './BorderRadiusConfig'
+import './FontConfig'
 
 import type { AttributeDeclarationItem, CSSDeclarationItem, ComponentManifests, GroupedCssVariables } from '../../store/manifest-declaration-item'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils'
@@ -300,6 +301,7 @@ export class ComponentConfigurationPanel extends LitElement {
               </svg>
               <div class="css-input-group-content">
                 ${this.renderElementCssPropertiesContent(groupCssVariables.cssProperties)}
+                <demo-font-config></demo-font-config>
               <div>
             </c2-details>`
           })}

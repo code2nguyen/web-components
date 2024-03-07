@@ -16,6 +16,11 @@
     font-style: normal,
     font-family: null,
 
+    placeholder--opacity: 0.5,
+    placeholder--font-weight: null,
+    placeholder--font-style: null,
+    placeholder--color: null,
+
     border-top: 1px solid variables.$color-border,
     border-bottom: 1px solid variables.$color-border,
     border-right: 1px solid variables.$color-border,
@@ -102,8 +107,10 @@
     padding-left: css.cssVar(padding-left);
 
     &::placeholder {
-      color: currentColor;
-      opacity: 0.5;
+      font-weight: css.cssVar(placeholder--font-weight);
+      font-style: css.cssVar(placeholder--font-style);
+      color: css.cssVar(placeholder--color);
+      opacity: css.cssVar(placeholder--opacity);
     }
 
     @media (forced-colors: active) {

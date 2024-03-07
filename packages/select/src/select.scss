@@ -42,9 +42,10 @@
     button__hover--background: variables.$color-bg-dark,
     button__hover--color: initial,
 
-    place-holder--font-weight: null,
-    place-holder--font-style: null,
-    place-holder--color: null,
+    placeholder--font-weight: null,
+    placeholder--font-style: null,
+    placeholder--color: null,
+    placeholder--opacity: 0.5,
   )
 );
 
@@ -115,9 +116,10 @@
   }
 
   .placeholder {
-    font-weight: css.cssVar(place-holder--font-weight);
-    font-style: css.cssVar(place-holder--font-style);
-    color: css.cssVar(place-holder--color);
+    font-weight: css.cssVar(placeholder--font-weight);
+    font-style: css.cssVar(placeholder--font-style);
+    color: css.cssVar(placeholder--color);
+    opacity: css.cssVar(placeholder--opacity);
   }
   .button-content {
     overflow: hidden;
