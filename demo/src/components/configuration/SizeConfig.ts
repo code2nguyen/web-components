@@ -22,6 +22,7 @@ export class SizeConfig extends LitElement {
         --c2-checkbox-checkmark-size: 16px;
         --c2-checkbox-uncheckmark-size: 16px;
         --c2-checkbox-state-layer-size: 16px;
+
         --c2-text-field-padding-left: 0px;
         --c2-text-field-border-top: 1px solid transparent;
         --c2-text-field-border-left: 1px solid transparent;
@@ -91,5 +92,11 @@ export class SizeConfig extends LitElement {
         </svg>
       </c2-checkbox>
     </div>`
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'demo-size-config': SizeConfig
   }
 }

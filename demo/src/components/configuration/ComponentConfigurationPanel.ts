@@ -1,7 +1,7 @@
-import { LitElement, html, css, nothing } from 'lit'
+import { LitElement, html, css, nothing, type TemplateResult } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import { StoreController } from '@nanostores/lit'
-
+import { classMap } from 'lit/directives/class-map.js'
 import { $configStore } from '../../store/config-store'
 import './GenerateCodeBlock'
 import * as changeCase from 'change-case'
@@ -12,8 +12,12 @@ import '@c2n/label'
 import '@c2n/checkbox'
 import '@c2n/text-field'
 import './SizeConfig'
-import type { AttributeDeclarationItem, CSSDeclarationItem, ComponentManifests } from '../../store/manifest-declaration-item'
+import './PaddingConfig'
+import './BorderRadiusConfig'
+
+import type { AttributeDeclarationItem, CSSDeclarationItem, ComponentManifests, GroupedCssVariables } from '../../store/manifest-declaration-item'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils'
+import { BORDER_RADIUS_ORDER, PADDING_ORDER } from '../../utils/dom'
 
 interface UpdateValue {
   name: string
@@ -39,6 +43,14 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-details__header__icon--width: 12px;
         --c2-details__header__icon--height: 12px;
         --c2-details__header__hover--background-color: transparent;
+
+        --c2-text-field--font-size: 0.7rem;
+        --c2-text-field--padding-top: 6px;
+        --c2-text-field--padding-bottom: 6px;
+      }
+
+      c2-text-field.number {
+        width: 80px;
       }
 
       c2-details:not(.sub-details):first-of-type {
@@ -54,6 +66,7 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-details--border-top: none;
         --c2-details__content--padding-left: 12px;
         --c2-details__content--padding-right: 12px;
+        --c2-details__content--padding-bottom: 0px;
       }
 
       c2-details:has(> .sub-details) {
@@ -61,6 +74,13 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-details__content--padding-right: 0px;
       }
 
+      .css-input-group-content {
+        padding-top: 4px;
+        padding-bottom: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
       .row {
         display: flex;
         align-items: center;
@@ -93,10 +113,13 @@ export class ComponentConfigurationPanel extends LitElement {
     </div>`
   }
 
-  generateStringInput(label: string, name: string, value: string) {
+  generateStringInput(label: string, name: string, value: string, type: string) {
+    const classes = {
+      number: type == 'pixel' || type == 'number',
+    }
     return html` <div class="row">
       <c2-label for=${name}>${label}</c2-label>
-      <c2-text-field @change=${this.handleTextInputChange} id=${name} .value=${value}></c2-text-field>
+      <c2-text-field class=${classMap(classes)} @change=${this.handleTextInputChange} id=${name} .value=${value}></c2-text-field>
     </div>`
   }
 
@@ -119,6 +142,19 @@ export class ComponentConfigurationPanel extends LitElement {
       value: target.value,
     }
     this.updateStore(updatedValue)
+  }
+
+  handleCustomConfigChange(event: CustomEvent) {
+    const detail = event.detail as Record<string, string>
+    if (!$configStore.value) return
+
+    for (const [key, value] of Object.entries(detail)) {
+      const updatedValue: UpdateValue = {
+        name: key,
+        value: value,
+      }
+      this.updateStore(updatedValue)
+    }
   }
 
   private updateStore(updateValue: UpdateValue) {
@@ -149,19 +185,95 @@ export class ComponentConfigurationPanel extends LitElement {
   // }
 
   generateAttributeInput(attr: AttributeDeclarationItem) {
+    const value = this.getValueOrDefaultValue(attr)
+
     switch (attr.type) {
       case 'boolean':
-        return this.generateBooleanInput(attr.name, attr.name, attr.value !== undefined ? attr.value : attr.default ?? 'false')
+        return this.generateBooleanInput(attr.name, attr.name, value)
       default:
-        return this.generateStringInput(attr.name, attr.name, attr.value !== undefined ? attr.value : attr.default ?? '')
+        return this.generateStringInput(attr.name, attr.name, value, attr.type)
     }
   }
 
-  generateCssVariableInput(attr: CSSDeclarationItem) {
-    switch (attr.type) {
+  getValueOrDefaultValue(item: CSSDeclarationItem | AttributeDeclarationItem) {
+    return item.value !== undefined ? item.value : item.default ?? (item.type == 'boolean' ? 'false' : '')
+  }
+
+  generateCssVariableInput(cssDeclaration: CSSDeclarationItem) {
+    const value = this.getValueOrDefaultValue(cssDeclaration)
+    switch (cssDeclaration.type) {
+      case 'pixel':
+        return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
       default:
-        return this.generateStringInput(attr.cssVariable, attr.cssVariable, attr.value !== undefined ? attr.value : attr.default ?? '')
+        return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
     }
+  }
+
+  renderPaddingConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const paddingVariables = cssProperties
+      .filter((item) => {
+        return item.type == 'padding' || item.property.startsWith('padding')
+      })
+      .sort((a, b) => {
+        const aOrder = PADDING_ORDER.indexOf(a.property)
+        const bOrder = PADDING_ORDER.indexOf(b.property)
+        return aOrder - bOrder
+      })
+
+    if (paddingVariables.length > 0) {
+      result.push(html`
+        <demo-padding-config
+          .name=${paddingVariables.length == 1 ? paddingVariables[0].cssVariable : paddingVariables.map((i) => i.cssVariable)}
+          .value=${paddingVariables.length == 1
+            ? this.getValueOrDefaultValue(paddingVariables[0])
+            : paddingVariables.map((i) => this.getValueOrDefaultValue(i))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-padding-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !paddingVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
+  renderBorderRadiusConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const borderRadiusVariables = cssProperties
+      .filter((item) => {
+        return item.type == 'border-radius' || BORDER_RADIUS_ORDER.includes(item.property)
+      })
+      .sort((a, b) => {
+        const aOrder = BORDER_RADIUS_ORDER.indexOf(a.property)
+        const bOrder = BORDER_RADIUS_ORDER.indexOf(b.property)
+        return aOrder - bOrder
+      })
+
+    if (borderRadiusVariables.length > 0) {
+      result.push(html`
+        <demo-border-radius-config
+          .name=${borderRadiusVariables.length == 1 ? borderRadiusVariables[0].cssVariable : borderRadiusVariables.map((i) => i.cssVariable)}
+          .value=${borderRadiusVariables.length == 1
+            ? this.getValueOrDefaultValue(borderRadiusVariables[0])
+            : borderRadiusVariables.map((i) => this.getValueOrDefaultValue(i))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-border-radius-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !borderRadiusVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
+  renderElementCssPropertiesContent(cssProperties: CSSDeclarationItem[]) {
+    const result: TemplateResult[] = []
+    cssProperties = this.renderPaddingConfig(cssProperties, result)
+    cssProperties = this.renderBorderRadiusConfig(cssProperties, result)
+
+    return [
+      ...result,
+      ...cssProperties.map((cssVar) => {
+        return this.generateCssVariableInput(cssVar)
+      }),
+    ]
   }
 
   renderCssProperties() {
@@ -179,9 +291,9 @@ export class ComponentConfigurationPanel extends LitElement {
               <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
                 <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
               </svg>
-              ${groupCssVariables.cssProperties.map((cssVar) => {
-                return this.generateCssVariableInput(cssVar)
-              })}
+              <div class="css-input-group-content">
+                ${this.renderElementCssPropertiesContent(groupCssVariables.cssProperties)}
+              <div>
             </c2-details>`
           })}
         </c2-details>`

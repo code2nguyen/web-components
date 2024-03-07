@@ -1,5 +1,8 @@
 import type { AttributeDeclarationItem, CSSDeclarationItem } from '../store/manifest-declaration-item'
 
+export const PADDING_ORDER = ['padding-top', 'padding-right', 'padding-bottom', 'padding-left']
+export const BORDER_RADIUS_ORDER = ['border-top-left-radius', 'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius']
+
 export function closestElementSibling(currentElement: HTMLElement, selector: string): HTMLElement | null {
   const parent = getParent(currentElement)
 

@@ -19,7 +19,7 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
  * @cssproperty {pixel} [--c2-list-item--padding=4px 8px 4px 8px] - <code>padding</code> value
  * 
  * @cssproperty {font-size} [--c2-list-item--font-size=14]
- * @cssproperty {font-weight} --c2-list-item--border-font-weight
+ * @cssproperty {font-weight} --c2-list-item--font-weight
  * @cssproperty {font-style} [--c2-list-item--font-style=normal]
  * @cssproperty {font-family} --c2-list-item--font-family
  * 
