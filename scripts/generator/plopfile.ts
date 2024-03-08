@@ -34,8 +34,9 @@ export default function (plop: NodePlopAPI) {
       {
         type: 'append',
         path: '../../demo/src/store/component-manifests.ts',
-        pattern: /export const componentManifests = {/,
-        template: '  [{{ camelCase name }}.modules[0].declarations[0].tagName]: normalizeManifest({{ camelCase name }}.modules[0].declarations[0]),',
+        pattern: /export const componentManifests: ComponentManifests = \[/,
+        separator: '',
+        template: '{{ camelCase name }}, ',
       },
       // {
       //   type: 'append',
