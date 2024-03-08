@@ -1,0 +1,44 @@
+{
+  "name": "@c2n/color-slider",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "dist/color-slider.js",
+  "exports": {
+    ".": {
+      "default": "./dist/color-slider.js",
+      "types": "./types/src/color-slider.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "color-slider",
+    "web component",
+    "lit"
+  ],
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run type-check && vite build",
+    "type-check": "tsc -p tsconfig.lib.json --composite false"
+  },
+  "dependencies": {
+    "@c2n/wc-utils": "0.0.4",
+    "lit": "3.1.2"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}
