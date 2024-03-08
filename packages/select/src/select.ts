@@ -101,7 +101,8 @@ export class Select extends LitElement {
     }
 
     if (typeof value == 'undefined') {
-      return this.menu.togglePopover()
+      this.menu.togglePopover()
+      return
     }
 
     if (value && !this.menu.matches(':popover-open')) {

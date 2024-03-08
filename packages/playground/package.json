@@ -12,8 +12,7 @@
     "url": "https://github.com/code2nguyen/web-components.git"
   },
   "dependencies": {
-    "custom-elements-manifest": "1.0.0",
-    "@spectrum-web-components/bundle": "^0.28.7"
+    "custom-elements-manifest": "1.0.0"
   },
   "devDependencies": {
     "@types/json-schema": "7.0.11"

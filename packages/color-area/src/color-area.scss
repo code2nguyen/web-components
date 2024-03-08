@@ -1,0 +1,39 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-color-area,
+  $theme: (
+    width: 240px,
+    height: 240px,
+    color-handle--size: 12px,
+  )
+);
+
+:host {
+  display: contents;
+}
+
+.c2-color-area {
+  display: block;
+  width: css.cssVar(width);
+  height: css.cssVar(height);
+  position: relative;
+  .gradient {
+    width: 100%;
+    height: 100%;
+  }
+  .color-handle {
+    position: absolute;
+    pointer-events: none;
+    box-sizing: border-box;
+    width: css.cssVar(color-handle--size);
+    height: css.cssVar(color-handle--size);
+    border-radius: 50%;
+    top: 0;
+    left: 0;
+    border: 2px solid white;
+    background: transparent;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 0px 0.6px;
+    cursor: inherit;
+  }
+}

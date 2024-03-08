@@ -1,12 +1,12 @@
 {
-  "name": "@c2n/color-slider",
+  "name": "@c2n/color-area",
   "version": "0.0.4",
   "type": "module",
-  "main": "dist/color-slider.js",
+  "main": "dist/color-area.js",
   "exports": {
     ".": {
-      "default": "./dist/color-slider.js",
-      "types": "./types/src/color-slider.d.ts"
+      "default": "./dist/color-area.js",
+      "types": "./types/src/color-area.d.ts"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
@@ -15,7 +15,7 @@
     "types"
   ],
   "keywords": [
-    "color-slider",
+    "color-area",
     "web component",
     "lit"
   ],

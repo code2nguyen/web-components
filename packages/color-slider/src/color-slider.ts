@@ -1,8 +1,8 @@
 import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './color-slider.scss?inline'
-
 import { TinyColor } from '@ctrl/tinycolor'
+import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 
 /**
  * @tag c2-color-slider
@@ -32,9 +32,14 @@ export class ColorSlider extends LitElement {
     this._value = hue
   }
 
+  get color() {
+    const tinyColor = new TinyColor({ h: this.value, s: 1, v: 1 })
+    return tinyColor.toHexShortString()
+  }
+
   private handleInput(event: Event & { target: HTMLInputElement }): void {
     this.value = event.target.valueAsNumber
-    this.dispatchChangeEvent()
+    redispatchEvent(this, event)
   }
 
   private updateColorHandlePosition() {
@@ -52,19 +57,6 @@ export class ColorSlider extends LitElement {
     }
   }
 
-  private dispatchChangeEvent() {
-    const color = new TinyColor({ h: this.value, s: 1, v: 1 })
-    this.dispatchEvent(
-      new CustomEvent('input', {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          hexString: color.toHexString(),
-          color,
-        },
-      }),
-    )
-  }
   override render() {
     return html`
       <div class="c2-color-slider">
