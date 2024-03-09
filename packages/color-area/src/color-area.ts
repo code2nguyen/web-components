@@ -26,13 +26,11 @@ export class ColorArea extends LitElement {
   @query('.color-handle') colorHandle!: HTMLElement
   @query('.c2-color-area') rootElement!: HTMLElement
 
-  @state()
-  currentMousePosition: Point = { x: 0, y: 0 }
+  @state() currentMousePosition: Point = { x: 0, y: 0 }
 
   get hexColor() {
     const s = this.currentMousePosition.x / this.rootElement.offsetWidth
     const v = 1 - this.currentMousePosition.y / this.rootElement.offsetHeight
-    console.log({ h: this.hue, s, v })
     const tinyColor = new TinyColor({ h: this.hue, s, v })
     return tinyColor.toHexShortString()
   }
@@ -57,10 +55,8 @@ export class ColorArea extends LitElement {
   getPointerPosition(event: PointerEvent) {
     let x = event.pageX - this.rootElement.offsetLeft
     let y = event.pageY - this.rootElement.offsetTop
-    x = Math.max(0, x)
-    y = Math.max(0, y)
-    x = Math.min(x, this.rootElement!.offsetWidth)
-    y = Math.min(y, this.rootElement!.offsetHeight)
+    x = Math.max(0, Math.min(x, this.rootElement!.offsetWidth))
+    y = Math.max(0, Math.min(y, this.rootElement!.offsetHeight))
     return { x, y }
   }
 
@@ -73,12 +69,12 @@ export class ColorArea extends LitElement {
   private updateColorHandlePosition() {
     const handleWidth = this.colorHandle.offsetWidth
     const handleHeight = this.colorHandle.offsetHeight
-
     let x = this.currentMousePosition.x - handleWidth / 2
     let y = this.currentMousePosition.y - handleHeight / 2
     x = Math.max(0, Math.min(x, this.rootElement!.offsetWidth - handleWidth))
     y = Math.max(0, Math.min(y, this.rootElement!.offsetHeight - handleHeight))
     this.colorHandle.style.setProperty('transform', `translate3d(${x}px, ${y}px, 0)`)
+    this.colorHandle.style.setProperty('background-color', this.hexColor)
   }
 
   private updateHueFromHexColor() {

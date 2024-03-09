@@ -44,7 +44,9 @@ export class ColorSlider extends LitElement {
 
   private updateColorHandlePosition() {
     const handleWidth = this.colorHandle.offsetWidth
-    let position = (this.inputSlider.offsetWidth / 360) * this.value - handleWidth / 2
+    let position = (this.inputSlider.offsetWidth / 360) * this.value
+    const delta = handleWidth / (this.inputSlider.offsetWidth / position)
+    position = position - delta
     position = Math.max(0, position)
     position = Math.min(position, this.inputSlider.offsetWidth - handleWidth)
     this.colorHandle.style.setProperty('transform', `translate(${position}px, -50%)`)
