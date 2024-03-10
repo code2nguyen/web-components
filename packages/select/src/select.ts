@@ -61,6 +61,7 @@ export class Select extends LitElement {
   @property({ type: Boolean }) fitTarget = false
   @property({ type: String }) placeholder = ''
   @property({ type: Boolean }) multiple: boolean = false
+  @property({ type: Boolean }) required: boolean = false
 
   /**
    * The value separated by <code>;</code>
@@ -154,11 +155,7 @@ export class Select extends LitElement {
   }
 
   private renderButtonIcon() {
-    return svg`<svg class="default-icon" viewBox="0 -960 960 960">
-      <path
-        d="M479.8-371.077q-5.662 0-10.423-2.115-4.762-2.116-8.992-6.346l-181.2-181.2q-5.954-5.954-5.839-11.608.115-5.654 6.5-12.039 6.385-6.384 11.654-6.384t11.654 6.384L480-406.539l177.846-177.846q5.615-5.615 11.269-5.5 5.654.116 12.039 6.5 6.385 6.385 6.385 11.654 0 5.27-6.724 11.936l-181.2 180.257q-4.63 4.23-9.392 6.346-4.761 2.115-10.423 2.115Z"
-      />
-    </svg>`
+    return svg`<svg class="default-icon" fill="currentColor" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>`
   }
 
   private handleSelectionChange(event: CustomEvent<SelectionChangeEventDetail>) {
@@ -213,7 +210,14 @@ export class Select extends LitElement {
         <slot name="button-icon">${this.renderButtonIcon()}</slot>
       </button>
       <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fittarget=${this.fitTarget}>
-        <c2-list id="list" .value=${this.value} class="list" ?multiple=${this.multiple} @selection-change=${this.handleSelectionChange}>
+        <c2-list
+          id="list"
+          .value=${this.value}
+          class="list"
+          ?multiple=${this.multiple}
+          @selection-change=${this.handleSelectionChange}
+          ?required=${this.required}
+        >
           <slot @slotchange=${this.handleSlotChange}></slot>
         </c2-list>
       </c2-overlay>

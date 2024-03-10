@@ -118,9 +118,9 @@ export class TextField extends LitElement {
       disabled: this.disabled,
       error: !this.disabled && this.error,
       'read-only': this.readOnly,
-      'focus-within': !!this.focused,
+      'focus-within': this.focused,
     }
-    addClasses(this, Object.keys(classes))
+    addClasses(this, classes)
     return html`<div class="c2-text-field ${classMap(classes)}">
         <div class="prefix-icon" @click=${this.forwardFocusin}>${this.renderPrefixSlot()}</div>
         <input

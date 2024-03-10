@@ -4,7 +4,8 @@
   $prefix: c2-overlay,
   $theme: (
     backdrop--background: transparent,
-    offset: 8px,
+    offset-y: 8px,
+    offset-x: 0px,
   )
 );
 
@@ -20,16 +21,28 @@
     background: css.cssVar(backdrop--background);
   }
 }
-:host([placement^='bottom']:popover-open) {
-  transform: translateY(css.cssVar(offset));
+:host([placement='bottom']:popover-open) {
+  transform: translateY(css.cssVar(offset-y));
+}
+:host([placement='bottom-start']:popover-open) {
+  transform: translate(css.cssVar(offset-x), css.cssVar(offset-y));
+}
+:host([placement='bottom-end']:popover-open) {
+  transform: translate(calc(-1 * css.cssVar(offset-x)), css.cssVar(offset-y));
 }
 
-:host([placement^='top']:popover-open) {
-  transform: translateY(calc(-1 * css.cssVar(offset)));
+:host([placement='top']:popover-open) {
+  transform: translateY(calc(-1 * css.cssVar(offset-y)));
+}
+:host([placement='top-start']:popover-open) {
+  transform: translate(css.cssVar(offset-x), calc(-1 * css.cssVar(offset-y)));
+}
+:host([placement='top-end']:popover-open) {
+  transform: translate(calc(-1 * css.cssVar(offset-x)), calc(-1 * css.cssVar(offset-y)));
 }
 
 @starting-style {
   :host([placement]:popover-open) {
-    transform: translateY(0);
+    transform: translate(0, 0);
   }
 }

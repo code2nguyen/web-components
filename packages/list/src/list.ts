@@ -32,6 +32,7 @@ export class List extends LitElement {
 
   @property({ type: Boolean }) disabled: boolean = false
   @property({ type: Boolean }) multiple: boolean = false
+  @property({ type: Boolean }) required: boolean = false
 
   @query('slot')
   private listItemSlot!: HTMLSlotElement
@@ -64,6 +65,11 @@ export class List extends LitElement {
       : this.multiple
         ? [...this.data, target.data]
         : [target.data]
+
+    if (this.required && updatedValues.length == 0) {
+      this.dispatchSelectionChangeEvent()
+      return
+    }
     this.value = updatedValues
     this.data = updatedData
   }

@@ -1,7 +1,6 @@
 import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './color-slider.scss?inline'
-import { TinyColor } from '@ctrl/tinycolor'
 import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 
 /**
@@ -19,23 +18,10 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 export class ColorSlider extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  private _value: number = 0
-  public get value(): number {
-    return this._value
-  }
+  @property({ type: Number }) value: number = 0
 
   @query('.color-handle') colorHandle!: HTMLElement
   @query('.input-slider') inputSlider!: HTMLElement
-
-  @property({ type: Number })
-  public set value(hue: number) {
-    this._value = hue
-  }
-
-  get color() {
-    const tinyColor = new TinyColor({ h: this.value, s: 1, v: 1 })
-    return tinyColor.toHexShortString()
-  }
 
   private handleInput(event: Event & { target: HTMLInputElement }): void {
     this.value = event.target.valueAsNumber

@@ -6,22 +6,33 @@
     width: 240px,
     height: 240px,
     color-handle--size: 12px,
+
+    border-top-left-radius: null,
+    border-top-right-radius: null,
+    border-bottom-left-radius: null,
+    border-bottom-right-radius: null,
   )
 );
 
 :host {
-  display: contents;
+  display: block;
 }
 
 .c2-color-area {
   display: block;
-  width: css.cssVar(width);
-  height: css.cssVar(height);
   position: relative;
   padding: calc(css.cssVar(color-handle--size) - 6px);
+  width: fit-content;
+  height: fit-content;
   .gradient {
     width: 100%;
     height: 100%;
+    width: css.cssVar(width);
+    height: css.cssVar(height);
+    border-top-left-radius: css.cssVar(border-top-left-radius);
+    border-top-right-radius: css.cssVar(border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
   }
   .color-handle {
     position: absolute;

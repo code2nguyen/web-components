@@ -1,0 +1,48 @@
+{
+  "name": "@c2n/color-select",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "dist/color-select.js",
+  "exports": {
+    ".": {
+      "default": "./dist/color-select.js",
+      "types": "./types/src/color-select.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "color-select",
+    "web component",
+    "lit"
+  ],
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run type-check && vite build",
+    "type-check": "tsc -p tsconfig.lib.json --composite false"
+  },
+  "dependencies": {
+    "@c2n/wc-utils": "0.0.4",
+    "@c2n/color-area": "0.0.4",
+    "@c2n/color-slider": "0.0.4",
+    "@c2n/overlay": "0.0.4",
+    "@ctrl/tinycolor": "4.0.3",
+    "lit": "3.1.2"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

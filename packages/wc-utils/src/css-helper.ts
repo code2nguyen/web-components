@@ -1,7 +1,9 @@
-export function addClasses(target: HTMLElement, cls: string[]) {
+import type { ClassInfo } from 'lit-html/directives/class-map.js'
+
+export function addClasses(target: HTMLElement, cls: ClassInfo) {
   if (!target?.classList) return
 
-  for (const item of cls) {
-    if (!target.classList.contains(item)) target.classList.add(item)
+  for (const item of Object.keys(cls)) {
+    target.classList.toggle(item, !!cls[item])
   }
 }

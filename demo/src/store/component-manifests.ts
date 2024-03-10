@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema'
+import colorSelect from '@c2n/color-select/custom-elements.json'
 import colorArea from '@c2n/color-area/custom-elements.json'
 import colorSlider from '@c2n/color-slider/custom-elements.json'
 import listItem from '@c2n/list-item/custom-elements.json'
@@ -13,7 +14,7 @@ import label from '@c2n/label/custom-elements.json'
 import { normalizeManifest } from '../utils/manifest-utils'
 import type { ComponentManifests } from './manifest-declaration-item'
 
-export const componentManifests: ComponentManifests = [colorArea, colorSlider, listItem, overlay, select, dropdownList, list, tabs, codeViewer, label].reduce((result, item) => {
+export const componentManifests: ComponentManifests = [colorSelect, colorArea, colorSlider, listItem, overlay, select, dropdownList, list, tabs, codeViewer, label].reduce((result, item) => {
   const pkg = item as Package
   for (const module of pkg.modules) {
     if (module.declarations) {

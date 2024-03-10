@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { customElement, property, query } from 'lit/decorators.js'
 import styles from './color-area.scss?inline'
 import { TinyColor } from '@ctrl/tinycolor'
 
@@ -21,25 +21,49 @@ export class ColorArea extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @property({ type: Number }) hue = 0
-  @property({ type: String }) color = '#FFFFFF'
+  @property({ type: Number }) saturation = 1
+  @property({ type: Number }) value = 1
 
-  @query('.color-handle') colorHandle!: HTMLElement
-  @query('.c2-color-area') rootElement!: HTMLElement
+  public get tinyColor(): TinyColor {
+    return new TinyColor({ h: this.hue, s: this.saturation, v: this.value })
+  }
 
-  @state() currentMousePosition: Point = { x: 0, y: 0 }
+  @query('.color-handle', true) colorHandle?: HTMLElement
+  @query('.c2-color-area', true) rootElement?: HTMLElement
 
-  get hexColor() {
-    const s = this.currentMousePosition.x / this.rootElement.offsetWidth
-    const v = 1 - this.currentMousePosition.y / this.rootElement.offsetHeight
-    const tinyColor = new TinyColor({ h: this.hue, s, v })
-    return tinyColor.toHexShortString()
+  currentMousePosition: Point = { x: 0, y: 0 }
+
+  private rootElementsRect?: DOMRect
+
+  convertPositionToHslValues(position: Point) {
+    if (!this.rootElement) {
+      return
+    }
+    if (!this.rootElementsRect) {
+      this.rootElementsRect = this.rootElement.getBoundingClientRect()
+    }
+    this.saturation = position.x / this.rootElementsRect.width
+    this.value = 1 - position.y / this.rootElementsRect.height
+  }
+
+  private convertValueToPosition() {
+    if (!this.rootElementsRect) {
+      this.rootElementsRect = this.rootElement!.getBoundingClientRect()
+    }
+    this.currentMousePosition = {
+      x: this.saturation * this.rootElementsRect.width,
+      y: (1 - this.value) * this.rootElementsRect.height,
+    }
   }
 
   private handleAreaPointerdown(event: PointerEvent): void {
-    if (event.button !== 0) {
+    if (event.button !== 0 || !this.rootElement) {
       return
     }
+    this.rootElementsRect = this.rootElement.getBoundingClientRect()
     this.currentMousePosition = this.getPointerPosition(event)
+    this.convertPositionToHslValues(this.currentMousePosition)
+
     document.addEventListener('pointermove', this.handleMouseMove, { passive: true })
     document.addEventListener('pointerup', this.handleMouseUp, { passive: true })
     document.addEventListener('pointercancel', this.handleMouseUp)
@@ -49,14 +73,15 @@ export class ColorArea extends LitElement {
 
   handleMouseMove = async (event: PointerEvent) => {
     this.currentMousePosition = this.getPointerPosition(event)
+    this.convertPositionToHslValues(this.currentMousePosition)
     this.dispatchChangeColor()
   }
 
   getPointerPosition(event: PointerEvent) {
-    let x = event.pageX - this.rootElement.offsetLeft
-    let y = event.pageY - this.rootElement.offsetTop
-    x = Math.max(0, Math.min(x, this.rootElement!.offsetWidth))
-    y = Math.max(0, Math.min(y, this.rootElement!.offsetHeight))
+    let x = event.pageX - this.rootElementsRect!.left
+    let y = event.pageY - this.rootElementsRect!.top
+    x = Math.max(0, Math.min(x, this.rootElementsRect!.width))
+    y = Math.max(0, Math.min(y, this.rootElementsRect!.height))
     return { x, y }
   }
 
@@ -64,39 +89,26 @@ export class ColorArea extends LitElement {
     document.removeEventListener('pointermove', this.handleMouseMove)
     document.removeEventListener('pointerup', this.handleMouseUp)
     document.removeEventListener('pointercancel', this.handleMouseUp)
+    this.rootElementsRect = undefined
   }
 
   private updateColorHandlePosition() {
+    if (!this.colorHandle) return
+
     const handleWidth = this.colorHandle.offsetWidth
     const handleHeight = this.colorHandle.offsetHeight
     let x = this.currentMousePosition.x - handleWidth / 2
     let y = this.currentMousePosition.y - handleHeight / 2
-    x = Math.max(0, Math.min(x, this.rootElement!.offsetWidth - handleWidth))
-    y = Math.max(0, Math.min(y, this.rootElement!.offsetHeight - handleHeight))
+    x = Math.max(0, Math.min(x, this.rootElementsRect!.width - handleWidth))
+    y = Math.max(0, Math.min(y, this.rootElementsRect!.height - handleHeight))
     this.colorHandle.style.setProperty('transform', `translate3d(${x}px, ${y}px, 0)`)
-    this.colorHandle.style.setProperty('background-color', this.hexColor)
-  }
-
-  private updateHueFromHexColor() {
-    const tinyColor = new TinyColor(this.color)
-    if (tinyColor.isValid) {
-      const { h, s, v } = tinyColor.toHsv()
-      this.hue = h
-      this.currentMousePosition = {
-        x: s * this.rootElement.offsetWidth,
-        y: (1 - v) * this.rootElement.offsetHeight,
-      }
-    }
+    this.colorHandle.style.setProperty('background-color', this.tinyColor.toRgbString())
   }
 
   protected override updated(_changedProperties: PropertyValueMap<this>): void {
     super.updated(_changedProperties)
-    if (_changedProperties.has('currentMousePosition')) {
-      this.updateColorHandlePosition()
-    }
-    if (_changedProperties.has('color')) {
-      this.updateHueFromHexColor()
-    }
+    this.convertValueToPosition()
+    this.updateColorHandlePosition()
   }
 
   dispatchChangeColor() {
@@ -104,7 +116,11 @@ export class ColorArea extends LitElement {
       new CustomEvent('change', {
         bubbles: true,
         cancelable: true,
-        detail: this.color,
+        detail: {
+          h: this.hue,
+          s: this.saturation,
+          v: this.value,
+        },
       }),
     )
   }
