@@ -80,8 +80,8 @@ export class ColorArea extends LitElement {
   }
 
   getPointerPosition(event: PointerEvent) {
-    let x = event.pageX - this.rootElementsRect!.left
-    let y = event.pageY - this.rootElementsRect!.top
+    let x = event.clientX - this.rootElementsRect!.left
+    let y = event.clientY - this.rootElementsRect!.top
     x = Math.max(0, Math.min(x, this.rootElementsRect!.width))
     y = Math.max(0, Math.min(y, this.rootElementsRect!.height))
     return { x, y }

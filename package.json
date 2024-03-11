@@ -31,7 +31,8 @@
   "wireit": {
     "build": {
       "dependencies": [
-        "./packages/wc-utils:build"
+        "./packages/wc-utils:build",
+        "./packages/list-item:build"
       ],
       "command": "npm run build --workspace=packages --if-present"
     }

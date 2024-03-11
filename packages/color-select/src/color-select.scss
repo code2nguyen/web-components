@@ -5,9 +5,15 @@
   $theme: (
     width: 16px,
     height: 16px,
+
     border-radius: 1px,
 
-    popover--background: variables.$color-bg-light,
+    border-top: null,
+    border-right: null,
+    border-bottom: null,
+    border-left: null,
+
+    popover--background-color: variables.$color-bg-light,
     popover--gap: 16px,
     popover--padding: 8px,
 
@@ -72,7 +78,12 @@
     align-items: stretch;
     position: relative;
     background: none;
-    border: none;
+
+    border-top: css.cssVar(border-top);
+    border-right: css.cssVar(border-right);
+    border-bottom: css.cssVar(border-bottom);
+    border-left: css.cssVar(border-left);
+
     padding: 0;
     margin: 0;
     cursor: inherit;
@@ -118,7 +129,6 @@
   padding: calc(var(--c2-color-area__color-handle--size, 12px) - 7px);
   position: relative;
   overflow: hidden;
-
   .popover-container {
     display: flex;
     flex-direction: column;

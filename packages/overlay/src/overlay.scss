@@ -17,6 +17,7 @@
   left: 0;
   border: none;
   transition: animation.standard-deceleration(transform) allow-discrete;
+  background-color: transparent;
   &::backdrop {
     background: css.cssVar(backdrop--background);
   }

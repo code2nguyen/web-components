@@ -4,9 +4,12 @@
   "type": "module",
   "main": "dist/checkbox.js",
   "exports": {
-    ".": "./dist/checkbox.js"
+    ".": {
+      "default": "./dist/checkbox.js",
+      "types": "./types/src/checkbox.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
   },
-  "types": "types/src/index.d.ts",
   "files": [
     "dist",
     "types"

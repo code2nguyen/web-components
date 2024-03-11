@@ -9,16 +9,18 @@ import '@c2n/color-area'
 import '@c2n/select'
 import '@c2n/text-field'
 import '@c2n/color-slider'
+
 import type { SelectionChangeEventDetail } from '@c2n/list'
 import type { ColorArea } from '@c2n/color-area'
 import type { ColorSlider } from '@c2n/color-slider'
 import type { TextField } from '@c2n/text-field'
 
-export const extractHsvaRegExp = /(\d{1,3}\.?\d*?)/
-
-export const extractHueAndSaturationRegExp = /^hs[v|l]a?\s?\((\d{1,3}\.?\d*?),?\s?(\d{1,3})/
-export const replaceHueRegExp = /(^hs[v|l]a?\()\d{1,3}/
-
+export interface ColorSelectChangeEventDetail {
+  h: number
+  s: number
+  v: number
+  a: number
+}
 /**
  * @tag c2-color-select
  *
@@ -30,6 +32,8 @@ export const replaceHueRegExp = /(^hs[v|l]a?\()\d{1,3}/
 @customElement('c2-color-select')
 export class ColorSelect extends LitElement {
   static override styles = unsafeCSS(styles)
+
+  @property({ type: String, reflect: true }) placement = 'bottom-start'
 
   private _color: string = 'hsla(0, 100%, 100%, 1)'
   public get color(): string {
@@ -172,7 +176,7 @@ export class ColorSelect extends LitElement {
 
   dispatchChangeEvent() {
     this.dispatchEvent(
-      new CustomEvent('change', {
+      new CustomEvent<ColorSelectChangeEventDetail>('change', {
         cancelable: true,
         bubbles: true,
         detail: {
@@ -195,7 +199,7 @@ export class ColorSelect extends LitElement {
           <div class="presentation-hue" style=${`background-color: ${colorWithOutAlpha.toHexString()}`}></div>
           <div class="presentation-color" style=${`background-color: ${this.tinyColor.toString('rgb')}`}></div>
         </button>
-        <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle}>
+        <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} .placement=${this.placement}>
           ${this.open
             ? html` <div class="popover">
                 <div class="popover-container">

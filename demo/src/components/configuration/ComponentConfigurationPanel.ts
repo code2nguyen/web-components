@@ -2,7 +2,7 @@ import { LitElement, html, css, nothing, type TemplateResult } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import { StoreController } from '@nanostores/lit'
 import { classMap } from 'lit/directives/class-map.js'
-import { $configStore } from '../../store/config-store'
+import { $configStore } from '../../store/config-store.ts'
 import './GenerateCodeBlock'
 import * as changeCase from 'change-case'
 import type { Checkbox } from '@c2n/checkbox'
@@ -15,10 +15,11 @@ import './SizeConfig'
 import './PaddingConfig'
 import './BorderRadiusConfig'
 import './FontConfig'
+import './ColorConfig'
 
-import type { AttributeDeclarationItem, CSSDeclarationItem } from '../../store/manifest-declaration-item'
-import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils'
-import { BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER } from '../../utils/dom'
+import type { AttributeDeclarationItem, CSSDeclarationItem } from '../../store/manifest-declaration-item.ts'
+import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils.ts'
+import { BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER } from '../../utils/dom.ts'
 
 interface UpdateValue {
   name: string
@@ -31,7 +32,7 @@ export class ComponentConfigurationPanel extends LitElement {
     css`
       :host {
         display: block;
-        font-size: 0.7rem;
+        font-size: 10px;
         --c2-details--border-top: none;
         --c2-details--border-left: none;
         --c2-details--border-right: none;
@@ -47,7 +48,7 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-details__header__icon--height: 12px;
         --c2-details__header__hover--background-color: transparent;
 
-        --c2-text-field--font-size: 0.7rem;
+        --c2-text-field--font-size: 10px;
         --c2-text-field--padding-top: 6px;
         --c2-text-field--padding-bottom: 6px;
 
@@ -361,6 +362,7 @@ export class ComponentConfigurationPanel extends LitElement {
     if (!componentUID || !this.configStore.value.showConfig) return nothing
     return html`<div>
       <c2-details>
+        <demo-color-config></demo-color-config>
         <div slot="title" class="title">Host</div>
         <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
           <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>

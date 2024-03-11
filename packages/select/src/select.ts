@@ -209,7 +209,7 @@ export class Select extends LitElement {
         <slot name="button-content">${this.renderButtonContent()}</slot>
         <slot name="button-icon">${this.renderButtonIcon()}</slot>
       </button>
-      <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fittarget=${this.fitTarget}>
+      <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fit-target=${this.fitTarget}>
         <c2-list
           id="list"
           .value=${this.value}

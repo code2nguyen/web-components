@@ -1,7 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "moduleResolution": "Node",
+    "moduleResolution": "NodeNext",
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
   }

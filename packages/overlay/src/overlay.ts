@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS, isServer, type PropertyValueMap } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
-import { computePosition, autoUpdate, flip } from '@floating-ui/dom'
+import { computePosition, autoUpdate, flip, type Placement } from '@floating-ui/dom'
 
 import styles from './overlay.scss?inline'
 import { type StyleInfo } from 'lit/directives/style-map.js'
@@ -17,8 +17,8 @@ export class Overlay extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @property({ type: Boolean, reflect: true }) open = false
-  @property({ type: String, reflect: true }) placement = 'bottom-start'
-  @property({ type: Boolean }) fitTarget = false
+  @property({ type: String, reflect: true }) placement: Placement = 'bottom-start'
+  @property({ type: Boolean, attribute: 'fit-target' }) fitTarget = false
 
   private _target: HTMLElement | null | undefined = null
 
@@ -54,8 +54,12 @@ export class Overlay extends LitElement {
   private updatePosition = async () => {
     this.style.minWidth = `${this.target!.offsetWidth}px`
     const position = await computePosition(this.target!, this, {
-      placement: 'bottom-start',
-      middleware: [flip()],
+      placement: this.placement,
+      middleware: [
+        flip({
+          crossAxis: false,
+        }),
+      ],
     })
     const style: StyleInfo = {
       top: `${position.y}px`,
