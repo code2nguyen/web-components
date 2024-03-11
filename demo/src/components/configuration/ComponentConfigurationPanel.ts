@@ -125,6 +125,82 @@ export class ComponentConfigurationPanel extends LitElement {
     </div>`
   }
 
+  renderPaddingConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const paddingVariables = cssProperties
+      .filter((item) => {
+        return item.type == 'padding' || item.property.startsWith('padding')
+      })
+      .sort((a, b) => {
+        const aOrder = PADDING_ORDER.indexOf(a.property)
+        const bOrder = PADDING_ORDER.indexOf(b.property)
+        return aOrder - bOrder
+      })
+
+    if (paddingVariables.length > 0) {
+      result.push(html`
+        <demo-padding-config
+          .name=${paddingVariables.length == 1 ? paddingVariables[0].cssVariable : paddingVariables.map((i) => i.cssVariable)}
+          .value=${paddingVariables.length == 1
+            ? this.getValueOrDefaultValue(paddingVariables[0])
+            : paddingVariables.map((i) => this.getValueOrDefaultValue(i))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-padding-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !paddingVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
+  renderBorderRadiusConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const borderRadiusVariables = cssProperties
+      .filter((item) => {
+        return item.type == 'border-radius' || BORDER_RADIUS_ORDER.includes(item.property)
+      })
+      .sort((a, b) => {
+        const aOrder = BORDER_RADIUS_ORDER.indexOf(a.property)
+        const bOrder = BORDER_RADIUS_ORDER.indexOf(b.property)
+        return aOrder - bOrder
+      })
+
+    if (borderRadiusVariables.length > 0) {
+      result.push(html`
+        <demo-border-radius-config
+          .name=${borderRadiusVariables.length == 1 ? borderRadiusVariables[0].cssVariable : borderRadiusVariables.map((i) => i.cssVariable)}
+          .value=${borderRadiusVariables.length == 1
+            ? this.getValueOrDefaultValue(borderRadiusVariables[0])
+            : borderRadiusVariables.map((i) => this.getValueOrDefaultValue(i))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-border-radius-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !borderRadiusVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
+  renderFontConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const fontVariables = cssProperties.filter((item) => {
+      return FONT_PROPERTY.includes(item.property)
+    })
+    if (fontVariables.length > 0) {
+      result.push(html`
+        <demo-font-config
+          .names=${fontVariables.map((i) => i.cssVariable)}
+          .values=${fontVariables.map((i) => this.getValueOrDefaultValue(i))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-font-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !fontVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
+  generateColorConfig(label: string, name: string, value: string) {
+    return html`<demo-color-config .label=${label} .name=${name} .value=${value} @change=${this.handleCustomConfigChange}></demo-color-config>`
+  }
+
   generateStringInput(label: string, name: string, value: string, type: string) {
     const classes = {
       number: type == 'pixel' || type == 'number',
@@ -216,81 +292,11 @@ export class ComponentConfigurationPanel extends LitElement {
     switch (cssDeclaration.type) {
       case 'pixel':
         return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
+      case 'color':
+        return this.generateColorConfig(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
       default:
         return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
     }
-  }
-
-  renderPaddingConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
-    const paddingVariables = cssProperties
-      .filter((item) => {
-        return item.type == 'padding' || item.property.startsWith('padding')
-      })
-      .sort((a, b) => {
-        const aOrder = PADDING_ORDER.indexOf(a.property)
-        const bOrder = PADDING_ORDER.indexOf(b.property)
-        return aOrder - bOrder
-      })
-
-    if (paddingVariables.length > 0) {
-      result.push(html`
-        <demo-padding-config
-          .name=${paddingVariables.length == 1 ? paddingVariables[0].cssVariable : paddingVariables.map((i) => i.cssVariable)}
-          .value=${paddingVariables.length == 1
-            ? this.getValueOrDefaultValue(paddingVariables[0])
-            : paddingVariables.map((i) => this.getValueOrDefaultValue(i))}
-          @change=${this.handleCustomConfigChange}
-        ></demo-padding-config>
-      `)
-      cssProperties = cssProperties.filter((item) => !paddingVariables.includes(item))
-    }
-
-    return cssProperties
-  }
-
-  renderBorderRadiusConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
-    const borderRadiusVariables = cssProperties
-      .filter((item) => {
-        return item.type == 'border-radius' || BORDER_RADIUS_ORDER.includes(item.property)
-      })
-      .sort((a, b) => {
-        const aOrder = BORDER_RADIUS_ORDER.indexOf(a.property)
-        const bOrder = BORDER_RADIUS_ORDER.indexOf(b.property)
-        return aOrder - bOrder
-      })
-
-    if (borderRadiusVariables.length > 0) {
-      result.push(html`
-        <demo-border-radius-config
-          .name=${borderRadiusVariables.length == 1 ? borderRadiusVariables[0].cssVariable : borderRadiusVariables.map((i) => i.cssVariable)}
-          .value=${borderRadiusVariables.length == 1
-            ? this.getValueOrDefaultValue(borderRadiusVariables[0])
-            : borderRadiusVariables.map((i) => this.getValueOrDefaultValue(i))}
-          @change=${this.handleCustomConfigChange}
-        ></demo-border-radius-config>
-      `)
-      cssProperties = cssProperties.filter((item) => !borderRadiusVariables.includes(item))
-    }
-
-    return cssProperties
-  }
-
-  renderFontConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
-    const fontVariables = cssProperties.filter((item) => {
-      return FONT_PROPERTY.includes(item.property)
-    })
-    if (fontVariables.length > 0) {
-      result.push(html`
-        <demo-font-config
-          .names=${fontVariables.map((i) => i.cssVariable)}
-          .values=${fontVariables.map((i) => this.getValueOrDefaultValue(i))}
-          @change=${this.handleCustomConfigChange}
-        ></demo-font-config>
-      `)
-      cssProperties = cssProperties.filter((item) => !fontVariables.includes(item))
-    }
-
-    return cssProperties
   }
 
   renderElementCssPropertiesContent(cssProperties: CSSDeclarationItem[]) {
@@ -362,7 +368,6 @@ export class ComponentConfigurationPanel extends LitElement {
     if (!componentUID || !this.configStore.value.showConfig) return nothing
     return html`<div>
       <c2-details>
-        <demo-color-config></demo-color-config>
         <div slot="title" class="title">Host</div>
         <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
           <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
