@@ -19,9 +19,14 @@ export class ColorSlider extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @property({ type: Number }) value: number = 0
+  @property({ type: Number }) min: number = 0
+  @property({ type: Number }) max: number = 360
 
   @query('.color-handle') colorHandle!: HTMLElement
   @query('.input-slider') inputSlider!: HTMLElement
+
+  private colorHandleRect?: DOMRect
+  private inputSliderRect?: DOMRect
 
   private handleInput(event: Event & { target: HTMLInputElement }): void {
     this.value = event.target.valueAsNumber
@@ -29,12 +34,19 @@ export class ColorSlider extends LitElement {
   }
 
   private updateColorHandlePosition() {
-    const handleWidth = this.colorHandle.offsetWidth
-    let position = (this.inputSlider.offsetWidth / 360) * this.value
-    const delta = handleWidth / (this.inputSlider.offsetWidth / position)
+    if (!this.colorHandleRect) {
+      this.colorHandleRect = this.colorHandle.getBoundingClientRect()
+    }
+    if (!this.inputSliderRect) {
+      this.inputSliderRect = this.inputSlider.getBoundingClientRect()
+    }
+    const handleWidth = this.colorHandleRect.width
+    const range = this.max - this.min
+    let position = (this.inputSliderRect.width / range) * this.value
+    const delta = handleWidth / (this.inputSliderRect.width / position)
     position = position - delta
     position = Math.max(0, position)
-    position = Math.min(position, this.inputSlider.offsetWidth - handleWidth)
+    position = Math.min(position, this.inputSliderRect.width - handleWidth)
     this.colorHandle.style.setProperty('transform', `translate(${position}px, -50%)`)
   }
 
@@ -48,8 +60,10 @@ export class ColorSlider extends LitElement {
   override render() {
     return html`
       <div class="c2-color-slider">
-        <input type="range" class="input-slider" min="0" max="360" step="1" .value=${String(this.value)} @input=${this.handleInput} />
-        <div class="gradient"></div>
+        <input type="range" class="input-slider" min=${this.min} max=${this.max} step="1" .value=${String(this.value)} @input=${this.handleInput} />
+        <div class="gradient">
+          <slot></slot>
+        </div>
         <div class="color-handle"></div>
       </div>
     `

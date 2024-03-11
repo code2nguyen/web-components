@@ -10,6 +10,7 @@
     popover--background: variables.$color-bg-light,
     popover--gap: 16px,
     popover--padding: 8px,
+
     popover--border-top: 1px solid variables.$color-border,
     popover--border-right: 1px solid variables.$color-border,
     popover--border-bottom: 1px solid variables.$color-border,
@@ -19,6 +20,11 @@
     popover--border-top-right-radius: 4px,
     popover--border-bottom-left-radius: 4px,
     popover--border-bottom-right-radius: 4px,
+
+    color-config__sample--border-top: 1px solid variables.$color-border,
+    color-config__sample--border-right: 1px solid variables.$color-border,
+    color-config__sample--border-bottom: 1px solid variables.$color-border,
+    color-config__sample--border-left: 1px solid variables.$color-border,
 
     color-config__sample--size: 48px,
     color-config__sample--border-radius: 4px,
@@ -50,9 +56,9 @@
 
   --c2-text-field--font-size: 10px;
   --c2-text-field--padding-top: 8px;
-  --c2-text-field--padding-right: 4px;
+  --c2-text-field--padding-right: 2px;
   --c2-text-field--padding-bottom: 8px;
-  --c2-text-field--padding-left: 4px;
+  --c2-text-field--padding-left: 2px;
   --c2-text-field--background: transparent;
 }
 
@@ -150,6 +156,12 @@
         width: css.cssVar(color-config__sample--size);
         height: css.cssVar(color-config__sample--size);
         border-radius: css.cssVar(color-config__sample--border-radius);
+
+        border-top: css.cssVar(color-config__sample--border-top);
+        border-right: css.cssVar(color-config__sample--border-right);
+        border-bottom: css.cssVar(color-config__sample--border-bottom);
+        border-left: css.cssVar(color-config__sample--border-left);
+
         grid-column: 1 / 2;
         grid-row: 1 / 3;
         background-color: red;

@@ -4,6 +4,11 @@
   $prefix: c2-color-slider,
   $theme: (
     border-radius: 8px,
+    border-top: 1px solid variables.$color-bg,
+    border-bottom: 1px solid variables.$color-bg,
+    border-right: 1px solid variables.$color-bg,
+    border-left: 1px solid variables.$color-bg,
+
     width: 160px,
     height: 12px,
 
@@ -12,22 +17,26 @@
 );
 
 :host {
-  display: contents;
+  display: block;
 }
 
 .c2-color-slider {
-  display: flex;
+  display: block;
   position: relative;
-  align-items: stretch;
   cursor: pointer;
   touch-action: none;
-  width: css.cssVar(width);
-  height: css.cssVar(height);
   outline: none;
 
   .gradient {
     flex: 1;
     border-radius: css.cssVar(border-radius);
+    border-top: css.cssVar(border-top);
+    border-bottom: css.cssVar(border-bottom);
+    border-right: css.cssVar(border-right);
+    border-left: css.cssVar(border-left);
+    width: css.cssVar(width);
+    height: css.cssVar(height);
+
     pointer-events: none;
     background: linear-gradient(
       to right,
@@ -39,7 +48,13 @@
       rgb(255 0 255) 83%,
       rgb(255 0 0) 100%
     );
+    ::slotted(*) {
+      width: css.cssVar(width);
+      height: css.cssVar(height);
+      border-radius: css.cssVar(border-radius);
+    }
   }
+
   .input-slider {
     position: absolute;
     margin: 0;
@@ -47,9 +62,9 @@
     opacity: 0;
     cursor: inherit;
     top: 0;
-    bottom: 0;
     left: 0;
-    right: 0;
+    width: css.cssVar(width);
+    height: css.cssVar(height);
   }
   .color-handle {
     position: absolute;

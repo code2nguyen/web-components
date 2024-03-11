@@ -4,9 +4,12 @@
   "type": "module",
   "main": "dist/text-field.js",
   "exports": {
-    ".": "./dist/text-field.js"
+    ".": {
+      "default": "./dist/text-field.js",
+      "types": "./types/src/text-field.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
   },
-  "types": "types/src/index.d.ts",
   "files": [
     "dist",
     "types"

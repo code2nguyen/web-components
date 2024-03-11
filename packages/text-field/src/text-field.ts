@@ -77,6 +77,7 @@ export class TextField extends LitElement {
   protected handleInput(event: InputEvent) {
     this.dirty = true
     this.value = (event.target as HTMLInputElement).value
+    redispatchEvent(this, event)
   }
 
   protected handleFocusin(event: Event) {

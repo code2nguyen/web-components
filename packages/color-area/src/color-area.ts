@@ -34,6 +34,7 @@ export class ColorArea extends LitElement {
   currentMousePosition: Point = { x: 0, y: 0 }
 
   private rootElementsRect?: DOMRect
+  private colorHandleRect?: DOMRect
 
   convertPositionToHslValues(position: Point) {
     if (!this.rootElement) {
@@ -57,10 +58,11 @@ export class ColorArea extends LitElement {
   }
 
   private handleAreaPointerdown(event: PointerEvent): void {
-    if (event.button !== 0 || !this.rootElement) {
+    if (event.button !== 0) {
       return
     }
-    this.rootElementsRect = this.rootElement.getBoundingClientRect()
+    this.rootElementsRect = this.rootElement!.getBoundingClientRect()
+    this.colorHandleRect = this.colorHandle!.getBoundingClientRect()
     this.currentMousePosition = this.getPointerPosition(event)
     this.convertPositionToHslValues(this.currentMousePosition)
 
@@ -94,9 +96,11 @@ export class ColorArea extends LitElement {
 
   private updateColorHandlePosition() {
     if (!this.colorHandle) return
-
-    const handleWidth = this.colorHandle.offsetWidth
-    const handleHeight = this.colorHandle.offsetHeight
+    if (!this.colorHandleRect) {
+      this.colorHandleRect = this.colorHandle.getBoundingClientRect()
+    }
+    const handleWidth = this.colorHandleRect.width
+    const handleHeight = this.colorHandleRect.height
     let x = this.currentMousePosition.x - handleWidth / 2
     let y = this.currentMousePosition.y - handleHeight / 2
     x = Math.max(0, Math.min(x, this.rootElementsRect!.width - handleWidth))
