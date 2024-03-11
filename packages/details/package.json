@@ -4,9 +4,12 @@
   "type": "module",
   "main": "dist/details.js",
   "exports": {
-    ".": "./dist/details.js"
+    ".": {
+      "default": "./dist/details.js",
+      "types": "./types/src/details.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
   },
-  "types": "types/src/index.d.ts",
   "files": [
     "dist",
     "types"

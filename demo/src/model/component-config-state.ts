@@ -1,4 +1,4 @@
-import type { ComponentManifest } from '../store/manifest-declaration-item'
+import type { ComponentManifest } from '../store/manifest-declaration-item.ts'
 
 export interface ComponentConfigState extends ComponentManifest {
   uid?: string

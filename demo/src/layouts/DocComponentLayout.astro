@@ -113,8 +113,8 @@ const { componentId } = Astro.props
 </style>
 
 <script>
-  import { $configStore } from '../store/config-store'
-  import { nextSibling, firstChild } from '../utils/dom'
+  import { $configStore } from '../store/config-store.ts'
+  import { nextSibling, firstChild } from '../utils/dom.ts'
 
   const tableRowHeader = document.querySelectorAll("tr[class*='t-h']")
   for (const tableRow of tableRowHeader) {
@@ -158,10 +158,9 @@ const { componentId } = Astro.props
   }
 
   $configStore.subscribe((configState) => {
-    if (configState.showConfig) {
-      document.querySelector('.document-page')?.classList.toggle('show-configuration-panel', true)
-    } else {
-      document.querySelector('.document-page')?.classList.remove('show-configuration-panel')
-    }
+    console.log(configState)
+    document.querySelectorAll(`.mdx-code-block-setting-btn:not([data-uid="${configState.uid}"])`)?.forEach((item) => item.classList.toggle('active', false))
+    document.querySelector(`.mdx-code-block-setting-btn[data-uid="${configState.uid}"]`)?.classList.toggle('active', !!configState.showConfig)
+    document.querySelector('.document-page')?.classList.toggle('show-configuration-panel', !!configState.showConfig)
   })
 </script>

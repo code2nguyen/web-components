@@ -50,12 +50,20 @@ code = code.replace(/^"|"$/g, '')
   <CodeBlock code={code} lang={lang} uid={uid} />
 </ExpansionPanel>
 
+<style>
+  .mdx-code-block-setting-btn.active {
+    --c2-icon-button--background-color: var(--logo-color-2);
+    --c2-icon-button__hover--background-color: var(--logo-color-2);
+    --c2-icon-button__icon--color: white;
+    --c2-icon-button__icon__hover--color: white;
+  }
+</style>
 <script>
-  import { $configStore } from '../store/config-store'
-  import { $configCodeStore } from '../store/config-code-store'
-  import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, updateDomCssValue, updateDomAttribute } from '../utils/dom'
-  import { getComponentManifestData } from '../utils/manifest-utils'
-  import { componentManifests } from '../store/component-manifests'
+  import { $configStore } from '../store/config-store.ts'
+  import { $configCodeStore } from '../store/config-code-store.ts'
+  import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, updateDomCssValue, updateDomAttribute } from '../utils/dom.ts'
+  import { getComponentManifestData } from '../utils/manifest-utils.ts'
+  import { componentManifests } from '../store/component-manifests.ts'
 
   const settingBtns = document.querySelectorAll('.mdx-code-block-setting-btn')
 
@@ -78,7 +86,6 @@ code = code.replace(/^"|"$/g, '')
         if (!targetComp) return
         const componentManifest = componentManifests[targetComp.tagName.toLowerCase()]
         const componentManifestData = getComponentManifestData(targetComp, componentManifest)
-        console.log(componentManifestData)
         $configStore.set({
           uid,
           showConfig: true,
@@ -93,7 +100,10 @@ code = code.replace(/^"|"$/g, '')
   $configStore.subscribe((componentConfig) => {
     const targetUID = componentConfig.uid
     let manifestStyleStr = ''
-    if (!targetUID) return
+    if (!targetUID) {
+      return
+    } else {
+    }
     const targetComp = getComponentByUid(targetUID)
     if (!targetComp) return
 
