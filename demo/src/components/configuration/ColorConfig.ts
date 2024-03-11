@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit'
+import { LitElement, html, css, nothing } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TinyColor } from '@ctrl/tinycolor'
 import type { ColorSelectChangeEventDetail } from '@c2n/color-select'
@@ -50,7 +50,7 @@ export class ColorConfig extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
+        gap: 4px;
       }
       .color-input-group {
         display: flex;
@@ -198,7 +198,7 @@ export class ColorConfig extends LitElement {
 
   render() {
     return html`<div class="color-config">
-        <div>${this.label}</div>
+        ${this.label ? html`<div>${this.label}</div>` : nothing}
         <div class="color-wrapper"> 
           <div class="color-input-group ${!this.show ? 'disabled' : ''}" >         
             <c2-color-select class="color-select" placement="bottom-end" .hue=${this.h} .saturation=${this.s} .value=${this.v} .alpha=${this.a} @change=${this.handleColorSelectChange}> </c2-color-select>

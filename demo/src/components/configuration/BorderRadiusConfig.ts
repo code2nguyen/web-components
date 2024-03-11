@@ -36,17 +36,13 @@ export class BorderRadiusConfig extends LitElement {
         --c2-text-field--padding-right: 4px;
         --c2-text-field--padding-top: 4px;
         --c2-text-field--padding-bottom: 4px;
+      }
 
-        --c2-text-field--border-top: 1px solid transparent;
-        --c2-text-field--border-left: 1px solid transparent;
-        --c2-text-field--border-bottom: 1px solid transparent;
-        --c2-text-field--border-right: 1px solid transparent;
-        --c2-text-field--background: transparent;
-
-        --c2-text-field__focus--border-top: 1px solid var(--logo-color-1);
-        --c2-text-field__focus--border-left: 1px solid var(--logo-color-1);
-        --c2-text-field__focus--border-bottom: 1px solid var(--logo-color-1);
-        --c2-text-field__focus--border-right: 1px solid var(--logo-color-1);
+      c2-text-field:hover {
+        --c2-text-field--border-top: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-right: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-bottom: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-left: 1px solid rgb(213, 213, 213);
       }
     `,
   ]

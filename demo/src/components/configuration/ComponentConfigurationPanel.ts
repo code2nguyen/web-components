@@ -16,6 +16,7 @@ import './PaddingConfig'
 import './BorderRadiusConfig'
 import './FontConfig'
 import './ColorConfig'
+import './BorderConfig'
 
 import type { AttributeDeclarationItem, CSSDeclarationItem } from '../../store/manifest-declaration-item.ts'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils.ts'
@@ -59,6 +60,22 @@ export class ComponentConfigurationPanel extends LitElement {
 
         --c2-select__button--background: transparent;
         --c2-text-field--background: transparent;
+        --c2-text-field--border-top: 1px solid transparent;
+        --c2-text-field--border-right: 1px solid transparent;
+        --c2-text-field--border-bottom: 1px solid transparent;
+        --c2-text-field--border-left: 1px solid transparent;
+
+        --c2-text-field__focus--border-top: 1px solid var(--logo-color-1);
+        --c2-text-field__focus--border-right: 1px solid var(--logo-color-1);
+        --c2-text-field__focus--border-bottom: 1px solid var(--logo-color-1);
+        --c2-text-field__focus--border-left: 1px solid var(--logo-color-1);
+      }
+
+      c2-text-field:hover {
+        --c2-text-field--border-top: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-right: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-bottom: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-left: 1px solid rgb(213, 213, 213);
       }
 
       c2-text-field.number {
@@ -201,6 +218,10 @@ export class ComponentConfigurationPanel extends LitElement {
     return html`<demo-color-config .label=${label} .name=${name} .value=${value} @change=${this.handleCustomConfigChange}></demo-color-config>`
   }
 
+  generateBorderConfig(label: string, name: string, value: string) {
+    return html`<demo-border-config .label=${label} .name=${name} .value=${value} @change=${this.handleCustomConfigChange}></demo-border-config>`
+  }
+
   generateStringInput(label: string, name: string, value: string, type: string) {
     const classes = {
       number: type == 'pixel' || type == 'number',
@@ -293,7 +314,9 @@ export class ComponentConfigurationPanel extends LitElement {
       case 'pixel':
         return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
       case 'color':
-        return this.generateColorConfig(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
+        return this.generateColorConfig(cssDeclaration.property, cssDeclaration.cssVariable, value)
+      case 'border':
+        return this.generateBorderConfig(cssDeclaration.property, cssDeclaration.cssVariable, value)
       default:
         return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
     }
@@ -372,7 +395,6 @@ export class ComponentConfigurationPanel extends LitElement {
         <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
           <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
         </svg>
-
         <demo-size-config
           .width=${this.configStore.value.host?.w}
           .height=${this.configStore.value.host?.h}
