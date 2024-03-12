@@ -30,8 +30,16 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run type-check && vite build",
+    "build": "wireit",
     "type-check": "tsc -p tsconfig.lib.json --composite false"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "../list=item:build"        
+      ],
+      "command": "npm run type-check && vite build"
+    }
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
