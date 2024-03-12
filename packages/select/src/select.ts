@@ -16,9 +16,9 @@ import '@c2n/list'
  * @slot default - This is a default/unnamed slot
  *
  * @event
- * @cssproperty {pixel} [--c2-select__default-icon--size=24px] - Default icon size
+ * @cssproperty {pixel} [--c2-select__button__suffix-icon--size=18px] - Default icon size
  * @cssproperty {padding} [--c2-select__button--padding=4px 8px 4px 8px] - Button padding
- * @cssproperty {background} [--c2-select__button--background=rgb(253, 253, 253)]
+ * @cssproperty {color} [--c2-select__button--background=rgb(253, 253, 253)]
  * @cssproperty {color} [--c2-select__button--color=initial]
  * @cssproperty {pixel} [--c2-select__button--gap=4px]
  *
@@ -41,7 +41,7 @@ import '@c2n/list'
  * @cssproperty {border} [--c2-select__button__hover--border-right=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-select__button__hover--border-bottom=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-select__button__hover--border-left=1px solid rgb(177, 177, 177)]
- * @cssproperty {background} [--c2-select__button__hover--background=rgb(253, 253, 253)]
+ * @cssproperty {color} [--c2-select__button__hover--background=rgb(253, 253, 253)]
  * @cssproperty {color} [--c2-select__button__hover--color=initial]
 
  * @cssproperty {number} --c2-select__placeholder--font-weight
@@ -58,7 +58,9 @@ export class Select extends LitElement {
   @property({ type: Boolean, reflect: true }) readonly = false
   @property({ type: Boolean, reflect: true }) disabled = false
   @property({ type: Boolean, reflect: true }) focused = false
-  @property({ type: Boolean }) fitTarget = false
+
+  @property({ type: Boolean, attribute: 'fit-target' }) fitTarget = false
+
   @property({ type: String }) placeholder = ''
   @property({ type: Boolean }) multiple: boolean = false
   @property({ type: Boolean }) required: boolean = false
@@ -154,7 +156,7 @@ export class Select extends LitElement {
     return html`<div class="button-content ${classMap(buttonContentClasses)}">${this.displayText || this.placeholder}</div>`
   }
 
-  private renderButtonIcon() {
+  private renderButtonSuffixIcon() {
     return svg`<svg class="default-icon" fill="currentColor" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>`
   }
 
@@ -206,8 +208,9 @@ export class Select extends LitElement {
         ?disabled=${this.disabled}
         tabindex="-1"
       >
+        <slot name="button-prefix-icon"></slot>
         <slot name="button-content">${this.renderButtonContent()}</slot>
-        <slot name="button-icon">${this.renderButtonIcon()}</slot>
+        <slot name="button-suffix-icon">${this.renderButtonSuffixIcon()}</slot>
       </button>
       <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fit-target=${this.fitTarget}>
         <c2-list

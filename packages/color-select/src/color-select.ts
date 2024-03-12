@@ -199,7 +199,7 @@ export class ColorSelect extends LitElement {
           <div class="presentation-hue" style=${`background-color: ${colorWithOutAlpha.toHexString()}`}></div>
           <div class="presentation-color" style=${`background-color: ${this.tinyColor.toString('rgb')}`}></div>
         </button>
-        <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} .placement=${this.placement}>
+        <c2-overlay id="menu-overlay" disabled-cross-axis popover @toggle=${this.handleOverlayToggle} .placement=${this.placement}>
           ${this.open
             ? html` <div class="popover">
                 <div class="popover-container">

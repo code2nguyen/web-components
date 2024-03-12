@@ -11,7 +11,7 @@ import { type StyleInfo } from 'lit/directives/style-map.js'
  * @slot default - Content of the overlay
  *
  * @cssproperty {pixel} - [--c2-overlay--offset=8px] - The offset position of content base on trigger component
- * @cssproperty {background} - [--c2-overlay__backdrop--background=transparent] - The background value of backdrop
+ * @cssproperty {color} - [--c2-overlay__backdrop--background=transparent] - The background value of backdrop
  */
 @customElement('c2-overlay')
 export class Overlay extends LitElement {
@@ -19,6 +19,7 @@ export class Overlay extends LitElement {
 
   @property({ type: Boolean, reflect: true }) open = false
   @property({ type: String, reflect: true }) placement: Placement = 'bottom-start'
+  @property({ type: Boolean, reflect: true, attribute: 'disabled-cross-axis' }) disabledCrossAxis = false
   @property({ type: Boolean, attribute: 'fit-target' }) fitTarget = false
 
   private _target: HTMLElement | null | undefined = null
@@ -58,7 +59,7 @@ export class Overlay extends LitElement {
       placement: this.placement,
       middleware: [
         flip({
-          crossAxis: false,
+          crossAxis: !this.disabledCrossAxis,
         }),
       ],
     })

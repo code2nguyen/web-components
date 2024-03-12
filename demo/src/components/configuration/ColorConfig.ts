@@ -22,13 +22,10 @@ export class ColorConfig extends LitElement {
         --c2-checkbox__checkmark--color: var(--primary-text-color);
         --c2-checkbox__container--border: none;
         --c2-checkbox__container__selected--color: transparent;
-        --c2-checkbox__state-layer__hover__unselected--color: transparent;
-        --c2-checkbox__state-layer__hover__selected--color: transparent;
         --c2-checkbox__touchable--size: 16px;
         --c2-checkbox__container--height: 16px;
         --c2-checkbox__checkmark--size: 16px;
         --c2-checkbox__uncheckmark--size: 16px;
-        --c2-checkbox__state-layer--size: 16px;
 
         --c2-text-field--border-top: 1px solid transparent;
         --c2-text-field--border-right: 1px solid transparent;

@@ -20,14 +20,14 @@
         position: absolute;
         top: 20px;
         left: 20px;
-        width: 150px;
+        width: 80px;
         --c2-list--max-height: 100px;
       }
 
       .top-right {
         position: absolute;
         top: 20px;
-        right: 0px;
+        right: 24px;
       }
 
       .bottom-left {
@@ -47,28 +47,38 @@
         bottom: -200px;
         right: 20px;
       }
+      c2-list-item {
+        white-space: nowrap;
+      }
     </style>
   </head>
   <body>
-    <c2-select placeholder="Select item abc xys" class="top-left" fittarget multiple value="item1" style="border-radius: 4px">
+    <c2-select placeholder="Select item abc xys" class="top-left" value="item1" style="border-radius: 4px">
       <!-- <div slot="button-content">test</div> -->
       <c2-list-item value="item1">item-1 very long test</c2-list-item>
       <c2-list-item value="item2">item-2</c2-list-item>
-      <c2-list-item value="item2">item-2</c2-list-item>
-      <c2-list-item value="item2">item-2</c2-list-item>
-      <c2-list-item value="item2">item-2</c2-list-item>
-      <c2-list-item value="item2">item-2</c2-list-item>
-      <c2-list-item value="item2">item-2</c2-list-item>
-      <c2-list-item value="item2">item-2</c2-list-item>
-      <c2-list-item value="item2">item-2</c2-list-item>
-      <c2-list-item value="item2">item-2</c2-list-item>
+      <c2-list-item value="item3">item-3</c2-list-item>
+      <c2-list-item value="item4">item-4</c2-list-item>
+      <c2-list-item value="item5">item-5</c2-list-item>
+      <c2-list-item value="item6">item-6</c2-list-item>
+      <c2-list-item value="item7">item-7</c2-list-item>
+      <c2-list-item value="item8">item-8</c2-list-item>
+      <c2-list-item value="item9">item-9</c2-list-item>
+      <c2-list-item value="item10">item-10</c2-list-item>
     </c2-select>
-    <!-- 
+
     <c2-select class="top-right" value="item-1" style="border-radius: 4px">
+      <svg slot="button-prefix-icon" viewBox="0 0 18 20" fill="none">
+        <path
+          d="M8 20V14H10V16H18V18H10V20H8ZM0 18V16H6V18H0ZM3.425 12H5.5L6.6 8.925H11.425L12.5 12H14.575L10.075 0H7.925L3.425 12ZM7.2 7.2L8.95 2.225H9.05L10.8 7.2H7.2Z"
+          fill="currentColor"
+          fill-opacity="0.8"
+        />
+      </svg>
       <c2-list-item value="item1">item-1 item-1 very long test</c2-list-item>
       <c2-list-item value="item2">item-2</c2-list-item>
     </c2-select>
-
+    <!-- 
     <c2-select class="bottom-left" value="item-1" fittarget style="border-radius: 4px">
       <c2-list-item value="item1">item-1 very long test</c2-list-item>
       <c2-list-item value="item2">item-2</c2-list-item>

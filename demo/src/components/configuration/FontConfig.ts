@@ -13,42 +13,24 @@ export class FontConfig extends LitElement {
         display: block;
       }
       .font-config {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
         padding: 0px 8px;
-        flex-wrap: wrap;
-        align-content: center;
-
-        --c2-select__button--font-size: 10px;
-        --c2-select__default-icon--size: 12px;
-        --c2-select__button--padding: 8px 8px 8px 8px;
-        --c2-select__button__hover--background: transparent;
-        --c2-select__button--background: transparent;
-        --c2-list-item--font-size: 10px;
-
-        --c2-select__button--border-top: 1px solid transparent;
-        --c2-select__button--border-right: 1px solid transparent;
-        --c2-select__button--border-bottom: 1px solid transparent;
-        --c2-select__button--border-left: 1px solid transparent;
       }
 
-      .typo-icon {
-        padding-top: 6px;
-        padding-left: 7px;
+      .font-icon {
+        padding-right: 4px;
       }
 
       #font-family {
-        width: 215px;
+        grid-column: 1 / -1;
       }
       #font-size {
-        width: 80px;
       }
       #font-style {
-        width: 110px;
       }
       #font-weight {
-        width: 95px;
       }
 
       .font-anonymous-pro {
@@ -137,18 +119,57 @@ export class FontConfig extends LitElement {
     )
   }
 
-  private renderTypoIcon() {
-    return svg`<svg class="typo-icon" width="12" height="14" viewBox="0 0 18 20" fill="none">
-<path d="M8 20V14H10V16H18V18H10V20H8ZM0 18V16H6V18H0ZM3.425 12H5.5L6.6 8.925H11.425L12.5 12H14.575L10.075 0H7.925L3.425 12ZM7.2 7.2L8.95 2.225H9.05L10.8 7.2H7.2Z" fill="currentColor" fill-opacity="0.8"/>
+  private renderFontFamilyIcon() {
+    return svg`<svg class="font-icon" slot="button-prefix-icon" width="17" height="12" viewBox="0 0 17 12" fill="none">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M0.982225 9.72104L5.25944 0L9.53662 9.72104H8.38747L6.92182 6.39007H3.59703L2.13138 9.72104H0.982225ZM5.25941 2.61187L4.05985 5.33819H6.45896L5.25941 2.61187ZM14.2005 4.46163V4.90398C13.7199 4.51802 13.1103 4.28632 12.4473 4.28632C10.9006 4.28632 9.64231 5.54466 9.64231 7.09133C9.64231 8.63801 10.9007 9.89634 12.4473 9.89634C13.1103 9.89634 13.7199 9.66465 14.2005 9.27869V9.72104H15.2523V4.46163H14.2005ZM12.4473 8.84447C11.4806 8.84447 10.6942 8.058 10.6942 7.09133C10.6942 6.12461 11.4806 5.3382 12.4473 5.3382C13.414 5.3382 14.2004 6.12467 14.2004 7.09133C14.2005 8.05803 13.414 8.84447 12.4473 8.84447ZM16.1289 10.9481H0V12H16.1289V10.9481Z" fill="currentColor" fill-opacity="0.8"/>
 </svg>
 `
   }
 
+  private renderFontSizeIcon() {
+    return html` <svg width="12.46" height="12" class="font-icon" slot="button-prefix-icon" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M12 2.56781L10.0741 0L8.14829 2.56781H9.43219V5.13561H8.14829L10.0741 7.70342L12 5.13561H10.7161V2.56781H12ZM3.85171 1.2839L0 11.5551H1.37185L2.57551 8.34537H6.66025L7.86391 11.5551H9.23576L5.38405 1.2839H3.85171ZM3.05633 7.06147L4.61756 2.89841L6.17878 7.06147H3.05633Z"
+        fill="currentColor"
+        fill-opacity="0.6"
+      />
+    </svg>`
+  }
+
+  private renderFontStyleIcon() {
+    return html`<svg width="17" height="12" class="font-icon" slot="button-prefix-icon" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M0 12L5.722 0L11.444 12H9.90664L7.94591 7.88814H3.49805L1.53732 12H0ZM5.72196 3.22419L4.11721 6.58966H7.32671L5.72196 3.22419Z"
+        fill="currentColor"
+        fill-opacity="0.6"
+      />
+      <path d="M12.9 0H14.1V2.4H16.5V3.6H14.1V6H12.9V3.6H10.5V2.4H12.9V0Z" fill="currentColor" fill-opacity="0.6" />
+    </svg> `
+  }
+
+  private renderFontWeightIcon() {
+    return html` <svg class="font-icon" slot="button-prefix-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 3L11 2V3H14V2L15 3L14 4V3H11V4L10 3Z" fill="currentColor" fill-opacity="0.6" />
+      <path
+        d="M10 3L9.64645 2.64645L9.29289 3L9.64645 3.35355L10 3ZM11 2H11.5V0.792893L10.6464 1.64645L11 2ZM14 2L14.3536 1.64645L13.5 0.792893V2H14ZM15 3L15.3536 3.35355L15.7071 3L15.3536 2.64645L15 3ZM14 4H13.5V5.20711L14.3536 4.35355L14 4ZM11 4L10.6464 4.35355L11.5 5.20711V4H11ZM10.3536 3.35355L11.3536 2.35355L10.6464 1.64645L9.64645 2.64645L10.3536 3.35355ZM10.5 2V3H11.5V2H10.5ZM11 3.5H14V2.5H11V3.5ZM14.5 3V2H13.5V3H14.5ZM13.6464 2.35355L14.6464 3.35355L15.3536 2.64645L14.3536 1.64645L13.6464 2.35355ZM14.6464 2.64645L13.6464 3.64645L14.3536 4.35355L15.3536 3.35355L14.6464 2.64645ZM14.5 4V3H13.5V4H14.5ZM10.5 3V4H11.5V3H10.5ZM11.3536 3.64645L10.3536 2.64645L9.64645 3.35355L10.6464 4.35355L11.3536 3.64645Z"
+        fill="currentColor"
+        fill-opacity="0.6"
+      />
+      <path
+        d="M5.722 0L0 12H1.53732L3.49805 7.88814H7.94591L9.90664 12H11.444L5.722 0ZM4.11721 6.58966L5.72196 3.22419L7.32671 6.58966H4.11721Z"
+        fill="currentColor"
+        fill-opacity="0.6"
+      />
+    </svg>`
+  }
+
   render() {
     return html`<div class="font-config">
-      <div>${this.renderTypoIcon()}</div>
       ${this.fontPropertyNames.includes('font-family')
         ? html`<c2-select id="font-family" placeholder="font-family" @selection-change=${this.handleSelectionChange}>
+            ${this.renderFontFamilyIcon()}
             <c2-list-item value="Anonymous Pro" class="font-anonymous-pro">Anonymous Pro</c2-list-item>
             <c2-list-item value="Caveat Variable" class="font-caveat">Caveat</c2-list-item>
             <c2-list-item value="Crimson Text" class="font-crimson-text">Crimson Text</c2-list-item>
@@ -168,6 +189,8 @@ export class FontConfig extends LitElement {
             placeholder="font-size"
             @selection-change=${this.handleSelectionChange}
           >
+            ${this.renderFontSizeIcon()}
+
             <c2-list-item value="10px">10</c2-list-item>
             <c2-list-item value="11px">11</c2-list-item>
             <c2-list-item value="12px">12</c2-list-item>
@@ -187,6 +210,8 @@ export class FontConfig extends LitElement {
         : nothing}
       ${this.fontPropertyNames.includes('font-style')
         ? html`<c2-select id="font-style" placeholder="font-style" @selection-change=${this.handleSelectionChange}>
+            ${this.renderFontStyleIcon()}
+
             <c2-list-item value="normal">Normal</c2-list-item>
             <c2-list-item value="italic">Italic</c2-list-item>
             <c2-list-item value="oblique 10deg">Oblique 10deg</c2-list-item>
@@ -202,6 +227,7 @@ export class FontConfig extends LitElement {
         : nothing}
       ${this.fontPropertyNames.includes('font-weight')
         ? html`<c2-select id="font-weight" placeholder="font-weight" @selection-change=${this.handleSelectionChange}>
+            ${this.renderFontWeightIcon()}
             <c2-list-item value="normal">Normal</c2-list-item>
             <c2-list-item value="bold">Bold</c2-list-item>
             <c2-list-item value="lighter">Lighter</c2-list-item>

@@ -19,7 +19,7 @@ import './BorderConfig'
 
 import type { AttributeDeclarationItem, CSSDeclarationItem } from '../../store/manifest-declaration-item.ts'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils.ts'
-import { BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER, PROPERTY_ORDER } from '../../utils/dom.ts'
+import { BORDER_ORDER, BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER } from '../../utils/dom.ts'
 
 interface UpdateValue {
   name: string
@@ -58,7 +58,20 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-checkbox__container--width: 16px;
         --c2-checkbox__state-layer__hover__selected--color: var(--logo-color-1);
         --c2-checkbox__state-layer__hover__unselected--color: var(--logo-color-1);
+
+        --c2-select__button--font-size: 10px;
+        --c2-select__button__suffix-icon--size: 12px;
+        --c2-select__button__prefix-icon--size: 12px;
+
+        --c2-select__button--padding: 8px 8px 8px 8px;
+        --c2-select__button__hover--background: transparent;
         --c2-select__button--background: transparent;
+        --c2-list-item--font-size: 10px;
+
+        --c2-select__button--border-top: 1px solid transparent;
+        --c2-select__button--border-right: 1px solid transparent;
+        --c2-select__button--border-bottom: 1px solid transparent;
+        --c2-select__button--border-left: 1px solid transparent;
 
         --c2-text-field--background: transparent;
         --c2-text-field--border-top: 1px solid transparent;
@@ -218,6 +231,22 @@ export class ComponentConfigurationPanel extends LitElement {
     return cssProperties
   }
 
+  renderBorderConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const borderVariables = cssProperties.filter((item) => {
+      return BORDER_ORDER.includes(item.property)
+    })
+    if (borderVariables.length > 0) {
+      result.push(
+        ...borderVariables.map((cssVar) => {
+          return this.generateCssVariableInput(cssVar)
+        }),
+      )
+      cssProperties = cssProperties.filter((item) => !borderVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
   generateColorConfig(label: string, name: string, value: string) {
     return html`<demo-color-config .label=${label} .name=${name} .value=${value} @change=${this.handleCustomConfigChange}></demo-color-config>`
   }
@@ -318,16 +347,18 @@ export class ComponentConfigurationPanel extends LitElement {
 
   renderElementCssPropertiesContent(cssProperties: CSSDeclarationItem[]) {
     const result: TemplateResult[] = []
-    cssProperties = this.renderFontConfig(cssProperties, result)
 
     cssProperties = this.renderPaddingConfig(cssProperties, result)
     cssProperties = this.renderBorderRadiusConfig(cssProperties, result)
-    cssProperties = cssProperties.sort((a, b) => {
-      const indexA = PROPERTY_ORDER.findIndex((i) => a.property.endsWith(i))
-      const indexB = PROPERTY_ORDER.findIndex((i) => b.property.endsWith(i))
-      return indexB - indexA
-    })
 
+    cssProperties = this.renderBorderConfig(cssProperties, result)
+    cssProperties = this.renderFontConfig(cssProperties, result)
+
+    // cssProperties = cssProperties.sort((a, b) => {
+    //   const indexA = PROPERTY_ORDER.findIndex((i) => a.property.endsWith(i))
+    //   const indexB = PROPERTY_ORDER.findIndex((i) => b.property.endsWith(i))
+    //   return indexB - indexA
+    // })
     return [
       ...result,
       ...cssProperties.map((cssVar) => {
