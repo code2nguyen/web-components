@@ -12,5 +12,5 @@ export default defineConfig({
     rollupOptions: {
       external: /^lit|@c2n/,
     },
-  }  
+  },
 })

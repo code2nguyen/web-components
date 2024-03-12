@@ -1,16 +1,14 @@
 {
-    "extends": "@c2n/config/tsconfig.lib.json",
-    "compilerOptions": {
-        "moduleResolution": "Node",
-        "forceConsistentCasingInFileNames": true,
-        "rootDir": "./src",
-        "outDir": "./dist",
-        "noEmit": false,
-        "emitDeclarationOnly": false,
-        "allowImportingTsExtensions": false,
-        "tsBuildInfoFile": "./dist/.tsbuildinfo"
-    },
-    "include": [
-        "**/*"
-    ]
+  "extends": "@c2n/config/tsconfig.lib.json",
+  "compilerOptions": {
+    "moduleResolution": "Node",
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "noEmit": false,
+    "emitDeclarationOnly": false,
+    "allowImportingTsExtensions": false,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  },
+  "include": ["**/*"]
 }

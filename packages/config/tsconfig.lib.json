@@ -10,11 +10,7 @@
     "inlineSources": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "lib": [
-      "es2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["es2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "verbatimModuleSyntax": true,
     "moduleResolution": "bundler",

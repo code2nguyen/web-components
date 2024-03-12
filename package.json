@@ -11,7 +11,7 @@
     "fix": "npm run lint:fix && npm run format:fix",
     "format": "npm run format:fix",
     "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --check",
-    "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --write",        
+    "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --write",
     "demo": "npm run start -w demo",
     "demo:dev": "npm run dev -w demo",
     "demo:build": "wireit",
@@ -50,7 +50,7 @@
       ],
       "output": [],
       "command": "eslint --ignore-pattern \"dist/\"  \"**/*.{js,ts}\""
-    },  
+    },
     "build": {
       "dependencies": [
         "./packages/card:build",

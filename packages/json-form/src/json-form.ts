@@ -51,7 +51,7 @@ export class JsonForm extends LitElement {
     if (formItem.ui?.enumData && !ui.slot) {
       const enumJsonUI = { ...formItem.ui, enumData: undefined }
       return html`${formItem.ui.enumData.map((enumItem) =>
-        this.renderFormItem({ formItem: { ...formItem, ui: enumJsonUI }, data: enumItem, value, formItemId, valuePath, isWrapper })
+        this.renderFormItem({ formItem: { ...formItem, ui: enumJsonUI }, data: enumItem, value, formItemId, valuePath, isWrapper }),
       )}`
     }
 

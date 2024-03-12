@@ -14,7 +14,19 @@ import label from '@c2n/label/custom-elements.json'
 import { normalizeManifest } from '../utils/manifest-utils'
 import type { ComponentManifests } from './manifest-declaration-item'
 
-export const componentManifests: ComponentManifests = [colorSelect, colorArea, colorSlider, listItem, overlay, select, dropdownList, list, tabs, codeViewer, label].reduce((result, item) => {
+export const componentManifests: ComponentManifests = [
+  colorSelect,
+  colorArea,
+  colorSlider,
+  listItem,
+  overlay,
+  select,
+  dropdownList,
+  list,
+  tabs,
+  codeViewer,
+  label,
+].reduce((result, item) => {
   const pkg = item as Package
   for (const module of pkg.modules) {
     if (module.declarations) {

@@ -53,7 +53,7 @@ export function handleFormItemValueChange(renderOps: UIRenderParam) {
           value,
           valuePath: renderOps.valuePath,
         },
-      })
+      }),
     )
   }
 }

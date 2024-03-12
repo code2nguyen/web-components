@@ -37,7 +37,7 @@
     "type-check": {
       "dependencies": [
         "../wc-utils:build",
-        "../list-item:build"           
+        "../list-item:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },

@@ -3,6 +3,6 @@
   "compilerOptions": {
     "moduleResolution": "NodeNext",
     "experimentalDecorators": true,
-    "useDefineForClassFields": false,
+    "useDefineForClassFields": false
   }
 }

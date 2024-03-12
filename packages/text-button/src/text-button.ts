@@ -4,12 +4,11 @@ import styles from './text-button.scss?inline'
 /**
  * TextButton component
  *
- * @slot 
- * @csspart 
+ * @slot
+ * @csspart
  */
 @customElement('c2-text-button')
 export class TextButton extends LitElement {
-
   static override styles = unsafeCSS(styles)
 
   override render() {
@@ -19,7 +18,6 @@ export class TextButton extends LitElement {
       </div>
     `
   }
-
 }
 
 declare global {

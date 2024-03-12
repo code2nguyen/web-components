@@ -1,69 +1,69 @@
 {
-    "$id": "./meta-json-form",
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "definitions": {
-        "formGroupDefinition": {
-            "patternProperties": {
-                ".*": {
-                    "$ref": "#/definitions/uiDefinition"
-                }
-            },
-            "properties": {
-                "ui": {
-                    "$ref": "#/definitions/uiDefinition"
-                },
-                "uiOrder": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                }
-            },
-            "type": "object"
-        },
-        "formItemDefinition": {
-            "properties": {
-                "additionalProperties": false,
-                "ui": {
-                    "$ref": "#/definitions/uiDefinition"
-                },
-                "value": {
-                    "description": "Specifies value of form item. This value will be validated by json schema validation spec",
-                    "type": "object"
-                }
-            },
-            "type": "object"
-        },
-        "uiDefinition": {
-            "additionalProperties": false,
-            "properties": {
-                "attribute": {
-                    "type": "object"
-                },
-                "component": {
-                    "type": "string"
-                },
-                "css": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                }
-            },
-            "type": "object"
-        }
-    },
-    "patternProperties": {
+  "$id": "./meta-json-form",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "formGroupDefinition": {
+      "patternProperties": {
         ".*": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/formItemDefinition"
-                },
-                {
-                    "$ref": "#/definitions/formGroupDefinition"
-                }
-            ]
+          "$ref": "#/definitions/uiDefinition"
         }
+      },
+      "properties": {
+        "ui": {
+          "$ref": "#/definitions/uiDefinition"
+        },
+        "uiOrder": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
     },
-    "type": "object"
+    "formItemDefinition": {
+      "properties": {
+        "additionalProperties": false,
+        "ui": {
+          "$ref": "#/definitions/uiDefinition"
+        },
+        "value": {
+          "description": "Specifies value of form item. This value will be validated by json schema validation spec",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "uiDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute": {
+          "type": "object"
+        },
+        "component": {
+          "type": "string"
+        },
+        "css": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "patternProperties": {
+    ".*": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/formItemDefinition"
+        },
+        {
+          "$ref": "#/definitions/formGroupDefinition"
+        }
+      ]
+    }
+  },
+  "type": "object"
 }

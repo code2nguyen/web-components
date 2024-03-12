@@ -4,18 +4,16 @@ import styles from './mat-icon.scss?inline'
 /**
  * MatIcon component
  *
- * @slot 
- * @csspart 
+ * @slot
+ * @csspart
  */
 @customElement('c2-mat-icon')
 export class MatIcon extends LitElement {
-
   static override styles = unsafeCSS(styles)
 
   override render() {
     return html`<slot></slot>`
   }
-
 }
 
 declare global {

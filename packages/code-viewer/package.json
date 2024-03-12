@@ -36,13 +36,13 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../wc-utils:build"        
+        "../wc-utils:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
     "build": {
       "dependencies": [
-        "type-check"        
+        "type-check"
       ],
       "command": "vite build"
     }

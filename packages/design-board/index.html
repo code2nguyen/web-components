@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -24,22 +24,20 @@
       <div>Item 3</div>
     </c2-design-board>
 
+    <c2-design-board #design-board>
+      <c2-design-board-item x="0" y="0" width="100" height="100">
+        <div>Item 1</div>
+      </c2-design-board-item>
+      <c2-design-board-item x="100" y="0" width="100" height="100">
+        <div x>Item 2</div>
+      </c2-design-board-item>
+      <c2-design-board-item x="200" y="0" width="100" height="100">
+        <div>Item 3</div>
+      </c2-design-board-item>
+    </c2-design-board>
 
-
-  <c2-design-board #design-board>
-    <c2-design-board-item x="0" y="0" width="100" height="100">
-      <div >Item 1</div>
-    </c2-design-board-item>
-    <c2-design-board-item x="100" y="0" width="100" height="100">
-      <div x>Item 2</div>
-    </c2-design-board-item>        
-    <c2-design-board-item x="200" y="0" width="100" height="100">
-      <div>Item 3<div>
-    </c2-design-board-item>
-  </c2-design-board>
-
-  <script>
+    <script>
       const designBoard = document.getElementById('design-board')
-  </script>
+    </script>
   </body>
 </html>

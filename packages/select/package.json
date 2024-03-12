@@ -38,13 +38,13 @@
       "dependencies": [
         "../wc-utils:build",
         "../overlay:build",
-        "../list:build"           
+        "../list:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
     "build": {
       "dependencies": [
-        "type-check"    
+        "type-check"
       ],
       "command": "vite build"
     }
