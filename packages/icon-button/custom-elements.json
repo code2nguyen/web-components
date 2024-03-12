@@ -1,1 +1,28 @@
-{"schemaVersion":"1.0.0","readme":"","modules":[{"kind":"javascript-module","path":"src/icon-button.ts","declarations":[{"kind":"class","description":"IconButton component","name":"IconButton","cssParts":[{}],"slots":[{}],"members":[{"kind":"field","name":"tooltip","type":{"text":"string | undefined"},"default":"undefined","attribute":"tooltip"}],"attributes":[{"name":"tooltip","type":{"text":"string | undefined"},"default":"undefined","fieldName":"tooltip"}],"superclass":{"name":"LitElement","package":"lit"},"tagName":"c2-icon-button","customElement":true}],"exports":[{"kind":"js","name":"IconButton","declaration":{"name":"IconButton","module":"src/icon-button.ts"}},{"kind":"custom-element-definition","name":"c2-icon-button","declaration":{"name":"IconButton","module":"src/icon-button.ts"}}]}]}
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/icon-button.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "IconButton component",
+          "name": "IconButton",
+          "cssParts": [{}],
+          "slots": [{}],
+          "members": [{ "kind": "field", "name": "tooltip", "type": { "text": "string | undefined" }, "default": "undefined", "attribute": "tooltip" }],
+          "attributes": [{ "name": "tooltip", "type": { "text": "string | undefined" }, "default": "undefined", "fieldName": "tooltip" }],
+          "superclass": { "name": "LitElement", "package": "lit" },
+          "tagName": "c2-icon-button",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        { "kind": "js", "name": "IconButton", "declaration": { "name": "IconButton", "module": "src/icon-button.ts" } },
+        { "kind": "custom-element-definition", "name": "c2-icon-button", "declaration": { "name": "IconButton", "module": "src/icon-button.ts" } }
+      ]
+    }
+  ]
+}

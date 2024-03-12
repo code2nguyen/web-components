@@ -12,7 +12,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js'
 @customElement('c2-code-viewer')
 export class CodeViewer extends LitElement {
   static override styles = unsafeCSS(styles)
-  static cachedHighlighters = new Map()
+  static cachedHighlighters = new Map<string, ShikiHighlighter>()
 
   @property({ type: String }) code = ''
   @property({ type: String, reflect: true }) theme: ThemePresets | ThemeRegistration | ThemeRegistrationRaw = 'github-light'

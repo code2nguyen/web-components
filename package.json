@@ -7,7 +7,7 @@
     "prepare": "husky install",
     "lint": "wireit",
     "lint:check": "wireit",
-    "lint:fix": "eslint --ignore-pattern=dist/ --fix \"**/*.{js,ts}\"",
+    "lint:fix": "eslint --ignore-pattern=dist/ --ignore-pattern=types/ --fix \"**/*.{js,ts}\"",
     "fix": "npm run lint:fix && npm run format:fix",
     "format": "npm run format:fix",
     "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --check",
@@ -49,7 +49,7 @@
         "!node_modules/"
       ],
       "output": [],
-      "command": "eslint --ignore-pattern \"dist/\"  \"**/*.{js,ts}\""
+      "command": "eslint --ignore-pattern \"dist/\"  --ignore-pattern \"types/\"  \"**/*.{js,ts}\""
     },
     "build": {
       "dependencies": [

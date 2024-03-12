@@ -1,1 +1,52 @@
-{"schemaVersion":"1.0.0","readme":"","modules":[{"kind":"javascript-module","path":"src/checkbox.ts","declarations":[{"kind":"class","description":"An example element.","name":"Checkbox","cssParts":[{"description":"The button","name":"button"}],"slots":[{"description":"This element has a slot","name":""}],"members":[{"kind":"field","name":"formElement","type":{"text":"HTMLInputElement"},"privacy":"protected"},{"kind":"field","name":"checked","type":{"text":"boolean"},"default":"false","attribute":"checked","reflects":true},{"kind":"field","name":"indeterminate","type":{"text":"boolean"},"default":"false","attribute":"indeterminate","reflects":true},{"kind":"field","name":"disabled","type":{"text":"boolean"},"default":"false","attribute":"disabled","reflects":true},{"kind":"field","name":"name","type":{"text":"string"},"default":"''","attribute":"name"},{"kind":"field","name":"ariaLabel","type":{"text":"string"},"attribute":"aria-label"},{"kind":"field","name":"ariaLabelledBy","type":{"text":"undefined | string"},"attribute":"aria-labelledby"},{"kind":"field","name":"ariaDescribedBy","type":{"text":"undefined | string"},"attribute":"aria-describedby"},{"kind":"method","name":"focus","return":{"type":{"text":"void"}},"parameters":[{"name":"options","optional":true,"type":{"text":"FocusOptions | undefined"}}]},{"kind":"method","name":"handleChange","privacy":"protected","parameters":[{"name":"event","type":{"text":"Event"}}]}],"attributes":[{"name":"checked","type":{"text":"boolean"},"default":"false","fieldName":"checked"},{"name":"indeterminate","type":{"text":"boolean"},"default":"false","fieldName":"indeterminate"},{"name":"disabled","type":{"text":"boolean"},"default":"false","fieldName":"disabled"},{"name":"name","type":{"text":"string"},"default":"''","fieldName":"name"},{"name":"aria-label","type":{"text":"string"},"fieldName":"ariaLabel"},{"name":"aria-labelledby","type":{"text":"undefined | string"},"fieldName":"ariaLabelledBy"},{"name":"aria-describedby","type":{"text":"undefined | string"},"fieldName":"ariaDescribedBy"}],"superclass":{"name":"LitElement","package":"lit"},"tagName":"c2-checkbox","customElement":true}],"exports":[{"kind":"js","name":"Checkbox","declaration":{"name":"Checkbox","module":"src/checkbox.ts"}},{"kind":"custom-element-definition","name":"c2-checkbox","declaration":{"name":"Checkbox","module":"src/checkbox.ts"}}]}]}
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/checkbox.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "An example element.",
+          "name": "Checkbox",
+          "cssParts": [{ "description": "The button", "name": "button" }],
+          "slots": [{ "description": "This element has a slot", "name": "" }],
+          "members": [
+            { "kind": "field", "name": "formElement", "type": { "text": "HTMLInputElement" }, "privacy": "protected" },
+            { "kind": "field", "name": "checked", "type": { "text": "boolean" }, "default": "false", "attribute": "checked", "reflects": true },
+            { "kind": "field", "name": "indeterminate", "type": { "text": "boolean" }, "default": "false", "attribute": "indeterminate", "reflects": true },
+            { "kind": "field", "name": "disabled", "type": { "text": "boolean" }, "default": "false", "attribute": "disabled", "reflects": true },
+            { "kind": "field", "name": "name", "type": { "text": "string" }, "default": "''", "attribute": "name" },
+            { "kind": "field", "name": "ariaLabel", "type": { "text": "string" }, "attribute": "aria-label" },
+            { "kind": "field", "name": "ariaLabelledBy", "type": { "text": "undefined | string" }, "attribute": "aria-labelledby" },
+            { "kind": "field", "name": "ariaDescribedBy", "type": { "text": "undefined | string" }, "attribute": "aria-describedby" },
+            {
+              "kind": "method",
+              "name": "focus",
+              "return": { "type": { "text": "void" } },
+              "parameters": [{ "name": "options", "optional": true, "type": { "text": "FocusOptions | undefined" } }]
+            },
+            { "kind": "method", "name": "handleChange", "privacy": "protected", "parameters": [{ "name": "event", "type": { "text": "Event" } }] }
+          ],
+          "attributes": [
+            { "name": "checked", "type": { "text": "boolean" }, "default": "false", "fieldName": "checked" },
+            { "name": "indeterminate", "type": { "text": "boolean" }, "default": "false", "fieldName": "indeterminate" },
+            { "name": "disabled", "type": { "text": "boolean" }, "default": "false", "fieldName": "disabled" },
+            { "name": "name", "type": { "text": "string" }, "default": "''", "fieldName": "name" },
+            { "name": "aria-label", "type": { "text": "string" }, "fieldName": "ariaLabel" },
+            { "name": "aria-labelledby", "type": { "text": "undefined | string" }, "fieldName": "ariaLabelledBy" },
+            { "name": "aria-describedby", "type": { "text": "undefined | string" }, "fieldName": "ariaDescribedBy" }
+          ],
+          "superclass": { "name": "LitElement", "package": "lit" },
+          "tagName": "c2-checkbox",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        { "kind": "js", "name": "Checkbox", "declaration": { "name": "Checkbox", "module": "src/checkbox.ts" } },
+        { "kind": "custom-element-definition", "name": "c2-checkbox", "declaration": { "name": "Checkbox", "module": "src/checkbox.ts" } }
+      ]
+    }
+  ]
+}

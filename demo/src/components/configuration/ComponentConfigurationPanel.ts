@@ -4,7 +4,6 @@ import { StoreController } from '@nanostores/lit'
 import { classMap } from 'lit/directives/class-map.js'
 import { $configStore } from '../../store/config-store.ts'
 import './GenerateCodeBlock'
-import * as changeCase from 'change-case'
 import type { Checkbox } from '@c2n/checkbox'
 
 import '@c2n/details'
