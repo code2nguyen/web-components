@@ -1,18 +1,38 @@
 :root {
-  --theme-color: #212121;
-  --primary-text-color: #212121;
+  --theme-color: #262a40;
+  --primary-text-color: #262a40;
   --logo-color-1: #3498db;
   --logo-color-2: #ff726b;
   --logo-color-3: #b280c1;
   --logo-color-4: #efc94c;
+
+  --border-color-default: rgb(213, 213, 213);
   --border-color: rgb(230 230 230);
   --border-color-100: rgb(241 245 249);
+
   --bg-color: rgb(249 250 251);
   --bg-color-1: rgb(239, 245, 254);
   --bg-color-200: rgb(226 232 240);
   --bg-color-100: rgb(241 245 249);
   --bg-color-300: rgb(203 213 225);
   --bg-color-400: rgb(148 163 184);
+  --bg-config-panel: #f2f2f2;
+}
+
+.logo-color-1 {
+  color: var(--logo-color-1);
+}
+
+.logo-color-2 {
+  color: var(--logo-color-2);
+}
+
+.logo-color-3 {
+  color: var(--logo-color-3);
+}
+
+.logo-color-4 {
+  color: var(--logo-color-4);
 }
 
 html {

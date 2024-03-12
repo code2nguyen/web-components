@@ -16,22 +16,19 @@ export class SizeConfig extends LitElement {
         --c2-checkbox__checkmark--color: var(--primary-text-color);
         --c2-checkbox__container--border: none;
         --c2-checkbox__container__selected--color: transparent;
-        --c2-checkbox__state-layer__hover__unselected--color: transparent;
-        --c2-checkbox__state-layer__hover__selected--color: transparent;
         --c2-checkbox__touchable--size: 16px;
         --c2-checkbox__container--height: 16px;
         --c2-checkbox__checkmark--size: 16px;
         --c2-checkbox__uncheckmark--size: 16px;
-        --c2-checkbox__state-layer--size: 16px;
 
         --c2-text-field--padding-left: 0px;
       }
 
       c2-text-field:hover {
-        --c2-text-field--border-top: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-right: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-bottom: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-left: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-top: 1px solid var(--border-color-default);
+        --c2-text-field--border-right: 1px solid var(--border-color-default);
+        --c2-text-field--border-bottom: 1px solid var(--border-color-default);
+        --c2-text-field--border-left: 1px solid var(--border-color-default);
       }
 
       .text-prefix {
@@ -43,6 +40,7 @@ export class SizeConfig extends LitElement {
         grid-auto-flow: column;
         align-items: center;
         gap: 4px;
+        padding: 0px 8px;
       }
     `,
   ]
@@ -101,7 +99,7 @@ export class SizeConfig extends LitElement {
   render() {
     return html` <div class="container">
       <c2-text-field .value=${this.width} @change=${this.handleWdithChange}>
-        <span class="text-prefix" slot="prefix-icon">W</span>
+        <span class="text-prefix logo-color-1" slot="prefix-icon">W</span>
       </c2-text-field>
       <c2-text-field .value=${this.height} @change=${this.handleHeightChange}>
         <span class="text-prefix" slot="prefix-icon">H</span>

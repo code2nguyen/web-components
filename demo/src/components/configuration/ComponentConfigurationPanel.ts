@@ -20,7 +20,7 @@ import './BorderConfig'
 
 import type { AttributeDeclarationItem, CSSDeclarationItem } from '../../store/manifest-declaration-item.ts'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils.ts'
-import { BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER } from '../../utils/dom.ts'
+import { BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER, PROPERTY_ORDER } from '../../utils/dom.ts'
 
 interface UpdateValue {
   name: string
@@ -33,7 +33,7 @@ export class ComponentConfigurationPanel extends LitElement {
     css`
       :host {
         display: block;
-        font-size: 10px;
+        font-size: 12px;
         --c2-details--border-top: none;
         --c2-details--border-left: none;
         --c2-details--border-right: none;
@@ -54,11 +54,13 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-text-field--padding-bottom: 6px;
 
         --c2-checkbox__touchable--size: 24px;
-        --c2-checkbox__state-layer--size: 28px;
+        --c2-checkbox__state-layer--size: 32px;
         --c2-checkbox__container--height: 16px;
         --c2-checkbox__container--width: 16px;
-
+        --c2-checkbox__state-layer__hover__selected--color: var(--logo-color-1);
+        --c2-checkbox__state-layer__hover__unselected--color: var(--logo-color-1);
         --c2-select__button--background: transparent;
+
         --c2-text-field--background: transparent;
         --c2-text-field--border-top: 1px solid transparent;
         --c2-text-field--border-right: 1px solid transparent;
@@ -72,10 +74,10 @@ export class ComponentConfigurationPanel extends LitElement {
       }
 
       c2-text-field:hover {
-        --c2-text-field--border-top: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-right: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-bottom: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-left: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-top: 1px solid var(--border-color-default);
+        --c2-text-field--border-right: 1px solid var(--border-color-default);
+        --c2-text-field--border-bottom: 1px solid var(--border-color-default);
+        --c2-text-field--border-left: 1px solid var(--border-color-default);
       }
 
       c2-text-field.number {
@@ -108,18 +110,21 @@ export class ComponentConfigurationPanel extends LitElement {
         padding-bottom: 4px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
       }
       .row {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        padding: 0px 8px 0px 12px;
       }
       .title {
         font-weight: 500;
       }
       c2-label {
         font-weight: 300;
+      }
+      .property-name {
       }
     `,
   ]
@@ -137,7 +142,7 @@ export class ComponentConfigurationPanel extends LitElement {
 
   generateBooleanInput(label: string, name: string, value: string) {
     return html` <div class="row">
-      <c2-label for=${name}>${label}</c2-label>
+      <c2-label class="property-name" for=${name}>${label}</c2-label>
       <c2-checkbox @change=${this.handleCheckboxChange} id=${name} ?checked=${value !== 'false'}></c2-checked>
     </div>`
   }
@@ -227,8 +232,8 @@ export class ComponentConfigurationPanel extends LitElement {
       number: type == 'pixel' || type == 'number',
     }
     return html` <div class="row">
-      <c2-label for=${name}>${label}</c2-label>
-      <c2-text-field class=${classMap(classes)} @change=${this.handleTextInputChange} id=${name} .value=${value}></c2-text-field>
+      <c2-label class="property-name" for=${name}>${label}</c2-label>
+      <c2-text-field .placeholder=${label} class=${classMap(classes)} @change=${this.handleTextInputChange} id=${name} .value=${value}></c2-text-field>
     </div>`
   }
 
@@ -283,16 +288,6 @@ export class ComponentConfigurationPanel extends LitElement {
     }
   }
 
-  // private getSettingName(name: string) {
-  //   const tagName = $configStore.value?.tagName ?? ''
-  //   const states = this.configStore.value.stateCssProperties ? Object.keys(this.configStore.value.stateCssProperties) : []
-  //   let settingName = name.replace(`--${tagName}`, '')
-  //   states.forEach((state) => {
-  //     settingName = settingName.replace(`-${changeCase.paramCase(state)}`, '')
-  //   })
-  //   return changeCase.capitalCase(settingName)
-  // }
-
   generateAttributeInput(attr: AttributeDeclarationItem) {
     const value = this.getValueOrDefaultValue(attr)
 
@@ -324,9 +319,15 @@ export class ComponentConfigurationPanel extends LitElement {
 
   renderElementCssPropertiesContent(cssProperties: CSSDeclarationItem[]) {
     const result: TemplateResult[] = []
+    cssProperties = this.renderFontConfig(cssProperties, result)
+
     cssProperties = this.renderPaddingConfig(cssProperties, result)
     cssProperties = this.renderBorderRadiusConfig(cssProperties, result)
-    cssProperties = this.renderFontConfig(cssProperties, result)
+    cssProperties = cssProperties.sort((a, b) => {
+      const indexA = PROPERTY_ORDER.findIndex((i) => a.property.endsWith(i))
+      const indexB = PROPERTY_ORDER.findIndex((i) => b.property.endsWith(i))
+      return indexB - indexA
+    })
 
     return [
       ...result,

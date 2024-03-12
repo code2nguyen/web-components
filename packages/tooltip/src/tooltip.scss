@@ -2,14 +2,14 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-tooltip,
   $theme: (
-    bg-color: #322F35,
+    background-color: #322f35,
   )
 );
 
 :host {
   display: inline-flex;
   position: absolute;
-  background: css.cssVar(bg-color);
+  background: css.cssVar(background-color);
   border-radius: 4px;
   display: inline-block;
   pointer-events: none;
@@ -19,12 +19,12 @@
   opacity: 0;
   transform: scale(0.75);
   transition: animation.standard-deceleration(opacity), animation.standard-deceleration(transform);
-  
+
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
-  
-  color: #F5EFF7;
+
+  color: #f5eff7;
 }
 
 :host([showing]) {
@@ -35,12 +35,13 @@
   display: inline-flex;
   align-items: center;
   position: relative;
-  padding: 4px 8px;  
+  padding: 4px 8px;
   max-width: 160px;
   width: max-content;
-  ::slotted(svg), .arrow {
+  ::slotted(svg),
+  .arrow {
     position: absolute;
     background-color: transparent;
-    color: css.cssVar(bg-color);
+    color: css.cssVar(background-color);
   }
 }

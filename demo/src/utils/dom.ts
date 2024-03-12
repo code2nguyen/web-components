@@ -1,7 +1,9 @@
-import type { AttributeDeclarationItem, CSSDeclarationItem } from '../store/manifest-declaration-item'
+import type { AttributeDeclarationItem, CSSDeclarationItem } from '../store/manifest-declaration-item.ts'
 
 export const PADDING_ORDER = ['padding-top', 'padding-right', 'padding-bottom', 'padding-left']
 export const BORDER_RADIUS_ORDER = ['border-top-left-radius', 'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius']
+
+export const PROPERTY_ORDER = ['border', 'border-top', 'border-right', 'border-bottom', 'border-left']
 
 export const FONT_PROPERTY = ['font-family', 'font-weight', 'font-size', 'font-style']
 

@@ -14,22 +14,19 @@ export class PaddingConfig extends LitElement {
       .padding-config {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-      }
-      .padding-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         gap: 2px;
+        padding: 0px 8px;
       }
 
-      .padding-wrapper svg {
-        width: 24px;
-        height: 24px;
+      .padding-config svg {
+        width: 12px;
+        height: 12px;
+        padding-left: 6px;
+        padding-right: 6px;
       }
 
-      .padding-wrapper c2-text-field {
-        width: 50px;
+      .padding-config c2-text-field {
+        width: 60px;
 
         --c2-text-field--padding-left: 0px;
         --c2-text-field--padding-right: 4px;
@@ -37,10 +34,14 @@ export class PaddingConfig extends LitElement {
         --c2-text-field--padding-bottom: 4px;
       }
       c2-text-field:hover {
-        --c2-text-field--border-top: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-right: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-bottom: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-left: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-top: 1px solid var(--border-color-default);
+        --c2-text-field--border-right: 1px solid var(--border-color-default);
+        --c2-text-field--border-bottom: 1px solid var(--border-color-default);
+        --c2-text-field--border-left: 1px solid var(--border-color-default);
+      }
+      .label {
+        padding-left: 4px;
+        font-weight: 300;
       }
     `,
   ]
@@ -109,63 +110,60 @@ export class PaddingConfig extends LitElement {
 
   render() {
     return html`<div class="padding-config">
-      <div>${this.label}</div>
-      <div class="padding-wrapper">
-        <!-- top -->
-        <c2-text-field id="0" .value=${this.paddingValues[0]} @change=${this.handlePaddingChange}>
-          <svg viewBox="0 0 24 24" slot="prefix-icon">
-            <path
-              fill="#000"
-              fill-opacity=".3"
-              fill-rule="evenodd"
-              stroke="none"
-              d="M6 16.5V10h1v6.5c0 .276.224.5.5.5h9c.276 0 .5-.224.5-.5V10h1v6.5c0 .828-.672 1.5-1.5 1.5h-9c-.828 0-1.5-.672-1.5-1.5z"
-            ></path>
-            <path fill="#000" fill-opacity="1" fill-rule="evenodd" stroke="none" d="M6 6h12v1H6V6z"></path>
-          </svg>
-        </c2-text-field>
+      <!-- top -->
+      <c2-text-field id="0" .value=${this.paddingValues[0]} @change=${this.handlePaddingChange}>
+        <svg slot="prefix-icon" viewBox="0 0 12 12" fill="none">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M2 2L10 2L10 3L2 3L2 2Z" fill="black" />
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12 2C12 0.895431 11.1046 -3.91405e-08 10 -8.74228e-08L2 -4.37114e-07C0.895431 -4.85396e-07 -3.91405e-08 0.89543 -8.74228e-08 2L-4.37114e-07 10C-4.85396e-07 11.1046 0.89543 12 2 12L10 12C11.1046 12 12 11.1046 12 10L12 2ZM11 3C11 1.89543 10.1046 1 9 1L3 1C1.89543 1 1 1.89543 1 3L1 9C1 10.1046 1.89543 11 3 11L9 11C10.1046 11 11 10.1046 11 9L11 3Z"
+            fill="black"
+            fill-opacity="0.5"
+          />
+        </svg>
+      </c2-text-field>
 
-        <!-- right -->
-        <c2-text-field id="1" .value=${this.paddingValues[1]} @change=${this.handlePaddingChange}>
-          <svg viewBox="0 0 24 24" slot="prefix-icon">
-            <path
-              fill="#000"
-              fill-opacity=".3"
-              fill-rule="evenodd"
-              stroke="none"
-              d="M7.5 6H14v1H7.5c-.276 0-.5.224-.5.5v9c0 .276.224.5.5.5H14v1H7.5c-.828 0-1.5-.672-1.5-1.5v-9C6 6.672 6.672 6 7.5 6z"
-            ></path>
-            <path fill="#000" fill-opacity="1" fill-rule="evenodd" stroke="none" d="M18 6v12h-1V6h1z"></path>
-          </svg>
-        </c2-text-field>
-        <!-- bottom -->
-        <c2-text-field id="2" .value=${this.paddingValues[2]} @change=${this.handlePaddingChange}>
-          <svg viewBox="0 0 24 24" slot="prefix-icon">
-            <path
-              fill="#000"
-              fill-opacity=".3"
-              fill-rule="evenodd"
-              stroke="none"
-              d="M18 7.5V14h-1V7.5c0-.276-.224-.5-.5-.5h-9c-.276 0-.5.224-.5.5V14H6V7.5C6 6.672 6.672 6 7.5 6h9c.828 0 1.5.672 1.5 1.5z"
-            ></path>
-            <path fill="#000" fill-opacity="1" fill-rule="evenodd" stroke="none" d="M18 18H6v-1h12v1z"></path>
-          </svg>
-        </c2-text-field>
+      <!-- right -->
+      <c2-text-field id="1" .value=${this.paddingValues[1]} @change=${this.handlePaddingChange}>
+        <svg slot="prefix-icon" viewBox="0 0 12 12" fill="none">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2L10 10L9 10L9 2L10 2Z" fill="black" />
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M10 12C11.1046 12 12 11.1046 12 10L12 2C12 0.895431 11.1046 -7.8281e-08 10 -1.74846e-07L2 -8.74228e-07C0.895432 -9.70792e-07 9.70792e-07 0.89543 8.74228e-07 2L1.74846e-07 10C7.8281e-08 11.1046 0.895431 12 2 12L10 12ZM9 11C10.1046 11 11 10.1046 11 9L11 3C11 1.89543 10.1046 1 9 1L3 0.999999C1.89543 0.999999 1 1.89543 1 3L1 9C1 10.1046 1.89543 11 3 11L9 11Z"
+            fill="black"
+            fill-opacity="0.5"
+          />
+        </svg>
+      </c2-text-field>
+      <!-- bottom -->
+      <c2-text-field id="2" .value=${this.paddingValues[2]} @change=${this.handlePaddingChange}>
+        <svg slot="prefix-icon" viewBox="0 0 12 12" fill="none">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M10 10L2 10L2 9L10 9L10 10Z" fill="black" />
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M-8.74228e-08 10C-3.91405e-08 11.1046 0.895431 12 2 12L10 12C11.1046 12 12 11.1046 12 10L12 2C12 0.89543 11.1046 -4.85396e-07 10 -4.37114e-07L2 -8.74228e-08C0.89543 -3.91405e-08 -4.85396e-07 0.895431 -4.37114e-07 2L-8.74228e-08 10ZM1 9C1 10.1046 1.89543 11 3 11L9 11C10.1046 11 11 10.1046 11 9L11 3C11 1.89543 10.1046 1 9 1L3 1C1.89543 1 1 1.89543 1 3L1 9Z"
+            fill="black"
+            fill-opacity="0.5"
+          />
+        </svg>
+      </c2-text-field>
 
-        <!-- left -->
-        <c2-text-field id="3" .value=${this.paddingValues[3]} @change=${this.handlePaddingChange}>
-          <svg viewBox="0 0 24 24" slot="prefix-icon">
-            <path
-              fill="#000"
-              fill-opacity=".3"
-              fill-rule="evenodd"
-              stroke="none"
-              d="M16.5 18H10v-1h6.5c.276 0 .5-.224.5-.5v-9c0-.276-.224-.5-.5-.5H10V6h6.5c.828 0 1.5.672 1.5 1.5v9c0 .828-.672 1.5-1.5 1.5z"
-            ></path>
-            <path fill="#000" fill-opacity="1" fill-rule="evenodd" stroke="none" d="M6 18V6h1v12H6z"></path>
-          </svg>
-        </c2-text-field>
-      </div>
+      <!-- left -->
+      <c2-text-field id="3" .value=${this.paddingValues[3]} @change=${this.handlePaddingChange}>
+        <svg slot="prefix-icon" viewBox="0 0 12 12" fill="none">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M2 10V2H3V10H2Z" fill="black" />
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M2 0C0.895431 0 0 0.895431 0 2V10C0 11.1046 0.895431 12 2 12H10C11.1046 12 12 11.1046 12 10V2C12 0.895431 11.1046 0 10 0H2ZM3 1C1.89543 1 1 1.89543 1 3V9C1 10.1046 1.89543 11 3 11H9C10.1046 11 11 10.1046 11 9V3C11 1.89543 10.1046 1 9 1H3Z"
+            fill="black"
+            fill-opacity="0.3"
+          />
+        </svg>
+      </c2-text-field>
     </div> `
   }
 }

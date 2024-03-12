@@ -45,13 +45,16 @@ export class ColorConfig extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 4px;
+        padding: 0px 8px;
       }
+
       .color-wrapper {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 4px;
+        gap: 2px;
       }
+
       .color-input-group {
         display: flex;
         align-items: center;
@@ -62,10 +65,10 @@ export class ColorConfig extends LitElement {
       }
 
       .color-input-group:hover {
-        --c2-text-field--border-top: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-right: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-bottom: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-left: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-top: 1px solid var(--border-color-default);
+        --c2-text-field--border-right: 1px solid var(--border-color-default);
+        --c2-text-field--border-bottom: 1px solid var(--border-color-default);
+        --c2-text-field--border-left: 1px solid var(--border-color-default);
       }
       .color-select {
         position: absolute;
@@ -96,7 +99,9 @@ export class ColorConfig extends LitElement {
       c2-text-field.focus-within + c2-text-field {
         --c2-text-field--border-left: var(--c2-text-field__focus--border-left, 1px solid #{variables.$color-blue});
       }
-      .show-option {
+      .label {
+        padding-left: 4px;
+        font-weight: 300;
       }
     `,
   ]
@@ -198,7 +203,7 @@ export class ColorConfig extends LitElement {
 
   render() {
     return html`<div class="color-config">
-        ${this.label ? html`<div>${this.label}</div>` : nothing}
+        ${this.label ? html`<div class="label">${this.label}</div>` : nothing}
         <div class="color-wrapper"> 
           <div class="color-input-group ${!this.show ? 'disabled' : ''}" >         
             <c2-color-select class="color-select" placement="bottom-end" .hue=${this.h} .saturation=${this.s} .value=${this.v} .alpha=${this.a} @change=${this.handleColorSelectChange}> </c2-color-select>

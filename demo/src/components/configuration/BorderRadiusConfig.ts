@@ -13,14 +13,20 @@ export class BorderRadiusConfig extends LitElement {
 
       .border-radius-config {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        flex-direction: column;
+        gap: 4px;
+        padding: 0px 8px;
       }
+
       .border-radius-wrapper {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 2px;
+      }
+
+      .label {
+        padding-left: 4px;
+        font-weight: 300;
       }
 
       .border-radius-wrapper svg {
@@ -30,7 +36,7 @@ export class BorderRadiusConfig extends LitElement {
       }
 
       .border-radius-wrapper c2-text-field {
-        width: 50px;
+        width: 60px;
 
         --c2-text-field--padding-left: 0px;
         --c2-text-field--padding-right: 4px;
@@ -39,10 +45,10 @@ export class BorderRadiusConfig extends LitElement {
       }
 
       c2-text-field:hover {
-        --c2-text-field--border-top: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-right: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-bottom: 1px solid rgb(213, 213, 213);
-        --c2-text-field--border-left: 1px solid rgb(213, 213, 213);
+        --c2-text-field--border-top: 1px solid var(--border-color-default);
+        --c2-text-field--border-right: 1px solid var(--border-color-default);
+        --c2-text-field--border-bottom: 1px solid var(--border-color-default);
+        --c2-text-field--border-left: 1px solid var(--border-color-default);
       }
     `,
   ]
@@ -111,7 +117,7 @@ export class BorderRadiusConfig extends LitElement {
 
   render() {
     return html`<div class="border-radius-config">
-      <div>${this.label}</div>
+      <!-- <div class="label">${this.label}</div> -->
       <div class="border-radius-wrapper">
         <!-- top -->
         <c2-text-field id="0" .value=${this.radiusValues[0]} @change=${this.handleRadiusChange}>
