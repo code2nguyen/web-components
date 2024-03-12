@@ -30,14 +30,28 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run type-check && vite build",
+    "build": "wireit",
     "type-check": "tsc -p tsconfig.lib.json --composite false"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [      
+        "../color-slider:build",        
+        "../color-area:build",
+        "../text-field:build",
+        "../select:build",
+        "../overlay:build"
+      ],
+      "command": "npm run type-check && vite build"
+    }
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
-    "@c2n/color-area": "0.0.4",
-    "@c2n/color-slider": "0.0.4",
     "@c2n/overlay": "0.0.4",
+    "@c2n/color-area": "0.0.4",
+    "@c2n/select": "0.0.4",
+    "@c2n/text-field": "0.0.4",
+    "@c2n/color-slider": "0.0.4",
     "@ctrl/tinycolor": "4.0.3",
     "lit": "3.1.2"
   },
