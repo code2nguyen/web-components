@@ -33,11 +33,13 @@ jobs:
       - name: Install Dependencies
         shell: "bash"
         run: npm ci
-      
-      - name: Build components
-        shell: "bash"
-        run: npm run build
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+        
       - name: Build demo
         shell: "bash"
         run: npm run demo:build

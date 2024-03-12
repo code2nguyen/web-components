@@ -1,0 +1,10 @@
+node_modules/
+*.tgz
+*.tsbuildinfo
+.DS_Store
+.vscode/
+.wireit
+/temp
+.idea
+
+package-lock.json

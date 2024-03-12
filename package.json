@@ -6,6 +6,12 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "wireit",
+    "lint:check": "wireit",
+    "lint:fix": "eslint --ignore-pattern=dist/ --fix \"**/*.{js,ts}\"",
+    "fix": "npm run lint:fix && npm run format:fix",
+    "format": "npm run format:fix",
+    "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --check",
+    "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --write",        
     "demo": "npm run start -w demo",
     "demo:dev": "npm run dev -w demo",
     "demo:build": "wireit",
@@ -30,11 +36,23 @@
   ],
   "wireit": {
     "lint": {
-      "command": "DEBUG=eslint:cli-engine; eslint . --ext .ts --fix --ignore-path .gitignore"
-    },    
+      "dependencies": [
+        "lint:check"
+      ]
+    },
+    "lint:check": {
+      "files": [
+        "**/*.{js,ts}",
+        ".eslintignore",
+        ".eslintrc.json",
+        "!**/dist/**/*.{js,ts}",
+        "!node_modules/"
+      ],
+      "output": [],
+      "command": "eslint --ignore-pattern \"dist/\"  \"**/*.{js,ts}\""
+    },  
     "build": {
       "dependencies": [
-        "lint",
         "./packages/card:build",
         "./packages/checkbox:build",
         "./packages/code-viewer:build",
@@ -68,6 +86,7 @@
     }
   },
   "lint-staged": {
-    "*.ts": "npm run lint"
+    "**/*.{cjs,html,js,json,md,ts}": "prettier --write",
+    "{*.{js,ts},!(dist)/**/*.{js,ts}}": "eslint --fix"
   }
 }
