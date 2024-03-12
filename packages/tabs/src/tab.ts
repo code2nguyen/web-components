@@ -1,4 +1,5 @@
-import { LitElement, html, unsafeCSS, isServer } from 'lit'
+import { LitElement, html, unsafeCSS } from 'lit'
+import { isServer } from 'lit-html/is-server.js'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './tab.scss?inline'
 import { selectedTabContext } from './tab-context'

@@ -1,4 +1,5 @@
-import { LitElement, html, unsafeCSS, isServer, type PropertyValueMap } from 'lit'
+import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
+import { isServer } from 'lit-html/is-server.js'
 import { customElement, property, state } from 'lit/decorators.js'
 import { computePosition, autoUpdate, flip, type Placement } from '@floating-ui/dom'
 

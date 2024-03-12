@@ -1,7 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "moduleResolution": "Bundler",
+    "moduleResolution": "Node16",
     "experimentalDecorators": true,
     "useDefineForClassFields": false
   }
