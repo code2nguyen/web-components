@@ -8,7 +8,7 @@
     "lint": "wireit",
     "demo": "npm run start -w demo",
     "demo:dev": "npm run dev -w demo",
-    "demo:build": "npm run build -w demo",
+    "demo:build": "wireit",
     "build": "wireit",
     "build:generator": "npm run build --workspace=scripts/generator",
     "pregenerate": "npm run build:generator",
@@ -34,9 +34,37 @@
     },    
     "build": {
       "dependencies": [
-        "lint"        
+        "lint",
+        "./packages/card:build",
+        "./packages/checkbox:build",
+        "./packages/code-viewer:build",
+        "./packages/color-area:build",
+        "./packages/color-select:build",
+        "./packages/color-slider:build",
+        "./packages/details:build",
+        "./packages/dropdown-list:build",
+        "./packages/expansion-panel:build",
+        "./packages/hyperlink-list:build",
+        "./packages/icon-button:build",
+        "./packages/label:build",
+        "./packages/list:build",
+        "./packages/list-item:build",
+        "./packages/mat-icon:build",
+        "./packages/overlay:build",
+        "./packages/reorder-list:build",
+        "./packages/select:build",
+        "./packages/tabs:build",
+        "./packages/text-button:build",
+        "./packages/text-field:build",
+        "./packages/tooltip:build",
+        "./packages/wc-utils:build"
+      ]
+    },
+    "demo:build": {
+      "dependencies": [
+        "build"
       ],
-      "command": "npm run build --workspace=packages --if-present"
+      "command": "npm run build -w demo"
     }
   },
   "lint-staged": {

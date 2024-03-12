@@ -25,8 +25,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
-      - name: Install
+          node-version: 20
+
+      # Set up GitHub Actions caching for Wireit.
+      - uses: google/wireit@setup-github-actions-caching/v1
+
+      - name: Install Dependencies
         shell: "bash"
         run: npm ci
       
