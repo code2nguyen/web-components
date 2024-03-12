@@ -5,7 +5,7 @@ import VitePluginCustomElementsManifest from 'vite-plugin-cem'
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry: 'src/label.ts',
       formats: ['es'],
     },
     minify: false,

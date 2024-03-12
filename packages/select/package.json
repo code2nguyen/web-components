@@ -31,15 +31,22 @@
   "scripts": {
     "dev": "vite",
     "build": "wireit",
-    "type-check": "tsc -p tsconfig.lib.json --composite false"
+    "type-check": "wireit"
   },
   "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../packages/wc-utils:build",
+        "../overlay:build",
+        "../list:build"           
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
     "build": {
       "dependencies": [
-        "../overlay:build",
-        "../list:build"       
+        "type-check"    
       ],
-      "command": "npm run type-check && vite build"
+      "command": "vite build"
     }
   },
   "dependencies": {

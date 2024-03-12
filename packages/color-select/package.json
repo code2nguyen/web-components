@@ -31,18 +31,25 @@
   "scripts": {
     "dev": "vite",
     "build": "wireit",
-    "type-check": "tsc -p tsconfig.lib.json --composite false"
+    "type-check": "wireit"
   },
   "wireit": {
-    "build": {
-      "dependencies": [      
+    "type-check": {
+      "dependencies": [
+        "../packages/wc-utils:build",
         "../color-slider:build",        
         "../color-area:build",
         "../text-field:build",
         "../select:build",
-        "../overlay:build"
+        "../overlay:build"        
       ],
-      "command": "npm run type-check && vite build"
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [      
+        "type-check"
+      ],
+      "command": "vite build"
     }
   },
   "dependencies": {

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "prepare": "husky install",
-    "lint": "DEBUG=eslint:cli-engine; eslint . --ext .ts --fix --ignore-path .gitignore",
+    "lint": "wireit",
     "demo": "npm run start -w demo",
     "demo:dev": "npm run dev -w demo",
     "demo:build": "npm run build -w demo",
@@ -29,9 +29,12 @@
     "scripts/generator"
   ],
   "wireit": {
+    "lint": {
+      "command": "DEBUG=eslint:cli-engine; eslint . --ext .ts --fix --ignore-path .gitignore"
+    },    
     "build": {
       "dependencies": [
-        "./packages/wc-utils:build"        
+        "lint"        
       ],
       "command": "npm run build --workspace=packages --if-present"
     }

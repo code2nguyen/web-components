@@ -4,9 +4,12 @@
   "type": "module",
   "main": "dist/hyperlink-list.js",
   "exports": {
-    ".": "./dist/hyperlink-list.js"
+    ".": {
+      "default": "./dist/hyperlink-list.js",
+      "types": "./types/src/hyperlink-list.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
   },
-  "types": "types/src/index.d.ts",
   "files": [
     "dist",
     "types"
@@ -27,8 +30,22 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run type-check && vite build",
-    "type-check": "tsc -p tsconfig.lib.json --composite false"
+    "build": "wireit",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../packages/wc-utils:build"        
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"        
+      ],
+      "command": "vite build"
+    }
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",

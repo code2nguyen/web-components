@@ -8,6 +8,14 @@
       "default": "./dist/tabs.js",
       "types": "./types/src/tabs.d.ts"
     },
+    "./tab.js": {
+      "default": "./dist/tab.js",
+      "types": "./types/src/tab.d.ts"
+    },
+    "./tab-context.js": {
+      "default": "./dist/tab-context.js",
+      "types": "./types/src/tab-context.d.ts"
+    },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
@@ -30,8 +38,22 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run type-check && vite build",
-    "type-check": "tsc -p tsconfig.lib.json --composite false"
+    "build": "wireit",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../packages/wc-utils:build"        
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"        
+      ],
+      "command": "vite build"
+    }
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
