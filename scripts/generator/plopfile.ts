@@ -38,18 +38,12 @@ export default function (plop: NodePlopAPI) {
         separator: '',
         template: '{{ camelCase name }}, ',
       },
-      // {
-      //   type: 'append',
-      //   path: '../../demo/src/layouts/Layout.astro',
-      //   pattern: /<script>/,
-      //   template: "			import '@c2n/{{ dashCase name }}';",
-      // },
-      // {
-      //   type: 'append',
-      //   path: '../../demo/src/pages/components/[componentId].astro',
-      //   pattern: /export function getStaticPaths.*\n\s*return\s*\[/,
-      //   template: "    {params: {componentId: '{{ dashCase name }}'}},",
-      // },
+      {
+        type: 'append',
+        path: '../../package.json',
+        pattern: /build.*\n?.*dependencies": \[/,
+        template: '        "./packages/{{ dashCase name }}:build",',
+      },
     ],
   })
 }
