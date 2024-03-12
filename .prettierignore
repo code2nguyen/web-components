@@ -6,5 +6,5 @@ node_modules/
 .wireit
 /temp
 .idea
-
+custom-elements.json
 package-lock.json
