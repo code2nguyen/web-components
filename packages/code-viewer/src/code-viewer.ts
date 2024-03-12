@@ -54,10 +54,10 @@ export class CodeViewer extends LitElement {
     const key = JSON.stringify(opts, Object.keys(opts).sort())
 
     if (CodeViewer.cachedHighlighters.has(key)) {
-      return CodeViewer.cachedHighlighters.get(key)
+      return CodeViewer.cachedHighlighters.get(key)!
     }
 
-    const highlighter = createShikiHighlighter(opts)
+    const highlighter = await createShikiHighlighter(opts)
     CodeViewer.cachedHighlighters.set(key, highlighter)
 
     return highlighter
