@@ -17,9 +17,9 @@ const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssPropert
   <thead>
     <tr>
       <th>Name</th>
-      <th>Type</th>
-      <th>Default</th>
-      <th>Description</th>
+      <th class="hide-mobile">Type</th>
+      <th class="hide-mobile">Default</th>
+      <th class="hide-mobile hide-tablet">Description</th>
     </tr>
   </thead>
   <tbody>
@@ -31,19 +31,19 @@ const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssPropert
               <td>
                 <span class="t-h1">Attribute</span>
               </td>
-              <td />
-              <td />
-              <td />
+              <td class="hide-mobile" />
+              <td class="hide-mobile" />
+              <td class="hide-mobile hide-tablet" />
             </>
           </tr>
           {componentManifest.attributes.map((attr) => (
             <tr>
               <td>{attr.name}</td>
-              <td>
+              <td class="hide-mobile">
                 <span class="t-code">{attr.type}</span>
               </td>
-              <td>{attr.default && <code>{attr.default}</code>}</td>
-              <td>
+              <td class="hide-mobile">{attr.default && <code>{attr.default}</code>}</td>
+              <td class="hide-mobile hide-tablet">
                 <fragment set:html={attr.description} />
               </td>
             </tr>
@@ -59,19 +59,19 @@ const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssPropert
               <td>
                 <span class="t-h1">Events</span>
               </td>
-              <td />
-              <td />
-              <td />
+              <td class="hide-mobile" />
+              <td class="hide-mobile" />
+              <td class="hide-mobile hide-tablet" />
             </>
           </tr>
           {componentManifest.events.map((event) => (
             <tr>
               <td>{event.name}</td>
-              <td>
+              <td class="hide-mobile">
                 <span class="t-code">{event.type}</span>
               </td>
-              <td />
-              <td>
+              <td class="hide-mobile" />
+              <td class="hide-mobile hide-tablet">
                 <fragment set:html={event.description} />
               </td>
             </tr>
@@ -87,9 +87,9 @@ const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssPropert
               <td>
                 <span class="t-h1">CSS Variables</span>
               </td>
-              <td />
-              <td />
-              <td />
+              <td class="hide-mobile" />
+              <td class="hide-mobile" />
+              <td class="hide-mobile hide-tablet" />
             </>
           </tr>
           {flattenGroupedCssProperties.map((group) => (
@@ -97,11 +97,11 @@ const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssPropert
               {group.cssProperty && (
                 <tr>
                   <td>{group.cssProperty.cssVariable}</td>
-                  <td>
+                  <td class="hide-mobile">
                     <span class="t-code">{group.cssProperty.type}</span>
                   </td>
-                  <td>{group.cssProperty.default && <code>{group.cssProperty.default}</code>}</td>
-                  <td>
+                  <td class="hide-mobile">{group.cssProperty.default && <code>{group.cssProperty.default}</code>}</td>
+                  <td class="hide-mobile hide-tablet">
                     <fragment set:html={group.cssProperty.description} />
                   </td>
                 </tr>
@@ -111,9 +111,9 @@ const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssPropert
                   <td>
                     <span class="t-h2">{group.fullGroupName}</span>
                   </td>
-                  <td />
-                  <td />
-                  <td />
+                  <td class="hide-mobile" />
+                  <td class="hide-mobile" />
+                  <td class="hide-mobile hide-tablet" />
                 </tr>
               )}
             </>
