@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema'
+import sideNav from '@c2n/side-nav/custom-elements.json'
 import colorSelect from '@c2n/color-select/custom-elements.json'
 import colorArea from '@c2n/color-area/custom-elements.json'
 import colorSlider from '@c2n/color-slider/custom-elements.json'
@@ -15,6 +16,7 @@ import { normalizeManifest } from '../utils/manifest-utils'
 import type { ComponentManifests } from './manifest-declaration-item'
 
 export const componentManifests: ComponentManifests = [
+  sideNav,
   colorSelect,
   colorArea,
   colorSlider,

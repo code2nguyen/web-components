@@ -1,0 +1,92 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-side-nav,
+  $theme: (
+    open-width: 240px,
+    close-width: 0px,
+    background: red,
+
+    dropback--background-color: rgb(230, 230, 230, 0.2),
+  )
+);
+
+:host {
+  display: block;
+}
+
+.c2-side-nav {
+  display: block;
+  position: relative;
+  min-width: css.cssVar(close-width);
+
+  .nav-content-wrapper {
+    width: css.cssVar(close-width);
+    overflow: hidden;
+    will-change: width;
+    transition: animation.standard-deceleration(transform), animation.standard-deceleration(width);
+
+    background: css.cssVar(background);
+    .nav-content {
+      width: css.cssVar(open-width);
+      position: relative;
+    }
+
+    .backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      background-color: css.cssVar(dropback--background-color);
+    }
+  }
+}
+
+:host([opened]) {
+  .c2-side-nav {
+    .nav-content-wrapper {
+      width: css.cssVar(open-width);
+    }
+  }
+}
+
+:host([desktop-mode='over']) {
+  .c2-side-nav {
+    .nav-content-wrapper {
+      position: absolute;
+      .backdrop {
+        display: block;
+      }
+    }
+  }
+}
+
+// Phone
+@media only screen and (max-width: 599.98px) {
+  :host {
+    .c2-side-nav {
+      .nav-content-wrapper {
+        position: absolute;
+        .backdrop {
+          display: block;
+        }
+      }
+    }
+  }
+}
+
+// Tablet
+@media only screen and (min-width: 600px) and (max-width: 959.98px) {
+  :host([tablet-mode='over']) {
+    .c2-side-nav {
+      .nav-content-wrapper {
+        position: absolute;
+        .backdrop {
+          display: block;
+        }
+      }
+    }
+  }
+}

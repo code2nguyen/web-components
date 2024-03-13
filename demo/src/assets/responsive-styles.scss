@@ -1,5 +1,5 @@
 // Phone in portrait
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 599.98px) {
   .hide-mobile {
     display: none;
   }
@@ -7,12 +7,12 @@
 
 // Tablet in portrait
 // Foldable in portrait (unfolded)
-@media only screen and (min-width: 601px) and (max-width: 840px) {
+@media only screen and (min-width: 600px) and (max-width: 959.98px) {
 }
 
 // Phone in landscape *
 // Tablet in landscape
 // Foldable in landscape (unfolded)
 // Desktop
-@media only screen and (min-width: 841px) and (max-width: 1200px) {
+@media only screen and (min-width: 960px) {
 }

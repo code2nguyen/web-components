@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/side-nav.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+      .content {
+        padding-top: 30px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div style="display: flex">
+      <!-- <c2-side-nav opened show-menu-icon show-close-menu-icon> 
+        <div class="content">side nav content</div> 
+      </c2-side-nav> -->
+
+      <button>Toggle Sizenav</button>
+      <c2-side-nav opened desktop-mode="side" responsive-tablet>
+        <div class="content">side nav content 1</div>
+      </c2-side-nav>
+
+      <div>Main Content</div>
+    </div>
+  </body>
+</html>

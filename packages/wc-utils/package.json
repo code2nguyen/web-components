@@ -23,6 +23,10 @@
     "./controllers/context-consumer.js": {
       "types": "./dist/controllers/context-consumer.d.ts",
       "default": "./dist/controllers/context-consumer.js"
+    },
+    "./controllers/breakpoints-observer.js": {
+      "types": "./dist/controllers/breakpoints-observer.d.ts",
+      "default": "./dist/controllers/breakpoints-observer.js"
     }
   },
   "files": [
