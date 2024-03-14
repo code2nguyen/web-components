@@ -31,7 +31,9 @@ import { SideNav } from '@c2n/side-nav'
     </div>
 
     <section class="component-content">
-      <slot />
+      <div class="content-wrapper">
+        <slot />
+      </div>
     </section>
     <section class="component-configuration">
       <ComponentConfigurationPanel client:load />
@@ -47,13 +49,19 @@ import { SideNav } from '@c2n/side-nav'
 
     .component-content {
       background-color: white;
-      padding: 16px;
-      width: clamp(200px, 1050px, 100vw);
+      display: flex;
+      justify-content: center;
+      .content-wrapper {
+        padding: 16px;
+        width: clamp(200px, 1050px, 100vw);
+      }
     }
     .side-nav {
       --c2-side-nav__open--height: calc(100vh - 172px);
       --c2-side-nav__over--background-color: white;
-      --c2-side-nav--open-width: var(--nav-sidew-width);
+      --c2-side-nav__over--padding-top: 32px;
+      --c2-side-nav__open--width: var(--nav-sidew-width);
+
       --c2-details--border-right: none;
       --c2-details--border-left: none;
       --c2-details--border-top: none;
@@ -67,6 +75,7 @@ import { SideNav } from '@c2n/side-nav'
       --c2-details__header--padding-right: 0px;
       --c2-details__header-padding-bottom: 4px;
       --c2-details__header__hover--background: transparent;
+      flex: 1;
       .side-nav-content {
         font-size: 0.9rem;
         gap: 10px;
