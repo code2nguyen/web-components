@@ -2,7 +2,7 @@ import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import styles from './side-nav.scss?inline'
 import { BreakpointsObserver } from '@c2n/wc-utils/controllers/breakpoints-observer.js'
-import { Breakpoints } from '@c2n/wc-utils/dom-helper.js'
+import { Breakpoints, smartFixedPosition } from '@c2n/wc-utils/dom-helper.js'
 export type DisplayMode = 'over' | 'side'
 
 const OPENED = 0b0001
@@ -144,12 +144,14 @@ export class SideNav extends LitElement {
 
   private renderBackdrop() {
     const { currentBreakpoint } = this.breakpointsController
+    smartFixedPosition(false)
     if (this.opened) {
       if (
         currentBreakpoint == Breakpoints.Phone ||
         (currentBreakpoint == Breakpoints.Destop && this.desktopMode == 'over') ||
         (currentBreakpoint == Breakpoints.Tablet && this.tabletMode == 'over')
       ) {
+        smartFixedPosition(true)
         return html`<div class="backdrop" @click=${this.handleBackdropClick}></div>`
       }
     }

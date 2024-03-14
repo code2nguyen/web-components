@@ -51,6 +51,8 @@ import { SideNav } from '@c2n/side-nav'
       width: clamp(200px, 1050px, 100vw);
     }
     .side-nav {
+      --c2-side-nav__open--height: calc(100vh - 172px);
+      --c2-side-nav__over--background-color: white;
       --c2-side-nav--open-width: var(--nav-sidew-width);
       --c2-details--border-right: none;
       --c2-details--border-left: none;
@@ -66,9 +68,6 @@ import { SideNav } from '@c2n/side-nav'
       --c2-details__header-padding-bottom: 4px;
       --c2-details__header__hover--background: transparent;
       .side-nav-content {
-        background-color: var(--bg-color);
-        height: calc(100vh - 72px);
-        overflow-y: auto;
         font-size: 0.9rem;
         gap: 10px;
         .nav-title {

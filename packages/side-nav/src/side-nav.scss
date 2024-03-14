@@ -3,30 +3,56 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-side-nav,
   $theme: (
-    open-width: 240px,
-    close-width: 0px,
-    background-color: transparent,
+    open--width: 240px,
+    open--height: 100vh,
+    close--width: 0px,
+    close--height: 0px,
 
-    over--position: absolute,
+    background-color: transparent,
+    border-top-left-radius: null,
+    border-top-right-radius: null,
+    border-bottom-left-radius: null,
+    border-bottom-right-radius: null,
+
+    padding-top: 16px,
+    padding-right: 16px,
+    padding-bottom: 16px,
+    padding-left: 16px,
+
+    border-top: 0px solid transparent,
+    border-bottom: 0px solid transparent,
+    border-right: 0px solid transparent,
+    border-left: 0px solid transparent,
+
+    over--position: fixed,
+    over__open--width: 240px,
+    over__open--height: 100vh,
+    over__close--width: 240px,
+    over__close--height: 100vh,
+
     over--top: 0px,
     over--left: 0px,
-    over--background-color: transparent,
+    over--background-color: variables.$color-bg,
     over--border-top-left-radius: null,
-    over--border-top-right-radius: null,
+    over--border-top-right-radius: 8px,
     over--border-bottom-left-radius: null,
-    over--border-bottom-right-radius: null,
-    over--padding: 8px 8px 8px 8px,
+    over--border-bottom-right-radius: 8px,
+    over--padding-top: 16px,
+    over--padding-right: 16px,
+    over--padding-bottom: 16px,
+    over--padding-left: 16px,
 
-    over--border-top: 0px solid transparent,
-    over--border-bottom: 0px solid transparent,
-    over--border-right: 0px solid transparent,
+    over--border-top: 1px solid transparent,
+    over--border-bottom: 1px solid transparent,
+    over--border-right: 1px solid transparent,
     over--border-left: 0px solid transparent,
 
-    dropback--background-color: rgb(230, 230, 230, 0.2),
+    dropback--background-color: rgba(0, 0, 0, 0.2),
     dropback--z-index: 1001,
   )
 );
 
+// Side / Close
 :host {
   display: block;
   .c2-side-nav {
@@ -34,14 +60,37 @@
     .nav-content-animate {
       opacity: 0;
       box-sizing: content-box;
-      width: css.cssVar(close-width);
       overflow: hidden;
-      transition: animation.standard-acceleration(width);
-      .nav-content {
-        width: css.cssVar(open-width);
-        overflow: auto;
-      }
+      width: css.cssVar(close--width);
+      height: css.cssVar(close--height);
+      transition: animation.standard-deceleration(width);
       z-index: 0;
+      .nav-content {
+        overflow: auto;
+        position: fixed;
+        box-sizing: content-box;
+        width: calc(#{css.cssVar(open--width)} - #{css.cssVar(padding-left)} - #{css.cssVar(padding-right)} - 10px);
+        height: css.cssVar(open--height);
+        opacity: 0;
+        visibility: hidden;
+        background-color: css.cssVar(background-color);
+
+        border-top-left-radius: css.cssVar(border-top-left-radius);
+        border-top-right-radius: css.cssVar(border-top-right-radius);
+        border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+        border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+        padding-top: css.cssVar(padding-top);
+        padding-right: css.cssVar(padding-right);
+        padding-bottom: css.cssVar(padding-bottom);
+        padding-left: css.cssVar(padding-left);
+
+        border-top: css.cssVar(border-top);
+        border-bottom: css.cssVar(border-bottom);
+        border-right: css.cssVar(border-right);
+        border-left: css.cssVar(border-left);
+        transition: animation.standard-acceleration(opacity);
+      }
     }
     .main-content {
       opacity: 0;
@@ -67,48 +116,42 @@
     }
   }
 }
+
+// Side/open
 :host([opened]) {
   .c2-side-nav {
     .nav-content-animate {
-      width: css.cssVar(open-width);
-      z-index: 3;
+      width: css.cssVar(open--width);
+      height: css.cssVar(open--height);
+      .nav-content {
+        opacity: 1;
+        visibility: visible;
+      }
     }
   }
 }
 
-:host([desktop-mode='over']) {
-  .c2-side-nav {
-    .backdrop {
-      z-index: css.cssVar(dropback--z-index);
-    }
-    .main-content {
-      z-index: calc(css.cssVar(dropback--z-index) - 1);
-    }
-    .nav-content-animate {
-      z-index: calc(css.cssVar(dropback--z-index) + 1);
-      position: css.cssVar(over--position);
-      top: css.cssVar(over--top);
-      left: css.cssVar(over--left);
-      background-color: css.cssVar(over--background-color);
+// ------------------------------------
+// Override config for over mode
+// ------------------------------------
 
-      border-top-left-radius: css.cssVar(over--border-top-left-radius);
-      border-top-right-radius: css.cssVar(over--border-top-right-radius);
-      border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-      border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
-
-      padding: css.cssVar(over--padding);
-
-      border-top: css.cssVar(over--border-top);
-      border-bottom: css.cssVar(over--border-bottom);
-      border-right: css.cssVar(over--border-right);
-      border-left: css.cssVar(over--border-left);
+// Desktop
+@media only screen and (min-width: 960px) {
+  :host([opened][desktop-mode='over']) {
+    .c2-side-nav {
+      .nav-content-animate {
+        width: css.cssVar(over__open--width);
+        height: css.cssVar(over__open--height);
+        .nav-content {
+          opacity: 1;
+          visibility: visible;
+          position: relative;
+        }
+      }
     }
   }
-}
 
-// Phone
-@media only screen and (max-width: 599.98px) {
-  :host {
+  :host([desktop-mode='over']) {
     .c2-side-nav {
       .backdrop {
         z-index: css.cssVar(dropback--z-index);
@@ -121,19 +164,26 @@
         position: css.cssVar(over--position);
         top: css.cssVar(over--top);
         left: css.cssVar(over--left);
-        background-color: css.cssVar(over--background-color);
+        .nav-content {
+          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)} - 10px);
+          height: css.cssVar(over__open--height);
+          background-color: css.cssVar(over--background-color);
 
-        border-top-left-radius: css.cssVar(over--border-top-left-radius);
-        border-top-right-radius: css.cssVar(over--border-top-right-radius);
-        border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-        border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
+          border-top-left-radius: css.cssVar(over--border-top-left-radius);
+          border-top-right-radius: css.cssVar(over--border-top-right-radius);
+          border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+          border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
 
-        padding: css.cssVar(over--padding);
+          padding-top: css.cssVar(over--padding-top);
+          padding-right: css.cssVar(over--padding-right);
+          padding-bottom: css.cssVar(over--padding-bottom);
+          padding-left: css.cssVar(over--padding-left);
 
-        border-top: css.cssVar(over--border-top);
-        border-bottom: css.cssVar(over--border-bottom);
-        border-right: css.cssVar(over--border-right);
-        border-left: css.cssVar(over--border-left);
+          border-top: css.cssVar(over--border-top);
+          border-bottom: css.cssVar(over--border-bottom);
+          border-right: css.cssVar(over--border-right);
+          border-left: css.cssVar(over--border-left);
+        }
       }
     }
   }
@@ -141,6 +191,19 @@
 
 // Tablet
 @media only screen and (min-width: 600px) and (max-width: 959.98px) {
+  :host([opened][tablet-mode='over']) {
+    .c2-side-nav {
+      .nav-content-animate {
+        width: css.cssVar(over__open--width);
+        height: css.cssVar(over__open--height);
+        .nav-content {
+          opacity: 1;
+          visibility: visible;
+          position: relative;
+        }
+      }
+    }
+  }
   :host([tablet-mode='over']) {
     .c2-side-nav {
       .backdrop {
@@ -154,19 +217,81 @@
         position: css.cssVar(over--position);
         top: css.cssVar(over--top);
         left: css.cssVar(over--left);
-        background-color: css.cssVar(over--background-color);
+        .nav-content {
+          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)} - 10px);
+          height: css.cssVar(over__open--height);
 
-        border-top-left-radius: css.cssVar(over--border-top-left-radius);
-        border-top-right-radius: css.cssVar(over--border-top-right-radius);
-        border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-        border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
+          background-color: css.cssVar(over--background-color);
 
-        padding: css.cssVar(over--padding);
+          border-top-left-radius: css.cssVar(over--border-top-left-radius);
+          border-top-right-radius: css.cssVar(over--border-top-right-radius);
+          border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+          border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
 
-        border-top: css.cssVar(over--border-top);
-        border-bottom: css.cssVar(over--border-bottom);
-        border-right: css.cssVar(over--border-right);
-        border-left: css.cssVar(over--border-left);
+          padding-top: css.cssVar(over--padding-top);
+          padding-right: css.cssVar(over--padding-right);
+          padding-bottom: css.cssVar(over--padding-bottom);
+          padding-left: css.cssVar(over--padding-left);
+
+          border-top: css.cssVar(over--border-top);
+          border-bottom: css.cssVar(over--border-bottom);
+          border-right: css.cssVar(over--border-right);
+          border-left: css.cssVar(over--border-left);
+        }
+      }
+    }
+  }
+}
+
+// Phone
+@media only screen and (max-width: 599.98px) {
+  :host([opened]) {
+    .c2-side-nav {
+      .nav-content-animate {
+        width: css.cssVar(over__open--width);
+        height: css.cssVar(over__open--height);
+        .nav-content {
+          opacity: 1;
+          visibility: visible;
+          position: relative;
+        }
+      }
+    }
+  }
+  :host {
+    .c2-side-nav {
+      .backdrop {
+        z-index: css.cssVar(dropback--z-index);
+      }
+      .main-content {
+        z-index: calc(css.cssVar(dropback--z-index) - 1);
+      }
+      .nav-content-animate {
+        z-index: calc(css.cssVar(dropback--z-index) + 1);
+        position: css.cssVar(over--position);
+        top: css.cssVar(over--top);
+        left: css.cssVar(over--left);
+        .nav-content {
+          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)} - 10px);
+          height: css.cssVar(over__open--height);
+
+          background-color: css.cssVar(over--background-color);
+
+          border-top-left-radius: css.cssVar(over--border-top-left-radius);
+          border-top-right-radius: css.cssVar(over--border-top-right-radius);
+          border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+          border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
+
+          padding-top: css.cssVar(over--padding-top);
+          padding-right: css.cssVar(over--padding-right);
+          padding-bottom: css.cssVar(over--padding-bottom);
+          padding-left: css.cssVar(over--padding-left);
+
+          border-top: css.cssVar(over--border-top);
+          border-bottom: css.cssVar(over--border-bottom);
+          border-right: css.cssVar(over--border-right);
+          border-left: css.cssVar(over--border-left);
+        }
       }
     }
   }
