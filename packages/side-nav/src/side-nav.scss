@@ -5,35 +5,59 @@
   $theme: (
     open-width: 240px,
     close-width: 0px,
-    background: red,
+    background-color: transparent,
+
+    over--position: absolute,
+    over--top: 0px,
+    over--left: 0px,
+    over--background-color: transparent,
+    over--border-top-left-radius: null,
+    over--border-top-right-radius: null,
+    over--border-bottom-left-radius: null,
+    over--border-bottom-right-radius: null,
+    over--padding: 8px 8px 8px 8px,
+
+    over--border-top: 0px solid transparent,
+    over--border-bottom: 0px solid transparent,
+    over--border-right: 0px solid transparent,
+    over--border-left: 0px solid transparent,
 
     dropback--background-color: rgb(230, 230, 230, 0.2),
+    dropback--z-index: 1001,
   )
 );
 
 :host {
   display: block;
-}
-
-.c2-side-nav {
-  display: block;
-  position: relative;
-  min-width: css.cssVar(close-width);
-
-  .nav-content-wrapper {
-    width: css.cssVar(close-width);
-    overflow: hidden;
-    will-change: width;
-    transition: animation.standard-deceleration(transform), animation.standard-deceleration(width);
-
-    background: css.cssVar(background);
-    .nav-content {
-      width: css.cssVar(open-width);
-      position: relative;
+  .c2-side-nav {
+    display: flex;
+    .nav-content-animate {
+      opacity: 0;
+      box-sizing: content-box;
+      width: css.cssVar(close-width);
+      overflow: hidden;
+      transition: animation.standard-acceleration(width);
+      .nav-content {
+        width: css.cssVar(open-width);
+        overflow: auto;
+      }
+      z-index: 0;
     }
-
+    .main-content {
+      opacity: 0;
+      z-index: 1;
+    }
+    .nav-content-animate.silent {
+      transition: none;
+    }
+    .nav-content-animate.stable {
+      opacity: 1;
+    }
+    .main-content.stable {
+      opacity: 1;
+    }
     .backdrop {
-      display: none;
+      display: block;
       position: fixed;
       top: 0;
       left: 0;
@@ -43,22 +67,41 @@
     }
   }
 }
-
 :host([opened]) {
   .c2-side-nav {
-    .nav-content-wrapper {
+    .nav-content-animate {
       width: css.cssVar(open-width);
+      z-index: 3;
     }
   }
 }
 
 :host([desktop-mode='over']) {
   .c2-side-nav {
-    .nav-content-wrapper {
-      position: absolute;
-      .backdrop {
-        display: block;
-      }
+    .backdrop {
+      z-index: css.cssVar(dropback--z-index);
+    }
+    .main-content {
+      z-index: calc(css.cssVar(dropback--z-index) - 1);
+    }
+    .nav-content-animate {
+      z-index: calc(css.cssVar(dropback--z-index) + 1);
+      position: css.cssVar(over--position);
+      top: css.cssVar(over--top);
+      left: css.cssVar(over--left);
+      background-color: css.cssVar(over--background-color);
+
+      border-top-left-radius: css.cssVar(over--border-top-left-radius);
+      border-top-right-radius: css.cssVar(over--border-top-right-radius);
+      border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+      border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
+
+      padding: css.cssVar(over--padding);
+
+      border-top: css.cssVar(over--border-top);
+      border-bottom: css.cssVar(over--border-bottom);
+      border-right: css.cssVar(over--border-right);
+      border-left: css.cssVar(over--border-left);
     }
   }
 }
@@ -67,11 +110,30 @@
 @media only screen and (max-width: 599.98px) {
   :host {
     .c2-side-nav {
-      .nav-content-wrapper {
-        position: absolute;
-        .backdrop {
-          display: block;
-        }
+      .backdrop {
+        z-index: css.cssVar(dropback--z-index);
+      }
+      .main-content {
+        z-index: calc(css.cssVar(dropback--z-index) - 1);
+      }
+      .nav-content-animate {
+        z-index: calc(css.cssVar(dropback--z-index) + 1);
+        position: css.cssVar(over--position);
+        top: css.cssVar(over--top);
+        left: css.cssVar(over--left);
+        background-color: css.cssVar(over--background-color);
+
+        border-top-left-radius: css.cssVar(over--border-top-left-radius);
+        border-top-right-radius: css.cssVar(over--border-top-right-radius);
+        border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+        border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
+
+        padding: css.cssVar(over--padding);
+
+        border-top: css.cssVar(over--border-top);
+        border-bottom: css.cssVar(over--border-bottom);
+        border-right: css.cssVar(over--border-right);
+        border-left: css.cssVar(over--border-left);
       }
     }
   }
@@ -81,11 +143,30 @@
 @media only screen and (min-width: 600px) and (max-width: 959.98px) {
   :host([tablet-mode='over']) {
     .c2-side-nav {
-      .nav-content-wrapper {
-        position: absolute;
-        .backdrop {
-          display: block;
-        }
+      .backdrop {
+        z-index: css.cssVar(dropback--z-index);
+      }
+      .main-content {
+        z-index: calc(css.cssVar(dropback--z-index) - 1);
+      }
+      .nav-content-animate {
+        z-index: calc(css.cssVar(dropback--z-index) + 1);
+        position: css.cssVar(over--position);
+        top: css.cssVar(over--top);
+        left: css.cssVar(over--left);
+        background-color: css.cssVar(over--background-color);
+
+        border-top-left-radius: css.cssVar(over--border-top-left-radius);
+        border-top-right-radius: css.cssVar(over--border-top-right-radius);
+        border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+        border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
+
+        padding: css.cssVar(over--padding);
+
+        border-top: css.cssVar(over--border-top);
+        border-bottom: css.cssVar(over--border-bottom);
+        border-right: css.cssVar(over--border-right);
+        border-left: css.cssVar(over--border-left);
       }
     }
   }

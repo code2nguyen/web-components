@@ -19,6 +19,8 @@
   --bg-color-300: rgb(203 213 225);
   --bg-color-400: rgb(148 163 184);
   --bg-config-panel: #f2f2f2;
+
+  --body-margin: 60px;
 }
 
 .logo-color-1 {
@@ -70,11 +72,6 @@ body {
   line-height: inherit;
 }
 
-.main-content {
-  max-width: 1080px;
-  margin: auto;
-}
-
 .space {
   flex: 1;
 }
@@ -118,6 +115,7 @@ hr {
   border: none;
   border-top: 1px solid var(--border-color);
 }
+
 .mdx-code-block {
   &.compack {
     --c2-expansion-panel--border-radius: 0px;
@@ -276,4 +274,11 @@ hr {
       font-size: 0.8rem;
     }
   }
+}
+
+c2-side-nav {
+  opacity: 0;
+}
+c2-side-nav:defined {
+  opacity: 1;
 }

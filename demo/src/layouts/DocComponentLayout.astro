@@ -8,31 +8,35 @@ interface Props {
   componentId: string
 }
 const { componentId } = Astro.props
+import { SideNav } from '@c2n/side-nav'
 ---
 
 <div class="document-page">
-  <section class="nav">
-    <Details expanded client:load>
-      <div slot="title" class="nav-title">Component</div>
-      <ListComponents componentId={componentId} class="detail-content" />
-      <svg slot="icon" viewBox="0 0 256 256"
-        ><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg
-      >
-    </Details>
-    <!-- <Details client:load>
+  <SideNav client:load class="side-nav" opened tablet-mode="over" responsive-tablet>
+    <div class="side-nav-content" slot="side-nav-content">
+      <Details expanded client:load>
+        <div slot="title" class="nav-title">Component</div>
+        <ListComponents componentId={componentId} class="detail-content" />
+        <svg slot="icon" viewBox="0 0 256 256"
+          ><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg
+        >
+      </Details>
+      <!-- <Details client:load>
       <div slot="title" class="nav-title">Pens</div>
       <ListComponents componentId="v" />
       <svg slot="icon" viewBox="0 0 256 256"
         ><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg
       >
     </Details> -->
-  </section>
-  <section class="component-content">
-    <slot />
-  </section>
-  <section class="component-configuration">
-    <ComponentConfigurationPanel client:load />
-  </section>
+    </div>
+
+    <section class="component-content">
+      <slot />
+    </section>
+    <section class="component-configuration">
+      <ComponentConfigurationPanel client:load />
+    </section>
+  </SideNav>
 </div>
 
 <style class="scss">
@@ -40,13 +44,14 @@ const { componentId } = Astro.props
     --nav-sidew-width: 240px;
     --config-side-width: 280px;
     display: flex;
-    justify-content: center;
-    margin-left: calc(var(--nav-sidew-width));
+
     .component-content {
+      background-color: white;
       padding: 16px;
-      width: clamp(200px, 1050px, calc(100vw - var(--nav-sidew-width)));
+      width: clamp(200px, 1050px, 100vw);
     }
-    .nav {
+    .side-nav {
+      --c2-side-nav--open-width: var(--nav-sidew-width);
       --c2-details--border-right: none;
       --c2-details--border-left: none;
       --c2-details--border-top: none;
@@ -60,27 +65,19 @@ const { componentId } = Astro.props
       --c2-details__header--padding-right: 0px;
       --c2-details__header-padding-bottom: 4px;
       --c2-details__header__hover--background: transparent;
-
-      position: fixed;
-      left: var(--body-margin);
-      width: var(--nav-sidew-width);
-      padding: 16px 0px;
-      height: calc(100vh - 72px);
-      overflow: auto;
-
-      display: flex;
-      justify-content: flex-start;
-      flex-direction: column;
-      height: calc(100vh - 72px);
-      overflow-y: auto;
-      font-size: 0.9rem;
-      gap: 10px;
-      .nav-title {
-        font-weight: 500;
-        user-select: none;
-      }
-      .detail-content {
-        margin-left: 5px;
+      .side-nav-content {
+        background-color: var(--bg-color);
+        height: calc(100vh - 72px);
+        overflow-y: auto;
+        font-size: 0.9rem;
+        gap: 10px;
+        .nav-title {
+          font-weight: 500;
+          user-select: none;
+        }
+        .detail-content {
+          margin-left: 5px;
+        }
       }
     }
 

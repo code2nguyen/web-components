@@ -31,12 +31,13 @@
   "scripts": {
     "dev": "vite",
     "build": "wireit",
+    "build:only": "vite build",
     "type-check": "wireit"
   },
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../packages/wc-utils:build"        
+        "../wc-utils:build"        
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },

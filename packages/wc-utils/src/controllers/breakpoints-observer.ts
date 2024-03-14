@@ -17,14 +17,16 @@ export class BreakpointsObserver implements ReactiveController {
   }
 
   hostConnected(): void {
-    this.mediaQueries.forEach((query) => {
-      const mql = window.matchMedia(query)
-      if (mql.matches) {
-        this.currentBreakpoint = query
-        this.callback(true)
-      }
-      mql.addEventListener('change', this.handleMediaChange)
-      this.mqls.push(mql)
+    window.requestAnimationFrame(() => {
+      this.mediaQueries.forEach((query) => {
+        const mql = window.matchMedia(query)
+        if (mql.matches) {
+          this.currentBreakpoint = query
+          this.callback(true)
+        }
+        mql.addEventListener('change', this.handleMediaChange)
+        this.mqls.push(mql)
+      })
     })
   }
 
@@ -37,6 +39,7 @@ export class BreakpointsObserver implements ReactiveController {
       this.previousBreakpoint = this.currentBreakpoint
       this.currentBreakpoint = event.media
       this.callback()
+      this.host.requestUpdate()
     }
   }
 }

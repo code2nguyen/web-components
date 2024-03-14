@@ -3,11 +3,23 @@
   .hide-mobile {
     display: none;
   }
+  .hide-tablet {
+    display: none;
+  }
+  :root {
+    --body-margin: 16px;
+  }
 }
 
 // Tablet in portrait
 // Foldable in portrait (unfolded)
 @media only screen and (min-width: 600px) and (max-width: 959.98px) {
+  .hide-tablet {
+    display: none;
+  }
+  :root {
+    --body-margin: 40px;
+  }
 }
 
 // Phone in landscape *

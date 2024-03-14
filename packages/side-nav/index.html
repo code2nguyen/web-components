@@ -13,22 +13,30 @@
       }
       .content {
         padding-top: 30px;
+        background-color: red;
+      }
+      c2-side-nav {
+        opacity: 0;
+      }
+      c2-side-nav:defined {
+        opacity: 1;
       }
     </style>
   </head>
 
   <body>
     <div style="display: flex">
-      <!-- <c2-side-nav opened show-menu-icon show-close-menu-icon> 
-        <div class="content">side nav content</div> 
-      </c2-side-nav> -->
+      <c2-side-nav id="sidenav" opened desktop-mode="side" responsive-tablet>
+        <div slot="side-nav-content" class="content">side nav content 1</div>
+        <button id="menu">Toggle Sizenav</button>
 
-      <button>Toggle Sizenav</button>
-      <c2-side-nav opened desktop-mode="side" responsive-tablet>
-        <div class="content">side nav content 1</div>
+        <div>Main Content</div>
       </c2-side-nav>
-
-      <div>Main Content</div>
     </div>
+    <script>
+      document.querySelector('#menu').addEventListener('click', () => {
+        document.querySelector('#sidenav').toggleAttribute('opened')
+      })
+    </script>
   </body>
 </html>
