@@ -10,6 +10,8 @@ import '@c2n/details'
 import '@c2n/label'
 import '@c2n/checkbox'
 import '@c2n/text-field'
+import '@c2n/icon-button'
+
 import './SizeConfig'
 import './PaddingConfig'
 import './BorderRadiusConfig'
@@ -83,6 +85,9 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-text-field__focus--border-right: 1px solid var(--logo-color-1);
         --c2-text-field__focus--border-bottom: 1px solid var(--logo-color-1);
         --c2-text-field__focus--border-left: 1px solid var(--logo-color-1);
+
+        --c2-icon-button__icon--size: 12px;
+        --c2-icon-button__state-layer--size: 24px;
       }
 
       c2-text-field:hover {
@@ -137,6 +142,15 @@ export class ComponentConfigurationPanel extends LitElement {
         font-weight: 300;
       }
       .property-name {
+      }
+      .header {
+        position: relative;
+        height: 20px;
+      }
+      .close-button {
+        position: absolute;
+        top: 4px;
+        right: 4px;
       }
     `,
   ]
@@ -417,10 +431,25 @@ export class ComponentConfigurationPanel extends LitElement {
       </c2-details>
     `
   }
+
+  private handleCloseClick() {
+    $configStore.setKey('showConfig', false)
+    $configStore.setKey('uid', '')
+  }
+
   render() {
     const componentUID = this.configStore.value.uid
     if (!componentUID || !this.configStore.value.showConfig) return nothing
     return html`<div>
+      <div class="header">
+        <c2-icon-button class="close-button" @click=${this.handleCloseClick}>
+          <svg fill="currentColor" viewBox="0 0 256 256">
+            <path
+              d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"
+            ></path>
+          </svg>
+        </c2-icon-button>
+      </div>
       <c2-details>
         <div slot="title" class="title">Host</div>
         <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">

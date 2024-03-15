@@ -53,7 +53,7 @@ import { SideNav } from '@c2n/side-nav'
         .content-wrapper {
           padding: 16px;
           max-width: 1050px;
-          min-width: 568px;
+          min-width: 0px;
           overflow: auto;
         }
       }
@@ -61,6 +61,8 @@ import { SideNav } from '@c2n/side-nav'
         --c2-side-nav__open--height: calc(100vh - 172px);
         --c2-side-nav__over--background-color: white;
         --c2-side-nav--background-color: white;
+        --c2-side-nav--padding-left: var(--body-margin);
+
         --c2-side-nav__over--padding-top: 32px;
         --c2-side-nav__open--width: var(--nav-sidew-width);
         --c2-side-nav__over__open--width: var(--nav-sidew-width);
@@ -118,6 +120,11 @@ import { SideNav } from '@c2n/side-nav'
 
     @media only screen and (max-width: 599.98px) {
       .document-page {
+        .component-content {
+          .content-wrapper {
+            padding: 4px 16px;
+          }
+        }
         &.show-configuration-panel {
           .component-content {
             margin-right: 0px;
@@ -128,9 +135,18 @@ import { SideNav } from '@c2n/side-nav'
 
     @media only screen and (min-width: 600px) and (max-width: 959.98px) {
       .document-page {
+        .component-content {
+          .content-wrapper {
+            padding: var(--body-margin);
+          }
+        }
+
         &.show-configuration-panel {
           .component-content {
             margin-right: 0px;
+            .content-wrapper {
+              padding: var(--body-margin);
+            }
           }
         }
       }

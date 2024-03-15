@@ -1,8 +1,10 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
+import { customElement, eventOptions, property, query, state } from 'lit/decorators.js'
 import styles from './side-nav.scss?inline'
 import { BreakpointsObserver } from '@c2n/wc-utils/controllers/breakpoints-observer.js'
 import { Breakpoints, smartFixedPosition } from '@c2n/wc-utils/dom-helper.js'
+import type { StyleInfo } from 'lit/directives/style-map.js'
+import { styleMap } from 'lit/directives/style-map.js'
 export type DisplayMode = 'over' | 'side'
 
 const OPENED = 0b0001
@@ -85,14 +87,19 @@ export class SideNav extends LitElement {
     }
   }
 
-  private isUpdatedProperties = 0
-
-  private breakpointStates: { [breckpoint: string]: boolean } = {}
-  private breakpoints = [Breakpoints.Phone, Breakpoints.Tablet, Breakpoints.Destop]
-
   @state() private readyForSizeNav = false
   @state() private readyForSizeNavContent = false
-  @state() silent = true
+  @state() private silent = true
+  @state() private scrollBarPosition = 0
+  @state() private scrollBarHeight = 0
+
+  private isUpdatedProperties = 0
+  private breakpointStates: { [breckpoint: string]: boolean } = {}
+  private breakpoints = [Breakpoints.Phone, Breakpoints.Tablet, Breakpoints.Destop]
+  private contentResizeObserver?: ResizeObserver
+
+  @query('.scroll-container') scrollContainer!: HTMLElement
+  @query('slot[name="side-nav-content"]') contentSlot!: HTMLSlotElement
 
   private onMediaQueryChange = async (isInitial?: boolean) => {
     const { currentBreakpoint, previousBreakpoint } = this.breakpointsController
@@ -165,6 +172,60 @@ export class SideNav extends LitElement {
     })
   }
 
+  private calculateScrollbarPostion() {
+    const traceWidth = this.scrollContainer.scrollHeight - this.scrollContainer.clientHeight
+    if (traceWidth > 0) {
+      const ratio = this.scrollContainer.clientHeight / this.scrollContainer.scrollHeight
+      this.scrollBarHeight = this.scrollContainer.clientHeight * ratio
+      this.scrollBarPosition = this.scrollContainer.scrollTop * ratio
+    } else {
+      this.scrollBarHeight = 0
+    }
+    console.log(this.scrollBarPosition)
+  }
+
+  private renderScrollbar() {
+    if (!this.scrollBarHeight) {
+      return nothing
+    }
+
+    const style: StyleInfo = {
+      transform: `translate3d(0px, ${this.scrollBarPosition}px,  0px)`,
+      height: `${this.scrollBarHeight}px`,
+    }
+
+    return html`<div class="scrollbar-track">
+      <div class="scrollbar-thumb" style="${styleMap(style)}"></div>
+    </div>`
+  }
+
+  @eventOptions({ passive: true })
+  private handleNavContentScroll() {
+    this.calculateScrollbarPostion()
+  }
+
+  listenContentSize() {
+    this.contentResizeObserver = new ResizeObserver(() => {
+      this.calculateScrollbarPostion()
+    })
+    this.contentSlot.assignedElements().forEach((element) => {
+      this.contentResizeObserver!.observe(element)
+    })
+  }
+
+  override disconnectedCallback(): void {
+    if (this.contentResizeObserver) {
+      this.contentSlot.assignedElements().forEach((element) => {
+        this.contentResizeObserver?.unobserve(element)
+      })
+    }
+    super.disconnectedCallback()
+  }
+  protected override firstUpdated(_changedProperties: PropertyValueMap<this>): void {
+    // this.calculateScrollbarPostion()
+    this.listenContentSize()
+  }
+
   override render() {
     return html`
       <div class="c2-side-nav">
@@ -173,7 +234,10 @@ export class SideNav extends LitElement {
         <div class="nav-content-animate ${this.readyForSizeNav ? 'stable' : ''} ${this.silent ? 'silent' : ''}">
           <!-- nav content  -->
           <div class="nav-content">
-            <slot name="side-nav-content"></slot>
+            <div class="scroll-container" @scroll=${this.handleNavContentScroll}>
+              <slot name="side-nav-content"></slot>
+            </div>
+            ${this.renderScrollbar()}
           </div>
         </div>
 

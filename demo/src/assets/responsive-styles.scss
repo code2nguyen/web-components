@@ -1,5 +1,8 @@
 // Phone in portrait
 @media only screen and (max-width: 599.98px) {
+  body > header {
+    gap: 4px !important;
+  }
   .hide-mobile {
     display: none;
   }
@@ -7,18 +10,22 @@
     display: none;
   }
   :root {
-    --body-margin: 16px;
+    --body-margin: 8px !important;
   }
 }
 
 // Tablet in portrait
 // Foldable in portrait (unfolded)
 @media only screen and (min-width: 600px) and (max-width: 959.98px) {
+  body > header {
+    gap: 8px !important;
+  }
+
   .hide-tablet {
     display: none;
   }
   :root {
-    --body-margin: 40px;
+    --body-margin: 20px !important;
   }
 }
 
@@ -27,4 +34,7 @@
 // Foldable in landscape (unfolded)
 // Desktop
 @media only screen and (min-width: 960px) {
+  .hide-desktop {
+    display: none;
+  }
 }

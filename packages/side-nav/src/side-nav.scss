@@ -4,7 +4,7 @@
   $prefix: c2-side-nav,
   $theme: (
     open--width: 240px,
-    open--height: 100vh,
+    open--height: 100%,
     close--width: 0px,
     close--height: 0px,
 
@@ -69,30 +69,78 @@
       transition: animation.standard-deceleration(width);
       z-index: 0;
       .nav-content {
-        overflow: auto;
+        display: flex;
         position: fixed;
         box-sizing: content-box;
-        width: calc(#{css.cssVar(open--width)} - #{css.cssVar(padding-left)} - #{css.cssVar(padding-right)});
+        width: css.cssVar(open--width);
         height: css.cssVar(open--height);
         opacity: 0;
         visibility: hidden;
-        background-color: css.cssVar(background-color);
 
-        border-top-left-radius: css.cssVar(border-top-left-radius);
-        border-top-right-radius: css.cssVar(border-top-right-radius);
-        border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
-        border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
-
-        padding-top: css.cssVar(padding-top);
-        padding-right: css.cssVar(padding-right);
-        padding-bottom: css.cssVar(padding-bottom);
-        padding-left: css.cssVar(padding-left);
-
-        border-top: css.cssVar(border-top);
-        border-bottom: css.cssVar(border-bottom);
-        border-right: css.cssVar(border-right);
-        border-left: css.cssVar(border-left);
         transition: animation.standard-acceleration(opacity);
+
+        .scroll-container {
+          box-sizing: content-box;
+          overflow-y: auto;
+          overflow-x: hidden;
+          scrollbar-width: none;
+          overscroll-behavior: none;
+          touch-action: pan-y;
+          flex: 1;
+
+          background-color: css.cssVar(background-color);
+
+          border-top-left-radius: css.cssVar(border-top-left-radius);
+          border-top-right-radius: css.cssVar(border-top-right-radius);
+          border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+          border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+          padding-top: css.cssVar(padding-top);
+          padding-right: css.cssVar(padding-right);
+          padding-bottom: css.cssVar(padding-bottom);
+          padding-left: css.cssVar(padding-left);
+
+          border-top: css.cssVar(border-top);
+          border-bottom: css.cssVar(border-bottom);
+          border-right: css.cssVar(border-right);
+          border-left: css.cssVar(border-left);
+          &::-webkit-scrollbar {
+            display: none;
+          }
+        }
+        .scrollbar-track {
+          position: absolute;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          width: 6px;
+          cursor: default;
+          z-index: 7;
+          padding: 2px;
+          .scrollbar-thumb {
+            display: none;
+            position: absolute;
+            width: 6px;
+            right: 2px;
+            top: 0;
+            &:after {
+              content: '';
+              position: absolute;
+              inset: 2px 0;
+              width: 100%;
+              border-radius: 6px;
+              background: var(--color-scrollbar, rgba(0, 0, 0, 0.15));
+            }
+          }
+        }
+
+        &:hover {
+          .scrollbar-track {
+            .scrollbar-thumb {
+              display: block;
+            }
+          }
+        }
       }
     }
     .main-content {
@@ -176,24 +224,25 @@
         top: css.cssVar(over--top);
         left: css.cssVar(over--left);
         .nav-content {
-          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)});
+          width: css.cssVar(over__open--width);
           height: css.cssVar(over__open--height);
-          background-color: css.cssVar(over--background-color);
+          .scroll-container {
+            background-color: css.cssVar(over--background-color);
+            border-top-left-radius: css.cssVar(over--border-top-left-radius);
+            border-top-right-radius: css.cssVar(over--border-top-right-radius);
+            border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+            border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
 
-          border-top-left-radius: css.cssVar(over--border-top-left-radius);
-          border-top-right-radius: css.cssVar(over--border-top-right-radius);
-          border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-          border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
+            padding-top: css.cssVar(over--padding-top);
+            padding-right: css.cssVar(over--padding-right);
+            padding-bottom: css.cssVar(over--padding-bottom);
+            padding-left: css.cssVar(over--padding-left);
 
-          padding-top: css.cssVar(over--padding-top);
-          padding-right: css.cssVar(over--padding-right);
-          padding-bottom: css.cssVar(over--padding-bottom);
-          padding-left: css.cssVar(over--padding-left);
-
-          border-top: css.cssVar(over--border-top);
-          border-bottom: css.cssVar(over--border-bottom);
-          border-right: css.cssVar(over--border-right);
-          border-left: css.cssVar(over--border-left);
+            border-top: css.cssVar(over--border-top);
+            border-bottom: css.cssVar(over--border-bottom);
+            border-right: css.cssVar(over--border-right);
+            border-left: css.cssVar(over--border-left);
+          }
         }
       }
     }
@@ -229,25 +278,25 @@
         top: css.cssVar(over--top);
         left: css.cssVar(over--left);
         .nav-content {
-          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)});
+          width: css.cssVar(over__open--width);
           height: css.cssVar(over__open--height);
+          .scroll-container {
+            background-color: css.cssVar(over--background-color);
+            border-top-left-radius: css.cssVar(over--border-top-left-radius);
+            border-top-right-radius: css.cssVar(over--border-top-right-radius);
+            border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+            border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
 
-          background-color: css.cssVar(over--background-color);
+            padding-top: css.cssVar(over--padding-top);
+            padding-right: css.cssVar(over--padding-right);
+            padding-bottom: css.cssVar(over--padding-bottom);
+            padding-left: css.cssVar(over--padding-left);
 
-          border-top-left-radius: css.cssVar(over--border-top-left-radius);
-          border-top-right-radius: css.cssVar(over--border-top-right-radius);
-          border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-          border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
-
-          padding-top: css.cssVar(over--padding-top);
-          padding-right: css.cssVar(over--padding-right);
-          padding-bottom: css.cssVar(over--padding-bottom);
-          padding-left: css.cssVar(over--padding-left);
-
-          border-top: css.cssVar(over--border-top);
-          border-bottom: css.cssVar(over--border-bottom);
-          border-right: css.cssVar(over--border-right);
-          border-left: css.cssVar(over--border-left);
+            border-top: css.cssVar(over--border-top);
+            border-bottom: css.cssVar(over--border-bottom);
+            border-right: css.cssVar(over--border-right);
+            border-left: css.cssVar(over--border-left);
+          }
         }
       }
     }
@@ -284,25 +333,25 @@
         top: css.cssVar(over--top);
         left: css.cssVar(over--left);
         .nav-content {
-          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)});
+          width: css.cssVar(over__open--width);
           height: css.cssVar(over__open--height);
+          .scroll-container {
+            background-color: css.cssVar(over--background-color);
+            border-top-left-radius: css.cssVar(over--border-top-left-radius);
+            border-top-right-radius: css.cssVar(over--border-top-right-radius);
+            border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
+            border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
 
-          background-color: css.cssVar(over--background-color);
+            padding-top: css.cssVar(over--padding-top);
+            padding-right: css.cssVar(over--padding-right);
+            padding-bottom: css.cssVar(over--padding-bottom);
+            padding-left: css.cssVar(over--padding-left);
 
-          border-top-left-radius: css.cssVar(over--border-top-left-radius);
-          border-top-right-radius: css.cssVar(over--border-top-right-radius);
-          border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-          border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
-
-          padding-top: css.cssVar(over--padding-top);
-          padding-right: css.cssVar(over--padding-right);
-          padding-bottom: css.cssVar(over--padding-bottom);
-          padding-left: css.cssVar(over--padding-left);
-
-          border-top: css.cssVar(over--border-top);
-          border-bottom: css.cssVar(over--border-bottom);
-          border-right: css.cssVar(over--border-right);
-          border-left: css.cssVar(over--border-left);
+            border-top: css.cssVar(over--border-top);
+            border-bottom: css.cssVar(over--border-bottom);
+            border-right: css.cssVar(over--border-right);
+            border-left: css.cssVar(over--border-left);
+          }
         }
       }
     }

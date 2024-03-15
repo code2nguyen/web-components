@@ -1,5 +1,9 @@
 @import './responsive-styles.scss';
 
+.scroll_container::-webkit-scrollbar {
+  display: none;
+}
+
 :root {
   --theme-color: #262a40;
   --primary-text-color: #262a40;
@@ -139,6 +143,7 @@ hr {
 .component-content {
   table {
     margin: 16px 0px;
+    max-width: 100%;
     width: 100%;
     border-spacing: 0px;
     font-size: 0.9rem;
