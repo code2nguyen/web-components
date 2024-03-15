@@ -5,7 +5,7 @@
   $theme: (
     border-top: 1px solid variables.$color-border-light,
     border-right: 1px solid variables.$color-border-light,
-    border-bottom: 1px solid rgb(213, 213, 213),
+    border-bottom: 1px solid variables.$color-border-light,
     border-left: 1px solid variables.$color-border-light,
 
     border-radius: 0px,

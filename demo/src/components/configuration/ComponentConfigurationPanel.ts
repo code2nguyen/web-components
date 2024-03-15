@@ -11,6 +11,8 @@ import '@c2n/label'
 import '@c2n/checkbox'
 import '@c2n/text-field'
 import '@c2n/icon-button'
+import '@c2n/tabs/tab.js'
+import '@c2n/tabs'
 
 import './SizeConfig'
 import './PaddingConfig'
@@ -35,14 +37,15 @@ export class ComponentConfigurationPanel extends LitElement {
       :host {
         display: block;
         font-size: 12px;
+        --c2-details--border-bottom: 1px solid var(--border-color);
         --c2-details--border-top: none;
         --c2-details--border-left: none;
         --c2-details--border-right: none;
 
-        --c2-details__header--padding-top: 12px;
-        --c2-details__header--padding-right: 12px;
-        --c2-details__header--padding-bottom: 12px;
-        --c2-details__header--padding-left: 12px;
+        --c2-details__header--padding-top: 16px;
+        --c2-details__header--padding-right: 16px;
+        --c2-details__header--padding-bottom: 16px;
+        --c2-details__header--padding-left: 16px;
         --c2-details__header--flex-direction: row-reverse;
         --c2-details__header__icon--rotate: 90deg;
         --c2-details__header--gap: 8px;
@@ -88,6 +91,10 @@ export class ComponentConfigurationPanel extends LitElement {
 
         --c2-icon-button__icon--size: 12px;
         --c2-icon-button__state-layer--size: 24px;
+        --c2-tabs__tab--padding: 16px;
+        --c2-tabs__indicator--height: 2px;
+        --c2-tabs--box-shadow: inset 0px -2px 0px 0px rgb(230 230 230);
+        --c2-tabs__indicator--color: var(--logo-color-1);
       }
 
       c2-text-field:hover {
@@ -122,6 +129,16 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-details__content--padding-right: 0px;
       }
 
+      .attribute-input-group-content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .attribute-input-group-content > .row {
+        border-bottom: 1px solid var(--border-color);
+        padding: 12px 16px;
+      }
+
       .css-input-group-content {
         padding-top: 4px;
         padding-bottom: 4px;
@@ -129,6 +146,7 @@ export class ComponentConfigurationPanel extends LitElement {
         flex-direction: column;
         gap: 12px;
       }
+
       .row {
         display: flex;
         align-items: center;
@@ -145,12 +163,11 @@ export class ComponentConfigurationPanel extends LitElement {
       }
       .header {
         position: relative;
-        height: 20px;
       }
       .close-button {
         position: absolute;
-        top: 4px;
-        right: 4px;
+        top: 11px;
+        right: 8px;
       }
     `,
   ]
@@ -368,11 +385,6 @@ export class ComponentConfigurationPanel extends LitElement {
     cssProperties = this.renderBorderConfig(cssProperties, result)
     cssProperties = this.renderFontConfig(cssProperties, result)
 
-    // cssProperties = cssProperties.sort((a, b) => {
-    //   const indexA = PROPERTY_ORDER.findIndex((i) => a.property.endsWith(i))
-    //   const indexB = PROPERTY_ORDER.findIndex((i) => b.property.endsWith(i))
-    //   return indexB - indexA
-    // })
     return [
       ...result,
       ...cssProperties.map((cssVar) => {
@@ -385,13 +397,8 @@ export class ComponentConfigurationPanel extends LitElement {
     const groupedCssVariables = flatGroupCssProperties(groupCssProperties(this.configStore.value.cssProperties))
 
     return groupedCssVariables.length > 0
-      ? html`<c2-details>
-          <div slot="title" class="title">CSS Variables</div>
-          <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
-            <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
-          </svg>
-          ${groupedCssVariables.map((groupCssVariables) => {
-            return html`<c2-details class="sub-details">
+      ? groupedCssVariables.map((groupCssVariables) => {
+          return html`<c2-details>
               <div slot="title" class="title">${groupCssVariables.groups.join(' > ')}</div>
               <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
                 <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
@@ -400,24 +407,17 @@ export class ComponentConfigurationPanel extends LitElement {
                 ${this.renderElementCssPropertiesContent(groupCssVariables.cssProperties)}
               <div>
             </c2-details>`
-          })}
-        </c2-details>`
+        })
       : nothing
   }
 
   renderAttribues() {
     return this.configStore.value.attributes.length > 0
-      ? html`<c2-details>
-          <div slot="title" class="title">Attributes</div>
-          <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
-            <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
-          </svg>
-          <div class="css-input-group-content">
-            ${this.configStore.value.attributes.map((attr) => {
-              return this.generateAttributeInput(attr)
-            })}
-          </div>
-        </c2-details>`
+      ? html` <div class="attribute-input-group-content">
+          ${this.configStore.value.attributes.map((attr) => {
+            return this.generateAttributeInput(attr)
+          })}
+        </div>`
       : nothing
   }
 
@@ -442,6 +442,14 @@ export class ComponentConfigurationPanel extends LitElement {
     if (!componentUID || !this.configStore.value.showConfig) return nothing
     return html`<div>
       <div class="header">
+        <c2-tabs selected-tab="CSS">
+          <c2-tab label="CSS" for="CSS"></c2-tab>
+          <c2-tab label="Attributes" for="Attributes"></c2-tab>
+          <c2-tab label="Code" for="Code"></c2-tab>
+          <div id="CSS">${this.renderCssProperties()}</div>
+          <div id="Attributes">${this.renderAttribues()}</div>
+          <div id="Code">${this.renderCode()}</div>
+        </c2-tabs>
         <c2-icon-button class="close-button" @click=${this.handleCloseClick}>
           <svg fill="currentColor" viewBox="0 0 256 256">
             <path
@@ -450,7 +458,7 @@ export class ComponentConfigurationPanel extends LitElement {
           </svg>
         </c2-icon-button>
       </div>
-      <c2-details>
+      <!-- <c2-details>
         <div slot="title" class="title">Host</div>
         <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
           <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
@@ -460,8 +468,7 @@ export class ComponentConfigurationPanel extends LitElement {
           .height=${this.configStore.value.host?.h}
           @change=${this.handleSizeConfigChange}
         ></demo-size-config>
-      </c2-details>
-      ${this.renderAttribues()} ${this.renderCssProperties()} ${this.renderCode()}
+      </c2-details> -->
     </div>`
   }
 }
