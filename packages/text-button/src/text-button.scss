@@ -4,12 +4,17 @@
   $prefix: c2-text-button,
   $theme: (
     color: variables.$color-text-subtitle,
-    hover-color: variables.$color-blue,
-    hover-text-decoration: underline,
-    state-layer-padding: 4px
+    text-decoration-color: variables.$color-blue,
+    text-decoration: none,
+    text-underline-offset: 4px,
+
+    hover--color: variables.$color-blue,
+    hover--text-decoration: underline,
+    hover--text-decoration-color: variables.$color-blue,
+
+    padding: 4px,
   )
 );
-
 
 :host {
   display: inline-flex;
@@ -19,18 +24,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: css.cssVar(color);
   cursor: pointer;
   user-select: none;
   will-change: color, text-decoration;
   transition: animation.standard(color), animation.standard(text-decoration);
-  padding: css.cssVar(state-layer-padding);
+  color: css.cssVar(color);
+  text-decoration: css.cssVar(text-decoration);
+  text-decoration-color: css.cssVar(text-decoration-color);
+  text-underline-offset: css.cssVar(text-underline-offset);
+
+  padding: css.cssVar(padding);
+
   &:hover {
-    color: css.cssVar(hover-color);
-    text-decoration: css.cssVar(hover-text-decoration);
+    color: css.cssVar(hover--color, color);
+    text-decoration: css.cssVar(hover--text-decoration, text-decoration);
+    text-decoration-color: css.cssVar(hover--text-decoration-color, text-decoration-color);
   }
-  &::slotted(a) {
-    text-decoration: inherit;
-  }
-  
 }

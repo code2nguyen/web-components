@@ -61,11 +61,11 @@ const { title, componentId, pageTitle } = Astro.props
           >
         </div>
       </TextField>
-      <a href="/web-components/docs" class="playground-link">
-        <TextButton client:load>Documentations</TextButton>
+      <a href="/web-components/docs">
+        <TextButton client:load class={'link-button' + (componentId ? ' selected' : '')}>Documentations</TextButton>
       </a>
-      <a href="/web-components/playground" class="playground-link hide-mobile">
-        <TextButton client:load>Playground</TextButton>
+      <a href="/web-components/playground" class="hide-mobile">
+        <TextButton client:load class="link-button">Playground</TextButton>
       </a>
       <a href="https://github.com/code2nguyen/web-components">
         <IconButton client:load class="github-button">
@@ -146,9 +146,15 @@ const { title, componentId, pageTitle } = Astro.props
         --c2-icon-button__state-layer--size: 32px;
         --c2-icon-button__icon--color: var(--theme-color);
       }
-      .playground-link {
-        text-decoration: none;
-        --TextButton-hover-text-decoration: none;
+      .link-button {
+        --c2-text-button--color: var(--primary-text-color);
+        --c2-text-button--text-decoration-color: var(--logo-color-1);
+        --c2-text-button__hover--color: var(--logo-color-1);
+        --c2-text-button__hover--text-decoration-color: var(--logo-color-1);
+        &.selected {
+          --c2-text-button--color: var(--logo-color-1);
+          --c2-text-button--text-decoration: underline;
+        }
       }
     }
 
