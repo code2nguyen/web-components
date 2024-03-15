@@ -45,6 +45,9 @@
   border-radius: css.cssVar(border-radius);
   summary {
     list-style: none;
+    &::-webkit-details-marker {
+      list-style: none;
+    }
     display: flex;
     flex-direction: css.cssVar(header--flex-direction);
     align-items: center;
