@@ -12,7 +12,7 @@
     item--border-radius: none,
     item--text-decoration: none,
 
-    item__hover--bg-color: inherit,
+    item__hover--background-color: inherit,
     item__hover--color: none,
     item__hover--border-top: inherit,
     item__hover--border-bottom: inherit,
@@ -21,7 +21,7 @@
     item__hover--border-radius: inherit,
     item__hover--text-decoration: inherit,
 
-    item__selected--background: inherit,
+    item__selected--background-color: inherit,
     item__selected--color: inherit,
     item__selected--border-top: inherit,
     item__selected--border-bottom: inherit,
@@ -54,7 +54,7 @@
   }
 
   ::slotted(a:hover) {
-    background: css.cssVar(item__hover--bg-color) !important;
+    background: css.cssVar(item__hover--background-color) !important;
     color: css.cssVar(item__hover--color) !important;
     border-top: css.cssVar(item__hover--border-top) !important;
     border-bottom: css.cssVar(item__hover--border-bottom) !important;
@@ -65,7 +65,7 @@
   }
 
   ::slotted(a[data-selected]) {
-    background: css.cssVar(item__selected--background, item__hover--bg-color) !important;
+    background: css.cssVar(item__selected--background-color, item__hover--background-color) !important;
     color: css.cssVar(item__selected--color, item__hover--color) !important;
     border-top: css.cssVar(item__selected--border-top, item__hover--border-top) !important;
     border-bottom: css.cssVar(item__selected--border-bottom, item__hover--border-bottom) !important;

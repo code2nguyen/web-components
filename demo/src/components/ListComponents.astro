@@ -26,11 +26,13 @@ const { componentId, class: className } = Astro.props
 <style>
   .list-component {
     /* box-shadow: inset 1px 0px 0px 0px var(--border-color-100); */
-    --c2-hyperlink-list__item__hover--color: inherit;
-    --c2-hyperlink-list__item--padding: 2px 0px 2px 24px;
+
+    --c2-hyperlink-list__item__hover--color: var(--logo-color-1);
+    --c2-hyperlink-list__item__selected--color: white;
+    --c2-hyperlink-list__item__selected--background-color: var(--logo-color-2);
+    --c2-hyperlink-list__item--padding: 8px 0px 8px 24px;
     --c2-hyperlink-list__item--gap: 16px;
-    --c2-hyperlink-list__item--border-left: 2px solid transparent;
-    --c2-hyperlink-list__item__hover--border-left: 2px solid var(--logo-color-1);
-    --c2-hyperlink-list__item__hover--border-left: 2px solid var(--logo-color-1);
+    --c2-hyperlink-list__item--border-radius: 0px 4px 4px 0px;
+    --c2-hyperlink-list__item__hover--border-radius: 0px 4px 4px 0px;
   }
 </style>
