@@ -61,6 +61,9 @@
       opacity: 0;
       box-sizing: content-box;
       overflow: hidden;
+      flex-grow: 0;
+      flex-shrink: 0;
+      flex-basis: auto;
       width: css.cssVar(close--width);
       height: css.cssVar(close--height);
       transition: animation.standard-deceleration(width);
@@ -69,7 +72,7 @@
         overflow: auto;
         position: fixed;
         box-sizing: content-box;
-        width: calc(#{css.cssVar(open--width)} - #{css.cssVar(padding-left)} - #{css.cssVar(padding-right)} - 10px);
+        width: calc(#{css.cssVar(open--width)} - #{css.cssVar(padding-left)} - #{css.cssVar(padding-right)});
         height: css.cssVar(open--height);
         opacity: 0;
         visibility: hidden;
@@ -94,9 +97,8 @@
     }
     .main-content {
       opacity: 0;
+      flex: 1 1 auto;
       z-index: 1;
-      width: 100%;
-      height: 100%;
     }
     .nav-content-animate.silent {
       transition: none;
@@ -125,11 +127,18 @@
     .nav-content-animate {
       width: css.cssVar(open--width);
       height: css.cssVar(open--height);
+      z-index: 3;
       .nav-content {
         opacity: 1;
         visibility: visible;
       }
     }
+  }
+}
+
+:host([position='right']) {
+  .c2-side-nav {
+    // flex-direction: row-reverse;
   }
 }
 
@@ -141,7 +150,14 @@
 @media only screen and (min-width: 960px) {
   :host([opened][desktop-mode='over']) {
     .c2-side-nav {
+      .backdrop {
+        z-index: css.cssVar(dropback--z-index);
+      }
+      .main-content {
+        z-index: calc(css.cssVar(dropback--z-index) - 1);
+      }
       .nav-content-animate {
+        z-index: calc(css.cssVar(dropback--z-index) + 1);
         width: css.cssVar(over__open--width);
         height: css.cssVar(over__open--height);
         .nav-content {
@@ -155,19 +171,12 @@
 
   :host([desktop-mode='over']) {
     .c2-side-nav {
-      .backdrop {
-        z-index: css.cssVar(dropback--z-index);
-      }
-      .main-content {
-        z-index: calc(css.cssVar(dropback--z-index) - 1);
-      }
       .nav-content-animate {
-        z-index: calc(css.cssVar(dropback--z-index) + 1);
         position: css.cssVar(over--position);
         top: css.cssVar(over--top);
         left: css.cssVar(over--left);
         .nav-content {
-          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)} - 10px);
+          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)});
           height: css.cssVar(over__open--height);
           background-color: css.cssVar(over--background-color);
 
@@ -195,7 +204,14 @@
 @media only screen and (min-width: 600px) and (max-width: 959.98px) {
   :host([opened][tablet-mode='over']) {
     .c2-side-nav {
+      .backdrop {
+        z-index: css.cssVar(dropback--z-index);
+      }
+      .main-content {
+        z-index: calc(css.cssVar(dropback--z-index) - 1);
+      }
       .nav-content-animate {
+        z-index: calc(css.cssVar(dropback--z-index) + 1);
         width: css.cssVar(over__open--width);
         height: css.cssVar(over__open--height);
         .nav-content {
@@ -208,19 +224,12 @@
   }
   :host([tablet-mode='over']) {
     .c2-side-nav {
-      .backdrop {
-        z-index: css.cssVar(dropback--z-index);
-      }
-      .main-content {
-        z-index: calc(css.cssVar(dropback--z-index) - 1);
-      }
       .nav-content-animate {
-        z-index: calc(css.cssVar(dropback--z-index) + 1);
         position: css.cssVar(over--position);
         top: css.cssVar(over--top);
         left: css.cssVar(over--left);
         .nav-content {
-          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)} - 10px);
+          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)});
           height: css.cssVar(over__open--height);
 
           background-color: css.cssVar(over--background-color);
@@ -249,7 +258,15 @@
 @media only screen and (max-width: 599.98px) {
   :host([opened]) {
     .c2-side-nav {
+      .backdrop {
+        z-index: css.cssVar(dropback--z-index);
+      }
+      .main-content {
+        z-index: calc(css.cssVar(dropback--z-index) - 1);
+      }
       .nav-content-animate {
+        z-index: calc(css.cssVar(dropback--z-index) + 1);
+
         width: css.cssVar(over__open--width);
         height: css.cssVar(over__open--height);
         .nav-content {
@@ -262,19 +279,12 @@
   }
   :host {
     .c2-side-nav {
-      .backdrop {
-        z-index: css.cssVar(dropback--z-index);
-      }
-      .main-content {
-        z-index: calc(css.cssVar(dropback--z-index) - 1);
-      }
       .nav-content-animate {
-        z-index: calc(css.cssVar(dropback--z-index) + 1);
         position: css.cssVar(over--position);
         top: css.cssVar(over--top);
         left: css.cssVar(over--left);
         .nav-content {
-          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)} - 10px);
+          width: calc(#{css.cssVar(over__open--width)} - #{css.cssVar(over--padding-left)} - #{css.cssVar(over--padding-right)});
           height: css.cssVar(over__open--height);
 
           background-color: css.cssVar(over--background-color);

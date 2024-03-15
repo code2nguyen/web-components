@@ -21,8 +21,6 @@ const TABLET_MODE = 0b1000
 export class SideNav extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  @property({ type: String, reflect: true }) position: 'left' | 'right' = 'left'
-
   /**
    * opened property
    */

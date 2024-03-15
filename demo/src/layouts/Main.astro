@@ -106,6 +106,7 @@ const { title, componentId, pageTitle } = Astro.props
       position: sticky;
       background-color: white;
       top: 0;
+      left: 0;
       z-index: 1001;
       transition:
         background-color 500ms cubic-bezier(0.3, 0, 0.8, 0.15),
@@ -149,6 +150,7 @@ const { title, componentId, pageTitle } = Astro.props
     }
 
     > main {
+      overflow: auto;
     }
     .header-sticky-detector {
       position: absolute;
@@ -176,7 +178,7 @@ const { title, componentId, pageTitle } = Astro.props
       header?.classList.toggle('is-scrolled', isIntersectingRatio < 1)
       header?.classList.toggle('is-scrolled-more', isIntersectingRatio < 0.9)
     },
-    { threshold: [0, 0.9, 1] },
+    { threshold: [0, 0.9, 1] }
   )
 
   if (detector) observer.observe(detector)
