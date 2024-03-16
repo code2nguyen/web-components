@@ -473,7 +473,6 @@ export class ComponentConfigurationPanel extends LitElement {
         <c2-tabs selected-tab="CSS">
           <c2-tab label="CSS" for="CSS"></c2-tab>
           <c2-tab label="Attributes" for="Attributes"></c2-tab>
-          <c2-tab label="Children" for="Children"></c2-tab>
           <c2-tab label="Code" for="Code"></c2-tab>
           <div id="CSS">${this.renderCssProperties()}</div>
           <div id="Attributes">${this.renderAttribues()}</div>
