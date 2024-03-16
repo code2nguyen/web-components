@@ -86,7 +86,7 @@ export class ColorConfig extends LitElement {
   }
 
   private extractBorderValue() {
-    const values = this.value.split(' ')
+    const values = this.value.replace(/\s*,\s/g, ',').split(' ')
     if (values.length == 3) {
       this.size = Number(values[0].replace('px', ''))
       this.color = values[2]

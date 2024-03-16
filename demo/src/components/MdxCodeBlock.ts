@@ -1,7 +1,15 @@
 import { $configStore } from '../store/config-store.ts'
 import { $configCodeStore } from '../store/config-code-store.ts'
-import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, updateDomCssValue, updateDomAttribute } from '../utils/dom.ts'
-import { getComponentManifestData } from '../utils/manifest-utils.ts'
+import {
+  closestElementSibling,
+  getParent,
+  getComponentByUid,
+  normalizeCssValue,
+  updateDomCssValue,
+  updateDomAttribute,
+  getInitialStyles,
+} from '../utils/dom.ts'
+import { getComponentManifestData, saveInitialStyle } from '../utils/manifest-utils.ts'
 import { componentManifests } from '../store/component-manifests.ts'
 
 const settingBtns = document.querySelectorAll('.mdx-code-block-setting-btn')
@@ -25,6 +33,7 @@ for (const settingBtn of settingBtns) {
       const targetComp = getComponentByUid(uid)
       if (!targetComp) return
       const componentManifest = componentManifests[targetComp.tagName.toLowerCase()]
+      saveInitialStyle(targetComp, componentManifest.allCssProperties)
       const componentManifestData = getComponentManifestData(targetComp, componentManifest)
       $configStore.set({
         uid,
@@ -44,6 +53,7 @@ $configStore.subscribe((componentConfig) => {
   if (!targetUID) {
     return
   }
+  const initialStyles = getInitialStyles(targetUID)
   const targetComp = getComponentByUid(targetUID)
   if (!targetComp) return
 
@@ -58,7 +68,9 @@ $configStore.subscribe((componentConfig) => {
     targetComp.style.height = height
   }
   targetComp.dataset.style = manifestStyleStr
-
-  updateDomCssValue(targetComp, componentConfig.allCssProperties)
+  const newCssProperties = componentConfig.allCssProperties.filter((cssVariable) => {
+    return initialStyles[cssVariable.cssVariable] !== cssVariable.value
+  })
+  updateDomCssValue(targetComp, newCssProperties)
   updateDomAttribute(targetComp, componentConfig.attributes)
 })

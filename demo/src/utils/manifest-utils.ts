@@ -30,7 +30,7 @@ export function normalizeManifest(value: CustomElement): ComponentManifest {
       }
     })
   const cssProperties = normalizeCssDeclaration(value.cssProperties)
-  // const externalCssProperties
+
   const events: EventDeclarationItem[] =
     value.events
       ?.filter((item) => item.name)
@@ -75,8 +75,9 @@ export function normalizeCssDeclaration(cssProperties?: CssCustomProperty[]): CS
 }
 
 export function updateManifestCssValue(element: HTMLElement, cssProperties: CSSDeclarationItem[]) {
+  const computedStyleMap = element.computedStyleMap()
   cssProperties.forEach((cssVariable) => {
-    const cssVariableValue = element.computedStyleMap().get(cssVariable.cssVariable) as CSSUnparsedValue
+    const cssVariableValue = computedStyleMap.get(cssVariable.cssVariable) as CSSUnparsedValue
     if (cssVariableValue && cssVariableValue.length > 0) {
       cssVariable.value = [...cssVariableValue.values()][0].toString()
     } else {
@@ -90,6 +91,21 @@ export function updateManifestAttributes(element: HTMLElement, attributes: Attri
     const attrValue = getElemenetProperty(element, attr.name)
     attr.value = attrValue
   })
+}
+
+export function saveInitialStyle(element: HTMLElement, cssProperties: CSSDeclarationItem[]) {
+  if (!element.dataset.initialStyles) {
+    const computedStyleMap = element.computedStyleMap()
+    const initialStyles: string[] = []
+    cssProperties.forEach((cssVariable) => {
+      const cssVariableValue = computedStyleMap.get(cssVariable.cssVariable) as CSSUnparsedValue
+      if (cssVariableValue && cssVariableValue.length > 0) {
+        const value = [...cssVariableValue.values()][0].toString()
+        initialStyles.push(`${cssVariable.cssVariable}:${value}`)
+      }
+    })
+    element.dataset.initialStyles = initialStyles.join(';')
+  }
 }
 
 export function getComponentManifestData(element: HTMLElement, defaultManifest: ComponentManifest): ComponentManifest {
@@ -107,7 +123,7 @@ export function getComponentManifestData(element: HTMLElement, defaultManifest: 
     h: styles.height ?? 'auto',
   }
 
-  updateManifestCssValue(element, computedManifest.cssProperties)
+  updateManifestCssValue(element, computedManifest.allCssProperties)
   updateManifestAttributes(element, computedManifest.attributes)
 
   return computedManifest

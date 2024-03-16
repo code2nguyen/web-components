@@ -57,11 +57,10 @@ export async function createShikiHighlighter({ langs = [], theme = 'github-dark'
               }
 
               const classValue = normalizePropAsString(node.properties.class) ?? ''
-              const styleValue = normalizePropAsString(node.properties.style) ?? ''
-
+              let styleValue = normalizePropAsString(node.properties.style) ?? ''
+              styleValue = styleValue.replace(/background-color:(.*?);/, 'background-color:var(--c2-code-viewer--background-color, $1);')
               // Replace "shiki" class naming with "astro-code"
               node.properties.class = classValue.replace(/shiki/g, 'c2-code-viewer')
-
               // Handle code wrapping
               // if wrap=null, do nothing.
               if (wrap === false) {

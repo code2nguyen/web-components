@@ -8,6 +8,8 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js'
 
 /**
  * @tag c2-code-viewer
+ *
+ * @cssproperty {color} --c2-code-viewer--background-color
  */
 @customElement('c2-code-viewer')
 export class CodeViewer extends LitElement {

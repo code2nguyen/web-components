@@ -172,6 +172,9 @@ export class ColorConfig extends LitElement {
   }
   handleShowOptionChange(event: Event) {
     this.show = (event.target as Checkbox).checked
+    if (this.show) {
+      this.a = 1
+    }
     this.dispathChangeEvent()
   }
 

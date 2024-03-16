@@ -25,7 +25,7 @@ export function closestElementSibling(currentElement: HTMLElement, selector: str
 
 export function updateDomCssValue(element: HTMLElement, cssProperties: CSSDeclarationItem[]) {
   cssProperties.forEach((cssVariable) => {
-    if (cssVariable.value && cssVariable.value !== cssVariable.default) {
+    if (cssVariable.value) {
       element.style.setProperty(cssVariable.cssVariable, cssVariable.value)
     } else {
       element.style.removeProperty(cssVariable.cssVariable)
@@ -86,35 +86,19 @@ export function getComponentByUid(uid: string): HTMLElement | null {
   return document.querySelector(`#${uid}`)
 }
 
-// export function extractManifestData(element: HTMLElement, componentManifest: ComponentManifest): ComponentManifest {
-//   const styles =
-//     element.dataset.style?.split(';').reduce((result, item) => {
-//       if (!item) return result
-//       const [key, value] = item.split(':')
-//       result[key.trim()] = value.trim()
-//       return result
-//     }, {} as ManifestDataItem) ?? {}
-
-//   const attributes: ManifestDataItem = {}
-//   for (const attr of element.attributes) {
-//     attributes[attr.name] = attr.value
-//   }
-//   const slots: ManifestDataItem = {}
-//   element.querySelectorAll('[slot]').forEach((slotItem) => {
-//     slots[slotItem.slot] = slotItem.outerHTML
-//   })
-//   const defaultSlot = element.querySelector(':not([slot])')
-//   if (defaultSlot) {
-//     slots['default'] = defaultSlot.outerHTML
-//   }
-//   if (element.innerText) {
-//     slots['default'] = slots['default'] ?? ''
-//     slots['default'] += element.innerText
-//   }
-
-//   return { styles, attributes, slots }
-// }
-
+export function getInitialStyles(uid: string): Record<string, string> {
+  const element = getComponentByUid(uid)
+  return (
+    element?.dataset.initialStyles?.split(';').reduce(
+      (result, item) => {
+        const initialValue = item.split(':')
+        result[initialValue[0]] = initialValue[1]
+        return result
+      },
+      {} as Record<string, string>,
+    ) ?? {}
+  )
+}
 export function normalizeCssValue(value: string | undefined): string {
   if (!value) return ''
 

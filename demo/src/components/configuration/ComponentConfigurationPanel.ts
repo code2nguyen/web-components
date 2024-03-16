@@ -1,11 +1,13 @@
-import { LitElement, html, css, nothing, type TemplateResult } from 'lit'
+import { LitElement, html, css, nothing, type TemplateResult, unsafeCSS } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import { StoreController } from '@nanostores/lit'
 import { classMap } from 'lit/directives/class-map.js'
 import { $configStore } from '../../store/config-store.ts'
-import './GenerateCodeBlock'
 import type { Checkbox } from '@c2n/checkbox'
 
+import styles from './ComponentConfigurationPanel.scss?inline'
+
+import './GenerateCodeBlock'
 import '@c2n/details'
 import '@c2n/label'
 import '@c2n/checkbox'
@@ -34,162 +36,14 @@ interface UpdateValue {
 
 @customElement('demo-component-configuration-panel')
 export class ComponentConfigurationPanel extends LitElement {
-  static styles = [
-    css`
-      :host {
-        display: block;
-        font-size: 12px;
-        --c2-details--border-bottom: 1px solid var(--border-color);
-        --c2-details--border-top: none;
-        --c2-details--border-left: none;
-        --c2-details--border-right: none;
-
-        --c2-details__header--padding-top: 16px;
-        --c2-details__header--padding-right: 16px;
-        --c2-details__header--padding-bottom: 16px;
-        --c2-details__header--padding-left: 16px;
-        --c2-details__header--flex-direction: row-reverse;
-        --c2-details__header__icon--rotate: 90deg;
-        --c2-details__header--gap: 8px;
-        --c2-details__header__icon--width: 12px;
-        --c2-details__header__icon--height: 12px;
-        --c2-details__header__hover--background-color: transparent;
-
-        --c2-text-field--font-size: 10px;
-        --c2-text-field--padding-top: 6px;
-        --c2-text-field--padding-bottom: 6px;
-
-        --c2-checkbox__touchable--size: 24px;
-        --c2-checkbox__state-layer--size: 32px;
-        --c2-checkbox__container--height: 16px;
-        --c2-checkbox__container--width: 16px;
-        --c2-checkbox__state-layer__hover__selected--color: var(--logo-color-1);
-        --c2-checkbox__state-layer__hover__unselected--color: var(--logo-color-1);
-
-        --c2-select__button--font-size: 10px;
-        --c2-select__button__suffix-icon--size: 12px;
-        --c2-select__button__prefix-icon--size: 12px;
-
-        --c2-select__button--padding: 8px 8px 8px 8px;
-        --c2-select__button__hover--background: transparent;
-        --c2-select__button--background: transparent;
-        --c2-list-item--font-size: 10px;
-
-        --c2-select__button--border-top: 1px solid transparent;
-        --c2-select__button--border-right: 1px solid transparent;
-        --c2-select__button--border-bottom: 1px solid transparent;
-        --c2-select__button--border-left: 1px solid transparent;
-
-        --c2-text-field--background: transparent;
-        --c2-text-field--border-top: 1px solid transparent;
-        --c2-text-field--border-right: 1px solid transparent;
-        --c2-text-field--border-bottom: 1px solid transparent;
-        --c2-text-field--border-left: 1px solid transparent;
-
-        --c2-text-field__focus--border-top: 1px solid var(--logo-color-1);
-        --c2-text-field__focus--border-right: 1px solid var(--logo-color-1);
-        --c2-text-field__focus--border-bottom: 1px solid var(--logo-color-1);
-        --c2-text-field__focus--border-left: 1px solid var(--logo-color-1);
-
-        --c2-icon-button__icon--size: 12px;
-        --c2-icon-button__state-layer--size: 24px;
-        --c2-tabs__tab--padding: 16px;
-        --c2-tabs__indicator--height: 2px;
-        --c2-tabs--box-shadow: inset 0px -2px 0px 0px rgb(230 230 230);
-        --c2-tabs__indicator--color: var(--logo-color-1);
-      }
-
-      c2-text-field:hover {
-        --c2-text-field--border-top: 1px solid var(--border-color-default);
-        --c2-text-field--border-right: 1px solid var(--border-color-default);
-        --c2-text-field--border-bottom: 1px solid var(--border-color-default);
-        --c2-text-field--border-left: 1px solid var(--border-color-default);
-      }
-
-      c2-text-field.number {
-        width: 80px;
-      }
-
-      c2-details:not(.sub-details):first-of-type {
-        --c2-details--border-radius: 8px 8px 0px 0px;
-      }
-
-      c2-details:not(.sub-details):last-of-type {
-        --c2-details--border-radius: 0px 0px 8px 8px;
-      }
-
-      c2-details.sub-details {
-        --c2-details--border-bottom: none;
-        --c2-details--border-top: none;
-        --c2-details__content--padding-left: 12px;
-        --c2-details__content--padding-right: 12px;
-        --c2-details__content--padding-bottom: 0px;
-      }
-
-      c2-details:has(> .sub-details) {
-        --c2-details__content--padding-left: 0px;
-        --c2-details__content--padding-right: 0px;
-      }
-
-      .config-content-group {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .config-content-group > .row {
-        border-bottom: 1px solid var(--border-color);
-        padding: 12px 16px 12px 20px;
-      }
-
-      .config-content-group-css {
-        padding-top: 4px;
-        padding-bottom: 4px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0px 8px 0px 12px;
-      }
-      .title {
-        font-weight: 500;
-      }
-      c2-label {
-        font-weight: 300;
-      }
-      .property-name {
-      }
-      .header {
-        position: relative;
-      }
-      .close-button {
-        position: absolute;
-        top: 11px;
-        right: 8px;
-      }
-      #component-select {
-        width: 160px;
-      }
-      .level-1 {
-        --c2-list-item--padding-left: 16px;
-      }
-    `,
-  ]
+  static override styles = unsafeCSS(styles)
 
   private configStore = new StoreController(this, $configStore)
 
-  private renderGenerateCodeBlock(componentUID: string) {
-    return html`<demo-generate-code-block .componentUID=${componentUID}></demo-generate-code-block>`
-  }
-
-  private handleSizeConfigChange(event: CustomEvent) {
-    console.log(event)
-    $configStore.setKey('host', event.detail)
-  }
+  // private handleSizeConfigChange(event: CustomEvent) {
+  //   console.log(event)
+  //   $configStore.setKey('host', event.detail)
+  // }
 
   private generateBooleanInput(label: string, name: string, value: string) {
     return html` <div class="row">
@@ -450,14 +304,7 @@ export class ComponentConfigurationPanel extends LitElement {
   }
 
   private renderCode() {
-    return html`
-      <c2-details>
-        <div slot="title" class="title">Code</div>
-        <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
-          <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
-        </svg>
-      </c2-details>
-    `
+    return html`<demo-generate-code-block .componentUID=${this.configStore.value.uid}></demo-generate-code-block> `
   }
 
   private handleCloseClick() {
