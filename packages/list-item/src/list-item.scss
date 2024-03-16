@@ -8,7 +8,10 @@
     border-bottom-left-radius: null,
     border-bottom-right-radius: null,
 
-    padding: 8px 8px 8px 8px,
+    padding-top: 4px,
+    padding-right: 8px,
+    padding-bottom: 4px,
+    padding-left: 8px,
 
     font-size: 14px,
     font-weight: null,
@@ -60,7 +63,10 @@
   border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
   border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 
-  padding: css.cssVar(padding);
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
 
   border-top: css.cssVar(border-top);
   border-bottom: css.cssVar(border-bottom);

@@ -11,7 +11,11 @@ declare namespace astroHTML.JSX {
     [attr: string]: string | boolean | any[]
   }
 }
-declare module 'custom-elements-manifest/schema' {
+declare module 'custom-elements-manifest/schema.ts' {
+  interface CustomElement {
+    internalComponents?: string[]
+    slotComponents?: string[]
+  }
   interface CssCustomProperty {
     type?: {
       text: string

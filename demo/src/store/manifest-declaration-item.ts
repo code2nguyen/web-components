@@ -28,6 +28,9 @@ export interface ComponentManifest {
     h?: string
   }
   cssProperties: CSSDeclarationItem[]
+  allCssProperties: CSSDeclarationItem[]
+  internalComponents: string[]
+  slotComponents: string[]
   attributes: AttributeDeclarationItem[]
   events: EventDeclarationItem[]
   tagName: string

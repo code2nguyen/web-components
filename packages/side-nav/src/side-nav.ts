@@ -181,7 +181,6 @@ export class SideNav extends LitElement {
     } else {
       this.scrollBarHeight = 0
     }
-    console.log(this.scrollBarPosition)
   }
 
   private renderScrollbar() {

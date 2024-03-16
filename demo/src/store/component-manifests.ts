@@ -1,4 +1,4 @@
-import type { Package, CustomElement } from 'custom-elements-manifest/schema'
+import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import sideNav from '@c2n/side-nav/custom-elements.json'
 import colorSelect from '@c2n/color-select/custom-elements.json'
 import colorArea from '@c2n/color-area/custom-elements.json'
@@ -12,33 +12,46 @@ import tabs from '@c2n/tabs/custom-elements.json'
 import codeViewer from '@c2n/code-viewer/custom-elements.json'
 import label from '@c2n/label/custom-elements.json'
 
-import { normalizeManifest } from '../utils/manifest-utils'
-import type { ComponentManifests } from './manifest-declaration-item'
+import { normalizeManifest } from '../utils/manifest-utils.ts'
+import type { ComponentManifests } from './manifest-declaration-item.ts'
 
-export const componentManifests: ComponentManifests = [
-  sideNav,
-  colorSelect,
-  colorArea,
-  colorSlider,
-  listItem,
-  overlay,
-  select,
-  dropdownList,
-  list,
-  tabs,
-  codeViewer,
-  label,
-].reduce((result, item) => {
-  const pkg = item as Package
-  for (const module of pkg.modules) {
-    if (module.declarations) {
-      for (const declaration of module.declarations) {
-        const customElementDeclaration = declaration as CustomElement
-        if (customElementDeclaration.tagName) {
-          result[customElementDeclaration.tagName] = normalizeManifest(customElementDeclaration)
+export const componentManifests = (function () {
+  const nomalizedManifests: ComponentManifests = [
+    sideNav,
+    colorSelect,
+    colorArea,
+    colorSlider,
+    listItem,
+    overlay,
+    select,
+    dropdownList,
+    list,
+    tabs,
+    codeViewer,
+    label,
+  ].reduce((result, item) => {
+    const pkg = item as Package
+    for (const module of pkg.modules) {
+      if (module.declarations) {
+        for (const declaration of module.declarations) {
+          const customElementDeclaration = declaration as CustomElement
+          if (customElementDeclaration.tagName) {
+            result[customElementDeclaration.tagName] = normalizeManifest(customElementDeclaration)
+          }
         }
       }
     }
-  }
-  return result
-}, {} as ComponentManifests)
+    return result
+  }, {} as ComponentManifests)
+
+  Object.keys(nomalizedManifests).forEach((componentTag) => {
+    const manifest = nomalizedManifests[componentTag]
+    manifest.internalComponents.concat(manifest.slotComponents).forEach((item) => {
+      if (nomalizedManifests[item]) {
+        manifest.allCssProperties = [...manifest.allCssProperties, ...nomalizedManifests[item].cssProperties]
+      }
+    })
+  })
+  console.log(nomalizedManifests)
+  return nomalizedManifests
+})()

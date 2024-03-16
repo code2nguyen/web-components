@@ -1,4 +1,6 @@
 ---
+// import { ViewTransitions } from 'astro:transitions'
+
 import logoRef from '../assets/logo.svg?raw'
 import { TextField } from '@c2n/text-field'
 import { TextButton } from '@c2n/text-button'
@@ -37,6 +39,7 @@ const { title, componentId, pageTitle } = Astro.props
     <!-- <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet" /> -->
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <!-- <ViewTransitions /> -->
   </head>
   <body>
     <div class="header-sticky-detector"></div>
@@ -90,105 +93,104 @@ const { title, componentId, pageTitle } = Astro.props
     <main>
       <slot />
     </main>
+    <style lang="scss">
+      :root {
+        --nav-bg-color: rgb(249 250 251);
+        --nav-border-color: rgb(230 230 230);
+      }
+      body {
+        position: relative;
+        > header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px var(--body-margin);
+          position: sticky;
+          background-color: white;
+          overflow: hidden;
+          top: 0;
+          left: 0;
+          z-index: 1001;
+          transition:
+            background-color 500ms cubic-bezier(0.3, 0, 0.8, 0.15),
+            box-shadow 300ms cubic-bezier(0.2, 0, 0, 1);
+          &.is-scrolled {
+            box-shadow: 0px 1px 0px 0px var(--border-color);
+          }
+          &.is-scrolled-more {
+            background-color: var(--bg-color);
+          }
+          .global-search {
+            min-width: 280px;
+
+            .search-icon {
+              // Center icon
+              padding-top: 4px;
+              padding-right: 4px;
+              color: --;
+            }
+          }
+          .logo {
+            align-items: center;
+            display: flex;
+            text-decoration: none;
+            gap: 12px;
+            flex-wrap: nowrap;
+            .logo-text {
+              text-wrap: nowrap;
+            }
+          }
+          .main-menu-button,
+          .github-button {
+            --c2-icon-button__icon--size: 20px;
+            --c2-icon-button__state-layer--size: 32px;
+            --c2-icon-button__icon--color: var(--theme-color);
+          }
+          .link-button {
+            --c2-text-button--color: var(--primary-text-color);
+            --c2-text-button--text-decoration-color: var(--logo-color-1);
+            --c2-text-button__hover--color: var(--logo-color-1);
+            --c2-text-button__hover--text-decoration-color: var(--logo-color-1);
+            &.selected {
+              --c2-text-button--color: var(--logo-color-1);
+              --c2-text-button--text-decoration: underline;
+            }
+          }
+        }
+
+        > main {
+          overflow: auto;
+        }
+        .header-sticky-detector {
+          position: absolute;
+          left: 0;
+          right: 0;
+          visibility: hidden;
+          height: 90px;
+          top: 5px;
+        }
+      }
+    </style>
+
+    <script>
+      const header = document.querySelector('body header')
+      const detector = document.querySelector('body .header-sticky-detector')
+      const menuBtn = document.querySelector('.main-menu-button')
+
+      menuBtn?.addEventListener('click', () => {
+        document.querySelector('.side-nav')?.toggleAttribute('opened')
+      })
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const detector = entries[0]
+          const isIntersectingRatio = detector.intersectionRatio
+          header?.classList.toggle('is-scrolled', isIntersectingRatio < 1)
+          header?.classList.toggle('is-scrolled-more', isIntersectingRatio < 0.9)
+        },
+        { threshold: [0, 0.9, 1] }
+      )
+
+      if (detector) observer.observe(detector)
+    </script>
   </body>
 </html>
-
-<style lang="scss">
-  :root {
-    --nav-bg-color: rgb(249 250 251);
-    --nav-border-color: rgb(230 230 230);
-  }
-  body {
-    position: relative;
-    > header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px var(--body-margin);
-      position: sticky;
-      background-color: white;
-      overflow: hidden;
-      top: 0;
-      left: 0;
-      z-index: 1001;
-      transition:
-        background-color 500ms cubic-bezier(0.3, 0, 0.8, 0.15),
-        box-shadow 300ms cubic-bezier(0.2, 0, 0, 1);
-      &.is-scrolled {
-        box-shadow: 0px 1px 0px 0px var(--border-color);
-      }
-      &.is-scrolled-more {
-        background-color: var(--bg-color);
-      }
-      .global-search {
-        min-width: 280px;
-
-        .search-icon {
-          // Center icon
-          padding-top: 4px;
-          padding-right: 4px;
-          color: --;
-        }
-      }
-      .logo {
-        align-items: center;
-        display: flex;
-        text-decoration: none;
-        gap: 12px;
-        flex-wrap: nowrap;
-        .logo-text {
-          text-wrap: nowrap;
-        }
-      }
-      .main-menu-button,
-      .github-button {
-        --c2-icon-button__icon--size: 20px;
-        --c2-icon-button__state-layer--size: 32px;
-        --c2-icon-button__icon--color: var(--theme-color);
-      }
-      .link-button {
-        --c2-text-button--color: var(--primary-text-color);
-        --c2-text-button--text-decoration-color: var(--logo-color-1);
-        --c2-text-button__hover--color: var(--logo-color-1);
-        --c2-text-button__hover--text-decoration-color: var(--logo-color-1);
-        &.selected {
-          --c2-text-button--color: var(--logo-color-1);
-          --c2-text-button--text-decoration: underline;
-        }
-      }
-    }
-
-    > main {
-      overflow: auto;
-    }
-    .header-sticky-detector {
-      position: absolute;
-      left: 0;
-      right: 0;
-      visibility: hidden;
-      height: 90px;
-      top: 5px;
-    }
-  }
-</style>
-
-<script>
-  const header = document.querySelector('body header')
-  const detector = document.querySelector('body .header-sticky-detector')
-  const menuBtn = document.querySelector('.main-menu-button')
-
-  menuBtn?.addEventListener('click', () => {
-    document.querySelector('.side-nav')?.toggleAttribute('opened')
-  })
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const detector = entries[0]
-      const isIntersectingRatio = detector.intersectionRatio
-      header?.classList.toggle('is-scrolled', isIntersectingRatio < 1)
-      header?.classList.toggle('is-scrolled-more', isIntersectingRatio < 0.9)
-    },
-    { threshold: [0, 0.9, 1] }
-  )
-
-  if (detector) observer.observe(detector)
-</script>

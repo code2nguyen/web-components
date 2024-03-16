@@ -16,6 +16,17 @@ export interface SelectionChangeEventDetail {
  *
  * @slot default - default slot which accept c2-list-item as chidren
  *
+ * @cssproperty {pixel} [--c2-list--border-top-left-radius=initial] - <code>border-top-left-radius</code> value
+ * @cssproperty {pixel} [--c2-list--border-top-right-radius=initial] - <code>border-top-right-radius</code> value
+ * @cssproperty {pixel} [--c2-list--border-bottom-left-radius=initial] - <code>border-bottom-left-radius</code> value
+ * @cssproperty {pixel} [--c2-list--border-bottom-right-radius=initial] - <code>border-bottom-right-radius</code> value
+ *
+ * @cssproperty {border} --c2-list--border-top - <code>border-top</code> value
+ * @cssproperty {border} --c2-list--border-bottom - <code>border-bottom</code> value
+ * @cssproperty {border} --c2-list--border-right - <code>border-right</code> value
+ * @cssproperty {border} --c2-list--border-left - <code>border-left</code> value
+ *
+ * @cssproperty {color} [--c2-list--background=rgb(255, 255, 255)] - <code>background-color</code> value
  */
 @customElement('c2-list')
 export class List extends LitElement {

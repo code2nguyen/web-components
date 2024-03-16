@@ -39,7 +39,7 @@ code = code.replace(/^"|"$/g, '')
   <div slot="title" data-uid={uid}>
     {style ? <Fragment set:html={style} /> : ''}
     <slot />
-    <IconButton client:load class="mdx-code-block-setting-btn hide-mobile" data-uid={uid} tooltip="Interacting">
+    <IconButton class="mdx-code-block-setting-btn hide-mobile" data-uid={uid} tooltip="Interacting">
       <svg fill="currentColor" viewBox="0 0 256 256"
         ><path
           d="M32,80a8,8,0,0,1,8-8H72a8,8,0,0,1,0,16H40A8,8,0,0,1,32,80Zm184,88H176V152a8,8,0,0,0-16,0v48a8,8,0,0,0,16,0V184h40a8,8,0,0,0,0-16Zm-80,0H40a8,8,0,0,0,0,16h96a8,8,0,0,0,0-16Zm-32-56a8,8,0,0,0,8-8V88H216a8,8,0,0,0,0-16H112V56a8,8,0,0,0-16,0v48A8,8,0,0,0,104,112Z"
@@ -58,68 +58,4 @@ code = code.replace(/^"|"$/g, '')
     --c2-icon-button__icon__hover--color: white;
   }
 </style>
-<script>
-  import { $configStore } from '../store/config-store.ts'
-  import { $configCodeStore } from '../store/config-code-store.ts'
-  import { closestElementSibling, getParent, getComponentByUid, normalizeCssValue, updateDomCssValue, updateDomAttribute } from '../utils/dom.ts'
-  import { getComponentManifestData } from '../utils/manifest-utils.ts'
-  import { componentManifests } from '../store/component-manifests.ts'
-
-  const settingBtns = document.querySelectorAll('.mdx-code-block-setting-btn')
-
-  for (const settingBtn of settingBtns) {
-    settingBtn.addEventListener('click', (event) => {
-      const btn = (event.target as HTMLElement).closest('c2-icon-button') as HTMLElement
-      const uid = btn?.dataset.uid
-      if (uid) {
-        const hideConfig = $configStore.get()['uid'] == uid
-        if (hideConfig) {
-          $configStore.setKey('showConfig', false)
-          $configStore.setKey('uid', '')
-          return
-        }
-
-        const codeBlockElement = closestElementSibling(getParent(btn), '.code')!
-        const code = codeBlockElement.querySelector('code')?.innerText
-        const lang = codeBlockElement.dataset.lang
-        const targetComp = getComponentByUid(uid)
-        if (!targetComp) return
-        const componentManifest = componentManifests[targetComp.tagName.toLowerCase()]
-        const componentManifestData = getComponentManifestData(targetComp, componentManifest)
-        $configStore.set({
-          uid,
-          showConfig: true,
-          ...componentManifestData,
-        })
-        $configCodeStore.setKey(uid, { code: code ?? '', lang: lang ?? '' })
-      }
-    })
-  }
-
-  // update config from configStore
-  $configStore.subscribe((componentConfig) => {
-    const targetUID = componentConfig.uid
-    let manifestStyleStr = ''
-    if (!targetUID) {
-      return
-    } else {
-    }
-    const targetComp = getComponentByUid(targetUID)
-    if (!targetComp) return
-
-    if (componentConfig.host?.w && componentConfig.host?.w !== 'auto') {
-      const width = normalizeCssValue(componentConfig.host.w)
-      manifestStyleStr += `width:${width};`
-      targetComp.style.width = width
-    }
-    if (componentConfig.host?.h && componentConfig.host?.h !== 'auto') {
-      const height = normalizeCssValue(componentConfig.host.h)
-      manifestStyleStr += `height:${height};`
-      targetComp.style.height = height
-    }
-    targetComp.dataset.style = manifestStyleStr
-
-    updateDomCssValue(targetComp, componentConfig.cssProperties)
-    updateDomAttribute(targetComp, componentConfig.attributes)
-  })
-</script>
+<script src="./MdxCodeBlock.ts"></script>

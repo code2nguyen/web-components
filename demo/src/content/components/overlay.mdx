@@ -4,7 +4,7 @@
     slug: "overlay"
 ---
 
-import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import ApiTable from '../../components/ApiTable.astro'
 
@@ -30,7 +30,7 @@ import '@c2n/overlay'
 ---
 
 ```html tag=MdxCodeBlock,compack=true,component=c2-overlay
-<c2-overlay></c2-overlay>    
+<c2-overlay client:only="lit"></c2-overlay>
 ```
 
 ---

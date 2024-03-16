@@ -36,3 +36,11 @@ const { componentId, class: className } = Astro.props
     --c2-hyperlink-list__item__hover--border-radius: 0px 4px 4px 0px;
   }
 </style>
+<script>
+  // document.addEventListener('astro:page-load', () => {
+  document.querySelector('.list-component > a[data-selected]')?.scrollIntoView({
+    block: 'center',
+    behavior: 'instant',
+  })
+  // })
+</script>

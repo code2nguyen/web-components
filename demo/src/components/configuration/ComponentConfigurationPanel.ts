@@ -9,6 +9,7 @@ import type { Checkbox } from '@c2n/checkbox'
 import '@c2n/details'
 import '@c2n/label'
 import '@c2n/checkbox'
+import '@c2n/select'
 import '@c2n/text-field'
 import '@c2n/icon-button'
 import '@c2n/tabs/tab.js'
@@ -24,6 +25,7 @@ import './BorderConfig'
 import type { AttributeDeclarationItem, CSSDeclarationItem } from '../../store/manifest-declaration-item.ts'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils.ts'
 import { BORDER_ORDER, BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER } from '../../utils/dom.ts'
+import type { Select } from '@c2n/select'
 
 interface UpdateValue {
   name: string
@@ -129,17 +131,17 @@ export class ComponentConfigurationPanel extends LitElement {
         --c2-details__content--padding-right: 0px;
       }
 
-      .attribute-input-group-content {
+      .config-content-group {
         display: flex;
         flex-direction: column;
       }
 
-      .attribute-input-group-content > .row {
+      .config-content-group > .row {
         border-bottom: 1px solid var(--border-color);
-        padding: 12px 16px;
+        padding: 12px 16px 12px 20px;
       }
 
-      .css-input-group-content {
+      .config-content-group-css {
         padding-top: 4px;
         padding-bottom: 4px;
         display: flex;
@@ -169,28 +171,34 @@ export class ComponentConfigurationPanel extends LitElement {
         top: 11px;
         right: 8px;
       }
+      #component-select {
+        width: 160px;
+      }
+      .level-1 {
+        --c2-list-item--padding-left: 16px;
+      }
     `,
   ]
 
   private configStore = new StoreController(this, $configStore)
 
-  renderGenerateCodeBlock(componentUID: string) {
+  private renderGenerateCodeBlock(componentUID: string) {
     return html`<demo-generate-code-block .componentUID=${componentUID}></demo-generate-code-block>`
   }
 
-  handleSizeConfigChange(event: CustomEvent) {
+  private handleSizeConfigChange(event: CustomEvent) {
     console.log(event)
     $configStore.setKey('host', event.detail)
   }
 
-  generateBooleanInput(label: string, name: string, value: string) {
+  private generateBooleanInput(label: string, name: string, value: string) {
     return html` <div class="row">
       <c2-label class="property-name" for=${name}>${label}</c2-label>
       <c2-checkbox @change=${this.handleCheckboxChange} id=${name} ?checked=${value !== 'false'}></c2-checked>
     </div>`
   }
 
-  renderPaddingConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+  private renderPaddingConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
     const paddingVariables = cssProperties
       .filter((item) => {
         return item.type == 'padding' || item.property.startsWith('padding')
@@ -217,7 +225,7 @@ export class ComponentConfigurationPanel extends LitElement {
     return cssProperties
   }
 
-  renderBorderRadiusConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+  private renderBorderRadiusConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
     const borderRadiusVariables = cssProperties
       .filter((item) => {
         return item.type == 'border-radius' || BORDER_RADIUS_ORDER.includes(item.property)
@@ -244,7 +252,7 @@ export class ComponentConfigurationPanel extends LitElement {
     return cssProperties
   }
 
-  renderFontConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+  private renderFontConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
     const fontVariables = cssProperties.filter((item) => {
       return FONT_PROPERTY.includes(item.property)
     })
@@ -262,7 +270,7 @@ export class ComponentConfigurationPanel extends LitElement {
     return cssProperties
   }
 
-  renderBorderConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+  private renderBorderConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
     const borderVariables = cssProperties.filter((item) => {
       return BORDER_ORDER.includes(item.property)
     })
@@ -278,15 +286,15 @@ export class ComponentConfigurationPanel extends LitElement {
     return cssProperties
   }
 
-  generateColorConfig(label: string, name: string, value: string) {
+  private generateColorConfig(label: string, name: string, value: string) {
     return html`<demo-color-config .label=${label} .name=${name} .value=${value} @change=${this.handleCustomConfigChange}></demo-color-config>`
   }
 
-  generateBorderConfig(label: string, name: string, value: string) {
+  private generateBorderConfig(label: string, name: string, value: string) {
     return html`<demo-border-config .label=${label} .name=${name} .value=${value} @change=${this.handleCustomConfigChange}></demo-border-config>`
   }
 
-  generateStringInput(label: string, name: string, value: string, type: string) {
+  private generateStringInput(label: string, name: string, value: string, type: string) {
     const classes = {
       number: type == 'pixel' || type == 'number',
     }
@@ -296,7 +304,7 @@ export class ComponentConfigurationPanel extends LitElement {
     </div>`
   }
 
-  handleCheckboxChange(event: Event) {
+  private handleCheckboxChange(event: Event) {
     const target = event.target as Checkbox
 
     if (!$configStore.value) return
@@ -307,7 +315,7 @@ export class ComponentConfigurationPanel extends LitElement {
     this.updateStore(updatedValue)
   }
 
-  handleTextInputChange(event: Event) {
+  private handleTextInputChange(event: Event) {
     const target = event.target as HTMLElement & { value: string }
     if (!$configStore.value) return
     const updatedValue: UpdateValue = {
@@ -317,7 +325,7 @@ export class ComponentConfigurationPanel extends LitElement {
     this.updateStore(updatedValue)
   }
 
-  handleCustomConfigChange(event: CustomEvent) {
+  private handleCustomConfigChange(event: CustomEvent) {
     const detail = event.detail as Record<string, string>
     if (!$configStore.value) return
 
@@ -339,15 +347,15 @@ export class ComponentConfigurationPanel extends LitElement {
       return
     }
 
-    const updateCssProperties = $configStore.value.cssProperties.find((item) => item.cssVariable == updateValue.name)
+    const updateCssProperties = $configStore.value.allCssProperties.find((item) => item.cssVariable == updateValue.name)
     if (updateCssProperties) {
       updateCssProperties.value = updateValue.value
-      $configStore.setKey('cssProperties', [...$configStore.value.cssProperties])
+      $configStore.setKey('allCssProperties', [...$configStore.value.allCssProperties])
       return
     }
   }
 
-  generateAttributeInput(attr: AttributeDeclarationItem) {
+  private generateAttributeInput(attr: AttributeDeclarationItem) {
     const value = this.getValueOrDefaultValue(attr)
 
     switch (attr.type) {
@@ -358,11 +366,11 @@ export class ComponentConfigurationPanel extends LitElement {
     }
   }
 
-  getValueOrDefaultValue(item: CSSDeclarationItem | AttributeDeclarationItem) {
+  private getValueOrDefaultValue(item: CSSDeclarationItem | AttributeDeclarationItem) {
     return item.value !== undefined ? item.value : item.default ?? (item.type == 'boolean' ? 'false' : '')
   }
 
-  generateCssVariableInput(cssDeclaration: CSSDeclarationItem) {
+  private generateCssVariableInput(cssDeclaration: CSSDeclarationItem) {
     const value = this.getValueOrDefaultValue(cssDeclaration)
     switch (cssDeclaration.type) {
       case 'pixel':
@@ -376,7 +384,7 @@ export class ComponentConfigurationPanel extends LitElement {
     }
   }
 
-  renderElementCssPropertiesContent(cssProperties: CSSDeclarationItem[]) {
+  private renderElementCssPropertiesContent(cssProperties: CSSDeclarationItem[]) {
     const result: TemplateResult[] = []
 
     cssProperties = this.renderPaddingConfig(cssProperties, result)
@@ -393,27 +401,47 @@ export class ComponentConfigurationPanel extends LitElement {
     ]
   }
 
-  renderCssProperties() {
-    const groupedCssVariables = flatGroupCssProperties(groupCssProperties(this.configStore.value.cssProperties))
+  private handleCssComponentChange(event: Event & { target: Select }) {
+    $configStore.setKey('cssComponentTag', event.target.value[0])
+  }
 
-    return groupedCssVariables.length > 0
-      ? groupedCssVariables.map((groupCssVariables) => {
-          return html`<c2-details>
+  private renderCssProperties() {
+    const componentManifest = this.configStore.value
+    const cssComponentTag = this.configStore.value.cssComponentTag
+    const cssProperties = componentManifest.allCssProperties.filter((item) => {
+      return item.cssVariable.startsWith(`--${cssComponentTag}--`) || item.cssVariable.startsWith(`--${cssComponentTag}__`)
+    })
+    const groupedCssVariables = flatGroupCssProperties(groupCssProperties(cssProperties))
+    return html`<div class="config-content-group">
+      <div class="row">
+        <c2-label for="component-select">Component</c2-label>
+        <c2-select id="component-select" value=${cssComponentTag} required @selection-change=${this.handleCssComponentChange}>
+          <c2-list-item value=${componentManifest.tagName} class="level-0">${componentManifest.tagName}</c2-list-item>
+          ${componentManifest.internalComponents.map((tag) => {
+            return html`<c2-list-item value=${tag} class="level-1">${tag}</c2-list-item>`
+          })}
+          ${componentManifest.slotComponents.map((tag) => {
+            return html`<c2-list-item value=${tag}>${tag}</c2-list-item>`
+          })}
+        </c2-select>
+      </div>
+      ${groupedCssVariables.map((groupCssVariables) => {
+        return html`<c2-details>
               <div slot="title" class="title">${groupCssVariables.groups.join(' > ')}</div>
               <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
                 <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
               </svg>
-              <div class="css-input-group-content">
+              <div class="config-content-group-css">
                 ${this.renderElementCssPropertiesContent(groupCssVariables.cssProperties)}
               <div>
             </c2-details>`
-        })
-      : nothing
+      })}
+    </div>`
   }
 
-  renderAttribues() {
+  private renderAttribues() {
     return this.configStore.value.attributes.length > 0
-      ? html` <div class="attribute-input-group-content">
+      ? html` <div class="config-content-group">
           ${this.configStore.value.attributes.map((attr) => {
             return this.generateAttributeInput(attr)
           })}
@@ -421,7 +449,7 @@ export class ComponentConfigurationPanel extends LitElement {
       : nothing
   }
 
-  renderCode() {
+  private renderCode() {
     return html`
       <c2-details>
         <div slot="title" class="title">Code</div>
@@ -445,6 +473,7 @@ export class ComponentConfigurationPanel extends LitElement {
         <c2-tabs selected-tab="CSS">
           <c2-tab label="CSS" for="CSS"></c2-tab>
           <c2-tab label="Attributes" for="Attributes"></c2-tab>
+          <c2-tab label="Children" for="Children"></c2-tab>
           <c2-tab label="Code" for="Code"></c2-tab>
           <div id="CSS">${this.renderCssProperties()}</div>
           <div id="Attributes">${this.renderAttribues()}</div>
@@ -458,17 +487,6 @@ export class ComponentConfigurationPanel extends LitElement {
           </svg>
         </c2-icon-button>
       </div>
-      <!-- <c2-details>
-        <div slot="title" class="title">Host</div>
-        <svg slot="icon" fill="currentColor" slot viewBox="0 0 256 256">
-          <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
-        </svg>
-        <demo-size-config
-          .width=${this.configStore.value.host?.w}
-          .height=${this.configStore.value.host?.h}
-          @change=${this.handleSizeConfigChange}
-        ></demo-size-config>
-      </c2-details> -->
     </div>`
   }
 }

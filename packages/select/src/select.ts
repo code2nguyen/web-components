@@ -48,6 +48,11 @@ import '@c2n/list'
  * @cssproperty {font-style} --c2-select__placeholder--font-style
  * @cssproperty {color} --c2-select__placeholder--color
  * @cssproperty {number} --c2-select__placeholder--opacity
+ * 
+ * @internalcomponent c2-list
+ * @internalcomponent c2-overlay
+ * 
+ * @slotcomponent c2-list-item
  *
  */
 @customElement('c2-select')

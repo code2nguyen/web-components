@@ -1,4 +1,4 @@
-import type { CustomElement } from 'custom-elements-manifest/schema'
+import type { CssCustomProperty, CustomElement } from 'custom-elements-manifest/schema.ts'
 
 import type {
   AttributeDeclarationItem,
@@ -7,10 +7,10 @@ import type {
   EventDeclarationItem,
   FlattenGroupedCssVariable,
   GroupedCssVariables,
-} from '../store/manifest-declaration-item'
-import type { ManifestDataItem } from './types'
+} from '../store/manifest-declaration-item.ts'
+import type { ManifestDataItem } from './types.ts'
 import { cloneDeep } from 'lodash-es'
-import { getElemenetProperty } from './dom'
+import { getElemenetProperty } from './dom.ts'
 
 export function normalizeManifest(value: CustomElement): ComponentManifest {
   value.attributes = value.attributes ?? []
@@ -29,22 +29,8 @@ export function normalizeManifest(value: CustomElement): ComponentManifest {
         description: item.description,
       }
     })
-  const cssProperties: CSSDeclarationItem[] =
-    value.cssProperties
-      ?.filter((item) => item.name)
-      .map((item) => {
-        const items = item.name.split('--')
-        const blocks = items.length > 1 ? items[1].split('__') : []
-        const property = items.length > 2 ? items[2] : ''
-        return {
-          cssVariable: item.name,
-          type: item.type?.text ?? '',
-          default: item.default,
-          blocks,
-          property,
-          description: item.description,
-        }
-      }) ?? []
+  const cssProperties = normalizeCssDeclaration(value.cssProperties)
+  // const externalCssProperties
   const events: EventDeclarationItem[] =
     value.events
       ?.filter((item) => item.name)
@@ -61,8 +47,31 @@ export function normalizeManifest(value: CustomElement): ComponentManifest {
     attributes,
     cssProperties,
     events,
+    allCssProperties: [...cssProperties],
+    internalComponents: value.internalComponents ?? [],
+    slotComponents: value.slotComponents ?? [],
     tagName: value.tagName ?? '',
   }
+}
+
+export function normalizeCssDeclaration(cssProperties?: CssCustomProperty[]): CSSDeclarationItem[] {
+  return (
+    cssProperties
+      ?.filter((item) => item.name)
+      .map((item) => {
+        const items = item.name.split('--')
+        const blocks = items.length > 1 ? items[1].split('__') : []
+        const property = items.length > 2 ? items[2] : ''
+        return {
+          cssVariable: item.name,
+          type: item.type?.text ?? '',
+          default: item.default,
+          blocks,
+          property,
+          description: item.description,
+        }
+      }) ?? []
+  )
 }
 
 export function updateManifestCssValue(element: HTMLElement, cssProperties: CSSDeclarationItem[]) {
