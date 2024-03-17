@@ -1,7 +1,9 @@
-import { LitElement, html, css, nothing } from 'lit'
+import { LitElement, html, css, nothing, type PropertyValueMap } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { TinyColor } from '@ctrl/tinycolor'
 import type { ColorSelectChangeEventDetail } from '@c2n/color-select'
+
+import { $configStore } from '../../store/config-store.ts'
 
 import '@c2n/text-field'
 import '@c2n/color-select'
@@ -102,6 +104,7 @@ export class ColorConfig extends LitElement {
       }
     `,
   ]
+
   @property() label: string = 'color'
   @property({ attribute: false }) name: string = ''
 
@@ -114,7 +117,7 @@ export class ColorConfig extends LitElement {
   @property({ attribute: false })
   public set value(value: string) {
     this._value = value
-    this.extractHsvaFromColor()
+    this.extractHsvaFromColor(value)
   }
 
   @state() show = true
@@ -123,21 +126,22 @@ export class ColorConfig extends LitElement {
   @state() v = 0
   @state() a = 1
 
+  get hiddenName() {
+    return `hideValue${this.name}`
+  }
   public get tinyColor(): TinyColor {
     return new TinyColor({ h: this.h, s: this.s, v: this.v, a: this.a })
   }
 
   private dispathChangeEvent() {
-    let detail: Record<string, string> = {}
+    const detail: Record<string, string> = {}
+
     if (this.show) {
-      const tinyColor = this.tinyColor
-      detail = {
-        [this.name]: tinyColor.toRgbString(),
-      }
+      detail[this.name] = this.tinyColor.toRgbString()
+      detail[this.hiddenName] = ''
     } else {
-      detail = {
-        [this.name]: '',
-      }
+      detail[this.name] = ''
+      detail[this.hiddenName] = this.tinyColor.toRgbString()
     }
 
     this.dispatchEvent(
@@ -158,23 +162,38 @@ export class ColorConfig extends LitElement {
     this.dispathChangeEvent()
   }
 
-  private extractHsvaFromColor() {
-    const tinyColor = new TinyColor(this.value)
+  private extractHsvaFromColor(value: string) {
+    const tinyColor = new TinyColor(value)
     if (tinyColor.isValid) {
       const { h, s, v, a } = tinyColor.toHsv()
       this.h = h
       this.s = s
       this.v = v
       this.a = a
+      this.show = true
     } else {
+      this.h = 0
+      this.s = 0
+      this.v = 0
+      this.a = 1
       this.show = false
     }
   }
+
+  protected willUpdate(changedProperties: PropertyValueMap<this>): void {
+    if (changedProperties.has('name') || changedProperties.has('value')) {
+      // if found hideValues, so this value was hidden,
+      // we change color to the hideValue, and make show = false
+      const hiddenColor = $configStore.value?.hideValues ? $configStore.value?.hideValues[this.name] : null
+      if (hiddenColor) {
+        this.extractHsvaFromColor(hiddenColor)
+        this.show = false
+      }
+    }
+  }
+
   handleShowOptionChange(event: Event) {
     this.show = (event.target as Checkbox).checked
-    if (this.show) {
-      this.a = 1
-    }
     this.dispathChangeEvent()
   }
 
@@ -187,8 +206,8 @@ export class ColorConfig extends LitElement {
       this.s = s
       this.v = v
       this.a = a
-      this.dispathChangeEvent()
       this.show = true
+      this.dispathChangeEvent()
     }
   }
 
@@ -196,8 +215,8 @@ export class ColorConfig extends LitElement {
     const value = Number(event.target.value.replace('%', ''))
     if (value >= 0 && value <= 100) {
       this.a = value / 100
-      this.dispathChangeEvent()
       this.show = true
+      this.dispathChangeEvent()
     }
   }
 

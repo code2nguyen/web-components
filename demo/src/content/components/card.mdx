@@ -5,22 +5,36 @@
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
 import { Card } from '@c2n/card'
 
 # Card
 
-```html tag=MdxCodeBlock
-<div class="container">
-  <c2-card class="card"></c2-card>
-</div>
+Cards help regroup contents and actions in a single element. Most cards have a border and border radius style.
+
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/card
+```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/card'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-card class="card">Simple card</c2-card>
 
 <style>
-  .container {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    justify-content: center;
-  }
   .card {
     width: 250px;
     height: 200px;
@@ -28,4 +42,9 @@ import { Card } from '@c2n/card'
 </style>
 ```
 
-Cards help regroup contents and actions in a single element. Most cards have a border and border radius style.
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-card"></ApiTable>

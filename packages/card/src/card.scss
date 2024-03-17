@@ -7,33 +7,76 @@
     padding-right: 8px,
     padding-bottom: 8px,
     padding-left: 8px,
-    border-radius: 4px,
+
+    border-top-left-radius: 4px,
+    border-top-right-radius: 4px,
+    border-bottom-left-radius: 4px,
+    border-bottom-right-radius: 4px,
 
     border-top: 1px solid variables.$color-border,
     border-bottom: 1px solid variables.$color-border,
     border-right: 1px solid variables.$color-border,
     border-left: 1px solid variables.$color-border,
-    bg-color: variables.$color-bg-lighter,
+
+    background: variables.$color-bg-lighter,
     box-shadow: none,
+
+    // hover
+    hover--border-top: null,
+    hover--border-bottom: null,
+    hover--border-right: null,
+    hover--border-left: null,
+
+    hover--background: null,
+    hover--box-shadow: null,
+
+    // disabled
+    disabled--box-shadow: null,
+    disabled--opacity: variables.$disabled-content-opacity,
   )
 );
 
 :host {
-  display: inline-flex;
+  display: flex;
+
+  .c2-card {
+    flex: 1;
+    box-sizing: border-box;
+
+    padding-top: css.cssVar(padding-top);
+    padding-bottom: css.cssVar(padding-bottom);
+    padding-right: css.cssVar(padding-right);
+    padding-left: css.cssVar(padding-left);
+
+    border-top-left-radius: css.cssVar(border-top-left-radius);
+    border-top-right-radius: css.cssVar(border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+    border-top: css.cssVar(border-top);
+    border-bottom: css.cssVar(border-bottom);
+    border-right: css.cssVar(border-right);
+    border-left: css.cssVar(border-left);
+
+    background: css.cssVar(background);
+    box-shadow: css.cssVar(box-shadow);
+
+    &:hover {
+      border-top: css.cssVar(hover--border-top, border-top);
+      border-bottom: css.cssVar(hover--border-bottom, border-bottom);
+      border-right: css.cssVar(hover--border-right, border-right);
+      border-left: css.cssVar(hover--border-left, border-left);
+
+      background: css.cssVar(hover--background, background);
+      box-shadow: css.cssVar(hover--box-shadow, box-shadow);
+    }
+  }
 }
-.c2-card {
-  flex: 1;
-  border-radius: css.cssVar(border-radius);
-  padding-top: css.cssVar(padding-top);
-  padding-bottom: css.cssVar(padding-bottom);
-  padding-right: css.cssVar(padding-right);
-  padding-left: css.cssVar(padding-left);
 
-  border-top: css.cssVar(border-top);
-  border-bottom: css.cssVar(border-bottom);
-  border-right: css.cssVar(border-right);
-  border-left: css.cssVar(border-left);
-  background-color: css.cssVar(bg-color);
-
-  box-shadow: css.cssVar(box-shadow);
+:host([disabled]) {
+  .c2-card {
+    pointer-events: none;
+    box-shadow: css.cssVar(disabled--box-shadow, box-shadow);
+    opacity: css.cssVar(disabled--opacity);
+  }
 }

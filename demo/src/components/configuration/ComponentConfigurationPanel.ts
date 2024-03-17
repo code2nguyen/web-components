@@ -40,11 +40,6 @@ export class ComponentConfigurationPanel extends LitElement {
 
   private configStore = new StoreController(this, $configStore)
 
-  // private handleSizeConfigChange(event: CustomEvent) {
-  //   console.log(event)
-  //   $configStore.setKey('host', event.detail)
-  // }
-
   private generateBooleanInput(label: string, name: string, value: string) {
     return html` <div class="row">
       <c2-label class="property-name" for=${name}>${label}</c2-label>
@@ -68,8 +63,8 @@ export class ComponentConfigurationPanel extends LitElement {
         <demo-padding-config
           .name=${paddingVariables.length == 1 ? paddingVariables[0].cssVariable : paddingVariables.map((i) => i.cssVariable)}
           .value=${paddingVariables.length == 1
-            ? this.getValueOrDefaultValue(paddingVariables[0])
-            : paddingVariables.map((i) => this.getValueOrDefaultValue(i))}
+            ? this.getCssVariableValue(paddingVariables[0].cssVariable)
+            : paddingVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
           @change=${this.handleCustomConfigChange}
         ></demo-padding-config>
       `)
@@ -95,8 +90,8 @@ export class ComponentConfigurationPanel extends LitElement {
         <demo-border-radius-config
           .name=${borderRadiusVariables.length == 1 ? borderRadiusVariables[0].cssVariable : borderRadiusVariables.map((i) => i.cssVariable)}
           .value=${borderRadiusVariables.length == 1
-            ? this.getValueOrDefaultValue(borderRadiusVariables[0])
-            : borderRadiusVariables.map((i) => this.getValueOrDefaultValue(i))}
+            ? this.getCssVariableValue(borderRadiusVariables[0].cssVariable)
+            : borderRadiusVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
           @change=${this.handleCustomConfigChange}
         ></demo-border-radius-config>
       `)
@@ -114,7 +109,7 @@ export class ComponentConfigurationPanel extends LitElement {
       result.push(html`
         <demo-font-config
           .names=${fontVariables.map((i) => i.cssVariable)}
-          .values=${fontVariables.map((i) => this.getValueOrDefaultValue(i))}
+          .values=${fontVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
           @change=${this.handleCustomConfigChange}
         ></demo-font-config>
       `)
@@ -154,7 +149,7 @@ export class ComponentConfigurationPanel extends LitElement {
     }
     return html` <div class="row">
       <c2-label class="property-name" for=${name}>${label}</c2-label>
-      <c2-text-field .placeholder=${label} class=${classMap(classes)} @change=${this.handleTextInputChange} id=${name} .value=${value}></c2-text-field>
+      <c2-text-field .placeholder=${label} class=${classMap(classes)} @input=${this.handleTextInputChange} id=${name} .value=${value}></c2-text-field>
     </div>`
   }
 
@@ -184,12 +179,26 @@ export class ComponentConfigurationPanel extends LitElement {
     if (!$configStore.value) return
 
     for (const [key, value] of Object.entries(detail)) {
-      const updatedValue: UpdateValue = {
-        name: key,
-        value: value,
+      if (key.startsWith('hideValue')) {
+        const hideValues = $configStore.value.hideValues ?? {}
+        hideValues[key.replace('hideValue', '')] = value
+        $configStore.setKey('hideValues', hideValues)
+      } else {
+        const updatedValue: UpdateValue = {
+          name: key,
+          value: value,
+        }
+        this.updateStore(updatedValue)
       }
-      this.updateStore(updatedValue)
     }
+  }
+  private handleSelectComponentChange(event: Event & { target: Select }) {
+    $configStore.setKey('cssComponentTag', event.target.value[0])
+  }
+
+  private handleCloseClick() {
+    $configStore.setKey('showConfig', false)
+    $configStore.setKey('uid', '')
   }
 
   private updateStore(updateValue: UpdateValue) {
@@ -204,14 +213,14 @@ export class ComponentConfigurationPanel extends LitElement {
     const updateCssProperties = $configStore.value.allCssProperties.find((item) => item.cssVariable == updateValue.name)
     if (updateCssProperties) {
       updateCssProperties.value = updateValue.value
-      $configStore.setKey('allCssProperties', [...$configStore.value.allCssProperties])
+      const optimizedCssProperties = this.optimizeCssVariables([...$configStore.value.allCssProperties])
+      $configStore.setKey('allCssProperties', optimizedCssProperties)
       return
     }
   }
 
   private generateAttributeInput(attr: AttributeDeclarationItem) {
-    const value = this.getValueOrDefaultValue(attr)
-
+    const value = this.getAttributeValue(attr.name)
     switch (attr.type) {
       case 'boolean':
         return this.generateBooleanInput(attr.name, attr.name, value)
@@ -220,12 +229,29 @@ export class ComponentConfigurationPanel extends LitElement {
     }
   }
 
-  private getValueOrDefaultValue(item: CSSDeclarationItem | AttributeDeclarationItem) {
-    return item.value !== undefined ? item.value : item.default ?? (item.type == 'boolean' ? 'false' : '')
+  private getCssVariableValue(name: string): string {
+    const cssVariable = this.configStore.value.allCssProperties.find((item) => item.cssVariable == name)
+    if (!cssVariable) return ''
+
+    if (cssVariable.value !== undefined) {
+      return cssVariable.value
+    }
+
+    if (cssVariable.default?.startsWith('--')) {
+      return this.getCssVariableValue(cssVariable.default)
+    }
+
+    return cssVariable.default ?? ''
+  }
+
+  private getAttributeValue(name: string) {
+    const attr = this.configStore.value.attributes.find((item) => item.name == name)
+    if (!attr) return ''
+    return attr.value !== undefined ? attr.value : attr.default ?? (attr.type == 'boolean' ? 'false' : '')
   }
 
   private generateCssVariableInput(cssDeclaration: CSSDeclarationItem) {
-    const value = this.getValueOrDefaultValue(cssDeclaration)
+    const value = this.getCssVariableValue(cssDeclaration.cssVariable)
     switch (cssDeclaration.type) {
       case 'pixel':
         return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
@@ -255,10 +281,6 @@ export class ComponentConfigurationPanel extends LitElement {
     ]
   }
 
-  private handleCssComponentChange(event: Event & { target: Select }) {
-    $configStore.setKey('cssComponentTag', event.target.value[0])
-  }
-
   private renderCssProperties() {
     const componentManifest = this.configStore.value
     const cssComponentTag = this.configStore.value.cssComponentTag
@@ -269,7 +291,7 @@ export class ComponentConfigurationPanel extends LitElement {
     return html`<div class="config-content-group">
       <div class="row">
         <c2-label for="component-select">Component</c2-label>
-        <c2-select id="component-select" value=${cssComponentTag} required @selection-change=${this.handleCssComponentChange}>
+        <c2-select id="component-select" value=${cssComponentTag} required @selection-change=${this.handleSelectComponentChange}>
           <c2-list-item value=${componentManifest.tagName} class="level-0">${componentManifest.tagName}</c2-list-item>
           ${componentManifest.internalComponents.map((tag) => {
             return html`<c2-list-item value=${tag} class="level-1">${tag}</c2-list-item>`
@@ -307,9 +329,16 @@ export class ComponentConfigurationPanel extends LitElement {
     return html`<demo-generate-code-block .componentUID=${this.configStore.value.uid}></demo-generate-code-block> `
   }
 
-  private handleCloseClick() {
-    $configStore.setKey('showConfig', false)
-    $configStore.setKey('uid', '')
+  private optimizeCssVariables(cssProperties: CSSDeclarationItem[]) {
+    cssProperties.forEach((cssProperty) => {
+      if (cssProperty.value && cssProperty.default?.startsWith('--')) {
+        const fallbackValue = this.getCssVariableValue(cssProperty.default)
+        if (cssProperty.value == fallbackValue) {
+          cssProperty.value = undefined
+        }
+      }
+    })
+    return cssProperties
   }
 
   render() {

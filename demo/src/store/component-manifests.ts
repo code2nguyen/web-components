@@ -1,5 +1,6 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import sideNav from '@c2n/side-nav/custom-elements.json'
+import card from '@c2n/card/custom-elements.json'
 import colorSelect from '@c2n/color-select/custom-elements.json'
 import colorArea from '@c2n/color-area/custom-elements.json'
 import colorSlider from '@c2n/color-slider/custom-elements.json'
@@ -25,6 +26,7 @@ export const componentManifests = (function () {
     overlay,
     select,
     dropdownList,
+    card,
     list,
     tabs,
     codeViewer,

@@ -46,11 +46,7 @@ export class GenerateCodeBLock extends LitElement {
         return initialStyles[cssVariable.cssVariable] !== cssVariable.value && cssVariable.value
       })
       .map((item) => `${item.cssVariable}: ${item.value}`)
-    return newCssProperties.length > 0
-      ? `:host {
-    ${newCssProperties.join(';\n') + ';'} 
-    }`
-      : ''
+    return newCssProperties.length > 0 ? `:host {\n${newCssProperties.join(';\n') + ';'}\n}` : ''
   }
 
   render() {

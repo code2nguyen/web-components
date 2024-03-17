@@ -4,4 +4,7 @@ export interface ComponentConfigState extends ComponentManifest {
   uid?: string
   showConfig?: boolean
   cssComponentTag?: string
+  hideValues?: {
+    [key: string]: string
+  }
 }

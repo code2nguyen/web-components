@@ -71,6 +71,11 @@ $configStore.subscribe((componentConfig) => {
   const newCssProperties = componentConfig.allCssProperties.filter((cssVariable) => {
     return initialStyles[cssVariable.cssVariable] !== cssVariable.value
   })
+
+  componentConfig.allCssProperties.forEach((cssVariable) => {
+    targetComp.style.removeProperty(cssVariable.cssVariable)
+  })
+
   updateDomCssValue(targetComp, newCssProperties)
   updateDomAttribute(targetComp, componentConfig.attributes)
 })

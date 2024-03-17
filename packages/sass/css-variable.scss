@@ -8,8 +8,13 @@ $theme: () !default;
 /* ex : var((width: 24px), width, c2-checkbox)  returns var(--c2-checkbox-width, 24px) */
 @function cssVar($fallback...) {
   $result: '';
+  $defaul-value: null;
+
   @for $i from 1 through length($fallback) {
     $item: nth($fallback, $i);
+    @if not $defaul-value {
+      $defaul-value: map.get($theme, $item);
+    }
     @if not str-index($item, '--') {
       $result: $result + 'var(--#{$prefix}--#{$item},';
     } @else if str-index($item, '--') == 1 {
@@ -18,9 +23,8 @@ $theme: () !default;
       $result: $result + 'var(--#{$prefix}__#{$item},';
     }
   }
-  $property: nth($fallback, 1);
-  @if $property and map.get($theme, $property) {
-    $result: $result + '#{map.get($theme, $property)},';
+  @if $defaul-value {
+    $result: $result + '#{$defaul-value},';
   }
   $result: str-slice($result, 1, -2);
   @for $i from 1 through length($fallback) {

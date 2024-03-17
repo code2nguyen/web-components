@@ -111,7 +111,7 @@ export class PaddingConfig extends LitElement {
   render() {
     return html`<div class="padding-config">
       <!-- top -->
-      <c2-text-field id="0" .value=${this.paddingValues[0]} @change=${this.handlePaddingChange}>
+      <c2-text-field id="0" .value=${this.paddingValues[0]} @input=${this.handlePaddingChange}>
         <svg slot="prefix-icon" viewBox="0 0 12 12" fill="none">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M2 2L10 2L10 3L2 3L2 2Z" fill="black" />
           <path
@@ -125,7 +125,7 @@ export class PaddingConfig extends LitElement {
       </c2-text-field>
 
       <!-- right -->
-      <c2-text-field id="1" .value=${this.paddingValues[1]} @change=${this.handlePaddingChange}>
+      <c2-text-field id="1" .value=${this.paddingValues[1]} @input=${this.handlePaddingChange}>
         <svg slot="prefix-icon" viewBox="0 0 12 12" fill="none">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2L10 10L9 10L9 2L10 2Z" fill="black" />
           <path
@@ -138,7 +138,7 @@ export class PaddingConfig extends LitElement {
         </svg>
       </c2-text-field>
       <!-- bottom -->
-      <c2-text-field id="2" .value=${this.paddingValues[2]} @change=${this.handlePaddingChange}>
+      <c2-text-field id="2" .value=${this.paddingValues[2]} @input=${this.handlePaddingChange}>
         <svg slot="prefix-icon" viewBox="0 0 12 12" fill="none">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M10 10L2 10L2 9L10 9L10 10Z" fill="black" />
           <path
@@ -152,7 +152,7 @@ export class PaddingConfig extends LitElement {
       </c2-text-field>
 
       <!-- left -->
-      <c2-text-field id="3" .value=${this.paddingValues[3]} @change=${this.handlePaddingChange}>
+      <c2-text-field id="3" .value=${this.paddingValues[3]} @input=${this.handlePaddingChange}>
         <svg slot="prefix-icon" viewBox="0 0 12 12" fill="none">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M2 10V2H3V10H2Z" fill="black" />
           <path

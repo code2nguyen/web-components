@@ -6,7 +6,7 @@ import './ColorConfig.ts'
 import type { TextField } from '@c2n/text-field'
 
 @customElement('demo-border-config')
-export class ColorConfig extends LitElement {
+export class BorderConfig extends LitElement {
   static styles = [
     css`
       :host {
@@ -52,6 +52,7 @@ export class ColorConfig extends LitElement {
       }
     `,
   ]
+
   @property() label: string = 'border'
   @property({ attribute: false }) name: string = ''
 
@@ -64,16 +65,23 @@ export class ColorConfig extends LitElement {
   @property({ attribute: false })
   public set value(value: string) {
     this._value = value
+    this.hideValue = ''
     this.extractBorderValue()
   }
 
   @state() size = 0
   @state() color = 'transparent'
+  private hideValue = ''
+
+  get hiddenName() {
+    return `hideValue${this.name}`
+  }
 
   private dispathChangeEvent() {
     let detail: Record<string, string> = {}
     detail = {
-      [this.name]: `${this.size}px solid ${this.color || 'transparent'}`,
+      [this.name]: `${this.size}px solid ${this.color}`,
+      [this.hiddenName]: this.hideValue,
     }
 
     this.dispatchEvent(
@@ -102,7 +110,13 @@ export class ColorConfig extends LitElement {
   }
 
   private handleColorConfigChange(event: CustomEvent<Record<string, string>>) {
-    this.color = event.detail.color
+    const color = event.detail[this.name]
+    this.hideValue = event.detail[this.hiddenName]
+    if (this.hideValue) {
+      this.color = 'transparent'
+    } else {
+      this.color = color
+    }
     this.dispathChangeEvent()
   }
 
@@ -159,12 +173,12 @@ export class ColorConfig extends LitElement {
     return html`<div class="border-config">
         <!-- <div class="label">${this.label}</div> -->
         <div class="border-wrapper"> 
-          <c2-text-field class="size-input" .value=${this.size} @change=${this.handleSizeInputChange}>
+          <c2-text-field class="size-input" .value=${this.size} @input=${this.handleSizeInputChange}>
             <div class="prefix-icon" slot="prefix-icon">
               ${this.generateBorderIcon()}
             </div>
           </c2-text-field>
-          <demo-color-config .label=${''} .value=${this.color} .name=${'color'} @change=${this.handleColorConfigChange}></demo-color-config>
+          <demo-color-config .label=${''} .value=${this.color} .name=${this.name} @change=${this.handleColorConfigChange}></demo-color-config>
         </div>
       </div>
     </div>`
