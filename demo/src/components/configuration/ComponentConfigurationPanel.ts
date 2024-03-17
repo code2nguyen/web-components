@@ -47,94 +47,6 @@ export class ComponentConfigurationPanel extends LitElement {
     </div>`
   }
 
-  private renderPaddingConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
-    const paddingVariables = cssProperties
-      .filter((item) => {
-        return item.type == 'padding' || item.property.startsWith('padding')
-      })
-      .sort((a, b) => {
-        const aOrder = PADDING_ORDER.indexOf(a.property)
-        const bOrder = PADDING_ORDER.indexOf(b.property)
-        return aOrder - bOrder
-      })
-
-    if (paddingVariables.length > 0) {
-      result.push(html`
-        <demo-padding-config
-          .name=${paddingVariables.length == 1 ? paddingVariables[0].cssVariable : paddingVariables.map((i) => i.cssVariable)}
-          .value=${paddingVariables.length == 1
-            ? this.getCssVariableValue(paddingVariables[0].cssVariable)
-            : paddingVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
-          @change=${this.handleCustomConfigChange}
-        ></demo-padding-config>
-      `)
-      cssProperties = cssProperties.filter((item) => !paddingVariables.includes(item))
-    }
-
-    return cssProperties
-  }
-
-  private renderBorderRadiusConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
-    const borderRadiusVariables = cssProperties
-      .filter((item) => {
-        return item.type == 'border-radius' || BORDER_RADIUS_ORDER.includes(item.property)
-      })
-      .sort((a, b) => {
-        const aOrder = BORDER_RADIUS_ORDER.indexOf(a.property)
-        const bOrder = BORDER_RADIUS_ORDER.indexOf(b.property)
-        return aOrder - bOrder
-      })
-
-    if (borderRadiusVariables.length > 0) {
-      result.push(html`
-        <demo-border-radius-config
-          .name=${borderRadiusVariables.length == 1 ? borderRadiusVariables[0].cssVariable : borderRadiusVariables.map((i) => i.cssVariable)}
-          .value=${borderRadiusVariables.length == 1
-            ? this.getCssVariableValue(borderRadiusVariables[0].cssVariable)
-            : borderRadiusVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
-          @change=${this.handleCustomConfigChange}
-        ></demo-border-radius-config>
-      `)
-      cssProperties = cssProperties.filter((item) => !borderRadiusVariables.includes(item))
-    }
-
-    return cssProperties
-  }
-
-  private renderFontConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
-    const fontVariables = cssProperties.filter((item) => {
-      return FONT_PROPERTY.includes(item.property)
-    })
-    if (fontVariables.length > 0) {
-      result.push(html`
-        <demo-font-config
-          .names=${fontVariables.map((i) => i.cssVariable)}
-          .values=${fontVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
-          @change=${this.handleCustomConfigChange}
-        ></demo-font-config>
-      `)
-      cssProperties = cssProperties.filter((item) => !fontVariables.includes(item))
-    }
-
-    return cssProperties
-  }
-
-  private renderBorderConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
-    const borderVariables = cssProperties.filter((item) => {
-      return BORDER_ORDER.includes(item.property)
-    })
-    if (borderVariables.length > 0) {
-      result.push(
-        ...borderVariables.map((cssVar) => {
-          return this.generateCssVariableInput(cssVar)
-        }),
-      )
-      cssProperties = cssProperties.filter((item) => !borderVariables.includes(item))
-    }
-
-    return cssProperties
-  }
-
   private generateColorConfig(label: string, name: string, value: string) {
     return html`<demo-color-config .label=${label} .name=${name} .value=${value} @change=${this.handleCustomConfigChange}></demo-color-config>`
   }
@@ -255,6 +167,8 @@ export class ComponentConfigurationPanel extends LitElement {
     switch (cssDeclaration.type) {
       case 'pixel':
         return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
+      case 'background':
+      case 'background-color':
       case 'color':
         return this.generateColorConfig(cssDeclaration.property, cssDeclaration.cssVariable, value)
       case 'border':
@@ -262,6 +176,94 @@ export class ComponentConfigurationPanel extends LitElement {
       default:
         return this.generateStringInput(cssDeclaration.property, cssDeclaration.cssVariable, value, cssDeclaration.type)
     }
+  }
+
+  private renderPaddingConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const paddingVariables = cssProperties
+      .filter((item) => {
+        return item.type == 'padding' || item.property.startsWith('padding')
+      })
+      .sort((a, b) => {
+        const aOrder = PADDING_ORDER.indexOf(a.property)
+        const bOrder = PADDING_ORDER.indexOf(b.property)
+        return aOrder - bOrder
+      })
+
+    if (paddingVariables.length > 0) {
+      result.push(html`
+        <demo-padding-config
+          .name=${paddingVariables.length == 1 ? paddingVariables[0].cssVariable : paddingVariables.map((i) => i.cssVariable)}
+          .value=${paddingVariables.length == 1
+            ? this.getCssVariableValue(paddingVariables[0].cssVariable)
+            : paddingVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-padding-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !paddingVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
+  private renderBorderRadiusConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const borderRadiusVariables = cssProperties
+      .filter((item) => {
+        return item.type == 'border-radius' || BORDER_RADIUS_ORDER.includes(item.property)
+      })
+      .sort((a, b) => {
+        const aOrder = BORDER_RADIUS_ORDER.indexOf(a.property)
+        const bOrder = BORDER_RADIUS_ORDER.indexOf(b.property)
+        return aOrder - bOrder
+      })
+
+    if (borderRadiusVariables.length > 0) {
+      result.push(html`
+        <demo-border-radius-config
+          .name=${borderRadiusVariables.length == 1 ? borderRadiusVariables[0].cssVariable : borderRadiusVariables.map((i) => i.cssVariable)}
+          .value=${borderRadiusVariables.length == 1
+            ? this.getCssVariableValue(borderRadiusVariables[0].cssVariable)
+            : borderRadiusVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-border-radius-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !borderRadiusVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
+  private renderFontConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const fontVariables = cssProperties.filter((item) => {
+      return FONT_PROPERTY.includes(item.property)
+    })
+    if (fontVariables.length > 0) {
+      result.push(html`
+        <demo-font-config
+          .names=${fontVariables.map((i) => i.cssVariable)}
+          .values=${fontVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
+          @change=${this.handleCustomConfigChange}
+        ></demo-font-config>
+      `)
+      cssProperties = cssProperties.filter((item) => !fontVariables.includes(item))
+    }
+
+    return cssProperties
+  }
+
+  private renderBorderConfig(cssProperties: CSSDeclarationItem[], result: TemplateResult[]) {
+    const borderVariables = cssProperties.filter((item) => {
+      return BORDER_ORDER.includes(item.property)
+    })
+    if (borderVariables.length > 0) {
+      result.push(
+        ...borderVariables.map((cssVar) => {
+          return this.generateCssVariableInput(cssVar)
+        }),
+      )
+      cssProperties = cssProperties.filter((item) => !borderVariables.includes(item))
+    }
+
+    return cssProperties
   }
 
   private renderElementCssPropertiesContent(cssProperties: CSSDeclarationItem[]) {

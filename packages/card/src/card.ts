@@ -21,18 +21,18 @@ import styles from './card.scss?inline'
  * @cssproperty {border} [--c2-card--border-right=1px solid rgb(177, 177, 177)]
  * @cssproperty {border} [--c2-card--border-left=1px solid rgb(177, 177, 177)]
  * 
- * @cssproperty {color} [--c2-card--background=rgb(255, 255, 255)]
- * @cssproperty {color} --c2-card--box-shadow 
+ * @cssproperty {background} [--c2-card--background=rgb(255, 255, 255)]
+ * @cssproperty {opacity} --c2-card--box-shadow 
  *
  * @cssproperty {border} [--c2-card__hover--border-top=--c2-card--border-top] 
  * @cssproperty {border} [--c2-card__hover--border-bottom=--c2-card--border-bottom] 
  * @cssproperty {border} [--c2-card__hover--border-right=--c2-card--border-right] 
  * @cssproperty {border} [--c2-card__hover--border-left=--c2-card--border-lef] 
- * @cssproperty {color} [--c2-card__hover--background=--c2-card--background] 
- * @cssproperty {color} [--c2-card__hover--box-shadow=--c2-card--box-shadow]
+ * @cssproperty {background} [--c2-card__hover--background=--c2-card--background] 
+ * @cssproperty {box-shadow} [--c2-card__hover--box-shadow=--c2-card--box-shadow]
  
- * @cssproperty {color} [--c2-card__disabled--box-shadow=--c2-card--box-shadow] 
- * @cssproperty {color} [--c2-card__disabled--opacity=0.38] 
+ * @cssproperty {box-shadow} [--c2-card__disabled--box-shadow=--c2-card--box-shadow] 
+ * @cssproperty {opacity} [--c2-card__disabled--opacity=0.38] 
 
  */
 @customElement('c2-card')
