@@ -5,10 +5,47 @@ import styles from './checkbox.scss?inline'
 import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 
 /**
- * An example element.
+ * @tag c2-checkbox
  *
- * @slot - This element has a slot
- * @csspart button - The button
+ * @cssproperty {pixel} [--c2-checkbox__container--height=18px]
+ * @cssproperty {pixel} [--c2-checkbox__container--width=18px]
+ * @cssproperty {border-radius} [--c2-checkbox__container--border-top-left-radius=4px]
+ * @cssproperty {border-radius} [--c2-checkbox__container--border-top-right-radius=4px]
+ * @cssproperty {border-radius} [--c2-checkbox__container--border-bottom-left-radius=4px]
+ * @cssproperty {border-radius} [--c2-checkbox__container--border-bottom-right-radius=4px]
+ *
+ * @cssproperty {border} [--c2-checkbox__container--border-top=1px solid #bcbcc6]
+ * @cssproperty {border} [--c2-checkbox__container--border-right=1px solid #bcbcc6]
+ * @cssproperty {border} [--c2-checkbox__container--border-bottom=1px solid #bcbcc6]
+ * @cssproperty {border} [--c2-checkbox__container--border-left=1px solid #bcbcc6]
+ *
+ * @cssproperty {color} [--c2-checkbox__container__selected--background-color=#476ef9]
+ * @cssproperty {border} [--c2-checkbox__container__selected--border-top=0px solid transparent]
+ * @cssproperty {border} [--c2-checkbox__container__selected--border-right=0px solid transparent]
+ * @cssproperty {border} [--c2-checkbox__container__selected--border-bottom=0px solid transparent]
+ * @cssproperty {border} [--c2-checkbox__container__selected--border-left=0px solid transparent]
+ 
+ *
+ * @cssproperty {pixel} [--c2-checkbox__checkmark--size=12px]
+ * @cssproperty {color} [--c2-checkbox__checkmark--color=#ffffff]
+ *
+ * @cssproperty {pixel} [--c2-checkbox__mixedmark--size=12px]
+ * @cssproperty {color} [--c2-checkbox__mixedmark--color=#ffffff]
+ *
+ * @cssproperty {pixel} [--c2-checkbox__uncheckmark--size=12px]
+ * @cssproperty {color} [--c2-checkbox__uncheckmark--color=#ffffff]
+ *
+ * @cssproperty {pixel} [--c2-checkbox__touchable--size=48px]
+ *
+ * @cssproperty {border-radius} [--c2-checkbox__state-layer--border-top-left-radius=999px]
+ * @cssproperty {border-radius} [--c2-checkbox__state-layer--border-top-right-radius=999px]
+ * @cssproperty {border-radius} [--c2-checkbox__state-layer--border-bottom-left-radius=999px]
+ * @cssproperty {border-radius} [--c2-checkbox__state-layer--border-bottom-right-radius=999px]
+ *
+ * @cssproperty {pixel} [--c2-checkbox__state-layer--size=40px]
+ * @cssproperty {color} [--c2-checkbox__state-layer__hover__unselected--color=#bcbcc6]
+ * @cssproperty {color} [--c2-checkbox__state-layer__hover__selected--color=#476ef9]
+ *
  */
 @customElement('c2-checkbox')
 export class Checkbox extends LitElement {

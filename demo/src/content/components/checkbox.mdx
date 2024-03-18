@@ -4,22 +4,51 @@
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
 import { Checkbox } from '@c2n/checkbox'
 
 # Checkbox
 
-`c2n-checkbox` provides the same functionality as a native `<input type="checkbox">` enhanced with Material Design styling and animations.
+`c2n-checkbox` provides the same functionality as a native `<input type="checkbox">` enhanced with styling and animations.
 
-```html tag=MdxCodeBlock,link=http://xyz.com
-<div class="container">
-  <c2-checkbox></c2-checkbox>
-  <label>check me</label>
-</div>
-<style>
-  .container {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-</style>
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/checkbox
 ```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/checkbox'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-checkbox></c2-checkbox>
+```
+
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-checkbox indeterminate></c2-checkbox>
+```
+
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-checkbox checked></c2-checkbox>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-checkbox"></ApiTable>

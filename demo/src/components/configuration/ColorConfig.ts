@@ -22,8 +22,11 @@ export class ColorConfig extends LitElement {
 
         --c2-checkbox__uncheckmark--color: var(--primary-text-color);
         --c2-checkbox__checkmark--color: var(--primary-text-color);
-        --c2-checkbox__container--border: none;
-        --c2-checkbox__container__selected--color: transparent;
+        --c2-checkbox__container--border-top: none;
+        --c2-checkbox__container--border-left: none;
+        --c2-checkbox__container--border-right: none;
+        --c2-checkbox__container--border-bottom: none;
+        --c2-checkbox__container__selected--background-color: transparent;
         --c2-checkbox__touchable--size: 16px;
         --c2-checkbox__container--height: 16px;
         --c2-checkbox__checkmark--size: 16px;
@@ -140,7 +143,9 @@ export class ColorConfig extends LitElement {
       detail[this.name] = this.tinyColor.toRgbString()
       detail[this.hiddenName] = ''
     } else {
-      detail[this.name] = ''
+      const cssProperty = $configStore.value?.allCssProperties.find((item) => item.cssVariable == this.name)
+
+      detail[this.name] = cssProperty?.type == 'color' && cssProperty?.default && !cssProperty?.default.startsWith('--') ? 'transparent' : ''
       detail[this.hiddenName] = this.tinyColor.toRgbString()
     }
 
