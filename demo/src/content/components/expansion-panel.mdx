@@ -4,13 +4,30 @@
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
 import { ExpansionPanel } from '@c2n/expansion-panel'
 
 # Expansion Panel
 
-The `c2-expansion-panel` represents data inform of details/summary. Behind the sence it uses details/summary html tag.
+### Installation
 
-```html tag=MdxCodeBlock,link=http://xyz.com
+```bash tag=CodeBlock
+npm install @c2n/expansion-panel
+```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/expansion-panel'
+```
+
+<br />
+## Examples
+<br />
+
+```html tag=MdxCodeBlock,compack=true,component=c2-expansion-panel
 <c2-expansion-panel class="basic">
   <div slot="title" class="title">Section 1</div>
   <div class="content">The content can be toggled visible.</div>
@@ -25,3 +42,8 @@ The `c2-expansion-panel` represents data inform of details/summary. Behind the s
   }
 </style>
 ```
+
+<br />
+## API
+
+<ApiTable componentTag="c2-expansion-panel"></ApiTable>

@@ -27,11 +27,11 @@
 
     header__title__icon--width: 24px,
     header__title__icon--height: 24px,
-    header__title__icon--rotate: 180deg,    
+    header__title__icon--rotate: 180deg,
     header__title__icon--color: null,
     header__title__hover--background: variables.$color-bg-dark,
 
-    content--padding-top: 0px,
+    content--padding-top: 8px,
     content--padding-right: null,
     content--padding-bottom: null,
     content--padding-left: null,
@@ -51,7 +51,7 @@
     border-top-left-radius: css.cssVar(border-top-left-radius);
     border-top-right-radius: css.cssVar(border-top-right-radius);
     border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
-    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);  
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 
     .c2-expansion-panel-header {
       display: flex;
@@ -71,7 +71,7 @@
       gap: css.cssVar(header--gap);
 
       .c2-expansion-panel-header-title {
-        border-radius: inherit;        
+        border-radius: inherit;
         display: flex;
         align-items: center;
         position: relative;
@@ -95,10 +95,10 @@
             will-change: transform;
             transition: animation.standard(transform);
             width: css.cssVar(header__title__icon--width);
-            height: css.cssVar(header__title__icon--height);            
+            height: css.cssVar(header__title__icon--height);
           }
         }
-  
+
         slot[name='expanded-icon'] {
           display: none;
           cursor: pointer;
@@ -108,11 +108,11 @@
             height: css.cssVar(header__title__icon--height);
           }
         }
-  
+
         .default-icon {
           transform: rotate(0deg);
           will-change: transform;
-          transition: animation.standard(transform);  
+          transition: animation.standard(transform);
           width: css.cssVar(header__title__icon--width);
           height: css.cssVar(header__title__icon--height);
         }
@@ -130,7 +130,7 @@
       .c2-expansion-panel-header-title:has(+ .c2-expansion-panel-header-content[data-filled]) {
         border-bottom-left-radius: 0px;
         border-bottom-right-radius: 0px;
-        padding-bottom: 0;
+        padding-bottom: css.cssVar(header--padding-top);
         border-bottom: css.cssVar(header__title--border-bottom);
       }
 
@@ -155,7 +155,7 @@
 
       border-right: css.cssVar(border-right);
       border-left: css.cssVar(border-left);
-
+      border-bottom: css.cssVar(border-bottom);
       border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
       border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 
@@ -183,11 +183,11 @@
       }
       slot[name='icon'] {
         &::slotted(svg) {
-          transform: rotate(css.cssVar(header__icon--rotate));
+          transform: rotate(css.cssVar(header__title__icon--rotate));
         }
       }
       .default-icon {
-        transform: rotate(css.cssVar(header__icon--rotate));
+        transform: rotate(css.cssVar(header__title__icon--rotate));
       }
     }
     .c2-expansion-panel-content {

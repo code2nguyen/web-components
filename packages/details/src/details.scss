@@ -31,7 +31,7 @@
 
     header__hover--background: variables.$color-bg-dark,
 
-    content--padding-top: 0px,
+    content--padding-top: 8px,
     content--padding-right: null,
     content--padding-bottom: null,
     content--padding-left: null,
@@ -56,10 +56,10 @@
     &::-webkit-details-marker {
       list-style: none;
     }
-    display: flex;    
+    display: flex;
     align-items: center;
     user-select: none;
-    will-change: border-radius, background;    
+    will-change: border-radius, background;
     transition: animation.standard(background), animation.standard(border-radius);
     position: relative;
     cursor: pointer;
@@ -73,7 +73,7 @@
     border-top-right-radius: css.cssVar(border-top-right-radius);
     border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
     border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
-        
+
     padding-top: css.cssVar(header--padding-top);
     padding-right: css.cssVar(header--padding-right);
     padding-bottom: css.cssVar(header--padding-bottom);
@@ -112,10 +112,6 @@
       }
     }
 
-    slot[name='expanded-icon'][data-filled] {
-      display: contents;
-    }
-
     &:hover {
       background: css.cssVar(header__hover--background);
     }
@@ -144,7 +140,6 @@
     border-top-left-radius: 0px;
     border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
     border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
-
   }
 
   &[open] {
@@ -162,6 +157,10 @@
         &::slotted(svg) {
           transform: rotate(css.cssVar(header__icon--rotate));
         }
+      }
+
+      slot[name='expanded-icon'][data-filled] {
+        display: contents;
       }
 
       .default-icon {

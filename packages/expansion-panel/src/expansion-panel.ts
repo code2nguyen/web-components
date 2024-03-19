@@ -1,11 +1,44 @@
 import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './expansion-panel.scss?inline'
+
 /**
- * ExpansionPanel component
+ * @tag c2-expansion-panel
  *
- * @slot
- * @csspart
+ * @cssproperty {border} [--c2-expansion-panel--border-top=1px solid rgb(230, 230, 230)]
+ * @cssproperty {border} [--c2-expansion-panel--border-right=1px solid rgb(230, 230, 230)]
+ * @cssproperty {border} [--c2-expansion-panel--border-bottom=1px solid rgb(230, 230, 230)]
+ * @cssproperty {border} [--c2-expansion-panel--border-left=1px solid rgb(230, 230, 230)]
+ *
+ * @cssproperty {border-radius} [--c2-expansion-panel--border-top=left-radius=0px]
+ * @cssproperty {border-radius} [--c2-expansion-panel--border-top=right-radius=0px]
+ * @cssproperty {border-radius} [--c2-expansion-panel--border-bottom=left-radius=0px]
+ * @cssproperty {border-radius} [--c2-expansion-panel--border-bottom=right-radius=0px]
+ *
+ * @cssproperty {box-shadow} --c2-expansion-panel--box-shadow
+ * @cssproperty {pixel} --c2-expansion-panel__header--gap
+ *
+ * @cssproperty {padding} [--c2-expansion-panel__header--padding-top=16px]
+ * @cssproperty {padding} [--c2-expansion-panel__header--padding-right=16px]
+ * @cssproperty {padding} [--c2-expansion-panel__header--padding-bottom=16px]
+ * @cssproperty {padding} [--c2-expansion-panel__header--padding-left=16px]
+ *
+ * @cssproperty {background} --c2-expansion-panel__header__title--background
+ * @cssproperty {pixel} [--c2-expansion-panel__header__title--gap=16px]
+ * @cssproperty {flex-direction-row} [--c2-expansion-panel__header__title--flex-direction=row]
+ * @cssproperty {border} [--c2-expansion-panel__header__title--border-bottom=0px solid transparent]
+ *
+ * @cssproperty {pixel} [--c2-expansion-panel__header__title__icon--width=24px]
+ * @cssproperty {pixel} [--c2-expansion-panel__header__title__icon--height=24px]
+ * @cssproperty {pixel} [--c2-expansion-panel__header__title__icon--rotage=180deg]
+ * @cssproperty {color} --c2-expansion-panel__header__title__icon--color
+ *
+ * @cssproperty {background} [--c2-expansion-panel__header__title__hover--background=rgb(230, 230, 230)]
+ *
+ * @cssproperty {padding} [--c2-expansion-panel__content--padding-top=8px]
+ * @cssproperty {padding} --c2-expansion-panel__content--padding-right
+ * @cssproperty {padding} --c2-expansion-panel__content--padding-bottom
+ * @cssproperty {padding} --c2-expansion-panel__content--padding-left
  */
 @customElement('c2-expansion-panel')
 export class ExpansionPanel extends LitElement {
@@ -20,7 +53,7 @@ export class ExpansionPanel extends LitElement {
 
   protected renderDefaultIcon() {
     return html`<slot name="icon" @click=${this.handleIconClick}>
-      <svg class="default-icon" viewBox="0 -960 960 960">
+      <svg class="default-icon" fill="currentColor" viewBox="0 -960 960 960">
         <path
           d="M479.8-371.077q-5.662 0-10.423-2.115-4.762-2.116-8.992-6.346l-181.2-181.2q-5.954-5.954-5.839-11.608.115-5.654 6.5-12.039 6.385-6.384 11.654-6.384t11.654 6.384L480-406.539l177.846-177.846q5.615-5.615 11.269-5.5 5.654.116 12.039 6.5 6.385 6.385 6.385 11.654 0 5.27-6.724 11.936l-181.2 180.257q-4.63 4.23-9.392 6.346-4.761 2.115-10.423 2.115Z"
         />

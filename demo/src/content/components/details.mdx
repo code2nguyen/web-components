@@ -12,6 +12,8 @@ import { Details } from '@c2n/details'
 
 # Details
 
+The `c2-details` represents data inform of details/summary. Behind the sence it uses details/summary html tag.
+
 ### Installation
 
 ```bash tag=CodeBlock
@@ -30,15 +32,20 @@ import '@c2n/details'
 ---
 
 ```html tag=MdxCodeBlock,compack=true,component=c2-details
-<c2-details>
+<c2-details class="demo">
   <div slot="title" class="title">Section 1</div>
-  <div class="content">The content can be toggled visible.</div>
+  <div>The content can be toggled visible.</div>
 </c2-details>
+<style>
+  .demo {
+    width: 250px;
+  }
+</style>
 ```
+
 ---
 
 <br />
 ## API
 
-<ApiTable componentTag="c2-cardr"></ApiTable>
-
+<ApiTable componentTag="c2-details"></ApiTable>
