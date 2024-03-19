@@ -34,7 +34,7 @@ import { SideNav } from '@c2n/side-nav'
       <div class="content-wrapper">
         <slot />
       </div>
-      <section class="component-configuration" slot="side-nav-content">
+      <section class="component-configuration">
         <ComponentConfigurationPanel client:load />
       </section>
     </section>
@@ -59,6 +59,7 @@ import { SideNav } from '@c2n/side-nav'
         }
       }
       .side-nav {
+        flex: 1;
         --c2-side-nav__open--height: calc(100vh - 172px);
         --c2-side-nav__over--background-color: white;
         --c2-side-nav--background-color: white;
@@ -69,21 +70,21 @@ import { SideNav } from '@c2n/side-nav'
         --c2-side-nav__open--width: calc(var(--nav-sidew-width) + var(--body-margin));
         --c2-side-nav__over__open--width: var(--nav-sidew-width);
 
-        --c2-details--border-right: none;
-        --c2-details--border-left: none;
-        --c2-details--border-top: none;
-        --c2-details--border-bottom: none;
-        --c2-details__header--flex-direction: row-reverse;
-        --c2-details__header__icon--rotate: 90deg;
-        --c2-details__header__icon--width: 12px;
-        --c2-details__header__icon--gap: 8px;
-        --c2-details__header--padding-top: 4px;
-        --c2-details__header--padding-left: 0px;
-        --c2-details__header--padding-right: 0px;
-        --c2-details__header-padding-bottom: 4px;
-        --c2-details__header__hover--background: transparent;
-        flex: 1;
         .side-nav-content {
+          --c2-details--border-right: none;
+          --c2-details--border-left: none;
+          --c2-details--border-top: none;
+          --c2-details--border-bottom: none;
+          --c2-details__header--flex-direction: row-reverse;
+          --c2-details__header__icon--rotate: 90deg;
+          --c2-details__header__icon--width: 12px;
+          --c2-details__header__icon--gap: 8px;
+          --c2-details__header--padding-top: 4px;
+          --c2-details__header--padding-left: 0px;
+          --c2-details__header--padding-right: 0px;
+          --c2-details__header-padding-bottom: 4px;
+          --c2-details__header__hover--background: transparent;
+       
           font-size: 0.9rem;
           gap: 10px;
           .nav-title {
