@@ -6,7 +6,10 @@
     width: 16px,
     height: 16px,
 
-    border-radius: 1px,
+    border-top-left-radius: 1px,
+    border-top-right-radius: 1px,
+    border-bottom-left-radius: 1px,
+    border-bottom-right-radius: 1px,
 
     border-top: null,
     border-right: null,
@@ -15,7 +18,11 @@
 
     popover--background-color: variables.$color-bg-light,
     popover--gap: 16px,
-    popover--padding: 8px,
+
+    popover--padding-top: 0px,
+    popover--padding-left: 8px,
+    popover--padding-right: 8px,
+    popover--padding-bottom: 8px,
 
     popover--border-top: 1px solid variables.$color-border,
     popover--border-right: 1px solid variables.$color-border,
@@ -27,13 +34,13 @@
     popover--border-bottom-left-radius: 4px,
     popover--border-bottom-right-radius: 4px,
 
-    color-config__sample--border-top: 1px solid variables.$color-border,
-    color-config__sample--border-right: 1px solid variables.$color-border,
-    color-config__sample--border-bottom: 1px solid variables.$color-border,
-    color-config__sample--border-left: 1px solid variables.$color-border,
+    color__sample--border-top: 1px solid variables.$color-border,
+    color__sample--border-right: 1px solid variables.$color-border,
+    color__sample--border-bottom: 1px solid variables.$color-border,
+    color__sample--border-left: 1px solid variables.$color-border,
 
-    color-config__sample--size: 48px,
-    color-config__sample--border-radius: 4px,
+    color__sample--size: 48px,
+    color__sample--border-radius: 4px,
   )
 );
 
@@ -75,7 +82,12 @@
   .presentation {
     width: css.cssVar(width);
     height: css.cssVar(height);
-    border-radius: css.cssVar(border-radius);
+
+    border-top-left-radius: css.cssVar(border-top-left-radius);
+    border-top-right-radius: css.cssVar(border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
     display: flex;
     align-items: stretch;
     position: relative;
@@ -160,34 +172,39 @@
     }
     .color-config {
       display: grid;
-      grid-template-columns: fit-content(css.cssVar(color-config__sample--size)), 1fr;
+      grid-template-columns: fit-content(css.cssVar(color__sample--size)), 1fr;
       grid-auto-flow: column;
       place-items: center;
-      padding-bottom: 16px;
-      .color-sample {
-        width: css.cssVar(color-config__sample--size);
-        height: css.cssVar(color-config__sample--size);
-        border-radius: css.cssVar(color-config__sample--border-radius);
 
-        border-top: css.cssVar(color-config__sample--border-top);
-        border-right: css.cssVar(color-config__sample--border-right);
-        border-bottom: css.cssVar(color-config__sample--border-bottom);
-        border-left: css.cssVar(color-config__sample--border-left);
+      padding-left: css.cssVar(popover--padding-left);
+      padding-right: css.cssVar(popover--padding-right);
+      padding-top: css.cssVar(popover--padding-top);
+
+      .color-sample {
+        width: css.cssVar(color__sample--size);
+        height: css.cssVar(color__sample--size);
+        border-radius: css.cssVar(color__sample--border-radius);
+
+        border-top: css.cssVar(color__sample--border-top);
+        border-right: css.cssVar(color__sample--border-right);
+        border-bottom: css.cssVar(color__sample--border-bottom);
+        border-left: css.cssVar(color__sample--border-left);
 
         grid-column: 1 / 2;
         grid-row: 1 / 3;
         background-color: red;
       }
-      padding: css.cssVar(popover--padding);
-      padding-top: 0px;
-      padding-bottom: 0px;
+      .alpha-input {
+        --c2-color-slider__color-handle--background-color: transparent;
+      }
     }
     .color-input-container {
       display: flex;
       align-items: center;
       gap: 4px;
-      padding: css.cssVar(popover--padding);
-      padding-top: 0px;
+      padding-left: css.cssVar(popover--padding-left);
+      padding-right: css.cssVar(popover--padding-right);
+      padding-bottom: css.cssVar(popover--padding-bottom);
       .color-input-group {
         display: flex;
         align-items: center;

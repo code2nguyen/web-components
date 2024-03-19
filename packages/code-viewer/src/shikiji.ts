@@ -59,6 +59,27 @@ export async function createShikiHighlighter({ langs = [], theme = 'github-dark'
               const classValue = normalizePropAsString(node.properties.class) ?? ''
               let styleValue = normalizePropAsString(node.properties.style) ?? ''
               styleValue = styleValue.replace(/background-color:(.*?);/, 'background-color:var(--c2-code-viewer--background-color, $1);')
+              if (!styleValue.endsWith(';')) {
+                styleValue += ';'
+              }
+              styleValue =
+                styleValue +
+                [
+                  'padding-top: var(--c2-code-viewer--padding-top)',
+                  'padding-right: var(--c2-code-viewer--padding-right)',
+                  'padding-bottom: var(--c2-code-viewer--padding-bottom)',
+                  'padding-left: var(--c2-code-viewer--padding-left)',
+
+                  'border-top: var(--c2-code-viewer--border-top)',
+                  'border-right: var(--c2-code-viewer--border-right)',
+                  'border-bottom: var(--c2-code-viewer--border-bottom)',
+                  'border-left: var(--c2-code-viewer--border-left)',
+
+                  'border-top-left-radius: var(--c2-code-viewer--border-top-left-radius)',
+                  'border-top-right-radius: var(--c2-code-viewer--border-top-right-radius)',
+                  'border-bottom-left-radius: var(--c2-code-viewer--border-bottom-left-radius)',
+                  'border-bottom-right-radius: var(--c2-code-viewer--border-bottom-right-radius)',
+                ].join(';')
               // Replace "shiki" class naming with "astro-code"
               node.properties.class = classValue.replace(/shiki/g, 'c2-code-viewer')
               // Handle code wrapping

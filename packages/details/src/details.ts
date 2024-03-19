@@ -2,10 +2,15 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './details.scss?inline'
 /**
- * Details component
+ * @tag c2-details
  *
- * @slot
- * @csspart
+ * @cssproperty {border} [--c2-details--border-top=1px solid rgb(230, 230, 230)]
+ * @cssproperty {border} [--c2-details--border-right=1px solid rgb(230, 230, 230)]
+ * @cssproperty {border} [--c2-details--border-bottom=1px solid rgb(230, 230, 230)]
+ * @cssproperty {border} [--c2-details--border-left=1px solid rgb(230, 230, 230)]
+ *
+ *
+ *
  */
 @customElement('c2-details')
 export class Details extends LitElement {

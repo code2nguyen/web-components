@@ -8,13 +8,12 @@
     border-bottom: 1px solid variables.$color-border-light,
     border-left: 1px solid variables.$color-border-light,
 
-    border-radius: 0px,
-    box-shadow: none,
+    border-top-left-radius: 0px,
+    border-top-right-radius: 0px,
+    border-bottom-left-radius: 0px,
+    border-bottom-right-radius: 0px,
 
-    content--padding-top: 16px,
-    content--padding-right: 16px,
-    content--padding-bottom: 16px,
-    content--padding-left: 16px,
+    box-shadow: none,
 
     header--padding-top: 16px,
     header--padding-right: 16px,
@@ -30,6 +29,11 @@
     header__icon--height: 24px,
     header__icon--rotate: 180deg,
     header__hover--background: variables.$color-bg-dark,
+
+    content--padding-top: 0px,
+    content--padding-right: 16px,
+    content--padding-bottom: 16px,
+    content--padding-left: 16px,
   )
 );
 
@@ -42,7 +46,10 @@
   align-self: stretch;
   display: flex;
   box-shadow: css.cssVar(box-shadow);
-  border-radius: css.cssVar(border-radius);
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
   summary {
     list-style: none;
     &::-webkit-details-marker {
@@ -66,7 +73,10 @@
     border-bottom: css.cssVar(border-bottom);
     border-left: css.cssVar(border-left);
 
-    border-radius: css.cssVar(border-radius);
+    border-top-left-radius: css.cssVar(border-top-left-radius);
+    border-top-right-radius: css.cssVar(border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 
     background: css.cssVar(header--background);
 
@@ -100,6 +110,10 @@
       }
     }
 
+    slot[name='expanded-icon'][data-filled] {
+      display: contents;
+    }
+
     .default-icon {
       transform: rotate(0deg);
       transition: animation.standard(transform);
@@ -122,10 +136,15 @@
 
     border-right: css.cssVar(border-right);
     border-left: css.cssVar(border-left);
+    border-bottom: css.cssVar(border-bottom);
 
+    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+    padding-top: css.cssVar(content--padding-top);
     padding-right: css.cssVar(content--padding-right, header--padding-right);
-    padding-bottom: css.cssVar(content--padding-bottom, header--padding-bottom);
     padding-left: css.cssVar(content--padding-left, header--padding-left);
+    padding-bottom: css.cssVar(content--padding-bottom, header--padding-bottom);
   }
 
   &[open] {
@@ -133,12 +152,6 @@
       border-bottom: none;
       border-bottom-right-radius: 0px;
       border-bottom-left-radius: 0px;
-
-      padding-bottom: css.cssVar(header--padding-top);
-
-      slot[name='expanded-icon'][data-filled] {
-        display: contents;
-      }
 
       // has expanded icon
       slot[name='expanded-icon'][data-filled] + slot[name='icon'] {

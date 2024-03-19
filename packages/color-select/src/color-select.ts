@@ -24,10 +24,51 @@ export interface ColorSelectChangeEventDetail {
 /**
  * @tag c2-color-select
  *
- * @slot default - This is a default/unnamed slot
+ * @event {CustomEvent} change
  *
- * @event
- * @cssproperty
+ * @cssproperty {pixel} [--c2-color-select--width=16px]
+ * @cssproperty {pixel} [--c2-color-select--height=16px]
+ * @cssproperty {border-radius} [--c2-color-select--border-top-left-radius=1px]
+ * @cssproperty {border-radius} [--c2-color-select--border-top-right-radius=1px]
+ * @cssproperty {border-radius} [--c2-color-select--border-bottom-left-radius=1px]
+ * @cssproperty {border-radius} [--c2-color-select--border-bottom-right-radius=1px]
+ *
+ * @cssproperty {border} --c2-color-select--border-top
+ * @cssproperty {border} --c2-color-select--border-right
+ * @cssproperty {border} --c2-color-select--border-bottom
+ * @cssproperty {border} --c2-color-select--border-left
+ *
+ * @cssproperty {color} [--c2-color-select__popover--background-color=rgb(255, 255, 255)]
+ * @cssproperty {pixel} [--c2-color-select__popover--gap=16px]
+ * @cssproperty {padding} [--c2-color-select__popover--padding-top=0px]
+ * @cssproperty {padding} [--c2-color-select__popover--padding-left=8px]
+ * @cssproperty {padding} [--c2-color-select__popover--padding-right=8px]
+ * @cssproperty {padding} [--c2-color-select__popover--padding-bottom=8px]
+ *
+ * @cssproperty {border} [--c2-color-select__popover--border-top=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-color-select__popover--border-right=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-color-select__popover--border-bottom=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-color-select__popover--border-left=1px solid rgb(177, 177, 177)]
+ *
+ * @cssproperty {border-radius} [--c2-color-select__popover--border-top-left-radius=4px]
+ * @cssproperty {border-radius} [--c2-color-select__popover--border-top-right-radius=4px]
+ * @cssproperty {border-radius} [--c2-color-select__popover--border-bottom-left-radius=4px]
+ * @cssproperty {border-radius} [--c2-color-select__popover--border-bottom-right-radius=4px]
+ *
+ * @cssproperty {border} [--c2-color-select__color__sample--border-top=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-color-select__color__sample--border-right=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-color-select__color__sample--border-bottom=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-color-select__color__sample--border-left=1px solid rgb(177, 177, 177)]
+ *
+ * @cssproperty {pixel} [--c2-color-select__color__sample--size=48px]
+ * @cssproperty {border-radius} [--c2-color-select__color__sample--border-radius=4px]
+ *
+ * @internalcomponent c2-color-area
+ * @internalcomponent c2-color-slider
+ * @internalcomponent c2-select
+ * @internalcomponent c2-text-field
+ * @internalcomponent c2-overlay
+ *
  */
 @customElement('c2-color-select')
 export class ColorSelect extends LitElement {
@@ -35,20 +76,22 @@ export class ColorSelect extends LitElement {
 
   @property({ type: String, reflect: true }) placement = 'bottom-start'
 
-  private _color: string = 'hsla(0, 100%, 100%, 1)'
+  private _color: string = '#000000'
   public get color(): string {
     return this._color
   }
 
-  @property()
+  @property({ reflect: true })
   public set color(value: string) {
-    this._color = value
-    this.extractHsvaFromColor()
+    if (this._color != value) {
+      this._color = value
+      this.extractHsvaFromColor()
+    }
   }
 
   @state() hue = 0
-  @state() saturation = 1
-  @state() value = 1
+  @state() saturation = 0
+  @state() value = 0
   @state() alpha = 1
 
   @state() inputType = 'HEX'
@@ -93,6 +136,11 @@ export class ColorSelect extends LitElement {
       this.value = v
       this.dispatchChangeEvent()
     }
+  }
+
+  private updateColor() {
+    this._color = this.tinyColor.toRgbString()
+    this.setAttribute('color', this._color)
   }
 
   private handleHueInputChange(event: Event & { target: TextField }) {
@@ -175,6 +223,7 @@ export class ColorSelect extends LitElement {
   }
 
   dispatchChangeEvent() {
+    this.updateColor()
     this.dispatchEvent(
       new CustomEvent<ColorSelectChangeEventDetail>('change', {
         cancelable: true,
@@ -209,7 +258,7 @@ export class ColorSelect extends LitElement {
                   <div class="color-config">
                     <div class="color-sample" style="background-color: ${this.tinyColor.toRgbString()}"></div>
                     <c2-color-slider @input=${this.handleHueSliderChange} .value=${this.hue}></c2-color-slider>
-                    <c2-color-slider @input=${this.handleAlphaSliderChange} min="0" max="100" .value=${this.alpha * 100}>
+                    <c2-color-slider class="alpha-input" @input=${this.handleAlphaSliderChange} min="0" max="100" .value=${this.alpha * 100}>
                       <div
                         style="background-image: url(data:image/svg+xml;utf8,%3Csvg%20width%3D%226%22%20height%3D%226%22%20viewBox%3D%220%200%206%206%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200H3V3H0V0Z%22%20fill%3D%22%23E1E1E1%22/%3E%3Cpath%20d%3D%22M3%200H6V3H3V0Z%22%20fill%3D%22white%22/%3E%3Cpath%20d%3D%22M3%203H6V6H3V3Z%22%20fill%3D%22%23E1E1E1%22/%3E%3Cpath%20d%3D%22M0%203H3V6H0V3Z%22%20fill%3D%22white%22/%3E%3C/svg%3E%0A),
                                   linear-gradient(to right, rgba(255 255 255) 0%, ${colorWithOutAlpha.toRgbString()} 100%);

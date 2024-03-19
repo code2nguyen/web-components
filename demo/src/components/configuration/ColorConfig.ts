@@ -10,6 +10,7 @@ import '@c2n/color-select'
 import '@c2n/checkbox'
 import type { Checkbox } from '@c2n/checkbox'
 import type { TextField } from '@c2n/text-field'
+import { shortName } from '../../utils/dom.ts'
 
 @customElement('demo-color-config')
 export class ColorConfig extends LitElement {
@@ -227,7 +228,7 @@ export class ColorConfig extends LitElement {
 
   render() {
     return html`<div class="color-config">
-        ${this.label ? html`<div class="label">${this.label}</div>` : nothing}
+        ${this.label ? html`<div class="label">${shortName(this.label)}</div>` : nothing}
         <div class="color-wrapper"> 
           <div class="color-input-group ${!this.show ? 'disabled' : ''}" >         
             <c2-color-select class="color-select" placement="bottom-end" .hue=${this.h} .saturation=${this.s} .value=${this.v} .alpha=${this.a} @change=${this.handleColorSelectChange}> </c2-color-select>

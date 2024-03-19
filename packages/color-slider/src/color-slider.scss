@@ -3,7 +3,11 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-color-slider,
   $theme: (
-    border-radius: 8px,
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
     border-top: 1px solid variables.$color-bg,
     border-bottom: 1px solid variables.$color-bg,
     border-right: 1px solid variables.$color-bg,
@@ -12,7 +16,13 @@
     width: 160px,
     height: 12px,
 
-    color-handle--size: 12px,
+    color-handle--width: 12px,
+    color-handle--height: 12px,
+
+    color-handle--border-top-left-radius: 6px,
+    color-handle--border-top-right-radius: 6px,
+    color-handle--border-bottom-left-radius: 6px,
+    color-handle--border-bottom-right-radius: 6px,
   )
 );
 
@@ -29,11 +39,16 @@
 
   .gradient {
     flex: 1;
-    border-radius: css.cssVar(border-radius);
+    border-top-left-radius: css.cssVar(border-top-left-radius);
+    border-top-right-radius: css.cssVar(border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
     border-top: css.cssVar(border-top);
     border-bottom: css.cssVar(border-bottom);
     border-right: css.cssVar(border-right);
     border-left: css.cssVar(border-left);
+
     width: css.cssVar(width);
     height: css.cssVar(height);
 
@@ -51,7 +66,10 @@
     ::slotted(*) {
       width: css.cssVar(width);
       height: css.cssVar(height);
-      border-radius: css.cssVar(border-radius);
+      border-top-left-radius: css.cssVar(border-top-left-radius);
+      border-top-right-radius: css.cssVar(border-top-right-radius);
+      border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+      border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
     }
   }
 
@@ -70,13 +88,18 @@
     position: absolute;
     pointer-events: none;
     box-sizing: border-box;
-    width: css.cssVar(color-handle--size);
-    height: css.cssVar(color-handle--size);
-    border-radius: 50%;
+
+    width: css.cssVar(color-handle--width);
+    height: css.cssVar(color-handle--height);
+
+    border-top-left-radius: css.cssVar(color-handle--border-top-left-radius);
+    border-top-right-radius: css.cssVar(color-handle--border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(color-handle--border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(color-handle--border-bottom-right-radius);
+
     top: 50%;
     left: 0;
     border: 2px solid white;
-    background: transparent;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 0px 0.6px;
     cursor: inherit;
     transform: translateY(-50%);

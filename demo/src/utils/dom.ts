@@ -23,6 +23,14 @@ export function closestElementSibling(currentElement: HTMLElement, selector: str
   return null
 }
 
+export function shortName(propertyName: string) {
+  if (propertyName === 'background-color') return 'background'
+
+  if (propertyName === 'box-shadown') return 'shadown'
+
+  return propertyName
+}
+
 export function updateDomCssValue(element: HTMLElement, cssProperties: CSSDeclarationItem[]) {
   cssProperties.forEach((cssVariable) => {
     if (cssVariable.value) {

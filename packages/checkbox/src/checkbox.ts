@@ -7,6 +7,8 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 /**
  * @tag c2-checkbox
  *
+ * @event {Event} change
+ * 
  * @cssproperty {pixel} [--c2-checkbox__container--height=18px]
  * @cssproperty {pixel} [--c2-checkbox__container--width=18px]
  * @cssproperty {border-radius} [--c2-checkbox__container--border-top-left-radius=4px]

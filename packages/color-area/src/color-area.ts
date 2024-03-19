@@ -12,9 +12,15 @@ export interface Point {
  * @tag c2-color-area
  *
  * @event {CustomEvent} change
+ *
  * @cssproperty {pixel} [--c2-color-area--width=240px]
  * @cssproperty {pixel} [--c2-color-area--height=240px]
  * @cssproperty {pixel} [--c2-color-area__color-handle--size=12px]
+ *
+ * @cssproperty {border-radius} --c2-color-area--border-top-left-radius
+ * @cssproperty {border-radius} --c2-color-area--border-top-right-radius
+ * @cssproperty {border-radius} --c2-color-area--border-bottom-left-radius
+ * @cssproperty {border-radius} --c2-color-area--border-bottom-right-radius
  */
 @customElement('c2-color-area')
 export class ColorArea extends LitElement {

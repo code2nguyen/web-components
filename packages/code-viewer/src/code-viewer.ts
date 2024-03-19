@@ -10,6 +10,21 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js'
  * @tag c2-code-viewer
  *
  * @cssproperty {color} --c2-code-viewer--background-color
+ * @cssproperty {padding} --c2-code-viewer--padding-top
+ * @cssproperty {padding} --c2-code-viewer--padding-right
+ * @cssproperty {padding} --c2-code-viewer--padding-bottom
+ * @cssproperty {padding} --c2-code-viewer--padding-left
+ * 
+ * @cssproperty {border} --c2-code-viewer--border-top
+ * @cssproperty {border} --c2-code-viewer--border-right
+ * @cssproperty {border} --c2-code-viewer--border-bottom
+ * @cssproperty {border} --c2-code-viewer--border-left
+
+ * @cssproperty {border-radius} --c2-code-viewer--border-top-left-radius
+ * @cssproperty {border-radius} --c2-code-viewer--border-top-right-radius
+ * @cssproperty {border-radius} --c2-code-viewer--border-bottom-left-radius
+ * @cssproperty {border-radius} --c2-code-viewer--border-bottom-right-radius
+
  */
 @customElement('c2-code-viewer')
 export class CodeViewer extends LitElement {
