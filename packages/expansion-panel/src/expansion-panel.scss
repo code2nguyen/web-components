@@ -23,7 +23,7 @@
     header__title--background: null,
     header__title--gap: 16px,
     header__title--flex-direction: row,
-    header__title--border-bottom: null,
+    header__title--border-bottom: 0px solid transparent,
 
     header__title__icon--width: 24px,
     header__title__icon--height: 24px,
@@ -139,50 +139,32 @@
         padding-right: css.cssVar(header--padding-right);
         padding-left: css.cssVar(header--padding-left);
         padding-bottom: css.cssVar(header--padding-bottom);
-        border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
-        border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+        border-bottom-left-radius: inherit;
+        border-bottom-right-radius: inherit;
       }
       .c2-expansion-panel-header-content[data-filled] {
         display: block;
       }
-
-     
-
-     
     }
 
     .c2-expansion-panel-content {
       display: none;
       box-sizing: border-box;
-      padding-top: 0px;
       position: relative;
       will-change: height, opacity, display;
-      transition: animation.standard(max-height);
-
-      animation-duration: 150ms;
-      animation-timing-function: ease;
-      text-transform: none;
-
-      overflow: hidden;
 
       border-right: css.cssVar(border-right);
       border-left: css.cssVar(border-left);
 
+      border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+      border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+      padding-top: css.cssVar(content--padding-top);
       padding-left: css.cssVar(content--padding-left, header--padding-left);
       padding-right: css.cssVar(content--padding-right, header--padding-right);
       padding-bottom: css.cssVar(content--padding-bottom, header--padding-bottom);
     }
   }
-  // .c2-expansion-panel-content__detect-height {
-  //   position: absolute;
-  //   visibility: hidden;
-  //   opacity: 0;
-  //   z-index: -1;
-  //   padding-right: css.cssVar(padding-right);
-  //   padding-left: css.cssVar(padding-left);
-  //   padding-top: css.cssVar(padding-top);
-  //   padding-bottom: css.cssVar(padding-bottom);
-  // }
 }
 
 :host([expanded]) {
@@ -191,10 +173,6 @@
       border-bottom: none;
       border-bottom-right-radius: 0px;
       border-bottom-left-radius: 0px;
-
-      .c2-expansion-panel-header-title {
-        padding-bottom: css.cssVar(header--padding-top);
-      }
 
       slot[name='expanded-icon'][data-filled] {
         display: contents;
@@ -213,13 +191,7 @@
       }
     }
     .c2-expansion-panel-content {
-      border-bottom: css.cssVar(border-bottom);
-      border-radius: css.cssVar(border-radius);
-      border-top-right-radius: 0px;
-      border-top-left-radius: 0px;
       display: block;
-      // height: var(--c2-expansion-panel-content-height, 0px);
-      // max-height: var(--c2-expansion-panel-content-height, 0px);
     }
   }
 }
@@ -228,6 +200,7 @@
   .c2-expansion-panel {
     .c2-expansion-panel-header {
       .c2-expansion-panel-header-title {
+        cursor: default;
         &:hover {
           background: inherit;
         }
