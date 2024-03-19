@@ -13,27 +13,27 @@
     border-bottom-left-radius: 0px,
     border-bottom-right-radius: 0px,
 
-    box-shadow: none,
+    box-shadow: null,
 
     header--padding-top: 16px,
     header--padding-right: 16px,
     header--padding-bottom: 16px,
     header--padding-left: 16px,
 
-    header--background: transparent,
-
+    header--background: null,
     header--gap: 16px,
     header--flex-direction: row,
 
     header__icon--width: 24px,
     header__icon--height: 24px,
     header__icon--rotate: 180deg,
+
     header__hover--background: variables.$color-bg-dark,
 
     content--padding-top: 0px,
-    content--padding-right: 16px,
-    content--padding-bottom: 16px,
-    content--padding-left: 16px,
+    content--padding-right: null,
+    content--padding-bottom: null,
+    content--padding-left: null,
   )
 );
 
@@ -55,18 +55,13 @@
     &::-webkit-details-marker {
       list-style: none;
     }
-    display: flex;
-    flex-direction: css.cssVar(header--flex-direction);
+    display: flex;    
     align-items: center;
     user-select: none;
-    will-change: border-radius;
-    will-change: border-radius, background;
-    transition: animation.standard(background);
-    transition: animation.standard(border-radius);
+    will-change: border-radius, background;    
+    transition: animation.standard(background), animation.standard(border-radius);
     position: relative;
     cursor: pointer;
-
-    gap: css.cssVar(header--gap);
 
     border-top: css.cssVar(border-top);
     border-right: css.cssVar(border-right);
@@ -77,24 +72,28 @@
     border-top-right-radius: css.cssVar(border-top-right-radius);
     border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
     border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
-
-    background: css.cssVar(header--background);
-
+        
     padding-top: css.cssVar(header--padding-top);
     padding-right: css.cssVar(header--padding-right);
     padding-bottom: css.cssVar(header--padding-bottom);
     padding-left: css.cssVar(header--padding-left);
 
-    &:hover {
-      background: css.cssVar(header__hover--background);
+    flex-direction: css.cssVar(header--flex-direction);
+    background: css.cssVar(header--background);
+    gap: css.cssVar(header--gap);
+
+    .default-icon {
+      transform: rotate(0deg);
+      transition: animation.standard(transform);
+      width: css.cssVar(header__icon--width);
+      height: css.cssVar(header__icon--height);
     }
+
     slot[name='icon'] {
       cursor: pointer;
-
       &::slotted(svg) {
         transition: animation.standard(transform);
         transform: rotate(0deg);
-
         width: css.cssVar(header__icon--width);
         height: css.cssVar(header__icon--height);
       }
@@ -103,7 +102,6 @@
     slot[name='expanded-icon'] {
       display: none;
       cursor: pointer;
-
       &::slotted(svg) {
         width: css.cssVar(header__icon--width);
         height: css.cssVar(header__icon--height);
@@ -114,12 +112,8 @@
       display: contents;
     }
 
-    .default-icon {
-      transform: rotate(0deg);
-      transition: animation.standard(transform);
-
-      width: css.cssVar(header__icon--width);
-      height: css.cssVar(header__icon--height);
+    &:hover {
+      background: css.cssVar(header__hover--background);
     }
 
     .c2-details-summary-content {
@@ -131,20 +125,22 @@
   }
 
   .c2-details-content {
-    padding-top: 0px;
+    padding-top: css.cssVar(content--padding-top);
+    padding-right: css.cssVar(content--padding-right, header--padding-right);
+    padding-left: css.cssVar(content--padding-left, header--padding-left);
+    padding-bottom: css.cssVar(content--padding-bottom, header--padding-bottom);
+
     position: relative;
 
     border-right: css.cssVar(border-right);
     border-left: css.cssVar(border-left);
     border-bottom: css.cssVar(border-bottom);
 
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
     border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
     border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 
-    padding-top: css.cssVar(content--padding-top);
-    padding-right: css.cssVar(content--padding-right, header--padding-right);
-    padding-left: css.cssVar(content--padding-left, header--padding-left);
-    padding-bottom: css.cssVar(content--padding-bottom, header--padding-bottom);
   }
 
   &[open] {
@@ -168,12 +164,7 @@
         transform: rotate(css.cssVar(header__icon--rotate));
       }
     }
-    .c2-details-content {
-      border-top-right-radius: 0px;
-      border-top-left-radius: 0px;
-
-      border-bottom: css.cssVar(border-bottom);
-      border-radius: css.cssVar(border-radius);
-    }
+    // .c2-details-content {
+    // }
   }
 }

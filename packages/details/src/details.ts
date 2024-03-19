@@ -8,9 +8,33 @@ import styles from './details.scss?inline'
  * @cssproperty {border} [--c2-details--border-right=1px solid rgb(230, 230, 230)]
  * @cssproperty {border} [--c2-details--border-bottom=1px solid rgb(230, 230, 230)]
  * @cssproperty {border} [--c2-details--border-left=1px solid rgb(230, 230, 230)]
+ * 
+ * @cssproperty {border-radius} [--c2-details--border-top=left-radius=0px]
+ * @cssproperty {border-radius} [--c2-details--border-top=right-radius=0px]
+ * @cssproperty {border-radius} [--c2-details--border-bottom=left-radius=0px]
+ * @cssproperty {border-radius} [--c2-details--border-bottom=right-radius=0px]
+ * 
+ * @cssproperty {box-shadow} --c2-details--box-shadow
  *
- *
- *
+ * @cssproperty {padding} [--c2-details__header--padding-top=16px]
+ * @cssproperty {padding} [--c2-details__header--padding-right=16px]
+ * @cssproperty {padding} [--c2-details__header--padding-bottom=16px]
+ * @cssproperty {padding} [--c2-details__header--padding-left=16px]
+ * 
+ * @cssproperty {background} --c2-details__header--background
+ * @cssproperty {pixel} [--c2-details__header--gap=16px]
+ * @cssproperty {flex-direction-row} [--c2-details__header--flex-direction=row]
+ * 
+ * @cssproperty {pixel} [--c2-details__header__ison--width=24px]
+ * @cssproperty {pixel} [--c2-details__header__ison--height=24px]
+ * @cssproperty {pixel} [--c2-details__header__ison--rotage=180deg]
+ * 
+ * @cssproperty {background} [--c2-details__header__hover--background=rgb(230, 230, 230)]
+ * 
+ * @cssproperty {padding} [--c2-details__content--padding-top=0px]
+ * @cssproperty {padding} --c2-details__content--padding-right
+ * @cssproperty {padding} --c2-details__content--padding-bottom
+ * @cssproperty {padding} --c2-details__content--padding-left
  */
 @customElement('c2-details')
 export class Details extends LitElement {
