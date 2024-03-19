@@ -8,28 +8,33 @@
     border-right: 1px solid variables.$color-border-light,
     border-left: 1px solid variables.$color-border-light,
 
-    border-radius: 0px,
-    box-shadow: none,
+    border-top-left-radius: 0px,
+    border-top-right-radius: 0px,
+    border-bottom-left-radius: 0px,
+    border-bottom-right-radius: 0px,
 
-    content--padding-top: 16px,
-    content--padding-right: 16px,
-    content--padding-bottom: 16px,
-    content--padding-left: 16px,
-
+    box-shadow: null,
+    header--gap: 16px,
     header--padding-top: 16px,
     header--padding-right: 16px,
     header--padding-bottom: 16px,
     header--padding-left: 16px,
 
-    header--background: transparent,
+    header__title--background: null,
+    header__title--gap: 16px,
+    header__title--flex-direction: row,
+    header__title--border-bottom: null,
 
-    header--gap: 16px,
-    header--flex-direction: row,
+    header__title__icon--width: 24px,
+    header__title__icon--height: 24px,
+    header__title__icon--rotate: 180deg,    
+    header__title__icon--color: null,
+    header__title__hover--background: variables.$color-bg-dark,
 
-    header__icon--width: 24px,
-    header__icon--height: 24px,
-    header__icon--rotate: 180deg,
-    header__hover--background: variables.$color-bg-dark,
+    content--padding-top: 0px,
+    content--padding-right: null,
+    content--padding-bottom: null,
+    content--padding-left: null,
   )
 );
 
@@ -40,10 +45,14 @@
     flex: 1;
     align-self: stretch;
     display: flex;
+    position: relative;
     flex-direction: column;
     box-shadow: css.cssVar(box-shadow);
-    border-radius: css.cssVar(border-radius);
-    position: relative;
+    border-top-left-radius: css.cssVar(border-top-left-radius);
+    border-top-right-radius: css.cssVar(border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);  
+
     .c2-expansion-panel-header {
       display: flex;
       flex-direction: column;
@@ -55,57 +64,61 @@
       border-right: css.cssVar(border-right);
       border-left: css.cssVar(border-left);
 
-      border-radius: css.cssVar(border-radius);
-
-      slot[name='icon'] {
-        cursor: pointer;
-        &::slotted(svg) {
-          transform: rotate(0deg);
-          will-change: transform;
-          transition: animation.standard(transform);
-
-          width: css.cssVar(header__icon--width);
-          height: css.cssVar(header__icon--height);
-        }
-      }
-
-      slot[name='expanded-icon'] {
-        display: none;
-        cursor: pointer;
-
-        &::slotted(svg) {
-          width: css.cssVar(header__icon--width);
-          height: css.cssVar(header__icon--height);
-        }
-      }
-
-      .default-icon {
-        transform: rotate(0deg);
-        will-change: transform;
-        transition: animation.standard(transform);
-
-        width: css.cssVar(header__icon--width);
-        height: css.cssVar(header__icon--height);
-      }
+      border-top-left-radius: css.cssVar(border-top-left-radius);
+      border-top-right-radius: css.cssVar(border-top-right-radius);
+      border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+      border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+      gap: css.cssVar(header--gap);
 
       .c2-expansion-panel-header-title {
-        border-radius: inherit;
+        border-radius: inherit;        
         display: flex;
         align-items: center;
         position: relative;
         cursor: pointer;
         transition: animation.standard(background);
-        flex-direction: css.cssVar(header--flex-direction);
-        gap: css.cssVar(header--gap);
-        background: css.cssVar(header--background);
 
         padding-top: css.cssVar(header--padding-top);
         padding-right: css.cssVar(header--padding-right);
         padding-bottom: css.cssVar(header--padding-bottom);
         padding-left: css.cssVar(header--padding-left);
 
+        background: css.cssVar(header__title--background);
+        gap: css.cssVar(header__title--gap);
+        flex-direction: css.cssVar(header__title--flex-direction);
+
+        slot[name='icon'] {
+          cursor: pointer;
+          color: css.cssVar(header__title__icon--color);
+          &::slotted(svg) {
+            transform: rotate(0deg);
+            will-change: transform;
+            transition: animation.standard(transform);
+            width: css.cssVar(header__title__icon--width);
+            height: css.cssVar(header__title__icon--height);            
+          }
+        }
+  
+        slot[name='expanded-icon'] {
+          display: none;
+          cursor: pointer;
+          color: css.cssVar(header__title__icon--color);
+          &::slotted(svg) {
+            width: css.cssVar(header__title__icon--width);
+            height: css.cssVar(header__title__icon--height);
+          }
+        }
+  
+        .default-icon {
+          transform: rotate(0deg);
+          will-change: transform;
+          transition: animation.standard(transform);  
+          width: css.cssVar(header__title__icon--width);
+          height: css.cssVar(header__title__icon--height);
+        }
+
         &:hover {
-          background: css.cssVar(header__hover--background);
+          background: css.cssVar(header__title__hover--background);
         }
         .c2-expansion-panel-header-title-content {
           flex: 1;
@@ -113,21 +126,29 @@
           align-items: center;
         }
       }
+
       .c2-expansion-panel-header-title:has(+ .c2-expansion-panel-header-content[data-filled]) {
         border-bottom-left-radius: 0px;
         border-bottom-right-radius: 0px;
+        padding-bottom: 0;
+        border-bottom: css.cssVar(header__title--border-bottom);
       }
 
       .c2-expansion-panel-header-content {
+        display: none;
         padding-right: css.cssVar(header--padding-right);
         padding-left: css.cssVar(header--padding-left);
-        &:has(slot[data-filled]) {
-          border-top-right-radius: 0px;
-          border-top-left-radius: 0px;
-          border-bottom-left-radius: inherit;
-          border-bottom-right-radius: inherit;
-        }
+        padding-bottom: css.cssVar(header--padding-bottom);
+        border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+        border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
       }
+      .c2-expansion-panel-header-content[data-filled] {
+        display: block;
+      }
+
+     
+
+     
     }
 
     .c2-expansion-panel-content {

@@ -1,6 +1,7 @@
 import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './details.scss?inline'
+
 /**
  * @tag c2-details
  *

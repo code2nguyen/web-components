@@ -26,6 +26,7 @@
 
     header__icon--width: 24px,
     header__icon--height: 24px,
+    header__icon--color: null,
     header__icon--rotate: 180deg,
 
     header__hover--background: variables.$color-bg-dark,
@@ -91,17 +92,20 @@
 
     slot[name='icon'] {
       cursor: pointer;
+      color: css.cssVar(header__icon--color);
       &::slotted(svg) {
         transition: animation.standard(transform);
         transform: rotate(0deg);
         width: css.cssVar(header__icon--width);
         height: css.cssVar(header__icon--height);
+        color: css.cssVar(header__icon--color);
       }
     }
 
     slot[name='expanded-icon'] {
       display: none;
       cursor: pointer;
+      color: css.cssVar(header__icon--color);
       &::slotted(svg) {
         width: css.cssVar(header__icon--width);
         height: css.cssVar(header__icon--height);
@@ -164,7 +168,5 @@
         transform: rotate(css.cssVar(header__icon--rotate));
       }
     }
-    // .c2-details-content {
-    // }
   }
 }
