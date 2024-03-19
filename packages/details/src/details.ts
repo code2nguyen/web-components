@@ -10,10 +10,10 @@ import styles from './details.scss?inline'
  * @cssproperty {border} [--c2-details--border-bottom=1px solid rgb(230, 230, 230)]
  * @cssproperty {border} [--c2-details--border-left=1px solid rgb(230, 230, 230)]
  *
- * @cssproperty {border-radius} [--c2-details--border-top=left-radius=0px]
- * @cssproperty {border-radius} [--c2-details--border-top=right-radius=0px]
- * @cssproperty {border-radius} [--c2-details--border-bottom=left-radius=0px]
- * @cssproperty {border-radius} [--c2-details--border-bottom=right-radius=0px]
+ * @cssproperty {border-radius} [--c2-details--border-top-left-radius=0px]
+ * @cssproperty {border-radius} [--c2-details--border-top-right-radius=0px]
+ * @cssproperty {border-radius} [--c2-details--border-bottom-left-radius=0px]
+ * @cssproperty {border-radius} [--c2-details--border-bottom-right-radius=0px]
  *
  * @cssproperty {box-shadow} --c2-details--box-shadow
  *

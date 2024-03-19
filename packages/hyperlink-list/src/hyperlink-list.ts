@@ -2,10 +2,9 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import styles from './hyperlink-list.scss?inline'
 /**
- * HyperlinkList component
+ * @tag c2-hyperlink-list
  *
- * @slot
- * @csspart
+ * @cssproperty {pixel} [--c2-hyperlink-list__item--gap=0px]
  */
 @customElement('c2-hyperlink-list')
 export class HyperlinkList extends LitElement {

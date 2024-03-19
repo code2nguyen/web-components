@@ -10,10 +10,10 @@ import styles from './expansion-panel.scss?inline'
  * @cssproperty {border} [--c2-expansion-panel--border-bottom=1px solid rgb(230, 230, 230)]
  * @cssproperty {border} [--c2-expansion-panel--border-left=1px solid rgb(230, 230, 230)]
  *
- * @cssproperty {border-radius} [--c2-expansion-panel--border-top=left-radius=0px]
- * @cssproperty {border-radius} [--c2-expansion-panel--border-top=right-radius=0px]
- * @cssproperty {border-radius} [--c2-expansion-panel--border-bottom=left-radius=0px]
- * @cssproperty {border-radius} [--c2-expansion-panel--border-bottom=right-radius=0px]
+ * @cssproperty {border-radius} [--c2-expansion-panel--border-top-left-radius=0px]
+ * @cssproperty {border-radius} [--c2-expansion-panel--border-top-right-radius=0px]
+ * @cssproperty {border-radius} [--c2-expansion-panel--border-bottom-left-radius=0px]
+ * @cssproperty {border-radius} [--c2-expansion-panel--border-bottom-right-radius=0px]
  *
  * @cssproperty {box-shadow} --c2-expansion-panel--box-shadow
  * @cssproperty {pixel} --c2-expansion-panel__header--gap

@@ -11,6 +11,8 @@ import { ExpansionPanel } from '@c2n/expansion-panel'
 
 # Expansion Panel
 
+`c2-expansion-panel` is an variant of `c2-details`which does not ues _details/summary_ native component.
+
 ### Installation
 
 ```bash tag=CodeBlock
@@ -26,22 +28,21 @@ import '@c2n/expansion-panel'
 <br />
 ## Examples
 <br />
+---
 
-```html tag=MdxCodeBlock,compack=true,component=c2-expansion-panel
+```html tag=MdxCodeBlock,component=c2-expansion-panel
 <c2-expansion-panel class="basic">
-  <div slot="title" class="title">Section 1</div>
-  <div class="content">The content can be toggled visible.</div>
+  <div slot="title">Section 1</div>
+  <div>The content can be toggled visible.</div>
 </c2-expansion-panel>
 <style>
   .basic {
     width: 500px;
-    background: white;
-  }
-  .title {
-    font-weight: 600;
   }
 </style>
 ```
+
+---
 
 <br />
 ## API
