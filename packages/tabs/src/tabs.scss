@@ -7,15 +7,16 @@
     justify-content: flex-center,
     background-color: null,
     height: null,
-
-    font-weight: null,
-    font-size: null,
-    font-style: null,
-    font-family: null,
+    gap: null,
 
     indicator--color: variables.$color-border-dark,
     indicator--border-radius: null,
     indicator--height: 2px,
+
+    tab--font-weight: null,
+    tab--font-size: null,
+    tab--font-style: null,
+    tab--font-family: null,
 
     tab--padding-top: 8px,
     tab--padding-right: 16px,
@@ -48,19 +49,14 @@
 
   .c2-tabs-header {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     position: relative;
-
+    gap: css.cssVar(gap);
     box-shadow: css.cssVar(box-shadow);
     justify-content: css.cssVar(justify-content);
 
     background-color: css.cssVar(background-color);
     height: css.cssVar(height);
-
-    font-weight: css.cssVar(font-weight);
-    font-size: css.cssVar(font-size);
-    font-style: css.cssVar(font-style);
-    font-family: css.cssVar(font-family);
 
     padding-bottom: css.cssVar(indicator--height);
 
@@ -70,12 +66,11 @@
       transform-origin: top left;
       left: 0;
       bottom: 0;
-      width: 1px;
       z-index: 1;
       background-color: css.cssVar(indicator--color, tab__selected--color, tab__hover--color);
       border-radius: css.cssVar(indicator--border-radius);
       height: css.cssVar(indicator--height);
-      transition: animation.standard-acceleration(transform);
+      transition: animation.standard-acceleration(transform), animation.standard-acceleration(width);
       &.first-position {
         transition: none;
       }
@@ -86,6 +81,11 @@
       padding-right: css.cssVar(tab--padding-right);
       padding-bottom: css.cssVar(tab--padding-bottom);
       padding-left: css.cssVar(tab--padding-left);
+
+      font-weight: css.cssVar(tab--font-weight);
+      font-size: css.cssVar(tab--font-size);
+      font-style: css.cssVar(tab--font-style);
+      font-family: css.cssVar(tab--font-family);
 
       color: css.cssVar(tab--color);
       background-color: css.cssVar(tab--background-color);

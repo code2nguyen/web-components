@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
+import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './tabs.scss?inline'
 import { selectedTabContext } from './tab-context'
@@ -13,11 +13,12 @@ import { classMap } from 'lit/directives/class-map.js'
  * @cssproperty {justify-content} [--c2-tabs--justify-content=flex-center]
  * @cssproperty {background-color} --c2-tabs--background-color
  * @cssproperty {pixel} --c2-tabs--height
+ * @cssproperty {pixel} --c2-tabs--gap
  *
- * @cssproperty {font-weight} --c2-tabs--font-weight
- * @cssproperty {font-size} --c2-tabs--font-size
- * @cssproperty {font-style} --c2-tabs--font-style
- * @cssproperty {font-family} --c2-tabs--font-family
+ * @cssproperty {font-weight} --c2-tabs__tab--font-weight
+ * @cssproperty {font-size} --c2-tabs__tab--font-size
+ * @cssproperty {font-style} --c2-tabs__tab--font-style
+ * @cssproperty {font-family} --c2-tabs__tab--font-family
  *
  * @cssproperty {color} [--c2-tabs__indicator--color=rgb(109, 109, 109)]
  * @cssproperty {border-radius} --c2-tabs__indicator--border-radius
@@ -85,7 +86,7 @@ export class Tabs extends LitElement {
 
   private updateSelectionIndicator(tab: HTMLElement) {
     const tabClienRect = tab.getBoundingClientRect()
-    this.selectionIndicatorStyle = `transform: translateX(${tab.offsetLeft - this.offsetLeft}px) scaleX(${tabClienRect.width});`
+    this.selectionIndicatorStyle = `transform: translateX(${tab.offsetLeft - this.offsetLeft}px); width: ${tabClienRect.width}px;`
     for (const el of this.tabsSlot.assignedElements()) {
       if (el == tab) {
         el.setAttribute('selected', '')
@@ -101,6 +102,9 @@ export class Tabs extends LitElement {
     if (this.firstPosition) {
       for (const tab of this.tabsSlot.assignedElements()) {
         if (tab.getAttribute('for') == this.selectedTab) {
+          if (tab instanceof LitElement) {
+            await tab.updateComplete
+          }
           this.updateSelectionIndicator(tab as HTMLElement)
           await this.updateComplete
           this.firstPosition = false
@@ -108,11 +112,6 @@ export class Tabs extends LitElement {
         }
       }
     }
-  }
-
-  protected override firstUpdated(_changedProperties: PropertyValueMap<this>): void {
-    super.firstUpdated(_changedProperties)
-    // this.updateSelectionIndicator()
   }
 
   override render() {

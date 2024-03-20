@@ -5,7 +5,7 @@ import styles from './tab.scss?inline'
 import { selectedTabContext } from './tab-context'
 import { consume } from '@lit/context'
 /**
- * @tag c2-tabs
+ * @tag c2-tab
  *
  * @event {CustomEvent} tab-change
  *

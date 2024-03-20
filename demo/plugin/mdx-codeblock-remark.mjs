@@ -107,7 +107,7 @@ function changeComponentName(vnode, uid, componentName) {
     const classAttribute = vnode.attributes[classAttributeIndex]
     classAttribute.value = classAttribute.value + ` ${uid}`
   }
-  if (vnode.name?.startsWith('c2-')) {
+  if (vnode.name?.startsWith('c2-') && vnode.name != 'c2-tab') {
     vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
     vnode.attributes = vnode.attributes || []
 
