@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from 'lit'
+import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './list.scss?inline'
 import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
@@ -16,17 +16,24 @@ export interface SelectionChangeEventDetail {
  *
  * @slot default - default slot which accept c2-list-item as chidren
  *
- * @cssproperty {pixel} [--c2-list--border-top-left-radius=initial] - <code>border-top-left-radius</code> value
- * @cssproperty {pixel} [--c2-list--border-top-right-radius=initial] - <code>border-top-right-radius</code> value
- * @cssproperty {pixel} [--c2-list--border-bottom-left-radius=initial] - <code>border-bottom-left-radius</code> value
- * @cssproperty {pixel} [--c2-list--border-bottom-right-radius=initial] - <code>border-bottom-right-radius</code> value
+ * @cssproperty {pixel} --c2-list--border-top-left-radius
+ * @cssproperty {pixel} --c2-list--border-top-right-radius
+ * @cssproperty {pixel} --c2-list--border-bottom-left-radius
+ * @cssproperty {pixel} --c2-list--border-bottom-right-radius
  *
- * @cssproperty {border} --c2-list--border-top - <code>border-top</code> value
- * @cssproperty {border} --c2-list--border-bottom - <code>border-bottom</code> value
- * @cssproperty {border} --c2-list--border-right - <code>border-right</code> value
- * @cssproperty {border} --c2-list--border-left - <code>border-left</code> value
+ * @cssproperty {border} --c2-list--border-top
+ * @cssproperty {border} --c2-list--border-bottom
+ * @cssproperty {border} --c2-list--border-right
+ * @cssproperty {border} --c2-list--border-left
+ *
+ * @cssproperty {padding} [--c2-list--padding-top=4px]
+ * @cssproperty {padding} [--c2-list--padding-bottom=4px]
+ * @cssproperty {padding} [--c2-list--padding-right=0px]
+ * @cssproperty {padding} [--c2-list--padding-left=0px]
  *
  * @cssproperty {color} [--c2-list--background=rgb(255, 255, 255)] - <code>background-color</code> value
+ *@cssproperty {pixel} --c2-list--max-height
+ * @slotcomponent c2-list-item
  */
 @customElement('c2-list')
 export class List extends LitElement {
@@ -96,6 +103,25 @@ export class List extends LitElement {
         },
       }),
     )
+  }
+
+  private initPaddingClass() {
+    const styleMap = this.computedStyleMap()
+    const paddingTop0 = styleMap.get('padding-top')?.toString() == '0px' ? true : false
+    const paddingBottom0 = styleMap.get('padding-bottom')?.toString() == '0px' ? true : false
+    this.classList.toggle('padding-top-0', paddingTop0)
+    this.classList.toggle('padding-bottom-0', paddingBottom0)
+  }
+
+  protected override firstUpdated(_changedProperties: PropertyValueMap<this>): void {
+    super.firstUpdated(_changedProperties)
+  }
+
+  /**
+   * private function used for demo project in some edge case need to refresh component
+   */
+  _initComponent() {
+    this.initPaddingClass()
   }
 
   override render() {

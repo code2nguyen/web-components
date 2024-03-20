@@ -11,41 +11,42 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
  *
  * @event {CustomEvent} selected-change - An Event emitted after selection state is changed
  *
- * @cssproperty {pixel} --c2-list-item--border-top-left-radius - <code>border-top-left-radius</code> value
- * @cssproperty {pixel} --c2-list-item--border-top-right-radius - <code>border-top-right-radius</code> value
- * @cssproperty {pixel} --c2-list-item--border-bottom-left-radius - <code>border-bottom-left-radius</code> value
- * @cssproperty {pixel} --c2-list-item--border-bottom-right-radius - <code>border-bottom-right-radius</code> value
+ * @cssproperty {pixel} --c2-list-item--border-top-left-radius 
+ * @cssproperty {pixel} --c2-list-item--border-top-right-radius 
+ * @cssproperty {pixel} --c2-list-item--border-bottom-left-radius
+ * @cssproperty {pixel} --c2-list-item--border-bottom-right-radius
  * 
- * @cssproperty {pixel} [--c2-list-item--padding-top=4px] - <code>padding-top</code> value
- * @cssproperty {pixel} [--c2-list-item--padding-right=8px] - <code>padding-right</code> value
- * @cssproperty {pixel} [--c2-list-item--padding-bottom=8px] - <code>padding-bottom</code> value
- * @cssproperty {pixel} [--c2-list-item--padding-left=4px] - <code>padding-left</code> value
+ * @cssproperty {pixel} [--c2-list-item--padding-top=4px]
+ * @cssproperty {pixel} [--c2-list-item--padding-right=8px]
+ * @cssproperty {pixel} [--c2-list-item--padding-bottom=8px]
+ * @cssproperty {pixel} [--c2-list-item--padding-left=4px] 
  * 
- * @cssproperty {font-size} [--c2-list-item--font-size=14]
+ * @cssproperty {font-size} --c2-list-item--font-size
  * @cssproperty {font-weight} --c2-list-item--font-weight
- * @cssproperty {font-style} [--c2-list-item--font-style=normal]
+ * @cssproperty {font-style} --c2-list-item--font-style
  * @cssproperty {font-family} --c2-list-item--font-family
  * 
- * @cssproperty {border} [--c2-list-item--border-top=0px solid transparent] - <code>border-top</code> value
- * @cssproperty {border} [--c2-list-item--border-bottom=0px solid transparent] - <code>border-bottom</code> value
- * @cssproperty {border} [--c2-list-item--border-right=0px solid transparent] - <code>border-right</code> value
- * @cssproperty {border} [--c2-list-item--border-left=0px solid transparent] - <code>border-left</code> value
- * @cssproperty {color} [--c2-list-item--color=initial] - <code>color<code> value
- * @cssproperty {color} [--c2-list-item--background=transparent] - <code>background-color</code> value
- *
- * @cssproperty {border} --c2-list-item__hover--border-top - Hover <code>border-top</code> value
- * @cssproperty {border} --c2-list-item__hover--border-bottom - Hover <code>border-bottom</code> value
- * @cssproperty {border} --c2-list-item__hover--border-right - Hover <code>border-right</code> value
- * @cssproperty {border} --c2-list-item__hover--border-left - Hover <code>border-left</code> value
- * @cssproperty {color}  --c2-list-item__hover--color - Hover <code>color</code> value
- * @cssproperty {color} [--c2-list-item__hover--background=rgb(230, 230, 230)] - Hover <code>background-color</code> value
+ * @cssproperty {border} --c2-list-item--border-top
+ * @cssproperty {border} --c2-list-item--border-bottom
+ * @cssproperty {border} --c2-list-item--border-right
+ * @cssproperty {border} --c2-list-item--border-left
  * 
- * @cssproperty {border} --c2-list-item__selected--border-top - Selected <code>border-top</code> value
- * @cssproperty {border} --c2-list-item__selected--border-bottom - Selected <code>border-bottom</code> value
- * @cssproperty {border} --c2-list-item__selected--border-right - Selected <code>border-right</code> value
- * @cssproperty {border} --c2-list-item__selected--border-left - Selected <code>border-left</code> value
- * @cssproperty {color} --c2-list-item__selected--color - Selected <code>color</code> value
- * @cssproperty {color} [--c2-list-item__selected--background=rgb(230, 230, 230)] - Selected <code>background-color</code> value
+ * @cssproperty {color} --c2-list-item--color
+ * @cssproperty {color} --c2-list-item--background
+ *
+ * @cssproperty {border} --c2-list-item__hover--border-top
+ * @cssproperty {border} --c2-list-item__hover--border-bottom
+ * @cssproperty {border} --c2-list-item__hover--border-right
+ * @cssproperty {border} --c2-list-item__hover--border-left
+ * @cssproperty {color}  --c2-list-item__hover--color 
+ * @cssproperty {color} [--c2-list-item__hover--background=rgb(230, 230, 230)]
+ * 
+ * @cssproperty {border} --c2-list-item__selected--border-top
+ * @cssproperty {border} --c2-list-item__selected--border-bottom
+ * @cssproperty {border} --c2-list-item__selected--border-right
+ * @cssproperty {border} --c2-list-item__selected--border-left
+ * @cssproperty {color} --c2-list-item__selected--color
+ * @cssproperty {color} --c2-list-item__selected--background
  
  */
 @customElement('c2-list-item')

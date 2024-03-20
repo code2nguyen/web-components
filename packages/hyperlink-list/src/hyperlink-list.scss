@@ -3,75 +3,159 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-hyperlink-list,
   $theme: (
-    item--gap: 0px,
-    item--padding: 8px 24px 8px 16px,
-    item--border-top: 0px solid transparent,
-    item--border-bottom: 0px solid transparent,
-    item--border-right: 0px solid transparent,
-    item--border-left: 0px solid transparent,
-    item--border-radius: none,
+    background: variables.$color-bg-lighter,
+
+    border-top-left-radius: null,
+    border-top-right-radius: null,
+    border-bottom-left-radius: null,
+    border-bottom-right-radius: null,
+
+    padding-top: null,
+    padding-right: null,
+    padding-bottom: null,
+    padding-left: null,
+
+    border-top: null,
+    border-right: null,
+    border-bottom: null,
+    border-left: null,
+
+    max-height: null,
+
+    item--font-size: null,
+    item--font-weight: null,
+    item--font-style: null,
+    item--font-family: null,
+    item--color: null,
+    item--background: null,
+
+    item--padding-top: 8px,
+    item--padding-right: 24px,
+    item--padding-bottom: 8px,
+    item--padding-left: 24px,
+
+    item--border-top: null,
+    item--border-bottom: null,
+    item--border-right: null,
+    item--border-left: null,
+
+    item--border-top-left-radius: null,
+    item--border-top-right-radius: null,
+    item--border-bottom-left-radius: null,
+    item--border-bottom-right-radius: null,
+
     item--text-decoration: none,
+    item--text-decoration-color: null,
+    item--text-underline-offset: 4px,
 
-    item__hover--background-color: inherit,
-    item__hover--color: none,
-    item__hover--border-top: inherit,
-    item__hover--border-bottom: inherit,
-    item__hover--border-right: inherit,
-    item__hover--border-left: inherit,
-    item__hover--border-radius: inherit,
-    item__hover--text-decoration: inherit,
+    item__hover--border-top: null,
+    item__hover--border-bottom: null,
+    item__hover--border-right: null,
+    item__hover--border-left: null,
 
-    item__selected--background-color: inherit,
-    item__selected--color: inherit,
-    item__selected--border-top: inherit,
-    item__selected--border-bottom: inherit,
-    item__selected--border-right: inherit,
-    item__selected--border-left: inherit,
-    item__selected--border-radius: inherit,
+    item__hover--text-decoration: null,
+    item__hover--text-decoration-color: null,
+    item__hover--color: null,
+    item__hover--background: variables.$color-bg-dark,
+
+    item__selected--border-top: null,
+    item__selected--border-bottom: null,
+    item__selected--border-right: null,
+    item__selected--border-left: null,
+
+    item__selected--text-decoration: null,
+    item__selected--text-decoration-color: null,
+    item__selected--color: null,
+    item__selected--background: null,
   )
 );
 
 :host {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
-  gap: css.cssVar(item--gap);
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  pointer-events: initial;
+  max-height: css.cssVar(max-height);
+
+  border-top: css.cssVar(border-top);
+  border-bottom: css.cssVar(border-bottom);
+  border-right: css.cssVar(border-right);
+  border-left: css.cssVar(border-left);
+
+  padding-top: css.cssVar(padding-top);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-right: css.cssVar(padding-right);
+  padding-left: css.cssVar(padding-left);
+
+  background: css.cssVar(background);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
   ::slotted(a) {
     display: flex;
     flex: 1;
     align-items: center;
-    padding: css.cssVar(item--padding) !important;
-    background: transparent;
+    text-wrap: nowrap;
+    transition: animation.standard-acceleration(background), animation.standard(color), animation.standard(border);
+
+    font-size: css.cssVar(item--font-size);
+    font-weight: css.cssVar(item--font-weight);
+    font-style: css.cssVar(item--font-style);
+    font-family: css.cssVar(item--font-family);
+
+    background: css.cssVar(item--background);
+    color: css.cssVar(item--color);
+
+    padding-top: css.cssVar(item--padding-top) !important;
+    padding-right: css.cssVar(item--padding-right) !important;
+    padding-bottom: css.cssVar(item--padding-bottom) !important;
+    padding-left: css.cssVar(item--padding-left) !important;
 
     border-top: css.cssVar(item--border-top) !important;
     border-bottom: css.cssVar(item--border-bottom) !important;
     border-right: css.cssVar(item--border-right) !important;
     border-left: css.cssVar(item--border-left) !important;
-    border-radius: css.cssVar(item--border-radius) !important;
-    color: inherit;
+
+    border-top-left-radius: css.cssVar(item--border-top-left-radius);
+    border-top-right-radius: css.cssVar(item--border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(item--border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(item--border-bottom-right-radius);
+
     text-decoration: css.cssVar(item--text-decoration) !important;
-    text-wrap: nowrap;
-    transition: animation.standard-acceleration(background), animation.standard(color), animation.standard(border), animation.standard(border-radius);
+    text-decoration-color: css.cssVar(item--text-decoration-color) !important;
+    text-underline-offset: css.cssVar(item--text-underline-offset) !important;
   }
 
   ::slotted(a:hover) {
-    background: css.cssVar(item__hover--background-color) !important;
-    color: css.cssVar(item__hover--color) !important;
-    border-top: css.cssVar(item__hover--border-top) !important;
-    border-bottom: css.cssVar(item__hover--border-bottom) !important;
-    border-right: css.cssVar(item__hover--border-right) !important;
-    border-left: css.cssVar(item__hover--border-left) !important;
-    border-radius: css.cssVar(item__hover--border-radius) !important;
-    text-decoration: css.cssVar(item__hover--text-decoration) !important;
+    border-top: css.cssVar(item__hover--border-top, item--border-top) !important;
+    border-bottom: css.cssVar(item__hover--border-bottom, item--border-bottom) !important;
+    border-right: css.cssVar(item__hover--border-right, item--border-right) !important;
+    border-left: css.cssVar(item__hover--border-left, item--border-left) !important;
+
+    text-decoration: css.cssVar(item__hover--text-decoration, item--text-decoration) !important;
+    text-decoration-color: css.cssVar(item__hover--text-decoration-color, item--text-decoration-color) !important;
+
+    background: css.cssVar(item__hover--background, item--background) !important;
+    color: css.cssVar(item__hover--color, item--color) !important;
   }
 
   ::slotted(a[data-selected]) {
-    background: css.cssVar(item__selected--background-color, item__hover--background-color) !important;
-    color: css.cssVar(item__selected--color, item__hover--color) !important;
-    border-top: css.cssVar(item__selected--border-top, item__hover--border-top) !important;
-    border-bottom: css.cssVar(item__selected--border-bottom, item__hover--border-bottom) !important;
-    border-right: css.cssVar(item__selected--border-right, item__hover--border-right) !important;
-    border-left: css.cssVar(item__selected--border-left, item__hover--border-left) !important;
-    border-radius: css.cssVar(item__selected--border-radius, item__hover--border-radius) !important;
-    text-decoration: css.cssVar(item__selected--border-radius, item__hover--text-decoration) !important;
+    border-top: css.cssVar(item__selected--border-top, item__hover--border-top, item--border-top) !important;
+    border-bottom: css.cssVar(item__selected--border-bottom, item__hover--border-bottom, item--border-bottom) !important;
+    border-right: css.cssVar(item__selected--border-right, item__hover--border-right, item--border-right) !important;
+    border-left: css.cssVar(item__selected--border-left, item__hover--border-left, item--border-left) !important;
+
+    text-decoration: css.cssVar(item__selected--text-decoration, item__hover--text-decoration, item--text-decoration) !important;
+    text-decoration-color: css.cssVar(item__selected--text-decoration-color, item__hover--text-decoration-color, item--text-decoration-color) !important;
+
+    background: css.cssVar(item__selected--background, item__hover--background, item--background) !important;
+    color: css.cssVar(item__selected--color, item__hover--color, item--color) !important;
   }
 }

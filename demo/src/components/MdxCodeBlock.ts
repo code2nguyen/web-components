@@ -78,4 +78,7 @@ $configStore.subscribe((componentConfig) => {
 
   updateDomCssValue(targetComp, newCssProperties)
   updateDomAttribute(targetComp, componentConfig.attributes)
+  if (targetComp._initComponent) {
+    targetComp._initComponent()
+  }
 })

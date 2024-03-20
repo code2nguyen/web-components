@@ -13,18 +13,18 @@
     padding-bottom: 4px,
     padding-left: 8px,
 
-    font-size: 14px,
+    font-size: null,
     font-weight: null,
-    font-style: normal,
+    font-style: null,
     font-family: null,
 
-    border-top: 0px solid transparent,
-    border-bottom: 0px solid transparent,
-    border-right: 0px solid transparent,
-    border-left: 0px solid transparent,
+    border-top: null,
+    border-bottom: null,
+    border-right: null,
+    border-left: null,
 
-    color: initial,
-    background: transparent,
+    color: null,
+    background: null,
 
     hover--border-top: null,
     hover--border-bottom: null,
@@ -38,7 +38,7 @@
     selected--border-right: null,
     selected--border-left: null,
     selected--color: null,
-    selected--background: variables.$color-bg-dark,
+    selected--background: null,
   )
 );
 

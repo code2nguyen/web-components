@@ -90,7 +90,7 @@ export function getParent(currentElement: HTMLElement): HTMLElement {
   return parent
 }
 
-export function getComponentByUid(uid: string): HTMLElement | null {
+export function getComponentByUid(uid: string): (HTMLElement & { _initComponent?: () => void }) | null {
   return document.querySelector(`#${uid}`)
 }
 

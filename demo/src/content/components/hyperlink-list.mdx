@@ -5,21 +5,42 @@
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
 import { HyperlinkList } from '@c2n/hyperlink-list'
 
 # Hyperlink List
 
-```html tag=MdxCodeBlock
-<div class="container">
-  <c2-hyperlink-list></c2-hyperlink-list>
-</div>
-<style>
-  .container {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-</style>
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/list-item
 ```
 
-TODO
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/list-item'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-hyperlink-list selected-url-pattern="/link3">
+  <a href="/link1">Link 1</a>
+  <a href="/link2">Link 2</a>
+  <a href="/link3">Link 3</a>
+  <a href="/link4">Link 4</a>
+</c2-hyperlink-list>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-hyperlink-list"></ApiTable>
