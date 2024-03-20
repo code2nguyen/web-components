@@ -3,7 +3,8 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-icon-button,
   $theme: (
-    icon--size: 24px,
+    icon--width: 24px,
+    icon--height: 24px,
     icon--color: inherit,
     icon__hover--color: inherit,
 
@@ -39,8 +40,8 @@
   }
 }
 ::slotted(*) {
-  width: css.cssVar(icon--size);
-  height: css.cssVar(icon--size);
+  width: css.cssVar(icon--width);
+  height: css.cssVar(icon--height);
   color: css.cssVar(icon--color);
   transition: animation.standard(color);
 }

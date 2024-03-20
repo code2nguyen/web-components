@@ -11,7 +11,8 @@ export class BorderConfig extends LitElement {
     css`
       :host {
         display: block;
-        --c2-text-field__svg-icon--size: 18px;
+        --c2-text-field__svg-icon--width: 18px;
+        --c2-text-field__svg-icon--height: 18px;
       }
 
       .border-config {

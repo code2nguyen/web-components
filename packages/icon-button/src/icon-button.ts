@@ -6,9 +6,8 @@ import styles from './icon-button.scss?inline'
 import '@c2n/tooltip'
 
 /**
- * IconButton component
+ * @tag c2-icon-button
  *
- * @slot
  * @csspart
  */
 @customElement('c2-icon-button')

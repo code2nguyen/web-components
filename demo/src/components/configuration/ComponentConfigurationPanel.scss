@@ -29,8 +29,10 @@
   --c2-checkbox__state-layer__hover__unselected--color: var(--logo-color-1);
 
   --c2-select__button--font-size: 10px;
-  --c2-select__button__suffix-icon--size: 12px;
-  --c2-select__button__prefix-icon--size: 12px;
+  --c2-select__button__suffix-icon--width: 12px;
+  --c2-select__button__suffix-icon--height: 12px;
+  --c2-select__button__prefix-icon--width: 12px;
+  --c2-select__button__prefix-icon--height: 12px;
 
   --c2-select__button--padding: 8px 8px 8px 8px;
   --c2-select__button__hover--background: transparent;
@@ -53,7 +55,8 @@
   --c2-text-field__focus--border-bottom: 1px solid var(--logo-color-1);
   --c2-text-field__focus--border-left: 1px solid var(--logo-color-1);
 
-  --c2-icon-button__icon--size: 12px;
+  --c2-icon-button__icon--width: 12px;
+  --c2-icon-button__icon--height: 12px;
   --c2-icon-button__state-layer--size: 24px;
   --c2-tabs__tab--padding: 16px;
   --c2-tabs__indicator--height: 2px;

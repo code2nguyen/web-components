@@ -16,7 +16,8 @@ import '@c2n/list'
  * @slot default - This is a default/unnamed slot
  *
  * @event
- * @cssproperty {pixel} [--c2-select__button__suffix-icon--size=18px] - Default icon size
+ * @cssproperty {pixel} [--c2-select__button__suffix-icon--width=18px] 
+ * @cssproperty {pixel} [--c2-select__button__suffix-icon--height=18px] 
  * @cssproperty {padding} [--c2-select__button--padding=4px 8px 4px 8px] - Button padding
  * @cssproperty {color} [--c2-select__button--background=rgb(253, 253, 253)]
  * @cssproperty {color} [--c2-select__button--color=initial]

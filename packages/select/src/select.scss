@@ -19,10 +19,12 @@
     button--font-style: normal,
     button--font-family: null,
 
-    button__prefix-icon--size: 18px,
+    button__prefix-icon--width: 18px,
+    button__prefix-icon--height: 18px,
     button__prefix-icon--color: null,
 
-    button__suffix-icon--size: 18px,
+    button__suffix-icon--width: 18px,
+    button__suffix-icon--height: 18px,
     button__suffix-icon--color: null,
 
     button--padding: 8px 8px 8px 8px,
@@ -116,15 +118,15 @@
   }
 
   ::slotted([slot='button-prefix-icon']) {
-    width: css.cssVar(button__prefix-icon--size);
-    height: css.cssVar(button__prefix-icon--size);
+    width: css.cssVar(button__prefix-icon--width);
+    height: css.cssVar(button__prefix-icon--height);
     color: css.cssVar(button__prefix-icon--color);
   }
 
   ::slotted([slot='button-suffix-icon']),
   .default-icon {
-    width: css.cssVar(button__suffix-icon--size);
-    height: css.cssVar(button__suffix-icon--size);
+    width: css.cssVar(button__suffix-icon--width);
+    height: css.cssVar(button__suffix-icon--height);
     color: css.cssVar(button__suffix-icon--color);
   }
 
