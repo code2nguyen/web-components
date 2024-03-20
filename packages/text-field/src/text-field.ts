@@ -6,7 +6,7 @@ import { live } from 'lit/directives/live.js'
 import { addClasses } from '@c2n/wc-utils/css-helper.js'
 import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 /**
- * TextField component
+ * @tag c2-text-field
  *
  * @slot
  * @csspart

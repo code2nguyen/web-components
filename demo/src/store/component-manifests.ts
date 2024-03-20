@@ -18,6 +18,7 @@ import expansionPanel from '@c2n/expansion-panel/custom-elements.json'
 import hyperlinkList from '@c2n/hyperlink-list/custom-elements.json'
 import iconButton from '@c2n/icon-button/custom-elements.json'
 import matIcon from '@c2n/mat-icon/custom-elements.json'
+import textButton from '@c2n/text-button/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
@@ -26,6 +27,7 @@ export const componentManifests = (function () {
   const nomalizedManifests: ComponentManifests = [
     sideNav,
     details,
+    textButton,
     matIcon,
     iconButton,
     hyperlinkList,

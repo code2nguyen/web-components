@@ -8,11 +8,14 @@
     text-decoration: none,
     text-underline-offset: 4px,
 
+    padding-top: 4px,
+    padding-left: 4px,
+    padding-right: 4px,
+    padding-bottom: 4px,
+
     hover--color: variables.$color-blue,
     hover--text-decoration: underline,
-    hover--text-decoration-color: variables.$color-blue,
-
-    padding: 4px,
+    hover--text-decoration-color: null,
   )
 );
 
@@ -33,7 +36,10 @@
   text-decoration-color: css.cssVar(text-decoration-color);
   text-underline-offset: css.cssVar(text-underline-offset);
 
-  padding: css.cssVar(padding);
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
 
   &:hover {
     color: css.cssVar(hover--color, color);

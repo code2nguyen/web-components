@@ -5,21 +5,37 @@
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
 import { TextButton } from '@c2n/text-button'
 
 # Text Button
 
-```html tag=MdxCodeBlock
-<div class="container">
-  <c2-text-button></c2-text-button>
-</div>
-<style>
-  .container {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-</style>
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/text-button
 ```
 
-TODO
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/text-button'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true,component=c2-text-button
+<c2-text-button>Link</c2-text-button>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-text-button"></ApiTable>
