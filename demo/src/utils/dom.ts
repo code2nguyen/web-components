@@ -91,7 +91,7 @@ export function getParent(currentElement: HTMLElement): HTMLElement {
 }
 
 export function getComponentByUid(uid: string): (HTMLElement & { _initComponent?: () => void }) | null {
-  return document.querySelector(`#${uid}`)
+  return document.querySelector(`[data-target-uid="${uid}"]`)
 }
 
 export function getInitialStyles(uid: string): Record<string, string> {

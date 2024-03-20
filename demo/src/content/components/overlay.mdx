@@ -30,7 +30,21 @@ import '@c2n/overlay'
 ---
 
 ```html tag=MdxCodeBlock,compack=true,component=c2-overlay
-<c2-overlay client:only="lit"></c2-overlay>
+<div>
+  <button popovertarget="demo-overlay">click me</button>
+  <c2-overlay id="demo-overlay" popover="auto" client:only="lit">
+    <div class="overlay-content">Overlay content</div>
+  </c2-overlay>
+</div>
+<style>
+  .overlay-content {
+    background-color: #ffff;
+    border: 1px solid #cccccc;
+    padding: 24px;
+    border-radius: 8px;
+    user-select: none;
+  }
+</style>
 ```
 
 ---

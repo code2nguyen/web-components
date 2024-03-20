@@ -8,7 +8,17 @@ import '@c2n/tooltip'
 /**
  * @tag c2-icon-button
  *
- * @csspart
+ * @cssproperty {color} --c2-icon-button--background-color
+ * @cssproperty {border-radius} [--c2-icon-button--border-radius=999px]
+ *
+ * @cssproperty {color} [--c2-icon-button__hover--background-color=rgb(230, 230, 230)]
+ *
+ * @cssproperty {pixel} [--c2-icon-button__icon--width=24px]
+ * @cssproperty {pixel} [--c2-icon-button__icon--height=24px]
+ * @cssproperty {color} --c2-icon-button__icon--color
+ * @cssproperty {color} --c2-icon-button__icon__hover--color
+ *
+ * @cssproperty {pixel} [--c2-icon-button__state-layer--size=48px]
  */
 @customElement('c2-icon-button')
 export class IconButton extends LitElement {

@@ -34,7 +34,8 @@
     "@fontsource/playfair-display": "latest",
     "@fontsource/roboto": "latest",
     "@fontsource/roboto-mono": "latest",
-    "@fontsource/source-serif-pro": "latest"
+    "@fontsource/source-serif-pro": "latest",
+    "@fontsource/material-icons": "latest"
   },
   "devDependencies": {
     "@types/lodash-es": "4.17.12",

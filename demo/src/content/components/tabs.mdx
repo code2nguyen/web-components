@@ -9,6 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import ApiTable from '../../components/ApiTable.astro'
 
 import { Tabs } from '@c2n/tabs'
+import { Tab } from '@c2n/tabs/tab.js'
 
 # Tabs
 
@@ -30,7 +31,15 @@ import '@c2n/tabs'
 ---
 
 ```html tag=MdxCodeBlock,compack=true,component=c2-tabs
-<c2-tabs client:only="lit"></c2-tabs>
+<c2-tabs client:only="lit" selected-tab="tab2">
+  <c2-tab label="tab1" for="tab1"></c2-tab>
+  <c2-tab for="tab2">tab 2</c2-tab>
+  <c2-tab for="tab2" disabled>tab 3</c2-tab>
+  <c2-tab for="tab2">tab 4</c2-tab>
+  <div id="tab1">tab1 content</div>
+  <div id="tab2">tab2 content</div>
+  <div id="tab4">tab4 content</div>
+</c2-tabs>
 ```
 
 ---

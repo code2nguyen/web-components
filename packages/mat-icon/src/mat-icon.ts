@@ -2,10 +2,11 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import styles from './mat-icon.scss?inline'
 /**
- * MatIcon component
+ * @tag c2-mat-icon
  *
- * @slot
- * @csspart
+ * @cssproperty {font-size} [--c2-mat-icon--font-size=24px]
+ * @cssproperty {font-weight} [--c2-mat-icon--font-weight=400]
+ * @cssproperty {color} --c2-mat-icon--color
  */
 @customElement('c2-mat-icon')
 export class MatIcon extends LitElement {

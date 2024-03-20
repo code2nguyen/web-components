@@ -3,15 +3,17 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-icon-button,
   $theme: (
+    background-color: null,
+    border-radius: 999px,
+
+    hover--background-color: variables.$color-bg-dark,
+
     icon--width: 24px,
     icon--height: 24px,
-    icon--color: inherit,
-    icon__hover--color: inherit,
+    icon--color: null,
+    icon__hover--color: null,
 
-    border-radius: 50%,
     state-layer--size: 48px,
-    background-color: transparent,
-    hover--background-color: variables.$color-bg-dark,
   )
 );
 

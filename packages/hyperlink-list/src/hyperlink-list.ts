@@ -5,6 +5,8 @@ import styles from './hyperlink-list.scss?inline'
  * @tag c2-hyperlink-list
  *
  * @cssproperty {background} [--c2-hyperlink-list--background: rgb(255, 255,255)]
+ * @cssproperty {pixel} [--c2-hyperlink-list--gap=4px]
+ *
  * @cssproperty {border-radius} --c2-hyperlink-list--border-top-left-radius
  * @cssproperty {border-radius} --c2-hyperlink-list--border-top-right-radius
  * @cssproperty {border-radius} --c2-hyperlink-list--border-bottom-left-radius

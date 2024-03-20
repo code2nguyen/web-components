@@ -14,10 +14,56 @@ const TABLET_MODE = 0b1000
 /**
  * @tag c2-side-nav
  *
- * @slot default - This is a default/unnamed slot
+ * @cssproperty {pixel} [--c2-side-nav__open--width=240px]
+ * @cssproperty {pixel} [--c2-side-nav__open--height=100%]
+ * @cssproperty {pixel} [--c2-side-nav__close--width=0px]
+ * @cssproperty {pixel} [--c2-side-nav__close--height=0px]
  *
- * @event
- * @cssproperty
+ * @cssproperty {color} --c2-side-nav--background-color
+ *
+ * @cssproperty {border-radius} --c2-side-nav--border-top-left-radius
+ * @cssproperty {border-radius} --c2-side-nav--border-top-right-radius
+ * @cssproperty {border-radius} --c2-side-nav--border-bottom-left-radius
+ * @cssproperty {border-radius} --c2-side-nav--border-bottom-right-radius
+ *
+ * @cssproperty {padding} [--c2-side-nav--padding-top=16px]
+ * @cssproperty {padding} [--c2-side-nav--padding-left=16px]
+ * @cssproperty {padding} [--c2-side-nav--padding-right=16px]
+ * @cssproperty {padding} [--c2-side-nav--padding-bottom=16px]
+ *
+ * @cssproperty {border} --c2-side-nav--border-top
+ * @cssproperty {border} --c2-side-nav--border-left
+ * @cssproperty {border} --c2-side-nav--border-right
+ * @cssproperty {border} --c2-side-nav--border-bottom
+ *
+ * @cssproperty {position} [--c2-side-nav__over--position=fixed]
+ *
+ * @cssproperty {pixel} [--c2-side-nav__over__open--width=240px]
+ * @cssproperty {pixel} [--c2-side-nav__over__open--height=100vh]
+ * @cssproperty {pixel} [--c2-side-nav__over__close--width=240px]
+ * @cssproperty {pixel} [--c2-side-nav__over__close--height=100vh]
+ *
+ * @cssproperty {pixel} [--c2-side-nav__over--top=0px]
+ * @cssproperty {pixel} [--c2-side-nav__over--left=0px]
+ * @cssproperty {pixel} [--c2-side-nav__over--background-color=rgb(248, 248, 248)]
+ *
+ * @cssproperty {border-radius} --c2-side-nav__over--border-top-left-radius
+ * @cssproperty {border-radius} [--c2-side-nav__over--border-top-right-radius=8px]
+ * @cssproperty {border-radius} --c2-side-nav__over--border-bottom-left-radius
+ * @cssproperty {border-radius} [--c2-side-nav__over--border-bottom-right-radius=8px]
+ *
+ * @cssproperty {padding} [--c2-side-nav__over--padding-top=16px]
+ * @cssproperty {padding} [--c2-side-nav__over--padding-left=16px]
+ * @cssproperty {padding} [--c2-side-nav__over--padding-right=16px]
+ * @cssproperty {padding} [--c2-side-nav__over--padding-bottom=16px]
+ *
+ * @cssproperty {border} --c2-side-nav__over--border-top
+ * @cssproperty {border} --c2-side-nav__over--border-left
+ * @cssproperty {border} --c2-side-nav__over--border-right
+ * @cssproperty {border} --c2-side-nav__over--border-bottom
+ *
+ * @cssproperty {border} [--c2-side-nav__dropback--background-color=rgba(0, 0, 0, 0.2)]
+ * @cssproperty {z-index} [--c2-side-nav__dropback--z-index=1001]
  */
 @customElement('c2-side-nav')
 export class SideNav extends LitElement {

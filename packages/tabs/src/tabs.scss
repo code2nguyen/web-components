@@ -5,27 +5,36 @@
   $theme: (
     box-shadow: inset 0px -2px 0px 0px variables.$color-border-light,
     justify-content: flex-center,
-    background-color: transparent,
-    height: auto,
-    font-weight: inherit,
+    background-color: null,
+    height: null,
 
-    tab--padding: 8px 16px 8px 16px,
-    tab--color: inherit,
-    tab--background-color: transparent,
-    tab--border-radius: inherit,
-
-    tab__hover--color: variables.$color-blue,
-    tab__hover--background-color: transparent,
-
-    tab__selected--color: variables.$color-blue,
-    tab__selected--background-color: transparent,
-
-    tab__disabled-color: inherit,
-    tab__disabled-background-color: transparent,
+    font-weight: null,
+    font-size: null,
+    font-style: null,
+    font-family: null,
 
     indicator--color: variables.$color-border-dark,
-    indicator--border-radius: inherit,
+    indicator--border-radius: null,
     indicator--height: 2px,
+
+    tab--padding-top: 8px,
+    tab--padding-right: 16px,
+    tab--padding-bottom: 8px,
+    tab--padding-left: 16px,
+
+    tab--color: null,
+    tab--background-color: null,
+
+    tab--border-top-left-radius: null,
+    tab--border-top-right-radius: null,
+    tab--border-bottom-left-radius: null,
+    tab--border-bottom-right-radius: null,
+
+    tab__hover--color: variables.$color-blue,
+    tab__hover--background-color: null,
+
+    tab__selected--color: variables.$color-blue,
+    tab__selected--background-color: null,
   )
 );
 
@@ -40,13 +49,21 @@
   .c2-tabs-header {
     display: flex;
     align-items: center;
+    position: relative;
+
     box-shadow: css.cssVar(box-shadow);
     justify-content: css.cssVar(justify-content);
+
     background-color: css.cssVar(background-color);
     height: css.cssVar(height);
+
     font-weight: css.cssVar(font-weight);
-    position: relative;
+    font-size: css.cssVar(font-size);
+    font-style: css.cssVar(font-style);
+    font-family: css.cssVar(font-family);
+
     padding-bottom: css.cssVar(indicator--height);
+
     .selection-indicator {
       position: absolute;
       will-change: transform;
@@ -55,7 +72,7 @@
       bottom: 0;
       width: 1px;
       z-index: 1;
-      background-color: css.cssVar(indicator--color);
+      background-color: css.cssVar(indicator--color, tab__selected--color, tab__hover--color);
       border-radius: css.cssVar(indicator--border-radius);
       height: css.cssVar(indicator--height);
       transition: animation.standard-acceleration(transform);
@@ -63,23 +80,32 @@
         transition: none;
       }
     }
+
     ::slotted(c2-tab) {
-      padding: css.cssVar(tab--padding);
+      padding-top: css.cssVar(tab--padding-top);
+      padding-right: css.cssVar(tab--padding-right);
+      padding-bottom: css.cssVar(tab--padding-bottom);
+      padding-left: css.cssVar(tab--padding-left);
+
       color: css.cssVar(tab--color);
       background-color: css.cssVar(tab--background-color);
-      border-radius: css.cssVar(tab--border-radius);
+
+      border-top-left-radius: css.cssVar(tab--border-top-left-radius);
+      border-top-right-radius: css.cssVar(tab--border-top-right-radius);
+      border-bottom-left-radius: css.cssVar(tab--border-bottom-left-radius);
+      border-bottom-right-radius: css.cssVar(tab--border-bottom-right-radius);
       will-change: color background-color;
       transition: animation.standard(background-color), animation.standard(color);
     }
 
     ::slotted(c2-tab:hover) {
-      color: css.cssVar(tab__hover--color);
-      background-color: css.cssVar(tab__hover--background-color);
+      color: css.cssVar(tab__hover--color, tab--color);
+      background-color: css.cssVar(tab__hover--background-color, tab--background-color);
     }
 
     ::slotted(c2-tab[selected]) {
-      color: css.cssVar(tab__selected--color, tab__hover--color);
-      background-color: css.cssVar(tab__selected--background-color);
+      color: css.cssVar(tab__selected--color, tab__hover--color, tab__hover--color, tab--color);
+      background-color: css.cssVar(tab__selected--background-color, tab__hover--background-color, tab--background-color);
     }
 
     ::slotted(c2-tab[disabled]) {

@@ -4,21 +4,22 @@
   $prefix: c2-list,
   $theme: (
     background: variables.$color-bg-lighter,
+    gap: null,
 
     border-top-left-radius: null,
     border-top-right-radius: null,
     border-bottom-left-radius: null,
     border-bottom-right-radius: null,
 
-    padding-top: 4px,
-    padding-right: 0px,
-    padding-bottom: 4px,
-    padding-left: 0px,
-
     border-top: null,
     border-right: null,
     border-bottom: null,
     border-left: null,
+
+    padding-top: 4px,
+    padding-right: 0px,
+    padding-bottom: 4px,
+    padding-left: 0px,
 
     max-height: null,
   )
@@ -29,7 +30,7 @@
   flex-direction: column;
   margin: 0;
   padding: 0;
-
+  gap: css.cssVar(gap);
   overflow: auto;
   overscroll-behavior: contain;
   pointer-events: initial;

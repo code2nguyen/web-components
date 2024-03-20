@@ -1,9 +1,9 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-mat-icon,
   $theme: (
-    icon-size: 24px,
-    icon-font: ('Material Symbols Rounded', 'Material Symbols Outlined', 'Material Symbols Sharp'),
-    icon-color: inherit,
+    font-size: 24px,
+    font-weight: 400,
+    color: null,
   )
 );
 
@@ -12,12 +12,12 @@
   align-items: center;
   justify-content: center;
   border-radius: inherit;
-  color: css.cssVar(icon-color);
+  color: css.cssVar(color);
   user-select: none;
-  font-family: css.cssVar(icon-font);
+  font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Symbols Sharp', 'Material Icons';
   font-weight: normal;
   font-style: normal;
-  font-size: css.cssVar(icon-size);
+  font-size: css.cssVar(font-size);
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;

@@ -92,7 +92,7 @@ function compileComponentCode(code, uid, componentName) {
     hostComponent.attributes = hostComponent.attributes || []
     hostComponent.attributes.push({
       type: 'mdxJsxAttribute',
-      name: 'id',
+      name: 'data-target-uid',
       value: uid,
     })
   }

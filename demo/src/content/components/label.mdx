@@ -29,11 +29,18 @@ import '@c2n/label'
 <br />
 ---
 
-```html tag=MdxCodeBlock,component=c2-label
-<div>
+```html tag=MdxCodeBlock,compack=true, component=c2-label
+<div class="container">
    <c2-label for="input">Sample input</c2-label>
    <input type="text" id="input"></input>
 </div>
+<style>
+    .container {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+</style>
 ```
 
 ---

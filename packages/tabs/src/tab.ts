@@ -7,11 +7,8 @@ import { consume } from '@lit/context'
 /**
  * @tag c2-tabs
  *
- * @slot default - This is a default/unnamed slot
+ * @event {CustomEvent} tab-change
  *
- * @event tab-change
- *
- * @cssproperty
  */
 @customElement('c2-tab')
 export class Tab extends LitElement {

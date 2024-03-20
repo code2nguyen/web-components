@@ -16,10 +16,13 @@ export interface SelectionChangeEventDetail {
  *
  * @slot default - default slot which accept c2-list-item as chidren
  *
- * @cssproperty {pixel} --c2-list--border-top-left-radius
- * @cssproperty {pixel} --c2-list--border-top-right-radius
- * @cssproperty {pixel} --c2-list--border-bottom-left-radius
- * @cssproperty {pixel} --c2-list--border-bottom-right-radius
+ * @cssproperty {color} [--c2-list--background=rgb(255, 255, 255)]
+ * @cssproperty {pixel} --c2-list--gap
+ *
+ * @cssproperty {border-radius} --c2-list--border-top-left-radius
+ * @cssproperty {border-radius} --c2-list--border-top-right-radius
+ * @cssproperty {border-radius} --c2-list--border-bottom-left-radius
+ * @cssproperty {border-radius} --c2-list--border-bottom-right-radius
  *
  * @cssproperty {border} --c2-list--border-top
  * @cssproperty {border} --c2-list--border-bottom
@@ -31,8 +34,8 @@ export interface SelectionChangeEventDetail {
  * @cssproperty {padding} [--c2-list--padding-right=0px]
  * @cssproperty {padding} [--c2-list--padding-left=0px]
  *
- * @cssproperty {color} [--c2-list--background=rgb(255, 255, 255)] - <code>background-color</code> value
- *@cssproperty {pixel} --c2-list--max-height
+ * @cssproperty {pixel} --c2-list--max-height
+ *
  * @slotcomponent c2-list-item
  */
 @customElement('c2-list')

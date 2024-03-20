@@ -4,36 +4,42 @@
     slug: "mat-icon"
 ---
 
+import '@fontsource/material-icons'
+
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
 import { MatIcon } from '@c2n/mat-icon'
 
 # Mat Icon
 
-```html tag=MdxCodeBlock,github=packages/mat-icon/src/mat-icon.ts
-<div class="container">
-  <c2-mat-icon>home</c2-mat-icon>
-  <c2-mat-icon class="sentiment_dissatisfied">sentiment_dissatisfied</c2-mat-icon>
-  <c2-mat-icon class="local_cafe">local_cafe</c2-mat-icon>
-</div>
-<style>
-  .container {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-  .sentiment_dissatisfied {
-    --c2-mat-icon-icon-color: rgb(247, 92, 70);
-  }
+`c2-mat-icon` is a simple wrapper for Material Icon font component.
 
-  .local_cafe {
-    --c2-mat-icon-icon-color: rgb(56, 146, 243);
-    --c2-mat-icon-icon-size: 32px;
-  }
-</style>
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/mat-icon
 ```
 
-<span class="material-symbols-outlined">
+### Import
 
-</span>
+```typescript tag=CodeBlock
+import '@c2n/mat-icon'
+```
 
-`c2-mat-icon` is a simple wrapper for Material Icon font component.
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true
+<c2-mat-icon>home</c2-mat-icon>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-mat-icon"></ApiTable>

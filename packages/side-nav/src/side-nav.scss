@@ -8,7 +8,7 @@
     close--width: 0px,
     close--height: 0px,
 
-    background-color: transparent,
+    background-color: null,
     border-top-left-radius: null,
     border-top-right-radius: null,
     border-bottom-left-radius: null,
@@ -19,10 +19,10 @@
     padding-bottom: 16px,
     padding-left: 16px,
 
-    border-top: 0px solid transparent,
-    border-bottom: 0px solid transparent,
-    border-right: 0px solid transparent,
-    border-left: 0px solid transparent,
+    border-top: null,
+    border-bottom: null,
+    border-right: null,
+    border-left: null,
 
     over--position: fixed,
     over__open--width: 240px,
@@ -33,19 +33,21 @@
     over--top: 0px,
     over--left: 0px,
     over--background-color: variables.$color-bg,
+
     over--border-top-left-radius: null,
     over--border-top-right-radius: 8px,
     over--border-bottom-left-radius: null,
     over--border-bottom-right-radius: 8px,
+
     over--padding-top: 16px,
     over--padding-right: 16px,
     over--padding-bottom: 16px,
     over--padding-left: 16px,
 
-    over--border-top: 1px solid transparent,
-    over--border-bottom: 1px solid transparent,
-    over--border-right: 1px solid transparent,
-    over--border-left: 0px solid transparent,
+    over--border-top: null,
+    over--border-bottom: null,
+    over--border-right: null,
+    over--border-left: null,
 
     dropback--background-color: rgba(0, 0, 0, 0.2),
     dropback--z-index: 1001,
