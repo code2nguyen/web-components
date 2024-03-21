@@ -8,8 +8,59 @@ import { redispatchEvent } from '@c2n/wc-utils/dom-helper.js'
 /**
  * @tag c2-text-field
  *
- * @slot
- * @csspart
+ * @cssproperty {border-radius} [--c2-text-field--border-top-left-radius=4px]
+ * @cssproperty {border-radius} [--c2-text-field--border-top-right-radius=4px]
+ * @cssproperty {border-radius} [--c2-text-field--border-bottom-left-radius=4px]
+ * @cssproperty {border-radius} [--c2-text-field--border-bottom-right-radius=4px]
+ *
+ * @cssproperty {padding} [--c2-text-field--padding-top=8px]
+ * @cssproperty {padding} [--c2-text-field--padding-right=8px]
+ * @cssproperty {padding} [--c2-text-field--padding-bottom=8px]
+ * @cssproperty {padding} [--c2-text-field--padding-left=8px]
+ *
+ * @cssproperty {border} [--c2-text-field--border-top=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-text-field--border-right=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-text-field--border-bottom=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-text-field--border-left=1px solid rgb(177, 177, 177)]
+ *
+ * @cssproperty {color} --c2-text-field--color
+ * @cssproperty {background} [--c2-text-field--background=field]
+ *
+ * @cssproperty {font-size} --c2-text-field--font-size
+ * @cssproperty {font-weight} --c2-text-field--font-weight
+ * @cssproperty {font-style} --c2-text-field--font-style
+ * @cssproperty {font-family} --c2-text-field--font-family
+ *
+ * @cssproperty {opacity} [--c2-text-field__placeholder--opacity=0.5]
+ * @cssproperty {font-weight} --c2-text-field__placeholder--font-weight
+ * @cssproperty {font-style} --c2-text-field__placeholder--font-style
+ * @cssproperty {color} --c2-text-field__placeholder--color
+ *
+ * @cssproperty {border} [--c2-text-field__focus--border-top=1px solid rgb(2, 101, 220)]
+ * @cssproperty {border} [--c2-text-field__focus--border-right=1px solid rgb(2, 101, 220)]
+ * @cssproperty {border} [--c2-text-field__focus--border-bottom=1px solid rgb(2, 101, 220)]
+ * @cssproperty {border} [--c2-text-field__focus--border-left=1px solid rgb(2, 101, 220)]
+ *
+ * @cssproperty {color} --c2-text-field__focus--color
+ * @cssproperty {background} --c2-text-field__focus--background
+ *
+ * @cssproperty {border} [--c2-text-field__error--border-top=1px solid rgb(211, 21, 16)]
+ * @cssproperty {border} [--c2-text-field__error--border-right=1px solid rgb(211, 21, 16)]
+ * @cssproperty {border} [--c2-text-field__error--border-bottom=1px solid rgb(211, 21, 16)]
+ * @cssproperty {border} [--c2-text-field__error--border-left=1px solid rgb(211, 21, 16)]
+ *
+ * @cssproperty {color} [--c2-text-field__error--color=rgb(211, 21, 16)]
+ * @cssproperty {background} --c2-text-field__error--background
+ *
+ * @cssproperty {border} [--c2-text-field__read-only--border-top=unset]
+ * @cssproperty {border} [--c2-text-field__read-only--border-right=unset]
+ * @cssproperty {border} [--c2-text-field__read-only--border-bottom=unset]
+ * @cssproperty {border} [--c2-text-field__read-only--border-left=unset]
+ *
+ * @cssproperty {color} --c2-text-field__read-only--color
+ * @cssproperty {background} [--c2-text-field__read-only--background=transparent]
+ *
+ *
  */
 @customElement('c2-text-field')
 export class TextField extends LitElement {

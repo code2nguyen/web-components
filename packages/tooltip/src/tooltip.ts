@@ -11,10 +11,21 @@ const enterEvents = ['pointerenter', 'focus']
 const leaveEvents = ['pointerleave', 'blur', 'keydown', 'click']
 
 /**
- * Tooltip component
+ * @tag c2-tooltip
  *
- * @slot
- * @csspart
+ * @cssproperty {background-color} [--c2-tooltip--background-color=#322f35]
+ * @cssproperty {color} [--c2-tooltip--color=#f5eff7]
+ * @cssproperty {font-size} [--c2-tooltip--font-size=12px]
+ * @cssproperty {font-weight} --c2-tooltip--font-weight
+ * @cssproperty {font-style} --c2-tooltip--font-style
+ * @cssproperty {font-family} --c2-tooltip--font-family
+ *
+ * @cssproperty {padding} [--c2-tooltip--padding-top=4px]
+ * @cssproperty {padding} [--c2-tooltip--padding-right=8px]
+ * @cssproperty {padding} [--c2-tooltip--padding-bottom=4px]
+ * @cssproperty {padding} [--c2-tooltip--padding-left=8px]
+ *
+ * @cssproperty {pixel} [--c2-tooltip--max-width=160px]
  */
 @customElement('c2-tooltip')
 export class Tooltip extends LitElement {
@@ -67,7 +78,7 @@ export class Tooltip extends LitElement {
     if (this.targetStrategy == 'previousElement') {
       this.target ??= this.previousElementSibling as HTMLElement
     } else {
-      this.target ??= this.parentElement
+      this.target ??= this.parentElement?.tagName == 'ASTRO-ISLAND' ? this.parentElement.parentElement : this.parentElement
     }
   }
 
@@ -81,6 +92,7 @@ export class Tooltip extends LitElement {
     if (this.delayTimeout) {
       return
     }
+    this.updateTargetPosition()
     this.delayTimeout = setTimeout(() => {
       const arrowEl = this.arrowEl
       const middleware = [offset(this.offset), shift(), autoPlacement({ allowedPlacements: this.position.split(',') as Placement[] })]
@@ -92,7 +104,9 @@ export class Tooltip extends LitElement {
         )
       }
 
-      this.style.cssText = ''
+      this.style.removeProperty('display')
+      this.style.removeProperty('top')
+      this.style.removeProperty('left')
 
       computePosition(this.target!, this, {
         strategy: 'absolute',
@@ -150,6 +164,7 @@ export class Tooltip extends LitElement {
   private finishHide = () => {
     if (!this.showing) {
       this.style.display = 'none'
+      this.restoreTargetPosition()
     }
   }
 
@@ -164,6 +179,22 @@ export class Tooltip extends LitElement {
     if (this.delayTimeout) {
       clearTimeout(this.delayTimeout)
       this.delayTimeout = null
+    }
+  }
+
+  private updateTargetPosition() {
+    if (!this.target) return
+    const targetPosition = (this.target?.computedStyleMap().get('position') as CSSKeywordValue).value
+
+    if (!targetPosition || targetPosition === 'static') {
+      this.target.dataset.position = targetPosition
+      this.target.style.setProperty('position', 'relative')
+    }
+  }
+
+  private restoreTargetPosition() {
+    if (this.target?.dataset.position) {
+      this.target.style.setProperty('position', this.target?.dataset.position)
     }
   }
 

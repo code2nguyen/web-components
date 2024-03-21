@@ -7,7 +7,8 @@
     ".": {
       "default": "./dist/tooltip.js",
       "types": "./types/src/tooltip.d.ts"
-    }
+    },
+    "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",

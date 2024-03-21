@@ -5,27 +5,39 @@
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
 import { Tooltip } from '@c2n/tooltip'
 
 # Tooltip
 
-```html tag=MdxCodeBlock
-<div class="container">
-  <button class="tooltip-button">
-    Hover me !
-    <c2-tooltip>This is tooltip</c2-tooltip>
-  </button>
-</div>
-<style>
-  .container {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-  .tooltip-button {
-    position: relative;
-  }
-</style>
+`c2-tooltip` allow users to get contextual help or information about specific components when hovering or focusing on them.
+
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/tooltip
 ```
 
-`c2-tooltip` allow users to get contextual help or information about specific components when hovering or focusing on them.
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/tooltip'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true,component=c2-tooltip
+<button class="tooltip-button">Hover me !<c2-tooltip client:only="lit">This is tooltip</c2-tooltip></button>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-tooltip"></ApiTable>

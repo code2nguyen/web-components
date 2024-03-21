@@ -3,28 +3,41 @@
   $prefix: c2-tooltip,
   $theme: (
     background-color: #322f35,
+    color: #f5eff7,
+
+    font-size: 12px,
+    font-weight: null,
+    font-style: null,
+    font-family: null,
+
+    padding-top: 4px,
+    padding-right: 8px,
+    padding-bottom: 4px,
+    padding-left: 8px,
+
+    max-wdith: 160px,
   )
 );
 
 :host {
-  display: inline-flex;
   position: absolute;
-  background: css.cssVar(background-color);
+
   border-radius: 4px;
   display: inline-block;
   pointer-events: none;
   user-select: none;
-
   /* Animate in */
   opacity: 0;
   transform: scale(0.75);
   transition: animation.standard-deceleration(opacity), animation.standard-deceleration(transform);
 
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
+  background: css.cssVar(background-color);
+  color: css.cssVar(color);
 
-  color: #f5eff7;
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-style: css.cssVar(font-style);
+  font-family: css.cssVar(font-family);
 }
 
 :host([showing]) {
@@ -35,8 +48,13 @@
   display: inline-flex;
   align-items: center;
   position: relative;
-  padding: 4px 8px;
-  max-width: 160px;
+
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+  max-width: css.cssVar(max-widt);
+
   width: max-content;
   ::slotted(svg),
   .arrow {
