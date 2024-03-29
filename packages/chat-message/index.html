@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/chat-message.ts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+      import '@c2n/avatar'
+    </script>
+    <style>
+      body {
+        padding: 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-chat-message>
+      <c2-avatar name="Nguyen Thai Vinh" slot="avatar"></c2-avatar>
+      <div slot="title">You</div>
+      <div slot="header-time">17h 29</div>
+      <div slot="message">Bonjour</div>
+    </c2-chat-message>
+    <br />
+    <c2-chat-message align="right">
+      <c2-avatar name="Chat GPT" slot="avatar"></c2-avatar>
+      <div slot="title">Chat GPT</div>
+      <div slot="header-time">Hier</div>
+      <div slot="message">
+        <div>Hi</div>
+        <div>Can i help you</div>
+      </div>
+    </c2-chat-message>
+    <br />
+    <c2-chat-message>
+      <c2-avatar name="Nguyen Thai Vinh" slot="avatar"></c2-avatar>
+      <div slot="title">You</div>
+      <div slot="header-time">17h 30</div>
+      <div slot="message">Give me a chat image</div>
+    </c2-chat-message>
+    <br />
+    <c2-chat-message align="right">
+      <c2-avatar name="Chat GPT" slot="avatar"></c2-avatar>
+      <div slot="header-time">Hier</div>
+      <div slot="message">
+        <div>Sure, here you are</div>
+        <img src="./chat.jpg" slot="image-message" alt="chat" />
+      </div>
+    </c2-chat-message>
+  </body>
+</html>

@@ -3,8 +3,8 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-avatar,
   $theme: (
-    width: 32px,
-    height: 32px,
+    width: 24px,
+    height: 24px,
 
     color: #ffffff,
     background: variables.$color-green,
@@ -19,7 +19,7 @@
     border-right: null,
     border-left: null,
 
-    font-size: 18px,
+    font-size: 12px,
     font-weight: 700,
     font-style: null,
     font-family: null,

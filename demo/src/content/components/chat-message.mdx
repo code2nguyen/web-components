@@ -1,0 +1,82 @@
+---
+    
+    title: "Chat Message"
+    slug: "chat-message"
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
+import { ChatMessage } from '@c2n/chat-message'
+import { Avatar } from '@c2n/avatar'
+
+# Chat Message
+
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chat-message
+```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/chat-message'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true,component=c2-chat-message
+<c2-chat-message client:only="lit">
+  <c2-avatar name="Nguyen Thai Vinh" slot="avatar"></c2-avatar>
+  <div slot="title">You</div>
+  <div slot="header-time">17h 29</div>
+  <div slot="message">Bonjour</div>
+</c2-chat-message>
+```
+
+---
+
+```html tag=MdxCodeBlock,compack=true,component=c2-chat-message
+<c2-chat-message client:only="lit" class="custom-chat-message">
+  <c2-avatar name="Chat GPT" slot="avatar">
+    <img src="/web-components/chat.avif" />
+  </c2-avatar>
+  <div slot="title">Chat GPT</div>
+  <div slot="header-time">10h 29</div>
+  <div slot="message">
+    <div>Hi,</div>
+    <div>What can I help you</div>
+  </div>
+</c2-chat-message>
+
+<style>
+  .custom-chat-message {
+    --c2-chat-message--gap: 8px;
+    --c2-chat-message__message--gap: 8px;
+    --c2-chat-message__message--border-top-left-radius: 4px;
+    --c2-chat-message__message--border-top-right-radius: 4px;
+    --c2-chat-message__message--border-bottom-left-radius: 4px;
+    --c2-chat-message__message--border-bottom-right-radius: 4px;
+    --c2-chat-message__message--padding-top: 12px;
+    --c2-chat-message__message--padding-right: 16px;
+    --c2-chat-message__message--padding-bottom: 12px;
+    --c2-chat-message__message--padding-left: 16px;
+    --c2-chat-message__message--background: rgba(220, 224, 234, 0.59);
+    --c2-chat-message__header--gap: 8px;
+    --c2-chat-message__time--font-size: 10px;
+    --c2-chat-message--line-height: 26px;
+  }
+</style>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-chat-message"></ApiTable>

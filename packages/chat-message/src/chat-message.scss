@@ -1,0 +1,138 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chat-message,
+  $theme: (
+    gap: 16px,
+
+    font-size: 14px,
+    font-weight: null,
+    font-family: null,
+    line-height: null,
+
+    message--gap: 4px,
+
+    message--border-top: null,
+    message--border-bottom: null,
+    message--border-right: null,
+    message--border-left: null,
+
+    message--border-top-left-radius: null,
+    message--border-top-right-radius: null,
+    message--border-bottom-left-radius: null,
+    message--border-bottom-right-radius: null,
+
+    message--padding-top: null,
+    message--padding-bottom: null,
+    message--padding-right: null,
+    message--padding-left: null,
+
+    message--color: null,
+    message--background: null,
+
+    header--gap: 8px,
+    header__title--color: null,
+    header__title--font-size: 15px,
+    header__title--font-weight: 600,
+    header__title--font-style: null,
+
+    time--color: null,
+    time--font-size: 12px,
+    time--font-weight: null,
+    time--font-style: null,
+  )
+);
+
+:host {
+  display: block;
+  .c2-chat-message {
+    display: flex;
+    align-items: flex-start;
+    gap: css.cssVar(gap);
+
+    .c2-chat-message-container {
+      display: flex;
+      flex-direction: column;
+      gap: css.cssVar(message--gap);
+      font-variant-ligatures: common-ligatures;
+      font-size: css.cssVar(font-size);
+      font-weight: css.cssVar(font-weight);
+      font-family: css.cssVar(font-family);
+      line-height: css.cssVar(line-height);
+
+      border-top: css.cssVar(message--border-top);
+      border-right: css.cssVar(message--border-right);
+      border-bottom: css.cssVar(message--border-bottom);
+      border-left: css.cssVar(message--border-left);
+
+      padding-top: css.cssVar(message--padding-top);
+      padding-right: css.cssVar(message--padding-right);
+      padding-bottom: css.cssVar(message--padding-bottom);
+      padding-left: css.cssVar(message--padding-left);
+
+      border-top-left-radius: css.cssVar(message--border-top-left-radius);
+      border-top-right-radius: css.cssVar(message--border-top-right-radius);
+      border-bottom-left-radius: css.cssVar(message--border-bottom-left-radius);
+      border-bottom-right-radius: css.cssVar(message--border-bottom-right-radius);
+
+      background: css.cssVar(message--background);
+
+      .c2-chat-message__header {
+        display: flex;
+        align-items: center;
+        gap: css.cssVar(header--gap);
+
+        slot[name='title'] {
+          color: css.cssVar(header__title--color);
+          font-size: css.cssVar(header__title--font-size);
+          font-weight: css.cssVar(header__title--font-weight);
+          font-style: css.cssVar(header__title--font-style);
+          line-height: css.cssVar(header__title--font-size);
+        }
+
+        slot[name='header-time'] {
+          color: css.cssVar(time--color);
+          line-height: css.cssVar(time--font-size);
+          font-size: css.cssVar(time--font-size);
+          font-weight: css.cssVar(time--font-weight);
+          font-style: css.cssVar(time--font-style);
+        }
+      }
+      .c2-chat-message__content {
+        color: css.cssVar(message--color);
+        ::slotted([slot='message']) {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
+      .c2-chat-message__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        slot[name='footer-time'] {
+          color: css.cssVar(time--color);
+          font-size: css.cssVar(time--font-size);
+          font-weight: css.cssVar(time--font-weight);
+          font-style: css.cssVar(time--font-style);
+        }
+      }
+    }
+  }
+}
+
+:host([align='right']) {
+  .c2-chat-message {
+    flex-direction: row-reverse;
+    .c2-chat-message__header {
+      flex-direction: row-reverse;
+    }
+    .c2-chat-message__content {
+      ::slotted([slot='message']) {
+        align-items: flex-end;
+      }
+    }
+  }
+}

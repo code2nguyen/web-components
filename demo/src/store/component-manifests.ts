@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import chatMessage from '@c2n/chat-message/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
 import sideNav from '@c2n/side-nav/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
@@ -28,6 +29,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const nomalizedManifests: ComponentManifests = [
+    chatMessage,
     avatar,
     sideNav,
     details,
