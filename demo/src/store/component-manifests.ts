@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import avatar from '@c2n/avatar/custom-elements.json'
 import sideNav from '@c2n/side-nav/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
 import checkbox from '@c2n/checkbox/custom-elements.json'
@@ -27,6 +28,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const nomalizedManifests: ComponentManifests = [
+    avatar,
     sideNav,
     details,
     textField,
@@ -72,6 +74,5 @@ export const componentManifests = (function () {
       }
     })
   })
-  console.log(nomalizedManifests)
   return nomalizedManifests
 })()

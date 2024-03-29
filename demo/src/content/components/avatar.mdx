@@ -1,0 +1,47 @@
+---
+    
+    title: "Avatar"
+    slug: "avatar"
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
+import { Avatar } from '@c2n/avatar'
+
+# Avatar
+
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/avatar
+```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/avatar'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true,component=c2-avatar
+<c2-avatar client:only="lit" name="Nguyen Thai Vinh"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,compack=true,component=c2-avatar
+<c2-avatar client:only="lit" name="Nguyen Thai Vinh">
+  <img src="/web-components/chat.avif" />
+</c2-avatar>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-avatar"></ApiTable>

@@ -53,6 +53,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/avatar:build",
         "./packages/side-nav:build",
         "./packages/card:build",
         "./packages/checkbox:build",

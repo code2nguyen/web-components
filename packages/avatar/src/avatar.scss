@@ -1,0 +1,65 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-avatar,
+  $theme: (
+    width: 32px,
+    height: 32px,
+
+    color: #ffffff,
+    background: variables.$color-green,
+
+    border-top-left-radius: 999px,
+    border-top-right-radius: 999px,
+    border-bottom-left-radius: 999px,
+    border-bottom-right-radius: 999px,
+
+    border-top: null,
+    border-bottom: null,
+    border-right: null,
+    border-left: null,
+
+    font-size: 18px,
+    font-weight: 700,
+    font-style: null,
+    font-family: null,
+  )
+);
+
+:host {
+  display: block;
+}
+
+.c2-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+
+  width: css.cssVar(width);
+  height: css.cssVar(height);
+
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-style: css.cssVar(font-style);
+  font-family: css.cssVar(font-family);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  border-top: css.cssVar(border-top);
+  border-bottom: css.cssVar(border-bottom);
+  border-right: css.cssVar(border-right);
+  border-left: css.cssVar(border-left);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  overflow: hidden;
+
+  ::slotted(svg),
+  ::slotted(img) {
+    max-width: 100%;
+    height: auto;
+  }
+}
