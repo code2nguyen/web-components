@@ -70,10 +70,12 @@
   box-sizing: border-box;
   flex: 1;
   cursor: text;
+
   border-top: css.cssVar(border-top);
   border-bottom: css.cssVar(border-bottom);
   border-right: css.cssVar(border-right);
   border-left: css.cssVar(border-left);
+
   border-top-left-radius: css.cssVar(border-top-left-radius);
   border-top-right-radius: css.cssVar(border-top-right-radius);
   border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
@@ -128,7 +130,7 @@
     border-right: css.cssVar(focus--border-right, border-right);
     border-left: css.cssVar(focus--border-left, border-left);
     color: css.cssVar(focus--color, color);
-    background: css.cssVar(focus--background);
+    background: css.cssVar(focus--background, background);
 
     .prefix-icon,
     .suffix-icon {

@@ -1,0 +1,216 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chat-input,
+  $theme: (
+    border-top-left-radius: 4px,
+    border-top-right-radius: 4px,
+    border-bottom-left-radius: 4px,
+    border-bottom-right-radius: 4px,
+
+    padding-top: 8px,
+    padding-right: 8px,
+    padding-bottom: 8px,
+    padding-left: 8px,
+
+    border-top: 1px solid variables.$color-border,
+    border-bottom: 1px solid variables.$color-border,
+    border-right: 1px solid variables.$color-border,
+    border-left: 1px solid variables.$color-border,
+
+    color: variables.$color-text,
+    background: variables.$color-bg-lighter,
+
+    font-size: 14px,
+    font-weight: null,
+    font-style: null,
+    font-family: null,
+    line-height: 24px,
+    max-height: 25vh,
+
+    placeholder--opacity: 0.5,
+    placeholder--font-weight: null,
+    placeholder--font-style: null,
+    placeholder--color: null,
+
+    send-icon--width: 24px,
+    send-icon--height: 24px,
+    send-icon--opacity: 0.5,
+
+    send-icon--color: null,
+    send-icon__active--color: null,
+
+    focus--border-top: null,
+    focus--border-bottom: null,
+    focus--border-right: null,
+    focus--border-left: null,
+
+    focus--color: null,
+    focus--background: null,
+  )
+);
+
+:host {
+  display: block;
+}
+
+.c2-chat-input {
+  display: flex;
+  flex-direction: column;
+  .c2-chat-input-wrapper {
+    flex: 1;
+    display: flex;
+    cursor: text;
+    position: relative;
+    align-self: stretch;
+    justify-self: stretch;
+
+    border-top: css.cssVar(border-top);
+    border-bottom: css.cssVar(border-bottom);
+    border-right: css.cssVar(border-right);
+    border-left: css.cssVar(border-left);
+
+    border-top-left-radius: css.cssVar(border-top-left-radius);
+    border-top-right-radius: css.cssVar(border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+    color: css.cssVar(color);
+    background: css.cssVar(background);
+    gap: 4px;
+
+    .input {
+      resize: none;
+      scrollbar-width: none;
+      overscroll-behavior: none;
+      touch-action: pan-y;
+      z-index: 0;
+      width: 100%;
+      flex: 1;
+      border: none;
+      outline: none;
+      caret-color: inherit;
+      text-align: inherit;
+      border-radius: inherit;
+      color: inherit;
+      background: transparent;
+      overflow: visible;
+      text-wrap: wrap;
+      text-indent: 0;
+      max-height: css.cssVar(max-height);
+      padding-top: css.cssVar(padding-top);
+      padding-bottom: css.cssVar(padding-bottom);
+      padding-left: css.cssVar(padding-left);
+      padding-right: calc(#{css.cssVar(send-icon--width)} + 2 * #{css.cssVar(padding-right)} + 6px);
+
+      font-size: css.cssVar(font-size);
+      font-weight: css.cssVar(font-weight);
+      font-style: css.cssVar(font-style);
+      font-family: css.cssVar(font-family);
+      line-height: css.cssVar(line-height);
+
+      &::placeholder {
+        font-weight: css.cssVar(placeholder--font-weight);
+        font-style: css.cssVar(placeholder--font-style);
+        color: css.cssVar(placeholder--color);
+        opacity: css.cssVar(placeholder--opacity);
+      }
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    .scrollbar-track {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      cursor: default;
+      z-index: 7;
+      padding: 2px;
+      .scrollbar-thumb {
+        display: none;
+        position: absolute;
+        width: 6px;
+        right: 2px;
+        top: 0;
+        &:after {
+          content: '';
+          position: absolute;
+          inset: 2px 0;
+          width: 100%;
+          border-radius: 6px;
+          background: var(--color-scrollbar, rgba(0, 0, 0, 0.15));
+        }
+      }
+    }
+
+    &:hover {
+      .scrollbar-track {
+        .scrollbar-thumb {
+          display: block;
+        }
+      }
+    }
+    .send-button-wrapper {
+      display: flex;
+      position: absolute;
+      right: 0px;
+      bottom: 0px;
+      padding-right: calc(#{css.cssVar(padding-right)} + 6px);
+      padding-top: css.cssVar(padding-top);
+      padding-bottom: css.cssVar(padding-bottom);
+      padding-left: css.cssVar(padding-right);
+      button {
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 0px;
+        margin: 0px;
+        background: none;
+        line-height: 0px;
+        opacity: css.cssVar(send-icon--opacity);
+        slot[name='send-icon'] {
+          svg {
+            color: css.cssVar(send-icon--opacity);
+            width: css.cssVar(send-icon--width);
+            height: css.cssVar(send-icon--height);
+          }
+        }
+        ::slotted(svg) {
+          color: css.cssVar(send-icon--opacity);
+          width: css.cssVar(send-icon--width);
+          height: css.cssVar(send-icon--height);
+        }
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+      button[active] {
+        opacity: 1;
+        slot[name='send-icon'] {
+          svg {
+            color: css.cssVar(send-icon__active--color);
+          }
+        }
+        ::slotted(svg) {
+          color: css.cssVar(send-icon__active--color);
+        }
+      }
+    }
+  }
+
+  // Focus
+  &.focus-within {
+    .c2-chat-input-wrapper {
+      border-top: css.cssVar(focus--border-top, border-top);
+      border-bottom: css.cssVar(focus--border-bottom, border-bottom);
+      border-right: css.cssVar(focus--border-right, border-right);
+      border-left: css.cssVar(focus--border-left, border-left);
+      color: css.cssVar(focus--color, color);
+      background: css.cssVar(focus--background, background);
+    }
+  }
+}

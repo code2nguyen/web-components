@@ -92,10 +92,6 @@ export class TextField extends LitElement {
   // Query
   @query('.input') private readonly input?: HTMLInputElement | null
 
-  constructor() {
-    super()
-  }
-
   reset() {
     this.dirty = false
     this.value = this.getAttribute('value') ?? ''
@@ -121,7 +117,7 @@ export class TextField extends LitElement {
   }
 
   override focus(options?: FocusOptions | undefined): void {
-    super.focus(options)
+    this.input?.focus(options)
     this.focused = true
   }
 

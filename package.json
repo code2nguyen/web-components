@@ -53,6 +53,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/chat-input:build",
         "./packages/chat-message:build",
         "./packages/avatar:build",
         "./packages/side-nav:build",

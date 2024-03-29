@@ -1,0 +1,41 @@
+---
+    
+    title: "Chat Input"
+    slug: "chat-input"
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
+import { ChatInput } from '@c2n/chat-input'
+
+# Chat Input
+
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chat-input
+```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/chat-input'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compack=true,component=c2-chat-input
+<c2-chat-input client:only="lit"></c2-chat-input>
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-chat-input"></ApiTable>

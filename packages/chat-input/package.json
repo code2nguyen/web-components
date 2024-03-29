@@ -1,0 +1,59 @@
+{
+  "name": "@c2n/chat-input",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "dist/chat-input.js",
+  "exports": {
+    ".": {
+      "default": "./dist/chat-input.js",
+      "types": "./types/src/chat-input.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "chat-input",
+    "web component",
+    "lit"
+  ],
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../wc-utils:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/wc-utils": "0.0.4",
+    "lit": "3.1.2"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}
