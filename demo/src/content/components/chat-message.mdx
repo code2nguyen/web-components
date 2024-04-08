@@ -31,7 +31,7 @@ import '@c2n/chat-message'
 ---
 
 ```html tag=MdxCodeBlock,compack=true,component=c2-chat-message
-<c2-chat-message client:only="lit">
+<c2-chat-message>
   <c2-avatar name="Nguyen Thai Vinh" slot="avatar"></c2-avatar>
   <div slot="title">You</div>
   <div slot="header-time">17h 29</div>
@@ -42,7 +42,7 @@ import '@c2n/chat-message'
 ---
 
 ```html tag=MdxCodeBlock,compack=true,component=c2-chat-message
-<c2-chat-message client:only="lit" class="custom-chat-message">
+<c2-chat-message class="custom-chat-message">
   <c2-avatar name="Chat GPT" slot="avatar">
     <img src="/web-components/chat.avif" />
   </c2-avatar>
