@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
-    "lit": "3.1.2",
+    "lit": "3.2.1",
     "@floating-ui/dom": "1.6.3"
   },
   "devDependencies": {

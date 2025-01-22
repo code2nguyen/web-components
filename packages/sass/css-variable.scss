@@ -10,14 +10,14 @@ $theme: () !default;
   $result: '';
   $defaul-value: null;
 
-  @for $i from 1 through length($fallback) {
-    $item: nth($fallback, $i);
+  @for $i from 1 through list.length($fallback) {
+    $item: list.nth($fallback, $i);
     @if not $defaul-value {
       $defaul-value: map.get($theme, $item);
     }
-    @if not str-index($item, '--') {
+    @if not string.index($item, '--') {
       $result: $result + 'var(--#{$prefix}--#{$item},';
-    } @else if str-index($item, '--') == 1 {
+    } @else if string.index($item, '--') == 1 {
       $result: $result + 'var(#{$item},';
     } @else {
       $result: $result + 'var(--#{$prefix}__#{$item},';
@@ -26,8 +26,8 @@ $theme: () !default;
   @if $defaul-value {
     $result: $result + '#{$defaul-value},';
   }
-  $result: str-slice($result, 1, -2);
-  @for $i from 1 through length($fallback) {
+  $result: string.slice($result, 1, -2);
+  @for $i from 1 through list.length($fallback) {
     $result: $result + ')';
   }
   @return string.unquote($result);

@@ -51,7 +51,7 @@
   "dependencies": {
     "@c2n/wc-utils": "0.0.4",
     "@c2n/list-item": "0.0.4",
-    "lit": "3.1.2"
+    "lit": "3.2.1"
   },
   "devDependencies": {
     "@c2n/config": "*"

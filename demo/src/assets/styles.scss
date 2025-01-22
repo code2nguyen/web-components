@@ -1,4 +1,4 @@
-@import './responsive-styles.scss';
+@use './responsive-styles.scss';
 
 .scroll_container::-webkit-scrollbar {
   display: none;

@@ -10,6 +10,12 @@
       "options": {
         "parser": "astro"
       }
+    },
+    {
+      "files": "*.json.hbs",
+      "options": {
+        "parser": "json"
+      }
     }
   ]
 }

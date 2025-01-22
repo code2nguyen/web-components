@@ -148,7 +148,7 @@
     color: css.cssVar(item__hover--color, item--color) !important;
   }
 
-  ::slotted(a[data-selected]) {
+  ::slotted(a[data-selected='true']) {
     border-top: css.cssVar(item__selected--border-top, item__hover--border-top, item--border-top) !important;
     border-bottom: css.cssVar(item__selected--border-bottom, item__hover--border-bottom, item--border-bottom) !important;
     border-right: css.cssVar(item__selected--border-right, item__hover--border-right, item--border-right) !important;

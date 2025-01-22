@@ -5,7 +5,5 @@
       "message": "chore(release): publish %s"
     }
   },
-  "useNx": true,
-  "useWorkspaces": true,
   "version": "0.0.4"
 }

@@ -46,6 +46,7 @@
   flex: 1;
   align-self: stretch;
   display: flex;
+  flex-direction: column;
   box-shadow: css.cssVar(box-shadow);
   border-top-left-radius: css.cssVar(border-top-left-radius);
   border-top-right-radius: css.cssVar(border-top-right-radius);
