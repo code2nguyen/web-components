@@ -4,6 +4,8 @@ import styles from './avatar.scss?inline'
 /**
  * @tag c2-avatar
  *
+ * @description This is a simple avatar component that displays the first initial of a name or image.
+ *
  * @slot default - This is a default/unnamed slot
  *
  * @cssproperty {pixel} [--c2-avatar--width=32px]
@@ -25,6 +27,7 @@ import styles from './avatar.scss?inline'
  * @cssproperty {font-weight} [--c2-avatar--font-weight=700]
  * @cssproperty {font-style} --c2-avatar--font-style
  * @cssproperty {font-family} --c2-avatar--font-family
+ *
  */
 @customElement('c2-avatar')
 export class Avatar extends LitElement {
