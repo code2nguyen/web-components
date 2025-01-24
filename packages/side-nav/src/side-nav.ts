@@ -62,6 +62,8 @@ const TABLET_MODE = 0b1000
  * @cssproperty {border} --c2-side-nav__over--border-right
  * @cssproperty {border} --c2-side-nav__over--border-bottom
  *
+ * @cssproperty {color} [--c2-side-nav__scrollbar__thumb--color=rgba(0, 0, 0, 0.15)]
+ *
  * @cssproperty {border} [--c2-side-nav__dropback--background-color=rgba(0, 0, 0, 0.2)]
  * @cssproperty {z-index} [--c2-side-nav__dropback--z-index=1001]
  */

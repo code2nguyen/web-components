@@ -24,6 +24,7 @@
     border-right: null,
     border-left: null,
 
+    scrollbar__thumb--color: rgba(0, 0, 0, 0.15),
     over--position: fixed,
     over__open--width: 240px,
     over__open--height: 100vh,
@@ -131,7 +132,7 @@
               inset: 2px 0;
               width: 100%;
               border-radius: 6px;
-              background: var(--color-scrollbar, rgba(0, 0, 0, 0.15));
+              background: css.cssVar(scrollbar__thumb--color);
             }
           }
         }
