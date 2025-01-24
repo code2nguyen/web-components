@@ -5,8 +5,10 @@ import logoRef from '../assets/logo.svg?raw'
 import { TextField } from '@c2n/text-field'
 import { TextButton } from '@c2n/text-button'
 import { IconButton } from '@c2n/icon-button'
-import '../assets/styles.scss'
-
+import '../assets/common.scss'
+import '../assets/components.scss'
+import '../assets/utilities.scss'
+import '../assets/theme-dark.scss'
 const base = import.meta.env.BASE_URL
 
 interface Props {
@@ -18,18 +20,14 @@ const { title, componentId, pageTitle } = Astro.props
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content="WC Library" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href=`${base}/favicon.svg` />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet" /> -->
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    <!-- <ViewTransitions /> -->
   </head>
   <body>
     <div class="header-sticky-detector"></div>
@@ -55,7 +53,7 @@ const { title, componentId, pageTitle } = Astro.props
         </div>
       </TextField>
       <a href="/web-components/docs">
-        <TextButton client:load class={'link-button' + (componentId ? ' selected' : '')}>Documentations</TextButton>
+        <TextButton client:load class={'link-button' + (componentId ? ' selected' : '')}>Components</TextButton>
       </a>
       <a href="/web-components/playground" class="hide-mobile">
         <TextButton client:load class="link-button">Playground</TextButton>
@@ -84,10 +82,6 @@ const { title, componentId, pageTitle } = Astro.props
       <slot />
     </main>
     <style lang="scss">
-      :root {
-        --nav-bg-color: rgb(249 250 251);
-        --nav-border-color: rgb(230 230 230);
-      }
       body {
         position: relative;
         > header {
@@ -96,7 +90,8 @@ const { title, componentId, pageTitle } = Astro.props
           gap: 16px;
           padding: 16px var(--body-margin);
           position: sticky;
-          background-color: white;
+          background-color: var(--site-color-surface);
+          color: var(--site-color-on-surface);
           overflow: hidden;
           top: 0;
           left: 0;
@@ -105,12 +100,19 @@ const { title, componentId, pageTitle } = Astro.props
             background-color 500ms cubic-bezier(0.3, 0, 0.8, 0.15),
             box-shadow 300ms cubic-bezier(0.2, 0, 0, 1);
           &.is-scrolled {
-            box-shadow: 0px 1px 0px 0px var(--border-color);
+            box-shadow: 0px 1px 0px 0px var(--site-color-outline-variant);
           }
+
+          --c2-text-field--background: transparent;
           &.is-scrolled-more {
-            background-color: var(--bg-color);
+            background-color: var(--site-color-surface-container-3);
           }
           .global-search {
+            --c2-text-field--border-top: 1px solid var(--site-color-outline-variant);
+            --c2-text-field--border-left: 1px solid var(--site-color-outline-variant);
+            --c2-text-field--border-right: 1px solid var(--site-color-outline-variant);
+            --c2-text-field--border-bottom: 1px solid var(--site-color-outline-variant);
+            --c2-text-field--font-size: 14px;
             min-width: 280px;
 
             .search-icon {
@@ -125,6 +127,8 @@ const { title, componentId, pageTitle } = Astro.props
             text-decoration: none;
             gap: 12px;
             flex-wrap: nowrap;
+            font-size: 18px;
+            font-weight: 500;
             .logo-text {
               text-wrap: nowrap;
             }
@@ -134,15 +138,17 @@ const { title, componentId, pageTitle } = Astro.props
             --c2-icon-button__icon--width: 20px;
             --c2-icon-button__icon--height: 20px;
             --c2-icon-button__state-layer--size: 32px;
-            --c2-icon-button__icon--color: var(--github-icon-color);
+            --c2-icon-button__icon--color: var(--site-color-on-surface);
+            --c2-icon-button__hover--background-color: var(--site-color-surface-container-5);
+            --c2-icon-button__icon__hover--color: var(--site-color-on-surface);
           }
           .link-button {
-            --c2-text-button--color: var(--primary-text-color);
-            --c2-text-button--text-decoration-color: var(--logo-color-1);
-            --c2-text-button__hover--color: var(--logo-color-1);
-            --c2-text-button__hover--text-decoration-color: var(--logo-color-1);
+            --c2-text-button--color: var(--site-color-on-surface);
+            --c2-text-button--text-decoration-color: var(--site-color-primary);
+            --c2-text-button__hover--color: var(--site-color-primary);
+            --c2-text-button__hover--text-decoration-color: var(--site-color-primary);
             &.selected {
-              --c2-text-button--color: var(--logo-color-1);
+              --c2-text-button--color: var(--site-color-primary);
               --c2-text-button--text-decoration: underline;
             }
           }

@@ -1,0 +1,71 @@
+@use './responsive-styles.scss';
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300..900&display=swap');
+
+:root {
+  --body-margin: 60px;
+}
+
+html {
+  font-family: 'Inter', serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  color: var(--site-color-on-surface);
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a:active {
+  all: unset;
+}
+a:visited {
+  color: currentColor;
+}
+body {
+  margin: 0;
+  line-height: inherit;
+  background-color: var(--site-color-surface);
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin: 8px 0px;
+  &:not(:first-of-type) {
+    margin-top: 16px;
+  }
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin: 8px 0px;
+  &:not(:first-of-type) {
+    margin-top: 16px;
+  }
+}
+
+h5 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--site-color-primary);
+  line-height: 1rem;
+  margin: 8px 0px;
+}
+
+hr {
+  margin: 0px;
+  border: none;
+  border-top: 1px solid var(--site-color-outline-variant);
+}
+p {
+  color: var(--site-color-on-surface-variant);
+}

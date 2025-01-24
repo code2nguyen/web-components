@@ -60,3 +60,9 @@ npx lerna publish patch --no-private --exact --yes
 ```
 
 ```
+
+References:
+
+- https://phosphoricons.com/?q=%22copy%22
+
+- Icon: https://feathericons.com/?query=copy

@@ -11,18 +11,18 @@ interface Props {
   lang: shiki.BuiltinLanguage
   uid: string
   github?: string
-  compack?: string
+  compact?: string
   style: string
 }
 
-const { code: rawCode, lang, github, compack, uid, style } = Astro.props
+const { code: rawCode, lang, github, compact, uid, style } = Astro.props
 let code = rawCode.replace(/\\\\/g, '\\')
 code = rawCode.replace(/\\n/g, '\n')
 code = code.replace(/\\"/g, '"')
 code = code.replace(/^"|"$/g, '')
 ---
 
-<ExpansionPanel client:load class={'mdx-code-block ' + (compack ? 'compack' : '')} title-not-clickable>
+<ExpansionPanel client:load class={'mdx-code-block ' + (compact ? 'compact' : '')} title-not-clickable>
   <IconButton slot="icon" class="open-close-icon" tooltip="Show code">
     <svg fill="currentColor" viewBox="0 0 256 256">
       <path

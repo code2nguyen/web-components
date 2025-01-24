@@ -1,7 +1,7 @@
 :host {
   display: block;
   font-size: 12px;
-  --c2-details--border-bottom: 1px solid var(--border-color);
+  --c2-details--border-bottom: 1px solid var(--site-color-outline);
   --c2-details--border-top: none;
   --c2-details--border-left: none;
   --c2-details--border-right: none;
@@ -25,8 +25,8 @@
   --c2-checkbox__state-layer--size: 32px;
   --c2-checkbox__container--height: 16px;
   --c2-checkbox__container--width: 16px;
-  --c2-checkbox__state-layer__hover__selected--color: var(--logo-color-1);
-  --c2-checkbox__state-layer__hover__unselected--color: var(--logo-color-1);
+  --c2-checkbox__state-layer__hover__selected--color: var(--site-color-primary);
+  --c2-checkbox__state-layer__hover__unselected--color: var(--site-color-primary);
 
   --c2-select__button--font-size: 10px;
   --c2-select__button__suffix-icon--width: 12px;
@@ -50,10 +50,10 @@
   --c2-text-field--border-bottom: 1px solid transparent;
   --c2-text-field--border-left: 1px solid transparent;
 
-  --c2-text-field__focus--border-top: 1px solid var(--logo-color-1);
-  --c2-text-field__focus--border-right: 1px solid var(--logo-color-1);
-  --c2-text-field__focus--border-bottom: 1px solid var(--logo-color-1);
-  --c2-text-field__focus--border-left: 1px solid var(--logo-color-1);
+  --c2-text-field__focus--border-top: 1px solid var(--site-color-primary);
+  --c2-text-field__focus--border-right: 1px solid var(--site-color-primary);
+  --c2-text-field__focus--border-bottom: 1px solid var(--site-color-primary);
+  --c2-text-field__focus--border-left: 1px solid var(--site-color-primary);
 
   --c2-icon-button__icon--width: 12px;
   --c2-icon-button__icon--height: 12px;
@@ -64,14 +64,14 @@
   --c2-tabs__tab--padding-bottom: 16px;
   --c2-tabs__indicator--height: 2px;
   --c2-tabs--box-shadow: inset 0px -2px 0px 0px rgb(230 230 230);
-  --c2-tabs__indicator--color: var(--logo-color-1);
+  --c2-tabs__indicator--color: var(--site-color-primary);
 }
 
 c2-text-field:hover {
-  --c2-text-field--border-top: 1px solid var(--border-color-default);
-  --c2-text-field--border-right: 1px solid var(--border-color-default);
-  --c2-text-field--border-bottom: 1px solid var(--border-color-default);
-  --c2-text-field--border-left: 1px solid var(--border-color-default);
+  --c2-text-field--border-top: 1px solid var(--site-color-outline);
+  --c2-text-field--border-right: 1px solid var(--site-color-outline);
+  --c2-text-field--border-bottom: 1px solid var(--site-color-outline);
+  --c2-text-field--border-left: 1px solid var(--site-color-outline);
 }
 
 c2-text-field.number {
@@ -105,7 +105,7 @@ c2-details:has(> .sub-details) {
 }
 
 .config-content-group > .row {
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--site-color-outline);
   padding: 12px 16px 12px 20px;
 }
 

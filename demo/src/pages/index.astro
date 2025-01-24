@@ -29,7 +29,8 @@ const customTextFieldSlotCode = `
 
 <Main title="CW Library">
   <div class="index-page">
-    <section class="title">Flexible and compact Web Component Library.</section>
+    <section class="title"><span class="em-1">Flexible</span> & <span class="em-2">Compact</span> Web Component Library</section>
+
     <section class="text-section">
       <h5 class="em-1">Getting started</h5>
       <h2>Installation</h2>
@@ -44,7 +45,7 @@ const customTextFieldSlotCode = `
       <p>
         To import components into your project. Uses <span class="em-1">import syntax </span> of javascript
         <br /><br />Example for importing Text Field component
-        <CodeBlock code='import "@c2n/text-field"' />
+        <CodeBlock code='import "@c2n text-field""' />
       </p>
     </section>
     <section class="text-section">
@@ -77,8 +78,6 @@ const customTextFieldSlotCode = `
       font-weight: 600;
       max-width: 600px;
       line-height: 1.4;
-      display: flex;
-      justify-content: center;
       text-align: center;
       align-self: center;
       margin: 32px 0;
@@ -87,6 +86,7 @@ const customTextFieldSlotCode = `
       margin: 16px min(250px, 10vw);
       p {
         line-height: 1.5rem;
+        color: var(--site-color-on-surface-variant);
       }
     }
 

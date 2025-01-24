@@ -12,6 +12,8 @@ import { Avatar } from '@c2n/avatar'
 
 # Avatar
 
+A simple component that displays an avatar using a name attribute or an slotted image.
+
 ### Installation
 
 ```bash tag=CodeBlock
@@ -29,13 +31,13 @@ import '@c2n/avatar'
 <br />
 ---
 
-```html tag=MdxCodeBlock,compack=true,component=c2-avatar
+```html tag=MdxCodeBlock,compact=true,component=c2-avatar
 <c2-avatar client:only="lit" name="Nguyen Thai Vinh"></c2-avatar>
 ```
 
 ---
 
-```html tag=MdxCodeBlock,compack=true,component=c2-avatar
+```html tag=MdxCodeBlock,compact=true,component=c2-avatar
 <c2-avatar client:only="lit" name="Nguyen Thai Vinh">
   <img src="/web-components/chat.avif" />
 </c2-avatar>
