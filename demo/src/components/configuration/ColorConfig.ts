@@ -11,6 +11,7 @@ import '@c2n/checkbox'
 import type { Checkbox } from '@c2n/checkbox'
 import type { TextField } from '@c2n/text-field'
 import { shortName } from '../../utils/dom.ts'
+import type { ExtraComponentConfigState } from '../../model/component-config-state.ts'
 
 @customElement('demo-color-config')
 export class ColorConfig extends LitElement {
@@ -137,16 +138,19 @@ export class ColorConfig extends LitElement {
     return new TinyColor({ h: this.h, s: this.s, v: this.v, a: this.a })
   }
 
-  private dispathChangeEvent() {
+  private dispatchChangeEvent() {
     const detail: Record<string, string> = {}
 
     if (this.show) {
       detail[this.name] = this.tinyColor.toRgbString()
       detail[this.hiddenName] = ''
     } else {
-      const cssProperty = $configStore.value?.allCssProperties.find((item) => item.cssVariable == this.name)
+      const cssProperty = this.componentConfig?.allCssProperties.find((item) => item.cssVariable == this.name)
 
-      detail[this.name] = cssProperty?.type == 'color' && cssProperty?.default && !cssProperty?.default.startsWith('--') ? 'transparent' : ''
+      detail[this.name] =
+        cssProperty?.type == 'background' || (cssProperty?.type == 'color' && cssProperty?.default && !cssProperty?.default.startsWith('--'))
+          ? 'transparent'
+          : ''
       detail[this.hiddenName] = this.tinyColor.toRgbString()
     }
 
@@ -165,7 +169,7 @@ export class ColorConfig extends LitElement {
     this.v = event.detail.v
     this.a = event.detail.a
     this.show = true
-    this.dispathChangeEvent()
+    this.dispatchChangeEvent()
   }
 
   private extractHsvaFromColor(value: string) {
@@ -190,7 +194,7 @@ export class ColorConfig extends LitElement {
     if (changedProperties.has('name') || changedProperties.has('value')) {
       // if found hideValues, so this value was hidden,
       // we change color to the hideValue, and make show = false
-      const hiddenColor = $configStore.value?.hideValues ? $configStore.value?.hideValues[this.name] : null
+      const hiddenColor = this.componentConfig?.hideValues ? this.componentConfig.hideValues[this.name] : null
       if (hiddenColor) {
         this.extractHsvaFromColor(hiddenColor)
         this.show = false
@@ -198,9 +202,13 @@ export class ColorConfig extends LitElement {
     }
   }
 
+  private get componentConfig(): ExtraComponentConfigState | null | undefined {
+    return $configStore.value.uid && $configStore.value.configs ? $configStore.value.configs.get($configStore.value.uid) : null
+  }
+
   handleShowOptionChange(event: Event) {
     this.show = (event.target as Checkbox).checked
-    this.dispathChangeEvent()
+    this.dispatchChangeEvent()
   }
 
   handleColorInputChange(event: Event & { target: TextField }) {
@@ -213,7 +221,7 @@ export class ColorConfig extends LitElement {
       this.v = v
       this.a = a
       this.show = true
-      this.dispathChangeEvent()
+      this.dispatchChangeEvent()
     }
   }
 
@@ -222,7 +230,7 @@ export class ColorConfig extends LitElement {
     if (value >= 0 && value <= 100) {
       this.a = value / 100
       this.show = true
-      this.dispathChangeEvent()
+      this.dispatchChangeEvent()
     }
   }
 

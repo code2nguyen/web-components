@@ -26,8 +26,8 @@ export class GenerateCodeBLock extends LitElement {
   private _componentUID = ''
   @property() set componentUID(value: string) {
     this._componentUID = value
-    this.code = $configCodeStore.get()[this._componentUID].code
-    this.lang = $configCodeStore.get()[this._componentUID].lang
+    this.code = $configCodeStore.get()[this._componentUID]?.code
+    this.lang = $configCodeStore.get()[this._componentUID]?.lang
   }
 
   get componentUID() {
@@ -41,12 +41,13 @@ export class GenerateCodeBLock extends LitElement {
 
   generateCssCode() {
     const initialStyles = getInitialStyles(this.componentUID)
-    const newCssProperties = this.configStore.value.allCssProperties
-      .filter((cssVariable) => {
+    const newCssProperties = this.configStore.value.configs
+      .get(this.componentUID)
+      ?.allCssProperties.filter((cssVariable) => {
         return initialStyles[cssVariable.cssVariable] !== cssVariable.value && cssVariable.value
       })
       .map((item) => `${item.cssVariable}: ${item.value}`)
-    return newCssProperties.length > 0 ? `:host {\n${newCssProperties.join(';\n') + ';'}\n}` : ''
+    return newCssProperties && newCssProperties.length > 0 ? `:host {\n${newCssProperties.join(';\n') + ';'}\n}` : ''
   }
 
   render() {

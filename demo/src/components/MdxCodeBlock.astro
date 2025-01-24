@@ -52,10 +52,15 @@ code = code.replace(/^"|"$/g, '')
 
 <style>
   .mdx-code-block-setting-btn.active {
-    --c2-icon-button--background-color: var(--logo-color-2);
-    --c2-icon-button__hover--background-color: var(--logo-color-2);
-    --c2-icon-button__icon--color: white;
-    --c2-icon-button__icon__hover--color: white;
+    --c2-icon-button--background-color: var(--site-color-secondary);
+    --c2-icon-button__icon--color: var(--site-color-on-surface);
+    --c2-icon-button__icon__hover--color: var(--site-color-on-surface);
+  }
+
+  .mdx-code-block-setting-btn,
+  .open-close-icon {
+    --c2-icon-button--background-color: transparent;
+    --c2-icon-button__hover--background-color: var(--site-color-surface-container-5);
   }
 </style>
-<script src="./MdxCodeBlock.ts"></script>
+<script src="./MdxCodeBlockScript.ts"></script>

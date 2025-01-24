@@ -32,13 +32,21 @@ import '@c2n/select'
 <br />
 ---
 
-```html tag=MdxCodeBlock,compact=true,component=c2-select
-<c2-select client:only="lit" placeholder="Select your country">
+```html tag=MdxCodeBlock,compact=true,component=c2-select,id=default
+<c2-select client:only="lit" placeholder="Select your country" class="c2-select-default">
   <c2-list-item value="US">United States</c2-list-item>
   <c2-list-item value="CA">Canada</c2-list-item>
   <c2-list-item value="FR">France</c2-list-item>
   <c2-list-item value="CO">Colombia</c2-list-item>
 </c2-select>
+<style>
+  .c2-select-default {
+    --c2-list-item--font-size: 14px;
+    --c2-list-item--padding-top: 8px;
+    --c2-list-item--padding-bottom: 8px;
+    width: 180px;
+  }
+</style>
 ```
 
 ---

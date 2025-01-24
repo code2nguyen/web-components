@@ -1,14 +1,5 @@
 import { $configStore } from '../store/config-store.ts'
-import { $configCodeStore } from '../store/config-code-store.ts'
-import {
-  closestElementSibling,
-  getParent,
-  getComponentByUid,
-  normalizeCssValue,
-  updateDomCssValue,
-  updateDomAttribute,
-  getInitialStyles,
-} from '../utils/dom.ts'
+import { getComponentByUid, normalizeCssValue, updateDomCssValue, updateDomAttribute, getInitialStyles } from '../utils/dom.ts'
 import { getComponentManifestData, saveInitialStyle } from '../utils/manifest-utils.ts'
 import { componentManifests } from '../store/component-manifests.ts'
 
@@ -19,43 +10,52 @@ for (const settingBtn of settingBtns) {
     const btn = (event.target as HTMLElement).closest('c2-icon-button') as HTMLElement
     const uid = btn?.dataset.uid
     if (uid) {
-      const hideConfig = $configStore.get()['uid'] == uid
+      const configStore = $configStore.get()
+      const hideConfig = configStore.uid == uid
       if (hideConfig) {
         $configStore.setKey('showConfig', false)
+        $configStore.setKey('currentComponentTag', '')
         $configStore.setKey('uid', '')
-        $configStore.setKey('cssComponentTag', '')
         return
       }
 
-      const codeBlockElement = closestElementSibling(getParent(btn), '.code')!
-      const code = codeBlockElement.querySelector('code')?.innerText
-      const lang = codeBlockElement.dataset.lang
       const targetComp = getComponentByUid(uid)
       if (!targetComp) return
+
       const componentManifest = componentManifests[targetComp.tagName.toLowerCase()]
       saveInitialStyle(targetComp, componentManifest.allCssProperties)
-      const componentManifestData = getComponentManifestData(targetComp, componentManifest)
-      $configStore.set({
-        uid,
-        cssComponentTag: componentManifestData.tagName,
-        showConfig: true,
-        ...componentManifestData,
-      })
-      $configCodeStore.setKey(uid, { code: code ?? '', lang: lang ?? '' })
+
+      $configStore.setKey('showConfig', true)
+      $configStore.setKey('currentComponentTag', componentManifest.tagName)
+      $configStore.setKey('uid', uid)
+
+      if (!configStore.configs || !configStore.configs.get(uid)) {
+        const new_configs = configStore.configs ? new Map(configStore.configs) : new Map()
+        const componentManifestData = getComponentManifestData(targetComp, componentManifest)
+        new_configs.set(uid, componentManifestData)
+        $configStore.setKey('configs', new_configs)
+      }
+      // TODO: review the way we display generated code
+      // const codeBlockElement = closestElementSibling(getParent(btn), '.code')!
+      // const code = codeBlockElement.querySelector('code')?.innerText
+      // const lang = codeBlockElement.dataset.lang
+      // $configCodeStore.setKey(uid, { code: code ?? '', lang: lang ?? '' })
     }
   })
 }
 
 // update config from configStore
-$configStore.subscribe((componentConfig) => {
-  const targetUID = componentConfig.uid
+$configStore.subscribe((configStore) => {
+  const targetUID = configStore.uid
   let manifestStyleStr = ''
-  if (!targetUID) {
+  if (!targetUID || !configStore.configs) {
     return
   }
   const initialStyles = getInitialStyles(targetUID)
   const targetComp = getComponentByUid(targetUID)
-  if (!targetComp) return
+  const componentConfig = configStore.configs.get(targetUID)
+
+  if (!targetComp || !componentConfig) return
 
   if (componentConfig.host?.w && componentConfig.host?.w !== 'auto') {
     const width = normalizeCssValue(componentConfig.host.w)

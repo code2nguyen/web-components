@@ -15,7 +15,7 @@
   --c2-details__header--gap: 8px;
   --c2-details__header__icon--width: 12px;
   --c2-details__header__icon--height: 12px;
-  --c2-details__header__hover--background-color: transparent;
+  --c2-details__header__hover--background: transparent;
 
   --c2-text-field--font-size: 10px;
   --c2-text-field--padding-top: 6px;
@@ -28,7 +28,7 @@
   --c2-checkbox__state-layer__hover__selected--color: var(--site-color-primary);
   --c2-checkbox__state-layer__hover__unselected--color: var(--site-color-primary);
 
-  --c2-select__button--font-size: 10px;
+  --c2-select__button--font-size: 12px;
   --c2-select__button__suffix-icon--width: 12px;
   --c2-select__button__suffix-icon--height: 12px;
   --c2-select__button__prefix-icon--width: 12px;
@@ -37,7 +37,6 @@
   --c2-select__button--padding: 8px 8px 8px 8px;
   --c2-select__button__hover--background: transparent;
   --c2-select__button--background: transparent;
-  --c2-list-item--font-size: 10px;
 
   --c2-select__button--color: var(--site-color-on-surface);
   --c2-select__button__hover--color: var(--site-color-on-surface);
@@ -65,10 +64,11 @@
   --c2-tabs__tab--padding-right: 16px;
   --c2-tabs__tab--padding-bottom: 16px;
   --c2-tabs__indicator--height: 2px;
-  --c2-tabs--box-shadow: inset 0px -2px 0px 0px rgb(230 230 230);
+  --c2-tabs--box-shadow: inset 0px -1px 0px 0px var(--site-color-outline);
   --c2-tabs__indicator--color: var(--site-color-primary);
 
   --c2-list--background: var(--site-color-surface);
+  --c2-list-item--font-size: 12px;
   --c2-list-item--color: var(--site-color-on-surface);
   --c2-list-item__hover--background: var(--site-color-surface-container-5);
   --c2-list-item__selected--background: var(--site-color-surface-container-3);

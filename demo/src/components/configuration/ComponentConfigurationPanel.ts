@@ -28,6 +28,7 @@ import type { AttributeDeclarationItem, CSSDeclarationItem } from '../../store/m
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils.ts'
 import { BORDER_ORDER, BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER } from '../../utils/dom.ts'
 import type { Select } from '@c2n/select'
+import type { ExtraComponentConfigState } from '../../model/component-config-state.ts'
 
 interface UpdateValue {
   name: string
@@ -67,8 +68,6 @@ export class ComponentConfigurationPanel extends LitElement {
 
   private handleCheckboxChange(event: Event) {
     const target = event.target as Checkbox
-
-    if (!$configStore.value) return
     const updatedValue: UpdateValue = {
       name: target.id,
       value: target.checked ? 'true' : 'false',
@@ -78,7 +77,6 @@ export class ComponentConfigurationPanel extends LitElement {
 
   private handleTextInputChange(event: Event) {
     const target = event.target as HTMLElement & { value: string }
-    if (!$configStore.value) return
     const updatedValue: UpdateValue = {
       name: target.id,
       value: target.value,
@@ -88,13 +86,11 @@ export class ComponentConfigurationPanel extends LitElement {
 
   private handleCustomConfigChange(event: CustomEvent) {
     const detail = event.detail as Record<string, string>
-    if (!$configStore.value) return
-
     for (const [key, value] of Object.entries(detail)) {
       if (key.startsWith('hideValue')) {
-        const hideValues = $configStore.value.hideValues ?? {}
+        const hideValues = this.componentConfig!.hideValues ?? {}
         hideValues[key.replace('hideValue', '')] = value
-        $configStore.setKey('hideValues', hideValues)
+        this.updateComponentConfig('hideValues', hideValues)
       } else {
         const updatedValue: UpdateValue = {
           name: key,
@@ -104,8 +100,9 @@ export class ComponentConfigurationPanel extends LitElement {
       }
     }
   }
+
   private handleSelectComponentChange(event: Event & { target: Select }) {
-    $configStore.setKey('cssComponentTag', event.target.value[0])
+    $configStore.setKey('currentComponentTag', event.target.value[0])
   }
 
   private handleCloseClick() {
@@ -115,20 +112,28 @@ export class ComponentConfigurationPanel extends LitElement {
 
   private updateStore(updateValue: UpdateValue) {
     if (!$configStore.value) return
-    const updateAttribute = $configStore.value.attributes.find((item) => item.name == updateValue.name)
+    const updateAttribute = this.componentConfig?.attributes.find((item) => item.name == updateValue.name)
     if (updateAttribute) {
       updateAttribute.value = updateValue.value
-      $configStore.setKey('attributes', [...$configStore.value.attributes])
+      this.updateComponentConfig('attributes', [...this.componentConfig!.attributes])
       return
     }
 
-    const updateCssProperties = $configStore.value.allCssProperties.find((item) => item.cssVariable == updateValue.name)
+    const updateCssProperties = this.componentConfig?.allCssProperties.find((item) => item.cssVariable == updateValue.name)
     if (updateCssProperties) {
       updateCssProperties.value = updateValue.value
-      const optimizedCssProperties = this.optimizeCssVariables([...$configStore.value.allCssProperties])
-      $configStore.setKey('allCssProperties', optimizedCssProperties)
+      const optimizedCssProperties = this.optimizeCssVariables([...this.componentConfig!.allCssProperties])
+      this.updateComponentConfig('allCssProperties', optimizedCssProperties)
       return
     }
+  }
+  private updateComponentConfig(key: keyof ExtraComponentConfigState, value: ExtraComponentConfigState[keyof ExtraComponentConfigState]) {
+    if (!$configStore.get().uid || !$configStore.get().configs || !this.componentConfig) return
+    const new_configs = new Map($configStore.value.configs)
+    const newComponentConfig: ExtraComponentConfigState = { ...this.componentConfig }
+    newComponentConfig[key] = value as never
+    new_configs.set($configStore.get().uid!, newComponentConfig)
+    $configStore.setKey('configs', new_configs)
   }
 
   private generateAttributeInput(attr: AttributeDeclarationItem) {
@@ -142,7 +147,7 @@ export class ComponentConfigurationPanel extends LitElement {
   }
 
   private getCssVariableValue(name: string): string {
-    const cssVariable = this.configStore.value.allCssProperties.find((item) => item.cssVariable == name)
+    const cssVariable = this.componentConfig?.allCssProperties.find((item) => item.cssVariable == name)
     if (!cssVariable) return ''
 
     if (cssVariable.value !== undefined) {
@@ -157,9 +162,9 @@ export class ComponentConfigurationPanel extends LitElement {
   }
 
   private getAttributeValue(name: string) {
-    const attr = this.configStore.value.attributes.find((item) => item.name == name)
+    const attr = this.componentConfig?.attributes.find((item) => item.name == name)
     if (!attr) return ''
-    return attr.value !== undefined ? attr.value : attr.default ?? (attr.type == 'boolean' ? 'false' : '')
+    return attr.value !== undefined ? attr.value : (attr.default ?? (attr.type == 'boolean' ? 'false' : ''))
   }
 
   private generateCssVariableInput(cssDeclaration: CSSDeclarationItem) {
@@ -284,9 +289,9 @@ export class ComponentConfigurationPanel extends LitElement {
   }
 
   private renderCssProperties() {
-    const componentManifest = this.configStore.value
-    const cssComponentTag = this.configStore.value.cssComponentTag
-    const cssProperties = componentManifest.allCssProperties.filter((item) => {
+    if (this.componentConfig == null) return nothing
+    const cssComponentTag = this.configStore.value.currentComponentTag
+    const cssProperties = this.componentConfig.allCssProperties.filter((item) => {
       return item.cssVariable.startsWith(`--${cssComponentTag}--`) || item.cssVariable.startsWith(`--${cssComponentTag}__`)
     })
     const groupedCssVariables = flatGroupCssProperties(groupCssProperties(cssProperties))
@@ -294,11 +299,11 @@ export class ComponentConfigurationPanel extends LitElement {
       <div class="row">
         <c2-label for="component-select">Component</c2-label>
         <c2-select id="component-select" value=${cssComponentTag} required @selection-change=${this.handleSelectComponentChange}>
-          <c2-list-item value=${componentManifest.tagName} class="level-0">${componentManifest.tagName}</c2-list-item>
-          ${componentManifest.internalComponents.map((tag) => {
+          <c2-list-item value=${this.componentConfig.tagName} class="level-0">${this.componentConfig.tagName}</c2-list-item>
+          ${this.componentConfig.internalComponents.map((tag) => {
             return html`<c2-list-item value=${tag} class="level-1">${tag}</c2-list-item>`
           })}
-          ${componentManifest.slotComponents.map((tag) => {
+          ${this.componentConfig.slotComponents.map((tag) => {
             return html`<c2-list-item value=${tag}>${tag}</c2-list-item>`
           })}
         </c2-select>
@@ -317,10 +322,14 @@ export class ComponentConfigurationPanel extends LitElement {
     </div>`
   }
 
-  private renderAttribues() {
-    return this.configStore.value.attributes.length > 0
+  private get componentConfig(): ExtraComponentConfigState | null | undefined {
+    return this.configStore.value.uid && this.configStore.value.configs ? this.configStore.value.configs.get(this.configStore.value.uid) : null
+  }
+
+  private renderAttributes() {
+    return this.componentConfig && this.componentConfig.attributes.length > 0
       ? html` <div class="config-content-group">
-          ${this.configStore.value.attributes.map((attr) => {
+          ${this.componentConfig.attributes.map((attr) => {
             return this.generateAttributeInput(attr)
           })}
         </div>`
@@ -328,7 +337,7 @@ export class ComponentConfigurationPanel extends LitElement {
   }
 
   private renderCode() {
-    return html`<demo-generate-code-block .componentUID=${this.configStore.value.uid}></demo-generate-code-block> `
+    return html`<demo-generate-code-block .componentUID=${this.configStore.value.uid!}></demo-generate-code-block> `
   }
 
   private optimizeCssVariables(cssProperties: CSSDeclarationItem[]) {
@@ -353,7 +362,7 @@ export class ComponentConfigurationPanel extends LitElement {
           <c2-tab label="Attributes" for="Attributes"></c2-tab>
           <c2-tab label="Code" for="Code"></c2-tab>
           <div id="CSS">${this.renderCssProperties()}</div>
-          <div id="Attributes">${this.renderAttribues()}</div>
+          <div id="Attributes">${this.renderAttributes()}</div>
           <div id="Code">${this.renderCode()}</div>
         </c2-tabs>
         <c2-icon-button class="close-button" @click=${this.handleCloseClick}>

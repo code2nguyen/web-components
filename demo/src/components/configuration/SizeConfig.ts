@@ -12,8 +12,8 @@ export class SizeConfig extends LitElement {
       :host {
         display: block;
 
-        --c2-checkbox__uncheckmark--color: var(--primary-text-color);
-        --c2-checkbox__checkmark--color: var(--primary-text-color);
+        --c2-checkbox__uncheckmark--color: var(--site-color-primary);
+        --c2-checkbox__checkmark--color: var(--site-color-primary);
         --c2-checkbox__container--border: none;
         --c2-checkbox__container__selected--color: transparent;
         --c2-checkbox__touchable--size: 16px;
@@ -25,10 +25,10 @@ export class SizeConfig extends LitElement {
       }
 
       c2-text-field:hover {
-        --c2-text-field--border-top: 1px solid var(--border-color-default);
-        --c2-text-field--border-right: 1px solid var(--border-color-default);
-        --c2-text-field--border-bottom: 1px solid var(--border-color-default);
-        --c2-text-field--border-left: 1px solid var(--border-color-default);
+        --c2-text-field--border-top: 1px solid var(--site-color-outline);
+        --c2-text-field--border-right: 1px solid var(--site-color-outline);
+        --c2-text-field--border-bottom: 1px solid var(--site-color-outline);
+        --c2-text-field--border-left: 1px solid var(--site-color-outline);
       }
 
       .text-prefix {
