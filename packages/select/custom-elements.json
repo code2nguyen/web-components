@@ -1,1 +1,568 @@
-{"schemaVersion":"1.0.0","readme":"","modules":[{"kind":"javascript-module","path":"src/select.ts","declarations":[{"kind":"class","description":"","name":"Select","cssProperties":[{"type":{"text":"pixel"},"name":"--c2-select__button__suffix-icon--width","default":"18px"},{"type":{"text":"pixel"},"name":"--c2-select__button__suffix-icon--height","default":"18px"},{"type":{"text":"padding"},"description":"Button padding","name":"--c2-select__button--padding","default":"4px 8px 4px 8px"},{"type":{"text":"color"},"name":"--c2-select__button--background","default":"rgb(253, 253, 253)"},{"type":{"text":"color"},"name":"--c2-select__button--color","default":"initial"},{"type":{"text":"pixel"},"name":"--c2-select__button--gap","default":"4px"},{"type":{"text":"font-size"},"name":"--c2-select__button--font-size","default":"14px"},{"type":{"text":"font-weight"},"name":"--c2-select__button--font-weight"},{"type":{"text":"font-style"},"name":"--c2-select__button--font-style","default":"normal"},{"type":{"text":"font-family"},"name":"--c2-select__button--font-family"},{"type":{"text":"pixel"},"name":"--c2-select__button--border-top-left-radius","default":"4px"},{"type":{"text":"pixel"},"name":"--c2-select__button--border-top-right-radius","default":"4px"},{"type":{"text":"pixel"},"name":"--c2-select__button--border-bottom-left-radius","default":"4px"},{"type":{"text":"pixel"},"name":"--c2-select__button--border-bottom-right-radius","default":"4px"},{"type":{"text":"border"},"name":"--c2-select__button--border-top","default":"1px solid rgb(177, 177, 177)"},{"type":{"text":"border"},"name":"--c2-select__button--border-right","default":"1px solid rgb(177, 177, 177)"},{"type":{"text":"border"},"name":"--c2-select__button--border-bottom","default":"1px solid rgb(177, 177, 177)"},{"type":{"text":"border"},"name":"--c2-select__button--border-left","default":"1px solid rgb(177, 177, 177)"},{"type":{"text":"border"},"name":"--c2-select__button__hover--border-top","default":"1px solid rgb(177, 177, 177)"},{"type":{"text":"border"},"name":"--c2-select__button__hover--border-right","default":"1px solid rgb(177, 177, 177)"},{"type":{"text":"border"},"name":"--c2-select__button__hover--border-bottom","default":"1px solid rgb(177, 177, 177)"},{"type":{"text":"border"},"name":"--c2-select__button__hover--border-left","default":"1px solid rgb(177, 177, 177)"},{"type":{"text":"color"},"name":"--c2-select__button__hover--background","default":"rgb(253, 253, 253)"},{"type":{"text":"color"},"name":"--c2-select__button__hover--color","default":"initial"},{"type":{"text":"number"},"name":"--c2-select__placeholder--font-weight"},{"type":{"text":"font-style"},"name":"--c2-select__placeholder--font-style"},{"type":{"text":"color"},"name":"--c2-select__placeholder--color"},{"type":{"text":"number"},"name":"--c2-select__placeholder--opacity"}],"slots":[{"description":"This is a default/unnamed slot","name":"default"}],"members":[{"kind":"field","name":"open","type":{"text":"boolean"},"default":"false","attribute":"open","reflects":true},{"kind":"field","name":"readonly","type":{"text":"boolean"},"default":"false","attribute":"readonly","reflects":true},{"kind":"field","name":"disabled","type":{"text":"boolean"},"default":"false","attribute":"disabled","reflects":true},{"kind":"field","name":"focused","type":{"text":"boolean"},"default":"false","attribute":"focused","reflects":true},{"kind":"field","name":"fitTarget","type":{"text":"boolean"},"default":"false","attribute":"fit-target"},{"kind":"field","name":"placeholder","type":{"text":"string"},"default":"''","attribute":"placeholder"},{"kind":"field","name":"multiple","type":{"text":"boolean"},"default":"false","attribute":"multiple"},{"kind":"field","name":"required","type":{"text":"boolean"},"default":"false","attribute":"required"},{"kind":"field","name":"value","type":{"text":"string[]"},"default":"[]","description":"The value separated by <code>;</code>","attribute":"value","reflects":true},{"kind":"field","name":"button","type":{"text":"HTMLButtonElement"},"privacy":"public"},{"kind":"field","name":"menu","type":{"text":"HTMLElement"},"privacy":"public"},{"kind":"field","name":"listItemSlot","type":{"text":"HTMLSlotElement | undefined"},"privacy":"public"},{"kind":"field","name":"displayText","type":{"text":"string"},"privacy":"private","default":"''"},{"kind":"field","name":"childItemsUpdated","type":{"text":"Promise<unknown[]>"},"privacy":"protected"},{"kind":"field","name":"data","type":{"text":"unknown[]"},"default":"[]"},{"kind":"method","name":"onButtonBlur","privacy":"private","return":{"type":{"text":"void"}}},{"kind":"field","name":"onKeydown","privacy":"private"},{"kind":"method","name":"toggle","privacy":"public","return":{"type":{"text":"void"}},"parameters":[{"name":"value","optional":true,"type":{"text":"boolean"}}]},{"kind":"method","name":"onButtonFocus","privacy":"private","return":{"type":{"text":"void"}}},{"kind":"method","name":"prepareGetDisplayText","privacy":"private"},{"kind":"method","name":"updateDisplayText","privacy":"private"},{"kind":"method","name":"renderButtonContent","privacy":"private"},{"kind":"method","name":"renderButtonSuffixIcon","privacy":"private"},{"kind":"method","name":"handleSelectionChange","privacy":"private","parameters":[{"name":"event","type":{"text":"CustomEvent<SelectionChangeEventDetail>"}}]},{"kind":"method","name":"handleOverlayToggle","privacy":"private","parameters":[{"name":"event","type":{"text":"Event"}}]},{"kind":"method","name":"getUpdateComplete","privacy":"protected","return":{"type":{"text":"Promise<boolean>"}}},{"kind":"method","name":"handleSlotChange","privacy":"private"}],"events":[{}],"attributes":[{"name":"open","type":{"text":"boolean"},"default":"false","fieldName":"open"},{"name":"readonly","type":{"text":"boolean"},"default":"false","fieldName":"readonly"},{"name":"disabled","type":{"text":"boolean"},"default":"false","fieldName":"disabled"},{"name":"focused","type":{"text":"boolean"},"default":"false","fieldName":"focused"},{"name":"fit-target","type":{"text":"boolean"},"default":"false","fieldName":"fitTarget"},{"name":"placeholder","type":{"text":"string"},"default":"''","fieldName":"placeholder"},{"name":"multiple","type":{"text":"boolean"},"default":"false","fieldName":"multiple"},{"name":"required","type":{"text":"boolean"},"default":"false","fieldName":"required"},{"name":"value","type":{"text":"string[]"},"default":"[]","description":"The value separated by <code>;</code>","fieldName":"value"}],"superclass":{"name":"LitElement","package":"lit"},"tagName":"c2-select","customElement":true,"internalComponents":["c2-list","c2-overlay"],"slotComponents":["c2-list-item"]}],"exports":[{"kind":"js","name":"Select","declaration":{"name":"Select","module":"src/select.ts"}},{"kind":"custom-element-definition","name":"c2-select","declaration":{"name":"Select","module":"src/select.ts"}}]}]}
+{
+    "schemaVersion": "1.0.0",
+    "readme": "",
+    "modules": [
+        {
+            "kind": "javascript-module",
+            "path": "src/select.ts",
+            "declarations": [
+                {
+                    "kind": "class",
+                    "description": "",
+                    "name": "Select",
+                    "cssProperties": [
+                        {
+                            "type": {
+                                "text": "pixel"
+                            },
+                            "name": "--c2-select__button__suffix-icon--width",
+                            "default": "18px"
+                        },
+                        {
+                            "type": {
+                                "text": "pixel"
+                            },
+                            "name": "--c2-select__button__suffix-icon--height",
+                            "default": "18px"
+                        },
+                        {
+                            "type": {
+                                "text": "padding"
+                            },
+                            "description": "Button padding",
+                            "name": "--c2-select__button--padding",
+                            "default": "4px 8px 4px 8px"
+                        },
+                        {
+                            "type": {
+                                "text": "color"
+                            },
+                            "name": "--c2-select__button--background",
+                            "default": "rgb(253, 253, 253)"
+                        },
+                        {
+                            "type": {
+                                "text": "color"
+                            },
+                            "name": "--c2-select__button--color",
+                            "default": "initial"
+                        },
+                        {
+                            "type": {
+                                "text": "pixel"
+                            },
+                            "name": "--c2-select__button--gap",
+                            "default": "4px"
+                        },
+                        {
+                            "type": {
+                                "text": "font-size"
+                            },
+                            "name": "--c2-select__button--font-size",
+                            "default": "14px"
+                        },
+                        {
+                            "type": {
+                                "text": "font-weight"
+                            },
+                            "name": "--c2-select__button--font-weight"
+                        },
+                        {
+                            "type": {
+                                "text": "font-style"
+                            },
+                            "name": "--c2-select__button--font-style",
+                            "default": "normal"
+                        },
+                        {
+                            "type": {
+                                "text": "font-family"
+                            },
+                            "name": "--c2-select__button--font-family"
+                        },
+                        {
+                            "type": {
+                                "text": "pixel"
+                            },
+                            "name": "--c2-select__button--border-top-left-radius",
+                            "default": "4px"
+                        },
+                        {
+                            "type": {
+                                "text": "pixel"
+                            },
+                            "name": "--c2-select__button--border-top-right-radius",
+                            "default": "4px"
+                        },
+                        {
+                            "type": {
+                                "text": "pixel"
+                            },
+                            "name": "--c2-select__button--border-bottom-left-radius",
+                            "default": "4px"
+                        },
+                        {
+                            "type": {
+                                "text": "pixel"
+                            },
+                            "name": "--c2-select__button--border-bottom-right-radius",
+                            "default": "4px"
+                        },
+                        {
+                            "type": {
+                                "text": "border"
+                            },
+                            "name": "--c2-select__button--border-top",
+                            "default": "1px solid rgb(177, 177, 177)"
+                        },
+                        {
+                            "type": {
+                                "text": "border"
+                            },
+                            "name": "--c2-select__button--border-right",
+                            "default": "1px solid rgb(177, 177, 177)"
+                        },
+                        {
+                            "type": {
+                                "text": "border"
+                            },
+                            "name": "--c2-select__button--border-bottom",
+                            "default": "1px solid rgb(177, 177, 177)"
+                        },
+                        {
+                            "type": {
+                                "text": "border"
+                            },
+                            "name": "--c2-select__button--border-left",
+                            "default": "1px solid rgb(177, 177, 177)"
+                        },
+                        {
+                            "type": {
+                                "text": "border"
+                            },
+                            "name": "--c2-select__button__hover--border-top",
+                            "default": "1px solid rgb(177, 177, 177)"
+                        },
+                        {
+                            "type": {
+                                "text": "border"
+                            },
+                            "name": "--c2-select__button__hover--border-right",
+                            "default": "1px solid rgb(177, 177, 177)"
+                        },
+                        {
+                            "type": {
+                                "text": "border"
+                            },
+                            "name": "--c2-select__button__hover--border-bottom",
+                            "default": "1px solid rgb(177, 177, 177)"
+                        },
+                        {
+                            "type": {
+                                "text": "border"
+                            },
+                            "name": "--c2-select__button__hover--border-left",
+                            "default": "1px solid rgb(177, 177, 177)"
+                        },
+                        {
+                            "type": {
+                                "text": "color"
+                            },
+                            "name": "--c2-select__button__hover--background",
+                            "default": "rgb(253, 253, 253)"
+                        },
+                        {
+                            "type": {
+                                "text": "color"
+                            },
+                            "name": "--c2-select__button__hover--color",
+                            "default": "initial"
+                        },
+                        {
+                            "type": {
+                                "text": "number"
+                            },
+                            "name": "--c2-select__placeholder--font-weight"
+                        },
+                        {
+                            "type": {
+                                "text": "font-style"
+                            },
+                            "name": "--c2-select__placeholder--font-style"
+                        },
+                        {
+                            "type": {
+                                "text": "color"
+                            },
+                            "name": "--c2-select__placeholder--color"
+                        },
+                        {
+                            "type": {
+                                "text": "number"
+                            },
+                            "name": "--c2-select__placeholder--opacity"
+                        }
+                    ],
+                    "slots": [
+                        {
+                            "description": "This is a default/unnamed slot",
+                            "name": "default"
+                        }
+                    ],
+                    "members": [
+                        {
+                            "kind": "field",
+                            "name": "open",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "attribute": "open",
+                            "reflects": true
+                        },
+                        {
+                            "kind": "field",
+                            "name": "readonly",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "attribute": "readonly",
+                            "reflects": true
+                        },
+                        {
+                            "kind": "field",
+                            "name": "disabled",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "attribute": "disabled",
+                            "reflects": true
+                        },
+                        {
+                            "kind": "field",
+                            "name": "focused",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "attribute": "focused",
+                            "reflects": true
+                        },
+                        {
+                            "kind": "field",
+                            "name": "fitSize",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "attribute": "fit-size"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "placeholder",
+                            "type": {
+                                "text": "string"
+                            },
+                            "default": "''",
+                            "attribute": "placeholder"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "multiple",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "attribute": "multiple"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "required",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "attribute": "required"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "value",
+                            "type": {
+                                "text": "string[]"
+                            },
+                            "default": "[]",
+                            "description": "The value separated by <code>;</code>",
+                            "attribute": "value",
+                            "reflects": true
+                        },
+                        {
+                            "kind": "field",
+                            "name": "button",
+                            "type": {
+                                "text": "HTMLButtonElement"
+                            },
+                            "privacy": "public"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "menu",
+                            "type": {
+                                "text": "HTMLElement"
+                            },
+                            "privacy": "public"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "listItemSlot",
+                            "type": {
+                                "text": "HTMLSlotElement | undefined"
+                            },
+                            "privacy": "public"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "displayText",
+                            "type": {
+                                "text": "string"
+                            },
+                            "privacy": "private",
+                            "default": "''"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "childItemsUpdated",
+                            "type": {
+                                "text": "Promise<unknown[]>"
+                            },
+                            "privacy": "protected"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "data",
+                            "type": {
+                                "text": "unknown[]"
+                            },
+                            "default": "[]"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "onButtonBlur",
+                            "privacy": "private",
+                            "return": {
+                                "type": {
+                                    "text": "void"
+                                }
+                            }
+                        },
+                        {
+                            "kind": "field",
+                            "name": "onKeydown",
+                            "privacy": "private"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "toggle",
+                            "privacy": "public",
+                            "return": {
+                                "type": {
+                                    "text": "void"
+                                }
+                            },
+                            "parameters": [
+                                {
+                                    "name": "value",
+                                    "optional": true,
+                                    "type": {
+                                        "text": "boolean"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "onButtonFocus",
+                            "privacy": "private",
+                            "return": {
+                                "type": {
+                                    "text": "void"
+                                }
+                            }
+                        },
+                        {
+                            "kind": "method",
+                            "name": "prepareGetDisplayText",
+                            "privacy": "private"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "updateDisplayText",
+                            "privacy": "private"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "renderButtonContent",
+                            "privacy": "private"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "renderButtonSuffixIcon",
+                            "privacy": "private"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "handleSelectionChange",
+                            "privacy": "private",
+                            "parameters": [
+                                {
+                                    "name": "event",
+                                    "type": {
+                                        "text": "CustomEvent<SelectionChangeEventDetail>"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "handleOverlayToggle",
+                            "privacy": "private",
+                            "parameters": [
+                                {
+                                    "name": "event",
+                                    "type": {
+                                        "text": "Event"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "kind": "method",
+                            "name": "getUpdateComplete",
+                            "privacy": "protected",
+                            "return": {
+                                "type": {
+                                    "text": "Promise<boolean>"
+                                }
+                            }
+                        },
+                        {
+                            "kind": "method",
+                            "name": "handleSlotChange",
+                            "privacy": "private"
+                        }
+                    ],
+                    "events": [
+                        {}
+                    ],
+                    "attributes": [
+                        {
+                            "name": "open",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "fieldName": "open"
+                        },
+                        {
+                            "name": "readonly",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "fieldName": "readonly"
+                        },
+                        {
+                            "name": "disabled",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "fieldName": "disabled"
+                        },
+                        {
+                            "name": "focused",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "fieldName": "focused"
+                        },
+                        {
+                            "name": "fit-size",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "fieldName": "fitSize"
+                        },
+                        {
+                            "name": "placeholder",
+                            "type": {
+                                "text": "string"
+                            },
+                            "default": "''",
+                            "fieldName": "placeholder"
+                        },
+                        {
+                            "name": "multiple",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "fieldName": "multiple"
+                        },
+                        {
+                            "name": "required",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "fieldName": "required"
+                        },
+                        {
+                            "name": "value",
+                            "type": {
+                                "text": "string[]"
+                            },
+                            "default": "[]",
+                            "description": "The value separated by <code>;</code>",
+                            "fieldName": "value"
+                        }
+                    ],
+                    "superclass": {
+                        "name": "LitElement",
+                        "package": "lit"
+                    },
+                    "tagName": "c2-select",
+                    "customElement": true,
+                    "internalComponents": [
+                        "c2-list",
+                        "c2-overlay"
+                    ],
+                    "slotComponents": [
+                        "c2-list-item"
+                    ]
+                }
+            ],
+            "exports": [
+                {
+                    "kind": "js",
+                    "name": "Select",
+                    "declaration": {
+                        "name": "Select",
+                        "module": "src/select.ts"
+                    }
+                },
+                {
+                    "kind": "custom-element-definition",
+                    "name": "c2-select",
+                    "declaration": {
+                        "name": "Select",
+                        "module": "src/select.ts"
+                    }
+                }
+            ]
+        }
+    ]
+}

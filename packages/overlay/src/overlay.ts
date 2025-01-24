@@ -21,21 +21,21 @@ export class Overlay extends LitElement {
   @property({ type: Boolean, reflect: true }) open = false
   @property({ type: String, reflect: true }) placement: Placement = 'bottom-start'
   @property({ type: Boolean, reflect: true, attribute: 'disabled-cross-axis' }) disabledCrossAxis = false
-  @property({ type: Boolean, attribute: 'fit-target' }) fitTarget = false
+  @property({ type: Boolean, attribute: 'fit-anchor' }) fitTarget = false
 
-  private _target: HTMLElement | null | undefined = null
+  private _anchor: HTMLElement | null | undefined = null
 
   private cleanupSynPosition: (() => void) | null = null
 
   @state()
   private overlayStyle: StyleInfo = {}
 
-  get target(): HTMLElement | null {
-    if (!this._target) {
-      this._target = this.findTargetElement()
+  get anchor(): HTMLElement | null {
+    if (!this._anchor) {
+      this._anchor = this.findAnchorElement()
     }
 
-    return this._target
+    return this._anchor
   }
 
   constructor() {
@@ -47,7 +47,7 @@ export class Overlay extends LitElement {
   }
 
   handleBeforeToggle(event: Event) {
-    if (!this.target) {
+    if (!this.anchor) {
       event.preventDefault()
       return
     }
@@ -55,8 +55,8 @@ export class Overlay extends LitElement {
   }
 
   private updatePosition = async () => {
-    this.style.minWidth = `${this.target!.offsetWidth}px`
-    const position = await computePosition(this.target!, this, {
+    this.style.minWidth = `${this.anchor!.offsetWidth}px`
+    const position = await computePosition(this.anchor!, this, {
       placement: this.placement,
       middleware: [
         flip({
@@ -67,10 +67,10 @@ export class Overlay extends LitElement {
     const style: StyleInfo = {
       top: `${position.y}px`,
       left: `${position.x}px`,
-      'min-width': `${this.target!.offsetWidth}px`,
+      'min-width': `${this.anchor!.offsetWidth}px`,
     }
     if (this.fitTarget) {
-      style.width = `${this.target!.offsetWidth}px`
+      style.width = `${this.anchor!.offsetWidth}px`
     }
 
     this.placement = position.placement
@@ -83,14 +83,14 @@ export class Overlay extends LitElement {
       this.cleanupSynPosition()
     }
 
-    this.cleanupSynPosition = autoUpdate(this.target!, this, this.updatePosition)
+    this.cleanupSynPosition = autoUpdate(this.anchor!, this, this.updatePosition)
   }
 
   private handleToggle(event: Event) {
     this.open = (event as ToggleEvent).newState == 'open'
   }
 
-  private findTargetElement() {
+  private findAnchorElement(): HTMLElement | null {
     let parent = this.parentElement
     let found: HTMLElement | null = null
     while (parent && !found) {

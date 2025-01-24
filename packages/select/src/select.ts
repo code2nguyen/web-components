@@ -65,7 +65,7 @@ export class Select extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false
   @property({ type: Boolean, reflect: true }) focused = false
 
-  @property({ type: Boolean, attribute: 'fit-target' }) fitTarget = false
+  @property({ type: Boolean, attribute: 'fit-size' }) fitSize = false
 
   @property({ type: String }) placeholder = ''
   @property({ type: Boolean }) multiple: boolean = false
@@ -218,7 +218,7 @@ export class Select extends LitElement {
         <slot name="button-content">${this.renderButtonContent()}</slot>
         <slot name="button-suffix-icon">${this.renderButtonSuffixIcon()}</slot>
       </button>
-      <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fit-target=${this.fitTarget}>
+      <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fit-anchor=${this.fitSize}>
         <c2-list
           id="list"
           .value=${this.value}
