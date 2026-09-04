@@ -1,0 +1,54 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chatbot,
+  $theme: (
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
+    border-top: 1px solid variables.$color-border,
+    border-right: 1px solid variables.$color-border,
+    border-bottom: 1px solid variables.$color-border,
+    border-left: 1px solid variables.$color-border,
+
+    header--padding: 16px 16px,
+    header--background: variables.$color-bg,
+    header--border-bottom: 1px solid variables.$color-border,
+  )
+);
+
+:host {
+  display: flex;
+  --c2-avatar--width: 32px;
+  --c2-avatar--height: 32px;
+  --c2-avatar--font-size: 13px;
+}
+
+.c2-chatbot {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  border-top: css.cssVar(border-top);
+  border-bottom: css.cssVar(border-bottom);
+  border-right: css.cssVar(border-right);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  .c2-chatbot__header-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: css.cssVar(header--padding);
+    background: css.cssVar(header--background);
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+    border-bottom: css.cssVar(header--border-bottom);
+  }
+}

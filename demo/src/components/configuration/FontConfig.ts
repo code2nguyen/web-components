@@ -167,80 +167,88 @@ export class FontConfig extends LitElement {
 
   render() {
     return html`<div class="font-config">
-      ${this.fontPropertyNames.includes('font-family')
-        ? html`<c2-select id="font-family" placeholder="font-family" @selection-change=${this.handleSelectionChange}>
-            ${this.renderFontFamilyIcon()}
-            <c2-list-item value="Anonymous Pro" class="font-anonymous-pro">Anonymous Pro</c2-list-item>
-            <c2-list-item value="Caveat Variable" class="font-caveat">Caveat</c2-list-item>
-            <c2-list-item value="Crimson Text" class="font-crimson-text">Crimson Text</c2-list-item>
-            <c2-list-item value="IMB Plex Mono" class="font-ibm-plex-mono">IBM Plex Mono</c2-list-item>
-            <c2-list-item value="Inter Variable" class="font-inter">Inter</c2-list-item>
-            <c2-list-item value="Pacifico" class="font-pacifico">Pacifico</c2-list-item>
-            <c2-list-item value="Playfair Display Variable" class="font-playfair-display">Playfair Display</c2-list-item>
-            <c2-list-item value="Roboto" class="font-roboto">Roboto</c2-list-item>
-            <c2-list-item value="Roboto Mono Variable" class="font-roboto-mono">Roboto Mono</c2-list-item>
-            <c2-list-item value="Source Serif Pro" class="font-source-serif-pro ">Source Serif Pro</c2-list-item>
-          </c2-select>`
-        : nothing}
-      ${this.fontPropertyNames.includes('font-size')
-        ? html`<c2-select
-            .value=${[this.values[this.fontPropertyNames.indexOf('font-size')]]}
-            id="font-size"
-            placeholder="font-size"
-            @selection-change=${this.handleSelectionChange}
-          >
-            ${this.renderFontSizeIcon()}
+      ${
+        this.fontPropertyNames.includes('font-family')
+          ? html`<c2-select id="font-family" placeholder="font-family" @selection-change=${this.handleSelectionChange}>
+              ${this.renderFontFamilyIcon()}
+              <c2-list-item value="Anonymous Pro" class="font-anonymous-pro">Anonymous Pro</c2-list-item>
+              <c2-list-item value="Caveat Variable" class="font-caveat">Caveat</c2-list-item>
+              <c2-list-item value="Crimson Text" class="font-crimson-text">Crimson Text</c2-list-item>
+              <c2-list-item value="IMB Plex Mono" class="font-ibm-plex-mono">IBM Plex Mono</c2-list-item>
+              <c2-list-item value="Inter Variable" class="font-inter">Inter</c2-list-item>
+              <c2-list-item value="Pacifico" class="font-pacifico">Pacifico</c2-list-item>
+              <c2-list-item value="Playfair Display Variable" class="font-playfair-display">Playfair Display</c2-list-item>
+              <c2-list-item value="Roboto" class="font-roboto">Roboto</c2-list-item>
+              <c2-list-item value="Roboto Mono Variable" class="font-roboto-mono">Roboto Mono</c2-list-item>
+              <c2-list-item value="Source Serif Pro" class="font-source-serif-pro ">Source Serif Pro</c2-list-item>
+            </c2-select>`
+          : nothing
+      }
+      ${
+        this.fontPropertyNames.includes('font-size')
+          ? html`<c2-select
+              .value=${[this.values[this.fontPropertyNames.indexOf('font-size')]]}
+              id="font-size"
+              placeholder="font-size"
+              @selection-change=${this.handleSelectionChange}
+            >
+              ${this.renderFontSizeIcon()}
 
-            <c2-list-item value="10px">10</c2-list-item>
-            <c2-list-item value="11px">11</c2-list-item>
-            <c2-list-item value="12px">12</c2-list-item>
-            <c2-list-item value="13px">13</c2-list-item>
-            <c2-list-item value="14px">14</c2-list-item>
-            <c2-list-item value="16px">16</c2-list-item>
-            <c2-list-item value="20px">20</c2-list-item>
-            <c2-list-item value="24px">24</c2-list-item>
-            <c2-list-item value="32px">32</c2-list-item>
-            <c2-list-item value="36px">36</c2-list-item>
-            <c2-list-item value="40px">40</c2-list-item>
-            <c2-list-item value="48px">48</c2-list-item>
-            <c2-list-item value="64px">64</c2-list-item>
-            <c2-list-item value="96px">96</c2-list-item>
-            <c2-list-item value="128px">128</c2-list-item>
-          </c2-select>`
-        : nothing}
-      ${this.fontPropertyNames.includes('font-style')
-        ? html`<c2-select id="font-style" placeholder="font-style" @selection-change=${this.handleSelectionChange}>
-            ${this.renderFontStyleIcon()}
+              <c2-list-item value="10px">10</c2-list-item>
+              <c2-list-item value="11px">11</c2-list-item>
+              <c2-list-item value="12px">12</c2-list-item>
+              <c2-list-item value="13px">13</c2-list-item>
+              <c2-list-item value="14px">14</c2-list-item>
+              <c2-list-item value="16px">16</c2-list-item>
+              <c2-list-item value="20px">20</c2-list-item>
+              <c2-list-item value="24px">24</c2-list-item>
+              <c2-list-item value="32px">32</c2-list-item>
+              <c2-list-item value="36px">36</c2-list-item>
+              <c2-list-item value="40px">40</c2-list-item>
+              <c2-list-item value="48px">48</c2-list-item>
+              <c2-list-item value="64px">64</c2-list-item>
+              <c2-list-item value="96px">96</c2-list-item>
+              <c2-list-item value="128px">128</c2-list-item>
+            </c2-select>`
+          : nothing
+      }
+      ${
+        this.fontPropertyNames.includes('font-style')
+          ? html`<c2-select id="font-style" placeholder="font-style" @selection-change=${this.handleSelectionChange}>
+              ${this.renderFontStyleIcon()}
 
-            <c2-list-item value="normal">Normal</c2-list-item>
-            <c2-list-item value="italic">Italic</c2-list-item>
-            <c2-list-item value="oblique 10deg">Oblique 10deg</c2-list-item>
-            <c2-list-item value="oblique 15deg">Oblique 15deg</c2-list-item>
-            <c2-list-item value="oblique 20deg">Oblique 20deg</c2-list-item>
-            <c2-list-item value="oblique 30deg">Oblique 30deg</c2-list-item>
-            <c2-list-item value="oblique 40deg">Oblique 40deg</c2-list-item>
-            <c2-list-item value="oblique 45deg">Oblique 45deg</c2-list-item>
-            <c2-list-item value="oblique 50deg">Oblique 50deg</c2-list-item>
-            <c2-list-item value="oblique 60deg">Oblique 60deg</c2-list-item>
-            <c2-list-item value="oblique 70deg">Oblique 70deg</c2-list-item>
-          </c2-select>`
-        : nothing}
-      ${this.fontPropertyNames.includes('font-weight')
-        ? html`<c2-select id="font-weight" placeholder="font-weight" @selection-change=${this.handleSelectionChange}>
-            ${this.renderFontWeightIcon()}
-            <c2-list-item value="normal">Normal</c2-list-item>
-            <c2-list-item value="bold">Bold</c2-list-item>
-            <c2-list-item value="lighter">Lighter</c2-list-item>
-            <c2-list-item value="bolder">Bolder</c2-list-item>
-            <c2-list-item value="100">100</c2-list-item>
-            <c2-list-item value="300">300</c2-list-item>
-            <c2-list-item value="400">400</c2-list-item>
-            <c2-list-item value="500">500</c2-list-item>
-            <c2-list-item value="600">600</c2-list-item>
-            <c2-list-item value="700">700</c2-list-item>
-            <c2-list-item value="900">900</c2-list-item>
-          </c2-select>`
-        : nothing}
+              <c2-list-item value="normal">Normal</c2-list-item>
+              <c2-list-item value="italic">Italic</c2-list-item>
+              <c2-list-item value="oblique 10deg">Oblique 10deg</c2-list-item>
+              <c2-list-item value="oblique 15deg">Oblique 15deg</c2-list-item>
+              <c2-list-item value="oblique 20deg">Oblique 20deg</c2-list-item>
+              <c2-list-item value="oblique 30deg">Oblique 30deg</c2-list-item>
+              <c2-list-item value="oblique 40deg">Oblique 40deg</c2-list-item>
+              <c2-list-item value="oblique 45deg">Oblique 45deg</c2-list-item>
+              <c2-list-item value="oblique 50deg">Oblique 50deg</c2-list-item>
+              <c2-list-item value="oblique 60deg">Oblique 60deg</c2-list-item>
+              <c2-list-item value="oblique 70deg">Oblique 70deg</c2-list-item>
+            </c2-select>`
+          : nothing
+      }
+      ${
+        this.fontPropertyNames.includes('font-weight')
+          ? html`<c2-select id="font-weight" placeholder="font-weight" @selection-change=${this.handleSelectionChange}>
+              ${this.renderFontWeightIcon()}
+              <c2-list-item value="normal">Normal</c2-list-item>
+              <c2-list-item value="bold">Bold</c2-list-item>
+              <c2-list-item value="lighter">Lighter</c2-list-item>
+              <c2-list-item value="bolder">Bolder</c2-list-item>
+              <c2-list-item value="100">100</c2-list-item>
+              <c2-list-item value="300">300</c2-list-item>
+              <c2-list-item value="400">400</c2-list-item>
+              <c2-list-item value="500">500</c2-list-item>
+              <c2-list-item value="600">600</c2-list-item>
+              <c2-list-item value="700">700</c2-list-item>
+              <c2-list-item value="900">900</c2-list-item>
+            </c2-select>`
+          : nothing
+      }
     </div>`
   }
 }

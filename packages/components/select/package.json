@@ -1,0 +1,62 @@
+{
+  "name": "@c2n/select",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "dist/select.js",
+  "exports": {
+    ".": {
+      "default": "./dist/select.js",
+      "types": "./types/src/select.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "select",
+    "web component",
+    "lit"
+  ],
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build",
+        "../overlay:build",
+        "../list:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/core": "0.0.4",
+    "@c2n/overlay": "0.0.4",
+    "@c2n/list": "0.0.4",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

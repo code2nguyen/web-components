@@ -1,22 +1,22 @@
 ---
 import Main from '../../layouts/Main.astro'
 import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
-import { getCollection } from 'astro:content'
+import { getCollection, render } from 'astro:content'
 
 export async function getStaticPaths() {
   const componentEntries = await getCollection('components')
   return componentEntries.map((entry) => ({
-    params: { componentId: entry.slug },
+    params: { componentId: entry.id },
     props: { component: entry },
   }))
 }
 
 const { component } = Astro.props
-const { Content: ComponentContent } = await component.render()
+const { Content: ComponentContent } = await render(component)
 ---
 
-<Main title="CW Library" componentId={component.slug} pageTitle={component.data.title}>
-  <DocComponentLayout componentId={component.slug}>
+<Main title="CW Library" componentId={component.id} pageTitle={component.data.title}>
+  <DocComponentLayout componentId={component.id}>
     <ComponentContent />
   </DocComponentLayout>
 </Main>

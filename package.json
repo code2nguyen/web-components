@@ -7,7 +7,7 @@
     "prepare": "husky",
     "lint": "wireit",
     "lint:check": "wireit",
-    "lint:fix": "eslint --ignore-pattern=dist/ --ignore-pattern=types/ --fix \"**/*.{js,ts}\"",
+    "lint:fix": "eslint . --fix",
     "fix": "npm run lint:fix && npm run format:fix",
     "format": "npm run format:fix",
     "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --check",
@@ -23,17 +23,23 @@
   },
   "devDependencies": {
     "husky": "9.1.7",
-    "lerna": "8.1.9",
-    "lint-staged": "15.4.1",
-    "prettier": "3.4.2",
+    "lerna": "10.0.1",
+    "lint-staged": "17.4.1",
+    "prettier": "3.9.6",
     "prettier-plugin-astro": "^0.14.1",
-    "wireit": "^0.14.9"
+    "wireit": "^0.14.13"
   },
   "workspaces": [
-    "packages/**/*",
+    "open-packages/*",
+    "packages/components/*",
+    "packages/core",
+    "packages/tools/*",
     "demo",
     "scripts/generator"
   ],
+  "overrides": {
+    "@lit-labs/ssr": "3.2.2"
+  },
   "wireit": {
     "lint": {
       "dependencies": [
@@ -42,44 +48,46 @@
     },
     "lint:check": {
       "files": [
-        "**/*.{js,ts}",
-        ".eslintignore",
-        ".eslintrc.json",
-        "!**/dist/**/*.{js,ts}",
+        "**/*.{js,mjs,cjs,ts}",
+        "eslint.config.js",
+        "packages/tools/config/eslint.config.js",
+        "!**/dist/**/*",
+        "!**/types/**/*",
         "!node_modules/"
       ],
       "output": [],
-      "command": "eslint --ignore-pattern \"dist/\"  --ignore-pattern \"types/\"  \"**/*.{js,ts}\""
+      "command": "eslint ."
     },
     "build": {
       "dependencies": [
-        "./packages/chat-input:build",
-        "./packages/chat-message:build",
-        "./packages/avatar:build",
-        "./packages/side-nav:build",
-        "./packages/card:build",
-        "./packages/checkbox:build",
-        "./packages/code-viewer:build",
-        "./packages/color-area:build",
-        "./packages/color-select:build",
-        "./packages/color-slider:build",
-        "./packages/details:build",
-        "./packages/dropdown-list:build",
-        "./packages/expansion-panel:build",
-        "./packages/hyperlink-list:build",
-        "./packages/icon-button:build",
-        "./packages/label:build",
-        "./packages/list:build",
-        "./packages/list-item:build",
-        "./packages/mat-icon:build",
-        "./packages/overlay:build",
-        "./packages/reorder-list:build",
-        "./packages/select:build",
-        "./packages/tabs:build",
-        "./packages/text-button:build",
-        "./packages/text-field:build",
-        "./packages/tooltip:build",
-        "./packages/wc-utils:build"
+        "./open-packages/chatbot:build",
+        "./packages/components/chat-input:build",
+        "./packages/components/chat-message:build",
+        "./packages/components/avatar:build",
+        "./packages/components/side-nav:build",
+        "./packages/components/card:build",
+        "./packages/components/checkbox:build",
+        "./packages/components/code-viewer:build",
+        "./packages/components/color-area:build",
+        "./packages/components/color-select:build",
+        "./packages/components/color-slider:build",
+        "./packages/components/details:build",
+        "./packages/components/dropdown-list:build",
+        "./packages/components/expansion-panel:build",
+        "./packages/components/hyperlink-list:build",
+        "./packages/components/icon-button:build",
+        "./packages/components/label:build",
+        "./packages/components/list:build",
+        "./packages/components/list-item:build",
+        "./packages/components/mat-icon:build",
+        "./packages/components/overlay:build",
+        "./packages/components/reorder-list:build",
+        "./packages/components/select:build",
+        "./packages/components/tabs:build",
+        "./packages/components/text-button:build",
+        "./packages/components/text-field:build",
+        "./packages/components/tooltip:build",
+        "./packages/core:build"
       ]
     },
     "demo:build": {

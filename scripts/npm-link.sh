@@ -6,11 +6,10 @@ source ~/.profile
 # Move to root folder
 pushd ../$(dirname -- "$0")
 
-# Scan package folders
-for d in packages/*/
+# Scan package folders (packages are nested one level deeper: components/ core/ tools/)
+for d in packages/*/*/
 do
-    cd $d
-    npm link     
-    cd ..
+    [ -f "$d/package.json" ] || continue
+    (cd "$d" && npm link)
 done
 popd

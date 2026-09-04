@@ -198,9 +198,11 @@ export class ComponentConfigurationPanel extends LitElement {
       result.push(html`
         <demo-padding-config
           .name=${paddingVariables.length == 1 ? paddingVariables[0].cssVariable : paddingVariables.map((i) => i.cssVariable)}
-          .value=${paddingVariables.length == 1
-            ? this.getCssVariableValue(paddingVariables[0].cssVariable)
-            : paddingVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
+          .value=${
+            paddingVariables.length == 1
+              ? this.getCssVariableValue(paddingVariables[0].cssVariable)
+              : paddingVariables.map((i) => this.getCssVariableValue(i.cssVariable))
+          }
           @change=${this.handleCustomConfigChange}
         ></demo-padding-config>
       `)
@@ -225,9 +227,11 @@ export class ComponentConfigurationPanel extends LitElement {
       result.push(html`
         <demo-border-radius-config
           .name=${borderRadiusVariables.length == 1 ? borderRadiusVariables[0].cssVariable : borderRadiusVariables.map((i) => i.cssVariable)}
-          .value=${borderRadiusVariables.length == 1
-            ? this.getCssVariableValue(borderRadiusVariables[0].cssVariable)
-            : borderRadiusVariables.map((i) => this.getCssVariableValue(i.cssVariable))}
+          .value=${
+            borderRadiusVariables.length == 1
+              ? this.getCssVariableValue(borderRadiusVariables[0].cssVariable)
+              : borderRadiusVariables.map((i) => this.getCssVariableValue(i.cssVariable))
+          }
           @change=${this.handleCustomConfigChange}
         ></demo-border-radius-config>
       `)

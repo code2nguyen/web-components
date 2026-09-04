@@ -20,12 +20,12 @@
     "type-check": "wireit"
   },
   "wireit": {
-    "type-check": { "dependencies": ["../wc-utils:build"], "command": "tsc -p tsconfig.lib.json --composite false" },
+    "type-check": { "dependencies": ["{{ coreBuildDep }}"], "command": "tsc -p tsconfig.lib.json --composite false" },
     "build": { "dependencies": ["type-check"], "command": "vite build" }
   },
   "dependencies": {
-    "@c2n/wc-utils": "{{pkg 'version'}}",
-    "lit": "3.2.1"
+    "@c2n/core": "{{pkg 'version'}}",
+    "lit": "3.3.3"
   },
   "devDependencies": { "@c2n/config": "*" },
   "customElements": "custom-elements.json"

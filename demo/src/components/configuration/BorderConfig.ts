@@ -79,8 +79,7 @@ export class BorderConfig extends LitElement {
   }
 
   private dispathChangeEvent() {
-    let detail: Record<string, string> = {}
-    detail = {
+    const detail: Record<string, string> = {
       [this.name]: `${this.size}px solid ${this.color}`,
       [this.hiddenName]: this.hideValue,
     }
