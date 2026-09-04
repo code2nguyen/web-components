@@ -1,0 +1,42 @@
+{
+  "name": "@c2n/design-board",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "dist/design-board.js",
+  "exports": {
+    ".": "./dist/design-board.js"
+  },
+  "types": "types/src/index.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "design-board",
+    "web component",
+    "lit"
+  ],
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "--build": "npm run type-check && vite build",
+    "type-check": "tsc -p tsconfig.lib.json --composite false"
+  },
+  "dependencies": {
+    "@c2n/core": "0.0.4",
+    "lit": "3.3.3",
+    "@lit/context": "1.1.6"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

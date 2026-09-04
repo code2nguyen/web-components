@@ -1,0 +1,13 @@
+{
+  "extends": "@c2n/config/tsconfig.lib.json",
+  "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "noEmit": false,
+    "emitDeclarationOnly": false,
+    "allowImportingTsExtensions": false,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  },
+  "include": ["**/*"]
+}

@@ -29,7 +29,7 @@ import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
-  const normalizeManifests: ComponentManifests = [
+  const normalizedManifests: ComponentManifests = [
     chatInput,
     chatMessage,
     avatar,
@@ -70,13 +70,13 @@ export const componentManifests = (function () {
     return result
   }, {} as ComponentManifests)
 
-  Object.keys(normalizeManifests).forEach((componentTag) => {
-    const manifest = normalizeManifests[componentTag]
+  Object.keys(normalizedManifests).forEach((componentTag) => {
+    const manifest = normalizedManifests[componentTag]
     manifest.internalComponents.concat(manifest.slotComponents).forEach((item) => {
-      if (normalizeManifests[item]) {
-        manifest.allCssProperties = [...manifest.allCssProperties, ...normalizeManifests[item].cssProperties]
+      if (normalizedManifests[item]) {
+        manifest.allCssProperties = [...manifest.allCssProperties, ...normalizedManifests[item].cssProperties]
       }
     })
   })
-  return normalizeManifests
+  return normalizedManifests
 })()

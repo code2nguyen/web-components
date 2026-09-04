@@ -1,0 +1,69 @@
+{
+  "name": "@c2n/color-select",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "dist/color-select.js",
+  "exports": {
+    ".": {
+      "default": "./dist/color-select.js",
+      "types": "./types/src/color-select.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "color-select",
+    "web component",
+    "lit"
+  ],
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build",
+        "../color-slider:build",
+        "../color-area:build",
+        "../text-field:build",
+        "../select:build",
+        "../overlay:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/core": "0.0.4",
+    "@c2n/overlay": "0.0.4",
+    "@c2n/color-area": "0.0.4",
+    "@c2n/select": "0.0.4",
+    "@c2n/text-field": "0.0.4",
+    "@c2n/color-slider": "0.0.4",
+    "@ctrl/tinycolor": "4.2.0",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

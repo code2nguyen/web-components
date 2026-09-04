@@ -16,7 +16,7 @@ const { componentId, class: className } = Astro.props
 <HyperlinkList client:load class={`list-component ${className}`}>
   {
     allComponents.map((component) => (
-      <a href={`${base}/components/${component.slug}`} data-selected={componentId == component.slug}>
+      <a href={`${base}/components/${component.id}`} data-selected={componentId == component.id}>
         {component.data.title}
       </a>
     ))

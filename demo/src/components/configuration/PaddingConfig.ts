@@ -85,7 +85,7 @@ export class PaddingConfig extends LitElement {
   }
 
   dispathChangeEvent() {
-    let detail: Record<string, string> = {}
+    let detail: Record<string, string>
     if (Array.isArray(this.name)) {
       detail = this.name.reduce(
         (result, item, index) => {

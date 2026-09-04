@@ -1,0 +1,41 @@
+---
+    
+    title: "Chatbot"
+    slug: "chatbot"
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+
+import { Chatbot } from '@c2n/chatbot'
+
+# Chatbot
+
+### Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chatbot
+```
+
+### Import
+
+```typescript tag=CodeBlock
+import '@c2n/chatbot'
+```
+
+<br />
+## Examples
+<br />
+---
+
+```html tag=MdxCodeBlock,compact=true,component=c2-chatbot
+<c2-chatbot client:only="lit"></c2-chatbot>    
+```
+
+---
+
+<br />
+## API
+
+<ApiTable componentTag="c2-chatbot"></ApiTable>

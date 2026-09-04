@@ -2,11 +2,13 @@
 
 A monorepos contains all web components using lit. Each component is released in a separated package.
 
+Packages are grouped by role: `packages/components/*` (the web components), `packages/core` (the shared runtime, published as `@c2n/core`) and `packages/tools/*` (`config`, `sass`, `playground`). npm package names stay flat, e.g. `packages/components/avatar` is published as `@c2n/avatar`.
+
 ## Development mode
 
 Each package is a npm package and will try to limit maximum cross dependencies.
 
-All packages have `@c2n/config` as dev dependencies and maybe link with `@c2n/wc-utils` to reuse the sharing code.
+All packages have `@c2n/config` as dev dependencies and maybe link with `@c2n/core` to reuse the sharing code.
 
 - npm workspace:
 - each package uses vitejs as a build tool
@@ -41,7 +43,7 @@ npm run demo:dev
 
 ```
 
-npm run dev -w packages/checkbox
+npm run dev -w packages/components/checkbox
 
 ```
 

@@ -5,9 +5,9 @@
     "inlineSourceMap": true,
     "noImplicitAny": false,
     "skipLibCheck": true,
-    "module": "es2020",
-    "moduleResolution": "node",
-    "target": "es2019"
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "es2022"
   },
   "include": ["**/*"]
 }
