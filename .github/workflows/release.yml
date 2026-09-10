@@ -1,0 +1,126 @@
+name: Release to npm
+
+# Manual only: publishing is deliberate. Run it from the Actions tab, pick the bump, and the whole
+# monorepo is versioned together (fixed versioning, see the `version` field in lerna.json).
+#
+# Requires a repository secret named NPM_TOKEN: an npm **automation** token (Access Tokens ->
+# Generate New Token -> Automation). A classic "publish" token is refused when the account or the
+# @c2n scope enforces 2FA, because automation tokens are the only kind that bypass the OTP prompt.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump applied to every package'
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+          - premajor
+          - preminor
+          - prepatch
+          - prerelease
+      dist_tag:
+        description: 'npm dist-tag (use "next" for a prerelease so it does not become the default install)'
+        type: string
+        default: latest
+      dry_run:
+        description: 'Verify, version locally and pack — publish nothing, tag nothing, push nothing'
+        type: boolean
+        default: false
+
+permissions:
+  # lerna commits the version bump and pushes the tags back to the branch.
+  contents: write
+  # npm provenance: lerna turns it on by itself for a public repo running in GitHub Actions, but only
+  # if it can mint an OIDC token. Without this the publish still works, just unattested.
+  id-token: write
+
+# Two releases at once would race on tags and on the registry.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # lerna reads the tag history to work out the last release; a shallow clone hides it.
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          # Writes the .npmrc that maps the registry to NODE_AUTH_TOKEN.
+          registry-url: 'https://registry.npmjs.org'
+
+      # Set up GitHub Actions caching for Wireit.
+      - uses: google/wireit@setup-github-actions-caching/v1
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The same gates as the deploy workflow: a release must not be able to ship what CI would reject.
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Build all packages
+        run: npm run build
+
+      - name: Build tools (MCP registry, skill cheatsheet)
+        run: npm run build:tools
+
+      - name: Smoke test the MCP server
+        run: npm run mcp:smoke
+
+      - name: Generated files are up to date
+        run: git diff --exit-code -- packages/tools/mcp/data packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json
+
+      # Each package ships only what its `files` field lists, and `dist/` is built above and never
+      # committed — so this is the one place a missing entry shows up before it reaches the registry.
+      - name: Show what every package would publish
+        run: npx lerna exec --no-private --concurrency 1 -- npm pack --dry-run
+
+      - name: Version locally (dry run)
+        if: ${{ inputs.dry_run }}
+        run: |
+          npx lerna version ${{ inputs.bump }} --no-private --exact --yes --no-push --no-git-tag-version
+          echo "--- versions that would be published ---"
+          npx lerna list --no-private --long
+          echo
+          echo "Dry run: nothing was published, tagged or pushed."
+
+      - name: Configure git author for the version commit
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Publish
+        if: ${{ !inputs.dry_run }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # `--no-private` skips @c2n/config, @c2n/ui and the generator; `--exact` pins the cross-package
+        # dependencies to the released version instead of a caret range. The `version` lifecycle script
+        # of @c2n/skill re-syncs its plugin.json and .mcp.json pin during this step.
+        run: npx lerna publish ${{ inputs.bump }} --dist-tag ${{ inputs.dist_tag }} --no-private --exact --yes
+
+      - name: Summary
+        if: ${{ always() }}
+        run: |
+          {
+            echo "### Release"
+            echo
+            echo "- bump: \`${{ inputs.bump }}\`"
+            echo "- dist-tag: \`${{ inputs.dist_tag }}\`"
+            echo "- dry run: \`${{ inputs.dry_run }}\`"
+            echo "- version now in lerna.json: \`$(node -p "require('./lerna.json').version")\`"
+          } >> "$GITHUB_STEP_SUMMARY"
