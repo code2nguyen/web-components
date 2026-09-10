@@ -1,6 +1,7 @@
 {
   "name": "@c2n/mcp",
   "version": "0.0.5",
+  "private": true,
   "description": "MCP server exposing the c2n web components (API, examples, presets, theme tokens, variant generation) to AI agents",
   "type": "module",
   "bin": {

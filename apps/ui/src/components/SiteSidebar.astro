@@ -35,7 +35,7 @@ const overviews = {
 const overview = overviews[section]
 ---
 
-<nav class="sidebar__nav" aria-label={section === 'components' ? 'Components' : section === 'icons' ? 'Icon sets' : 'Guides'}>
+<nav class="sidebar__nav" data-section={section} aria-label={section === 'components' ? 'Components' : section === 'icons' ? 'Icon sets' : 'Guides'}>
   <a href={overview.href} class:list={['sidebar__overview', { active: !currentId }]}>{overview.label}</a>
   {
     groups.map((group) => (
@@ -114,8 +114,81 @@ const overview = overviews[section]
 </style>
 
 <script>
-  // Two copies exist on docs pages (drawer + desktop grid); scroll the visible desktop one into view.
-  const current =
-    document.querySelector('.docs__sidebar .sidebar__nav a[aria-current="page"]') ?? document.querySelector('.sidebar__nav a[aria-current="page"]')
-  current?.scrollIntoView({ block: 'center', behavior: 'instant' })
+  // The docs site is a plain MPA — every sidebar link is a full page load — so the sidebar's own scroll offset is
+  // thrown away on each navigation unless we carry it across ourselves. Restore what the visitor left behind, and
+  // only fall back to revealing the current entry when there is nothing to restore (first visit, deep link, or a
+  // stored offset that would leave the current entry off screen).
+  //
+  // Two copies of this nav exist on docs pages: the desktop grid sidebar (its own scroll container) and the
+  // c2-side-nav drawer, which takes over below 960px where `.docs__sidebar` is `display: none`.
+  const sidebar = document.querySelector<HTMLElement>('.docs__sidebar')
+  const nav = sidebar?.querySelector<HTMLElement>('.sidebar__nav')
+
+  if (sidebar && nav) {
+    const key = `c2n-sidebar-scroll:${nav.dataset.section ?? 'components'}`
+    const current = nav.querySelector<HTMLElement>('a[aria-current="page"]')
+
+    // Private browsing and blocked site data both make sessionStorage throw rather than return null.
+    const read = () => {
+      try {
+        // `Number(null)` is 0, which is indistinguishable from a visitor who really is at the top.
+        const stored = sessionStorage.getItem(key)
+        return stored === null ? NaN : Number(stored)
+      } catch {
+        return NaN
+      }
+    }
+    const write = (value: number) => {
+      try {
+        sessionStorage.setItem(key, String(value))
+      } catch {
+        /* not worth reporting: the sidebar simply starts where it always did */
+      }
+    }
+
+    const offsetOf = (el: HTMLElement) => el.getBoundingClientRect().top - sidebar.getBoundingClientRect().top + sidebar.scrollTop
+    const currentIsVisible = () => {
+      if (!current) return true
+      const top = offsetOf(current) - sidebar.scrollTop
+      return top >= 0 && top + current.offsetHeight <= sidebar.clientHeight
+    }
+
+    const restored = read()
+    const apply = () => {
+      if (Number.isFinite(restored) && restored >= 0) {
+        sidebar.scrollTop = restored
+        if (currentIsVisible()) return
+      }
+      if (current) sidebar.scrollTop = Math.max(0, offsetOf(current) - sidebar.clientHeight / 2 + current.offsetHeight / 2)
+    }
+
+    // `scrollTop` clamps to the height the element has *right now*, and this runs before `c2-side-nav` (a
+    // `client:load` island wrapping the whole grid) has hydrated — at which point the sidebar may not be scrollable
+    // yet and the assignment silently collapses to 0. Re-apply once the layout has settled, but never fight a
+    // visitor who has already started scrolling.
+    let touched = false
+    for (const event of ['wheel', 'touchstart', 'keydown'] as const) {
+      window.addEventListener(event, () => (touched = true), { once: true, passive: true })
+    }
+    const applyUntilSettled = () => {
+      if (!touched) apply()
+    }
+
+    apply()
+    requestAnimationFrame(applyUntilSettled)
+    customElements.whenDefined('c2-side-nav').then(() => requestAnimationFrame(applyUntilSettled))
+
+    let frame = 0
+    sidebar.addEventListener(
+      'scroll',
+      () => {
+        if (frame) return
+        frame = requestAnimationFrame(() => {
+          frame = 0
+          write(sidebar.scrollTop)
+        })
+      },
+      { passive: true },
+    )
+  }
 </script>

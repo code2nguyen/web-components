@@ -96,7 +96,7 @@ jobs:
       - name: Version locally (dry run)
         if: ${{ inputs.dry_run }}
         run: |
-          npx lerna version ${{ inputs.bump }} --no-private --exact --yes --no-push --no-git-tag-version
+          npx lerna version ${{ inputs.bump }} --no-private --exact --yes --force-publish --no-push --no-git-tag-version
           echo "--- versions that would be published ---"
           npx lerna list --no-private --long
           echo
@@ -112,10 +112,11 @@ jobs:
         if: ${{ !inputs.dry_run }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        # `--no-private` skips @c2n/config, @c2n/ui and the generator; `--exact` pins the cross-package
+        # `--no-private` skips the private packages — @c2n/config, @c2n/ui, the generator, and for now
+        # @c2n/mcp and @c2n/skill; `--exact` pins the cross-package
         # dependencies to the released version instead of a caret range. The `version` lifecycle script
         # of @c2n/skill re-syncs its plugin.json and .mcp.json pin during this step.
-        run: npx lerna publish ${{ inputs.bump }} --dist-tag ${{ inputs.dist_tag }} --no-private --exact --yes
+        run: npx lerna publish ${{ inputs.bump }} --dist-tag ${{ inputs.dist_tag }} --no-private --exact --yes --force-publish
 
       # lerna already created and pushed the `v<version>` tag; this turns it into a GitHub Release
       # with notes generated from the commits/PRs since the previous one. Kept out of lerna itself

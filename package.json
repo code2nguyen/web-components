@@ -10,6 +10,7 @@
     "lint:fix": "eslint . --fix",
     "fix": "npm run lint:fix && npm run format:fix",
     "format": "npm run format:fix",
+    "version": "node packages/tools/mcp/scripts/stamp-version.ts && node packages/tools/skill/scripts/build-skill.ts && git add packages/tools/mcp/data/registry.json packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json",
     "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --check",
     "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --write",
     "ui": "npm run start -w apps/ui",
