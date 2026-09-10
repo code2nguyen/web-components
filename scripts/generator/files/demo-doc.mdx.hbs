@@ -1,10 +1,10 @@
 ---
-    
-    title: "{{ titleCase name}}"
-    slug: "{{ dashCase name}}"
+title: '{{ titleCase name}}'
+description: 'One sentence describing what the component does.'
+category: 'Layout'
 ---
 
-import MdxCodeBlock from '../../components/MdxCodeBlock.astro';
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import ApiTable from '../../components/ApiTable.astro'
 
@@ -12,30 +12,26 @@ import { {{pascalCase name}} } from '@c2n/{{ dashCase name}}'
 
 # {{ titleCase name}}
 
-### Installation
+`c2-{{ dashCase name}}` does something useful.
+
+## Installation
 
 ```bash tag=CodeBlock
 npm install @c2n/{{ dashCase name}}
 ```
 
-### Import
+## Import
 
 ```typescript tag=CodeBlock
 import '@c2n/{{ dashCase name}}'
 ```
 
-<br />
 ## Examples
-<br />
----
 
-```html tag=MdxCodeBlock,compact=true,component=c2-{{ dashCase name}}
-<c2-{{ dashCase name}} client:only="lit"></c2-{{ dashCase name}}>    
+```html tag=MdxCodeBlock
+<c2-{{ dashCase name}}></c2-{{ dashCase name}}>
 ```
 
----
-
-<br />
 ## API
 
 <ApiTable componentTag="c2-{{ dashCase name}}"></ApiTable>

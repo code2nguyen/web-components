@@ -1,0 +1,333 @@
+---
+import { getCollection } from 'astro:content'
+import Main from '../layouts/Main.astro'
+import CodeBlock from '../components/CodeBlock.astro'
+import ComponentGallery from '../components/ComponentGallery.astro'
+import { componentPreviews } from '../data/component-previews'
+import SiteButton from '../components/ui/SiteButton.astro'
+import SiteCard from '../components/ui/SiteCard.astro'
+import { FeatherArrowRightIcon, FeatherLayersIcon, FeatherPackageIcon, FeatherSlidersIcon } from '../components/ui/icons'
+
+const base = import.meta.env.BASE_URL
+const componentCount = (await getCollection('components')).length
+const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.localeCompare(b.data.title))
+
+const installCode = `npm install @c2n/text-field`
+const importCode = `import '@c2n/text-field'
+
+// then anywhere in your markup
+<c2-text-field placeholder="Your email"></c2-text-field>`
+const themeCode = `.newsletter c2-text-field {
+  --c2-text-field--border-radius: 12px;
+  --c2-text-field--background: #f4f4f5;
+  --c2-text-field__focus--border: 1px solid #2563eb;
+}`
+const slotCode = `<c2-text-field placeholder="Search">
+  <svg slot="prefix-icon" viewBox="0 0 24 24">…</svg>
+</c2-text-field>`
+---
+
+<Main title="c2n web components">
+  <div class="home">
+    <section class="hero">
+      <p class="eyebrow">c2n web components</p>
+      <h1 class="hero__title">Small, themable UI components that work in any stack.</h1>
+      <p class="hero__lead">
+        {componentCount} components published as individual npm packages. Built on Lit, styled through CSS custom properties, and usable from plain HTML, React, Vue,
+        Astro or anything that speaks the DOM.
+      </p>
+      <div class="hero__actions">
+        <SiteButton href={`${base}/components/`} variant="primary">
+          Browse components
+          <FeatherArrowRightIcon client:load slot="suffix-icon" />
+        </SiteButton>
+        <SiteButton href={`${base}/icons/`} variant="ghost">Icon sets</SiteButton>
+      </div>
+      <ul class="hero__facts">
+        <li>
+          <FeatherPackageIcon client:load class="hero__fact-icon" />
+          One package per component
+        </li>
+        <li>
+          <FeatherSlidersIcon client:load class="hero__fact-icon" />
+          Themed with CSS variables
+        </li>
+        <li>
+          <FeatherLayersIcon client:load class="hero__fact-icon" />
+          Framework agnostic, SSR friendly
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" id="components" aria-labelledby="components-title">
+      <div class="section__header">
+        <h2 id="components-title">Components</h2>
+        <p>Every preview below is the real component. Open one to see its examples, API and an interactive theming panel.</p>
+      </div>
+      <ComponentGallery />
+    </section>
+
+    <section class="section" id="icons" aria-labelledby="icons-title">
+      <div class="section__header">
+        <h2 id="icons-title">Icons</h2>
+        <p>Icon sets ship as separate packages. Every icon is a web component that inherits <code>currentColor</code>.</p>
+      </div>
+      <ul class="icon-teaser">
+        {
+          iconSets.map((set) => (
+            <li>
+              <SiteCard href={`${base}/icons/${set.id}`} class="icon-teaser__card">
+                <span class="icon-teaser__preview">
+                  <Fragment set:html={componentPreviews[set.id] ?? ''} />
+                </span>
+                <span class="icon-teaser__text">
+                  <span class="icon-teaser__title">{set.data.title}</span>
+                  <span class="icon-teaser__desc">{set.data.description}</span>
+                </span>
+                <FeatherArrowRightIcon client:load class="icon-teaser__arrow" />
+              </SiteCard>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="section" id="getting-started" aria-labelledby="getting-started-title">
+      <div class="section__header">
+        <h2 id="getting-started-title">Getting started</h2>
+        <p>Three steps from an empty project to a themed component.</p>
+      </div>
+      <ol class="steps">
+        <li class="step">
+          <div class="step__text">
+            <span class="step__number">1</span>
+            <h3>Install the packages you need</h3>
+            <p>
+              Each component ships as its own package under the <code>@c2n</code> scope, so you only pay for what you use. Lit is a peer dependency shared between
+              them.
+            </p>
+          </div>
+          <CodeBlock code={installCode} lang="bash" />
+        </li>
+        <li class="step">
+          <div class="step__text">
+            <span class="step__number">2</span>
+            <h3>Import once, use anywhere</h3>
+            <p>Importing a package registers its <code>c2-*</code> custom element. After that it is plain HTML.</p>
+          </div>
+          <CodeBlock code={importCode} lang="html" />
+        </li>
+        <li class="step">
+          <div class="step__text">
+            <span class="step__number">3</span>
+            <h3>Theme with CSS custom properties</h3>
+            <p>
+              Every visual detail is exposed as a variable named <code>--c2-&lt;component&gt;__&lt;part&gt;--&lt;property&gt;</code>. Set them on any ancestor
+              to restyle a component, a section, or the whole app. Or load <a href={`${base}/guides/theming`}>@c2n/theme</a> and set a handful of design tokens once.
+            </p>
+          </div>
+          <CodeBlock code={themeCode} lang="css" />
+        </li>
+        <li class="step">
+          <div class="step__text">
+            <span class="step__number">4</span>
+            <h3>Extend with slots</h3>
+            <p>Named slots let you replace icons and inject content without forking the component.</p>
+          </div>
+          <CodeBlock code={slotCode} lang="html" />
+        </li>
+      </ol>
+    </section>
+  </div>
+</Main>
+
+<style lang="scss">
+  .home {
+    max-width: var(--site-page-max-width);
+    margin: 0 auto;
+    padding: 0 var(--site-gutter) 96px;
+  }
+
+  .hero {
+    padding: 96px 0 72px;
+    max-width: 760px;
+    &__title {
+      margin: 12px 0 20px;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      text-wrap: balance;
+    }
+    &__lead {
+      margin: 0 0 32px;
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: var(--site-color-on-surface-variant);
+      max-width: 620px;
+    }
+    &__actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    &__facts {
+      list-style: none;
+      margin: 40px 0 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 28px;
+      font-size: 14px;
+      color: var(--site-color-on-surface-variant);
+      li {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        :global(.hero__fact-icon) {
+          color: var(--site-color-primary);
+          --c2-feather-icon--size: 16px;
+        }
+      }
+    }
+  }
+
+  .section {
+    padding: 56px 0 0;
+    scroll-margin-top: var(--site-header-height);
+    &__header {
+      margin-bottom: 32px;
+      max-width: 620px;
+      h2 {
+        margin: 0 0 8px;
+        font-size: 1.75rem;
+        letter-spacing: -0.02em;
+        font-weight: 700;
+      }
+      p {
+        margin: 0;
+        color: var(--site-color-on-surface-variant);
+      }
+    }
+  }
+
+  .icon-teaser {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    li {
+      display: flex;
+    }
+    :global(.icon-teaser__card) {
+      flex: 1;
+      --c2-card--padding-top: 12px;
+      --c2-card--padding-right: 16px;
+      --c2-card--padding-bottom: 12px;
+      --c2-card--padding-left: 12px;
+      --c2-card__hover--background: var(--site-color-surface-container-1);
+      --c2-card__hover--box-shadow: none;
+      // The card body is the link content: lay the three parts out as a row.
+      :global(a),
+      :global(.c2-card) {
+        display: grid;
+        grid-template-columns: 120px 1fr auto;
+        align-items: center;
+        gap: 16px;
+      }
+    }
+    :global(.icon-teaser__arrow) {
+      color: var(--site-color-on-surface-muted);
+      --c2-feather-icon--size: 16px;
+    }
+    &__preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+      border-radius: var(--site-radius-md);
+      background-color: var(--site-color-surface-container-2);
+      color: var(--site-color-on-surface);
+      :global(.preview-row) {
+        gap: 10px !important;
+        --c2-feather-icon--size: 20px;
+        font-size: 20px !important;
+      }
+    }
+    &__text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    &__title {
+      font-weight: 600;
+      color: var(--site-color-on-surface);
+    }
+    &__desc {
+      font-size: 13px;
+      color: var(--site-color-on-surface-variant);
+    }
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 32px;
+    align-items: start;
+    &__text {
+      position: relative;
+      padding-left: 44px;
+      h3 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      p {
+        margin: 0;
+        color: var(--site-color-on-surface-variant);
+      }
+      code {
+        font-size: 0.85em;
+        padding: 2px 6px;
+        border-radius: 5px;
+        background: var(--site-color-surface-container-3);
+        color: var(--site-color-on-surface);
+      }
+    }
+    &__number {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--site-color-primary-soft);
+      color: var(--site-color-primary);
+      font-size: 13px;
+      font-weight: 600;
+    }
+  }
+
+  @media (max-width: 959.98px) {
+    .hero {
+      padding: 56px 0 40px;
+    }
+    .step {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+  }
+</style>

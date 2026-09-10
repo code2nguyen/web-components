@@ -1,0 +1,203 @@
+@use './tokens.scss';
+@use './c2-theme.scss';
+
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--site-font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--site-color-on-surface);
+  background-color: var(--site-color-surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-padding-top: calc(var(--site-header-height) + 24px);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--site-color-surface);
+}
+
+a {
+  color: var(--site-color-primary);
+  text-decoration: none;
+  text-underline-offset: 3px;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--site-color-outline-variant);
+  margin: 32px 0;
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--site-font-mono);
+  font-feature-settings: 'liga' 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--site-color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--site-color-primary-container);
+  color: var(--site-color-on-primary-container);
+}
+
+// Site chrome rendered as plain c2 tags (not Astro islands) is hidden until the element upgrades, so its light DOM
+// never flashes unstyled. Islands are SSR'd with declarative shadow DOM and need no guard.
+c2-modal:not(:defined),
+c2-side-nav:not(:defined) {
+  display: none;
+}
+
+// ---------------------------------------------------------------------------
+// Utilities
+// ---------------------------------------------------------------------------
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px;
+  height: 20px;
+  font-family: var(--site-font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--site-color-on-surface-muted);
+  border: 1px solid var(--site-color-outline-variant);
+  border-radius: 5px;
+  background: var(--site-color-surface-container-1);
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-color-primary);
+}
+
+// ---------------------------------------------------------------------------
+// Prose (MDX doc content)
+// ---------------------------------------------------------------------------
+.prose {
+  max-width: var(--site-content-max-width);
+  min-width: 0;
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+  }
+  h2 {
+    font-size: 1.375rem;
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 48px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--site-color-outline-variant);
+  }
+  h3 {
+    font-size: 1.05rem;
+    line-height: 1.4;
+    font-weight: 600;
+    margin: 32px 0 12px;
+  }
+  h4,
+  h5 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 24px 0 8px;
+  }
+  h2,
+  h3 {
+    scroll-margin-top: calc(var(--site-header-height) + 24px);
+    .heading-anchor {
+      margin-left: 8px;
+      opacity: 0;
+      color: var(--site-color-on-surface-muted);
+      text-decoration: none;
+      font-weight: 400;
+    }
+    &:hover .heading-anchor {
+      opacity: 1;
+    }
+  }
+
+  p,
+  li {
+    color: var(--site-color-on-surface-variant);
+  }
+  p {
+    margin: 0 0 16px;
+  }
+  h1 + p {
+    font-size: 1.05rem;
+    color: var(--site-color-on-surface-variant);
+  }
+
+  :not(pre) > code {
+    font-size: 0.85em;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--site-color-surface-container-3);
+    color: var(--site-color-on-surface);
+  }
+
+  // Legacy spacing helpers still present in some MDX files.
+  > br {
+    display: none;
+  }
+  > hr {
+    display: none;
+  }
+
+  .code-block,
+  .example {
+    margin: 16px 0;
+  }
+}

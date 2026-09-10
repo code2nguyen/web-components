@@ -1,0 +1,112 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Spinner } from '@c2n/spinner'
+
+## Presets
+
+Curated looks for `c2-spinner`. Open any card in the studio to start from it. The ring is one SVG: `--c2-spinner--size`, `--c2-spinner--stroke-width`, the arc and track colours and `--c2-spinner--animation-duration` cover almost every look.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-spinner></c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .large {
+    --c2-spinner--size: 48px;
+    --c2-spinner--stroke-width: 3px;
+  }
+</style>
+<c2-spinner class="large"></c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Thin
+<style>
+  .thin {
+    --c2-spinner--size: 32px;
+    --c2-spinner--stroke-width: 2px;
+    --c2-spinner__track--color: transparent;
+  }
+</style>
+<c2-spinner class="thin"></c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Bold
+<style>
+  .bold {
+    --c2-spinner--size: 32px;
+    --c2-spinner--stroke-width: 8px;
+    --c2-spinner--stroke-linecap: butt;
+  }
+</style>
+<c2-spinner class="bold"></c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Determinate
+<c2-spinner value="65" style="--c2-spinner--size: 40px"></c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Steps
+<style>
+  .steps {
+    --c2-spinner--size: 28px;
+    --c2-spinner--stroke-width: 6px;
+    --c2-spinner__label--color: #18181b;
+    --c2-spinner__label--font-weight: 500;
+  }
+</style>
+<c2-spinner class="steps" value="2" max="5">Step 2 of 5</c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .success {
+    --c2-spinner--color: #16a34a;
+    --c2-spinner__track--color: #dcfce7;
+  }
+</style>
+<c2-spinner class="success">Almost there</c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Warning
+<style>
+  .warning {
+    --c2-spinner--color: #f59e0b;
+    --c2-spinner__track--color: #fef3c7;
+    --c2-spinner--animation-duration: 2s;
+  }
+</style>
+<c2-spinner class="warning">Retrying…</c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Stacked
+<style>
+  .stacked {
+    --c2-spinner--flex-direction: column;
+    --c2-spinner--size: 36px;
+    --c2-spinner--gap: 10px;
+    --c2-spinner__label--font-size: 13px;
+  }
+</style>
+<c2-spinner class="stacked">Preparing your export</c2-spinner>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    display: inline-flex;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: #18181b;
+    --c2-spinner--color: #5aa3ff;
+    --c2-spinner__track--color: #3f3f46;
+    --c2-spinner__label--color: #d4d4d8;
+  }
+</style>
+<div class="dark"><c2-spinner>Syncing workspace</c2-spinner></div>
+```
+
+</GalleryGrid>

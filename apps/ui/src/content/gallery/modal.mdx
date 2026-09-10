@@ -1,0 +1,194 @@
+---
+description: 'Ready-made looks for c2-modal: dividers, alerts, bottom sheets, top-aligned, frosted and dark dialogs, fullscreen. Open a card, then the dialog, to see it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Modal } from '@c2n/modal'
+import { Button } from '@c2n/button'
+
+## Presets
+
+Curated looks for `c2-modal`. Each card shows a trigger; open the dialog to see the look. The box is `--c2-modal--*` (width, margins, radius, shadow, enter transform), the sections are `__header`, `__body` and `__footer`, the × button is `__close`, and the backdrop colour and blur are `__backdrop`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    --c2-modal--width: min(440px, calc(100vw - 32px));
+  }
+  .default p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-default').show()">Open</c2-button>
+<c2-modal id="mg-default" class="default">
+  <span slot="title">Invite your team</span>
+  <p>Share the link below with your teammates. They will be added with the Member role.</p>
+  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>
+</c2-modal>
+```
+
+```html tag=MdxCodeBlock,label=Divided
+<style>
+  .divided {
+    --c2-modal__header--padding-bottom: 14px;
+    --c2-modal__header--border-bottom: 1px solid #e4e4e7;
+    --c2-modal__body--padding-top: 16px;
+    --c2-modal__footer--padding-top: 14px;
+    --c2-modal__footer--border-top: 1px solid #e4e4e7;
+  }
+  .divided p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-divided').show()">Open</c2-button>
+<c2-modal id="mg-divided" class="divided">
+  <span slot="title">Invite your team</span>
+  <p>Share the link below with your teammates. They will be added with the Member role.</p>
+  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>
+</c2-modal>
+```
+
+```html tag=MdxCodeBlock,label=Alert
+<style>
+  .alert {
+    --c2-modal--width: 360px;
+    --c2-modal--border-top-left-radius: 18px;
+    --c2-modal--border-top-right-radius: 18px;
+    --c2-modal--border-bottom-left-radius: 18px;
+    --c2-modal--border-bottom-right-radius: 18px;
+    --c2-modal__header--font-size: 16px;
+    --c2-modal__footer--justify-content: stretch;
+    --c2-modal__footer--gap: 8px;
+  }
+  .alert p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-alert').show()">Open</c2-button>
+<c2-modal id="mg-alert" class="alert" hide-close no-backdrop-close>
+  <span slot="title">Discard changes?</span>
+  <p>Your edits will be lost. This cannot be undone.</p>
+  <c2-button slot="footer" style="flex: 1; --c2-button__container--background-color: transparent; --c2-button__container--color: #18181b; --c2-button__container--border: 1px solid #d4d4d8" onclick="this.closest('c2-modal').close('cancel')">Keep editing</c2-button>
+  <c2-button slot="footer" style="flex: 1; --c2-button__container--background-color: #dc2626" onclick="this.closest('c2-modal').close('discard')">Discard</c2-button>
+</c2-modal>
+```
+
+```html tag=MdxCodeBlock,label=Bottom sheet
+<style>
+  .sheet {
+    --c2-modal--margin-bottom: 0;
+    --c2-modal--width: 100vw;
+    --c2-modal--border-bottom-left-radius: 0px;
+    --c2-modal--border-bottom-right-radius: 0px;
+    --c2-modal--border-top-left-radius: 20px;
+    --c2-modal--border-top-right-radius: 20px;
+    --c2-modal--enter-transform: translateY(100%);
+    --c2-modal--max-height: 70vh;
+  }
+  .sheet p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-sheet').show()">Open</c2-button>
+<c2-modal id="mg-sheet" class="sheet">
+  <span slot="title">Invite your team</span>
+  <p>Share the link below with your teammates. They will be added with the Member role.</p>
+  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>
+</c2-modal>
+```
+
+```html tag=MdxCodeBlock,label=Top aligned
+<style>
+  .top {
+    --c2-modal--margin-top: 48px;
+    --c2-modal--enter-transform: translateY(-16px);
+  }
+  .top p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-top').show()">Open</c2-button>
+<c2-modal id="mg-top" class="top">
+  <span slot="title">Invite your team</span>
+  <p>Share the link below with your teammates. They will be added with the Member role.</p>
+  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>
+</c2-modal>
+```
+
+```html tag=MdxCodeBlock,label=Frosted
+<style>
+  .frosted {
+    --c2-modal__backdrop--background: rgba(255, 255, 255, 0.35);
+    --c2-modal__backdrop--backdrop-filter: blur(8px);
+    --c2-modal--box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+    --c2-modal--border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .frosted p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-frosted').show()">Open</c2-button>
+<c2-modal id="mg-frosted" class="frosted">
+  <span slot="title">Invite your team</span>
+  <p>Share the link below with your teammates. They will be added with the Member role.</p>
+  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>
+</c2-modal>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    --c2-modal--background: #18181b;
+    --c2-modal--color: #fafafa;
+    --c2-modal--border: 1px solid #27272a;
+    --c2-modal__body--color: #a1a1aa;
+    --c2-modal__close--color: #a1a1aa;
+    --c2-modal__close__hover--background: #27272a;
+    --c2-modal__close__hover--color: #fafafa;
+    --c2-modal__backdrop--background: rgba(0, 0, 0, 0.7);
+  }
+  .dark p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-dark').show()">Open</c2-button>
+<c2-modal id="mg-dark" class="dark">
+  <span slot="title">Invite your team</span>
+  <p>Share the link below with your teammates. They will be added with the Member role.</p>
+  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Copy link</c2-button>
+</c2-modal>
+```
+
+```html tag=MdxCodeBlock,label=Fullscreen
+<style>
+  .fullscreen {
+    --c2-modal--width: 100vw;
+    --c2-modal--max-height: 100vh;
+    --c2-modal--margin-top: 0;
+    --c2-modal--margin-bottom: 0;
+    --c2-modal--border-top-left-radius: 0px;
+    --c2-modal--border-top-right-radius: 0px;
+    --c2-modal--border-bottom-left-radius: 0px;
+    --c2-modal--border-bottom-right-radius: 0px;
+    --c2-modal--enter-transform: scale(1.02);
+    --c2-modal__header--border-bottom: 1px solid #e4e4e7;
+    --c2-modal__header--padding-bottom: 16px;
+    --c2-modal__body--padding-top: 24px;
+  }
+  .fullscreen p {
+    margin: 0;
+  }
+</style>
+<c2-button onclick="document.getElementById('mg-fullscreen').show()">Open</c2-button>
+<c2-modal id="mg-fullscreen" class="fullscreen">
+  <span slot="title">Edit profile</span>
+  <p>A full-screen dialog for focused tasks; the body scrolls, header and footer stay put.</p>
+  <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Save</c2-button>
+</c2-modal>
+```
+
+</GalleryGrid>

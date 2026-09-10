@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@c2n/feather-icons</title>
+    <script type="module" src="/src/index.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        color: #1f2937;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .large {
+        --c2-feather-icon--size: 48px;
+      }
+      .thin {
+        --c2-feather-icon--stroke-width: 1;
+      }
+      .bold {
+        --c2-feather-icon--stroke-width: 3;
+      }
+      .accent {
+        --c2-feather-icon--color: #2563eb;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+      }
+      .grid figure {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 4px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+      }
+      .grid figcaption {
+        font-size: 11px;
+        color: #6b7280;
+        word-break: break-all;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Sizes, stroke width and color</h2>
+    <div class="demo">
+      <c2-feather-arrow-right></c2-feather-arrow-right>
+      <c2-feather-arrow-right class="large"></c2-feather-arrow-right>
+      <c2-feather-arrow-right class="large thin"></c2-feather-arrow-right>
+      <c2-feather-arrow-right class="large bold"></c2-feather-arrow-right>
+      <c2-feather-arrow-right class="large accent"></c2-feather-arrow-right>
+      <span style="color: #dc2626">inherits <c2-feather-heart></c2-feather-heart> currentColor</span>
+    </div>
+
+    <h2>All icons</h2>
+    <div class="grid" id="grid"></div>
+
+    <script type="module">
+      import { featherIconNames, featherIconTag } from '/src/icon-names.ts'
+      const grid = document.getElementById('grid')
+      for (const name of featherIconNames) {
+        const figure = document.createElement('figure')
+        figure.append(document.createElement(featherIconTag(name)))
+        const caption = document.createElement('figcaption')
+        caption.textContent = name
+        figure.append(caption)
+        grid.append(figure)
+      }
+    </script>
+  </body>
+</html>

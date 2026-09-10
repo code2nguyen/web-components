@@ -1,0 +1,330 @@
+---
+title: 'Side Nav'
+description: 'Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SideNav } from '@c2n/side-nav'
+import { List } from '@c2n/list'
+import { ListItem } from '@c2n/list-item'
+
+`c2-side-nav` is an app-shell layout: the drawer goes in the `side-nav-content` slot, the page in the default slot, and both stretch to the host's height. It has two display modes. In **side** mode the drawer is part of the layout: it collapses to `--c2-side-nav__close--width` (0 by default, or a rail) and pushes the content. In **over** mode it leaves the flow, slides over the content with a backdrop, locks page scrolling, behaves as a dialog for assistive technology and closes on Escape or a click outside. Phones (under 600px) always use over mode; `tablet-mode` (600 to 959px, `over` by default) and `desktop-mode` (960px and up, `side` by default) choose the mode for the larger breakpoints. When the viewport crosses a breakpoint the drawer closes or reopens by itself and remembers your choice; on phones the initial `opened` is ignored so the overlay never covers the page on load.
+
+Give any element inside the side nav a `side-nav-toggle` attribute, in the page header or in the drawer itself, and clicking it toggles the drawer, no script needed; with nested side navs the toggle acts on the nearest enclosing one. `opened` reflects the state (so `c2-side-nav:not([opened])` can restyle the collapsed drawer into an icon rail) and `opened-change` reports user-driven changes.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/side-nav
+```
+
+## Usage
+
+The frames below are fixed-height containers; in an app the side nav usually fills the viewport (`height: 100dvh`). The docs viewport is a desktop, so resize the window to see the tablet and phone behaviour. Over mode is kept inside the frame here with `--c2-side-nav__over--position: absolute`; leave the default (`fixed`) in an app.
+
+```html tag=UsageBlock,package=@c2n/side-nav
+<style>
+  .frame {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ffffff;
+    font-size: 14px;
+  }
+  .frame c2-side-nav {
+    height: 100%;
+  }
+  .frame.tall {
+    height: 300px;
+  }
+  .page {
+    padding: 12px 16px;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .bar strong {
+    font-size: 14px;
+  }
+  .menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #d4d4d8;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+  .menu:hover {
+    background: #f4f4f5;
+  }
+  .menu svg {
+    width: 16px;
+    height: 16px;
+  }
+  .muted {
+    color: #71717a;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .nav {
+    width: 100%;
+    --c2-list--background: transparent;
+    --c2-list--padding-left: 0px;
+    --c2-list--padding-right: 0px;
+    --c2-list--padding-top: 0px;
+    --c2-list--padding-bottom: 0px;
+    --c2-list-item--padding-left: 10px;
+    --c2-list-item--padding-right: 10px;
+    --c2-list-item__hover--background: #eeeef0;
+  }
+  .brand {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    margin: 0 0 10px 10px;
+  }
+  .contained {
+    --c2-side-nav__over--position: absolute;
+    --c2-side-nav__over--height: 100%;
+    --c2-side-nav__open--width: 200px;
+  }
+  .icon-rail {
+    --c2-side-nav__close--width: 56px;
+    --c2-side-nav__open--width: 210px;
+    --c2-side-nav--padding-top: 8px;
+    --c2-side-nav--padding-right: 8px;
+    --c2-side-nav--padding-bottom: 8px;
+    --c2-side-nav--padding-left: 8px;
+  }
+  .icon-rail .rail-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+  .icon-rail .logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #18181b;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .icon-rail .label {
+    white-space: nowrap;
+    transition: opacity 200ms ease;
+  }
+  .icon-rail:not([opened]) .label {
+    opacity: 0;
+  }
+  .icon-rail .collapse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    margin-left: auto;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #71717a;
+    cursor: pointer;
+  }
+  .icon-rail .collapse:hover {
+    background: #eeeef0;
+    color: #18181b;
+  }
+  .icon-rail .collapse svg {
+    width: 16px;
+    height: 16px;
+  }
+  .icon-rail:not([opened]) .rail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .icon-rail:not([opened]) .collapse {
+    margin-left: 0;
+  }
+  .icon-rail .when-closed {
+    display: none;
+  }
+  .icon-rail:not([opened]) .when-closed {
+    display: block;
+  }
+  .icon-rail:not([opened]) .when-open {
+    display: none;
+  }
+  .icon-rail .nav {
+    --c2-list-item--padding-left: 12px;
+    --c2-list-item--padding-right: 10px;
+    --c2-list-item--gap: 12px;
+    --c2-list-item__icon--size: 16px;
+  }
+  .icon-rail .nav c2-list-item {
+    white-space: nowrap;
+  }
+  .icon-rail .badge {
+    width: auto;
+    height: auto;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #476ef9;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    transition: opacity 200ms ease;
+  }
+  .icon-rail:not([opened]) .badge {
+    opacity: 0;
+  }
+</style>
+<div data-label="Side mode">
+  <div class="frame">
+    <c2-side-nav opened>
+      <div slot="side-nav-content">
+        <span class="brand">Acme</span>
+        <c2-list client:only="lit" value="inbox" class="nav">
+          <c2-list-item value="inbox">Inbox</c2-list-item>
+          <c2-list-item value="drafts">Drafts</c2-list-item>
+          <c2-list-item value="sent">Sent</c2-list-item>
+          <c2-list-item value="archive">Archive</c2-list-item>
+        </c2-list>
+      </div>
+      <div class="page">
+        <div class="bar">
+          <button class="menu" side-nav-toggle aria-label="Toggle navigation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <strong>Inbox</strong>
+        </div>
+        <p class="muted">The drawer is part of the layout and pushes this content. Click the menu button to collapse it; the content grows to fill the space.</p>
+      </div>
+    </c2-side-nav>
+  </div>
+</div>
+<div data-label="Over mode">
+  <div class="frame">
+    <c2-side-nav desktop-mode="over" class="contained">
+      <div slot="side-nav-content">
+        <span class="brand">Acme</span>
+        <c2-list client:only="lit" value="inbox" class="nav">
+          <c2-list-item value="inbox">Inbox</c2-list-item>
+          <c2-list-item value="drafts">Drafts</c2-list-item>
+          <c2-list-item value="sent">Sent</c2-list-item>
+        </c2-list>
+      </div>
+      <div class="page">
+        <div class="bar">
+          <button class="menu" side-nav-toggle aria-label="Open navigation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <strong>Inbox</strong>
+        </div>
+        <p class="muted">The drawer slides over this content with a backdrop. Press Escape or click the backdrop to close it. This is what every mode becomes on a phone.</p>
+      </div>
+    </c2-side-nav>
+  </div>
+</div>
+<div data-label="End position">
+  <div class="frame">
+    <c2-side-nav opened position="end">
+      <div slot="side-nav-content">
+        <span class="brand">Filters</span>
+        <c2-list client:only="lit" value="all" class="nav">
+          <c2-list-item value="all">All</c2-list-item>
+          <c2-list-item value="unread">Unread</c2-list-item>
+          <c2-list-item value="flagged">Flagged</c2-list-item>
+        </c2-list>
+      </div>
+      <div class="page">
+        <div class="bar">
+          <strong>Messages</strong>
+          <span style="flex: 1"></span>
+          <button class="menu" side-nav-toggle aria-label="Toggle filters">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+          </button>
+        </div>
+        <p class="muted">The drawer sits on the end edge; the divider and the slide direction follow.</p>
+      </div>
+    </c2-side-nav>
+  </div>
+</div>
+<div data-label="Icon rail">
+  <div class="frame tall">
+    <c2-side-nav class="icon-rail">
+      <div slot="side-nav-content">
+        <div class="rail-header">
+          <span class="logo" title="Acme">A</span>
+          <strong class="label">Acme</strong>
+          <button class="collapse" side-nav-toggle aria-label="Toggle navigation" title="Toggle navigation">
+            <svg class="when-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
+            <svg class="when-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>
+          </button>
+        </div>
+        <c2-list client:only="lit" value="inbox" class="nav">
+          <c2-list-item value="inbox" title="Inbox"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg><span class="label">Inbox</span><span slot="suffix-icon" class="badge">12</span></c2-list-item>
+          <c2-list-item value="sent" title="Sent"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span class="label">Sent</span></c2-list-item>
+          <c2-list-item value="archive" title="Archive"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg><span class="label">Archive</span></c2-list-item>
+          <c2-list-item value="settings" title="Settings"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span class="label">Settings</span></c2-list-item>
+        </c2-list>
+      </div>
+      <div class="page">
+        <div class="bar"><strong>Icon rail</strong></div>
+        <p class="muted">Collapsed to a 56px rail: the logo mark, the icons and their native `title` hints stay; the labels and the unread badge fade out. The collapse button sits in the drawer header. Click it: the drawer widens to 210px and the same rows show icon, label and badge, then click again to go back.</p>
+      </div>
+    </c2-side-nav>
+  </div>
+</div>
+```
+
+## Controlling it
+
+Toggle from markup with `side-nav-toggle`, from code with `opened` or `toggle()`, and listen to `opened-change` to keep your own controls in sync. The event fires for user actions and breakpoint changes, not for values you set yourself.
+
+```ts tag=CodeBlock
+const nav = document.querySelector('c2-side-nav')
+
+nav.addEventListener('opened-change', (event) => {
+  menuButton.setAttribute('aria-expanded', String(event.detail.opened))
+})
+
+nav.toggle() // flip
+nav.opened = false // set silently
+console.log(nav.mode) // 'side' | 'over' for the current viewport
+```
+
+An app shell is the host filling the viewport, with the page scrolling inside the default slot:
+
+```html tag=CodeBlock
+<c2-side-nav opened style="height: 100dvh">
+  <nav slot="side-nav-content">…</nav>
+  <main style="overflow: auto">…</main>
+</c2-side-nav>
+```
+
+## Theming
+
+`--c2-side-nav--*` styles the drawer panel (background, padding, borders, radius) and its widths; `__divider--*` is the line towards the content, `__over--*` overrides the panel and adds the shadow in over mode (each falls back to the base value), `__backdrop--*` the scrim. `--c2-side-nav--transition-duration` drives the collapse and slide. See the API tab for every variable and the Gallery tab for ready-made looks.

@@ -1,0 +1,260 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-slider,
+  $theme: (
+    container--height: 32px,
+    container--length: 160px,
+    container__disabled--opacity: variables.$disabled-content-opacity,
+
+    track--height: 4px,
+    track--border-radius: 999px,
+    track--color: #e4e4e7,
+    fill--color: #0265dc,
+
+    thumb--size: 18px,
+    thumb--border-radius: 999px,
+    thumb--color: #ffffff,
+    thumb--border: 2px solid #0265dc,
+    thumb--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15),
+    thumb__hover--box-shadow: 0 0 0 6px rgba(2, 101, 220, 0.12),
+    thumb__active--box-shadow: 0 0 0 8px rgba(2, 101, 220, 0.18),
+    thumb__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    thumb__focus--outline-offset: 2px,
+
+    tick--size: 2px,
+    tick--color: #a1a1aa,
+    tick__filled--color: #ffffff,
+
+    value--background: #18181b,
+    value--color: #fafafa,
+    value--font-size: 12px,
+    value--font-weight: 500,
+    value--border-radius: 6px,
+    value--padding: 4px 8px,
+    value--offset: 8px,
+    value--opacity: 0,
+  )
+);
+
+// The thumb centre travels between half a thumb from either end, which is also where the native range input puts
+// its own (invisible) thumb, so pointer positions and our drawing agree.
+$_thumb: css.cssVar(thumb--size);
+$_offset: calc(#{$_thumb} / 2 + var(--_p) * (100% - #{$_thumb}));
+
+:host {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([orientation='vertical']) {
+  display: inline-block;
+  width: css.cssVar(container--height);
+  height: css.cssVar(container--length);
+}
+
+.c2-slider {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: css.cssVar(container--height);
+  display: flex;
+  align-items: center;
+  touch-action: pan-y;
+}
+
+:host([orientation='vertical']) .c2-slider {
+  width: css.cssVar(container--height);
+  height: 100%;
+  justify-content: center;
+  touch-action: pan-x;
+}
+
+:host([disabled]) .c2-slider {
+  opacity: css.cssVar(container__disabled--opacity);
+}
+
+.c2-slider-track {
+  position: relative;
+  flex: 1;
+  height: css.cssVar(track--height);
+  border-radius: css.cssVar(track--border-radius);
+  background: css.cssVar(track--color);
+}
+
+:host([orientation='vertical']) .c2-slider-track {
+  flex: none;
+  width: css.cssVar(track--height);
+  height: 100%;
+}
+
+.c2-slider-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: $_offset;
+  border-radius: inherit;
+  background: css.cssVar(fill--color);
+}
+
+:host([orientation='vertical']) .c2-slider-fill {
+  inset: auto 0 0 0;
+  width: auto;
+  height: $_offset;
+}
+
+.c2-slider-ticks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.c2-slider-tick {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: $_offset;
+  width: css.cssVar(tick--size);
+  height: css.cssVar(tick--size);
+  border-radius: 999px;
+  background: css.cssVar(tick--color);
+  transform: translate(-50%, -50%);
+
+  &.is-filled {
+    background: css.cssVar(tick__filled--color);
+  }
+}
+
+:host(:dir(rtl)) .c2-slider-tick {
+  transform: translate(50%, -50%);
+}
+
+// Vertical: centre across the track with physical `left`/`right` (the logical start offset above would otherwise win).
+:host([orientation='vertical']) .c2-slider-tick {
+  top: auto;
+  left: 50%;
+  right: auto;
+  bottom: $_offset;
+  transform: translate(-50%, 50%);
+}
+
+.c2-slider-thumb {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: $_offset;
+  width: $_thumb;
+  height: $_thumb;
+  box-sizing: border-box;
+  border-radius: css.cssVar(thumb--border-radius);
+  background: css.cssVar(thumb--color);
+  border: css.cssVar(thumb--border);
+  box-shadow: css.cssVar(thumb--box-shadow);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: animation.standard(box-shadow);
+}
+
+:host(:dir(rtl)) .c2-slider-thumb {
+  transform: translate(50%, -50%);
+}
+
+:host([orientation='vertical']) .c2-slider-thumb {
+  top: auto;
+  left: 50%;
+  right: auto;
+  bottom: $_offset;
+  transform: translate(-50%, 50%);
+}
+
+// Value bubble, centred above the thumb (beside it when vertical).
+.c2-slider-value {
+  position: absolute;
+  bottom: calc(100% + #{css.cssVar(value--offset)});
+  left: 50%;
+  transform: translateX(-50%);
+  padding: css.cssVar(value--padding);
+  border-radius: css.cssVar(value--border-radius);
+  background: css.cssVar(value--background);
+  color: css.cssVar(value--color);
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: css.cssVar(value--opacity);
+  transition: animation.standard(opacity);
+}
+
+:host([orientation='vertical']) .c2-slider-value {
+  bottom: auto;
+  left: calc(100% + #{css.cssVar(value--offset)});
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+// The native input covers the whole box invisibly and owns pointer and keyboard behaviour. Its thumb is sized like
+// ours so the browser maps a press to the same position we draw.
+.c2-slider-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: $_thumb;
+    height: $_thumb;
+  }
+
+  &::-moz-range-thumb {
+    width: $_thumb;
+    height: $_thumb;
+    border: 0;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+:host([orientation='vertical']) .c2-slider-input {
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+// The input follows the track in DOM order, so state lives on the input and the track is styled through :has().
+.c2-slider:has(.c2-slider-input:enabled:hover) .c2-slider-thumb {
+  box-shadow: css.cssVar(thumb__hover--box-shadow);
+}
+
+.c2-slider:has(.c2-slider-input:enabled:active) .c2-slider-thumb {
+  box-shadow: css.cssVar(thumb__active--box-shadow);
+}
+
+.c2-slider:has(.c2-slider-input:focus-visible) .c2-slider-thumb {
+  outline: css.cssVar(thumb__focus--outline);
+  outline-offset: css.cssVar(thumb__focus--outline-offset);
+}
+
+.c2-slider:has(.c2-slider-input:enabled:hover) .c2-slider-value,
+.c2-slider:has(.c2-slider-input:enabled:active) .c2-slider-value,
+.c2-slider:has(.c2-slider-input:focus-visible) .c2-slider-value {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-slider-thumb,
+  .c2-slider-value {
+    transition: none;
+  }
+}

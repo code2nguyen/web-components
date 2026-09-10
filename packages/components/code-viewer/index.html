@@ -2,22 +2,107 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-code-viewer</title>
     <script type="module" src="/src/code-viewer.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 28px;
+        max-width: 720px;
       }
-      .demo {
-        display: flex;
-        align-items: center;
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      p {
+        margin: 0;
+        line-height: 1.6;
       }
     </style>
   </head>
   <body>
-    <c2-code-viewer code="const markup = '<h3>Some HTML to render.</h3>';" langage="js"></c2-code-viewer>
+    <section>
+      <h2>Slot source in a &lt;pre&gt; (survives formatters), dedented, copy button on hover</h2>
+      <c2-code-viewer language="ts" copyable>
+        <pre>
+export function greet(name: string) {
+  return `Hello, ${name}!`
+}
+        </pre>
+      </c2-code-viewer>
+    </section>
+
+    <section>
+      <h2>Title header, line numbers, highlighted lines 2-3 and 6</h2>
+      <c2-code-viewer language="ts" line-numbers highlight-lines="2-3,6" copyable>
+        <span slot="title">src/tabs.ts</span>
+        <pre>
+import { LitElement, html } from 'lit'
+
+export class Tabs extends LitElement {
+  selectedTab = ''
+
+  render() {
+    return html`<slot name="tab"></slot>`
+  }
+}
+        </pre>
+      </c2-code-viewer>
+    </section>
+
+    <section>
+      <h2>Markup via &lt;template&gt;, dark theme, wrap</h2>
+      <c2-code-viewer language="html" theme="github-dark-default" wrap copyable>
+        <template>
+          <c2-tabs selected-tab="tab2">
+            <c2-tab for="tab1">Tab 1</c2-tab>
+            <c2-tab for="tab2">Tab 2 has a fairly long label so that this line needs to wrap inside the viewer</c2-tab>
+            <div id="tab1">Tab 1 content</div>
+          </c2-tabs>
+        </template>
+      </c2-code-viewer>
+    </section>
+
+    <section>
+      <h2>Dual theme (follows the OS), forced dark, forced light</h2>
+      <div style="display: grid; gap: 8px">
+        <c2-code-viewer language="js" theme="github-light" dark-theme="github-dark-default" code="const auto = 'follows prefers-color-scheme'"></c2-code-viewer>
+        <c2-code-viewer language="js" theme="github-light" dark-theme="github-dark-default" color-scheme="dark" code="const forced = 'dark'"></c2-code-viewer>
+        <c2-code-viewer language="js" theme="github-light" dark-theme="github-dark-default" color-scheme="light" code="const forced = 'light'"></c2-code-viewer>
+      </div>
+    </section>
+
+    <section>
+      <h2>Diff, bash, css-variables theme</h2>
+      <div style="display: grid; gap: 8px">
+        <c2-code-viewer language="diff" code="- const old = 1&#10;+ const fresh = 2&#10;  unchanged()"></c2-code-viewer>
+        <c2-code-viewer language="bash" theme="vitesse-dark" code="npm install @c2n/code-viewer"></c2-code-viewer>
+        <c2-code-viewer
+          language="ts"
+          theme="css-variables"
+          style="--c2-code-viewer__theme--background: #fdf6e3; --c2-code-viewer__theme--token-keyword: #859900; --c2-code-viewer__theme--token-string: #2aa198"
+          code="const solarized: string = 'via --c2-code-viewer__theme--* tokens'"
+        ></c2-code-viewer>
+      </div>
+    </section>
+
+    <section>
+      <h2>Inline, legacy langage attribute, unknown language, live edit</h2>
+      <p>
+        Call <c2-code-viewer inline language="ts" code="element.select('tab2')"></c2-code-viewer> to switch tabs, or set
+        <c2-code-viewer inline langage="html" code='selected-tab="tab2"'></c2-code-viewer>.
+      </p>
+      <c2-code-viewer language="not-a-language" code="unknown languages render as plain text" style="margin-top: 8px"></c2-code-viewer>
+      <p style="margin-top: 8px">
+        <button onclick="document.getElementById('live').code = 'const t = ' + Date.now()">Change code</button>
+        <button onclick="document.getElementById('live').theme = 'nord'">Nord theme</button>
+      </p>
+      <c2-code-viewer id="live" language="js" code="const t = 0" style="margin-top: 8px"></c2-code-viewer>
+    </section>
   </body>
 </html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-slider</title>
+    <script type="module" src="/src/slider.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 32px;
+        max-width: 480px;
+        font-size: 14px;
+        color: #3f3f46;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .field {
+        display: grid;
+        gap: 4px;
+      }
+      .field header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+      }
+      .field header output {
+        font-variant-numeric: tabular-nums;
+        color: #71717a;
+      }
+      .row {
+        display: flex;
+        align-items: flex-start;
+        gap: 32px;
+      }
+      .thick {
+        --c2-slider__track--height: 8px;
+        --c2-slider__thumb--size: 22px;
+        --c2-slider__thumb--border: 3px solid #0265dc;
+      }
+      .flat {
+        --c2-slider__thumb--color: #0265dc;
+        --c2-slider__thumb--border: none;
+        --c2-slider__thumb--box-shadow: none;
+        --c2-slider__thumb--size: 14px;
+      }
+      .success {
+        --c2-slider__fill--color: #16a34a;
+        --c2-slider__thumb--border: 2px solid #16a34a;
+        --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.12);
+        --c2-slider__thumb__active--box-shadow: 0 0 0 8px rgba(22, 163, 74, 0.18);
+        --c2-slider__thumb__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Default with external label and live output (input / change events)</h2>
+      <div class="field">
+        <header><label id="vol-label">Volume</label><output id="vol-out">40</output></header>
+        <c2-slider id="vol" value="40" aria-labelledby="vol-label"></c2-slider>
+      </div>
+      <script>
+        const vol = document.getElementById('vol')
+        vol.addEventListener('input', () => (document.getElementById('vol-out').textContent = vol.value))
+        vol.addEventListener('change', () => console.log('change', vol.value))
+      </script>
+    </section>
+
+    <section>
+      <h2>show-value bubble, formatValue, always visible via --c2-slider__value--opacity</h2>
+      <c2-slider id="pct" value="65" show-value aria-label="Opacity"></c2-slider>
+      <script>
+        document.getElementById('pct').formatValue = (v) => `${v}%`
+      </script>
+      <c2-slider value="25" show-value style="--c2-slider__value--opacity: 1; margin-top: 24px" aria-label="Always visible"></c2-slider>
+    </section>
+
+    <section>
+      <h2>min / max / step with ticks, and a disabled slider</h2>
+      <c2-slider min="0" max="10" step="1" value="6" ticks show-value aria-label="Rating"></c2-slider>
+      <c2-slider min="0" max="1" step="0.25" value="0.5" ticks show-value aria-label="Quarter steps"></c2-slider>
+      <c2-slider value="30" disabled aria-label="Disabled"></c2-slider>
+    </section>
+
+    <section>
+      <h2>Vertical (height from --c2-slider__container--length) and RTL</h2>
+      <div class="row">
+        <c2-slider orientation="vertical" value="40" show-value aria-label="Vertical"></c2-slider>
+        <c2-slider orientation="vertical" value="70" ticks step="10" style="--c2-slider__container--length: 120px" aria-label="Vertical with ticks"></c2-slider>
+        <div dir="rtl" style="flex: 1"><c2-slider value="30" show-value aria-label="RTL"></c2-slider></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Themed: thick, flat thumb, success</h2>
+      <c2-slider class="thick" value="55" aria-label="Thick"></c2-slider>
+      <c2-slider class="flat" value="35" aria-label="Flat"></c2-slider>
+      <c2-slider class="success" value="80" show-value aria-label="Success"></c2-slider>
+    </section>
+  </body>
+</html>

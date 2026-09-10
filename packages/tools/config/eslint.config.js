@@ -34,8 +34,15 @@ export default tseslint.config(
     },
   },
   {
-    // build/tooling scripts run in Node
-    files: ['**/*.config.{js,mjs,cjs,ts}', '**/plopfile.{js,ts}', 'scripts/**/*.{js,mjs,ts}', 'demo/plugin/**/*.mjs'],
+    // build/tooling scripts and the MCP server run in Node
+    files: [
+      '**/*.config.{js,mjs,cjs,ts}',
+      '**/plopfile.{js,ts}',
+      'scripts/**/*.{js,mjs,ts}',
+      '**/scripts/**/*.{js,mjs,ts}',
+      'apps/ui/plugin/**/*.mjs',
+      'packages/tools/mcp/**/*.ts',
+    ],
     languageOptions: { globals: { ...globals.node } },
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },

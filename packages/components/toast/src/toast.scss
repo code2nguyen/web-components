@@ -1,0 +1,154 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-toast,
+  $theme: (
+    container--background: #ffffff,
+    container--color: #18181b,
+    container--border: 1px solid #e4e4e7,
+    container--border-radius: 10px,
+    container--padding: 14px 16px,
+    container--gap: 12px,
+    container--box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+    container--font-family: inherit,
+    container--font-size: 14px,
+    container--line-height: 1.5,
+    heading--font-weight: 600,
+    icon--align-self: center,
+    progress--height: 3px,
+    progress--color: #2563eb,
+    progress--background: rgba(37, 99, 235, 0.15),
+    icon--size: 20px,
+    icon--color: #71717a,
+    icon__info--color: #2563eb,
+    icon__success--color: #15803d,
+    icon__warning--color: #a16207,
+    icon__error--color: #dc2626,
+    action--color: #2563eb,
+    close--color: #71717a,
+    close__hover--background: #f4f4f5,
+    button__focus--outline: 2px solid #476ef9,
+  )
+);
+:host {
+  display: block;
+  min-width: 0;
+}
+:host([hidden]) {
+  display: none;
+}
+.toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  box-sizing: border-box;
+  background: css.cssVar(container--background);
+  color: css.cssVar(container--color);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  padding: css.cssVar(container--padding);
+  gap: css.cssVar(container--gap);
+  box-shadow: css.cssVar(container--box-shadow);
+  font-family: css.cssVar(container--font-family);
+  font-size: css.cssVar(container--font-size);
+  line-height: css.cssVar(container--line-height);
+}
+.content {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.heading {
+  font-weight: css.cssVar(heading--font-weight);
+}
+.icon {
+  align-self: css.cssVar(icon--align-self);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+  display: inline-flex;
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+}
+.icon svg,
+::slotted([slot='icon']) {
+  width: 100%;
+  height: 100%;
+}
+:host([variant='info']) .icon {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+  color: css.cssVar(icon__info--color);
+}
+:host([variant='success']) .icon {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+  color: css.cssVar(icon__success--color);
+}
+:host([variant='warning']) .icon {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+  color: css.cssVar(icon__warning--color);
+}
+:host([variant='error']) .icon {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+  color: css.cssVar(icon__error--color);
+}
+button {
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+  &:focus-visible {
+    outline: css.cssVar(button__focus--outline);
+    outline-offset: 2px;
+  }
+}
+.action {
+  display: block;
+  color: css.cssVar(action--color);
+  padding: 4px 0;
+  text-decoration: underline;
+}
+.close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  color: css.cssVar(close--color);
+  &:hover {
+    background: css.cssVar(close__hover--background);
+  }
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+@media (forced-colors: active) {
+  .toast {
+    border-color: CanvasText;
+  }
+}
+
+.progress {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: css.cssVar(progress--height);
+  background: css.cssVar(progress--background);
+  border-radius: 0 0 #{css.cssVar(container--border-radius)} #{css.cssVar(container--border-radius)};
+  overflow: hidden;
+}
+.progress__bar {
+  height: 100%;
+  background: css.cssVar(progress--color);
+  transform-origin: left;
+}
+:host(:dir(rtl)) .progress__bar {
+  transform-origin: right;
+}

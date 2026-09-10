@@ -1,0 +1,77 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-radio-group,
+  $theme: (
+    gap: 8px,
+    align-items: flex-start,
+    header--gap: 2px,
+    header--margin-bottom: 8px,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 500,
+    description--color: #71717a,
+    description--font-size: 12px,
+    header__disabled--opacity: variables.$disabled-content-opacity,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-radio-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.c2-radio-group-header {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(header--gap);
+  margin-bottom: css.cssVar(header--margin-bottom);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+:host([disabled]) .c2-radio-group-header {
+  opacity: css.cssVar(header__disabled--opacity);
+}
+
+.c2-radio-group-label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-radio-group-description {
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-radio-group-items {
+  display: flex;
+  flex-direction: column;
+  align-items: css.cssVar(align-items);
+  gap: css.cssVar(gap);
+}
+
+:host([orientation='horizontal']) .c2-radio-group-items {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}

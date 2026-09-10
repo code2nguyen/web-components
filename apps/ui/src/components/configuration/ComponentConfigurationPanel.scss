@@ -1,0 +1,472 @@
+// Inspector panel (studio right rail). Colours come from @c2n/theme/base.css + assets/c2-theme.scss; this file only
+// sets the dense sizes, the panel chrome and the "ghost" look (transparent until hover) of the c2 controls.
+//
+// Density scale: 28px row, 24px control, 11.5px body text, 10.5px uppercase section eyebrow, 12px gutter.
+
+:host {
+  display: block;
+  height: 100%;
+  // `auto`, not `hidden`: the inner chain (grid track -> `.tab-panel`) should mean the host never overflows, but if
+  // that ever breaks again the panel gets a scrollbar instead of silently clipping the properties out of reach.
+  overflow: auto;
+  font-size: 12px;
+  font-family: var(--site-font-sans);
+  color: var(--site-color-on-surface);
+  background: var(--site-color-surface);
+
+  // --- dense control variants ------------------------------------------------
+  --c2-text-field--min-height: 24px;
+  --c2-text-field--font-size: 11.5px;
+  --c2-text-field--line-height: 16px;
+  --c2-text-field--padding-top: 2px;
+  --c2-text-field--padding-bottom: 2px;
+  --c2-text-field--padding-left: 8px;
+  --c2-text-field--padding-right: 6px;
+  --c2-text-field--gap: 4px;
+  --c2-text-field--background: transparent;
+  --c2-text-field--border-top-left-radius: 5px;
+  --c2-text-field--border-top-right-radius: 5px;
+  --c2-text-field--border-bottom-left-radius: 5px;
+  --c2-text-field--border-bottom-right-radius: 5px;
+  --c2-text-field--border-top: 1px solid transparent;
+  --c2-text-field--border-right: 1px solid transparent;
+  --c2-text-field--border-bottom: 1px solid transparent;
+  --c2-text-field--border-left: 1px solid transparent;
+  --c2-text-field__hover--border-top: 1px solid var(--site-color-outline);
+  --c2-text-field__hover--border-right: 1px solid var(--site-color-outline);
+  --c2-text-field__hover--border-bottom: 1px solid var(--site-color-outline);
+  --c2-text-field__hover--border-left: 1px solid var(--site-color-outline);
+  --c2-text-field__focus--border-top: 1px solid var(--site-color-primary);
+  --c2-text-field__focus--border-right: 1px solid var(--site-color-primary);
+  --c2-text-field__focus--border-bottom: 1px solid var(--site-color-primary);
+  --c2-text-field__focus--border-left: 1px solid var(--site-color-primary);
+  --c2-text-field__focus--outline: 0 solid transparent;
+  --c2-text-field__icon--size: 12px;
+
+  --c2-select__button--font-size: 11.5px;
+  --c2-select__button--min-height: 24px;
+  --c2-select__button--padding: 3px 4px 3px 8px;
+  --c2-select__button--background: transparent;
+  --c2-select__button__hover--background: var(--site-color-surface-container-2);
+  --c2-select__button--border-top: 1px solid transparent;
+  --c2-select__button--border-right: 1px solid transparent;
+  --c2-select__button--border-bottom: 1px solid transparent;
+  --c2-select__button--border-left: 1px solid transparent;
+  --c2-select__button__hover--border-top: 1px solid var(--site-color-outline);
+  --c2-select__button__hover--border-right: 1px solid var(--site-color-outline);
+  --c2-select__button__hover--border-bottom: 1px solid var(--site-color-outline);
+  --c2-select__button__hover--border-left: 1px solid var(--site-color-outline);
+  --c2-select__button__suffix-icon--width: 11px;
+  --c2-select__button__suffix-icon--height: 11px;
+  --c2-select__button__prefix-icon--width: 12px;
+  --c2-select__button__prefix-icon--height: 12px;
+
+  --c2-list-item--font-size: 11.5px;
+  --c2-list-item--min-height: 26px;
+  --c2-list-item__hover--background: var(--site-color-surface-container-3);
+  --c2-list-item__selected--background: var(--site-color-surface-container-3);
+  --c2-list-item__selected--color: var(--site-color-on-surface);
+  --c2-list-item__selected__hover--background: var(--site-color-surface-container-5);
+
+  --c2-switch__track--width: 28px;
+  --c2-switch__track--height: 16px;
+  --c2-switch__thumb--size: 12px;
+
+  --c2-icon-button__icon--width: 13px;
+  --c2-icon-button__icon--height: 13px;
+  --c2-icon-button__state-layer--size: 24px;
+
+  --c2-tabs__tab--padding-top: 9px;
+  --c2-tabs__tab--padding-bottom: 9px;
+  --c2-tabs__tab--padding-left: 10px;
+  --c2-tabs__tab--padding-right: 10px;
+  --c2-tabs__tab--font-size: 11.5px;
+  --c2-tabs__tab--font-weight: 500;
+  --c2-tabs__indicator--height: 2px;
+  --c2-tabs--box-shadow: inset 0 -1px 0 0 var(--site-color-outline-variant);
+  --c2-tabs__tab--color: var(--site-color-on-surface-variant);
+  --c2-tabs__tab__hover--color: var(--site-color-on-surface);
+  --c2-tabs__tab__selected--color: var(--site-color-on-surface);
+  --c2-tabs__indicator--color: var(--site-color-primary);
+
+  --c2-badge--font-size: 10px;
+  --c2-badge--height: 17px;
+}
+
+// ---------------------------------------------------------------------------
+// Shell
+// ---------------------------------------------------------------------------
+.inspector {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  &__header {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 6px 8px 12px;
+    border-bottom: 1px solid var(--site-color-outline-variant);
+    background: var(--site-color-surface-container-1);
+  }
+  &__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    margin-right: auto;
+  }
+  &__eyebrow {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--site-color-on-surface-muted);
+  }
+  &__tag {
+    font-family: var(--site-font-mono);
+    font-size: 11.5px;
+    color: var(--site-color-on-surface);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  &__count {
+    flex: none;
+    --c2-badge__info--background: var(--site-color-primary-soft);
+    --c2-badge__info--color: var(--site-color-primary);
+  }
+  &__actions {
+    flex: none;
+    display: flex;
+    gap: 2px;
+  }
+
+  // The tab strip stays put; only the active panel scrolls.
+  //
+  // Grid, not flex, on purpose: `c2-tabs` lays out header + panel in a `.c2-tabs` flex column inside its shadow
+  // root, and that wrapper has no `height`/`flex-grow` we can reach. As a flex item it would size to its content
+  // and never fill the rail; as a grid item in a `minmax(0, 1fr)` track it stretches to the track in the block
+  // axis, which finally gives the slotted `.tab-panel` below a definite height to scroll inside.
+  &__tabs {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+// Slotted into `c2-tabs`' `tab-content` slot, so its flex parent is `.c2-tabs` in that shadow root
+// (`slot` is `display: contents`). `min-height: 0` + `overflow-y` is what lets it shrink below its content.
+.tab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+// ---------------------------------------------------------------------------
+// Shared bits
+// ---------------------------------------------------------------------------
+.inspector-btn {
+  --c2-button__container--height: 24px;
+  --c2-button__container--padding-left: 10px;
+  --c2-button__container--padding-right: 10px;
+  --c2-button__container--font-size: 11.5px;
+  --c2-button__container--border-radius: 6px;
+  --c2-button__container--gap: 5px;
+  --c2-button__container--background-color: var(--site-color-surface);
+  --c2-button__container--color: var(--site-color-on-surface);
+  --c2-button__container--border: 1px solid var(--site-color-outline-variant);
+  --c2-button__container__hover--background-color: var(--site-color-surface-container-2);
+  --c2-button__container__hover--border: 1px solid var(--site-color-outline);
+  --c2-button__container__active--background-color: var(--site-color-surface-container-3);
+  --c2-button__icon--size: 12px;
+  white-space: nowrap;
+
+  &--primary {
+    --c2-button__container--background-color: var(--site-color-primary);
+    --c2-button__container--color: var(--site-color-on-primary);
+    --c2-button__container--border: 1px solid transparent;
+    // Same accent-hover recipe as SiteButton --primary; the site has no separate hover token.
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--site-color-primary), var(--site-color-on-surface) 12%);
+    --c2-button__container__hover--border: 1px solid transparent;
+  }
+}
+
+.inspector-icon-btn {
+  --c2-icon-button--border-radius: 5px;
+  --c2-icon-button__icon--color: var(--site-color-on-surface-variant);
+  --c2-icon-button__icon__hover--color: var(--site-color-on-surface);
+  --c2-icon-button__hover--background-color: var(--site-color-surface-container-2);
+
+  &[aria-pressed='true'] {
+    --c2-icon-button__icon--color: var(--site-color-primary);
+    --c2-icon-button--background-color: var(--site-color-primary-soft);
+  }
+}
+
+.inspector-field {
+  flex: 1;
+  min-width: 0;
+  --c2-text-field--min-height: 26px;
+  --c2-text-field--background: var(--site-color-surface-container-1);
+  --c2-text-field--border-top: 1px solid var(--site-color-outline-variant);
+  --c2-text-field--border-right: 1px solid var(--site-color-outline-variant);
+  --c2-text-field--border-bottom: 1px solid var(--site-color-outline-variant);
+  --c2-text-field--border-left: 1px solid var(--site-color-outline-variant);
+}
+
+.text-control {
+  flex: 1;
+  min-width: 0;
+  --c2-text-field--font-family: var(--site-font-mono);
+}
+
+.empty {
+  margin: 0;
+  padding: 20px 14px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--site-color-on-surface-muted);
+}
+
+// ---------------------------------------------------------------------------
+// Design tab
+// ---------------------------------------------------------------------------
+.design {
+  display: flex;
+  flex-direction: column;
+
+  // Part picker + filter stay reachable while the property list scrolls under them.
+  &__toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 8px 8px 12px;
+    border-bottom: 1px solid var(--site-color-outline-variant);
+    background: var(--site-color-surface);
+  }
+  &__filter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.part-select {
+  width: 100%;
+  --c2-select__button--font-family: var(--site-font-mono);
+  --c2-select__button--background: var(--site-color-surface-container-1);
+  --c2-select__button--border-top: 1px solid var(--site-color-outline-variant);
+  --c2-select__button--border-right: 1px solid var(--site-color-outline-variant);
+  --c2-select__button--border-bottom: 1px solid var(--site-color-outline-variant);
+  --c2-select__button--border-left: 1px solid var(--site-color-outline-variant);
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 0;
+  --c2-text-field--background: var(--site-color-surface-container-1);
+  --c2-text-field--padding-left: 6px;
+}
+
+// A slotted `c2-list-item` gets the indent through its own variable, not a descendant selector.
+.level-1 {
+  --c2-list-item--padding-left: 20px;
+}
+
+c2-details.section {
+  --c2-details--border-top: none;
+  --c2-details--border-right: none;
+  --c2-details--border-left: none;
+  --c2-details--border-bottom: 1px solid var(--site-color-outline-variant);
+  // c2-details is a rounded card by default (8px, themed as --c2-theme--radius-lg). These sections are full-bleed
+  // rows in a 400px rail divided by a single bottom rule, so the corners have to go with the side borders.
+  --c2-details--border-top-left-radius: 0;
+  --c2-details--border-top-right-radius: 0;
+  --c2-details--border-bottom-left-radius: 0;
+  --c2-details--border-bottom-right-radius: 0;
+  --c2-details__header--padding-top: 8px;
+  --c2-details__header--padding-bottom: 8px;
+  --c2-details__header--padding-left: 12px;
+  --c2-details__header--padding-right: 10px;
+  --c2-details__header--flex-direction: row-reverse;
+  --c2-details__header--gap: 6px;
+  --c2-details__header__icon--width: 10px;
+  --c2-details__header__icon--height: 10px;
+  --c2-details__header__icon--color: var(--site-color-on-surface-muted);
+  --c2-details__header__icon--rotate: 90deg;
+  --c2-details__header__hover--background: var(--site-color-surface-container-1);
+  --c2-details__content--padding-top: 2px;
+  --c2-details__content--padding-bottom: 10px;
+  --c2-details__content--padding-left: 0;
+  --c2-details__content--padding-right: 0;
+}
+
+.section__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--site-color-on-surface);
+  text-transform: capitalize;
+}
+
+.section__badge {
+  --c2-badge__info--background: var(--site-color-primary);
+  --c2-badge__dot--size: 5px;
+}
+
+.section__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+// ---------------------------------------------------------------------------
+// Props tab
+// ---------------------------------------------------------------------------
+.props {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+}
+
+.prop-switch {
+  flex: none;
+}
+
+.prop-select {
+  flex: 1;
+  min-width: 0;
+  --c2-select__button--background: var(--site-color-surface-container-1);
+}
+
+// ---------------------------------------------------------------------------
+// Collection tab
+// ---------------------------------------------------------------------------
+.collection {
+  display: flex;
+  flex-direction: column;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--site-color-outline-variant);
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--site-color-on-surface-muted);
+  }
+  &__count {
+    --c2-badge__neutral--background: var(--site-color-surface-container-3);
+    --c2-badge__neutral--color: var(--site-color-on-surface-variant);
+    letter-spacing: 0;
+  }
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  &__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 2px 0 4px;
+  }
+  &__hint {
+    margin: 0;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--site-color-on-surface-muted);
+
+    code {
+      font-family: var(--site-font-mono);
+      font-size: 11px;
+    }
+  }
+}
+
+// The share/import disclosure reuses `.block` for its padding, so its own chrome must stay flat.
+c2-details.block--details {
+  padding: 0;
+  gap: 0;
+  --c2-details--border-top: none;
+  --c2-details--border-right: none;
+  --c2-details--border-left: none;
+  --c2-details--border-bottom: none;
+  // Flat means flat: the default card radius has to be cleared alongside the borders (see `.section` above).
+  --c2-details--border-top-left-radius: 0;
+  --c2-details--border-top-right-radius: 0;
+  --c2-details--border-bottom-left-radius: 0;
+  --c2-details--border-bottom-right-radius: 0;
+  --c2-details__header--padding-top: 12px;
+  --c2-details__header--padding-bottom: 12px;
+  --c2-details__header--padding-left: 12px;
+  --c2-details__header--padding-right: 10px;
+  --c2-details__header--flex-direction: row-reverse;
+  --c2-details__header--gap: 6px;
+  --c2-details__header__icon--width: 10px;
+  --c2-details__header__icon--height: 10px;
+  --c2-details__header__icon--rotate: 90deg;
+  --c2-details__header__icon--color: var(--site-color-on-surface-muted);
+  --c2-details__content--padding-left: 12px;
+  --c2-details__content--padding-right: 12px;
+  --c2-details__content--padding-bottom: 12px;
+  --c2-details__content--padding-top: 0;
+}
+
+.preset-list {
+  --c2-list--padding-top: 0;
+  --c2-list--padding-bottom: 0;
+  --c2-list-item--min-height: 34px;
+  --c2-list-item--border-top-left-radius: 6px;
+  --c2-list-item--border-top-right-radius: 6px;
+  --c2-list-item--border-bottom-left-radius: 6px;
+  --c2-list-item--border-bottom-right-radius: 6px;
+  --c2-list-item--padding-left: 8px;
+  --c2-list-item--padding-right: 4px;
+  --c2-list-item--font-size: 12px;
+  --c2-list-item--font-weight: 500;
+  --c2-list-item__description--font-size: 10.5px;
+}
+
+.preset__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rename-field {
+  --c2-text-field--min-height: 30px;
+}
+
+.import-field {
+  --c2-textarea__container--font-family: var(--site-font-mono);
+  --c2-textarea__container--font-size: 11px;
+  --c2-textarea__container--background: var(--site-color-surface-container-1);
+  --c2-textarea__container--min-height: 62px;
+  --c2-textarea__container--border: 1px solid var(--site-color-outline-variant);
+}

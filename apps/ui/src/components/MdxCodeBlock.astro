@@ -1,0 +1,282 @@
+---
+import CodeBlock from './CodeBlock.astro'
+import SiteButton from './ui/SiteButton.astro'
+import SiteIconButton from './ui/SiteIconButton.astro'
+import type { CodeLanguage } from 'astro'
+
+/**
+ * Live example frame produced by the `tag=MdxCodeBlock` fence meta (see plugin/mdx-codeblock-remark.mjs).
+ * The rendered component is slotted in; the source is shown in a collapsible code panel below.
+ */
+interface Props {
+  code: string
+  lang: CodeLanguage
+  uid: string
+  style: string
+  /** Legacy fence option, accepted but no longer changes the layout. */
+  compact?: string
+  component?: string
+  id?: string
+  /** Studio title label ("Button · <label>"); defaults to the nearest heading above the frame. */
+  label?: string
+  /** Render hidden on the page; the frame only appears when expanded into the studio (preset cards use this). */
+  offscreen?: boolean
+}
+
+const { code, lang, uid, style, label, offscreen } = Astro.props
+---
+
+<figure class:list={['example', { 'example--offscreen': offscreen }]} data-uid={uid} data-label={label}>
+  <header class="example__studio-bar" hidden>
+    <SiteButton hydrate="defined" size="sm" variant="ghost" class="example__studio-exit" title="Exit (Esc)">
+      <c2-feather-arrow-left slot="prefix-icon"></c2-feather-arrow-left>
+      Exit
+    </SiteButton>
+    <div class="example__studio-heading">
+      <span class="example__studio-title"></span>
+      <code class="example__studio-tag"></code>
+    </div>
+    <div class="example__studio-actions">
+      <SiteButton hydrate="defined" size="sm" variant="ghost" class="example__studio-reset" title="Restore the authored example">
+        <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
+        Reset
+      </SiteButton>
+      <SiteButton hydrate="defined" size="sm" variant="primary" class="example__studio-save" title="Save the current values to your collection">
+        Save to collection
+      </SiteButton>
+    </div>
+  </header>
+  <div class="example__canvas">
+    {style ? <Fragment set:html={style} /> : ''}
+    <slot />
+  </div>
+  <figcaption class="example__toolbar">
+    {label && <span class="example__label">{label}</span>}
+    <span class="example__badge" hidden>Customized</span>
+    <SiteIconButton hydrate="defined" size="sm" label="Reset to authored example" class="example__reset" hidden>
+      <c2-feather-rotate-ccw></c2-feather-rotate-ccw>
+    </SiteIconButton>
+    <SiteIconButton hydrate="defined" size="sm" label="Invert preview background" class="example__canvas-toggle" aria-pressed="false">
+      <c2-feather-sun></c2-feather-sun>
+    </SiteIconButton>
+    <SiteIconButton
+      hydrate="defined"
+      size="sm"
+      label="Customize this example"
+      tooltip="Customize with the theming panel"
+      class="mdx-code-block-setting-btn"
+      data-uid={uid}
+    >
+      <c2-feather-sliders></c2-feather-sliders>
+    </SiteIconButton>
+    <SiteIconButton hydrate="defined" size="sm" label="Show code" class="example__code-toggle" aria-expanded="false">
+      <c2-feather-code></c2-feather-code>
+    </SiteIconButton>
+  </figcaption>
+  <div class="example__code" hidden>
+    <CodeBlock code={code} lang={lang} uid={uid} bare />
+  </div>
+</figure>
+
+<style lang="scss" is:global>
+  .example {
+    margin: 16px 0;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: var(--site-radius-md);
+    background: var(--site-color-surface);
+    overflow: hidden;
+
+    &__canvas {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      min-height: 120px;
+      padding: 32px 24px;
+      background-color: var(--site-color-surface);
+      background-image: radial-gradient(var(--site-canvas-dot) 1px, transparent 1px);
+      background-size: 16px 16px;
+      color: var(--site-color-on-surface);
+      transition: background-color 200ms var(--site-ease);
+      > astro-island {
+        display: contents;
+      }
+    }
+    &.inverted &__canvas {
+      color-scheme: dark;
+      color: #f4f4f5;
+      background-color: #18181b;
+      --site-canvas-dot: rgba(244, 244, 245, 0.14);
+    }
+    html[data-theme='dark'] &.inverted &__canvas {
+      color-scheme: light;
+      color: #18181b;
+      background-color: #ffffff;
+      --site-canvas-dot: rgba(24, 24, 27, 0.14);
+    }
+
+    &__toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 6px;
+      border-top: 1px solid var(--site-color-outline-variant);
+      background: var(--site-color-surface-container-1);
+    }
+    &__code {
+      border-top: 1px solid var(--site-color-outline-variant);
+      &[hidden] {
+        display: none;
+      }
+    }
+
+    // Card title (gallery frames pass `label=`).
+    &__label {
+      margin-right: auto;
+      padding-left: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--site-color-on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    &__label + &__badge {
+      margin-right: 4px;
+    }
+
+    // "Customized" badge + reset shown on the toolbar once an example differs from its authored state.
+    &__badge {
+      margin-right: auto;
+      padding: 0 8px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--site-color-primary);
+      background: var(--site-color-primary-soft);
+      border-radius: 999px;
+      &[hidden] {
+        display: none;
+      }
+    }
+    &__reset[hidden] {
+      display: none;
+    }
+
+    // Studio bar: only visible while the example is expanded into the studio.
+    &__studio-bar {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      height: 52px;
+      padding: 0 12px 0 8px;
+      border-bottom: 1px solid var(--site-color-outline-variant);
+      background: var(--site-color-surface);
+      color: var(--site-color-on-surface);
+    }
+    &__studio-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+    }
+    &__studio-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    &__studio-tag {
+      font-family: var(--site-font-mono);
+      font-size: 12px;
+      color: var(--site-color-on-surface-muted);
+    }
+    &__studio-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    // ---------------------------------------------------------------------
+    // Studio mode: the figure covers the viewport left of the inspector.
+    // ---------------------------------------------------------------------
+    &.is-configuring {
+      position: fixed;
+      inset: 0 var(--site-studio-panel-width) 0 0;
+      z-index: var(--site-z-studio);
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      background: var(--site-color-surface);
+
+      .example__studio-bar {
+        display: flex;
+      }
+      .example__canvas {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        padding: 48px 40px;
+      }
+      .example__code {
+        max-height: 40vh;
+        overflow: auto;
+      }
+      .mdx-code-block-setting-btn,
+      .example__label,
+      .example__badge,
+      .example__reset {
+        display: none;
+      }
+      // The element the inspector drives, even when the example renders several.
+      [data-target-uid] {
+        outline: 2px dashed var(--site-color-primary);
+        outline-offset: 8px;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  // Frames that exist only to be opened in the studio (e.g. preset cards).
+  .example.example--offscreen:not(.is-configuring) {
+    display: none;
+  }
+
+  html.c2n-studio-open {
+    overflow: hidden;
+  }
+
+  @media (max-width: 959.98px) {
+    .example.is-configuring {
+      inset: 0 0 50vh 0;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.example').forEach((example) => {
+    const codeToggle = example.querySelector<HTMLElement>('.example__code-toggle')
+    const codePanel = example.querySelector<HTMLElement>('.example__code')
+    codeToggle?.addEventListener('click', () => {
+      const expanded = codeToggle.getAttribute('aria-expanded') === 'true'
+      codeToggle.setAttribute('aria-expanded', String(!expanded))
+      codeToggle.setAttribute('aria-label', expanded ? 'Show code' : 'Hide code')
+      if (codePanel) codePanel.hidden = expanded
+    })
+    example.querySelector<HTMLElement>('.example__canvas-toggle')?.addEventListener('click', (event) => {
+      const inverted = example.classList.toggle('inverted')
+      ;(event.currentTarget as HTMLElement).setAttribute('aria-pressed', String(inverted))
+    })
+  })
+</script>
+<script src="./MdxCodeBlockScript.ts"></script>

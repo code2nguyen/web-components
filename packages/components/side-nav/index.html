@@ -4,38 +4,166 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-side-nav</title>
     <script type="module" src="/src/side-nav.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      html,
       body {
-        padding: 24px;
+        margin: 0;
+        height: 100%;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
       }
-      .content {
-        padding-top: 30px;
-        background-color: red;
-      }
-      c2-side-nav {
+      c2-side-nav:not(:defined) {
         opacity: 0;
       }
-      c2-side-nav:defined {
-        opacity: 1;
+      #shell {
+        height: 100dvh;
+      }
+      nav a {
+        display: block;
+        padding: 8px 10px;
+        border-radius: 6px;
+        color: #18181b;
+        text-decoration: none;
+      }
+      nav a:hover {
+        background: #eeeef0;
+      }
+      nav a.active {
+        background: #e4e4e7;
+        font-weight: 600;
+      }
+      main {
+        height: 100%;
+        overflow: auto;
+        padding: 16px 24px;
+        box-sizing: border-box;
+      }
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      button {
+        font: inherit;
+      }
+      .log {
+        color: #71717a;
+        font-size: 13px;
+      }
+      .frame {
+        position: relative;
+        width: 480px;
+        height: 200px;
+        border: 1px solid #e4e4e7;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 24px;
+      }
+      .frame c2-side-nav {
+        height: 100%;
+        --c2-side-nav__over--position: absolute;
+        --c2-side-nav__over--height: 100%;
+        --c2-side-nav__open--width: 180px;
+      }
+      .rail {
+        --c2-side-nav__close--width: 56px;
+        --c2-side-nav--padding-left: 8px;
+        --c2-side-nav--padding-right: 8px;
+      }
+      .rail:not([opened]) .label {
+        display: none;
+      }
+      .rail .head {
+        display: flex;
+        align-items: center;
+        height: 32px;
+        margin-bottom: 8px;
+        padding-left: 10px;
+        font-weight: 600;
+      }
+      .rail:not([opened]) .head {
+        padding-left: 4px;
+      }
+      .rail:not([opened]) .collapse {
+        margin-left: 0;
+      }
+      .rail .collapse {
+        margin-left: auto;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        cursor: pointer;
+      }
+      .rail nav a {
+        white-space: nowrap;
       }
     </style>
   </head>
 
   <body>
-    <div style="display: flex">
-      <c2-side-nav id="sidenav" opened desktop-mode="side" responsive-tablet>
-        <div slot="side-nav-content" class="content">side nav content 1</div>
-        <button id="menu">Toggle Sizenav</button>
+    <!-- App shell: the side nav fills the viewport. Resize the window to see side / over switching. -->
+    <c2-side-nav id="shell" opened responsive-tablet>
+      <nav slot="side-nav-content">
+        <a class="active" href="#">Inbox</a>
+        <a href="#">Drafts</a>
+        <a href="#">Sent</a>
+        <a href="#">Archive</a>
+        <a href="#">Spam</a>
+        <a href="#">Trash</a>
+      </nav>
+      <main>
+        <div class="bar">
+          <button side-nav-toggle>☰ Toggle</button>
+          <strong>Inbox</strong>
+          <span class="log" id="log">opened-change events appear here</span>
+        </div>
+        <p>
+          Desktop: side mode (pushes content). Tablet: over mode with a backdrop. Phone: over mode. Escape and backdrop click close the overlay; focus moves
+          into the drawer and back.
+        </p>
 
-        <div>Main Content</div>
-      </c2-side-nav>
-    </div>
-    <script>
-      document.querySelector('#menu').addEventListener('click', () => {
-        document.querySelector('#sidenav').toggleAttribute('opened')
+        <div class="frame">
+          <c2-side-nav desktop-mode="over" tablet-mode="over">
+            <nav slot="side-nav-content">
+              <a class="active" href="#">Overview</a>
+              <a href="#">Members</a>
+              <a href="#">Billing</a>
+            </nav>
+            <div style="padding: 12px">
+              <button side-nav-toggle>Open contained overlay</button>
+              <p class="log">Over mode kept inside this frame with --c2-side-nav__over--position: absolute.</p>
+            </div>
+          </c2-side-nav>
+        </div>
+
+        <div class="frame">
+          <c2-side-nav class="rail">
+            <div slot="side-nav-content">
+              <div class="head"><span class="label">Acme</span><button class="collapse" side-nav-toggle aria-label="Toggle navigation">⇔</button></div>
+              <nav>
+                <a class="active" href="#">★ <span class="label">Starred</span></a>
+                <a href="#">✉ <span class="label">Unread</span></a>
+                <a href="#">⚑ <span class="label">Flagged</span></a>
+              </nav>
+            </div>
+            <div style="padding: 12px">
+              <p class="log">Icon rail: closed width 56px keeps the icons; the toggle sits in the drawer header and labels hide via .rail:not([opened]).</p>
+            </div>
+          </c2-side-nav>
+        </div>
+      </main>
+    </c2-side-nav>
+
+    <script type="module">
+      const shell = document.getElementById('shell')
+      const log = document.getElementById('log')
+      shell.addEventListener('opened-change', (event) => {
+        if (event.target === shell) log.textContent = `opened-change → ${event.detail.opened} (${shell.mode})`
       })
     </script>
   </body>

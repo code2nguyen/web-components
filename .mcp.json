@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "c2n": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["packages/tools/mcp/src/cli.ts"]
+    }
+  }
+}

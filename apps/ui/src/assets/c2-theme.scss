@@ -1,0 +1,37 @@
+// Bridge: the site's own design tokens drive every c2 component through the shared --c2-theme--* tokens.
+// `@c2n/theme/base.css` (imported in layouts/Main.astro) maps each component variable onto these tokens, so this
+// block is the whole theme of the docs site; dark mode follows automatically because the --site-* values flip.
+// Tokens left out keep the component defaults (font sizes/weights, disabled opacity, motion, border width).
+:root {
+  // Colour roles
+  --c2-theme--color-primary: var(--site-color-primary);
+  --c2-theme--color-primary-hover: color-mix(in srgb, var(--site-color-primary), var(--site-color-on-surface) 12%);
+  --c2-theme--color-primary-active: color-mix(in srgb, var(--site-color-primary), var(--site-color-on-surface) 22%);
+  --c2-theme--color-on-primary: var(--site-color-on-primary);
+  --c2-theme--color-primary-container: var(--site-color-primary-container);
+  --c2-theme--color-surface: var(--site-color-surface);
+  --c2-theme--color-surface-container-low: var(--site-color-surface-container-1);
+  --c2-theme--color-surface-container: var(--site-color-surface-container-3);
+  --c2-theme--color-on-surface: var(--site-color-on-surface);
+  --c2-theme--color-on-surface-variant: var(--site-color-on-surface-muted);
+  --c2-theme--color-outline: var(--site-color-outline);
+  --c2-theme--color-outline-variant: var(--site-color-outline-variant);
+  --c2-theme--color-outline-strong: color-mix(in srgb, var(--site-color-outline), var(--site-color-on-surface) 30%);
+  --c2-theme--color-error: var(--site-color-error);
+  --c2-theme--color-scrim: var(--site-color-scrim);
+  --c2-theme--color-inverse-surface: var(--site-color-on-surface);
+  --c2-theme--color-on-inverse-surface: var(--site-color-surface);
+
+  // Typography
+  --c2-theme--font-family: var(--site-font-sans);
+
+  // Shape: the site scale is one step rounder than the component defaults (6/10/14 vs 6/8/14).
+  --c2-theme--radius-md: var(--site-radius-sm);
+  --c2-theme--radius-lg: var(--site-radius-md);
+  --c2-theme--radius-xl: var(--site-radius-lg);
+
+  // Interaction and elevation
+  --c2-theme--focus-ring: 2px solid var(--site-color-primary);
+  --c2-theme--shadow-md: var(--site-elevation-2);
+  --c2-theme--shadow-lg: var(--site-elevation-3);
+}

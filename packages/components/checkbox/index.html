@@ -4,105 +4,100 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-checkbox</title>
     <script type="module" src="/src/checkbox.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
       }
-      .demo {
+      .row {
         display: flex;
         align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .field {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .halo {
+        --c2-checkbox__state-layer--size: 40px;
+        --c2-checkbox__state-layer--border-top-left-radius: 999px;
+        --c2-checkbox__state-layer--border-top-right-radius: 999px;
+        --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+        --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+        --c2-checkbox__state-layer__hover__unselected--color: #bcbcc6;
+        --c2-checkbox__state-layer__hover__selected--color: #476ef9;
+      }
+      .compact {
+        --c2-checkbox__state-layer--size: 18px;
+      }
+      .soft-hover {
+        --c2-checkbox__state-layer__hover__unselected--color: #18181b;
+        --c2-checkbox__state-layer__hover__selected--color: #476ef9;
+        --c2-checkbox__container__selected__hover--background-color: #2f56e6;
       }
     </style>
   </head>
+
   <body>
-    <div>States</div>
-    <div class="flex gap-24">
-      <div class="flex flex-col gap-8">
-        <div class="demo">
-          <span>---------</span>
-          <c2-checkbox id="mycheckbox"> </c2-checkbox>
-          <label for="mycheckbox">Check it</label>
-        </div>
-
-        <div class="demo">
-          <span>---------</span>
-          <c2-checkbox> </c2-checkbox>
-          <span>---------</span>
-        </div>
-        <div class="demo">
-          <span>---------</span>
-          <c2-checkbox indeterminate> </c2-checkbox>
-          <span>---------</span>
-        </div>
-        <div class="demo">
-          <span>---------</span>
-          <c2-checkbox checked> </c2-checkbox>
-          <span>---------</span>
-        </div>
-      </div>
-
-      <div class="flex flex-col gap-8">
-        <div class="demo">
-          <span>---------</span>
-          <c2-checkbox disabled> </c2-checkbox>
-          <span>---------</span>
-        </div>
-        <div class="demo">
-          <span>---------</span>
-          <c2-checkbox indeterminate disabled> </c2-checkbox>
-          <span>---------</span>
-        </div>
-        <div class="demo">
-          <span>---------</span>
-          <c2-checkbox checked disabled> </c2-checkbox>
-          <span>---------</span>
-        </div>
-      </div>
+    <div class="row">
+      <span class="field"><c2-checkbox id="mycheckbox"></c2-checkbox> Unchecked</span>
+      <span class="field"><c2-checkbox indeterminate></c2-checkbox> Indeterminate</span>
+      <span class="field"><c2-checkbox checked></c2-checkbox> Checked</span>
     </div>
-    <hr />
-    <div class="demo">
-      <span>---------</span>
-      <c2-checkbox indeterminate style="--c2-checkbox-mixedmark-size: 8px">
-        <svg slot="mixedmark" width="10" height="2" viewBox="0 0 10 2">
+
+    <div class="row">
+      <span class="field"><c2-checkbox disabled></c2-checkbox> Disabled</span>
+      <span class="field"><c2-checkbox indeterminate disabled></c2-checkbox> Disabled indeterminate</span>
+      <span class="field"><c2-checkbox checked disabled></c2-checkbox> Disabled checked</span>
+    </div>
+
+    <div class="row">
+      <span class="field"><c2-checkbox class="soft-hover"></c2-checkbox> Soft square hover</span>
+      <span class="field"><c2-checkbox class="soft-hover" checked></c2-checkbox> Soft square hover</span>
+      <span class="field"><c2-checkbox class="halo"></c2-checkbox> Material halo (opt-in)</span>
+      <span class="field"><c2-checkbox class="halo" checked></c2-checkbox> Material halo (opt-in)</span>
+      <span class="field"><c2-checkbox class="compact" checked></c2-checkbox> Compact (no touch padding)</span>
+    </div>
+
+    <div class="row">
+      <c2-checkbox checked style="--c2-checkbox__checkmark--size: 10px; --c2-checkbox__mixedmark--size: 8px">
+        <svg slot="checkmark" viewBox="0 0 10 7" fill="none">
+          <path d="M9 1L3.5 6L1 3.72727" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <svg slot="mixedmark" viewBox="0 0 10 2">
           <rect width="10" height="2" rx="1" fill="currentColor" />
         </svg>
       </c2-checkbox>
-      <span>---------</span>
-    </div>
-
-    <div class="demo">
-      <span>---------</span>
-      <c2-checkbox checked style="--c2-checkbox-mixedmark-size: 8px; --c2-checkbox-checkmark-size: 10px">
-        <svg slot="checkmark" width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 1L3.5 6L1 3.72727" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-
-        <svg slot="mixedmark" width="10" height="2" viewBox="0 0 10 2">
+      <c2-checkbox indeterminate style="--c2-checkbox__mixedmark--size: 8px">
+        <svg slot="mixedmark" viewBox="0 0 10 2">
           <rect width="10" height="2" rx="1" fill="currentColor" />
         </svg>
       </c2-checkbox>
-      <span>---------</span>
-    </div>
-
-    <div class="demo">
-      <span>---------</span>
-      <c2-checkbox style="--c2-checkbox-mixedmark-size: 8px; --c2-checkbox-checkmark-size: 10px">
-        <svg slot="checkmark" width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 1L3.5 6L1 3.72727" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-
-        <svg slot="mixedmark" width="10" height="2" viewBox="0 0 10 2">
-          <rect width="10" height="2" rx="1" fill="currentColor" />
-        </svg>
-
+      <c2-checkbox style="--c2-checkbox__uncheckmark--size: 12px; --c2-checkbox__uncheckmark--color: #bcbcc6">
         <svg slot="uncheckmark" viewBox="0 0 24 24">
           <path fill="currentColor" d="M19 13H5v-2h14v2z" />
         </svg>
       </c2-checkbox>
-      <span>---------</span>
+      <span>Custom marks</span>
     </div>
+
+    <div class="row">
+      <c2-checkbox id="events"></c2-checkbox>
+      <span id="log">Toggle to log change events</span>
+    </div>
+
+    <script type="module">
+      const cb = document.getElementById('events')
+      const log = document.getElementById('log')
+      cb.addEventListener('change', () => (log.textContent = `change → checked=${cb.checked}`))
+    </script>
   </body>
 </html>

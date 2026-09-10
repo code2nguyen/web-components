@@ -1,0 +1,141 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Seperator } from '@c2n/seperator'
+import { Badge } from '@c2n/badge'
+
+## Presets
+
+Curated looks for `c2-seperator`. Open any card in the studio to start from it. Everything is a line variable (`thickness`, `color`, `style`, `spacing`, `inset-*`) or a label variable (`__label--*`, `__line-start--flex`).
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Hairline
+<c2-seperator style="width: 240px"></c2-seperator>
+```
+
+```html tag=MdxCodeBlock,label=Or
+<c2-seperator style="width: 240px">or</c2-seperator>
+```
+
+```html tag=MdxCodeBlock,label=Dashed
+<style>
+  .dashed {
+    width: 240px;
+    --c2-seperator--style: dashed;
+    --c2-seperator--color: #d4d4d8;
+  }
+</style>
+<c2-seperator class="dashed"></c2-seperator>
+```
+
+```html tag=MdxCodeBlock,label=Dotted
+<style>
+  .dotted {
+    width: 240px;
+    --c2-seperator--style: dotted;
+    --c2-seperator--thickness: 2px;
+    --c2-seperator--color: #a1a1aa;
+  }
+</style>
+<c2-seperator class="dotted"></c2-seperator>
+```
+
+```html tag=MdxCodeBlock,label=Accent
+<style>
+  .accent {
+    width: 240px;
+    --c2-seperator--thickness: 3px;
+    --c2-seperator--color: #0265dc;
+  }
+</style>
+<c2-seperator class="accent"></c2-seperator>
+```
+
+```html tag=MdxCodeBlock,label=Section heading
+<style>
+  .heading {
+    width: 240px;
+    --c2-seperator__line-start--flex: 0 0 0px;
+    --c2-seperator__label--gap: 0px;
+    --c2-seperator__label--color: #18181b;
+    --c2-seperator__label--font-weight: 600;
+    --c2-seperator__label--font-size: 11px;
+    --c2-seperator__label--text-transform: uppercase;
+    --c2-seperator__label--letter-spacing: 0.06em;
+  }
+  .heading::part(line) {
+    margin-left: 12px;
+  }
+</style>
+<c2-seperator class="heading">Recent files</c2-seperator>
+```
+
+```html tag=MdxCodeBlock,label=Leading label
+<style>
+  .leading {
+    width: 240px;
+    --c2-seperator__line-start--flex: 0 0 24px;
+    --c2-seperator__label--color: #3f3f46;
+    --c2-seperator__label--font-size: 13px;
+    --c2-seperator__label--font-weight: 400;
+  }
+</style>
+<c2-seperator class="leading">Continue with</c2-seperator>
+```
+
+```html tag=MdxCodeBlock,label=Badge label
+<style>
+  .badge-label {
+    width: 240px;
+    --c2-seperator__label--gap: 8px;
+  }
+</style>
+<c2-seperator class="badge-label"><c2-badge tone="primary">New</c2-badge></c2-seperator>
+```
+
+```html tag=MdxCodeBlock,label=Vertical
+<style>
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #3f3f46;
+  }
+</style>
+<div class="toolbar">
+  <span>Bold</span>
+  <span>Italic</span>
+  <c2-seperator orientation="vertical" decorative style="--c2-seperator--spacing: 2px"></c2-seperator>
+  <span>Link</span>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    display: grid;
+    gap: 14px;
+    width: 240px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #18181b;
+    color: #a1a1aa;
+    font-size: 13px;
+    --c2-seperator--color: #3f3f46;
+    --c2-seperator__label--color: #71717a;
+  }
+</style>
+<div class="dark">
+  <span>Signed in as ada@example.com</span>
+  <c2-seperator></c2-seperator>
+  <c2-seperator>or</c2-seperator>
+</div>
+```
+
+</GalleryGrid>

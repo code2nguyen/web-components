@@ -3,60 +3,88 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-list-item,
   $theme: (
-    border-top-left-radius: null,
-    border-top-right-radius: null,
-    border-bottom-left-radius: null,
-    border-bottom-right-radius: null,
+    min-height: 36px,
+    gap: 8px,
 
-    padding-top: 4px,
-    padding-right: 8px,
-    padding-bottom: 4px,
-    padding-left: 8px,
+    border-top-left-radius: 6px,
+    border-top-right-radius: 6px,
+    border-bottom-left-radius: 6px,
+    border-bottom-right-radius: 6px,
 
-    font-size: null,
+    padding-top: 6px,
+    padding-right: 10px,
+    padding-bottom: 6px,
+    padding-left: 10px,
+
+    font-size: 14px,
     font-weight: null,
     font-style: null,
     font-family: null,
+    line-height: 20px,
 
     border-top: null,
     border-bottom: null,
     border-right: null,
     border-left: null,
 
-    color: null,
-    background: null,
+    color: #18181b,
+    background: transparent,
+
+    description--color: #71717a,
+    description--font-size: 12px,
+    description--line-height: 16px,
+    description--margin-top: 1px,
 
     hover--border-top: null,
     hover--border-bottom: null,
     hover--border-right: null,
     hover--border-left: null,
     hover--color: null,
-    hover--background: variables.$color-bg-dark,
+    hover--background: #f4f4f5,
 
     selected--border-top: null,
     selected--border-bottom: null,
     selected--border-right: null,
     selected--border-left: null,
-    selected--color: null,
-    selected--background: null,
+    selected--color: #2f56e6,
+    selected--background: #edf1fe,
+    selected__hover--background: #e2e9fd,
+    selected__description--color: null,
+
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: -2px,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    icon--size: 16px,
+    icon--color: null,
   )
 );
 
 :host {
   display: block;
-  flex: 1;
+  flex: none;
   user-select: none;
+}
+
+:host([hidden]) {
+  display: none;
 }
 
 .c2-list-item {
   display: flex;
   align-items: center;
+  box-sizing: border-box;
   cursor: pointer;
-  flex: 1;
+  text-decoration: none;
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+
   font-size: css.cssVar(font-size);
   font-weight: css.cssVar(font-weight);
   font-style: css.cssVar(font-style);
   font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
 
   border-top-left-radius: css.cssVar(border-top-left-radius);
   border-top-right-radius: css.cssVar(border-top-right-radius);
@@ -89,21 +117,79 @@
   }
 }
 
+// The text column grows and may wrap; the slotted icons keep their size.
+.c2-list-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.c2-list-item__description {
+  margin-top: css.cssVar(description--margin-top);
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: css.cssVar(description--line-height);
+  font-weight: normal;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+:host(:focus) {
+  outline: none;
+}
+
+:host(:focus-visible) .c2-list-item {
+  outline: css.cssVar(focus--outline);
+  outline-offset: css.cssVar(focus--outline-offset);
+}
+
+::slotted([slot='prefix-icon']),
+::slotted([slot='suffix-icon']) {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
 :host([selected]) {
   .c2-list-item {
-    border-top: css.cssVar(selected--border-top, hover--border-top, border-top);
-    border-bottom: css.cssVar(selected--border-bottom, hover--border-bottom, border-bottom);
-    border-right: css.cssVar(selected--border-right, hover--border-right, border-right);
-    border-left: css.cssVar(selected--border-left, hover--border-left, border-left);
+    border-top: css.cssVar(selected--border-top, border-top);
+    border-bottom: css.cssVar(selected--border-bottom, border-bottom);
+    border-right: css.cssVar(selected--border-right, border-right);
+    border-left: css.cssVar(selected--border-left, border-left);
 
-    background: css.cssVar(selected--background, hover--background, background);
-    color: css.cssVar(selected--color, hover--color, color);
+    background: css.cssVar(selected--background, background);
+    color: css.cssVar(selected--color, color);
+
+    &:hover {
+      background: css.cssVar(selected__hover--background, selected--background);
+    }
   }
+
+  .c2-list-item__description {
+    color: css.cssVar(selected__description--color, description--color);
+  }
+}
+
+// Adjacent selected rows inside a `c2-list` are marked `joined-before` / `joined-after` by the list: square the corners
+// that face each other so the run reads as one block.
+:host([selected][joined-before]) .c2-list-item {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+:host([selected][joined-after]) .c2-list-item {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 :host([disabled]) {
   .c2-list-item {
     pointer-events: none;
-    opacity: variables.$disabled-content-opacity;
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
   }
 }

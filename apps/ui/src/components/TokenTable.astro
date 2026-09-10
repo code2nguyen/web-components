@@ -1,0 +1,102 @@
+---
+import { tokens } from '@c2n/theme/tokens.js'
+
+// Renders the @c2n/theme token table: name, light/dark values (with swatches for colours), description.
+const isColor = (value: string | null | undefined) => !!value && /^(#|rgb|hsl|color)/.test(value)
+---
+
+<div class="token-table-wrapper">
+  <table class="token-table">
+    <thead>
+      <tr>
+        <th>Token</th>
+        <th>Light</th>
+        <th>Dark</th>
+        <th class="token-table__description">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        tokens.map((token) => (
+          <tr>
+            <td>
+              <code>{token.name}</code>
+            </td>
+            <td>
+              {token.light === null ? (
+                <em class="token-table__unset">unset</em>
+              ) : (
+                <span class="token-table__value">
+                  {isColor(token.light) && <span class="token-table__swatch" style={`background: ${token.light}`} />}
+                  <code>{token.light}</code>
+                </span>
+              )}
+            </td>
+            <td>
+              {token.dark === undefined ? (
+                <em class="token-table__unset">same</em>
+              ) : (
+                <span class="token-table__value">
+                  {isColor(token.dark) && <span class="token-table__swatch" style={`background: ${token.dark}`} />}
+                  <code>{token.dark}</code>
+                </span>
+              )}
+            </td>
+            <td class="token-table__description">{token.description}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style lang="scss">
+  .token-table-wrapper {
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: var(--site-radius-md);
+  }
+  .token-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    th,
+    td {
+      text-align: left;
+      vertical-align: top;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--site-color-outline-variant);
+    }
+    th {
+      font-weight: 600;
+      color: var(--site-color-on-surface-variant);
+      background: var(--site-color-surface-container-1);
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    code {
+      white-space: nowrap;
+    }
+    &__value {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    &__swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid var(--site-color-outline-variant);
+      flex: none;
+    }
+    &__unset {
+      color: var(--site-color-on-surface-muted);
+    }
+    &__description {
+      min-width: 260px;
+      color: var(--site-color-on-surface-variant);
+    }
+  }
+</style>

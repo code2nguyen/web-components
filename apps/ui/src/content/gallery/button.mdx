@@ -1,0 +1,586 @@
+---
+description: 'Ready-made looks for c2-button: variants, sizes, shapes, icons, states and groups. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import '@fontsource/material-icons'
+
+import { Button } from '@c2n/button'
+import { MatIcon } from '@c2n/mat-icon'
+import { FeatherPlusIcon as FeatherPlus } from '@c2n/feather-icons/icons/plus.js'
+import { FeatherArrowRightIcon as FeatherArrowRight } from '@c2n/feather-icons/icons/arrow-right.js'
+import { FeatherDownloadIcon as FeatherDownload } from '@c2n/feather-icons/icons/download.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+import { FeatherLoaderIcon as FeatherLoader } from '@c2n/feather-icons/icons/loader.js'
+import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
+
+## Variants
+
+Every look below is a handful of `--c2-button__*` custom properties on top of the default filled button.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Filled
+<c2-button>Filled</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Soft
+<style>
+  .soft {
+    --c2-button__container--background-color: rgba(37, 99, 235, 0.1);
+    --c2-button__container--color: #1d4ed8;
+    --c2-button__container__hover--background-color: rgba(37, 99, 235, 0.16);
+    --c2-button__container__active--background-color: rgba(37, 99, 235, 0.24);
+  }
+</style>
+<c2-button class="soft">Soft</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Outline
+<style>
+  .outline {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__hover--border: 1px solid #a1a1aa;
+    --c2-button__container__active--background-color: #e4e4e7;
+  }
+</style>
+<c2-button class="outline">Outline</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Ghost
+<style>
+  .ghost {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #2563eb;
+    --c2-button__container__hover--background-color: rgba(37, 99, 235, 0.08);
+    --c2-button__container__active--background-color: rgba(37, 99, 235, 0.16);
+    --c2-button__container--font-weight: 600;
+  }
+</style>
+<c2-button class="ghost">Ghost</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Link
+<style>
+  .link {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #2563eb;
+    --c2-button__container--padding-left: 4px;
+    --c2-button__container--padding-right: 4px;
+    --c2-button__container__hover--background-color: transparent;
+    --c2-button__container__hover--color: #1e40af;
+    --c2-button__container__active--background-color: transparent;
+  }
+</style>
+<c2-button class="link">Learn more</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    --c2-button__container--background-color: #18181b;
+    --c2-button__container__hover--background-color: #3f3f46;
+    --c2-button__container__active--background-color: #52525b;
+    --c2-button__container__focus--outline: 2px solid rgba(24, 24, 27, 0.35);
+  }
+</style>
+<c2-button class="dark">Dark</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Neutral
+<style>
+  .neutral {
+    --c2-button__container--background-color: #e4e4e7;
+    --c2-button__container--color: #18181b;
+    --c2-button__container__hover--background-color: #d4d4d8;
+    --c2-button__container__active--background-color: #a1a1aa;
+    --c2-button__container__focus--outline: 2px solid rgba(24, 24, 27, 0.25);
+  }
+</style>
+<c2-button class="neutral">Neutral</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Danger
+<style>
+  .danger {
+    --c2-button__container--background-color: #dc2626;
+    --c2-button__container__hover--background-color: #b91c1c;
+    --c2-button__container__active--background-color: #991b1b;
+    --c2-button__container__focus--outline: 2px solid rgba(220, 38, 38, 0.4);
+  }
+</style>
+<c2-button class="danger">
+  <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14"></path>
+  </svg>
+  Delete
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .success {
+    --c2-button__container--background-color: #16a34a;
+    --c2-button__container__hover--background-color: #15803d;
+    --c2-button__container__active--background-color: #166534;
+    --c2-button__container__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+  }
+</style>
+<c2-button class="success">
+  <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 6L9 17l-5-5"></path>
+  </svg>
+  Approve
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Warning
+<style>
+  .warning {
+    --c2-button__container--background-color: #f59e0b;
+    --c2-button__container--color: #1c1917;
+    --c2-button__container__hover--background-color: #d97706;
+    --c2-button__container__active--background-color: #b45309;
+    --c2-button__container__focus--outline: 2px solid rgba(245, 158, 11, 0.45);
+  }
+</style>
+<c2-button class="warning">Warning</c2-button>
+```
+
+</GalleryGrid>
+
+## Sizes
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Extra small
+<style>
+  .xs {
+    --c2-button__container--height: 24px;
+    --c2-button__container--padding-left: 8px;
+    --c2-button__container--padding-right: 8px;
+    --c2-button__container--gap: 4px;
+    --c2-button__container--font-size: 11px;
+    --c2-button__container--border-radius: 4px;
+    --c2-button__icon--size: 12px;
+  }
+</style>
+<c2-button class="xs">Extra small</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Small
+<style>
+  .sm {
+    --c2-button__container--height: 28px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--gap: 6px;
+    --c2-button__container--font-size: 12px;
+    --c2-button__icon--size: 14px;
+  }
+</style>
+<c2-button class="sm">Small</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Medium
+<c2-button>Medium</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .lg {
+    --c2-button__container--height: 44px;
+    --c2-button__container--padding-left: 20px;
+    --c2-button__container--padding-right: 20px;
+    --c2-button__container--gap: 10px;
+    --c2-button__container--font-size: 15px;
+    --c2-button__container--border-radius: 8px;
+    --c2-button__icon--size: 20px;
+  }
+</style>
+<c2-button class="lg">Large</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Wide
+<style>
+  .wide {
+    --c2-button__container--padding-left: 40px;
+    --c2-button__container--padding-right: 40px;
+  }
+</style>
+<c2-button class="wide">Continue</c2-button>
+```
+
+</GalleryGrid>
+
+## Shapes
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--padding-left: 20px;
+    --c2-button__container--padding-right: 20px;
+  }
+</style>
+<c2-button class="pill">Pill</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Square
+<style>
+  .square {
+    --c2-button__container--border-radius: 0;
+  }
+</style>
+<c2-button class="square">Square</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Extra rounded
+<style>
+  .rounded-xl {
+    --c2-button__container--border-radius: 14px;
+    --c2-button__container--height: 40px;
+    --c2-button__container--padding-left: 18px;
+    --c2-button__container--padding-right: 18px;
+  }
+</style>
+<c2-button class="rounded-xl">Extra rounded</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Chip
+<style>
+  .chip {
+    --c2-button__container--height: 26px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--font-size: 12px;
+    --c2-button__container--background-color: #f4f4f5;
+    --c2-button__container--color: #18181b;
+    --c2-button__container__hover--background-color: #e4e4e7;
+    --c2-button__container__active--background-color: #d4d4d8;
+    --c2-button__container__focus--outline: 2px solid rgba(24, 24, 27, 0.25);
+  }
+</style>
+<c2-button class="chip">Chip</c2-button>
+```
+
+</GalleryGrid>
+
+## With icons
+
+Icons go in the `prefix-icon` and `suffix-icon` slots; they inherit the label colour and `--c2-button__icon--size`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Prefix icon
+<c2-button>
+  <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 5v14M5 12h14"></path>
+  </svg>
+  New item
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Suffix icon
+<c2-button>
+  Continue
+  <svg slot="suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12h14M12 5l7 7-7 7"></path>
+  </svg>
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Both icons
+<style>
+  .both {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__active--background-color: #e4e4e7;
+  }
+</style>
+<c2-button class="both">
+  <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+  </svg>
+  Download
+  <svg slot="suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 9l6 6 6-6"></path>
+  </svg>
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Tinted icon
+<style>
+  .tinted-icon {
+    --c2-button__container--background-color: #18181b;
+    --c2-button__container__hover--background-color: #3f3f46;
+    --c2-button__container__active--background-color: #52525b;
+    --c2-button__icon--color: #fbbf24;
+  }
+</style>
+<c2-button class="tinted-icon">
+  <svg slot="prefix-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+  </svg>
+  Upgrade
+</c2-button>
+```
+
+</GalleryGrid>
+
+## With icon components
+
+Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon slots: the button sizes them through `--c2-button__icon--size` and they inherit the label colour.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Feather prefix
+<c2-button>
+  <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+  New item
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Feather suffix
+<c2-button>
+  Continue
+  <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Feather outline
+<style>
+  .feather-outline {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__icon--color: #2563eb;
+  }
+</style>
+<c2-button class="feather-outline">
+  <c2-feather-download slot="prefix-icon"></c2-feather-download>
+  Download
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Feather danger
+<style>
+  .feather-danger {
+    --c2-button__container--background-color: #dc2626;
+    --c2-button__container__hover--background-color: #b91c1c;
+    --c2-button__container__active--background-color: #991b1b;
+    --c2-button__container__focus--outline: 2px solid rgba(220, 38, 38, 0.4);
+  }
+</style>
+<c2-button class="feather-danger">
+  <c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>
+  Delete
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Feather running icon
+<c2-button running>
+  <c2-feather-loader slot="running-icon"></c2-feather-loader>
+  Loading
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Material prefix
+<c2-button>
+  <c2-mat-icon slot="prefix-icon">favorite</c2-mat-icon>
+  Favorite
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Material suffix
+<c2-button>
+  Open
+  <c2-mat-icon slot="suffix-icon">open_in_new</c2-mat-icon>
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Material soft
+<style>
+  .material-soft {
+    --c2-button__container--background-color: rgba(37, 99, 235, 0.1);
+    --c2-button__container--color: #1d4ed8;
+    --c2-button__container__hover--background-color: rgba(37, 99, 235, 0.16);
+    --c2-button__container__active--background-color: rgba(37, 99, 235, 0.24);
+    --c2-button__icon--size: 20px;
+  }
+</style>
+<c2-button class="material-soft">
+  <c2-mat-icon slot="prefix-icon">cloud_upload</c2-mat-icon>
+  Upload
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Material dark pill
+<style>
+  .material-dark-pill {
+    --c2-button__container--background-color: #18181b;
+    --c2-button__container__hover--background-color: #3f3f46;
+    --c2-button__container__active--background-color: #52525b;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--padding-left: 14px;
+    --c2-button__container--padding-right: 20px;
+    --c2-button__icon--color: #fbbf24;
+  }
+</style>
+<c2-button class="material-dark-pill">
+  <c2-mat-icon slot="prefix-icon">star</c2-mat-icon>
+  Upgrade
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Mixed icon sets
+<c2-button>
+  <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+  Create
+  <c2-mat-icon slot="suffix-icon">expand_more</c2-mat-icon>
+</c2-button>
+```
+
+</GalleryGrid>
+
+## States
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Running
+<c2-button running>Saving…</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Slow spinner
+<style>
+  .slow {
+    --c2-button__running-icon--animation-duration: 1600ms;
+    --c2-button__running-icon--size: 16px;
+  }
+</style>
+<c2-button class="slow" running>Syncing</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Custom running icon
+<c2-button running>
+  <svg slot="running-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+  </svg>
+  Uploading
+</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Disabled
+<c2-button disabled>Disabled</c2-button>
+```
+
+```html tag=MdxCodeBlock,label=Disabled outline
+<style>
+  .disabled-outline {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__disabled--opacity: 0.5;
+  }
+</style>
+<c2-button class="disabled-outline" disabled>Disabled</c2-button>
+```
+
+</GalleryGrid>
+
+## Groups
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Segmented pair
+<style>
+  .segmented {
+    display: inline-flex;
+    gap: 1px;
+  }
+  .segmented-left {
+    --c2-button__container--border-radius: 6px 0 0 6px;
+  }
+  .segmented-right {
+    --c2-button__container--border-radius: 0 6px 6px 0;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+    --c2-button__container--gap: 0;
+  }
+</style>
+<div class="segmented">
+  <c2-button class="segmented-left">Publish</c2-button>
+  <c2-button class="segmented-right" aria-label="More options">
+    <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 9l6 6 6-6"></path>
+    </svg>
+  </c2-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Dialog actions
+<style>
+  .actions {
+    display: inline-flex;
+    gap: 8px;
+  }
+  .actions-cancel {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__active--background-color: #e4e4e7;
+  }
+</style>
+<div class="actions">
+  <c2-button class="actions-cancel">Cancel</c2-button>
+  <c2-button>Save changes</c2-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Pill toolbar
+<style>
+  .toolbar {
+    display: inline-flex;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 999px;
+    background: #f4f4f5;
+  }
+  .toolbar-item {
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 14px;
+    --c2-button__container--padding-right: 14px;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #52525b;
+    --c2-button__container__hover--background-color: #e4e4e7;
+    --c2-button__container__active--background-color: #d4d4d8;
+  }
+  .toolbar-item-selected {
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #18181b;
+    --c2-button__container__hover--background-color: #ffffff;
+  }
+</style>
+<div class="toolbar">
+  <c2-button class="toolbar-item toolbar-item-selected">Day</c2-button>
+  <c2-button class="toolbar-item">Week</c2-button>
+  <c2-button class="toolbar-item">Month</c2-button>
+</div>
+```
+
+</GalleryGrid>

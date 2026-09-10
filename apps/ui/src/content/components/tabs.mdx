@@ -1,0 +1,64 @@
+---
+title: 'Tabs'
+description: 'Tab strip that shows one content panel at a time.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Tabs } from '@c2n/tabs'
+import { FeatherInboxIcon as FeatherInbox } from '@c2n/feather-icons/icons/inbox.js'
+import { FeatherStarIcon as FeatherStar } from '@c2n/feather-icons/icons/star.js'
+import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
+import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
+import { FeatherPieChartIcon as FeatherPieChart } from '@c2n/feather-icons/icons/pie-chart.js'
+import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+
+`c2-tabs` pairs a row of `c2-tab` headers with content panels. Every `<c2-tab for="…">` child becomes a tab; every other child is a panel and is shown when its `id` matches the tab's `for`. Set the initial tab with `selected-tab`, or leave it out to start on the first enabled tab. The strip is a proper `tablist`: Left/Right arrows, Home and End move between tabs (disabled tabs are skipped), Enter and Space activate. Tab labels are slotted content, so an icon component (`c2-feather-*`, `c2-mat-icon`) or an inline SVG can sit next to, or instead of, the text; give icon-only tabs an `aria-label`. It fires `change` (`detail.value`) after a user picks a tab; listen for the cancelable `tab-change` from a `c2-tab` and call `preventDefault()` to veto a switch.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/tabs
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/tabs
+<div data-label="Default">
+  <c2-tabs client:only="lit" selected-tab="tab2">
+    <c2-tab label="Tab 1" for="tab1"></c2-tab>
+    <c2-tab for="tab2">Tab 2</c2-tab>
+    <c2-tab for="tab3" disabled>Tab 3</c2-tab>
+    <c2-tab for="tab4">Tab 4</c2-tab>
+    <div id="tab1">Tab 1 content</div>
+    <div id="tab2">Tab 2 content</div>
+    <div id="tab3">Tab 3 content</div>
+    <div id="tab4">Tab 4 content</div>
+  </c2-tabs>
+</div>
+<div data-label="Icon and label">
+  <c2-tabs client:load selected-tab="inbox" style="--c2-tabs--gap: 4px; --c2-feather-icon--size: 16px">
+    <c2-tab for="inbox"><c2-feather-inbox></c2-feather-inbox>Inbox</c2-tab>
+    <c2-tab for="starred"><c2-feather-star></c2-feather-star>Starred</c2-tab>
+    <c2-tab for="archive"><c2-feather-archive></c2-feather-archive>Archive</c2-tab>
+    <div id="inbox">Inbox panel</div>
+    <div id="starred">Starred panel</div>
+    <div id="archive">Archive panel</div>
+  </c2-tabs>
+</div>
+<div data-label="Icon only">
+  <c2-tabs client:load selected-tab="chart" style="--c2-feather-icon--size: 18px; --c2-tabs__tab--padding-left: 12px; --c2-tabs__tab--padding-right: 12px">
+    <c2-tab for="home" aria-label="Home"><c2-feather-home></c2-feather-home></c2-tab>
+    <c2-tab for="chart" aria-label="Analytics"><c2-feather-pie-chart></c2-feather-pie-chart></c2-tab>
+    <c2-tab for="alerts" aria-label="Alerts"><c2-feather-bell></c2-feather-bell></c2-tab>
+    <c2-tab for="prefs" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-tab>
+    <div id="home">Home panel</div>
+    <div id="chart">Analytics panel</div>
+    <div id="alerts">Alerts panel</div>
+    <div id="prefs">Settings panel</div>
+  </c2-tabs>
+</div>
+```

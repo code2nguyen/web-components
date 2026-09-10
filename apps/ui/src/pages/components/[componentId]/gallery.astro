@@ -1,0 +1,37 @@
+---
+import Main from '../../../layouts/Main.astro'
+import DocComponentLayout from '../../../layouts/DocComponentLayout.astro'
+import { getCollection, getEntry, render } from 'astro:content'
+import { ComponentConfigurationPanel } from '../../../components/configuration/ComponentConfigurationPanel'
+import { countGalleryExamples } from '../../../utils/gallery'
+
+/** Gallery of styled variants for a component: `src/content/gallery/<componentId>.mdx`, paired with its docs entry. */
+export async function getStaticPaths() {
+  const galleryEntries = await getCollection('gallery')
+  return galleryEntries.map((entry) => ({
+    params: { componentId: entry.id },
+    props: { gallery: entry },
+  }))
+}
+
+const { gallery } = Astro.props
+const component = await getEntry('components', gallery.id)
+if (!component) throw new Error(`Gallery "${gallery.id}" has no matching entry in src/content/components`)
+const { Content: GalleryContent, headings } = await render(gallery)
+const title = gallery.data.title ?? component.data.title
+const description = gallery.data.description ?? component.data.description
+---
+
+<Main title={`${title} gallery · c2n web components`} description={description} withSidebar section="components">
+  <DocComponentLayout
+    componentId={component.id}
+    headings={headings}
+    title={title}
+    description={description}
+    view="gallery"
+    galleryCount={countGalleryExamples(gallery.body)}
+  >
+    <ComponentConfigurationPanel client:load slot="panel" />
+    <GalleryContent />
+  </DocComponentLayout>
+</Main>

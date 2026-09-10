@@ -12,11 +12,24 @@ export interface SelectionChangeEventDetail {
 }
 
 /**
+ * A vertical list of `c2-list-item` rows with single or multiple selection. The list owns the selection: it reads the
+ * `value` of the clicked row, updates its own `value` (a `;`-separated list in the attribute, an array in the property)
+ * and pushes the selected state down to every row through context, so rows never need a `selected` attribute of
+ * their own when they live inside a list.
+ *
+ * Keyboard: the list is a `listbox` with a roving `tabindex`. Arrow Up/Down move between enabled rows, Home/End jump to
+ * the first/last, Enter and Space select the focused row, and typing letters jumps to the next row starting with them.
+ *
+ * Besides rows, the default slot accepts `<hr>` dividers and `<h1>`–`<h6>` group headings; both are styled by the
+ * `__divider` and `__heading` tokens and skipped by selection and keyboard.
+ *
  * @tag c2-list
  *
- * @slot default - default slot which accept c2-list-item as chidren
+ * @slot default - The rows: `c2-list-item` elements (or wrappers whose first child is a `c2-list-item`), plus `<hr>` dividers and heading elements.
  *
- * @cssproperty {color} [--c2-list--background=rgb(255, 255, 255)]
+ * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected values, `detail.data` the matching `data` of each row.
+ *
+ * @cssproperty {color} [--c2-list--background=#ffffff]
  * @cssproperty {pixel} --c2-list--gap
  *
  * @cssproperty {border-radius} --c2-list--border-top-left-radius
@@ -29,12 +42,27 @@ export interface SelectionChangeEventDetail {
  * @cssproperty {border} --c2-list--border-right
  * @cssproperty {border} --c2-list--border-left
  *
+ * @cssproperty {box-shadow} --c2-list--box-shadow
+ *
  * @cssproperty {padding} [--c2-list--padding-top=4px]
  * @cssproperty {padding} [--c2-list--padding-bottom=4px]
- * @cssproperty {padding} [--c2-list--padding-right=0px]
- * @cssproperty {padding} [--c2-list--padding-left=0px]
+ * @cssproperty {padding} [--c2-list--padding-right=4px]
+ * @cssproperty {padding} [--c2-list--padding-left=4px]
  *
- * @cssproperty {pixel} --c2-list--max-height
+ * @cssproperty {pixel} --c2-list--max-height - Scrolls when the rows are taller than this.
+ *
+ * @cssproperty {color} [--c2-list__divider--color=#e4e4e7]
+ * @cssproperty {margin} [--c2-list__divider--margin=4px 0]
+ *
+ * @cssproperty {color} [--c2-list__heading--color=#71717a]
+ * @cssproperty {font-size} [--c2-list__heading--font-size=11px]
+ * @cssproperty {font-weight} [--c2-list__heading--font-weight=600]
+ * @cssproperty {letter-spacing} [--c2-list__heading--letter-spacing=0.06em]
+ * @cssproperty {text-transform} [--c2-list__heading--text-transform=uppercase]
+ * @cssproperty {padding} [--c2-list__heading--padding-top=10px]
+ * @cssproperty {padding} [--c2-list__heading--padding-right=10px]
+ * @cssproperty {padding} [--c2-list__heading--padding-bottom=4px]
+ * @cssproperty {padding} [--c2-list__heading--padding-left=10px]
  *
  * @slotcomponent c2-list-item
  */
@@ -42,6 +70,7 @@ export interface SelectionChangeEventDetail {
 export class List extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /** Selected values. Written as `value="a;b"` in markup, read as `['a', 'b']` from the property. */
   @provide({ context: selectedItemValueContext })
   @property({
     converter: arrayPropertyConverter,
@@ -49,50 +78,142 @@ export class List extends LitElement {
   })
   value: string[] = []
 
+  /** The `data` of every selected row, in `value` order. Not an attribute. */
   data: unknown[] = []
 
-  @property({ type: Boolean }) disabled: boolean = false
+  /** Dims the whole list and ignores clicks and keyboard. */
+  @property({ type: Boolean, reflect: true }) disabled: boolean = false
+
+  /** Allow several rows to be selected; clicking a selected row deselects it. */
   @property({ type: Boolean }) multiple: boolean = false
+
+  /** Keep at least one row selected: clicking the only selected row does nothing. */
   @property({ type: Boolean }) required: boolean = false
 
   @query('slot')
   private listItemSlot!: HTMLSlotElement
 
-  private async handleSlotChange() {
-    for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
-      const listItem = slotItem instanceof ListItem ? slotItem : slotItem.firstChild
-      if (listItem instanceof ListItem && !listItem.applyContext) {
+  /** The row that currently holds the roving tabindex. */
+  private focusedItem: ListItem | undefined = undefined
+
+  private typeahead = ''
+  private typeaheadTimer: ReturnType<typeof setTimeout> | undefined
+
+  /** Slotted rows, in DOM order (dividers and headings excluded). */
+  get items(): ListItem[] {
+    return (this.listItemSlot?.assignedElements({ flatten: true }) ?? [])
+      .map((slotItem) => (slotItem instanceof ListItem ? slotItem : slotItem.firstChild))
+      .filter((item): item is ListItem => item instanceof ListItem)
+  }
+
+  private get enabledItems(): ListItem[] {
+    return this.items.filter((item) => !item.disabled)
+  }
+
+  private handleSlotChange() {
+    for (const listItem of this.items) {
+      if (!listItem.applyContext) {
         listItem.applyContext = true
       }
     }
+    this.syncRows()
+  }
+
+  /**
+   * Mirrors the selection onto the rows: `data`, the roving tabindex, and `joined-before` / `joined-after` on adjacent
+   * selected rows so `c2-list-item` can square the corners between them and a run of selected rows reads as one block.
+   */
+  private syncRows() {
+    const items = this.items
+    if (items.length === 0) return
+
+    this.data = this.value.map((value) => items.find((item) => item.value === value)?.data)
+
+    items.forEach((item, index) => {
+      const selected = this.value.includes(item.value)
+      item.toggleAttribute('joined-before', selected && index > 0 && this.value.includes(items[index - 1].value))
+      item.toggleAttribute('joined-after', selected && index < items.length - 1 && this.value.includes(items[index + 1].value))
+    })
+
+    const enabled = this.enabledItems
+    if (!this.focusedItem || !enabled.includes(this.focusedItem)) {
+      this.focusedItem = enabled.find((item) => this.value.includes(item.value)) ?? enabled[0]
+    }
+    for (const item of items) item.tabIndex = item === this.focusedItem && !this.disabled ? 0 : -1
+  }
+
+  private setFocusedItem(item: ListItem, focus = true) {
+    this.focusedItem = item
+    for (const other of this.items) other.tabIndex = other === item ? 0 : -1
+    if (focus) item.focus()
   }
 
   private handleListItemClick(event: Event) {
     const target = event.target
-    if (target instanceof ListItem) {
-      this.updateValueAndData(target)
-      this.dispatchSelectionChangeEvent()
+    if (target instanceof ListItem && !target.disabled) {
+      this.setFocusedItem(target, false)
+      this.select(target.value)
     }
   }
 
-  private updateValueAndData(target: ListItem) {
-    const updatedValues = this.value.includes(target.value)
-      ? this.value.filter((item) => item !== target.value)
-      : this.multiple
-        ? [...this.value, target.value]
-        : [target.value]
-    const updatedData = this.data.includes(target.data)
-      ? this.data.filter((item) => item !== target.data)
-      : this.multiple
-        ? [...this.data, target.data]
-        : [target.data]
+  /** Applies a user selection of `value` (toggle in `multiple` mode) and fires `selection-change`. */
+  private select(value: string) {
+    const wasSelected = this.value.includes(value)
+    const updatedValues = wasSelected ? this.value.filter((v) => v !== value) : this.multiple ? [...this.value, value] : [value]
 
-    if (this.required && updatedValues.length == 0) {
+    if (this.required && updatedValues.length === 0) {
       this.dispatchSelectionChangeEvent()
       return
     }
     this.value = updatedValues
-    this.data = updatedData
+    this.syncRows()
+    this.dispatchSelectionChangeEvent()
+  }
+
+  private handleKeydown(event: KeyboardEvent) {
+    if (this.disabled) return
+    const enabled = this.enabledItems
+    if (enabled.length === 0) return
+    const current = event.target instanceof ListItem ? event.target : this.focusedItem
+    const index = current ? enabled.indexOf(current) : -1
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault()
+        this.setFocusedItem(enabled[Math.min(index + 1, enabled.length - 1)])
+        return
+      case 'ArrowUp':
+        event.preventDefault()
+        this.setFocusedItem(enabled[Math.max(index - 1, 0)])
+        return
+      case 'Home':
+        event.preventDefault()
+        this.setFocusedItem(enabled[0])
+        return
+      case 'End':
+        event.preventDefault()
+        this.setFocusedItem(enabled[enabled.length - 1])
+        return
+      case 'Enter':
+      case ' ':
+        if (current) {
+          event.preventDefault()
+          if (current.href) current.renderRoot.querySelector('a')?.click()
+          else this.select(current.value)
+        }
+        return
+    }
+
+    // Typeahead: letters jump to the next row whose text starts with what was typed.
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      clearTimeout(this.typeaheadTimer)
+      this.typeahead += event.key.toLowerCase()
+      this.typeaheadTimer = setTimeout(() => (this.typeahead = ''), 600)
+      const start = this.typeahead.length === 1 ? index + 1 : index
+      const ordered = [...enabled.slice(Math.max(start, 0)), ...enabled.slice(0, Math.max(start, 0))]
+      const match = ordered.find((item) => item.displayText.trim().toLowerCase().startsWith(this.typeahead))
+      if (match) this.setFocusedItem(match)
+    }
   }
 
   private dispatchSelectionChangeEvent() {
@@ -108,27 +229,40 @@ export class List extends LitElement {
     )
   }
 
-  private initPaddingClass() {
+  /** Flush lists (no vertical padding) let the first and last rows take the list's corner radius. */
+  private syncPaddingClasses() {
     const styleMap = this.computedStyleMap()
-    const paddingTop0 = styleMap.get('padding-top')?.toString() == '0px' ? true : false
-    const paddingBottom0 = styleMap.get('padding-bottom')?.toString() == '0px' ? true : false
-    this.classList.toggle('padding-top-0', paddingTop0)
-    this.classList.toggle('padding-bottom-0', paddingBottom0)
+    this.classList.toggle('padding-top-0', styleMap.get('padding-top')?.toString() === '0px')
+    this.classList.toggle('padding-bottom-0', styleMap.get('padding-bottom')?.toString() === '0px')
   }
 
-  protected override firstUpdated(_changedProperties: PropertyValueMap<this>): void {
-    super.firstUpdated(_changedProperties)
+  protected override willUpdate(changedProperties: PropertyValueMap<this>): void {
+    // Frameworks (and Astro islands) may set `value` as a `;`-separated string property instead of an attribute.
+    if (changedProperties.has('value') && typeof this.value === 'string') {
+      this.value = arrayPropertyConverter.fromAttribute(this.value)
+    }
+  }
+
+  protected override updated(changedProperties: PropertyValueMap<this>): void {
+    if (changedProperties.has('value')) {
+      this.syncRows()
+    }
+    this.setAttribute('role', 'listbox')
+    this.setAttribute('aria-multiselectable', String(this.multiple))
+    if (this.disabled) this.setAttribute('aria-disabled', 'true')
+    else this.removeAttribute('aria-disabled')
+    this.syncPaddingClasses()
   }
 
   /**
    * private function used for demo project in some edge case need to refresh component
    */
   _initComponent() {
-    this.initPaddingClass()
+    this.syncPaddingClasses()
   }
 
   override render() {
-    return html`<slot @slotchange=${this.handleSlotChange} @click=${this.handleListItemClick}></slot>`
+    return html`<slot @slotchange=${this.handleSlotChange} @click=${this.handleListItemClick} @keydown=${this.handleKeydown}></slot>`
   }
 }
 

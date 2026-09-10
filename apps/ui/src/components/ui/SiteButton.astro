@@ -1,0 +1,149 @@
+---
+// Site variant of `c2-button` / `c2-link-button`: one set of classes written once for both tags through the shared
+// `__container--*` grammar. Variants: primary (filled accent), ghost (outlined), subtle (tinted). Sizes: sm 30px, md 40px.
+// Used by the studio bar (MdxCodeBlock) and the landing page hero.
+import { Button } from '@c2n/button'
+import { LinkButton } from '@c2n/link-button'
+import { rawElement, type AttributeValue } from '../../utils/raw-element'
+
+interface Props {
+  variant?: 'primary' | 'ghost' | 'subtle'
+  size?: 'sm' | 'md'
+  /** Renders a `c2-link-button` (a real `<a>`) instead of a `c2-button`. */
+  href?: string
+  /** `island` (default) or `defined` (raw plain tag upgraded by `data/chrome-modules.ts`, for repeated chrome). */
+  hydrate?: 'island' | 'defined'
+  class?: string
+  [attr: string]: unknown
+}
+const { variant = 'primary', size = 'md', href, hydrate = 'island', class: className = '', ...rest } = Astro.props
+const classes = ['site-button', `site-button--${variant}`, `site-button--${size}`, className].filter(Boolean).join(' ')
+const hasPrefix = Astro.slots.has('prefix-icon')
+const hasSuffix = Astro.slots.has('suffix-icon')
+const tag = href ? 'c2-link-button' : 'c2-button'
+const raw =
+  hydrate === 'defined'
+    ? rawElement(
+        tag,
+        { class: classes, href, ...(rest as Record<string, AttributeValue>) },
+        [
+          hasPrefix ? `<span slot="prefix-icon">${await Astro.slots.render('prefix-icon')}</span>` : '',
+          await Astro.slots.render('default'),
+          hasSuffix ? `<span slot="suffix-icon">${await Astro.slots.render('suffix-icon')}</span>` : '',
+        ].join(''),
+      )
+    : ''
+---
+
+{
+  hydrate === 'defined' ? (
+    <Fragment set:html={raw} />
+  ) : href ? (
+    <LinkButton client:load class={classes} href={href} {...rest}>
+      {hasPrefix && (
+        <span slot="prefix-icon">
+          <slot name="prefix-icon" />
+        </span>
+      )}
+      <slot />
+      {hasSuffix && (
+        <span slot="suffix-icon">
+          <slot name="suffix-icon" />
+        </span>
+      )}
+    </LinkButton>
+  ) : (
+    <Button client:load class={classes} {...rest}>
+      {hasPrefix && (
+        <span slot="prefix-icon">
+          <slot name="prefix-icon" />
+        </span>
+      )}
+      <slot />
+      {hasSuffix && (
+        <span slot="suffix-icon">
+          <slot name="suffix-icon" />
+        </span>
+      )}
+    </Button>
+  )
+}
+
+<style lang="scss" is:global>
+  .site-button {
+    // Shared: button and link-button read the same `__container--*` names.
+    --c2-button__container--font-size: 13.5px;
+    --c2-link-button__container--font-size: 13.5px;
+    --c2-button__container--gap: 8px;
+    --c2-link-button__container--gap: 8px;
+    --c2-link-button__container--text-decoration: none;
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__container__selected--font-weight: 500;
+    --c2-button__container--border-radius: var(--site-radius-sm);
+    --c2-link-button__container--border-radius: var(--site-radius-sm);
+    --c2-button__icon--size: 16px;
+    --c2-link-button__icon--size: 16px;
+    white-space: nowrap;
+
+    &--md {
+      --c2-button__container--height: 40px;
+      --c2-button__container--padding-left: 18px;
+      --c2-button__container--padding-right: 18px;
+      --c2-link-button__container--padding-top: 10px;
+      --c2-link-button__container--padding-bottom: 10px;
+      --c2-link-button__container--padding-left: 18px;
+      --c2-link-button__container--padding-right: 18px;
+    }
+    &--sm {
+      --c2-button__container--height: 30px;
+      --c2-button__container--padding-left: 12px;
+      --c2-button__container--padding-right: 12px;
+      --c2-link-button__container--padding-top: 6px;
+      --c2-link-button__container--padding-bottom: 6px;
+      --c2-link-button__container--padding-left: 12px;
+      --c2-link-button__container--padding-right: 12px;
+    }
+
+    // primary: the button default (accent fill) carried over to link-button.
+    &--primary {
+      --c2-link-button__container--background-color: var(--site-color-primary);
+      --c2-link-button__container--color: var(--site-color-on-primary);
+      --c2-link-button__container__hover--color: var(--site-color-on-primary);
+      --c2-link-button__container__hover--background-color: color-mix(in srgb, var(--site-color-primary), var(--site-color-on-surface) 12%);
+    }
+    &--ghost {
+      --c2-button__container--background-color: transparent;
+      --c2-button__container--color: var(--site-color-on-surface);
+      --c2-button__container--border: 1px solid var(--site-color-outline-variant);
+      --c2-button__container__hover--background-color: var(--site-color-surface-container-2);
+      --c2-button__container__hover--border: 1px solid var(--site-color-outline);
+      --c2-button__container__active--background-color: var(--site-color-surface-container-3);
+      --c2-link-button__container--color: var(--site-color-on-surface);
+      --c2-link-button__container__hover--color: var(--site-color-on-surface);
+      --c2-link-button__container__hover--background-color: var(--site-color-surface-container-2);
+      // link-button has no border variable: draw it on the host.
+      &:where(c2-link-button) {
+        border-radius: var(--site-radius-sm);
+        box-shadow: inset 0 0 0 1px var(--site-color-outline-variant);
+      }
+    }
+    &--subtle {
+      --c2-button__container--background-color: var(--site-color-surface-container-2);
+      --c2-button__container--color: var(--site-color-on-surface);
+      --c2-button__container__hover--background-color: var(--site-color-surface-container-3);
+      --c2-button__container__active--background-color: var(--site-color-surface-container-4);
+      --c2-link-button__container--background-color: var(--site-color-surface-container-2);
+      --c2-link-button__container--color: var(--site-color-on-surface);
+      --c2-link-button__container__hover--color: var(--site-color-on-surface);
+      --c2-link-button__container__hover--background-color: var(--site-color-surface-container-3);
+    }
+
+    &:not(:defined) {
+      visibility: hidden;
+    }
+  }
+</style>
+
+<script>
+  import '../../data/chrome-modules'
+</script>

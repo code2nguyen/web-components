@@ -1,0 +1,60 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ChatMessage } from '@c2n/chat-message'
+import { Avatar } from '@c2n/avatar'
+
+## Presets
+
+Curated looks for `c2-chat-message`. Open any card in the studio to start from it.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Bubble
+<style>
+  .bubble {
+    --c2-chat-message__message--background: #eff6ff;
+    --c2-chat-message__message--padding-top: 8px;
+    --c2-chat-message__message--padding-bottom: 8px;
+    --c2-chat-message__message--padding-left: 12px;
+    --c2-chat-message__message--padding-right: 12px;
+    --c2-chat-message__message--border-top-left-radius: 4px;
+    --c2-chat-message__message--border-top-right-radius: 14px;
+    --c2-chat-message__message--border-bottom-left-radius: 14px;
+    --c2-chat-message__message--border-bottom-right-radius: 14px;
+  }
+</style>
+<c2-chat-message style="width: 240px" class="bubble"><c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar><div slot="title">Elisa</div><div slot="header-time">17:29</div><div slot="message">Bonjour 👋</div></c2-chat-message>
+```
+
+```html tag=MdxCodeBlock,label=Outgoing
+<style>
+  .outgoing {
+    --c2-chat-message__message--background: #2563eb;
+    --c2-chat-message__message--color: #ffffff;
+    --c2-chat-message__message--padding-top: 8px;
+    --c2-chat-message__message--padding-bottom: 8px;
+    --c2-chat-message__message--padding-left: 12px;
+    --c2-chat-message__message--padding-right: 12px;
+    --c2-chat-message__message--border-top-left-radius: 14px;
+    --c2-chat-message__message--border-top-right-radius: 4px;
+    --c2-chat-message__message--border-bottom-left-radius: 14px;
+    --c2-chat-message__message--border-bottom-right-radius: 14px;
+  }
+</style>
+<c2-chat-message style="width: 240px" class="outgoing" align="right"><c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar><div slot="title">Elisa</div><div slot="header-time">17:29</div><div slot="message">Bonjour 👋</div></c2-chat-message>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-chat-message--gap: 8;
+    --c2-chat-message--font-size: 13px;
+    --c2-chat-message__header__title---font-size: 13px;
+    --c2-chat-message__time--font-size: 11px;
+  }
+</style>
+<c2-chat-message style="width: 240px" class="compact"><c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar><div slot="title">Elisa</div><div slot="header-time">17:29</div><div slot="message">Bonjour 👋</div></c2-chat-message>
+```
+
+</GalleryGrid>

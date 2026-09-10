@@ -1,0 +1,307 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-radio,
+  $theme: (
+    container--gap: 4px,
+    container--flex-direction: row,
+    container--padding-top: 0px,
+    container--padding-right: 0px,
+    container--padding-bottom: 0px,
+    container--padding-left: 0px,
+    container--border: none,
+    container--border-radius: 8px,
+    container--background: null,
+    container__hover--background: null,
+    container__checked--border: null,
+    container__checked--background: null,
+
+    control--size: 18px,
+    control--border-radius: 999px,
+    control--border: 1px solid #bcbcc6,
+    control--background-color: transparent,
+    control__hover--border: 1px solid #a1a1aa,
+    control__checked--border: 1px solid transparent,
+    control__checked--background-color: #0265dc,
+    control__checked__hover--background-color: #0154b8,
+    control__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    control__focus--outline-offset: 2px,
+    control__disabled--opacity: variables.$disabled-content-opacity,
+
+    dot--size: 8px,
+    dot--color: #ffffff,
+
+    icon--size: null,
+    icon--color: #71717a,
+    icon__checked--color: #0265dc,
+
+    state-layer--size: 32px,
+    state-layer--border-radius: 999px,
+    state-layer__hover--color: null,
+
+    label--color: inherit,
+    label--font-size: inherit,
+    label--font-weight: inherit,
+    label--line-height: inherit,
+    label__checked--color: null,
+    label__disabled--opacity: variables.$disabled-content-opacity,
+
+    description--color: #71717a,
+    description--font-size: 12px,
+    description--line-height: 1.4,
+    description--margin-top: 2px,
+  )
+);
+
+:host {
+  display: inline-flex;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// The whole row is the label, so clicking the text checks the radio. Border, padding and background are unset by
+// default and turn the row into a selectable card when themed.
+.c2-radio {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  flex-direction: css.cssVar(container--flex-direction);
+  gap: css.cssVar(container--gap);
+  padding-top: css.cssVar(container--padding-top);
+  padding-right: css.cssVar(container--padding-right);
+  padding-bottom: css.cssVar(container--padding-bottom);
+  padding-left: css.cssVar(container--padding-left);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background: css.cssVar(container--background);
+  transition: animation.standard(background), animation.standard(border-color);
+
+  &.has-description {
+    align-items: flex-start;
+  }
+
+  &:hover:has(.c2-radio-input:enabled) {
+    background: css.cssVar(container__hover--background, container--background);
+  }
+
+  &:has(.c2-radio-input:checked) {
+    border: css.cssVar(container__checked--border, container--border);
+    background: css.cssVar(container__checked--background, container--background);
+  }
+
+  &:has(.c2-radio-input:checked:enabled):hover {
+    background: css.cssVar(container__hover--background, container__checked--background, container--background);
+  }
+
+  &:has(.c2-radio-input:disabled) {
+    cursor: default;
+  }
+}
+
+// Touch target and hover layer share one square; the control sits centred in it.
+.c2-radio-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: css.cssVar(state-layer--size);
+  height: css.cssVar(state-layer--size);
+  line-height: 0;
+}
+
+.c2-radio-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.c2-radio__background {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(control--size);
+  height: css.cssVar(control--size);
+  border-radius: css.cssVar(control--border-radius);
+  border: css.cssVar(control--border);
+  background-color: css.cssVar(control--background-color);
+  pointer-events: none;
+  transition: animation.standard(background-color), animation.standard(border-color);
+}
+
+// The dot is a filled shape by default; slotted `dot` content replaces the fill and is drawn in the same colour.
+.c2-radio__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(dot--size);
+  height: css.cssVar(dot--size);
+  border-radius: css.cssVar(control--border-radius);
+  background: css.cssVar(dot--color);
+  color: css.cssVar(dot--color);
+  line-height: 0;
+  transform: scale(0);
+  transition: animation.standard-deceleration(transform);
+  --c2-feather-icon--size: #{css.cssVar(dot--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(dot--size)};
+
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.has-dot .c2-radio__dot {
+  background: transparent;
+}
+
+// Slotted indicators replace the ring: `icon` while unchecked (and while checked too, recoloured, when there is no
+// `checked-icon`), `checked-icon` while checked. Both sit in the same square as the ring so layout never shifts.
+.c2-radio__icon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(icon--size, control--size);
+  height: css.cssVar(icon--size, control--size);
+  border-radius: css.cssVar(control--border-radius);
+  color: css.cssVar(icon--color);
+  line-height: 0;
+  pointer-events: none;
+  transition: animation.standard(color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size, control--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size, control--size)};
+
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.has-icon .c2-radio-input:not(:checked) ~ .c2-radio__background,
+.has-icon:not(.has-checked-icon) .c2-radio-input:checked ~ .c2-radio__background,
+.has-checked-icon .c2-radio-input:checked ~ .c2-radio__background {
+  display: none;
+}
+
+.has-icon .c2-radio-input:not(:checked) ~ .c2-radio__icon--unchecked,
+.has-icon:not(.has-checked-icon) .c2-radio-input:checked ~ .c2-radio__icon--unchecked,
+.has-checked-icon .c2-radio-input:checked ~ .c2-radio__icon--checked {
+  display: inline-flex;
+}
+
+.c2-radio-input:checked ~ .c2-radio__icon {
+  color: css.cssVar(icon__checked--color);
+}
+
+.c2-radio-state-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: css.cssVar(state-layer--border-radius);
+  background-color: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: animation.standard(background-color), animation.standard(opacity);
+}
+
+.c2-radio-input:checked ~ .c2-radio__background {
+  border: css.cssVar(control__checked--border);
+  background-color: css.cssVar(control__checked--background-color);
+
+  .c2-radio__dot {
+    transform: scale(1);
+  }
+}
+
+.c2-radio-input:enabled:not(:checked):hover ~ .c2-radio__background {
+  border: css.cssVar(control__hover--border);
+}
+
+.c2-radio-input:enabled:checked:hover ~ .c2-radio__background {
+  background-color: css.cssVar(control__checked__hover--background-color, control__checked--background-color);
+}
+
+.c2-radio-input:enabled:hover ~ .c2-radio-state-layer {
+  background-color: css.cssVar(state-layer__hover--color);
+  opacity: variables.$state-layer-hover-opacity;
+}
+
+.c2-radio-input:focus-visible ~ .c2-radio__background,
+.c2-radio-input:focus-visible ~ .c2-radio__icon {
+  outline: css.cssVar(control__focus--outline);
+  outline-offset: css.cssVar(control__focus--outline-offset);
+}
+
+.c2-radio-input:disabled ~ .c2-radio__background,
+.c2-radio-input:disabled ~ .c2-radio__icon {
+  opacity: css.cssVar(control__disabled--opacity);
+}
+
+.c2-radio-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.c2-radio-label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: css.cssVar(label--line-height);
+  transition: animation.standard(color);
+}
+
+// With a description the row aligns to the top; keep the label centred on the control's touch square.
+.has-description .c2-radio-label {
+  display: flex;
+  align-items: center;
+  min-height: css.cssVar(state-layer--size);
+}
+
+.c2-radio:has(.c2-radio-input:checked) .c2-radio-label {
+  color: css.cssVar(label__checked--color, label--color);
+}
+
+.c2-radio:has(.c2-radio-input:disabled) .c2-radio-text {
+  opacity: css.cssVar(label__disabled--opacity);
+}
+
+.c2-radio-description {
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: css.cssVar(description--line-height);
+  margin-top: css.cssVar(description--margin-top);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.has-description .c2-radio-description {
+  // The label row already fills the touch square; pull the description up under the text.
+  margin-top: calc(#{css.cssVar(description--margin-top)} - (#{css.cssVar(state-layer--size)} - 1.5em) / 2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-radio,
+  .c2-radio__background,
+  .c2-radio__dot,
+  .c2-radio__icon,
+  .c2-radio-state-layer,
+  .c2-radio-label {
+    transition: none;
+  }
+}

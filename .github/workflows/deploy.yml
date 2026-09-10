@@ -20,18 +20,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository using git
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
 
       # Set up GitHub Actions caching for Wireit.
-      - uses: google/wireit@setup-github-actions-caching/v1
+      - uses: google/wireit@setup-github-actions-caching/v2
 
       - name: Install Dependencies
-        shell: "bash"
         run: npm ci
 
       - name: Lint
@@ -40,14 +39,23 @@ jobs:
       - name: Check formatting
         run: npm run format:check
         
-      - name: Build demo
+      - name: Build UI app
         shell: "bash"
-        run: npm run demo:build
+        run: npm run ui:build
+
+      - name: Build tools (MCP registry, skill cheatsheet)
+        run: npm run build:tools
+
+      - name: Smoke test the MCP server
+        run: npm run mcp:smoke
+
+      - name: Generated files are up to date
+        run: git diff --exit-code -- packages/tools/mcp/data packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json
 
       - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
-          path: "demo/dist/"
+          path: "apps/ui/dist/"
 
   deploy:
     needs: build
@@ -58,6 +66,6 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v5 
         with:
           token: ${{ github.token }}

@@ -1,0 +1,162 @@
+---
+import { getCollection } from 'astro:content'
+import { componentPreviews } from '../data/component-previews'
+import { COMPONENT_CATEGORIES } from '../schemas'
+import SiteCard from './ui/SiteCard.astro'
+
+const base = import.meta.env.BASE_URL
+const components = (await getCollection('components')).sort((a, b) => a.data.title.localeCompare(b.data.title))
+const groups = COMPONENT_CATEGORIES.map((category) => ({
+  category,
+  items: components.filter((component) => component.data.category === category),
+})).filter((group) => group.items.length > 0)
+---
+
+<div class="gallery">
+  {
+    groups.map((group) => (
+      <section class="gallery__group">
+        <h3 class="gallery__group-title" id={`gallery-${group.category.toLowerCase().replace(/\s+/g, '-')}`}>
+          {group.category}
+          <span class="gallery__count">{group.items.length}</span>
+        </h3>
+        <div class="gallery__grid">
+          {group.items.map((component) => (
+            <SiteCard hydrate="defined" flush class="gallery__card">
+              <div slot="media" class="gallery__canvas">
+                <Fragment set:html={componentPreviews[component.id] ?? `<c2-${component.id}></c2-${component.id}>`} />
+              </div>
+              <a class="gallery__link" href={`${base}/components/${component.id}`}>
+                <span class="gallery__title">
+                  {component.data.title}
+                  <c2-feather-arrow-right class="site-card__arrow" />
+                </span>
+                <span class="gallery__desc">{component.data.description}</span>
+              </a>
+            </SiteCard>
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</div>
+
+<style lang="scss" is:global>
+  .gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+
+    &__group-title {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 16px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      scroll-margin-top: calc(var(--site-header-height) + 24px);
+    }
+    &__count {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--site-color-on-surface-muted);
+    }
+    &__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    &__card {
+      // The card frame comes from SiteCard; the media slot clips the canvas to the top radius.
+      .site-card__media {
+        border-radius: var(--site-radius-lg) var(--site-radius-lg) 0 0;
+        overflow: hidden;
+      }
+    }
+    &__canvas {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 160px;
+      padding: 16px;
+      overflow: hidden;
+      background-color: var(--site-color-surface-container-1);
+      background-image: radial-gradient(var(--site-canvas-dot) 1px, transparent 1px);
+      background-size: 16px 16px;
+      color: var(--site-color-on-surface);
+      opacity: 0;
+      transition: opacity 250ms var(--site-ease);
+      &.ready {
+        opacity: 1;
+      }
+      > * {
+        max-width: 100%;
+      }
+    }
+    &__link {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--site-color-outline-variant);
+      border-radius: 0 0 var(--site-radius-lg) var(--site-radius-lg);
+      color: inherit;
+      &:hover {
+        text-decoration: none;
+        background: var(--site-color-surface-container-1);
+      }
+    }
+    &__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--site-color-on-surface);
+    }
+    &__desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--site-color-on-surface-variant);
+    }
+  }
+
+  // Helpers used by the preview markup in src/data/component-previews.ts
+  .preview-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .preview-button {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: var(--site-radius-sm);
+    border: 1px solid var(--site-color-outline);
+    background: var(--site-color-surface);
+    color: var(--site-color-on-surface);
+    cursor: pointer;
+    position: relative;
+    &:hover {
+      background: var(--site-color-surface-container-2);
+    }
+  }
+  .preview-popover {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-radius: var(--site-radius-md);
+    border: 1px solid var(--site-color-outline-variant);
+    background: var(--site-color-surface);
+    color: var(--site-color-on-surface);
+    box-shadow: var(--site-elevation-2);
+  }
+</style>
+
+<script>
+  import '../data/component-modules'
+  document.querySelectorAll('.gallery__canvas').forEach((canvas) => canvas.classList.add('ready'))
+</script>

@@ -5,7 +5,7 @@ import VitePluginCustomElementsManifest from 'vite-plugin-cem'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/tabs.ts', 'src/tab.ts'],
+      entry: ['src/tabs.ts', 'src/tab.ts', 'src/tab-context.ts'],
       formats: ['es'],
     },
     minify: false,

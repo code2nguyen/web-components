@@ -1,0 +1,92 @@
+---
+import { getCollection } from 'astro:content'
+import Main from '../../layouts/Main.astro'
+import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import SiteCard from '../../components/ui/SiteCard.astro'
+import { COMPONENT_CATEGORIES } from '../../schemas'
+
+const base = import.meta.env.BASE_URL
+const components = (await getCollection('components')).sort((a, b) => a.data.title.localeCompare(b.data.title))
+const groups = COMPONENT_CATEGORIES.map((category) => ({
+  category,
+  items: components.filter((component) => component.data.category === category),
+})).filter((group) => group.items.length > 0)
+
+const headings = groups.map((group) => ({ depth: 2, slug: group.category.toLowerCase().replace(/\s+/g, '-'), text: group.category }))
+---
+
+<Main title="Components · c2n web components" withSidebar section="components">
+  <DocComponentLayout headings={headings}>
+    <h1>Components</h1>
+    <p>
+      {components.length} components, each published as its own npm package under the <code>@c2n</code> scope. Every component is themed through CSS custom properties
+      and documented with live, editable examples.
+    </p>
+    {
+      groups.map((group) => (
+        <section>
+          <h2 id={group.category.toLowerCase().replace(/\s+/g, '-')}>{group.category}</h2>
+          <ul class="component-index">
+            {group.items.map((component) => (
+              <li>
+                <SiteCard hydrate="defined" href={`${base}/components/${component.id}`} class="component-index__card">
+                  <span class="component-index__title">
+                    {component.data.title}
+                    <c2-feather-arrow-right class="site-card__arrow" />
+                  </span>
+                  <span class="component-index__desc">{component.data.description}</span>
+                  <code class="component-index__pkg">{component.data.package ?? `@c2n/${component.id}`}</code>
+                </SiteCard>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </DocComponentLayout>
+</Main>
+
+<style lang="scss">
+  .component-index {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+
+    li {
+      display: flex;
+    }
+    :global(.component-index__card) {
+      flex: 1;
+      --c2-card--border-top-left-radius: var(--site-radius-md);
+      --c2-card--border-top-right-radius: var(--site-radius-md);
+      --c2-card--border-bottom-left-radius: var(--site-radius-md);
+      --c2-card--border-bottom-right-radius: var(--site-radius-md);
+      --c2-card--padding-bottom: 14px;
+      --c2-card__hover--background: var(--site-color-surface-container-1);
+      --c2-card__hover--box-shadow: none;
+    }
+    &__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      color: var(--site-color-on-surface);
+    }
+    &__desc {
+      display: block;
+      margin: 6px 0;
+      font-size: 13px;
+      color: var(--site-color-on-surface-variant);
+      flex: 1;
+    }
+    &__pkg {
+      font-size: 11.5px;
+      color: var(--site-color-on-surface-muted);
+      background: transparent !important;
+      padding: 0 !important;
+    }
+  }
+</style>

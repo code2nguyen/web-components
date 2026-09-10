@@ -1,0 +1,148 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { CodeViewer } from '@c2n/code-viewer'
+
+## Presets
+
+Curated looks for `c2-code-viewer`. Open any card in the studio to start from it. The frame is `--c2-code-viewer--*` (`background` and `color` override the theme's own), the file-name bar is `__header`, the copy button `__copy`, gutters `__line-numbers`, emphasised rows `__line__highlighted`, and with `theme="css-variables"` the token colours themselves are the `__theme--*` properties.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .terminal {
+    --c2-code-viewer--border-top: none;
+    --c2-code-viewer--border-right: none;
+    --c2-code-viewer--border-bottom: none;
+    --c2-code-viewer--border-left: none;
+    --c2-code-viewer--border-top-left-radius: 10px;
+    --c2-code-viewer--border-top-right-radius: 10px;
+    --c2-code-viewer--border-bottom-left-radius: 10px;
+    --c2-code-viewer--border-bottom-right-radius: 10px;
+    --c2-code-viewer--box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    --c2-code-viewer__header--background: rgba(255, 255, 255, 0.06);
+    --c2-code-viewer__header--border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    --c2-code-viewer__header--color: #a1a1aa;
+  }
+</style>
+<c2-code-viewer style="width: 240px" class="terminal" language="bash" theme="vitesse-dark" copyable code="npm install\nnpm run ui">
+  <span slot="title">~/web-components</span>
+</c2-code-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Numbered
+<style>
+  .numbered {
+    --c2-code-viewer--border-top-left-radius: 8px;
+    --c2-code-viewer--border-top-right-radius: 8px;
+    --c2-code-viewer--border-bottom-left-radius: 8px;
+    --c2-code-viewer--border-bottom-right-radius: 8px;
+    --c2-code-viewer__line-numbers--gap: 20px;
+    --c2-code-viewer__line-numbers--color: #94a3b8;
+  }
+</style>
+<c2-code-viewer style="width: 240px" class="numbered" language="ts" theme="github-light" line-numbers code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Highlighted lines
+<style>
+  .highlighted {
+    --c2-code-viewer__line__highlighted--background: rgba(245, 158, 11, 0.15);
+    --c2-code-viewer__line__highlighted--border-left: 3px solid #f59e0b;
+  }
+</style>
+<c2-code-viewer style="width: 240px" class="highlighted" language="ts" theme="github-light" line-numbers highlight-lines="2" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Dark pair
+<style>
+  .dark-pair {
+    --c2-code-viewer--border-top: none;
+    --c2-code-viewer--border-right: none;
+    --c2-code-viewer--border-bottom: none;
+    --c2-code-viewer--border-left: none;
+    --c2-code-viewer--border-top-left-radius: 10px;
+    --c2-code-viewer--border-top-right-radius: 10px;
+    --c2-code-viewer--border-bottom-left-radius: 10px;
+    --c2-code-viewer--border-bottom-right-radius: 10px;
+  }
+</style>
+<c2-code-viewer style="width: 240px" class="dark-pair" language="ts" theme="github-light" dark-theme="github-dark-default" color-scheme="dark" copyable code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Diff
+<style>
+  .diff {
+    --c2-code-viewer--font-size: 12px;
+    --c2-code-viewer--border-top-left-radius: 8px;
+    --c2-code-viewer--border-top-right-radius: 8px;
+    --c2-code-viewer--border-bottom-left-radius: 8px;
+    --c2-code-viewer--border-bottom-right-radius: 8px;
+  }
+</style>
+<c2-code-viewer style="width: 240px" class="diff" language="diff" theme="github-light" code="- &quot;@c2n/expansion-panel&quot;: &quot;0.0.4&quot;,\n+ &quot;@c2n/details&quot;: &quot;0.0.4&quot;,">
+  <span slot="title">package.json</span>
+</c2-code-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Solarized via tokens
+<style>
+  .solarized {
+    --c2-code-viewer--border-top: none;
+    --c2-code-viewer--border-right: none;
+    --c2-code-viewer--border-bottom: none;
+    --c2-code-viewer--border-left: none;
+    --c2-code-viewer--border-top-left-radius: 8px;
+    --c2-code-viewer--border-top-right-radius: 8px;
+    --c2-code-viewer--border-bottom-left-radius: 8px;
+    --c2-code-viewer--border-bottom-right-radius: 8px;
+    --c2-code-viewer__theme--background: #fdf6e3;
+    --c2-code-viewer__theme--foreground: #657b83;
+    --c2-code-viewer__theme--token-keyword: #859900;
+    --c2-code-viewer__theme--token-function: #268bd2;
+    --c2-code-viewer__theme--token-string: #2aa198;
+    --c2-code-viewer__theme--token-string-expression: #2aa198;
+    --c2-code-viewer__theme--token-constant: #cb4b16;
+    --c2-code-viewer__theme--token-comment: #93a1a1;
+    --c2-code-viewer__theme--token-punctuation: #586e75;
+  }
+</style>
+<c2-code-viewer style="width: 240px" class="solarized" language="ts" theme="css-variables" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-code-viewer--font-size: 12px;
+    --c2-code-viewer--line-height: 1.5;
+    --c2-code-viewer--padding-top: 8px;
+    --c2-code-viewer--padding-bottom: 8px;
+    --c2-code-viewer--padding-left: 10px;
+    --c2-code-viewer--padding-right: 10px;
+    --c2-code-viewer--border-top-left-radius: 6px;
+    --c2-code-viewer--border-top-right-radius: 6px;
+    --c2-code-viewer--border-bottom-left-radius: 6px;
+    --c2-code-viewer--border-bottom-right-radius: 6px;
+    --c2-code-viewer--background: #fafafa;
+  }
+</style>
+<c2-code-viewer style="width: 240px" class="compact" language="ts" theme="github-light" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>
+```
+
+```html tag=MdxCodeBlock,label=Scrolling
+<style>
+  .scrolling {
+    --c2-code-viewer--max-height: 96px;
+    --c2-code-viewer--border-top-left-radius: 8px;
+    --c2-code-viewer--border-top-right-radius: 8px;
+    --c2-code-viewer--border-bottom-left-radius: 8px;
+    --c2-code-viewer--border-bottom-right-radius: 8px;
+  }
+</style>
+<c2-code-viewer style="width: 240px" class="scrolling" language="ts" theme="github-light" line-numbers code="const one = 1\nconst two = 2\nconst three = 3\nconst four = 4\nconst five = 5\nconst six = 6\nconst seven = 7">
+  <span slot="title">long.ts</span>
+</c2-code-viewer>
+```
+
+</GalleryGrid>

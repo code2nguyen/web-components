@@ -1,0 +1,105 @@
+{
+  "name": "@c2n/theme",
+  "version": "0.0.4",
+  "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
+  "type": "module",
+  "main": "dist/tokens.js",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
+    },
+    "./tokens.js": {
+      "types": "./dist/tokens.d.ts",
+      "default": "./dist/tokens.js"
+    },
+    "./theme.css": "./dist/theme.css",
+    "./tokens.css": "./dist/tokens.css",
+    "./base.css": "./dist/base.css",
+    "./tokens.json": "./dist/tokens.json",
+    "./report.json": "./dist/report.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "theme",
+    "design tokens",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "type-check": "wireit",
+    "generate": "node scripts/theme-generator/index.ts"
+  },
+  "wireit": {
+    "type-check": {
+      "command": "tsc -p tsconfig.node.json"
+    },
+    "build": {
+      "dependencies": [
+        "type-check",
+        "../../components/copy-button:build",
+        "../../components/textarea:build",
+        "../../components/switch:build",
+        "../../components/spinner:build",
+        "../../components/slider:build",
+        "../../components/seperator:build",
+        "../../components/breadcrumb:build",
+        "../../components/badge:build",
+        "../../components/toast:build",
+        "../../components/radio:build",
+        "../../components/button-group:build",
+        "../../components/accordion:build",
+        "../../components/avatar:build",
+        "../../components/button:build",
+        "../../components/card:build",
+        "../../components/chat-input:build",
+        "../../components/chat-message:build",
+        "../../components/checkbox:build",
+        "../../components/code-viewer:build",
+        "../../components/color-area:build",
+        "../../components/color-select:build",
+        "../../components/color-slider:build",
+        "../../components/details:build",
+        "../../components/dropdown-list:build",
+        "../../components/icon-button:build",
+        "../../components/label:build",
+        "../../components/link-button:build",
+        "../../components/list:build",
+        "../../components/list-item:build",
+        "../../components/mat-icon:build",
+        "../../components/modal:build",
+        "../../components/overlay:build",
+        "../../components/reorder-list:build",
+        "../../components/select:build",
+        "../../components/side-nav:build",
+        "../../components/tabs:build",
+        "../../components/text-field:build",
+        "../../components/tooltip:build",
+        "../../icons/feather-icons:build",
+        "../../../open-packages/chatbot:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json && node scripts/theme-generator/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "prettier": "3.9.6"
+  }
+}

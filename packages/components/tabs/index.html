@@ -2,31 +2,104 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-tabs</title>
     <script type="module" src="/src/tabs.ts"></script>
     <script type="module" src="/src/tab.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 40px;
       }
-      .demo {
-        display: flex;
-        align-items: center;
+      h2 {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0 0 8px;
+        color: #666;
+      }
+      .segmented {
+        --c2-tabs--box-shadow: none;
+        --c2-tabs--background-color: #f4f4f5;
+        --c2-tabs--gap: 4px;
+        --c2-tabs__indicator--height: 0px;
+        --c2-tabs__tab--border-top-left-radius: 8px;
+        --c2-tabs__tab--border-top-right-radius: 8px;
+        --c2-tabs__tab--border-bottom-left-radius: 8px;
+        --c2-tabs__tab--border-bottom-right-radius: 8px;
+        --c2-tabs__tab--padding-top: 6px;
+        --c2-tabs__tab--padding-bottom: 6px;
+        --c2-tabs__tab__selected--background-color: #ffffff;
+        --c2-tabs__tab__selected--color: #18181b;
+        --c2-tabs__tab__hover--background-color: #e4e4e7;
       }
     </style>
   </head>
   <body>
-    <c2-tabs selected-tab="tab2">
-      <c2-tab label="tab1" for="tab1"></c2-tab>
-      <c2-tab for="tab2">tab 2</c2-tab>
-      <c2-tab for="tab2" disabled>tab 3</c2-tab>
-      <c2-tab for="tab2">tab 4</c2-tab>
-      <div id="tab1">tab1 content</div>
-      <div id="tab2">tab2 content</div>
-      <div id="tab4">tab4 content</div>
-    </c2-tabs>
+    <section>
+      <h2>Default (selected-tab, disabled tab, keyboard: ← → Home End)</h2>
+      <c2-tabs selected-tab="tab2">
+        <c2-tab label="Tab 1" for="tab1"></c2-tab>
+        <c2-tab for="tab2">Tab 2</c2-tab>
+        <c2-tab for="tab3" disabled>Tab 3</c2-tab>
+        <c2-tab for="tab4">Tab 4</c2-tab>
+        <div id="tab1">Tab 1 content</div>
+        <div id="tab2">Tab 2 content</div>
+        <div id="tab3">Tab 3 content</div>
+        <div id="tab4">Tab 4 content</div>
+      </c2-tabs>
+    </section>
+
+    <section>
+      <h2>No selected-tab: first enabled tab is picked</h2>
+      <c2-tabs>
+        <c2-tab for="a" disabled>Disabled</c2-tab>
+        <c2-tab for="b">Second</c2-tab>
+        <c2-tab for="c">Third</c2-tab>
+        <div id="a">A</div>
+        <div id="b">B</div>
+        <div id="c">C</div>
+      </c2-tabs>
+    </section>
+
+    <section>
+      <h2>Resizable container (indicator follows)</h2>
+      <div style="resize: horizontal; overflow: hidden; width: 320px; border: 1px dashed #ccc; padding: 8px">
+        <c2-tabs style="--c2-tabs--justify-content: space-between" selected-tab="r2">
+          <c2-tab for="r1">One</c2-tab>
+          <c2-tab for="r2">Two</c2-tab>
+          <c2-tab for="r3">Three</c2-tab>
+          <div id="r1">1</div>
+          <div id="r2">2</div>
+          <div id="r3">3</div>
+        </c2-tabs>
+      </div>
+    </section>
+
+    <section>
+      <h2>Segmented look, programmatic select + change event + veto</h2>
+      <c2-tabs class="segmented" id="seg" selected-tab="s1" style="width: 320px">
+        <c2-tab for="s1">Overview</c2-tab>
+        <c2-tab for="s2">Activity</c2-tab>
+        <c2-tab for="s3">Locked</c2-tab>
+        <div id="s1">Overview</div>
+        <div id="s2">Activity</div>
+        <div id="s3">You should never see this</div>
+      </c2-tabs>
+      <p style="margin-top: 12px">
+        <button onclick="document.getElementById('seg').selectedTab = 's2'">Select Activity programmatically</button>
+        <span id="log" style="margin-left: 12px; color: #666"></span>
+      </p>
+      <script>
+        const seg = document.getElementById('seg')
+        seg.addEventListener('tab-change', (e) => {
+          if (e.detail === 's3') e.preventDefault()
+        })
+        seg.addEventListener('change', (e) => {
+          document.getElementById('log').textContent = `change → ${e.detail.value}`
+        })
+      </script>
+    </section>
   </body>
 </html>

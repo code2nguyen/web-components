@@ -1,0 +1,69 @@
+---
+title: 'Button'
+description: 'Themeable button with slots for text, prefix, suffix and running icons.'
+category: 'Buttons'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Button } from '@c2n/button'
+
+`c2-button` is a filled button whose label, prefix icon, suffix icon and running indicator are all slots. Set `running` while an action is in flight: clicks are ignored and the `running-icon` slot (a spinner by default) takes the place of the prefix icon.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/button
+```
+
+## Usage
+
+Drop text into the default slot; use `prefix-icon`, `suffix-icon` and `running-icon` for icons. `running` disables the button and swaps the prefix icon for a spinner.
+
+```html tag=UsageBlock,package=@c2n/button
+<style>
+  .outline {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__active--background-color: #e4e4e7;
+  }
+</style>
+<div data-label="Text">
+  <c2-button>Basic</c2-button>
+  <c2-button disabled>Disabled</c2-button>
+  <c2-button running>Running</c2-button>
+</div>
+<div data-label="Outline">
+  <c2-button class="outline">Basic</c2-button>
+  <c2-button class="outline" disabled>Disabled</c2-button>
+  <c2-button class="outline" running>Running</c2-button>
+</div>
+<div data-label="Prefix icon">
+  <c2-button>
+    <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"></path>
+    </svg>
+    New item
+  </c2-button>
+</div>
+<div data-label="Suffix icon">
+  <c2-button>
+    Continue
+    <svg slot="suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14M12 5l7 7-7 7"></path>
+    </svg>
+  </c2-button>
+</div>
+<div data-label="Running icon">
+  <c2-button running>Saving…</c2-button>
+  <c2-button running>
+    <svg slot="running-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+    </svg>
+    Uploading
+  </c2-button>
+</div>
+```

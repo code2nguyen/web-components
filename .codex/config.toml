@@ -1,0 +1,3 @@
+[mcp_servers.c2n]
+command = "node"
+args = ["packages/tools/mcp/src/cli.ts"]

@@ -4,11 +4,12 @@
   $prefix: c2-side-nav,
   $theme: (
     open--width: 240px,
-    open--height: 100%,
     close--width: 0px,
-    close--height: 0px,
+    transition-duration: 250ms,
 
-    background-color: null,
+    background-color: #fafafa,
+    color: null,
+
     border-top-left-radius: null,
     border-top-right-radius: null,
     border-bottom-left-radius: null,
@@ -24,339 +25,183 @@
     border-right: null,
     border-left: null,
 
-    scrollbar__thumb--color: rgba(0, 0, 0, 0.15),
+    divider--width: 1px,
+    divider--color: #e4e4e7,
+
+    scrollbar--color: rgba(0, 0, 0, 0.2),
+
     over--position: fixed,
-    over__open--width: 240px,
-    over__open--height: 100vh,
-    over__close--width: 240px,
-    over__close--height: 100vh,
-
     over--top: 0px,
-    over--left: 0px,
-    over--background-color: variables.$color-bg,
-
+    over--height: 100dvh,
+    over--width: null,
+    over--background-color: null,
+    over--box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18),
     over--border-top-left-radius: null,
-    over--border-top-right-radius: 8px,
+    over--border-top-right-radius: null,
     over--border-bottom-left-radius: null,
-    over--border-bottom-right-radius: 8px,
+    over--border-bottom-right-radius: null,
+    over--padding-top: null,
+    over--padding-right: null,
+    over--padding-bottom: null,
+    over--padding-left: null,
 
-    over--padding-top: 16px,
-    over--padding-right: 16px,
-    over--padding-bottom: 16px,
-    over--padding-left: 16px,
-
-    over--border-top: null,
-    over--border-bottom: null,
-    over--border-right: null,
-    over--border-left: null,
-
-    dropback--background-color: rgba(0, 0, 0, 0.2),
-    dropback--z-index: 1001,
+    backdrop--background-color: rgba(0, 0, 0, 0.32),
+    backdrop--backdrop-filter: none,
+    backdrop--z-index: 1000,
   )
 );
 
-// Side / Close
+$_duration: css.cssVar(transition-duration);
+
 :host {
-  display: block;
-  .c2-side-nav {
-    display: flex;
-    .nav-content-animate {
-      opacity: 0;
-      box-sizing: content-box;
-      overflow: hidden;
-      flex-grow: 0;
-      flex-shrink: 0;
-      flex-basis: auto;
-      width: css.cssVar(close--width);
-      height: css.cssVar(close--height);
-      transition: animation.standard-deceleration(width);
-      z-index: 0;
-      .nav-content {
-        display: flex;
-        position: fixed;
-        box-sizing: content-box;
-        width: css.cssVar(open--width);
-        height: css.cssVar(open--height);
-        opacity: 0;
-        visibility: hidden;
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
 
-        transition: animation.standard-acceleration(opacity);
+:host([hidden]) {
+  display: none;
+}
 
-        .scroll-container {
-          box-sizing: content-box;
-          overflow-y: auto;
-          overflow-x: hidden;
-          scrollbar-width: none;
-          overscroll-behavior: none;
-          touch-action: pan-y;
-          flex: 1;
+.c2-side-nav {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: stretch;
 
-          background-color: css.cssVar(background-color);
-
-          border-top-left-radius: css.cssVar(border-top-left-radius);
-          border-top-right-radius: css.cssVar(border-top-right-radius);
-          border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
-          border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
-
-          padding-top: css.cssVar(padding-top);
-          padding-right: css.cssVar(padding-right);
-          padding-bottom: css.cssVar(padding-bottom);
-          padding-left: css.cssVar(padding-left);
-
-          border-top: css.cssVar(border-top);
-          border-bottom: css.cssVar(border-bottom);
-          border-right: css.cssVar(border-right);
-          border-left: css.cssVar(border-left);
-          &::-webkit-scrollbar {
-            display: none;
-          }
-        }
-        .scrollbar-track {
-          position: absolute;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          width: 6px;
-          cursor: default;
-          z-index: 7;
-          padding: 2px;
-          .scrollbar-thumb {
-            display: none;
-            position: absolute;
-            width: 6px;
-            right: 2px;
-            top: 0;
-            &:after {
-              content: '';
-              position: absolute;
-              inset: 2px 0;
-              width: 100%;
-              border-radius: 6px;
-              background: css.cssVar(scrollbar__thumb--color);
-            }
-          }
-        }
-
-        &:hover {
-          .scrollbar-track {
-            .scrollbar-thumb {
-              display: block;
-            }
-          }
-        }
-      }
-    }
-    .main-content {
-      opacity: 0;
-      flex: 1 1 auto;
-      z-index: 1;
-    }
-    .nav-content-animate.silent {
-      transition: none;
-    }
-    .nav-content-animate.stable {
-      opacity: 1;
-    }
-    .main-content.stable {
-      opacity: 1;
-    }
-    .backdrop {
-      display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 100vw;
-      background-color: css.cssVar(dropback--background-color);
-    }
+  &.end {
+    flex-direction: row-reverse;
   }
 }
 
-// Side/open
-:host([opened]) {
-  .c2-side-nav {
-    .nav-content-animate {
-      width: css.cssVar(open--width);
-      height: css.cssVar(open--height);
-      z-index: 3;
-      .nav-content {
-        opacity: 1;
-        visibility: visible;
-      }
-    }
-  }
+// The drawer is a flex item whose width animates between the closed and open widths; the panel inside keeps the open
+// width so its content does not reflow while the drawer collapses.
+.drawer {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: css.cssVar(close--width);
+  z-index: 1;
+  transition:
+    width $_duration animation.$standard-deceleration-easing,
+    transform $_duration animation.$standard-deceleration-easing,
+    visibility 0s linear $_duration;
 }
 
-:host([position='right']) {
-  .c2-side-nav {
-    // flex-direction: row-reverse;
-  }
+:host([opened]) .drawer {
+  width: css.cssVar(open--width);
+}
+
+// No transition until the first breakpoint has been resolved, so the page does not animate on load.
+.c2-side-nav:not(.ready) .drawer {
+  transition: none;
+}
+
+.panel {
+  box-sizing: border-box;
+  width: css.cssVar(open--width);
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: css.cssVar(scrollbar--color) transparent;
+
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+
+  border-top: css.cssVar(border-top);
+  border-bottom: css.cssVar(border-bottom);
+  border-right: css.cssVar(border-right);
+  border-left: css.cssVar(border-left);
+
+  // The divider sits on the edge that faces the content, whichever side the drawer is on.
+  border-inline-end: css.cssVar(divider--width) solid css.cssVar(divider--color);
+  transition: background-color $_duration animation.$standard-easing;
+}
+
+.c2-side-nav.end .panel {
+  border-inline-end: none;
+  border-inline-start: css.cssVar(divider--width) solid css.cssVar(divider--color);
+}
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 // ------------------------------------
-// Override config for over mode
+// Over mode: the drawer leaves the flow, slides in from its edge and gets a backdrop.
 // ------------------------------------
-
-// Desktop
-@media only screen and (min-width: 960px) {
-  :host([opened][desktop-mode='over']) {
-    .c2-side-nav {
-      .backdrop {
-        z-index: css.cssVar(dropback--z-index);
-      }
-      .main-content {
-        z-index: calc(css.cssVar(dropback--z-index) - 1);
-      }
-      .nav-content-animate {
-        z-index: calc(css.cssVar(dropback--z-index) + 1);
-        width: css.cssVar(over__open--width);
-        height: css.cssVar(over__open--height);
-        .nav-content {
-          opacity: 1;
-          visibility: visible;
-          position: relative;
-        }
-      }
-    }
+.c2-side-nav.over {
+  .drawer {
+    position: css.cssVar(over--position);
+    top: css.cssVar(over--top);
+    left: 0;
+    height: css.cssVar(over--height);
+    width: css.cssVar(over--width, open--width);
+    z-index: calc(css.cssVar(backdrop--z-index) + 1);
+    transform: translateX(-100%);
+    visibility: hidden;
+    overflow: visible;
   }
 
-  :host([desktop-mode='over']) {
-    .c2-side-nav {
-      .nav-content-animate {
-        position: css.cssVar(over--position);
-        top: css.cssVar(over--top);
-        left: css.cssVar(over--left);
-        .nav-content {
-          width: css.cssVar(over__open--width);
-          height: css.cssVar(over__open--height);
-          .scroll-container {
-            background-color: css.cssVar(over--background-color);
-            border-top-left-radius: css.cssVar(over--border-top-left-radius);
-            border-top-right-radius: css.cssVar(over--border-top-right-radius);
-            border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-            border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
+  &.end .drawer {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+  }
 
-            padding-top: css.cssVar(over--padding-top);
-            padding-right: css.cssVar(over--padding-right);
-            padding-bottom: css.cssVar(over--padding-bottom);
-            padding-left: css.cssVar(over--padding-left);
+  .panel {
+    width: 100%;
+    border-inline-end: none;
+    border-inline-start: none;
+    background-color: css.cssVar(over--background-color, background-color);
 
-            border-top: css.cssVar(over--border-top);
-            border-bottom: css.cssVar(over--border-bottom);
-            border-right: css.cssVar(over--border-right);
-            border-left: css.cssVar(over--border-left);
-          }
-        }
-      }
-    }
+    border-top-left-radius: css.cssVar(over--border-top-left-radius, border-top-left-radius);
+    border-top-right-radius: css.cssVar(over--border-top-right-radius, border-top-right-radius);
+    border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius, border-bottom-left-radius);
+    border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius, border-bottom-right-radius);
+
+    padding-top: css.cssVar(over--padding-top, padding-top);
+    padding-right: css.cssVar(over--padding-right, padding-right);
+    padding-bottom: css.cssVar(over--padding-bottom, padding-bottom);
+    padding-left: css.cssVar(over--padding-left, padding-left);
+
+    box-shadow: css.cssVar(over--box-shadow);
   }
 }
 
-// Tablet
-@media only screen and (min-width: 600px) and (max-width: 959.98px) {
-  :host([opened][tablet-mode='over']) {
-    .c2-side-nav {
-      .backdrop {
-        z-index: css.cssVar(dropback--z-index);
-      }
-      .main-content {
-        z-index: calc(css.cssVar(dropback--z-index) - 1);
-      }
-      .nav-content-animate {
-        z-index: calc(css.cssVar(dropback--z-index) + 1);
-        width: css.cssVar(over__open--width);
-        height: css.cssVar(over__open--height);
-        .nav-content {
-          opacity: 1;
-          visibility: visible;
-          position: relative;
-        }
-      }
-    }
-  }
-  :host([tablet-mode='over']) {
-    .c2-side-nav {
-      .nav-content-animate {
-        position: css.cssVar(over--position);
-        top: css.cssVar(over--top);
-        left: css.cssVar(over--left);
-        .nav-content {
-          width: css.cssVar(over__open--width);
-          height: css.cssVar(over__open--height);
-          .scroll-container {
-            background-color: css.cssVar(over--background-color);
-            border-top-left-radius: css.cssVar(over--border-top-left-radius);
-            border-top-right-radius: css.cssVar(over--border-top-right-radius);
-            border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-            border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
-
-            padding-top: css.cssVar(over--padding-top);
-            padding-right: css.cssVar(over--padding-right);
-            padding-bottom: css.cssVar(over--padding-bottom);
-            padding-left: css.cssVar(over--padding-left);
-
-            border-top: css.cssVar(over--border-top);
-            border-bottom: css.cssVar(over--border-bottom);
-            border-right: css.cssVar(over--border-right);
-            border-left: css.cssVar(over--border-left);
-          }
-        }
-      }
-    }
-  }
+:host([opened]) .c2-side-nav.over .drawer {
+  transform: none;
+  visibility: visible;
+  transition:
+    transform $_duration animation.$standard-deceleration-easing,
+    visibility 0s;
 }
 
-// Phone
-@media only screen and (max-width: 599.98px) {
-  :host([opened]) {
-    .c2-side-nav {
-      .backdrop {
-        z-index: css.cssVar(dropback--z-index);
-      }
-      .main-content {
-        z-index: calc(css.cssVar(dropback--z-index) - 1);
-      }
-      .nav-content-animate {
-        z-index: calc(css.cssVar(dropback--z-index) + 1);
+.backdrop {
+  position: css.cssVar(over--position);
+  inset: 0;
+  z-index: css.cssVar(backdrop--z-index);
+  background-color: css.cssVar(backdrop--background-color);
+  backdrop-filter: css.cssVar(backdrop--backdrop-filter);
+  animation: c2-side-nav-fade-in $_duration animation.$standard-easing;
+}
 
-        width: css.cssVar(over__open--width);
-        height: css.cssVar(over__open--height);
-        .nav-content {
-          opacity: 1;
-          visibility: visible;
-          position: relative;
-        }
-      }
-    }
-  }
-  :host {
-    .c2-side-nav {
-      .nav-content-animate {
-        position: css.cssVar(over--position);
-        top: css.cssVar(over--top);
-        left: css.cssVar(over--left);
-        .nav-content {
-          width: css.cssVar(over__open--width);
-          height: css.cssVar(over__open--height);
-          .scroll-container {
-            background-color: css.cssVar(over--background-color);
-            border-top-left-radius: css.cssVar(over--border-top-left-radius);
-            border-top-right-radius: css.cssVar(over--border-top-right-radius);
-            border-bottom-left-radius: css.cssVar(over--border-bottom-left-radius);
-            border-bottom-right-radius: css.cssVar(over--border-bottom-right-radius);
-
-            padding-top: css.cssVar(over--padding-top);
-            padding-right: css.cssVar(over--padding-right);
-            padding-bottom: css.cssVar(over--padding-bottom);
-            padding-left: css.cssVar(over--padding-left);
-
-            border-top: css.cssVar(over--border-top);
-            border-bottom: css.cssVar(over--border-bottom);
-            border-right: css.cssVar(over--border-right);
-            border-left: css.cssVar(over--border-left);
-          }
-        }
-      }
-    }
+@keyframes c2-side-nav-fade-in {
+  from {
+    opacity: 0;
   }
 }

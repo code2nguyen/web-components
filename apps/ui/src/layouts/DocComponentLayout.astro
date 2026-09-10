@@ -1,0 +1,266 @@
+---
+import type { MarkdownHeading } from 'astro'
+import SiteSidebar from '../components/SiteSidebar.astro'
+import Toc from '../components/Toc.astro'
+import ViewTabs from '../components/ViewTabs.astro'
+import SiteIconButton from '../components/ui/SiteIconButton.astro'
+import { FeatherXIcon } from '../components/ui/icons'
+import { SideNav } from '@c2n/side-nav'
+
+interface Props {
+  /** Id of the open component or icon set; also enables the Docs | Gallery | API tabs. */
+  componentId?: string
+  /** Id of the open entry for sidebar highlighting when it is not a component (guides). Defaults to `componentId`. */
+  currentId?: string
+  section?: 'components' | 'icons' | 'guides'
+  headings?: MarkdownHeading[]
+  /** When given, the layout renders the page header (title, lead, Docs | Gallery tabs) above the content. */
+  title?: string
+  description?: string
+  view?: 'docs' | 'gallery' | 'api'
+  /** Number of gallery cards; undefined hides the Gallery tab. */
+  galleryCount?: number
+}
+const { componentId, currentId = componentId, section = 'components', headings = [], title, description, view = 'docs', galleryCount } = Astro.props
+---
+
+{
+  /* Small screens: the sidebar lives in a c2-side-nav drawer (over mode: backdrop, focus trap, Escape, scroll lock).
+     Desktop keeps the grid sidebar and the drawer stays closed. The header menu button toggles it (see the script). */
+}
+<SideNav client:load class="docs-shell" desktop-mode="over" tablet-mode="over">
+  <nav slot="side-nav-content" class="docs-shell__drawer" aria-label="Site navigation">
+    <div class="docs-shell__drawer-head">
+      <span class="docs-shell__drawer-title">Navigation</span>
+      <SiteIconButton label="Close navigation" tooltip={false} side-nav-toggle>
+        <FeatherXIcon client:load />
+      </SiteIconButton>
+    </div>
+    <SiteSidebar section={section} currentId={currentId} />
+  </nav>
+
+  <div class="docs">
+    <aside class="docs__sidebar" id="docs-sidebar">
+      <SiteSidebar section={section} currentId={currentId} />
+    </aside>
+
+    <aside class="docs__aside">
+      <div class="docs__toc">
+        <Toc headings={headings} />
+      </div>
+      <div class="docs__panel">
+        {
+          /* Pages pass the theming panel through this slot *before* their content. Astro renders slot content ahead of
+          the layout body and emits its <astro-island> bootstrap with the first island rendered; if that island is
+          `client:only` (MDX examples can be) the bootstrap lands inside a <template> and nothing on the page hydrates,
+          so a `client:load` island must come first in slot order. */
+        }
+        <slot name="panel" />
+      </div>
+    </aside>
+
+    <article class="docs__content">
+      <div class="prose">
+        {
+          title && (
+            <header class="docs__header">
+              <h1>{title}</h1>
+              {description && <p class="docs__lead">{description}</p>}
+              {componentId && <ViewTabs componentId={componentId} view={view} galleryCount={galleryCount} />}
+            </header>
+          )
+        }
+        <slot />
+      </div>
+    </article>
+  </div>
+</SideNav>
+
+<style lang="scss">
+  .docs-shell {
+    // Drawer tokens: the site sidebar width, surface and scrim; above the sticky header (z 1000), below the studio (1100).
+    --c2-side-nav__open--width: min(var(--site-sidebar-width), 85vw);
+    --c2-side-nav--background-color: var(--site-color-surface);
+    --c2-side-nav--padding-top: 0px;
+    --c2-side-nav--padding-right: 0px;
+    --c2-side-nav--padding-bottom: 0px;
+    --c2-side-nav--padding-left: 0px;
+    --c2-side-nav__over--box-shadow: var(--site-elevation-3);
+    --c2-side-nav__backdrop--background-color: var(--site-color-scrim);
+    --c2-side-nav__backdrop--z-index: 1050;
+    &__drawer {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 8px 12px 16px;
+    }
+    &__drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--site-header-height);
+      margin-bottom: 8px;
+      padding-left: 10px;
+    }
+    &__drawer-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--site-color-on-surface-variant);
+    }
+  }
+
+  .docs {
+    --aside-width: var(--site-toc-width);
+    display: grid;
+    grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr) var(--aside-width);
+    max-width: var(--site-page-max-width);
+    margin: 0 auto;
+    padding: 0 var(--site-gutter);
+    gap: 0 32px;
+    transition: grid-template-columns 200ms var(--site-ease);
+
+    &__sidebar {
+      grid-column: 1;
+      position: sticky;
+      top: var(--site-header-height);
+      height: calc(100vh - var(--site-header-height));
+      overflow-y: auto;
+      padding: 24px 12px 0 0;
+      border-right: 1px solid var(--site-color-outline-variant);
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+      &:hover {
+        scrollbar-color: var(--site-color-outline) transparent;
+      }
+    }
+    &__content {
+      grid-column: 2;
+      grid-row: 1;
+      padding: 40px 0 96px;
+      min-width: 0;
+    }
+    &__header {
+      margin-bottom: 32px;
+      h1 {
+        margin-bottom: 8px;
+      }
+    }
+    &__lead {
+      margin: 0 0 20px;
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: var(--site-color-on-surface-variant);
+    }
+
+    &__aside {
+      grid-column: 3;
+      grid-row: 1;
+      position: sticky;
+      top: var(--site-header-height);
+      height: calc(100vh - var(--site-header-height));
+      padding: 40px 0 24px;
+    }
+    &__toc {
+      position: sticky;
+      top: calc(var(--site-header-height) + 40px);
+    }
+    &__panel {
+      display: none;
+      height: 100%;
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: var(--site-radius-lg);
+      background: var(--site-color-surface);
+      box-shadow: var(--site-elevation-1);
+      overflow: hidden;
+
+      // The inspector is a `client:load` island, and `<astro-island>` is an unknown element -> `display: inline`.
+      // Without this the panel's own `height: 100%` has no definite parent height to resolve against, so it grows
+      // past the viewport and this `overflow: hidden` silently clips it instead of letting the panel scroll.
+      //
+      // `:global()` is required: this `<style>` is scoped, and Astro would otherwise emit
+      // `astro-island.astro-<cid>` — but the island element is generated by the *page* that fills the `panel`
+      // slot, so it never carries this layout's scope class and the rule would silently never match.
+      > :global(astro-island) {
+        display: contents;
+      }
+    }
+
+    // Studio mode: the inspector is fixed on the right, full height, above the header; the example being edited
+    // covers the rest of the viewport (see `.example.is-configuring` in MdxCodeBlock.astro). The grid behind keeps
+    // its columns so the page does not reflow when the studio closes.
+    &.show-configuration-panel {
+      .docs__toc {
+        display: none;
+      }
+      .docs__aside {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: var(--site-studio-panel-width);
+        height: auto;
+        padding: 0;
+        z-index: var(--site-z-studio);
+      }
+      .docs__panel {
+        display: block;
+        border-radius: 0;
+        border-width: 0 0 0 1px;
+        box-shadow: none;
+      }
+    }
+  }
+
+  @media (max-width: 1199.98px) {
+    .docs {
+      grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
+      &__aside {
+        display: none;
+      }
+    }
+  }
+
+  @media (max-width: 959.98px) {
+    .docs {
+      grid-template-columns: minmax(0, 1fr);
+      &__content {
+        grid-column: 1;
+      }
+      // The grid sidebar gives way to the c2-side-nav drawer.
+      &__sidebar {
+        display: none;
+      }
+      &__content {
+        padding: 24px 0 64px;
+      }
+      // Studio on small screens: inspector as a bottom sheet, example on the top half.
+      &.show-configuration-panel .docs__aside {
+        top: auto;
+        left: 0;
+        width: auto;
+        height: 50vh;
+      }
+      &.show-configuration-panel .docs__panel {
+        border-width: 1px 0 0 0;
+      }
+    }
+  }
+</style>
+
+<script>
+  import { installStudio } from '../utils/studio.ts'
+
+  import type { SideNav } from '@c2n/side-nav'
+
+  const docs = document.querySelector('.docs')
+  const shell = document.querySelector<SideNav>('c2-side-nav.docs-shell')
+
+  // The header menu button lives outside the side nav, so it cannot use `side-nav-toggle`; toggle from here.
+  document.querySelectorAll('[data-toggle-sidebar]').forEach((el) => {
+    el.addEventListener('click', () => shell?.toggle())
+  })
+
+  installStudio(docs)
+</script>

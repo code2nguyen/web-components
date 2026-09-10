@@ -1,0 +1,122 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-link-button,
+  $theme: (
+    container--gap: 6px,
+    container--padding-top: 4px,
+    container--padding-right: 4px,
+    container--padding-bottom: 4px,
+    container--padding-left: 4px,
+    container--border-radius: 4px,
+    container--background-color: null,
+    container--color: currentColor,
+    container--font-size: 14px,
+    container--font-weight: 500,
+    container--text-decoration: none,
+    container--text-decoration-color: variables.$color-blue,
+    container--text-underline-offset: 4px,
+
+    container__hover--color: variables.$color-blue,
+    container__hover--background-color: null,
+    container__hover--text-decoration: underline,
+    container__hover--text-decoration-color: null,
+
+    container__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    container__focus--outline-offset: 2px,
+
+    container__selected--color: variables.$color-blue,
+    container__selected--background-color: null,
+    container__selected--font-weight: 600,
+    container__selected--text-decoration: null,
+
+    container__disabled--opacity: variables.$disabled-content-opacity,
+
+    icon--size: 16px,
+    icon--color: null,
+  )
+);
+
+:host {
+  display: inline-flex;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-link-button {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: css.cssVar(container--gap);
+  padding-top: css.cssVar(container--padding-top);
+  padding-right: css.cssVar(container--padding-right);
+  padding-bottom: css.cssVar(container--padding-bottom);
+  padding-left: css.cssVar(container--padding-left);
+  border-radius: css.cssVar(container--border-radius);
+  background-color: css.cssVar(container--background-color);
+  color: css.cssVar(container--color);
+  font-family: inherit;
+  font-size: css.cssVar(container--font-size);
+  font-weight: css.cssVar(container--font-weight);
+  line-height: 1.2;
+  text-decoration: css.cssVar(container--text-decoration);
+  text-decoration-color: css.cssVar(container--text-decoration-color);
+  text-underline-offset: css.cssVar(container--text-underline-offset);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: color, background-color, text-decoration-color;
+  transition: animation.standard(color), animation.standard(background-color), animation.standard(text-decoration-color);
+
+  &:hover:not(:disabled) {
+    color: css.cssVar(container__hover--color, container--color);
+    background-color: css.cssVar(container__hover--background-color, container--background-color);
+    text-decoration: css.cssVar(container__hover--text-decoration, container--text-decoration);
+    text-decoration-color: css.cssVar(container__hover--text-decoration-color, container--text-decoration-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(container__focus--outline);
+    outline-offset: css.cssVar(container__focus--outline-offset);
+  }
+}
+
+:host([selected]) .c2-link-button {
+  color: css.cssVar(container__selected--color, container--color);
+  background-color: css.cssVar(container__selected--background-color, container--background-color);
+  font-weight: css.cssVar(container__selected--font-weight, container--font-weight);
+  text-decoration: css.cssVar(container__selected--text-decoration, container--text-decoration);
+
+  &:hover:not(:disabled) {
+    color: css.cssVar(container__selected--color, container__hover--color, container--color);
+    background-color: css.cssVar(container__selected--background-color, container__hover--background-color, container--background-color);
+  }
+}
+
+:host([disabled]) .c2-link-button {
+  cursor: default;
+  opacity: css.cssVar(container__disabled--opacity);
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+}
+
+// `.icon` is the `<slot>` itself, so `::slotted()` must be attached to it directly: with a descendant
+// combinator the slot would have to be a *descendant* of `.icon`, and nothing would ever match.
+.icon::slotted(*),
+.icon > svg {
+  flex-shrink: 0;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color, currentColor);
+  // Size the icon components of this library to the slot: feather icons and Material icon ligatures.
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}

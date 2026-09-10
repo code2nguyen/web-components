@@ -1,0 +1,145 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-button,
+  $theme: (
+    container--height: 36px,
+    container--padding-left: 16px,
+    container--padding-right: 16px,
+    container--gap: 8px,
+    container--border-radius: 6px,
+    container--border: 1px solid transparent,
+    container--background-color: variables.$color-blue,
+    container--color: #ffffff,
+    container--font-size: 14px,
+    container--font-weight: 500,
+
+    container__hover--background-color: rgb(1, 84, 184),
+    container__hover--color: null,
+    container__hover--border: null,
+
+    container__active--background-color: rgb(1, 70, 154),
+    container__selected--background-color: null,
+    container__selected--color: null,
+    container__selected--border: null,
+    container__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    container__focus--outline-offset: 2px,
+
+    container__disabled--opacity: variables.$disabled-content-opacity,
+
+    icon--size: 18px,
+    icon--color: null,
+
+    running-icon--size: 18px,
+    running-icon--color: null,
+    running-icon--animation-duration: 800ms,
+  )
+);
+
+:host {
+  display: inline-flex;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-button {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: css.cssVar(container--gap);
+  height: css.cssVar(container--height);
+  padding-left: css.cssVar(container--padding-left);
+  padding-right: css.cssVar(container--padding-right);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background-color: css.cssVar(container--background-color);
+  color: css.cssVar(container--color);
+  font-family: inherit;
+  font-size: css.cssVar(container--font-size);
+  font-weight: css.cssVar(container--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  will-change: background-color, color, border-color;
+  transition: animation.standard(background-color), animation.standard(color), animation.standard(border-color);
+
+  &:hover:not(:disabled) {
+    background-color: css.cssVar(container__hover--background-color, container--background-color);
+    color: css.cssVar(container__hover--color, container--color);
+    border: css.cssVar(container__hover--border, container--border);
+  }
+
+  &:active:not(:disabled) {
+    background-color: css.cssVar(container__active--background-color, container__hover--background-color, container--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(container__focus--outline);
+    outline-offset: css.cssVar(container__focus--outline-offset);
+  }
+}
+
+// Pressed toggle button: each value falls back to the resting one, so an unthemed `selected` changes only `aria-pressed`.
+:host([selected]) .c2-button,
+:host([selected]) .c2-button:hover:not(:disabled) {
+  background-color: css.cssVar(container__selected--background-color, container__hover--background-color, container--background-color);
+  color: css.cssVar(container__selected--color, container--color);
+  border: css.cssVar(container__selected--border, container--border);
+}
+
+:host([disabled]) .c2-button {
+  cursor: default;
+  opacity: css.cssVar(container__disabled--opacity);
+}
+
+:host([running]) .c2-button {
+  cursor: progress;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.icon::slotted(*) {
+  flex-shrink: 0;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color, container--color);
+  // Size the icon components of this library to the slot: feather icons and Material icon ligatures.
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+// The wrapper spins (not the slotted node), so any slotted content rotates, including elements that render as
+// `display: contents` wrappers around the actual icon.
+.running-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: css.cssVar(running-icon--size);
+  height: css.cssVar(running-icon--size);
+  color: css.cssVar(running-icon--color, container--color);
+  --c2-feather-icon--size: #{css.cssVar(running-icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(running-icon--size)};
+  animation: c2-button-spin css.cssVar(running-icon--animation-duration) linear infinite;
+}
+.running-icon ::slotted(*),
+.running-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes c2-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

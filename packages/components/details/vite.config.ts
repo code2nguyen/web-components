@@ -6,12 +6,12 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/details.ts',
+      entry: ['src/details.ts', 'src/details-context.ts'],
       formats: ['es'],
     },
     minify: false,
     rollupOptions: {
-      external: /^lit|@c2n/,
+      external: /^lit|@lit\/context|@c2n/,
     },
   },
   plugins: [

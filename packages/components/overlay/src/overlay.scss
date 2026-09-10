@@ -1,49 +1,82 @@
 @use '@c2n/sass/animation';
-@use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-overlay,
   $theme: (
-    backdrop--background: transparent,
     offset-y: 8px,
     offset-x: 0px,
+    viewport-padding: 8px,
+    transition-duration: 150ms,
+    backdrop--background: transparent,
   )
 );
 
 :host {
   position: absolute;
-  margin: 0;
-  padding: 0;
+  inset: auto;
   top: 0;
   left: 0;
+  margin: 0;
+  padding: 0;
   border: none;
-  transition: animation.standard-deceleration(transform) allow-discrete;
-  background-color: transparent;
+  background: transparent;
+  color: inherit;
+  overflow: visible;
+  box-sizing: border-box;
+  transform-origin: top left;
+
+  // Fade + slight scale from the anchor side. `display`/`overlay` are discrete so the close animation can finish.
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity css.cssVar(transition-duration) animation.$standard-easing,
+    transform css.cssVar(transition-duration) animation.$standard-easing,
+    display css.cssVar(transition-duration) allow-discrete,
+    overlay css.cssVar(transition-duration) allow-discrete;
+
   &::backdrop {
     background: css.cssVar(backdrop--background);
   }
 }
-:host([placement='bottom']:popover-open) {
-  transform: translateY(css.cssVar(offset-y));
-}
-:host([placement='bottom-start']:popover-open) {
-  transform: translate(css.cssVar(offset-x), css.cssVar(offset-y));
-}
-:host([placement='bottom-end']:popover-open) {
-  transform: translate(calc(-1 * css.cssVar(offset-x)), css.cssVar(offset-y));
-}
 
-:host([placement='top']:popover-open) {
-  transform: translateY(calc(-1 * css.cssVar(offset-y)));
-}
-:host([placement='top-start']:popover-open) {
-  transform: translate(css.cssVar(offset-x), calc(-1 * css.cssVar(offset-y)));
-}
-:host([placement='top-end']:popover-open) {
-  transform: translate(calc(-1 * css.cssVar(offset-x)), calc(-1 * css.cssVar(offset-y)));
+:host(:not(:popover-open)) {
+  opacity: 0;
+  transform: scale(0.96);
 }
 
 @starting-style {
-  :host([placement]:popover-open) {
-    transform: translate(0, 0);
+  :host(:popover-open) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+:host([current-placement^='top']) {
+  transform-origin: bottom center;
+}
+:host([current-placement^='bottom']) {
+  transform-origin: top center;
+}
+:host([current-placement^='left']) {
+  transform-origin: center right;
+}
+:host([current-placement^='right']) {
+  transform-origin: center left;
+}
+:host([current-placement$='-start'][current-placement^='top']) {
+  transform-origin: bottom left;
+}
+:host([current-placement$='-start'][current-placement^='bottom']) {
+  transform-origin: top left;
+}
+:host([current-placement$='-end'][current-placement^='top']) {
+  transform-origin: bottom right;
+}
+:host([current-placement$='-end'][current-placement^='bottom']) {
+  transform-origin: top right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
   }
 }

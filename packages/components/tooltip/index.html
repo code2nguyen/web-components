@@ -2,92 +2,127 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-tooltip</title>
     <script type="module" src="/src/tooltip.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 28px;
       }
-      .demo {
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .row {
         display: flex;
+        gap: 12px;
         align-items: center;
-        gap: 24px;
         flex-wrap: wrap;
       }
-
       button {
-        border: 1px solid gray;
+        font: inherit;
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: 1px solid #d4d4d8;
+        background: #fff;
+        cursor: pointer;
+      }
+      .clip {
+        overflow: hidden;
+        width: 220px;
+        height: 60px;
+        border: 1px dashed #a1a1aa;
         display: flex;
-        padding: 10px;
-        width: 200px;
-        height: 100px;
         align-items: center;
         justify-content: center;
-        border-radius: 16px;
       }
-      .small {
-        width: 80px;
-        height: 30px;
+      .light {
+        --c2-tooltip--background-color: #ffffff;
+        --c2-tooltip--color: #18181b;
+        --c2-tooltip--border: 1px solid #e4e4e7;
+        --c2-tooltip--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+      .brand {
+        --c2-tooltip--background-color: #2563eb;
+        --c2-tooltip--color: #ffffff;
+        --c2-tooltip--border-radius: 999px;
+        --c2-tooltip--padding-left: 12px;
+        --c2-tooltip--padding-right: 12px;
+      }
+      kbd {
+        font: inherit;
+        font-size: 11px;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.15);
       }
     </style>
   </head>
-  <body class="demo">
-    <button type="button">
-      Hover me
-      <c2-tooltip>Hello tooltip</c2-tooltip>
-    </button>
+  <body>
+    <section>
+      <h2>Placements (hover or focus with Tab)</h2>
+      <div class="row">
+        <button>top<c2-tooltip>Default placement</c2-tooltip></button>
+        <button>bottom<c2-tooltip placement="bottom">Below the button</c2-tooltip></button>
+        <button>left<c2-tooltip placement="left">To the left</c2-tooltip></button>
+        <button>right<c2-tooltip placement="right">To the right</c2-tooltip></button>
+        <button>top-start<c2-tooltip placement="top-start">Aligned to the start</c2-tooltip></button>
+        <button>legacy position<c2-tooltip position="bottom,top">position="bottom,top"</c2-tooltip></button>
+      </div>
+    </section>
 
-    <button type="button" class="small">
-      Hover me
-      <c2-tooltip>Hello tooltip over size</c2-tooltip>
-    </button>
+    <section>
+      <h2>Not clipped by overflow: hidden (top layer)</h2>
+      <div class="clip">
+        <button>hover me<c2-tooltip>Escapes the clipped box</c2-tooltip></button>
+      </div>
+    </section>
 
-    <button type="button">
-      Hover me
-      <c2-tooltip hide-arrow>Hello tooltip</c2-tooltip>
-    </button>
+    <section>
+      <h2>Rich content, delays, no arrow, data-tooltip, for=</h2>
+      <div class="row">
+        <button>
+          Save<c2-tooltip>Save changes <kbd>⌘S</kbd></c2-tooltip>
+        </button>
+        <button>No delay<c2-tooltip delay="0" hide-delay="400">Instant, lingers 400ms</c2-tooltip></button>
+        <button>No arrow<c2-tooltip hide-arrow>Arrow hidden</c2-tooltip></button>
+        <button data-tooltip="From data-tooltip">data-tooltip<c2-tooltip></c2-tooltip></button>
+        <span id="term" style="text-decoration: underline dotted; cursor: help" tabindex="0">HTTP</span>
+        <c2-tooltip for="term" placement="bottom">Hypertext Transfer Protocol</c2-tooltip>
+      </div>
+    </section>
 
-    <button type="button">targetStrategy previousElement</button>
-    <c2-tooltip target-strategy="previousElement">Hello tooltip</c2-tooltip>
-
-    <button type="button">
-      position Left righ
-      <c2-tooltip position="left,right">Hello tooltip</c2-tooltip>
-    </button>
-    <button type="button" data-tooltip="This is tooltip">
-      Tooltip data
-      <c2-tooltip></c2-tooltip>
-    </button>
-    <button type="button">
-      Hover me
-      <c2-tooltip>Hello tooltip</c2-tooltip>
-    </button>
-    <button type="button">
-      Hover me
-      <c2-tooltip>Hello tooltip</c2-tooltip>
-    </button>
-    <button type="button">
-      Hover me
-      <c2-tooltip>Hello tooltip</c2-tooltip>
-    </button>
-    <button type="button">
-      Hover me
-      <c2-tooltip>Hello tooltip</c2-tooltip>
-    </button>
-    <button type="button">
-      Hover me
-      <c2-tooltip>Hello tooltip</c2-tooltip>
-    </button>
-    <button type="button">
-      Hover me
-      <c2-tooltip>Hello tooltip</c2-tooltip>
-    </button>
-    <button type="button">
-      Hover me
-      <c2-tooltip>Hello tooltip</c2-tooltip>
-    </button>
+    <section>
+      <h2>Themes and long text (max-width wraps)</h2>
+      <div class="row">
+        <button class="light">Light<c2-tooltip>Light bubble with border and shadow</c2-tooltip></button>
+        <button class="brand">Brand pill<c2-tooltip>Brand coloured pill</c2-tooltip></button>
+        <button>
+          Long<c2-tooltip>This tooltip has a fairly long explanation that wraps onto several lines once it reaches the max-width token.</c2-tooltip>
+        </button>
+        <button
+          onclick="
+            const t = this.querySelector('c2-tooltip')
+            t.open = !t.open
+          "
+        >
+          Toggle programmatically<c2-tooltip delay="99999">Opened with the open property</c2-tooltip>
+        </button>
+      </div>
+      <p id="log" style="font-size: 13px; color: #666"></p>
+      <script>
+        document.addEventListener(
+          'show',
+          (e) =>
+            (document.getElementById('log').textContent = `show ← ${e.target.textContent.trim().slice(0, 30)} (${e.target.getAttribute('current-placement')})`),
+          true,
+        )
+      </script>
+    </section>
   </body>
 </html>

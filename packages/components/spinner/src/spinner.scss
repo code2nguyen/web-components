@@ -1,0 +1,119 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-spinner,
+  $theme: (
+    size: 24px,
+    stroke-width: 4px,
+    stroke-linecap: round,
+    color: #0265dc,
+    track--color: #e4e4e7,
+    animation-duration: 1.4s,
+    gap: 8px,
+    flex-direction: row,
+    label--color: #71717a,
+    label--font-size: 14px,
+    label--font-weight: null,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-spinner {
+  display: inline-flex;
+  align-items: center;
+  flex-direction: css.cssVar(flex-direction);
+  gap: css.cssVar(gap);
+}
+
+.c2-spinner-ring {
+  flex: none;
+  width: css.cssVar(size);
+  height: css.cssVar(size);
+  // Start at 12 o'clock; the indeterminate animation rotates the whole ring from here.
+  transform: rotate(-90deg);
+  animation: c2-spinner-rotate css.cssVar(animation-duration) linear infinite;
+}
+
+.c2-spinner-track,
+.c2-spinner-arc {
+  fill: none;
+  stroke-width: css.cssVar(stroke-width);
+}
+
+.c2-spinner-track {
+  stroke: css.cssVar(track--color);
+}
+
+.c2-spinner-arc {
+  stroke: css.cssVar(color);
+  stroke-linecap: css.cssVar(stroke-linecap);
+  // Circumference of r=20: the arc grows and shrinks while the ring spins.
+  stroke-dasharray: 1 200;
+  stroke-dashoffset: 0;
+  animation: c2-spinner-dash calc(#{css.cssVar(animation-duration)} * 1.1) ease-in-out infinite;
+}
+
+// Determinate: fixed rotation, the dash offset (set inline from `value`) animates between values.
+.is-determinate .c2-spinner-ring {
+  animation: none;
+}
+
+.is-determinate .c2-spinner-arc {
+  animation: none;
+  transition: stroke-dashoffset calc(#{css.cssVar(animation-duration)} / 2) cubic-bezier(0.2, 0, 0, 1);
+}
+
+.c2-spinner-label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.4;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+@keyframes c2-spinner-rotate {
+  from {
+    transform: rotate(-90deg);
+  }
+  to {
+    transform: rotate(270deg);
+  }
+}
+
+@keyframes c2-spinner-dash {
+  0% {
+    stroke-dasharray: 1 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90 200;
+    stroke-dashoffset: -30;
+  }
+  100% {
+    stroke-dasharray: 90 200;
+    stroke-dashoffset: -124;
+  }
+}
+
+// Reduced motion: keep a slow, steady rotation of a fixed arc so progress is still signalled without the pulsing.
+@media (prefers-reduced-motion: reduce) {
+  .c2-spinner-ring {
+    animation-duration: 3s;
+  }
+  .c2-spinner-arc {
+    animation: none;
+    stroke-dasharray: 60 200;
+  }
+  .is-determinate .c2-spinner-arc {
+    transition: none;
+  }
+}

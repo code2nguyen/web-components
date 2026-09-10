@@ -1,0 +1,88 @@
+---
+/**
+ * Docs | Gallery | API switcher under a component page title. Each view is its own route:
+ * `/components/<id>` (docs), `/components/<id>/gallery` (styled variants) and `/components/<id>/api` (reference).
+ */
+interface Props {
+  componentId: string
+  view: 'docs' | 'gallery' | 'api'
+  /** Number of gallery cards; when undefined the component has no gallery page yet and the tab is hidden. */
+  galleryCount?: number
+}
+const { componentId, view, galleryCount } = Astro.props
+const base = import.meta.env.BASE_URL
+const tabs = [
+  { id: 'docs', label: 'Docs', href: `${base}/components/${componentId}` },
+  ...(galleryCount !== undefined ? [{ id: 'gallery', label: 'Gallery', href: `${base}/components/${componentId}/gallery`, count: galleryCount }] : []),
+  { id: 'api', label: 'API', href: `${base}/components/${componentId}/api` },
+]
+---
+
+<nav class="view-tabs" aria-label="Page views">
+  {
+    tabs.map((tab) => (
+      <a href={tab.href} aria-current={tab.id === view ? 'page' : undefined}>
+        {tab.label}
+        {'count' in tab && <span class="view-tabs__count">{tab.count}</span>}
+      </a>
+    ))
+  }
+</nav>
+
+<style lang="scss">
+  .view-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--site-color-outline-variant);
+
+    a {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px 10px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--site-color-on-surface-variant);
+      text-decoration: none;
+      border-radius: var(--site-radius-sm) var(--site-radius-sm) 0 0;
+      transition:
+        color 150ms var(--site-ease),
+        background-color 150ms var(--site-ease);
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: -1px;
+        height: 2px;
+        border-radius: 2px;
+        background: transparent;
+        transition: background-color 150ms var(--site-ease);
+      }
+      &:hover {
+        color: var(--site-color-on-surface);
+        background: var(--site-color-surface-container-1);
+      }
+      &[aria-current='page'] {
+        color: var(--site-color-on-surface);
+        &::after {
+          background: var(--site-color-primary);
+        }
+      }
+    }
+
+    &__count {
+      display: inline-flex;
+      align-items: center;
+      height: 18px;
+      padding: 0 7px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--site-color-primary);
+      background: var(--site-color-primary-soft);
+      border-radius: 999px;
+    }
+  }
+</style>

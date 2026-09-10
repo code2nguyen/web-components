@@ -1,0 +1,112 @@
+---
+title: 'List Item'
+description: 'Selectable row with icon slots, used on its own or as the option of list and select.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ListItem } from '@c2n/list-item'
+import { List } from '@c2n/list'
+import { FeatherInboxIcon as FeatherInbox } from '@c2n/feather-icons/icons/inbox.js'
+import { FeatherSendIcon as FeatherSend } from '@c2n/feather-icons/icons/send.js'
+import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
+import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
+
+`c2-list-item` is the row that `c2-list` and `c2-select` are built from. On its own it is a self-contained toggle: a click, Enter or Space flips `selected` and fires `selected-change`. Inside a `c2-list` the list takes over: it matches each row's `value` against its own, sets `selected` for you and handles the keyboard, so rows in a list never carry the attribute themselves. The default slot is the content, `description` a second muted line; `prefix-icon` and `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by `--c2-list-item__icon--size`. `href` turns the row into a link. `label` is the short text a select shows in its trigger when the row content is richer than a line of text. Rows expose `role="button"` with `aria-pressed` on their own and `role="option"` with `aria-selected` inside a list, and draw a focus ring for keyboard users.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/list-item
+```
+
+## Usage
+
+Rows stretch to their container, so give the wrapper a width. Hover, selected and disabled each have their own set of variables.
+
+```html tag=UsageBlock,package=@c2n/list-item
+<style>
+  .col {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+  }
+  .menu {
+    width: 220px;
+    --c2-list--border-top: 1px solid #e4e4e7;
+    --c2-list--border-right: 1px solid #e4e4e7;
+    --c2-list--border-bottom: 1px solid #e4e4e7;
+    --c2-list--border-left: 1px solid #e4e4e7;
+    --c2-list--border-top-left-radius: 8px;
+    --c2-list--border-top-right-radius: 8px;
+    --c2-list--border-bottom-left-radius: 8px;
+    --c2-list--border-bottom-right-radius: 8px;
+  }
+  .hint {
+    width: auto;
+    height: auto;
+    font-size: 12px;
+    color: #a1a1aa;
+  }
+</style>
+<div data-label="States">
+  <div class="col">
+    <c2-list-item>Default</c2-list-item>
+    <c2-list-item selected>Selected</c2-list-item>
+    <c2-list-item disabled>Disabled</c2-list-item>
+  </div>
+</div>
+<div data-label="Prefix icon">
+  <div class="col">
+    <c2-list-item selected><c2-feather-inbox slot="prefix-icon"></c2-feather-inbox>Inbox</c2-list-item>
+    <c2-list-item><c2-feather-send slot="prefix-icon"></c2-feather-send>Sent</c2-list-item>
+    <c2-list-item><c2-feather-archive slot="prefix-icon"></c2-feather-archive>Archive</c2-list-item>
+  </div>
+</div>
+<div data-label="Suffix icon">
+  <div class="col">
+    <c2-list-item selected>Selected<c2-feather-check slot="suffix-icon"></c2-feather-check></c2-list-item>
+    <c2-list-item>Shortcut<span slot="suffix-icon" class="hint">⌘K</span></c2-list-item>
+  </div>
+</div>
+<div data-label="Description">
+  <div class="col">
+    <c2-list-item label="Pro">Pro<span slot="description">Unlimited projects, priority support</span></c2-list-item>
+    <c2-list-item label="Team" selected>Team<span slot="description">Everything in Pro, plus SSO</span></c2-list-item>
+  </div>
+</div>
+<div data-label="Link rows">
+  <div class="col">
+    <c2-list-item href="https://github.com/code2nguyen/web-components" target="_blank">GitHub repository<span slot="suffix-icon" class="hint">↗</span></c2-list-item>
+    <c2-list-item href="https://www.npmjs.com/org/c2n" target="_blank">npm packages<span slot="suffix-icon" class="hint">↗</span></c2-list-item>
+  </div>
+</div>
+<div data-label="Inside a list">
+  <c2-list client:only="lit" value="sent" class="menu">
+    <c2-list-item value="inbox">Inbox</c2-list-item>
+    <c2-list-item value="sent">Sent</c2-list-item>
+    <c2-list-item value="drafts">Drafts</c2-list-item>
+    <c2-list-item value="archive" disabled>Archive</c2-list-item>
+  </c2-list>
+</div>
+```
+
+## Behaviour
+
+- **Standalone**: a click toggles `selected` and fires `selected-change` with `detail.selected` and `detail.value`.
+- **In a list**: the click bubbles to the `c2-list`, which updates its `value` and pushes the selected state back down. Listen to `selection-change` on the list (or the select) instead.
+- **Adjacent selection**: in a `multiple` list, selected rows that touch lose the corner radius between them and read as one block; a selected row on its own keeps its full radius.
+- **Keyboard**: a standalone row is a tab stop; Enter and Space toggle it. In a list the list moves focus with the arrow keys and selects with Enter or Space.
+- **`description`**: a second line under the content, muted and smaller; `label` keeps the select trigger to the first line.
+- **`href`**: the row renders as a link (`role="link"`); inside a list it still takes part in the selection.
+- **`label`**: what a `c2-select` shows for the row. Without it the trigger shows the row's text content, which for a two-line row would be both lines.
+- **`data`**: any object you attach to the row; a list or select returns it in `selection-change` next to the value.
+
+```ts tag=CodeBlock
+const item = document.querySelector('c2-list-item')
+item.addEventListener('selected-change', (event) => {
+  console.log(event.detail) // { selected: true, value: 'inbox' }
+})
+```

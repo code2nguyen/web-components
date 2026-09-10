@@ -1,0 +1,162 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Breadcrumb } from '@c2n/breadcrumb'
+
+## Presets
+
+Curated looks for `c2-breadcrumb`. Open any card in the studio to start from it. Item colours, padding and radius come from `--c2-breadcrumb__item--*`, the separator from `--c2-breadcrumb__separator--*` or the `separator` slot.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-breadcrumb client:only="lit">
+  <c2-link-button href="#">Home</c2-link-button>
+  <c2-link-button href="#">Library</c2-link-button>
+  <c2-link-button href="#">Data</c2-link-button>
+</c2-breadcrumb>
+```
+
+```html tag=MdxCodeBlock,label=Slash
+<style>
+  .slash {
+    --c2-breadcrumb--gap: 6px;
+    --c2-breadcrumb__separator--color: #d4d4d8;
+    --c2-breadcrumb__item--font-weight: 400;
+  }
+</style>
+<c2-breadcrumb client:only="lit" class="slash">
+  <span slot="separator">/</span>
+  <c2-link-button href="#">src</c2-link-button>
+  <c2-link-button href="#">components</c2-link-button>
+  <c2-link-button href="#">breadcrumb.ts</c2-link-button>
+</c2-breadcrumb>
+```
+
+```html tag=MdxCodeBlock,label=Quiet
+<style>
+  .quiet {
+    --c2-breadcrumb__item--color: #a1a1aa;
+    --c2-breadcrumb__item--font-weight: 400;
+    --c2-breadcrumb__item__hover--color: #52525b;
+    --c2-breadcrumb__item__current--color: #52525b;
+    --c2-breadcrumb__item__current--font-weight: 400;
+    --c2-breadcrumb__separator--color: #d4d4d8;
+    --c2-breadcrumb__separator--size: 12px;
+  }
+</style>
+<c2-breadcrumb client:only="lit" class="quiet">
+  <c2-link-button href="#">Account</c2-link-button>
+  <c2-link-button href="#">Billing</c2-link-button>
+  <c2-link-button href="#">Invoices</c2-link-button>
+</c2-breadcrumb>
+```
+
+```html tag=MdxCodeBlock,label=Pills
+<style>
+  .pills {
+    --c2-breadcrumb--gap: 2px;
+    --c2-breadcrumb__item--padding-top: 4px;
+    --c2-breadcrumb__item--padding-right: 10px;
+    --c2-breadcrumb__item--padding-bottom: 4px;
+    --c2-breadcrumb__item--padding-left: 10px;
+    --c2-breadcrumb__item--border-radius: 999px;
+    --c2-breadcrumb__item__hover--background-color: #f4f4f5;
+    --c2-breadcrumb__item__current--background-color: #edf1fe;
+    --c2-breadcrumb__item__current--color: #0265dc;
+  }
+</style>
+<c2-breadcrumb client:only="lit" class="pills">
+  <c2-link-button href="#">Home</c2-link-button>
+  <c2-link-button href="#">Settings</c2-link-button>
+  <c2-link-button href="#">Notifications</c2-link-button>
+</c2-breadcrumb>
+```
+
+```html tag=MdxCodeBlock,label=Accent current
+<style>
+  .accent {
+    --c2-breadcrumb__item--color: #52525b;
+    --c2-breadcrumb__item__hover--color: #0265dc;
+    --c2-breadcrumb__item__hover--text-decoration: underline;
+    --c2-breadcrumb__item__current--color: #0265dc;
+    --c2-breadcrumb__item__current--font-weight: 600;
+  }
+</style>
+<c2-breadcrumb client:only="lit" class="accent">
+  <c2-link-button href="#">Store</c2-link-button>
+  <c2-link-button href="#">Audio</c2-link-button>
+  <c2-link-button href="#">Headphones</c2-link-button>
+</c2-breadcrumb>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .large {
+    --c2-breadcrumb--gap: 8px;
+    --c2-breadcrumb__item--font-size: 16px;
+    --c2-breadcrumb__item--padding-right: 6px;
+    --c2-breadcrumb__item--padding-left: 6px;
+    --c2-breadcrumb__separator--size: 18px;
+    --c2-breadcrumb__item__current--font-weight: 600;
+  }
+</style>
+<c2-breadcrumb client:only="lit" class="large">
+  <c2-link-button href="#">Home</c2-link-button>
+  <c2-link-button href="#">Reports</c2-link-button>
+  <c2-link-button href="#">2026</c2-link-button>
+</c2-breadcrumb>
+```
+
+```html tag=MdxCodeBlock,label=Auto collapse
+<style>
+  .narrow {
+    width: 240px;
+    max-width: 100%;
+    padding: 4px;
+    border: 1px dashed #d4d4d8;
+    border-radius: 6px;
+  }
+</style>
+<div class="narrow">
+  <c2-breadcrumb client:only="lit">
+    <c2-link-button href="#">Home</c2-link-button>
+    <c2-link-button href="#">Workspace</c2-link-button>
+    <c2-link-button href="#">Team</c2-link-button>
+    <c2-link-button href="#">Projects</c2-link-button>
+    <c2-link-button href="#">Q3 launch</c2-link-button>
+  </c2-breadcrumb>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Capped
+<c2-breadcrumb client:only="lit" max-items="3">
+  <c2-link-button href="#">Home</c2-link-button>
+  <c2-link-button href="#">Workspace</c2-link-button>
+  <c2-link-button href="#">Team</c2-link-button>
+  <c2-link-button href="#">Projects</c2-link-button>
+  <c2-link-button href="#">Q3 launch</c2-link-button>
+</c2-breadcrumb>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #18181b;
+    --c2-breadcrumb__item--color: #a1a1aa;
+    --c2-breadcrumb__item__hover--color: #fafafa;
+    --c2-breadcrumb__item__hover--background-color: #27272a;
+    --c2-breadcrumb__item__current--color: #fafafa;
+    --c2-breadcrumb__separator--color: #52525b;
+  }
+</style>
+<c2-breadcrumb client:only="lit" class="dark">
+  <c2-link-button href="#">Console</c2-link-button>
+  <c2-link-button href="#">Databases</c2-link-button>
+  <c2-link-button href="#">production</c2-link-button>
+</c2-breadcrumb>
+```
+
+</GalleryGrid>

@@ -1,0 +1,33 @@
+---
+import Main from '../../layouts/Main.astro'
+import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import { getCollection, getEntry, render } from 'astro:content'
+import { countGalleryExamples } from '../../utils/gallery'
+import { ComponentConfigurationPanel } from '../../components/configuration/ComponentConfigurationPanel'
+
+export async function getStaticPaths() {
+  const componentEntries = await getCollection('components')
+  return componentEntries.map((entry) => ({
+    params: { componentId: entry.id },
+    props: { component: entry },
+  }))
+}
+
+const { component } = Astro.props
+const { Content: ComponentContent, headings } = await render(component)
+const gallery = await getEntry('gallery', component.id)
+---
+
+<Main title={`${component.data.title} · c2n web components`} description={component.data.description} withSidebar section="components">
+  <DocComponentLayout
+    componentId={component.id}
+    headings={headings}
+    title={component.data.title}
+    description={component.data.description}
+    view="docs"
+    galleryCount={gallery ? countGalleryExamples(gallery.body) : undefined}
+  >
+    <ComponentConfigurationPanel client:load slot="panel" />
+    <ComponentContent />
+  </DocComponentLayout>
+</Main>

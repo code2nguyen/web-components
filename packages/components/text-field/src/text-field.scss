@@ -3,73 +3,121 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-text-field,
   $theme: (
-    border-top-left-radius: 4px,
-    border-top-right-radius: 4px,
-    border-bottom-left-radius: 4px,
-    border-bottom-right-radius: 4px,
+    min-height: 36px,
+    gap: 8px,
 
-    padding-top: 8px,
-    padding-right: 8px,
-    padding-bottom: 8px,
-    padding-left: 8px,
+    border-top-left-radius: 6px,
+    border-top-right-radius: 6px,
+    border-bottom-left-radius: 6px,
+    border-bottom-right-radius: 6px,
 
-    border-top: 1px solid variables.$color-border,
-    border-bottom: 1px solid variables.$color-border,
-    border-right: 1px solid variables.$color-border,
-    border-left: 1px solid variables.$color-border,
+    padding-top: 6px,
+    padding-right: 10px,
+    padding-bottom: 6px,
+    padding-left: 12px,
 
-    color: null,
-    background: field,
+    border-top: 1px solid #bcbcc6,
+    border-bottom: 1px solid #bcbcc6,
+    border-right: 1px solid #bcbcc6,
+    border-left: 1px solid #bcbcc6,
 
-    font-size: null,
+    color: #18181b,
+    background: #ffffff,
+
+    font-size: 14px,
     font-weight: null,
     font-style: null,
     font-family: null,
+    line-height: 20px,
 
-    placeholder--opacity: 0.5,
+    placeholder--opacity: 1,
     placeholder--font-weight: null,
     placeholder--font-style: null,
-    placeholder--color: null,
+    placeholder--color: #71717a,
 
-    focus--border-top: 1px solid variables.$color-blue,
-    focus--border-bottom: 1px solid variables.$color-blue,
-    focus--border-right: 1px solid variables.$color-blue,
-    focus--border-left: 1px solid variables.$color-blue,
+    hover--border-top: 1px solid #a1a1aa,
+    hover--border-bottom: 1px solid #a1a1aa,
+    hover--border-right: 1px solid #a1a1aa,
+    hover--border-left: 1px solid #a1a1aa,
 
+    focus--border-top: 1px solid #476ef9,
+    focus--border-bottom: 1px solid #476ef9,
+    focus--border-right: 1px solid #476ef9,
+    focus--border-left: 1px solid #476ef9,
     focus--color: null,
     focus--background: null,
+    focus--outline: 3px solid rgba(71, 110, 249, 0.2),
+    focus--outline-offset: 0px,
 
-    error--border-top: 1px solid variables.$color-red,
-    error--border-bottom: 1px solid variables.$color-red,
-    error--border-right: 1px solid variables.$color-red,
-    error--border-left: 1px solid variables.$color-red,
-
+    error--border-top: 1px solid #dc2626,
+    error--border-bottom: 1px solid #dc2626,
+    error--border-right: 1px solid #dc2626,
+    error--border-left: 1px solid #dc2626,
+    error--color: null,
     error--background: null,
-    error--color: variables.$color-red,
-
-    read-only--border-top: unset,
-    read-only--border-bottom: unset,
-    read-only--border-right: unset,
-    read-only--border-left: unset,
-    read-only--background: transparent,
+    error__focus--outline: 3px solid rgba(220, 38, 38, 0.2),
+    read-only--border-top: 1px solid #e4e4e7,
+    read-only--border-bottom: 1px solid #e4e4e7,
+    read-only--border-right: 1px solid #e4e4e7,
+    read-only--border-left: 1px solid #e4e4e7,
+    read-only--background: #fafafa,
     read-only--color: null,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    icon--size: 16px,
+    icon--color: #71717a,
+
+    clear-icon--size: 16px,
+    clear-icon--color: #a1a1aa,
+    clear-icon__hover--color: #18181b,
+
+    help-icon--size: 16px,
+    help-icon--color: #71717a,
+    help-icon--gap: 8px,
+
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
   )
 );
 
 :host {
-  display: inline-grid;
-  grid-template-columns: 1fr min-content;
-  grid-template-rows: fit-content, fit-content;
-  gap: 0px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(supporting-text--gap);
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// Row 1: the field itself plus the optional help icon beside it.
+.c2-text-field-row {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(help-icon--gap);
 }
 
 .c2-text-field {
-  display: inline-flex;
-  align-items: center;
-  text-align: inherit;
-  box-sizing: border-box;
+  display: flex;
   flex: 1;
+  min-width: 0;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative;
   cursor: text;
+  text-align: inherit;
+
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+  padding-top: css.cssVar(padding-top);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-right: css.cssVar(padding-right);
+  padding-left: css.cssVar(padding-left);
 
   border-top: css.cssVar(border-top);
   border-bottom: css.cssVar(border-bottom);
@@ -83,34 +131,36 @@
 
   color: css.cssVar(color);
   background: css.cssVar(background);
-  position: relative;
-  will-change: border;
-  box-sizing: border-box;
-  transition: animation.standard(border);
-  gap: 4px;
-  align-self: stretch;
-  justify-self: stretch;
-  .input {
-    font-size: css.cssVar(font-size);
-    font-weight: css.cssVar(font-weight);
-    font-style: css.cssVar(font-style);
-    font-family: css.cssVar(font-family);
 
-    z-index: 0;
-    width: 100%;
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-style: css.cssVar(font-style);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+
+  // The ring exists at rest with a transparent colour, so focusing only fades the colour in (an outline that appears
+  // from nothing would flash the browser's default black before the transition catches up).
+  outline: css.cssVar(focus--outline);
+  outline-color: transparent;
+  outline-offset: css.cssVar(focus--outline-offset);
+
+  will-change: border, background, outline-color;
+  transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
+
+  .input {
     flex: 1;
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     border: none;
     outline: none;
-    caret-color: inherit;
-    overflow-x: hidden;
-    text-align: inherit;
-    border-radius: inherit;
-    color: inherit;
     background: transparent;
-    padding-top: css.cssVar(padding-top);
-    padding-bottom: css.cssVar(padding-bottom);
-    padding-right: css.cssVar(padding-right);
-    padding-left: css.cssVar(padding-left);
+    color: inherit;
+    caret-color: inherit;
+    font: inherit;
+    line-height: inherit;
+    text-align: inherit;
 
     &::placeholder {
       font-weight: css.cssVar(placeholder--font-weight);
@@ -119,11 +169,25 @@
       opacity: css.cssVar(placeholder--opacity);
     }
 
+    // Native decorations (search clear, number spinners) are replaced by the component's own controls.
+    &::-webkit-search-cancel-button,
+    &::-webkit-search-decoration {
+      appearance: none;
+    }
+
     @media (forced-colors: active) {
       background: Field; // Remove white background in Firefox HCM
     }
   }
-  // Focus
+
+  &:hover {
+    border-top: css.cssVar(hover--border-top, border-top);
+    border-bottom: css.cssVar(hover--border-bottom, border-bottom);
+    border-right: css.cssVar(hover--border-right, border-right);
+    border-left: css.cssVar(hover--border-left, border-left);
+  }
+
+  // Focus: brand border plus a soft ring.
   &.focus-within {
     border-top: css.cssVar(focus--border-top, border-top);
     border-bottom: css.cssVar(focus--border-bottom, border-bottom);
@@ -131,11 +195,8 @@
     border-left: css.cssVar(focus--border-left, border-left);
     color: css.cssVar(focus--color, color);
     background: css.cssVar(focus--background, background);
-
-    .prefix-icon,
-    .suffix-icon {
-      opacity: 1;
-    }
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
   }
 
   &.error {
@@ -144,16 +205,15 @@
     border-right: css.cssVar(error--border-right);
     border-left: css.cssVar(error--border-left);
     color: css.cssVar(error--color, color);
-    background: css.cssVar(error--background);
-  }
+    background: css.cssVar(error--background, background);
 
-  &.disabled {
-    cursor: default;
-    opacity: variables.$disabled-content-opacity;
-    pointer-events: none;
+    &.focus-within {
+      outline: css.cssVar(error__focus--outline);
+    }
   }
 
   &.read-only {
+    cursor: default;
     border-top: css.cssVar(read-only--border-top);
     border-bottom: css.cssVar(read-only--border-bottom);
     border-right: css.cssVar(read-only--border-right);
@@ -161,15 +221,90 @@
     color: css.cssVar(read-only--color, color);
     background: css.cssVar(read-only--background);
   }
-  .prefix-icon,
-  .suffix-icon {
-    z-index: 1;
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    opacity: 0.5;
+
+  &.disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+    pointer-events: none;
   }
 }
-.help-icon {
-  align-self: center;
+
+// Icons: the slotted node itself is sized, so an inline <svg>, a `c2-feather-*` or a `c2-mat-icon` all work.
+::slotted([slot='prefix-icon']),
+::slotted([slot='suffix-icon']) {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.clear-button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: css.cssVar(clear-icon--size);
+  height: css.cssVar(clear-icon--size);
+  color: css.cssVar(clear-icon--color);
+  transition: animation.standard(color);
+
+  &:hover,
+  &:focus-visible {
+    color: css.cssVar(clear-icon__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+    --c2-feather-icon--size: #{css.cssVar(clear-icon--size)};
+    --c2-mat-icon--font-size: #{css.cssVar(clear-icon--size)};
+  }
+}
+
+::slotted([slot='help-icon']) {
+  flex: none;
+  width: css.cssVar(help-icon--size);
+  height: css.cssVar(help-icon--size);
+  color: css.cssVar(help-icon--color);
+  --c2-feather-icon--size: #{css.cssVar(help-icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(help-icon--size)};
+}
+
+// Row 2: helper / error text on the left, character counter on the right.
+.supporting-text {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+  color: css.cssVar(supporting-text--color);
+
+  &.error {
+    color: css.cssVar(supporting-text__error--color);
+  }
+
+  .supporting-text__message {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .supporting-text__counter {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+  }
 }

@@ -2,13 +2,292 @@
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-code-viewer,
-  $theme: ()
+  $theme: (
+    background: null,
+    color: null,
+    font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    font-size: 13px,
+    line-height: 1.6,
+    tab-size: 2,
+    max-height: null,
+
+    padding-top: 12px,
+    padding-right: 16px,
+    padding-bottom: 12px,
+    padding-left: 16px,
+
+    border-top: 1px solid variables.$color-border-light,
+    border-right: 1px solid variables.$color-border-light,
+    border-bottom: 1px solid variables.$color-border-light,
+    border-left: 1px solid variables.$color-border-light,
+    box-shadow: null,
+
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
+    header--background: rgba(127, 127, 127, 0.08),
+    header--color: null,
+    header--font-family: null,
+    header--font-size: 12px,
+    header--padding-top: 6px,
+    header--padding-right: 8px,
+    header--padding-bottom: 6px,
+    header--padding-left: 16px,
+    header--border-bottom: 1px solid rgba(127, 127, 127, 0.2),
+    copy--size: 28px,
+    copy--icon-size: 14px,
+    copy--border-radius: 6px,
+    copy--color: null,
+    copy--background: null,
+    copy__hover--background: rgba(127, 127, 127, 0.15),
+    copy__copied--color: rgb(34, 197, 94),
+    line-numbers--min-width: 2ch,
+    line-numbers--gap: 16px,
+    line-numbers--color: null,
+
+    line__highlighted--background: rgba(99, 102, 241, 0.12),
+    line__highlighted--border-left: 3px solid rgb(99, 102, 241),
+  )
 );
 
+// Frame colours: the author's token wins, then the theme's own colour (single theme: --cv-*, dual theme: --shiki-*).
+$bg-light: css.cssVar(background, --cv-bg, --shiki-light-bg);
+$fg-light: css.cssVar(color, --cv-fg, --shiki-light);
+$bg-dark: css.cssVar(background, --cv-bg, --shiki-dark-bg);
+$fg-dark: css.cssVar(color, --cv-fg, --shiki-dark);
+
 :host {
-  display: inline-flex;
+  display: block;
+  min-width: 0;
+}
+
+:host([inline]) {
+  display: inline;
 }
 
 .c2-code-viewer {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: clip;
+  position: relative;
+
+  background: $bg-light;
+  color: $fg-light;
+  box-shadow: css.cssVar(box-shadow);
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  line-height: css.cssVar(line-height);
+}
+
+.c2-code-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: css.cssVar(header--padding-top);
+  padding-right: css.cssVar(header--padding-right);
+  padding-bottom: css.cssVar(header--padding-bottom);
+  padding-left: css.cssVar(header--padding-left);
+  background: css.cssVar(header--background);
+  color: css.cssVar(header--color);
+  font-family: css.cssVar(header--font-family, font-family);
+  font-size: css.cssVar(header--font-size);
+  border-bottom: css.cssVar(header--border-bottom);
+
+  slot[name='title'] {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-code-viewer-body {
+  position: relative;
+  min-width: 0;
+  max-height: css.cssVar(max-height);
+  overflow: auto;
+
+  // The copy button floats over the code when there is no header.
+  > .c2-code-viewer-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    opacity: 0;
+    transition: animation.standard(opacity);
+  }
+
+  &:hover > .c2-code-viewer-copy,
+  &:focus-within > .c2-code-viewer-copy,
+  > .c2-code-viewer-copy.is-copied {
+    opacity: 1;
+  }
+}
+
+.c2-code-viewer-copy {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  width: css.cssVar(copy--size);
+  height: css.cssVar(copy--size);
+  padding: 0;
+  border: none;
+  border-radius: css.cssVar(copy--border-radius);
+  background: css.cssVar(copy--background);
+  color: css.cssVar(copy--color);
+  opacity: 0.7;
+  cursor: pointer;
+  transition: animation.standard(background), animation.standard(opacity);
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(copy--icon-size);
+    height: css.cssVar(copy--icon-size);
+  }
+
+  &:hover {
+    background: css.cssVar(copy__hover--background);
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(2, 101, 220, 0.4);
+    outline-offset: 1px;
+    opacity: 1;
+  }
+
+  &.is-copied {
+    color: css.cssVar(copy__copied--color);
+    opacity: 1;
+  }
+}
+
+// Shiki output (and the plain fallback that mirrors its structure).
+pre.shiki {
+  margin: 0;
+  box-sizing: border-box;
+  min-width: 100%;
+  width: max-content;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  tab-size: css.cssVar(tab-size);
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+
+  code {
+    display: block;
+    font: inherit;
+  }
+
+  .line {
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 1lh;
+  }
+
+  .line.highlighted {
+    background: css.cssVar(line__highlighted--background);
+    border-left: css.cssVar(line__highlighted--border-left);
+    margin-left: calc(-1 * css.cssVar(padding-left));
+    padding-left: calc(css.cssVar(padding-left) - 3px);
+    width: calc(100% + css.cssVar(padding-left) + css.cssVar(padding-right));
+    margin-right: calc(-1 * css.cssVar(padding-right));
+  }
+
+  &.has-line-numbers .line::before {
+    counter-increment: line;
+    content: counter(line);
+    display: inline-block;
+    min-width: css.cssVar(line-numbers--min-width);
+    margin-right: css.cssVar(line-numbers--gap);
+    text-align: right;
+    color: css.cssVar(line-numbers--color);
+    opacity: 0.45;
+    user-select: none;
+  }
+
+  .diff-marker {
+    user-select: none;
+  }
+}
+
+:host([wrap]) pre.shiki {
+  width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+// Inline mode: a bare <code> with the theme colours.
+.c2-code-viewer-inline {
+  font-family: css.cssVar(font-family);
+  font-size: 0.9em;
+  color: $fg-light;
+  background: $bg-light;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+}
+
+// Dual-theme output carries both palettes as variables; pick one per colour scheme.
+.dual span {
+  color: var(--shiki-light);
+}
+
+@mixin dark {
+  .c2-code-viewer,
+  .c2-code-viewer-inline {
+    background: $bg-dark;
+    color: $fg-dark;
+  }
+  .dual span {
+    color: var(--shiki-dark);
+  }
+}
+
+:host([color-scheme='dark']) {
+  @include dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host(:not([color-scheme='light'])) {
+    @include dark;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-code-viewer-copy,
+  .c2-code-viewer-body > .c2-code-viewer-copy {
+    transition: none;
+  }
 }

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-spinner</title>
+    <script type="module" src="/src/spinner.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 32px;
+        max-width: 560px;
+        font-size: 14px;
+        color: #3f3f46;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .dark {
+        display: inline-flex;
+        padding: 12px 16px;
+        border-radius: 10px;
+        background: #18181b;
+        --c2-spinner--color: #5aa3ff;
+        --c2-spinner__track--color: #3f3f46;
+        --c2-spinner__label--color: #d4d4d8;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Indeterminate: bare (aria-label "Loading"), with text, with label attribute</h2>
+      <div class="row">
+        <c2-spinner></c2-spinner>
+        <c2-spinner>Loading…</c2-spinner>
+        <c2-spinner label="Saving changes"></c2-spinner>
+      </div>
+    </section>
+
+    <section>
+      <h2>Sizes and strokes (stroke scales with size)</h2>
+      <div class="row">
+        <c2-spinner style="--c2-spinner--size: 16px; --c2-spinner--stroke-width: 5px"></c2-spinner>
+        <c2-spinner></c2-spinner>
+        <c2-spinner style="--c2-spinner--size: 32px"></c2-spinner>
+        <c2-spinner style="--c2-spinner--size: 48px; --c2-spinner--stroke-width: 3px"></c2-spinner>
+        <c2-spinner style="--c2-spinner--size: 32px; --c2-spinner--stroke-width: 8px; --c2-spinner--stroke-linecap: butt"></c2-spinner>
+        <c2-spinner style="--c2-spinner--size: 32px; --c2-spinner__track--color: transparent"></c2-spinner>
+      </div>
+    </section>
+
+    <section>
+      <h2>Determinate: fixed values, animated progress, back to indeterminate</h2>
+      <div class="row">
+        <c2-spinner value="0"></c2-spinner>
+        <c2-spinner value="25"></c2-spinner>
+        <c2-spinner value="50"></c2-spinner>
+        <c2-spinner value="75"></c2-spinner>
+        <c2-spinner value="100"></c2-spinner>
+        <c2-spinner value="3" max="4" style="--c2-spinner--size: 32px">3 of 4</c2-spinner>
+      </div>
+      <div class="row" style="margin-top: 16px">
+        <c2-spinner id="progress" value="0" style="--c2-spinner--size: 40px"><span id="progress-text">0%</span></c2-spinner>
+        <button type="button" onclick="run()">Run to 100%</button>
+        <button
+          type="button"
+          onclick="
+            const s = document.getElementById('progress')
+            s.value = undefined
+            document.getElementById('progress-text').textContent = 'indeterminate'
+          "
+        >
+          Clear value
+        </button>
+      </div>
+      <script>
+        function run() {
+          const s = document.getElementById('progress')
+          const t = document.getElementById('progress-text')
+          let v = 0
+          s.value = 0
+          const id = setInterval(() => {
+            v = Math.min(100, v + Math.round(5 + Math.random() * 15))
+            s.value = v
+            t.textContent = v + '%'
+            if (v >= 100) clearInterval(id)
+          }, 400)
+        }
+      </script>
+    </section>
+
+    <section>
+      <h2>Colours, text below, dark, slow</h2>
+      <div class="row">
+        <c2-spinner style="--c2-spinner--color: #16a34a; --c2-spinner__track--color: #dcfce7" value="80"></c2-spinner>
+        <c2-spinner style="--c2-spinner--color: #dc2626; --c2-spinner__track--color: #fee2e2"></c2-spinner>
+        <c2-spinner style="--c2-spinner--flex-direction: column; --c2-spinner--size: 32px; --c2-spinner--gap: 10px">Preparing export</c2-spinner>
+        <span class="dark"><c2-spinner>Syncing</c2-spinner></span>
+        <c2-spinner style="--c2-spinner--animation-duration: 3s">Slow</c2-spinner>
+      </div>
+    </section>
+  </body>
+</html>

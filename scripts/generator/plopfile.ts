@@ -30,14 +30,14 @@ export default function (plop: NodePlopAPI) {
         ? [
             {
               type: 'append',
-              path: '../../demo/src/store/component-manifests.ts',
+              path: '../../apps/ui/src/store/component-manifests.ts',
               pattern: /\n/,
               separator: '',
               template: "import {{ camelCase name }} from '@c2n/{{ dashCase name }}/custom-elements.json'\n",
             },
             {
               type: 'append',
-              path: '../../demo/src/store/component-manifests.ts',
+              path: '../../apps/ui/src/store/component-manifests.ts',
               pattern: /const normalizedManifests: ComponentManifests = \[/,
               template: '    {{ camelCase name }},',
             },
@@ -54,7 +54,7 @@ export default function (plop: NodePlopAPI) {
         },
         {
           type: 'add',
-          path: `../../demo/src/content/${demo_content_folder}/{{dashCase name}}.mdx`,
+          path: `../../apps/ui/src/content/${demo_content_folder}/{{dashCase name}}.mdx`,
           templateFile: 'files/demo-doc.mdx.hbs',
           skipIfExists: true,
         },
@@ -64,6 +64,13 @@ export default function (plop: NodePlopAPI) {
           path: '../../package.json',
           pattern: /build.*\n?.*dependencies": \[/,
           template: `        "./${packages}/{{ dashCase name }}:build",`,
+        },
+        {
+          // @c2n/theme reads every component manifest, so its build must run after the new component's build.
+          type: 'append',
+          path: '../../packages/tools/theme/package.json',
+          pattern: /"dependencies": \[\n\s*"type-check",/,
+          template: `        "${isNpmPackage ? '../../components' : '../../../open-packages'}/{{ dashCase name }}:build",`,
         },
       ]
     },

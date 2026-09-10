@@ -1,0 +1,142 @@
+---
+title: 'Button Group'
+description: 'Attached buttons with shared borders, optionally a segmented control with single or multiple selection.'
+category: 'Buttons'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ButtonGroup } from '@c2n/button-group'
+import { Button } from '@c2n/button'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherAlignLeftIcon as FeatherAlignLeft } from '@c2n/feather-icons/icons/align-left.js'
+import { FeatherAlignCenterIcon as FeatherAlignCenter } from '@c2n/feather-icons/icons/align-center.js'
+import { FeatherAlignRightIcon as FeatherAlignRight } from '@c2n/feather-icons/icons/align-right.js'
+import { FeatherBoldIcon as FeatherBold } from '@c2n/feather-icons/icons/bold.js'
+import { FeatherItalicIcon as FeatherItalic } from '@c2n/feather-icons/icons/italic.js'
+import { FeatherUnderlineIcon as FeatherUnderline } from '@c2n/feather-icons/icons/underline.js'
+
+`c2-button-group` attaches related `c2-button` or `c2-icon-button` elements into one control: shared borders, rounded outside corners only and a divider between items. On its own it is a layout: the buttons keep their own behaviour and clicks. Add `selection="single"` and it becomes a segmented control that keeps exactly one item pressed, or `selection="multiple"` to let each item toggle independently; the pressed items carry `selected` (which the buttons announce as `aria-pressed`) and the group reports them in `value` and fires `change`. A positive `--c2-button-group--gap` separates the items into individually rounded buttons instead.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/button-group
+```
+
+Importing `@c2n/button-group` also registers `c2-button`. Install `@c2n/icon-button` separately for icon items.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/button-group
+<style>
+  .outlined {
+    --c2-button-group--border: 1px solid #d4d4d8;
+    --c2-button-group__divider--color: #d4d4d8;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #3f3f46;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__hover--color: #18181b;
+    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__container__selected--background-color: #edf1fe;
+    --c2-button__container__selected--color: #0265dc;
+    --c2-icon-button--background-color: transparent;
+    --c2-icon-button__hover--background-color: #f4f4f5;
+    --c2-icon-button__selected--background-color: #edf1fe;
+    --c2-icon-button__icon__selected--color: #0265dc;
+    --c2-icon-button__state-layer--size: 36px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+    --c2-icon-button__icon--color: #3f3f46;
+  }
+  .segmented {
+    --c2-button-group--border-radius: 8px;
+    --c2-button-group__divider--color: transparent;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 14px;
+    --c2-button__container--padding-right: 14px;
+    --c2-button__container--background-color: #f4f4f5;
+    --c2-button__container--color: #52525b;
+    --c2-button__container__hover--background-color: #e4e4e7;
+    --c2-button__container__hover--color: #18181b;
+    --c2-button__container__active--background-color: #d4d4d8;
+    --c2-button__container__selected--background-color: #ffffff;
+    --c2-button__container__selected--color: #18181b;
+    --c2-button__container__selected--border: 1px solid #d4d4d8;
+  }
+  .full {
+    width: 320px;
+    max-width: 100%;
+    --c2-button-group__item--flex: 1 1 0;
+  }
+</style>
+<div data-label="Attached">
+  <c2-button-group client:only="lit" aria-label="Document actions">
+    <c2-button>Save</c2-button>
+    <c2-button>Publish</c2-button>
+    <c2-button>Archive</c2-button>
+  </c2-button-group>
+</div>
+<div data-label="Outlined">
+  <c2-button-group client:only="lit" class="outlined" aria-label="Document actions">
+    <c2-button>Save</c2-button>
+    <c2-button>Publish</c2-button>
+    <c2-button>Archive</c2-button>
+  </c2-button-group>
+</div>
+<div data-label="Single selection">
+  <c2-button-group client:only="lit" class="outlined" selection="single" value="week" aria-label="Period">
+    <c2-button value="day">Day</c2-button>
+    <c2-button value="week">Week</c2-button>
+    <c2-button value="month">Month</c2-button>
+    <c2-button value="year">Year</c2-button>
+  </c2-button-group>
+</div>
+<div data-label="Segmented">
+  <c2-button-group client:only="lit" class="segmented" selection="single" value="list" aria-label="View">
+    <c2-button value="list">List</c2-button>
+    <c2-button value="board">Board</c2-button>
+    <c2-button value="calendar">Calendar</c2-button>
+  </c2-button-group>
+</div>
+<div data-label="Multiple selection, icon buttons">
+  <c2-button-group client:load class="outlined" selection="multiple" value="bold" aria-label="Text style">
+    <c2-icon-button value="bold" aria-label="Bold"><c2-feather-bold></c2-feather-bold></c2-icon-button>
+    <c2-icon-button value="italic" aria-label="Italic"><c2-feather-italic></c2-feather-italic></c2-icon-button>
+    <c2-icon-button value="underline" aria-label="Underline"><c2-feather-underline></c2-feather-underline></c2-icon-button>
+  </c2-button-group>
+  <c2-button-group client:load class="outlined" selection="single" value="left" aria-label="Alignment">
+    <c2-icon-button value="left" aria-label="Align left"><c2-feather-align-left></c2-feather-align-left></c2-icon-button>
+    <c2-icon-button value="center" aria-label="Align center"><c2-feather-align-center></c2-feather-align-center></c2-icon-button>
+    <c2-icon-button value="right" aria-label="Align right"><c2-feather-align-right></c2-feather-align-right></c2-icon-button>
+  </c2-button-group>
+</div>
+<div data-label="Vertical and separated">
+  <c2-button-group client:only="lit" class="outlined" orientation="vertical" aria-label="Zoom">
+    <c2-button>Zoom in</c2-button>
+    <c2-button>Zoom out</c2-button>
+    <c2-button>Reset</c2-button>
+  </c2-button-group>
+  <c2-button-group client:only="lit" class="outlined" selection="single" value="m" style="--c2-button-group--gap: 8px; --c2-button-group--border-radius: 999px" aria-label="Size">
+    <c2-button value="s">S</c2-button>
+    <c2-button value="m">M</c2-button>
+    <c2-button value="l">L</c2-button>
+  </c2-button-group>
+</div>
+<div data-label="Full width and disabled">
+  <c2-button-group client:only="lit" class="outlined full" selection="single" value="no" aria-label="Answer">
+    <c2-button value="yes">Yes</c2-button>
+    <c2-button value="no">No</c2-button>
+    <c2-button value="maybe">Maybe</c2-button>
+  </c2-button-group>
+  <c2-button-group client:only="lit" class="outlined" disabled aria-label="Disabled">
+    <c2-button>One</c2-button>
+    <c2-button>Two</c2-button>
+  </c2-button-group>
+</div>
+```
+
+Items identify themselves with a `value` attribute (their index otherwise). In `single` mode the group's `value` is the pressed item's value and clicking the pressed item keeps it pressed; in `multiple` mode `value` is a comma-separated list and each click toggles one entry. Set `value` from code to change the selection silently; `change` fires only for clicks, with the new value in `detail.value`. The group marks its items `toggle` in selection modes so unpressed buttons still announce `aria-pressed="false"`, and `disabled` on the group disables every item without touching the ones you disabled yourself.
+
+The group owns the frame of its items through the button variables: `--c2-button-group--border` applies one border to every item (an outlined group), `--c2-button-group--border-radius` rounds the outside corners, and attached items overlap by `--c2-button-group__divider--width` so shared borders are drawn once, with `--c2-button-group__divider--color` painted between them (a translucent white line by default, which suits filled buttons; match the border colour for outlined groups or use `transparent`). Colours, heights and the pressed look come from the buttons' own variables set on the group, as the Outlined and Segmented classes above show. `--c2-button-group__item--flex: 1 1 0` makes every item the same width.

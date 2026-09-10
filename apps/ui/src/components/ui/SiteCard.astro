@@ -1,0 +1,115 @@
+---
+// Site variant of `c2-card`: hairline border, the site's large radius, hover lift and an optional whole-card link.
+// Fixes --c2-card--* (background, borders, radii, paddings, hover, focus) on the `.site-card` class.
+// Used by ComponentGallery, pages/components/index, pages/icons/index and the landing page icon teaser.
+import { Card } from '@c2n/card'
+import { rawElement, type AttributeValue } from '../../utils/raw-element'
+
+interface Props {
+  /** Makes the whole card a link (rendered as an `<a>` by c2-card). Only for cards without other interactive content. */
+  href?: string
+  /** No body padding: media + link layouts. */
+  flush?: boolean
+  /** `island` (default) or `defined` (raw plain tag upgraded by `data/chrome-modules.ts`, for long card lists). */
+  hydrate?: 'island' | 'defined'
+  class?: string
+  [attr: string]: unknown
+}
+const { href, flush = false, hydrate = 'island', class: className = '', ...rest } = Astro.props
+const classes = ['site-card', flush && 'site-card--flush', className].filter(Boolean).join(' ')
+const hasMedia = Astro.slots.has('media')
+const hasFooter = Astro.slots.has('footer')
+const raw =
+  hydrate === 'defined'
+    ? rawElement(
+        'c2-card',
+        { class: classes, href, interactive: !!href, ...(rest as Record<string, AttributeValue>) },
+        [
+          hasMedia ? `<div slot="media" class="site-card__media">${await Astro.slots.render('media')}</div>` : '',
+          await Astro.slots.render('default'),
+          hasFooter ? `<div slot="footer">${await Astro.slots.render('footer')}</div>` : '',
+        ].join(''),
+      )
+    : ''
+---
+
+{
+  hydrate === 'island' ? (
+    <Card client:load class={classes} href={href} interactive={href ? true : undefined} {...rest}>
+      {hasMedia && (
+        <div slot="media" class="site-card__media">
+          <slot name="media" />
+        </div>
+      )}
+      <slot />
+      {hasFooter && (
+        <div slot="footer">
+          <slot name="footer" />
+        </div>
+      )}
+    </Card>
+  ) : (
+    <Fragment set:html={raw} />
+  )
+}
+
+<style lang="scss" is:global>
+  .site-card {
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--color: inherit;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: var(--site-radius-lg);
+    --c2-card--border-top-right-radius: var(--site-radius-lg);
+    --c2-card--border-bottom-left-radius: var(--site-radius-lg);
+    --c2-card--border-bottom-right-radius: var(--site-radius-lg);
+    --c2-card--padding-top: 14px;
+    --c2-card--padding-right: 16px;
+    --c2-card--padding-bottom: 16px;
+    --c2-card--padding-left: 16px;
+    --c2-card__hover--border-top: 1px solid var(--site-color-outline);
+    --c2-card__hover--border-right: 1px solid var(--site-color-outline);
+    --c2-card__hover--border-bottom: 1px solid var(--site-color-outline);
+    --c2-card__hover--border-left: 1px solid var(--site-color-outline);
+    --c2-card__hover--box-shadow: var(--site-elevation-1);
+    --c2-card__focus--outline: 2px solid var(--site-color-primary);
+    --c2-card__focus--outline-offset: 2px;
+
+    &--flush {
+      --c2-card--padding-top: 0px;
+      --c2-card--padding-right: 0px;
+      --c2-card--padding-bottom: 0px;
+      --c2-card--padding-left: 0px;
+    }
+
+    // Reveal-on-hover arrow used by every index card.
+    .site-card__arrow {
+      color: var(--site-color-primary);
+      opacity: 0;
+      transform: translateX(-4px);
+      transition:
+        opacity 150ms var(--site-ease),
+        transform 150ms var(--site-ease);
+      --c2-feather-icon--size: 14px;
+    }
+    &:hover .site-card__arrow {
+      opacity: 1;
+      transform: none;
+    }
+
+    // Plain tags before upgrade: approximate the frame so long lists do not flash.
+    &:not(:defined) {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: var(--site-radius-lg);
+      overflow: hidden;
+    }
+  }
+</style>
+
+<script>
+  import '../../data/chrome-modules'
+</script>

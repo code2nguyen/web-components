@@ -1,0 +1,68 @@
+{
+  "name": "@c2n/feather-icons",
+  "version": "0.0.4",
+  "type": "module",
+  "main": "dist/index.js",
+  "sideEffects": true,
+  "exports": {
+    ".": {
+      "types": "./types/src/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./icons/*.js": {
+      "types": "./types/src/icons/*.d.ts",
+      "default": "./dist/icons/*.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "feather",
+    "icons",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "generate": "node scripts/icon-generator/index.ts",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "feather-icons": "4.29.2",
+    "prettier": "3.9.6"
+  },
+  "customElements": "custom-elements.json"
+}

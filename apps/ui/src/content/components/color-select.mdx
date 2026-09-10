@@ -1,0 +1,26 @@
+---
+title: 'Color Select'
+description: 'Colour swatch that opens a full picker built from area and slider.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ColorSelect } from '@c2n/color-select'
+
+`c2-color-select` is a component composed by `c2-color-area` and `c2-color-slider` allows users to select all properties of a color visually.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/color-select
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/color-select
+<div data-label="Default">
+  <c2-color-select color="#ff726b"></c2-color-select>
+</div>
+```

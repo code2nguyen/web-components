@@ -1,0 +1,8 @@
+---
+// Legacy URL kept for old links; the components index lives at /components/.
+const base = import.meta.env.BASE_URL
+const redirect = `${base}/components/`
+---
+
+<meta http-equiv="refresh" content={`0; url=${redirect}`} />
+<link rel="canonical" href={redirect} />

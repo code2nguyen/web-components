@@ -1,0 +1,87 @@
+---
+// Site variant of `c2-icon-button`: the site's sizes, hover/pressed colours and a tooltip that defaults to the label.
+// Fixes: state-layer size, icon size, radius, hover/pressed colours (all --c2-icon-button--* on a class).
+// Used by layouts/Main.astro, ThemeToggle, MdxCodeBlock, UsageBlock, CodeBlock and ApiTable.
+import { IconButton } from '@c2n/icon-button'
+import { rawElement, type AttributeValue } from '../../utils/raw-element'
+
+interface Props {
+  /** Accessible name; also the tooltip unless `tooltip` is given (`false` disables the tooltip). */
+  label: string
+  tooltip?: string | false
+  /** xs 24/13px, sm 30/16px, md 36/18px (state layer / icon). */
+  size?: 'xs' | 'sm' | 'md'
+  /**
+   * `island` (default): SSR'd Astro island with declarative shadow DOM, paints before JS.
+   * `defined`: plain `<c2-icon-button>` emitted as raw HTML and upgraded by `data/chrome-modules.ts`; use for
+   * repeated chrome such as toolbars (see utils/raw-element.ts for why it must be raw).
+   */
+  hydrate?: 'island' | 'defined'
+  class?: string
+  [attr: string]: unknown
+}
+const { label, tooltip, size = 'md', hydrate = 'island', class: className = '', ...rest } = Astro.props
+const tip = tooltip === false ? undefined : (tooltip ?? label)
+const classes = ['site-icon-button', `site-icon-button--${size}`, className].filter(Boolean).join(' ')
+const raw =
+  hydrate === 'defined'
+    ? rawElement(
+        'c2-icon-button',
+        { class: classes, 'aria-label': label, tooltip: tip, ...(rest as Record<string, AttributeValue>) },
+        await Astro.slots.render('default'),
+      )
+    : ''
+---
+
+{
+  hydrate === 'island' ? (
+    <IconButton client:load class={classes} aria-label={label} tooltip={tip} {...rest}>
+      <slot />
+    </IconButton>
+  ) : (
+    <Fragment set:html={raw} />
+  )
+}
+
+<style lang="scss" is:global>
+  .site-icon-button {
+    --c2-icon-button--border-radius: var(--site-radius-sm);
+    --c2-icon-button__hover--background-color: var(--site-color-surface-container-3);
+    --c2-icon-button__icon--color: var(--site-color-on-surface-variant);
+    --c2-icon-button__icon__hover--color: var(--site-color-on-surface);
+    --c2-icon-button__focus--outline: 2px solid var(--site-color-primary);
+
+    &--md {
+      --c2-icon-button__state-layer--size: 36px;
+      --c2-icon-button__icon--width: 18px;
+      --c2-icon-button__icon--height: 18px;
+    }
+    &--sm {
+      --c2-icon-button__state-layer--size: 30px;
+      --c2-icon-button__icon--width: 16px;
+      --c2-icon-button__icon--height: 16px;
+    }
+    &--xs {
+      --c2-icon-button__state-layer--size: 24px;
+      --c2-icon-button__icon--width: 13px;
+      --c2-icon-button__icon--height: 13px;
+    }
+    &[aria-pressed='true'],
+    &.active {
+      --c2-icon-button--background-color: var(--site-color-primary-soft);
+      --c2-icon-button__icon--color: var(--site-color-primary);
+      --c2-icon-button__icon__hover--color: var(--site-color-primary);
+    }
+    // Plain tags: hidden until upgraded to keep the toolbar layout stable (`[hidden]` on the host still wins).
+    &:not(:defined) {
+      display: inline-flex;
+      width: var(--c2-icon-button__state-layer--size);
+      height: var(--c2-icon-button__state-layer--size);
+      visibility: hidden;
+    }
+  }
+</style>
+
+<script>
+  import '../../data/chrome-modules'
+</script>

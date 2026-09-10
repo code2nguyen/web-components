@@ -1,0 +1,167 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { CopyButton } from '@c2n/copy-button'
+
+## Presets
+
+Curated looks for `c2-copy-button`. Open any card in the studio to start from it. Everything hangs off `__container--*` for the button box and `__icon--*` for the glyph, with a `__container__copied--*` set for the moment after the copy lands. Every card here sets `reveal="always"`, because nothing hovers a gallery card — in a real page the default hides the button until its source is hovered.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Icon only
+<c2-copy-button reveal="always" value="npx -y @c2n/mcp"></c2-copy-button>
+```
+
+```html tag=MdxCodeBlock,label=Outlined
+<style>
+  .outlined {
+    --c2-copy-button__container--border: 1px solid #bcbcc6;
+    --c2-copy-button__container__hover--border: 1px solid #a1a1aa;
+    --c2-copy-button__container__hover--background-color: #f4f4f5;
+  }
+</style>
+<c2-copy-button class="outlined" reveal="always" value="14 Rue de Rivoli, 75001 Paris">Copy</c2-copy-button>
+```
+
+```html tag=MdxCodeBlock,label=Solid accent
+<style>
+  .accent {
+    --c2-copy-button__container--height: 32px;
+    --c2-copy-button__container--padding-left: 12px;
+    --c2-copy-button__container--padding-right: 12px;
+    --c2-copy-button__container--background-color: #0265dc;
+    --c2-copy-button__container--color: #ffffff;
+    --c2-copy-button__container__hover--background-color: #0255b9;
+    --c2-copy-button__container__copied--background-color: #007a4d;
+    --c2-copy-button__container__copied--color: #ffffff;
+  }
+</style>
+<c2-copy-button class="accent" reveal="always" value="Order #A-4192">Copy order</c2-copy-button>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    --c2-copy-button__container--border-radius: 999px;
+    --c2-copy-button__container--height: 32px;
+    --c2-copy-button__container--padding-left: 14px;
+    --c2-copy-button__container--padding-right: 14px;
+    --c2-copy-button__container--background-color: #f4f4f5;
+    --c2-copy-button__container__hover--background-color: #e4e4e7;
+  }
+</style>
+<c2-copy-button class="pill" reveal="always" value="c2n_live_8f4c19ab7e2d">Copy token</c2-copy-button>
+```
+
+</GalleryGrid>
+
+## In context
+
+The shape it was built for: a block with the button pinned in its corner, copying the block it sits in. `pin` does the positioning, and keeps the button in place if the block scrolls.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Command line
+<style>
+  .snippet {
+    position: relative;
+    margin: 0;
+    padding: 12px 44px 12px 14px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    background: #fafafa;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    white-space: pre;
+    color: #18181b;
+  }
+</style>
+<pre class="snippet">npm install @c2n/copy-button<c2-copy-button pin reveal="always"></c2-copy-button></pre>
+```
+
+```html tag=MdxCodeBlock,label=Dark code block
+<style>
+  .dark-block {
+    position: relative;
+    margin: 0;
+    padding: 14px 46px 14px 16px;
+    border-radius: 8px;
+    background: #18181b;
+    color: #e4e4e7;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    white-space: pre;
+  }
+  .dark-block c2-copy-button {
+    --c2-copy-button__container--color: #a1a1aa;
+    --c2-copy-button__container__hover--background-color: rgba(255, 255, 255, 0.1);
+    --c2-copy-button__container__hover--color: #fafafa;
+    --c2-copy-button__container__copied--color: #4ade80;
+  }
+</style>
+<pre class="dark-block">git clone git@github.com:code2nguyen/web-components.git<c2-copy-button pin reveal="always"></c2-copy-button></pre>
+```
+
+```html tag=MdxCodeBlock,label=Detail card
+<style>
+  .detail {
+    position: relative;
+    max-width: 340px;
+    padding: 14px 52px 14px 16px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #3f3f46;
+  }
+  .detail c2-copy-button {
+    --c2-copy-button__container--border: 1px solid #e4e4e7;
+    --c2-copy-button__container__hover--background-color: #f4f4f5;
+  }
+</style>
+<div class="detail">
+  Anthropic, 548 Market St, San Francisco, CA 94104
+  <c2-copy-button pin reveal="always"></c2-copy-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Scrolling block
+<style>
+  .scrolls {
+    position: relative;
+    width: 300px;
+    max-height: 92px;
+    overflow: auto;
+    padding: 12px 44px 12px 14px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    background: #fafafa;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #18181b;
+  }
+</style>
+<div class="scrolls">git remote add origin git@github.com:code2nguyen/web-components.git && git fetch --all --tags --prune && git checkout -b feature/copy-button origin/develop && npm install && npm run build && npm run ui:build — scroll this box: the pinned button holds its corner in both directions<c2-copy-button pin reveal="always"></c2-copy-button></div>
+```
+
+```html tag=MdxCodeBlock,label=Revealed on hover
+<style>
+  .on-hover {
+    position: relative;
+    margin: 0;
+    padding: 12px 44px 12px 14px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    background: #fafafa;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    white-space: pre;
+    color: #18181b;
+  }
+</style>
+<pre class="on-hover">hover me — the default<c2-copy-button pin></c2-copy-button></pre>
+```
+
+</GalleryGrid>

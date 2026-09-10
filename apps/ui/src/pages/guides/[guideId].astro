@@ -1,0 +1,22 @@
+---
+import Main from '../../layouts/Main.astro'
+import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import { getCollection, render } from 'astro:content'
+
+export async function getStaticPaths() {
+  const entries = await getCollection('guides')
+  return entries.map((entry) => ({
+    params: { guideId: entry.id },
+    props: { guide: entry },
+  }))
+}
+
+const { guide } = Astro.props
+const { Content, headings } = await render(guide)
+---
+
+<Main title={`${guide.data.title} · c2n web components`} description={guide.data.description} withSidebar section="guides">
+  <DocComponentLayout section="guides" currentId={guide.id} headings={headings} title={guide.data.title} description={guide.data.description}>
+    <Content />
+  </DocComponentLayout>
+</Main>

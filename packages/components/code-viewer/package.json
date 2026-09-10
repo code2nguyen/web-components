@@ -51,7 +51,6 @@
     "@c2n/core": "0.0.4",
     "lit": "3.3.3",
     "@lit/task": "1.0.3",
-    "unist-util-visit": "^5.1.0",
     "shiki": "4.4.3"
   },
   "devDependencies": {

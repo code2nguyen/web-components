@@ -1,150 +1,175 @@
-import { bundledLanguages, createCssVariablesTheme, createHighlighter } from 'shiki'
-import type { BuiltinLanguage, BuiltinTheme, SpecialLanguage, ThemeRegistration, ThemeRegistrationRaw } from 'shiki'
-import { visit } from 'unist-util-visit'
-import type { Properties } from 'hast'
+import { createCssVariablesTheme, createHighlighterCore, type HighlighterCore, type ThemeRegistrationAny } from 'shiki/core'
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
+import { bundledLanguages, type BundledLanguage } from 'shiki/langs'
+import { bundledThemes, type BundledTheme } from 'shiki/themes'
 
-export type ThemePresets = BuiltinTheme | 'css-variables'
+export type { BundledLanguage, BundledTheme }
 
-export interface ShikiConfig {
-  langs?: Array<BuiltinLanguage | SpecialLanguage>
-  theme?: ThemePresets | ThemeRegistration | ThemeRegistrationRaw
-  wrap?: boolean | null
+/** Built-in shiki theme name, or `css-variables` to colour tokens with the `--c2-code-viewer__theme--*` custom properties. */
+export type ThemeName = BundledTheme | 'css-variables'
+
+export const CSS_VARIABLES_THEME = 'css-variables'
+const CSS_VARIABLES_PREFIX = '--c2-code-viewer__theme--'
+
+/** Defaults baked into the `css-variables` theme (a GitHub-light-like palette), overridable per element. */
+export const CSS_VARIABLE_DEFAULTS: Record<string, string> = {
+  foreground: '#24292e',
+  background: '#ffffff',
+  'token-constant': '#005cc5',
+  'token-string': '#032f62',
+  'token-comment': '#6a737d',
+  'token-keyword': '#d73a49',
+  'token-parameter': '#24292e',
+  'token-function': '#6f42c1',
+  'token-string-expression': '#22863a',
+  'token-punctuation': '#24292e',
+  'token-link': '#032f62',
 }
 
-const COLOR_REPLACEMENTS: Record<string, string> = {
-  '--c2-code-viewer-foreground': '--c2-code-viewer-color-text',
-  '--c2-code-viewer-background': '--c2-code-viewer-color-background',
+export interface HighlightOptions {
+  code: string
+  lang: string
+  theme: ThemeName
+  /** Second theme: the output carries both palettes as `--shiki-light` / `--shiki-dark` variables. */
+  darkTheme?: ThemeName
+  inline?: boolean
+  lineNumbers?: boolean
+  startLine?: number
+  /** 1-based line numbers to mark as highlighted. */
+  highlightedLines?: Set<number>
 }
-const COLOR_REPLACEMENT_REGEX = new RegExp(`${Object.keys(COLOR_REPLACEMENTS).join('|')}`, 'g')
 
-export interface ShikiHighlighter {
-  highlight(code: string, lang?: string, options?: { inline?: boolean }): string
+let corePromise: Promise<HighlighterCore> | undefined
+const pending = new Map<string, Promise<void>>()
+
+/** One shared highlighter for every `c2-code-viewer`; grammars and themes are loaded on demand. */
+function getCore(): Promise<HighlighterCore> {
+  return (corePromise ??= createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: true }), langs: [], themes: [] }))
 }
 
-let _cssVariablesTheme: ReturnType<typeof createCssVariablesTheme>
-const cssVariablesTheme = () => _cssVariablesTheme ?? (_cssVariablesTheme = createCssVariablesTheme({ variablePrefix: '--c2-code-viewer-' }))
+/** Resolves a language id or alias to what the highlighter knows, falling back to `plaintext`. */
+export function normalizeLang(lang: string | undefined): string {
+  const id = (lang ?? '').trim().toLowerCase()
+  if (!id || id === 'text' || id === 'txt' || id === 'plaintext' || id === 'plain') return 'plaintext'
+  return id in bundledLanguages ? id : 'plaintext'
+}
 
-export async function createShikiHighlighter({ langs = [], theme = 'github-dark', wrap = false }: ShikiConfig = {}): Promise<ShikiHighlighter> {
-  theme = theme === 'css-variables' ? cssVariablesTheme() : theme
+async function ensureLanguage(core: HighlighterCore, lang: string) {
+  if (lang === 'plaintext' || core.getLoadedLanguages().includes(lang)) return
+  const key = `lang:${lang}`
+  if (!pending.has(key)) {
+    pending.set(
+      key,
+      core.loadLanguage(bundledLanguages[lang as BundledLanguage]).finally(() => pending.delete(key)),
+    )
+  }
+  await pending.get(key)
+}
 
-  const highlighter = await createHighlighter({
-    langs: langs.length ? langs : Object.keys(bundledLanguages),
-    themes: [theme],
+let cssVariablesTheme: ThemeRegistrationAny | undefined
+
+async function ensureTheme(core: HighlighterCore, theme: ThemeName) {
+  if (core.getLoadedThemes().includes(theme)) return
+  const key = `theme:${theme}`
+  if (!pending.has(key)) {
+    const registration =
+      theme === CSS_VARIABLES_THEME
+        ? (cssVariablesTheme ??= createCssVariablesTheme({
+            name: CSS_VARIABLES_THEME,
+            variablePrefix: CSS_VARIABLES_PREFIX,
+            variableDefaults: CSS_VARIABLE_DEFAULTS,
+            fontStyle: true,
+          }))
+        : bundledThemes[theme as BundledTheme]
+    pending.set(
+      key,
+      core.loadTheme(registration).finally(() => pending.delete(key)),
+    )
+  }
+  await pending.get(key)
+}
+
+export function isKnownTheme(theme: string | undefined): theme is ThemeName {
+  return !!theme && (theme === CSS_VARIABLES_THEME || theme in bundledThemes)
+}
+
+export interface HighlightResult {
+  /** `<pre class="shiki"><code>…</code></pre>`, or only the token spans when `inline`. */
+  html: string
+  /**
+   * The theme's frame colours as custom properties (`--cv-bg` / `--cv-fg` for one theme, shiki's `--shiki-light(-bg)` /
+   * `--shiki-dark(-bg)` for two). Put it on the frame so the stylesheet can use them for header and body alike.
+   */
+  style: string
+}
+
+/** Highlights `code`; the component stylesheet owns the frame look, the theme only supplies colours. */
+export async function highlight({
+  code,
+  lang,
+  theme,
+  darkTheme,
+  inline = false,
+  lineNumbers = false,
+  startLine = 1,
+  highlightedLines,
+}: HighlightOptions): Promise<HighlightResult> {
+  const core = await getCore()
+  const language = normalizeLang(lang)
+  await Promise.all([ensureLanguage(core, language), ensureTheme(core, theme), darkTheme ? ensureTheme(core, darkTheme) : undefined])
+
+  const themeOptions = darkTheme ? { themes: { light: theme, dark: darkTheme }, defaultColor: false as const } : { theme }
+
+  const html = core.codeToHtml(code, {
+    lang: language,
+    ...themeOptions,
+    transformers: [
+      {
+        pre(node) {
+          // Move the theme's own frame colours into custom properties: the stylesheet decides whether they are used.
+          const style = String(node.properties.style ?? '')
+          if (!darkTheme) {
+            node.properties.style = style.replace(/background-color:/, '--cv-bg:').replace(/(^|;)color:/, '$1--cv-fg:')
+          }
+          const classes = [
+            ...String(node.properties.class ?? '')
+              .split(' ')
+              .filter(Boolean),
+          ]
+          if (lineNumbers) classes.push('has-line-numbers')
+          if (darkTheme) classes.push('dual')
+          node.properties.class = classes.join(' ')
+          delete node.properties.tabindex
+        },
+        code(node) {
+          if (lineNumbers) node.properties.style = `counter-reset: line ${startLine - 1}`
+        },
+        line(node, line) {
+          if (highlightedLines?.has(line)) this.addClassToHast(node, 'highlighted')
+          // Diff markers stay visible but are not copied with the selection.
+          if (language === 'diff') {
+            const first = node.children[0]
+            const text = first?.type === 'element' ? first.children[0] : undefined
+            if (text?.type === 'text' && (text.value[0] === '+' || text.value[0] === '-')) {
+              const marker = text.value[0]
+              text.value = text.value.slice(1)
+              ;(first as typeof node).children.unshift({
+                type: 'element',
+                tagName: 'span',
+                properties: { class: 'diff-marker' },
+                children: [{ type: 'text', value: marker }],
+              })
+            }
+          }
+        },
+      },
+    ],
   })
 
-  const loadedLanguages = highlighter.getLoadedLanguages()
-
-  return {
-    highlight(code, lang = 'plaintext', options) {
-      if (lang !== 'plaintext' && !loadedLanguages.includes(lang)) {
-        console.warn(`[Shiki] The language "${lang}" doesn't exist, falling back to "plaintext".`)
-        lang = 'plaintext'
-      }
-
-      const themeOptions = { theme }
-      const inline = options?.inline ?? false
-
-      return highlighter.codeToHtml(code, {
-        ...themeOptions,
-        lang,
-        transformers: [
-          {
-            pre(node) {
-              // Swap to `code` tag if inline
-              if (inline) {
-                node.tagName = 'code'
-              }
-
-              const classValue = normalizePropAsString(node.properties.class) ?? ''
-              let styleValue = normalizePropAsString(node.properties.style) ?? ''
-              styleValue = styleValue.replace(/background-color:(.*?);/, 'background-color:var(--c2-code-viewer--background-color, $1);')
-              if (!styleValue.endsWith(';')) {
-                styleValue += ';'
-              }
-              styleValue =
-                styleValue +
-                [
-                  'padding-top: var(--c2-code-viewer--padding-top)',
-                  'padding-right: var(--c2-code-viewer--padding-right)',
-                  'padding-bottom: var(--c2-code-viewer--padding-bottom)',
-                  'padding-left: var(--c2-code-viewer--padding-left)',
-
-                  'border-top: var(--c2-code-viewer--border-top)',
-                  'border-right: var(--c2-code-viewer--border-right)',
-                  'border-bottom: var(--c2-code-viewer--border-bottom)',
-                  'border-left: var(--c2-code-viewer--border-left)',
-
-                  'border-top-left-radius: var(--c2-code-viewer--border-top-left-radius)',
-                  'border-top-right-radius: var(--c2-code-viewer--border-top-right-radius)',
-                  'border-bottom-left-radius: var(--c2-code-viewer--border-bottom-left-radius)',
-                  'border-bottom-right-radius: var(--c2-code-viewer--border-bottom-right-radius)',
-                ].join(';')
-              // Replace "shiki" class naming with "astro-code"
-              node.properties.class = classValue.replace(/shiki/g, 'c2-code-viewer')
-              // Handle code wrapping
-              // if wrap=null, do nothing.
-              if (wrap === false) {
-                node.properties.style = styleValue + '; overflow-x: auto;'
-              } else if (wrap === true) {
-                node.properties.style = styleValue + '; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;'
-              }
-            },
-            line(node) {
-              // Add "user-select: none;" for "+"/"-" diff symbols.
-              // Transform `<span class="line"><span style="...">+ something</span></span>
-              // into      `<span class="line"><span style="..."><span style="user-select: none;">+</span> something</span></span>`
-              if (lang === 'diff') {
-                const innerSpanNode = node.children[0]
-                const innerSpanTextNode = innerSpanNode?.type === 'element' && innerSpanNode.children?.[0]
-
-                if (innerSpanTextNode && innerSpanTextNode.type === 'text') {
-                  const start = innerSpanTextNode.value[0]
-                  if (start === '+' || start === '-') {
-                    innerSpanTextNode.value = innerSpanTextNode.value.slice(1)
-                    innerSpanNode.children.unshift({
-                      type: 'element',
-                      tagName: 'span',
-                      properties: { style: 'user-select: none;' },
-                      children: [{ type: 'text', value: start }],
-                    })
-                  }
-                }
-              }
-            },
-            code(node) {
-              if (inline) {
-                return node.children[0] as typeof node
-              }
-              return node
-            },
-            root(node) {
-              // theme.id for shiki compat
-              const themeName = typeof theme === 'string' ? theme : theme.name
-              if (themeName === 'css-variables') {
-                // Replace special color tokens to CSS variables
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                visit(node as any, 'element', (child) => {
-                  if (child.properties?.style) {
-                    child.properties.style = replaceCssVariables(child.properties.style)
-                  }
-                })
-              }
-            },
-          },
-        ],
-      })
-    },
+  const style = html.match(/^<pre[^>]*?style="([^"]*)"/)?.[1] ?? ''
+  if (inline) {
+    const inner = html.match(/<code[^>]*>([\s\S]*)<\/code>\s*<\/pre>\s*$/)?.[1] ?? html
+    return { html: inner, style }
   }
-}
-
-function normalizePropAsString(value: Properties[string]): string | null {
-  return Array.isArray(value) ? value.join(' ') : (value as string | null)
-}
-
-/**
- * shiki compat as we need to manually replace it
- * @internal Exported for error overlay use only
- */
-export function replaceCssVariables(str: string) {
-  return str.replace(COLOR_REPLACEMENT_REGEX, (match) => COLOR_REPLACEMENTS[match] || match)
+  return { html, style }
 }

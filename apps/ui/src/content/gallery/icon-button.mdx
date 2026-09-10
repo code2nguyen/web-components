@@ -1,0 +1,290 @@
+---
+description: 'Ready-made looks for c2-icon-button: variants, sizes, shapes, icon sources and toolbars. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import '@fontsource/material-icons'
+
+import { IconButton } from '@c2n/icon-button'
+import { MatIcon } from '@c2n/mat-icon'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+import { FeatherHeartIcon as FeatherHeart } from '@c2n/feather-icons/icons/heart.js'
+
+## Variants
+
+An icon button is a 48px state layer around a 24px icon; every look below only changes `--c2-icon-button__*` custom properties.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Standard
+<c2-icon-button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Filled
+<style>
+  .filled {
+    --c2-icon-button--background-color: #18181b;
+    --c2-icon-button__hover--background-color: #3f3f46;
+    --c2-icon-button__icon--color: #ffffff;
+    --c2-icon-button__state-layer--size: 40px;
+    --c2-icon-button__icon--width: 20px;
+    --c2-icon-button__icon--height: 20px;
+  }
+</style>
+<c2-icon-button class="filled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Primary
+<style>
+  .primary {
+    --c2-icon-button--background-color: #2563eb;
+    --c2-icon-button__hover--background-color: #1d4ed8;
+    --c2-icon-button__icon--color: #ffffff;
+    --c2-icon-button__state-layer--size: 40px;
+    --c2-icon-button__icon--width: 20px;
+    --c2-icon-button__icon--height: 20px;
+  }
+</style>
+<c2-icon-button class="primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Soft tint
+<style>
+  .soft-tint {
+    --c2-icon-button--background-color: #dbeafe;
+    --c2-icon-button__hover--background-color: #bfdbfe;
+    --c2-icon-button__icon--color: #1d4ed8;
+    --c2-icon-button--border-radius: 10px;
+  }
+</style>
+<c2-icon-button class="soft-tint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Danger tint
+<style>
+  .danger-tint {
+    --c2-icon-button--background-color: #fee2e2;
+    --c2-icon-button__hover--background-color: #fecaca;
+    --c2-icon-button__icon--color: #dc2626;
+    --c2-icon-button__state-layer--size: 40px;
+    --c2-icon-button__icon--width: 20px;
+    --c2-icon-button__icon--height: 20px;
+  }
+</style>
+<c2-icon-button class="danger-tint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14"></path></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Muted with hover tint
+<style>
+  .muted {
+    --c2-icon-button__icon--color: #71717a;
+    --c2-icon-button__hover--background-color: rgba(37, 99, 235, 0.1);
+    --c2-icon-button__icon__hover--color: #2563eb;
+  }
+</style>
+<c2-icon-button class="muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Neutral filled
+<style>
+  .neutral {
+    --c2-icon-button--background-color: #f4f4f5;
+    --c2-icon-button__hover--background-color: #e4e4e7;
+    --c2-icon-button__icon--color: #18181b;
+    --c2-icon-button__state-layer--size: 36px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+    --c2-icon-button--border-radius: 8px;
+  }
+</style>
+<c2-icon-button class="neutral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg></c2-icon-button>
+```
+
+</GalleryGrid>
+
+## Sizes
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+  }
+</style>
+<c2-icon-button class="compact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Default
+<c2-icon-button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .large {
+    --c2-icon-button__state-layer--size: 56px;
+    --c2-icon-button__icon--width: 28px;
+    --c2-icon-button__icon--height: 28px;
+  }
+</style>
+<c2-icon-button class="large"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Dense
+<style>
+  .dense {
+    --c2-icon-button__state-layer--size: 28px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+    --c2-icon-button--border-radius: 6px;
+  }
+</style>
+<c2-icon-button class="dense"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></c2-icon-button>
+```
+
+</GalleryGrid>
+
+## Shapes
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Round
+<c2-icon-button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Rounded square
+<style>
+  .rounded-square {
+    --c2-icon-button--border-radius: 10px;
+    --c2-icon-button--background-color: #f4f4f5;
+    --c2-icon-button__hover--background-color: #e4e4e7;
+  }
+</style>
+<c2-icon-button class="rounded-square"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Square
+<style>
+  .square {
+    --c2-icon-button--border-radius: 0;
+    --c2-icon-button--background-color: #18181b;
+    --c2-icon-button__hover--background-color: #3f3f46;
+    --c2-icon-button__icon--color: #ffffff;
+  }
+</style>
+<c2-icon-button class="square"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
+```
+
+</GalleryGrid>
+
+## Icon sources
+
+Inline SVG, `@c2n/feather-icons` and `@c2n/mat-icon` all work in the default slot; the button sizes them through `--c2-icon-button__icon--width`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Feather icon
+<c2-icon-button><c2-feather-settings></c2-feather-settings></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Filled feather icon
+<style>
+  .feather-filled {
+    --c2-icon-button--background-color: #2563eb;
+    --c2-icon-button__hover--background-color: #1d4ed8;
+    --c2-icon-button__icon--color: #ffffff;
+    --c2-icon-button__state-layer--size: 40px;
+    --c2-icon-button__icon--width: 20px;
+    --c2-icon-button__icon--height: 20px;
+  }
+</style>
+<c2-icon-button class="feather-filled"><c2-feather-heart></c2-feather-heart></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Material icon
+<c2-icon-button><c2-mat-icon>favorite</c2-mat-icon></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=Tinted material icon
+<style>
+  .material-tinted {
+    --c2-icon-button--background-color: #fef3c7;
+    --c2-icon-button__hover--background-color: #fde68a;
+    --c2-icon-button__icon--color: #b45309;
+    --c2-icon-button__icon--width: 22px;
+    --c2-icon-button__icon--height: 22px;
+  }
+</style>
+<c2-icon-button class="material-tinted"><c2-mat-icon>star</c2-mat-icon></c2-icon-button>
+```
+
+```html tag=MdxCodeBlock,label=With tooltip
+<c2-icon-button tooltip="Take a photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
+```
+
+</GalleryGrid>
+
+## Toolbars
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Toolbar
+<style>
+  .toolbar {
+    display: inline-flex;
+    gap: 2px;
+    padding: 4px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .toolbar-item {
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--color: #52525b;
+    --c2-icon-button__hover--background-color: #f4f4f5;
+  }
+  .toolbar-item-active {
+    --c2-icon-button--background-color: #e4e4e7;
+    --c2-icon-button__icon--color: #18181b;
+  }
+</style>
+<div class="toolbar">
+  <c2-icon-button class="toolbar-item toolbar-item-active" tooltip="Bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6zM6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg></c2-icon-button>
+  <c2-icon-button class="toolbar-item" tooltip="Italic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4h-9M14 20H5M15 4L9 20"></path></svg></c2-icon-button>
+  <c2-icon-button class="toolbar-item" tooltip="Underline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3M4 21h16"></path></svg></c2-icon-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Dark toolbar
+<style>
+  .dark-toolbar {
+    display: inline-flex;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 999px;
+    background: #18181b;
+  }
+  .dark-toolbar-item {
+    --c2-icon-button__state-layer--size: 36px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+    --c2-icon-button__icon--color: #a1a1aa;
+    --c2-icon-button__hover--background-color: #3f3f46;
+    --c2-icon-button__icon__hover--color: #ffffff;
+  }
+</style>
+<div class="dark-toolbar">
+  <c2-icon-button class="dark-toolbar-item" tooltip="Add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></c2-icon-button>
+  <c2-icon-button class="dark-toolbar-item" tooltip="Camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
+  <c2-icon-button class="dark-toolbar-item" tooltip="More"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></c2-icon-button>
+</div>
+```
+
+</GalleryGrid>

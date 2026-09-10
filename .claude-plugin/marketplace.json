@@ -1,0 +1,18 @@
+{
+  "name": "c2n",
+  "owner": {
+    "name": "code2nguyen"
+  },
+  "metadata": {
+    "description": "c2n Lit web components: a Claude Code skill for the application workflow plus the @c2n/mcp server"
+  },
+  "plugins": [
+    {
+      "name": "c2n",
+      "description": "Apply c2n (c2-*) web components, @c2n/theme tokens and variant components in any project; bundles the @c2n/mcp server.",
+      "source": "./packages/tools/skill",
+      "category": "development",
+      "homepage": "https://code2nguyen.github.io/web-components/"
+    }
+  ]
+}

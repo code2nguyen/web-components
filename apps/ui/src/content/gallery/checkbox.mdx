@@ -1,0 +1,632 @@
+---
+description: 'Ready-made looks for c2-checkbox: fills, outlines, shapes, hover layers, borderless ticks and icon toggles built from inline SVG, Feather and Material icons. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import '@fontsource/material-icons'
+
+import { Checkbox } from '@c2n/checkbox'
+import { MatIcon } from '@c2n/mat-icon'
+import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
+import { FeatherMinusIcon as FeatherMinus } from '@c2n/feather-icons/icons/minus.js'
+import { FeatherHeartIcon as FeatherHeart } from '@c2n/feather-icons/icons/heart.js'
+import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
+import { FeatherBellOffIcon as FeatherBellOff } from '@c2n/feather-icons/icons/bell-off.js'
+import { FeatherSunIcon as FeatherSun } from '@c2n/feather-icons/icons/sun.js'
+import { FeatherMoonIcon as FeatherMoon } from '@c2n/feather-icons/icons/moon.js'
+import { FeatherVolume2Icon as FeatherVolume_2 } from '@c2n/feather-icons/icons/volume-2.js'
+import { FeatherVolumeXIcon as FeatherVolumeX } from '@c2n/feather-icons/icons/volume-x.js'
+
+## Box styles
+
+Every look below is a handful of `--c2-checkbox__container*` custom properties on top of the default blue fill.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-checkbox checked></c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Neutral
+<style>
+  .neutral {
+    --c2-checkbox__container__selected--background-color: #18181b;
+    --c2-checkbox__container--border-top: 1px solid #a1a1aa;
+    --c2-checkbox__container--border-right: 1px solid #a1a1aa;
+    --c2-checkbox__container--border-bottom: 1px solid #a1a1aa;
+    --c2-checkbox__container--border-left: 1px solid #a1a1aa;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
+  }
+</style>
+<c2-checkbox checked class="neutral"></c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Rounded brand
+<style>
+  .rounded-brand {
+    --c2-checkbox__container--border-top-left-radius: 999px;
+    --c2-checkbox__container--border-top-right-radius: 999px;
+    --c2-checkbox__container--border-bottom-left-radius: 999px;
+    --c2-checkbox__container--border-bottom-right-radius: 999px;
+    --c2-checkbox__container__selected--background-color: #7c3aed;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(124, 58, 237, 0.4);
+  }
+</style>
+<c2-checkbox checked class="rounded-brand"></c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Large square
+<style>
+  .large-square {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__checkmark--size: 16px;
+    --c2-checkbox__state-layer--size: 40px;
+    --c2-checkbox__container--border-top-left-radius: 2px;
+    --c2-checkbox__container--border-top-right-radius: 2px;
+    --c2-checkbox__container--border-bottom-left-radius: 2px;
+    --c2-checkbox__container--border-bottom-right-radius: 2px;
+    --c2-checkbox__container__selected--background-color: #18181b;
+  }
+</style>
+<c2-checkbox checked class="large-square"></c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Outline success
+<style>
+  .outline-success {
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__container__selected--border-top: 2px solid #16a34a;
+    --c2-checkbox__container__selected--border-right: 2px solid #16a34a;
+    --c2-checkbox__container__selected--border-bottom: 2px solid #16a34a;
+    --c2-checkbox__container__selected--border-left: 2px solid #16a34a;
+    --c2-checkbox__checkmark--color: #16a34a;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+  }
+</style>
+<c2-checkbox checked class="outline-success"></c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Soft tint
+<style>
+  .soft-tint {
+    --c2-checkbox__container--background-color: #f4f4f5;
+    --c2-checkbox__container--border-top: 1px solid transparent;
+    --c2-checkbox__container--border-right: 1px solid transparent;
+    --c2-checkbox__container--border-bottom: 1px solid transparent;
+    --c2-checkbox__container--border-left: 1px solid transparent;
+    --c2-checkbox__container__selected--background-color: #dbeafe;
+    --c2-checkbox__checkmark--color: #1d4ed8;
+    --c2-checkbox__mixedmark--color: #1d4ed8;
+  }
+</style>
+<c2-checkbox checked class="soft-tint"></c2-checkbox>
+```
+
+</GalleryGrid>
+
+## Hover and size
+
+The touch target is the hover layer. It is transparent by default: give it a colour for a tint, round it for the Material halo, or shrink it to the box for an inline checkbox.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Square hover tint
+<style>
+  .square-tint {
+    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
+    --c2-checkbox__state-layer__hover__selected--color: #476ef9;
+    --c2-checkbox__container__selected__hover--background-color: #2f56e6;
+  }
+</style>
+<c2-checkbox checked class="square-tint"></c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Material halo
+<style>
+  .material-halo {
+    --c2-checkbox__state-layer--size: 40px;
+    --c2-checkbox__state-layer--border-top-left-radius: 999px;
+    --c2-checkbox__state-layer--border-top-right-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+    --c2-checkbox__state-layer__hover__unselected--color: #bcbcc6;
+    --c2-checkbox__state-layer__hover__selected--color: #476ef9;
+  }
+</style>
+<c2-checkbox checked class="material-halo"></c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-checkbox__state-layer--size: 16px;
+    --c2-checkbox__container--width: 16px;
+    --c2-checkbox__container--height: 16px;
+    --c2-checkbox__checkmark--size: 11px;
+    --c2-checkbox__container--border-top-left-radius: 3px;
+    --c2-checkbox__container--border-top-right-radius: 3px;
+    --c2-checkbox__container--border-bottom-left-radius: 3px;
+    --c2-checkbox__container--border-bottom-right-radius: 3px;
+  }
+</style>
+<c2-checkbox checked class="compact"></c2-checkbox>
+```
+
+</GalleryGrid>
+
+## Marks and icon toggles
+
+The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the box (zero borders, transparent fills) and the checkbox becomes an icon toggle with native checkbox semantics.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Tick only
+<style>
+  .tick-only {
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 20px;
+    --c2-checkbox__checkmark--color: #2563eb;
+    --c2-checkbox__uncheckmark--size: 20px;
+    --c2-checkbox__uncheckmark--color: #d4d4d8;
+  }
+</style>
+<c2-checkbox checked class="tick-only">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  <svg slot="uncheckmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Stroke check
+<style>
+  .stroke-check {
+    --c2-checkbox__container--border-top: 1.5px solid #18181b;
+    --c2-checkbox__container--border-right: 1.5px solid #18181b;
+    --c2-checkbox__container--border-bottom: 1.5px solid #18181b;
+    --c2-checkbox__container--border-left: 1.5px solid #18181b;
+    --c2-checkbox__container__selected--background-color: #18181b;
+    --c2-checkbox__checkmark--size: 12px;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
+  }
+</style>
+<c2-checkbox checked class="stroke-check">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Circle
+<style>
+  .circle {
+    --c2-checkbox__container--width: 20px;
+    --c2-checkbox__container--height: 20px;
+    --c2-checkbox__container--border-top-left-radius: 999px;
+    --c2-checkbox__container--border-top-right-radius: 999px;
+    --c2-checkbox__container--border-bottom-left-radius: 999px;
+    --c2-checkbox__container--border-bottom-right-radius: 999px;
+    --c2-checkbox__container--border-top: 1.5px solid #a1a1aa;
+    --c2-checkbox__container--border-right: 1.5px solid #a1a1aa;
+    --c2-checkbox__container--border-bottom: 1.5px solid #a1a1aa;
+    --c2-checkbox__container--border-left: 1.5px solid #a1a1aa;
+    --c2-checkbox__container__selected--background-color: #16a34a;
+    --c2-checkbox__checkmark--size: 12px;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+  }
+</style>
+<c2-checkbox checked class="circle">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Cross mark
+<style>
+  .cross-mark {
+    --c2-checkbox__container__selected--background-color: #dc2626;
+    --c2-checkbox__checkmark--size: 12px;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(220, 38, 38, 0.4);
+  }
+</style>
+<c2-checkbox checked class="cross-mark">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Favourite
+<style>
+  .favourite {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 22px;
+    --c2-checkbox__checkmark--color: #e11d48;
+    --c2-checkbox__uncheckmark--size: 22px;
+    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer--border-top-left-radius: 999px;
+    --c2-checkbox__state-layer--border-top-right-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+    --c2-checkbox__state-layer__hover__unselected--color: #e11d48;
+    --c2-checkbox__state-layer__hover__selected--color: #e11d48;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(225, 29, 72, 0.4);
+  }
+</style>
+<c2-checkbox checked class="favourite">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+  <svg slot="uncheckmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Star
+<style>
+  .star {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 22px;
+    --c2-checkbox__checkmark--color: #f59e0b;
+    --c2-checkbox__uncheckmark--size: 22px;
+    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer--border-top-left-radius: 999px;
+    --c2-checkbox__state-layer--border-top-right-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+    --c2-checkbox__state-layer__hover__unselected--color: #f59e0b;
+    --c2-checkbox__state-layer__hover__selected--color: #f59e0b;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(245, 158, 11, 0.4);
+  }
+</style>
+<c2-checkbox checked class="star">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+  <svg slot="uncheckmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Bookmark
+<style>
+  .bookmark {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 22px;
+    --c2-checkbox__checkmark--color: #18181b;
+    --c2-checkbox__uncheckmark--size: 22px;
+    --c2-checkbox__uncheckmark--color: #52525b;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
+    --c2-checkbox__state-layer__hover__selected--color: #18181b;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
+  }
+</style>
+<c2-checkbox checked class="bookmark">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+  <svg slot="uncheckmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Visibility
+<style>
+  .visibility {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 20px;
+    --c2-checkbox__checkmark--color: #18181b;
+    --c2-checkbox__uncheckmark--size: 20px;
+    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
+    --c2-checkbox__state-layer__hover__selected--color: #18181b;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
+  }
+</style>
+<c2-checkbox checked class="visibility">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-4-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+  <svg slot="uncheckmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Thumbs up
+<style>
+  .thumbs-up {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 20px;
+    --c2-checkbox__checkmark--color: #2563eb;
+    --c2-checkbox__uncheckmark--size: 20px;
+    --c2-checkbox__uncheckmark--color: #71717a;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer--border-top-left-radius: 999px;
+    --c2-checkbox__state-layer--border-top-right-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+    --c2-checkbox__state-layer__hover__unselected--color: #2563eb;
+    --c2-checkbox__state-layer__hover__selected--color: #2563eb;
+  }
+</style>
+<c2-checkbox checked class="thumbs-up">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+  <svg slot="uncheckmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Lock
+<style>
+  .lock {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 20px;
+    --c2-checkbox__checkmark--color: #b45309;
+    --c2-checkbox__uncheckmark--size: 20px;
+    --c2-checkbox__uncheckmark--color: #71717a;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer__hover__unselected--color: #b45309;
+    --c2-checkbox__state-layer__hover__selected--color: #b45309;
+  }
+</style>
+<c2-checkbox checked class="lock">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+  <svg slot="uncheckmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Task done
+<style>
+  .task-done {
+    --c2-checkbox__container--width: 22px;
+    --c2-checkbox__container--height: 22px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 22px;
+    --c2-checkbox__checkmark--color: #16a34a;
+    --c2-checkbox__uncheckmark--size: 22px;
+    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+  }
+</style>
+<c2-checkbox checked class="task-done">
+  <svg slot="checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+  <svg slot="uncheckmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+</c2-checkbox>
+```
+
+</GalleryGrid>
+
+## With icon components
+
+The marks can also be the library's own icons: drop a `c2-feather-*` element or a `c2-mat-icon` ligature into a slot and the checkbox sizes it through `--c2-checkbox__checkmark--size` and friends.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Feather check
+<style>
+  .feather-check {
+    --c2-checkbox__checkmark--size: 14px;
+    --c2-checkbox__mixedmark--size: 14px;
+  }
+</style>
+<c2-checkbox checked class="feather-check">
+  <c2-feather-check slot="checkmark" style="--c2-feather-icon--stroke-width: 3"></c2-feather-check>
+  <c2-feather-minus slot="mixedmark" style="--c2-feather-icon--stroke-width: 3"></c2-feather-minus>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Material check
+<style>
+  .material-check {
+    --c2-checkbox__container__selected--background-color: #18181b;
+    --c2-checkbox__checkmark--size: 16px;
+    --c2-checkbox__mixedmark--size: 16px;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
+  }
+</style>
+<c2-checkbox checked class="material-check">
+  <c2-mat-icon slot="checkmark">done</c2-mat-icon>
+  <c2-mat-icon slot="mixedmark">remove</c2-mat-icon>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Feather heart
+<style>
+  .feather-heart {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 22px;
+    --c2-checkbox__checkmark--color: #e11d48;
+    --c2-checkbox__uncheckmark--size: 22px;
+    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer--border-top-left-radius: 999px;
+    --c2-checkbox__state-layer--border-top-right-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+    --c2-checkbox__state-layer__hover__unselected--color: #e11d48;
+    --c2-checkbox__state-layer__hover__selected--color: #e11d48;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(225, 29, 72, 0.4);
+  }
+</style>
+<c2-checkbox checked class="feather-heart">
+  <c2-feather-heart slot="checkmark" style="--c2-feather-icon--stroke-width: 2.5"></c2-feather-heart>
+  <c2-feather-heart slot="uncheckmark"></c2-feather-heart>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Material favourite
+<style>
+  .material-favourite {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 24px;
+    --c2-checkbox__checkmark--color: #e11d48;
+    --c2-checkbox__uncheckmark--size: 24px;
+    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer--border-top-left-radius: 999px;
+    --c2-checkbox__state-layer--border-top-right-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+    --c2-checkbox__state-layer__hover__unselected--color: #e11d48;
+    --c2-checkbox__state-layer__hover__selected--color: #e11d48;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(225, 29, 72, 0.4);
+  }
+</style>
+<c2-checkbox checked class="material-favourite">
+  <c2-mat-icon slot="checkmark">favorite</c2-mat-icon>
+  <c2-mat-icon slot="uncheckmark">favorite_border</c2-mat-icon>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Material star
+<style>
+  .material-star {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 24px;
+    --c2-checkbox__checkmark--color: #f59e0b;
+    --c2-checkbox__uncheckmark--size: 24px;
+    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer--border-top-left-radius: 999px;
+    --c2-checkbox__state-layer--border-top-right-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+    --c2-checkbox__state-layer__hover__unselected--color: #f59e0b;
+    --c2-checkbox__state-layer__hover__selected--color: #f59e0b;
+  }
+</style>
+<c2-checkbox checked class="material-star">
+  <c2-mat-icon slot="checkmark">star</c2-mat-icon>
+  <c2-mat-icon slot="uncheckmark">star_border</c2-mat-icon>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Notifications
+<style>
+  .notifications {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 20px;
+    --c2-checkbox__checkmark--color: #2563eb;
+    --c2-checkbox__uncheckmark--size: 20px;
+    --c2-checkbox__uncheckmark--color: #71717a;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer__hover__unselected--color: #2563eb;
+    --c2-checkbox__state-layer__hover__selected--color: #2563eb;
+  }
+</style>
+<c2-checkbox checked class="notifications">
+  <c2-feather-bell slot="checkmark"></c2-feather-bell>
+  <c2-feather-bell-off slot="uncheckmark"></c2-feather-bell-off>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Theme
+<style>
+  .theme {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 20px;
+    --c2-checkbox__checkmark--color: #18181b;
+    --c2-checkbox__uncheckmark--size: 20px;
+    --c2-checkbox__uncheckmark--color: #f59e0b;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer--border-top-left-radius: 999px;
+    --c2-checkbox__state-layer--border-top-right-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
+    --c2-checkbox__state-layer__hover__unselected--color: #f59e0b;
+    --c2-checkbox__state-layer__hover__selected--color: #18181b;
+  }
+</style>
+<c2-checkbox checked class="theme">
+  <c2-feather-moon slot="checkmark"></c2-feather-moon>
+  <c2-feather-sun slot="uncheckmark"></c2-feather-sun>
+</c2-checkbox>
+```
+
+```html tag=MdxCodeBlock,label=Mute
+<style>
+  .mute {
+    --c2-checkbox__container--width: 24px;
+    --c2-checkbox__container--height: 24px;
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 20px;
+    --c2-checkbox__checkmark--color: #dc2626;
+    --c2-checkbox__uncheckmark--size: 20px;
+    --c2-checkbox__uncheckmark--color: #18181b;
+    --c2-checkbox__state-layer--size: 36px;
+    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
+    --c2-checkbox__state-layer__hover__selected--color: #dc2626;
+  }
+</style>
+<c2-checkbox class="mute">
+  <c2-feather-volume-x slot="checkmark"></c2-feather-volume-x>
+  <c2-feather-volume-2 slot="uncheckmark"></c2-feather-volume-2>
+</c2-checkbox>
+```
+
+</GalleryGrid>

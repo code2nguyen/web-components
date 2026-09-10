@@ -1,0 +1,105 @@
+---
+title: 'Checkbox'
+description: 'Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import '@fontsource/material-icons'
+
+import { Checkbox } from '@c2n/checkbox'
+import { MatIcon } from '@c2n/mat-icon'
+import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
+import { FeatherHeartIcon as FeatherHeart } from '@c2n/feather-icons/icons/heart.js'
+
+`c2-checkbox` wraps a native `<input type="checkbox">`, so `checked`, `indeterminate`, `disabled`, `name` and the `change` event behave exactly like the built-in control. The visible box sits centred in a square touch target whose size is `--c2-checkbox__state-layer--size`; that same square is the hover layer, transparent by default. Set a `state-layer__hover__*--color` to tint it, or shrink it to the box size for a compact inline checkbox. Keyboard focus draws a ring around the box. The three marks are slots that take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` ligature.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/checkbox
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/checkbox
+<style>
+  .field {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+  }
+  .hover-tint {
+    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
+    --c2-checkbox__state-layer__hover__selected--color: #476ef9;
+  }
+  .compact {
+    --c2-checkbox__state-layer--size: 18px;
+  }
+  .heart-toggle {
+    --c2-checkbox__container--border-top: 0px solid transparent;
+    --c2-checkbox__container--border-right: 0px solid transparent;
+    --c2-checkbox__container--border-bottom: 0px solid transparent;
+    --c2-checkbox__container--border-left: 0px solid transparent;
+    --c2-checkbox__container__selected--background-color: transparent;
+    --c2-checkbox__checkmark--size: 20px;
+    --c2-checkbox__checkmark--color: #e11d48;
+    --c2-checkbox__uncheckmark--size: 20px;
+    --c2-checkbox__uncheckmark--color: #a1a1aa;
+  }
+</style>
+<div data-label="States">
+  <span class="field"><c2-checkbox></c2-checkbox> Unchecked</span>
+  <span class="field"><c2-checkbox indeterminate></c2-checkbox> Indeterminate</span>
+  <span class="field"><c2-checkbox checked></c2-checkbox> Checked</span>
+</div>
+<div data-label="Disabled">
+  <span class="field"><c2-checkbox disabled></c2-checkbox> Unchecked</span>
+  <span class="field"><c2-checkbox indeterminate disabled></c2-checkbox> Indeterminate</span>
+  <span class="field"><c2-checkbox checked disabled></c2-checkbox> Checked</span>
+</div>
+<div data-label="Hover tint">
+  <span class="field"><c2-checkbox class="hover-tint"></c2-checkbox> Hover me</span>
+  <span class="field"><c2-checkbox class="hover-tint" checked></c2-checkbox> Hover me</span>
+</div>
+<div data-label="Compact">
+  <span class="field"><c2-checkbox class="compact"></c2-checkbox> No touch padding</span>
+  <span class="field"><c2-checkbox class="compact" checked></c2-checkbox> No touch padding</span>
+</div>
+<div data-label="Custom marks">
+  <c2-checkbox checked style="--c2-checkbox__checkmark--size: 10px">
+    <svg slot="checkmark" viewBox="0 0 10 7" fill="none">
+      <path d="M9 1L3.5 6L1 3.72727" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+  </c2-checkbox>
+  <c2-checkbox indeterminate style="--c2-checkbox__mixedmark--size: 8px">
+    <svg slot="mixedmark" viewBox="0 0 10 2">
+      <rect width="10" height="2" rx="1" fill="currentColor"></rect>
+    </svg>
+  </c2-checkbox>
+  <c2-checkbox style="--c2-checkbox__uncheckmark--color: #bcbcc6">
+    <svg slot="uncheckmark" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M19 13H5v-2h14v2z"></path>
+    </svg>
+  </c2-checkbox>
+</div>
+<div data-label="Icon components">
+  <c2-checkbox checked style="--c2-checkbox__checkmark--size: 14px">
+    <c2-feather-check slot="checkmark" style="--c2-feather-icon--stroke-width: 3"></c2-feather-check>
+  </c2-checkbox>
+  <c2-checkbox checked style="--c2-checkbox__checkmark--size: 16px">
+    <c2-mat-icon slot="checkmark">done</c2-mat-icon>
+  </c2-checkbox>
+  <c2-checkbox checked class="heart-toggle">
+    <c2-feather-heart slot="checkmark"></c2-feather-heart>
+    <c2-feather-heart slot="uncheckmark"></c2-feather-heart>
+  </c2-checkbox>
+  <c2-checkbox class="heart-toggle">
+    <c2-mat-icon slot="checkmark">favorite</c2-mat-icon>
+    <c2-mat-icon slot="uncheckmark">favorite_border</c2-mat-icon>
+  </c2-checkbox>
+</div>
+```

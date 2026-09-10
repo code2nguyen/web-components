@@ -1,0 +1,91 @@
+---
+title: 'Card'
+description: 'Groups related content and actions on a single bordered surface.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Card } from '@c2n/card'
+import { Button } from '@c2n/button'
+
+`c2-card` is a surface with four optional sections: `media` (an image or any block that bleeds to the edges and is clipped to the card radius), `header`, the default slot for the body, and `footer` (a flex row for actions). A section is rendered only when its slot has content, so a bare `<c2-card>text</c2-card>` is just a padded box. Set `href` to make the whole card a link, or `interactive` to give it button semantics (focusable, Enter and Space click it). `disabled` dims the card and blocks interaction. Hover, focus and disabled looks are all tokens; `--c2-card__hover--transform` with a hover shadow gives the classic lift.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/card
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/card
+<style>
+  .card {
+    width: 260px;
+  }
+  .card .title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .card .text {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #71717a;
+  }
+  .card .cover {
+    height: 110px;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+  }
+  .card .ghost {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+  }
+  .lift {
+    --c2-card--box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --c2-card__hover--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --c2-card__hover--transform: translateY(-2px);
+  }
+</style>
+<div data-label="Default">
+  <c2-card class="card">
+    <p class="text">A bare card is a padded, bordered box. Put anything in the default slot.</p>
+  </c2-card>
+</div>
+<div data-label="Header, body, footer">
+  <c2-card class="card" client:load>
+    <h3 slot="header" class="title">Invite your team</h3>
+    <p class="text">Sections render only when their slot has content, each with its own padding tokens.</p>
+    <c2-button slot="footer" class="ghost">Later</c2-button>
+    <c2-button slot="footer">Invite</c2-button>
+  </c2-card>
+</div>
+<div data-label="Media">
+  <c2-card class="card lift">
+    <div slot="media" class="cover"></div>
+    <h3 slot="header" class="title">Northern lights</h3>
+    <p class="text">The media slot bleeds to the edges and is clipped to the card radius. Hover to see the lift.</p>
+  </c2-card>
+</div>
+<div data-label="Link and interactive">
+  <c2-card class="card lift" href="https://github.com/code2nguyen/web-components" target="_blank" rel="noopener noreferrer">
+    <h3 slot="header" class="title">Link card ↗</h3>
+    <p class="text">With <code>href</code> the whole card is an anchor.</p>
+  </c2-card>
+  <c2-card class="card lift" interactive>
+    <h3 slot="header" class="title">Interactive card</h3>
+    <p class="text">Focusable with a ring; Enter and Space dispatch <code>click</code>.</p>
+  </c2-card>
+</div>
+<div data-label="Disabled">
+  <c2-card class="card" disabled interactive>
+    <h3 slot="header" class="title">Archived project</h3>
+    <p class="text">Dimmed and inert.</p>
+  </c2-card>
+</div>
+```

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Toast manager</title>
+    <style>
+      body {
+        padding: 32px;
+        font-family: system-ui;
+      }
+      .examples {
+        display: grid;
+        gap: 16px;
+        max-width: 360px;
+        margin-top: 24px;
+      }
+      .soft {
+        --c2-toast__container--background: #f0fdf4;
+        --c2-toast__container--color: #14532d;
+      }
+      button {
+        padding: 8px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Toast manager</h1>
+    <button id="single">Show notification</button>
+    <button id="burst">Send 8 notifications</button>
+    <button id="persistent">Persistent notification</button>
+    <button id="update">Update persistent</button>
+    <button id="clear">Clear all</button>
+    <div class="examples">
+      <c2-toast message="Default notification"></c2-toast>
+      <c2-toast class="soft" variant="success" heading="Saved" message="Your work is up to date."></c2-toast>
+      <c2-toast variant="warning" dismissible heading="Storage almost full">Please free up some space.</c2-toast>
+      <c2-toast variant="error" heading="Upload failed" message="Check your connection."><button slot="action">Custom action</button></c2-toast>
+    </div>
+    <script type="module">
+      import { toast } from './src/toast.ts'
+      let count = 0
+      const show = () => toast.show({ heading: `Notification ${++count}`, message: 'A new update arrived.', variant: 'info' })
+      document.querySelector('#single').addEventListener('click', show)
+      document.querySelector('#burst').addEventListener('click', () => {
+        for (let i = 0; i < 8; i++) show()
+      })
+      document.querySelector('#persistent').addEventListener('click', () => toast.show({ id: 'upload', message: 'Uploading…', duration: 0 }))
+      document
+        .querySelector('#update')
+        .addEventListener('click', () => toast.update('upload', { message: 'Upload complete', variant: 'success', duration: 5000 }))
+      document.querySelector('#clear').addEventListener('click', () => toast.clear())
+    </script>
+  </body>
+</html>

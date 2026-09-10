@@ -1,0 +1,194 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Avatar } from '@c2n/avatar'
+
+## Presets
+
+Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--c2-avatar--size` sets the box and the font follows; `--c2-avatar--box-shadow` draws rings without touching layout; the `auto-color` hue is tuned with the `__auto-color` tokens and the dot or slotted badge with `__badge`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Large soft
+<style>
+  .large-soft {
+    --c2-avatar--size: 48px;
+    --c2-avatar--background: #ede9fe;
+    --c2-avatar--color: #5b21b6;
+  }
+</style>
+<c2-avatar name="Elisa Jasmin" initial-count="2" class="large-soft" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Squircle
+<style>
+  .squircle {
+    --c2-avatar--size: 40px;
+    --c2-avatar--border-top-left-radius: 10px;
+    --c2-avatar--border-top-right-radius: 10px;
+    --c2-avatar--border-bottom-left-radius: 10px;
+    --c2-avatar--border-bottom-right-radius: 10px;
+    --c2-avatar--background: #0f766e;
+  }
+</style>
+<c2-avatar name="Elisa Jasmin" initial-count="2" class="squircle" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Outlined
+<style>
+  .outlined {
+    --c2-avatar--size: 40px;
+    --c2-avatar--background: transparent;
+    --c2-avatar--color: #18181b;
+    --c2-avatar--border-top: 2px solid #18181b;
+    --c2-avatar--border-right: 2px solid #18181b;
+    --c2-avatar--border-bottom: 2px solid #18181b;
+    --c2-avatar--border-left: 2px solid #18181b;
+  }
+</style>
+<c2-avatar name="Elisa Jasmin" initial-count="2" class="outlined" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Gradient
+<style>
+  .gradient {
+    --c2-avatar--size: 48px;
+    --c2-avatar--background: linear-gradient(135deg, #f97316, #ec4899 60%, #8b5cf6);
+    --c2-avatar--font-weight: 700;
+    --c2-avatar--box-shadow: 0 6px 16px rgba(236, 72, 153, 0.35);
+  }
+</style>
+<c2-avatar name="Elisa Jasmin" initial-count="2" class="gradient" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Ring
+<style>
+  .ring {
+    --c2-avatar--size: 44px;
+    --c2-avatar--background: #2563eb;
+    --c2-avatar--box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #2563eb;
+  }
+</style>
+<c2-avatar name="Elisa Jasmin" initial-count="2" class="ring" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Photo
+<style>
+  .photo {
+    --c2-avatar--size: 56px;
+    --c2-avatar--border-top-left-radius: 14px;
+    --c2-avatar--border-top-right-radius: 14px;
+    --c2-avatar--border-bottom-left-radius: 14px;
+    --c2-avatar--border-bottom-right-radius: 14px;
+    --c2-avatar--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
+</style>
+<c2-avatar name="Elisa Jasmin" src="/web-components/chat.avif" class="photo" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Online
+<style>
+  .online {
+    --c2-avatar--size: 44px;
+    --c2-avatar__badge--size: 12px;
+    --c2-avatar__badge--border: 2px solid #ffffff;
+  }
+</style>
+<c2-avatar name="Elisa Jasmin" initial-count="2" class="online" status="online" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Count badge
+<style>
+  .count-badge {
+    --c2-avatar--size: 44px;
+    --c2-avatar--background: #18181b;
+    --c2-avatar__badge--offset: 2px;
+  }
+  .count-badge .count {
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 5px;
+  }
+</style>
+<c2-avatar name="Elisa Jasmin" initial-count="2" class="count-badge" client:only="lit"><span slot="badge" class="count">3</span></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Auto color
+<style>
+  .auto {
+    --c2-avatar--size: 36px;
+    --c2-avatar__auto-color--saturation: 65%;
+    --c2-avatar__auto-color--lightness: 45%;
+  }
+  .auto-row {
+    display: flex;
+    gap: 8px;
+  }
+</style>
+<div class="auto-row">
+  <c2-avatar auto-color name="Ada Lovelace" initial-count="2" class="auto" client:only="lit"></c2-avatar>
+  <c2-avatar auto-color name="Grace Hopper" initial-count="2" class="auto" client:only="lit"></c2-avatar>
+  <c2-avatar auto-color name="Alan Turing" initial-count="2" class="auto" client:only="lit"></c2-avatar>
+  <c2-avatar auto-color name="Katherine Johnson" initial-count="2" class="auto" client:only="lit"></c2-avatar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Pastel auto color
+<style>
+  .pastel {
+    --c2-avatar--size: 36px;
+    --c2-avatar--color: #18181b;
+    --c2-avatar__auto-color--saturation: 70%;
+    --c2-avatar__auto-color--lightness: 85%;
+  }
+  .pastel-row {
+    display: flex;
+    gap: 8px;
+  }
+</style>
+<div class="pastel-row">
+  <c2-avatar auto-color name="Ada Lovelace" initial-count="2" class="pastel" client:only="lit"></c2-avatar>
+  <c2-avatar auto-color name="Grace Hopper" initial-count="2" class="pastel" client:only="lit"></c2-avatar>
+  <c2-avatar auto-color name="Alan Turing" initial-count="2" class="pastel" client:only="lit"></c2-avatar>
+  <c2-avatar auto-color name="Katherine Johnson" initial-count="2" class="pastel" client:only="lit"></c2-avatar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Stacked group
+<style>
+  .stacked {
+    --c2-avatar--size: 36px;
+    --c2-avatar--box-shadow: 0 0 0 2px #ffffff;
+  }
+  .stacked-row {
+    display: flex;
+  }
+  .stacked-row c2-avatar + c2-avatar {
+    margin-left: -12px;
+  }
+</style>
+<div class="stacked-row">
+  <c2-avatar auto-color name="Ada Lovelace" initial-count="2" class="stacked" client:only="lit"></c2-avatar>
+  <c2-avatar auto-color name="Grace Hopper" initial-count="2" class="stacked" client:only="lit"></c2-avatar>
+  <c2-avatar auto-color name="Alan Turing" initial-count="2" class="stacked" client:only="lit"></c2-avatar>
+  <c2-avatar initials="+6" class="stacked" style="--c2-avatar--background: #e4e4e7; --c2-avatar--color: #52525b; --c2-avatar--font-size: 12px" client:only="lit"></c2-avatar>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Icon
+<style>
+  .icon {
+    --c2-avatar--size: 44px;
+    --c2-avatar--background: #f4f4f5;
+    --c2-avatar--color: #52525b;
+  }
+</style>
+<c2-avatar name="Team" class="icon" client:only="lit">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+</c2-avatar>
+```
+
+</GalleryGrid>

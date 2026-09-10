@@ -1,0 +1,99 @@
+---
+title: 'Tooltip'
+description: 'Contextual hint shown when its target is hovered or focused, rendered in the top layer.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Tooltip } from '@c2n/tooltip'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
+
+`c2-tooltip` describes the element it sits in: drop it inside a button and the button is the target, or point it at another element with `for="<id>"`. It shows after `delay` milliseconds on hover or focus and hides on leave, blur, press or Escape. The text is the slotted content, or the target's `data-tooltip` attribute when the slot is empty. It renders as a `popover` in the top layer, so it is never clipped by `overflow: hidden` or scrolling ancestors, and floating-ui flips the preferred `placement` when there is no room (the side in use is reflected as `current-placement`). The tooltip has `role="tooltip"` and the target gets `aria-describedby`, so screen readers announce it. `c2-icon-button` uses it for its `tooltip` attribute.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/tooltip
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/tooltip
+<style>
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+  .trigger:hover {
+    background: #f4f4f5;
+  }
+  .clip {
+    overflow: hidden;
+    width: 200px;
+    height: 56px;
+    border: 1px dashed #a1a1aa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .term {
+    text-decoration: underline dotted;
+    cursor: help;
+    font-size: 14px;
+  }
+  .light {
+    --c2-tooltip--background-color: #ffffff;
+    --c2-tooltip--color: #18181b;
+    --c2-tooltip--border: 1px solid #e4e4e7;
+    --c2-tooltip--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+  kbd {
+    font: inherit;
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+</style>
+<div data-label="Placements">
+  <button class="trigger">top<c2-tooltip client:only="lit">Default placement</c2-tooltip></button>
+  <button class="trigger">bottom<c2-tooltip placement="bottom" client:only="lit">Below the button</c2-tooltip></button>
+  <button class="trigger">left<c2-tooltip placement="left" client:only="lit">To the left</c2-tooltip></button>
+  <button class="trigger">right<c2-tooltip placement="right" client:only="lit">To the right</c2-tooltip></button>
+</div>
+<div data-label="Never clipped">
+  <div class="clip"><button class="trigger">Hover me<c2-tooltip client:only="lit">Escapes the overflow: hidden box</c2-tooltip></button></div>
+</div>
+<div data-label="Rich content and delays">
+  <button class="trigger">Save<c2-tooltip client:only="lit">Save changes <kbd>⌘S</kbd></c2-tooltip></button>
+  <button class="trigger">Instant<c2-tooltip delay="0" hide-delay="400" client:only="lit">No delay, lingers 400 ms</c2-tooltip></button>
+  <button class="trigger">No arrow<c2-tooltip hide-arrow client:only="lit">Arrow hidden</c2-tooltip></button>
+</div>
+<div data-label="Target by id and data-tooltip">
+  <span class="term" id="tt-term" tabindex="0">HTTP</span>
+  <c2-tooltip for="tt-term" placement="bottom" client:only="lit">Hypertext Transfer Protocol</c2-tooltip>
+  <button class="trigger" data-tooltip="Read from data-tooltip">data-tooltip<c2-tooltip client:only="lit"></c2-tooltip></button>
+</div>
+<div data-label="On an icon button">
+  <c2-icon-button tooltip="Delete" client:load><c2-feather-trash></c2-feather-trash></c2-icon-button>
+</div>
+<div data-label="Light theme">
+  <button class="trigger light">Light<c2-tooltip client:only="lit">Light bubble with a border and shadow</c2-tooltip></button>
+</div>
+```
+
+```ts tag=CodeBlock
+const tooltip = document.querySelector('c2-tooltip')
+tooltip.addEventListener('show', () => console.log(tooltip.getAttribute('current-placement')))
+tooltip.open = true // show programmatically; false hides
+```

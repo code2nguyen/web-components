@@ -1,0 +1,464 @@
+---
+description: 'Ready-made looks for c2-select: trigger variants, sizes, icons, dropdown and option styling, multiple selection. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Select } from '@c2n/select'
+import { ListItem } from '@c2n/list-item'
+
+## Trigger
+
+The trigger is the `--c2-select__button--*` family: a border per side, radius per corner, and `__hover`, `__open`, `__focus` states. Every card below keeps the default dropdown.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 190px;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="default" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Soft filled
+<style>
+  .soft-filled {
+    width: 190px;
+    --c2-select__button--background: #f4f4f5;
+    --c2-select__button__hover--background: #e4e4e7;
+    --c2-select__button--border-top: 1px solid transparent;
+    --c2-select__button--border-right: 1px solid transparent;
+    --c2-select__button--border-bottom: 1px solid transparent;
+    --c2-select__button--border-left: 1px solid transparent;
+    --c2-select__button__hover--border-top: 1px solid transparent;
+    --c2-select__button__hover--border-right: 1px solid transparent;
+    --c2-select__button__hover--border-bottom: 1px solid transparent;
+    --c2-select__button__hover--border-left: 1px solid transparent;
+    --c2-select__button__open--border-top: 1px solid transparent;
+    --c2-select__button__open--border-right: 1px solid transparent;
+    --c2-select__button__open--border-bottom: 1px solid transparent;
+    --c2-select__button__open--border-left: 1px solid transparent;
+    --c2-select__button--border-top-left-radius: 10px;
+    --c2-select__button--border-top-right-radius: 10px;
+    --c2-select__button--border-bottom-left-radius: 10px;
+    --c2-select__button--border-bottom-right-radius: 10px;
+    --c2-select__button--padding: 8px 12px 8px 12px;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="soft-filled" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    width: 190px;
+    --c2-select__button--border-top-left-radius: 999px;
+    --c2-select__button--border-top-right-radius: 999px;
+    --c2-select__button--border-bottom-left-radius: 999px;
+    --c2-select__button--border-bottom-right-radius: 999px;
+    --c2-select__button--padding: 8px 12px 8px 16px;
+    --c2-select__list--border-top-left-radius: 14px;
+    --c2-select__list--border-top-right-radius: 14px;
+    --c2-select__list--border-bottom-left-radius: 14px;
+    --c2-select__list--border-bottom-right-radius: 14px;
+    --c2-select__list--padding-top: 6px;
+    --c2-select__list--padding-right: 6px;
+    --c2-select__list--padding-bottom: 6px;
+    --c2-select__list--padding-left: 6px;
+    --c2-list-item--border-top-left-radius: 999px;
+    --c2-list-item--border-top-right-radius: 999px;
+    --c2-list-item--border-bottom-left-radius: 999px;
+    --c2-list-item--border-bottom-right-radius: 999px;
+    --c2-list-item--padding-left: 14px;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="pill" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Underline
+<style>
+  .underline {
+    width: 190px;
+    --c2-select__button--background: transparent;
+    --c2-select__button__hover--background: transparent;
+    --c2-select__button--padding: 8px 4px 8px 4px;
+    --c2-select__button--border-top: 0px solid transparent;
+    --c2-select__button--border-right: 0px solid transparent;
+    --c2-select__button--border-left: 0px solid transparent;
+    --c2-select__button--border-bottom: 1px solid #d4d4d8;
+    --c2-select__button__hover--border-top: 0px solid transparent;
+    --c2-select__button__hover--border-right: 0px solid transparent;
+    --c2-select__button__hover--border-left: 0px solid transparent;
+    --c2-select__button__hover--border-bottom: 1px solid #71717a;
+    --c2-select__button__open--border-top: 0px solid transparent;
+    --c2-select__button__open--border-right: 0px solid transparent;
+    --c2-select__button__open--border-left: 0px solid transparent;
+    --c2-select__button__open--border-bottom: 2px solid #476ef9;
+    --c2-select__button--border-top-left-radius: 0px;
+    --c2-select__button--border-top-right-radius: 0px;
+    --c2-select__button--border-bottom-left-radius: 0px;
+    --c2-select__button--border-bottom-right-radius: 0px;
+    --c2-select__button__focus--outline: 0px solid transparent;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="underline" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Brand outline
+<style>
+  .brand-outline {
+    width: 190px;
+    --c2-select__button--color: #7c3aed;
+    --c2-select__button__hover--color: #6d28d9;
+    --c2-select__button__suffix-icon--color: #7c3aed;
+    --c2-select__button--border-top: 1px solid #7c3aed;
+    --c2-select__button--border-right: 1px solid #7c3aed;
+    --c2-select__button--border-bottom: 1px solid #7c3aed;
+    --c2-select__button--border-left: 1px solid #7c3aed;
+    --c2-select__button__hover--border-top: 1px solid #6d28d9;
+    --c2-select__button__hover--border-right: 1px solid #6d28d9;
+    --c2-select__button__hover--border-bottom: 1px solid #6d28d9;
+    --c2-select__button__hover--border-left: 1px solid #6d28d9;
+    --c2-select__button__hover--background: #f5f3ff;
+    --c2-select__button__open--border-top: 1px solid #6d28d9;
+    --c2-select__button__open--border-right: 1px solid #6d28d9;
+    --c2-select__button__open--border-bottom: 1px solid #6d28d9;
+    --c2-select__button__open--border-left: 1px solid #6d28d9;
+    --c2-select__button__focus--outline: 2px solid rgba(124, 58, 237, 0.35);
+    --c2-list-item__selected--background: #f5f3ff;
+    --c2-list-item__selected--color: #6d28d9;
+    --c2-list-item__selected__hover--background: #ede9fe;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="brand-outline" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    width: 190px;
+    --c2-select__button--background: #18181b;
+    --c2-select__button__hover--background: #27272a;
+    --c2-select__button--color: #f4f4f5;
+    --c2-select__button__hover--color: #ffffff;
+    --c2-select__button__suffix-icon--color: #a1a1aa;
+    --c2-select__placeholder--color: #a1a1aa;
+    --c2-select__button--border-top: 1px solid #3f3f46;
+    --c2-select__button--border-right: 1px solid #3f3f46;
+    --c2-select__button--border-bottom: 1px solid #3f3f46;
+    --c2-select__button--border-left: 1px solid #3f3f46;
+    --c2-select__button__hover--border-top: 1px solid #52525b;
+    --c2-select__button__hover--border-right: 1px solid #52525b;
+    --c2-select__button__hover--border-bottom: 1px solid #52525b;
+    --c2-select__button__hover--border-left: 1px solid #52525b;
+    --c2-select__button__open--border-top: 1px solid #71717a;
+    --c2-select__button__open--border-right: 1px solid #71717a;
+    --c2-select__button__open--border-bottom: 1px solid #71717a;
+    --c2-select__button__open--border-left: 1px solid #71717a;
+    --c2-select__button__focus--outline: 2px solid rgba(244, 244, 245, 0.25);
+    --c2-select__list--background: #18181b;
+    --c2-select__list--border-top: 1px solid #3f3f46;
+    --c2-select__list--border-right: 1px solid #3f3f46;
+    --c2-select__list--border-bottom: 1px solid #3f3f46;
+    --c2-select__list--border-left: 1px solid #3f3f46;
+    --c2-select__list--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --c2-list-item--color: #e4e4e7;
+    --c2-list-item__hover--background: #27272a;
+    --c2-list-item__selected--background: #3f3f46;
+    --c2-list-item__selected--color: #ffffff;
+    --c2-list-item__selected__hover--background: #52525b;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="dark" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 150px;
+    --c2-select__button--min-height: 28px;
+    --c2-select__button--font-size: 13px;
+    --c2-select__button--padding: 3px 6px 3px 8px;
+    --c2-select__button--gap: 4px;
+    --c2-select__button__suffix-icon--width: 14px;
+    --c2-select__button__suffix-icon--height: 14px;
+    --c2-select__button--border-top-left-radius: 4px;
+    --c2-select__button--border-top-right-radius: 4px;
+    --c2-select__button--border-bottom-left-radius: 4px;
+    --c2-select__button--border-bottom-right-radius: 4px;
+    --c2-select__list--border-top-left-radius: 6px;
+    --c2-select__list--border-top-right-radius: 6px;
+    --c2-select__list--border-bottom-left-radius: 6px;
+    --c2-select__list--border-bottom-right-radius: 6px;
+    --c2-list-item--min-height: 28px;
+    --c2-list-item--font-size: 13px;
+    --c2-list-item--padding-top: 3px;
+    --c2-list-item--padding-bottom: 3px;
+    --c2-list-item--padding-left: 8px;
+    --c2-list-item--padding-right: 8px;
+    --c2-list-item--border-top-left-radius: 4px;
+    --c2-list-item--border-top-right-radius: 4px;
+    --c2-list-item--border-bottom-left-radius: 4px;
+    --c2-list-item--border-bottom-right-radius: 4px;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="compact" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .large {
+    width: 220px;
+    --c2-select__button--min-height: 44px;
+    --c2-select__button--font-size: 16px;
+    --c2-select__button--padding: 10px 12px 10px 16px;
+    --c2-select__button__suffix-icon--width: 20px;
+    --c2-select__button__suffix-icon--height: 20px;
+    --c2-select__button--border-top-left-radius: 10px;
+    --c2-select__button--border-top-right-radius: 10px;
+    --c2-select__button--border-bottom-left-radius: 10px;
+    --c2-select__button--border-bottom-right-radius: 10px;
+    --c2-select__list--border-top-left-radius: 12px;
+    --c2-select__list--border-top-right-radius: 12px;
+    --c2-select__list--border-bottom-left-radius: 12px;
+    --c2-select__list--border-bottom-right-radius: 12px;
+    --c2-list-item--min-height: 42px;
+    --c2-list-item--font-size: 16px;
+    --c2-list-item--padding-left: 14px;
+    --c2-list-item--padding-right: 14px;
+    --c2-list-item--border-top-left-radius: 8px;
+    --c2-list-item--border-top-right-radius: 8px;
+    --c2-list-item--border-bottom-left-radius: 8px;
+    --c2-list-item--border-bottom-right-radius: 8px;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="large" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+</GalleryGrid>
+
+## Icons
+
+`button-prefix-icon` and `button-suffix-icon` take any inline SVG or icon component; the default chevron flips while the dropdown is open.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Prefix icon
+<style>
+  .prefix-icon {
+    width: 190px;
+    --c2-select__button__prefix-icon--color: #71717a;
+  }
+</style>
+<c2-select placeholder="Language" class="prefix-icon" client:only="lit">
+  <svg slot="button-prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="2" y1="12" x2="22" y2="12"></line>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+  </svg>
+  <c2-list-item value="en">English</c2-list-item>
+  <c2-list-item value="fr">Français</c2-list-item>
+  <c2-list-item value="vi">Tiếng Việt</c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Chevrons
+<style>
+  .chevrons {
+    width: 190px;
+    --c2-select__button__suffix-icon--width: 14px;
+    --c2-select__button__suffix-icon--height: 14px;
+  }
+</style>
+<c2-select value="light" class="chevrons" client:only="lit">
+  <svg slot="button-suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m7 15 5 5 5-5"></path>
+    <path d="m7 9 5-5 5 5"></path>
+  </svg>
+  <c2-list-item value="light">Light</c2-list-item>
+  <c2-list-item value="dark">Dark</c2-list-item>
+  <c2-list-item value="system">System</c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Icon only trigger
+<style>
+  .icon-only {
+    width: 40px;
+    --c2-select__button--padding: 6px 6px 6px 6px;
+    --c2-select__button--gap: 0px;
+    --c2-select__button__prefix-icon--width: 18px;
+    --c2-select__button__prefix-icon--height: 18px;
+    --c2-select__button__suffix-icon--width: 0px;
+    --c2-select__button--border-top-left-radius: 999px;
+    --c2-select__button--border-top-right-radius: 999px;
+    --c2-select__button--border-bottom-left-radius: 999px;
+    --c2-select__button--border-bottom-right-radius: 999px;
+    --c2-list-item--min-height: 34px;
+  }
+  .icon-only .empty {
+    display: none;
+  }
+</style>
+<c2-select value="system" class="icon-only" client:only="lit">
+  <svg slot="button-prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <span slot="button-content" class="empty"></span>
+  <c2-list-item value="light">Light</c2-list-item>
+  <c2-list-item value="dark">Dark</c2-list-item>
+  <c2-list-item value="system">System</c2-list-item>
+</c2-select>
+```
+
+</GalleryGrid>
+
+## Options
+
+The rows are your own `c2-list-item` children: style them with `--c2-list-item--*` on the select, add icons through their slots, and use `label` to keep the trigger text short.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Status dots
+<style>
+  .status {
+    width: 190px;
+  }
+  .status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+  }
+  .status .dot--green {
+    background: #16a34a;
+  }
+  .status .dot--amber {
+    background: #f59e0b;
+  }
+  .status .dot--red {
+    background: #dc2626;
+  }
+</style>
+<c2-select value="active" class="status" client:only="lit">
+  <c2-list-item value="active"><span slot="prefix-icon" class="dot dot--green"></span>Active</c2-list-item>
+  <c2-list-item value="pending"><span slot="prefix-icon" class="dot dot--amber"></span>Pending</c2-list-item>
+  <c2-list-item value="blocked"><span slot="prefix-icon" class="dot dot--red"></span>Blocked</c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Check indicator
+<style>
+  .check {
+    width: 190px;
+    --c2-list-item__selected--background: transparent;
+    --c2-list-item__selected--color: #18181b;
+    --c2-list-item__selected__hover--background: #f4f4f5;
+    --c2-list-item__icon--color: #476ef9;
+  }
+  .check c2-list-item:not([selected]) .tick {
+    visibility: hidden;
+  }
+</style>
+<c2-select value="FR" class="check" client:only="lit">
+  <c2-list-item value="US">United States<svg slot="suffix-icon" class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></c2-list-item>
+  <c2-list-item value="FR">France<svg slot="suffix-icon" class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></c2-list-item>
+  <c2-list-item value="VN">Vietnam<svg slot="suffix-icon" class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Icon options
+<style>
+  .icon-options {
+    width: 190px;
+    --c2-list-item__icon--color: #71717a;
+    --c2-list-item--gap: 10px;
+  }
+</style>
+<c2-select value="light" class="icon-options" client:only="lit">
+  <c2-list-item value="light">
+    <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    Light
+  </c2-list-item>
+  <c2-list-item value="dark">
+    <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    Dark
+  </c2-list-item>
+  <c2-list-item value="system">
+    <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+    System
+  </c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Two-line options
+<style>
+  .two-line {
+    width: 220px;
+    --c2-list-item--padding-top: 8px;
+    --c2-list-item--padding-bottom: 8px;
+    --c2-list-item--line-height: 18px;
+  }
+  .two-line small {
+    display: block;
+    font-size: 12px;
+    color: #71717a;
+  }
+  .two-line c2-list-item[selected] small {
+    color: inherit;
+    opacity: 0.8;
+  }
+</style>
+<c2-select value="pro" class="two-line" client:only="lit">
+  <c2-list-item value="free" label="Free">Free<small>1 project, community support</small></c2-list-item>
+  <c2-list-item value="pro" label="Pro">Pro<small>Unlimited projects, priority support</small></c2-list-item>
+  <c2-list-item value="team" label="Team">Team<small>Everything in Pro, plus SSO</small></c2-list-item>
+</c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Multiple
+<style>
+  .multiple {
+    width: 220px;
+  }
+</style>
+<c2-select multiple value="design;engineering" placeholder="Teams" class="multiple" client:only="lit"><c2-list-item value="design">Design</c2-list-item><c2-list-item value="engineering">Engineering</c2-list-item><c2-list-item value="marketing">Marketing</c2-list-item><c2-list-item value="sales">Sales</c2-list-item></c2-select>
+```
+
+```html tag=MdxCodeBlock,label=Flat rows
+<style>
+  .flat {
+    width: 190px;
+    --c2-select__list--padding-top: 0px;
+    --c2-select__list--padding-right: 0px;
+    --c2-select__list--padding-bottom: 0px;
+    --c2-select__list--padding-left: 0px;
+    --c2-select__list--border-top-left-radius: 6px;
+    --c2-select__list--border-top-right-radius: 6px;
+    --c2-select__list--border-bottom-left-radius: 6px;
+    --c2-select__list--border-bottom-right-radius: 6px;
+    --c2-list-item--border-top-left-radius: 0px;
+    --c2-list-item--border-top-right-radius: 0px;
+    --c2-list-item--border-bottom-left-radius: 0px;
+    --c2-list-item--border-bottom-right-radius: 0px;
+    --c2-list-item--padding-left: 12px;
+    --c2-list-item--border-left: 3px solid transparent;
+    --c2-list-item__selected--border-left: 3px solid #476ef9;
+    --c2-list-item__selected--background: #fafafa;
+    --c2-list-item__selected--color: #18181b;
+  }
+</style>
+<c2-select value="FR" placeholder="Country" class="flat" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
+```
+
+</GalleryGrid>

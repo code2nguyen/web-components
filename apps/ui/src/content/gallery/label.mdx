@@ -1,0 +1,190 @@
+---
+description: 'Ready-made looks for c2-label: form captions, eyebrows, large headings and required markers. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Label } from '@c2n/label'
+import { TextField } from '@c2n/text-field'
+import { Checkbox } from '@c2n/checkbox'
+
+## Typography
+
+A label inherits the text around it; each look below sets a few `--c2-label__container--*` variables on top.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-label required>Email address</c2-label>
+```
+
+```html tag=MdxCodeBlock,label=Medium
+<style>
+  .medium {
+    --c2-label__container--font-size: 14px;
+    --c2-label__container--font-weight: 500;
+    --c2-label__container--color: #18181b;
+  }
+</style>
+<c2-label class="medium" required>Email address</c2-label>
+```
+
+```html tag=MdxCodeBlock,label=Eyebrow
+<style>
+  .eyebrow {
+    --c2-label__container--font-size: 11px;
+    --c2-label__container--font-weight: 600;
+    --c2-label__container--letter-spacing: 0.08em;
+    --c2-label__container--text-transform: uppercase;
+    --c2-label__container--color: #71717a;
+  }
+</style>
+<c2-label class="eyebrow">Billing details</c2-label>
+```
+
+```html tag=MdxCodeBlock,label=Muted
+<style>
+  .muted {
+    --c2-label__container--font-size: 13px;
+    --c2-label__container--font-weight: 400;
+    --c2-label__container--color: #a1a1aa;
+  }
+</style>
+<c2-label class="muted">Optional note</c2-label>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .large {
+    --c2-label__container--font-size: 20px;
+    --c2-label__container--font-weight: 600;
+    --c2-label__container--letter-spacing: -0.01em;
+    --c2-label__container--color: #18181b;
+  }
+</style>
+<c2-label class="large" required>Project name</c2-label>
+```
+
+```html tag=MdxCodeBlock,label=Serif
+<style>
+  .serif {
+    --c2-label__container--font-family: Georgia, 'Times New Roman', serif;
+    --c2-label__container--font-size: 17px;
+    --c2-label__container--font-weight: 400;
+    --c2-label__container--color: #3f3f46;
+  }
+</style>
+<c2-label class="serif">Your story</c2-label>
+```
+
+</GalleryGrid>
+
+## Required markers
+
+The asterisk is the default content of the `required-indicator` slot; restyle it or replace it with text.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Bold red
+<style>
+  .bold-red {
+    --c2-label__container--font-size: 14px;
+    --c2-label__container--font-weight: 500;
+    --c2-label__required-indicator--color: #dc2626;
+    --c2-label__required-indicator--font-weight: 700;
+    --c2-label__required-indicator--font-size: 16px;
+  }
+</style>
+<c2-label class="bold-red" required>Password</c2-label>
+```
+
+```html tag=MdxCodeBlock,label=Subtle
+<style>
+  .subtle {
+    --c2-label__container--font-size: 14px;
+    --c2-label__container--font-weight: 500;
+    --c2-label__container--gap: 2px;
+    --c2-label__required-indicator--color: #a1a1aa;
+  }
+</style>
+<c2-label class="subtle" required>Password</c2-label>
+```
+
+```html tag=MdxCodeBlock,label=Text indicator
+<style>
+  .text-indicator {
+    --c2-label__container--font-size: 14px;
+    --c2-label__container--font-weight: 500;
+    --c2-label__container--gap: 6px;
+    --c2-label__required-indicator--color: #71717a;
+    --c2-label__required-indicator--font-size: 12px;
+    --c2-label__required-indicator--font-weight: 400;
+  }
+</style>
+<c2-label class="text-indicator" required>Password <span slot="required-indicator">(required)</span></c2-label>
+```
+
+</GalleryGrid>
+
+## In a form
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Stacked field
+<style>
+  .stacked {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stacked-label {
+    --c2-label__container--font-size: 13px;
+    --c2-label__container--font-weight: 500;
+    --c2-label__container--color: #3f3f46;
+  }
+</style>
+<div class="stacked">
+  <c2-label class="stacked-label" for="gallery-stacked" required>Work email</c2-label>
+  <c2-text-field id="gallery-stacked" placeholder="you@company.com" style="width: 220px"></c2-text-field>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Inline field
+<style>
+  .inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .inline-label {
+    --c2-label__container--font-size: 14px;
+    --c2-label__container--font-weight: 500;
+    --c2-label__container__hover--color: #2563eb;
+  }
+</style>
+<div class="inline">
+  <c2-label class="inline-label" for="gallery-inline">Username</c2-label>
+  <c2-text-field id="gallery-inline" placeholder="ada" style="width: 160px"></c2-text-field>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Checkbox row
+<style>
+  .check-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .check-label {
+    --c2-label__container--font-size: 14px;
+    --c2-label__container--font-weight: 400;
+  }
+</style>
+<div class="check-row">
+  <c2-checkbox id="gallery-check"></c2-checkbox>
+  <c2-label class="check-label" for="gallery-check">Send me the newsletter</c2-label>
+</div>
+```
+
+</GalleryGrid>

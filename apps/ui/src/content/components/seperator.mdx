@@ -1,0 +1,119 @@
+---
+title: 'Seperator'
+description: 'Horizontal or vertical rule with an optional label, for dividing content and toolbars.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Seperator } from '@c2n/seperator'
+import { Avatar } from '@c2n/avatar'
+
+`c2-seperator` draws a thin rule between pieces of content. It fills the width by default and stretches to the height of a flex row with `orientation="vertical"`. Slotted text becomes a label between two line segments, centred unless you shrink the first segment. It is `role="separator"` for assistive technology; add `decorative` for the purely visual dividers of a list or toolbar so screen readers skip them. Thickness, colour and line style are variables, and `spacing` and `inset-*` control the margins across and along the line.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/seperator
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/seperator
+<style>
+  .stack {
+    width: 280px;
+    max-width: 100%;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #52525b;
+  }
+  .stack p {
+    margin: 0;
+  }
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #3f3f46;
+  }
+  .list {
+    display: grid;
+    width: 280px;
+    max-width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #18181b;
+  }
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .heading {
+    --c2-seperator__line-start--flex: 0 0 0px;
+    --c2-seperator__label--gap: 0px;
+    --c2-seperator__label--color: #18181b;
+    --c2-seperator__label--font-weight: 600;
+    --c2-seperator__label--text-transform: uppercase;
+    --c2-seperator__label--letter-spacing: 0.06em;
+    --c2-seperator__label--font-size: 11px;
+  }
+  .heading::part(line) {
+    margin-left: 12px;
+  }
+</style>
+<div data-label="Default">
+  <div class="stack">
+    <p>Your account is ready.</p>
+    <c2-seperator style="--c2-seperator--spacing: 12px"></c2-seperator>
+    <p>Invite teammates to get started.</p>
+  </div>
+</div>
+<div data-label="Labelled">
+  <div class="stack" style="display: grid; gap: 16px">
+    <c2-seperator>or</c2-seperator>
+    <c2-seperator style="--c2-seperator__line-start--flex: 0 0 24px">Continue with</c2-seperator>
+    <c2-seperator class="heading">Recent</c2-seperator>
+  </div>
+</div>
+<div data-label="Line styles">
+  <div class="stack" style="display: grid; gap: 16px">
+    <c2-seperator style="--c2-seperator--style: dashed"></c2-seperator>
+    <c2-seperator style="--c2-seperator--style: dotted; --c2-seperator--thickness: 2px"></c2-seperator>
+    <c2-seperator style="--c2-seperator--thickness: 3px; --c2-seperator--color: #0265dc"></c2-seperator>
+  </div>
+</div>
+<div data-label="Vertical">
+  <div class="toolbar">
+    <span>Bold</span>
+    <span>Italic</span>
+    <c2-seperator orientation="vertical" decorative></c2-seperator>
+    <span>Left</span>
+    <span>Center</span>
+    <c2-seperator orientation="vertical" decorative style="--c2-seperator--spacing: 4px"></c2-seperator>
+    <span>Link</span>
+  </div>
+</div>
+<div data-label="Inset list dividers">
+  <div class="list">
+    <div class="list-item"><c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 24px"></c2-avatar>Ada Lovelace</div>
+    <c2-seperator decorative style="--c2-seperator--inset-start: 48px"></c2-seperator>
+    <div class="list-item"><c2-avatar name="Grace Hopper" initial-count="2" style="--c2-avatar--size: 24px"></c2-avatar>Grace Hopper</div>
+    <c2-seperator decorative style="--c2-seperator--inset-start: 48px"></c2-seperator>
+    <div class="list-item"><c2-avatar name="Alan Turing" initial-count="2" style="--c2-avatar--size: 24px"></c2-avatar>Alan Turing</div>
+  </div>
+</div>
+```
+
+A vertical seperator is an inline-flex box with `align-self: stretch`, so inside a flex row it takes the row's height; anywhere else give the host a `height`. `--c2-seperator--spacing` is the margin above and below a horizontal rule (left and right of a vertical one) and `--c2-seperator--inset-start` / `--inset-end` shorten the line from either end, which is how inset list dividers line up with the text after an avatar or icon.
+
+The label's two line segments are flex items. Both grow equally by default; set `--c2-seperator__line-start--flex: 0 0 24px` to keep the label near the start, or `0 0 0px` together with a zero label gap for a section heading followed by a rule (the `line` part accepts a margin, as in the Labelled row). Text styling lives in `--c2-seperator__label--*`.

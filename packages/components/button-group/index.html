@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-button-group</title>
+    <script type="module" src="/src/button-group.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 32px;
+        max-width: 640px;
+        font-size: 14px;
+        color: #3f3f46;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .row {
+        display: flex;
+        align-items: flex-start;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      output {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #52525b;
+      }
+      .outlined {
+        --c2-button-group--border: 1px solid #d4d4d8;
+        --c2-button-group__divider--color: #d4d4d8;
+        --c2-button__container--background-color: transparent;
+        --c2-button__container--color: #3f3f46;
+        --c2-button__container__hover--background-color: #f4f4f5;
+        --c2-button__container__hover--color: #18181b;
+        --c2-button__container__active--background-color: #e4e4e7;
+        --c2-button__container__selected--background-color: #edf1fe;
+        --c2-button__container__selected--color: #0265dc;
+      }
+      .segmented {
+        --c2-button-group--border-radius: 8px;
+        --c2-button-group__divider--color: transparent;
+        --c2-button__container--height: 32px;
+        --c2-button__container--background-color: #f4f4f5;
+        --c2-button__container--color: #52525b;
+        --c2-button__container__hover--background-color: #e4e4e7;
+        --c2-button__container__selected--background-color: #ffffff;
+        --c2-button__container__selected--color: #18181b;
+        --c2-button__container__selected--border: 1px solid #d4d4d8;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Attached (filled, default divider) and outlined</h2>
+      <div class="row">
+        <c2-button-group aria-label="Actions">
+          <c2-button>Save</c2-button>
+          <c2-button>Publish</c2-button>
+          <c2-button>Archive</c2-button>
+        </c2-button-group>
+        <c2-button-group class="outlined" aria-label="Actions">
+          <c2-button>Save</c2-button>
+          <c2-button>Publish</c2-button>
+          <c2-button>Archive</c2-button>
+        </c2-button-group>
+        <c2-button-group class="outlined"><c2-button>Only child</c2-button></c2-button-group>
+      </div>
+    </section>
+
+    <section>
+      <h2>Single selection (change event), segmented, multiple</h2>
+      <div class="row">
+        <c2-button-group id="period" class="outlined" selection="single" value="week" aria-label="Period">
+          <c2-button value="day">Day</c2-button>
+          <c2-button value="week">Week</c2-button>
+          <c2-button value="month">Month</c2-button>
+        </c2-button-group>
+        <c2-button-group class="segmented" selection="single" value="board" aria-label="View">
+          <c2-button value="list">List</c2-button>
+          <c2-button value="board">Board</c2-button>
+          <c2-button value="calendar">Calendar</c2-button>
+        </c2-button-group>
+        <c2-button-group id="tags" class="outlined" selection="multiple" value="a,c" aria-label="Tags">
+          <c2-button value="a">Alpha</c2-button>
+          <c2-button value="b">Beta</c2-button>
+          <c2-button value="c">Gamma</c2-button>
+        </c2-button-group>
+      </div>
+      <output id="out">period = week · tags = a,c</output>
+      <script>
+        const render = () => (document.getElementById('out').textContent = `period = ${period.value} · tags = ${tags.value}`)
+        const period = document.getElementById('period')
+        const tags = document.getElementById('tags')
+        period.addEventListener('change', render)
+        tags.addEventListener('change', render)
+      </script>
+      <button
+        type="button"
+        style="margin-top: 8px"
+        onclick="
+          document.getElementById('period').value = 'day'
+          render()
+        "
+      >
+        Select Day from code (no event)
+      </button>
+    </section>
+
+    <section>
+      <h2>Vertical, separated pills, full width, RTL</h2>
+      <div class="row">
+        <c2-button-group class="outlined" orientation="vertical" aria-label="Zoom">
+          <c2-button>Zoom in</c2-button>
+          <c2-button>Zoom out</c2-button>
+          <c2-button>Reset</c2-button>
+        </c2-button-group>
+        <c2-button-group
+          class="outlined"
+          selection="single"
+          value="m"
+          style="--c2-button-group--gap: 8px; --c2-button-group--border-radius: 999px"
+          aria-label="Size"
+        >
+          <c2-button value="s">S</c2-button>
+          <c2-button value="m">M</c2-button>
+          <c2-button value="l">L</c2-button>
+        </c2-button-group>
+        <c2-button-group class="outlined" selection="single" value="no" style="width: 300px; --c2-button-group__item--flex: 1 1 0" aria-label="Answer">
+          <c2-button value="yes">Yes</c2-button>
+          <c2-button value="no">No</c2-button>
+          <c2-button value="maybe">Maybe</c2-button>
+        </c2-button-group>
+        <div dir="rtl">
+          <c2-button-group class="outlined" selection="single" value="b" aria-label="RTL">
+            <c2-button value="a">أول</c2-button>
+            <c2-button value="b">ثاني</c2-button>
+            <c2-button value="c">ثالث</c2-button>
+          </c2-button-group>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Disabled group (own disabled item stays disabled after re-enabling)</h2>
+      <c2-button-group id="dis" class="outlined" disabled aria-label="Disabled">
+        <c2-button>One</c2-button>
+        <c2-button disabled>Two (own)</c2-button>
+        <c2-button>Three</c2-button>
+      </c2-button-group>
+      <button
+        type="button"
+        style="margin-top: 8px"
+        onclick="
+          const g = document.getElementById('dis')
+          g.disabled = !g.disabled
+        "
+      >
+        Toggle group disabled
+      </button>
+    </section>
+  </body>
+</html>

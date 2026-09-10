@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-link-button</title>
+    <script type="module" src="/src/link-button.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .nav {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid #e4e4e7;
+        border-radius: 10px;
+      }
+      .nav-item {
+        --c2-link-button__container--padding-left: 12px;
+        --c2-link-button__container--padding-right: 12px;
+        --c2-link-button__container--padding-top: 6px;
+        --c2-link-button__container--padding-bottom: 6px;
+        --c2-link-button__container--border-radius: 6px;
+        --c2-link-button__container__hover--text-decoration: none;
+        --c2-link-button__container__hover--color: #18181b;
+        --c2-link-button__container__hover--background-color: #f4f4f5;
+        --c2-link-button__container__selected--color: #18181b;
+        --c2-link-button__container__selected--background-color: #e4e4e7;
+      }
+      .danger {
+        --c2-link-button__container--color: #dc2626;
+        --c2-link-button__container__hover--color: #b91c1c;
+        --c2-link-button__container--text-decoration-color: #b91c1c;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="row">
+      <c2-link-button>Button (no href)</c2-link-button>
+      <c2-link-button href="#anchor">Link (href)</c2-link-button>
+      <c2-link-button href="https://github.com/code2nguyen/web-components" external
+        >External<svg slot="suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+          <polyline points="15 3 21 3 21 9" />
+          <line x1="10" y1="14" x2="21" y2="3" /></svg
+      ></c2-link-button>
+      <c2-link-button href="/vite.svg" download>Download</c2-link-button>
+      <c2-link-button disabled>Disabled</c2-link-button>
+      <c2-link-button href="#anchor" disabled>Disabled link</c2-link-button>
+    </div>
+
+    <div class="row">
+      <c2-link-button href="#anchor">
+        <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+        </svg>
+        Back
+      </c2-link-button>
+      <c2-link-button href="#anchor">
+        Learn more
+        <svg slot="suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"></path>
+        </svg>
+      </c2-link-button>
+      <c2-link-button class="danger">
+        <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14"></path>
+        </svg>
+        Remove
+      </c2-link-button>
+    </div>
+
+    <div class="row">
+      <nav class="nav">
+        <c2-link-button class="nav-item" href="#overview" selected>Overview</c2-link-button>
+        <c2-link-button class="nav-item" href="#activity">Activity</c2-link-button>
+        <c2-link-button class="nav-item" href="#settings">Settings</c2-link-button>
+      </nav>
+      <c2-link-button selected>Selected button</c2-link-button>
+    </div>
+
+    <div class="row">
+      <c2-link-button id="counter">Click me</c2-link-button>
+      <c2-link-button id="counter-disabled" disabled>Disabled (no clicks)</c2-link-button>
+      <span id="log"></span>
+    </div>
+
+    <script type="module">
+      const log = document.getElementById('log')
+      let count = 0
+      document.getElementById('counter').addEventListener('click', () => (log.textContent = `clicked ${++count}×`))
+      document.getElementById('counter-disabled').addEventListener('click', () => (log.textContent = 'BUG: disabled fired'))
+    </script>
+  </body>
+</html>
