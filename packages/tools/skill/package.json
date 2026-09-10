@@ -1,6 +1,6 @@
 {
   "name": "@c2n/skill",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Claude Code plugin for the c2n web components: a skill that teaches the application workflow plus the @c2n/mcp server",
   "type": "module",
   "files": [
@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@c2n/config": "*",
-    "@c2n/mcp": "0.0.4",
+    "@c2n/mcp": "0.0.5",
     "prettier": "3.9.6"
   }
 }

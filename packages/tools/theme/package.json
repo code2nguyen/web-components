@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",

@@ -1,6 +1,6 @@
 {
   "name": "@c2n/accordion",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "main": "dist/accordion.js",
   "exports": {
@@ -51,9 +51,9 @@
     }
   },
   "dependencies": {
+    "@c2n/core": "0.0.5",
+    "@c2n/details": "0.0.5",
     "@lit/context": "1.1.6",
-    "@c2n/core": "0.0.4",
-    "@c2n/details": "0.0.4",
     "lit": "3.3.3"
   },
   "devDependencies": {
