@@ -1,6 +1,6 @@
 {
   "name": "@c2n/chat-message",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "main": "dist/chat-message.js",
   "exports": {
@@ -49,7 +49,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.5",
+    "@c2n/core": "0.0.6",
     "lit": "3.3.3"
   },
   "devDependencies": {
