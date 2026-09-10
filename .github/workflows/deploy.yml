@@ -30,9 +30,19 @@ jobs:
       # Set up GitHub Actions caching for Wireit.
       - uses: google/wireit@setup-github-actions-caching/v1
 
+      # `npm install`, not `npm ci`, on purpose.
+      #
+      # The toolchain (rolldown, esbuild, lightningcss, sharp, @astrojs/compiler, @parcel/watcher, …) ships its
+      # native binaries as platform-gated optionalDependencies. npm resolves those for the host platform only, so a
+      # lockfile written on macOS records `@rolldown/binding-darwin-arm64` and nothing for Linux — and `npm ci`
+      # installs strictly from the lockfile. The install then succeeds and the *build* dies with
+      # `Cannot find module '@rolldown/binding-linux-x64-gnu'`. `--os`/`--cpu` overrides do not change what gets
+      # written to the lockfile, so this cannot be fixed by regenerating it on a Mac.
+      #
+      # `npm install` still takes its versions from the lockfile; it only additionally fetches the optional
+      # binaries this platform needs. It rewrites the lockfile in the runner, which is discarded.
       - name: Install Dependencies
-        shell: "bash"
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Lint
         run: npm run lint
