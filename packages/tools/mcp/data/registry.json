@@ -5848,7 +5848,7 @@
               "name": "reveal",
               "type": "'hover' | 'always'",
               "default": "'hover'",
-              "description": "`hover` (default) keeps the button transparent until the pointer is over its source, or focus lands inside it.\n`always` shows it permanently. A hover-only button still appears on keyboard focus, on devices with no hover at\nall, and for as long as the `copied` confirmation is showing."
+              "description": "`hover` (default) keeps the button transparent until the pointer is over its source, or keyboard focus lands\ninside it. `always` shows it permanently. A hover-only button still appears on keyboard focus and on devices\nwith no hover at all.\n\nThe `copied` confirmation deliberately does *not* hold it on screen: once the pointer leaves, the button fades\nout with the check still on it and resets off-screen, so the icon never flips back to `copy` on a button the\nuser has already walked away from."
             },
             {
               "name": "pin",
