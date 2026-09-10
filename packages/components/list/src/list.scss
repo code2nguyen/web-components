@@ -3,7 +3,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-list,
   $theme: (
-    background: variables.$color-bg-lighter,
+    background: #ffffff,
     gap: null,
 
     border-top-left-radius: null,
@@ -16,18 +16,34 @@
     border-bottom: null,
     border-left: null,
 
+    box-shadow: null,
+
     padding-top: 4px,
-    padding-right: 0px,
+    padding-right: 4px,
     padding-bottom: 4px,
-    padding-left: 0px,
+    padding-left: 4px,
 
     max-height: null,
+
+    divider--color: #e4e4e7,
+    divider--margin: 4px 0,
+
+    heading--color: #71717a,
+    heading--font-size: 11px,
+    heading--font-weight: 600,
+    heading--letter-spacing: 0.06em,
+    heading--text-transform: uppercase,
+    heading--padding-top: 10px,
+    heading--padding-right: 10px,
+    heading--padding-bottom: 4px,
+    heading--padding-left: 10px,
   )
 );
 
 :host {
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
   gap: css.cssVar(gap);
@@ -47,12 +63,47 @@
   padding-left: css.cssVar(padding-left);
 
   background: css.cssVar(background);
+  box-shadow: css.cssVar(box-shadow);
 
   border-top-left-radius: css.cssVar(border-top-left-radius);
   border-top-right-radius: css.cssVar(border-top-right-radius);
   border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
   border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 }
+
+:host([hidden]) {
+  display: none;
+}
+
+:host(:focus) {
+  outline: none;
+}
+
+// Dividers and group headings slotted between the rows.
+::slotted(hr) {
+  flex: none;
+  border: none;
+  border-top: 1px solid css.cssVar(divider--color);
+  margin: css.cssVar(divider--margin);
+}
+
+::slotted(:is(h1, h2, h3, h4, h5, h6)) {
+  flex: none;
+  margin: 0;
+  color: css.cssVar(heading--color);
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  letter-spacing: css.cssVar(heading--letter-spacing);
+  text-transform: css.cssVar(heading--text-transform);
+  line-height: 1.4;
+  padding-top: css.cssVar(heading--padding-top);
+  padding-right: css.cssVar(heading--padding-right);
+  padding-bottom: css.cssVar(heading--padding-bottom);
+  padding-left: css.cssVar(heading--padding-left);
+  user-select: none;
+}
+
+// Flush lists (no vertical padding): the first and last rows take the list's corner radius.
 :host(.padding-top-0) {
   ::slotted(c2-list-item:first-child) {
     --c2-list-item--border-top-left-radius: #{css.cssVar(border-top-left-radius)};

@@ -1,0 +1,356 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Accordion } from '@c2n/accordion'
+
+## Presets
+
+One connected surface by default, with shared dividers and animated panels. The accordion owns the border and outside corners. Open a card in the studio to change the gap, border or animation duration; a positive gap separates the panels into cards. Flush, Ghost, Chevron first and Plus / minus drop individual borders by styling the panels directly from the page.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Connected
+<style>
+  .connected {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 0px;
+    --c2-accordion--border-color: #d4d4d8;
+    --c2-accordion--border-radius: 12px;
+    --c2-details__header--color: #18181b;
+    --c2-details__header__open--background: #f4f4f5;
+    --c2-details__content--color: #52525b;
+  }
+  .connected p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="connected" client:only="lit">
+  <c2-details label="Is there a free trial?" expanded><p>Try every feature for 14 days. No credit card required.</p></c2-details>
+  <c2-details label="Can I change plans?"><p>Upgrade or downgrade from your account settings.</p></c2-details>
+  <c2-details label="Can I cancel anytime?"><p>Yes. Your plan stays active until the end of the billing period.</p></c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Cards
+<style>
+  .cards {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 12px;
+    --c2-details--box-shadow: 0 2px 6px rgb(0 0 0 / 5%);
+    --c2-details__header--color: #18181b;
+    --c2-details__content--color: #52525b;
+  }
+  .cards p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="cards" client:only="lit">
+  <c2-details label="Shipping" expanded><p>Delivered in 3–5 business days. Free on orders over $50.</p></c2-details>
+  <c2-details label="Returns"><p>Return unused items within 30 days.</p></c2-details>
+  <c2-details label="Payment"><p>Pay with your preferred credit or debit card.</p></c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Filled headers
+<style>
+  .filled {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 0px;
+    --c2-details--background: #eff6ff;
+    --c2-accordion--border-color: #93c5fd;
+    --c2-details__header--background: #2563eb;
+    --c2-details__header--color: #ffffff;
+    --c2-details__header__hover--background: #1d4ed8;
+    --c2-details__header__icon--color: #ffffff;
+    --c2-details__content--color: #1e3a8a;
+    --c2-details__content--padding-top: 12px;
+  }
+  .filled p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="filled" client:only="lit">
+  <c2-details label="Getting started" expanded><p>Create a workspace and invite your team to your first project.</p></c2-details>
+  <c2-details label="Working together"><p>Share updates, assign tasks and track progress in one place.</p></c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Multiple open
+<style>
+  .multiple {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 0px;
+    --c2-accordion--border-color: #bbf7d0;
+    --c2-details__header--color: #18181b;
+    --c2-details__header__open--background: #f0fdf4;
+    --c2-details__header__open--color: #166534;
+    --c2-details__header__icon--color: #16a34a;
+    --c2-details__content--color: #52525b;
+    --c2-details__content--border-top: 1px solid #dcfce7;
+    --c2-details__content--padding-top: 12px;
+  }
+  .multiple p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="multiple" multiple client:only="lit">
+  <c2-details label="Sizing" expanded><p>Choose your usual size for a regular fit.</p></c2-details>
+  <c2-details label="Care" expanded><p>Wash cold with similar colors and air dry.</p></c2-details>
+  <c2-details label="Materials"><p>Made from 100% organic cotton.</p></c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Flush
+<style>
+  .flush {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 0px;
+    --c2-accordion--border-radius: 0px;
+    --c2-accordion--border-color: #e4e4e7;
+    --c2-details__header--padding-left: 0px;
+    --c2-details__header--padding-right: 0px;
+    --c2-details__header--color: #18181b;
+    --c2-details__header__hover--background: transparent;
+    --c2-details__header__hover--color: #2563eb;
+    --c2-details__content--color: #52525b;
+  }
+  .flush c2-details {
+    --c2-details--border-left: none;
+    --c2-details--border-right: none;
+  }
+  .flush p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="flush" client:only="lit">
+  <c2-details label="What is included?" expanded><p>Unlimited projects, priority support and every integration.</p></c2-details>
+  <c2-details label="How does billing work?"><p>Monthly or yearly. Switch at any time from your account.</p></c2-details>
+  <c2-details label="Is my data secure?"><p>Encrypted at rest and in transit, with daily backups.</p></c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Ghost
+<style>
+  .ghost {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 4px;
+    --c2-accordion--border-width: 0px;
+    --c2-accordion--border-radius: 8px;
+    --c2-details--background: transparent;
+    --c2-details__header--padding-top: 10px;
+    --c2-details__header--padding-bottom: 10px;
+    --c2-details__header--color: #3f3f46;
+    --c2-details__header__hover--background: #f4f4f5;
+    --c2-details__header__open--background: #f4f4f5;
+    --c2-details__header__open--color: #18181b;
+    --c2-details__content--color: #52525b;
+    --c2-details__content--padding-top: 8px;
+  }
+  .ghost c2-details {
+    --c2-details--border-top: none;
+    --c2-details--border-right: none;
+    --c2-details--border-bottom: none;
+    --c2-details--border-left: none;
+  }
+  .ghost p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="ghost" client:only="lit">
+  <c2-details label="Overview" expanded><p>A quick summary of the project and its goals.</p></c2-details>
+  <c2-details label="Timeline"><p>Kick-off in March, beta in June, launch in September.</p></c2-details>
+  <c2-details label="Team"><p>Four engineers, one designer and a product lead.</p></c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Chevron first
+<style>
+  .chevron-first {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 0px;
+    --c2-accordion--border-radius: 0px;
+    --c2-accordion--border-color: #e4e4e7;
+    --c2-details__header--flex-direction: row-reverse;
+    --c2-details__header--gap: 8px;
+    --c2-details__header--padding-left: 8px;
+    --c2-details__header--color: #18181b;
+    --c2-details__header__icon--width: 16px;
+    --c2-details__header__icon--height: 16px;
+    --c2-details__header__icon--rotate: 90deg;
+    --c2-details__header__icon--color: #71717a;
+    --c2-details__content--color: #52525b;
+    --c2-details__content--padding-left: 32px;
+  }
+  .chevron-first c2-details {
+    --c2-details--border-left: none;
+    --c2-details--border-right: none;
+  }
+  .chevron-first p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="chevron-first" client:only="lit">
+  <c2-details label="src" expanded>
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    <p>components, styles, utils</p>
+  </c2-details>
+  <c2-details label="tests">
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    <p>unit, integration, fixtures</p>
+  </c2-details>
+  <c2-details label="docs">
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    <p>guides, api, changelog</p>
+  </c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Plus / minus
+<style>
+  .plus-minus {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 0px;
+    --c2-accordion--border-radius: 0px;
+    --c2-accordion--border-color: #d4d4d8;
+    --c2-details__header--padding-top: 16px;
+    --c2-details__header--padding-bottom: 16px;
+    --c2-details__header--padding-left: 0px;
+    --c2-details__header--padding-right: 0px;
+    --c2-details__header--color: #18181b;
+    --c2-details__header--font-size: 15px;
+    --c2-details__header__hover--background: transparent;
+    --c2-details__header__icon--width: 18px;
+    --c2-details__header__icon--height: 18px;
+    --c2-details__header__icon--color: #18181b;
+    --c2-details__content--color: #52525b;
+    --c2-details__content--padding-top: 0px;
+    --c2-details__content--padding-bottom: 16px;
+  }
+  .plus-minus c2-details {
+    --c2-details--border-left: none;
+    --c2-details--border-right: none;
+  }
+  .plus-minus c2-details:first-of-type {
+    --c2-details--border-top: none;
+  }
+  .plus-minus p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="plus-minus" client:only="lit">
+  <c2-details label="Do you offer student pricing?" expanded>
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+    <svg slot="expanded-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+    <p>Yes. Verify with a school email address to get 50% off.</p>
+  </c2-details>
+  <c2-details label="Can I pay by invoice?">
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+    <svg slot="expanded-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+    <p>Invoicing is available on yearly team plans.</p>
+  </c2-details>
+  <c2-details label="Is there a setup fee?">
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+    <svg slot="expanded-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+    <p>No. You only pay for the plan you choose.</p>
+  </c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    width: 280px;
+    max-width: 100%;
+    --c2-accordion--gap: 0px;
+    --c2-accordion--border-color: #3f3f46;
+    --c2-accordion--border-radius: 10px;
+    --c2-details--background: #18181b;
+    --c2-details__header--color: #fafafa;
+    --c2-details__header__hover--background: #27272a;
+    --c2-details__header__open--background: #27272a;
+    --c2-details__header__icon--color: #a1a1aa;
+    --c2-details__header__focus--outline: 2px solid rgba(96, 165, 250, 0.6);
+    --c2-details__content--color: #a1a1aa;
+    --c2-details__content--padding-top: 12px;
+  }
+  .dark p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="dark" client:only="lit">
+  <c2-details label="Keyboard shortcuts" expanded><p>Press ⌘K to open the command palette from anywhere.</p></c2-details>
+  <c2-details label="Appearance"><p>Follow the system theme or pick light and dark manually.</p></c2-details>
+  <c2-details label="Notifications"><p>Choose which events send an email or a push notification.</p></c2-details>
+</c2-accordion>
+```
+
+```html tag=MdxCodeBlock,label=Descriptions
+<style>
+  .descriptions {
+    width: 300px;
+    max-width: 100%;
+    --c2-accordion--gap: 0px;
+    --c2-accordion--border-color: #e4e4e7;
+    --c2-accordion--border-radius: 12px;
+    --c2-details__header--padding-top: 14px;
+    --c2-details__header--padding-bottom: 14px;
+    --c2-details__header--color: #18181b;
+    --c2-details__header__content--color: #71717a;
+    --c2-details__header__content--font-size: 12px;
+    --c2-details__header__content--margin-top: 2px;
+    --c2-details__content--color: #52525b;
+    --c2-details__content--border-top: 1px solid #f4f4f5;
+    --c2-details__content--padding-top: 12px;
+  }
+  .descriptions p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<c2-accordion class="descriptions" client:only="lit">
+  <c2-details expanded>
+    <span slot="title">Profile</span>
+    <span slot="header-content">Name, avatar and public links</span>
+    <p>Your profile is visible to everyone in the workspace.</p>
+  </c2-details>
+  <c2-details>
+    <span slot="title">Security</span>
+    <span slot="header-content">Password, two-factor and sessions</span>
+    <p>Review active sessions and sign out of devices you do not recognise.</p>
+  </c2-details>
+  <c2-details>
+    <span slot="title">Billing</span>
+    <span slot="header-content">Plan, invoices and payment method</span>
+    <p>Invoices are sent to the billing contact at the start of each period.</p>
+  </c2-details>
+</c2-accordion>
+```
+
+</GalleryGrid>

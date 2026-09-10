@@ -1,0 +1,194 @@
+---
+title: 'Text Field'
+description: 'Single-line input with icon slots, clear button, helper and error text, and a character counter.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TextField } from '@c2n/text-field'
+import { Label } from '@c2n/label'
+import { FeatherSearchIcon as FeatherSearch } from '@c2n/feather-icons/icons/search.js'
+import { FeatherMailIcon as FeatherMail } from '@c2n/feather-icons/icons/mail.js'
+import { FeatherLockIcon as FeatherLock } from '@c2n/feather-icons/icons/lock.js'
+import { FeatherEyeIcon as FeatherEye } from '@c2n/feather-icons/icons/eye.js'
+import { FeatherUserIcon as FeatherUser } from '@c2n/feather-icons/icons/user.js'
+import { FeatherHelpCircleIcon as FeatherHelpCircle } from '@c2n/feather-icons/icons/help-circle.js'
+
+`c2-text-field` wraps a native `<input>`, so `type`, `name`, `autocomplete`, `maxlength`, `pattern`, `required` and the `input` / `change` events behave like the built-in control. Around it the field adds what a form usually needs: `prefix-icon` and `suffix-icon` slots (an inline SVG, a `c2-feather-*` icon, a `c2-mat-icon` or a short adornment text), a `clearable` button, `help` text under the field, an `error` state with `error-text`, a `n / max` counter when `maxlength` is set, and a `help-icon` slot beside the field. Hover darkens the border, focus turns it brand blue with a soft ring, `error` turns both red.
+
+The field has no intrinsic width: set a `width` on the host or place it in a grid. Its height follows `--c2-text-field--min-height`, padding and font size, so a compact or large field is a handful of variables on a class (see the Sizes row and the Compact / Large gallery cards). For a caption, pair it with `c2-label` and point the label's `for` at the field's `id`.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/text-field
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/text-field
+<style>
+  .w {
+    width: 220px;
+  }
+  .stack {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .adornment {
+    width: auto;
+    height: auto;
+    font-size: 13px;
+    color: #71717a;
+  }
+  .compact {
+    width: 180px;
+    --c2-text-field--min-height: 28px;
+    --c2-text-field--font-size: 13px;
+    --c2-text-field--line-height: 18px;
+    --c2-text-field--padding-top: 3px;
+    --c2-text-field--padding-bottom: 3px;
+    --c2-text-field--padding-left: 8px;
+    --c2-text-field--padding-right: 6px;
+    --c2-text-field--gap: 6px;
+    --c2-text-field--border-top-left-radius: 4px;
+    --c2-text-field--border-top-right-radius: 4px;
+    --c2-text-field--border-bottom-left-radius: 4px;
+    --c2-text-field--border-bottom-right-radius: 4px;
+    --c2-text-field__icon--size: 14px;
+    --c2-text-field__focus--outline: 2px solid rgba(71, 110, 249, 0.2);
+  }
+  .large {
+    width: 260px;
+    --c2-text-field--min-height: 48px;
+    --c2-text-field--font-size: 16px;
+    --c2-text-field--line-height: 24px;
+    --c2-text-field--padding-top: 10px;
+    --c2-text-field--padding-bottom: 10px;
+    --c2-text-field--padding-left: 16px;
+    --c2-text-field--padding-right: 14px;
+    --c2-text-field--border-top-left-radius: 10px;
+    --c2-text-field--border-top-right-radius: 10px;
+    --c2-text-field--border-bottom-left-radius: 10px;
+    --c2-text-field--border-bottom-right-radius: 10px;
+    --c2-text-field__icon--size: 20px;
+    --c2-text-field__supporting-text--font-size: 13px;
+  }
+</style>
+<div data-label="Default">
+  <c2-text-field placeholder="Placeholder" class="w"></c2-text-field>
+  <c2-text-field value="Ada Lovelace" class="w"></c2-text-field>
+</div>
+<div data-label="Sizes">
+  <c2-text-field placeholder="Compact · 28px" class="compact">
+    <c2-feather-search slot="prefix-icon"></c2-feather-search>
+  </c2-text-field>
+  <c2-text-field placeholder="Default · 36px" class="w">
+    <c2-feather-search slot="prefix-icon"></c2-feather-search>
+  </c2-text-field>
+  <c2-text-field placeholder="Large · 48px" class="large">
+    <c2-feather-search slot="prefix-icon"></c2-feather-search>
+  </c2-text-field>
+</div>
+<div data-label="Types">
+  <c2-text-field type="email" placeholder="you@example.com" autocomplete="email" class="w"></c2-text-field>
+  <c2-text-field type="password" value="hunter2" class="w"></c2-text-field>
+  <c2-text-field type="number" value="42" class="w"></c2-text-field>
+</div>
+<div data-label="States">
+  <c2-text-field disabled value="Disabled" class="w"></c2-text-field>
+  <c2-text-field readonly value="Read only" class="w"></c2-text-field>
+  <c2-text-field error value="ada@example" class="w"></c2-text-field>
+</div>
+<div data-label="Helper text">
+  <c2-text-field placeholder="Username" help="Lowercase letters and digits only." class="w"></c2-text-field>
+  <c2-text-field error value="ada@example" error-text="Enter a valid email address." class="w"></c2-text-field>
+</div>
+<div data-label="Icons">
+  <c2-text-field type="search" placeholder="Search" class="w">
+    <c2-feather-search slot="prefix-icon"></c2-feather-search>
+  </c2-text-field>
+  <c2-text-field type="email" placeholder="Email" class="w">
+    <c2-feather-mail slot="suffix-icon"></c2-feather-mail>
+  </c2-text-field>
+  <c2-text-field type="password" value="hunter2" class="w">
+    <c2-feather-lock slot="prefix-icon"></c2-feather-lock>
+    <c2-feather-eye slot="suffix-icon"></c2-feather-eye>
+  </c2-text-field>
+</div>
+<div data-label="Adornments">
+  <c2-text-field type="number" placeholder="0.00" class="w">
+    <span slot="prefix-icon" class="adornment">$</span>
+    <span slot="suffix-icon" class="adornment">USD</span>
+  </c2-text-field>
+  <c2-text-field placeholder="your-site" class="w">
+    <span slot="prefix-icon" class="adornment">https://</span>
+    <span slot="suffix-icon" class="adornment">.com</span>
+  </c2-text-field>
+</div>
+<div data-label="Clearable">
+  <c2-text-field clearable value="Type to edit, click × to clear" class="w"></c2-text-field>
+  <c2-text-field clearable type="search" placeholder="Search" class="w">
+    <c2-feather-search slot="prefix-icon"></c2-feather-search>
+  </c2-text-field>
+</div>
+<div data-label="Character count">
+  <c2-text-field maxlength="24" value="Quarterly report" help="Shown in the sidebar." class="w"></c2-text-field>
+</div>
+<div data-label="Help icon">
+  <c2-text-field placeholder="API key" class="w">
+    <c2-feather-help-circle slot="help-icon" title="Found under Settings › Developer"></c2-feather-help-circle>
+  </c2-text-field>
+</div>
+<div data-label="With label">
+  <div class="stack">
+    <c2-label for="tf-name">Full name</c2-label>
+    <c2-text-field id="tf-name" placeholder="Ada Lovelace" autocomplete="name" class="w">
+      <c2-feather-user slot="prefix-icon"></c2-feather-user>
+    </c2-text-field>
+  </div>
+  <div class="stack">
+    <c2-label for="tf-email" required>Email</c2-label>
+    <c2-text-field id="tf-email" type="email" required placeholder="you@example.com" help="We never share it." class="w"></c2-text-field>
+  </div>
+</div>
+```
+
+## Reading the value
+
+`input` fires on every keystroke and `change` when the value is committed, both re-dispatched from the inner input with `value` already updated. The clear button empties the field, then fires `clear`, `input` and `change`. Once the user has typed, setting the `value` attribute no longer changes the field (like a native input); call `reset()` to return to the attribute value, or set the `value` property.
+
+```ts tag=CodeBlock
+const field = document.querySelector('c2-text-field')
+
+field.addEventListener('input', () => {
+  field.error = !field.value.includes('@')
+  field.errorText = field.error ? 'Enter a valid email address.' : ''
+})
+
+field.addEventListener('change', () => save(field.value))
+
+field.value = 'ada@example.com' // programmatic update
+field.reset() // back to the value attribute, error cleared
+```
+
+## Theming
+
+`--c2-text-field--*` styles the box (border per side, radius per corner, padding, colours, font) with `__hover`, `__focus`, `__error`, `__read-only` and `__disabled` states. `--c2-text-field__icon--*` sizes and colours the slotted icons, `__clear-icon--*` the clear button, `__help-icon--*` the icon beside the field and `__supporting-text--*` the helper line. Every variable and its default is listed on the API tab; the Gallery tab has ready-made looks.
+
+```css tag=CodeBlock
+c2-text-field.soft {
+  --c2-text-field--background: #f4f4f5;
+  --c2-text-field--border-top: 1px solid transparent;
+  --c2-text-field--border-right: 1px solid transparent;
+  --c2-text-field--border-bottom: 1px solid transparent;
+  --c2-text-field--border-left: 1px solid transparent;
+  --c2-text-field__focus--background: #ffffff;
+  --c2-text-field__focus--outline: 3px solid rgba(24, 24, 27, 0.1);
+}
+```

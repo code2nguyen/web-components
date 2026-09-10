@@ -1,0 +1,141 @@
+---
+title: 'Radio'
+description: 'Radio options built on native inputs, grouped into one value with keyboard navigation.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Radio, RadioGroup } from '@c2n/radio'
+
+`c2-radio` is one option: a native `<input type="radio">` with its label beside it and an optional `description` slot underneath. `c2-radio-group` turns several of them into a single control with one `value` and one `name`, disables them together, and restores the native keyboard model across the shadow boundary: Arrow keys move and select, and only the selected option is a tab stop. Radios can sit anywhere inside the group, including in wrapper elements. Standalone radios sharing a `name` in the same root still uncheck each other, but only the group provides arrow-key navigation and a single `change` event with the new value.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/radio
+```
+
+Importing `@c2n/radio` registers both `c2-radio-group` and `c2-radio`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/radio
+<style>
+  .cards {
+    width: 280px;
+    max-width: 100%;
+    --c2-radio-group--align-items: stretch;
+    --c2-radio__container--border: 1px solid #d4d4d8;
+    --c2-radio__container--padding-top: 10px;
+    --c2-radio__container--padding-right: 14px;
+    --c2-radio__container--padding-bottom: 10px;
+    --c2-radio__container--padding-left: 8px;
+    --c2-radio__container__hover--background: #fafafa;
+    --c2-radio__container__checked--border: 1px solid #0265dc;
+    --c2-radio__container__checked--background: #edf1fe;
+    --c2-radio__state-layer--size: 24px;
+    --c2-radio__label--font-weight: 500;
+  }
+  .checklist {
+    width: 240px;
+    max-width: 100%;
+    --c2-radio-group--gap: 2px;
+    --c2-radio-group--align-items: stretch;
+    --c2-radio__container--flex-direction: row-reverse;
+    --c2-radio__container--gap: 8px;
+    --c2-radio__container--padding-top: 6px;
+    --c2-radio__container--padding-right: 10px;
+    --c2-radio__container--padding-bottom: 6px;
+    --c2-radio__container--padding-left: 12px;
+    --c2-radio__container--border-radius: 6px;
+    --c2-radio__container__hover--background: #f4f4f5;
+    --c2-radio__container__checked--background: #edf1fe;
+    --c2-radio__control--border: none;
+    --c2-radio__control__hover--border: none;
+    --c2-radio__state-layer--size: 20px;
+    --c2-radio__icon--size: 16px;
+    --c2-radio__icon__checked--color: #0265dc;
+    --c2-radio__label--font-size: 14px;
+    --c2-radio__label__checked--color: #0265dc;
+  }
+</style>
+<div data-label="Group">
+  <c2-radio-group client:only="lit" value="pro" name="plan">
+    <span slot="label">Plan</span>
+    <c2-radio value="free" label="Free"></c2-radio>
+    <c2-radio value="pro" label="Pro"></c2-radio>
+    <c2-radio value="team" label="Team"></c2-radio>
+  </c2-radio-group>
+</div>
+<div data-label="Horizontal">
+  <c2-radio-group client:only="lit" value="monthly" orientation="horizontal" style="--c2-radio-group--gap: 16px">
+    <c2-radio value="monthly">Monthly</c2-radio>
+    <c2-radio value="yearly">Yearly</c2-radio>
+  </c2-radio-group>
+</div>
+<div data-label="Descriptions">
+  <c2-radio-group client:only="lit" value="standard" style="width: 280px">
+    <span slot="label">Shipping</span>
+    <span slot="description">Delivery estimates are for business days.</span>
+    <c2-radio value="standard">Standard<span slot="description">3–5 days, free over $50</span></c2-radio>
+    <c2-radio value="express">Express<span slot="description">1–2 days, $9</span></c2-radio>
+    <c2-radio value="pickup">Store pickup<span slot="description">Ready in 2 hours</span></c2-radio>
+  </c2-radio-group>
+</div>
+<div data-label="Disabled">
+  <c2-radio-group client:only="lit" value="b" orientation="horizontal">
+    <c2-radio value="a">Enabled</c2-radio>
+    <c2-radio value="b" disabled>Checked and disabled</c2-radio>
+    <c2-radio value="c" disabled>Disabled</c2-radio>
+  </c2-radio-group>
+  <c2-radio-group client:only="lit" value="x" orientation="horizontal" disabled>
+    <span slot="label">Whole group disabled</span>
+    <c2-radio value="x">One</c2-radio>
+    <c2-radio value="y">Two</c2-radio>
+  </c2-radio-group>
+</div>
+<div data-label="Cards">
+  <c2-radio-group client:only="lit" class="cards" value="pro">
+    <c2-radio value="free">Free<span slot="description">For personal projects</span></c2-radio>
+    <c2-radio value="pro">Pro<span slot="description">Unlimited projects, priority support</span></c2-radio>
+    <c2-radio value="team">Team<span slot="description">Shared workspaces and SSO</span></c2-radio>
+  </c2-radio-group>
+</div>
+<div data-label="Custom indicators">
+  <c2-radio-group client:only="lit" value="b" orientation="horizontal" style="--c2-radio-group--gap: 16px; --c2-radio__control--border-radius: 4px">
+    <c2-radio value="a">Square</c2-radio>
+    <c2-radio value="b">Square</c2-radio>
+  </c2-radio-group>
+  <c2-radio-group client:only="lit" value="b" orientation="horizontal" style="--c2-radio-group--gap: 16px; --c2-radio__dot--size: 12px">
+    <c2-radio value="a"><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Check mark</c2-radio>
+    <c2-radio value="b"><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Check mark</c2-radio>
+  </c2-radio-group>
+  <c2-radio-group client:only="lit" value="b" orientation="horizontal" style="--c2-radio-group--gap: 16px; --c2-radio__icon--size: 20px">
+    <c2-radio value="a"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="8 12 11 15 16 9"></polyline></svg>Icon</c2-radio>
+    <c2-radio value="b"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="8 12 11 15 16 9"></polyline></svg>Icon</c2-radio>
+  </c2-radio-group>
+</div>
+<div data-label="Check list">
+  <c2-radio-group client:only="lit" class="checklist" value="en" aria-label="Language">
+    <c2-radio value="en"><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>English</c2-radio>
+    <c2-radio value="fr"><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Français</c2-radio>
+    <c2-radio value="de"><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Deutsch</c2-radio>
+    <c2-radio value="vi"><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Tiếng Việt</c2-radio>
+  </c2-radio-group>
+</div>
+<div data-label="Standalone by name">
+  <c2-radio name="size" value="s">Small</c2-radio>
+  <c2-radio name="size" value="m" checked>Medium</c2-radio>
+  <c2-radio name="size" value="l">Large</c2-radio>
+</div>
+```
+
+Set the group's `value` to select an option from code, or set `checked` on a radio: the group adopts it and unchecks the rest. Listen for `change` on the group (`detail.value`); the options' own `change` events are stopped at the group so a listener above it hears exactly one event per selection. Every option needs a `value`, and an option without a checked sibling leaves the group `value` empty.
+
+The inner inputs live in shadow roots, so they do not take part in a surrounding `<form>`; read `value` from the group on submit or mirror it into a hidden input. The `label` slot names the group for assistive technology (`aria-label` works too); give a standalone radio without visible text an `aria-label`.
+
+The indicator is not tied to the ring. `--c2-radio__control--border-radius` reshapes the ring and its dot (a square control at `4px`); the `dot` slot replaces the filled dot with a mark such as a check, drawn in `--c2-radio__dot--color`; and the `icon` and `checked-icon` slots replace the whole control with an icon per state, coloured by `--c2-radio__icon--color` and `--c2-radio__icon__checked--color` and sized by `--c2-radio__icon--size`. With only `icon`, the same icon shows in both states and changes colour; with only `checked-icon`, the ring stays for the unchecked state. Hide that ring with `--c2-radio__control--border: none` and move the indicator after the text with `--c2-radio__container--flex-direction: row-reverse` to get a menu-style check list, as in the row above.
+
+Theme the control with `--c2-radio__control--*` and `--c2-radio__dot--*` (an accent border with a transparent fill gives the outlined look), the text with `--c2-radio__label--*` and `--c2-radio__description--*`, and the whole row with `--c2-radio__container--*` for card-style options. Set those variables on the group and every option inherits them, as in the Cards row above; add `--c2-radio-group--align-items: stretch` so the cards fill the width.

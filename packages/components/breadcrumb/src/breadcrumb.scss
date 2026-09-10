@@ -1,0 +1,135 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-breadcrumb,
+  $theme: (
+    gap: 4px,
+    separator--size: 14px,
+    separator--color: #a1a1aa,
+
+    item--color: #71717a,
+    item--font-size: 14px,
+    item--font-weight: 500,
+    item--padding-top: 2px,
+    item--padding-right: 4px,
+    item--padding-bottom: 2px,
+    item--padding-left: 4px,
+    item--border-radius: 4px,
+    item--background-color: null,
+    item__hover--color: #18181b,
+    item__hover--background-color: null,
+    item__hover--text-decoration: none,
+    item__current--color: #18181b,
+    item__current--font-weight: 500,
+    item__current--background-color: null,
+  )
+);
+
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// One row: items that do not fit are collapsed by the component. While measuring, every item is laid out at its
+// natural width but hidden; once the user expands the trail, it may wrap.
+.c2-breadcrumb-list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+  overflow: hidden;
+
+  &.is-measuring {
+    visibility: hidden;
+  }
+
+  &.is-expanded {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+}
+
+.c2-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: css.cssVar(gap);
+  min-width: 0;
+}
+
+// Items are `c2-link-button`s (or any element): the breadcrumb owns their look through the link button's variables,
+// so one set of `--c2-breadcrumb__item--*` tokens styles links, the ellipsis and the current page alike.
+::slotted(*),
+.c2-breadcrumb-ellipsis {
+  --c2-link-button__container--color: #{css.cssVar(item--color)};
+  --c2-link-button__container--font-size: #{css.cssVar(item--font-size)};
+  --c2-link-button__container--font-weight: #{css.cssVar(item--font-weight)};
+  --c2-link-button__container--padding-top: #{css.cssVar(item--padding-top)};
+  --c2-link-button__container--padding-right: #{css.cssVar(item--padding-right)};
+  --c2-link-button__container--padding-bottom: #{css.cssVar(item--padding-bottom)};
+  --c2-link-button__container--padding-left: #{css.cssVar(item--padding-left)};
+  --c2-link-button__container--border-radius: #{css.cssVar(item--border-radius)};
+  --c2-link-button__container--background-color: #{css.cssVar(item--background-color)};
+  --c2-link-button__container__hover--color: #{css.cssVar(item__hover--color)};
+  --c2-link-button__container__hover--background-color: #{css.cssVar(item__hover--background-color)};
+  --c2-link-button__container__hover--text-decoration: #{css.cssVar(item__hover--text-decoration)};
+  --c2-link-button__container__selected--color: #{css.cssVar(item__current--color)};
+  --c2-link-button__container__selected--font-weight: #{css.cssVar(item__current--font-weight)};
+  --c2-link-button__container__selected--background-color: #{css.cssVar(item__current--background-color)};
+  --c2-link-button__icon--size: #{css.cssVar(separator--size)};
+  color: css.cssVar(item--color);
+  font-size: css.cssVar(item--font-size);
+  font-weight: css.cssVar(item--font-weight);
+  min-width: 0;
+}
+
+// A plain element as the current page (a <span>) gets the current colours directly.
+::slotted([aria-current]) {
+  color: css.cssVar(item__current--color);
+  font-weight: css.cssVar(item__current--font-weight);
+  background-color: css.cssVar(item__current--background-color);
+  padding-top: css.cssVar(item--padding-top);
+  padding-right: css.cssVar(item--padding-right);
+  padding-bottom: css.cssVar(item--padding-bottom);
+  padding-left: css.cssVar(item--padding-left);
+  border-radius: css.cssVar(item--border-radius);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c2-breadcrumb-separator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: css.cssVar(separator--color);
+  font-size: css.cssVar(separator--size);
+  line-height: 1;
+  user-select: none;
+
+  svg,
+  > * {
+    width: css.cssVar(separator--size);
+    height: css.cssVar(separator--size);
+  }
+  --c2-feather-icon--size: #{css.cssVar(separator--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(separator--size)};
+}
+
+// Text separators (a slotted "/" or "·") keep their natural width.
+.c2-breadcrumb-separator > :not(svg):not([class*='c2-']) {
+  width: auto;
+  height: auto;
+}
+
+.c2-breadcrumb-separator-source {
+  display: none;
+}

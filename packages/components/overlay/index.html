@@ -2,27 +2,141 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-overlay</title>
     <script type="module" src="/src/overlay.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 32px;
+        min-height: 150vh;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .surface {
+        background: #fff;
+        border: 1px solid #e4e4e7;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+      .menu {
+        display: grid;
+        gap: 2px;
+        padding: 4px;
+      }
+      .menu button {
+        text-align: left;
+        border: none;
+        background: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .menu button:hover {
+        background: #f4f4f5;
+      }
+      .list {
+        max-height: var(--c2-overlay--available-height, 300px);
+        overflow: auto;
       }
     </style>
   </head>
-
   <body>
-    <div>
-      <button popovertarget="mypopover">Show the popover</button>
-      <c2-overlay popover id="mypopover">This is content</c2-overlay>
-    </div>
+    <section>
+      <h2>Placements (flip and shift keep them on screen; scroll the page and reopen)</h2>
+      <div class="row">
+        <button popovertarget="p1">bottom-start</button>
+        <c2-overlay id="p1"><div class="surface">bottom-start (default)</div></c2-overlay>
+        <button popovertarget="p2">top</button>
+        <c2-overlay id="p2" placement="top"><div class="surface">top</div></c2-overlay>
+        <button popovertarget="p3">right-start</button>
+        <c2-overlay id="p3" placement="right-start" free-width><div class="surface">right-start, free-width</div></c2-overlay>
+        <button popovertarget="p4">bottom-end</button>
+        <c2-overlay id="p4" placement="bottom-end"><div class="surface">bottom-end</div></c2-overlay>
+      </div>
+    </section>
 
-    <div>
-      <button popovertarget="mypopover1">Show the popover1</button>
-      <c2-overlay popover id="mypopover1">This is content1</c2-overlay>
-    </div>
+    <section>
+      <h2>Menu surface, fit-anchor, custom offsets</h2>
+      <div class="row">
+        <button popovertarget="m1" style="width: 200px">Actions ▾</button>
+        <c2-overlay id="m1" fit-anchor>
+          <div class="surface menu">
+            <button>Rename</button>
+            <button>Duplicate</button>
+            <button style="color: #dc2626">Delete</button>
+          </div>
+        </c2-overlay>
+        <button popovertarget="m2">Offset 16 / 24</button>
+        <c2-overlay id="m2" style="--c2-overlay--offset-y: 16px; --c2-overlay--offset-x: 24px" free-width
+          ><div class="surface">offset-y 16px, offset-x 24px</div></c2-overlay
+        >
+      </div>
+    </section>
+
+    <section>
+      <h2>Anchor by id, programmatic open, manual popover with backdrop</h2>
+      <div class="row">
+        <span id="target" style="padding: 6px 10px; border: 1px dashed #a1a1aa; border-radius: 6px">I am the anchor</span>
+        <button onclick="document.getElementById('a1').open = !document.getElementById('a1').open">Toggle overlay anchored to the span</button>
+        <c2-overlay id="a1" anchor="target" placement="bottom" free-width
+          ><div class="surface">Anchored via <code>anchor="target"</code></div></c2-overlay
+        >
+        <button popovertarget="man">Manual + backdrop</button>
+        <c2-overlay id="man" popover="manual" style="--c2-overlay__backdrop--background: rgba(0, 0, 0, 0.3)" free-width>
+          <div class="surface">No light dismiss. <button popovertarget="man" popovertargetaction="hide">Close</button></div>
+        </c2-overlay>
+      </div>
+      <p id="log" style="font-size: 13px; color: #666"></p>
+      <script>
+        document.getElementById('a1').addEventListener('toggle', (e) => {
+          document.getElementById('log').textContent =
+            `toggle → ${e.newState}, current-placement=${e.target.getAttribute('current-placement')}, open=${e.target.open}`
+        })
+      </script>
+    </section>
+
+    <section>
+      <h2>Available height drives a scrolling list</h2>
+      <button popovertarget="l1">Long list (near the bottom it flips or shrinks)</button>
+      <c2-overlay id="l1">
+        <div class="surface list">
+          <div>Row 1</div>
+          <div>Row 2</div>
+          <div>Row 3</div>
+          <div>Row 4</div>
+          <div>Row 5</div>
+          <div>Row 6</div>
+          <div>Row 7</div>
+          <div>Row 8</div>
+          <div>Row 9</div>
+          <div>Row 10</div>
+          <div>Row 11</div>
+          <div>Row 12</div>
+          <div>Row 13</div>
+          <div>Row 14</div>
+          <div>Row 15</div>
+          <div>Row 16</div>
+          <div>Row 17</div>
+          <div>Row 18</div>
+          <div>Row 19</div>
+          <div>Row 20</div>
+        </div>
+      </c2-overlay>
+    </section>
   </body>
 </html>

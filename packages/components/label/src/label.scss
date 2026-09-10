@@ -2,15 +2,68 @@
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-label,
-  $theme: ()
+  $theme: (
+    container--gap: 4px,
+    container--color: inherit,
+    container--font-family: inherit,
+    container--font-size: inherit,
+    container--font-weight: inherit,
+    container--line-height: inherit,
+    container--letter-spacing: inherit,
+    container--text-transform: inherit,
+
+    container__hover--color: null,
+    container__disabled--opacity: variables.$disabled-content-opacity,
+
+    required-indicator--color: variables.$color-red,
+    required-indicator--font-size: inherit,
+    required-indicator--font-weight: inherit,
+  )
 );
 
 :host {
   display: inline-flex;
 }
+
+:host([hidden]) {
+  display: none;
+}
+
 :host([for]:not([disabled])) {
   cursor: pointer;
 }
+
 :host([disabled]) {
   cursor: default;
+}
+
+// Every typographic value falls back to `inherit`, so an unthemed label reads like the text around it and styles set
+// on the host element (font-size, color, text-transform, ...) pass straight through.
+.c2-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: css.cssVar(container--gap);
+  color: css.cssVar(container--color);
+  font-family: css.cssVar(container--font-family);
+  font-size: css.cssVar(container--font-size);
+  font-weight: css.cssVar(container--font-weight);
+  line-height: css.cssVar(container--line-height);
+  letter-spacing: css.cssVar(container--letter-spacing);
+  text-transform: css.cssVar(container--text-transform);
+  transition: animation.standard(color);
+}
+
+:host([for]:not([disabled])) .c2-label:hover {
+  color: css.cssVar(container__hover--color, container--color);
+}
+
+:host([disabled]) .c2-label {
+  opacity: css.cssVar(container__disabled--opacity);
+}
+
+.c2-label__required {
+  color: css.cssVar(required-indicator--color);
+  font-size: css.cssVar(required-indicator--font-size);
+  font-weight: css.cssVar(required-indicator--font-weight);
+  line-height: 1;
 }

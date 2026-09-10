@@ -1,0 +1,128 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Switch } from '@c2n/switch'
+
+## Presets
+
+Curated looks for `c2-switch`. Open any card in the studio to start from it. Sizes come from the three track and thumb dimensions; colours from the `__track`, `__thumb` and `__icon` variables.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-switch checked>Notifications</c2-switch>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .large {
+    --c2-switch__track--width: 52px;
+    --c2-switch__track--height: 32px;
+    --c2-switch__thumb--size: 28px;
+    --c2-switch__container--gap: 12px;
+    --c2-switch__label--font-size: 16px;
+  }
+</style>
+<c2-switch class="large" checked>Wi-Fi</c2-switch>
+```
+
+```html tag=MdxCodeBlock,label=Small
+<style>
+  .small {
+    --c2-switch__track--width: 28px;
+    --c2-switch__track--height: 16px;
+    --c2-switch__thumb--size: 12px;
+    --c2-switch__label--font-size: 13px;
+  }
+</style>
+<c2-switch class="small" checked>Compact rows</c2-switch>
+```
+
+```html tag=MdxCodeBlock,label=Icons
+<style>
+  .icons {
+    --c2-switch__track--width: 44px;
+    --c2-switch__track--height: 24px;
+    --c2-switch__thumb--size: 20px;
+    --c2-switch__icon--size: 12px;
+  }
+</style>
+<c2-switch class="icons" checked><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><svg slot="unchecked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Two-factor authentication</c2-switch>
+```
+
+```html tag=MdxCodeBlock,label=Outlined
+<style>
+  .outlined {
+    --c2-switch__track--color: transparent;
+    --c2-switch__track--border: 1px solid #a1a1aa;
+    --c2-switch__track__hover--color: #f4f4f5;
+    --c2-switch__thumb--color: #71717a;
+    --c2-switch__thumb--box-shadow: none;
+    --c2-switch__track__checked--border: 1px solid #0265dc;
+    --c2-switch__thumb__checked--color: #ffffff;
+  }
+</style>
+<c2-switch class="outlined" checked>Outlined</c2-switch>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .success {
+    --c2-switch__track__checked--color: #16a34a;
+    --c2-switch__track__checked__hover--color: #15803d;
+    --c2-switch__track__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+    --c2-switch__icon__checked--color: #16a34a;
+  }
+</style>
+<c2-switch class="success" checked><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Published</c2-switch>
+```
+
+```html tag=MdxCodeBlock,label=Square
+<style>
+  .square {
+    --c2-switch__track--border-radius: 4px;
+    --c2-switch__thumb--border-radius: 2px;
+    --c2-switch__track--color: #d4d4d8;
+    --c2-switch__track__checked--color: #18181b;
+    --c2-switch__track__checked__hover--color: #27272a;
+    --c2-switch__thumb--box-shadow: none;
+  }
+</style>
+<c2-switch class="square" checked>Grid snapping</c2-switch>
+```
+
+```html tag=MdxCodeBlock,label=Label first
+<style>
+  .label-first {
+    width: 240px;
+    --c2-switch__container--flex-direction: row-reverse;
+    --c2-switch__container--justify-content: space-between;
+    --c2-switch__container--gap: 16px;
+    --c2-switch__label--font-weight: 500;
+  }
+</style>
+<c2-switch class="label-first" checked>Email digest<span slot="description">Every morning at 8:00.</span></c2-switch>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    display: inline-flex;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: #18181b;
+    color: #fafafa;
+    --c2-switch__track--color: #3f3f46;
+    --c2-switch__track__hover--color: #52525b;
+    --c2-switch__track__checked--color: #5aa3ff;
+    --c2-switch__track__checked__hover--color: #7bb6ff;
+    --c2-switch__thumb--color: #fafafa;
+    --c2-switch__thumb__checked--color: #032a5c;
+    --c2-switch__track__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
+    --c2-switch__description--color: #a1a1aa;
+  }
+</style>
+<div class="dark"><c2-switch checked>Dark mode<span slot="description">Follows the system at sunset.</span></c2-switch></div>
+```
+
+</GalleryGrid>

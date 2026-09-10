@@ -1,0 +1,297 @@
+---
+import logoRef from '../assets/logo.svg?raw'
+// Base theme first: maps every c2 component variable onto the --c2-theme--* tokens that assets/c2-theme.scss bridges.
+import '@c2n/theme/base.css'
+import '../assets/global.scss'
+import SiteIconButton from '../components/ui/SiteIconButton.astro'
+import { FeatherGithubIcon, FeatherMenuIcon, FeatherSearchIcon } from '../components/ui/icons'
+import { LinkButton } from '@c2n/link-button'
+import ThemeToggle from '../components/ThemeToggle.astro'
+import SearchPalette from '../components/SearchPalette.astro'
+
+const base = import.meta.env.BASE_URL
+
+interface Props {
+  title: string
+  description?: string
+  /** Render the mobile "open navigation" button (docs pages). */
+  withSidebar?: boolean
+  /** Which top-level nav item is active. */
+  section?: 'components' | 'icons' | 'guides'
+}
+const { title, description = 'A library of small, themable Lit web components published as individual npm packages.', withSidebar, section } = Astro.props
+const repoUrl = 'https://github.com/code2nguyen/web-components'
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <title>{title}</title>
+    <script is:inline>
+      // Resolve the theme before first paint to avoid a flash.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('c2n-theme')
+          var theme = stored === 'light' || stored === 'dark' ? stored : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          document.documentElement.dataset.theme = theme
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light'
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="site-header__inner">
+        {
+          withSidebar && (
+            <SiteIconButton label="Open navigation" tooltip={false} class="site-header__menu" data-toggle-sidebar>
+              <FeatherMenuIcon client:load />
+            </SiteIconButton>
+          )
+        }
+        <a href={`${base}/`} class="site-header__brand" aria-label="c2n web components home">
+          <Fragment set:html={logoRef} />
+          <span class="site-header__wordmark">c2n<span class="site-header__wordmark-muted">/web-components</span></span>
+        </a>
+
+        <nav class="site-header__nav" aria-label="Primary">
+          <LinkButton client:load class="site-header__nav-link" href={`${base}/components/`} selected={section === 'components'}>Components</LinkButton>
+          <LinkButton client:load class="site-header__nav-link" href={`${base}/icons/`} selected={section === 'icons'}>Icons</LinkButton>
+          <LinkButton client:load class="site-header__nav-link" href={`${base}/guides/`} selected={section === 'guides'}>Guides</LinkButton>
+          <LinkButton client:load class="site-header__nav-link" href={`${base}/#getting-started`}>Getting started</LinkButton>
+        </nav>
+
+        <div class="site-header__spacer"></div>
+
+        <button class="site-header__search" type="button" data-open-search aria-label="Search components">
+          <FeatherSearchIcon client:load />
+          <span class="site-header__search-label">Search</span>
+          <kbd class="kbd">⌘K</kbd>
+        </button>
+        <SiteIconButton label="Search components" class="site-header__search-compact" data-open-search>
+          <FeatherSearchIcon client:load />
+        </SiteIconButton>
+        <ThemeToggle />
+        <LinkButton client:load class="site-header__github" href={repoUrl} external aria-label="GitHub repository">
+          <FeatherGithubIcon client:load slot="prefix-icon" />
+          <c2-tooltip>GitHub repository</c2-tooltip>
+        </LinkButton>
+      </div>
+    </header>
+
+    <main id="main" class="site-main">
+      <slot />
+    </main>
+
+    <slot name="footer">
+      <footer class="site-footer">
+        <div class="site-footer__inner">
+          <span>© {new Date().getFullYear()} code2nguyen · MIT licensed</span>
+          <span class="site-footer__links">
+            <a href={repoUrl} target="_blank" rel="noreferrer">GitHub</a>
+            <a href="https://www.npmjs.com/org/c2n" target="_blank" rel="noreferrer">npm</a>
+          </span>
+        </div>
+      </footer>
+    </slot>
+
+    <SearchPalette />
+
+    <style lang="scss">
+      .skip-link {
+        position: absolute;
+        left: 16px;
+        top: -100px;
+        z-index: 2000;
+        padding: 8px 12px;
+        background: var(--site-color-primary);
+        color: var(--site-color-on-primary);
+        border-radius: var(--site-radius-sm);
+        &:focus {
+          top: 8px;
+        }
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        height: var(--site-header-height);
+        background: color-mix(in srgb, var(--site-color-surface) 85%, transparent);
+        backdrop-filter: saturate(180%) blur(12px);
+        -webkit-backdrop-filter: saturate(180%) blur(12px);
+        border-bottom: 1px solid var(--site-color-outline-variant);
+
+        &__inner {
+          height: 100%;
+          max-width: var(--site-page-max-width);
+          margin: 0 auto;
+          padding: 0 var(--site-gutter);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        // Hosts rendered by SiteIconButton / LinkButton carry no scoped attribute, hence :global().
+        :global(.site-header__menu) {
+          display: none;
+          margin-left: -8px;
+        }
+        :global(.site-header__github) {
+          --c2-link-button__container--padding-top: 9px;
+          --c2-link-button__container--padding-right: 9px;
+          --c2-link-button__container--padding-bottom: 9px;
+          --c2-link-button__container--padding-left: 9px;
+          --c2-link-button__container--gap: 0;
+          --c2-link-button__container--border-radius: var(--site-radius-sm);
+          --c2-link-button__container--color: var(--site-color-on-surface-variant);
+          --c2-link-button__container__hover--color: var(--site-color-on-surface);
+          --c2-link-button__container__hover--background-color: var(--site-color-surface-container-3);
+          --c2-link-button__container__hover--text-decoration: none;
+          --c2-link-button__icon--size: 16px;
+        }
+
+        &__brand {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          color: var(--site-color-on-surface);
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 15px;
+          letter-spacing: -0.01em;
+          margin-right: 16px;
+          :global(svg) {
+            width: 22px;
+            height: 22px;
+            flex: none;
+          }
+          &:hover {
+            text-decoration: none;
+          }
+        }
+        &__wordmark-muted {
+          color: var(--site-color-on-surface-muted);
+          font-weight: 400;
+        }
+
+        &__nav {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        :global(.site-header__nav-link) {
+          --c2-link-button__container--padding-top: 6px;
+          --c2-link-button__container--padding-right: 10px;
+          --c2-link-button__container--padding-bottom: 6px;
+          --c2-link-button__container--padding-left: 10px;
+          --c2-link-button__container--border-radius: var(--site-radius-sm);
+          --c2-link-button__container--background-color: transparent;
+          --c2-link-button__container--color: var(--site-color-on-surface-variant);
+          --c2-link-button__container--font-size: 14px;
+          --c2-link-button__container--font-weight: 500;
+          --c2-link-button__container--text-decoration: none;
+          --c2-link-button__container__hover--color: var(--site-color-on-surface);
+          --c2-link-button__container__hover--background-color: var(--site-color-surface-container-2);
+          --c2-link-button__container__hover--text-decoration: none;
+          --c2-link-button__container__selected--color: var(--site-color-on-surface);
+          --c2-link-button__container__selected--background-color: transparent;
+          --c2-link-button__container__selected--font-weight: 500;
+          --c2-link-button__container__selected--text-decoration: none;
+          --c2-link-button__container__focus--outline: 2px solid var(--site-color-primary);
+          &:hover {
+            --c2-link-button__container__selected--background-color: var(--site-color-surface-container-2);
+          }
+        }
+
+        &__spacer {
+          flex: 1;
+        }
+
+        &__search {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          height: 34px;
+          padding: 0 10px 0 12px;
+          margin-right: 4px;
+          min-width: 220px;
+          border: 1px solid var(--site-color-outline-variant);
+          border-radius: var(--site-radius-sm);
+          background: var(--site-color-surface-container-1);
+          color: var(--site-color-on-surface-muted);
+          font-size: 13px;
+          cursor: pointer;
+          transition: border-color 150ms var(--site-ease);
+          &:hover {
+            border-color: var(--site-color-outline);
+            color: var(--site-color-on-surface-variant);
+          }
+          --c2-feather-icon--size: 16px;
+          .kbd {
+            margin-left: auto;
+          }
+        }
+        :global(.site-header__search-compact) {
+          display: none;
+        }
+      }
+
+      .site-main {
+        min-height: calc(100vh - var(--site-header-height));
+      }
+
+      .site-footer {
+        border-top: 1px solid var(--site-color-outline-variant);
+        font-size: 13px;
+        color: var(--site-color-on-surface-muted);
+        &__inner {
+          max-width: var(--site-page-max-width);
+          margin: 0 auto;
+          padding: 24px var(--site-gutter);
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+        &__links {
+          display: flex;
+          gap: 16px;
+          a {
+            color: var(--site-color-on-surface-variant);
+          }
+        }
+      }
+
+      @media (max-width: 959.98px) {
+        .site-header {
+          :global(.site-header__menu) {
+            display: inline-flex;
+          }
+          &__nav {
+            display: none;
+          }
+          &__search {
+            display: none;
+          }
+          :global(.site-header__search-compact) {
+            display: inline-flex;
+          }
+        }
+      }
+      @media (max-width: 599.98px) {
+        .site-header__wordmark-muted {
+          display: none;
+        }
+      }
+    </style>
+  </body>
+</html>

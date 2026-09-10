@@ -1,0 +1,80 @@
+---
+title: 'Link Button'
+description: 'Text-styled control for link and navigation actions, rendered as a real anchor or a button.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { LinkButton } from '@c2n/link-button'
+import { FeatherArrowLeftIcon as FeatherArrowLeft } from '@c2n/feather-icons/icons/arrow-left.js'
+import { FeatherArrowRightIcon as FeatherArrowRight } from '@c2n/feather-icons/icons/arrow-right.js'
+import { FeatherBookOpenIcon as FeatherBookOpen } from '@c2n/feather-icons/icons/book-open.js'
+import { FeatherGithubIcon as FeatherGithub } from '@c2n/feather-icons/icons/github.js'
+import { FeatherExternalLinkIcon as FeatherExternalLink } from '@c2n/feather-icons/icons/external-link.js'
+
+`c2-link-button` is the control for "go somewhere" actions. Give it an `href` and it renders a real `<a>`, so middle-click, open in new tab and screen readers all behave natively; leave `href` out and it renders a `<button>` that fires a normal `click`. Icons go in the `prefix-icon` and `suffix-icon` slots. `external` opens the destination in a new tab (add a `c2-feather-external-link` in `suffix-icon` if you want the hint), `selected` marks the current item in a navigation, and `disabled` dims it and blocks clicks.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/link-button
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/link-button
+<style>
+  .nav {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .nav-item {
+    --c2-link-button__container--padding-left: 12px;
+    --c2-link-button__container--padding-right: 12px;
+    --c2-link-button__container--padding-top: 6px;
+    --c2-link-button__container--padding-bottom: 6px;
+    --c2-link-button__container--border-radius: 6px;
+    --c2-link-button__container--color: #52525b;
+    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container__hover--background-color: #f4f4f5;
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__container__selected--color: #18181b;
+    --c2-link-button__container__selected--background-color: #e4e4e7;
+  }
+</style>
+<div data-label="Button vs link">
+  <c2-link-button>Button (no href)</c2-link-button>
+  <c2-link-button href="#">Link (href)</c2-link-button>
+</div>
+<div data-label="Icons">
+  <c2-link-button href="#"><c2-feather-arrow-left slot="prefix-icon"></c2-feather-arrow-left>Back</c2-link-button>
+  <c2-link-button href="#">Learn more<c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right></c2-link-button>
+  <c2-link-button href="#"><c2-feather-book-open slot="prefix-icon"></c2-feather-book-open>Read the docs</c2-link-button>
+</div>
+<div data-label="External">
+  <c2-link-button href="https://github.com/code2nguyen/web-components" external>Source on GitHub</c2-link-button>
+  <c2-link-button href="https://github.com/code2nguyen/web-components" external>
+    <c2-feather-github slot="prefix-icon"></c2-feather-github>
+    With icons
+    <c2-feather-external-link slot="suffix-icon"></c2-feather-external-link>
+  </c2-link-button>
+</div>
+<div data-label="Selected">
+  <nav class="nav">
+    <c2-link-button class="nav-item" href="#" selected>Overview</c2-link-button>
+    <c2-link-button class="nav-item" href="#">Activity</c2-link-button>
+    <c2-link-button class="nav-item" href="#">Settings</c2-link-button>
+  </nav>
+  <c2-link-button selected>Selected text</c2-link-button>
+</div>
+<div data-label="Disabled">
+  <c2-link-button disabled>Disabled button</c2-link-button>
+  <c2-link-button href="#" disabled>Disabled link</c2-link-button>
+</div>
+```

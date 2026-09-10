@@ -1,0 +1,110 @@
+---
+title: 'Overlay'
+description: 'Anchored popup built on the browser Popover API, positioned with floating-ui.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Overlay } from '@c2n/overlay'
+
+`c2-overlay` is a positioning shell around the browser Popover API. It lives in the top layer, opens and light-dismisses natively (Escape, click outside, `popover="manual"` to opt out), and floating-ui keeps it next to its anchor: the element whose `popovertarget` is the overlay's `id`, or whatever the `anchor` attribute (an id) or property (an element) points at. The preferred `placement` flips and shifts to stay on screen; the one in use is reflected as `current-placement`, and `--c2-overlay--available-height` / `--available-width` tell the content how much room it has. The overlay is at least as wide as its anchor unless `free-width` is set, and exactly as wide with `fit-anchor`. The slotted content brings its own surface. `c2-select` and `c2-color-select` are built on it.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/overlay
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/overlay
+<style>
+  .surface {
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #18181b;
+  }
+  .menu {
+    display: grid;
+    gap: 2px;
+    padding: 4px;
+  }
+  .menu button {
+    text-align: left;
+    border: none;
+    background: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font: inherit;
+    cursor: pointer;
+    color: inherit;
+  }
+  .menu button:hover {
+    background: #f4f4f5;
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+  .trigger:hover {
+    background: #f4f4f5;
+  }
+  .anchor {
+    padding: 6px 10px;
+    border: 1px dashed #a1a1aa;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+</style>
+<div data-label="Placements">
+  <button class="trigger" popovertarget="ov-bs">bottom-start</button>
+  <c2-overlay id="ov-bs" client:only="lit"><div class="surface">Default placement</div></c2-overlay>
+  <button class="trigger" popovertarget="ov-top">top</button>
+  <c2-overlay id="ov-top" placement="top" client:only="lit"><div class="surface">Above the button</div></c2-overlay>
+  <button class="trigger" popovertarget="ov-right">right-start</button>
+  <c2-overlay id="ov-right" placement="right-start" free-width client:only="lit"><div class="surface">To the right, sized by content</div></c2-overlay>
+</div>
+<div data-label="Menu, fit-anchor">
+  <button class="trigger" popovertarget="ov-menu" style="width: 200px">Actions ▾</button>
+  <c2-overlay id="ov-menu" fit-anchor client:only="lit">
+    <div class="surface menu">
+      <button>Rename</button>
+      <button>Duplicate</button>
+      <button style="color: #dc2626">Delete</button>
+    </div>
+  </c2-overlay>
+</div>
+<div data-label="Anchor by id, open property">
+  <span class="anchor" id="ov-target">anchor</span>
+  <button class="trigger" onclick="document.getElementById('ov-anchored').open = true">Open</button>
+  <c2-overlay id="ov-anchored" anchor="ov-target" placement="bottom" free-width client:only="lit"><div class="surface">Anchored to the span</div></c2-overlay>
+</div>
+<div data-label="Offsets and manual">
+  <button class="trigger" popovertarget="ov-offset">Offset 16 / 24</button>
+  <c2-overlay id="ov-offset" free-width style="--c2-overlay--offset-y: 16px; --c2-overlay--offset-x: 24px" client:only="lit"><div class="surface">offset-y 16px, offset-x 24px</div></c2-overlay>
+  <button class="trigger" popovertarget="ov-manual">Manual + backdrop</button>
+  <c2-overlay id="ov-manual" popover="manual" free-width style="--c2-overlay__backdrop--background: rgba(0, 0, 0, 0.3)" client:only="lit">
+    <div class="surface">No light dismiss. <button popovertarget="ov-manual" popovertargetaction="hide">Close</button></div>
+  </c2-overlay>
+</div>
+```
+
+```ts tag=CodeBlock
+const overlay = document.querySelector('c2-overlay')
+overlay.addEventListener('toggle', (event) => {
+  console.log(event.newState, overlay.getAttribute('current-placement'))
+})
+overlay.open = true // same as showPopover()
+```

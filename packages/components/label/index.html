@@ -4,23 +4,59 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-label</title>
     <script type="module" src="/src/label.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
       }
-      .demo {
+      .field {
         display: flex;
         align-items: center;
+        gap: 12px;
+      }
+      .eyebrow {
+        --c2-label__container--font-size: 11px;
+        --c2-label__container--font-weight: 600;
+        --c2-label__container--letter-spacing: 0.08em;
+        --c2-label__container--text-transform: uppercase;
+        --c2-label__container--color: #71717a;
+      }
+      .large {
+        --c2-label__container--font-size: 18px;
+        --c2-label__container--font-weight: 600;
+        --c2-label__container__hover--color: #2563eb;
+      }
+      .text-indicator {
+        --c2-label__required-indicator--color: #71717a;
+        --c2-label__required-indicator--font-size: 12px;
+        --c2-label__required-indicator--font-weight: 400;
       }
     </style>
   </head>
   <body>
-    <c2-label for="input"
-      >Input
-      <input type="text" id="input" />
-    </c2-label>
+    <div class="field"><c2-label for="name">Full name</c2-label> <input id="name" type="text" /></div>
+    <div class="field"><c2-label for="email" required>Email</c2-label> <input id="email" type="email" required /></div>
+    <div class="field"><c2-label for="agree">Native checkbox toggles on label click</c2-label> <input id="agree" type="checkbox" /></div>
+    <div class="field"><c2-label for="off" disabled>Disabled label</c2-label> <input id="off" type="text" disabled /></div>
+    <div class="field"><c2-label class="eyebrow" for="eyebrow">Section title</c2-label> <input id="eyebrow" type="text" /></div>
+    <div class="field"><c2-label class="large" for="large" required>Large label</c2-label> <input id="large" type="text" /></div>
+    <div class="field">
+      <c2-label class="text-indicator" for="ti" required>Phone <span slot="required-indicator">(required)</span></c2-label> <input id="ti" type="tel" />
+    </div>
+    <div class="field"><c2-label id="std" for="lbl">Custom id kept</c2-label> <input id="lbl" type="text" /> <span id="log"></span></div>
+    <script type="module">
+      const log = document.getElementById('log')
+      log.textContent =
+        'aria-labelledby=' +
+        document.getElementById('lbl').getAttribute('aria-labelledby') +
+        ' / ' +
+        document.getElementById('name').getAttribute('aria-labelledby')
+    </script>
   </body>
 </html>

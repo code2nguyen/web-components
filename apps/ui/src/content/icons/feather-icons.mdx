@@ -1,0 +1,70 @@
+---
+title: 'Feather Icons'
+description: '287 open-source Feather icons, one web component each.'
+package: '@c2n/feather-icons'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+import FeatherIconGallery from '../../components/FeatherIconGallery.astro'
+
+import {
+  FeatherArrowRightIcon as FeatherArrowRight,
+  FeatherCameraIcon as FeatherCamera,
+  FeatherHeartIcon as FeatherHeart,
+  FeatherSettingsIcon as FeatherSettings,
+} from '@c2n/feather-icons'
+
+# Feather Icons
+
+`@c2n/feather-icons` wraps every [Feather](https://feathericons.com/) icon as its own web component: `c2-feather-<icon-name>`.
+The components are generated from the `feather-icons` npm package, so the set tracks upstream releases.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/feather-icons
+```
+
+## Import
+
+Import individual icons to keep bundles small:
+
+```typescript tag=CodeBlock
+import '@c2n/feather-icons/icons/arrow-right.js'
+import '@c2n/feather-icons/icons/camera.js'
+```
+
+or register the whole set at once:
+
+```typescript tag=CodeBlock
+import '@c2n/feather-icons'
+```
+
+## Examples
+
+```html tag=MdxCodeBlock,compact=true
+<c2-feather-arrow-right></c2-feather-arrow-right>
+<c2-feather-camera></c2-feather-camera>
+<c2-feather-heart></c2-feather-heart>
+<c2-feather-settings></c2-feather-settings>
+```
+
+Icons inherit `currentColor` and are themed with the shared `--c2-feather-icon--*` custom properties.
+
+```html tag=MdxCodeBlock,compact=true
+<c2-feather-heart style="--c2-feather-icon--size: 48px; --c2-feather-icon--color: #dc2626"></c2-feather-heart>
+<c2-feather-heart style="--c2-feather-icon--size: 48px; --c2-feather-icon--stroke-width: 1"></c2-feather-heart>
+<c2-feather-heart style="--c2-feather-icon--size: 48px; --c2-feather-icon--stroke-width: 3"></c2-feather-heart>
+```
+
+## All icons
+
+<FeatherIconGallery />
+
+## API
+
+Every icon element shares the same API.
+
+<ApiTable componentTag="c2-feather-arrow-right"></ApiTable>

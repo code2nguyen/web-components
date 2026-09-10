@@ -1,0 +1,108 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-seperator,
+  $theme: (
+    thickness: 1px,
+    color: #e4e4e7,
+    style: solid,
+    spacing: 0px,
+    inset-start: 0px,
+    inset-end: 0px,
+    line-start--flex: 1,
+    line-end--flex: 1,
+
+    label--gap: 12px,
+    label--color: #71717a,
+    label--font-size: 12px,
+    label--font-weight: 500,
+    label--line-height: 1.4,
+    label--letter-spacing: null,
+    label--text-transform: none,
+  )
+);
+
+:host {
+  display: flex;
+  flex: none;
+  box-sizing: border-box;
+  margin-top: css.cssVar(spacing);
+  margin-bottom: css.cssVar(spacing);
+  padding-left: css.cssVar(inset-start);
+  padding-right: css.cssVar(inset-end);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// Vertical: an inline rule that fills the height of a flex row; elsewhere give the host a height.
+:host([orientation='vertical']) {
+  display: inline-flex;
+  align-self: stretch;
+  min-height: 1em;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: css.cssVar(spacing);
+  margin-right: css.cssVar(spacing);
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: css.cssVar(inset-start);
+  padding-bottom: css.cssVar(inset-end);
+}
+
+.c2-seperator {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+}
+
+:host([orientation='vertical']) .c2-seperator {
+  flex-direction: column;
+  justify-content: center;
+}
+
+// The line is a border so `--c2-seperator--style` can make it dashed or dotted.
+.c2-seperator-line {
+  flex: css.cssVar(line-start--flex);
+  align-self: center;
+  border: 0 css.cssVar(style) css.cssVar(color);
+  border-top-width: css.cssVar(thickness);
+}
+
+.c2-seperator-line--end {
+  flex: css.cssVar(line-end--flex);
+}
+
+:host([orientation='vertical']) .c2-seperator-line {
+  border-top-width: 0;
+  border-left-width: css.cssVar(thickness);
+  align-self: center;
+}
+
+// Without a label only the first segment is drawn, spanning the full length.
+.c2-seperator:not(.has-label) {
+  .c2-seperator-label,
+  .c2-seperator-line--end {
+    display: none;
+  }
+}
+
+.c2-seperator-label {
+  flex: none;
+  padding-left: css.cssVar(label--gap);
+  padding-right: css.cssVar(label--gap);
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: css.cssVar(label--line-height);
+  letter-spacing: css.cssVar(label--letter-spacing);
+  text-transform: css.cssVar(label--text-transform);
+  white-space: nowrap;
+}
+
+:host([orientation='vertical']) .c2-seperator-label {
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: css.cssVar(label--gap);
+  padding-bottom: css.cssVar(label--gap);
+}

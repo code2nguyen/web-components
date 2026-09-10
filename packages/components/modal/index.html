@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-modal</title>
+    <script type="module" src="/src/modal.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 16px;
+        min-height: 150vh;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      button.primary {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+      button.ghost {
+        background: transparent;
+        border: 1px solid #d4d4d8;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+      .sheet {
+        --c2-modal--margin-bottom: 0;
+        --c2-modal--margin-top: auto;
+        --c2-modal--width: 100vw;
+        --c2-modal--border-bottom-left-radius: 0px;
+        --c2-modal--border-bottom-right-radius: 0px;
+        --c2-modal--enter-transform: translateY(100%);
+        --c2-modal--max-height: 70vh;
+      }
+      .glass {
+        --c2-modal__backdrop--background: rgba(255, 255, 255, 0.4);
+        --c2-modal__backdrop--backdrop-filter: blur(6px);
+        --c2-modal--box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <button class="primary" onclick="m1.show()">Basic</button>
+      <button class="primary" onclick="m2.show()">Confirm (footer, no × , no backdrop close)</button>
+      <button class="primary" onclick="m3.show()">Long body scrolls</button>
+      <button class="primary" onclick="m4.show()">Bottom sheet</button>
+      <button class="primary" onclick="m5.show()">Frosted backdrop, no escape</button>
+      <button class="primary" onclick="m6.show()">No title, label only</button>
+    </div>
+    <p id="log" style="font-size: 13px; color: #666">events…</p>
+
+    <c2-modal id="m1">
+      <h2 slot="title">Invite your team</h2>
+      <p>Share the link below with your teammates. They will be added with the Member role.</p>
+      <input value="https://example.com/join/abc123" readonly style="width: 100%; box-sizing: border-box; padding: 8px" />
+      <button slot="footer" class="ghost" onclick="m1.close('cancel')">Cancel</button>
+      <button slot="footer" class="primary" onclick="m1.close('copied')">Copy link</button>
+    </c2-modal>
+
+    <c2-modal id="m2" hide-close no-backdrop-close>
+      <h2 slot="title">Delete workspace?</h2>
+      <p>This removes all projects and members. This action cannot be undone.</p>
+      <button slot="footer" class="ghost" onclick="m2.close('cancel')">Cancel</button>
+      <button slot="footer" class="primary" style="background: #dc2626" onclick="m2.close('delete')">Delete</button>
+    </c2-modal>
+
+    <c2-modal id="m3">
+      <h2 slot="title">Terms of service</h2>
+      <div id="long"></div>
+      <button slot="footer" class="primary" onclick="m3.close('accepted')">Accept</button>
+    </c2-modal>
+
+    <c2-modal id="m4" class="sheet">
+      <h2 slot="title">Share</h2>
+      <p>Bottom sheet via tokens: margins, width, radius and enter-transform.</p>
+    </c2-modal>
+
+    <c2-modal id="m5" class="glass" no-escape>
+      <h2 slot="title">Frosted</h2>
+      <p>Escape is ignored here; use the × button or the backdrop.</p>
+    </c2-modal>
+
+    <c2-modal id="m6" label="Notice">
+      <p>No title slot: the dialog is labelled by the <code>label</code> attribute.</p>
+    </c2-modal>
+
+    <script>
+      document.getElementById('long').innerHTML = Array.from(
+        { length: 30 },
+        (_, i) => `<p>Paragraph ${i + 1}: lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>`,
+      ).join('')
+      const log = document.getElementById('log')
+      document.querySelectorAll('c2-modal').forEach((m) => {
+        m.addEventListener('open', () => (log.textContent = `open ← #${m.id}`))
+        m.addEventListener('close', (e) => (log.textContent = `close ← #${m.id}, returnValue="${e.detail.returnValue}"`))
+        m.addEventListener('cancel', () => (log.textContent += ' (cancel)'))
+      })
+    </script>
+  </body>
+</html>

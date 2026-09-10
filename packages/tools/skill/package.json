@@ -1,0 +1,58 @@
+{
+  "name": "@c2n/skill",
+  "version": "0.0.4",
+  "description": "Claude Code plugin for the c2n web components: a skill that teaches the application workflow plus the @c2n/mcp server",
+  "type": "module",
+  "files": [
+    ".claude-plugin",
+    ".mcp.json",
+    "skills",
+    "README.md"
+  ],
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "skill",
+    "mcp",
+    "web components",
+    "c2n"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "build": "wireit",
+    "version": "node scripts/build-skill.ts && git add .claude-plugin/plugin.json .mcp.json skills"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "../mcp:build"
+      ],
+      "command": "node scripts/build-skill.ts",
+      "files": [
+        "scripts/build-skill.ts",
+        "../mcp/data/registry.json",
+        "package.json"
+      ],
+      "output": [
+        "skills/c2n-components/references/components-cheatsheet.md",
+        ".claude-plugin/plugin.json",
+        ".mcp.json"
+      ],
+      "clean": false
+    }
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "@c2n/mcp": "0.0.4",
+    "prettier": "3.9.6"
+  }
+}

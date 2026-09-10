@@ -11,69 +11,124 @@ import '@c2n/overlay'
 import '@c2n/list'
 
 /**
+ * A dropdown built from a trigger button and a `c2-list` of `c2-list-item` rows inside a `c2-overlay` popover. The
+ * rows are the light-DOM children of the select, so they are themed with the `--c2-list-item--*` variables directly on
+ * the select (or on a wrapper); the dropdown container is themed through the `--c2-select__list--*` variables and the
+ * trigger through `--c2-select__button--*`. The select has no intrinsic width: give the host a `width` (or place it in
+ * a grid/flex cell) and the trigger fills it.
+ *
  * @tag c2-select
  *
- * @slot default - This is a default/unnamed slot
+ * @slot default - The options: `c2-list-item` elements, each with a `value`.
+ * @slot button-prefix-icon - Icon shown at the start of the trigger: an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon`.
+ * @slot button-suffix-icon - Icon shown at the end of the trigger. Defaults to a chevron that flips while open.
+ * @slot button-content - Replaces the trigger text entirely (selected labels or placeholder) with custom markup.
  *
- * @event
- * @cssproperty {pixel} [--c2-select__button__suffix-icon--width=18px] 
- * @cssproperty {pixel} [--c2-select__button__suffix-icon--height=18px] 
- * @cssproperty {padding} [--c2-select__button--padding=4px 8px 4px 8px] - Button padding
- * @cssproperty {color} [--c2-select__button--background=rgb(253, 253, 253)]
- * @cssproperty {color} [--c2-select__button--color=initial]
- * @cssproperty {pixel} [--c2-select__button--gap=4px]
+ * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user picks an option. `detail.value` is the array of selected values (one entry unless `multiple`), `detail.data` the `data` of each selected row.
+ *
+ * @cssproperty {pixel} [--c2-select__button--min-height=36px]
+ * @cssproperty {padding} [--c2-select__button--padding=6px 10px 6px 12px]
+ * @cssproperty {pixel} [--c2-select__button--gap=8px] - Space between the icons and the text.
+ * @cssproperty {color} [--c2-select__button--background=#ffffff]
+ * @cssproperty {color} [--c2-select__button--color=#18181b]
  *
  * @cssproperty {font-size} [--c2-select__button--font-size=14px]
  * @cssproperty {font-weight} --c2-select__button--font-weight
  * @cssproperty {font-style} [--c2-select__button--font-style=normal]
  * @cssproperty {font-family} --c2-select__button--font-family
  *
- * @cssproperty {pixel} [--c2-select__button--border-top-left-radius=4px]
- * @cssproperty {pixel} [--c2-select__button--border-top-right-radius=4px]
- * @cssproperty {pixel} [--c2-select__button--border-bottom-left-radius=4px]
- * @cssproperty {pixel} [--c2-select__button--border-bottom-right-radius=4px]
+ * @cssproperty {border-radius} [--c2-select__button--border-top-left-radius=6px]
+ * @cssproperty {border-radius} [--c2-select__button--border-top-right-radius=6px]
+ * @cssproperty {border-radius} [--c2-select__button--border-bottom-left-radius=6px]
+ * @cssproperty {border-radius} [--c2-select__button--border-bottom-right-radius=6px]
  *
- * @cssproperty {border} [--c2-select__button--border-top=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-select__button--border-right=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-select__button--border-bottom=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-select__button--border-left=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-select__button--border-top=1px solid #bcbcc6]
+ * @cssproperty {border} [--c2-select__button--border-right=1px solid #bcbcc6]
+ * @cssproperty {border} [--c2-select__button--border-bottom=1px solid #bcbcc6]
+ * @cssproperty {border} [--c2-select__button--border-left=1px solid #bcbcc6]
  *
- * @cssproperty {border} [--c2-select__button__hover--border-top=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-select__button__hover--border-right=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-select__button__hover--border-bottom=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-select__button__hover--border-left=1px solid rgb(177, 177, 177)]
- * @cssproperty {color} [--c2-select__button__hover--background=rgb(253, 253, 253)]
- * @cssproperty {color} [--c2-select__button__hover--color=initial]
-
- * @cssproperty {number} --c2-select__placeholder--font-weight
+ * @cssproperty {border} [--c2-select__button__hover--border-top=1px solid #a1a1aa]
+ * @cssproperty {border} [--c2-select__button__hover--border-right=1px solid #a1a1aa]
+ * @cssproperty {border} [--c2-select__button__hover--border-bottom=1px solid #a1a1aa]
+ * @cssproperty {border} [--c2-select__button__hover--border-left=1px solid #a1a1aa]
+ * @cssproperty {color} [--c2-select__button__hover--background=#fafafa]
+ * @cssproperty {color} [--c2-select__button__hover--color=#18181b]
+ *
+ * @cssproperty {border} [--c2-select__button__open--border-top=1px solid #476ef9]
+ * @cssproperty {border} [--c2-select__button__open--border-right=1px solid #476ef9]
+ * @cssproperty {border} [--c2-select__button__open--border-bottom=1px solid #476ef9]
+ * @cssproperty {border} [--c2-select__button__open--border-left=1px solid #476ef9]
+ *
+ * @cssproperty {outline} [--c2-select__button__focus--outline=2px solid rgba(71, 110, 249, 0.4)]
+ * @cssproperty {pixel} [--c2-select__button__focus--outline-offset=1px]
+ *
+ * @cssproperty {opacity} [--c2-select__button__disabled--opacity=0.38]
+ *
+ * @cssproperty {pixel} [--c2-select__button__prefix-icon--width=16px]
+ * @cssproperty {pixel} [--c2-select__button__prefix-icon--height=16px]
+ * @cssproperty {color} --c2-select__button__prefix-icon--color - Defaults to the trigger text colour.
+ *
+ * @cssproperty {pixel} [--c2-select__button__suffix-icon--width=16px]
+ * @cssproperty {pixel} [--c2-select__button__suffix-icon--height=16px]
+ * @cssproperty {color} [--c2-select__button__suffix-icon--color=#71717a]
+ *
+ * @cssproperty {font-weight} --c2-select__placeholder--font-weight
  * @cssproperty {font-style} --c2-select__placeholder--font-style
- * @cssproperty {color} --c2-select__placeholder--color
- * @cssproperty {number} --c2-select__placeholder--opacity
- * 
+ * @cssproperty {color} [--c2-select__placeholder--color=#71717a]
+ * @cssproperty {opacity} [--c2-select__placeholder--opacity=1]
+ *
+ * @cssproperty {color} [--c2-select__list--background=#ffffff]
+ * @cssproperty {border} [--c2-select__list--border-top=1px solid #e4e4e7]
+ * @cssproperty {border} [--c2-select__list--border-right=1px solid #e4e4e7]
+ * @cssproperty {border} [--c2-select__list--border-bottom=1px solid #e4e4e7]
+ * @cssproperty {border} [--c2-select__list--border-left=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-select__list--border-top-left-radius=8px]
+ * @cssproperty {border-radius} [--c2-select__list--border-top-right-radius=8px]
+ * @cssproperty {border-radius} [--c2-select__list--border-bottom-left-radius=8px]
+ * @cssproperty {border-radius} [--c2-select__list--border-bottom-right-radius=8px]
+ * @cssproperty {box-shadow} [--c2-select__list--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {padding} [--c2-select__list--padding-top=4px]
+ * @cssproperty {padding} [--c2-select__list--padding-right=4px]
+ * @cssproperty {padding} [--c2-select__list--padding-bottom=4px]
+ * @cssproperty {padding} [--c2-select__list--padding-left=4px]
+ * @cssproperty {pixel} [--c2-select__list--max-height=280px] - The dropdown scrolls past this height.
+ *
  * @internalcomponent c2-list
  * @internalcomponent c2-overlay
- * 
- * @slotcomponent c2-list-item
  *
+ * @slotcomponent c2-list-item
  */
 @customElement('c2-select')
 export class Select extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true }
+
+  /** Whether the dropdown is showing. Reflects the popover state; set it to open or close programmatically. */
   @property({ type: Boolean, reflect: true }) open = false
+
+  /** Shows the current value but never opens the dropdown. */
   @property({ type: Boolean, reflect: true }) readonly = false
+
+  /** Dims the trigger and ignores interaction. */
   @property({ type: Boolean, reflect: true }) disabled = false
+
+  /** True while the trigger has keyboard focus. */
   @property({ type: Boolean, reflect: true }) focused = false
 
+  /** Make the dropdown exactly as wide as the trigger instead of at least as wide. */
   @property({ type: Boolean, attribute: 'fit-size' }) fitSize = false
 
+  /** Text shown in the trigger while nothing is selected. */
   @property({ type: String }) placeholder = ''
+
+  /** Allow several options to be selected; the dropdown stays open after a pick and the trigger lists every label. */
   @property({ type: Boolean }) multiple: boolean = false
+
+  /** Keep at least one option selected: picking the only selected option again does not clear it. */
   @property({ type: Boolean }) required: boolean = false
 
-  /**
-   * The value separated by <code>;</code>
-   */
+  /** Selected values. Written as `value="a;b"` in markup, read as `['a', 'b']` from the property. */
   @property({
     converter: arrayPropertyConverter,
     reflect: true,
@@ -152,7 +207,7 @@ export class Select extends LitElement {
         }
       }
     }
-    this.displayText = displayText.join(' ')
+    this.displayText = displayText.join(', ')
   }
 
   private renderButtonContent() {
@@ -163,7 +218,7 @@ export class Select extends LitElement {
   }
 
   private renderButtonSuffixIcon() {
-    return svg`<svg class="default-icon" fill="currentColor" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>`
+    return svg`<svg class="default-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>`
   }
 
   private handleSelectionChange(event: CustomEvent<SelectionChangeEventDetail>) {
@@ -179,6 +234,13 @@ export class Select extends LitElement {
   private handleOverlayToggle(event: Event) {
     const toggleEvent = event as ToggleEvent
     this.open = toggleEvent.newState == 'open'
+  }
+
+  protected override willUpdate(changedProperties: PropertyValueMap<this>): void {
+    // Frameworks (and Astro islands) may set `value` as a `;`-separated string property instead of an attribute.
+    if (changedProperties.has('value') && typeof this.value === 'string') {
+      this.value = arrayPropertyConverter.fromAttribute(this.value)
+    }
   }
 
   protected override updated(_changedProperties: PropertyValueMap<this>): void {
@@ -203,16 +265,15 @@ export class Select extends LitElement {
   override render() {
     return html`<div class="c2-select">
       <button
-        aria-haspopup="true"
+        type="button"
+        aria-haspopup="listbox"
         aria-expanded=${this.open ? 'true' : 'false'}
-        aria-labelledby="button icon label"
         id="button"
         popovertarget="menu-overlay"
         class="button"
         @blur=${this.onButtonBlur}
         @focus=${this.onButtonFocus}
         ?disabled=${this.disabled}
-        tabindex="-1"
       >
         <slot name="button-prefix-icon"></slot>
         <slot name="button-content">${this.renderButtonContent()}</slot>

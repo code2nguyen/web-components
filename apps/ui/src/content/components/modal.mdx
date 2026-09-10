@@ -1,0 +1,102 @@
+---
+title: 'Modal'
+description: 'Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Modal } from '@c2n/modal'
+import { Button } from '@c2n/button'
+
+`c2-modal` wraps a native `<dialog>` opened with `showModal()`, so focus is trapped and restored, the page behind is inert and covered by a backdrop, and Escape closes. Open it with the `open` attribute or `show()`; close it with `close(returnValue)`, the built-in × button, a backdrop click or Escape, each of which `hide-close`, `no-backdrop-close` and `no-escape` can turn off. Put the heading in the `title` slot (it labels the dialog; use `label` when there is none), the content in the default slot (it scrolls past `--c2-modal--max-height`) and the actions in `footer`. `close` fires with `detail.returnValue`, `open` after showing. The page stops scrolling while a modal is open unless `no-scroll-lock` is set.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/modal
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/modal
+<style>
+  .modal p {
+    margin: 0;
+  }
+  .ghost {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+  }
+  .danger {
+    --c2-button__container--background-color: #dc2626;
+    --c2-button__container__hover--background-color: #b91c1c;
+  }
+  .sheet {
+    --c2-modal--margin-bottom: 0;
+    --c2-modal--width: 100vw;
+    --c2-modal--border-bottom-left-radius: 0px;
+    --c2-modal--border-bottom-right-radius: 0px;
+    --c2-modal--enter-transform: translateY(100%);
+  }
+  .glass {
+    --c2-modal__backdrop--background: rgba(255, 255, 255, 0.4);
+    --c2-modal__backdrop--backdrop-filter: blur(6px);
+  }
+</style>
+<div data-label="Basic">
+  <c2-button onclick="document.getElementById('md-basic').show()">Invite your team</c2-button>
+  <c2-modal id="md-basic" class="modal">
+    <span slot="title">Invite your team</span>
+    <p>Share the link below with your teammates. They will be added with the Member role.</p>
+    <c2-button slot="footer" class="ghost" onclick="this.closest('c2-modal').close('cancel')">Cancel</c2-button>
+    <c2-button slot="footer" onclick="this.closest('c2-modal').close('copied')">Copy link</c2-button>
+  </c2-modal>
+</div>
+<div data-label="Confirm">
+  <c2-button class="danger" onclick="document.getElementById('md-confirm').show()">Delete workspace</c2-button>
+  <c2-modal id="md-confirm" class="modal" hide-close no-backdrop-close>
+    <span slot="title">Delete workspace?</span>
+    <p>This removes all projects and members. This action cannot be undone.</p>
+    <c2-button slot="footer" class="ghost" onclick="this.closest('c2-modal').close('cancel')">Cancel</c2-button>
+    <c2-button slot="footer" class="danger" onclick="this.closest('c2-modal').close('delete')">Delete</c2-button>
+  </c2-modal>
+</div>
+<div data-label="Scrolling body">
+  <c2-button class="ghost" onclick="document.getElementById('md-terms').show()">Terms of service</c2-button>
+  <c2-modal id="md-terms" class="modal" style="--c2-modal--max-height: 360px">
+    <span slot="title">Terms of service</span>
+    <p>1. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    <p>2. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    <p>3. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+    <p>4. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    <p>5. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+    <p>6. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores.</p>
+    <p>7. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.</p>
+    <c2-button slot="footer" onclick="this.closest('c2-modal').close('accepted')">Accept</c2-button>
+  </c2-modal>
+</div>
+<div data-label="Bottom sheet and frosted">
+  <c2-button class="ghost" onclick="document.getElementById('md-sheet').show()">Bottom sheet</c2-button>
+  <c2-modal id="md-sheet" class="modal sheet">
+    <span slot="title">Share</span>
+    <p>Margins, width, radius and the enter transform are tokens, so a sheet is a few variables away.</p>
+  </c2-modal>
+  <c2-button class="ghost" onclick="document.getElementById('md-glass').show()">Frosted backdrop</c2-button>
+  <c2-modal id="md-glass" class="modal glass" no-escape>
+    <span slot="title">Frosted</span>
+    <p>The backdrop is blurred and Escape is ignored: use × or click outside.</p>
+  </c2-modal>
+</div>
+```
+
+```ts tag=CodeBlock
+const modal = document.querySelector('c2-modal')
+modal.addEventListener('close', (event) => {
+  console.log(event.detail.returnValue) // 'copied' | 'cancel' | '' (Escape, backdrop, × button)
+})
+modal.show()
+```

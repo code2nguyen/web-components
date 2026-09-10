@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-badge</title>
+    <script type="module" src="/src/badge.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 24px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .icon-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #d4d4d8;
+        background: #fff;
+        color: #3f3f46;
+      }
+      .icon-button svg {
+        width: 18px;
+        height: 18px;
+      }
+      .outlined {
+        --c2-badge--background: transparent;
+        --c2-badge--border: 1px solid currentColor;
+      }
+      .solid {
+        --c2-badge--background: #0265dc;
+        --c2-badge--color: #ffffff;
+      }
+      .uppercase {
+        --c2-badge--font-size: 11px;
+        --c2-badge--font-weight: 600;
+        --c2-badge--letter-spacing: 0.04em;
+        --c2-badge--text-transform: uppercase;
+        --c2-badge--border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Tones</h2>
+      <div class="row">
+        <c2-badge>Neutral</c2-badge>
+        <c2-badge tone="primary">Primary</c2-badge>
+        <c2-badge tone="success">Success</c2-badge>
+        <c2-badge tone="warning">Warning</c2-badge>
+        <c2-badge tone="danger">Danger</c2-badge>
+        <c2-badge tone="info">Info</c2-badge>
+      </div>
+    </section>
+    <section>
+      <h2>Count, max, show-zero (the 0 without show-zero renders nothing)</h2>
+      <div class="row">
+        <c2-badge tone="danger" count="3"></c2-badge>
+        <c2-badge tone="danger" count="42"></c2-badge>
+        <c2-badge tone="danger" count="120"></c2-badge>
+        <c2-badge tone="danger" count="1200" max="999"></c2-badge>
+        <c2-badge tone="danger" count="0"></c2-badge>
+        <c2-badge count="0" show-zero></c2-badge>
+      </div>
+    </section>
+    <section>
+      <h2>Dot and pulse</h2>
+      <div class="row">
+        <c2-badge dot></c2-badge>
+        <c2-badge dot tone="success"></c2-badge>
+        <c2-badge dot tone="danger" pulse></c2-badge>
+        <span style="display: inline-flex; align-items: center; gap: 6px"><c2-badge dot tone="success" pulse></c2-badge> Live</span>
+      </div>
+    </section>
+    <section>
+      <h2>Prefix icon</h2>
+      <div class="row">
+        <c2-badge tone="success">
+          <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Verified
+        </c2-badge>
+        <c2-badge tone="warning">
+          <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 8v4M12 16h.01"></path>
+          </svg>
+          Pending
+        </c2-badge>
+      </div>
+    </section>
+    <section>
+      <h2>Anchored to an element, four placements (rectangular overlap)</h2>
+      <div class="row">
+        <c2-badge tone="danger" count="5">
+          <span slot="anchor" class="icon-button"
+            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"></path></svg
+          ></span>
+        </c2-badge>
+        <c2-badge tone="danger" dot pulse placement="top-left">
+          <span slot="anchor" class="icon-button"
+            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg
+          ></span>
+        </c2-badge>
+        <c2-badge tone="success" dot placement="bottom-right">
+          <span slot="anchor" class="icon-button"
+            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle></svg
+          ></span>
+        </c2-badge>
+        <c2-badge tone="primary" count="99" placement="bottom-left" style="--c2-badge__anchor--offset-x: 4px; --c2-badge__anchor--offset-y: 4px">
+          <span slot="anchor" class="icon-button"
+            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16v16H4z"></path></svg
+          ></span>
+        </c2-badge>
+      </div>
+    </section>
+    <section>
+      <h2>Circular overlap on round anchors</h2>
+      <div class="row">
+        <c2-badge tone="danger" count="5" overlap="circular">
+          <span slot="anchor" class="icon-button" style="border-radius: 999px"
+            ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"></path></svg
+          ></span>
+        </c2-badge>
+        <c2-badge tone="success" dot placement="bottom-right" overlap="circular" style="--c2-badge__dot--size: 10px">
+          <span slot="anchor" class="icon-button" style="border-radius: 999px; width: 40px; height: 40px; background: #e4e4e7">AL</span>
+        </c2-badge>
+        <c2-badge tone="danger" dot pulse placement="top-left" overlap="circular">
+          <span slot="anchor" class="icon-button" style="border-radius: 999px; width: 40px; height: 40px; background: #e4e4e7">GH</span>
+        </c2-badge>
+      </div>
+    </section>
+    <section>
+      <h2>Themed: outlined, solid, uppercase label</h2>
+      <div class="row">
+        <c2-badge class="outlined" tone="primary">Outlined</c2-badge>
+        <c2-badge class="outlined" tone="danger">Outlined</c2-badge>
+        <c2-badge class="solid">Solid</c2-badge>
+        <c2-badge class="uppercase" tone="info">Beta</c2-badge>
+        <c2-badge class="uppercase">New</c2-badge>
+      </div>
+    </section>
+  </body>
+</html>

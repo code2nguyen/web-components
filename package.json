@@ -12,14 +12,17 @@
     "format": "npm run format:fix",
     "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --check",
     "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --write",
-    "demo": "npm run start -w demo",
-    "demo:dev": "npm run dev -w demo",
-    "demo:build": "wireit",
+    "ui": "npm run start -w apps/ui",
+    "ui:dev": "npm run dev -w apps/ui",
+    "ui:build": "wireit",
     "build": "wireit",
     "build:generator": "npm run build --workspace=scripts/generator",
     "pregenerate": "npm run build:generator",
     "generate": "npm run plop --workspace=scripts/generator",
-    "clean": "npx del-cli **/node_modules **/dist **/types **/custom-elements.json package-lock.json -f"
+    "clean": "npx del-cli **/node_modules **/dist **/types **/custom-elements.json package-lock.json -f",
+    "build:tools": "wireit",
+    "mcp:inspect": "npm run inspect -w packages/tools/mcp",
+    "mcp:smoke": "npm run smoke -w packages/tools/mcp"
   },
   "devDependencies": {
     "husky": "9.1.7",
@@ -32,9 +35,10 @@
   "workspaces": [
     "open-packages/*",
     "packages/components/*",
+    "packages/icons/*",
     "packages/core",
     "packages/tools/*",
-    "demo",
+    "apps/ui",
     "scripts/generator"
   ],
   "overrides": {
@@ -60,6 +64,20 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/textarea:build",
+        "./packages/components/switch:build",
+        "./packages/components/spinner:build",
+        "./packages/components/slider:build",
+        "./packages/components/seperator:build",
+        "./packages/components/breadcrumb:build",
+        "./packages/components/badge:build",
+        "./packages/components/toast:build",
+        "./packages/components/radio:build",
+        "./packages/components/button-group:build",
+        "./packages/components/accordion:build",
+        "./packages/components/modal:build",
+        "./packages/components/button:build",
+        "./packages/icons/feather-icons:build",
         "./open-packages/chatbot:build",
         "./packages/components/chat-input:build",
         "./packages/components/chat-message:build",
@@ -73,8 +91,6 @@
         "./packages/components/color-slider:build",
         "./packages/components/details:build",
         "./packages/components/dropdown-list:build",
-        "./packages/components/expansion-panel:build",
-        "./packages/components/hyperlink-list:build",
         "./packages/components/icon-button:build",
         "./packages/components/label:build",
         "./packages/components/list:build",
@@ -84,17 +100,24 @@
         "./packages/components/reorder-list:build",
         "./packages/components/select:build",
         "./packages/components/tabs:build",
-        "./packages/components/text-button:build",
+        "./packages/components/link-button:build",
         "./packages/components/text-field:build",
         "./packages/components/tooltip:build",
-        "./packages/core:build"
+        "./packages/core:build",
+        "./packages/tools/theme:build"
       ]
     },
-    "demo:build": {
+    "ui:build": {
       "dependencies": [
         "build"
       ],
-      "command": "npm run build -w demo"
+      "command": "npm run build -w apps/ui"
+    },
+    "build:tools": {
+      "dependencies": [
+        "./packages/tools/mcp:build",
+        "./packages/tools/skill:build"
+      ]
     }
   },
   "lint-staged": {

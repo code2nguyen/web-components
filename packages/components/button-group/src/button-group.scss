@@ -1,0 +1,110 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-button-group,
+  $theme: (
+    gap: 0px,
+    border-radius: 6px,
+    border: 1px solid transparent,
+    divider--width: 1px,
+    divider--color: rgba(255, 255, 255, 0.35),
+    item--flex: 0 0 auto,
+  )
+);
+
+// Derived from the gap so the same rules serve attached (gap 0) and separated (gap > 0) groups without measuring:
+// inner corners are square and items overlap by the divider width only while attached.
+$_radius: css.cssVar(border-radius);
+$_inner: min(#{$_radius}, calc(#{css.cssVar(gap)} * 10000));
+$_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10000));
+
+:host {
+  display: inline-flex;
+  align-items: stretch;
+  gap: css.cssVar(gap);
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([orientation='vertical']) {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+// Items: the group owns their frame through the button variables, so `c2-button` and `c2-icon-button` line up.
+::slotted(*) {
+  position: relative;
+  flex: css.cssVar(item--flex);
+  min-width: 0;
+  --c2-button__container--border-radius: #{$_inner};
+  --c2-icon-button--border-radius: #{$_inner};
+}
+
+// One border for every item. The default equals the button's own default, so an unthemed group looks like its buttons.
+::slotted(*) {
+  --c2-button__container--border: #{css.cssVar(border)};
+  --c2-icon-button--border: #{css.cssVar(border)};
+}
+
+::slotted(:only-child) {
+  --c2-button__container--border-radius: #{$_radius};
+  --c2-icon-button--border-radius: #{$_radius};
+}
+
+// Horizontal corners (start/end), flipped for RTL.
+::slotted(:first-child:not(:only-child)) {
+  --c2-button__container--border-radius: #{$_radius} #{$_inner} #{$_inner} #{$_radius};
+  --c2-icon-button--border-radius: #{$_radius} #{$_inner} #{$_inner} #{$_radius};
+}
+
+::slotted(:last-child:not(:only-child)) {
+  --c2-button__container--border-radius: #{$_inner} #{$_radius} #{$_radius} #{$_inner};
+  --c2-icon-button--border-radius: #{$_inner} #{$_radius} #{$_radius} #{$_inner};
+}
+
+:host(:dir(rtl)) ::slotted(:first-child:not(:only-child)) {
+  --c2-button__container--border-radius: #{$_inner} #{$_radius} #{$_radius} #{$_inner};
+  --c2-icon-button--border-radius: #{$_inner} #{$_radius} #{$_radius} #{$_inner};
+}
+
+:host(:dir(rtl)) ::slotted(:last-child:not(:only-child)) {
+  --c2-button__container--border-radius: #{$_radius} #{$_inner} #{$_inner} #{$_radius};
+  --c2-icon-button--border-radius: #{$_radius} #{$_inner} #{$_inner} #{$_radius};
+}
+
+// Attached items overlap by the divider width so shared borders are drawn once; the divider is a shadow cast onto the
+// previous item, which shows on filled buttons without borders.
+::slotted(:not(:first-child)) {
+  margin-inline-start: calc(-1 * #{$_overlap});
+  box-shadow: calc(-1 * #{$_overlap}) 0 0 0 css.cssVar(divider--color);
+}
+
+:host(:dir(rtl)) ::slotted(:not(:first-child)) {
+  box-shadow: #{$_overlap} 0 0 0 css.cssVar(divider--color);
+}
+
+// Vertical corners (top/bottom) and dividers.
+:host([orientation='vertical']) ::slotted(:first-child:not(:only-child)) {
+  --c2-button__container--border-radius: #{$_radius} #{$_radius} #{$_inner} #{$_inner};
+  --c2-icon-button--border-radius: #{$_radius} #{$_radius} #{$_inner} #{$_inner};
+}
+
+:host([orientation='vertical']) ::slotted(:last-child:not(:only-child)) {
+  --c2-button__container--border-radius: #{$_inner} #{$_inner} #{$_radius} #{$_radius};
+  --c2-icon-button--border-radius: #{$_inner} #{$_inner} #{$_radius} #{$_radius};
+}
+
+:host([orientation='vertical']) ::slotted(:not(:first-child)) {
+  margin-inline-start: 0;
+  margin-block-start: calc(-1 * #{$_overlap});
+  box-shadow: 0 calc(-1 * #{$_overlap}) 0 0 css.cssVar(divider--color);
+}
+
+// The hovered, focused or pressed item rises above its neighbours so its full border and focus ring are visible.
+::slotted(:hover),
+::slotted(:focus-within),
+::slotted([selected]) {
+  z-index: 1;
+}

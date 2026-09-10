@@ -1,0 +1,317 @@
+---
+description: 'Ready-made looks for c2-link-button: text links, navigation items, breadcrumbs and footer links. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { LinkButton } from '@c2n/link-button'
+import { FeatherArrowRightIcon as FeatherArrowRight } from '@c2n/feather-icons/icons/arrow-right.js'
+import { FeatherExternalLinkIcon as FeatherExternalLink } from '@c2n/feather-icons/icons/external-link.js'
+import { FeatherChevronRightIcon as FeatherChevronRight } from '@c2n/feather-icons/icons/chevron-right.js'
+import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+import { FeatherUsersIcon as FeatherUsers } from '@c2n/feather-icons/icons/users.js'
+import { FeatherBarChart2Icon as FeatherBarChart_2 } from '@c2n/feather-icons/icons/bar-chart-2.js'
+
+## Text links
+
+Every look below is a handful of `--c2-link-button__container*` custom properties on top of the default muted link.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-link-button href="#">Learn more<c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right></c2-link-button>
+```
+
+```html tag=MdxCodeBlock,label=Primary
+<style>
+  .primary {
+    --c2-link-button__container--color: #2563eb;
+    --c2-link-button__container__hover--color: #1d4ed8;
+    --c2-link-button__container--text-decoration-color: #2563eb;
+  }
+</style>
+<c2-link-button class="primary" href="#">Learn more<c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right></c2-link-button>
+```
+
+```html tag=MdxCodeBlock,label=Always underlined
+<style>
+  .always-underlined {
+    --c2-link-button__container--text-decoration: underline;
+    --c2-link-button__container--text-underline-offset: 6px;
+    --c2-link-button__container--color: #18181b;
+    --c2-link-button__container--text-decoration-color: #a1a1aa;
+    --c2-link-button__container__hover--text-decoration-color: #18181b;
+  }
+</style>
+<c2-link-button class="always-underlined" href="#">Terms of service</c2-link-button>
+```
+
+```html tag=MdxCodeBlock,label=Danger
+<style>
+  .danger {
+    --c2-link-button__container--color: #dc2626;
+    --c2-link-button__container__hover--color: #b91c1c;
+    --c2-link-button__container--text-decoration-color: #b91c1c;
+  }
+</style>
+<c2-link-button class="danger">Delete workspace</c2-link-button>
+```
+
+```html tag=MdxCodeBlock,label=Muted
+<style>
+  .muted {
+    --c2-link-button__container--color: #a1a1aa;
+    --c2-link-button__container--font-weight: 400;
+    --c2-link-button__container__hover--color: #52525b;
+    --c2-link-button__container__hover--text-decoration: none;
+  }
+</style>
+<c2-link-button class="muted" href="#">Skip for now</c2-link-button>
+```
+
+```html tag=MdxCodeBlock,label=External
+<style>
+  .external {
+    --c2-link-button__container--color: #2563eb;
+    --c2-link-button__container__hover--color: #1d4ed8;
+    --c2-link-button__container--text-decoration-color: #2563eb;
+    --c2-link-button__icon--size: 14px;
+  }
+</style>
+<c2-link-button class="external" href="https://lit.dev" external>lit.dev<c2-feather-external-link slot="suffix-icon"></c2-feather-external-link></c2-link-button>
+```
+
+</GalleryGrid>
+
+## Navigation
+
+Padded items with a hover fill and a `selected` state; the underline is turned off so the fill carries the feedback.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Segmented nav
+<style>
+  .segmented {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .segmented-item {
+    --c2-link-button__container--padding-left: 12px;
+    --c2-link-button__container--padding-right: 12px;
+    --c2-link-button__container--padding-top: 6px;
+    --c2-link-button__container--padding-bottom: 6px;
+    --c2-link-button__container--border-radius: 6px;
+    --c2-link-button__container--color: #52525b;
+    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container__hover--background-color: #f4f4f5;
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__container__selected--color: #18181b;
+    --c2-link-button__container__selected--background-color: #e4e4e7;
+  }
+</style>
+<nav class="segmented">
+  <c2-link-button class="segmented-item" href="#" selected>Overview</c2-link-button>
+  <c2-link-button class="segmented-item" href="#">Activity</c2-link-button>
+  <c2-link-button class="segmented-item" href="#">Settings</c2-link-button>
+</nav>
+```
+
+```html tag=MdxCodeBlock,label=Underline tabs
+<style>
+  .tab-nav {
+    display: inline-flex;
+    gap: 16px;
+    border-bottom: 1px solid #e4e4e7;
+  }
+  .tab-item {
+    --c2-link-button__container--padding-left: 2px;
+    --c2-link-button__container--padding-right: 2px;
+    --c2-link-button__container--padding-top: 8px;
+    --c2-link-button__container--padding-bottom: 10px;
+    --c2-link-button__container--border-radius: 0;
+    --c2-link-button__container--color: #71717a;
+    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__container__selected--color: #2563eb;
+    --c2-link-button__container__selected--font-weight: 500;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+  }
+  .tab-item[selected] {
+    border-bottom-color: #2563eb;
+  }
+</style>
+<nav class="tab-nav">
+  <c2-link-button class="tab-item" href="#">Files</c2-link-button>
+  <c2-link-button class="tab-item" href="#" selected>Commits</c2-link-button>
+  <c2-link-button class="tab-item" href="#">Pull requests</c2-link-button>
+</nav>
+```
+
+```html tag=MdxCodeBlock,label=Sidebar list
+<style>
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 200px;
+    padding: 6px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .sidebar-item {
+    --c2-link-button__container--padding-left: 10px;
+    --c2-link-button__container--padding-right: 10px;
+    --c2-link-button__container--padding-top: 7px;
+    --c2-link-button__container--padding-bottom: 7px;
+    --c2-link-button__container--gap: 10px;
+    --c2-link-button__container--border-radius: 6px;
+    --c2-link-button__container--color: #3f3f46;
+    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container__hover--background-color: #f4f4f5;
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__container__selected--color: #1d4ed8;
+    --c2-link-button__container__selected--background-color: #dbeafe;
+    --c2-link-button__container__selected--font-weight: 500;
+  }
+  .sidebar-item::part(link) {
+    justify-content: flex-start;
+  }
+</style>
+<nav class="sidebar">
+  <c2-link-button class="sidebar-item" href="#" selected><c2-feather-home slot="prefix-icon"></c2-feather-home>Home</c2-link-button>
+  <c2-link-button class="sidebar-item" href="#"><c2-feather-bar-chart-2 slot="prefix-icon"></c2-feather-bar-chart-2>Analytics</c2-link-button>
+  <c2-link-button class="sidebar-item" href="#"><c2-feather-users slot="prefix-icon"></c2-feather-users>Members</c2-link-button>
+  <c2-link-button class="sidebar-item" href="#"><c2-feather-settings slot="prefix-icon"></c2-feather-settings>Settings</c2-link-button>
+</nav>
+```
+
+```html tag=MdxCodeBlock,label=Dark sidebar
+<style>
+  .dark-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 200px;
+    padding: 6px;
+    border-radius: 10px;
+    background: #18181b;
+  }
+  .dark-sidebar-item {
+    --c2-link-button__container--padding-left: 10px;
+    --c2-link-button__container--padding-right: 10px;
+    --c2-link-button__container--padding-top: 7px;
+    --c2-link-button__container--padding-bottom: 7px;
+    --c2-link-button__container--gap: 10px;
+    --c2-link-button__container--border-radius: 6px;
+    --c2-link-button__container--color: #a1a1aa;
+    --c2-link-button__container__hover--color: #fafafa;
+    --c2-link-button__container__hover--background-color: #27272a;
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__container__selected--color: #fafafa;
+    --c2-link-button__container__selected--background-color: #3f3f46;
+    --c2-link-button__container__selected--font-weight: 500;
+  }
+  .dark-sidebar-item::part(link) {
+    justify-content: flex-start;
+  }
+</style>
+<nav class="dark-sidebar">
+  <c2-link-button class="dark-sidebar-item" href="#"><c2-feather-home slot="prefix-icon"></c2-feather-home>Home</c2-link-button>
+  <c2-link-button class="dark-sidebar-item" href="#" selected><c2-feather-bar-chart-2 slot="prefix-icon"></c2-feather-bar-chart-2>Analytics</c2-link-button>
+  <c2-link-button class="dark-sidebar-item" href="#"><c2-feather-users slot="prefix-icon"></c2-feather-users>Members</c2-link-button>
+</nav>
+```
+
+</GalleryGrid>
+
+## Trails and footers
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Breadcrumb
+<style>
+  .breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: #a1a1aa;
+  }
+  .crumb {
+    --c2-link-button__container--padding-left: 2px;
+    --c2-link-button__container--padding-right: 2px;
+    --c2-link-button__container--font-size: 13px;
+    --c2-link-button__container--color: #71717a;
+    --c2-link-button__container--font-weight: 400;
+    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__container__selected--color: #18181b;
+    --c2-link-button__container__selected--font-weight: 500;
+  }
+  .breadcrumb c2-feather-chevron-right {
+    --c2-feather-icon--size: 14px;
+  }
+</style>
+<nav class="breadcrumb">
+  <c2-link-button class="crumb" href="#">Home</c2-link-button>
+  <c2-feather-chevron-right></c2-feather-chevron-right>
+  <c2-link-button class="crumb" href="#">Projects</c2-link-button>
+  <c2-feather-chevron-right></c2-feather-chevron-right>
+  <c2-link-button class="crumb" selected>Components</c2-link-button>
+</nav>
+```
+
+```html tag=MdxCodeBlock,label=Footer links
+<style>
+  .footer {
+    display: inline-flex;
+    gap: 16px;
+  }
+  .footer-link {
+    --c2-link-button__container--padding-left: 0;
+    --c2-link-button__container--padding-right: 0;
+    --c2-link-button__container--color: #71717a;
+    --c2-link-button__container--font-size: 12px;
+    --c2-link-button__container--font-weight: 400;
+    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container__hover--text-decoration: underline;
+    --c2-link-button__container--text-decoration-color: #d4d4d8;
+  }
+</style>
+<div class="footer">
+  <c2-link-button class="footer-link" href="#">Privacy</c2-link-button>
+  <c2-link-button class="footer-link" href="#">Terms</c2-link-button>
+  <c2-link-button class="footer-link" href="#">Status</c2-link-button>
+  <c2-link-button class="footer-link" href="https://github.com" external>GitHub</c2-link-button>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Call to action
+<style>
+  .cta {
+    --c2-link-button__container--color: #2563eb;
+    --c2-link-button__container--font-size: 16px;
+    --c2-link-button__container--font-weight: 600;
+    --c2-link-button__container--gap: 8px;
+    --c2-link-button__container__hover--color: #1d4ed8;
+    --c2-link-button__container__hover--text-decoration: none;
+    --c2-link-button__icon--size: 18px;
+  }
+  .cta:hover c2-feather-arrow-right {
+    transform: translateX(3px);
+  }
+  .cta c2-feather-arrow-right {
+    transition: transform 200ms ease;
+  }
+</style>
+<c2-link-button class="cta" href="#">Get started<c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right></c2-link-button>
+```
+
+</GalleryGrid>

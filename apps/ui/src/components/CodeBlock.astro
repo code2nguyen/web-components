@@ -1,0 +1,102 @@
+---
+import { Code } from 'astro:components'
+import type { CodeLanguage } from 'astro'
+import SiteIconButton from './ui/SiteIconButton.astro'
+
+interface Props {
+  code: string
+  lang?: CodeLanguage
+  uid?: string
+  /** Render without the outer card chrome (used inside example frames). */
+  bare?: boolean
+}
+
+const { code: rawCode, lang, uid, bare } = Astro.props
+// Code arrives JSON-encoded from the remark plugin when used through MDX.
+let code = rawCode.replace(/\\n/g, '\n')
+code = code.replace(/\\"/g, '"')
+code = code.replace(/^"|"$/g, '')
+code = code.trim()
+---
+
+<div class:list={['code-block', { 'code-block--bare': bare }]} data-uid={uid} data-lang={lang}>
+  <Code code={code} lang={lang ?? 'typescript'} themes={{ light: 'github-light', dark: 'github-dark-default' }} defaultColor={false} wrap />
+  <SiteIconButton hydrate="defined" size="sm" label="Copy code" tooltip="Copy" class="code-block__copy">
+    <c2-feather-copy class="code-block__copy-icon"></c2-feather-copy>
+    <c2-feather-check class="code-block__check-icon"></c2-feather-check>
+  </SiteIconButton>
+</div>
+
+<style lang="scss" is:global>
+  .code-block {
+    position: relative;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: var(--site-radius-md);
+    background: var(--site-color-surface-container-1);
+    overflow: hidden;
+
+    &--bare {
+      border: none;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    pre.astro-code {
+      margin: 0;
+      padding: 16px 52px 16px 18px;
+      font-size: 13px;
+      line-height: 1.65;
+      background: transparent !important;
+      tab-size: 2;
+      code {
+        font-family: var(--site-font-mono);
+      }
+    }
+    .astro-code,
+    .astro-code span {
+      color: var(--shiki-light);
+    }
+    html[data-theme='dark'] & .astro-code,
+    html[data-theme='dark'] & .astro-code span {
+      color: var(--shiki-dark);
+    }
+
+    &__copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      opacity: 0;
+      transition: opacity 150ms var(--site-ease);
+      .code-block__check-icon {
+        display: none;
+      }
+      &.copied {
+        opacity: 1;
+        --c2-icon-button__icon--color: var(--site-color-primary);
+        --c2-icon-button__icon__hover--color: var(--site-color-primary);
+        .code-block__copy-icon {
+          display: none;
+        }
+        .code-block__check-icon {
+          display: inline-flex;
+        }
+      }
+    }
+    &:hover &__copy,
+    &__copy:focus-visible {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.code-block__copy').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const code = button.closest('.code-block')?.querySelector('pre code')
+      if (!code) return
+      await navigator.clipboard.writeText((code as HTMLElement).innerText)
+      button.classList.add('copied')
+      setTimeout(() => button.classList.remove('copied'), 1200)
+    })
+  })
+</script>

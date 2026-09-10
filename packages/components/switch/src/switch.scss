@@ -1,0 +1,256 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-switch,
+  $theme: (
+    container--gap: 8px,
+    container--flex-direction: row,
+    container--justify-content: flex-start,
+    container__disabled--opacity: variables.$disabled-content-opacity,
+
+    track--width: 36px,
+    track--height: 20px,
+    track--border-radius: 999px,
+    track--border: 1px solid transparent,
+    track--color: #e4e4e7,
+    track__hover--color: #d4d4d8,
+    track__checked--color: #0265dc,
+    track__checked__hover--color: #0154b8,
+    track__checked--border: null,
+    track__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    track__focus--outline-offset: 2px,
+
+    thumb--size: 16px,
+    thumb--offset: 2px,
+    thumb--border-radius: 999px,
+    thumb--color: #ffffff,
+    thumb__checked--color: null,
+    thumb--box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2),
+    thumb__active--stretch: 4px,
+
+    icon--size: 10px,
+    icon--color: #71717a,
+    icon__checked--color: #0265dc,
+
+    label--color: inherit,
+    label--font-size: inherit,
+    label--font-weight: inherit,
+    label--line-height: inherit,
+    description--color: #71717a,
+    description--font-size: 12px,
+    description--margin-top: 2px,
+
+    transition-duration: 200ms,
+  )
+);
+
+$_duration: css.cssVar(transition-duration);
+$_easing: cubic-bezier(0.2, 0, 0, 1);
+// Distance the thumb travels: the track's inner width minus the thumb.
+$_travel: calc(#{css.cssVar(track--width)} - #{css.cssVar(thumb--size)} - 2 * #{css.cssVar(thumb--offset)});
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// The whole row is the label, so the text toggles the switch.
+.c2-switch {
+  display: inline-flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  flex-direction: css.cssVar(container--flex-direction);
+  justify-content: css.cssVar(container--justify-content);
+  gap: css.cssVar(container--gap);
+  cursor: pointer;
+
+  &.has-description {
+    align-items: flex-start;
+  }
+
+  &:has(.c2-switch-input:disabled) {
+    cursor: default;
+    opacity: css.cssVar(container__disabled--opacity);
+  }
+}
+
+.c2-switch-control {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  // Keeps the track centred on the first line of text when a description makes the row taller.
+  line-height: 0;
+}
+
+.c2-switch-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: inherit;
+  z-index: 1;
+  // Horizontal drags on the thumb must not scroll the page on touch screens.
+  touch-action: pan-y;
+}
+
+.c2-switch-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(track--width);
+  height: css.cssVar(track--height);
+  padding: css.cssVar(thumb--offset);
+  border-radius: css.cssVar(track--border-radius);
+  border: css.cssVar(track--border);
+  background-color: css.cssVar(track--color);
+  transition:
+    background-color $_duration $_easing,
+    border-color $_duration $_easing;
+}
+
+.c2-switch-thumb {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(thumb--size);
+  height: css.cssVar(thumb--size);
+  border-radius: css.cssVar(thumb--border-radius);
+  background-color: css.cssVar(thumb--color);
+  box-shadow: css.cssVar(thumb--box-shadow);
+  transform: translateX(0);
+  transition:
+    transform $_duration $_easing,
+    width $_duration $_easing,
+    background-color $_duration $_easing;
+}
+
+// Icons inside the thumb: one per state, cross-faded.
+.c2-switch-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  color: css.cssVar(icon--color);
+  opacity: 1;
+  transition: opacity $_duration $_easing;
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+
+  ::slotted(*) {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+  }
+}
+
+.c2-switch-icon--checked {
+  color: css.cssVar(icon__checked--color);
+  opacity: 0;
+}
+
+// On
+.c2-switch-input:checked ~ .c2-switch-track {
+  background-color: css.cssVar(track__checked--color);
+  border: css.cssVar(track__checked--border, track--border);
+
+  .c2-switch-thumb {
+    transform: translateX(#{$_travel});
+    background-color: css.cssVar(thumb__checked--color, thumb--color);
+  }
+  .c2-switch-icon--unchecked {
+    opacity: 0;
+  }
+  .c2-switch-icon--checked {
+    opacity: 1;
+  }
+}
+
+// Hover
+.c2-switch-input:enabled:hover ~ .c2-switch-track {
+  background-color: css.cssVar(track__hover--color, track--color);
+}
+
+.c2-switch-input:enabled:checked:hover ~ .c2-switch-track {
+  background-color: css.cssVar(track__checked__hover--color, track__checked--color);
+}
+
+// Pressed: the thumb stretches towards the side it will move to (not while it is being dragged).
+.c2-switch:not(.is-dragging) .c2-switch-input:enabled:active ~ .c2-switch-track .c2-switch-thumb {
+  width: calc(#{css.cssVar(thumb--size)} + #{css.cssVar(thumb__active--stretch)});
+}
+
+.c2-switch:not(.is-dragging) .c2-switch-input:enabled:active:checked ~ .c2-switch-track .c2-switch-thumb {
+  transform: translateX(calc(#{$_travel} - #{css.cssVar(thumb__active--stretch)}));
+}
+
+// Dragging: the thumb follows the pointer (`--_drag`, set by the script) without the slide transition or the stretch.
+.c2-switch.is-dragging .c2-switch-input ~ .c2-switch-track .c2-switch-thumb {
+  transition: none;
+  width: css.cssVar(thumb--size);
+  transform: translateX(var(--_drag, 0px));
+}
+
+// Focus
+.c2-switch-input:focus-visible ~ .c2-switch-track {
+  outline: css.cssVar(track__focus--outline);
+  outline-offset: css.cssVar(track__focus--outline-offset);
+}
+
+// Text
+.c2-switch-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.c2-switch-label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: css.cssVar(label--line-height);
+}
+
+.has-description .c2-switch-label {
+  display: flex;
+  align-items: center;
+  min-height: css.cssVar(track--height);
+}
+
+.c2-switch-description {
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  margin-top: css.cssVar(description--margin-top);
+  line-height: 1.4;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+:host(:dir(rtl)) .c2-switch-input:checked ~ .c2-switch-track .c2-switch-thumb {
+  transform: translateX(calc(-1 * #{$_travel}));
+}
+
+:host(:dir(rtl)) .c2-switch:not(.is-dragging) .c2-switch-input:enabled:active:checked ~ .c2-switch-track .c2-switch-thumb {
+  transform: translateX(calc(-1 * (#{$_travel} - #{css.cssVar(thumb__active--stretch)})));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-switch-track,
+  .c2-switch-thumb,
+  .c2-switch-icon {
+    transition: none;
+  }
+}

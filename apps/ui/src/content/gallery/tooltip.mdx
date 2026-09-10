@@ -1,0 +1,199 @@
+---
+description: 'Ready-made looks for c2-tooltip: dark and light bubbles, brand pills, dense and spacious sizes, status colours and a slide-in animation. Hover a trigger to see it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Tooltip } from '@c2n/tooltip'
+
+## Presets
+
+Curated looks for `c2-tooltip`. Hover the trigger in a card to see it. The bubble is `--c2-tooltip--*` (colours, radius, border, shadow, font, padding, max-width, offset, animation) and the arrow is `--c2-tooltip__arrow--size`, or `hide-arrow`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    --c2-tooltip--max-width: 240px;
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+</style>
+<button class="trigger default">Hover me<c2-tooltip delay="100" client:only="lit">Save changes</c2-tooltip></button>
+```
+
+```html tag=MdxCodeBlock,label=Light
+<style>
+  .light {
+    --c2-tooltip--background-color: #ffffff;
+    --c2-tooltip--color: #18181b;
+    --c2-tooltip--border: 1px solid #e4e4e7;
+    --c2-tooltip--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+</style>
+<button class="trigger light">Hover me<c2-tooltip delay="100" client:only="lit">Light bubble with border</c2-tooltip></button>
+```
+
+```html tag=MdxCodeBlock,label=Brand pill
+<style>
+  .brand {
+    --c2-tooltip--background-color: #2563eb;
+    --c2-tooltip--color: #ffffff;
+    --c2-tooltip--border-radius: 999px;
+    --c2-tooltip--padding-left: 12px;
+    --c2-tooltip--padding-right: 12px;
+    --c2-tooltip--box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+</style>
+<button class="trigger brand">Hover me<c2-tooltip delay="100" hide-arrow client:only="lit">Brand coloured pill</c2-tooltip></button>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-tooltip--font-size: 11px;
+    --c2-tooltip--padding-top: 3px;
+    --c2-tooltip--padding-bottom: 3px;
+    --c2-tooltip--padding-left: 6px;
+    --c2-tooltip--padding-right: 6px;
+    --c2-tooltip--border-radius: 4px;
+    --c2-tooltip__arrow--size: 6px;
+    --c2-tooltip--offset: 6px;
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+</style>
+<button class="trigger compact">Hover me<c2-tooltip delay="100" client:only="lit">Compact</c2-tooltip></button>
+```
+
+```html tag=MdxCodeBlock,label=Spacious
+<style>
+  .spacious {
+    --c2-tooltip--font-size: 13px;
+    --c2-tooltip--font-weight: 400;
+    --c2-tooltip--padding-top: 10px;
+    --c2-tooltip--padding-bottom: 10px;
+    --c2-tooltip--padding-left: 14px;
+    --c2-tooltip--padding-right: 14px;
+    --c2-tooltip--border-radius: 10px;
+    --c2-tooltip--max-width: 260px;
+    --c2-tooltip--line-height: 1.5;
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+</style>
+<button class="trigger spacious">Hover me<c2-tooltip delay="100" client:only="lit">A longer explanation with more room to breathe, wrapping onto a second line when needed.</c2-tooltip></button>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .success {
+    --c2-tooltip--background-color: #166534;
+    --c2-tooltip--color: #f0fdf4;
+    --c2-tooltip--box-shadow: none;
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+</style>
+<button class="trigger success">Hover me<c2-tooltip delay="100" placement="bottom" client:only="lit">Copied to clipboard</c2-tooltip></button>
+```
+
+```html tag=MdxCodeBlock,label=Warning
+<style>
+  .warning {
+    --c2-tooltip--background-color: #fef3c7;
+    --c2-tooltip--color: #78350f;
+    --c2-tooltip--border: 1px solid #fcd34d;
+    --c2-tooltip--box-shadow: none;
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+</style>
+<button class="trigger warning">Hover me<c2-tooltip delay="100" placement="right" client:only="lit">Unsaved changes</c2-tooltip></button>
+```
+
+```html tag=MdxCodeBlock,label=Slide in
+<style>
+  .slide {
+    --c2-tooltip--enter-transform: translateY(6px);
+    --c2-tooltip--transition-duration: 200ms;
+    --c2-tooltip--background-color: #312e81;
+    --c2-tooltip--color: #e0e7ff;
+  }
+  .trigger {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d4d4d8;
+    background: #ffffff;
+    color: #18181b;
+    cursor: pointer;
+  }
+</style>
+<button class="trigger slide">Hover me<c2-tooltip delay="100" client:only="lit">Slides up instead of scaling</c2-tooltip></button>
+```
+
+</GalleryGrid>

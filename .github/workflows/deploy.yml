@@ -40,14 +40,23 @@ jobs:
       - name: Check formatting
         run: npm run format:check
         
-      - name: Build demo
+      - name: Build UI app
         shell: "bash"
-        run: npm run demo:build
+        run: npm run ui:build
+
+      - name: Build tools (MCP registry, skill cheatsheet)
+        run: npm run build:tools
+
+      - name: Smoke test the MCP server
+        run: npm run mcp:smoke
+
+      - name: Generated files are up to date
+        run: git diff --exit-code -- packages/tools/mcp/data packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: "demo/dist/"
+          path: "apps/ui/dist/"
 
   deploy:
     needs: build

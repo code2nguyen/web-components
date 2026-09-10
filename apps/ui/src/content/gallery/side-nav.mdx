@@ -1,0 +1,525 @@
+---
+description: 'Ready-made looks for c2-side-nav: flat, bordered, dark, floating and tinted drawers, an overlay, an end-side drawer and an icon rail with its toggle in the drawer. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SideNav } from '@c2n/side-nav'
+
+## Drawer styles
+
+Every card is a fixed-height frame with a narrow drawer; the look is a handful of `--c2-side-nav--*` variables on a class. The rows inside are plain links styled by the card.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    display: block;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 104px;
+    --c2-side-nav--padding-top: 10px;
+    --c2-side-nav--padding-right: 8px;
+    --c2-side-nav--padding-bottom: 10px;
+    --c2-side-nav--padding-left: 8px;
+  }
+  .default .row {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #18181b;
+    text-decoration: none;
+  }
+  .default .row.active {
+    background: #e4e4e7;
+  }
+  .default .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened class="default"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Content</div></c2-side-nav>
+```
+
+```html tag=MdxCodeBlock,label=Bordered white
+<style>
+  .bordered {
+    display: block;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 104px;
+    --c2-side-nav--background-color: #ffffff;
+    --c2-side-nav__divider--color: #d4d4d8;
+    --c2-side-nav--padding-top: 10px;
+    --c2-side-nav--padding-right: 8px;
+    --c2-side-nav--padding-bottom: 10px;
+    --c2-side-nav--padding-left: 8px;
+  }
+  .bordered .row {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #52525b;
+    text-decoration: none;
+  }
+  .bordered .row.active {
+    color: #18181b;
+    font-weight: 600;
+    background: #f4f4f5;
+  }
+  .bordered .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened class="bordered"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Content</div></c2-side-nav>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    display: block;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 104px;
+    --c2-side-nav--background-color: #18181b;
+    --c2-side-nav--color: #e4e4e7;
+    --c2-side-nav__divider--width: 0px;
+    --c2-side-nav__scrollbar--color: rgba(255, 255, 255, 0.25);
+    --c2-side-nav--padding-top: 10px;
+    --c2-side-nav--padding-right: 8px;
+    --c2-side-nav--padding-bottom: 10px;
+    --c2-side-nav--padding-left: 8px;
+  }
+  .dark .row {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #a1a1aa;
+    text-decoration: none;
+  }
+  .dark .row.active {
+    color: #ffffff;
+    background: #3f3f46;
+  }
+  .dark .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened class="dark"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Content</div></c2-side-nav>
+```
+
+```html tag=MdxCodeBlock,label=Floating card
+<style>
+  .floating {
+    display: block;
+    height: 150px;
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fafafa;
+    --c2-side-nav__open--width: 104px;
+    --c2-side-nav--background-color: #ffffff;
+    --c2-side-nav__divider--width: 0px;
+    --c2-side-nav--border-top-left-radius: 10px;
+    --c2-side-nav--border-top-right-radius: 10px;
+    --c2-side-nav--border-bottom-left-radius: 10px;
+    --c2-side-nav--border-bottom-right-radius: 10px;
+    --c2-side-nav--border-top: 1px solid #e4e4e7;
+    --c2-side-nav--border-right: 1px solid #e4e4e7;
+    --c2-side-nav--border-bottom: 1px solid #e4e4e7;
+    --c2-side-nav--border-left: 1px solid #e4e4e7;
+    --c2-side-nav--padding-top: 8px;
+    --c2-side-nav--padding-right: 6px;
+    --c2-side-nav--padding-bottom: 8px;
+    --c2-side-nav--padding-left: 6px;
+  }
+  .floating .row {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #52525b;
+    text-decoration: none;
+  }
+  .floating .row.active {
+    color: #18181b;
+    background: #f4f4f5;
+  }
+  .floating .page {
+    padding: 2px 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened class="floating"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Content</div></c2-side-nav>
+```
+
+```html tag=MdxCodeBlock,label=Brand tint
+<style>
+  .brand {
+    display: block;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 104px;
+    --c2-side-nav--background-color: #4c1d95;
+    --c2-side-nav--color: #ede9fe;
+    --c2-side-nav__divider--width: 0px;
+    --c2-side-nav--padding-top: 10px;
+    --c2-side-nav--padding-right: 8px;
+    --c2-side-nav--padding-bottom: 10px;
+    --c2-side-nav--padding-left: 8px;
+  }
+  .brand .row {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #c4b5fd;
+    text-decoration: none;
+  }
+  .brand .row.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.14);
+  }
+  .brand .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened class="brand"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Content</div></c2-side-nav>
+```
+
+```html tag=MdxCodeBlock,label=Accent divider
+<style>
+  .accent {
+    display: block;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 104px;
+    --c2-side-nav--background-color: #eff6ff;
+    --c2-side-nav__divider--width: 3px;
+    --c2-side-nav__divider--color: #2563eb;
+    --c2-side-nav--padding-top: 10px;
+    --c2-side-nav--padding-right: 8px;
+    --c2-side-nav--padding-bottom: 10px;
+    --c2-side-nav--padding-left: 8px;
+  }
+  .accent .row {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #1e3a8a;
+    text-decoration: none;
+  }
+  .accent .row.active {
+    background: #dbeafe;
+    font-weight: 600;
+  }
+  .accent .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened class="accent"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Content</div></c2-side-nav>
+```
+
+</GalleryGrid>
+
+## Modes and positions
+
+The overlay is kept inside its frame with `--c2-side-nav__over--position: absolute`; leave it `fixed` in an app so it covers the viewport. The rail cards put the toggle in the drawer header and hide labels with a rule on `:not([opened])`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Overlay
+<style>
+  .overlay {
+    display: block;
+    position: relative;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 120px;
+    --c2-side-nav__over--position: absolute;
+    --c2-side-nav__over--height: 100%;
+    --c2-side-nav__over--border-top-right-radius: 10px;
+    --c2-side-nav__over--border-bottom-right-radius: 10px;
+    --c2-side-nav__backdrop--background-color: rgba(24, 24, 27, 0.35);
+    --c2-side-nav--padding-top: 10px;
+    --c2-side-nav--padding-right: 8px;
+    --c2-side-nav--padding-bottom: 10px;
+    --c2-side-nav--padding-left: 8px;
+  }
+  .overlay .row {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #18181b;
+    text-decoration: none;
+  }
+  .overlay .row.active {
+    background: #e4e4e7;
+  }
+  .overlay .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened desktop-mode="over" class="overlay"><div slot="side-nav-content"><a class="row active" href="#">Inbox</a><a class="row" href="#">Drafts</a><a class="row" href="#">Sent</a></div><div class="page">Click the backdrop or press Escape to close, then reopen from the studio.</div></c2-side-nav>
+```
+
+```html tag=MdxCodeBlock,label=End side
+<style>
+  .end-side {
+    display: block;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 104px;
+    --c2-side-nav--padding-top: 10px;
+    --c2-side-nav--padding-right: 8px;
+    --c2-side-nav--padding-bottom: 10px;
+    --c2-side-nav--padding-left: 8px;
+  }
+  .end-side .row {
+    display: block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #18181b;
+    text-decoration: none;
+  }
+  .end-side .row.active {
+    background: #e4e4e7;
+  }
+  .end-side .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened position="end" class="end-side"><div slot="side-nav-content"><a class="row active" href="#">All</a><a class="row" href="#">Unread</a><a class="row" href="#">Flagged</a></div><div class="page">Content</div></c2-side-nav>
+```
+
+```html tag=MdxCodeBlock,label=Icon rail
+<style>
+  .icon-rail {
+    display: block;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 124px;
+    --c2-side-nav__close--width: 44px;
+    --c2-side-nav--padding-top: 6px;
+    --c2-side-nav--padding-right: 6px;
+    --c2-side-nav--padding-bottom: 6px;
+    --c2-side-nav--padding-left: 6px;
+  }
+  .icon-rail .head {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    margin-bottom: 4px;
+    padding-left: 8px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .icon-rail:not([opened]) .head {
+    padding-left: 2px;
+  }
+  .icon-rail:not([opened]) .collapse {
+    margin-left: 0;
+  }
+  .icon-rail .collapse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-left: auto;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #71717a;
+    cursor: pointer;
+  }
+  .icon-rail .collapse:hover {
+    background: #e4e4e7;
+    color: #18181b;
+  }
+  .icon-rail .collapse svg {
+    width: 14px;
+    height: 14px;
+  }
+  .icon-rail .when-closed {
+    display: none;
+  }
+  .icon-rail:not([opened]) .when-closed {
+    display: block;
+  }
+  .icon-rail:not([opened]) .when-open {
+    display: none;
+  }
+  .icon-rail:not([opened]) .label {
+    display: none;
+  }
+  .icon-rail .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #18181b;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .icon-rail .row svg {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+  .icon-rail .row.active {
+    background: #e4e4e7;
+  }
+  .icon-rail .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav class="icon-rail"><div slot="side-nav-content"><div class="head"><span class="label">Acme</span><button class="collapse" side-nav-toggle aria-label="Toggle navigation"><svg class="when-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg><svg class="when-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></button></div><a class="row active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg><span class="label">Inbox</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span class="label">Sent</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg><span class="label">Archive</span></a></div><div class="page">Icon mode: a 44px rail with the collapse button in the drawer header.</div></c2-side-nav>
+```
+
+```html tag=MdxCodeBlock,label=Expanded rail
+<style>
+  .expanded-rail {
+    display: block;
+    height: 150px;
+    width: 100%;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+    --c2-side-nav__open--width: 124px;
+    --c2-side-nav__close--width: 44px;
+    --c2-side-nav--padding-top: 6px;
+    --c2-side-nav--padding-right: 6px;
+    --c2-side-nav--padding-bottom: 6px;
+    --c2-side-nav--padding-left: 6px;
+  }
+  .expanded-rail .head {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    margin-bottom: 4px;
+    padding-left: 8px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .expanded-rail:not([opened]) .head {
+    padding-left: 2px;
+  }
+  .expanded-rail:not([opened]) .collapse {
+    margin-left: 0;
+  }
+  .expanded-rail .collapse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-left: auto;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #71717a;
+    cursor: pointer;
+  }
+  .expanded-rail .collapse:hover {
+    background: #e4e4e7;
+    color: #18181b;
+  }
+  .expanded-rail .collapse svg {
+    width: 14px;
+    height: 14px;
+  }
+  .expanded-rail .when-closed {
+    display: none;
+  }
+  .expanded-rail:not([opened]) .when-closed {
+    display: block;
+  }
+  .expanded-rail:not([opened]) .when-open {
+    display: none;
+  }
+  .expanded-rail:not([opened]) .label {
+    display: none;
+  }
+  .expanded-rail .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #18181b;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .expanded-rail .row svg {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+  .expanded-rail .row.active {
+    background: #e4e4e7;
+  }
+  .expanded-rail .page {
+    padding: 10px;
+    font-size: 12px;
+    color: #71717a;
+  }
+</style>
+<c2-side-nav opened class="expanded-rail"><div slot="side-nav-content"><div class="head"><span class="label">Acme</span><button class="collapse" side-nav-toggle aria-label="Toggle navigation"><svg class="when-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg><svg class="when-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></button></div><a class="row active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg><span class="label">Inbox</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span class="label">Sent</span></a><a class="row" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg><span class="label">Archive</span></a></div><div class="page">Expanded mode: the same rows with icon and label; the header chevrons collapse it.</div></c2-side-nav>
+```
+
+</GalleryGrid>

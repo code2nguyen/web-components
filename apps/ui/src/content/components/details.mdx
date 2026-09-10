@@ -1,0 +1,73 @@
+---
+title: 'Details'
+description: 'Collapsible disclosure built on native details and summary.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Details } from '@c2n/details'
+import { Button } from '@c2n/button'
+
+`c2-details` wraps a native `<details>` / `<summary>` pair, so keyboard access, screen-reader semantics and find-in-page auto-expand come from the browser. Give panels the same `name` and they form an exclusive accordion: opening one closes the others. The header is the `title` slot (or the `label` attribute) plus an optional `header-content` row that stays visible when collapsed; buttons and links placed there work without toggling the panel. `title-not-clickable` limits toggling to the chevron, `disabled` blocks it. Open and close slide the content smoothly in every browser (`--c2-details--transition-duration` controls the length, reduced motion disables it), and `expanded` mirrors the native `open` state; listen for `toggle` on the element.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/details
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/details
+<style>
+  .demo {
+    width: 300px;
+  }
+  .demo p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #52525b;
+  }
+  .stack {
+    display: grid;
+    gap: 8px;
+    width: 300px;
+  }
+</style>
+<div data-label="Default">
+  <c2-details class="demo" label="What is included?">
+    <p>Everything in the free plan plus unlimited projects and priority support.</p>
+  </c2-details>
+</div>
+<div data-label="Header content">
+  <c2-details class="demo" expanded client:load>
+    <span slot="title">Billing</span>
+    <span slot="header-content">Next invoice on 1 Oct</span>
+    <p>Visa ending 4242. Invoices are sent to billing@example.com.</p>
+    <c2-button slot="header-content" style="margin-left: 8px; --c2-button__container--padding-top: 2px; --c2-button__container--padding-bottom: 2px; --c2-button__container--font-size: 12px">Update card</c2-button>
+  </c2-details>
+</div>
+<div data-label="Accordion">
+  <div class="stack">
+    <c2-details name="faq" label="Can I cancel anytime?"><p>Yes. Your plan stays active until the end of the period.</p></c2-details>
+    <c2-details name="faq" label="Do you offer refunds?"><p>Within 14 days, no questions asked.</p></c2-details>
+    <c2-details name="faq" label="Is there a student discount?"><p>50% off with a valid student email.</p></c2-details>
+  </div>
+</div>
+<div data-label="Icon only toggles">
+  <c2-details class="demo" title-not-clickable label="Only the chevron toggles"><p>Clicks on the title are ignored.</p></c2-details>
+</div>
+<div data-label="Custom icons">
+  <c2-details class="demo" label="Plus and minus">
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+    <svg slot="expanded-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path></svg>
+    <p>The <code>expanded-icon</code> slot replaces the rotation.</p>
+  </c2-details>
+</div>
+<div data-label="Disabled">
+  <c2-details class="demo" disabled label="Archived section"><p>Never shown.</p></c2-details>
+</div>
+```

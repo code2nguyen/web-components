@@ -8,6 +8,10 @@
       "default": "./dist/text-field.js",
       "types": "./types/src/text-field.d.ts"
     },
+    "./text-field-clear.js": {
+      "default": "./dist/text-field-clear.js",
+      "types": "./types/src/text-field-clear.d.ts"
+    },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [

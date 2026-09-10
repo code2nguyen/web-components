@@ -8,6 +8,10 @@
       "default": "./dist/details.js",
       "types": "./types/src/details.d.ts"
     },
+    "./details-context.js": {
+      "default": "./dist/details-context.js",
+      "types": "./types/src/details-context.d.ts"
+    },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
@@ -48,6 +52,7 @@
     }
   },
   "dependencies": {
+    "@lit/context": "1.1.6",
     "@c2n/core": "0.0.4",
     "lit": "3.3.3"
   },

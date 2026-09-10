@@ -1,0 +1,206 @@
+---
+title: 'Icon Button'
+description: 'Round, hoverable button wrapping a slotted SVG icon.'
+category: 'Buttons'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import '@fontsource/material-icons'
+
+import { IconButton } from '@c2n/icon-button'
+import { MatIcon } from '@c2n/mat-icon'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
+import { FeatherSearchIcon as FeatherSearch } from '@c2n/feather-icons/icons/search.js'
+
+`c2-icon-button` is a 48px circular state layer around a 24px icon. Drop any icon into the default slot: an inline `<svg>`, a `c2-feather-*` element or a `c2-mat-icon` ligature. Add `tooltip` to label it for the pointer, and theme size, shape and colours through `--c2-icon-button__*` custom properties.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/icon-button
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/icon-button
+<style>
+  .small {
+    --c2-icon-button__state-layer--size: 36px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+  }
+  .large {
+    --c2-icon-button__state-layer--size: 56px;
+    --c2-icon-button__icon--width: 28px;
+    --c2-icon-button__icon--height: 28px;
+  }
+  .filled {
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgb(127 127 127 / 0.35);
+    --c2-icon-button--background-color: #18181b;
+    --c2-icon-button__hover--background-color: #3f3f46;
+    --c2-icon-button__icon--color: #ffffff;
+    --c2-icon-button__state-layer--size: 40px;
+    --c2-icon-button__icon--width: 20px;
+    --c2-icon-button__icon--height: 20px;
+  }
+  .primary {
+    --c2-icon-button--background-color: #2563eb;
+    --c2-icon-button__hover--background-color: #1d4ed8;
+    --c2-icon-button__icon--color: #ffffff;
+    --c2-icon-button__state-layer--size: 40px;
+    --c2-icon-button__icon--width: 20px;
+    --c2-icon-button__icon--height: 20px;
+  }
+  .soft {
+    --c2-icon-button--background-color: #dbeafe;
+    --c2-icon-button__hover--background-color: #bfdbfe;
+    --c2-icon-button__icon--color: #1d4ed8;
+    --c2-icon-button--border-radius: 10px;
+    --c2-icon-button__state-layer--size: 40px;
+    --c2-icon-button__icon--width: 20px;
+    --c2-icon-button__icon--height: 20px;
+  }
+  .danger {
+    --c2-icon-button--background-color: #fee2e2;
+    --c2-icon-button__hover--background-color: #fecaca;
+    --c2-icon-button__icon--color: #dc2626;
+    --c2-icon-button--border-radius: 10px;
+    --c2-icon-button__state-layer--size: 40px;
+    --c2-icon-button__icon--width: 20px;
+    --c2-icon-button__icon--height: 20px;
+  }
+  .toolbar {
+    display: inline-flex;
+    gap: 2px;
+    padding: 4px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .toolbar-item {
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--color: #52525b;
+    --c2-icon-button__hover--background-color: #f4f4f5;
+  }
+  .toolbar-item-active {
+    --c2-icon-button--background-color: #e4e4e7;
+    --c2-icon-button__icon--color: #18181b;
+  }
+</style>
+<div data-label="Default">
+  <c2-icon-button>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+      <circle cx="12" cy="13" r="4"></circle>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="5" r="3"></circle>
+      <circle cx="6" cy="12" r="3"></circle>
+      <circle cx="18" cy="19" r="3"></circle>
+      <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"></path>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button>
+    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <circle cx="12" cy="5" r="1.6"></circle>
+      <circle cx="12" cy="12" r="1.6"></circle>
+      <circle cx="12" cy="19" r="1.6"></circle>
+    </svg>
+  </c2-icon-button>
+</div>
+<div data-label="Tooltip">
+  <c2-icon-button tooltip="Take a photo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+      <circle cx="12" cy="13" r="4"></circle>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button tooltip="Add to favourites">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button tooltip="Delete">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14"></path>
+    </svg>
+  </c2-icon-button>
+</div>
+<div data-label="Icon sources">
+  <c2-icon-button tooltip="Inline SVG">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"></path>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button tooltip="Feather icon"><c2-feather-settings></c2-feather-settings></c2-icon-button>
+  <c2-icon-button tooltip="Feather icon"><c2-feather-bell></c2-feather-bell></c2-icon-button>
+  <c2-icon-button tooltip="Material icon"><c2-mat-icon>favorite</c2-mat-icon></c2-icon-button>
+  <c2-icon-button tooltip="Material icon"><c2-mat-icon>palette</c2-mat-icon></c2-icon-button>
+</div>
+<div data-label="Sizes">
+  <c2-icon-button class="small"><c2-feather-search></c2-feather-search></c2-icon-button>
+  <c2-icon-button><c2-feather-search></c2-feather-search></c2-icon-button>
+  <c2-icon-button class="large"><c2-feather-search></c2-feather-search></c2-icon-button>
+</div>
+<div data-label="Filled / tinted">
+  <c2-icon-button class="filled">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M5 12h14"></path>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button class="primary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h14M12 5l7 7-7 7"></path>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button class="soft">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+  </c2-icon-button>
+  <c2-icon-button class="danger">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14"></path>
+    </svg>
+  </c2-icon-button>
+</div>
+<div data-label="Toolbar">
+  <div class="toolbar">
+    <c2-icon-button class="toolbar-item toolbar-item-active" tooltip="Bold">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6zM6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+      </svg>
+    </c2-icon-button>
+    <c2-icon-button class="toolbar-item" tooltip="Italic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 4h-9M14 20H5M15 4L9 20"></path>
+      </svg>
+    </c2-icon-button>
+    <c2-icon-button class="toolbar-item" tooltip="Underline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3M4 21h16"></path>
+      </svg>
+    </c2-icon-button>
+    <c2-icon-button class="toolbar-item" tooltip="Link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+      </svg>
+    </c2-icon-button>
+  </div>
+</div>
+```

@@ -1,0 +1,100 @@
+{
+  "name": "@c2n/mcp",
+  "version": "0.0.4",
+  "description": "MCP server exposing the c2n web components (API, examples, presets, theme tokens, variant generation) to AI agents",
+  "type": "module",
+  "bin": {
+    "c2n-mcp": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./registry.json": "./data/registry.json"
+  },
+  "files": [
+    "dist",
+    "data"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "web components",
+    "lit",
+    "c2n"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "build": "wireit",
+    "build:registry": "wireit",
+    "build:tsc": "wireit",
+    "start": "node dist/cli.js",
+    "dev": "node src/cli.ts",
+    "inspect": "npx -y @modelcontextprotocol/inspector node src/cli.ts",
+    "smoke": "node scripts/smoke.ts"
+  },
+  "wireit": {
+    "build:registry": {
+      "dependencies": [
+        "../../..:build"
+      ],
+      "command": "node scripts/build-registry.ts",
+      "files": [
+        "scripts/build-registry.ts",
+        "src/registry-types.ts",
+        "src/lib/css-var-name.ts",
+        "../../components/*/custom-elements.json",
+        "../../icons/*/custom-elements.json",
+        "../../../open-packages/*/custom-elements.json",
+        "../../../apps/ui/src/content/**/*.mdx",
+        "../../../apps/ui/src/data/component-presets.ts",
+        "../../../apps/ui/src/data/component-previews.ts",
+        "../theme/dist/tokens.json",
+        "../skill/skills/c2n-components/references/*.md",
+        "!../skill/skills/c2n-components/references/components-cheatsheet.md",
+        "../../../lerna.json",
+        "../../../package.json"
+      ],
+      "output": [
+        "data/registry.json"
+      ]
+    },
+    "build:tsc": {
+      "command": "tsc -p tsconfig.json",
+      "files": [
+        "src/**/*.ts",
+        "tsconfig.json"
+      ],
+      "output": [
+        "dist/**"
+      ]
+    },
+    "build": {
+      "dependencies": [
+        "build:registry",
+        "build:tsc"
+      ]
+    }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "custom-elements-manifest": "2.1.0"
+  }
+}

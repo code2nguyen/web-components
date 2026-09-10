@@ -1,0 +1,86 @@
+---
+import Main from '../../../layouts/Main.astro'
+import DocComponentLayout from '../../../layouts/DocComponentLayout.astro'
+import ApiTable from '../../../components/ApiTable.astro'
+import { getCollection, getEntry } from 'astro:content'
+import { componentManifests } from '../../../store/component-manifests'
+import { countGalleryExamples } from '../../../utils/gallery'
+
+/** API reference for a component (attributes, events, CSS custom properties) from its custom-elements manifest. */
+export async function getStaticPaths() {
+  const componentEntries = await getCollection('components')
+  return componentEntries.map((entry) => ({
+    params: { componentId: entry.id },
+    props: { component: entry },
+  }))
+}
+
+const { component } = Astro.props
+const componentTag = `c2-${component.id}`
+const manifest = componentManifests[componentTag]
+if (!manifest) throw new Error(`No custom-elements manifest registered for ${componentTag} (see src/store/component-manifests.ts)`)
+const gallery = await getEntry('gallery', component.id)
+
+// One API table per element of the package (`c2-tabs` + `c2-tab`, `c2-radio` + `c2-radio-group`); the page's own tag first.
+const elements = [componentTag, ...manifest.siblingTags].map((tag, index) => ({
+  tag,
+  manifest: componentManifests[tag],
+  idPrefix: index === 0 ? 'api' : `api-${tag}`,
+}))
+const multiple = elements.length > 1
+
+// The API table renders one <h3> per non-empty section; mirror them in the TOC (nested under the element when there are several).
+type Heading = { depth: number; slug: string; text: string }
+const headings = elements.flatMap(({ tag, manifest, idPrefix }) =>
+  [
+    multiple && { depth: 2, slug: idPrefix, text: tag },
+    manifest.attributes.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-attributes`, text: 'Attributes' },
+    manifest.events.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-events`, text: 'Events' },
+    manifest.cssProperties.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-css`, text: 'CSS custom properties' },
+  ].filter((heading): heading is Heading => Boolean(heading)),
+)
+---
+
+<Main title={`${component.data.title} API · c2n web components`} description={component.data.description} withSidebar section="components">
+  <DocComponentLayout
+    componentId={component.id}
+    headings={headings}
+    title={component.data.title}
+    description={component.data.description}
+    view="api"
+    galleryCount={gallery ? countGalleryExamples(gallery.body) : undefined}
+  >
+    {
+      elements.map(({ tag, manifest, idPrefix }) => (
+        <section class="api-element">
+          {multiple && (
+            <h2 id={idPrefix} class="api-element__title">
+              <code>{tag}</code>
+            </h2>
+          )}
+          {multiple && <p class="api-element__lead" set:html={manifest.description} />}
+          <ApiTable componentTag={tag} idPrefix={idPrefix} />
+        </section>
+      ))
+    }
+  </DocComponentLayout>
+</Main>
+
+<style lang="scss">
+  .api-element + .api-element {
+    margin-top: 48px;
+  }
+  .api-element__title {
+    font-size: 20px;
+    margin: 0 0 8px;
+    code {
+      font-size: 18px;
+    }
+  }
+  .api-element__lead {
+    margin: 0;
+    color: var(--site-color-on-surface-variant);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+</style>

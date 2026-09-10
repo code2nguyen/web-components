@@ -19,9 +19,9 @@ All packages have `@c2n/config` as dev dependencies and maybe link with `@c2n/co
 npm run generate
 ```
 
-### Demo
+### UI app
 
-Demo application is a static web using [Astro Framework](https://astro.build/)
+The documentation / demo app lives in `apps/ui` and is a static site built with the [Astro Framework](https://astro.build/). It is the home for future app features (backend, database, …).
 
 From root folder.
 
@@ -29,13 +29,13 @@ From root folder.
 
 npm install
 
-# Will build all web components first, then start demo dev server
+# Will build all web components first, then start the UI dev server
 
-npm run demo
+npm run ui
 
-# Will start demo dev server only
+# Will start the UI dev server only
 
-npm run demo:dev
+npm run ui:dev
 
 ```
 
@@ -46,6 +46,15 @@ npm run demo:dev
 npm run dev -w packages/components/checkbox
 
 ```
+
+## Theme
+
+`@c2n/theme` ships ~35 design tokens (`--c2-theme--*`) and a generated base theme that maps every component variable onto them. Import `@c2n/theme/theme.css` once, override a handful of tokens, done. Guide: https://code2nguyen.github.io/web-components/guides/theming
+
+## For AI agents
+
+- **MCP server** `@c2n/mcp`: `npx -y @c2n/mcp` (stdio) exposes component APIs, examples, presets, theme tokens and variant generation. `claude mcp add --transport stdio c2n -- npx -y @c2n/mcp`.
+- **Claude Code plugin** `c2n` (skill + MCP): `/plugin marketplace add code2nguyen/web-components` then `/plugin install c2n@c2n`.
 
 ## Release
 

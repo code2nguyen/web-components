@@ -1,0 +1,88 @@
+---
+title: 'Slider'
+description: 'Range input with a themeable track, thumb, step ticks and value bubble.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Slider } from '@c2n/slider'
+
+`c2-slider` wraps a native `<input type="range">`, so dragging, keyboard steps (Arrow keys, Page Up/Down, Home and End), right-to-left layouts and the `slider` role all come from the browser. The component draws the track, the filled part, the thumb, optional step `ticks` and a value bubble that `show-value` reveals while hovering, dragging or focused. `value`, `min`, `max` and `step` behave like the native attributes; `input` fires on every step of a drag and `change` when the value is committed. Set the `formatValue` property to format the bubble and `aria-valuetext` together.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/slider
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/slider
+<style>
+  .field {
+    display: grid;
+    gap: 4px;
+    width: 260px;
+    max-width: 100%;
+  }
+  .field header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #3f3f46;
+  }
+  .field header span:last-child {
+    color: #71717a;
+    font-variant-numeric: tabular-nums;
+  }
+  .wide {
+    width: 260px;
+    max-width: 100%;
+  }
+  .stack {
+    display: grid;
+    gap: 20px;
+  }
+  .success {
+    --c2-slider__fill--color: #16a34a;
+    --c2-slider__thumb--border: 2px solid #16a34a;
+    --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.12);
+    --c2-slider__thumb__active--box-shadow: 0 0 0 8px rgba(22, 163, 74, 0.18);
+    --c2-slider__thumb__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+  }
+</style>
+<div data-label="Default">
+  <div class="field">
+    <header><span id="volume-label">Volume</span><span>40</span></header>
+    <c2-slider value="40" aria-labelledby="volume-label"></c2-slider>
+  </div>
+</div>
+<div data-label="Value bubble">
+  <div class="stack wide">
+    <c2-slider value="65" show-value aria-label="Opacity"></c2-slider>
+    <c2-slider value="25" show-value style="--c2-slider__value--opacity: 1; margin-top: 16px" aria-label="Always visible"></c2-slider>
+  </div>
+</div>
+<div data-label="Steps and ticks">
+  <div class="stack wide">
+    <c2-slider min="0" max="10" step="1" value="6" ticks show-value aria-label="Rating"></c2-slider>
+    <c2-slider min="0" max="1" step="0.25" value="0.5" ticks show-value aria-label="Quarter steps"></c2-slider>
+  </div>
+</div>
+<div data-label="Disabled">
+  <c2-slider class="wide" value="30" disabled aria-label="Disabled"></c2-slider>
+</div>
+<div data-label="Vertical">
+  <c2-slider orientation="vertical" value="40" show-value aria-label="Level"></c2-slider>
+  <c2-slider orientation="vertical" value="70" ticks step="10" style="--c2-slider__container--length: 120px" aria-label="Level with ticks"></c2-slider>
+</div>
+<div data-label="Themed">
+  <c2-slider class="wide success" value="80" show-value aria-label="Progress"></c2-slider>
+</div>
+```
+
+Label the slider with `aria-label` or point `aria-labelledby` at a visible label, as in the Default row; the value itself is announced through `aria-valuetext`, which uses the same `formatValue` as the bubble. A horizontal slider fills the width of its container, so size it from the outside; a vertical one is an inline box whose height is `--c2-slider__container--length`.
+
+Because the native input owns the interaction, the thumb you see is a drawing: the invisible native thumb has the same size, so a press lands where the visual thumb sits. Theme the drawing with `--c2-slider__track--*`, `--c2-slider__fill--color` and `--c2-slider__thumb--*`; the thumb has hover and active halos (`__hover--box-shadow`, `__active--box-shadow`) and a focus ring. Tick marks pick a different colour on the filled part (`--c2-slider__tick__filled--color`), and the bubble is themed with `--c2-slider__value--*`, including a resting `--c2-slider__value--opacity` for an always-visible readout.

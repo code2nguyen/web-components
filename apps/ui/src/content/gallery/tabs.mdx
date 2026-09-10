@@ -1,0 +1,309 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Tabs } from '@c2n/tabs'
+import { FeatherHomeIcon as FeatherHome } from '@c2n/feather-icons/icons/home.js'
+import { FeatherBookOpenIcon as FeatherBookOpen } from '@c2n/feather-icons/icons/book-open.js'
+import { FeatherEditIcon as FeatherEdit } from '@c2n/feather-icons/icons/edit.js'
+import { FeatherInboxIcon as FeatherInbox } from '@c2n/feather-icons/icons/inbox.js'
+import { FeatherStarIcon as FeatherStar } from '@c2n/feather-icons/icons/star.js'
+import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+
+## Presets
+
+Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every look is CSS variables only: the rail (`--c2-tabs--*`), the tabs (`--c2-tabs__tab--*` and their `hover` / `selected` / `focus` / `disabled` states) and the indicator (`--c2-tabs__indicator--*`). Give the indicator a full height and a `bottom` offset and it becomes a pill sliding behind the labels.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Brand indicator
+<style>
+  .brand-indicator {
+    --c2-tabs__indicator--color: #2563eb;
+    --c2-tabs__indicator--height: 3px;
+    --c2-tabs__indicator--border-radius: 3px 3px 0 0;
+    --c2-tabs__tab__selected--color: #2563eb;
+    --c2-tabs__tab--font-weight: 500;
+  }
+</style>
+<c2-tabs selected-tab="t2" style="width: 260px" class="brand-indicator" client:only="lit"
+  ><c2-tab label="Overview" for="t1"></c2-tab><c2-tab label="Activity" for="t2"></c2-tab><c2-tab label="Settings" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Segmented
+<style>
+  .segmented {
+    --c2-tabs--box-shadow: none;
+    --c2-tabs--background-color: #e4e4e7;
+    --c2-tabs--border-radius: 10px;
+    --c2-tabs--padding-top: 4px;
+    --c2-tabs--padding-right: 4px;
+    --c2-tabs--padding-bottom: 4px;
+    --c2-tabs--padding-left: 4px;
+    --c2-tabs--gap: 4px;
+    --c2-tabs__tab--flex: 1 1 0;
+    --c2-tabs__indicator--height: 0px;
+    --c2-tabs__tab--border-top-left-radius: 7px;
+    --c2-tabs__tab--border-top-right-radius: 7px;
+    --c2-tabs__tab--border-bottom-left-radius: 7px;
+    --c2-tabs__tab--border-bottom-right-radius: 7px;
+    --c2-tabs__tab--padding-top: 6px;
+    --c2-tabs__tab--padding-bottom: 6px;
+    --c2-tabs__tab--color: #52525b;
+    --c2-tabs__tab--font-weight: 500;
+    --c2-tabs__tab--font-size: 13px;
+    --c2-tabs__tab__hover--color: #18181b;
+    --c2-tabs__tab__hover--background-color: rgba(255, 255, 255, 0.5);
+    --c2-tabs__tab__selected--background-color: #ffffff;
+    --c2-tabs__tab__selected--color: #18181b;
+  }
+</style>
+<c2-tabs selected-tab="t2" style="width: 260px" class="segmented" client:only="lit"
+  ><c2-tab label="Day" for="t1"></c2-tab><c2-tab label="Week" for="t2"></c2-tab><c2-tab label="Month" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Sliding pill
+<style>
+  .sliding-pill {
+    --c2-tabs--box-shadow: none;
+    --c2-tabs--gap: 2px;
+    --c2-tabs--padding-top: 4px;
+    --c2-tabs--padding-right: 4px;
+    --c2-tabs--padding-bottom: 4px;
+    --c2-tabs--padding-left: 4px;
+    --c2-tabs--border-radius: 999px;
+    --c2-tabs--background-color: #f4f4f5;
+    --c2-tabs__indicator--height: calc(100% - 8px);
+    --c2-tabs__indicator--bottom: 4px;
+    --c2-tabs__indicator--border-radius: 999px;
+    --c2-tabs__indicator--color: #18181b;
+    --c2-tabs__tab--border-top-left-radius: 999px;
+    --c2-tabs__tab--border-top-right-radius: 999px;
+    --c2-tabs__tab--border-bottom-left-radius: 999px;
+    --c2-tabs__tab--border-bottom-right-radius: 999px;
+    --c2-tabs__tab--padding-top: 6px;
+    --c2-tabs__tab--padding-bottom: 6px;
+    --c2-tabs__tab--font-size: 13px;
+    --c2-tabs__tab--font-weight: 500;
+    --c2-tabs__tab--color: #52525b;
+    --c2-tabs__tab__hover--color: #18181b;
+    --c2-tabs__tab__selected--color: #fafafa;
+  }
+</style>
+<c2-tabs selected-tab="t1" style="width: 260px" class="sliding-pill" client:only="lit"
+  ><c2-tab label="All" for="t1"></c2-tab><c2-tab label="Active" for="t2"></c2-tab><c2-tab label="Done" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Browser tabs
+<style>
+  .browser-tabs {
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #d4d4d8;
+    --c2-tabs--background-color: #f4f4f5;
+    --c2-tabs--padding-top: 6px;
+    --c2-tabs--padding-left: 6px;
+    --c2-tabs--padding-right: 6px;
+    --c2-tabs--border-radius: 10px 10px 0 0;
+    --c2-tabs--gap: 2px;
+    --c2-tabs__indicator--height: 0px;
+    --c2-tabs__tab--border-top-left-radius: 8px;
+    --c2-tabs__tab--border-top-right-radius: 8px;
+    --c2-tabs__tab--padding-top: 7px;
+    --c2-tabs__tab--padding-bottom: 7px;
+    --c2-tabs__tab--font-size: 13px;
+    --c2-tabs__tab--color: #52525b;
+    --c2-tabs__tab__hover--color: #18181b;
+    --c2-tabs__tab__hover--background-color: #e4e4e7;
+    --c2-tabs__tab__selected--background-color: #ffffff;
+    --c2-tabs__tab__selected--color: #18181b;
+  }
+</style>
+<c2-tabs selected-tab="t2" style="width: 260px" class="browser-tabs" client:only="lit"
+  ><c2-tab label="Home" for="t1"></c2-tab><c2-tab label="Docs" for="t2"></c2-tab><c2-tab label="Blog" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Material
+<style>
+  .material {
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #cac4d0;
+    --c2-tabs__tab--flex: 1 1 0;
+    --c2-tabs__indicator--color: #6750a4;
+    --c2-tabs__indicator--height: 3px;
+    --c2-tabs__indicator--border-radius: 3px 3px 0 0;
+    --c2-tabs__tab--padding-top: 12px;
+    --c2-tabs__tab--padding-bottom: 12px;
+    --c2-tabs__tab--border-top-left-radius: 8px;
+    --c2-tabs__tab--border-top-right-radius: 8px;
+    --c2-tabs__tab--font-size: 14px;
+    --c2-tabs__tab--font-weight: 500;
+    --c2-tabs__tab--color: #49454f;
+    --c2-tabs__tab__hover--color: #1d1b20;
+    --c2-tabs__tab__hover--background-color: rgba(103, 80, 164, 0.08);
+    --c2-tabs__tab__selected--color: #6750a4;
+    --c2-tabs__tab__selected--background-color: transparent;
+    --c2-tabs__tab__focus--outline: 2px solid rgba(103, 80, 164, 0.5);
+  }
+</style>
+<c2-tabs selected-tab="t1" style="width: 260px" class="material" client:only="lit"
+  ><c2-tab label="Flights" for="t1"></c2-tab><c2-tab label="Hotels" for="t2"></c2-tab><c2-tab label="Cars" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .terminal {
+    --c2-tabs--background-color: #18181b;
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #27272a;
+    --c2-tabs--border-radius: 8px 8px 0 0;
+    --c2-tabs--padding-left: 6px;
+    --c2-tabs--padding-right: 6px;
+    --c2-tabs__indicator--color: #22c55e;
+    --c2-tabs__indicator--height: 2px;
+    --c2-tabs__tab--font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    --c2-tabs__tab--font-size: 11px;
+    --c2-tabs__tab--padding-top: 10px;
+    --c2-tabs__tab--padding-bottom: 10px;
+    --c2-tabs__tab--padding-left: 8px;
+    --c2-tabs__tab--padding-right: 8px;
+    --c2-tabs__tab--color: #71717a;
+    --c2-tabs__tab__hover--color: #e4e4e7;
+    --c2-tabs__tab__hover--background-color: #27272a;
+    --c2-tabs__tab__selected--color: #fafafa;
+    --c2-tabs__tab__selected--background-color: transparent;
+    --c2-tabs__tab__focus--outline: 2px solid rgba(34, 197, 94, 0.5);
+  }
+</style>
+<c2-tabs selected-tab="t1" style="width: 260px" class="terminal" client:only="lit"
+  ><c2-tab label="index.ts" for="t1"></c2-tab><c2-tab label="styles.scss" for="t2"></c2-tab><c2-tab label="README.md" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-tabs__tab--padding-top: 4px;
+    --c2-tabs__tab--padding-bottom: 4px;
+    --c2-tabs__tab--padding-left: 10px;
+    --c2-tabs__tab--padding-right: 10px;
+    --c2-tabs__tab--font-size: 13px;
+  }
+</style>
+<c2-tabs selected-tab="t2" style="width: 260px" class="compact" client:only="lit"
+  ><c2-tab label="Overview" for="t1"></c2-tab><c2-tab label="Activity" for="t2"></c2-tab><c2-tab label="Settings" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Full width
+<style>
+  .full-width {
+    --c2-tabs--justify-content: space-between;
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #e4e4e7;
+    --c2-tabs__indicator--color: #18181b;
+    --c2-tabs__tab--color: #71717a;
+    --c2-tabs__tab__hover--color: #18181b;
+    --c2-tabs__tab__selected--color: #18181b;
+    --c2-tabs__tab--font-weight: 500;
+  }
+</style>
+<c2-tabs selected-tab="t2" style="width: 260px" class="full-width" client:only="lit"
+  ><c2-tab label="Overview" for="t1"></c2-tab><c2-tab label="Activity" for="t2"></c2-tab><c2-tab label="Settings" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Icon and label
+<style>
+  .icon-label {
+    --c2-feather-icon--size: 15px;
+    --c2-tabs--gap: 2px;
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #e4e4e7;
+    --c2-tabs__indicator--color: #0f766e;
+    --c2-tabs__tab--padding-left: 12px;
+    --c2-tabs__tab--padding-right: 12px;
+    --c2-tabs__tab--font-size: 13px;
+    --c2-tabs__tab--font-weight: 500;
+    --c2-tabs__tab--color: #71717a;
+    --c2-tabs__tab__hover--color: #134e4a;
+    --c2-tabs__tab__hover--background-color: #f0fdfa;
+    --c2-tabs__tab__selected--color: #0f766e;
+  }
+</style>
+<c2-tabs selected-tab="t1" style="width: 260px" class="icon-label" client:load>
+  <c2-tab for="t1"><c2-feather-home></c2-feather-home>Home</c2-tab>
+  <c2-tab for="t2"><c2-feather-book-open></c2-feather-book-open>Docs</c2-tab>
+  <c2-tab for="t3"><c2-feather-edit></c2-feather-edit>Blog</c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div>
+</c2-tabs>
+```
+
+```html tag=MdxCodeBlock,label=Icon pills
+<style>
+  .icon-pills {
+    --c2-feather-icon--size: 18px;
+    --c2-tabs--box-shadow: none;
+    --c2-tabs--gap: 4px;
+    --c2-tabs--padding-top: 4px;
+    --c2-tabs--padding-right: 4px;
+    --c2-tabs--padding-bottom: 4px;
+    --c2-tabs--padding-left: 4px;
+    --c2-tabs--border-radius: 999px;
+    --c2-tabs--background-color: #fef3c7;
+    --c2-tabs--justify-content: space-between;
+    --c2-tabs__indicator--height: calc(100% - 8px);
+    --c2-tabs__indicator--bottom: 4px;
+    --c2-tabs__indicator--border-radius: 999px;
+    --c2-tabs__indicator--color: #f59e0b;
+    --c2-tabs__tab--padding-top: 8px;
+    --c2-tabs__tab--padding-bottom: 8px;
+    --c2-tabs__tab--padding-left: 14px;
+    --c2-tabs__tab--padding-right: 14px;
+    --c2-tabs__tab--border-top-left-radius: 999px;
+    --c2-tabs__tab--border-top-right-radius: 999px;
+    --c2-tabs__tab--border-bottom-left-radius: 999px;
+    --c2-tabs__tab--border-bottom-right-radius: 999px;
+    --c2-tabs__tab--color: #b45309;
+    --c2-tabs__tab__hover--color: #78350f;
+    --c2-tabs__tab__selected--color: #ffffff;
+  }
+</style>
+<c2-tabs selected-tab="t2" style="width: 260px" class="icon-pills" client:load>
+  <c2-tab for="t1" aria-label="Inbox"><c2-feather-inbox></c2-feather-inbox></c2-tab>
+  <c2-tab for="t2" aria-label="Starred"><c2-feather-star></c2-feather-star></c2-tab>
+  <c2-tab for="t3" aria-label="Archive"><c2-feather-archive></c2-feather-archive></c2-tab>
+  <c2-tab for="t4" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div>
+  <div id="t4"></div>
+</c2-tabs>
+```
+
+</GalleryGrid>

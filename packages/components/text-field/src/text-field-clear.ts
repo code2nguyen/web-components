@@ -4,6 +4,18 @@ import styles from './text-field-clear.scss?inline'
 
 import { TextField } from './text-field'
 
+/**
+ * A `c2-text-field` that always shows a clear button while it has a value. Prefer `c2-text-field` with the
+ * `clearable` attribute; this element remains for markup that cannot toggle attributes. Inherits every attribute,
+ * slot, event and CSS variable of `c2-text-field`.
+ *
+ * @tag c2-text-field-clear
+ *
+ * @slot clear-icon - Replaces the default cross icon.
+ *
+ * @cssproperty {pixel} [--c2-text-field-clear__clear-icon--size=24px]
+ * @cssproperty {color} [--c2-text-field-clear__clear-icon--color=rgb(70, 70, 70)]
+ */
 @customElement('c2-text-field-clear')
 export class TextFieldClear extends TextField {
   static override styles: CSSResult | CSSResult[] = [unsafeCSS(styles), TextField.styles as CSSResult]

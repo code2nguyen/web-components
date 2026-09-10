@@ -1,0 +1,48 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-accordion,
+  $theme: (
+    gap: 0px,
+    border-width: 1px,
+    border-color: #d5d5d5,
+    border-radius: 8px,
+    transition-duration: 300ms,
+  )
+);
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.c2-accordion {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: 0;
+  gap: css.cssVar(gap);
+}
+
+// The accordion owns the frame. At zero gap, each boundary is drawn once by the preceding panel's bottom
+// border, and only the outside corners are rounded. A positive gap restores a complete frame per panel.
+// Derive this from the actual CSS gap so responsive styles and studio edits work without JS measurement.
+::slotted(c2-details) {
+  --c2-details--border-top: min(#{css.cssVar(border-width)}, calc(#{css.cssVar(gap)} * 10000)) solid #{css.cssVar(border-color)};
+  --c2-details--border-right: #{css.cssVar(border-width)} solid #{css.cssVar(border-color)};
+  --c2-details--border-bottom: #{css.cssVar(border-width)} solid #{css.cssVar(border-color)};
+  --c2-details--border-left: #{css.cssVar(border-width)} solid #{css.cssVar(border-color)};
+  --c2-details--border-top-left-radius: min(#{css.cssVar(border-radius)}, calc(#{css.cssVar(gap)} * 10000));
+  --c2-details--border-top-right-radius: min(#{css.cssVar(border-radius)}, calc(#{css.cssVar(gap)} * 10000));
+  --c2-details--border-bottom-left-radius: min(#{css.cssVar(border-radius)}, calc(#{css.cssVar(gap)} * 10000));
+  --c2-details--border-bottom-right-radius: min(#{css.cssVar(border-radius)}, calc(#{css.cssVar(gap)} * 10000));
+  --c2-details--transition-duration: #{css.cssVar(transition-duration)};
+}
+
+::slotted(c2-details:first-of-type) {
+  --c2-details--border-top: #{css.cssVar(border-width)} solid #{css.cssVar(border-color)};
+  --c2-details--border-top-left-radius: #{css.cssVar(border-radius)};
+  --c2-details--border-top-right-radius: #{css.cssVar(border-radius)};
+}
+
+::slotted(c2-details:last-of-type) {
+  --c2-details--border-bottom-left-radius: #{css.cssVar(border-radius)};
+  --c2-details--border-bottom-right-radius: #{css.cssVar(border-radius)};
+}

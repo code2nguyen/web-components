@@ -16,6 +16,12 @@
       "options": {
         "parser": "json"
       }
+    },
+    {
+      "files": "*.mdx",
+      "options": {
+        "embeddedLanguageFormatting": "off"
+      }
     }
   ]
 }

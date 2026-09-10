@@ -1,0 +1,143 @@
+---
+title: 'Toast'
+description: 'Notification cards and a manager for stacked, queued notifications with independent lifetimes.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ToastManagerDemo from '../../components/ToastManagerDemo.astro'
+import { Toast } from '@c2n/toast'
+
+`c2-toast` displays a notification. `c2-toast-region` manages multiple notifications: three are visible by default, and additional notifications wait in a FIFO queue. Each toast gets its full duration once it becomes visible, so a burst of messages does not expire before the user can read it.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/toast
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/toast
+<style>
+  .notification { width: 320px; }
+</style>
+<div data-label="Information">
+  <c2-toast class="notification" variant="info" heading="New message" message="Alex left a comment on your document."></c2-toast>
+</div>
+<div data-label="Success">
+  <c2-toast class="notification" variant="success" heading="Changes saved" message="Your work is up to date."></c2-toast>
+</div>
+<div data-label="Warning">
+  <c2-toast class="notification" variant="warning" heading="Storage almost full" message="Free up space to keep uploading."></c2-toast>
+</div>
+<div data-label="Error">
+  <c2-toast class="notification" variant="error" heading="Upload failed" message="Check your connection and try again."></c2-toast>
+</div>
+<div data-label="Dismissible">
+  <c2-toast class="notification" dismissible heading="Welcome back" message="You have three new notifications."></c2-toast>
+</div>
+```
+
+## Toast management
+
+<ToastManagerDemo />
+
+The shared `toast` manager creates a region in `document.body` on its first `show()` call. Importing the package is safe during server rendering; call the manager in browser event handlers. Managed toasts are dismissible by default and stay visible for 5,000 milliseconds.
+
+```ts tag=CodeBlock
+import { toast } from '@c2n/toast'
+
+toast.show({ heading: 'New message', message: 'Alex commented on your document.', variant: 'info' })
+toast.show({ message: 'Your export is ready.', variant: 'success' })
+
+// Reuse an ID to update a notification without adding another card.
+const id = toast.show({ id: 'upload', message: 'Uploading…', duration: 0 })
+toast.update(id, { message: 'Upload complete.', variant: 'success', duration: 5000 })
+
+// Remove a visible or queued notification, or clear the whole queue.
+toast.dismiss(id)
+toast.clear()
+```
+
+`duration: 0` keeps a notification until dismissed. Timers pause when the stack is hovered or contains keyboard focus, when the document is hidden, and when the region is disconnected. Resuming preserves the remaining time. Updating a toast resets its duration; queued updates retain their place. Identical messages are independent unless they share an explicit `id`.
+
+## Position and capacity
+
+Use `getToastRegion()` to configure the shared stack, or place your own `<c2-toast-region>` in the application shell and call its methods. The region exposes `show(options)`, `updateToast(id, options)`, `dismiss(id)`, `clear()`, `pause()`, `resume()`, `count`, and `queuedCount`. `max-visible` is clamped to at least one. Changing capacity preserves the remaining lifetime of toasts moved into the queue.
+
+```ts tag=CodeBlock
+import { getToastRegion } from '@c2n/toast'
+
+const region = getToastRegion()
+region.position = 'top-right'
+region.maxVisible = 4
+region.show({ message: 'A new notification arrived.' })
+```
+
+Available positions are `top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, and `bottom-right` (default). The `inline` attribute embeds a stack in normal document flow. Set `label` to name the notification region. Width, spacing, viewport offset and stacking order use `--c2-toast-region__container--width`, `--gap`, `--offset` and `--z-index` with the same prefix.
+
+## Entrance and exit animations
+
+Choose effects independently with `enter-animation` and `exit-animation` on the region, or the `enterAnimation` and `exitAnimation` properties. Both accept `none`, `fade`, `slide-up`, `slide-down`, `slide-left`, `slide-right`, and `scale`. The defaults are `slide-up` on entrance and `fade` on exit. `animation-duration` / `animationDuration` controls both effects in milliseconds (default 200).
+
+Directions describe movement: `slide-down` enters from above and exits downward; `slide-right` enters from the left and exits toward the right. Try each combination with the controls in the management demo.
+
+```ts tag=CodeBlock
+import { getToastRegion } from '@c2n/toast'
+
+const region = getToastRegion()
+region.enterAnimation = 'slide-down'
+region.exitAnimation = 'slide-right'
+region.animationDuration = 400
+region.show({ message: 'A new notification arrived.' })
+```
+
+Timeouts, close buttons, actions, and `clear()` all use the exit effect. A closing toast keeps its slot until the animation completes; only then does the next queued toast appear and start its timeout. `toast-dismiss` fires after removal, and `count` includes closing toasts. Updating a closing toast cancels its removal and restarts its lifetime. Queued toasts are removed immediately when dismissed.
+
+Animations are skipped for `prefers-reduced-motion`, zero duration, `none`, or when the Web Animations API is unavailable. Disconnecting the region cancels active effects and finishes pending removals. Standalone `c2-toast` cards remain immediate; these effects belong to the manager.
+
+## Actions and dismissal
+
+```ts tag=CodeBlock
+import { getToastRegion } from '@c2n/toast'
+
+const region = getToastRegion()
+region.addEventListener('toast-action', event => {
+  const { id } = (event as CustomEvent).detail
+  if (id === 'archived') console.log('Restore the archived item')
+})
+region.addEventListener('toast-dismiss', event => {
+  const { id, reason } = (event as CustomEvent).detail
+  console.log(id, reason) // timeout, close, action, programmatic, or clear
+})
+region.show({ id: 'archived', message: 'Item archived.', actionLabel: 'Undo', duration: 0 })
+```
+
+Activating an action emits `toast-action` with `{ id, toast }`, then dismisses the notification. The dismiss button and Escape while focused inside a dismissible toast close it. Notifications do not take focus when they arrive. Managed notifications are announced politely through the stack's live region; hover and keyboard focus pause the entire stack. Use persistent notifications for actions users need time to consider.
+
+Standalone cards have no timer. Add `dismissible` to allow closing, and listen for `toast-close` or `toast-action`. The `icon`, `close-icon`, default message, and `action` slots allow custom content. A custom action slot owns its own event handling.
+
+## Icons
+
+Replace the leading icon with an inline SVG or a `c2-feather-*` component in `slot="icon"`. Use `--c2-toast__icon--size` and `--c2-toast__icon--color` to style it (semantic variants use their own icon colour variables). The `close-icon` slot replaces the dismiss glyph. Icons are decorative; keep the meaning in the message.
+
+Set `no-icon` on a card or pass `noIcon: true` to `toast.show()` to remove the leading icon and its spacing. The Gallery includes custom SVGs, Feather icons, custom dismiss icons, and several icon-free layouts.
+
+## Countdown bar and icon alignment
+
+Icons are vertically centered by default. Set `--c2-toast__icon--align-self: flex-start` for top alignment.
+
+Timed managed toasts show a thin countdown bar along the bottom by default. It shrinks from full to empty as the dismissal time runs out. Set `region.showProgress = false` to hide it for a region. Each toast can override the setting with `showProgress: true` or `false`:
+
+```ts tag=CodeBlock
+import { toast } from '@c2n/toast'
+
+toast.show({ message: 'Changes saved.', duration: 6000 })
+toast.show({ message: 'Quiet notification.', showProgress: false })
+```
+
+The bar uses the same clock as dismissal: it pauses on hover, focus, hidden pages and disconnection, resets on updates, and starts only when a queued toast becomes visible. Persistent toasts (`duration: 0`) have no countdown. The management demo includes a toggle to try it.
+
+Style the bar with `--c2-toast__progress--height`, `--c2-toast__progress--color`, and `--c2-toast__progress--background`. The countdown is decorative and does not repeatedly announce time changes. A standalone card can display a static preview with `show-progress` and `progress="0.65"` (remaining fraction from 0 to 1); it does not start a timer.

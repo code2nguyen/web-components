@@ -1,0 +1,26 @@
+---
+title: 'Color Slider'
+description: 'Horizontal slider for choosing a hue from 0 to 360.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ColorSlider } from '@c2n/color-slider'
+
+`c2-color-slider` allows users to select hue of a color from 0 to 360.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/color-slider
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/color-slider
+<div data-label="Default">
+  <c2-color-slider></c2-color-slider>
+</div>
+```

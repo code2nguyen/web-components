@@ -1,0 +1,208 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ButtonGroup } from '@c2n/button-group'
+import { Button } from '@c2n/button'
+
+## Presets
+
+Curated looks for `c2-button-group`. Open any card in the studio to start from it. The group frames its items through the `c2-button` variables, so one class on the group themes every button, including the pressed state of a segmented control.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Attached
+<c2-button-group client:only="lit">
+  <c2-button>Save</c2-button>
+  <c2-button>Publish</c2-button>
+  <c2-button>Archive</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Outlined
+<style>
+  .outlined {
+    --c2-button-group--border: 1px solid #d4d4d8;
+    --c2-button-group__divider--color: #d4d4d8;
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #3f3f46;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__hover--color: #18181b;
+    --c2-button__container__active--background-color: #e4e4e7;
+  }
+</style>
+<c2-button-group client:only="lit" class="outlined">
+  <c2-button>Save</c2-button>
+  <c2-button>Publish</c2-button>
+  <c2-button>Archive</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Segmented
+<style>
+  .segmented {
+    --c2-button-group--border-radius: 8px;
+    --c2-button-group__divider--color: transparent;
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 14px;
+    --c2-button__container--padding-right: 14px;
+    --c2-button__container--background-color: #f4f4f5;
+    --c2-button__container--color: #52525b;
+    --c2-button__container__hover--background-color: #e4e4e7;
+    --c2-button__container__hover--color: #18181b;
+    --c2-button__container__active--background-color: #d4d4d8;
+    --c2-button__container__selected--background-color: #ffffff;
+    --c2-button__container__selected--color: #18181b;
+    --c2-button__container__selected--border: 1px solid #d4d4d8;
+  }
+</style>
+<c2-button-group client:only="lit" class="segmented" selection="single" value="board">
+  <c2-button value="list">List</c2-button>
+  <c2-button value="board">Board</c2-button>
+  <c2-button value="calendar">Calendar</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Accent selection
+<style>
+  .accent {
+    --c2-button-group--border: 1px solid #d4d4d8;
+    --c2-button-group__divider--color: #d4d4d8;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #3f3f46;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__hover--color: #18181b;
+    --c2-button__container__selected--background-color: #0265dc;
+    --c2-button__container__selected--color: #ffffff;
+    --c2-button__container__selected--border: 1px solid #0265dc;
+  }
+</style>
+<c2-button-group client:only="lit" class="accent" selection="single" value="week">
+  <c2-button value="day">Day</c2-button>
+  <c2-button value="week">Week</c2-button>
+  <c2-button value="month">Month</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Pill toggles
+<style>
+  .pills {
+    --c2-button-group--gap: 8px;
+    --c2-button-group--border-radius: 999px;
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 14px;
+    --c2-button__container--padding-right: 14px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--border: 1px solid #e4e4e7;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #52525b;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__hover--color: #18181b;
+    --c2-button__container__selected--background-color: #18181b;
+    --c2-button__container__selected--color: #ffffff;
+    --c2-button__container__selected--border: 1px solid #18181b;
+  }
+</style>
+<c2-button-group client:only="lit" class="pills" selection="multiple" value="design,frontend">
+  <c2-button value="design">Design</c2-button>
+  <c2-button value="frontend">Frontend</c2-button>
+  <c2-button value="backend">Backend</c2-button>
+  <c2-button value="ops">Ops</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-button-group--border: 1px solid #d4d4d8;
+    --c2-button-group__divider--color: #d4d4d8;
+    --c2-button-group--border-radius: 4px;
+    --c2-button__container--height: 28px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+    --c2-button__container--font-size: 12px;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #3f3f46;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__selected--background-color: #f4f4f5;
+    --c2-button__container__selected--color: #18181b;
+  }
+</style>
+<c2-button-group client:only="lit" class="compact" selection="single" value="10">
+  <c2-button value="10">10</c2-button>
+  <c2-button value="25">25</c2-button>
+  <c2-button value="50">50</c2-button>
+  <c2-button value="100">100</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Vertical
+<style>
+  .vertical {
+    --c2-button-group--border: 1px solid #d4d4d8;
+    --c2-button-group__divider--color: #d4d4d8;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #3f3f46;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__hover--color: #18181b;
+    --c2-button-group__item--flex: 1 1 0;
+    width: 140px;
+  }
+</style>
+<c2-button-group client:only="lit" class="vertical" orientation="vertical">
+  <c2-button>Zoom in</c2-button>
+  <c2-button>Zoom out</c2-button>
+  <c2-button>Reset</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Full width
+<style>
+  .full {
+    width: 300px;
+    max-width: 100%;
+    --c2-button-group__item--flex: 1 1 0;
+    --c2-button-group--border: 1px solid #d4d4d8;
+    --c2-button-group__divider--color: #d4d4d8;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #3f3f46;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__selected--background-color: #edf1fe;
+    --c2-button__container__selected--color: #0265dc;
+  }
+</style>
+<c2-button-group client:only="lit" class="full" selection="single" value="no">
+  <c2-button value="yes">Yes</c2-button>
+  <c2-button value="no">No</c2-button>
+  <c2-button value="maybe">Maybe</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    padding: 16px;
+    border-radius: 12px;
+    background: #18181b;
+    display: inline-flex;
+    --c2-button-group--border: 1px solid #3f3f46;
+    --c2-button-group__divider--color: #3f3f46;
+    --c2-button__container--background-color: #27272a;
+    --c2-button__container--color: #d4d4d8;
+    --c2-button__container__hover--background-color: #3f3f46;
+    --c2-button__container__hover--color: #fafafa;
+    --c2-button__container__selected--background-color: #5aa3ff;
+    --c2-button__container__selected--color: #032a5c;
+    --c2-button__container__selected--border: 1px solid #5aa3ff;
+    --c2-button__container__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
+  }
+</style>
+<div class="dark">
+  <c2-button-group client:only="lit" selection="single" value="dark">
+    <c2-button value="light">Light</c2-button>
+    <c2-button value="dark">Dark</c2-button>
+    <c2-button value="system">System</c2-button>
+  </c2-button-group>
+</div>
+```
+
+</GalleryGrid>

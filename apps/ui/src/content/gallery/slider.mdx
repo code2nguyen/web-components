@@ -1,0 +1,146 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Slider } from '@c2n/slider'
+
+## Presets
+
+Curated looks for `c2-slider`. Open any card in the studio to start from it. The track, fill, thumb, ticks and bubble are each a small group of variables, so most looks are a handful of lines.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-slider value="40" style="width: 220px" aria-label="Default"></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Thick
+<style>
+  .thick {
+    width: 220px;
+    --c2-slider__track--height: 8px;
+    --c2-slider__thumb--size: 22px;
+    --c2-slider__thumb--border: 3px solid #0265dc;
+  }
+</style>
+<c2-slider class="thick" value="55" aria-label="Thick"></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Flat thumb
+<style>
+  .flat {
+    width: 220px;
+    --c2-slider__thumb--color: #0265dc;
+    --c2-slider__thumb--border: none;
+    --c2-slider__thumb--box-shadow: none;
+    --c2-slider__thumb--size: 14px;
+  }
+</style>
+<c2-slider class="flat" value="35" aria-label="Flat thumb"></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Bar
+<style>
+  .bar {
+    width: 220px;
+    --c2-slider__track--height: 24px;
+    --c2-slider__track--border-radius: 6px;
+    --c2-slider__track--color: #f4f4f5;
+    --c2-slider__fill--color: #0265dc;
+    --c2-slider__thumb--size: 8px;
+    --c2-slider__thumb--border-radius: 2px;
+    --c2-slider__thumb--color: #ffffff;
+    --c2-slider__thumb--border: none;
+    --c2-slider__thumb--box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    --c2-slider__thumb__hover--box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    --c2-slider__thumb__active--box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  }
+</style>
+<c2-slider class="bar" value="60" show-value aria-label="Bar"></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Ticks
+<c2-slider min="0" max="10" step="1" value="6" ticks show-value style="width: 220px" aria-label="Ticks"></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Always visible value
+<style>
+  .readout {
+    width: 220px;
+    margin-top: 20px;
+    --c2-slider__value--opacity: 1;
+    --c2-slider__value--background: #0265dc;
+    --c2-slider__value--color: #ffffff;
+    --c2-slider__value--border-radius: 999px;
+  }
+</style>
+<c2-slider class="readout" value="72" show-value aria-label="Readout"></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .success {
+    width: 220px;
+    --c2-slider__fill--color: #16a34a;
+    --c2-slider__thumb--border: 2px solid #16a34a;
+    --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.12);
+    --c2-slider__thumb__active--box-shadow: 0 0 0 8px rgba(22, 163, 74, 0.18);
+    --c2-slider__thumb__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+  }
+</style>
+<c2-slider class="success" value="80" aria-label="Success"></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Warm gradient
+<style>
+  .warm {
+    width: 220px;
+    --c2-slider__track--height: 6px;
+    --c2-slider__track--color: #fee2e2;
+    --c2-slider__fill--color: linear-gradient(90deg, #f59e0b, #dc2626);
+    --c2-slider__thumb--border: 2px solid #dc2626;
+    --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12);
+    --c2-slider__thumb__active--box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.18);
+    --c2-slider__thumb__focus--outline: 2px solid rgba(220, 38, 38, 0.4);
+  }
+</style>
+<c2-slider class="warm" value="70" aria-label="Heat"></c2-slider>
+```
+
+```html tag=MdxCodeBlock,label=Vertical
+<style>
+  .vertical-row {
+    display: flex;
+    gap: 24px;
+  }
+</style>
+<div class="vertical-row">
+  <c2-slider orientation="vertical" value="40" show-value aria-label="Bass"></c2-slider>
+  <c2-slider orientation="vertical" value="65" show-value aria-label="Mid"></c2-slider>
+  <c2-slider orientation="vertical" value="30" show-value aria-label="Treble"></c2-slider>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    width: 240px;
+    padding: 20px;
+    border-radius: 12px;
+    background: #18181b;
+    --c2-slider__track--color: #3f3f46;
+    --c2-slider__fill--color: #5aa3ff;
+    --c2-slider__thumb--color: #18181b;
+    --c2-slider__thumb--border: 2px solid #5aa3ff;
+    --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(90, 163, 255, 0.2);
+    --c2-slider__thumb__active--box-shadow: 0 0 0 8px rgba(90, 163, 255, 0.28);
+    --c2-slider__thumb__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
+    --c2-slider__value--background: #fafafa;
+    --c2-slider__value--color: #18181b;
+  }
+</style>
+<div class="dark">
+  <c2-slider value="45" show-value aria-label="Brightness"></c2-slider>
+</div>
+```
+
+</GalleryGrid>

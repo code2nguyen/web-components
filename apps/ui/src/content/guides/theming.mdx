@@ -1,0 +1,87 @@
+---
+title: 'Theming'
+description: 'Theme every c2n component from a handful of design tokens with @c2n/theme, or reach for any component variable directly.'
+order: 10
+---
+
+import CodeBlock from '../../components/CodeBlock.astro'
+import TokenTable from '../../components/TokenTable.astro'
+
+Every `c2-*` component is styled exclusively through its own CSS custom properties, named `--c2-<component>__<part>[__<state>]--<property>` (about 700 in total, listed on each component's API tab). They stay fully independent: you can theme an app by setting those variables one by one, without any other layer.
+
+`@c2n/theme` adds a convenience layer on top: a small set of **design tokens** and a **generated base theme** that maps every component variable onto them. Set ~35 tokens and every component follows; any component variable you set yourself still wins.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/theme
+```
+
+```typescript tag=CodeBlock
+import '@c2n/theme/theme.css' // tokens + base theme, once at the app root
+```
+
+Then override the tokens that differ in your brand:
+
+```css tag=CodeBlock
+:root {
+  --c2-theme--color-primary: #7c3aed;
+  --c2-theme--color-primary-hover: #6d28d9;
+  --c2-theme--radius-md: 10px;
+  --c2-theme--font-family: 'Inter', system-ui, sans-serif;
+}
+```
+
+## How the layers stack
+
+1. **Tokens** — `--c2-theme--<name>`. Shared colours, type, shape, focus ring, motion and elevation. Defined by `tokens.css`, overridden by your app.
+2. **Base theme** — `base.css` sets each component variable to `var(--c2-theme--<token>, <component default>)` on `:root`. It is generated from the components' manifests, so coverage grows with the library.
+3. **Component variables** — the fine-grained escape hatch. `--c2-button__container--background-color: crimson` on an element or class beats the base theme because the base theme only sets `:root` values.
+4. **Application variant components** — repeated looks wrapped in your own components (a class, a wrapper, or a Lit subclass) built from the two layers above.
+
+```css tag=CodeBlock
+/* What base.css emits for one variable: the token first, the component's own default as the innermost fallback. */
+--c2-list--border-top: var(--c2-theme--border, var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline, #e4e4e7));
+```
+
+Composite tokens such as `--c2-theme--border` and `--c2-theme--focus-ring` wrap their primitives, so you can set the whole shorthand (`--c2-theme--border: 2px dashed hotpink`) or just the colour inside it (`--c2-theme--color-outline`).
+
+## Dark mode
+
+`tokens.css` defines light values on `:root` and dark values under `[data-theme='dark']` and the `.c2-dark` class, with the OS preference as fallback when no `data-theme` attribute is present. `data-theme="light"` / `.c2-light` opts a subtree out.
+
+```html tag=CodeBlock
+<html data-theme="dark">
+  …
+  <section class="c2-light">Light island inside a dark page</section>
+</html>
+```
+
+Because the selectors are not tied to the root element, any subtree can be inverted: a preview canvas, a chat panel, a sidebar.
+
+## Bring your own tokens
+
+If your app already has a token system, skip `tokens.css`, load only `base.css`, and bridge your tokens onto the `--c2-theme--*` names. Dark mode then follows your own switch automatically.
+
+```css tag=CodeBlock
+@import '@c2n/theme/base.css';
+
+:root {
+  --c2-theme--color-primary: var(--brand-600);
+  --c2-theme--color-on-primary: var(--brand-on-600);
+  --c2-theme--color-surface: var(--surface);
+  --c2-theme--color-on-surface: var(--text);
+  --c2-theme--color-outline: var(--border);
+  --c2-theme--radius-md: var(--radius);
+  --c2-theme--font-family: var(--font-sans);
+  --c2-theme--focus-ring: 2px solid var(--brand-600);
+}
+```
+
+## Tokens
+
+<TokenTable />
+
+## What the base theme covers
+
+Colours, backgrounds, borders, radii, focus rings, disabled opacity, font sizes and weights, durations and shadows with a concrete default are mapped. Sizes, paddings, gaps, identity colours (avatar fallbacks), status colours and the code viewer's syntax theme stay component-specific by design, and variables without a default (they inherit) are left untouched. `@c2n/theme/report.json` lists, per package, what is mapped and what is not.

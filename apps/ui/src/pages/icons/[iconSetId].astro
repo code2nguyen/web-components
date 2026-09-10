@@ -1,0 +1,24 @@
+---
+import Main from '../../layouts/Main.astro'
+import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import { ComponentConfigurationPanel } from '../../components/configuration/ComponentConfigurationPanel'
+import { getCollection, render } from 'astro:content'
+
+export async function getStaticPaths() {
+  const entries = await getCollection('icons')
+  return entries.map((entry) => ({
+    params: { iconSetId: entry.id },
+    props: { iconSet: entry },
+  }))
+}
+
+const { iconSet } = Astro.props
+const { Content, headings } = await render(iconSet)
+---
+
+<Main title={`${iconSet.data.title} · c2n web components`} description={iconSet.data.description} withSidebar section="icons">
+  <DocComponentLayout componentId={iconSet.id} section="icons" headings={headings}>
+    <ComponentConfigurationPanel client:load slot="panel" />
+    <Content />
+  </DocComponentLayout>
+</Main>

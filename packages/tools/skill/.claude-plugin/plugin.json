@@ -1,0 +1,12 @@
+{
+  "name": "c2n",
+  "description": "Build UI with the c2n web components (c2-* Lit elements from @c2n/*): theme once with @c2n/theme, use the tags directly, turn repeated looks into variant components. Bundles the @c2n/mcp server.",
+  "version": "0.0.4",
+  "author": {
+    "name": "code2nguyen"
+  },
+  "homepage": "https://code2nguyen.github.io/web-components/",
+  "repository": "https://github.com/code2nguyen/web-components",
+  "license": "MIT",
+  "keywords": ["web components", "lit", "design system", "theme", "c2n"]
+}

@@ -1,0 +1,113 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-textarea,
+  $theme: (
+    container--min-height: 80px,
+    container--padding: 10px 12px,
+    container--border: 1px solid #bcbcc6,
+    container--border-radius: 6px,
+    container--background: #ffffff,
+    container--color: #18181b,
+    container--font-family: inherit,
+    container--font-size: 14px,
+    container--line-height: 20px,
+    container__hover--border: 1px solid #a1a1aa,
+    container__focus--border: 1px solid #476ef9,
+    container__focus--outline: 3px solid rgba(71, 110, 249, 0.2),
+    container__error--border: 1px solid #dc2626,
+    container__error__focus--outline: 3px solid rgba(220, 38, 38, 0.2),
+    container__read-only--background: #fafafa,
+    container__disabled--opacity: 0.38,
+    placeholder--color: #71717a,
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: middle;
+  max-width: 100%;
+}
+:host([hidden]) {
+  display: none;
+}
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  resize: vertical;
+  text-align: inherit;
+  min-height: css.cssVar(container--min-height);
+  padding: css.cssVar(container--padding);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background: css.cssVar(container--background);
+  color: css.cssVar(container--color);
+  font-family: css.cssVar(container--font-family);
+  font-size: css.cssVar(container--font-size);
+  line-height: css.cssVar(container--line-height);
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+  &:hover:not(:disabled) {
+    border: css.cssVar(container__hover--border);
+  }
+  &:focus {
+    border: css.cssVar(container__focus--border);
+    outline: css.cssVar(container__focus--outline);
+  }
+  &:read-only {
+    background: css.cssVar(container__read-only--background);
+  }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: css.cssVar(container__disabled--opacity);
+  }
+}
+:host([resize='none']) textarea {
+  resize: none;
+}
+:host([resize='horizontal']) textarea {
+  resize: horizontal;
+}
+:host([resize='both']) textarea {
+  resize: both;
+}
+:host([error]:not([disabled])) {
+  textarea {
+    border: css.cssVar(container__error--border);
+  }
+  textarea:focus {
+    outline: css.cssVar(container__error__focus--outline);
+  }
+  .supporting-text {
+    color: css.cssVar(supporting-text__error--color);
+  }
+}
+.supporting-text {
+  display: flex;
+  justify-content: space-between;
+  gap: css.cssVar(supporting-text--gap);
+  margin-top: css.cssVar(supporting-text--gap);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+  color: css.cssVar(supporting-text--color);
+}
+[hidden] {
+  display: none;
+}
+.message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.counter {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  margin-inline-start: auto;
+}

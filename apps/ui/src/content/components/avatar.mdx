@@ -1,0 +1,79 @@
+---
+title: 'Avatar'
+description: 'Image, initials or icon for a person, with status dot and badge.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Avatar } from '@c2n/avatar'
+
+`c2-avatar` shows a person or entity. It resolves its content in order: the `src` image (a broken image fires `error` and falls back to the initials), then slotted content such as an icon or emoji, then the initials computed from `name`. `initial-count="2"` picks the first and last word of a longer name, and `initials` overrides the computation. `auto-color` derives a stable background hue from the name, `status` adds a presence dot, and the `badge` slot replaces the dot with your own element. One `--c2-avatar--size` token drives the width, height and font size.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/avatar
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/avatar
+<style>
+  .stack c2-avatar {
+    --c2-avatar--box-shadow: 0 0 0 2px #ffffff;
+  }
+  .stack c2-avatar + c2-avatar {
+    margin-left: -10px;
+  }
+  .badge {
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 5px;
+  }
+</style>
+<div data-label="Initials">
+  <c2-avatar name="Nguyen Thai Vinh"></c2-avatar>
+  <c2-avatar name="Nguyen Thai Vinh" initial-count="2"></c2-avatar>
+  <c2-avatar name="Nguyen Thai Vinh" initials="TV"></c2-avatar>
+</div>
+<div data-label="Sizes">
+  <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 20px"></c2-avatar>
+  <c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar>
+  <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 48px"></c2-avatar>
+  <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 64px"></c2-avatar>
+</div>
+<div data-label="Image and fallbacks">
+  <c2-avatar name="Elisa Jasmin" src="/web-components/chat.avif" style="--c2-avatar--size: 48px"></c2-avatar>
+  <c2-avatar name="Elisa Jasmin" initial-count="2" src="/web-components/missing.png" style="--c2-avatar--size: 48px"></c2-avatar>
+  <c2-avatar name="Assistant" style="--c2-avatar--size: 48px; --c2-avatar--background: #18181b">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"></rect><path d="M12 8V4M8 14h.01M16 14h.01"></path></svg>
+  </c2-avatar>
+</div>
+<div data-label="Auto color">
+  <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Grace Hopper" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Alan Turing" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Katherine Johnson" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Linus Torvalds" initial-count="2"></c2-avatar>
+</div>
+<div data-label="Status and badge">
+  <c2-avatar name="Ada Lovelace" initial-count="2" status="online"></c2-avatar>
+  <c2-avatar name="Ada Lovelace" initial-count="2" status="away"></c2-avatar>
+  <c2-avatar name="Ada Lovelace" initial-count="2" status="busy"></c2-avatar>
+  <c2-avatar name="Ada Lovelace" initial-count="2" status="offline"></c2-avatar>
+  <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 40px"><span slot="badge" class="badge">3</span></c2-avatar>
+</div>
+<div data-label="Stacked group">
+  <div class="stack" style="display: flex">
+    <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
+    <c2-avatar auto-color name="Grace Hopper" initial-count="2"></c2-avatar>
+    <c2-avatar auto-color name="Alan Turing" initial-count="2"></c2-avatar>
+    <c2-avatar initials="+4" style="--c2-avatar--background: #e4e4e7; --c2-avatar--color: #52525b; --c2-avatar--font-size: 11px"></c2-avatar>
+  </div>
+</div>
+```

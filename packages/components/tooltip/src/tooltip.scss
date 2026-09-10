@@ -2,64 +2,131 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-tooltip,
   $theme: (
-    background-color: #322f35,
-    color: #f5eff7,
+    background-color: #18181b,
+    color: #fafafa,
+    border-radius: 6px,
+    box-shadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    border: null,
 
     font-size: 12px,
-    font-weight: null,
+    font-weight: 500,
     font-style: null,
     font-family: null,
+    line-height: 1.4,
 
-    padding-top: 4px,
+    padding-top: 5px,
     padding-right: 8px,
-    padding-bottom: 4px,
+    padding-bottom: 5px,
     padding-left: 8px,
 
-    max-wdith: 160px,
+    max-width: 240px,
+    offset: 8px,
+    arrow--size: 8px,
+    transition-duration: 120ms,
+    enter-transform: scale(0.92),
   )
 );
 
 :host {
-  position: absolute;
-
-  border-radius: 4px;
-  display: inline-block;
+  // Popover in the top layer, placed by floating-ui with `position: fixed`.
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+  width: max-content;
+  max-width: css.cssVar(max-width);
   pointer-events: none;
   user-select: none;
-  /* Animate in */
+  box-sizing: border-box;
+
   opacity: 0;
-  transform: scale(0.75);
-  transition: animation.standard-deceleration(opacity), animation.standard-deceleration(transform);
-
-  background: css.cssVar(background-color);
-  color: css.cssVar(color);
-
-  font-size: css.cssVar(font-size);
-  font-weight: css.cssVar(font-weight);
-  font-style: css.cssVar(font-style);
-  font-family: css.cssVar(font-family);
+  transform: css.cssVar(enter-transform);
+  transition:
+    opacity css.cssVar(transition-duration) animation.$standard-easing,
+    transform css.cssVar(transition-duration) animation.$standard-easing,
+    display css.cssVar(transition-duration) allow-discrete,
+    overlay css.cssVar(transition-duration) allow-discrete;
 }
 
-:host([showing]) {
+:host(:popover-open) {
   opacity: 1;
-  transform: scale(1);
+  transform: none;
 }
-.c2-tooltip {
-  display: inline-flex;
-  align-items: center;
-  position: relative;
 
+@starting-style {
+  :host(:popover-open) {
+    opacity: 0;
+    transform: css.cssVar(enter-transform);
+  }
+}
+
+:host([current-placement^='top']) {
+  transform-origin: bottom center;
+}
+:host([current-placement^='bottom']) {
+  transform-origin: top center;
+}
+:host([current-placement^='left']) {
+  transform-origin: center right;
+}
+:host([current-placement^='right']) {
+  transform-origin: center left;
+}
+
+.c2-tooltip {
+  position: relative;
+  box-sizing: border-box;
   padding-top: css.cssVar(padding-top);
   padding-right: css.cssVar(padding-right);
   padding-bottom: css.cssVar(padding-bottom);
   padding-left: css.cssVar(padding-left);
-  max-width: css.cssVar(max-widt);
+  border-radius: css.cssVar(border-radius);
+  border: css.cssVar(border);
+  background: css.cssVar(background-color);
+  color: css.cssVar(color);
+  box-shadow: css.cssVar(box-shadow);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-style: css.cssVar(font-style);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  text-align: left;
+  overflow-wrap: break-word;
+}
 
-  width: max-content;
-  ::slotted(svg),
-  .arrow {
-    position: absolute;
-    background-color: transparent;
-    color: css.cssVar(background-color);
+// A rotated square that shares the bubble's background and border; floating-ui positions it along the edge.
+.c2-tooltip__arrow {
+  position: absolute;
+  width: css.cssVar(arrow--size);
+  height: css.cssVar(arrow--size);
+  background: css.cssVar(background-color);
+  border: css.cssVar(border);
+  transform: rotate(45deg);
+  pointer-events: none;
+  // Only the two edges facing outwards should show a border; the clip hides the half that sits under the bubble.
+  clip-path: none;
+}
+
+:host([current-placement^='top']) .c2-tooltip__arrow {
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+:host([current-placement^='bottom']) .c2-tooltip__arrow {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+:host([current-placement^='left']) .c2-tooltip__arrow {
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+:host([current-placement^='right']) .c2-tooltip__arrow {
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    transition: none;
   }
 }

@@ -2,121 +2,111 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-details</title>
     <script type="module" src="/src/details.ts"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 32px;
+        max-width: 480px;
       }
-      .demo {
-        display: flex;
-        flex-direction: column;
-        > div {
-          background-color: rgb(213, 213, 213);
-          padding-top: 16px;
-          padding-bottom: 16px;
-          padding-left: 16px;
-          font-weight: 600;
-        }
-        > div + * {
-          padding: 16px;
-          background-color: rgb(248, 248, 248);
-        }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #52525b;
+      }
+      .stack {
+        display: grid;
+        gap: 8px;
+      }
+      .flush c2-details {
+        --c2-details--border-top-left-radius: 0px;
+        --c2-details--border-top-right-radius: 0px;
+        --c2-details--border-bottom-left-radius: 0px;
+        --c2-details--border-bottom-right-radius: 0px;
+        --c2-details--border-top: none;
+        --c2-details--border-left: none;
+        --c2-details--border-right: none;
+        --c2-details__header--padding-left: 0px;
+        --c2-details__header--padding-right: 0px;
+        --c2-details__header__hover--background: transparent;
+      }
+      .flush {
+        display: grid;
       }
     </style>
   </head>
-  <body class="demo">
-    <div>Basic</div>
-    <c2-details title="Hello title">
-      <div>This content can be toggle visible</div>
-    </c2-details>
+  <body>
+    <section>
+      <h2>Default (animated open/close, label attribute)</h2>
+      <c2-details label="What is included?">
+        <p>Everything in the free plan plus unlimited projects and priority support.</p>
+      </c2-details>
+    </section>
 
-    <div>Basic Row Inverse</div>
-    <c2-details title="Hello title" style="--c2-details__header--flex-direction: row-reverse">
-      <div>This content can be toggle visible</div>
-    </c2-details>
+    <section>
+      <h2>Header content + interactive element inside the header</h2>
+      <c2-details expanded>
+        <span slot="title">Billing</span>
+        <span slot="header-content"
+          >Next invoice on 1 Oct ·
+          <a
+            href="#"
+            onclick="
+              event.preventDefault()
+              this.textContent = 'clicked (panel stayed)'
+            "
+            >Update card</a
+          ></span
+        >
+        <p>Visa ending 4242. Invoices are sent to billing@example.com.</p>
+      </c2-details>
+    </section>
 
-    <div>Customize Title</div>
-    <c2-details>
-      <div slot="title">Custome title</div>
-      <div>This content can be toggle visible</div>
-    </c2-details>
-
-    <div>Customize Title bg color</div>
-    <c2-details style="--c2-details__header--background: red">
-      <div slot="title">Custome title</div>
-      <div>This content can be toggle visible</div>
-    </c2-details>
-
-    <div>Customize border-radius</div>
-    <c2-details
-      style="
-        --c2-details--border-top-left-radius: 16px;
-        --c2-details--border-top-right-radius: 16px;
-        --c2-details--border-bottom-left-radius: 16px;
-        --c2-details--border-bottom-right-radius: 16px;
-        --c2-details--border-right: 1px solid rgb(213, 213, 213);
-        --c2-details--border-left: 1px solid rgb(213, 213, 213);
-        --c2-details--box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 3px -2px, rgba(0, 0, 0, 0.14) 0px 3px 4px 0px, rgba(0, 0, 0, 0.12) 0px 1px 8px 0px;
-      "
-    >
-      <div slot="title">Custome title</div>
-      <div>This content can be toggle visible</div>
-    </c2-details>
-
-    <div>Customize Title larges + icon position absolute</div>
-    <c2-details>
-      <div slot="title">
-        <div>Select</div>
-        <ol>
-          <li>Custome title</li>
-          <li>Custome title</li>
-          <li>Custome title</li>
-        </ol>
+    <section>
+      <h2>Exclusive accordion via <code>name</code></h2>
+      <div class="stack">
+        <c2-details name="faq" label="Can I cancel anytime?"><p>Yes. Your plan stays active until the end of the period.</p></c2-details>
+        <c2-details name="faq" label="Do you offer refunds?"><p>Within 14 days, no questions asked.</p></c2-details>
+        <c2-details name="faq" label="Is there a student discount?"><p>50% off with a valid student email.</p></c2-details>
       </div>
-      <svg style="position: absolute; top: 16px; right: 16px" slot="icon" viewBox="0 -960 960 960">
-        <path
-          d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
-        />
-      </svg>
-      <div>This content can be toggle visible</div>
-    </c2-details>
+    </section>
 
-    <div>Customize Icon</div>
-    <c2-details>
-      <svg slot="icon" viewBox="0 -960 960 960">
-        <path
-          d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
-        />
-      </svg>
-      <svg slot="expanded-icon" viewBox="0 -960 960 960">
-        <path
-          d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"
-        />
-      </svg>
-    </c2-details>
+    <section>
+      <h2>Flush list (borderless), icon first, title-not-clickable, custom icons, disabled</h2>
+      <div class="flush">
+        <c2-details style="--c2-details__header--flex-direction: row-reverse; --c2-details__header--gap: 8px" label="Icon on the left"
+          ><p>Chevron first.</p></c2-details
+        >
+        <c2-details title-not-clickable label="Only the chevron toggles me"><p>Title clicks are ignored.</p></c2-details>
+        <c2-details label="Plus / minus icons">
+          <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
+          <svg slot="expanded-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14" /></svg>
+          <p>The expanded icon replaces the rotation.</p>
+        </c2-details>
+        <c2-details disabled label="Disabled"><p>Never shown.</p></c2-details>
+      </div>
+    </section>
 
-    <div>Customize without content</div>
-    <c2-details>
-      <svg slot="icon" viewBox="0 -960 960 960">
-        <path
-          d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
-        />
-      </svg>
-    </c2-details>
-
-    <div>Customize add padding for content</div>
-    <c2-details>
-      <svg slot="icon" viewBox="0 -960 960 960">
-        <path
-          d="m480-267.077 177.846-178.615q5.615-5.616 11.654-5.616t11.654 5.616q6.385 6.384 6.385 11.654 0 5.269-6.385 11.653L499.615-240.846q-4.23 4.231-9.192 6.346-4.961 2.116-10.423 2.116t-10.423-2.116q-4.962-2.115-9.192-6.346L278.846-422.385q-5.615-5.615-5.115-11.653.5-6.039 6.115-11.654 6.385-6.385 11.654-6.385t11.654 6.385L480-267.077Zm0-283.462 177.846-178.615q5.615-5.615 11.654-5.615t11.654 5.615q6.385 6.385 6.385 11.654t-6.385 11.654L499.615-524.308q-4.23 4.231-9.192 6.347-4.961 2.115-10.423 2.115t-10.423-2.115q-4.962-2.116-9.192-6.347L278.846-705.846q-5.615-5.615-5.115-11.654t6.115-11.654q6.385-6.385 11.654-6.385t11.654 6.385L480-550.539Z"
-        />
-      </svg>
-      <div slot="title">Example title add padding for content</div>
-      <div style="padding-top: 30px">Summary content</div>
-      Content
-    </c2-details>
+    <section>
+      <h2>Toggle event</h2>
+      <c2-details id="ev" label="Toggle me"><p>…</p></c2-details>
+      <p id="log" style="margin-top: 8px"></p>
+      <script>
+        document.getElementById('ev').addEventListener('toggle', (e) => {
+          document.getElementById('log').textContent = `toggle → newState=${e.newState}, expanded=${e.target.expanded}`
+        })
+      </script>
+    </section>
   </body>
 </html>

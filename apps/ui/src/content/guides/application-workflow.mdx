@@ -1,0 +1,117 @@
+---
+title: 'Using c2n in an application'
+description: 'The workflow behind every c2n app: load the theme once, use c2-* tags directly, and turn every repeated pattern into a small variant or composed component.'
+order: 20
+---
+
+import CodeBlock from '../../components/CodeBlock.astro'
+
+The goal is less code per screen. Three layers do the work: a theme that makes the plain tags look right, variant components for the looks you repeat, and composed components for the patterns you repeat. This docs site is built that way; the files named below are its reference implementation.
+
+## 1. Load the theme once
+
+Install `@c2n/theme` with the components you use, import it at the application root, and set the tokens that differ from the defaults. Every `c2-*` element then follows your brand without per-component CSS.
+
+```typescript tag=CodeBlock
+import '@c2n/theme/theme.css'
+import '@c2n/button'
+import '@c2n/text-field'
+```
+
+```css tag=CodeBlock
+:root {
+  --c2-theme--color-primary: #7c3aed;
+  --c2-theme--radius-md: 10px;
+  --c2-theme--font-family: 'Inter', system-ui, sans-serif;
+}
+```
+
+If the application already has design tokens, load `@c2n/theme/base.css` alone and bridge your tokens onto the `--c2-theme--*` names, as `apps/ui/src/assets/c2-theme.scss` does for this site. Dark mode then follows your own switch. See [Theming](./theming) for the token list.
+
+## 2. Use the tags directly
+
+With the theme in place, a component that appears once needs nothing else:
+
+```html tag=CodeBlock
+<c2-button>Save</c2-button>
+<c2-text-field placeholder="Email" type="email"></c2-text-field>
+```
+
+Attributes, slots and events are documented on each component's API tab. Icons are components too: `c2-feather-<name>` from `@c2n/feather-icons`.
+
+## 3. Variant components for repeated looks
+
+The moment the same look appears twice, name it. A variant wraps one c2 component with a fixed set of CSS variables and attributes. Three shapes, from cheapest to richest; pick the first one that fits.
+
+**A class.** The look differs, the markup does not. Component variables set on a class win over the theme because the theme only sets `:root` values.
+
+```css tag=CodeBlock
+.danger-button {
+  --c2-button__container--background-color: var(--c2-theme--color-error);
+  --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-error), black 12%);
+}
+```
+
+**A wrapper component in your framework.** Attributes and slots repeat as well: an icon button with a tooltip and a fixed size, a card that is always a link. This site's `SiteIconButton.astro` renders `c2-icon-button` with `aria-label`, `tooltip` and a size class:
+
+```html tag=CodeBlock
+<!-- one call site -->
+<SiteIconButton label="Copy code" size="sm"><c2-feather-copy></c2-feather-copy></SiteIconButton>
+
+<!-- the wrapper: a class block on the c2 element, nothing else -->
+<c2-icon-button class="site-icon-button site-icon-button--sm" aria-label="Copy code" tooltip="Copy code">…</c2-icon-button>
+<style>
+  .site-icon-button {
+    --c2-icon-button--border-radius: var(--c2-theme--radius-sm);
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-surface-container);
+  }
+  .site-icon-button--sm {
+    --c2-icon-button__state-layer--size: 30px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+  }
+</style>
+```
+
+**A Lit subclass.** When the variant must exist as its own tag (used from strings, other Lit templates, or shipped as a package), extend the component and bake the variables in. The inspector's Code tab generates this for you from any example:
+
+```typescript tag=CodeBlock
+import { css } from 'lit'
+import { Button } from '@c2n/button'
+
+export class DangerButton extends Button {
+  static override styles = [
+    Button.styles,
+    css`
+      :host {
+        --c2-button__container--background-color: var(--c2-theme--color-error);
+      }
+    `,
+  ]
+}
+customElements.define('app-danger-button', DangerButton)
+```
+
+Rules that hold for every shape: set child variables on the host element or a class, never through `::part` (the components do not expose parts); register variants under your own prefix (`app-*`, `site-*`), never `c2-*`; one file per variant in one directory (`src/components/ui/` here).
+
+## 4. Composed components for repeated patterns
+
+When several c2 components and some logic repeat, compose them into one component. The primitives keep their responsibilities; you add the glue. This site's ⌘K palette (`SearchPalette.astro`) is `c2-modal` + `c2-text-field` + `c2-list` with `c2-list-item` rows:
+
+- the modal brings the focus trap, Escape, backdrop click, scroll lock and focus restore;
+- the text field brings the input, icons and clearing;
+- the list drives the highlighted row through its `value`;
+- the palette itself only filters rows and maps arrow keys and Enter.
+
+Set the children's variables on the composed component's class (`--c2-text-field--border-top: none` on `.search-palette__field`), forward the attributes you want configurable, and re-emit child events you want callers to see.
+
+## 5. Gaps stay in the application
+
+When no c2 component fits (a keyboard hint, a count pill), write a plain application component styled with the same `--c2-theme--*` tokens so it follows the theme. Do not fork or patch a `@c2n/*` package; if the pattern is general, propose a component instead.
+
+## Reference implementation
+
+- `apps/ui/src/assets/c2-theme.scss` — the token bridge of this site.
+- `apps/ui/src/components/ui/` — `SiteIconButton`, `SiteButton`, `SiteCard`, the icon barrel.
+- `apps/ui/src/components/SearchPalette.astro` — a composed component.
+- `apps/ui/src/layouts/DocComponentLayout.astro` — the mobile drawer on `c2-side-nav`.

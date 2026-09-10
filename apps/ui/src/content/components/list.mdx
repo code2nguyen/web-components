@@ -1,0 +1,120 @@
+---
+title: 'List'
+description: 'Vertical list container with single or multiple selection.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { List } from '@c2n/list'
+import { ListItem } from '@c2n/list-item'
+import { FeatherInboxIcon as FeatherInbox } from '@c2n/feather-icons/icons/inbox.js'
+import { FeatherSendIcon as FeatherSend } from '@c2n/feather-icons/icons/send.js'
+import { FeatherArchiveIcon as FeatherArchive } from '@c2n/feather-icons/icons/archive.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
+
+`c2-list` stacks `c2-list-item` rows and owns their selection: it compares each row's `value` with its own `value` and marks the matching rows selected. A click updates `value` and fires `selection-change` with the values and each row's `data`. `multiple` allows several rows, `required` keeps at least one, `disabled` freezes the whole list. The list is a `listbox` with a roving `tabindex`: Arrow Up/Down, Home and End move between rows, Enter and Space select, and typing a few letters jumps to the matching row. `<hr>` dividers and `<h1>`–`<h6>` headings can sit between rows to group them. Set `--c2-list--max-height` to make a long list scroll. It is also the dropdown inside `c2-select`.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/list @c2n/list-item
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/list
+<style>
+  .menu {
+    width: 220px;
+    --c2-list--border-top: 1px solid #e4e4e7;
+    --c2-list--border-right: 1px solid #e4e4e7;
+    --c2-list--border-bottom: 1px solid #e4e4e7;
+    --c2-list--border-left: 1px solid #e4e4e7;
+    --c2-list--border-top-left-radius: 8px;
+    --c2-list--border-top-right-radius: 8px;
+    --c2-list--border-bottom-left-radius: 8px;
+    --c2-list--border-bottom-right-radius: 8px;
+  }
+  .scrolling {
+    --c2-list--max-height: 150px;
+  }
+</style>
+<div data-label="Single">
+  <c2-list client:only="lit" value="design" class="menu">
+    <c2-list-item value="inbox">Inbox</c2-list-item>
+    <c2-list-item value="design">Design</c2-list-item>
+    <c2-list-item value="archive">Archive</c2-list-item>
+  </c2-list>
+</div>
+<div data-label="Multiple">
+  <c2-list client:only="lit" multiple value="bold;italic" class="menu">
+    <c2-list-item value="bold">Bold</c2-list-item>
+    <c2-list-item value="italic">Italic</c2-list-item>
+    <c2-list-item value="underline">Underline</c2-list-item>
+  </c2-list>
+</div>
+<div data-label="Required">
+  <c2-list client:only="lit" required value="light" class="menu">
+    <c2-list-item value="light">Light</c2-list-item>
+    <c2-list-item value="dark">Dark</c2-list-item>
+    <c2-list-item value="system">System</c2-list-item>
+  </c2-list>
+</div>
+<div data-label="Headings and dividers">
+  <c2-list client:only="lit" value="inbox" class="menu">
+    <h6>Mail</h6>
+    <c2-list-item value="inbox">Inbox</c2-list-item>
+    <c2-list-item value="sent">Sent</c2-list-item>
+    <c2-list-item value="archive">Archive</c2-list-item>
+    <hr />
+    <h6>Account</h6>
+    <c2-list-item value="settings">Settings</c2-list-item>
+    <c2-list-item value="signout">Sign out</c2-list-item>
+  </c2-list>
+</div>
+<div data-label="Descriptions">
+  <c2-list client:only="lit" value="team" class="menu">
+    <c2-list-item value="free">Free<span slot="description">1 project, community support</span></c2-list-item>
+    <c2-list-item value="team">Team<span slot="description">Unlimited projects, SSO</span></c2-list-item>
+    <c2-list-item value="enterprise">Enterprise<span slot="description">Audit log, dedicated support</span></c2-list-item>
+  </c2-list>
+</div>
+<div data-label="Disabled">
+  <c2-list client:only="lit" disabled value="design" class="menu">
+    <c2-list-item value="inbox">Inbox</c2-list-item>
+    <c2-list-item value="design">Design</c2-list-item>
+    <c2-list-item value="archive">Archive</c2-list-item>
+  </c2-list>
+</div>
+<div data-label="Scrolling">
+  <c2-list client:only="lit" value="3" class="menu scrolling">
+    <c2-list-item value="1">January</c2-list-item>
+    <c2-list-item value="2">February</c2-list-item>
+    <c2-list-item value="3">March</c2-list-item>
+    <c2-list-item value="4">April</c2-list-item>
+    <c2-list-item value="5">May</c2-list-item>
+    <c2-list-item value="6">June</c2-list-item>
+    <c2-list-item value="7">July</c2-list-item>
+  </c2-list>
+</div>
+```
+
+```ts tag=CodeBlock
+const list = document.querySelector('c2-list')
+list.addEventListener('selection-change', (event) => {
+  console.log(event.detail.value) // ['bold', 'italic']
+  console.log(event.detail.data) // the `data` property of each selected row, same order
+})
+```
+
+## Keyboard
+
+| Key                   | Action                                                     |
+| --------------------- | ---------------------------------------------------------- |
+| Tab                   | Focuses the selected row (or the first enabled row)        |
+| Arrow Up / Arrow Down | Moves focus to the previous / next enabled row             |
+| Home / End            | Moves focus to the first / last enabled row                |
+| Enter / Space         | Selects the focused row (toggles it in a `multiple` list)  |
+| Letters               | Jumps to the next row whose text starts with what you type |

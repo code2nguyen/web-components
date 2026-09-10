@@ -1,0 +1,121 @@
+---
+import { getCollection } from 'astro:content'
+import { COMPONENT_CATEGORIES } from '../schemas'
+
+interface Props {
+  /** Which section this sidebar navigates. */
+  section?: 'components' | 'icons' | 'guides'
+  /** Currently open entry id. */
+  currentId?: string
+}
+const { section = 'components', currentId } = Astro.props
+const base = import.meta.env.BASE_URL
+
+const components = (await getCollection('components')).sort((a, b) => a.data.title.localeCompare(b.data.title))
+const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.localeCompare(b.data.title))
+const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title))
+
+const groups =
+  section === 'components'
+    ? COMPONENT_CATEGORIES.map((category) => ({
+        title: category,
+        items: components
+          .filter((component) => component.data.category === category)
+          .map((c) => ({ id: c.id, title: c.data.title, href: `${base}/components/${c.id}` })),
+      })).filter((group) => group.items.length > 0)
+    : section === 'icons'
+      ? [{ title: 'Icon sets', items: iconSets.map((set) => ({ id: set.id, title: set.data.title, href: `${base}/icons/${set.id}` })) }]
+      : [{ title: 'Guides', items: guides.map((guide) => ({ id: guide.id, title: guide.data.title, href: `${base}/guides/${guide.id}` })) }]
+
+const overviews = {
+  components: { href: `${base}/components/`, label: 'All components' },
+  icons: { href: `${base}/icons/`, label: 'All icon sets' },
+  guides: { href: `${base}/guides/`, label: 'All guides' },
+}
+const overview = overviews[section]
+---
+
+<nav class="sidebar__nav" aria-label={section === 'components' ? 'Components' : section === 'icons' ? 'Icon sets' : 'Guides'}>
+  <a href={overview.href} class:list={['sidebar__overview', { active: !currentId }]}>{overview.label}</a>
+  {
+    groups.map((group) => (
+      <div class="sidebar__group">
+        <div class="sidebar__group-title">{group.title}</div>
+        <ul>
+          {group.items.map((item) => (
+            <li>
+              <a href={item.href} aria-current={currentId === item.id ? 'page' : undefined}>
+                {item.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</nav>
+
+<style lang="scss">
+  .sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: 13.5px;
+    padding-bottom: 32px;
+  }
+  .sidebar__overview {
+    display: block;
+    padding: 6px 10px;
+    border-radius: var(--site-radius-sm);
+    color: var(--site-color-on-surface-variant);
+    font-weight: 500;
+    &:hover {
+      text-decoration: none;
+      background: var(--site-color-surface-container-2);
+      color: var(--site-color-on-surface);
+    }
+    &.active {
+      color: var(--site-color-primary);
+      background: var(--site-color-primary-soft);
+    }
+  }
+  .sidebar__group-title {
+    padding: 0 10px 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--site-color-on-surface-muted);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  li a {
+    display: block;
+    padding: 5px 10px;
+    border-radius: var(--site-radius-sm);
+    color: var(--site-color-on-surface-variant);
+    &:hover {
+      text-decoration: none;
+      background: var(--site-color-surface-container-2);
+      color: var(--site-color-on-surface);
+    }
+    &[aria-current='page'] {
+      color: var(--site-color-primary);
+      background: var(--site-color-primary-soft);
+      font-weight: 500;
+    }
+  }
+</style>
+
+<script>
+  // Two copies exist on docs pages (drawer + desktop grid); scroll the visible desktop one into view.
+  const current =
+    document.querySelector('.docs__sidebar .sidebar__nav a[aria-current="page"]') ?? document.querySelector('.sidebar__nav a[aria-current="page"]')
+  current?.scrollIntoView({ block: 'center', behavior: 'instant' })
+</script>

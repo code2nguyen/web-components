@@ -3,7 +3,7 @@ import { isServer } from 'lit-html/is-server.js'
 export const Breakpoints = {
   Phone: '(max-width: 599.98px)',
   Tablet: '(min-width: 600px) and (max-width: 959.98px)',
-  Destop: '(min-width: 960px)',
+  Desktop: '(min-width: 960px)',
 }
 
 export function redispatchEvent(host: HTMLElement, event: Event) {

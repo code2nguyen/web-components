@@ -1,0 +1,227 @@
+---
+// ⌘K search, composed from c2 components: c2-modal (focus trap, Escape, backdrop, scroll lock, focus restore),
+// c2-text-field (the query) and c2-list / c2-list-item (results; the list drives the highlighted row through `value`).
+// Rendered as plain tags (registered by data/chrome-modules.ts): the palette is hidden until opened and has many rows,
+// so SSR'ing every row as an island would only add weight. What stays ours: filtering, arrow-key highlight, Enter.
+import { getCollection } from 'astro:content'
+import { escapeHtml, rawElement } from '../utils/raw-element'
+
+const base = import.meta.env.BASE_URL
+const components = (await getCollection('components')).sort((a, b) => a.data.title.localeCompare(b.data.title))
+const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.localeCompare(b.data.title))
+const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order)
+const entries = [
+  ...components.map((c) => ({
+    id: `component-${c.id}`,
+    href: `${base}/components/${c.id}`,
+    title: c.data.title,
+    meta: c.data.category,
+    description: c.data.description,
+    haystack: `${c.data.title} ${c.data.description} ${c.data.category} c2-${c.id}`.toLowerCase(),
+  })),
+  ...iconSets.map((s) => ({
+    id: `icons-${s.id}`,
+    href: `${base}/icons/${s.id}`,
+    title: s.data.title,
+    meta: 'Icons',
+    description: s.data.description,
+    haystack: `${s.data.title} ${s.data.description} icons c2-${s.id}`.toLowerCase(),
+  })),
+  ...guides.map((g) => ({
+    id: `guide-${g.id}`,
+    href: `${base}/guides/${g.id}`,
+    title: g.data.title,
+    meta: 'Guide',
+    description: g.data.description,
+    haystack: `${g.data.title} ${g.data.description} guide`.toLowerCase(),
+  })),
+]
+
+// Raw HTML (see utils/raw-element.ts): written as tags, Astro would server-render these registered elements and drop
+// `href` / `value` / `placeholder`, which are Lit properties.
+const rows = entries
+  .map((entry) =>
+    rawElement(
+      'c2-list-item',
+      { value: entry.href, href: entry.href, id: entry.id, 'data-search': entry.haystack },
+      `${escapeHtml(entry.title)}<span slot="description">${escapeHtml(entry.description)}</span><span slot="suffix-icon" class="search-palette__meta">${escapeHtml(entry.meta)}</span>`,
+    ),
+  )
+  .join('')
+const field = rawElement(
+  'c2-text-field',
+  { class: 'search-palette__field', type: 'search', placeholder: 'Search components…', autocomplete: 'off' },
+  '<c2-feather-search slot="prefix-icon"></c2-feather-search><kbd slot="suffix-icon" class="kbd">esc</kbd>',
+)
+const palette = rawElement(
+  'c2-modal',
+  { class: 'search-palette', label: 'Search components', 'hide-close': true },
+  `<div class="search-palette__inner">${field}${rawElement('c2-list', { class: 'search-palette__results', 'aria-label': 'Results' }, rows)}<p class="search-palette__empty" hidden>No components match.</p></div>`,
+)
+---
+
+<Fragment set:html={palette} />
+
+<style lang="scss" is:global>
+  .search-palette {
+    --c2-modal--width: min(600px, calc(100vw - 32px));
+    --c2-modal--max-height: min(70vh, 560px);
+    --c2-modal--margin-top: 10vh;
+    --c2-modal--border: 1px solid var(--site-color-outline-variant);
+    --c2-modal--border-top-left-radius: var(--site-radius-lg);
+    --c2-modal--border-top-right-radius: var(--site-radius-lg);
+    --c2-modal--border-bottom-left-radius: var(--site-radius-lg);
+    --c2-modal--border-bottom-right-radius: var(--site-radius-lg);
+    --c2-modal--box-shadow: var(--site-elevation-3);
+    --c2-modal__body--padding-top: 0px;
+    --c2-modal__body--padding-right: 0px;
+    --c2-modal__body--padding-bottom: 0px;
+    --c2-modal__body--padding-left: 0px;
+    --c2-modal__backdrop--backdrop-filter: blur(2px);
+
+    &__inner {
+      display: flex;
+      flex-direction: column;
+      max-height: min(70vh, 560px);
+    }
+    &__field {
+      display: block;
+      flex: none;
+      border-bottom: 1px solid var(--site-color-outline-variant);
+      --c2-text-field--min-height: 54px;
+      --c2-text-field--font-size: 16px;
+      --c2-text-field--padding-left: 16px;
+      --c2-text-field--padding-right: 12px;
+      --c2-text-field--background: transparent;
+      --c2-text-field--border-top: none;
+      --c2-text-field--border-right: none;
+      --c2-text-field--border-bottom: none;
+      --c2-text-field--border-left: none;
+      --c2-text-field__hover--border-top: none;
+      --c2-text-field__hover--border-right: none;
+      --c2-text-field__hover--border-bottom: none;
+      --c2-text-field__hover--border-left: none;
+      --c2-text-field__focus--border-top: none;
+      --c2-text-field__focus--border-right: none;
+      --c2-text-field__focus--border-bottom: none;
+      --c2-text-field__focus--border-left: none;
+      --c2-text-field__focus--outline: none;
+      --c2-text-field__icon--size: 18px;
+      --c2-text-field__icon--color: var(--site-color-on-surface-muted);
+    }
+    &__results {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      --c2-list--background: transparent;
+      --c2-list--padding-top: 8px;
+      --c2-list--padding-right: 8px;
+      --c2-list--padding-bottom: 8px;
+      --c2-list--padding-left: 8px;
+      --c2-list--border-top: none;
+      --c2-list--border-right: none;
+      --c2-list--border-bottom: none;
+      --c2-list--border-left: none;
+      --c2-list-item--padding-top: 10px;
+      --c2-list-item--padding-bottom: 10px;
+      --c2-list-item--padding-left: 12px;
+      --c2-list-item--padding-right: 12px;
+      --c2-list-item--font-size: 14px;
+      --c2-list-item__selected--background: var(--site-color-primary-soft);
+      --c2-list-item__selected--color: var(--site-color-primary);
+      --c2-list-item__selected__hover--background: var(--site-color-primary-soft);
+      --c2-list-item__hover--background: var(--site-color-surface-container-2);
+    }
+    &__meta {
+      font-size: 12px;
+      color: var(--site-color-on-surface-muted);
+      white-space: nowrap;
+    }
+    &__empty {
+      margin: 0;
+      padding: 24px 12px;
+      text-align: center;
+      color: var(--site-color-on-surface-muted);
+      &[hidden] {
+        display: none;
+      }
+    }
+  }
+</style>
+
+<script>
+  import '../data/chrome-modules'
+  import type { Modal } from '@c2n/modal'
+  import type { TextField } from '@c2n/text-field'
+  import type { List } from '@c2n/list'
+  import type { ListItem } from '@c2n/list-item'
+
+  const modal = document.querySelector<Modal>('.search-palette')
+  const field = modal?.querySelector<TextField>('.search-palette__field')
+  const list = modal?.querySelector<List>('.search-palette__results')
+  const items = Array.from(modal?.querySelectorAll<ListItem>('c2-list-item') ?? [])
+  const empty = modal?.querySelector<HTMLElement>('.search-palette__empty')
+  let index = 0
+
+  const visibleItems = () => items.filter((item) => !item.hidden)
+
+  function highlight(next: number) {
+    const visible = visibleItems()
+    index = Math.max(0, Math.min(next, visible.length - 1))
+    const row = visible[index]
+    if (list) list.value = row ? [row.value] : []
+    row?.scrollIntoView({ block: 'nearest' })
+  }
+
+  function filter() {
+    const terms = (field?.value ?? '').trim().toLowerCase().split(/\s+/).filter(Boolean)
+    items.forEach((item) => {
+      item.hidden = !terms.every((term) => (item.dataset.search ?? '').includes(term))
+    })
+    if (empty) empty.hidden = visibleItems().length > 0
+    highlight(0)
+  }
+
+  function open() {
+    if (!modal || modal.open) return
+    if (field) field.value = ''
+    modal.show()
+  }
+
+  // The modal fires `open` once the dialog is shown; focus the query then (TextField.focus() reaches the inner input).
+  modal?.addEventListener('open', () => {
+    filter()
+    field?.focus()
+  })
+
+  document.querySelectorAll('[data-open-search]').forEach((button) => button.addEventListener('click', open))
+
+  document.addEventListener('keydown', (event) => {
+    const target = event.target as HTMLElement | null
+    const typing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'C2-TEXT-FIELD' || target.isContentEditable)
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault()
+      open()
+    } else if (event.key === '/' && !typing && !modal?.open) {
+      event.preventDefault()
+      open()
+    }
+  })
+
+  field?.addEventListener('input', filter)
+  field?.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      highlight(index + 1)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      highlight(index - 1)
+    } else if (event.key === 'Enter') {
+      const row = visibleItems()[index]
+      if (row?.href) {
+        event.preventDefault()
+        window.location.assign(row.href)
+      }
+    }
+  })
+</script>

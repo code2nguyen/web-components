@@ -1,0 +1,204 @@
+---
+title: 'Select'
+description: 'Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Select } from '@c2n/select'
+import { ListItem } from '@c2n/list-item'
+
+`c2-select` is a trigger button plus a popover. The options are plain `c2-list-item` children, so everything you know about list items applies here: `value` identifies an option, `label` gives the trigger a short text when the row content is rich, `disabled` greys a row out, and the `prefix-icon` / `suffix-icon` slots decorate it. Inside the popover the rows live in a `c2-list` that owns the selection, keeps the dropdown open in `multiple` mode and lists every selected label in the trigger. The dropdown is a native popover on the top layer, positioned by `c2-overlay`, so it flips above the trigger near the bottom of the viewport and is never clipped by an `overflow: hidden` parent.
+
+The trigger has no intrinsic width: give the host a `width` (or a grid / flex cell) and the button fills it. Tab to the trigger, then use Space, Enter or the arrow keys to open it.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/select
+```
+
+`@c2n/list-item` is a dependency of the package and is registered for you.
+
+## Usage
+
+Put one `c2-list-item` per option in the default slot and read the selection from `value`. In markup the value is a `;`-separated string; on the element it is an array.
+
+```html tag=UsageBlock,package=@c2n/select
+<style>
+  .country {
+    width: 200px;
+  }
+  .team {
+    width: 240px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+  }
+  .dot--green {
+    background: #16a34a;
+  }
+  .dot--amber {
+    background: #f59e0b;
+  }
+  .dot--zinc {
+    background: #a1a1aa;
+  }
+  .scrolling {
+    width: 200px;
+    --c2-select__list--max-height: 160px;
+  }
+</style>
+<div data-label="Default">
+  <c2-select client:only="lit" placeholder="Select a country" class="country">
+    <c2-list-item value="US">United States</c2-list-item>
+    <c2-list-item value="CA">Canada</c2-list-item>
+    <c2-list-item value="FR">France</c2-list-item>
+    <c2-list-item value="DE">Germany</c2-list-item>
+    <c2-list-item value="VN">Vietnam</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Preselected">
+  <c2-select client:only="lit" value="FR" class="country">
+    <c2-list-item value="US">United States</c2-list-item>
+    <c2-list-item value="CA">Canada</c2-list-item>
+    <c2-list-item value="FR">France</c2-list-item>
+    <c2-list-item value="DE">Germany</c2-list-item>
+    <c2-list-item value="VN">Vietnam</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Multiple">
+  <c2-select client:only="lit" multiple value="design;engineering" placeholder="Teams" class="team">
+    <c2-list-item value="design">Design</c2-list-item>
+    <c2-list-item value="engineering">Engineering</c2-list-item>
+    <c2-list-item value="marketing">Marketing</c2-list-item>
+    <c2-list-item value="sales">Sales</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Required">
+  <c2-select client:only="lit" required value="CA" class="country">
+    <c2-list-item value="US">United States</c2-list-item>
+    <c2-list-item value="CA">Canada</c2-list-item>
+    <c2-list-item value="FR">France</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="States">
+  <c2-select client:only="lit" disabled placeholder="Disabled" class="country">
+    <c2-list-item value="US">United States</c2-list-item>
+  </c2-select>
+  <c2-select client:only="lit" disabled value="FR" class="country">
+    <c2-list-item value="FR">France</c2-list-item>
+  </c2-select>
+  <c2-select client:only="lit" readonly value="CA" class="country">
+    <c2-list-item value="CA">Canada</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Disabled options">
+  <c2-select client:only="lit" placeholder="Pick a plan" class="country">
+    <c2-list-item value="free">Free</c2-list-item>
+    <c2-list-item value="pro">Pro</c2-list-item>
+    <c2-list-item value="team" disabled>Team (coming soon)</c2-list-item>
+    <c2-list-item value="enterprise" disabled>Enterprise (contact us)</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Prefix icon">
+  <c2-select client:only="lit" placeholder="Language" class="country">
+    <svg slot="button-prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="2" y1="12" x2="22" y2="12"></line>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+    </svg>
+    <c2-list-item value="en">English</c2-list-item>
+    <c2-list-item value="fr">Français</c2-list-item>
+    <c2-list-item value="vi">Tiếng Việt</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Suffix icon">
+  <c2-select client:only="lit" value="light" class="country">
+    <svg slot="button-suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m7 15 5 5 5-5"></path>
+      <path d="m7 9 5-5 5 5"></path>
+    </svg>
+    <c2-list-item value="light">Light</c2-list-item>
+    <c2-list-item value="dark">Dark</c2-list-item>
+    <c2-list-item value="system">System</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Rich options">
+  <c2-select client:only="lit" value="active" class="country">
+    <c2-list-item value="active"><span slot="prefix-icon" class="dot dot--green"></span>Active</c2-list-item>
+    <c2-list-item value="pending"><span slot="prefix-icon" class="dot dot--amber"></span>Pending</c2-list-item>
+    <c2-list-item value="archived"><span slot="prefix-icon" class="dot dot--zinc"></span>Archived</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Short labels">
+  <c2-select client:only="lit" value="US" class="country">
+    <c2-list-item value="US" label="USA">United States of America</c2-list-item>
+    <c2-list-item value="GB" label="UK">United Kingdom of Great Britain</c2-list-item>
+    <c2-list-item value="AE" label="UAE">United Arab Emirates</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Scrolling">
+  <c2-select client:only="lit" placeholder="Time zone" class="scrolling">
+    <c2-list-item value="-8">Pacific (UTC−8)</c2-list-item>
+    <c2-list-item value="-5">Eastern (UTC−5)</c2-list-item>
+    <c2-list-item value="0">London (UTC+0)</c2-list-item>
+    <c2-list-item value="1">Paris (UTC+1)</c2-list-item>
+    <c2-list-item value="3">Moscow (UTC+3)</c2-list-item>
+    <c2-list-item value="5.5">Mumbai (UTC+5:30)</c2-list-item>
+    <c2-list-item value="7">Hanoi (UTC+7)</c2-list-item>
+    <c2-list-item value="9">Tokyo (UTC+9)</c2-list-item>
+    <c2-list-item value="10">Sydney (UTC+10)</c2-list-item>
+  </c2-select>
+</div>
+<div data-label="Fit size">
+  <c2-select client:only="lit" fit-size placeholder="Wraps long options" class="country">
+    <c2-list-item value="1">A very long option that wraps inside the trigger width</c2-list-item>
+    <c2-list-item value="2">Short</c2-list-item>
+  </c2-select>
+</div>
+```
+
+## Handling selection
+
+`selection-change` fires after every pick. `detail.value` is the array of selected values; `detail.data` carries the `data` property of each selected row, handy for keeping the full record next to its id. Set `value` (an array) to change the selection from code, and `open` to show or hide the dropdown.
+
+```ts tag=CodeBlock
+const select = document.querySelector('c2-select')
+
+select.addEventListener('selection-change', (event) => {
+  console.log(event.detail.value) // ['FR']
+  console.log(event.detail.data) // [{ code: 'FR', name: 'France' }]
+})
+
+select.querySelector('c2-list-item[value="FR"]').data = { code: 'FR', name: 'France' }
+select.value = ['FR']
+select.open = true
+```
+
+## Theming
+
+Three variable families cover the whole control. `--c2-select__button--*` is the trigger, with `__hover`, `__open`, `__focus` and `__disabled` states; `--c2-select__list--*` is the dropdown container (background, border, radius, shadow, padding, max height); and because the rows are your own children, `--c2-list-item--*` set on the select cascades into every option.
+
+```css tag=CodeBlock
+c2-select.brand {
+  --c2-select__button--border-top-left-radius: 999px;
+  --c2-select__button--border-top-right-radius: 999px;
+  --c2-select__button--border-bottom-left-radius: 999px;
+  --c2-select__button--border-bottom-right-radius: 999px;
+
+  --c2-select__list--border-top-left-radius: 12px;
+  --c2-select__list--border-top-right-radius: 12px;
+  --c2-select__list--border-bottom-left-radius: 12px;
+  --c2-select__list--border-bottom-right-radius: 12px;
+
+  --c2-list-item__selected--background: #fdf2f8;
+  --c2-list-item__selected--color: #be185d;
+}
+```
+
+Every variable, with its default, is listed on the API tab, and the Gallery tab has ready-made looks to start from.

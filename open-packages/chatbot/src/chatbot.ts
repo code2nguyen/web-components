@@ -20,7 +20,7 @@ export class Chatbot extends LitElement {
     return html`
       <div class="c2-chatbot">
         <section class="c2-chatbot__header-container">
-          <c2-avatar name="Elisa Jasmin" initialCount="2"></c2-avatar>
+          <c2-avatar name="Elisa Jasmin" initial-count="2"></c2-avatar>
           <div>Elisa Jasmin</div>
         </section>
         <section class="c2-chatbot__message-container"></section>

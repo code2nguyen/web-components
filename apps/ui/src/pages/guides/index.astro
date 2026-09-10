@@ -1,0 +1,11 @@
+---
+import { getCollection } from 'astro:content'
+
+// The guides index opens the first guide.
+const base = import.meta.env.BASE_URL
+const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order)
+const redirect = `${base}/guides/${guides[0]?.id ?? ''}`
+---
+
+<meta http-equiv="refresh" content={`0; url=${redirect}`} />
+<link rel="canonical" href={redirect} />

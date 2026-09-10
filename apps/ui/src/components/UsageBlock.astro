@@ -1,0 +1,193 @@
+---
+import CodeBlock from './CodeBlock.astro'
+import SiteIconButton from './ui/SiteIconButton.astro'
+import type { CodeLanguage } from 'astro'
+
+/**
+ * Docs usage frame produced by a ```html tag=UsageBlock,package=… fence (see plugin/mdx-codeblock-remark.mjs).
+ * Same look as an example frame (dotted canvas, toolbar at the bottom, collapsible code), but the fence body groups all
+ * usage examples of a component: one element per row carrying `data-label="…"`, components inside are live.
+ * The code panel shows the import line and the full markup. There is deliberately no "customize" button here: the
+ * studio lives on the Gallery tab.
+ */
+interface Props {
+  code: string
+  lang: CodeLanguage
+  uid: string
+  style: string
+  /** npm package to show in the import line, e.g. `@c2n/button`. */
+  package?: string
+  /** Fence meta passthrough, unused. */
+  title?: string
+  compact?: string
+  component?: string
+  id?: string
+}
+
+const { code, lang, uid, style, package: pkg } = Astro.props
+---
+
+<section class="usage" data-uid={uid}>
+  <div class="usage__canvas">
+    {style ? <Fragment set:html={style} /> : ''}
+    <slot />
+  </div>
+  <div class="usage__toolbar">
+    <SiteIconButton hydrate="defined" size="sm" label="Invert preview background" class="usage__invert" aria-pressed="false">
+      <c2-feather-sun></c2-feather-sun>
+    </SiteIconButton>
+    <SiteIconButton hydrate="defined" size="sm" label="Show code" class="usage__code-toggle" aria-expanded="false">
+      <c2-feather-code></c2-feather-code>
+    </SiteIconButton>
+  </div>
+  <div class="usage__code" hidden>
+    {
+      pkg && (
+        <div class="usage__code-section">
+          <span class="usage__code-label">Import</span>
+          <CodeBlock code={`import '${pkg}'`} lang="typescript" bare />
+        </div>
+      )
+    }
+    <div class="usage__code-section">
+      <span class="usage__code-label">Markup</span>
+      <CodeBlock code={code} lang={lang} uid={uid} bare />
+    </div>
+  </div>
+</section>
+
+<style lang="scss" is:global>
+  .usage {
+    margin: 16px 0;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: var(--site-radius-md);
+    background: var(--site-color-surface);
+    overflow: hidden;
+
+    &__canvas {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 120px;
+      padding: 20px 24px;
+      background-color: var(--site-color-surface);
+      background-image: radial-gradient(var(--site-canvas-dot) 1px, transparent 1px);
+      background-size: 16px 16px;
+      color: var(--site-color-on-surface);
+      transition: background-color 200ms var(--site-ease);
+
+      > astro-island {
+        display: contents;
+      }
+      // One row per `data-label` element: a muted label on the left, live components after it.
+      > [data-label] {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        min-height: 48px;
+        padding: 8px 0 8px 144px;
+        &::before {
+          content: attr(data-label);
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 128px;
+          font-size: 12px;
+          font-weight: 500;
+          letter-spacing: 0.01em;
+          color: var(--site-color-on-surface-muted);
+        }
+        > astro-island {
+          display: contents;
+        }
+      }
+    }
+    &.inverted &__canvas {
+      color-scheme: dark;
+      color: #f4f4f5;
+      background-color: #18181b;
+      --site-canvas-dot: rgba(244, 244, 245, 0.14);
+      > [data-label]::before {
+        color: #a1a1aa;
+      }
+    }
+    html[data-theme='dark'] &.inverted &__canvas {
+      color-scheme: light;
+      color: #18181b;
+      background-color: #ffffff;
+      --site-canvas-dot: rgba(24, 24, 27, 0.14);
+      > [data-label]::before {
+        color: #52525b;
+      }
+    }
+
+    &__toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 6px;
+      border-top: 1px solid var(--site-color-outline-variant);
+      background: var(--site-color-surface-container-1);
+    }
+
+    &__code {
+      border-top: 1px solid var(--site-color-outline-variant);
+      &[hidden] {
+        display: none;
+      }
+    }
+    &__code-section {
+      position: relative;
+      & + & {
+        border-top: 1px solid var(--site-color-outline-variant);
+      }
+    }
+    &__code-label {
+      position: absolute;
+      top: 10px;
+      left: 18px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--site-color-on-surface-muted);
+      pointer-events: none;
+    }
+    &__code-section pre.astro-code {
+      padding-top: 34px;
+    }
+  }
+
+  @media (max-width: 599.98px) {
+    .usage__canvas > [data-label] {
+      padding-left: 0;
+      padding-top: 28px;
+      &::before {
+        top: 6px;
+        transform: none;
+        width: auto;
+      }
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.usage').forEach((usage) => {
+    const codeToggle = usage.querySelector<HTMLElement>('.usage__code-toggle')
+    const codePanel = usage.querySelector<HTMLElement>('.usage__code')
+    codeToggle?.addEventListener('click', () => {
+      const expanded = codeToggle.getAttribute('aria-expanded') === 'true'
+      codeToggle.setAttribute('aria-expanded', String(!expanded))
+      codeToggle.setAttribute('aria-label', expanded ? 'Show code' : 'Hide code')
+      if (codePanel) codePanel.hidden = expanded
+    })
+    usage.querySelector<HTMLElement>('.usage__invert')?.addEventListener('click', (event) => {
+      const inverted = usage.classList.toggle('inverted')
+      ;(event.currentTarget as HTMLElement).setAttribute('aria-pressed', String(inverted))
+    })
+  })
+</script>

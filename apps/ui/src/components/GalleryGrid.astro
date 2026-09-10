@@ -1,0 +1,33 @@
+---
+/**
+ * Grid wrapper for gallery pages. Put ```html tag=MdxCodeBlock,label=… fences inside it (blank line before and after
+ * each fence: MDX requires it); the remark plugin still turns every fence into a live example frame.
+ */
+---
+
+<div class="gallery-grid">
+  <slot />
+</div>
+
+<style lang="scss" is:global>
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+    margin: 16px 0 24px;
+    align-items: start;
+
+    > .example {
+      margin: 0;
+    }
+    // Cards are narrower than a docs example: tighter canvas, code drawer scrolls instead of stretching the row.
+    > .example:not(.is-configuring) .example__canvas {
+      min-height: 140px;
+      padding: 28px 16px;
+    }
+    > .example:not(.is-configuring) .example__code {
+      max-height: 320px;
+      overflow: auto;
+    }
+  }
+</style>

@@ -1,0 +1,94 @@
+---
+title: 'Label'
+description: 'Caption that names and activates the control referenced by its for attribute, with a required marker.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Label } from '@c2n/label'
+import { TextField } from '@c2n/text-field'
+import { Checkbox } from '@c2n/checkbox'
+
+`c2-label` is the caption for a form control. Point `for` at the control's `id`: clicking the label toggles native checkboxes and radios (including the one inside `c2-checkbox`) and focuses anything else, and the label sets `aria-labelledby` on the control so screen readers announce it. `required` appends a marker (an asterisk by default, replace it through the `required-indicator` slot). Typography inherits from the surrounding text until you set the `--c2-label__container--*` variables for font, size, weight, spacing or transform.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/label
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/label
+<style>
+  .field {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stack {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .eyebrow {
+    --c2-label__container--font-size: 11px;
+    --c2-label__container--font-weight: 600;
+    --c2-label__container--letter-spacing: 0.08em;
+    --c2-label__container--text-transform: uppercase;
+    --c2-label__container--color: #71717a;
+  }
+  .large {
+    --c2-label__container--font-size: 18px;
+    --c2-label__container--font-weight: 600;
+    --c2-label__container__hover--color: #2563eb;
+  }
+  .serif {
+    --c2-label__container--font-family: Georgia, 'Times New Roman', serif;
+    --c2-label__container--font-size: 16px;
+    --c2-label__container--font-weight: 400;
+  }
+  .text-indicator {
+    --c2-label__required-indicator--color: #71717a;
+    --c2-label__required-indicator--font-size: 12px;
+    --c2-label__required-indicator--font-weight: 400;
+  }
+</style>
+<div data-label="Default">
+  <div class="field">
+    <c2-label for="usage-name">Full name</c2-label>
+    <c2-text-field id="usage-name" placeholder="Ada Lovelace" style="width: 200px"></c2-text-field>
+  </div>
+</div>
+<div data-label="Required">
+  <div class="field">
+    <c2-label for="usage-email" required>Email</c2-label>
+    <c2-text-field id="usage-email" placeholder="you@example.com" required style="width: 200px"></c2-text-field>
+  </div>
+</div>
+<div data-label="With checkbox">
+  <div class="field">
+    <c2-checkbox id="usage-agree"></c2-checkbox>
+    <c2-label for="usage-agree">I agree to the terms</c2-label>
+  </div>
+</div>
+<div data-label="Disabled">
+  <div class="field">
+    <c2-label for="usage-off" disabled>Company</c2-label>
+    <c2-text-field id="usage-off" disabled placeholder="Not editable" style="width: 200px"></c2-text-field>
+  </div>
+</div>
+<div data-label="Typography">
+  <c2-label class="eyebrow" for="usage-eyebrow">Eyebrow</c2-label>
+  <c2-label class="large" for="usage-large">Large</c2-label>
+  <c2-label class="serif" for="usage-serif">Serif</c2-label>
+</div>
+<div data-label="Custom indicator">
+  <div class="field">
+    <c2-label class="text-indicator" for="usage-phone" required>Phone <span slot="required-indicator">(required)</span></c2-label>
+    <c2-text-field id="usage-phone" placeholder="+33 6 00 00 00 00" style="width: 200px"></c2-text-field>
+  </div>
+</div>
+```

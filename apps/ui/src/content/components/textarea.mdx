@@ -1,0 +1,66 @@
+---
+title: 'Textarea'
+description: 'Multiline text input with resizing, helper and error text, and a character counter.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import { Textarea } from '@c2n/textarea'
+
+`c2-textarea` wraps a native textarea. It supports keyboard editing, text selection, length constraints, and native resizing. Set `rows` for the initial height and `resize` to `vertical` (the default), `horizontal`, `both`, or `none`. Set a CSS width on the host to fit your layout.
+
+Give the control an accessible name using `label` or `aria-label`. Use `help` for guidance, `error` with `error-text` for feedback, and `maxlength` to enable a character counter. The `supporting-text` slot accepts rich helper content; an active error message takes precedence.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/textarea
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/textarea
+<style>
+  .field { width: 260px; }
+</style>
+<div data-label="Default">
+  <c2-textarea class="field" label="Message" placeholder="Write your message…"></c2-textarea>
+</div>
+<div data-label="Character count">
+  <c2-textarea class="field" label="Bio" maxlength="160" value="Building things for the web." help="Tell us a little about yourself."></c2-textarea>
+</div>
+<div data-label="Error">
+  <c2-textarea class="field" label="Feedback" required error error-text="Please add your feedback." placeholder="What could we improve?"></c2-textarea>
+</div>
+<div data-label="States">
+  <c2-textarea class="field" label="Read-only notes" readonly value="These notes are read only."></c2-textarea>
+  <c2-textarea class="field" label="Disabled notes" disabled value="This field is unavailable."></c2-textarea>
+</div>
+<div data-label="Fixed size">
+  <c2-textarea class="field" label="Short note" rows="2" resize="none" placeholder="Leave a short note…"></c2-textarea>
+</div>
+```
+
+## Reading and updating the value
+
+Listen for `input` to read each edit or `change` when an edit is committed. Both events expose the updated `value` property on the host. Set the property for programmatic updates. After user input, changes to the `value` attribute only affect the reset value; `reset()` restores that attribute and clears the error state.
+
+```ts tag=CodeBlock
+import '@c2n/textarea'
+
+const field = document.querySelector('c2-textarea')!
+field.addEventListener('input', () => console.log(field.value))
+field.value = 'Updated notes'
+await field.updateComplete
+field.focus()
+field.select()
+```
+
+`required`, `minlength`, and `maxlength` are forwarded to the native control. Call `checkValidity()` or `reportValidity()` after `updateComplete` to validate, and `setCustomValidity(message)` to supply a custom validation message (clear it with an empty string). The `error` property controls visual feedback separately from native validity.
+
+The component is not form-associated: `name` is forwarded inside the shadow root, but the host does not automatically submit a value or reset with an enclosing form. Read `value` in your submit handler and call `reset()` when resetting the form.
+
+## Theming
+
+Use `--c2-textarea__container--*` for the field, `__container__focus--*` and `__container__error--*` for states, and `__supporting-text--*` for the helper line. All variables appear on the API tab. The Gallery tab offers editable examples.

@@ -53,6 +53,7 @@
     "@c2n/core": "0.0.4",
     "@c2n/overlay": "0.0.4",
     "@c2n/list": "0.0.4",
+    "@c2n/list-item": "0.0.4",
     "lit": "3.3.3"
   },
   "devDependencies": {

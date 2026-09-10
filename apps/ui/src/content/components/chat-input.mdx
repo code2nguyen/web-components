@@ -1,0 +1,24 @@
+---
+title: 'Chat Input'
+description: 'Auto-growing message box with a send button for chat interfaces.'
+category: 'Chat'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ChatInput } from '@c2n/chat-input'
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chat-input
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chat-input
+<div data-label="Default">
+  <c2-chat-input client:only="lit"></c2-chat-input>
+</div>
+```

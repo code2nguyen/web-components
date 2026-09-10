@@ -1,0 +1,48 @@
+---
+title: 'Textarea gallery'
+---
+
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import { Textarea } from '@c2n/textarea'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Feedback
+<style>
+  .feedback { width: 280px; }
+</style>
+<c2-textarea class="feedback" label="Feedback" placeholder="What is on your mind?" maxlength="300" help="Your feedback helps us improve."></c2-textarea>
+```
+
+```html tag=MdxCodeBlock,label=Soft
+<style>
+  .soft {
+    width: 280px;
+    --c2-textarea__container--background: #f4f4f5;
+    --c2-textarea__container--border: 1px solid transparent;
+    --c2-textarea__container--border-radius: 12px;
+    --c2-textarea__container--padding: 14px 16px;
+  }
+</style>
+<c2-textarea class="soft" label="Notes" placeholder="Add your notes…" rows="4"></c2-textarea>
+```
+
+```html tag=MdxCodeBlock,label=Notebook
+<style>
+  .notebook {
+    width: 280px;
+    --c2-textarea__container--background: #fffbeb;
+    --c2-textarea__container--color: #78350f;
+    --c2-textarea__container--border: 1px solid #fcd34d;
+    --c2-textarea__container--font-family: monospace;
+    --c2-textarea__container--line-height: 24px;
+    --c2-textarea__container__focus--border: 1px solid #d97706;
+    --c2-textarea__container__focus--outline: 3px solid rgba(217, 119, 6, 0.2);
+    --c2-textarea__placeholder--color: #92400e;
+  }
+</style>
+<c2-textarea class="notebook" label="Ideas" placeholder="Capture an idea…" rows="4"></c2-textarea>
+```
+
+</GalleryGrid>

@@ -1,0 +1,12 @@
+{
+  "extends": "@c2n/config/tsconfig.node.json",
+  "include": ["scripts/**/*.ts", "src/**/*.ts"],
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  }
+}

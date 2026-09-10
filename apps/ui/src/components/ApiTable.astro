@@ -1,0 +1,317 @@
+---
+import { groupCssProperties, deepFlatGroupCssProperties } from '../utils/manifest-utils'
+import { componentManifests } from '../store/component-manifests'
+import SiteIconButton from './ui/SiteIconButton.astro'
+
+interface Props {
+  componentTag: string
+  /** Prefix of the section heading ids (`<prefix>-attributes`, …); pass a distinct one when several tables share a page. */
+  idPrefix?: string
+}
+
+const { componentTag, idPrefix = 'api' } = Astro.props
+const componentManifest = componentManifests[componentTag]
+const groupedCssProperties = groupCssProperties(componentManifest.cssProperties)
+const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssProperties)
+const hasAttributes = componentManifest.attributes && componentManifest.attributes.length > 0
+const hasEvents = componentManifest.events && componentManifest.events.length > 0
+const hasCss = flattenGroupedCssProperties.length > 0
+---
+
+<div class="api">
+  {
+    hasAttributes && (
+      <section class="api__section">
+        <h3 id={`${idPrefix}-attributes`}>Attributes</h3>
+        <div class="api__table-wrapper">
+          <table class="api__table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th class="api__col-description">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {componentManifest.attributes.map((attr) => (
+                <tr>
+                  <td class="api__name">
+                    <span class="api__name-cell">
+                      <code>{attr.name}</code>
+                      <SiteIconButton hydrate="defined" size="xs" label="Copy" tooltip={false} class="api__copy" data-copy={attr.name}>
+                        <c2-feather-copy />
+                      </SiteIconButton>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="api__type">{attr.type}</span>
+                  </td>
+                  <td>{attr.default ? <code>{attr.default}</code> : <span class="api__none">—</span>}</td>
+                  <td class="api__col-description">
+                    <Fragment set:html={attr.description} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+  {
+    hasEvents && (
+      <section class="api__section">
+        <h3 id={`${idPrefix}-events`}>Events</h3>
+        <div class="api__table-wrapper">
+          <table class="api__table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th class="api__col-description">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {componentManifest.events.map((event) => (
+                <tr>
+                  <td class="api__name">
+                    <span class="api__name-cell">
+                      <code>{event.name}</code>
+                      <SiteIconButton hydrate="defined" size="xs" label="Copy" tooltip={false} class="api__copy" data-copy={event.name}>
+                        <c2-feather-copy />
+                      </SiteIconButton>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="api__type">{event.type}</span>
+                  </td>
+                  <td class="api__col-description">
+                    <Fragment set:html={event.description} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+  {
+    hasCss && (
+      <section class="api__section">
+        <h3 id={`${idPrefix}-css`}>CSS custom properties</h3>
+        <p class="api__hint">Grouped by the element and state they target. Click a group to collapse it; click a name to copy it.</p>
+        <div class="api__table-wrapper">
+          <table class="api__table api__table--css">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Default</th>
+                <th class="api__col-description">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {flattenGroupedCssProperties.map((group) =>
+                group.cssProperty ? (
+                  <tr data-level={group.level + 1}>
+                    <td class="api__name">
+                      <span class="api__name-cell">
+                        <code>{group.cssProperty.cssVariable}</code>
+                        <SiteIconButton hydrate="defined" size="xs" label="Copy" tooltip={false} class="api__copy" data-copy={group.cssProperty.cssVariable}>
+                          <c2-feather-copy />
+                        </SiteIconButton>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="api__type">{group.cssProperty.type}</span>
+                    </td>
+                    <td>{group.cssProperty.default ? <code>{group.cssProperty.default}</code> : <span class="api__none">—</span>}</td>
+                    <td class="api__col-description">
+                      <Fragment set:html={group.cssProperty.description} />
+                    </td>
+                  </tr>
+                ) : (
+                  <tr class="api__group" data-level={group.level} style={`--level:${group.level}`}>
+                    <td colspan="4">
+                      <button class="api__group-toggle" type="button" aria-expanded="true">
+                        <c2-feather-chevron-down />
+                        <span>{group.fullGroupName}</span>
+                      </button>
+                    </td>
+                  </tr>
+                ),
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+</div>
+
+<style lang="scss" is:global>
+  .api {
+    &__section {
+      margin-top: 24px;
+    }
+    &__hint {
+      font-size: 13px;
+      color: var(--site-color-on-surface-muted);
+      margin-top: -4px;
+    }
+    &__table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: var(--site-radius-md);
+    }
+    &__table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 10px 14px;
+        border-top: 1px solid var(--site-color-outline-variant);
+      }
+      th {
+        border-top: none;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: var(--site-color-on-surface-muted);
+        background: var(--site-color-surface-container-1);
+        white-space: nowrap;
+      }
+      td {
+        color: var(--site-color-on-surface-variant);
+        p {
+          margin: 0;
+        }
+      }
+      tbody tr:hover > td {
+        background: var(--site-color-surface-container-1);
+      }
+      code {
+        font-size: 12.5px;
+        color: var(--site-color-on-surface);
+        background: transparent;
+        padding: 0;
+      }
+      tr.hide {
+        display: none;
+      }
+    }
+    &__name {
+      white-space: nowrap;
+    }
+    &__name-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    &__copy {
+      opacity: 0;
+      transition: opacity 150ms var(--site-ease);
+      &.copied {
+        --c2-icon-button__icon--color: var(--site-color-primary);
+        --c2-icon-button__icon__hover--color: var(--site-color-primary);
+      }
+    }
+    tr:hover .api__copy,
+    .api__copy:focus-within,
+    .api__copy.copied {
+      opacity: 1;
+    }
+    &__type {
+      display: inline-block;
+      font-family: var(--site-font-mono);
+      font-size: 12px;
+      padding: 1px 7px;
+      border-radius: 5px;
+      background: var(--site-color-primary-soft);
+      color: var(--site-color-primary);
+      white-space: nowrap;
+    }
+    &__none {
+      color: var(--site-color-on-surface-muted);
+    }
+    &__group {
+      td {
+        padding: 0;
+        background: var(--site-color-surface-container-1);
+      }
+      &:hover > td {
+        background: var(--site-color-surface-container-2);
+      }
+    }
+    &__group-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 14px;
+      padding-left: calc(14px + var(--level, 0) * 16px);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--site-color-on-surface);
+      c2-feather-chevron-down {
+        --c2-feather-icon--size: 14px;
+        transition: transform 200ms var(--site-ease);
+        color: var(--site-color-on-surface-muted);
+      }
+      &[aria-expanded='false'] c2-feather-chevron-down {
+        transform: rotate(-90deg);
+      }
+    }
+    &__table--css td.api__name {
+      padding-left: 30px;
+    }
+  }
+
+  @media (max-width: 959.98px) {
+    .api__col-description {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Copy attribute / css variable names.
+  document.querySelectorAll<HTMLElement>('.api__copy').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const text = button.dataset.copy
+      if (!text) return
+      await navigator.clipboard.writeText(text)
+      button.classList.add('copied')
+      setTimeout(() => button.classList.remove('copied'), 1200)
+    })
+  })
+
+  // Collapse / expand css variable groups. A group hides every following row until a row at the same or shallower level.
+  document.querySelectorAll<HTMLTableRowElement>('tr.api__group').forEach((groupRow) => {
+    const toggle = groupRow.querySelector<HTMLButtonElement>('.api__group-toggle')
+    toggle?.addEventListener('click', () => {
+      const collapsed = toggle.getAttribute('aria-expanded') === 'true'
+      toggle.setAttribute('aria-expanded', String(!collapsed))
+      const level = Number(groupRow.dataset.level ?? 0)
+      let next = groupRow.nextElementSibling as HTMLTableRowElement | null
+      while (next) {
+        const nextLevel = Number(next.dataset.level ?? 0)
+        if (next.classList.contains('api__group') && nextLevel <= level) break
+        next.classList.toggle('hide', collapsed)
+        if (next.classList.contains('api__group')) {
+          next.querySelector('.api__group-toggle')?.setAttribute('aria-expanded', String(!collapsed))
+        }
+        next = next.nextElementSibling as HTMLTableRowElement | null
+      }
+    })
+  })
+</script>

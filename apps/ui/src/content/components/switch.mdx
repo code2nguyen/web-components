@@ -1,0 +1,99 @@
+---
+title: 'Switch'
+description: 'On/off toggle on a native switch input, with label, description and thumb icons.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Switch } from '@c2n/switch'
+import { Seperator } from '@c2n/seperator'
+
+`c2-switch` toggles a setting on or off. It wraps a native `<input type="checkbox" role="switch">`, so Space toggles it, the form receives `name` and `value` while on, and assistive technology announces a switch. The thumb can be clicked or dragged: it follows the pointer and settles on the side it is released. The whole row is the label: text in the default slot and an optional `description` sit beside the track and clicking them toggles it too. Small icons can ride inside the thumb for either state, and every part of the track, thumb and text is a variable. Use it for settings that apply immediately; use `c2-checkbox` for choices that are submitted later.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/switch
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/switch
+<style>
+  .settings {
+    display: grid;
+    width: 300px;
+    max-width: 100%;
+    padding: 4px 16px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #18181b;
+  }
+  .settings c2-switch {
+    padding: 10px 0;
+    --c2-switch__container--flex-direction: row-reverse;
+    --c2-switch__container--justify-content: space-between;
+    --c2-switch__container--gap: 16px;
+  }
+  .success {
+    --c2-switch__track__checked--color: #16a34a;
+    --c2-switch__track__checked__hover--color: #15803d;
+    --c2-switch__track__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+    --c2-switch__icon__checked--color: #16a34a;
+  }
+  .outlined {
+    --c2-switch__track--color: transparent;
+    --c2-switch__track--border: 1px solid #a1a1aa;
+    --c2-switch__track__hover--color: #f4f4f5;
+    --c2-switch__thumb--color: #71717a;
+    --c2-switch__thumb--box-shadow: none;
+    --c2-switch__track__checked--border: 1px solid #0265dc;
+    --c2-switch__thumb__checked--color: #ffffff;
+  }
+</style>
+<div data-label="Default">
+  <c2-switch></c2-switch>
+  <c2-switch checked></c2-switch>
+  <c2-switch checked>Notifications</c2-switch>
+  <c2-switch label="Dark mode"></c2-switch>
+</div>
+<div data-label="Description">
+  <c2-switch checked style="width: 280px">Email digest<span slot="description">A summary of activity every morning.</span></c2-switch>
+</div>
+<div data-label="Thumb icons">
+  <c2-switch checked><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><svg slot="unchecked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Two-factor authentication</c2-switch>
+  <c2-switch><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><svg slot="unchecked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Auto-save</c2-switch>
+</div>
+<div data-label="Sizes">
+  <c2-switch checked style="--c2-switch__track--width: 28px; --c2-switch__track--height: 16px; --c2-switch__thumb--size: 12px">Small</c2-switch>
+  <c2-switch checked>Default</c2-switch>
+  <c2-switch checked style="--c2-switch__track--width: 48px; --c2-switch__track--height: 28px; --c2-switch__thumb--size: 24px">Large</c2-switch>
+</div>
+<div data-label="Disabled">
+  <c2-switch disabled>Off</c2-switch>
+  <c2-switch checked disabled>On</c2-switch>
+</div>
+<div data-label="Colours">
+  <c2-switch class="success" checked><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Published</c2-switch>
+  <c2-switch class="outlined" checked>Outlined</c2-switch>
+  <c2-switch class="outlined">Outlined</c2-switch>
+</div>
+<div data-label="Settings list">
+  <div class="settings">
+    <c2-switch checked>Push notifications</c2-switch>
+    <c2-seperator decorative></c2-seperator>
+    <c2-switch>Sounds<span slot="description">Play a sound for new messages.</span></c2-switch>
+    <c2-seperator decorative></c2-seperator>
+    <c2-switch checked>Show previews</c2-switch>
+  </div>
+</div>
+```
+
+`checked` reflects the state and `change` fires on every user toggle; call `toggle()` (optionally with `true` or `false`) to flip it from code and fire the same event, or set `checked` to change it silently. The inner input carries `name` and `value` (`on` by default) but lives in a shadow root, so it is not submitted with a surrounding form; read `checked` on submit or mirror it into a hidden input.
+
+Name a switch with slotted text or `label`, and use `aria-label` only for a bare track. A `description` is announced through the row label as well. The pressed thumb stretches slightly towards the side it is moving to (`--c2-switch__thumb__active--stretch`, `0px` to disable) and the thumb slides over `--c2-switch--transition-duration`, which is disabled under reduced motion. Dragging works with mouse, pen and touch: after a few pixels of movement the thumb follows the pointer, and releasing it past the middle of the track changes the state (and fires `change`); a shorter press is a normal click.
+
+The label sits after the track by default; `--c2-switch__container--flex-direction: row-reverse` puts it first and, with `justify-content: space-between` and a width, pushes the track to the far edge, which is the settings-row layout above. Track and thumb are themed with `--c2-switch__track--*` and `--c2-switch__thumb--*` (an outlined switch is a transparent track with a border and a tinted thumb), and the thumb icons with `--c2-switch__icon--*`.

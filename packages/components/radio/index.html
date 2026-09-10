@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-radio</title>
+    <script type="module" src="/src/index.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 32px;
+        max-width: 560px;
+        font-size: 14px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .row {
+        display: flex;
+        align-items: flex-start;
+        gap: 32px;
+        flex-wrap: wrap;
+      }
+      output {
+        display: block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #52525b;
+      }
+      .cards {
+        width: 280px;
+        --c2-radio-group--align-items: stretch;
+        --c2-radio__container--border: 1px solid #d4d4d8;
+        --c2-radio__container--padding-top: 10px;
+        --c2-radio__container--padding-right: 14px;
+        --c2-radio__container--padding-bottom: 10px;
+        --c2-radio__container--padding-left: 8px;
+        --c2-radio__container__hover--background: #fafafa;
+        --c2-radio__container__checked--border: 1px solid #0265dc;
+        --c2-radio__container__checked--background: #edf1fe;
+        --c2-radio__state-layer--size: 24px;
+        --c2-radio__label--font-weight: 500;
+      }
+      .checklist {
+        width: 240px;
+        max-width: 100%;
+        --c2-radio-group--gap: 2px;
+        --c2-radio-group--align-items: stretch;
+        --c2-radio__container--flex-direction: row-reverse;
+        --c2-radio__container--gap: 8px;
+        --c2-radio__container--padding-top: 6px;
+        --c2-radio__container--padding-right: 10px;
+        --c2-radio__container--padding-bottom: 6px;
+        --c2-radio__container--padding-left: 12px;
+        --c2-radio__container--border-radius: 6px;
+        --c2-radio__container__hover--background: #f4f4f5;
+        --c2-radio__container__checked--background: #edf1fe;
+        --c2-radio__control--border: none;
+        --c2-radio__control__hover--border: none;
+        --c2-radio__state-layer--size: 20px;
+        --c2-radio__icon--size: 16px;
+        --c2-radio__icon__checked--color: #0265dc;
+        --c2-radio__label--font-size: 14px;
+        --c2-radio__label__checked--color: #0265dc;
+      }
+      .outlined {
+        --c2-radio__control__checked--border: 2px solid #0265dc;
+        --c2-radio__control__checked--background-color: transparent;
+        --c2-radio__control__checked__hover--background-color: transparent;
+        --c2-radio__dot--color: #0265dc;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Group: value, name, change event (arrow keys move, only the checked option is a tab stop)</h2>
+      <c2-radio-group id="plan" name="plan" value="pro">
+        <span slot="label">Plan</span>
+        <span slot="description">Billed monthly.</span>
+        <c2-radio value="free" label="Free"></c2-radio>
+        <c2-radio value="pro">Pro</c2-radio>
+        <c2-radio value="team">Team<span slot="description">Shared workspaces and SSO</span></c2-radio>
+        <c2-radio value="enterprise" disabled>Enterprise</c2-radio>
+      </c2-radio-group>
+      <output id="plan-output">value = pro</output>
+      <script>
+        const group = document.getElementById('plan')
+        group.addEventListener('change', (event) => {
+          document.getElementById('plan-output').textContent = `value = ${event.detail.value} (change event)`
+        })
+      </script>
+      <button
+        type="button"
+        onclick="
+          document.getElementById('plan').value = 'free'
+          document.getElementById('plan-output').textContent = 'value = free (set from code, no event)'
+        "
+      >
+        Select Free from code
+      </button>
+    </section>
+
+    <section>
+      <h2>Horizontal, disabled group, nested wrappers</h2>
+      <div class="row">
+        <c2-radio-group value="monthly" orientation="horizontal" style="--c2-radio-group--gap: 16px">
+          <c2-radio value="monthly">Monthly</c2-radio>
+          <c2-radio value="yearly">Yearly</c2-radio>
+        </c2-radio-group>
+        <c2-radio-group value="x" orientation="horizontal" disabled>
+          <span slot="label">Disabled group</span>
+          <c2-radio value="x">One</c2-radio>
+          <c2-radio value="y">Two</c2-radio>
+        </c2-radio-group>
+        <c2-radio-group value="b">
+          <span slot="label">Wrapped options</span>
+          <div style="display: grid; gap: 4px; padding: 8px; border: 1px dashed #d4d4d8; border-radius: 8px">
+            <c2-radio value="a">A (inside a div)</c2-radio>
+            <c2-radio value="b">B (inside a div)</c2-radio>
+          </div>
+          <c2-radio value="c">C</c2-radio>
+        </c2-radio-group>
+      </div>
+    </section>
+
+    <section>
+      <h2>Themed: cards, check list (trailing check, no ring), outlined accent</h2>
+      <div class="row">
+        <c2-radio-group class="cards" value="pro">
+          <c2-radio value="free">Free<span slot="description">For personal projects</span></c2-radio>
+          <c2-radio value="pro">Pro<span slot="description">Unlimited projects</span></c2-radio>
+          <c2-radio value="team">Team<span slot="description">Shared workspaces</span></c2-radio>
+        </c2-radio-group>
+        <c2-radio-group class="checklist" value="en" aria-label="Language">
+          <c2-radio value="en"
+            ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline></svg
+            >English</c2-radio
+          >
+          <c2-radio value="fr"
+            ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline></svg
+            >Français</c2-radio
+          >
+          <c2-radio value="de"
+            ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline></svg
+            >Deutsch</c2-radio
+          >
+        </c2-radio-group>
+        <c2-radio-group class="outlined" value="b">
+          <c2-radio value="a">Alpha</c2-radio>
+          <c2-radio value="b">Beta</c2-radio>
+          <c2-radio value="c">Gamma</c2-radio>
+        </c2-radio-group>
+      </div>
+    </section>
+
+    <section>
+      <h2>Custom indicators: square ring, check mark in the dot slot, icon / checked-icon pairs</h2>
+      <div class="row">
+        <c2-radio-group value="b" style="--c2-radio__control--border-radius: 4px">
+          <c2-radio value="a">Square</c2-radio>
+          <c2-radio value="b">Square</c2-radio>
+        </c2-radio-group>
+        <c2-radio-group value="b" style="--c2-radio__dot--size: 12px">
+          <c2-radio value="a"
+            ><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline></svg
+            >Check</c2-radio
+          >
+          <c2-radio value="b"
+            ><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline></svg
+            >Check</c2-radio
+          >
+        </c2-radio-group>
+        <c2-radio-group value="b" style="--c2-radio__icon--size: 20px">
+          <c2-radio value="a"
+            ><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg
+            ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <polyline points="8 12 11 15 16 9"></polyline></svg
+            >Icons</c2-radio
+          >
+          <c2-radio value="b"
+            ><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg
+            ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <polyline points="8 12 11 15 16 9"></polyline></svg
+            >Icons</c2-radio
+          >
+        </c2-radio-group>
+        <c2-radio-group value="b" style="--c2-radio__icon--size: 20px">
+          <c2-radio value="a"
+            ><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg
+            >Only icon (recolours)</c2-radio
+          >
+          <c2-radio value="b"
+            ><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg
+            >Only icon (recolours)</c2-radio
+          >
+        </c2-radio-group>
+        <c2-radio-group value="b" style="--c2-radio__icon--size: 20px">
+          <c2-radio value="a"
+            ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <polyline points="8 12 11 15 16 9"></polyline></svg
+            >Only checked-icon</c2-radio
+          >
+          <c2-radio value="b"
+            ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <polyline points="8 12 11 15 16 9"></polyline></svg
+            >Only checked-icon</c2-radio
+          >
+        </c2-radio-group>
+      </div>
+    </section>
+
+    <section>
+      <h2>Standalone radios sharing a name (uncheck each other; no arrow-key navigation without a group)</h2>
+      <div class="row" style="gap: 8px">
+        <c2-radio name="size" value="s">Small</c2-radio>
+        <c2-radio name="size" value="m" checked>Medium</c2-radio>
+        <c2-radio name="size" value="l">Large</c2-radio>
+        <c2-radio name="size" value="xl" disabled>XL</c2-radio>
+      </div>
+    </section>
+  </body>
+</html>

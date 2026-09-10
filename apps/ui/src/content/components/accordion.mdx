@@ -1,0 +1,90 @@
+---
+title: 'Accordion'
+description: 'Connected, animated panels with shared borders and single or multiple expansion.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Accordion } from '@c2n/accordion'
+
+`c2-accordion` combines `c2-details` panels into one disclosure surface: a shared frame, single-line dividers and rounded outside corners. Panels animate open and closed together, and their chevrons rotate with the same timing. Opening a panel closes its siblings by default; add `multiple` to keep several open. All panels can be closed in either mode. Each panel provides its own label, content, disabled state and header slots through `c2-details`.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/accordion
+```
+
+Importing `@c2n/accordion` also registers `c2-details`.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/accordion
+<style>
+  .demo {
+    width: 320px;
+    max-width: 100%;
+    --c2-details__header--color: #18181b;
+    --c2-details__content--color: #52525b;
+  }
+  .demo p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+</style>
+<div data-label="Single open panel">
+  <c2-accordion class="demo" client:only="lit">
+    <c2-details label="How long does shipping take?" expanded><p>Delivered in 3–5 business days. Shipping is free on orders over $50.</p></c2-details>
+    <c2-details label="Can I return my order?"><p>Return unused items within 30 days for a full refund.</p></c2-details>
+    <c2-details label="Do you ship internationally?"><p>Yes. Delivery estimates and shipping costs appear at checkout.</p></c2-details>
+  </c2-accordion>
+</div>
+<div data-label="Multiple open panels">
+  <c2-accordion class="demo" multiple client:only="lit">
+    <c2-details label="Sizing" expanded><p>Choose your usual size. For a relaxed fit, go one size up.</p></c2-details>
+    <c2-details label="Care" expanded><p>Machine wash cold with similar colors and air dry.</p></c2-details>
+  </c2-accordion>
+</div>
+<div data-label="Disabled panel">
+  <c2-accordion class="demo" client:only="lit">
+    <c2-details label="Standard delivery"><p>Available on all orders.</p></c2-details>
+    <c2-details label="Express delivery — coming soon" disabled><p>Next-day delivery is not available yet.</p></c2-details>
+  </c2-accordion>
+</div>
+<div data-label="Nested groups">
+  <c2-accordion class="demo" client:only="lit">
+    <c2-details label="Products" expanded>
+      <c2-accordion>
+        <c2-details label="Clothing" expanded><p>Explore shirts, knitwear and jackets.</p></c2-details>
+        <c2-details label="Accessories"><p>Browse bags, hats and everyday essentials.</p></c2-details>
+      </c2-accordion>
+    </c2-details>
+    <c2-details label="Support"><p>Contact our team for help with your order.</p></c2-details>
+  </c2-accordion>
+</div>
+```
+
+Only direct `c2-details` children participate in grouping: place them inside the accordion without wrapper elements. Nested accordions operate independently, and panel `name` values are unnecessary. If several panels initially have `expanded`, the first in DOM order stays open in single mode. Removing `multiple` applies the same rule.
+
+Set a panel's `expanded` property or call its `toggle(force?)` method to control it programmatically. Listen for the non-bubbling `toggle` event directly on each panel. A disabled panel blocks user interaction and `toggle()`, but the accordion can still close it when a sibling opens.
+
+The accordion owns the frame through `--c2-accordion--border-width`, `--c2-accordion--border-color` and `--c2-accordion--border-radius`. Its default `--c2-accordion--gap: 0px` joins panels without doubled borders or rounded inner corners. Set a positive gap to separate them into individually rounded cards.
+
+The accordion applies the same border to every side of each panel. To drop a side, for example a flush list without left and right borders, target the panels from the page; a document rule beats the accordion's slotted defaults:
+
+```css tag=CodeBlock
+c2-accordion.flush {
+  --c2-accordion--border-radius: 0px;
+}
+c2-accordion.flush c2-details {
+  --c2-details--border-left: none;
+  --c2-details--border-right: none;
+}
+```
+
+Set `--c2-accordion--transition-duration` (default `300ms`) to adjust panel expansion and chevron rotation together, or `0ms` to disable them. Reduced-motion preferences disable transitions automatically. Panel height is animated by the component itself (a slide plus a fade of the content), so opening and closing look the same in every browser.
+
+Use inherited `--c2-details-*` properties for header colors, content padding and typography. Set frame and animation properties on the accordion itself; see the Gallery for styled examples.

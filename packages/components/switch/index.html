@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-switch</title>
+    <script type="module" src="/src/switch.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 32px;
+        max-width: 560px;
+        font-size: 14px;
+        color: #18181b;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .settings {
+        display: grid;
+        width: 300px;
+        padding: 4px 16px;
+        border: 1px solid #e4e4e7;
+        border-radius: 10px;
+      }
+      .settings c2-switch {
+        padding: 10px 0;
+        --c2-switch__container--flex-direction: row-reverse;
+        --c2-switch__container--justify-content: space-between;
+      }
+      .settings c2-switch + c2-switch {
+        border-top: 1px solid #f4f4f5;
+      }
+      .outlined {
+        --c2-switch__track--color: transparent;
+        --c2-switch__track--border: 1px solid #a1a1aa;
+        --c2-switch__track__hover--color: #f4f4f5;
+        --c2-switch__thumb--color: #71717a;
+        --c2-switch__thumb--box-shadow: none;
+        --c2-switch__track__checked--border: 1px solid #0265dc;
+        --c2-switch__thumb__checked--color: #ffffff;
+      }
+      output {
+        font-size: 12px;
+        color: #52525b;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Default, checked, label, description, change event and toggle()</h2>
+      <div class="row">
+        <c2-switch></c2-switch>
+        <c2-switch checked></c2-switch>
+        <c2-switch id="notif" checked>Notifications</c2-switch>
+        <c2-switch label="Dark mode"></c2-switch>
+      </div>
+      <div class="row" style="margin-top: 12px">
+        <c2-switch checked style="width: 280px">Email digest<span slot="description">A summary of activity every morning.</span></c2-switch>
+      </div>
+      <div class="row" style="margin-top: 12px">
+        <output id="out">notifications = on</output>
+        <button type="button" onclick="document.getElementById('notif').toggle()">toggle()</button>
+        <button
+          type="button"
+          onclick="
+            document.getElementById('notif').checked = false
+            document.getElementById('out').textContent = 'notifications = off (silent)'
+          "
+        >
+          checked = false
+        </button>
+      </div>
+      <script>
+        const notif = document.getElementById('notif')
+        notif.addEventListener('change', () => (document.getElementById('out').textContent = `notifications = ${notif.checked ? 'on' : 'off'} (change)`))
+      </script>
+    </section>
+
+    <section>
+      <h2>Thumb icons, sizes, disabled</h2>
+      <div class="row">
+        <c2-switch checked
+          ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline></svg
+          ><svg slot="unchecked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18M6 6l12 12"></path></svg
+          >Two-factor</c2-switch
+        >
+        <c2-switch
+          ><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline></svg
+          ><svg slot="unchecked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18M6 6l12 12"></path></svg
+          >Auto-save</c2-switch
+        >
+      </div>
+      <div class="row" style="margin-top: 12px">
+        <c2-switch checked style="--c2-switch__track--width: 28px; --c2-switch__track--height: 16px; --c2-switch__thumb--size: 12px">Small</c2-switch>
+        <c2-switch checked>Default</c2-switch>
+        <c2-switch checked style="--c2-switch__track--width: 52px; --c2-switch__track--height: 32px; --c2-switch__thumb--size: 28px">Large</c2-switch>
+        <c2-switch disabled>Off disabled</c2-switch>
+        <c2-switch checked disabled>On disabled</c2-switch>
+      </div>
+    </section>
+
+    <section>
+      <h2>Themed: outlined, success, square, RTL</h2>
+      <div class="row">
+        <c2-switch class="outlined" checked>Outlined</c2-switch>
+        <c2-switch class="outlined">Outlined</c2-switch>
+        <c2-switch checked style="--c2-switch__track__checked--color: #16a34a; --c2-switch__track__checked__hover--color: #15803d">Success</c2-switch>
+        <c2-switch checked style="--c2-switch__track--border-radius: 4px; --c2-switch__thumb--border-radius: 2px; --c2-switch__track__checked--color: #18181b"
+          >Square</c2-switch
+        >
+        <div dir="rtl"><c2-switch checked>من اليمين</c2-switch></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Settings list (label first, track at the edge)</h2>
+      <div class="settings">
+        <c2-switch checked>Push notifications</c2-switch>
+        <c2-switch>Sounds<span slot="description">Play a sound for new messages.</span></c2-switch>
+        <c2-switch checked>Show previews</c2-switch>
+      </div>
+    </section>
+  </body>
+</html>

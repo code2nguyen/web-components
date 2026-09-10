@@ -1,0 +1,45 @@
+---
+// Site variant: a `c2-icon-button` (via SiteIconButton) whose sun / moon icons swap with the resolved theme.
+import SiteIconButton from './ui/SiteIconButton.astro'
+import { FeatherMoonIcon, FeatherSunIcon } from './ui/icons'
+---
+
+<SiteIconButton label="Toggle color theme" tooltip="Toggle theme" class="theme-toggle">
+  <FeatherSunIcon client:load class="theme-toggle__sun" />
+  <FeatherMoonIcon client:load class="theme-toggle__moon" />
+</SiteIconButton>
+
+<style lang="scss" is:global>
+  .theme-toggle__moon {
+    display: none;
+  }
+  html[data-theme='dark'] {
+    .theme-toggle__sun {
+      display: none;
+    }
+    .theme-toggle__moon {
+      display: inline-flex;
+    }
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = 'c2n-theme'
+  const root = document.documentElement
+
+  function apply(theme: 'light' | 'dark') {
+    root.dataset.theme = theme
+    try {
+      localStorage.setItem(STORAGE_KEY, theme)
+    } catch {
+      /* storage unavailable */
+    }
+    window.dispatchEvent(new CustomEvent('c2n-theme-change', { detail: theme }))
+  }
+
+  document.querySelectorAll<HTMLElement>('.theme-toggle').forEach((button) => {
+    button.addEventListener('click', () => {
+      apply(root.dataset.theme === 'dark' ? 'light' : 'dark')
+    })
+  })
+</script>

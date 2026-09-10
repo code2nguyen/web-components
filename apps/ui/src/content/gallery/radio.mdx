@@ -1,0 +1,277 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Radio, RadioGroup } from '@c2n/radio'
+
+## Presets
+
+Curated looks for `c2-radio` and `c2-radio-group`. Open any card in the studio to start from it. Variables set on the group inherit into every option, so one class themes the whole set. The last cards swap the indicator itself: a square ring, a check mark in the `dot` slot, and `icon` / `checked-icon` pairs.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-radio-group client:only="lit" value="pro">
+  <c2-radio value="free">Free</c2-radio>
+  <c2-radio value="pro">Pro</c2-radio>
+  <c2-radio value="team">Team</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Outlined accent
+<style>
+  .outlined {
+    --c2-radio__control__checked--border: 2px solid #0265dc;
+    --c2-radio__control__checked--background-color: transparent;
+    --c2-radio__control__checked__hover--background-color: transparent;
+    --c2-radio__dot--color: #0265dc;
+    --c2-radio__label__checked--color: #0265dc;
+  }
+</style>
+<c2-radio-group client:only="lit" class="outlined" value="pro">
+  <c2-radio value="free">Free</c2-radio>
+  <c2-radio value="pro">Pro</c2-radio>
+  <c2-radio value="team">Team</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Cards
+<style>
+  .cards {
+    width: 260px;
+    max-width: 100%;
+    --c2-radio-group--align-items: stretch;
+    --c2-radio__container--border: 1px solid #d4d4d8;
+    --c2-radio__container--padding-top: 10px;
+    --c2-radio__container--padding-right: 14px;
+    --c2-radio__container--padding-bottom: 10px;
+    --c2-radio__container--padding-left: 8px;
+    --c2-radio__container__hover--background: #fafafa;
+    --c2-radio__container__checked--border: 1px solid #0265dc;
+    --c2-radio__container__checked--background: #edf1fe;
+    --c2-radio__state-layer--size: 24px;
+    --c2-radio__label--font-weight: 500;
+  }
+</style>
+<c2-radio-group client:only="lit" class="cards" value="pro">
+  <c2-radio value="free">Free<span slot="description">For personal projects</span></c2-radio>
+  <c2-radio value="pro">Pro<span slot="description">Unlimited projects</span></c2-radio>
+  <c2-radio value="team">Team<span slot="description">Shared workspaces</span></c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Segmented
+<style>
+  .segmented {
+    --c2-radio-group--gap: 4px;
+    --c2-radio__container--border: 1px solid #e4e4e7;
+    --c2-radio__container--border-radius: 999px;
+    --c2-radio__container--padding-top: 6px;
+    --c2-radio__container--padding-right: 14px;
+    --c2-radio__container--padding-bottom: 6px;
+    --c2-radio__container--padding-left: 10px;
+    --c2-radio__container__hover--background: #f4f4f5;
+    --c2-radio__container__checked--border: 1px solid #18181b;
+    --c2-radio__container__checked--background: #18181b;
+    --c2-radio__control--size: 14px;
+    --c2-radio__control--border: 1px solid #a1a1aa;
+    --c2-radio__control__checked--border: 1px solid #ffffff;
+    --c2-radio__control__checked--background-color: transparent;
+    --c2-radio__control__checked__hover--background-color: transparent;
+    --c2-radio__dot--size: 6px;
+    --c2-radio__state-layer--size: 18px;
+    --c2-radio__label--font-size: 13px;
+    --c2-radio__label--font-weight: 500;
+    --c2-radio__label__checked--color: #ffffff;
+  }
+</style>
+<c2-radio-group client:only="lit" class="segmented" value="m" orientation="horizontal">
+  <c2-radio value="s">S</c2-radio>
+  <c2-radio value="m">M</c2-radio>
+  <c2-radio value="l">L</c2-radio>
+  <c2-radio value="xl">XL</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .large {
+    --c2-radio-group--gap: 12px;
+    --c2-radio__control--size: 22px;
+    --c2-radio__dot--size: 10px;
+    --c2-radio__state-layer--size: 40px;
+    --c2-radio__label--font-size: 15px;
+  }
+</style>
+<c2-radio-group client:only="lit" class="large" value="b">
+  <c2-radio value="a">Comfortable</c2-radio>
+  <c2-radio value="b">Cosy</c2-radio>
+  <c2-radio value="c">Compact</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .success {
+    --c2-radio__control__checked--background-color: #16a34a;
+    --c2-radio__control__checked__hover--background-color: #15803d;
+    --c2-radio__control__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+    --c2-radio__state-layer__hover--color: #16a34a;
+    --c2-radio__label__checked--color: #166534;
+  }
+</style>
+<c2-radio-group client:only="lit" class="success" value="yes" orientation="horizontal" style="--c2-radio-group--gap: 16px">
+  <c2-radio value="yes">Approve</c2-radio>
+  <c2-radio value="no">Reject</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: #18181b;
+    color: #fafafa;
+    --c2-radio-group__label--color: #fafafa;
+    --c2-radio-group__description--color: #a1a1aa;
+    --c2-radio__control--border: 1px solid #52525b;
+    --c2-radio__control__hover--border: 1px solid #71717a;
+    --c2-radio__control__checked--background-color: #5aa3ff;
+    --c2-radio__control__checked__hover--background-color: #7bb6ff;
+    --c2-radio__dot--color: #032a5c;
+    --c2-radio__control__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
+    --c2-radio__description--color: #a1a1aa;
+  }
+</style>
+<c2-radio-group client:only="lit" class="dark" value="system">
+  <span slot="label">Appearance</span>
+  <span slot="description">Choose how the app looks.</span>
+  <c2-radio value="light">Light</c2-radio>
+  <c2-radio value="dark">Dark</c2-radio>
+  <c2-radio value="system">System</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Compact list
+<style>
+  .compact {
+    --c2-radio-group--gap: 0px;
+    --c2-radio__control--size: 16px;
+    --c2-radio__dot--size: 6px;
+    --c2-radio__state-layer--size: 28px;
+    --c2-radio__label--font-size: 13px;
+    --c2-radio__label--color: #3f3f46;
+  }
+</style>
+<c2-radio-group client:only="lit" class="compact" value="name">
+  <span slot="label">Sort by</span>
+  <c2-radio value="name">Name</c2-radio>
+  <c2-radio value="date">Date modified</c2-radio>
+  <c2-radio value="size">Size</c2-radio>
+  <c2-radio value="kind">Kind</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Square
+<style>
+  .square {
+    --c2-radio__control--border-radius: 4px;
+    --c2-radio__control--size: 18px;
+    --c2-radio__dot--size: 8px;
+  }
+</style>
+<c2-radio-group client:only="lit" class="square" value="b">
+  <c2-radio value="a">Option A</c2-radio>
+  <c2-radio value="b">Option B</c2-radio>
+  <c2-radio value="c">Option C</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Check mark
+<style>
+  .check {
+    --c2-radio__dot--size: 12px;
+    --c2-radio__control__checked--background-color: #16a34a;
+    --c2-radio__control__checked__hover--background-color: #15803d;
+    --c2-radio__control__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
+  }
+</style>
+<c2-radio-group client:only="lit" class="check" value="b">
+  <c2-radio value="a"><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Draft</c2-radio>
+  <c2-radio value="b"><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Published</c2-radio>
+  <c2-radio value="c"><svg slot="dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Archived</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Icon indicator
+<style>
+  .icon-indicator {
+    --c2-radio__icon--size: 20px;
+    --c2-radio__icon--color: #a1a1aa;
+    --c2-radio__icon__checked--color: #0265dc;
+    --c2-radio__label__checked--color: #0265dc;
+  }
+</style>
+<c2-radio-group client:only="lit" class="icon-indicator" value="b">
+  <c2-radio value="a"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="8 12 11 15 16 9"></polyline></svg>Basic</c2-radio>
+  <c2-radio value="b"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="8 12 11 15 16 9"></polyline></svg>Standard</c2-radio>
+  <c2-radio value="c"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="8 12 11 15 16 9"></polyline></svg>Premium</c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Rating
+<style>
+  .rating {
+    --c2-radio-group--gap: 0px;
+    --c2-radio__container--gap: 0px;
+    --c2-radio__state-layer--size: 32px;
+    --c2-radio__icon--size: 22px;
+    --c2-radio__icon--color: #d4d4d8;
+    --c2-radio__icon__checked--color: #f59e0b;
+    --c2-radio__state-layer__hover--color: #f59e0b;
+    --c2-radio__control__focus--outline: 2px solid rgba(245, 158, 11, 0.4);
+  }
+</style>
+<c2-radio-group client:only="lit" class="rating" value="4" orientation="horizontal" aria-label="Rating">
+  <c2-radio value="1" aria-label="1 star"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></c2-radio>
+  <c2-radio value="2" aria-label="2 stars"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></c2-radio>
+  <c2-radio value="3" aria-label="3 stars"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></c2-radio>
+  <c2-radio value="4" aria-label="4 stars"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></c2-radio>
+  <c2-radio value="5" aria-label="5 stars"><svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><svg slot="checked-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></c2-radio>
+</c2-radio-group>
+```
+
+```html tag=MdxCodeBlock,label=Check list
+<style>
+  .checklist {
+    width: 240px;
+    max-width: 100%;
+    --c2-radio-group--gap: 2px;
+    --c2-radio-group--align-items: stretch;
+    --c2-radio__container--flex-direction: row-reverse;
+    --c2-radio__container--gap: 8px;
+    --c2-radio__container--padding-top: 6px;
+    --c2-radio__container--padding-right: 10px;
+    --c2-radio__container--padding-bottom: 6px;
+    --c2-radio__container--padding-left: 12px;
+    --c2-radio__container--border-radius: 6px;
+    --c2-radio__container__hover--background: #f4f4f5;
+    --c2-radio__container__checked--background: #edf1fe;
+    --c2-radio__control--border: none;
+    --c2-radio__control__hover--border: none;
+    --c2-radio__state-layer--size: 20px;
+    --c2-radio__icon--size: 16px;
+    --c2-radio__icon__checked--color: #0265dc;
+    --c2-radio__label--font-size: 14px;
+    --c2-radio__label__checked--color: #0265dc;
+  }
+</style>
+<c2-radio-group client:only="lit" class="checklist" value="en" aria-label="Language">
+  <c2-radio value="en"><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>English</c2-radio>
+  <c2-radio value="fr"><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Français</c2-radio>
+  <c2-radio value="de"><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Deutsch</c2-radio>
+  <c2-radio value="vi"><svg slot="checked-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Tiếng Việt</c2-radio>
+</c2-radio-group>
+```
+
+</GalleryGrid>

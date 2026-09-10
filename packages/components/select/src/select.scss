@@ -4,92 +4,117 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-select,
   $theme: (
-    _list--border-top: 1px solid variables.$color-border,
-    _list--border-right: 1px solid variables.$color-border,
-    _list--border-bottom: 1px solid variables.$color-border,
-    _list--border-left: 1px solid variables.$color-border,
-
-    _list--border-top-left-radius: 4px,
-    _list--border-top-right-radius: 4px,
-    _list--border-bottom-left-radius: 4px,
-    _list--border-bottom-right-radius: 4px,
+    button--min-height: 36px,
 
     button--font-size: 14px,
     button--font-weight: null,
     button--font-style: normal,
     button--font-family: null,
 
-    button__prefix-icon--width: 18px,
-    button__prefix-icon--height: 18px,
+    button__prefix-icon--width: 16px,
+    button__prefix-icon--height: 16px,
     button__prefix-icon--color: null,
 
-    button__suffix-icon--width: 18px,
-    button__suffix-icon--height: 18px,
-    button__suffix-icon--color: null,
+    button__suffix-icon--width: 16px,
+    button__suffix-icon--height: 16px,
+    button__suffix-icon--color: #71717a,
 
-    button--padding: 8px 8px 8px 8px,
-    button--background: variables.$color-bg-light,
-    button--color: initial,
-    button--gap: 4px,
+    button--padding: 6px 10px 6px 12px,
+    button--background: #ffffff,
+    button--color: #18181b,
+    button--gap: 8px,
 
-    button--border-top: 1px solid variables.$color-border,
-    button--border-right: 1px solid variables.$color-border,
-    button--border-bottom: 1px solid variables.$color-border,
-    button--border-left: 1px solid variables.$color-border,
+    button--border-top: 1px solid #bcbcc6,
+    button--border-right: 1px solid #bcbcc6,
+    button--border-bottom: 1px solid #bcbcc6,
+    button--border-left: 1px solid #bcbcc6,
 
-    button--border-top-left-radius: 4px,
-    button--border-top-right-radius: 4px,
-    button--border-bottom-left-radius: 4px,
-    button--border-bottom-right-radius: 4px,
+    button--border-top-left-radius: 6px,
+    button--border-top-right-radius: 6px,
+    button--border-bottom-left-radius: 6px,
+    button--border-bottom-right-radius: 6px,
 
-    button__hover--border-top: 1px solid variables.$color-border,
-    button__hover--border-right: 1px solid variables.$color-border,
-    button__hover--border-bottom: 1px solid variables.$color-border,
-    button__hover--border-left: 1px solid variables.$color-border,
-    button__hover--background: variables.$color-bg-dark,
-    button__hover--color: initial,
+    button__hover--border-top: 1px solid #a1a1aa,
+    button__hover--border-right: 1px solid #a1a1aa,
+    button__hover--border-bottom: 1px solid #a1a1aa,
+    button__hover--border-left: 1px solid #a1a1aa,
+    button__hover--background: #fafafa,
+    button__hover--color: #18181b,
+
+    button__open--border-top: 1px solid #476ef9,
+    button__open--border-right: 1px solid #476ef9,
+    button__open--border-bottom: 1px solid #476ef9,
+    button__open--border-left: 1px solid #476ef9,
+
+    button__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
+    button__focus--outline-offset: 1px,
+
+    button__disabled--opacity: variables.$disabled-content-opacity,
 
     placeholder--font-weight: null,
     placeholder--font-style: null,
-    placeholder--color: null,
-    placeholder--opacity: 0.5,
+    placeholder--color: #71717a,
+    placeholder--opacity: 1,
+
+    list--background: #ffffff,
+    list--border-top: 1px solid #e4e4e7,
+    list--border-right: 1px solid #e4e4e7,
+    list--border-bottom: 1px solid #e4e4e7,
+    list--border-left: 1px solid #e4e4e7,
+
+    list--border-top-left-radius: 8px,
+    list--border-top-right-radius: 8px,
+    list--border-bottom-left-radius: 8px,
+    list--border-bottom-right-radius: 8px,
+
+    list--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+
+    list--padding-top: 4px,
+    list--padding-right: 4px,
+    list--padding-bottom: 4px,
+    list--padding-left: 4px,
+
+    list--max-height: 280px,
   )
 );
 
 :host {
   display: inline-flex;
-  --c2-list--border-top: #{css.get(_list--border-top)};
-  --c2-list--border-right: #{css.get(_list--border-right)};
-  --c2-list--border-bottom: #{css.get(_list--border-bottom)};
-  --c2-list--border-left: #{css.get(_list--border-left)};
-
-  --c2-list--border-top-left-radius: #{css.get(_list--border-top-left-radius)};
-  --c2-list--border-top-right-radius: #{css.get(_list--border-top-right-radius)};
-  --c2-list--border-bottom-left-radius: #{css.get(_list--border-bottom-left-radius)};
-  --c2-list--border-bottom-right-radius: #{css.get(_list--border-bottom-right-radius)};
+  vertical-align: middle;
 }
+
+:host([hidden]) {
+  display: none;
+}
+
 .c2-select {
   display: contents;
 }
+
 .button {
   display: flex;
   flex: 1;
   position: relative;
+  box-sizing: border-box;
   width: 100%;
   min-width: 100%;
   max-width: 100%;
+  min-height: css.cssVar(button--min-height);
+  margin: 0;
   align-items: center;
   justify-content: space-between;
-  appearance: button;
+  appearance: none;
   user-select: none;
   cursor: pointer;
   text-transform: none;
   vertical-align: middle;
+  outline: none;
 
   font-size: css.cssVar(button--font-size);
   font-weight: css.cssVar(button--font-weight);
   font-style: css.cssVar(button--font-style);
   font-family: css.cssVar(button--font-family);
+  line-height: 1.4;
 
   background: css.cssVar(button--background);
   gap: css.cssVar(button--gap);
@@ -117,17 +142,39 @@
     color: css.cssVar(button__hover--color);
   }
 
+  // Keyboard focus draws a ring; the ring also marks the trigger while its dropdown is open.
+  &:focus-visible {
+    outline: css.cssVar(button__focus--outline);
+    outline-offset: css.cssVar(button__focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    pointer-events: none;
+    opacity: css.cssVar(button__disabled--opacity);
+  }
+
   ::slotted([slot='button-prefix-icon']) {
+    flex: none;
     width: css.cssVar(button__prefix-icon--width);
     height: css.cssVar(button__prefix-icon--height);
     color: css.cssVar(button__prefix-icon--color);
+    --c2-feather-icon--size: #{css.cssVar(button__prefix-icon--width)};
+    --c2-mat-icon--font-size: #{css.cssVar(button__prefix-icon--width)};
   }
 
   ::slotted([slot='button-suffix-icon']),
   .default-icon {
+    flex: none;
     width: css.cssVar(button__suffix-icon--width);
     height: css.cssVar(button__suffix-icon--height);
     color: css.cssVar(button__suffix-icon--color);
+    --c2-feather-icon--size: #{css.cssVar(button__suffix-icon--width)};
+    --c2-mat-icon--font-size: #{css.cssVar(button__suffix-icon--width)};
+  }
+
+  .default-icon {
+    transition: animation.standard(transform);
   }
 
   .placeholder {
@@ -136,11 +183,52 @@
     color: css.cssVar(placeholder--color);
     opacity: css.cssVar(placeholder--opacity);
   }
+
   .button-content {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     text-align: start;
     flex: 1;
+    min-width: 0;
   }
+}
+
+:host([open]) .button {
+  border-top: css.cssVar(button__open--border-top);
+  border-bottom: css.cssVar(button__open--border-bottom);
+  border-right: css.cssVar(button__open--border-right);
+  border-left: css.cssVar(button__open--border-left);
+
+  .default-icon {
+    transform: rotate(180deg);
+  }
+}
+
+:host([readonly]) .button {
+  cursor: default;
+}
+
+// The dropdown: a `c2-list` inside the overlay, themed through the `list--*` variables of the select.
+.list {
+  --c2-list--background: #{css.cssVar(list--background)};
+
+  --c2-list--border-top: #{css.cssVar(list--border-top)};
+  --c2-list--border-right: #{css.cssVar(list--border-right)};
+  --c2-list--border-bottom: #{css.cssVar(list--border-bottom)};
+  --c2-list--border-left: #{css.cssVar(list--border-left)};
+
+  --c2-list--border-top-left-radius: #{css.cssVar(list--border-top-left-radius)};
+  --c2-list--border-top-right-radius: #{css.cssVar(list--border-top-right-radius)};
+  --c2-list--border-bottom-left-radius: #{css.cssVar(list--border-bottom-left-radius)};
+  --c2-list--border-bottom-right-radius: #{css.cssVar(list--border-bottom-right-radius)};
+
+  --c2-list--box-shadow: #{css.cssVar(list--box-shadow)};
+
+  --c2-list--padding-top: #{css.cssVar(list--padding-top)};
+  --c2-list--padding-right: #{css.cssVar(list--padding-right)};
+  --c2-list--padding-bottom: #{css.cssVar(list--padding-bottom)};
+  --c2-list--padding-left: #{css.cssVar(list--padding-left)};
+
+  --c2-list--max-height: #{css.cssVar(list--max-height)};
 }

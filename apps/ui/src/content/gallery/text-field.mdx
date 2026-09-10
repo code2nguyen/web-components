@@ -1,0 +1,506 @@
+---
+description: 'Ready-made looks for c2-text-field: box styles, five sizes, states, icons and adornments, clear button, helper text and labels. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TextField } from '@c2n/text-field'
+import { Label } from '@c2n/label'
+import { FeatherSearchIcon as FeatherSearch } from '@c2n/feather-icons/icons/search.js'
+import { FeatherMailIcon as FeatherMail } from '@c2n/feather-icons/icons/mail.js'
+import { FeatherLockIcon as FeatherLock } from '@c2n/feather-icons/icons/lock.js'
+import { FeatherEyeIcon as FeatherEye } from '@c2n/feather-icons/icons/eye.js'
+import { FeatherUserIcon as FeatherUser } from '@c2n/feather-icons/icons/user.js'
+import { FeatherCalendarIcon as FeatherCalendar } from '@c2n/feather-icons/icons/calendar.js'
+import { FeatherCheckCircleIcon as FeatherCheckCircle } from '@c2n/feather-icons/icons/check-circle.js'
+import { FeatherHelpCircleIcon as FeatherHelpCircle } from '@c2n/feather-icons/icons/help-circle.js'
+
+## Box styles
+
+Border per side, radius per corner, padding and colours are all `--c2-text-field--*` variables, with `__hover`, `__focus` and `__error` states on top.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 220px;
+  }
+</style>
+<c2-text-field placeholder="Your email" class="default"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Soft filled
+<style>
+  .soft-filled {
+    width: 220px;
+    --c2-text-field--background: #f4f4f5;
+    --c2-text-field--border-top: 1px solid transparent;
+    --c2-text-field--border-right: 1px solid transparent;
+    --c2-text-field--border-bottom: 1px solid transparent;
+    --c2-text-field--border-left: 1px solid transparent;
+    --c2-text-field__hover--border-top: 1px solid transparent;
+    --c2-text-field__hover--border-right: 1px solid transparent;
+    --c2-text-field__hover--border-bottom: 1px solid transparent;
+    --c2-text-field__hover--border-left: 1px solid transparent;
+    --c2-text-field--border-top-left-radius: 10px;
+    --c2-text-field--border-top-right-radius: 10px;
+    --c2-text-field--border-bottom-left-radius: 10px;
+    --c2-text-field--border-bottom-right-radius: 10px;
+    --c2-text-field__focus--background: #ffffff;
+    --c2-text-field__focus--border-top: 1px solid #18181b;
+    --c2-text-field__focus--border-right: 1px solid #18181b;
+    --c2-text-field__focus--border-bottom: 1px solid #18181b;
+    --c2-text-field__focus--border-left: 1px solid #18181b;
+    --c2-text-field__focus--outline: 3px solid rgba(24, 24, 27, 0.1);
+  }
+</style>
+<c2-text-field placeholder="Your email" class="soft-filled"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Underline
+<style>
+  .underline {
+    width: 220px;
+    --c2-text-field--background: transparent;
+    --c2-text-field--border-top: 0px solid transparent;
+    --c2-text-field--border-right: 0px solid transparent;
+    --c2-text-field--border-left: 0px solid transparent;
+    --c2-text-field--border-bottom: 1px solid #d4d4d8;
+    --c2-text-field__hover--border-top: 0px solid transparent;
+    --c2-text-field__hover--border-right: 0px solid transparent;
+    --c2-text-field__hover--border-left: 0px solid transparent;
+    --c2-text-field__hover--border-bottom: 1px solid #71717a;
+    --c2-text-field__focus--border-top: 0px solid transparent;
+    --c2-text-field__focus--border-right: 0px solid transparent;
+    --c2-text-field__focus--border-left: 0px solid transparent;
+    --c2-text-field__focus--border-bottom: 2px solid #476ef9;
+    --c2-text-field__focus--outline: 0px solid transparent;
+    --c2-text-field--border-top-left-radius: 0px;
+    --c2-text-field--border-top-right-radius: 0px;
+    --c2-text-field--border-bottom-left-radius: 0px;
+    --c2-text-field--border-bottom-right-radius: 0px;
+    --c2-text-field--padding-left: 2px;
+    --c2-text-field--padding-right: 2px;
+  }
+</style>
+<c2-text-field placeholder="Your email" class="underline"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    width: 220px;
+    --c2-text-field--border-top-left-radius: 999px;
+    --c2-text-field--border-top-right-radius: 999px;
+    --c2-text-field--border-bottom-left-radius: 999px;
+    --c2-text-field--border-bottom-right-radius: 999px;
+    --c2-text-field--padding-left: 16px;
+    --c2-text-field--padding-right: 14px;
+  }
+</style>
+<c2-text-field placeholder="Your email" class="pill"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    width: 220px;
+    --c2-text-field--background: #18181b;
+    --c2-text-field--color: #f4f4f5;
+    --c2-text-field__placeholder--color: #a1a1aa;
+    --c2-text-field__icon--color: #a1a1aa;
+    --c2-text-field--border-top: 1px solid #3f3f46;
+    --c2-text-field--border-right: 1px solid #3f3f46;
+    --c2-text-field--border-bottom: 1px solid #3f3f46;
+    --c2-text-field--border-left: 1px solid #3f3f46;
+    --c2-text-field__hover--border-top: 1px solid #52525b;
+    --c2-text-field__hover--border-right: 1px solid #52525b;
+    --c2-text-field__hover--border-bottom: 1px solid #52525b;
+    --c2-text-field__hover--border-left: 1px solid #52525b;
+    --c2-text-field__focus--border-top: 1px solid #a1a1aa;
+    --c2-text-field__focus--border-right: 1px solid #a1a1aa;
+    --c2-text-field__focus--border-bottom: 1px solid #a1a1aa;
+    --c2-text-field__focus--border-left: 1px solid #a1a1aa;
+    --c2-text-field__focus--outline: 3px solid rgba(244, 244, 245, 0.15);
+  }
+</style>
+<c2-text-field placeholder="Your email" class="dark"><c2-feather-mail slot="prefix-icon"></c2-feather-mail></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Brand ring
+<style>
+  .brand-ring {
+    width: 220px;
+    --c2-text-field--border-top: 1px solid #ddd6fe;
+    --c2-text-field--border-right: 1px solid #ddd6fe;
+    --c2-text-field--border-bottom: 1px solid #ddd6fe;
+    --c2-text-field--border-left: 1px solid #ddd6fe;
+    --c2-text-field__hover--border-top: 1px solid #a78bfa;
+    --c2-text-field__hover--border-right: 1px solid #a78bfa;
+    --c2-text-field__hover--border-bottom: 1px solid #a78bfa;
+    --c2-text-field__hover--border-left: 1px solid #a78bfa;
+    --c2-text-field__focus--border-top: 1px solid #7c3aed;
+    --c2-text-field__focus--border-right: 1px solid #7c3aed;
+    --c2-text-field__focus--border-bottom: 1px solid #7c3aed;
+    --c2-text-field__focus--border-left: 1px solid #7c3aed;
+    --c2-text-field__focus--outline: 3px solid rgba(124, 58, 237, 0.2);
+    --c2-text-field__icon--color: #7c3aed;
+  }
+</style>
+<c2-text-field placeholder="Your email" class="brand-ring"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Sharp
+<style>
+  .sharp {
+    width: 220px;
+    --c2-text-field--border-top-left-radius: 0px;
+    --c2-text-field--border-top-right-radius: 0px;
+    --c2-text-field--border-bottom-left-radius: 0px;
+    --c2-text-field--border-bottom-right-radius: 0px;
+    --c2-text-field--border-top: 1px solid #18181b;
+    --c2-text-field--border-right: 1px solid #18181b;
+    --c2-text-field--border-bottom: 1px solid #18181b;
+    --c2-text-field--border-left: 1px solid #18181b;
+    --c2-text-field__hover--border-top: 1px solid #18181b;
+    --c2-text-field__hover--border-right: 1px solid #18181b;
+    --c2-text-field__hover--border-bottom: 1px solid #18181b;
+    --c2-text-field__hover--border-left: 1px solid #18181b;
+    --c2-text-field__focus--border-top: 2px solid #18181b;
+    --c2-text-field__focus--border-right: 2px solid #18181b;
+    --c2-text-field__focus--border-bottom: 2px solid #18181b;
+    --c2-text-field__focus--border-left: 2px solid #18181b;
+    --c2-text-field__focus--outline: 0px solid transparent;
+    --c2-text-field--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --c2-text-field--font-size: 13px;
+  }
+</style>
+<c2-text-field placeholder="> command" class="sharp"></c2-text-field>
+```
+
+</GalleryGrid>
+
+## Sizes
+
+Height follows `--c2-text-field--min-height`, the paddings and the font size; icons scale with `--c2-text-field__icon--size`. Each card is one class.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Extra small
+<style>
+  .xs {
+    width: 160px;
+    --c2-text-field--min-height: 24px;
+    --c2-text-field--font-size: 12px;
+    --c2-text-field--line-height: 16px;
+    --c2-text-field--padding-top: 2px;
+    --c2-text-field--padding-bottom: 2px;
+    --c2-text-field--padding-left: 6px;
+    --c2-text-field--padding-right: 4px;
+    --c2-text-field--gap: 4px;
+    --c2-text-field--border-top-left-radius: 4px;
+    --c2-text-field--border-top-right-radius: 4px;
+    --c2-text-field--border-bottom-left-radius: 4px;
+    --c2-text-field--border-bottom-right-radius: 4px;
+    --c2-text-field__icon--size: 12px;
+    --c2-text-field__focus--outline: 2px solid rgba(71, 110, 249, 0.2);
+    --c2-text-field__supporting-text--font-size: 11px;
+    --c2-text-field__supporting-text--line-height: 14px;
+  }
+</style>
+<c2-text-field placeholder="Extra small · 24px" class="xs"><c2-feather-search slot="prefix-icon"></c2-feather-search></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 180px;
+    --c2-text-field--min-height: 28px;
+    --c2-text-field--font-size: 13px;
+    --c2-text-field--line-height: 18px;
+    --c2-text-field--padding-top: 3px;
+    --c2-text-field--padding-bottom: 3px;
+    --c2-text-field--padding-left: 8px;
+    --c2-text-field--padding-right: 6px;
+    --c2-text-field--gap: 6px;
+    --c2-text-field--border-top-left-radius: 4px;
+    --c2-text-field--border-top-right-radius: 4px;
+    --c2-text-field--border-bottom-left-radius: 4px;
+    --c2-text-field--border-bottom-right-radius: 4px;
+    --c2-text-field__icon--size: 14px;
+    --c2-text-field__focus--outline: 2px solid rgba(71, 110, 249, 0.2);
+  }
+</style>
+<c2-text-field placeholder="Compact · 28px" class="compact"><c2-feather-search slot="prefix-icon"></c2-feather-search></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Default size
+<style>
+  .default-size {
+    width: 220px;
+  }
+</style>
+<c2-text-field placeholder="Default · 36px" class="default-size"><c2-feather-search slot="prefix-icon"></c2-feather-search></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .large {
+    width: 240px;
+    --c2-text-field--min-height: 48px;
+    --c2-text-field--font-size: 16px;
+    --c2-text-field--line-height: 24px;
+    --c2-text-field--padding-top: 10px;
+    --c2-text-field--padding-bottom: 10px;
+    --c2-text-field--padding-left: 16px;
+    --c2-text-field--padding-right: 14px;
+    --c2-text-field--border-top-left-radius: 10px;
+    --c2-text-field--border-top-right-radius: 10px;
+    --c2-text-field--border-bottom-left-radius: 10px;
+    --c2-text-field--border-bottom-right-radius: 10px;
+    --c2-text-field__icon--size: 20px;
+  }
+</style>
+<c2-text-field placeholder="Large · 48px" class="large"><c2-feather-search slot="prefix-icon"></c2-feather-search></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Extra large
+<style>
+  .xl {
+    width: 260px;
+    --c2-text-field--min-height: 56px;
+    --c2-text-field--font-size: 18px;
+    --c2-text-field--line-height: 28px;
+    --c2-text-field--padding-top: 12px;
+    --c2-text-field--padding-bottom: 12px;
+    --c2-text-field--padding-left: 18px;
+    --c2-text-field--padding-right: 16px;
+    --c2-text-field--gap: 10px;
+    --c2-text-field--border-top-left-radius: 12px;
+    --c2-text-field--border-top-right-radius: 12px;
+    --c2-text-field--border-bottom-left-radius: 12px;
+    --c2-text-field--border-bottom-right-radius: 12px;
+    --c2-text-field__icon--size: 22px;
+    --c2-text-field__focus--outline: 4px solid rgba(71, 110, 249, 0.2);
+    --c2-text-field__supporting-text--font-size: 14px;
+    --c2-text-field__supporting-text--line-height: 20px;
+  }
+</style>
+<c2-text-field placeholder="Extra large · 56px" class="xl"><c2-feather-search slot="prefix-icon"></c2-feather-search></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Large with helper
+<style>
+  .large-helper {
+    width: 260px;
+    --c2-text-field--min-height: 48px;
+    --c2-text-field--font-size: 16px;
+    --c2-text-field--line-height: 24px;
+    --c2-text-field--padding-top: 10px;
+    --c2-text-field--padding-bottom: 10px;
+    --c2-text-field--padding-left: 16px;
+    --c2-text-field--padding-right: 14px;
+    --c2-text-field--border-top-left-radius: 10px;
+    --c2-text-field--border-top-right-radius: 10px;
+    --c2-text-field--border-bottom-left-radius: 10px;
+    --c2-text-field--border-bottom-right-radius: 10px;
+    --c2-text-field__icon--size: 20px;
+    --c2-text-field__supporting-text--font-size: 13px;
+    --c2-text-field__supporting-text--line-height: 18px;
+    --c2-text-field__supporting-text--gap: 6px;
+  }
+</style>
+<c2-text-field type="email" placeholder="you@example.com" help="Helper text scales with the field." class="large-helper"><c2-feather-mail slot="prefix-icon"></c2-feather-mail></c2-text-field>
+```
+
+</GalleryGrid>
+
+## States
+
+`error` swaps the border and ring for the `__error` set and shows `error-text` under the field; a success look is just green values on a class.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Error
+<style>
+  .error-field {
+    width: 220px;
+  }
+</style>
+<c2-text-field error value="ada@example" error-text="Enter a valid email address." class="error-field"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .success {
+    width: 220px;
+    --c2-text-field--border-top: 1px solid #16a34a;
+    --c2-text-field--border-right: 1px solid #16a34a;
+    --c2-text-field--border-bottom: 1px solid #16a34a;
+    --c2-text-field--border-left: 1px solid #16a34a;
+    --c2-text-field__hover--border-top: 1px solid #15803d;
+    --c2-text-field__hover--border-right: 1px solid #15803d;
+    --c2-text-field__hover--border-bottom: 1px solid #15803d;
+    --c2-text-field__hover--border-left: 1px solid #15803d;
+    --c2-text-field__focus--border-top: 1px solid #16a34a;
+    --c2-text-field__focus--border-right: 1px solid #16a34a;
+    --c2-text-field__focus--border-bottom: 1px solid #16a34a;
+    --c2-text-field__focus--border-left: 1px solid #16a34a;
+    --c2-text-field__focus--outline: 3px solid rgba(22, 163, 74, 0.2);
+    --c2-text-field__icon--color: #16a34a;
+    --c2-text-field__supporting-text--color: #15803d;
+  }
+</style>
+<c2-text-field value="ada" help="Username is available." class="success"><c2-feather-check-circle slot="suffix-icon"></c2-feather-check-circle></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Read only
+<style>
+  .read-only-field {
+    width: 220px;
+  }
+</style>
+<c2-text-field readonly value="ACME-8841-Q" help="Assigned by the system." class="read-only-field"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Disabled
+<style>
+  .disabled-field {
+    width: 220px;
+  }
+</style>
+<c2-text-field disabled value="Not editable" class="disabled-field"></c2-text-field>
+```
+
+</GalleryGrid>
+
+## Content
+
+Icons, adornment text, the clear button, helper text, the counter and a `c2-label` caption.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Search
+<style>
+  .search {
+    width: 220px;
+    --c2-text-field--border-top-left-radius: 999px;
+    --c2-text-field--border-top-right-radius: 999px;
+    --c2-text-field--border-bottom-left-radius: 999px;
+    --c2-text-field--border-bottom-right-radius: 999px;
+    --c2-text-field--padding-left: 14px;
+    --c2-text-field--padding-right: 12px;
+    --c2-text-field--background: #f4f4f5;
+    --c2-text-field--border-top: 1px solid transparent;
+    --c2-text-field--border-right: 1px solid transparent;
+    --c2-text-field--border-bottom: 1px solid transparent;
+    --c2-text-field--border-left: 1px solid transparent;
+    --c2-text-field__hover--border-top: 1px solid transparent;
+    --c2-text-field__hover--border-right: 1px solid transparent;
+    --c2-text-field__hover--border-bottom: 1px solid transparent;
+    --c2-text-field__hover--border-left: 1px solid transparent;
+    --c2-text-field__focus--background: #ffffff;
+  }
+</style>
+<c2-text-field type="search" clearable placeholder="Search…" class="search"><c2-feather-search slot="prefix-icon"></c2-feather-search></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Password
+<style>
+  .password {
+    width: 220px;
+  }
+</style>
+<c2-text-field type="password" value="correct horse" class="password"><c2-feather-lock slot="prefix-icon"></c2-feather-lock><c2-feather-eye slot="suffix-icon"></c2-feather-eye></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Currency
+<style>
+  .currency {
+    width: 220px;
+  }
+  .currency .adornment {
+    width: auto;
+    height: auto;
+    font-size: 13px;
+    color: #71717a;
+  }
+</style>
+<c2-text-field type="number" placeholder="0.00" class="currency"><span slot="prefix-icon" class="adornment">$</span><span slot="suffix-icon" class="adornment">USD</span></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=URL prefix
+<style>
+  .url {
+    width: 240px;
+    --c2-text-field--gap: 4px;
+  }
+  .url .adornment {
+    width: auto;
+    height: auto;
+    font-size: 13px;
+    color: #a1a1aa;
+  }
+</style>
+<c2-text-field placeholder="your-site" class="url"><span slot="prefix-icon" class="adornment">https://</span><span slot="suffix-icon" class="adornment">.com</span></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Clearable
+<style>
+  .clearable {
+    width: 220px;
+    --c2-text-field__clear-icon--color: #71717a;
+    --c2-text-field__clear-icon__hover--color: #dc2626;
+  }
+</style>
+<c2-text-field clearable value="Click × to clear" class="clearable"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Helper text
+<style>
+  .helper {
+    width: 220px;
+  }
+</style>
+<c2-text-field placeholder="Username" help="Lowercase letters and digits only." class="helper"><c2-feather-user slot="prefix-icon"></c2-feather-user></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Character counter
+<style>
+  .counter {
+    width: 220px;
+  }
+</style>
+<c2-text-field maxlength="24" value="Quarterly report" help="Shown in the sidebar." class="counter"></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Help icon
+<style>
+  .help-icon {
+    width: 200px;
+    --c2-text-field__help-icon--color: #476ef9;
+  }
+</style>
+<c2-text-field placeholder="API key" class="help-icon"><c2-feather-help-circle slot="help-icon" title="Found under Settings › Developer"></c2-feather-help-circle></c2-text-field>
+```
+
+```html tag=MdxCodeBlock,label=Labelled
+<style>
+  .labelled {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 220px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+</style>
+<div class="labelled">
+  <c2-label for="gallery-date" required>Start date</c2-label>
+  <c2-text-field id="gallery-date" required placeholder="DD / MM / YYYY" help="Leave empty to start today."><c2-feather-calendar slot="suffix-icon"></c2-feather-calendar></c2-text-field>
+</div>
+```
+
+</GalleryGrid>

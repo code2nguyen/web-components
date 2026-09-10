@@ -5,13 +5,19 @@
   $theme: (
     background-color: null,
     border-radius: 999px,
+    border: none,
 
     hover--background-color: variables.$color-bg-dark,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+    disabled--opacity: variables.$disabled-content-opacity,
+    selected--background-color: variables.$color-bg-dark,
 
     icon--width: 24px,
     icon--height: 24px,
     icon--color: null,
     icon__hover--color: null,
+    icon__selected--color: null,
 
     state-layer--size: 48px,
   )
@@ -21,7 +27,26 @@
   display: inline-flex;
 }
 
+:host([hidden]) {
+  display: none;
+}
+
+:host([disabled]) {
+  pointer-events: none;
+  opacity: css.cssVar(disabled--opacity);
+}
+
 .c2-icon-button {
+  // Reset the native button.
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: css.cssVar(border);
+  font: inherit;
+  color: inherit;
+  line-height: 0;
+
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -40,10 +65,24 @@
       color: css.cssVar(icon__hover--color);
     }
   }
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+:host([selected]) .c2-icon-button {
+  background-color: css.cssVar(selected--background-color);
+  ::slotted(*) {
+    color: css.cssVar(icon__selected--color, icon--color);
+  }
 }
 ::slotted(*) {
   width: css.cssVar(icon--width);
   height: css.cssVar(icon--height);
   color: css.cssVar(icon--color);
   transition: animation.standard(color);
+  // Size the icon components of this library to the slot: feather icons and Material icon ligatures.
+  --c2-feather-icon--size: #{css.cssVar(icon--width)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--width)};
 }

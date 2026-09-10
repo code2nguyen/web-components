@@ -2,22 +2,84 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-card</title>
     <script type="module" src="/src/card.ts"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 24px;
+        align-items: start;
       }
-      .demo {
-        display: flex;
-        align-items: center;
+      h3 {
+        margin: 0;
+        font-size: 15px;
+      }
+      p {
+        margin: 0;
+        font-size: 13px;
+        color: #52525b;
+      }
+      .media {
+        height: 120px;
+        background: linear-gradient(135deg, #6366f1, #ec4899);
+      }
+      .lift {
+        --c2-card--box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        --c2-card__hover--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        --c2-card__hover--transform: translateY(-2px);
+      }
+      .divided {
+        --c2-card__header--padding-bottom: 12px;
+        --c2-card__header--border-bottom: 1px solid #e4e4e7;
+        --c2-card__footer--padding-top: 12px;
+        --c2-card__footer--border-top: 1px solid #e4e4e7;
+        --c2-card__footer--justify-content: flex-end;
       }
     </style>
   </head>
   <body>
-    <c2-card> test </c2-card>
-    <c2-card disabled> test </c2-card>
+    <c2-card>Plain card, body only.</c2-card>
+
+    <c2-card>
+      <h3 slot="header">Header + body + footer</h3>
+      <p>Sections render only when their slot has content.</p>
+      <button slot="footer">Cancel</button>
+      <button slot="footer">Save</button>
+    </c2-card>
+
+    <c2-card class="divided">
+      <h3 slot="header">Divided</h3>
+      <p>Header and footer dividers via tokens.</p>
+      <button slot="footer">Done</button>
+    </c2-card>
+
+    <c2-card class="lift">
+      <div slot="media" class="media"></div>
+      <h3 slot="header">Media card</h3>
+      <p>The media slot bleeds to the edges and is clipped to the radius. Hover lifts the card.</p>
+    </c2-card>
+
+    <c2-card interactive onclick="this.querySelector('p').textContent = 'clicked ' + new Date().toLocaleTimeString()">
+      <h3 slot="header">Interactive</h3>
+      <p>Tab to me, press Enter or Space.</p>
+    </c2-card>
+
+    <c2-card href="https://example.com" target="_blank" rel="noopener">
+      <h3 slot="header">Link card</h3>
+      <p>The whole card is an anchor.</p>
+    </c2-card>
+
+    <c2-card disabled interactive>
+      <h3 slot="header">Disabled</h3>
+      <p>Dimmed, no interaction.</p>
+    </c2-card>
+
+    <c2-card>
+      <div slot="media" class="media" style="height: 80px"></div>
+    </c2-card>
   </body>
 </html>

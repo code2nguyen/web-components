@@ -1,0 +1,267 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Details } from '@c2n/details'
+
+## Presets
+
+Curated looks for `c2-details`. Open any card in the studio to start from it. The frame is `--c2-details--*`, the header is `--c2-details__header--*` with `__icon`, `__content` (the second header row), `__hover`, `__open`, `__focus` and `__disabled` states, and the body is `--c2-details__content--*`. Panels that share a `name` form an exclusive accordion.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Card
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .card {
+    --c2-details--border-top-left-radius: 12px;
+    --c2-details--border-top-right-radius: 12px;
+    --c2-details--border-bottom-left-radius: 12px;
+    --c2-details--border-bottom-right-radius: 12px;
+    --c2-details--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --c2-details__header--background: #fafafa;
+    --c2-details__header__hover--background: #f4f4f5;
+    --c2-details__content--border-top: 1px solid #f4f4f5;
+    --c2-details__content--padding-top: 12px;
+  }
+</style>
+<c2-details style="width: 240px" class="g card" expanded>
+  <span slot="title">Shipping</span>
+  <p>Delivered in 3–5 business days. Free over $50.</p>
+</c2-details>
+```
+
+```html tag=MdxCodeBlock,label=Borderless
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .borderless {
+    --c2-details--border-top: none;
+    --c2-details--border-right: none;
+    --c2-details--border-left: none;
+    --c2-details--border-bottom: 1px solid #e4e4e7;
+    --c2-details--background: transparent;
+    --c2-details--border-top-left-radius: 0px;
+    --c2-details--border-top-right-radius: 0px;
+    --c2-details--border-bottom-left-radius: 0px;
+    --c2-details--border-bottom-right-radius: 0px;
+    --c2-details__header--padding-left: 0px;
+    --c2-details__header--padding-right: 0px;
+    --c2-details__header__hover--background: transparent;
+    --c2-details__header__hover--color: #2563eb;
+    --c2-details__header__icon--color: #a1a1aa;
+  }
+</style>
+<c2-details style="width: 240px" class="g borderless" expanded>
+  <span slot="title">Shipping</span>
+  <p>Delivered in 3–5 business days. Free over $50.</p>
+</c2-details>
+```
+
+```html tag=MdxCodeBlock,label=Icon first
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .icon-first {
+    --c2-details__header--flex-direction: row-reverse;
+    --c2-details__header--gap: 8px;
+    --c2-details__header__icon--width: 16px;
+    --c2-details__header__icon--height: 16px;
+    --c2-details__header__icon--rotate: 90deg;
+    --c2-details__header--padding-top: 10px;
+    --c2-details__header--padding-bottom: 10px;
+    --c2-details__content--padding-left: 40px;
+  }
+</style>
+<c2-details style="width: 240px" class="g icon-first" expanded>
+  <span slot="title">Shipping</span>
+  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  <p>Delivered in 3–5 business days. Free over $50.</p>
+</c2-details>
+```
+
+```html tag=MdxCodeBlock,label=Filled header
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .filled {
+    --c2-details--border-top: none;
+    --c2-details--border-right: none;
+    --c2-details--border-bottom: none;
+    --c2-details--border-left: none;
+    --c2-details--border-top-left-radius: 10px;
+    --c2-details--border-top-right-radius: 10px;
+    --c2-details--border-bottom-left-radius: 10px;
+    --c2-details--border-bottom-right-radius: 10px;
+    --c2-details--background: #eff6ff;
+    --c2-details__header--background: #2563eb;
+    --c2-details__header--color: #ffffff;
+    --c2-details__header__hover--background: #1d4ed8;
+    --c2-details__header__icon--color: rgba(255, 255, 255, 0.8);
+    --c2-details__content--color: #1e3a8a;
+    --c2-details__content--padding-top: 12px;
+  }
+</style>
+<c2-details style="width: 240px" class="g filled" expanded>
+  <span slot="title">Shipping</span>
+  <p>Delivered in 3–5 business days. Free over $50.</p>
+</c2-details>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .dark {
+    --c2-details--background: #18181b;
+    --c2-details--border-top: 1px solid #27272a;
+    --c2-details--border-right: 1px solid #27272a;
+    --c2-details--border-bottom: 1px solid #27272a;
+    --c2-details--border-left: 1px solid #27272a;
+    --c2-details--border-top-left-radius: 10px;
+    --c2-details--border-top-right-radius: 10px;
+    --c2-details--border-bottom-left-radius: 10px;
+    --c2-details--border-bottom-right-radius: 10px;
+    --c2-details__header--color: #fafafa;
+    --c2-details__header__hover--background: #27272a;
+    --c2-details__header__icon--color: #71717a;
+    --c2-details__content--color: #a1a1aa;
+  }
+</style>
+<c2-details style="width: 240px" class="g dark" expanded>
+  <span slot="title">Shipping</span>
+  <p>Delivered in 3–5 business days. Free over $50.</p>
+</c2-details>
+```
+
+```html tag=MdxCodeBlock,label=Description row
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .described {
+    --c2-details--border-top-left-radius: 10px;
+    --c2-details--border-top-right-radius: 10px;
+    --c2-details--border-bottom-left-radius: 10px;
+    --c2-details--border-bottom-right-radius: 10px;
+    --c2-details__header__content--color: #71717a;
+    --c2-details__content--border-top: 1px solid #f4f4f5;
+    --c2-details__content--padding-top: 12px;
+  }
+</style>
+<c2-details style="width: 240px" class="g described">
+  <span slot="title">Notifications</span>
+  <span slot="header-content">Email, push and weekly digest</span>
+  <p>Choose how you want to be notified about mentions and replies.</p>
+</c2-details>
+```
+
+```html tag=MdxCodeBlock,label=Plus / minus
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .plus-minus {
+    --c2-details--border-top: none;
+    --c2-details--border-right: none;
+    --c2-details--border-left: none;
+    --c2-details--border-bottom: 1px solid #e4e4e7;
+    --c2-details--background: transparent;
+    --c2-details--border-top-left-radius: 0px;
+    --c2-details--border-top-right-radius: 0px;
+    --c2-details--border-bottom-left-radius: 0px;
+    --c2-details--border-bottom-right-radius: 0px;
+    --c2-details__header--padding-left: 0px;
+    --c2-details__header--padding-right: 0px;
+    --c2-details__header--font-weight: 600;
+    --c2-details__header__hover--background: transparent;
+    --c2-details__header__icon--width: 16px;
+    --c2-details__header__icon--height: 16px;
+    --c2-details__header__icon--color: #18181b;
+    --c2-details__content--padding-left: 0px;
+    --c2-details__content--padding-right: 0px;
+  }
+</style>
+<c2-details style="width: 240px" class="g plus-minus" expanded>
+  <span slot="title">Is there a free trial?</span>
+  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+  <svg slot="expanded-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+  <p>Yes, 14 days with every feature unlocked. No credit card required.</p>
+</c2-details>
+```
+
+```html tag=MdxCodeBlock,label=Open state
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .open-state {
+    --c2-details--border-top-left-radius: 10px;
+    --c2-details--border-top-right-radius: 10px;
+    --c2-details--border-bottom-left-radius: 10px;
+    --c2-details--border-bottom-right-radius: 10px;
+    --c2-details__header__open--background: #f0fdf4;
+    --c2-details__header__open--color: #166534;
+    --c2-details__header__hover--background: #f0fdf4;
+    --c2-details__header__icon--color: #16a34a;
+    --c2-details__content--border-top: 1px solid #dcfce7;
+    --c2-details__content--padding-top: 12px;
+  }
+</style>
+<c2-details style="width: 240px" class="g open-state" expanded>
+  <span slot="title">Shipping</span>
+  <p>Delivered in 3–5 business days. Free over $50.</p>
+</c2-details>
+```
+
+```html tag=MdxCodeBlock,label=Accordion
+<style>
+  .g p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .accordion {
+    display: grid;
+    gap: 6px;
+    width: 240px;
+  }
+  .accordion c2-details {
+    --c2-details--border-top-left-radius: 8px;
+    --c2-details--border-top-right-radius: 8px;
+    --c2-details--border-bottom-left-radius: 8px;
+    --c2-details--border-bottom-right-radius: 8px;
+    --c2-details__header--padding-top: 10px;
+    --c2-details__header--padding-bottom: 10px;
+    --c2-details__header--font-size: 13px;
+  }
+</style>
+<div class="g accordion">
+  <c2-details name="plan" label="Starter" expanded><p>For side projects. 1 user, 3 projects.</p></c2-details>
+  <c2-details name="plan" label="Team"><p>Up to 10 users, unlimited projects.</p></c2-details>
+  <c2-details name="plan" label="Enterprise"><p>SSO, audit log, dedicated support.</p></c2-details>
+</div>
+```
+
+</GalleryGrid>

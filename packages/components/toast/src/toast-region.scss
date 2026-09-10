@@ -1,0 +1,50 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-toast-region,
+  $theme: (
+    container--width: 360px,
+    container--gap: 12px,
+    container--offset: 20px,
+    container--z-index: 1000,
+  )
+);
+:host {
+  display: block;
+  position: fixed;
+  z-index: css.cssVar(container--z-index);
+  width: css.cssVar(container--width);
+  max-width: calc(100vw - 2 * #{css.cssVar(container--offset)});
+  bottom: max(#{css.cssVar(container--offset)}, env(safe-area-inset-bottom));
+  right: max(#{css.cssVar(container--offset)}, env(safe-area-inset-right));
+  pointer-events: none;
+}
+:host([hidden]) {
+  display: none;
+}
+:host([position^='top-']) {
+  bottom: auto;
+  top: max(#{css.cssVar(container--offset)}, env(safe-area-inset-top));
+}
+:host([position$='-left']) {
+  right: auto;
+  left: max(#{css.cssVar(container--offset)}, env(safe-area-inset-left));
+}
+:host([position$='-center']) {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+:host([inline]) {
+  position: static;
+  transform: none;
+  max-width: 100%;
+}
+section {
+  max-height: calc(100dvh - 2 * #{css.cssVar(container--offset)});
+  overflow: auto;
+  pointer-events: auto;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(container--gap);
+}

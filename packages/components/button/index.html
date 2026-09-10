@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-button</title>
+    <script type="module" src="/src/button.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .outline {
+        --c2-button__container--background-color: transparent;
+        --c2-button__container--color: rgb(34, 34, 34);
+        --c2-button__container--border: 1px solid rgb(177, 177, 177);
+        --c2-button__container__hover--background-color: rgb(248, 248, 248);
+        --c2-button__container__active--background-color: rgb(230, 230, 230);
+      }
+      .pill {
+        --c2-button__container--border-radius: 999px;
+        --c2-button__container--background-color: #18181b;
+        --c2-button__container__hover--background-color: #3f3f46;
+        --c2-button__container__active--background-color: #52525b;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="row">
+      <c2-button>Save</c2-button>
+      <c2-button>
+        <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"></path>
+        </svg>
+        New item
+      </c2-button>
+      <c2-button>
+        Continue
+        <svg slot="suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"></path>
+        </svg>
+      </c2-button>
+      <c2-button running>Saving…</c2-button>
+      <c2-button disabled>Disabled</c2-button>
+    </div>
+
+    <div class="row">
+      <c2-button class="outline">Outline</c2-button>
+      <c2-button class="outline" running>Loading</c2-button>
+      <c2-button class="pill">Pill</c2-button>
+      <c2-button class="pill" running>
+        <svg slot="running-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+        </svg>
+        Custom running icon
+      </c2-button>
+    </div>
+
+    <div class="row">
+      <c2-button id="toggle">Click to run for 2s</c2-button>
+      <span id="log"></span>
+    </div>
+
+    <script type="module">
+      const button = document.getElementById('toggle')
+      const log = document.getElementById('log')
+      let count = 0
+      button.addEventListener('click', () => {
+        log.textContent = `clicked ${++count}×`
+        button.running = true
+        setTimeout(() => (button.running = false), 2000)
+      })
+    </script>
+  </body>
+</html>

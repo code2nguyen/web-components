@@ -2,23 +2,98 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>c2-avatar</title>
     <script type="module" src="/src/avatar.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 24px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .stack c2-avatar {
+        --c2-avatar--box-shadow: 0 0 0 2px #fff;
+      }
+      .stack c2-avatar + c2-avatar {
+        margin-left: -10px;
       }
     </style>
   </head>
-
   <body>
-    <c2-avatar name="Nguyen Thai Vinh"></c2-avatar>
-    <br />
-    <c2-avatar name="Nguyen Thai Vinh">
-      <img src="./chat.avif" />
-    </c2-avatar>
+    <section>
+      <h2>Initials: 1, 2 (first + last), explicit, empty name, legacy initialCount attribute</h2>
+      <div class="row">
+        <c2-avatar name="Nguyen Thai Vinh"></c2-avatar>
+        <c2-avatar name="Nguyen Thai Vinh" initial-count="2"></c2-avatar>
+        <c2-avatar name="Nguyen Thai Vinh" initials="TV"></c2-avatar>
+        <c2-avatar name=""></c2-avatar>
+        <c2-avatar name="Elisa Jasmin" initialCount="2"></c2-avatar>
+      </div>
+    </section>
+    <section>
+      <h2>Sizes via --c2-avatar--size (font follows)</h2>
+      <div class="row">
+        <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 20px"></c2-avatar>
+        <c2-avatar name="Ada Lovelace" initial-count="2"></c2-avatar>
+        <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 48px"></c2-avatar>
+        <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 72px"></c2-avatar>
+      </div>
+    </section>
+    <section>
+      <h2>Image via src, broken src falls back to initials, slotted svg</h2>
+      <div class="row">
+        <c2-avatar name="Elisa Jasmin" src="./chat.avif" style="--c2-avatar--size: 48px"></c2-avatar>
+        <c2-avatar name="Elisa Jasmin" initial-count="2" src="/does-not-exist.png" style="--c2-avatar--size: 48px"></c2-avatar>
+        <c2-avatar name="Bot" style="--c2-avatar--size: 48px; --c2-avatar--background: #18181b">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="8" width="18" height="12" rx="2" />
+            <path d="M12 8V4M8 14h.01M16 14h.01" />
+          </svg>
+        </c2-avatar>
+      </div>
+    </section>
+    <section>
+      <h2>auto-color</h2>
+      <div class="row">
+        <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
+        <c2-avatar auto-color name="Grace Hopper" initial-count="2"></c2-avatar>
+        <c2-avatar auto-color name="Alan Turing" initial-count="2"></c2-avatar>
+        <c2-avatar auto-color name="Katherine Johnson" initial-count="2"></c2-avatar>
+        <c2-avatar auto-color name="Linus Torvalds" initial-count="2"></c2-avatar>
+      </div>
+    </section>
+    <section>
+      <h2>Status dot and badge slot</h2>
+      <div class="row">
+        <c2-avatar name="Ada Lovelace" initial-count="2" status="online"></c2-avatar>
+        <c2-avatar name="Ada Lovelace" initial-count="2" status="away"></c2-avatar>
+        <c2-avatar name="Ada Lovelace" initial-count="2" status="busy"></c2-avatar>
+        <c2-avatar name="Ada Lovelace" initial-count="2" status="offline"></c2-avatar>
+        <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 40px">
+          <span slot="badge" style="background: #dc2626; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 5px">3</span>
+        </c2-avatar>
+      </div>
+    </section>
+    <section>
+      <h2>Stacked group</h2>
+      <div class="row stack">
+        <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
+        <c2-avatar auto-color name="Grace Hopper" initial-count="2"></c2-avatar>
+        <c2-avatar auto-color name="Alan Turing" initial-count="2"></c2-avatar>
+        <c2-avatar initials="+4" style="--c2-avatar--background: #e4e4e7; --c2-avatar--color: #52525b"></c2-avatar>
+      </div>
+    </section>
   </body>
 </html>

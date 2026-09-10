@@ -1,0 +1,138 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Badge } from '@c2n/badge'
+import { Avatar } from '@c2n/avatar'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
+
+## Presets
+
+Curated looks for `c2-badge`. Open any card in the studio to start from it. The tone pairs (`--c2-badge__success--background` and `--color`, …) recolour a tone everywhere; `--c2-badge--background` and `--c2-badge--color` override the active tone on one badge, and the shape and typography variables turn the pill into a tag, a chip or a counter.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Soft
+<c2-badge tone="success">Active</c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Solid
+<style>
+  .solid {
+    --c2-badge--background: #0265dc;
+    --c2-badge--color: #ffffff;
+  }
+</style>
+<c2-badge class="solid">Pro</c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Outlined
+<style>
+  .outlined {
+    --c2-badge--background: transparent;
+    --c2-badge--border: 1px solid currentColor;
+  }
+</style>
+<c2-badge class="outlined" tone="primary">Draft</c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Tag
+<style>
+  .tag {
+    --c2-badge--height: 18px;
+    --c2-badge--font-size: 11px;
+    --c2-badge--font-weight: 600;
+    --c2-badge--letter-spacing: 0.04em;
+    --c2-badge--text-transform: uppercase;
+    --c2-badge--border-radius: 4px;
+  }
+</style>
+<c2-badge class="tag" tone="info">Beta</c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Counter
+<c2-badge tone="danger" count="120"></c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Dark counter
+<style>
+  .dark-counter {
+    --c2-badge--background: #18181b;
+    --c2-badge--color: #fafafa;
+    --c2-badge--font-weight: 600;
+  }
+</style>
+<c2-badge class="dark-counter" count="8"></c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Status dot
+<style>
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #3f3f46;
+  }
+</style>
+<span class="status"><c2-badge dot tone="success" pulse></c2-badge> All systems operational</span>
+```
+
+```html tag=MdxCodeBlock,label=Notification
+<c2-badge tone="danger" count="5" overlap="circular">
+  <c2-icon-button slot="anchor"><c2-feather-bell></c2-feather-bell></c2-icon-button>
+</c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Presence
+<style>
+  .presence {
+    --c2-badge__dot--size: 10px;
+  }
+</style>
+<c2-badge class="presence" dot tone="success" placement="bottom-right" overlap="circular">
+  <c2-avatar slot="anchor" name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 40px"></c2-avatar>
+</c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Icon label
+<style>
+  .icon-label {
+    --c2-badge--padding-left: 8px;
+    --c2-badge--padding-right: 10px;
+    --c2-badge--height: 24px;
+    --c2-badge__icon--size: 14px;
+  }
+</style>
+<c2-badge class="icon-label" tone="success">
+  <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  Verified
+</c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Rounded square
+<style>
+  .square {
+    --c2-badge--border-radius: 6px;
+    --c2-badge--height: 22px;
+    --c2-badge--min-width: 22px;
+    --c2-badge--font-weight: 600;
+    --c2-badge__primary--background: #0265dc;
+    --c2-badge__primary--color: #ffffff;
+  }
+</style>
+<c2-badge class="square" tone="primary" count="7"></c2-badge>
+```
+
+```html tag=MdxCodeBlock,label=Warm tones
+<style>
+  .warm {
+    --c2-badge__warning--background: #ffedd5;
+    --c2-badge__warning--color: #c2410c;
+    --c2-badge--font-weight: 600;
+  }
+</style>
+<c2-badge class="warm" tone="warning">Expiring soon</c2-badge>
+```
+
+</GalleryGrid>

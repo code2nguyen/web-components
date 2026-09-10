@@ -1,0 +1,70 @@
+---
+title: 'Code Viewer'
+description: 'Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { CodeViewer } from '@c2n/code-viewer'
+
+`c2-code-viewer` renders source code highlighted by [shiki](https://shiki.style/). Put the code in the default slot, as text inside a `<pre>` or markup inside a `<template>` (indentation is stripped), or set the `code` property; a literal `\n` in the attribute stands for a newline. `language` accepts any shiki language id or alias, `theme` any built-in theme or `css-variables`. Grammars and themes are loaded on demand into one shared highlighter with shiki's JavaScript engine, and the plain code renders immediately, server-side too, then upgrades in place. Add `dark-theme` for a light and dark pair switched by `color-scheme` (`auto` follows the OS), `line-numbers`, `highlight-lines="2-4,7"`, `copyable` (fires `code-copy`), `wrap`, `inline`, and a `title` slot for a file name header.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/code-viewer
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/code-viewer
+<style>
+  .demo {
+    width: 420px;
+    max-width: 100%;
+  }
+  .prose {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 420px;
+  }
+</style>
+<div data-label="Basic">
+  <c2-code-viewer class="demo" language="ts" copyable code="export function greet(name: string) {\n  return `Hello, ${name}!`\n}"></c2-code-viewer>
+</div>
+<div data-label="Title, line numbers, highlights">
+  <c2-code-viewer
+    class="demo"
+    language="ts"
+    line-numbers
+    highlight-lines="4,7-8"
+    copyable
+    code="import { LitElement, html } from 'lit'\n\nexport class Tabs extends LitElement {\n  selectedTab = ''\n\n  render() {\n    return html`<slot name=&quot;tab&quot;></slot>`\n  }\n}"
+  >
+    <span slot="title">src/tabs.ts</span>
+  </c2-code-viewer>
+</div>
+<div data-label="Markup, dark theme, wrap">
+  <c2-code-viewer
+    class="demo"
+    language="html"
+    theme="github-dark-default"
+    wrap
+    code="<c2-tabs selected-tab=&quot;tab2&quot;>\n  <c2-tab for=&quot;tab1&quot;>Tab 1</c2-tab>\n  <c2-tab for=&quot;tab2&quot;>Tab 2 has a long label so this line wraps inside the viewer</c2-tab>\n  <div id=&quot;tab1&quot;>Tab 1 content</div>\n</c2-tabs>"
+  ></c2-code-viewer>
+</div>
+<div data-label="Light and dark pair">
+  <c2-code-viewer class="demo" language="css" theme="github-light" dark-theme="github-dark-default" color-scheme="light" code=".tabs { --c2-tabs__indicator--color: #2563eb; }"></c2-code-viewer>
+  <c2-code-viewer class="demo" language="css" theme="github-light" dark-theme="github-dark-default" color-scheme="dark" code=".tabs { --c2-tabs__indicator--color: #2563eb; }"></c2-code-viewer>
+</div>
+<div data-label="Diff and shell">
+  <c2-code-viewer class="demo" language="diff" code="- npm install @c2n/expansion-panel\n+ npm install @c2n/details"></c2-code-viewer>
+  <c2-code-viewer class="demo" language="bash" theme="vitesse-dark" code="npm run build -w packages/components/tabs"></c2-code-viewer>
+</div>
+<div data-label="Inline">
+  <p class="prose">Call <c2-code-viewer inline language="ts" code="tabs.select('tab2')"></c2-code-viewer> to switch tabs programmatically, or set the <c2-code-viewer inline language="html" code='selected-tab="tab2"'></c2-code-viewer> attribute.</p>
+</div>
+```

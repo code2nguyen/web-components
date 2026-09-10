@@ -1,0 +1,137 @@
+---
+import { ToastRegion } from '@c2n/toast'
+---
+
+<section class="toast-demo" data-toast-demo>
+  <div class="controls motion-controls">
+    <label
+      >Entrance
+      <select data-toast-enter>
+        <option value="slide-up">Slide up (from below)</option>
+        <option value="slide-down">Slide down (from above)</option>
+        <option value="slide-right">Slide right (from left)</option>
+        <option value="slide-left">Slide left (from right)</option>
+        <option value="fade">Fade in</option>
+        <option value="scale">Scale in</option>
+        <option value="none">None</option>
+      </select>
+    </label>
+    <label
+      >Exit
+      <select data-toast-exit>
+        <option value="fade">Fade out</option>
+        <option value="slide-up">Slide up</option>
+        <option value="slide-down">Slide down</option>
+        <option value="slide-right">Slide right</option>
+        <option value="slide-left">Slide left</option>
+        <option value="scale">Scale out</option>
+        <option value="none">None</option>
+      </select>
+    </label>
+    <label
+      >Speed
+      <select data-toast-speed>
+        <option value="200">Quick · 200 ms</option>
+        <option value="400">Gentle · 400 ms</option>
+        <option value="700">Slow · 700 ms</option>
+      </select>
+    </label>
+  </div>
+  <label class="progress-toggle"><input type="checkbox" data-toast-progress checked /> Show countdown bar</label>
+  <div class="controls">
+    <button type="button" data-toast-single>Show notification</button>
+    <button type="button" data-toast-burst>Send 8 notifications</button>
+    <button type="button" data-toast-persistent>Show persistent</button>
+    <button type="button" data-toast-clear>Clear all</button>
+  </div>
+  <p>Three visible at a time. Hover or focus the stack to pause timers.</p>
+  <ToastRegion client:load showProgress inline maxVisible={3} label="Demo notifications" />
+</section>
+
+<script>
+  import type { ToastRegion, ToastAnimation } from '@c2n/toast'
+
+  // Astro islands own the runtime import. A second script import can use a different HMR URL.
+  await customElements.whenDefined('c2-toast-region')
+
+  document.querySelectorAll<HTMLElement>('[data-toast-demo]').forEach((demo) => {
+    const region = demo.querySelector<ToastRegion>('c2-toast-region')!
+    demo.querySelector<HTMLSelectElement>('[data-toast-enter]')?.addEventListener('change', (event) => {
+      region.enterAnimation = (event.target as HTMLSelectElement).value as ToastAnimation
+    })
+    demo.querySelector<HTMLSelectElement>('[data-toast-exit]')?.addEventListener('change', (event) => {
+      region.exitAnimation = (event.target as HTMLSelectElement).value as ToastAnimation
+    })
+    demo.querySelector<HTMLSelectElement>('[data-toast-speed]')?.addEventListener('change', (event) => {
+      region.animationDuration = Number((event.target as HTMLSelectElement).value)
+    })
+    demo.querySelector<HTMLInputElement>('[data-toast-progress]')?.addEventListener('change', (event) => {
+      region.showProgress = (event.target as HTMLInputElement).checked
+    })
+    let count = 0
+    const show = () => region.show({ heading: `Notification ${++count}`, message: 'A new update has arrived.', variant: 'info', duration: 5000 })
+    demo.querySelector('[data-toast-single]')?.addEventListener('click', show)
+    demo.querySelector('[data-toast-burst]')?.addEventListener('click', () => {
+      for (let i = 0; i < 8; i++) show()
+    })
+    demo.querySelector('[data-toast-persistent]')?.addEventListener('click', () => {
+      region.show({ heading: 'Connection lost', message: 'This notification stays until dismissed.', variant: 'warning', duration: 0 })
+    })
+    demo.querySelector('[data-toast-clear]')?.addEventListener('click', () => region.clear())
+  })
+</script>
+
+<style>
+  .toast-demo {
+    padding: 20px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 12px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .progress-toggle {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .motion-controls {
+    margin-bottom: 16px;
+  }
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+  }
+  select {
+    font: inherit;
+    padding: 6px;
+    color: var(--site-color-on-surface);
+    background: var(--site-color-surface);
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 6px;
+  }
+  button {
+    padding: 8px 12px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 6px;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+  }
+  button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+  p {
+    font-size: 14px;
+  }
+  c2-toast-region {
+    width: 100%;
+    --c2-toast-region__container--width: 100%;
+  }
+</style>

@@ -1,0 +1,177 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-badge,
+  $theme: (
+    height: 20px,
+    min-width: 20px,
+    padding-left: 6px,
+    padding-right: 6px,
+    gap: 4px,
+    border-radius: 999px,
+    border: none,
+    box-shadow: null,
+    background: null,
+    color: null,
+
+    font-family: inherit,
+    font-size: 12px,
+    font-weight: 500,
+    line-height: 1,
+    letter-spacing: null,
+    text-transform: none,
+
+    icon--size: 12px,
+
+    neutral--background: #f4f4f5,
+    neutral--color: #52525b,
+    primary--background: #edf1fe,
+    primary--color: #0265dc,
+    success--background: #dcfce7,
+    success--color: #166534,
+    warning--background: #fef3c7,
+    warning--color: #92400e,
+    danger--background: #fee2e2,
+    danger--color: #dc2626,
+    info--background: #e0f2fe,
+    info--color: #075985,
+
+    dot--size: 8px,
+    pulse--animation-duration: 1.5s,
+
+    anchor--border: 2px solid #ffffff,
+    anchor--offset-x: 0px,
+    anchor--offset-y: 0px,
+  )
+);
+
+:host {
+  display: inline-flex;
+  position: relative;
+  vertical-align: middle;
+  flex: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  user-select: none;
+
+  height: css.cssVar(height);
+  min-width: css.cssVar(min-width);
+  padding-left: css.cssVar(padding-left);
+  padding-right: css.cssVar(padding-right);
+  gap: css.cssVar(gap);
+  border-radius: css.cssVar(border-radius);
+  border: css.cssVar(border);
+  box-shadow: css.cssVar(box-shadow);
+
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  line-height: css.cssVar(line-height);
+  letter-spacing: css.cssVar(letter-spacing);
+  text-transform: css.cssVar(text-transform);
+
+  // Tone colours; `--c2-badge--background` / `--color` win over the tone pair.
+  background: css.cssVar(background, neutral--background);
+  color: css.cssVar(color, neutral--color);
+}
+
+@each $tone in primary, success, warning, danger, info {
+  :host([tone='#{$tone}']) .c2-badge {
+    background: css.cssVar(background, #{$tone}--background);
+    color: css.cssVar(color, #{$tone}--color);
+  }
+}
+
+::slotted([slot='prefix-icon']) {
+  display: block;
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}
+
+// Dot: a filled circle in the tone's text colour, so a single variable pair recolours both looks. The anchor ring is
+// drawn outside the dot so `--c2-badge__dot--size` is the visible diameter.
+.c2-badge.is-dot {
+  position: relative;
+  box-sizing: content-box;
+  width: css.cssVar(dot--size);
+  height: css.cssVar(dot--size);
+  min-width: 0;
+  padding: 0;
+  background: currentColor;
+  border-radius: 999px;
+
+  &.is-pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    animation: c2-badge-pulse css.cssVar(pulse--animation-duration) cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+@keyframes c2-badge-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+// Anchored: overlay pinned to a corner of the slotted anchor, ringed in the page colour. A circular anchor moves the
+// badge 14.6% inwards, which is where the corner meets the circle: (1 - 1/sqrt(2)) / 2.
+.c2-badge.is-anchored {
+  --_offset-x: #{css.cssVar(anchor--offset-x)};
+  --_offset-y: #{css.cssVar(anchor--offset-y)};
+  position: absolute;
+  z-index: 1;
+  border: css.cssVar(anchor--border);
+}
+
+:host([overlap='circular']) .c2-badge.is-anchored {
+  --_offset-x: var(--c2-badge__anchor--offset-x, 14.6%);
+  --_offset-y: var(--c2-badge__anchor--offset-y, 14.6%);
+}
+
+:host([placement='top-right']) .c2-badge.is-anchored,
+:host(:not([placement])) .c2-badge.is-anchored {
+  top: var(--_offset-y);
+  right: var(--_offset-x);
+  transform: translate(50%, -50%);
+}
+
+:host([placement='top-left']) .c2-badge.is-anchored {
+  top: var(--_offset-y);
+  left: var(--_offset-x);
+  transform: translate(-50%, -50%);
+}
+
+:host([placement='bottom-right']) .c2-badge.is-anchored {
+  bottom: var(--_offset-y);
+  right: var(--_offset-x);
+  transform: translate(50%, 50%);
+}
+
+:host([placement='bottom-left']) .c2-badge.is-anchored {
+  bottom: var(--_offset-y);
+  left: var(--_offset-x);
+  transform: translate(-50%, 50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-badge.is-dot.is-pulse::after {
+    animation: none;
+  }
+}

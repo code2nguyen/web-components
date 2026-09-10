@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@c2n/theme</title>
+    <link rel="stylesheet" href="/dist/theme.css" />
+    <script type="module">
+      import '@c2n/button'
+      import '@c2n/checkbox'
+      import '@c2n/text-field'
+      import '@c2n/select'
+      import '@c2n/list-item'
+      import '@c2n/list'
+      import '@c2n/card'
+      import '@c2n/modal'
+      import '@c2n/tabs'
+      import '@c2n/tooltip'
+      import '@c2n/icon-button'
+      import '@c2n/details'
+      import '@c2n/label'
+      import '@c2n/avatar'
+
+      document.querySelector('#toggle-theme').addEventListener('click', () => {
+        const root = document.documentElement
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark'
+      })
+      document.querySelector('#open-modal').addEventListener('click', () => document.querySelector('c2-modal').show())
+    </script>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: Inter, system-ui, sans-serif;
+        background: var(--c2-theme--color-surface);
+        color: var(--c2-theme--color-on-surface);
+      }
+      h2 {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--c2-theme--color-on-surface-variant);
+        margin: 32px 0 12px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+      .row > c2-card {
+        width: 240px;
+      }
+      /* Override tokens on a subtree: every component inside follows. */
+      .brand {
+        --c2-theme--color-primary: rebeccapurple;
+        --c2-theme--color-primary-hover: #4b2a7a;
+        --c2-theme--color-primary-active: #3a1f5e;
+        --c2-theme--color-primary-container: #efe6fb;
+        --c2-theme--radius-md: 0px;
+        --c2-theme--radius-sm: 0px;
+        --c2-theme--border: 2px dashed rebeccapurple;
+        --c2-theme--focus-ring: 3px solid rgba(102, 51, 153, 0.4);
+        padding: 16px;
+        border: 1px solid var(--c2-theme--color-outline-variant);
+      }
+      /* Probe: `inherit` as a var() fallback. The label below must use the cursive body font of this box. */
+      .font-probe {
+        font-family: 'Comic Sans MS', cursive;
+      }
+      /* Dark subtree via class. */
+      .c2-dark.panel {
+        padding: 16px;
+        background: var(--c2-theme--color-surface);
+        color: var(--c2-theme--color-on-surface);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <c2-button id="toggle-theme">Toggle data-theme</c2-button>
+      <c2-button id="open-modal">Open modal</c2-button>
+    </div>
+
+    <h2>Default tokens</h2>
+    <div class="row">
+      <c2-button>Primary</c2-button>
+      <c2-button disabled>Disabled</c2-button>
+      <c2-checkbox checked></c2-checkbox>
+      <c2-checkbox></c2-checkbox>
+      <c2-text-field placeholder="Text field"></c2-text-field>
+      <c2-text-field placeholder="Error" error error-text="Required"></c2-text-field>
+      <c2-select placeholder="Select">
+        <c2-list-item value="1">One</c2-list-item>
+        <c2-list-item value="2">Two</c2-list-item>
+      </c2-select>
+      <c2-icon-button tooltip="Tooltip"
+        ><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /></svg
+      ></c2-icon-button>
+      <c2-avatar name="Ada Lovelace"></c2-avatar>
+    </div>
+    <div class="row">
+      <c2-card
+        ><strong>Card</strong>
+        <p>Surface, border and radius come from tokens.</p></c2-card
+      >
+      <c2-list style="width: 200px">
+        <c2-list-item value="a" selected>Selected</c2-list-item>
+        <c2-list-item value="b">Item</c2-list-item>
+      </c2-list>
+      <c2-tabs>
+        <c2-tab label="One" for="p1" selected></c2-tab>
+        <c2-tab label="Two" for="p2"></c2-tab>
+        <div id="p1">Panel one</div>
+        <div id="p2">Panel two</div>
+      </c2-tabs>
+      <c2-details label="Details">Content</c2-details>
+    </div>
+
+    <h2>Token overrides on a subtree (.brand)</h2>
+    <div class="row brand">
+      <c2-button>Primary</c2-button>
+      <c2-checkbox checked></c2-checkbox>
+      <c2-text-field placeholder="Text field"></c2-text-field>
+      <c2-list style="width: 200px">
+        <c2-list-item value="a" selected>Selected</c2-list-item>
+        <c2-list-item value="b">Item</c2-list-item>
+      </c2-list>
+    </div>
+
+    <h2>Dark subtree (.c2-dark)</h2>
+    <div class="row c2-dark panel">
+      <c2-button>Primary</c2-button>
+      <c2-text-field placeholder="Text field"></c2-text-field>
+      <c2-card
+        ><strong>Card</strong>
+        <p>Dark tokens from the class.</p></c2-card
+      >
+    </div>
+
+    <h2>font-family inherit probe</h2>
+    <div class="row font-probe">
+      <c2-label>Label should be cursive (inherits)</c2-label>
+      <c2-text-field placeholder="Text field inherits page font"></c2-text-field>
+    </div>
+
+    <c2-modal label="Themed modal">
+      <p>Dialog surface, radius and shadow come from tokens.</p>
+      <c2-button slot="footer">Close</c2-button>
+    </c2-modal>
+  </body>
+</html>

@@ -1,0 +1,107 @@
+---
+title: 'Badge'
+description: 'Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Badge } from '@c2n/badge'
+import { Avatar } from '@c2n/avatar'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherBellIcon as FeatherBell } from '@c2n/feather-icons/icons/bell.js'
+import { FeatherMessageSquareIcon as FeatherMessageSquare } from '@c2n/feather-icons/icons/message-square.js'
+
+`c2-badge` labels a state in a small tinted pill. Six `tone`s carry meaning (neutral, primary, success, warning, danger, info) and each is a background/text variable pair, so a design system recolours them without touching markup. Give it a `count` to show a number clamped at `max` (`99+`), or `dot` for a presence indicator that can `pulse`. Put an element in the `anchor` slot and the badge pins itself to one of its corners chosen with `placement`, the classic notification count on an icon button. `--c2-badge--background` and `--c2-badge--color` override whichever tone is active.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/badge
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/badge
+<style>
+  .outlined {
+    --c2-badge--background: transparent;
+    --c2-badge--border: 1px solid currentColor;
+  }
+  .solid {
+    --c2-badge--background: #0265dc;
+    --c2-badge--color: #ffffff;
+  }
+  .tag {
+    --c2-badge--font-size: 11px;
+    --c2-badge--font-weight: 600;
+    --c2-badge--letter-spacing: 0.04em;
+    --c2-badge--text-transform: uppercase;
+    --c2-badge--border-radius: 4px;
+  }
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #3f3f46;
+  }
+</style>
+<div data-label="Tones">
+  <c2-badge>Neutral</c2-badge>
+  <c2-badge tone="primary">Primary</c2-badge>
+  <c2-badge tone="success">Success</c2-badge>
+  <c2-badge tone="warning">Warning</c2-badge>
+  <c2-badge tone="danger">Danger</c2-badge>
+  <c2-badge tone="info">Info</c2-badge>
+</div>
+<div data-label="Counts">
+  <c2-badge tone="danger" count="3"></c2-badge>
+  <c2-badge tone="danger" count="42"></c2-badge>
+  <c2-badge tone="danger" count="120"></c2-badge>
+  <c2-badge tone="primary" count="1200" max="999"></c2-badge>
+  <c2-badge count="0" show-zero></c2-badge>
+</div>
+<div data-label="Dot and pulse">
+  <c2-badge dot></c2-badge>
+  <c2-badge dot tone="success"></c2-badge>
+  <c2-badge dot tone="danger" pulse></c2-badge>
+  <span class="live"><c2-badge dot tone="success" pulse></c2-badge> Live</span>
+</div>
+<div data-label="Prefix icon">
+  <c2-badge tone="success">
+    <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    Verified
+  </c2-badge>
+  <c2-badge tone="warning">
+    <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+    Pending
+  </c2-badge>
+</div>
+<div data-label="Anchored">
+  <c2-badge tone="danger" count="5" overlap="circular">
+    <c2-icon-button slot="anchor"><c2-feather-bell></c2-feather-bell></c2-icon-button>
+  </c2-badge>
+  <c2-badge tone="danger" dot pulse placement="top-left" overlap="circular">
+    <c2-icon-button slot="anchor"><c2-feather-message-square></c2-feather-message-square></c2-icon-button>
+  </c2-badge>
+  <c2-badge tone="success" dot placement="bottom-right" overlap="circular" style="--c2-badge__dot--size: 10px">
+    <c2-avatar slot="anchor" name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 40px"></c2-avatar>
+  </c2-badge>
+  <c2-badge tone="primary" count="3" style="--c2-badge__anchor--offset-x: 2px; --c2-badge__anchor--offset-y: 2px">
+    <c2-avatar slot="anchor" name="Grace Hopper" initial-count="2" style="--c2-avatar--size: 40px; --c2-avatar--border-top-left-radius: 8px; --c2-avatar--border-top-right-radius: 8px; --c2-avatar--border-bottom-left-radius: 8px; --c2-avatar--border-bottom-right-radius: 8px"></c2-avatar>
+  </c2-badge>
+</div>
+<div data-label="Themed">
+  <c2-badge class="outlined" tone="primary">Outlined</c2-badge>
+  <c2-badge class="outlined" tone="danger">Outlined</c2-badge>
+  <c2-badge class="solid">Solid</c2-badge>
+  <c2-badge class="tag" tone="info">Beta</c2-badge>
+  <c2-badge class="tag">New</c2-badge>
+</div>
+```
+
+A badge is static text: it has no focus or click behaviour. When it conveys something not visible elsewhere, give the host an `aria-label` (a `dot` badge in particular carries no text). A `count` of `0` renders nothing unless `show-zero` is set, so a notification badge can stay in the markup and simply disappear.
+
+The anchored badge is positioned relative to the `c2-badge` host, which wraps the anchor as an inline-flex box. By default it sits on the corner of the anchor's bounding box, which suits buttons and cards; for a round anchor such as an avatar or icon button add `overlap="circular"` so the badge lands on the edge of the circle. `--c2-badge__anchor--border` draws the ring in your page background colour; set it to `none` on dark surfaces or when the badge sits on a card. The `__anchor--offset-*` variables fine-tune the position in either mode.

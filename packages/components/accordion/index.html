@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accordion</title>
+    <script type="module" src="/src/accordion.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Accordion</h1>
+    <h2>Connected · shared borders and animated panels</h2>
+    <c2-accordion>
+      <c2-details label="Section 1" expanded>Content for section 1</c2-details>
+      <c2-details label="Section 2">Content for section 2</c2-details>
+      <c2-details label="Section 3">Content for section 3</c2-details>
+      <c2-details label="Unavailable" disabled>Coming soon</c2-details>
+    </c2-accordion>
+    <h2>Separated cards · positive gap</h2>
+    <c2-accordion style="--c2-accordion--gap: 12px; --c2-accordion--border-radius: 12px">
+      <c2-details label="Shipping" expanded>Delivered in 3–5 business days.</c2-details>
+      <c2-details label="Returns">Return within 30 days.</c2-details>
+    </c2-accordion>
+    <h2>Single panel · all outside corners</h2>
+    <c2-accordion><c2-details label="Overview">A single panel keeps its complete frame.</c2-details></c2-accordion>
+    <h2>Multiple open panels</h2>
+    <c2-accordion multiple>
+      <c2-details label="Sizing" expanded>Choose your usual size.</c2-details>
+      <c2-details label="Care" expanded>Wash cold.</c2-details>
+    </c2-accordion>
+    <h2>Nested groups</h2>
+    <c2-accordion>
+      <c2-details label="Products" expanded>
+        <c2-accordion>
+          <c2-details label="Clothing">Shirts and jackets.</c2-details>
+          <c2-details label="Accessories">Bags and hats.</c2-details>
+        </c2-accordion>
+      </c2-details>
+      <c2-details label="Support">Contact our team.</c2-details>
+    </c2-accordion>
+  </body>
+</html>

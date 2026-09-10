@@ -3,34 +3,55 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-card,
   $theme: (
-    padding-top: 8px,
-    padding-right: 8px,
-    padding-bottom: 8px,
-    padding-left: 8px,
+    padding-top: 12px,
+    padding-right: 16px,
+    padding-bottom: 12px,
+    padding-left: 16px,
 
-    border-top-left-radius: 4px,
-    border-top-right-radius: 4px,
-    border-bottom-left-radius: 4px,
-    border-bottom-right-radius: 4px,
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
 
-    border-top: 1px solid variables.$color-border,
-    border-bottom: 1px solid variables.$color-border,
-    border-right: 1px solid variables.$color-border,
-    border-left: 1px solid variables.$color-border,
+    border-top: 1px solid variables.$color-border-light,
+    border-bottom: 1px solid variables.$color-border-light,
+    border-right: 1px solid variables.$color-border-light,
+    border-left: 1px solid variables.$color-border-light,
 
     background: variables.$color-bg-lighter,
+    color: null,
     box-shadow: none,
+    transform: null,
 
-    // hover
+    header--padding-top: null,
+    header--padding-right: null,
+    header--padding-bottom: 0px,
+    header--padding-left: null,
+    header--border-bottom: null,
+
+    footer--padding-top: 0px,
+    footer--padding-right: null,
+    footer--padding-bottom: null,
+    footer--padding-left: null,
+    footer--border-top: null,
+    footer--gap: 8px,
+    footer--justify-content: flex-start,
+
+    media--height: null,
+    media--aspect-ratio: null,
+    media--object-fit: cover,
+
     hover--border-top: null,
     hover--border-bottom: null,
     hover--border-right: null,
     hover--border-left: null,
-
     hover--background: null,
     hover--box-shadow: null,
+    hover--transform: null,
 
-    // disabled
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+
     disabled--box-shadow: null,
     disabled--opacity: variables.$disabled-content-opacity,
   )
@@ -38,45 +59,117 @@
 
 :host {
   display: flex;
+}
 
-  .c2-card {
-    flex: 1;
-    box-sizing: border-box;
+.c2-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: 0;
 
-    padding-top: css.cssVar(padding-top);
-    padding-bottom: css.cssVar(padding-bottom);
-    padding-right: css.cssVar(padding-right);
-    padding-left: css.cssVar(padding-left);
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
 
-    border-top-left-radius: css.cssVar(border-top-left-radius);
-    border-top-right-radius: css.cssVar(border-top-right-radius);
-    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
-    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+  border-top: css.cssVar(border-top);
+  border-bottom: css.cssVar(border-bottom);
+  border-right: css.cssVar(border-right);
+  border-left: css.cssVar(border-left);
 
-    border-top: css.cssVar(border-top);
-    border-bottom: css.cssVar(border-bottom);
-    border-right: css.cssVar(border-right);
-    border-left: css.cssVar(border-left);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  box-shadow: css.cssVar(box-shadow);
+  transform: css.cssVar(transform);
+  transition: animation.standard(background), animation.standard(border-color), animation.standard(box-shadow), animation.standard(transform);
 
-    background: css.cssVar(background);
-    box-shadow: css.cssVar(box-shadow);
+  &:hover {
+    border-top: css.cssVar(hover--border-top, border-top);
+    border-bottom: css.cssVar(hover--border-bottom, border-bottom);
+    border-right: css.cssVar(hover--border-right, border-right);
+    border-left: css.cssVar(hover--border-left, border-left);
 
-    &:hover {
-      border-top: css.cssVar(hover--border-top, border-top);
-      border-bottom: css.cssVar(hover--border-bottom, border-bottom);
-      border-right: css.cssVar(hover--border-right, border-right);
-      border-left: css.cssVar(hover--border-left, border-left);
+    background: css.cssVar(hover--background, background);
+    box-shadow: css.cssVar(hover--box-shadow, box-shadow);
+    transform: css.cssVar(hover--transform, transform);
+  }
 
-      background: css.cssVar(hover--background, background);
-      box-shadow: css.cssVar(hover--box-shadow, box-shadow);
-    }
+  &.is-interactive {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
   }
 }
 
-:host([disabled]) {
+a.c2-card {
+  text-decoration: none;
+}
+
+// Media bleeds to the edges and follows the card radius (the card itself keeps `overflow: visible` so nothing inside is clipped).
+.c2-card-media {
+  overflow: hidden;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+
+  &:last-child {
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+  }
+
+  ::slotted(*) {
+    display: block;
+    width: 100%;
+    height: css.cssVar(media--height);
+    aspect-ratio: css.cssVar(media--aspect-ratio);
+    object-fit: css.cssVar(media--object-fit);
+  }
+}
+
+.c2-card-header {
+  padding-top: css.cssVar(header--padding-top, padding-top);
+  padding-right: css.cssVar(header--padding-right, padding-right);
+  padding-bottom: css.cssVar(header--padding-bottom);
+  padding-left: css.cssVar(header--padding-left, padding-left);
+  border-bottom: css.cssVar(header--border-bottom);
+}
+
+.c2-card-content {
+  flex: 1;
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+}
+
+.c2-card-footer {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(footer--gap);
+  justify-content: css.cssVar(footer--justify-content);
+  padding-top: css.cssVar(footer--padding-top);
+  padding-right: css.cssVar(footer--padding-right, padding-right);
+  padding-bottom: css.cssVar(footer--padding-bottom, padding-bottom);
+  padding-left: css.cssVar(footer--padding-left, padding-left);
+  border-top: css.cssVar(footer--border-top);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:host([disabled]) .c2-card {
+  pointer-events: none;
+  box-shadow: css.cssVar(disabled--box-shadow, box-shadow);
+  opacity: css.cssVar(disabled--opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
   .c2-card {
-    pointer-events: none;
-    box-shadow: css.cssVar(disabled--box-shadow, box-shadow);
-    opacity: css.cssVar(disabled--opacity);
+    transition: none;
   }
 }

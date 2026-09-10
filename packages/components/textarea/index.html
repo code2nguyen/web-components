@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Textarea examples</title>
+    <script type="module" src="/src/textarea.ts"></script>
+    <style>
+      body {
+        padding: 32px;
+        font-family: system-ui;
+        display: grid;
+        gap: 24px;
+      }
+      c2-textarea {
+        width: 320px;
+      }
+      .soft {
+        --c2-textarea__container--background: #f4f4f5;
+        --c2-textarea__container--border-radius: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-textarea label="Message" placeholder="Write a message…" help="Vertical resizing is enabled."></c2-textarea>
+    <c2-textarea label="Bio" maxlength="160" value="Hello world" help="Up to 160 characters."></c2-textarea>
+    <c2-textarea label="Feedback" required error error-text="Please add your feedback."></c2-textarea>
+    <c2-textarea label="Read-only" readonly value="You can select this text."></c2-textarea>
+    <c2-textarea label="Disabled" disabled value="Unavailable"></c2-textarea>
+    <c2-textarea class="soft" label="Notes" resize="none" rows="5" placeholder="Notes"
+      ><span slot="supporting-text">A <strong>fixed-size</strong> notes field.</span></c2-textarea
+    >
+  </body>
+</html>
