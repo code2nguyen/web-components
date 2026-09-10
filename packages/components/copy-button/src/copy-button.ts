@@ -97,9 +97,13 @@ export class CopyButton extends LitElement {
   @property({ attribute: 'copied-label' }) copiedLabel = 'Copied'
 
   /**
-   * `hover` (default) keeps the button transparent until the pointer is over its source, or focus lands inside it.
-   * `always` shows it permanently. A hover-only button still appears on keyboard focus, on devices with no hover at
-   * all, and for as long as the `copied` confirmation is showing.
+   * `hover` (default) keeps the button transparent until the pointer is over its source, or keyboard focus lands
+   * inside it. `always` shows it permanently. A hover-only button still appears on keyboard focus and on devices
+   * with no hover at all.
+   *
+   * The `copied` confirmation deliberately does *not* hold it on screen: once the pointer leaves, the button fades
+   * out with the check still on it and resets off-screen, so the icon never flips back to `copy` on a button the
+   * user has already walked away from.
    */
   @property({ reflect: true }) reveal: 'hover' | 'always' = 'hover'
 
@@ -114,12 +118,15 @@ export class CopyButton extends LitElement {
   /** Set when the last copy attempt failed, so the failure is visible rather than silent. */
   @state() private failed = false
 
-  /** Whether a `hover`-reveal button is currently showing. Always true when `reveal` is `always`. */
-  @state() private revealed = false
+  /** Whether the pointer is currently over the source. */
+  @state() private hovered = false
+
+  /** Whether the source holds *keyboard* focus. Mouse focus does not count — see `handleFocusIn`. */
+  @state() private focused = false
 
   private timer: ReturnType<typeof setTimeout> | undefined
 
-  /** The element whose hover reveals the button, and whose focus keeps it revealed. */
+  /** The element whose hover reveals the button, and whose keyboard focus keeps it revealed. */
   private hoverTarget: HTMLElement | null = null
 
   /** The scroll container whose offset the pin compensates for. */
@@ -161,11 +168,27 @@ export class CopyButton extends LitElement {
 
   private handleHoverQueryChange = () => this.requestUpdate()
 
-  /** True when the button should be visible: `always`, no hover support, revealed, or mid-confirmation. */
+  /** True when the button should be visible: `always`, no hover support, or the user is actually there. */
   private get isVisible(): boolean {
     if (this.reveal === 'always') return true
     if (this.hoverQuery && !this.hoverQuery.matches) return true
-    return this.revealed || this.copied || this.failed
+    return this.hovered || this.focused
+  }
+
+  /**
+   * Resolved fade duration of the reveal transition, in ms.
+   *
+   * Read off the rendered button rather than off the custom property, so an overridden
+   * `--c2-copy-button--transition-duration` and `prefers-reduced-motion: reduce` (which drops it to `0s`) are both
+   * accounted for without re-deriving the cascade here.
+   */
+  private get concealDuration(): number {
+    const button = this.renderRoot?.querySelector('button')
+    if (!button) return 0
+    const [first = ''] = getComputedStyle(button).transitionDuration.split(',')
+    const value = Number.parseFloat(first)
+    if (!Number.isFinite(value)) return 0
+    return first.trim().endsWith('ms') ? value : value * 1000
   }
 
   // ---------------------------------------------------------------------------
@@ -178,24 +201,67 @@ export class CopyButton extends LitElement {
     this.detachHoverTarget()
     this.hoverTarget = next
     if (!next) return
-    next.addEventListener('pointerenter', this.handleReveal)
-    next.addEventListener('pointerleave', this.handleConceal)
-    next.addEventListener('focusin', this.handleReveal)
-    next.addEventListener('focusout', this.handleConceal)
+    next.addEventListener('pointerenter', this.handlePointerEnter)
+    next.addEventListener('pointerleave', this.handlePointerLeave)
+    next.addEventListener('focusin', this.handleFocusIn)
+    next.addEventListener('focusout', this.handleFocusOut)
   }
 
   private detachHoverTarget() {
     const target = this.hoverTarget
     if (!target) return
-    target.removeEventListener('pointerenter', this.handleReveal)
-    target.removeEventListener('pointerleave', this.handleConceal)
-    target.removeEventListener('focusin', this.handleReveal)
-    target.removeEventListener('focusout', this.handleConceal)
+    target.removeEventListener('pointerenter', this.handlePointerEnter)
+    target.removeEventListener('pointerleave', this.handlePointerLeave)
+    target.removeEventListener('focusin', this.handleFocusIn)
+    target.removeEventListener('focusout', this.handleFocusOut)
     this.hoverTarget = null
   }
 
-  private handleReveal = () => (this.revealed = true)
-  private handleConceal = () => (this.revealed = false)
+  private handlePointerEnter = () => this.updateReveal(() => (this.hovered = true))
+  private handlePointerLeave = () => this.updateReveal(() => (this.hovered = false))
+
+  /**
+   * Only *keyboard* focus holds a hover-reveal button on screen.
+   *
+   * A mouse click focuses the button too, so counting every `focusin` as a reveal kept an abandoned button fully
+   * opaque after the pointer had left — long enough for the confirmation to expire and flip the icon back to
+   * `copy` in place, which reads as a phantom second interaction. `:focus-visible` is exactly the distinction the
+   * platform already draws, so it is read off the focused element instead of being guessed at.
+   */
+  private handleFocusIn = () => this.updateReveal(() => (this.focused = deepActiveElement()?.matches(':focus-visible') ?? false))
+
+  private handleFocusOut = (event: FocusEvent) =>
+    this.updateReveal(() => {
+      // Focus moving between descendants of the source is not focus leaving the source.
+      const next = event.relatedTarget
+      if (next instanceof Node && this.hoverTarget?.contains(next)) return
+      this.focused = false
+    })
+
+  /** Applies a reveal change, re-arming the confirmation timer when the button crosses the visibility line. */
+  private updateReveal(apply: () => void) {
+    const wasVisible = this.isVisible
+    apply()
+    if (this.isVisible !== wasVisible) this.armResolvedTimer()
+  }
+
+  /**
+   * (Re)arms the reset of the `copied` / `failed` state.
+   *
+   * On screen it runs for the full `copied-duration`. Off screen it only has to outlast the fade: the state is
+   * cleared once the button is invisible, so the icon swap is never painted. Coming back mid-confirmation restarts
+   * the full countdown, so the state can never stick with no timer behind it.
+   */
+  private armResolvedTimer() {
+    if (!this.copied && !this.failed) return
+    clearTimeout(this.timer)
+    this.timer = setTimeout(() => this.clearResolvedState(), this.isVisible ? this.copiedDuration : this.concealDuration)
+  }
+
+  private clearResolvedState() {
+    this.copied = false
+    this.failed = false
+  }
 
   // ---------------------------------------------------------------------------
   // Pinning: stay in the corner while the source scrolls
@@ -267,15 +333,13 @@ export class CopyButton extends LitElement {
     } catch (error) {
       this.copied = false
       this.failed = true
-      clearTimeout(this.timer)
-      this.timer = setTimeout(() => (this.failed = false), this.copiedDuration)
+      this.armResolvedTimer()
       this.dispatchEvent(new CustomEvent('copy-error', { detail: { error }, bubbles: true, composed: true }))
       return false
     }
     this.failed = false
     this.copied = true
-    clearTimeout(this.timer)
-    this.timer = setTimeout(() => (this.copied = false), this.copiedDuration)
+    this.armResolvedTimer()
     this.dispatchEvent(new CustomEvent('copied', { detail: { text }, bubbles: true, composed: true }))
     return true
   }
@@ -319,6 +383,18 @@ export class CopyButton extends LitElement {
       }
     `
   }
+}
+
+/**
+ * The focused element, descending through shadow roots.
+ *
+ * `document.activeElement` stops at the outermost shadow host, which for a focused copy button is the
+ * `c2-copy-button` element itself — and a host never matches `:focus-visible` the way the inner `<button>` does.
+ */
+function deepActiveElement(): Element | null {
+  let active = document.activeElement
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+  return active
 }
 
 /**
