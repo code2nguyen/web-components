@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-copy-button</title>
+    <script type="module" src="/src/copy-button.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #71717a;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      /* The common shape: a block with the button pinned in its corner, copying the block. */
+      .snippet {
+        position: relative;
+        margin: 0;
+        padding: 14px 48px 14px 14px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+        background: #fafafa;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12.5px;
+        white-space: pre;
+      }
+      .scroller {
+        position: relative;
+        width: 380px;
+        max-height: 110px;
+        overflow: auto;
+        margin: 0 0 16px;
+        padding: 14px 48px 14px 14px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+        background: #fafafa;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12.5px;
+        white-space: pre;
+      }
+
+      .callout {
+        position: relative;
+        max-width: 480px;
+        padding: 16px 56px 16px 16px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+
+      /* Themed variant: a solid accent button with a label. */
+      .accent {
+        --c2-copy-button__container--height: 32px;
+        --c2-copy-button__container--padding-left: 12px;
+        --c2-copy-button__container--padding-right: 12px;
+        --c2-copy-button__container--background-color: rgb(2, 101, 220);
+        --c2-copy-button__container--color: #ffffff;
+        --c2-copy-button__container__hover--background-color: rgb(2, 85, 185);
+        --c2-copy-button__container__copied--background-color: rgb(0, 122, 77);
+        --c2-copy-button__container__copied--color: #ffffff;
+      }
+      .outlined {
+        --c2-copy-button__container--border: 1px solid #bcbcc6;
+        --c2-copy-button__container__hover--border: 1px solid #a1a1aa;
+        --c2-copy-button__container__hover--background-color: #f4f4f5;
+      }
+      .pill {
+        --c2-copy-button__container--border-radius: 999px;
+        --c2-copy-button__container--height: 32px;
+        --c2-copy-button__container--padding-left: 14px;
+        --c2-copy-button__container--padding-right: 14px;
+        --c2-copy-button__container--background-color: #f4f4f5;
+      }
+      code {
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: #f4f4f5;
+        font-size: 12.5px;
+      }
+      #shipping-address {
+        margin: 0;
+        line-height: 1.6;
+      }
+      .field {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .field input {
+        width: 280px;
+        padding: 6px 10px;
+        border: 1px solid #bcbcc6;
+        border-radius: 6px;
+        font: inherit;
+      }
+      .log {
+        padding: 8px 12px;
+        border-radius: 6px;
+        background: #f4f4f5;
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        color: #52525b;
+        min-height: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>Inside its parent, pinned, revealed on hover (the defaults)</h2>
+      <pre class="snippet">npm install @c2n/copy-button<c2-copy-button pin></c2-copy-button></pre>
+      <p>The button copies the element it sits in, and leaves its own label out of the result.</p>
+    </section>
+
+    <section>
+      <h2>With a label</h2>
+      <div class="row">
+        <div class="callout">
+          <p>Ship to: 14 Rue de Rivoli, 75001 Paris, France</p>
+          <c2-copy-button class="outlined" pin>Copy</c2-copy-button>
+        </div>
+        <div class="callout">
+          <p>Order #A-4192 · 3 items · €148.00</p>
+          <c2-copy-button class="accent" pin>Copy order</c2-copy-button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Pointing elsewhere with <code>for</code></h2>
+      <p id="shipping-address">Anthropic, 548 Market St, San Francisco, CA 94104</p>
+      <div class="row">
+        <c2-copy-button class="pill" reveal="always" for="shipping-address">Copy address</c2-copy-button>
+      </div>
+    </section>
+
+    <section>
+      <h2>A literal string with <code>value</code></h2>
+      <div class="row">
+        <c2-copy-button class="outlined" reveal="always" value="npx -y @c2n/mcp">Copy command</c2-copy-button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Reading a form field's value</h2>
+      <div class="field">
+        <input id="token" value="c2n_live_8f4c19ab7e2d" />
+        <c2-copy-button class="outlined" reveal="always" for="token">Copy token</c2-copy-button>
+      </div>
+    </section>
+
+    <section>
+      <h2>States and slots</h2>
+      <div class="row">
+        <c2-copy-button class="outlined" reveal="always" value="disabled" disabled>Disabled</c2-copy-button>
+        <c2-copy-button class="outlined" reveal="always" value="slow" copied-duration="6000">Long feedback</c2-copy-button>
+        <c2-copy-button class="outlined" reveal="always" value="custom labels" copied-label="Got it">
+          Copy
+          <span slot="copied-label">Got it</span>
+        </c2-copy-button>
+        <c2-copy-button class="outlined" reveal="always" value="custom icon">
+          <span slot="copy-icon">⧉</span>
+          <span slot="copied-icon">✓</span>
+          Custom icons
+        </c2-copy-button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Scrolling source (pin holds its corner)</h2>
+      <pre class="scroller">git remote add origin git@github.com:code2nguyen/web-components.git
+git fetch --all --tags --prune
+git checkout -b feature/copy-button origin/develop
+npm install && npm run build
+# scroll this box down and to the right:
+# the button does not move
+<c2-copy-button pin reveal="always"></c2-copy-button></pre>
+      <p>Also try <code>pin="bottom-left"</code> and the four corners.</p>
+      <pre class="scroller">the same box, pinned bottom-left
+git fetch --all --tags --prune
+git checkout -b feature/copy-button origin/develop
+npm install && npm run build
+<c2-copy-button pin="bottom-left" reveal="always"></c2-copy-button></pre>
+    </section>
+
+    <section>
+      <h2>Events</h2>
+      <div class="row">
+        <c2-copy-button class="accent" reveal="always" value="events are wired">Copy me</c2-copy-button>
+      </div>
+      <p class="log" id="log">no event yet</p>
+    </section>
+
+    <script type="module">
+      const log = document.getElementById('log')
+      document.addEventListener('copied', (event) => {
+        log.textContent = `copied: ${JSON.stringify(event.detail.text)}`
+      })
+      document.addEventListener('copy-error', (event) => {
+        log.textContent = `copy-error: ${event.detail.error}`
+      })
+    </script>
+  </body>
+</html>

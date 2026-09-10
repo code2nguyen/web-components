@@ -61,6 +61,10 @@ export const componentPreviews: Record<string, string> = {
   <c2-color-select color="#b280c1"></c2-color-select>
 </div>`,
   'color-slider': `<c2-color-slider value="200" style="width:220px"></c2-color-slider>`,
+  'copy-button': `<div class="preview-row">
+  <c2-copy-button reveal="always" value="npx -y @c2n/mcp"></c2-copy-button>
+  <c2-copy-button reveal="always" value="14 Rue de Rivoli, 75001 Paris" style="--c2-copy-button__container--border: 1px solid #bcbcc6; --c2-copy-button__container__hover--background-color: #f4f4f5">Copy</c2-copy-button>
+</div>`,
   details: `<c2-details expanded style="width:240px" label="Shipping">
   <div style="font-size:12px;line-height:1.5;color:#52525b">Delivered in 3–5 business days. Free over $50.</div>
 </c2-details>`,

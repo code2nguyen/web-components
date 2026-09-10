@@ -1,0 +1,190 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-copy-button,
+  $theme: (
+    container--background-color: null,
+    container--color: variables.$color-text,
+    container--border: none,
+    container--border-radius: 6px,
+    container--height: 28px,
+    container--min-width: 28px,
+    container--padding-left: 6px,
+    container--padding-right: 6px,
+    container--gap: 6px,
+    container--font-size: 12px,
+    container--font-weight: 500,
+    container--font-family: null,
+
+    container__hover--background-color: variables.$color-bg-dark,
+    container__hover--color: null,
+    container__hover--border: null,
+    container__active--background-color: variables.$color-border-light,
+    container__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    container__focus--outline-offset: 2px,
+    container__disabled--opacity: variables.$disabled-content-opacity,
+
+    container__copied--color: variables.$color-green,
+    container__copied--background-color: null,
+    container__copied--border: null,
+
+    icon--size: 16px,
+    icon--color: null,
+    icon__copied--color: null,
+
+    transition-duration: animation.$standard-acceleration-duration,
+    pin--offset-x: 6px,
+    pin--offset-y: 6px,
+  )
+);
+
+:host {
+  display: inline-flex;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// Pinned: an absolutely positioned corner button. `--_scroll-*` is written by the element on every scroll of the
+// container, cancelling out the offset so the button stays against the visible box instead of scrolling away with
+// the content (the whole point: long or wide text is exactly when you need the button).
+:host([pin]) {
+  position: absolute;
+  top: css.cssVar(pin--offset-y);
+  right: css.cssVar(pin--offset-x);
+  transform: translate(var(--_c2-copy-button-scroll-x, 0px), var(--_c2-copy-button-scroll-y, 0px));
+}
+:host([pin='top-left']) {
+  right: auto;
+  left: css.cssVar(pin--offset-x);
+}
+:host([pin='bottom-right']) {
+  top: auto;
+  bottom: css.cssVar(pin--offset-y);
+}
+:host([pin='bottom-left']) {
+  top: auto;
+  bottom: css.cssVar(pin--offset-y);
+  right: auto;
+  left: css.cssVar(pin--offset-x);
+}
+
+:host([disabled]) {
+  pointer-events: none;
+  opacity: css.cssVar(container__disabled--opacity);
+}
+
+.c2-copy-button {
+  // Reset the native button.
+  appearance: none;
+  box-sizing: border-box;
+  margin: 0;
+  font: inherit;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: css.cssVar(container--gap);
+  height: css.cssVar(container--height);
+  min-width: css.cssVar(container--min-width);
+  padding: 0 css.cssVar(container--padding-right) 0 css.cssVar(container--padding-left);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background-color: css.cssVar(container--background-color);
+  color: css.cssVar(container--color);
+  font-size: css.cssVar(container--font-size);
+  font-weight: css.cssVar(container--font-weight);
+  font-family: css.cssVar(container--font-family);
+  cursor: pointer;
+  user-select: none;
+  transition: animation.standard(background-color), animation.standard(color);
+
+  &:hover {
+    background-color: css.cssVar(container__hover--background-color);
+    color: css.cssVar(container__hover--color, container--color);
+    border: css.cssVar(container__hover--border, container--border);
+  }
+  &:active {
+    background-color: css.cssVar(container__active--background-color, container__hover--background-color);
+  }
+  &:focus-visible {
+    outline: css.cssVar(container__focus--outline);
+    outline-offset: css.cssVar(container__focus--outline-offset);
+  }
+  &:disabled {
+    cursor: default;
+  }
+
+  // Success and failure both read as "the copy resolved"; only the colour differs.
+  &.is-copied {
+    color: css.cssVar(container__copied--color);
+    background-color: css.cssVar(container__copied--background-color, container--background-color);
+    border: css.cssVar(container__copied--border, container--border);
+  }
+  &.is-failed {
+    color: variables.$color-red;
+  }
+}
+
+// Reveal on hover is the default, so the selector is written as "not always": a Lit property default is not
+// reflected to the attribute until it changes, so `:host([reveal='hover'])` would not match out of the box.
+:host(:not([reveal='always'])) .c2-copy-button {
+  opacity: 0;
+  // Never leave an invisible click target behind; the source's hover brings it back before it can be aimed at.
+  pointer-events: none;
+  transition: animation.standard(opacity, css.cssVar(transition-duration));
+}
+:host(:not([reveal='always'])) .c2-copy-button.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(:not([reveal='always'])) .c2-copy-button {
+    transition: none;
+  }
+}
+
+.c2-copy-button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  transition: animation.standard(color);
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+    // Size the icon components of this library to the slot: feather icons and Material icon ligatures.
+    --c2-feather-icon--size: #{css.cssVar(icon--size)};
+    --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+  }
+}
+
+.c2-copy-button.is-copied .c2-copy-button-icon {
+  color: css.cssVar(icon__copied--color, container__copied--color);
+}
+
+// Collapses entirely when nothing is slotted, so an icon-only button stays square.
+.c2-copy-button-label {
+  display: contents;
+  white-space: nowrap;
+}
+
+// Visually hidden live region: the icon swap alone is not announced.
+.c2-copy-button-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

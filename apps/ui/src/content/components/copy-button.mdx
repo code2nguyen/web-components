@@ -1,0 +1,132 @@
+---
+title: 'Copy Button'
+description: 'Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.'
+category: 'Buttons'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { CopyButton } from '@c2n/copy-button'
+import { CodeViewer } from '@c2n/code-viewer'
+import { TextField } from '@c2n/text-field'
+
+`c2-copy-button` puts text on the clipboard. Drop it inside the element you want to copy and that is all the configuration it needs: it copies its parent, and leaves its own label out of the result. Point it at something else with `for` (the `id` of the source), or hand it the exact string with `value`. It reads each source the way that source stores its text — the code of a `c2-code-viewer`, the `value` of an input or `c2-text-field`, the rendered text of anything else — so copying a highlighted snippet gives you the code, not a wall of token spans. By default the button stays out of the way until you hover its source, and `pin` parks it in a corner where it stays put even while the source scrolls.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/copy-button
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/copy-button
+<style>
+  .snippet {
+    position: relative;
+    margin: 0;
+    padding: 12px 44px 12px 14px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    background: #fafafa;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    white-space: pre;
+    color: #18181b;
+  }
+  .scroller {
+    position: relative;
+    width: 300px;
+    max-height: 92px;
+    overflow: auto;
+    padding: 12px 44px 12px 14px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    background: #fafafa;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #18181b;
+  }
+  .card {
+    position: relative;
+    max-width: 380px;
+    padding: 14px 52px 14px 16px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #3f3f46;
+  }
+  .outlined {
+    --c2-copy-button__container--border: 1px solid #bcbcc6;
+    --c2-copy-button__container__hover--border: 1px solid #a1a1aa;
+    --c2-copy-button__container__hover--background-color: #f4f4f5;
+  }
+  .accent {
+    --c2-copy-button__container--height: 32px;
+    --c2-copy-button__container--padding-left: 12px;
+    --c2-copy-button__container--padding-right: 12px;
+    --c2-copy-button__container--background-color: #0265dc;
+    --c2-copy-button__container--color: #ffffff;
+    --c2-copy-button__container__hover--background-color: #0255b9;
+    --c2-copy-button__container__copied--background-color: #007a4d;
+    --c2-copy-button__container__copied--color: #ffffff;
+  }
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+</style>
+<div data-label="Hover the block (default)">
+  <pre class="snippet">npx -y @c2n/mcp<c2-copy-button pin></c2-copy-button></pre>
+</div>
+<div data-label="Scrolls under a pinned button">
+  <div class="scroller">git remote add origin git@github.com:code2nguyen/web-components.git && git fetch --all --tags --prune && git checkout -b feature/copy-button origin/develop && npm install && npm run build && npm run ui:build — scroll this box: the pinned button holds its corner in both directions<c2-copy-button pin reveal="always"></c2-copy-button></div>
+</div>
+<div data-label="Always visible">
+  <c2-copy-button class="outlined" reveal="always" value="14 Rue de Rivoli, 75001 Paris">Copy</c2-copy-button>
+  <c2-copy-button class="accent" reveal="always" value="Order #A-4192">Copy order</c2-copy-button>
+</div>
+<div data-label="Copying a block">
+  <div class="card">
+    Anthropic, 548 Market St, San Francisco, CA 94104
+    <c2-copy-button class="outlined" pin></c2-copy-button>
+  </div>
+</div>
+<div data-label="A field's value">
+  <div class="field-row">
+    <c2-text-field id="usage-token" value="c2n_live_8f4c19ab7e2d" style="width: 220px"></c2-text-field>
+    <c2-copy-button class="outlined" reveal="always" for="usage-token">Copy token</c2-copy-button>
+  </div>
+</div>
+<div data-label="A code viewer">
+  <c2-code-viewer
+    id="usage-snippet"
+    style="width: 300px"
+    language="ts"
+    code="const copy = document.createElement('c2-copy-button')\ncopy.value = 'hello'"
+  ></c2-code-viewer>
+  <c2-copy-button class="outlined" reveal="always" for="usage-snippet">Copy code</c2-copy-button>
+</div>
+<div data-label="States">
+  <c2-copy-button class="outlined" reveal="always" value="disabled" disabled>Disabled</c2-copy-button>
+  <c2-copy-button class="outlined" reveal="always" value="slow" copied-duration="6000">Long feedback</c2-copy-button>
+  <c2-copy-button class="outlined" reveal="always" value="custom" copied-label="Got it">
+    Copy
+    <span slot="copied-label">Got it</span>
+  </c2-copy-button>
+</div>
+```
+
+**Reveal.** `reveal="hover"` is the default: the button is transparent until the pointer enters its source, which keeps a corner button from sitting on top of the content it copies. It is only the opacity that changes, so the button keeps its box and stays reachable — it also appears when focus lands anywhere inside the source (so it is keyboard-operable), on devices with no hover at all (a hover-only button would be unreachable on touch), and for as long as the `copied` confirmation is showing, so the check mark does not flash invisibly after the pointer leaves. While hidden it takes no pointer events, so there is never an invisible click target. Use `reveal="always"` when the button should be permanently visible — which is also what the previews and gallery cards on this site do, since nothing hovers them.
+
+**Pin.** `pin` absolutely positions the button in a corner of its containing block — `pin` alone means top right, or name one of `top-right`, `top-left`, `bottom-right`, `bottom-left` — inset by `--c2-copy-button__pin--offset-x` / `-y`. Give the element it sits in `position: relative`, as with any absolutely positioned child.
+
+The reason `pin` exists rather than leaving you to write the CSS: an absolutely positioned child of a scrolling box lives in that box's scrollable overflow, so it scrolls away with the content — exactly when you need it, because long or wide text is why there is a scrollbar in the first place. A pinned button finds the nearest ancestor that can scroll and cancels out its scroll offset, so it holds its corner no matter where the content is scrolled, in either direction. Scroll the second example above to see it.
+
+**Sources.** Resolution is `value`, then `for`, then the light-DOM parent. `parentElement` is deliberate: a button slotted into another custom element copies the element it was authored inside, not the shadow-DOM node it happens to render in. Whitespace inside the source is preserved (newlines in a `<pre>` survive) and only the leading and trailing whitespace is trimmed.
+
+**Feedback and slots.** With no slotted content the button is icon-only and square (`--c2-copy-button__container--min-width` matches its height); slot text and it grows into an icon-and-label button. The `copy-icon` and `copied-icon` slots replace the two default glyphs, and `copied-label` replaces the text while the copied state is showing. `copied` is reflected, so `c2-copy-button[copied]` is styleable from outside, and the `__container__copied--*` variables cover the state from within. Because an icon swap alone is not announced, the element renders a visually hidden `role="status"` region carrying `copied-label` (or `Copy failed`), and the button's `aria-label` follows the same text — set `label` and `copied-label` when the defaults ("Copy" / "Copied") do not fit. A refused clipboard write turns the button red and fires `copy-error` rather than failing silently, and where `navigator.clipboard` is unavailable — any non-secure context, which includes a plain-http dev server — it falls back to an off-screen `<textarea>` and `document.execCommand('copy')`.

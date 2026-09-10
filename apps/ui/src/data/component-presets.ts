@@ -634,6 +634,56 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'Full width', css: { '--c2-button-group__item--flex': '1 1 0', width: '320px' } },
     ],
   },
+  'c2-copy-button': {
+    html: `<c2-copy-button reveal="always" value="npx -y @c2n/mcp">Copy</c2-copy-button>`,
+    presets: [
+      {
+        name: 'Outlined',
+        description: 'Hairline border, tinted on hover',
+        css: {
+          '--c2-copy-button__container--border': '1px solid #bcbcc6',
+          '--c2-copy-button__container__hover--border': '1px solid #a1a1aa',
+          '--c2-copy-button__container__hover--background-color': '#f4f4f5',
+        },
+      },
+      {
+        name: 'Solid accent',
+        description: 'Filled primary button, green when copied',
+        css: {
+          '--c2-copy-button__container--height': '32px',
+          '--c2-copy-button__container--padding-left': '12px',
+          '--c2-copy-button__container--padding-right': '12px',
+          '--c2-copy-button__container--background-color': '#0265dc',
+          '--c2-copy-button__container--color': '#ffffff',
+          '--c2-copy-button__container__hover--background-color': '#0255b9',
+          '--c2-copy-button__container__copied--background-color': '#007a4d',
+          '--c2-copy-button__container__copied--color': '#ffffff',
+        },
+      },
+      {
+        name: 'Pill',
+        description: 'Fully rounded, tinted surface',
+        css: {
+          '--c2-copy-button__container--border-radius': '999px',
+          '--c2-copy-button__container--height': '32px',
+          '--c2-copy-button__container--padding-left': '14px',
+          '--c2-copy-button__container--padding-right': '14px',
+          '--c2-copy-button__container--background-color': '#f4f4f5',
+          '--c2-copy-button__container__hover--background-color': '#e4e4e7',
+        },
+      },
+      {
+        name: 'Ghost on dark',
+        description: 'For a code block or dark surface',
+        css: {
+          '--c2-copy-button__container--color': '#a1a1aa',
+          '--c2-copy-button__container__hover--background-color': 'rgba(255, 255, 255, 0.1)',
+          '--c2-copy-button__container__hover--color': '#fafafa',
+          '--c2-copy-button__container__copied--color': '#4ade80',
+        },
+      },
+    ],
+  },
   'c2-badge': {
     html: `<c2-badge tone="success">Active</c2-badge>`,
     presets: [

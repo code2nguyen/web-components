@@ -5786,6 +5786,497 @@
       ],
       "hasGallery": false
     },
+    "copy-button": {
+      "id": "copy-button",
+      "package": "@c2n/copy-button",
+      "title": "Copy Button",
+      "description": "Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.",
+      "intro": "`c2-copy-button` puts text on the clipboard. Drop it inside the element you want to copy and that is all the configuration it needs: it copies its parent, and leaves its own label out of the result. Point it at something else with `for` (the `id` of the source), or hand it the exact string with `value`. It reads each source the way that source stores its text — the code of a `c2-code-viewer`, the `value` of an input or `c2-text-field`, the rendered text of anything else — so copying a highlighted snippet gives you the code, not a wall of token spans. By default the button stays out of the way until you hover its source, and `pin` parks it in a corner where it stays put even while the source scrolls.",
+      "category": "Buttons",
+      "status": "stable",
+      "docsUrl": "https://code2nguyen.github.io/web-components/components/copy-button",
+      "elements": [
+        {
+          "tag": "c2-copy-button",
+          "className": "CopyButton",
+          "modulePath": "@c2n/copy-button",
+          "description": "Copies text to the clipboard.\n\nDrop it inside the element you want to copy and it copies that element: `<pre><c2-copy-button></c2-copy-button>…</pre>`\ncopies the `<pre>`. Point it somewhere else with `for` (the `id` of the source), or give it the literal text with\n`value`. It reads the source the way that source stores its text — the `source` of a `c2-code-viewer`, the `value`\nof an `<input>`/`<textarea>` or of a field that keeps its input in a shadow root (`c2-text-field`), otherwise the\nrendered text — and never copies its own label, so a button sitting inside its source does not end up in the result.\n\nRenders a real `<button>` (focus is delegated to it). With no content it is an icon-only button; slot text to get\nan icon and a label. After a successful copy it flips to the `copied` state for `copied-duration` ms.\n\nBy default it only appears while the pointer is over its source (`reveal=\"always\"` opts out), and `pin` puts it in\na corner of the source where it stays put even while the source scrolls.",
+          "attributes": [
+            {
+              "name": "value",
+              "type": "string | undefined",
+              "default": "undefined",
+              "description": "Literal text to copy. Takes precedence over `for` and over the parent element."
+            },
+            {
+              "name": "for",
+              "type": "string | undefined",
+              "default": "undefined",
+              "description": "`id` of the element to copy, looked up in the containing document or shadow root. Overrides the parent element."
+            },
+            {
+              "name": "disabled",
+              "type": "boolean",
+              "default": "false",
+              "description": "Disables the button: no pointer events, no focus, reduced opacity."
+            },
+            {
+              "name": "copied",
+              "type": "boolean",
+              "default": "false",
+              "description": "True for `copied-duration` after a successful copy. Reflected, so `c2-copy-button[copied]` is styleable."
+            },
+            {
+              "name": "copied-duration",
+              "type": "number",
+              "default": "2000",
+              "description": "How long the `copied` state lasts, in ms."
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "default": "'Copy'",
+              "description": "Accessible name of the button while idle."
+            },
+            {
+              "name": "copied-label",
+              "type": "string",
+              "default": "'Copied'",
+              "description": "Accessible name (and `copied-label` fallback) after a successful copy."
+            },
+            {
+              "name": "reveal",
+              "type": "'hover' | 'always'",
+              "default": "'hover'",
+              "description": "`hover` (default) keeps the button transparent until the pointer is over its source, or focus lands inside it.\n`always` shows it permanently. A hover-only button still appears on keyboard focus, on devices with no hover at\nall, and for as long as the `copied` confirmation is showing."
+            },
+            {
+              "name": "pin",
+              "type": "CopyButtonPin | '' | undefined",
+              "default": "undefined",
+              "description": "Pins the button to a corner of its containing block, staying put while the source scrolls under it.\n\nThe bare attribute means `top-right`. The containing block must be positioned (`position: relative` on the\nelement the button sits in), as with any absolutely positioned child."
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "Optional label beside the icon. Empty by default, which gives an icon-only button."
+            },
+            {
+              "name": "copy-icon",
+              "description": "Replaces the default copy icon."
+            },
+            {
+              "name": "copied-icon",
+              "description": "Replaces the default check icon shown after a copy."
+            },
+            {
+              "name": "copied-label",
+              "description": "Replaces the default slot's text while in the `copied` state."
+            }
+          ],
+          "events": [
+            {
+              "name": "copy-error",
+              "type": "CustomEvent<{ error: unknown }>",
+              "description": "Fired when the clipboard write failed (denied permission, or no clipboard at all)."
+            },
+            {
+              "name": "copied",
+              "type": "CustomEvent<{ text: string }>",
+              "description": "Fired after the text reached the clipboard. `detail.text` is what was copied."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--c2-copy-button__container--background-color",
+              "type": "color",
+              "part": "container",
+              "property": "background-color"
+            },
+            {
+              "name": "--c2-copy-button__container--color",
+              "type": "color",
+              "default": "rgb(34, 34, 34)",
+              "part": "container",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-copy-button__container--border",
+              "type": "border",
+              "default": "none",
+              "part": "container",
+              "property": "border"
+            },
+            {
+              "name": "--c2-copy-button__container--border-radius",
+              "type": "border-radius",
+              "default": "6px",
+              "part": "container",
+              "property": "border-radius",
+              "token": "--c2-theme--radius-md"
+            },
+            {
+              "name": "--c2-copy-button__container--height",
+              "type": "pixel",
+              "default": "28px",
+              "part": "container",
+              "property": "height"
+            },
+            {
+              "name": "--c2-copy-button__container--min-width",
+              "type": "pixel",
+              "default": "28px",
+              "part": "container",
+              "property": "min-width"
+            },
+            {
+              "name": "--c2-copy-button__container--padding-left",
+              "type": "padding",
+              "default": "6px",
+              "part": "container",
+              "property": "padding-left"
+            },
+            {
+              "name": "--c2-copy-button__container--padding-right",
+              "type": "padding",
+              "default": "6px",
+              "part": "container",
+              "property": "padding-right"
+            },
+            {
+              "name": "--c2-copy-button__container--gap",
+              "type": "pixel",
+              "default": "6px",
+              "part": "container",
+              "property": "gap"
+            },
+            {
+              "name": "--c2-copy-button__container--font-size",
+              "type": "font-size",
+              "default": "12px",
+              "part": "container",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-sm"
+            },
+            {
+              "name": "--c2-copy-button__container--font-weight",
+              "type": "font-weight",
+              "default": "500",
+              "part": "container",
+              "property": "font-weight",
+              "token": "--c2-theme--font-weight-medium"
+            },
+            {
+              "name": "--c2-copy-button__container--font-family",
+              "type": "font-family",
+              "part": "container",
+              "property": "font-family"
+            },
+            {
+              "name": "--c2-copy-button__container__hover--background-color",
+              "type": "color",
+              "default": "rgb(230, 230, 230)",
+              "part": "container",
+              "state": "hover",
+              "property": "background-color",
+              "token": "--c2-theme--color-surface-container"
+            },
+            {
+              "name": "--c2-copy-button__container__hover--color",
+              "type": "color",
+              "part": "container",
+              "state": "hover",
+              "property": "color"
+            },
+            {
+              "name": "--c2-copy-button__container__hover--border",
+              "type": "border",
+              "part": "container",
+              "state": "hover",
+              "property": "border"
+            },
+            {
+              "name": "--c2-copy-button__container__active--background-color",
+              "type": "color",
+              "default": "rgb(213, 213, 213)",
+              "part": "container",
+              "state": "active",
+              "property": "background-color",
+              "token": "--c2-theme--color-surface-container"
+            },
+            {
+              "name": "--c2-copy-button__container__focus--outline",
+              "type": "outline",
+              "default": "2px solid rgba(2, 101, 220, 0.4)",
+              "part": "container",
+              "state": "focus",
+              "property": "outline",
+              "token": "--c2-theme--focus-ring"
+            },
+            {
+              "name": "--c2-copy-button__container__focus--outline-offset",
+              "type": "pixel",
+              "default": "2px",
+              "part": "container",
+              "state": "focus",
+              "property": "outline-offset"
+            },
+            {
+              "name": "--c2-copy-button__container__disabled--opacity",
+              "type": "opacity",
+              "default": "0.38",
+              "part": "container",
+              "state": "disabled",
+              "property": "opacity",
+              "token": "--c2-theme--disabled-opacity"
+            },
+            {
+              "name": "--c2-copy-button__container__copied--color",
+              "type": "color",
+              "default": "rgb(0, 122, 77)",
+              "part": "container",
+              "state": "copied",
+              "property": "color",
+              "description": "Applied for `copied-duration` after a successful copy."
+            },
+            {
+              "name": "--c2-copy-button__container__copied--background-color",
+              "type": "color",
+              "part": "container",
+              "state": "copied",
+              "property": "background-color"
+            },
+            {
+              "name": "--c2-copy-button__container__copied--border",
+              "type": "border",
+              "part": "container",
+              "state": "copied",
+              "property": "border"
+            },
+            {
+              "name": "--c2-copy-button__icon--size",
+              "type": "pixel",
+              "default": "16px",
+              "part": "icon",
+              "property": "size"
+            },
+            {
+              "name": "--c2-copy-button__icon--color",
+              "type": "color",
+              "part": "icon",
+              "property": "color",
+              "description": "Defaults to the button's text colour."
+            },
+            {
+              "name": "--c2-copy-button__icon__copied--color",
+              "type": "color",
+              "part": "icon",
+              "state": "copied",
+              "property": "color"
+            },
+            {
+              "name": "--c2-copy-button--transition-duration",
+              "type": "time",
+              "default": "150ms",
+              "part": "",
+              "property": "transition-duration",
+              "token": "--c2-theme--motion-scale",
+              "description": "Fade of the hover reveal."
+            },
+            {
+              "name": "--c2-copy-button__pin--offset-x",
+              "type": "pixel",
+              "default": "6px",
+              "part": "pin",
+              "property": "offset-x",
+              "description": "Inset from the pinned corner, horizontally."
+            },
+            {
+              "name": "--c2-copy-button__pin--offset-y",
+              "type": "pixel",
+              "default": "6px",
+              "part": "pin",
+              "property": "offset-y",
+              "description": "Inset from the pinned corner, vertically."
+            }
+          ]
+        }
+      ],
+      "composition": {
+        "internal": [],
+        "slotted": [],
+        "usedBy": []
+      },
+      "install": {
+        "npm": "npm install @c2n/copy-button @c2n/theme",
+        "import": "import '@c2n/copy-button'",
+        "importClass": "import { CopyButton } from '@c2n/copy-button'"
+      },
+      "presets": {
+        "html": "<c2-copy-button reveal=\"always\" value=\"npx -y @c2n/mcp\">Copy</c2-copy-button>",
+        "items": [
+          {
+            "name": "Outlined",
+            "description": "Hairline border, tinted on hover",
+            "css": {
+              "--c2-copy-button__container--border": "1px solid #bcbcc6",
+              "--c2-copy-button__container__hover--border": "1px solid #a1a1aa",
+              "--c2-copy-button__container__hover--background-color": "#f4f4f5"
+            }
+          },
+          {
+            "name": "Solid accent",
+            "description": "Filled primary button, green when copied",
+            "css": {
+              "--c2-copy-button__container--height": "32px",
+              "--c2-copy-button__container--padding-left": "12px",
+              "--c2-copy-button__container--padding-right": "12px",
+              "--c2-copy-button__container--background-color": "#0265dc",
+              "--c2-copy-button__container--color": "#ffffff",
+              "--c2-copy-button__container__hover--background-color": "#0255b9",
+              "--c2-copy-button__container__copied--background-color": "#007a4d",
+              "--c2-copy-button__container__copied--color": "#ffffff"
+            }
+          },
+          {
+            "name": "Pill",
+            "description": "Fully rounded, tinted surface",
+            "css": {
+              "--c2-copy-button__container--border-radius": "999px",
+              "--c2-copy-button__container--height": "32px",
+              "--c2-copy-button__container--padding-left": "14px",
+              "--c2-copy-button__container--padding-right": "14px",
+              "--c2-copy-button__container--background-color": "#f4f4f5",
+              "--c2-copy-button__container__hover--background-color": "#e4e4e7"
+            }
+          },
+          {
+            "name": "Ghost on dark",
+            "description": "For a code block or dark surface",
+            "css": {
+              "--c2-copy-button__container--color": "#a1a1aa",
+              "--c2-copy-button__container__hover--background-color": "rgba(255, 255, 255, 0.1)",
+              "--c2-copy-button__container__hover--color": "#fafafa",
+              "--c2-copy-button__container__copied--color": "#4ade80"
+            }
+          }
+        ]
+      },
+      "examples": [
+        {
+          "kind": "usage",
+          "label": "Hover the block (default)",
+          "html": "<pre class=\"snippet\">npx -y @c2n/mcp<c2-copy-button pin></c2-copy-button></pre>",
+          "css": ".snippet {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}\n.scroller {\n  position: relative;\n  width: 300px;\n  max-height: 92px;\n  overflow: auto;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  line-height: 1.7;\n  color: #18181b;\n}\n.card {\n  position: relative;\n  max-width: 380px;\n  padding: 14px 52px 14px 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  font-size: 13px;\n  line-height: 1.55;\n  color: #3f3f46;\n}\n.outlined {\n  --c2-copy-button__container--border: 1px solid #bcbcc6;\n  --c2-copy-button__container__hover--border: 1px solid #a1a1aa;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}\n.accent {\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 12px;\n  --c2-copy-button__container--padding-right: 12px;\n  --c2-copy-button__container--background-color: #0265dc;\n  --c2-copy-button__container--color: #ffffff;\n  --c2-copy-button__container__hover--background-color: #0255b9;\n  --c2-copy-button__container__copied--background-color: #007a4d;\n  --c2-copy-button__container__copied--color: #ffffff;\n}\n.field-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Scrolls under a pinned button",
+          "html": "<div class=\"scroller\">git remote add origin git@github.com:code2nguyen/web-components.git && git fetch --all --tags --prune && git checkout -b feature/copy-button origin/develop && npm install && npm run build && npm run ui:build — scroll this box: the pinned button holds its corner in both directions<c2-copy-button pin reveal=\"always\"></c2-copy-button></div>",
+          "css": ".snippet {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}\n.scroller {\n  position: relative;\n  width: 300px;\n  max-height: 92px;\n  overflow: auto;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  line-height: 1.7;\n  color: #18181b;\n}\n.card {\n  position: relative;\n  max-width: 380px;\n  padding: 14px 52px 14px 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  font-size: 13px;\n  line-height: 1.55;\n  color: #3f3f46;\n}\n.outlined {\n  --c2-copy-button__container--border: 1px solid #bcbcc6;\n  --c2-copy-button__container__hover--border: 1px solid #a1a1aa;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}\n.accent {\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 12px;\n  --c2-copy-button__container--padding-right: 12px;\n  --c2-copy-button__container--background-color: #0265dc;\n  --c2-copy-button__container--color: #ffffff;\n  --c2-copy-button__container__hover--background-color: #0255b9;\n  --c2-copy-button__container__copied--background-color: #007a4d;\n  --c2-copy-button__container__copied--color: #ffffff;\n}\n.field-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Always visible",
+          "html": "<c2-copy-button class=\"outlined\" reveal=\"always\" value=\"14 Rue de Rivoli, 75001 Paris\">Copy</c2-copy-button>\n<c2-copy-button class=\"accent\" reveal=\"always\" value=\"Order #A-4192\">Copy order</c2-copy-button>",
+          "css": ".snippet {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}\n.scroller {\n  position: relative;\n  width: 300px;\n  max-height: 92px;\n  overflow: auto;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  line-height: 1.7;\n  color: #18181b;\n}\n.card {\n  position: relative;\n  max-width: 380px;\n  padding: 14px 52px 14px 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  font-size: 13px;\n  line-height: 1.55;\n  color: #3f3f46;\n}\n.outlined {\n  --c2-copy-button__container--border: 1px solid #bcbcc6;\n  --c2-copy-button__container__hover--border: 1px solid #a1a1aa;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}\n.accent {\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 12px;\n  --c2-copy-button__container--padding-right: 12px;\n  --c2-copy-button__container--background-color: #0265dc;\n  --c2-copy-button__container--color: #ffffff;\n  --c2-copy-button__container__hover--background-color: #0255b9;\n  --c2-copy-button__container__copied--background-color: #007a4d;\n  --c2-copy-button__container__copied--color: #ffffff;\n}\n.field-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Copying a block",
+          "html": "<div class=\"card\">\n  Anthropic, 548 Market St, San Francisco, CA 94104\n  <c2-copy-button class=\"outlined\" pin></c2-copy-button>\n</div>",
+          "css": ".snippet {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}\n.scroller {\n  position: relative;\n  width: 300px;\n  max-height: 92px;\n  overflow: auto;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  line-height: 1.7;\n  color: #18181b;\n}\n.card {\n  position: relative;\n  max-width: 380px;\n  padding: 14px 52px 14px 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  font-size: 13px;\n  line-height: 1.55;\n  color: #3f3f46;\n}\n.outlined {\n  --c2-copy-button__container--border: 1px solid #bcbcc6;\n  --c2-copy-button__container__hover--border: 1px solid #a1a1aa;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}\n.accent {\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 12px;\n  --c2-copy-button__container--padding-right: 12px;\n  --c2-copy-button__container--background-color: #0265dc;\n  --c2-copy-button__container--color: #ffffff;\n  --c2-copy-button__container__hover--background-color: #0255b9;\n  --c2-copy-button__container__copied--background-color: #007a4d;\n  --c2-copy-button__container__copied--color: #ffffff;\n}\n.field-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "A field's value",
+          "html": "<div class=\"field-row\">\n  <c2-text-field id=\"usage-token\" value=\"c2n_live_8f4c19ab7e2d\" style=\"width: 220px\"></c2-text-field>\n  <c2-copy-button class=\"outlined\" reveal=\"always\" for=\"usage-token\">Copy token</c2-copy-button>\n</div>",
+          "css": ".snippet {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}\n.scroller {\n  position: relative;\n  width: 300px;\n  max-height: 92px;\n  overflow: auto;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  line-height: 1.7;\n  color: #18181b;\n}\n.card {\n  position: relative;\n  max-width: 380px;\n  padding: 14px 52px 14px 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  font-size: 13px;\n  line-height: 1.55;\n  color: #3f3f46;\n}\n.outlined {\n  --c2-copy-button__container--border: 1px solid #bcbcc6;\n  --c2-copy-button__container__hover--border: 1px solid #a1a1aa;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}\n.accent {\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 12px;\n  --c2-copy-button__container--padding-right: 12px;\n  --c2-copy-button__container--background-color: #0265dc;\n  --c2-copy-button__container--color: #ffffff;\n  --c2-copy-button__container__hover--background-color: #0255b9;\n  --c2-copy-button__container__copied--background-color: #007a4d;\n  --c2-copy-button__container__copied--color: #ffffff;\n}\n.field-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "A code viewer",
+          "html": "<c2-code-viewer\n  id=\"usage-snippet\"\n  style=\"width: 300px\"\n  language=\"ts\"\n  code=\"const copy = document.createElement('c2-copy-button')\\ncopy.value = 'hello'\"\n></c2-code-viewer>\n<c2-copy-button class=\"outlined\" reveal=\"always\" for=\"usage-snippet\">Copy code</c2-copy-button>",
+          "css": ".snippet {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}\n.scroller {\n  position: relative;\n  width: 300px;\n  max-height: 92px;\n  overflow: auto;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  line-height: 1.7;\n  color: #18181b;\n}\n.card {\n  position: relative;\n  max-width: 380px;\n  padding: 14px 52px 14px 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  font-size: 13px;\n  line-height: 1.55;\n  color: #3f3f46;\n}\n.outlined {\n  --c2-copy-button__container--border: 1px solid #bcbcc6;\n  --c2-copy-button__container__hover--border: 1px solid #a1a1aa;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}\n.accent {\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 12px;\n  --c2-copy-button__container--padding-right: 12px;\n  --c2-copy-button__container--background-color: #0265dc;\n  --c2-copy-button__container--color: #ffffff;\n  --c2-copy-button__container__hover--background-color: #0255b9;\n  --c2-copy-button__container__copied--background-color: #007a4d;\n  --c2-copy-button__container__copied--color: #ffffff;\n}\n.field-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "States",
+          "html": "<c2-copy-button class=\"outlined\" reveal=\"always\" value=\"disabled\" disabled>Disabled</c2-copy-button>\n<c2-copy-button class=\"outlined\" reveal=\"always\" value=\"slow\" copied-duration=\"6000\">Long feedback</c2-copy-button>\n<c2-copy-button class=\"outlined\" reveal=\"always\" value=\"custom\" copied-label=\"Got it\">\n  Copy\n  <span slot=\"copied-label\">Got it</span>\n</c2-copy-button>",
+          "css": ".snippet {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}\n.scroller {\n  position: relative;\n  width: 300px;\n  max-height: 92px;\n  overflow: auto;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  line-height: 1.7;\n  color: #18181b;\n}\n.card {\n  position: relative;\n  max-width: 380px;\n  padding: 14px 52px 14px 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  font-size: 13px;\n  line-height: 1.55;\n  color: #3f3f46;\n}\n.outlined {\n  --c2-copy-button__container--border: 1px solid #bcbcc6;\n  --c2-copy-button__container__hover--border: 1px solid #a1a1aa;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}\n.accent {\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 12px;\n  --c2-copy-button__container--padding-right: 12px;\n  --c2-copy-button__container--background-color: #0265dc;\n  --c2-copy-button__container--color: #ffffff;\n  --c2-copy-button__container__hover--background-color: #0255b9;\n  --c2-copy-button__container__copied--background-color: #007a4d;\n  --c2-copy-button__container__copied--color: #ffffff;\n}\n.field-row {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Icon only",
+          "section": "Presets",
+          "html": "<c2-copy-button reveal=\"always\" value=\"npx -y @c2n/mcp\"></c2-copy-button>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Outlined",
+          "section": "Presets",
+          "html": "<c2-copy-button class=\"outlined\" reveal=\"always\" value=\"14 Rue de Rivoli, 75001 Paris\">Copy</c2-copy-button>",
+          "css": ".outlined {\n  --c2-copy-button__container--border: 1px solid #bcbcc6;\n  --c2-copy-button__container__hover--border: 1px solid #a1a1aa;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Solid accent",
+          "section": "Presets",
+          "html": "<c2-copy-button class=\"accent\" reveal=\"always\" value=\"Order #A-4192\">Copy order</c2-copy-button>",
+          "css": ".accent {\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 12px;\n  --c2-copy-button__container--padding-right: 12px;\n  --c2-copy-button__container--background-color: #0265dc;\n  --c2-copy-button__container--color: #ffffff;\n  --c2-copy-button__container__hover--background-color: #0255b9;\n  --c2-copy-button__container__copied--background-color: #007a4d;\n  --c2-copy-button__container__copied--color: #ffffff;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Pill",
+          "section": "Presets",
+          "html": "<c2-copy-button class=\"pill\" reveal=\"always\" value=\"c2n_live_8f4c19ab7e2d\">Copy token</c2-copy-button>",
+          "css": ".pill {\n  --c2-copy-button__container--border-radius: 999px;\n  --c2-copy-button__container--height: 32px;\n  --c2-copy-button__container--padding-left: 14px;\n  --c2-copy-button__container--padding-right: 14px;\n  --c2-copy-button__container--background-color: #f4f4f5;\n  --c2-copy-button__container__hover--background-color: #e4e4e7;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Command line",
+          "section": "In context",
+          "html": "<pre class=\"snippet\">npm install @c2n/copy-button<c2-copy-button pin reveal=\"always\"></c2-copy-button></pre>",
+          "css": ".snippet {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Dark code block",
+          "section": "In context",
+          "html": "<pre class=\"dark-block\">git clone git@github.com:code2nguyen/web-components.git<c2-copy-button pin reveal=\"always\"></c2-copy-button></pre>",
+          "css": ".dark-block {\n  position: relative;\n  margin: 0;\n  padding: 14px 46px 14px 16px;\n  border-radius: 8px;\n  background: #18181b;\n  color: #e4e4e7;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n}\n.dark-block c2-copy-button {\n  --c2-copy-button__container--color: #a1a1aa;\n  --c2-copy-button__container__hover--background-color: rgba(255, 255, 255, 0.1);\n  --c2-copy-button__container__hover--color: #fafafa;\n  --c2-copy-button__container__copied--color: #4ade80;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Detail card",
+          "section": "In context",
+          "html": "<div class=\"detail\">\n  Anthropic, 548 Market St, San Francisco, CA 94104\n  <c2-copy-button pin reveal=\"always\"></c2-copy-button>\n</div>",
+          "css": ".detail {\n  position: relative;\n  max-width: 340px;\n  padding: 14px 52px 14px 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  font-size: 13px;\n  line-height: 1.55;\n  color: #3f3f46;\n}\n.detail c2-copy-button {\n  --c2-copy-button__container--border: 1px solid #e4e4e7;\n  --c2-copy-button__container__hover--background-color: #f4f4f5;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Scrolling block",
+          "section": "In context",
+          "html": "<div class=\"scrolls\">git remote add origin git@github.com:code2nguyen/web-components.git && git fetch --all --tags --prune && git checkout -b feature/copy-button origin/develop && npm install && npm run build && npm run ui:build — scroll this box: the pinned button holds its corner in both directions<c2-copy-button pin reveal=\"always\"></c2-copy-button></div>",
+          "css": ".scrolls {\n  position: relative;\n  width: 300px;\n  max-height: 92px;\n  overflow: auto;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  line-height: 1.7;\n  color: #18181b;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Revealed on hover",
+          "section": "In context",
+          "html": "<pre class=\"on-hover\">hover me — the default<c2-copy-button pin></c2-copy-button></pre>",
+          "css": ".on-hover {\n  position: relative;\n  margin: 0;\n  padding: 12px 44px 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  background: #fafafa;\n  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;\n  font-size: 12.5px;\n  white-space: pre;\n  color: #18181b;\n}"
+        },
+        {
+          "kind": "preview",
+          "label": "Preview",
+          "html": "<div class=\"preview-row\">\n  <c2-copy-button reveal=\"always\" value=\"npx -y @c2n/mcp\"></c2-copy-button>\n  <c2-copy-button reveal=\"always\" value=\"14 Rue de Rivoli, 75001 Paris\" style=\"--c2-copy-button__container--border: 1px solid #bcbcc6; --c2-copy-button__container__hover--background-color: #f4f4f5\">Copy</c2-copy-button>\n</div>"
+        }
+      ],
+      "hasGallery": true
+    },
     "details": {
       "id": "details",
       "package": "@c2n/details",
@@ -17614,6 +18105,7 @@
     "c2-color-area": "color-area",
     "c2-color-select": "color-select",
     "c2-color-slider": "color-slider",
+    "c2-copy-button": "copy-button",
     "c2-details": "details",
     "c2-dropdown-list": "dropdown-list",
     "c2-icon-button": "icon-button",
@@ -17658,6 +18150,7 @@
     "@c2n/color-area": "color-area",
     "@c2n/color-select": "color-select",
     "@c2n/color-slider": "color-slider",
+    "@c2n/copy-button": "copy-button",
     "@c2n/details": "details",
     "@c2n/dropdown-list": "dropdown-list",
     "@c2n/feather-icons": "feather-icons",
@@ -17756,7 +18249,7 @@
         "light": "#f4f4f5",
         "dark": "#27272a",
         "description": "Hover surface for rows and icon buttons.",
-        "usedBy": 6
+        "usedBy": 8
       },
       {
         "name": "--c2-theme--color-on-surface",
@@ -17764,7 +18257,7 @@
         "light": "#18181b",
         "dark": "#f4f4f5",
         "description": "Primary text colour.",
-        "usedBy": 13
+        "usedBy": 14
       },
       {
         "name": "--c2-theme--color-on-surface-variant",
@@ -17842,7 +18335,7 @@
         "category": "font",
         "light": "12px",
         "description": "Small text: supporting text, tooltips, descriptions, timestamps.",
-        "usedBy": 12
+        "usedBy": 13
       },
       {
         "name": "--c2-theme--font-size-md",
@@ -17856,7 +18349,7 @@
         "category": "font",
         "light": "500",
         "description": "Medium weight: buttons, headers, tooltips.",
-        "usedBy": 10
+        "usedBy": 11
       },
       {
         "name": "--c2-theme--font-weight-semibold",
@@ -17877,7 +18370,7 @@
         "category": "radius",
         "light": "6px",
         "description": "Default radius: buttons, inputs, list items, tooltips.",
-        "usedBy": 26
+        "usedBy": 27
       },
       {
         "name": "--c2-theme--radius-lg",
@@ -17920,21 +18413,21 @@
         "light": "2px solid rgba(2, 101, 220, 0.4)",
         "dark": "2px solid rgba(90, 163, 255, 0.5)",
         "description": "Focus-visible outline of every component.",
-        "usedBy": 16
+        "usedBy": 17
       },
       {
         "name": "--c2-theme--disabled-opacity",
         "category": "disabled",
         "light": "0.38",
         "description": "Opacity of disabled components.",
-        "usedBy": 17
+        "usedBy": 18
       },
       {
         "name": "--c2-theme--motion-scale",
         "category": "motion",
         "light": "1",
         "description": "Multiplier applied to every transition and animation duration (0 disables motion).",
-        "usedBy": 10
+        "usedBy": 11
       },
       {
         "name": "--c2-theme--shadow-md",
@@ -18070,6 +18563,15 @@
       "--c2-color-slider__color-handle--border-top-right-radius": "--c2-theme--radius-md",
       "--c2-color-slider__color-handle--border-bottom-left-radius": "--c2-theme--radius-md",
       "--c2-color-slider__color-handle--border-bottom-right-radius": "--c2-theme--radius-md",
+      "--c2-copy-button__container--color": "--c2-theme--color-on-surface",
+      "--c2-copy-button__container--border-radius": "--c2-theme--radius-md",
+      "--c2-copy-button__container--font-size": "--c2-theme--font-size-sm",
+      "--c2-copy-button__container--font-weight": "--c2-theme--font-weight-medium",
+      "--c2-copy-button__container__hover--background-color": "--c2-theme--color-surface-container",
+      "--c2-copy-button__container__active--background-color": "--c2-theme--color-surface-container",
+      "--c2-copy-button__container__focus--outline": "--c2-theme--focus-ring",
+      "--c2-copy-button__container__disabled--opacity": "--c2-theme--disabled-opacity",
+      "--c2-copy-button--transition-duration": "--c2-theme--motion-scale",
       "--c2-details--border-top": "--c2-theme--border",
       "--c2-details--border-right": "--c2-theme--border",
       "--c2-details--border-bottom": "--c2-theme--border",

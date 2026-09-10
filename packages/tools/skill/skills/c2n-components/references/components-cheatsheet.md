@@ -26,6 +26,16 @@ Attached buttons with shared borders, optionally a segmented control with single
 - Key variables (6 total): `--c2-button-group--border-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-button-group__divider--color` = `rgba(255, 255, 255, 0.35)`, `--c2-button-group--border` = `1px solid transparent`, `--c2-button-group--gap` = `0px`, `--c2-button-group__divider--width` = `1px`, `--c2-button-group__item--flex` = `0 0 auto`
 - Presets: Outlined, Segmented, Separated, Full width
 
+### Copy Button — `c2-copy-button`
+
+Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string. Package `@c2n/copy-button`. Register: `import '@c2n/copy-button'`.
+
+- Attributes: `value` (string | undefined), `for` (string | undefined), `disabled` (boolean), `copied` (boolean), `copied-duration` (number), `label` (string), `copied-label` (string), `reveal` ('hover' | 'always'), `pin` (CopyButtonPin | '' | undefined)
+- Slots: `default`, `copy-icon`, `copied-icon`, `copied-label`
+- Events: `copy-error`, `copied`
+- Key variables (28 total): `--c2-copy-button__container--color` = `rgb(34, 34, 34)` (→ `--c2-theme--color-on-surface`), `--c2-copy-button__container--border-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-copy-button__container--font-size` = `12px` (→ `--c2-theme--font-size-sm`), `--c2-copy-button__container--font-weight` = `500` (→ `--c2-theme--font-weight-medium`), `--c2-copy-button__container__hover--background-color` = `rgb(230, 230, 230)` (→ `--c2-theme--color-surface-container`), `--c2-copy-button__container__active--background-color` = `rgb(213, 213, 213)` (→ `--c2-theme--color-surface-container`), `--c2-copy-button--transition-duration` = `150ms` (→ `--c2-theme--motion-scale`), `--c2-copy-button__container--background-color`
+- Presets: Outlined, Solid accent, Pill, Ghost on dark
+
 ### Icon Button — `c2-icon-button`
 
 Round, hoverable button wrapping a slotted SVG icon. Package `@c2n/icon-button`. Register: `import '@c2n/icon-button'`.

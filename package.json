@@ -64,6 +64,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/copy-button:build",
         "./packages/components/textarea:build",
         "./packages/components/switch:build",
         "./packages/components/spinner:build",

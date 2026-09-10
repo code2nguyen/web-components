@@ -39,6 +39,14 @@ export const overrides: Record<string, Override> = {
     token: 'border',
     value: 'var(--c2-theme--border, var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline, rgb(177, 177, 177)))',
   },
+  // Copy button: the pressed surface is a slightly stronger tint of the hover surface (same trick as the selected +
+  // hovered list item above), so it follows the theme instead of staying a hard-coded grey. The copied state is a
+  // success colour, which the theme has no token for.
+  '--c2-copy-button__container__active--background-color': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
+  '--c2-copy-button__container__copied--color': { exclude: 'status colour' },
   // Badge status tones are semantic colours with no theme token; the neutral/primary/danger pairs map on their own.
   '--c2-badge__success--background': { exclude: 'status colour' },
   '--c2-badge__success--color': { exclude: 'status colour' },
