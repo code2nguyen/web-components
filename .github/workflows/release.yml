@@ -45,6 +45,10 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # NPM_TOKEN lives on this environment, and an environment secret is only injected into a job that
+    # declares the environment. Any protection rule set on it (required reviewer, wait timer, allowed
+    # branches) therefore gates the release too.
+    environment: release
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -112,6 +116,24 @@ jobs:
         # dependencies to the released version instead of a caret range. The `version` lifecycle script
         # of @c2n/skill re-syncs its plugin.json and .mcp.json pin during this step.
         run: npx lerna publish ${{ inputs.bump }} --dist-tag ${{ inputs.dist_tag }} --no-private --exact --yes
+
+      # lerna already created and pushed the `v<version>` tag; this turns it into a GitHub Release
+      # with notes generated from the commits/PRs since the previous one. Kept out of lerna itself
+      # because its `--create-release github` also forces `--conventional-commits`, which would take
+      # the bump out of the workflow input's hands.
+      - name: Create the GitHub release
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version="$(node -p "require('./lerna.json').version")"
+          prerelease=''
+          case "$version" in *-*) prerelease='--prerelease' ;; esac
+          gh release create "v$version" \
+            --title "v$version" \
+            --generate-notes \
+            --verify-tag \
+            $prerelease
 
       - name: Summary
         if: ${{ always() }}
