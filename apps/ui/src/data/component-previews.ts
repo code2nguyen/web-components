@@ -157,6 +157,16 @@ export const componentPreviews: Record<string, string> = {
   <c2-switch></c2-switch>
   <c2-switch checked>Notifications</c2-switch>
 </div>`,
+  table: `<c2-table sortable stripe row-key="id" style="height:180px;width:100%" rows='[
+  {"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},
+  {"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},
+  {"id":"3","name":"Alan Turing","team":"Research","score":87200},
+  {"id":"4","name":"Radia Perlman","team":"Networks","score":74800}
+]'>
+  <c2-table-column field="name" header="Name" width="2fr" sortable></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="90px" align="end" format="number" sortable></c2-table-column>
+</c2-table>`,
   tabs: `<c2-tabs selected-tab="tab2" style="width:240px">
   <c2-tab label="Overview" for="tab1"></c2-tab>
   <c2-tab label="Activity" for="tab2"></c2-tab>

@@ -117,6 +117,19 @@ function unwrapParagraphs(node) {
   })
 }
 
+// Everything Astro passes to an island arrives as a prop, and `@astrojs/lit` then decides between `setAttribute` and a
+// direct property assignment with `name in Ctr.prototype` — the same test on the SSR side and on the hydration side.
+// A fence is authored as HTML, so every one of its attributes has to reach the element as an attribute: a direct
+// assignment hands over the raw string and skips the property's converter, so `rows='[…]'` lands as a string instead
+// of an array, and the element is marked `defer-hydration` for a property that was never really set. Handing the name
+// over capitalized misses that prototype check; `setAttribute` lowercases it again (attribute names are
+// case-insensitive in HTML), so the element ends up with exactly the attribute the fence author wrote.
+// Astro directives (`client:only`, `set:html`) and `class` are its own to interpret, so they are passed through.
+function asAttributeName(name) {
+  if (name.includes(':') || name.startsWith('data-') || name === 'class') return name
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
+
 // Client-only children must bypass Astro's renderer entirely. Even plain custom-element tags can be picked up by
 // the Lit SSR renderer, losing non-reflected attributes and gaining defer-hydration without a child island to
 // restore them. Raw HTML also keeps the children directly slotted, without nested astro-island wrappers.
@@ -131,6 +144,7 @@ function changeComponentName(vnode, uid, componentName, markup) {
   if (vnode.name?.startsWith('c2-') && vnode.name != 'c2-tab') {
     vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
     vnode.attributes = vnode.attributes || []
+    for (const attribute of vnode.attributes) attribute.name = asAttributeName(attribute.name)
 
     const clientDirective = vnode.attributes.find((item) => item.name.startsWith('client:'))
     if (!clientDirective) {

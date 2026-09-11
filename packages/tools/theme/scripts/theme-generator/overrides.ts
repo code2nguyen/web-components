@@ -74,4 +74,14 @@ export const overrides: Record<string, Override> = {
   '--c2-color-select--border-top-right-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-bottom-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-bottom-right-radius': { exclude: 'swatch detail radius' },
+  // Table: the pinned-column separators are hairlines drawn as shadows, so they follow the outline colour (same trick
+  // as the tabs baseline above) instead of staying a hard-coded grey on a dark table.
+  '--c2-table__pinned-start--box-shadow': {
+    token: 'color-outline-variant',
+    value: '1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-table__pinned-end--box-shadow': {
+    token: 'color-outline-variant',
+    value: '-1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
 }

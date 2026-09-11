@@ -1,0 +1,145 @@
+---
+title: 'Table'
+description: 'Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Table } from '@c2n/table'
+import { TableColumn } from '@c2n/table/table-column.js'
+
+`c2-table` is one CSS grid: the header row and every body row are grid items using `grid-template-columns: subgrid`, so columns stay aligned without any scroll syncing, pinned columns are sticky cells instead of separate containers, and the whole body scrolls in a single viewport. Columns are declared either as `c2-table-column` children — definitions that render nothing themselves, the same way `c2-select` reads its `c2-list-item` children — or as a `columns` array of the same shape.
+
+Rows and columns are both readable from markup as JSON and from script as properties, so a table can be authored without a build step. Past `virtual-threshold` rows (100 by default) the body is windowed to the visible range, and an async `dataSource` loads blocks of rows as they scroll into view — a million rows cost the same DOM as twenty.
+
+Give the host a height (or `--c2-table--max-height`); the header stays sticky while the rows scroll under it. Tab moves into the header, the arrow keys walk cells, Enter sorts the focused column, Space selects the focused row and shift-click selects a range.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/table
+```
+
+`@c2n/checkbox` and `@c2n/spinner` are dependencies of the package and are registered for you.
+
+## Usage
+
+Put one `c2-table-column` per column in the default slot, and hand the table its `rows`. `sortable` on the table makes every column sortable; `format` runs the value through `Intl`; `renderCell` (a property) replaces a cell body with any markup.
+
+```html tag=UsageBlock,package=@c2n/table
+<style>
+  .grid {
+    height: 208px;
+    width: 100%;
+  }
+  .compact {
+    height: 190px;
+    width: 100%;
+    --c2-table__header--background: #ffffff;
+    --c2-table__header--height: 32px;
+    --c2-table__row--height: 30px;
+    --c2-table__cell--font-size: 13px;
+  }
+</style>
+<div data-label="Sortable columns">
+  <c2-table client:only="lit" class="grid" sortable stripe row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000,"joined":"2024-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500,"joined":"2023-11-02"},{"id":"3","name":"Alan Turing","team":"Research","score":87200,"joined":"2024-06-30"},{"id":"4","name":"Katherine Johnson","team":"Flight","score":143000,"joined":"2022-09-14"},{"id":"5","name":"Radia Perlman","team":"Networks","score":74800,"joined":"2025-01-08"}]'>
+    <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+    <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+    <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+    <c2-table-column field="joined" header="Joined" width="130px" format="date"></c2-table-column>
+  </c2-table>
+</div>
+<div data-label="Columns as data">
+  <c2-table client:only="lit" class="grid" sortable row-key="id" columns='[{"field":"name","header":"Name","width":"2fr"},{"field":"team","header":"Team","width":"1fr"},{"field":"score","header":"Score","width":"110px","align":"end","format":"number"},{"field":"joined","header":"Joined","width":"130px","format":"date"}]' rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000,"joined":"2024-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500,"joined":"2023-11-02"},{"id":"3","name":"Alan Turing","team":"Research","score":87200,"joined":"2024-06-30"},{"id":"4","name":"Katherine Johnson","team":"Flight","score":143000,"joined":"2022-09-14"},{"id":"5","name":"Radia Perlman","team":"Networks","score":74800,"joined":"2025-01-08"}]'></c2-table>
+</div>
+<div data-label="Selection">
+  <c2-table client:only="lit" class="grid" selection="multiple" checkbox-selection sortable row-key="id" value="2;3" rows='[{"id":"1","name":"Ada Lovelace","status":"active","score":128000},{"id":"2","name":"Grace Hopper","status":"invited","score":96500},{"id":"3","name":"Alan Turing","status":"active","score":87200},{"id":"4","name":"Katherine Johnson","status":"active","score":143000},{"id":"5","name":"Radia Perlman","status":"invited","score":74800}]'>
+    <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+    <c2-table-column field="status" header="Status" width="120px"></c2-table-column>
+    <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  </c2-table>
+</div>
+<div data-label="Pinned and resizable">
+  <c2-table client:only="lit" class="compact" resizable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","status":"active","score":128000,"owner":"Grace"},{"id":"2","name":"Grace Hopper","team":"Compilers","status":"invited","score":96500,"owner":"Ada"},{"id":"3","name":"Alan Turing","team":"Research","status":"active","score":87200,"owner":"Radia"},{"id":"4","name":"Katherine Johnson","team":"Flight","status":"active","score":143000,"owner":"Alan"}]'>
+    <c2-table-column field="name" header="Name" width="170px" pinned="start"></c2-table-column>
+    <c2-table-column field="team" header="Team" width="150px"></c2-table-column>
+    <c2-table-column field="status" header="Status" width="150px"></c2-table-column>
+    <c2-table-column field="score" header="Score" width="150px" align="end" format="number"></c2-table-column>
+    <c2-table-column field="owner" header="Owner" width="110px" pinned="end"></c2-table-column>
+  </c2-table>
+</div>
+<div data-label="Empty">
+  <c2-table client:only="lit" class="compact" empty-message="No rows match this filter">
+    <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+    <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  </c2-table>
+</div>
+```
+
+### Columns as data
+
+`columns` takes the same fields as `c2-table-column`, as an array. Use it when the columns are computed rather than
+authored — a user-configurable grid, a response that decides its own shape, or a framework template that already holds
+them in state. It is a JSON attribute as well as a property, so the row above has no script behind it:
+
+```html tag=CodeBlock
+<c2-table sortable row-key="id" columns='[{"field":"name","header":"Name","width":"2fr"}]' rows="..."></c2-table>
+```
+
+From script the array can carry the things an attribute cannot — `renderCell`, `renderHeader` and `comparator`:
+
+```typescript tag=CodeBlock
+import { html } from 'lit'
+import type { TableColumnConfig } from '@c2n/table/table-types.js'
+
+const columns: TableColumnConfig[] = [
+  { field: 'name', header: 'Name', width: '2fr' },
+  { field: 'score', header: 'Score', width: '110px', align: 'end', format: 'number' },
+  {
+    field: 'status',
+    header: 'Status',
+    width: '120px',
+    renderCell: ({ value }) => html`<c2-badge tone=${value === 'active' ? 'success' : 'warning'}>${value}</c2-badge>`,
+  },
+]
+
+table.columns = columns
+```
+
+The two ways are exclusive per table, not merged: `c2-table-column` children win whenever there are any, so `columns`
+is the fallback and never a way to patch a child. With neither, the table derives one column per key of the first row,
+which is enough to look at a response before deciding how to present it.
+
+### Rendering a cell
+
+`renderCell` is a property on the column, so it is set from script. It receives the cell's value, the whole row and the row index, and returns anything Lit can render.
+
+```typescript tag=CodeBlock
+import { html } from 'lit'
+import '@c2n/table'
+import '@c2n/badge'
+
+const table = document.querySelector('c2-table')!
+table.rows = await fetchPeople()
+
+const status = table.querySelector<HTMLElement & { renderCell?: unknown }>('c2-table-column[field="status"]')!
+status.renderCell = ({ value }) => html`<c2-badge tone=${value === 'active' ? 'success' : 'warning'}>${value}</c2-badge>`
+```
+
+### Loading rows lazily
+
+Set `dataSource` instead of `rows` and the table asks for one block at a time as rows scroll into view, using the total to size the scrollbar. Sorting is delegated to the source: it arrives as `request.sort`, and the cache is dropped whenever the sort changes.
+
+```typescript tag=CodeBlock
+table.dataSource = {
+  async getRows({ start, count, sort }) {
+    const params = new URLSearchParams({ offset: String(start), limit: String(count) })
+    if (sort[0]) params.set('sort', `${sort[0].field}:${sort[0].direction}`)
+    const response = await fetch(`/api/people?${params}`)
+    const { items, total } = await response.json()
+    return { rows: items, total }
+  },
+}
+```

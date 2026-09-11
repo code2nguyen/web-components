@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-table</title>
+    <script type="module" src="/src/table.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+        color: #18181b;
+      }
+
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #71717a;
+      }
+
+      p.hint {
+        margin: 0 0 12px;
+        font-size: 13px;
+        color: #71717a;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 500;
+        background: #f4f4f5;
+        color: #3f3f46;
+      }
+
+      .tag--active {
+        background: rgba(0, 122, 77, 0.12);
+        color: rgb(0, 122, 77);
+      }
+
+      .tag--invited {
+        background: rgba(177, 76, 0, 0.12);
+        color: rgb(177, 76, 0);
+      }
+
+      /* A themed, compact variant: only CSS variables, no CSS reaching into the shadow root. */
+      c2-table.compact {
+        --c2-table--border-top-left-radius: 14px;
+        --c2-table--border-top-right-radius: 14px;
+        --c2-table--border-bottom-left-radius: 14px;
+        --c2-table--border-bottom-right-radius: 14px;
+        --c2-table--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.08);
+        --c2-table__header--background: #ffffff;
+        --c2-table__header--height: 32px;
+        --c2-table__header--border-bottom: 1px solid #18181b;
+        --c2-table__row--height: 28px;
+        --c2-table__row--border-bottom: none;
+        --c2-table__cell--font-size: 13px;
+        --c2-table__cell--padding: 0 10px;
+        --c2-table__header-cell--padding: 0 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>Rows and columns from markup</h2>
+      <p class="hint">Sortable headers, striped rows, a right-aligned number column and a date column — no script at all.</p>
+      <c2-table
+        sortable
+        stripe
+        multi-sort
+        row-key="id"
+        style="height: 240px"
+        rows='[
+          { "id": "1", "name": "Ada Lovelace", "team": "Analytics", "score": 128000, "joined": "2024-02-11" },
+          { "id": "2", "name": "Grace Hopper", "team": "Compilers", "score": 96500, "joined": "2023-11-02" },
+          { "id": "3", "name": "Alan Turing", "team": "Research", "score": 87200, "joined": "2024-06-30" },
+          { "id": "4", "name": "Katherine Johnson", "team": "Flight", "score": 143000, "joined": "2022-09-14" },
+          { "id": "5", "name": "Radia Perlman", "team": "Networks", "score": 74800, "joined": "2025-01-08" }
+        ]'
+      >
+        <c2-table-column field="name" header="Name" width="2fr" sortable></c2-table-column>
+        <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+        <c2-table-column field="score" header="Score" width="120px" align="end" format="number" sortable></c2-table-column>
+        <c2-table-column field="joined" header="Joined" width="140px" format="date" sortable></c2-table-column>
+      </c2-table>
+    </section>
+
+    <section>
+      <h2>Selection, toolbar and footer</h2>
+      <p class="hint">Checkbox column, ⌘/ctrl-click to toggle, shift-click for a range. The footer slot shows the live count.</p>
+      <c2-table id="selectable" selection="multiple" checkbox-selection row-key="id" sortable style="height: 260px">
+        <span slot="toolbar" style="font-weight: 600">Team members</span>
+        <c2-table-column field="name" header="Name" width="2fr" sortable></c2-table-column>
+        <c2-table-column field="status" header="Status" width="140px"></c2-table-column>
+        <c2-table-column field="score" header="Score" width="120px" align="end" format="number" sortable></c2-table-column>
+        <span slot="footer" id="selection-count" style="font-size: 13px; color: #71717a">No rows selected</span>
+      </c2-table>
+    </section>
+
+    <section>
+      <h2>Custom cell rendering</h2>
+      <p class="hint">A <code>renderCell</code> function returns any markup — here a status pill and a formatted currency cell.</p>
+      <c2-table id="rendered" class="compact" row-key="id" style="height: 220px">
+        <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+        <c2-table-column id="status-column" field="status" header="Status" width="120px" align="center"></c2-table-column>
+        <c2-table-column field="score" header="Revenue" width="140px" align="end" format="currency" currency="EUR"></c2-table-column>
+      </c2-table>
+    </section>
+
+    <section>
+      <h2>Pinned and resizable columns</h2>
+      <p class="hint">The name column is pinned to the start, the actions column to the end; drag any header edge to resize.</p>
+      <c2-table id="pinned" resizable row-key="id" style="height: 240px; max-width: 520px">
+        <c2-table-column field="name" header="Name" width="180px" pinned="start"></c2-table-column>
+        <c2-table-column field="team" header="Team" width="160px"></c2-table-column>
+        <c2-table-column field="status" header="Status" width="160px"></c2-table-column>
+        <c2-table-column field="score" header="Score" width="160px" align="end" format="number"></c2-table-column>
+        <c2-table-column field="joined" header="Joined" width="160px" format="date"></c2-table-column>
+        <c2-table-column field="owner" header="Owner" width="120px" pinned="end"></c2-table-column>
+      </c2-table>
+    </section>
+
+    <section>
+      <h2>50 000 rows, virtualized</h2>
+      <p class="hint">Only the visible window is in the DOM; sorting still runs over the whole array.</p>
+      <c2-table id="large" sortable stripe row-key="id" style="height: 320px">
+        <c2-table-column field="id" header="#" width="80px" align="end" sortable></c2-table-column>
+        <c2-table-column field="name" header="Name" width="2fr" sortable></c2-table-column>
+        <c2-table-column field="team" header="Team" width="1fr" sortable></c2-table-column>
+        <c2-table-column field="score" header="Score" width="120px" align="end" format="number" sortable></c2-table-column>
+      </c2-table>
+    </section>
+
+    <section>
+      <h2>Async data source</h2>
+      <p class="hint">One million rows behind a fake server: blocks of 100 load as they scroll into view, cells show a placeholder until then.</p>
+      <c2-table id="remote" row-key="id" style="height: 320px">
+        <c2-table-column field="id" header="#" width="100px" align="end"></c2-table-column>
+        <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+        <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+      </c2-table>
+    </section>
+
+    <section>
+      <h2>Columns as data</h2>
+      <p class="hint">
+        No <code>c2-table-column</code> children: the left table gets its columns from the <code>columns</code> JSON attribute, the right one from the property,
+        which can also carry <code>renderCell</code> and <code>comparator</code>.
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <c2-table
+          sortable
+          row-key="id"
+          style="height: 200px"
+          columns='[
+            { "field": "name", "header": "Name", "width": "2fr" },
+            { "field": "team", "header": "Team", "width": "1fr" },
+            { "field": "score", "header": "Score", "width": "110px", "align": "end", "format": "number" }
+          ]'
+          rows='[
+            { "id": "1", "name": "Ada Lovelace", "team": "Analytics", "score": 128000 },
+            { "id": "2", "name": "Grace Hopper", "team": "Compilers", "score": 96500 },
+            { "id": "3", "name": "Alan Turing", "team": "Research", "score": 87200 },
+            { "id": "4", "name": "Radia Perlman", "team": "Networks", "score": 74800 }
+          ]'
+        ></c2-table>
+        <c2-table id="columns-from-script" sortable row-key="id" style="height: 200px"></c2-table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Columns from the first row</h2>
+      <p class="hint">Neither children nor a <code>columns</code> array: one column per key of the first row, with a humanized header.</p>
+      <c2-table
+        id="auto-columns"
+        sortable
+        row-key="id"
+        style="height: 200px"
+        rows='[
+          { "id": "1", "name": "Ada Lovelace", "team": "Analytics", "joined": "2024-02-11" },
+          { "id": "2", "name": "Grace Hopper", "team": "Compilers", "joined": "2023-11-02" },
+          { "id": "3", "name": "Alan Turing", "team": "Research", "joined": "2024-06-30" }
+        ]'
+      ></c2-table>
+    </section>
+
+    <section>
+      <h2>Empty and error states</h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <c2-table style="height: 160px">
+          <c2-table-column field="name" header="Name"></c2-table-column>
+          <c2-table-column field="team" header="Team"></c2-table-column>
+          <span slot="empty">Nothing here yet</span>
+        </c2-table>
+        <c2-table style="height: 160px" error="The request failed with 503">
+          <c2-table-column field="name" header="Name"></c2-table-column>
+          <c2-table-column field="team" header="Team"></c2-table-column>
+        </c2-table>
+      </div>
+    </section>
+
+    <script type="module">
+      import { html } from 'lit'
+
+      const TEAMS = ['Analytics', 'Compilers', 'Research', 'Flight', 'Networks']
+      const STATUSES = ['active', 'invited', 'active', 'active', 'invited']
+      const NAMES = ['Ada Lovelace', 'Grace Hopper', 'Alan Turing', 'Katherine Johnson', 'Radia Perlman', 'Barbara Liskov', 'Margaret Hamilton']
+
+      const makeRows = (count, offset = 0) =>
+        Array.from({ length: count }, (_, index) => {
+          const seed = index + offset
+          return {
+            id: String(seed + 1),
+            name: `${NAMES[seed % NAMES.length]} ${seed + 1}`,
+            team: TEAMS[seed % TEAMS.length],
+            status: STATUSES[seed % STATUSES.length],
+            owner: NAMES[(seed + 3) % NAMES.length].split(' ')[0],
+            score: ((seed * 7919) % 90000) + 10000,
+            joined: new Date(2022, seed % 12, (seed % 27) + 1).toISOString().slice(0, 10),
+          }
+        })
+
+      const sample = makeRows(8)
+
+      const fromScript = document.querySelector('#columns-from-script')
+      fromScript.rows = sample
+      fromScript.columns = [
+        { field: 'name', header: 'Name', width: '2fr' },
+        { field: 'status', header: 'Status', width: '110px', renderCell: ({ value }) => html`<b>${value}</b>` },
+        { field: 'score', header: 'Score', width: '110px', align: 'end', format: 'number', comparator: (a, b) => a - b },
+      ]
+
+      const selectable = document.querySelector('#selectable')
+      selectable.rows = sample
+      const count = document.querySelector('#selection-count')
+      selectable.addEventListener('selection-change', (event) => {
+        const total = event.detail.value.length
+        count.textContent = total === 0 ? 'No rows selected' : `${total} row${total === 1 ? '' : 's'} selected`
+      })
+
+      const rendered = document.querySelector('#rendered')
+      rendered.rows = sample.slice(0, 5)
+      document.querySelector('#status-column').renderCell = ({ value }) => html`<span class="tag tag--${value}">${value}</span>`
+
+      document.querySelector('#pinned').rows = sample
+      document.querySelector('#large').rows = makeRows(50000)
+
+      const remoteRows = makeRows(1000)
+      document.querySelector('#remote').dataSource = {
+        async getRows({ start, count: size }) {
+          await new Promise((resolve) => setTimeout(resolve, 350))
+          return {
+            total: 1000000,
+            rows: Array.from({ length: size }, (_, index) => {
+              const row = remoteRows[(start + index) % remoteRows.length]
+              return { ...row, id: String(start + index + 1) }
+            }),
+          }
+        },
+      }
+    </script>
+  </body>
+</html>
