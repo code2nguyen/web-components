@@ -48,7 +48,9 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../checkbox:build",
+        "../spinner:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },

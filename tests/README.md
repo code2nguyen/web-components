@@ -1,6 +1,6 @@
 # Component browser tests
 
-Playwright runs real component scenarios through one shared Vite server. Tests live beside each component in `test/`. The server compiles source and SCSS on demand; component and core imports resolve to source, so the suites need no package build or Astro app. Existing component Vite configs remain the standalone development/build harnesses.
+Playwright runs real component scenarios through one shared Vite server. Tests live beside each component in `test/`. The server compiles source and SCSS on demand; component and core imports resolve to source, so running the suites needs no package build or Astro app. `npm run test:type-check` is the exception: tsc resolves a component's `@c2n/*` imports through each package's `exports`, which point at the generated `dist/*.d.ts`, so it needs `npm run build` first — which is why CI builds before type-checking. Existing component Vite configs remain the standalone development/build harnesses.
 
 ## Run
 

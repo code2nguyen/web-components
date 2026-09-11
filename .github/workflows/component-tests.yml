@@ -29,6 +29,10 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # The suites themselves run against source, but the type-check resolves a component's `@c2n/*` imports through
+      # each package's `exports`, which point at the generated `dist/*.d.ts`. Those are git-ignored, so without a
+      # build tsc cannot see them and fails on any component that depends on a sibling package.
+      - run: npm run build
       - run: npx playwright install --with-deps ${{ matrix.browser }}
       - run: npm run test:type-check
       - name: Test changed component packages
