@@ -1,4 +1,4 @@
-import { LibDefinition, UIDefinition } from '../types'
+import type { LibDefinition, UIDefinition } from '../types'
 
 const inputComponentDefinition: UIDefinition = {
   tagName: 'input',

@@ -175,6 +175,11 @@ summary {
   transition-timing-function: animation.$standard-easing;
 }
 
+// WebKit does not consistently apply the native closed-details rendering rule to slotted shadow content.
+.c2-details:not([open]) > .c2-details-content {
+  display: none;
+}
+
 .c2-details-body {
   padding-top: css.cssVar(content--padding-top);
   padding-right: css.cssVar(content--padding-right, header--padding-right);

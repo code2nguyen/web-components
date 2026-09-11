@@ -4,6 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "playwright test --project=chromium",
+    "test:button": "playwright test packages/components/button/test --project=chromium",
+    "test:all": "playwright test",
+    "test:serve": "vite --config tests/vite.config.ts",
+    "test:type-check": "tsc -p tests/tsconfig.json",
+    "test:report": "playwright show-report",
     "prepare": "husky",
     "lint": "wireit",
     "lint:check": "wireit",
@@ -26,6 +32,8 @@
     "mcp:smoke": "npm run smoke -w packages/tools/mcp"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
     "husky": "9.1.7",
     "lerna": "10.0.1",
     "lint-staged": "17.4.1",

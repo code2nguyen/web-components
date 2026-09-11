@@ -113,6 +113,7 @@ export class ReorderList extends LitElement {
 
   @eventOptions({ passive: true })
   private handleMouseDown(event: MouseEvent) {
+    if (!this.editable) return
     const targetIndex = this.getSlottedTargetIndex(event)
     if (targetIndex == -1) return
 
@@ -355,7 +356,6 @@ export class ReorderList extends LitElement {
         isFixed: slot ? this.isFixedItem(slot.assignedNodes()[0] as HTMLElement) : false,
       })
     })
-    console.log(this.itemPositions)
   }
 
   private applyTransform(event: MutateMouseEvent) {

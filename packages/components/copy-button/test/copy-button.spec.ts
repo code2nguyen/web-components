@@ -1,0 +1,31 @@
+import { test, expect, watch, accessible, clipboard } from '../../../../tests/component-fixture'
+
+test('copy writes the explicit value and announces completion', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-copy-button value="hello" reveal="always" copied-duration="100">Copy text</c2-copy-button>')
+  await clipboard(page)
+  const host = page.locator('c2-copy-button')
+  await watch(host, 'copied')
+  await page.getByRole('button', { name: 'Copy', exact: true }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-clipboard', 'hello')
+  await expect(host).toHaveAttribute('data-events', '[{"text":"hello"}]')
+  await expect(page.getByRole('button', { name: 'Copy', exact: true })).toBeVisible()
+  await accessible(page)
+})
+test('for reads the current input value and excludes copy-button labels from parent text', async ({ page, renderScenario }) => {
+  await renderScenario('<input id="source" aria-label="Source" value="old" /><c2-copy-button for="source" reveal="always"></c2-copy-button>')
+  await clipboard(page)
+  await page.getByRole('textbox').fill('edited')
+  await page.getByRole('button', { name: 'Copy', exact: true }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-clipboard', 'edited')
+  await renderScenario('<div>Source text<c2-copy-button reveal="always">Do not copy me</c2-copy-button></div>')
+  await clipboard(page)
+  await page.getByRole('button', { name: 'Copy', exact: true }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-clipboard', 'Source text')
+})
+test('clipboard rejection announces failure without claiming success', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-copy-button value="hello" reveal="always"></c2-copy-button>')
+  await clipboard(page, true)
+  await page.getByRole('button', { name: 'Copy', exact: true }).click()
+  await expect(page.getByRole('status')).toHaveText('Copy failed')
+  await expect(page.locator('c2-copy-button')).toHaveJSProperty('copied', false)
+})

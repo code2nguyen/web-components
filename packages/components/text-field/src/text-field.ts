@@ -151,6 +151,9 @@ export class TextField extends LitElement {
   /** Text shown while the field is empty. */
   @property({ type: String }) placeholder = ''
 
+  /** Accessible name forwarded to the native input. */
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+
   /** The current text. Setting the attribute after the user has typed no longer updates it, like a native input. */
   @property({ type: String }) value = ''
 
@@ -318,6 +321,7 @@ export class TextField extends LitElement {
         <div class="c2-text-field ${classMap(classes)}" @click=${this.forwardFocusin}>
           ${this.renderPrefixSlot()}
           <input
+            aria-label=${ifDefined(this.ariaLabel || undefined)}
             type=${this.type}
             class="input"
             name=${ifDefined(this.name || undefined)}

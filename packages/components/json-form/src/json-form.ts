@@ -1,7 +1,7 @@
-import { LitElement, html, TemplateResult } from 'lit'
+import { LitElement, html, type TemplateResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import COMPONENT_REGISTRY from './component-registry'
-import { JsonFormGroup, JsonFormItem, UIDefinition } from './types'
+import type { JsonFormGroup, JsonFormItem, UIDefinition } from './types'
 import { FORM_DATA_CHANGE, FORM_ITEM_DATA_CHANGE, isJsonFormGroup, isJsonFormItem, renderUI } from './utils'
 
 interface RenderFormItemParams {

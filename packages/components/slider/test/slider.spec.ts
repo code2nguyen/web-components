@@ -1,0 +1,33 @@
+import { test, expect, props, watch, accessible, pointerClick } from '../../../../tests/component-fixture'
+
+test('keyboard steps publish input and change, and Home/End reach bounds', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-slider aria-label="Volume" min="10" max="30" step="5" value="15" show-value ticks></c2-slider>')
+  const host = page.locator('c2-slider')
+  const slider = page.getByRole('slider', { name: 'Volume' })
+  await watch(host, 'change')
+  await slider.press('ArrowRight')
+  await expect(host).toHaveJSProperty('value', 20)
+  await expect(slider).toHaveAttribute('aria-valuetext', '20')
+  await expect(host).toHaveAttribute('data-events', '[null]')
+  await slider.press('End')
+  await expect(slider).toHaveValue('30')
+  await slider.press('Home')
+  await expect(slider).toHaveValue('10')
+  await accessible(page)
+})
+test('disabled prevents keyboard changes and vertical semantics are exposed', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-slider aria-label="Volume" value="40" orientation="vertical"></c2-slider>')
+  const slider = page.getByRole('slider')
+  await expect(slider).toHaveAttribute('aria-orientation', 'vertical')
+  await props(page.locator('c2-slider'), { disabled: true })
+  await expect(slider).toBeDisabled()
+  await pointerClick(slider)
+  await expect(slider).toHaveValue('40')
+})
+test('out-of-range values keep the display and accessibility value in sync', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-slider aria-label="Volume" min="10" max="30" value="100" show-value></c2-slider>')
+  const slider = page.getByRole('slider')
+  await expect(slider).toHaveValue('30')
+  await expect(slider).toHaveAttribute('aria-valuetext', '30')
+  await expect(page.locator('c2-slider [part="value"]')).toHaveText('30')
+})

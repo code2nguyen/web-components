@@ -77,8 +77,8 @@ export class Spinner extends LitElement {
         aria-label=${this.hasText ? nothing : ifDefined(this.label || 'Loading')}
         aria-labelledby=${this.hasText ? 'label' : nothing}
         aria-valuemin=${determinate ? '0' : nothing}
-        aria-valuemax=${determinate ? String(this.max) : nothing}
-        aria-valuenow=${determinate ? String(this.value) : nothing}
+        aria-valuemax=${determinate ? String(this.max > 0 ? this.max : 100) : nothing}
+        aria-valuenow=${determinate ? String(fraction * (this.max > 0 ? this.max : 100)) : nothing}
       >
         <svg class="c2-spinner-ring" part="ring" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
           <circle class="c2-spinner-track" part="track" cx="24" cy="24" r=${RADIUS}></circle>

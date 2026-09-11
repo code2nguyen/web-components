@@ -70,6 +70,7 @@ export class Breadcrumb extends LitElement {
   private observer?: MutationObserver
   private resizeObserver?: ResizeObserver
   private measuredWidth = -1
+  private automaticCurrent?: HTMLElement
 
   override connectedCallback() {
     super.connectedCallback()
@@ -110,11 +111,16 @@ export class Breadcrumb extends LitElement {
   }
 
   private markCurrent(items: HTMLElement[]) {
+    if (this.automaticCurrent) {
+      this.automaticCurrent.removeAttribute(this.automaticCurrent.localName === LINK_BUTTON_TAG ? 'selected' : 'aria-current')
+      this.automaticCurrent = undefined
+    }
     const last = items[items.length - 1]
     if (!last) return
     const explicit = items.some((item) => item !== last && (item.hasAttribute('selected') || item.hasAttribute('aria-current')))
     for (const item of items) {
       const isCurrent = !explicit && item === last
+      if (isCurrent && !item.hasAttribute('selected') && !item.hasAttribute('aria-current')) this.automaticCurrent = item
       if (item.localName === LINK_BUTTON_TAG) {
         if (isCurrent) item.setAttribute('selected', '')
         else if (item === last && explicit) item.removeAttribute('selected')
@@ -141,7 +147,6 @@ export class Breadcrumb extends LitElement {
       if (changed.has('itemCount')) this.expanded = false
       this.requestMeasure()
     }
-    if (this.measuring && !changed.has('measuring')) return
     if (this.measuring) this.measure()
   }
 

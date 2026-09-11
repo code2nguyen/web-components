@@ -47,6 +47,17 @@ npm run dev -w packages/components/checkbox
 
 ```
 
+### Component tests
+
+```bash
+npx playwright install chromium # first run, or after a Playwright upgrade
+npm run test:button             # focused button suite in Chromium
+npm test                       # all component suites in Chromium
+npm run test:all                # Chromium, Firefox and WebKit (install all browsers first)
+```
+
+Tests use one shared Vite server and live beside their components. See [the testing guide](tests/README.md) for setup, focused runs, CI, and adding scenarios.
+
 ## Theme
 
 `@c2n/theme` ships ~35 design tokens (`--c2-theme--*`) and a generated base theme that maps every component variable onto them. Import `@c2n/theme/theme.css` once, override a handful of tokens, done. Guide: https://code2nguyen.github.io/web-components/guides/theming

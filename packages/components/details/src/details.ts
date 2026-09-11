@@ -212,7 +212,8 @@ export class Details extends LitElement {
   }
 
   private handleDetailsToggle(event: Event) {
-    this.expanded = this.detailsElement.open
+    // The native element stays open during the closing animation.
+    if (!this.closing) this.expanded = this.detailsElement.open
     redispatchEvent(this, event)
   }
 

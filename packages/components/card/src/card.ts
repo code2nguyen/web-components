@@ -73,6 +73,20 @@ import styles from './card.scss?inline'
 export class Card extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  constructor() {
+    super()
+    this.addEventListener(
+      'click',
+      (event) => {
+        if (this.disabled && (this.interactive || this.href)) {
+          event.preventDefault()
+          event.stopImmediatePropagation()
+        }
+      },
+      true,
+    )
+  }
+
   /** Dims the card and ignores pointer and keyboard interaction. A link card renders without its anchor. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
@@ -118,6 +132,7 @@ export class Card extends LitElement {
   }
 
   private handleKeydown(event: KeyboardEvent) {
+    if (event.target !== event.currentTarget) return
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
       this.click()

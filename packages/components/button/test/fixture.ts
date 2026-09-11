@@ -1,0 +1,12 @@
+import { expect } from '@playwright/test'
+import { test as base } from '../../../../tests/fixture'
+
+export const test = base.extend<{ scenario: (name?: string) => Promise<void> }>({
+  scenario: async ({ page }, use) => {
+    await use(async (name = 'default') => {
+      await page.goto(`/packages/components/button/test/scenarios.html?scenario=${encodeURIComponent(name)}`)
+      await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
+    })
+  },
+})
+export { expect } from '@playwright/test'

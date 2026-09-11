@@ -54,6 +54,9 @@ export class LinkButton extends LitElement {
   /** Destination URL. When set (and the element is not disabled) the control renders as an anchor element. */
   @property() href: string | undefined = undefined
 
+  /** Accessible name forwarded to the native link or button. */
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+
   /** Browsing context for the link, forwarded to the anchor. Ignored when `external` is set. */
   @property() target: string | undefined = undefined
 
@@ -87,6 +90,7 @@ export class LinkButton extends LitElement {
           class="c2-link-button"
           part="link"
           href=${this.href}
+          aria-label=${ifDefined(this.ariaLabel ?? undefined)}
           target=${ifDefined(this.external ? '_blank' : this.target)}
           rel=${ifDefined(this.rel ?? (this.external ? 'noopener noreferrer' : undefined))}
           download=${ifDefined(this.download)}
@@ -97,7 +101,14 @@ export class LinkButton extends LitElement {
       `
     }
     return html`
-      <button class="c2-link-button" part="button" type="button" ?disabled=${this.disabled} aria-pressed=${this.selected ? 'true' : nothing}>
+      <button
+        class="c2-link-button"
+        part="button"
+        type="button"
+        aria-label=${ifDefined(this.ariaLabel ?? undefined)}
+        ?disabled=${this.disabled}
+        aria-pressed=${this.selected ? 'true' : nothing}
+      >
         ${this.renderContent()}
       </button>
     `

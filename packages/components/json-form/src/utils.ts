@@ -2,7 +2,7 @@ import { unsafeStatic } from 'lit/static-html.js'
 import type { JsonFormGroup, JsonFormItem, UIDefinition, JsonUI, UIRenderParam, VariantUIDefinition, CompareFn } from './types'
 import { html, type TemplateResult } from 'lit'
 import { ifDefined } from 'lit/directives/if-defined.js'
-import { bindMap, dynamicHtml, ObjectMap } from './dynamic-html'
+import { bindMap, dynamicHtml, type ObjectMap } from './dynamic-html'
 import COMPONENT_REGISTRY from './component-registry'
 
 type UnionGroupPropertyTypes = JsonFormGroup | JsonFormItem | UIDefinition | string[] | undefined | JsonUI

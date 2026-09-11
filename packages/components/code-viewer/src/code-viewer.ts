@@ -74,7 +74,7 @@ const LEGACY_LANG_ATTRIBUTE = 'langage'
  * @cssproperty {pixel} [--c2-code-viewer__line-numbers--gap=16px]
  * @cssproperty {color} --c2-code-viewer__line-numbers--color - Defaults to the foreground at 45% opacity.
  *
- * @cssproperty {background} [--c2-code-viewer__line__highlighted--background=rgba(99, 102, 241, 0.12)]
+ * @cssproperty {background} [--c2-code-viewer__line__highlighted--background=rgba(99, 102, 241, 0.01)]
  * @cssproperty {border} [--c2-code-viewer__line__highlighted--border-left=3px solid rgb(99, 102, 241)]
  *
  * @cssproperty {color} [--c2-code-viewer__theme--foreground=#24292e] - `css-variables` theme only.

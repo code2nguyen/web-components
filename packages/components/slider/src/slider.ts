@@ -113,6 +113,15 @@ export class Slider extends LitElement {
     redispatchEvent(this, event)
   }
 
+  protected override updated(changed: PropertyValues<this>) {
+    if (changed.has('value') || changed.has('min') || changed.has('max') || changed.has('step')) {
+      // Native range inputs clamp and snap even programmatic values. Mirror the
+      // sanitized value so the thumb, bubble and accessible text agree.
+      const value = this.formElement.valueAsNumber
+      if (Number.isFinite(value) && value !== this.value) this.value = value
+    }
+  }
+
   private handleChange(event: Event) {
     this.value = Number(this.formElement.value)
     redispatchEvent(this, event)
