@@ -8,8 +8,10 @@ Playwright runs real component scenarios through one shared Vite server. Tests l
 npm install
 npx playwright install chromium # once, and after Playwright upgrades
 npm run test:button             # button, Chromium
-npm test -- packages/components/button/test # focus any component directory
-npm test -- --grep 'keyboard'   # focus matching test titles
+npm test                       # changed component packages, Chromium
+npm test -- --base=origin/develop # committed changes since a branch/ref
+npm test -- packages/components/button/test # explicitly focus a component
+npm test -- --grep 'keyboard'   # matching tests in changed packages
 npm run test:all -- --list      # list tests without launching browsers
 npm run test:type-check
 
@@ -17,6 +19,8 @@ npx playwright install         # install all three browser engines
 npm run test:all                # all components, Chromium/Firefox/WebKit
 npm run test:report             # inspect the last HTML report
 ```
+
+`npm test` reads staged, unstaged and untracked files, then runs the suites belonging to changed `packages/components/*` and `open-packages/*` packages. On a local feature branch it also includes committed changes since `origin/HEAD` (currently `origin/develop`); pass `--base=<branch-or-sha>` to choose another comparison point. Changes to Playwright infrastructure, root package metadata, core, Sass, shared config or icon packages run every component suite because they can affect every package. If no changed package has a suite, the command exits successfully without starting Vite or a browser.
 
 Playwright starts Vite on `127.0.0.1:4175`, waits for the health page, and stops its server when finished. For repeated local runs, optionally keep `npm run test:serve` running; Playwright reuses it outside CI. A conflicting port fails instead of silently choosing another one. Browser processes are reused across tests, with an isolated browser context/page per test. Override concurrency with `--workers=4` when useful.
 
@@ -36,6 +40,6 @@ For keyboard navigation, destructure the shared `tab` fixture and use `tab()` / 
 
 ## CI and scale
 
-`component-tests.yml` runs on pull requests and main, with one job per browser. Each job starts one shared Vite server, runs with two workers, and uploads the report and failure traces for seven days. Retries are limited to one in CI, and focused tests (`test.only`) fail CI.
+`component-tests.yml` runs on pull requests and pushes to `develop` or `main`, with one job per browser. CI fetches history and compares the change with the event's base commit, so it runs only affected package suites even after changes are committed. Manual workflow runs execute the complete suite. Each browser job uploads its report and failure traces for seven days. Retries are limited to one in CI, and focused tests (`test.only`) fail CI.
 
-Initially CI runs the complete suite. Dependency-aware affected-component selection is intentionally deferred until more suites exist; a shared core, Sass, theme, or dependency change must include consumers. Local directory filtering is available now. At larger scale, distribute the full suite using Playwright's `--shard=1/4` (and corresponding jobs), retaining the full main-branch suite as a backstop. Measure suite timings before increasing workers or sharding.
+Selection is package-based: changing Button runs Button, and changing Button plus Select runs both. Shared inputs run everything rather than trying to infer every transitive consumer. At larger scale, distribute manual full-suite runs using Playwright's `--shard=1/4` and corresponding jobs. Measure timings before increasing workers or sharding.
