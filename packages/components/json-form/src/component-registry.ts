@@ -1,5 +1,5 @@
 import { NativeComponentLib } from './lib/native-components'
-import { ComponentRegistryConfig, LibDefinition, UIDefinition } from './types'
+import type { ComponentRegistryConfig, LibDefinition, UIDefinition } from './types'
 import { mergeObject, mergeVariantUI } from './utils'
 
 export class ComponentRegistry {

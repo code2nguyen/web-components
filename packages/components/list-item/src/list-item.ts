@@ -150,11 +150,19 @@ export class ListItem extends LitElement {
     super.connectedCallback()
     if (this.authorRole === null) this.authorRole = this.getAttribute('role')
     this.addEventListener('keydown', this.handleKeydown)
+    this.addEventListener('click', this.blockDisabledClick, true)
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.removeEventListener('keydown', this.handleKeydown)
+    this.removeEventListener('click', this.blockDisabledClick, true)
+  }
+
+  private blockDisabledClick = (event: Event) => {
+    if (!this.disabled) return
+    event.preventDefault()
+    event.stopImmediatePropagation()
   }
 
   /** Behaves like a click: dispatches `click` on the row and, for a standalone row, toggles `selected`. */

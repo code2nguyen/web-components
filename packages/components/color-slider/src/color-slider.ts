@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
 import { customElement, property, query } from 'lit/decorators.js'
 import styles from './color-slider.scss?inline'
@@ -43,6 +43,8 @@ export class ColorSlider extends LitElement {
   @property({ type: Number, reflect: true }) min: number = 0
   @property({ type: Number, reflect: true }) max: number = 360
 
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+
   @query('.color-handle') colorHandle!: HTMLElement
   @query('.input-slider') inputSlider!: HTMLElement
 
@@ -84,9 +86,8 @@ export class ColorSlider extends LitElement {
     }
     const handleWidth = this.colorHandleRect.width
     const range = this.max - this.min
-    let position = (this.inputSliderRect.width / range) * this.value
-    const delta = handleWidth / (this.inputSliderRect.width / position)
-    position = position - delta
+    const fraction = range > 0 ? Math.min(1, Math.max(0, (this.value - this.min) / range)) : 0
+    let position = (this.inputSliderRect.width - handleWidth) * fraction
     position = Math.max(0, position)
     position = Math.min(position, this.inputSliderRect.width - handleWidth)
     this.colorHandle.style.setProperty('transform', `translate(${position}px, -50%)`)
@@ -103,7 +104,16 @@ export class ColorSlider extends LitElement {
     const tinyColor = new TinyColor({ h: this.value, s: 1, v: 1, a: 1 })
     return html`
       <div class="c2-color-slider">
-        <input type="range" class="input-slider" min=${this.min} max=${this.max} step="1" .value=${String(this.value)} @input=${this.handleInput} />
+        <input
+          aria-label=${this.ariaLabel || nothing}
+          type="range"
+          class="input-slider"
+          min=${this.min}
+          max=${this.max}
+          step="1"
+          .value=${String(this.value)}
+          @input=${this.handleInput}
+        />
         <div class="gradient">
           <slot></slot>
         </div>

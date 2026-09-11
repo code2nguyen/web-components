@@ -1,0 +1,40 @@
+import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
+
+const rows = '<c2-list-item value="a">Apple</c2-list-item><c2-list-item value="b" disabled>Banana</c2-list-item><c2-list-item value="c">Cherry</c2-list-item>'
+test('selection updates options and emits consumer data', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-list aria-label="Fruit">${rows}</c2-list>`)
+  const host = page.locator('c2-list')
+  await watch(host, 'selection-change')
+  await page.getByRole('option', { name: 'Apple' }).click()
+  await expect(host).toHaveJSProperty('value', ['a'])
+  await expect(page.getByRole('option', { name: 'Apple' })).toHaveAttribute('aria-selected', 'true')
+  await expect(host).toHaveAttribute('data-events', '[{"value":["a"],"data":[null]}]')
+  await accessible(page)
+})
+test('keyboard skips disabled rows and typeahead finds matching options', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-list aria-label="Fruit">${rows}</c2-list>`)
+  await page.getByRole('option', { name: 'Apple' }).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(page.getByRole('option', { name: 'Cherry' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('c2-list')).toHaveJSProperty('value', ['c'])
+  await page.keyboard.press('Home')
+  await expect(page.getByRole('option', { name: 'Apple' })).toBeFocused()
+  await page.keyboard.press('c')
+  await expect(page.getByRole('option', { name: 'Cherry' })).toBeFocused()
+})
+test('multiple required selection cannot remove the last value', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-list aria-label="Fruit" multiple required value="a">${rows}</c2-list>`)
+  await page.getByRole('option', { name: 'Cherry' }).click()
+  await expect(page.locator('c2-list')).toHaveJSProperty('value', ['a', 'c'])
+  await page.getByRole('option', { name: 'Apple' }).click()
+  await page.getByRole('option', { name: 'Cherry' }).click()
+  await expect(page.locator('c2-list')).toHaveJSProperty('value', ['c'])
+})
+test('disabling an existing list removes its keyboard tab stop', async ({ page, renderScenario }) => {
+  await renderScenario(`<button>Before</button><c2-list aria-label="Fruit">${rows}</c2-list><button>After</button>`)
+  await props(page.locator('c2-list'), { disabled: true })
+  await expect(page.getByRole('option', { name: 'Apple' })).toHaveAttribute('tabindex', '-1')
+  await props(page.locator('c2-list'), { disabled: false })
+  await expect(page.getByRole('option', { name: 'Apple' })).toHaveAttribute('tabindex', '0')
+})

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Button test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+      }
+      main {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .themed {
+        --c2-button__container--height: 48px;
+        --c2-button__container--border-radius: 24px;
+        --c2-button__container--background-color: rgb(20, 30, 40);
+        --c2-button__container__hover--background-color: rgb(40, 50, 60);
+        --c2-button__container__selected--background-color: rgb(60, 70, 80);
+        --c2-button__container__focus--outline: 3px solid rgb(100, 20, 150);
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Button scenario"></main>
+  </body>
+</html>

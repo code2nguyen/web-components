@@ -151,7 +151,7 @@ export class RadioGroup extends LitElement {
     const radio = event.target
     if (radio === this || !(radio instanceof Radio) || radio.closest('c2-radio-group') !== this) return
     // The group speaks for its options: swallow the option's event and emit one `change` with the group value.
-    event.stopPropagation()
+    event.stopImmediatePropagation()
     this.select(radio)
   }
 

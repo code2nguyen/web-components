@@ -149,6 +149,7 @@ export class List extends LitElement {
   }
 
   private handleListItemClick(event: Event) {
+    if (this.disabled) return
     const target = event.target
     if (target instanceof ListItem && !target.disabled) {
       this.setFocusedItem(target, false)
@@ -231,9 +232,9 @@ export class List extends LitElement {
 
   /** Flush lists (no vertical padding) let the first and last rows take the list's corner radius. */
   private syncPaddingClasses() {
-    const styleMap = this.computedStyleMap()
-    this.classList.toggle('padding-top-0', styleMap.get('padding-top')?.toString() === '0px')
-    this.classList.toggle('padding-bottom-0', styleMap.get('padding-bottom')?.toString() === '0px')
+    const style = getComputedStyle(this)
+    this.classList.toggle('padding-top-0', style.paddingTop === '0px')
+    this.classList.toggle('padding-bottom-0', style.paddingBottom === '0px')
   }
 
   protected override willUpdate(changedProperties: PropertyValueMap<this>): void {
@@ -244,7 +245,7 @@ export class List extends LitElement {
   }
 
   protected override updated(changedProperties: PropertyValueMap<this>): void {
-    if (changedProperties.has('value')) {
+    if (changedProperties.has('value') || changedProperties.has('disabled')) {
       this.syncRows()
     }
     this.setAttribute('role', 'listbox')

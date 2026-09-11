@@ -65,6 +65,7 @@ export class ChatInput extends LitElement {
 
   @property({ type: String }) placeholder = ''
   @property({ type: String }) value = ''
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   // State
   @state() private dirty = false
@@ -107,6 +108,7 @@ export class ChatInput extends LitElement {
   }
 
   protected async handleInput(event: InputEvent) {
+    this.dirty = true
     this.value = (event.target as HTMLInputElement).value
     this.updateInputHeight()
     redispatchEvent(this, event)
@@ -116,10 +118,10 @@ export class ChatInput extends LitElement {
     const input = this.input
     if (input) {
       if (!this.inputDimensions) {
-        const computedStyleMap = input.computedStyleMap()
+        const computedStyle = getComputedStyle(input)
         this.inputDimensions = {
-          top: (computedStyleMap.get('padding-top') as CSSUnitValue).value,
-          bottom: (computedStyleMap.get('padding-bottom') as CSSUnitValue).value,
+          top: parseFloat(computedStyle.paddingTop) || 0,
+          bottom: parseFloat(computedStyle.paddingBottom) || 0,
         }
       }
       this.input.style.height = ''
@@ -154,7 +156,6 @@ export class ChatInput extends LitElement {
   // }
 
   private dispatchSubmitEvent() {
-    console.log('submit-message', this.value)
     this.dispatchEvent(
       new CustomEvent('submit-message', {
         bubbles: true,
@@ -225,6 +226,7 @@ export class ChatInput extends LitElement {
       <div class="c2-chat-input ${classMap(classes)}">
         <div class="c2-chat-input-wrapper">
           <textarea
+            aria-label=${this.ariaLabel || nothing}
             class="input"
             tabindex="0"
             .value=${live(this.value)}

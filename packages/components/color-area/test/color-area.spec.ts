@@ -1,0 +1,25 @@
+import { test, expect, watch } from '../../../../tests/component-fixture'
+
+test('pointer position updates saturation/value and dispatches the chosen color', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-color-area hue="120" style="--c2-color-area--width: 200px; --c2-color-area--height: 200px"></c2-color-area>')
+  const area = page.locator('.gradient')
+  const host = page.locator('c2-color-area')
+  await watch(host, 'change')
+  await area.click({ position: { x: 100, y: 100 } })
+  await expect.poll(() => host.evaluate((el) => (el as HTMLElement & { saturation: number }).saturation)).toBeCloseTo(0.5, 1)
+  await expect.poll(() => host.evaluate((el) => (el as HTMLElement & { value: number }).value)).toBeCloseTo(0.5, 1)
+  await expect(host).toHaveAttribute('data-events', /"h":120/)
+})
+test('dragging outside clamps values and release stops tracking the pointer', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-color-area style="--c2-color-area--width: 200px; --c2-color-area--height: 200px"></c2-color-area>')
+  const box = await page.locator('.gradient').boundingBox()
+  if (!box) throw new Error('Missing area')
+  await page.mouse.move(box.x + 50, box.y + 50)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width + 30, box.y - 10)
+  await page.mouse.up()
+  await expect(page.locator('c2-color-area')).toHaveJSProperty('saturation', 1)
+  await expect(page.locator('c2-color-area')).toHaveJSProperty('value', 1)
+  await page.mouse.move(box.x + 20, box.y + 20)
+  await expect(page.locator('c2-color-area')).toHaveJSProperty('saturation', 1)
+})

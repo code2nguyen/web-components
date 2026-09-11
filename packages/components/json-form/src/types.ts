@@ -1,4 +1,4 @@
-import { TemplateResult } from 'lit'
+import type { TemplateResult } from 'lit'
 
 export interface OptionsBase {
   [key: string]: boolean | number | string | object | unknown[] | null | undefined

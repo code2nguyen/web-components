@@ -1,4 +1,4 @@
-import { LitElement, html, svg, unsafeCSS, type PropertyValueMap } from 'lit'
+import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValueMap } from 'lit'
 import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './select.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
@@ -122,6 +122,9 @@ export class Select extends LitElement {
   /** Text shown in the trigger while nothing is selected. */
   @property({ type: String }) placeholder = ''
 
+  /** Accessible name of the trigger and option list. */
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+
   /** Allow several options to be selected; the dropdown stays open after a pick and the trigger lists every label. */
   @property({ type: Boolean }) multiple: boolean = false
 
@@ -160,7 +163,8 @@ export class Select extends LitElement {
   }
 
   public toggle(value?: boolean): void {
-    if (this.readonly) {
+    if (this.readonly || this.disabled) {
+      if (this.menu.matches(':popover-open')) this.menu.hidePopover()
       return
     }
 
@@ -244,7 +248,7 @@ export class Select extends LitElement {
   }
 
   protected override updated(_changedProperties: PropertyValueMap<this>): void {
-    if (_changedProperties.has('open')) {
+    if (_changedProperties.has('open') || _changedProperties.has('readonly') || _changedProperties.has('disabled')) {
       this.toggle(this.open)
     }
     if (_changedProperties.has('value')) {
@@ -266,10 +270,11 @@ export class Select extends LitElement {
     return html`<div class="c2-select">
       <button
         type="button"
+        aria-label=${this.ariaLabel || nothing}
         aria-haspopup="listbox"
         aria-expanded=${this.open ? 'true' : 'false'}
         id="button"
-        popovertarget="menu-overlay"
+        popovertarget=${this.readonly || this.disabled ? nothing : 'menu-overlay'}
         class="button"
         @blur=${this.onButtonBlur}
         @focus=${this.onButtonFocus}
@@ -282,6 +287,7 @@ export class Select extends LitElement {
       <c2-overlay id="menu-overlay" popover @toggle=${this.handleOverlayToggle} ?fit-anchor=${this.fitSize}>
         <c2-list
           id="list"
+          aria-labelledby="button"
           .value=${this.value}
           class="list"
           ?multiple=${this.multiple}
