@@ -34,6 +34,7 @@
     "@c2n/dropdown-list": "*",
     "@c2n/feather-icons": "*",
     "@c2n/icon-button": "*",
+    "@c2n/kbd": "*",
     "@c2n/label": "*",
     "@c2n/link-button": "*",
     "@c2n/list": "*",

@@ -189,6 +189,83 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-kbd': {
+    html: `<c2-kbd>⌘ + K</c2-kbd>`,
+    presets: [
+      {
+        name: 'Flat',
+        description: 'No shadow, hairline border — an inline tag rather than a key',
+        css: {
+          '--c2-kbd--background-color': 'transparent',
+          '--c2-kbd--border': '1px solid #d4d4d8',
+          '--c2-kbd--box-shadow': 'none',
+        },
+      },
+      {
+        name: 'Dark',
+        description: 'For dark surfaces and command palettes',
+        css: {
+          '--c2-kbd--background-color': '#27272a',
+          '--c2-kbd--color': '#e4e4e7',
+          '--c2-kbd--border': '1px solid #3f3f46',
+          '--c2-kbd--box-shadow': '0 1px 0 #18181b',
+        },
+      },
+      {
+        name: 'Mechanical',
+        description: 'Tall square cap with a deep edge',
+        css: {
+          '--c2-kbd--min-width': '34px',
+          '--c2-kbd--height': '34px',
+          '--c2-kbd--background-color': '#fafafa',
+          '--c2-kbd--border': '1px solid #d4d4d8',
+          '--c2-kbd--border-radius': '8px',
+          '--c2-kbd--box-shadow': '0 3px 0 #d4d4d8',
+          '--c2-kbd--font-size': '13px',
+          '--c2-kbd--font-weight': '600',
+        },
+      },
+      {
+        name: 'Round',
+        description: 'Circular cap, tinted',
+        css: {
+          '--c2-kbd--min-width': '28px',
+          '--c2-kbd--height': '28px',
+          '--c2-kbd--border-radius': '999px',
+          '--c2-kbd--box-shadow': 'none',
+          '--c2-kbd--background-color': '#eef2ff',
+          '--c2-kbd--color': '#3730a3',
+          '--c2-kbd--border': '1px solid #c7d2fe',
+        },
+      },
+      {
+        name: 'Terminal',
+        description: 'Monospace on a console surface',
+        css: {
+          '--c2-kbd--background-color': '#0b1020',
+          '--c2-kbd--color': '#7ee787',
+          '--c2-kbd--border': '1px solid #1f2a44',
+          '--c2-kbd--border-radius': '4px',
+          '--c2-kbd--box-shadow': 'none',
+          '--c2-kbd--text-transform': 'uppercase',
+          '--c2-kbd--letter-spacing': '0.08em',
+        },
+      },
+      {
+        name: 'Ghost',
+        description: 'Borderless caption for a quiet shortcut hint',
+        css: {
+          '--c2-kbd--background-color': 'transparent',
+          '--c2-kbd--border': 'none',
+          '--c2-kbd--box-shadow': 'none',
+          '--c2-kbd--color': '#71717a',
+          '--c2-kbd--font-size': '11px',
+          '--c2-kbd--letter-spacing': '0.06em',
+          '--c2-kbd--text-transform': 'uppercase',
+        },
+      },
+    ],
+  },
   'c2-label': {
     html: `<c2-label required>Email address</c2-label>`,
     presets: [
