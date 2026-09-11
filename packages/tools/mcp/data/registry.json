@@ -7687,6 +7687,332 @@
       ],
       "hasGallery": true
     },
+    "kbd": {
+      "id": "kbd",
+      "package": "@c2n/kbd",
+      "title": "Kbd",
+      "description": "Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.",
+      "intro": "`c2-kbd` renders a keyboard key. It wraps a native `<kbd>`, so a screen reader announces it as keyboard input rather than as decoration, and it is styled entirely through CSS variables — cap height, radius, the shadow that gives it depth, and the monospace stack.",
+      "category": "Data display",
+      "status": "stable",
+      "docsUrl": "https://code2nguyen.github.io/web-components/components/kbd",
+      "elements": [
+        {
+          "tag": "c2-kbd",
+          "className": "Kbd",
+          "modulePath": "@c2n/kbd",
+          "description": "Displays a keyboard key or shortcut with the semantics of the native `kbd` element. Use one element for a complete\nshortcut (`Ctrl + K`) or place several beside descriptive text. The component is presentational and never enters the\ntab order; when it repeats a shortcut already announced by a surrounding control, set `aria-hidden=\"true\"` on the\nhost.",
+          "attributes": [],
+          "slots": [
+            {
+              "name": "",
+              "description": "Key name or shortcut to display."
+            }
+          ],
+          "events": [],
+          "cssProperties": [
+            {
+              "name": "--c2-kbd--min-width",
+              "type": "pixel",
+              "default": "24px",
+              "part": "",
+              "property": "min-width"
+            },
+            {
+              "name": "--c2-kbd--height",
+              "type": "pixel",
+              "default": "24px",
+              "part": "",
+              "property": "height"
+            },
+            {
+              "name": "--c2-kbd--padding-left",
+              "type": "padding",
+              "default": "6px",
+              "part": "",
+              "property": "padding-left"
+            },
+            {
+              "name": "--c2-kbd--padding-right",
+              "type": "padding",
+              "default": "6px",
+              "part": "",
+              "property": "padding-right"
+            },
+            {
+              "name": "--c2-kbd--gap",
+              "type": "pixel",
+              "default": "4px",
+              "part": "",
+              "property": "gap",
+              "description": "Space between multiple slotted nodes."
+            },
+            {
+              "name": "--c2-kbd--background-color",
+              "type": "color",
+              "default": "#f4f4f5",
+              "part": "",
+              "property": "background-color",
+              "token": "--c2-theme--color-surface-container"
+            },
+            {
+              "name": "--c2-kbd--color",
+              "type": "color",
+              "default": "#3f3f46",
+              "part": "",
+              "property": "color"
+            },
+            {
+              "name": "--c2-kbd--border",
+              "type": "border",
+              "default": "1px solid #d4d4d8",
+              "part": "",
+              "property": "border",
+              "token": "--c2-theme--border"
+            },
+            {
+              "name": "--c2-kbd--border-radius",
+              "type": "border-radius",
+              "default": "5px",
+              "part": "",
+              "property": "border-radius"
+            },
+            {
+              "name": "--c2-kbd--box-shadow",
+              "type": "box-shadow",
+              "default": "0 1px 0 #a1a1aa",
+              "part": "",
+              "property": "box-shadow"
+            },
+            {
+              "name": "--c2-kbd--font-family",
+              "type": "font-family",
+              "default": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+              "part": "",
+              "property": "font-family",
+              "token": "--c2-theme--font-family"
+            },
+            {
+              "name": "--c2-kbd--font-size",
+              "type": "font-size",
+              "default": "12px",
+              "part": "",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-sm"
+            },
+            {
+              "name": "--c2-kbd--font-weight",
+              "type": "font-weight",
+              "default": "500",
+              "part": "",
+              "property": "font-weight",
+              "token": "--c2-theme--font-weight-medium"
+            },
+            {
+              "name": "--c2-kbd--line-height",
+              "type": "line-height",
+              "default": "1",
+              "part": "",
+              "property": "line-height"
+            },
+            {
+              "name": "--c2-kbd--letter-spacing",
+              "type": "pixel",
+              "default": "0.01em",
+              "part": "",
+              "property": "letter-spacing"
+            },
+            {
+              "name": "--c2-kbd--text-transform",
+              "type": "text-transform",
+              "default": "none",
+              "part": "",
+              "property": "text-transform"
+            }
+          ]
+        }
+      ],
+      "composition": {
+        "internal": [],
+        "slotted": [],
+        "usedBy": []
+      },
+      "install": {
+        "npm": "npm install @c2n/kbd @c2n/theme",
+        "import": "import '@c2n/kbd'",
+        "importClass": "import { Kbd } from '@c2n/kbd'"
+      },
+      "presets": {
+        "html": "<c2-kbd>⌘ + K</c2-kbd>",
+        "items": [
+          {
+            "name": "Flat",
+            "description": "No shadow, hairline border — an inline tag rather than a key",
+            "css": {
+              "--c2-kbd--background-color": "transparent",
+              "--c2-kbd--border": "1px solid #d4d4d8",
+              "--c2-kbd--box-shadow": "none"
+            }
+          },
+          {
+            "name": "Dark",
+            "description": "For dark surfaces and command palettes",
+            "css": {
+              "--c2-kbd--background-color": "#27272a",
+              "--c2-kbd--color": "#e4e4e7",
+              "--c2-kbd--border": "1px solid #3f3f46",
+              "--c2-kbd--box-shadow": "0 1px 0 #18181b"
+            }
+          },
+          {
+            "name": "Mechanical",
+            "description": "Tall square cap with a deep edge",
+            "css": {
+              "--c2-kbd--min-width": "34px",
+              "--c2-kbd--height": "34px",
+              "--c2-kbd--background-color": "#fafafa",
+              "--c2-kbd--border": "1px solid #d4d4d8",
+              "--c2-kbd--border-radius": "8px",
+              "--c2-kbd--box-shadow": "0 3px 0 #d4d4d8",
+              "--c2-kbd--font-size": "13px",
+              "--c2-kbd--font-weight": "600"
+            }
+          },
+          {
+            "name": "Round",
+            "description": "Circular cap, tinted",
+            "css": {
+              "--c2-kbd--min-width": "28px",
+              "--c2-kbd--height": "28px",
+              "--c2-kbd--border-radius": "999px",
+              "--c2-kbd--box-shadow": "none",
+              "--c2-kbd--background-color": "#eef2ff",
+              "--c2-kbd--color": "#3730a3",
+              "--c2-kbd--border": "1px solid #c7d2fe"
+            }
+          },
+          {
+            "name": "Terminal",
+            "description": "Monospace on a console surface",
+            "css": {
+              "--c2-kbd--background-color": "#0b1020",
+              "--c2-kbd--color": "#7ee787",
+              "--c2-kbd--border": "1px solid #1f2a44",
+              "--c2-kbd--border-radius": "4px",
+              "--c2-kbd--box-shadow": "none",
+              "--c2-kbd--text-transform": "uppercase",
+              "--c2-kbd--letter-spacing": "0.08em"
+            }
+          },
+          {
+            "name": "Ghost",
+            "description": "Borderless caption for a quiet shortcut hint",
+            "css": {
+              "--c2-kbd--background-color": "transparent",
+              "--c2-kbd--border": "none",
+              "--c2-kbd--box-shadow": "none",
+              "--c2-kbd--color": "#71717a",
+              "--c2-kbd--font-size": "11px",
+              "--c2-kbd--letter-spacing": "0.06em",
+              "--c2-kbd--text-transform": "uppercase"
+            }
+          }
+        ]
+      },
+      "examples": [
+        {
+          "kind": "usage",
+          "label": "Single keys",
+          "html": "<c2-kbd>⌘</c2-kbd>\n<c2-kbd>K</c2-kbd>\n<c2-kbd>⇧</c2-kbd>\n<c2-kbd>Esc</c2-kbd>\n<c2-kbd>Enter</c2-kbd>",
+          "css": ".hint {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 13px;\n  color: #52525b;\n}\n.sep {\n  color: #a1a1aa;\n  font-size: 12px;\n}\n.flat {\n  --c2-kbd--box-shadow: none;\n  --c2-kbd--background-color: transparent;\n  --c2-kbd--border: 1px solid #d4d4d8;\n}\n.dark {\n  --c2-kbd--background-color: #27272a;\n  --c2-kbd--color: #e4e4e7;\n  --c2-kbd--border: 1px solid #3f3f46;\n  --c2-kbd--box-shadow: 0 1px 0 #18181b;\n}\n.round {\n  --c2-kbd--border-radius: 999px;\n  --c2-kbd--min-width: 28px;\n  --c2-kbd--height: 28px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "A whole shortcut",
+          "html": "<c2-kbd>Ctrl + K</c2-kbd>\n<c2-kbd>Ctrl + Shift + P</c2-kbd>\n<c2-kbd>⌘ + ⌥ + I</c2-kbd>",
+          "css": ".hint {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 13px;\n  color: #52525b;\n}\n.sep {\n  color: #a1a1aa;\n  font-size: 12px;\n}\n.flat {\n  --c2-kbd--box-shadow: none;\n  --c2-kbd--background-color: transparent;\n  --c2-kbd--border: 1px solid #d4d4d8;\n}\n.dark {\n  --c2-kbd--background-color: #27272a;\n  --c2-kbd--color: #e4e4e7;\n  --c2-kbd--border: 1px solid #3f3f46;\n  --c2-kbd--box-shadow: 0 1px 0 #18181b;\n}\n.round {\n  --c2-kbd--border-radius: 999px;\n  --c2-kbd--min-width: 28px;\n  --c2-kbd--height: 28px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Key by key",
+          "html": "<span class=\"hint\">\n  <c2-kbd>Ctrl</c2-kbd>\n  <span class=\"sep\">+</span>\n  <c2-kbd>Shift</c2-kbd>\n  <span class=\"sep\">+</span>\n  <c2-kbd>P</c2-kbd>\n</span>",
+          "css": ".hint {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 13px;\n  color: #52525b;\n}\n.sep {\n  color: #a1a1aa;\n  font-size: 12px;\n}\n.flat {\n  --c2-kbd--box-shadow: none;\n  --c2-kbd--background-color: transparent;\n  --c2-kbd--border: 1px solid #d4d4d8;\n}\n.dark {\n  --c2-kbd--background-color: #27272a;\n  --c2-kbd--color: #e4e4e7;\n  --c2-kbd--border: 1px solid #3f3f46;\n  --c2-kbd--box-shadow: 0 1px 0 #18181b;\n}\n.round {\n  --c2-kbd--border-radius: 999px;\n  --c2-kbd--min-width: 28px;\n  --c2-kbd--height: 28px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "In a sentence",
+          "html": "<span class=\"hint\">Press <c2-kbd>/</c2-kbd> to search, or <c2-kbd>?</c2-kbd> for every shortcut.</span>",
+          "css": ".hint {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 13px;\n  color: #52525b;\n}\n.sep {\n  color: #a1a1aa;\n  font-size: 12px;\n}\n.flat {\n  --c2-kbd--box-shadow: none;\n  --c2-kbd--background-color: transparent;\n  --c2-kbd--border: 1px solid #d4d4d8;\n}\n.dark {\n  --c2-kbd--background-color: #27272a;\n  --c2-kbd--color: #e4e4e7;\n  --c2-kbd--border: 1px solid #3f3f46;\n  --c2-kbd--box-shadow: 0 1px 0 #18181b;\n}\n.round {\n  --c2-kbd--border-radius: 999px;\n  --c2-kbd--min-width: 28px;\n  --c2-kbd--height: 28px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Themed",
+          "html": "<c2-kbd class=\"flat\">Tab</c2-kbd>\n<c2-kbd class=\"dark\">⌘ + K</c2-kbd>\n<c2-kbd class=\"round\">A</c2-kbd>",
+          "css": ".hint {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 13px;\n  color: #52525b;\n}\n.sep {\n  color: #a1a1aa;\n  font-size: 12px;\n}\n.flat {\n  --c2-kbd--box-shadow: none;\n  --c2-kbd--background-color: transparent;\n  --c2-kbd--border: 1px solid #d4d4d8;\n}\n.dark {\n  --c2-kbd--background-color: #27272a;\n  --c2-kbd--color: #e4e4e7;\n  --c2-kbd--border: 1px solid #3f3f46;\n  --c2-kbd--box-shadow: 0 1px 0 #18181b;\n}\n.round {\n  --c2-kbd--border-radius: 999px;\n  --c2-kbd--min-width: 28px;\n  --c2-kbd--height: 28px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Keycap",
+          "section": "Presets",
+          "html": "<c2-kbd>⌘ + K</c2-kbd>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Flat",
+          "section": "Presets",
+          "html": "<c2-kbd class=\"flat\">Tab</c2-kbd>",
+          "css": ".flat {\n  --c2-kbd--background-color: transparent;\n  --c2-kbd--border: 1px solid #d4d4d8;\n  --c2-kbd--box-shadow: none;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Dark",
+          "section": "Presets",
+          "html": "<c2-kbd class=\"dark\">⌘ + K</c2-kbd>",
+          "css": ".dark {\n  --c2-kbd--background-color: #27272a;\n  --c2-kbd--color: #e4e4e7;\n  --c2-kbd--border: 1px solid #3f3f46;\n  --c2-kbd--box-shadow: 0 1px 0 #18181b;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Mechanical",
+          "section": "Presets",
+          "html": "<c2-kbd class=\"mechanical\">A</c2-kbd>",
+          "css": ".mechanical {\n  --c2-kbd--min-width: 34px;\n  --c2-kbd--height: 34px;\n  --c2-kbd--background-color: #fafafa;\n  --c2-kbd--border: 1px solid #d4d4d8;\n  --c2-kbd--border-radius: 8px;\n  --c2-kbd--box-shadow: 0 3px 0 #d4d4d8;\n  --c2-kbd--font-size: 13px;\n  --c2-kbd--font-weight: 600;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Round",
+          "section": "Presets",
+          "html": "<c2-kbd class=\"round\">?</c2-kbd>",
+          "css": ".round {\n  --c2-kbd--min-width: 28px;\n  --c2-kbd--height: 28px;\n  --c2-kbd--border-radius: 999px;\n  --c2-kbd--box-shadow: none;\n  --c2-kbd--background-color: #eef2ff;\n  --c2-kbd--color: #3730a3;\n  --c2-kbd--border: 1px solid #c7d2fe;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Terminal",
+          "section": "Presets",
+          "html": "<c2-kbd class=\"terminal\">ctrl + c</c2-kbd>",
+          "css": ".terminal {\n  --c2-kbd--background-color: #0b1020;\n  --c2-kbd--color: #7ee787;\n  --c2-kbd--border: 1px solid #1f2a44;\n  --c2-kbd--border-radius: 4px;\n  --c2-kbd--box-shadow: none;\n  --c2-kbd--text-transform: uppercase;\n  --c2-kbd--letter-spacing: 0.08em;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Ghost",
+          "section": "Presets",
+          "html": "<c2-kbd class=\"ghost\">Esc</c2-kbd>",
+          "css": ".ghost {\n  --c2-kbd--background-color: transparent;\n  --c2-kbd--border: none;\n  --c2-kbd--box-shadow: none;\n  --c2-kbd--color: #71717a;\n  --c2-kbd--font-size: 11px;\n  --c2-kbd--letter-spacing: 0.06em;\n  --c2-kbd--text-transform: uppercase;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Shortcut row",
+          "section": "Presets",
+          "html": "<span class=\"row\">\n  <c2-kbd>Ctrl</c2-kbd>\n  +\n  <c2-kbd>Shift</c2-kbd>\n  +\n  <c2-kbd>P</c2-kbd>\n</span>",
+          "css": ".row {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  font-size: 13px;\n  color: #52525b;\n}\n.row c2-kbd {\n  --c2-kbd--min-width: 26px;\n  --c2-kbd--height: 26px;\n}"
+        },
+        {
+          "kind": "preview",
+          "label": "Preview",
+          "html": "<div class=\"preview-row\">\n  <c2-kbd>⌘</c2-kbd>\n  <c2-kbd>K</c2-kbd>\n  <c2-kbd>Ctrl + Shift + P</c2-kbd>\n  <c2-kbd>Esc</c2-kbd>\n</div>"
+        }
+      ],
+      "hasGallery": true
+    },
     "label": {
       "id": "label",
       "package": "@c2n/label",
@@ -19053,6 +19379,7 @@
     "c2-details": "details",
     "c2-dropdown-list": "dropdown-list",
     "c2-icon-button": "icon-button",
+    "c2-kbd": "kbd",
     "c2-label": "label",
     "c2-link-button": "link-button",
     "c2-list": "list",
@@ -19101,6 +19428,7 @@
     "@c2n/dropdown-list": "dropdown-list",
     "@c2n/feather-icons": "feather-icons",
     "@c2n/icon-button": "icon-button",
+    "@c2n/kbd": "kbd",
     "@c2n/label": "label",
     "@c2n/link-button": "link-button",
     "@c2n/list": "list",
@@ -19196,7 +19524,7 @@
         "light": "#f4f4f5",
         "dark": "#27272a",
         "description": "Hover surface for rows and icon buttons.",
-        "usedBy": 10
+        "usedBy": 11
       },
       {
         "name": "--c2-theme--color-on-surface",
@@ -19275,14 +19603,14 @@
         "category": "font",
         "light": null,
         "description": "Font family of every component. Unset by default so components inherit the page font.",
-        "usedBy": 0
+        "usedBy": 1
       },
       {
         "name": "--c2-theme--font-size-sm",
         "category": "font",
         "light": "12px",
         "description": "Small text: supporting text, tooltips, descriptions, timestamps.",
-        "usedBy": 14
+        "usedBy": 15
       },
       {
         "name": "--c2-theme--font-size-md",
@@ -19296,7 +19624,7 @@
         "category": "font",
         "light": "500",
         "description": "Medium weight: buttons, headers, tooltips.",
-        "usedBy": 11
+        "usedBy": 12
       },
       {
         "name": "--c2-theme--font-weight-semibold",
@@ -19352,7 +19680,7 @@
         "category": "border",
         "light": null,
         "description": "Complete resting border shorthand. Unset by default: it falls back to `border-width solid color-outline`.",
-        "usedBy": 42
+        "usedBy": 43
       },
       {
         "name": "--c2-theme--focus-ring",
@@ -19540,6 +19868,11 @@
       "--c2-icon-button__focus--outline": "--c2-theme--focus-ring",
       "--c2-icon-button__disabled--opacity": "--c2-theme--disabled-opacity",
       "--c2-icon-button__selected--background-color": "--c2-theme--color-surface-container",
+      "--c2-kbd--background-color": "--c2-theme--color-surface-container",
+      "--c2-kbd--border": "--c2-theme--border",
+      "--c2-kbd--font-family": "--c2-theme--font-family",
+      "--c2-kbd--font-size": "--c2-theme--font-size-sm",
+      "--c2-kbd--font-weight": "--c2-theme--font-weight-medium",
       "--c2-label__container__disabled--opacity": "--c2-theme--disabled-opacity",
       "--c2-label__required-indicator--color": "--c2-theme--color-error",
       "--c2-link-button__container--border-radius": "--c2-theme--radius-sm",

@@ -1,0 +1,87 @@
+---
+title: 'Kbd'
+description: 'Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Kbd } from '@c2n/kbd'
+
+`c2-kbd` renders a keyboard key. It wraps a native `<kbd>`, so a screen reader announces it as keyboard input rather than as decoration, and it is styled entirely through CSS variables — cap height, radius, the shadow that gives it depth, and the monospace stack.
+
+Use one element for a whole shortcut (`Ctrl + K`) when it reads as a single chord, or one element per key when you want the separators to sit between real keycaps. Both are correct; the second lets you style each cap.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/kbd
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/kbd
+<style>
+  .hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #52525b;
+  }
+  .sep {
+    color: #a1a1aa;
+    font-size: 12px;
+  }
+  .flat {
+    --c2-kbd--box-shadow: none;
+    --c2-kbd--background-color: transparent;
+    --c2-kbd--border: 1px solid #d4d4d8;
+  }
+  .dark {
+    --c2-kbd--background-color: #27272a;
+    --c2-kbd--color: #e4e4e7;
+    --c2-kbd--border: 1px solid #3f3f46;
+    --c2-kbd--box-shadow: 0 1px 0 #18181b;
+  }
+  .round {
+    --c2-kbd--border-radius: 999px;
+    --c2-kbd--min-width: 28px;
+    --c2-kbd--height: 28px;
+  }
+</style>
+<div data-label="Single keys">
+  <c2-kbd>⌘</c2-kbd>
+  <c2-kbd>K</c2-kbd>
+  <c2-kbd>⇧</c2-kbd>
+  <c2-kbd>Esc</c2-kbd>
+  <c2-kbd>Enter</c2-kbd>
+</div>
+<div data-label="A whole shortcut">
+  <c2-kbd>Ctrl + K</c2-kbd>
+  <c2-kbd>Ctrl + Shift + P</c2-kbd>
+  <c2-kbd>⌘ + ⌥ + I</c2-kbd>
+</div>
+<div data-label="Key by key">
+  <span class="hint">
+    <c2-kbd>Ctrl</c2-kbd>
+    <span class="sep">+</span>
+    <c2-kbd>Shift</c2-kbd>
+    <span class="sep">+</span>
+    <c2-kbd>P</c2-kbd>
+  </span>
+</div>
+<div data-label="In a sentence">
+  <span class="hint">Press <c2-kbd>/</c2-kbd> to search, or <c2-kbd>?</c2-kbd> for every shortcut.</span>
+</div>
+<div data-label="Themed">
+  <c2-kbd class="flat">Tab</c2-kbd>
+  <c2-kbd class="dark">⌘ + K</c2-kbd>
+  <c2-kbd class="round">A</c2-kbd>
+</div>
+```
+
+The element is presentational: it never takes focus and carries no interactive role. When the same shortcut is already announced by the control it belongs to — a menu item that reads "Search, Command K" — set `aria-hidden="true"` on the host so it is not read twice.
+
+`--c2-kbd--min-width` keeps single letters square while longer labels such as `Enter` grow past it, so a row of mixed keys stays even. Turn the raised look off by setting `--c2-kbd--box-shadow` to `none`; that is the whole difference between a keycap and a flat inline tag.

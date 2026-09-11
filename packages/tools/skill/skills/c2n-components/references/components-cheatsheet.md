@@ -96,6 +96,14 @@ Syntax-highlighted code with line numbers, copy button and dark mode, powered by
 - Key variables (52 total): `--c2-code-viewer--border-top` = `1px solid rgb(213, 213, 213)` (→ `--c2-theme--border`), `--c2-code-viewer--border-right` = `1px solid rgb(213, 213, 213)` (→ `--c2-theme--border`), `--c2-code-viewer--border-bottom` = `1px solid rgb(213, 213, 213)` (→ `--c2-theme--border`), `--c2-code-viewer--border-left` = `1px solid rgb(213, 213, 213)` (→ `--c2-theme--border`), `--c2-code-viewer--border-top-left-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-code-viewer--border-top-right-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-code-viewer--border-bottom-left-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-code-viewer--border-bottom-right-radius` = `8px` (→ `--c2-theme--radius-lg`)
 - Presets: Terminal, Numbered, Solarized via tokens, Compact
 
+### Kbd — `c2-kbd`
+
+Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element. Package `@c2n/kbd`. Register: `import '@c2n/kbd'`.
+
+- Slots: `default`
+- Key variables (16 total): `--c2-kbd--background-color` = `#f4f4f5` (→ `--c2-theme--color-surface-container`), `--c2-kbd--border` = `1px solid #d4d4d8` (→ `--c2-theme--border`), `--c2-kbd--font-family` = `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace` (→ `--c2-theme--font-family`), `--c2-kbd--font-size` = `12px` (→ `--c2-theme--font-size-sm`), `--c2-kbd--font-weight` = `500` (→ `--c2-theme--font-weight-medium`), `--c2-kbd--color` = `#3f3f46`, `--c2-kbd--border-radius` = `5px`, `--c2-kbd--height` = `24px`
+- Presets: Flat, Dark, Mechanical, Round, Terminal, Ghost
+
 ### List — `c2-list`
 
 Vertical list container with single or multiple selection. Package `@c2n/list`. Register: `import '@c2n/list'`.

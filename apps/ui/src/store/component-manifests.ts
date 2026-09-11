@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import kbd from '@c2n/kbd/custom-elements.json'
 import table from '@c2n/table/custom-elements.json'
 import copyButton from '@c2n/copy-button/custom-elements.json'
 import textarea from '@c2n/textarea/custom-elements.json'
@@ -44,6 +45,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    kbd,
     table,
     copyButton,
     textarea,

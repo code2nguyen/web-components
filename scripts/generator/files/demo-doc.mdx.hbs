@@ -4,15 +4,13 @@ description: 'One sentence describing what the component does.'
 category: 'Layout'
 ---
 
-import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
-import ApiTable from '../../components/ApiTable.astro'
 
 import { {{pascalCase name}} } from '@c2n/{{ dashCase name}}'
 
-# {{ titleCase name}}
-
-`c2-{{ dashCase name}}` does something useful.
+`c2-{{ dashCase name}}` does something useful. Describe the element in a short paragraph: what it is for, the attributes
+that change its behaviour, and the slots a consumer fills.
 
 ## Installation
 
@@ -20,18 +18,16 @@ import { {{pascalCase name}} } from '@c2n/{{ dashCase name}}'
 npm install @c2n/{{ dashCase name}}
 ```
 
-## Import
+## Usage
 
-```typescript tag=CodeBlock
-import '@c2n/{{ dashCase name}}'
+```html tag=UsageBlock,package=@c2n/{{ dashCase name}}
+<div data-label="Default">
+  <c2-{{ dashCase name}}></c2-{{ dashCase name}}>
+</div>
 ```
 
-## Examples
+Add one `<div data-label="…">` per row of live examples above: states, slots, a themed variant. A fence-local
+`<style>` block can hold the classes those rows use.
 
-```html tag=MdxCodeBlock
-<c2-{{ dashCase name}}></c2-{{ dashCase name}}>
-```
-
-## API
-
-<ApiTable componentTag="c2-{{ dashCase name}}"></ApiTable>
+The page header, the Docs | Gallery | API tabs and the API table all come from the layout and the manifest, so this
+file must not contain a `# Title` heading or an `<ApiTable>`.

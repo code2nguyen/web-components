@@ -1,20 +1,12 @@
 {
-  "name": "@c2n/table",
+  "name": "@c2n/kbd",
   "version": "0.0.5",
   "type": "module",
-  "main": "dist/table.js",
+  "main": "dist/kbd.js",
   "exports": {
     ".": {
-      "default": "./dist/table.js",
-      "types": "./types/src/table.d.ts"
-    },
-    "./table-column.js": {
-      "default": "./dist/table-column.js",
-      "types": "./types/src/table-column.d.ts"
-    },
-    "./table-types.js": {
-      "default": "./dist/table-types.js",
-      "types": "./types/src/table-types.d.ts"
+      "default": "./dist/kbd.js",
+      "types": "./types/src/kbd.d.ts"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
@@ -23,9 +15,7 @@
     "types"
   ],
   "keywords": [
-    "table",
-    "data grid",
-    "virtual scroll",
+    "kbd",
     "web component",
     "lit"
   ],
@@ -48,9 +38,7 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build",
-        "../checkbox:build",
-        "../spinner:build"
+        "../../core:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -62,9 +50,6 @@
     }
   },
   "dependencies": {
-    "@c2n/checkbox": "0.0.5",
-    "@c2n/core": "0.0.5",
-    "@c2n/spinner": "0.0.5",
     "lit": "3.3.3"
   },
   "devDependencies": {
