@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import table from '@c2n/table/custom-elements.json'
 import copyButton from '@c2n/copy-button/custom-elements.json'
 import textarea from '@c2n/textarea/custom-elements.json'
 import switchManifest from '@c2n/switch/custom-elements.json'
@@ -43,6 +44,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    table,
     copyButton,
     textarea,
     switchManifest,

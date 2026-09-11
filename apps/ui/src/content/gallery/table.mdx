@@ -1,0 +1,138 @@
+---
+title: 'Table gallery'
+description: 'Styled variants of c2-table, from a hairline report to a dark spreadsheet.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Table } from '@c2n/table'
+import { TableColumn } from '@c2n/table/table-column.js'
+
+## Presets
+
+Curated looks for `c2-table`. Open any one in the studio to start from it. The surface is `--c2-table--*` (background, borders, radius, shadow), the header is `--c2-table__header--*` and `--c2-table__header-cell--*`, the body is `--c2-table__row--*` (plus the `__hover`, `__selected` and `__odd` states) and `--c2-table__cell--*`, and `--c2-table__sort-icon--*` / `--c2-table__pinned-start--box-shadow` cover the affordances.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Hairline report
+<style>
+  .report {
+    height: 208px;
+    width: 100%;
+    --c2-table--border-top: none;
+    --c2-table--border-right: none;
+    --c2-table--border-bottom: none;
+    --c2-table--border-left: none;
+    --c2-table--border-top-left-radius: 0;
+    --c2-table--border-top-right-radius: 0;
+    --c2-table--border-bottom-left-radius: 0;
+    --c2-table--border-bottom-right-radius: 0;
+    --c2-table__header--background: transparent;
+    --c2-table__header--border-bottom: 1px solid #18181b;
+    --c2-table__header--color: #18181b;
+    --c2-table__header--letter-spacing: 0.08em;
+    --c2-table__header-cell--padding: 0 8px;
+    --c2-table__row--border-bottom: 1px solid #f4f4f5;
+    --c2-table__row__hover--background: #fafafa;
+    --c2-table__cell--padding: 0 8px;
+  }
+</style>
+<c2-table client:only="lit" class="report" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},{"id":"3","name":"Alan Turing","team":"Research","score":87200},{"id":"4","name":"Radia Perlman","team":"Networks","score":74800}]'>
+  <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="100px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Spreadsheet
+<style>
+  .sheet {
+    height: 208px;
+    width: 100%;
+    --c2-table--border-top-left-radius: 4px;
+    --c2-table--border-top-right-radius: 4px;
+    --c2-table--border-bottom-left-radius: 4px;
+    --c2-table--border-bottom-right-radius: 4px;
+    --c2-table__header--background: #f4f4f5;
+    --c2-table__header--height: 28px;
+    --c2-table__header--font-size: 12px;
+    --c2-table__row--height: 26px;
+    --c2-table__row--border-bottom: 1px solid #e4e4e7;
+    --c2-table__cell--border-right: 1px solid #e4e4e7;
+    --c2-table__cell--font-size: 13px;
+    --c2-table__cell--padding: 0 8px;
+    --c2-table__header-cell--padding: 0 8px;
+  }
+</style>
+<c2-table client:only="lit" class="sheet" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},{"id":"3","name":"Alan Turing","team":"Research","score":87200},{"id":"4","name":"Radia Perlman","team":"Networks","score":74800},{"id":"5","name":"Katherine Johnson","team":"Flight","score":143000}]'>
+  <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="100px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Dark console
+<style>
+  .console {
+    height: 208px;
+    width: 100%;
+    --c2-table--background: #18181b;
+    --c2-table--color: #f4f4f5;
+    --c2-table--border-top: 1px solid #3f3f46;
+    --c2-table--border-right: 1px solid #3f3f46;
+    --c2-table--border-bottom: 1px solid #3f3f46;
+    --c2-table--border-left: 1px solid #3f3f46;
+    --c2-table__header--background: #27272a;
+    --c2-table__header--color: #a1a1aa;
+    --c2-table__header--border-bottom: 1px solid #3f3f46;
+    --c2-table__row--border-bottom: 1px solid #27272a;
+    --c2-table__row__hover--background: #27272a;
+    --c2-table__row__selected--background: rgba(2, 101, 220, 0.24);
+    --c2-table__row__selected--color: #ffffff;
+    --c2-table__cell--color: #e4e4e7;
+    --c2-table__cell--font-size: 13px;
+    --c2-table__sort-icon--color: #71717a;
+  }
+</style>
+<c2-table client:only="lit" class="console" sortable selection="multiple" row-key="id" value="2" rows='[{"id":"1","name":"api-gateway","team":"200","score":128000},{"id":"2","name":"auth-service","team":"401","score":96500},{"id":"3","name":"worker-queue","team":"503","score":87200},{"id":"4","name":"static-cdn","team":"200","score":74800}]'>
+  <c2-table-column field="name" header="Service" width="2fr"></c2-table-column>
+  <c2-table-column field="team" header="Status" width="90px" align="center"></c2-table-column>
+  <c2-table-column field="score" header="Requests" width="110px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Soft cards
+<style>
+  .soft {
+    height: 208px;
+    width: 100%;
+    --c2-table--background: #fafafa;
+    --c2-table--border-top: none;
+    --c2-table--border-right: none;
+    --c2-table--border-bottom: none;
+    --c2-table--border-left: none;
+    --c2-table--border-top-left-radius: 14px;
+    --c2-table--border-top-right-radius: 14px;
+    --c2-table--border-bottom-left-radius: 14px;
+    --c2-table--border-bottom-right-radius: 14px;
+    --c2-table--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.08);
+    --c2-table__header--background: #fafafa;
+    --c2-table__header--border-bottom: none;
+    --c2-table__header--height: 40px;
+    --c2-table__row--height: 44px;
+    --c2-table__row--border-bottom: none;
+    --c2-table__row__odd--background: #ffffff;
+    --c2-table__row__hover--background: #f4f4f5;
+    --c2-table__cell--padding: 0 16px;
+    --c2-table__header-cell--padding: 0 16px;
+  }
+</style>
+<c2-table client:only="lit" class="soft" stripe sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},{"id":"3","name":"Alan Turing","team":"Research","score":87200},{"id":"4","name":"Radia Perlman","team":"Networks","score":74800}]'>
+  <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="100px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>

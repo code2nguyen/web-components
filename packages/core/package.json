@@ -27,6 +27,10 @@
     "./controllers/breakpoints-observer.js": {
       "types": "./dist/controllers/breakpoints-observer.d.ts",
       "default": "./dist/controllers/breakpoints-observer.js"
+    },
+    "./controllers/virtual-scroll.js": {
+      "types": "./dist/controllers/virtual-scroll.d.ts",
+      "default": "./dist/controllers/virtual-scroll.js"
     }
   },
   "files": [

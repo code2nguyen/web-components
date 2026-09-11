@@ -3123,6 +3123,11 @@
               "name": "value",
               "type": "string",
               "default": "''"
+            },
+            {
+              "name": "aria-label",
+              "type": "string | null",
+              "default": "null"
             }
           ],
           "slots": [
@@ -4881,7 +4886,7 @@
             {
               "name": "--c2-code-viewer__line__highlighted--background",
               "type": "background",
-              "default": "rgba(99, 102, 241, 0.12)",
+              "default": "rgba(99, 102, 241, 0.01)",
               "part": "line",
               "state": "highlighted",
               "property": "background"
@@ -5609,6 +5614,11 @@
               "name": "max",
               "type": "number",
               "default": "360"
+            },
+            {
+              "name": "aria-label",
+              "type": "string | null",
+              "default": "null"
             }
           ],
           "slots": [],
@@ -8025,6 +8035,12 @@
               "type": "string | undefined",
               "default": "undefined",
               "description": "Destination URL. When set (and the element is not disabled) the control renders as an anchor element."
+            },
+            {
+              "name": "aria-label",
+              "type": "string | null",
+              "default": "null",
+              "description": "Accessible name forwarded to the native link or button."
             },
             {
               "name": "target",
@@ -11330,6 +11346,12 @@
               "description": "Text shown in the trigger while nothing is selected."
             },
             {
+              "name": "aria-label",
+              "type": "string | null",
+              "default": "null",
+              "description": "Accessible name of the trigger and option list."
+            },
+            {
               "name": "multiple",
               "type": "boolean",
               "default": "false",
@@ -14327,6 +14349,916 @@
       ],
       "hasGallery": true
     },
+    "table": {
+      "id": "table",
+      "package": "@c2n/table",
+      "title": "Table",
+      "description": "Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.",
+      "intro": "`c2-table` is one CSS grid: the header row and every body row are grid items using `grid-template-columns: subgrid`, so columns stay aligned without any scroll syncing, pinned columns are sticky cells instead of separate containers, and the whole body scrolls in a single viewport. Columns are declared either as `c2-table-column` children — definitions that render nothing themselves, the same way `c2-select` reads its `c2-list-item` children — or as a `columns` array of the same shape.",
+      "category": "Data display",
+      "status": "stable",
+      "docsUrl": "https://code2nguyen.github.io/web-components/components/table",
+      "elements": [
+        {
+          "tag": "c2-table",
+          "className": "Table",
+          "modulePath": "@c2n/table",
+          "description": "A data grid: a scrolling, virtualized table built from a `rows` array (or an async `dataSource`) and a set of\n`c2-table-column` definitions given as light-DOM children. Sorting, row selection, column pinning, column resizing\nand keyboard navigation are built in; every cell can be rendered by a function, so a cell body can be any markup —\nincluding other c2 components.\n\nRows and columns are readable from markup as JSON attributes as well as from script as properties, so a table can be\nauthored without a build step:\n\n```html\n<c2-table row-key=\"id\" selection=\"multiple\" checkbox-selection sortable stripe style=\"height: 320px\">\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\" pinned=\"start\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"120px\" align=\"end\" format=\"number\"></c2-table-column>\n</c2-table>\n```\n\n**Layout.** The table is one CSS grid: the header row and every body row are grid items using `grid-template-columns:\nsubgrid`, so columns stay aligned without any scroll syncing, and pinned columns are `position: sticky` cells rather\nthan separate containers. Give the host a height (or `--c2-table--max-height`) — the body scrolls inside it.\n\n**Virtualization** windows the rows to the visible range plus an overscan margin. It needs a uniform row height, which\nit measures from the first rendered row, so theme the height with `--c2-table__row--height` (`row-height` is only the\nestimate used for the first paint). It turns on automatically past `virtual-threshold` rows; `virtual=\"always\"` and\n`virtual=\"never\"` force it.",
+          "attributes": [
+            {
+              "name": "rows",
+              "type": "TableRow[]",
+              "default": "[]",
+              "description": "The rows to display. An array in the property, JSON in the attribute."
+            },
+            {
+              "name": "columns",
+              "type": "TableColumnConfig[] | undefined",
+              "description": "Column definitions, as an alternative to `c2-table-column` children. Children win when both are present."
+            },
+            {
+              "name": "row-key",
+              "type": "string",
+              "default": "''",
+              "description": "Field used as the identity of a row, for selection and DOM reuse. Falls back to the row index."
+            },
+            {
+              "name": "selection",
+              "type": "TableSelectionMode",
+              "default": "'none'",
+              "description": "`single` selects one row at a time, `multiple` supports ⌘/ctrl-click and shift-click ranges."
+            },
+            {
+              "name": "checkbox-selection",
+              "type": "boolean",
+              "default": "false",
+              "description": "Adds a leading checkbox column, pinned to the start."
+            },
+            {
+              "name": "value",
+              "type": "string[]",
+              "default": "[]",
+              "description": "Keys of the selected rows: an array in the property, `;`-separated in the attribute."
+            },
+            {
+              "name": "sort",
+              "type": "SortModel[]",
+              "default": "[]",
+              "description": "The sort, in priority order: `SortModel[]` in the property, `field:asc;other:desc` in the `sort` attribute."
+            },
+            {
+              "name": "multi-sort",
+              "type": "boolean",
+              "default": "false",
+              "description": "Lets shift-click add a column to the sort instead of replacing it."
+            },
+            {
+              "name": "sortable",
+              "type": "boolean",
+              "default": "false",
+              "description": "Makes every column sortable; a column's own `sortable` still wins."
+            },
+            {
+              "name": "resizable",
+              "type": "boolean",
+              "default": "false",
+              "description": "Makes every column resizable; a column's own `resizable` still wins."
+            },
+            {
+              "name": "stripe",
+              "type": "boolean",
+              "default": "false",
+              "description": "Tints odd rows with `--c2-table__row__odd--background`."
+            },
+            {
+              "name": "virtual",
+              "type": "TableVirtualMode",
+              "default": "'auto'",
+              "description": "`auto` virtualizes past `virtual-threshold` rows; `always` and `never` force it."
+            },
+            {
+              "name": "row-height",
+              "type": "number",
+              "default": "36",
+              "description": "Row height in pixels used before the first row has been measured."
+            },
+            {
+              "name": "overscan",
+              "type": "number",
+              "default": "6",
+              "description": "Rows rendered above and below the viewport while virtualizing."
+            },
+            {
+              "name": "virtual-threshold",
+              "type": "number",
+              "default": "100",
+              "description": "Row count past which `virtual=\"auto\"` starts windowing."
+            },
+            {
+              "name": "block-size",
+              "type": "number",
+              "default": "100",
+              "description": "Number of rows the table asks a `dataSource` for at a time."
+            },
+            {
+              "name": "loading",
+              "type": "boolean",
+              "default": "false",
+              "description": "Shows the loading state; implied while a `dataSource` resolves its first block."
+            },
+            {
+              "name": "error",
+              "type": "string",
+              "default": "''",
+              "description": "Shows the error state with this message."
+            },
+            {
+              "name": "empty-message",
+              "type": "string",
+              "default": "'No rows'",
+              "description": "Message shown when there are no rows."
+            }
+          ],
+          "slots": [
+            {
+              "name": "default",
+              "description": "The column definitions: `c2-table-column` elements. They render nothing themselves."
+            },
+            {
+              "name": "toolbar",
+              "description": "Bar above the header, for a title, filters or a column menu. Hidden when empty."
+            },
+            {
+              "name": "footer",
+              "description": "Bar below the rows, for a pager or a row count. Hidden when empty."
+            },
+            {
+              "name": "empty",
+              "description": "Replaces the built-in \"no rows\" message."
+            },
+            {
+              "name": "loading",
+              "description": "Replaces the built-in spinner shown while the first rows load."
+            },
+            {
+              "name": "error",
+              "description": "Replaces the built-in message shown when `error` is set."
+            }
+          ],
+          "events": [
+            {
+              "name": "sort-change",
+              "type": "CustomEvent<TableSortChangeEventDetail>",
+              "description": "Fired after the user clicks a sortable header. `detail.sort` is the new sort model, in priority order."
+            },
+            {
+              "name": "row-click",
+              "type": "CustomEvent<TableRowEventDetail>",
+              "description": "Fired when a row is clicked, before the selection is applied."
+            },
+            {
+              "name": "cell-click",
+              "type": "CustomEvent<TableCellEventDetail>",
+              "description": "Fired when a cell is clicked; adds `detail.column` and `detail.value`."
+            },
+            {
+              "name": "selection-change",
+              "type": "CustomEvent<TableSelectionChangeEventDetail>",
+              "description": "Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows."
+            },
+            {
+              "name": "column-resize",
+              "type": "CustomEvent<TableColumnResizeEventDetail>",
+              "description": "Fired when the user releases a column's resize handle."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--c2-table--background",
+              "type": "color",
+              "default": "#ffffff",
+              "part": "",
+              "property": "background",
+              "token": "--c2-theme--color-surface"
+            },
+            {
+              "name": "--c2-table--color",
+              "type": "color",
+              "default": "#18181b",
+              "part": "",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-table--font-size",
+              "type": "font-size",
+              "default": "14px",
+              "part": "",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-md"
+            },
+            {
+              "name": "--c2-table--max-height",
+              "type": "pixel",
+              "default": "none",
+              "part": "",
+              "property": "max-height",
+              "description": "Caps the height when the host is not sized itself; the body scrolls."
+            },
+            {
+              "name": "--c2-table--border-top",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "",
+              "property": "border-top",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-table--border-right",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "",
+              "property": "border-right",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-table--border-bottom",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "",
+              "property": "border-bottom",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-table--border-left",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "",
+              "property": "border-left",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-table--border-top-left-radius",
+              "type": "border-radius",
+              "default": "8px",
+              "part": "",
+              "property": "border-top-left-radius",
+              "token": "--c2-theme--radius-lg"
+            },
+            {
+              "name": "--c2-table--border-top-right-radius",
+              "type": "border-radius",
+              "default": "8px",
+              "part": "",
+              "property": "border-top-right-radius",
+              "token": "--c2-theme--radius-lg"
+            },
+            {
+              "name": "--c2-table--border-bottom-left-radius",
+              "type": "border-radius",
+              "default": "8px",
+              "part": "",
+              "property": "border-bottom-left-radius",
+              "token": "--c2-theme--radius-lg"
+            },
+            {
+              "name": "--c2-table--border-bottom-right-radius",
+              "type": "border-radius",
+              "default": "8px",
+              "part": "",
+              "property": "border-bottom-right-radius",
+              "token": "--c2-theme--radius-lg"
+            },
+            {
+              "name": "--c2-table--box-shadow",
+              "type": "box-shadow",
+              "default": "none",
+              "part": "",
+              "property": "box-shadow"
+            },
+            {
+              "name": "--c2-table__header--background",
+              "type": "color",
+              "default": "#fafafa",
+              "part": "header",
+              "property": "background",
+              "token": "--c2-theme--color-surface-container-low"
+            },
+            {
+              "name": "--c2-table__header--color",
+              "type": "color",
+              "default": "#71717a",
+              "part": "header",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
+            },
+            {
+              "name": "--c2-table__header--height",
+              "type": "pixel",
+              "default": "36px",
+              "part": "header",
+              "property": "height"
+            },
+            {
+              "name": "--c2-table__header--font-size",
+              "type": "font-size",
+              "default": "12px",
+              "part": "header",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-sm"
+            },
+            {
+              "name": "--c2-table__header--font-weight",
+              "type": "font-weight",
+              "default": "600",
+              "part": "header",
+              "property": "font-weight",
+              "token": "--c2-theme--font-weight-semibold"
+            },
+            {
+              "name": "--c2-table__header--letter-spacing",
+              "type": "letter-spacing",
+              "default": "0.02em",
+              "part": "header",
+              "property": "letter-spacing"
+            },
+            {
+              "name": "--c2-table__header--border-bottom",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "header",
+              "property": "border-bottom",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-table__header-cell--padding",
+              "type": "padding",
+              "default": "0 12px",
+              "part": "header-cell",
+              "property": "padding"
+            },
+            {
+              "name": "--c2-table__header-cell--gap",
+              "type": "pixel",
+              "default": "6px",
+              "part": "header-cell",
+              "property": "gap"
+            },
+            {
+              "name": "--c2-table__header-cell__hover--background",
+              "type": "color",
+              "default": "#f4f4f5",
+              "part": "header-cell",
+              "state": "hover",
+              "property": "background",
+              "token": "--c2-theme--color-surface-container"
+            },
+            {
+              "name": "--c2-table__header-cell__sorted--color",
+              "type": "color",
+              "default": "#18181b",
+              "part": "header-cell/sorted",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-table__sort-icon--width",
+              "type": "pixel",
+              "default": "14px",
+              "part": "sort-icon",
+              "property": "width"
+            },
+            {
+              "name": "--c2-table__sort-icon--height",
+              "type": "pixel",
+              "default": "14px",
+              "part": "sort-icon",
+              "property": "height"
+            },
+            {
+              "name": "--c2-table__sort-icon--color",
+              "type": "color",
+              "default": "#a1a1aa",
+              "part": "sort-icon",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
+            },
+            {
+              "name": "--c2-table__sort-icon__active--color",
+              "type": "color",
+              "default": "rgb(2, 101, 220)",
+              "part": "sort-icon",
+              "state": "active",
+              "property": "color",
+              "token": "--c2-theme--color-primary"
+            },
+            {
+              "name": "--c2-table__resizer--width",
+              "type": "pixel",
+              "default": "5px",
+              "part": "resizer",
+              "property": "width"
+            },
+            {
+              "name": "--c2-table__resizer--color",
+              "type": "color",
+              "default": "transparent",
+              "part": "resizer",
+              "property": "color"
+            },
+            {
+              "name": "--c2-table__resizer__hover--color",
+              "type": "color",
+              "default": "rgb(2, 101, 220)",
+              "part": "resizer",
+              "state": "hover",
+              "property": "color",
+              "token": "--c2-theme--color-primary"
+            },
+            {
+              "name": "--c2-table__row--height",
+              "type": "pixel",
+              "default": "36px",
+              "part": "row",
+              "property": "height",
+              "description": "Row height; virtualization measures it, so keep it uniform."
+            },
+            {
+              "name": "--c2-table__row--border-bottom",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "row",
+              "property": "border-bottom",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-table__row__hover--background",
+              "type": "color",
+              "default": "#fafafa",
+              "part": "row",
+              "state": "hover",
+              "property": "background",
+              "token": "--c2-theme--color-surface-container-low"
+            },
+            {
+              "name": "--c2-table__row__odd--background",
+              "type": "color",
+              "default": "#fafafa",
+              "part": "row/odd",
+              "property": "background",
+              "token": "--c2-theme--color-surface-container-low",
+              "description": "Applies with the `stripe` attribute."
+            },
+            {
+              "name": "--c2-table__row__selected--background",
+              "type": "color",
+              "default": "#edf1fe",
+              "part": "row",
+              "state": "selected",
+              "property": "background",
+              "token": "--c2-theme--color-primary-container"
+            },
+            {
+              "name": "--c2-table__row__selected--color",
+              "type": "color",
+              "default": "#18181b",
+              "part": "row",
+              "state": "selected",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-table__cell--padding",
+              "type": "padding",
+              "default": "0 12px",
+              "part": "cell",
+              "property": "padding"
+            },
+            {
+              "name": "--c2-table__cell--gap",
+              "type": "pixel",
+              "default": "8px",
+              "part": "cell",
+              "property": "gap"
+            },
+            {
+              "name": "--c2-table__cell--font-size",
+              "type": "font-size",
+              "default": "14px",
+              "part": "cell",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-md"
+            },
+            {
+              "name": "--c2-table__cell--color",
+              "type": "color",
+              "default": "#18181b",
+              "part": "cell",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-table__cell--border-right",
+              "type": "border",
+              "default": "none",
+              "part": "cell",
+              "property": "border-right",
+              "description": "Vertical grid lines; applies to header cells too."
+            },
+            {
+              "name": "--c2-table__cell__focus--outline",
+              "type": "outline",
+              "default": "2px solid rgba(2, 101, 220, 0.4)",
+              "part": "cell",
+              "state": "focus",
+              "property": "outline",
+              "token": "--c2-theme--focus-ring"
+            },
+            {
+              "name": "--c2-table__cell__focus--outline-offset",
+              "type": "pixel",
+              "default": "-2px",
+              "part": "cell",
+              "state": "focus",
+              "property": "outline-offset"
+            },
+            {
+              "name": "--c2-table__pinned-start--box-shadow",
+              "type": "box-shadow",
+              "default": "1px 0 0 0 #e4e4e7",
+              "part": "pinned-start",
+              "property": "box-shadow",
+              "token": "--c2-theme--color-outline-variant",
+              "description": "Separator on the last column pinned to the start."
+            },
+            {
+              "name": "--c2-table__pinned-end--box-shadow",
+              "type": "box-shadow",
+              "default": "-1px 0 0 0 #e4e4e7",
+              "part": "pinned-end",
+              "property": "box-shadow",
+              "token": "--c2-theme--color-outline-variant",
+              "description": "Separator on the first column pinned to the end."
+            },
+            {
+              "name": "--c2-table__selection-cell--width",
+              "type": "pixel",
+              "default": "44px",
+              "part": "selection-cell",
+              "property": "width",
+              "description": "Width of the `checkbox-selection` column."
+            },
+            {
+              "name": "--c2-table__skeleton--background",
+              "type": "color",
+              "default": "#f4f4f5",
+              "part": "skeleton",
+              "property": "background",
+              "token": "--c2-theme--color-surface-container",
+              "description": "Placeholder shown in cells whose `dataSource` block is still loading."
+            },
+            {
+              "name": "--c2-table__skeleton--border-radius",
+              "type": "border-radius",
+              "default": "4px",
+              "part": "skeleton",
+              "property": "border-radius",
+              "token": "--c2-theme--radius-sm"
+            },
+            {
+              "name": "--c2-table__state--color",
+              "type": "color",
+              "default": "#71717a",
+              "part": "state",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant",
+              "description": "Colour of the empty and loading messages."
+            },
+            {
+              "name": "--c2-table__state--padding",
+              "type": "padding",
+              "default": "32px 12px",
+              "part": "state",
+              "property": "padding"
+            },
+            {
+              "name": "--c2-table__state--font-size",
+              "type": "font-size",
+              "default": "14px",
+              "part": "state",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-md"
+            },
+            {
+              "name": "--c2-table__state__error--color",
+              "type": "color",
+              "default": "rgb(211, 21, 16)",
+              "part": "state",
+              "state": "error",
+              "property": "color",
+              "token": "--c2-theme--color-error"
+            },
+            {
+              "name": "--c2-table__toolbar--background",
+              "type": "color",
+              "default": "transparent",
+              "part": "toolbar",
+              "property": "background"
+            },
+            {
+              "name": "--c2-table__toolbar--padding",
+              "type": "padding",
+              "default": "8px 12px",
+              "part": "toolbar",
+              "property": "padding"
+            },
+            {
+              "name": "--c2-table__toolbar--border-bottom",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "toolbar",
+              "property": "border-bottom",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-table__footer--background",
+              "type": "color",
+              "default": "transparent",
+              "part": "footer",
+              "property": "background"
+            },
+            {
+              "name": "--c2-table__footer--padding",
+              "type": "padding",
+              "default": "8px 12px",
+              "part": "footer",
+              "property": "padding"
+            },
+            {
+              "name": "--c2-table__footer--border-top",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "footer",
+              "property": "border-top",
+              "token": "--c2-theme--color-outline-variant"
+            }
+          ]
+        },
+        {
+          "tag": "c2-table-column",
+          "className": "TableColumn",
+          "modulePath": "@c2n/table/table-column.js",
+          "description": "One column of a `c2-table`, declared as a light-DOM child. The element renders nothing: it is a definition the\ntable reads, the same way `c2-select` reads its `c2-list-item` children. Everything it exposes as an attribute can\nalso be set as a property, and the function-valued properties (`renderCell`, `renderHeader`, `comparator`) are\nproperty-only.\n\n```html\n<c2-table rows='[{ \"name\": \"Ada\", \"score\": 12 }]'>\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\" sortable pinned=\"start\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"120px\" align=\"end\" format=\"number\" sortable></c2-table-column>\n</c2-table>\n```",
+          "attributes": [
+            {
+              "name": "field",
+              "type": "string",
+              "default": "''",
+              "description": "Key of the value in the row object; may be a dotted path such as `user.name`."
+            },
+            {
+              "name": "header",
+              "type": "string | undefined",
+              "description": "Header label. Falls back to the field name."
+            },
+            {
+              "name": "width",
+              "type": "string",
+              "default": "'1fr'",
+              "description": "Grid track for the column: `1fr`, `160px`, `minmax(120px, 1fr)`…"
+            },
+            {
+              "name": "min-width",
+              "type": "number",
+              "default": "64",
+              "description": "Lower bound in pixels while the column is resized."
+            },
+            {
+              "name": "align",
+              "type": "ColumnAlign",
+              "default": "'start'",
+              "description": "Horizontal alignment of the header and the cells."
+            },
+            {
+              "name": "sortable",
+              "type": "boolean",
+              "default": "false",
+              "description": "Lets the user sort by this column."
+            },
+            {
+              "name": "resizable",
+              "type": "boolean | undefined",
+              "description": "Lets the user drag the column's trailing edge. Defaults to the table's `resizable`."
+            },
+            {
+              "name": "pinned",
+              "type": "ColumnPin | undefined",
+              "description": "Freezes the column against the leading or trailing edge while scrolling horizontally."
+            },
+            {
+              "name": "hidden",
+              "type": "boolean",
+              "default": "false",
+              "description": "Leaves the column out of the table without removing the definition."
+            },
+            {
+              "name": "format",
+              "type": "ColumnFormat",
+              "default": "'text'",
+              "description": "Built-in `Intl` formatting applied when no `renderCell` is set."
+            },
+            {
+              "name": "format-options",
+              "type": "Record<string, unknown> | undefined",
+              "description": "Options handed to the `Intl` formatter of `format`, as JSON in the attribute."
+            },
+            {
+              "name": "currency",
+              "type": "string | undefined",
+              "description": "Currency code used by `format=\"currency\"`."
+            },
+            {
+              "name": "locale",
+              "type": "string | undefined",
+              "description": "BCP 47 locale used by `format`. Defaults to the browser locale."
+            },
+            {
+              "name": "cell-class",
+              "type": "string | undefined",
+              "description": "Class set on every cell of this column, so light-DOM CSS can target it through `::part(cell)`."
+            }
+          ],
+          "slots": [],
+          "events": [
+            {
+              "name": "COLUMN_CHANGE_EVENT",
+              "type": "CustomEvent"
+            }
+          ],
+          "cssProperties": []
+        }
+      ],
+      "composition": {
+        "internal": [],
+        "slotted": [
+          "c2-table-column - One column definition."
+        ],
+        "usedBy": []
+      },
+      "install": {
+        "npm": "npm install @c2n/table @c2n/theme",
+        "import": "import '@c2n/table'",
+        "importClass": "import { Table } from '@c2n/table'"
+      },
+      "presets": {
+        "html": "<c2-table style=\"height:208px;width:100%\" sortable row-key=\"id\" rows='[{\"id\":\"1\",\"name\":\"Ada Lovelace\",\"team\":\"Analytics\",\"score\":128000},{\"id\":\"2\",\"name\":\"Grace Hopper\",\"team\":\"Compilers\",\"score\":96500},{\"id\":\"3\",\"name\":\"Alan Turing\",\"team\":\"Research\",\"score\":87200},{\"id\":\"4\",\"name\":\"Radia Perlman\",\"team\":\"Networks\",\"score\":74800}]'><c2-table-column field=\"name\" header=\"Name\" width=\"2fr\"></c2-table-column><c2-table-column field=\"team\" header=\"Team\" width=\"1fr\"></c2-table-column><c2-table-column field=\"score\" header=\"Score\" width=\"100px\" align=\"end\" format=\"number\"></c2-table-column></c2-table>",
+        "items": [
+          {
+            "name": "Hairline report",
+            "description": "No frame, a rule under the header and hairline rows.",
+            "css": {
+              "--c2-table--border-top": "none",
+              "--c2-table--border-right": "none",
+              "--c2-table--border-bottom": "none",
+              "--c2-table--border-left": "none",
+              "--c2-table__header--background": "transparent",
+              "--c2-table__header--color": "#18181b",
+              "--c2-table__header--border-bottom": "1px solid #18181b",
+              "--c2-table__header--letter-spacing": "0.08em",
+              "--c2-table__row--border-bottom": "1px solid #f4f4f5",
+              "--c2-table__cell--padding": "0 8px",
+              "--c2-table__header-cell--padding": "0 8px"
+            }
+          },
+          {
+            "name": "Spreadsheet",
+            "description": "Dense rows with vertical grid lines.",
+            "css": {
+              "--c2-table__header--background": "#f4f4f5",
+              "--c2-table__header--height": "28px",
+              "--c2-table__row--height": "26px",
+              "--c2-table__row--border-bottom": "1px solid #e4e4e7",
+              "--c2-table__cell--border-right": "1px solid #e4e4e7",
+              "--c2-table__cell--font-size": "13px",
+              "--c2-table__cell--padding": "0 8px",
+              "--c2-table__header-cell--padding": "0 8px"
+            }
+          },
+          {
+            "name": "Dark console",
+            "description": "Near-black surface for logs and service tables.",
+            "css": {
+              "--c2-table--background": "#18181b",
+              "--c2-table--color": "#f4f4f5",
+              "--c2-table--border-top": "1px solid #3f3f46",
+              "--c2-table--border-right": "1px solid #3f3f46",
+              "--c2-table--border-bottom": "1px solid #3f3f46",
+              "--c2-table--border-left": "1px solid #3f3f46",
+              "--c2-table__header--background": "#27272a",
+              "--c2-table__header--color": "#a1a1aa",
+              "--c2-table__header--border-bottom": "1px solid #3f3f46",
+              "--c2-table__row--border-bottom": "1px solid #27272a",
+              "--c2-table__row__hover--background": "#27272a",
+              "--c2-table__cell--color": "#e4e4e7",
+              "--c2-table__sort-icon--color": "#71717a"
+            }
+          },
+          {
+            "name": "Soft cards",
+            "description": "Rounded, shadowed surface with roomy striped rows.",
+            "attributes": {
+              "stripe": ""
+            },
+            "css": {
+              "--c2-table--background": "#fafafa",
+              "--c2-table--border-top": "none",
+              "--c2-table--border-right": "none",
+              "--c2-table--border-bottom": "none",
+              "--c2-table--border-left": "none",
+              "--c2-table--border-top-left-radius": "14px",
+              "--c2-table--border-top-right-radius": "14px",
+              "--c2-table--border-bottom-left-radius": "14px",
+              "--c2-table--border-bottom-right-radius": "14px",
+              "--c2-table--box-shadow": "0 1px 3px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.08)",
+              "--c2-table__header--background": "#fafafa",
+              "--c2-table__header--border-bottom": "none",
+              "--c2-table__header--height": "40px",
+              "--c2-table__row--height": "44px",
+              "--c2-table__row--border-bottom": "none",
+              "--c2-table__row__odd--background": "#ffffff",
+              "--c2-table__cell--padding": "0 16px",
+              "--c2-table__header-cell--padding": "0 16px"
+            }
+          }
+        ]
+      },
+      "examples": [
+        {
+          "kind": "usage",
+          "label": "Sortable columns",
+          "html": "<c2-table client:only=\"lit\" class=\"grid\" sortable stripe row-key=\"id\" rows='[{\"id\":\"1\",\"name\":\"Ada Lovelace\",\"team\":\"Analytics\",\"score\":128000,\"joined\":\"2024-02-11\"},{\"id\":\"2\",\"name\":\"Grace Hopper\",\"team\":\"Compilers\",\"score\":96500,\"joined\":\"2023-11-02\"},{\"id\":\"3\",\"name\":\"Alan Turing\",\"team\":\"Research\",\"score\":87200,\"joined\":\"2024-06-30\"},{\"id\":\"4\",\"name\":\"Katherine Johnson\",\"team\":\"Flight\",\"score\":143000,\"joined\":\"2022-09-14\"},{\"id\":\"5\",\"name\":\"Radia Perlman\",\"team\":\"Networks\",\"score\":74800,\"joined\":\"2025-01-08\"}]'>\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\"></c2-table-column>\n  <c2-table-column field=\"team\" header=\"Team\" width=\"1fr\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"110px\" align=\"end\" format=\"number\"></c2-table-column>\n  <c2-table-column field=\"joined\" header=\"Joined\" width=\"130px\" format=\"date\"></c2-table-column>\n</c2-table>",
+          "css": ".grid {\n  height: 208px;\n  width: 100%;\n}\n.compact {\n  height: 190px;\n  width: 100%;\n  --c2-table__header--background: #ffffff;\n  --c2-table__header--height: 32px;\n  --c2-table__row--height: 30px;\n  --c2-table__cell--font-size: 13px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Columns as data",
+          "html": "<c2-table client:only=\"lit\" class=\"grid\" sortable row-key=\"id\" columns='[{\"field\":\"name\",\"header\":\"Name\",\"width\":\"2fr\"},{\"field\":\"team\",\"header\":\"Team\",\"width\":\"1fr\"},{\"field\":\"score\",\"header\":\"Score\",\"width\":\"110px\",\"align\":\"end\",\"format\":\"number\"},{\"field\":\"joined\",\"header\":\"Joined\",\"width\":\"130px\",\"format\":\"date\"}]' rows='[{\"id\":\"1\",\"name\":\"Ada Lovelace\",\"team\":\"Analytics\",\"score\":128000,\"joined\":\"2024-02-11\"},{\"id\":\"2\",\"name\":\"Grace Hopper\",\"team\":\"Compilers\",\"score\":96500,\"joined\":\"2023-11-02\"},{\"id\":\"3\",\"name\":\"Alan Turing\",\"team\":\"Research\",\"score\":87200,\"joined\":\"2024-06-30\"},{\"id\":\"4\",\"name\":\"Katherine Johnson\",\"team\":\"Flight\",\"score\":143000,\"joined\":\"2022-09-14\"},{\"id\":\"5\",\"name\":\"Radia Perlman\",\"team\":\"Networks\",\"score\":74800,\"joined\":\"2025-01-08\"}]'></c2-table>",
+          "css": ".grid {\n  height: 208px;\n  width: 100%;\n}\n.compact {\n  height: 190px;\n  width: 100%;\n  --c2-table__header--background: #ffffff;\n  --c2-table__header--height: 32px;\n  --c2-table__row--height: 30px;\n  --c2-table__cell--font-size: 13px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Selection",
+          "html": "<c2-table client:only=\"lit\" class=\"grid\" selection=\"multiple\" checkbox-selection sortable row-key=\"id\" value=\"2;3\" rows='[{\"id\":\"1\",\"name\":\"Ada Lovelace\",\"status\":\"active\",\"score\":128000},{\"id\":\"2\",\"name\":\"Grace Hopper\",\"status\":\"invited\",\"score\":96500},{\"id\":\"3\",\"name\":\"Alan Turing\",\"status\":\"active\",\"score\":87200},{\"id\":\"4\",\"name\":\"Katherine Johnson\",\"status\":\"active\",\"score\":143000},{\"id\":\"5\",\"name\":\"Radia Perlman\",\"status\":\"invited\",\"score\":74800}]'>\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\"></c2-table-column>\n  <c2-table-column field=\"status\" header=\"Status\" width=\"120px\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"110px\" align=\"end\" format=\"number\"></c2-table-column>\n</c2-table>",
+          "css": ".grid {\n  height: 208px;\n  width: 100%;\n}\n.compact {\n  height: 190px;\n  width: 100%;\n  --c2-table__header--background: #ffffff;\n  --c2-table__header--height: 32px;\n  --c2-table__row--height: 30px;\n  --c2-table__cell--font-size: 13px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Pinned and resizable",
+          "html": "<c2-table client:only=\"lit\" class=\"compact\" resizable row-key=\"id\" rows='[{\"id\":\"1\",\"name\":\"Ada Lovelace\",\"team\":\"Analytics\",\"status\":\"active\",\"score\":128000,\"owner\":\"Grace\"},{\"id\":\"2\",\"name\":\"Grace Hopper\",\"team\":\"Compilers\",\"status\":\"invited\",\"score\":96500,\"owner\":\"Ada\"},{\"id\":\"3\",\"name\":\"Alan Turing\",\"team\":\"Research\",\"status\":\"active\",\"score\":87200,\"owner\":\"Radia\"},{\"id\":\"4\",\"name\":\"Katherine Johnson\",\"team\":\"Flight\",\"status\":\"active\",\"score\":143000,\"owner\":\"Alan\"}]'>\n  <c2-table-column field=\"name\" header=\"Name\" width=\"170px\" pinned=\"start\"></c2-table-column>\n  <c2-table-column field=\"team\" header=\"Team\" width=\"150px\"></c2-table-column>\n  <c2-table-column field=\"status\" header=\"Status\" width=\"150px\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"150px\" align=\"end\" format=\"number\"></c2-table-column>\n  <c2-table-column field=\"owner\" header=\"Owner\" width=\"110px\" pinned=\"end\"></c2-table-column>\n</c2-table>",
+          "css": ".grid {\n  height: 208px;\n  width: 100%;\n}\n.compact {\n  height: 190px;\n  width: 100%;\n  --c2-table__header--background: #ffffff;\n  --c2-table__header--height: 32px;\n  --c2-table__row--height: 30px;\n  --c2-table__cell--font-size: 13px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Empty",
+          "html": "<c2-table client:only=\"lit\" class=\"compact\" empty-message=\"No rows match this filter\">\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\"></c2-table-column>\n  <c2-table-column field=\"team\" header=\"Team\" width=\"1fr\"></c2-table-column>\n</c2-table>",
+          "css": ".grid {\n  height: 208px;\n  width: 100%;\n}\n.compact {\n  height: 190px;\n  width: 100%;\n  --c2-table__header--background: #ffffff;\n  --c2-table__header--height: 32px;\n  --c2-table__row--height: 30px;\n  --c2-table__cell--font-size: 13px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Hairline report",
+          "section": "Presets",
+          "html": "<c2-table client:only=\"lit\" class=\"report\" sortable row-key=\"id\" rows='[{\"id\":\"1\",\"name\":\"Ada Lovelace\",\"team\":\"Analytics\",\"score\":128000},{\"id\":\"2\",\"name\":\"Grace Hopper\",\"team\":\"Compilers\",\"score\":96500},{\"id\":\"3\",\"name\":\"Alan Turing\",\"team\":\"Research\",\"score\":87200},{\"id\":\"4\",\"name\":\"Radia Perlman\",\"team\":\"Networks\",\"score\":74800}]'>\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\"></c2-table-column>\n  <c2-table-column field=\"team\" header=\"Team\" width=\"1fr\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"100px\" align=\"end\" format=\"number\"></c2-table-column>\n</c2-table>",
+          "css": ".report {\n  height: 208px;\n  width: 100%;\n  --c2-table--border-top: none;\n  --c2-table--border-right: none;\n  --c2-table--border-bottom: none;\n  --c2-table--border-left: none;\n  --c2-table--border-top-left-radius: 0;\n  --c2-table--border-top-right-radius: 0;\n  --c2-table--border-bottom-left-radius: 0;\n  --c2-table--border-bottom-right-radius: 0;\n  --c2-table__header--background: transparent;\n  --c2-table__header--border-bottom: 1px solid #18181b;\n  --c2-table__header--color: #18181b;\n  --c2-table__header--letter-spacing: 0.08em;\n  --c2-table__header-cell--padding: 0 8px;\n  --c2-table__row--border-bottom: 1px solid #f4f4f5;\n  --c2-table__row__hover--background: #fafafa;\n  --c2-table__cell--padding: 0 8px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Spreadsheet",
+          "section": "Presets",
+          "html": "<c2-table client:only=\"lit\" class=\"sheet\" sortable row-key=\"id\" rows='[{\"id\":\"1\",\"name\":\"Ada Lovelace\",\"team\":\"Analytics\",\"score\":128000},{\"id\":\"2\",\"name\":\"Grace Hopper\",\"team\":\"Compilers\",\"score\":96500},{\"id\":\"3\",\"name\":\"Alan Turing\",\"team\":\"Research\",\"score\":87200},{\"id\":\"4\",\"name\":\"Radia Perlman\",\"team\":\"Networks\",\"score\":74800},{\"id\":\"5\",\"name\":\"Katherine Johnson\",\"team\":\"Flight\",\"score\":143000}]'>\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\"></c2-table-column>\n  <c2-table-column field=\"team\" header=\"Team\" width=\"1fr\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"100px\" align=\"end\" format=\"number\"></c2-table-column>\n</c2-table>",
+          "css": ".sheet {\n  height: 208px;\n  width: 100%;\n  --c2-table--border-top-left-radius: 4px;\n  --c2-table--border-top-right-radius: 4px;\n  --c2-table--border-bottom-left-radius: 4px;\n  --c2-table--border-bottom-right-radius: 4px;\n  --c2-table__header--background: #f4f4f5;\n  --c2-table__header--height: 28px;\n  --c2-table__header--font-size: 12px;\n  --c2-table__row--height: 26px;\n  --c2-table__row--border-bottom: 1px solid #e4e4e7;\n  --c2-table__cell--border-right: 1px solid #e4e4e7;\n  --c2-table__cell--font-size: 13px;\n  --c2-table__cell--padding: 0 8px;\n  --c2-table__header-cell--padding: 0 8px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Dark console",
+          "section": "Presets",
+          "html": "<c2-table client:only=\"lit\" class=\"console\" sortable selection=\"multiple\" row-key=\"id\" value=\"2\" rows='[{\"id\":\"1\",\"name\":\"api-gateway\",\"team\":\"200\",\"score\":128000},{\"id\":\"2\",\"name\":\"auth-service\",\"team\":\"401\",\"score\":96500},{\"id\":\"3\",\"name\":\"worker-queue\",\"team\":\"503\",\"score\":87200},{\"id\":\"4\",\"name\":\"static-cdn\",\"team\":\"200\",\"score\":74800}]'>\n  <c2-table-column field=\"name\" header=\"Service\" width=\"2fr\"></c2-table-column>\n  <c2-table-column field=\"team\" header=\"Status\" width=\"90px\" align=\"center\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Requests\" width=\"110px\" align=\"end\" format=\"number\"></c2-table-column>\n</c2-table>",
+          "css": ".console {\n  height: 208px;\n  width: 100%;\n  --c2-table--background: #18181b;\n  --c2-table--color: #f4f4f5;\n  --c2-table--border-top: 1px solid #3f3f46;\n  --c2-table--border-right: 1px solid #3f3f46;\n  --c2-table--border-bottom: 1px solid #3f3f46;\n  --c2-table--border-left: 1px solid #3f3f46;\n  --c2-table__header--background: #27272a;\n  --c2-table__header--color: #a1a1aa;\n  --c2-table__header--border-bottom: 1px solid #3f3f46;\n  --c2-table__row--border-bottom: 1px solid #27272a;\n  --c2-table__row__hover--background: #27272a;\n  --c2-table__row__selected--background: rgba(2, 101, 220, 0.24);\n  --c2-table__row__selected--color: #ffffff;\n  --c2-table__cell--color: #e4e4e7;\n  --c2-table__cell--font-size: 13px;\n  --c2-table__sort-icon--color: #71717a;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Soft cards",
+          "section": "Presets",
+          "html": "<c2-table client:only=\"lit\" class=\"soft\" stripe sortable row-key=\"id\" rows='[{\"id\":\"1\",\"name\":\"Ada Lovelace\",\"team\":\"Analytics\",\"score\":128000},{\"id\":\"2\",\"name\":\"Grace Hopper\",\"team\":\"Compilers\",\"score\":96500},{\"id\":\"3\",\"name\":\"Alan Turing\",\"team\":\"Research\",\"score\":87200},{\"id\":\"4\",\"name\":\"Radia Perlman\",\"team\":\"Networks\",\"score\":74800}]'>\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\"></c2-table-column>\n  <c2-table-column field=\"team\" header=\"Team\" width=\"1fr\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"100px\" align=\"end\" format=\"number\"></c2-table-column>\n</c2-table>",
+          "css": ".soft {\n  height: 208px;\n  width: 100%;\n  --c2-table--background: #fafafa;\n  --c2-table--border-top: none;\n  --c2-table--border-right: none;\n  --c2-table--border-bottom: none;\n  --c2-table--border-left: none;\n  --c2-table--border-top-left-radius: 14px;\n  --c2-table--border-top-right-radius: 14px;\n  --c2-table--border-bottom-left-radius: 14px;\n  --c2-table--border-bottom-right-radius: 14px;\n  --c2-table--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.08);\n  --c2-table__header--background: #fafafa;\n  --c2-table__header--border-bottom: none;\n  --c2-table__header--height: 40px;\n  --c2-table__row--height: 44px;\n  --c2-table__row--border-bottom: none;\n  --c2-table__row__odd--background: #ffffff;\n  --c2-table__row__hover--background: #f4f4f5;\n  --c2-table__cell--padding: 0 16px;\n  --c2-table__header-cell--padding: 0 16px;\n}"
+        },
+        {
+          "kind": "preview",
+          "label": "Preview",
+          "html": "<c2-table sortable stripe row-key=\"id\" style=\"height:180px;width:100%\" rows='[\n  {\"id\":\"1\",\"name\":\"Ada Lovelace\",\"team\":\"Analytics\",\"score\":128000},\n  {\"id\":\"2\",\"name\":\"Grace Hopper\",\"team\":\"Compilers\",\"score\":96500},\n  {\"id\":\"3\",\"name\":\"Alan Turing\",\"team\":\"Research\",\"score\":87200},\n  {\"id\":\"4\",\"name\":\"Radia Perlman\",\"team\":\"Networks\",\"score\":74800}\n]'>\n  <c2-table-column field=\"name\" header=\"Name\" width=\"2fr\" sortable></c2-table-column>\n  <c2-table-column field=\"team\" header=\"Team\" width=\"1fr\"></c2-table-column>\n  <c2-table-column field=\"score\" header=\"Score\" width=\"90px\" align=\"end\" format=\"number\" sortable></c2-table-column>\n</c2-table>"
+        }
+      ],
+      "hasGallery": true
+    },
     "tabs": {
       "id": "tabs",
       "package": "@c2n/tabs",
@@ -15031,6 +15963,12 @@
               "description": "Text shown while the field is empty."
             },
             {
+              "name": "aria-label",
+              "type": "string | null",
+              "default": "null",
+              "description": "Accessible name forwarded to the native input."
+            },
+            {
               "name": "value",
               "type": "string",
               "default": "''",
@@ -15675,6 +16613,12 @@
               "type": "string",
               "default": "''",
               "description": "Text shown while the field is empty."
+            },
+            {
+              "name": "aria-label",
+              "type": "string | null",
+              "default": "null",
+              "description": "Accessible name forwarded to the native input."
             },
             {
               "name": "value",
@@ -18126,6 +19070,8 @@
     "c2-spinner": "spinner",
     "c2-switch": "switch",
     "c2-tab": "tabs",
+    "c2-table": "table",
+    "c2-table-column": "table",
     "c2-tabs": "tabs",
     "c2-text-field": "text-field",
     "c2-text-field-clear": "text-field",
@@ -18170,6 +19116,7 @@
     "@c2n/slider": "slider",
     "@c2n/spinner": "spinner",
     "@c2n/switch": "switch",
+    "@c2n/table": "table",
     "@c2n/tabs": "tabs",
     "@c2n/text-field": "text-field",
     "@c2n/textarea": "textarea",
@@ -18193,7 +19140,7 @@
         "light": "#0265dc",
         "dark": "#5aa3ff",
         "description": "Accent colour: filled buttons, selected states, focused borders, links.",
-        "usedBy": 27
+        "usedBy": 29
       },
       {
         "name": "--c2-theme--color-primary-hover",
@@ -18225,7 +19172,7 @@
         "light": "#edf1fe",
         "dark": "#0f2d5c",
         "description": "Soft accent surface, e.g. a selected list item.",
-        "usedBy": 3
+        "usedBy": 4
       },
       {
         "name": "--c2-theme--color-surface",
@@ -18233,7 +19180,7 @@
         "light": "#ffffff",
         "dark": "#18181b",
         "description": "Default surface of inputs, lists, cards, dialogs.",
-        "usedBy": 15
+        "usedBy": 16
       },
       {
         "name": "--c2-theme--color-surface-container-low",
@@ -18241,7 +19188,7 @@
         "light": "#fafafa",
         "dark": "#1f1f23",
         "description": "Slightly raised surface: side navigation, read-only fields, subtle hover.",
-        "usedBy": 5
+        "usedBy": 8
       },
       {
         "name": "--c2-theme--color-surface-container",
@@ -18249,7 +19196,7 @@
         "light": "#f4f4f5",
         "dark": "#27272a",
         "description": "Hover surface for rows and icon buttons.",
-        "usedBy": 8
+        "usedBy": 10
       },
       {
         "name": "--c2-theme--color-on-surface",
@@ -18257,7 +19204,7 @@
         "light": "#18181b",
         "dark": "#f4f4f5",
         "description": "Primary text colour.",
-        "usedBy": 14
+        "usedBy": 18
       },
       {
         "name": "--c2-theme--color-on-surface-variant",
@@ -18265,7 +19212,7 @@
         "light": "#71717a",
         "dark": "#a1a1aa",
         "description": "Secondary text, placeholders, icons, supporting text.",
-        "usedBy": 27
+        "usedBy": 30
       },
       {
         "name": "--c2-theme--color-outline",
@@ -18281,7 +19228,7 @@
         "light": "#e4e4e7",
         "dark": "#27272a",
         "description": "Hairline dividers and light borders.",
-        "usedBy": 16
+        "usedBy": 26
       },
       {
         "name": "--c2-theme--color-outline-strong",
@@ -18297,7 +19244,7 @@
         "light": "#dc2626",
         "dark": "#f87171",
         "description": "Error borders, error text, required indicators.",
-        "usedBy": 10
+        "usedBy": 11
       },
       {
         "name": "--c2-theme--color-scrim",
@@ -18335,14 +19282,14 @@
         "category": "font",
         "light": "12px",
         "description": "Small text: supporting text, tooltips, descriptions, timestamps.",
-        "usedBy": 13
+        "usedBy": 14
       },
       {
         "name": "--c2-theme--font-size-md",
         "category": "font",
         "light": "14px",
         "description": "Body text: buttons, inputs, list items, dialog content.",
-        "usedBy": 13
+        "usedBy": 16
       },
       {
         "name": "--c2-theme--font-weight-medium",
@@ -18356,14 +19303,14 @@
         "category": "font",
         "light": "600",
         "description": "Semibold weight: dialog titles, list headings, avatars.",
-        "usedBy": 5
+        "usedBy": 6
       },
       {
         "name": "--c2-theme--radius-sm",
         "category": "radius",
         "light": "4px",
         "description": "Small radius: checkboxes, link buttons, inline controls.",
-        "usedBy": 15
+        "usedBy": 16
       },
       {
         "name": "--c2-theme--radius-md",
@@ -18377,7 +19324,7 @@
         "category": "radius",
         "light": "8px",
         "description": "Large radius: cards, panels, popovers.",
-        "usedBy": 24
+        "usedBy": 28
       },
       {
         "name": "--c2-theme--radius-xl",
@@ -18413,7 +19360,7 @@
         "light": "2px solid rgba(2, 101, 220, 0.4)",
         "dark": "2px solid rgba(90, 163, 255, 0.5)",
         "description": "Focus-visible outline of every component.",
-        "usedBy": 17
+        "usedBy": 18
       },
       {
         "name": "--c2-theme--disabled-opacity",
@@ -18738,6 +19685,44 @@
       "--c2-switch__description--color": "--c2-theme--color-on-surface-variant",
       "--c2-switch__description--font-size": "--c2-theme--font-size-sm",
       "--c2-switch--transition-duration": "--c2-theme--motion-scale",
+      "--c2-table--background": "--c2-theme--color-surface",
+      "--c2-table--color": "--c2-theme--color-on-surface",
+      "--c2-table--font-size": "--c2-theme--font-size-md",
+      "--c2-table--border-top": "--c2-theme--color-outline-variant",
+      "--c2-table--border-right": "--c2-theme--color-outline-variant",
+      "--c2-table--border-bottom": "--c2-theme--color-outline-variant",
+      "--c2-table--border-left": "--c2-theme--color-outline-variant",
+      "--c2-table--border-top-left-radius": "--c2-theme--radius-lg",
+      "--c2-table--border-top-right-radius": "--c2-theme--radius-lg",
+      "--c2-table--border-bottom-left-radius": "--c2-theme--radius-lg",
+      "--c2-table--border-bottom-right-radius": "--c2-theme--radius-lg",
+      "--c2-table__header--background": "--c2-theme--color-surface-container-low",
+      "--c2-table__header--color": "--c2-theme--color-on-surface-variant",
+      "--c2-table__header--font-size": "--c2-theme--font-size-sm",
+      "--c2-table__header--font-weight": "--c2-theme--font-weight-semibold",
+      "--c2-table__header--border-bottom": "--c2-theme--color-outline-variant",
+      "--c2-table__header-cell__hover--background": "--c2-theme--color-surface-container",
+      "--c2-table__header-cell__sorted--color": "--c2-theme--color-on-surface",
+      "--c2-table__sort-icon--color": "--c2-theme--color-on-surface-variant",
+      "--c2-table__sort-icon__active--color": "--c2-theme--color-primary",
+      "--c2-table__resizer__hover--color": "--c2-theme--color-primary",
+      "--c2-table__row--border-bottom": "--c2-theme--color-outline-variant",
+      "--c2-table__row__hover--background": "--c2-theme--color-surface-container-low",
+      "--c2-table__row__odd--background": "--c2-theme--color-surface-container-low",
+      "--c2-table__row__selected--background": "--c2-theme--color-primary-container",
+      "--c2-table__row__selected--color": "--c2-theme--color-on-surface",
+      "--c2-table__cell--font-size": "--c2-theme--font-size-md",
+      "--c2-table__cell--color": "--c2-theme--color-on-surface",
+      "--c2-table__cell__focus--outline": "--c2-theme--focus-ring",
+      "--c2-table__pinned-start--box-shadow": "--c2-theme--color-outline-variant",
+      "--c2-table__pinned-end--box-shadow": "--c2-theme--color-outline-variant",
+      "--c2-table__skeleton--background": "--c2-theme--color-surface-container",
+      "--c2-table__skeleton--border-radius": "--c2-theme--radius-sm",
+      "--c2-table__state--color": "--c2-theme--color-on-surface-variant",
+      "--c2-table__state--font-size": "--c2-theme--font-size-md",
+      "--c2-table__state__error--color": "--c2-theme--color-error",
+      "--c2-table__toolbar--border-bottom": "--c2-theme--color-outline-variant",
+      "--c2-table__footer--border-top": "--c2-theme--color-outline-variant",
       "--c2-tabs--box-shadow": "--c2-theme--color-outline-variant",
       "--c2-tabs__indicator--color": "--c2-theme--color-primary",
       "--c2-tabs__tab__hover--color": "--c2-theme--color-primary",

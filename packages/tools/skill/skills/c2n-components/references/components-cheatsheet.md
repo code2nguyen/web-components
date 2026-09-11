@@ -51,7 +51,7 @@ Round, hoverable button wrapping a slotted SVG icon. Package `@c2n/icon-button`.
 
 Auto-growing message box with a send button for chat interfaces. Package `@c2n/chat-input`. Register: `import '@c2n/chat-input'`.
 
-- Attributes: `placeholder` (string), `value` (string)
+- Attributes: `placeholder` (string), `value` (string), `aria-label` (string | null)
 - Slots: `send-icon`
 - Events: `submit-message`
 - Key variables (35 total): `--c2-chat-input--color` = `rgb(34, 34, 34)` (→ `--c2-theme--color-on-surface`), `--c2-chat-input--background` = `rgb(255, 255, 255)` (→ `--c2-theme--color-surface`), `--c2-chat-input--border-top-left-radius` = `4px` (→ `--c2-theme--radius-sm`), `--c2-chat-input--border-top-right-radius` = `4px` (→ `--c2-theme--radius-sm`), `--c2-chat-input--border-bottom-left-radius` = `4px` (→ `--c2-theme--radius-sm`), `--c2-chat-input--border-bottom-right-radius` = `4px` (→ `--c2-theme--radius-sm`), `--c2-chat-input--border-top` = `1px solid rgb(177, 177, 177)` (→ `--c2-theme--border`), `--c2-chat-input--border-right` = `1px solid rgb(177, 177, 177)` (→ `--c2-theme--border`)
@@ -115,6 +115,23 @@ Selectable row with icon slots, used on its own or as the option of list and sel
 - Events: `click`, `selected-change`
 - Key variables (44 total): `--c2-list-item--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-list-item__description--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-list-item--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-list-item--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-list-item--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-list-item--border-bottom-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-list-item--font-size` = `14px` (→ `--c2-theme--font-size-md`), `--c2-list-item__description--font-size` = `12px` (→ `--c2-theme--font-size-sm`)
 - Presets: Neutral, Rounded rows, Pill, Accent bar, Dense, Spacious, Dark, Outlined selected
+
+### Table — `c2-table`
+
+Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Package `@c2n/table`. Register: `import '@c2n/table'`.
+
+**`c2-table`** (`@c2n/table`)
+
+- Attributes: `rows` (TableRow[]), `columns` (TableColumnConfig[] | undefined), `row-key` (string), `selection` (TableSelectionMode), `checkbox-selection` (boolean), `value` (string[]), `sort` (SortModel[]), `multi-sort` (boolean), `sortable` (boolean), `resizable` (boolean), `stripe` (boolean), `virtual` (TableVirtualMode), `row-height` (number), `overscan` (number), `virtual-threshold` (number), `block-size` (number), `loading` (boolean), `error` (string), `empty-message` (string)
+- Slots: `default`, `toolbar`, `footer`, `empty`, `loading`, `error`
+- Events: `sort-change`, `row-click`, `cell-click`, `selection-change`, `column-resize`
+- Key variables (59 total): `--c2-table--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-table--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-table__header--background` = `#fafafa` (→ `--c2-theme--color-surface-container-low`), `--c2-table__header--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-table__header-cell__sorted--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-table__sort-icon--color` = `#a1a1aa` (→ `--c2-theme--color-on-surface-variant`), `--c2-table__row__odd--background` = `#fafafa` (→ `--c2-theme--color-surface-container-low`), `--c2-table__cell--color` = `#18181b` (→ `--c2-theme--color-on-surface`)
+
+**`c2-table-column`** (`@c2n/table/table-column.js`)
+
+- Attributes: `field` (string), `header` (string | undefined), `width` (string), `min-width` (number), `align` (ColumnAlign), `sortable` (boolean), `resizable` (boolean | undefined), `pinned` (ColumnPin | undefined), `hidden` (boolean), `format` (ColumnFormat), `format-options` (Record<string, unknown> | undefined), `currency` (string | undefined), `locale` (string | undefined), `cell-class` (string | undefined)
+- Events: `COLUMN_CHANGE_EVENT`
+- Presets: Hairline report, Spreadsheet, Dark console, Soft cards
 
 ## Feedback
 
@@ -220,7 +237,7 @@ Colour swatch that opens a full picker built from area and slider. Package `@c2n
 
 Horizontal slider for choosing a hue from 0 to 360. Package `@c2n/color-slider`. Register: `import '@c2n/color-slider'`.
 
-- Attributes: `value` (number), `min` (number), `max` (number)
+- Attributes: `value` (number), `min` (number), `max` (number), `aria-label` (string | null)
 - Events: `input`
 - Key variables (18 total): `--c2-color-slider--border-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-color-slider--border-top-left-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-color-slider--border-top-right-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-color-slider--border-bottom-left-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-color-slider--border-bottom-right-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-color-slider--border-top` = `1px solid rgb(177, 177, 177)` (→ `--c2-theme--border`), `--c2-color-slider--border-right` = `1px solid rgb(177, 177, 177)` (→ `--c2-theme--border`), `--c2-color-slider--border-bottom` = `1px solid rgb(177, 177, 177)` (→ `--c2-theme--border`)
 
@@ -256,7 +273,7 @@ Radio options built on native inputs, grouped into one value with keyboard navig
 
 Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Package `@c2n/select`. Register: `import '@c2n/select'`.
 
-- Attributes: `open` (boolean), `readonly` (boolean), `disabled` (boolean), `focused` (boolean), `fit-size` (boolean), `placeholder` (string), `multiple` (boolean), `required` (boolean), `value` (string[])
+- Attributes: `open` (boolean), `readonly` (boolean), `disabled` (boolean), `focused` (boolean), `fit-size` (boolean), `placeholder` (string), `aria-label` (string | null), `multiple` (boolean), `required` (boolean), `value` (string[])
 - Slots: `default`, `button-prefix-icon`, `button-suffix-icon`, `button-content`
 - Events: `selection-change`
 - Key variables (55 total): `--c2-select__button--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-select__button--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-select__button__suffix-icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-select__placeholder--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-select__list--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-select__button--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-select__button--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-select__button--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`)
@@ -287,14 +304,14 @@ Single-line input with icon slots, clear button, helper and error text, and a ch
 
 **`c2-text-field`** (`@c2n/text-field`)
 
-- Attributes: `readOnly` (boolean), `disabled` (boolean), `error` (boolean), `maxLength` (number), `minLength` (number), `pattern` (string), `required` (boolean), `type` (TextFieldType), `name` (string), `autocomplete` (string), `placeholder` (string), `value` (string), `error-text` (string), `help` (string), `clearable` (boolean)
+- Attributes: `readOnly` (boolean), `disabled` (boolean), `error` (boolean), `maxLength` (number), `minLength` (number), `pattern` (string), `required` (boolean), `type` (TextFieldType), `name` (string), `autocomplete` (string), `placeholder` (string), `aria-label` (string | null), `value` (string), `error-text` (string), `help` (string), `clearable` (boolean)
 - Slots: `prefix-icon`, `suffix-icon`, `clear-icon`, `help-icon`, `supporting-text`
 - Events: `input`, `change`, `clear`
 - Key variables (64 total): `--c2-text-field--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-text-field--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-text-field__placeholder--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field__icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field__clear-icon--color` = `#a1a1aa` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field__help-icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field__supporting-text--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`)
 
 **`c2-text-field-clear`** (`@c2n/text-field/text-field-clear.js`)
 
-- Attributes: `readOnly` (boolean), `disabled` (boolean), `error` (boolean), `maxLength` (number), `minLength` (number), `pattern` (string), `required` (boolean), `type` (TextFieldType), `name` (string), `autocomplete` (string), `placeholder` (string), `value` (string), `error-text` (string), `help` (string), `clearable` (boolean)
+- Attributes: `readOnly` (boolean), `disabled` (boolean), `error` (boolean), `maxLength` (number), `minLength` (number), `pattern` (string), `required` (boolean), `type` (TextFieldType), `name` (string), `autocomplete` (string), `placeholder` (string), `aria-label` (string | null), `value` (string), `error-text` (string), `help` (string), `clearable` (boolean)
 - Slots: `clear-icon`, `prefix-icon`, `suffix-icon`, `help-icon`, `supporting-text`
 - Events: `input`, `change`, `clear`
 - Key variables (66 total): `--c2-text-field--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-text-field--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-text-field__placeholder--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field__icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field__clear-icon--color` = `#a1a1aa` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field__help-icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field__supporting-text--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-text-field--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`)
@@ -386,7 +403,7 @@ Navigation trail of link buttons with separators, a current page and optional co
 
 Text-styled control for link and navigation actions, rendered as a real anchor or a button. Package `@c2n/link-button`. Register: `import '@c2n/link-button'`.
 
-- Attributes: `href` (string | undefined), `target` (string | undefined), `rel` (string | undefined), `download` (string | undefined), `external` (boolean), `disabled` (boolean), `selected` (boolean)
+- Attributes: `href` (string | undefined), `aria-label` (string | null), `target` (string | undefined), `rel` (string | undefined), `download` (string | undefined), `external` (boolean), `disabled` (boolean), `selected` (boolean)
 - Slots: `default`, `prefix-icon`, `suffix-icon`
 - Key variables (26 total): `--c2-link-button__container--text-decoration-color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`), `--c2-link-button__container--border-radius` = `4px` (→ `--c2-theme--radius-sm`), `--c2-link-button__container--font-size` = `14px` (→ `--c2-theme--font-size-md`), `--c2-link-button__container--font-weight` = `500` (→ `--c2-theme--font-weight-medium`), `--c2-link-button__container__hover--color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`), `--c2-link-button__container__selected--color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`), `--c2-link-button__container--background-color`, `--c2-link-button__container--color` = `currentColor`
 - Presets: Primary link, Always underlined, Danger, Nav pill
