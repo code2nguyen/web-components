@@ -372,6 +372,13 @@ Package `@c2n/dropdown-list` (no docs page yet). Register: `import '@c2n/dropdow
 - Slots: `default`
 - Events: `undefined`
 
+### kbd — `c2-kbd`
+
+Package `@c2n/kbd` (no docs page yet). Register: `import '@c2n/kbd'`.
+
+- Slots: `default`
+- Key variables (16 total): `--c2-kbd--background-color` = `#f4f4f5`, `--c2-kbd--color` = `#3f3f46`, `--c2-kbd--border` = `1px solid #d4d4d8`, `--c2-kbd--border-radius` = `5px`, `--c2-kbd--height` = `24px`, `--c2-kbd--padding-left` = `6px`, `--c2-kbd--padding-right` = `6px`, `--c2-kbd--font-family` = `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`
+
 ### reorder-list — `c2-reorder-list`
 
 Package `@c2n/reorder-list` (no docs page yet). Register: `import '@c2n/reorder-list'`.

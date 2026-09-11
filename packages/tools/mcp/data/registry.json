@@ -7687,6 +7687,158 @@
       ],
       "hasGallery": true
     },
+    "kbd": {
+      "id": "kbd",
+      "package": "@c2n/kbd",
+      "title": "kbd",
+      "description": "",
+      "category": "Layout",
+      "status": "undocumented",
+      "docsUrl": "https://code2nguyen.github.io/web-components/components/kbd",
+      "elements": [
+        {
+          "tag": "c2-kbd",
+          "className": "Kbd",
+          "modulePath": "@c2n/kbd",
+          "description": "Displays a keyboard key or shortcut with the semantics of the native `kbd` element. Use one element for a complete\nshortcut (`Ctrl + K`) or place several beside descriptive text. The component is presentational and never enters the\ntab order; when it repeats a shortcut already announced by a surrounding control, set `aria-hidden=\"true\"` on the\nhost.",
+          "attributes": [],
+          "slots": [
+            {
+              "name": "",
+              "description": "Key name or shortcut to display."
+            }
+          ],
+          "events": [],
+          "cssProperties": [
+            {
+              "name": "--c2-kbd--min-width",
+              "type": "pixel",
+              "default": "24px",
+              "part": "",
+              "property": "min-width"
+            },
+            {
+              "name": "--c2-kbd--height",
+              "type": "pixel",
+              "default": "24px",
+              "part": "",
+              "property": "height"
+            },
+            {
+              "name": "--c2-kbd--padding-left",
+              "type": "padding",
+              "default": "6px",
+              "part": "",
+              "property": "padding-left"
+            },
+            {
+              "name": "--c2-kbd--padding-right",
+              "type": "padding",
+              "default": "6px",
+              "part": "",
+              "property": "padding-right"
+            },
+            {
+              "name": "--c2-kbd--gap",
+              "type": "pixel",
+              "default": "4px",
+              "part": "",
+              "property": "gap",
+              "description": "Space between multiple slotted nodes."
+            },
+            {
+              "name": "--c2-kbd--background-color",
+              "type": "color",
+              "default": "#f4f4f5",
+              "part": "",
+              "property": "background-color"
+            },
+            {
+              "name": "--c2-kbd--color",
+              "type": "color",
+              "default": "#3f3f46",
+              "part": "",
+              "property": "color"
+            },
+            {
+              "name": "--c2-kbd--border",
+              "type": "border",
+              "default": "1px solid #d4d4d8",
+              "part": "",
+              "property": "border"
+            },
+            {
+              "name": "--c2-kbd--border-radius",
+              "type": "border-radius",
+              "default": "5px",
+              "part": "",
+              "property": "border-radius"
+            },
+            {
+              "name": "--c2-kbd--box-shadow",
+              "type": "box-shadow",
+              "default": "0 1px 0 #a1a1aa",
+              "part": "",
+              "property": "box-shadow"
+            },
+            {
+              "name": "--c2-kbd--font-family",
+              "type": "font-family",
+              "default": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+              "part": "",
+              "property": "font-family"
+            },
+            {
+              "name": "--c2-kbd--font-size",
+              "type": "font-size",
+              "default": "12px",
+              "part": "",
+              "property": "font-size"
+            },
+            {
+              "name": "--c2-kbd--font-weight",
+              "type": "font-weight",
+              "default": "500",
+              "part": "",
+              "property": "font-weight"
+            },
+            {
+              "name": "--c2-kbd--line-height",
+              "type": "line-height",
+              "default": "1",
+              "part": "",
+              "property": "line-height"
+            },
+            {
+              "name": "--c2-kbd--letter-spacing",
+              "type": "pixel",
+              "default": "0.01em",
+              "part": "",
+              "property": "letter-spacing"
+            },
+            {
+              "name": "--c2-kbd--text-transform",
+              "type": "text-transform",
+              "default": "none",
+              "part": "",
+              "property": "text-transform"
+            }
+          ]
+        }
+      ],
+      "composition": {
+        "internal": [],
+        "slotted": [],
+        "usedBy": []
+      },
+      "install": {
+        "npm": "npm install @c2n/kbd @c2n/theme",
+        "import": "import '@c2n/kbd'",
+        "importClass": "import { Kbd } from '@c2n/kbd'"
+      },
+      "examples": [],
+      "hasGallery": false
+    },
     "label": {
       "id": "label",
       "package": "@c2n/label",
@@ -19053,6 +19205,7 @@
     "c2-details": "details",
     "c2-dropdown-list": "dropdown-list",
     "c2-icon-button": "icon-button",
+    "c2-kbd": "kbd",
     "c2-label": "label",
     "c2-link-button": "link-button",
     "c2-list": "list",
@@ -19101,6 +19254,7 @@
     "@c2n/dropdown-list": "dropdown-list",
     "@c2n/feather-icons": "feather-icons",
     "@c2n/icon-button": "icon-button",
+    "@c2n/kbd": "kbd",
     "@c2n/label": "label",
     "@c2n/link-button": "link-button",
     "@c2n/list": "list",

@@ -1,6 +1,6 @@
 {
   "name": "@c2n/{{dashCase name}}",
-  "version": "{{pkg 'version'}}",
+  "version": "{{packageVersion}}",
   "type": "module",
   "main": "dist/{{dashCase name}}.js",
   "exports": {
@@ -24,7 +24,7 @@
     "build": { "dependencies": ["type-check"], "command": "vite build" }
   },
   "dependencies": {
-    "@c2n/core": "{{pkg 'version'}}",
+    "@c2n/core": "{{packageVersion}}",
     "lit": "3.3.3"
   },
   "devDependencies": { "@c2n/config": "*" },

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kbd</title>
+    <script type="module" src="/src/kbd.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        margin: 0;
+        padding: 32px;
+        font: 14px system-ui;
+        color: #18181b;
+      }
+      section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .dark {
+        --c2-kbd--background-color: #18181b;
+        --c2-kbd--color: #fafafa;
+        --c2-kbd--border: 1px solid #3f3f46;
+        --c2-kbd--box-shadow: 0 1px 0 #09090b;
+      }
+    </style>
+  </head>
+  <body>
+    <section>Open search <c2-kbd>⌘ K</c2-kbd></section>
+    <section>Save changes <c2-kbd>Ctrl + S</c2-kbd></section>
+    <section>Dark key <c2-kbd class="dark">Enter</c2-kbd></section>
+  </body>
+</html>

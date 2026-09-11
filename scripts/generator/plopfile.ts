@@ -1,4 +1,10 @@
 import { NodePlopAPI } from 'plop'
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+const { version: packageVersion } = JSON.parse(readFileSync(resolve(repositoryRoot, 'lerna.json'), 'utf8')) as { version: string }
 
 export default function (plop: NodePlopAPI) {
   plop.setGenerator('wc', {
@@ -24,6 +30,7 @@ export default function (plop: NodePlopAPI) {
       const packages = isNpmPackage ? 'packages/components' : 'open-packages'
       const demo_content_folder = isNpmPackage ? 'components' : 'oepn-components'
       const templateData = data as Record<string, unknown>
+      templateData.packageVersion = packageVersion
       templateData.coreBuildDep = isNpmPackage ? '../../core:build' : '../../packages/core:build'
       templateData.cemPluginPath = isNpmPackage ? '../../../scripts/cem-plugin-customize/index' : '../../scripts/cem-plugin-customize/index'
       const actions = isNpmPackage

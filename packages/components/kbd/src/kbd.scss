@@ -1,0 +1,57 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-kbd,
+  $theme: (
+    min-width: 24px,
+    height: 24px,
+    padding-left: 6px,
+    padding-right: 6px,
+    gap: 4px,
+    background-color: #f4f4f5,
+    color: #3f3f46,
+    border: 1px solid #d4d4d8,
+    border-radius: 5px,
+    box-shadow: 0 1px 0 #a1a1aa,
+    font-family: ui-monospace SFMono-Regular Menlo Monaco Consolas monospace,
+    font-size: 12px,
+    font-weight: 500,
+    line-height: 1,
+    letter-spacing: 0.01em,
+    text-transform: none,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex: none;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: css.cssVar(min-width);
+  height: css.cssVar(height);
+  margin: 0;
+  padding-left: css.cssVar(padding-left);
+  padding-right: css.cssVar(padding-right);
+  gap: css.cssVar(gap);
+  background-color: css.cssVar(background-color);
+  color: css.cssVar(color);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  line-height: css.cssVar(line-height);
+  letter-spacing: css.cssVar(letter-spacing);
+  text-transform: css.cssVar(text-transform);
+  white-space: nowrap;
+  user-select: none;
+}

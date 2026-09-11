@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/kbd:build",
         "../../components/table:build",
         "../../components/copy-button:build",
         "../../components/textarea:build",
