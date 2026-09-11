@@ -4,12 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-`@c2n/web-components` is an npm-workspaces monorepo of Lit 3 web components. Each component is its own publishable package (`@c2n/<name>`, all versioned together by Lerna at the root `lerna.json` version). Components are registered as custom elements with the `c2-` tag prefix. There are no tests in this repo — verification is done via each package's Vite dev harness and the Astro UI app in `apps/ui`.
+`@c2n/web-components` is an npm-workspaces monorepo of Lit 3 web components. Each component is its own publishable package (`@c2n/<name>`, all versioned together by Lerna at the root `lerna.json` version). Components are registered as custom elements with the `c2-` tag prefix. Component browser tests use Playwright with one shared Vite server; suites live in each package's `test/` directory. See `tests/README.md`.
 
 ## Commands
 
 ```bash
 npm install                       # root install wires all workspaces
+
+npm test                         # changed component browser tests in Chromium
+npm run test:all                  # all components in Chromium, Firefox and WebKit
+npm run test:type-check           # type-check test infrastructure and scenarios
 
 npm run build                     # wireit: type-check + vite build for every component package
 npm run build -w packages/components/checkbox  # build one package

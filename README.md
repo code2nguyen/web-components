@@ -52,7 +52,7 @@ npm run dev -w packages/components/checkbox
 ```bash
 npx playwright install chromium # first run, or after a Playwright upgrade
 npm run test:button             # focused button suite in Chromium
-npm test                       # all component suites in Chromium
+npm test                       # changed component suites in Chromium
 npm run test:all                # Chromium, Firefox and WebKit (install all browsers first)
 ```
 

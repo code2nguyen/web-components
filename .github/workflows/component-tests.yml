@@ -3,7 +3,7 @@ name: Component tests
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:
@@ -22,6 +22,8 @@ jobs:
         browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -29,7 +31,14 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps ${{ matrix.browser }}
       - run: npm run test:type-check
-      - run: npm run test:all -- --project=${{ matrix.browser }}
+      - name: Test changed component packages
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          COMPONENT_TEST_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: npm run test:changed -- --project=${{ matrix.browser }}
+      - name: Test all component packages
+        if: github.event_name == 'workflow_dispatch'
+        run: npm run test:all -- --project=${{ matrix.browser }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

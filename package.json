@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "playwright test --project=chromium",
+    "test": "node scripts/run-changed-component-tests.mjs --project=chromium",
+    "test:changed": "node scripts/run-changed-component-tests.mjs",
+    "test:changed:unit": "node --test scripts/run-changed-component-tests.test.mjs",
     "test:button": "playwright test packages/components/button/test --project=chromium",
     "test:all": "playwright test",
     "test:serve": "vite --config tests/vite.config.ts",
