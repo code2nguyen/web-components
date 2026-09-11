@@ -43,3 +43,31 @@ For keyboard navigation, destructure the shared `tab` fixture and use `tab()` / 
 `component-tests.yml` runs on pull requests and pushes to `develop` or `main`, with one job per browser. CI fetches history and compares the change with the event's base commit, so it runs only affected package suites even after changes are committed. Manual workflow runs execute the complete suite. Each browser job uploads its report and failure traces for seven days. Retries are limited to one in CI, and focused tests (`test.only`) fail CI.
 
 Selection is package-based: changing Button runs Button, and changing Button plus Select runs both. Shared inputs run everything rather than trying to infer every transitive consumer. At larger scale, distribute manual full-suite runs using Playwright's `--shard=1/4` and corresponding jobs. Measure timings before increasing workers or sharding.
+
+## Benchmarks
+
+Two different things guard table performance, and they are deliberately separate.
+
+`table.perf.spec.ts` runs with every other suite, on all three engines. It asserts _cost_, never wall-clock: a
+quarter of a million rows must produce exactly as many DOM elements as a thousand, scrolling must not grow that
+window, and a realtime row update must reuse every rendered row element instead of rebuilding the body. Those hold
+on any machine, so they can fail the build. Turning virtualization off in the harness fails all six.
+
+`table.bench.spec.ts` measures wall-clock and is skipped unless `C2_BENCH` is set, because the numbers belong to the
+machine that produced them:
+
+```bash
+npm run bench:table            # measure, and compare against the recorded baseline
+npm run bench:table:baseline   # record the current numbers as the new baseline
+C2_BENCH_REPEATS=15 npm run bench:table   # more samples on a noisy machine
+```
+
+Each case reports the median of seven runs in milliseconds of table work — from the change, through Lit's render, to
+the layout it forces, measured in the page so no driver round-trip is included. The run prints a comparison with
+`packages/components/table/test/bench/baseline.json`, writes `test-results/table-bench.json`, and fails when a metric
+is more than 2.5x its baseline (`C2_BENCH_TOLERANCE` overrides). The tolerance is wide on purpose: this catches a
+regression that changes the shape of the work, not the noise between two runs. Metrics whose baseline is under half a
+millisecond are reported but not gated, since `performance.now()` is quantized to about a tenth of one.
+
+Re-record the baseline only once a change is understood, and commit it in the same change, so the next run compares
+against the version it is meant to.

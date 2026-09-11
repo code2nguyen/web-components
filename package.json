@@ -12,6 +12,8 @@
     "test:serve": "vite --config tests/vite.config.ts",
     "test:type-check": "tsc -p tests/tsconfig.json",
     "test:report": "playwright show-report",
+    "bench:table": "C2_BENCH=1 playwright test packages/components/table/test/table.bench.spec.ts --project=chromium --workers=1",
+    "bench:table:baseline": "C2_BENCH_UPDATE=1 C2_BENCH=1 playwright test packages/components/table/test/table.bench.spec.ts --project=chromium --workers=1",
     "prepare": "husky",
     "lint": "wireit",
     "lint:check": "wireit",

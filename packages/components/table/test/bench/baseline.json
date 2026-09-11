@@ -1,0 +1,12 @@
+{
+  "recordedOn": "2026-09-11",
+  "metrics": {
+    "mount.small": 0.8,
+    "mount.huge": 0.9,
+    "patch.huge": 0.7,
+    "stream100.huge": 34.6,
+    "replace.huge": 1.4,
+    "scroll.huge": 16.6,
+    "sort.huge": 137.5
+  }
+}
