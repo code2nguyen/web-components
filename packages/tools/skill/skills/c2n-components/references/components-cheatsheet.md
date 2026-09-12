@@ -162,6 +162,33 @@ Anchored popup built on the browser Popover API, positioned with floating-ui. Pa
 - Events: `toggle`, `beforetoggle`
 - Key variables (5 total): `--c2-overlay--transition-duration` = `150ms` (→ `--c2-theme--motion-scale`), `--c2-overlay__backdrop--background` = `transparent`, `--c2-overlay--viewport-padding` = `8px`, `--c2-overlay--offset-y` = `8px`, `--c2-overlay--offset-x` = `0px`
 
+### Progress — `c2-progress`
+
+Linear progress bar, indeterminate or filling to a value, with an optional label and count. Package `@c2n/progress`. Register: `import '@c2n/progress'`.
+
+- Attributes: `value` (number | undefined), `max` (number), `label` (string), `show-value` (boolean)
+- Slots: `default`, `value`
+- Key variables (13 total): `--c2-progress__track--background-color` = `#e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-progress__indicator--background-color` = `#0265dc` (→ `--c2-theme--color-primary`), `--c2-progress__label--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-progress__value--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-progress--border-radius` = `999px` (→ `--c2-theme--radius-full`), `--c2-progress__label--font-size` = `14px` (→ `--c2-theme--font-size-md`), `--c2-progress__value--font-size` = `14px` (→ `--c2-theme--font-size-md`), `--c2-progress__value--font-weight` = `500` (→ `--c2-theme--font-weight-medium`)
+- Presets: Hairline, Thick, Success, Danger, Slow
+
+### Sheet — `c2-sheet`
+
+Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it. Package `@c2n/sheet`. Register: `import '@c2n/sheet'`.
+
+- Attributes: `open` (boolean), `side` (SheetSide), `label` (string | undefined), `no-backdrop-close` (boolean), `no-escape` (boolean), `hide-close` (boolean), `no-scroll-lock` (boolean)
+- Slots: `default`, `title`, `footer`, `close-icon`
+- Events: `open`, `close`, `cancel`
+- Key variables (38 total): `--c2-sheet--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-sheet--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-sheet__close--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-sheet__backdrop--background` = `rgba(9, 9, 11, 0.45)` (→ `--c2-theme--color-scrim`), `--c2-sheet__close--border-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-sheet__header--font-weight` = `600` (→ `--c2-theme--font-weight-semibold`), `--c2-sheet__body--font-size` = `14px` (→ `--c2-theme--font-size-md`), `--c2-sheet__close__hover--background` = `#f4f4f5` (→ `--c2-theme--color-surface-container`)
+- Presets: Wide, Rounded, Divided, Frosted, Instant
+
+### Skeleton — `c2-skeleton`
+
+Placeholder block standing in for content that has not arrived, in three shapes and three animations. Package `@c2n/skeleton`. Register: `import '@c2n/skeleton'`.
+
+- Attributes: `variant` (SkeletonVariant), `animation` (SkeletonAnimation), `lines` (number), `label` (string)
+- Key variables (10 total): `--c2-skeleton--background-color` = `#e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-skeleton--border-radius` = `4px` (→ `--c2-theme--radius-sm`), `--c2-skeleton--animation-duration` = `1.6s` (→ `--c2-theme--motion-scale`), `--c2-skeleton__sheen--color` = `rgba(255, 255, 255, 0.55)`, `--c2-skeleton--height` = `16px`, `--c2-skeleton__circle--size` = `40px`, `--c2-skeleton--width` = `100%`, `--c2-skeleton__pulse--opacity` = `0.45`
+- Presets: Media, Button, Tight, Subtle, Slow
+
 ### Spinner — `c2-spinner`
 
 Circular progress indicator, indeterminate or showing a value, with optional text. Package `@c2n/spinner`. Register: `import '@c2n/spinner'`.

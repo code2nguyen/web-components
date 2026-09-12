@@ -10819,6 +10819,338 @@
       ],
       "hasGallery": false
     },
+    "progress": {
+      "id": "progress",
+      "package": "@c2n/progress",
+      "title": "Progress",
+      "description": "Linear progress bar, indeterminate or filling to a value, with an optional label and count.",
+      "intro": "`c2-progress` is a bar that fills as work completes. Without a `value` its indicator sweeps the track indefinitely; give it a `value` (out of `max`, 100 by default) and it fills from the start edge and animates between values. Text in the default slot labels the bar and doubles as its accessible name, `show-value` prints the percentage on the opposite side, and the `value` slot replaces that text when you are counting steps or megabytes instead. It is a `progressbar` for assistive technology, with `aria-valuenow` when determinate. Track and indicator are two plain boxes, so height, radius, colours and speed are all variables.",
+      "category": "Feedback",
+      "status": "stable",
+      "docsUrl": "https://code2nguyen.github.io/web-components/components/progress",
+      "elements": [
+        {
+          "tag": "c2-progress",
+          "className": "Progress",
+          "modulePath": "@c2n/progress",
+          "description": "Linear progress bar. Without a `value` the indicator slides across the track indefinitely; with one it fills the\ntrack from the start edge and animates between values. Text in the default slot labels the bar and doubles as its\naccessible name, and `show-value` adds the percentage on the opposite side — override that text with the `value`\nslot to count something other than percent. Track and indicator are two plain boxes, so height, radius, colours\nand speed are all variables. Use `c2-spinner` when the wait has no natural width to fill.",
+          "attributes": [
+            {
+              "name": "value",
+              "type": "number | undefined",
+              "default": "undefined",
+              "description": "Progress between `0` and `max`. Leave unset for an indeterminate bar."
+            },
+            {
+              "name": "max",
+              "type": "number",
+              "default": "100",
+              "description": "Value that fills the whole track."
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "default": "''",
+              "description": "Accessible name when nothing is slotted. Defaults to \"Loading\"."
+            },
+            {
+              "name": "show-value",
+              "type": "boolean",
+              "default": "false",
+              "description": "Show the completed percentage beside the label. Always on when the `value` slot has content."
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "Label shown above the track (e.g. \"Uploading files\"). Also used as the accessible name."
+            },
+            {
+              "name": "value",
+              "description": "Replaces the percentage shown next to the label, for counts such as \"3 of 5\" or \"1.2 of 4 MB\"."
+            }
+          ],
+          "events": [],
+          "cssProperties": [
+            {
+              "name": "--c2-progress--height",
+              "type": "pixel",
+              "default": "8px",
+              "part": "",
+              "property": "height",
+              "description": "Thickness of the track and the indicator."
+            },
+            {
+              "name": "--c2-progress--width",
+              "type": "pixel",
+              "default": "100%",
+              "part": "",
+              "property": "width",
+              "description": "Width of the bar; the host is a block by default."
+            },
+            {
+              "name": "--c2-progress--border-radius",
+              "type": "border-radius",
+              "default": "999px",
+              "part": "",
+              "property": "border-radius",
+              "token": "--c2-theme--radius-full",
+              "description": "Rounding of both the track and the indicator."
+            },
+            {
+              "name": "--c2-progress__track--background-color",
+              "type": "color",
+              "default": "#e4e4e7",
+              "part": "track",
+              "property": "background-color",
+              "token": "--c2-theme--color-outline-variant",
+              "description": "Colour of the unfilled track."
+            },
+            {
+              "name": "--c2-progress__indicator--background-color",
+              "type": "color",
+              "default": "#0265dc",
+              "part": "indicator",
+              "property": "background-color",
+              "token": "--c2-theme--color-primary",
+              "description": "Colour of the filled part."
+            },
+            {
+              "name": "--c2-progress--animation-duration",
+              "type": "time",
+              "default": "1.4s",
+              "part": "",
+              "property": "animation-duration",
+              "token": "--c2-theme--motion-scale",
+              "description": "One indeterminate cycle; the determinate fill takes half of it."
+            },
+            {
+              "name": "--c2-progress--gap",
+              "type": "pixel",
+              "default": "8px",
+              "part": "",
+              "property": "gap",
+              "description": "Space between the label row and the track."
+            },
+            {
+              "name": "--c2-progress__label--color",
+              "type": "color",
+              "default": "#71717a",
+              "part": "label",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
+            },
+            {
+              "name": "--c2-progress__label--font-size",
+              "type": "font-size",
+              "default": "14px",
+              "part": "label",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-md"
+            },
+            {
+              "name": "--c2-progress__label--font-weight",
+              "type": "font-weight",
+              "part": "label",
+              "property": "font-weight"
+            },
+            {
+              "name": "--c2-progress__value--color",
+              "type": "color",
+              "default": "#18181b",
+              "part": "value",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-progress__value--font-size",
+              "type": "font-size",
+              "default": "14px",
+              "part": "value",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-md"
+            },
+            {
+              "name": "--c2-progress__value--font-weight",
+              "type": "font-weight",
+              "default": "500",
+              "part": "value",
+              "property": "font-weight",
+              "token": "--c2-theme--font-weight-medium"
+            }
+          ]
+        }
+      ],
+      "composition": {
+        "internal": [],
+        "slotted": [],
+        "usedBy": []
+      },
+      "install": {
+        "npm": "npm install @c2n/progress @c2n/theme",
+        "import": "import '@c2n/progress'",
+        "importClass": "import { Progress } from '@c2n/progress'"
+      },
+      "presets": {
+        "html": "<c2-progress value=\"60\" show-value>Uploading files</c2-progress>",
+        "items": [
+          {
+            "name": "Hairline",
+            "css": {
+              "--c2-progress--height": "3px",
+              "--c2-progress--border-radius": "0"
+            }
+          },
+          {
+            "name": "Thick",
+            "css": {
+              "--c2-progress--height": "16px",
+              "--c2-progress--border-radius": "8px"
+            }
+          },
+          {
+            "name": "Success",
+            "css": {
+              "--c2-progress__indicator--background-color": "#16a34a",
+              "--c2-progress__track--background-color": "#dcfce7"
+            }
+          },
+          {
+            "name": "Danger",
+            "css": {
+              "--c2-progress__indicator--background-color": "#dc2626",
+              "--c2-progress__track--background-color": "#fee2e2",
+              "--c2-progress__value--color": "#dc2626"
+            }
+          },
+          {
+            "name": "Slow",
+            "css": {
+              "--c2-progress--animation-duration": "2.5s"
+            }
+          }
+        ]
+      },
+      "examples": [
+        {
+          "kind": "usage",
+          "label": "Indeterminate",
+          "html": "<div class=\"stack\">\n  <c2-progress></c2-progress>\n  <c2-progress>Uploading files</c2-progress>\n  <c2-progress label=\"Connecting\"></c2-progress>\n</div>",
+          "css": ".stack {\n  display: grid;\n  gap: 16px;\n  width: 260px;\n  max-width: 100%;\n}\n.card {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n  font-size: 13px;\n  color: #52525b;\n}\n.card strong {\n  color: #18181b;\n  font-weight: 500;\n}\n.success {\n  --c2-progress__indicator--background-color: #16a34a;\n  --c2-progress__track--background-color: #dcfce7;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-progress__indicator--background-color: #5aa3ff;\n  --c2-progress__track--background-color: #3f3f46;\n  --c2-progress__label--color: #a1a1aa;\n  --c2-progress__value--color: #fafafa;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Determinate",
+          "html": "<div class=\"stack\">\n  <c2-progress value=\"25\"></c2-progress>\n  <c2-progress value=\"60\" show-value>Uploading files</c2-progress>\n  <c2-progress class=\"success\" value=\"100\" show-value>Upload complete</c2-progress>\n</div>",
+          "css": ".stack {\n  display: grid;\n  gap: 16px;\n  width: 260px;\n  max-width: 100%;\n}\n.card {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n  font-size: 13px;\n  color: #52525b;\n}\n.card strong {\n  color: #18181b;\n  font-weight: 500;\n}\n.success {\n  --c2-progress__indicator--background-color: #16a34a;\n  --c2-progress__track--background-color: #dcfce7;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-progress__indicator--background-color: #5aa3ff;\n  --c2-progress__track--background-color: #3f3f46;\n  --c2-progress__label--color: #a1a1aa;\n  --c2-progress__value--color: #fafafa;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Heights",
+          "html": "<div class=\"stack\">\n  <c2-progress value=\"45\" style=\"--c2-progress--height: 3px; --c2-progress--border-radius: 0\"></c2-progress>\n  <c2-progress value=\"45\"></c2-progress>\n  <c2-progress value=\"45\" style=\"--c2-progress--height: 16px; --c2-progress--border-radius: 6px\"></c2-progress>\n</div>",
+          "css": ".stack {\n  display: grid;\n  gap: 16px;\n  width: 260px;\n  max-width: 100%;\n}\n.card {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n  font-size: 13px;\n  color: #52525b;\n}\n.card strong {\n  color: #18181b;\n  font-weight: 500;\n}\n.success {\n  --c2-progress__indicator--background-color: #16a34a;\n  --c2-progress__track--background-color: #dcfce7;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-progress__indicator--background-color: #5aa3ff;\n  --c2-progress__track--background-color: #3f3f46;\n  --c2-progress__label--color: #a1a1aa;\n  --c2-progress__value--color: #fafafa;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Counting something else",
+          "html": "<div class=\"stack\">\n  <c2-progress value=\"3\" max=\"5\">Onboarding<span slot=\"value\">Step 3 of 5</span></c2-progress>\n  <c2-progress value=\"1.2\" max=\"4\">Downloading<span slot=\"value\">1.2 / 4 MB</span></c2-progress>\n</div>",
+          "css": ".stack {\n  display: grid;\n  gap: 16px;\n  width: 260px;\n  max-width: 100%;\n}\n.card {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n  font-size: 13px;\n  color: #52525b;\n}\n.card strong {\n  color: #18181b;\n  font-weight: 500;\n}\n.success {\n  --c2-progress__indicator--background-color: #16a34a;\n  --c2-progress__track--background-color: #dcfce7;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-progress__indicator--background-color: #5aa3ff;\n  --c2-progress__track--background-color: #3f3f46;\n  --c2-progress__label--color: #a1a1aa;\n  --c2-progress__value--color: #fafafa;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "In context",
+          "html": "<div class=\"card\">\n  <strong>Deploying</strong>\n  <c2-progress value=\"60\" show-value>Building assets</c2-progress>\n</div>\n<div class=\"inverse\"><c2-progress value=\"72\" show-value>Syncing workspace</c2-progress></div>",
+          "css": ".stack {\n  display: grid;\n  gap: 16px;\n  width: 260px;\n  max-width: 100%;\n}\n.card {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n  font-size: 13px;\n  color: #52525b;\n}\n.card strong {\n  color: #18181b;\n  font-weight: 500;\n}\n.success {\n  --c2-progress__indicator--background-color: #16a34a;\n  --c2-progress__track--background-color: #dcfce7;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-progress__indicator--background-color: #5aa3ff;\n  --c2-progress__track--background-color: #3f3f46;\n  --c2-progress__label--color: #a1a1aa;\n  --c2-progress__value--color: #fafafa;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-progress value=\"60\"></c2-progress>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Indeterminate",
+          "section": "Presets",
+          "html": "<c2-progress></c2-progress>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Hairline",
+          "section": "Presets",
+          "html": "<c2-progress class=\"hairline\" value=\"60\"></c2-progress>",
+          "css": ".hairline {\n  --c2-progress--height: 3px;\n  --c2-progress--border-radius: 0;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Thick",
+          "section": "Presets",
+          "html": "<c2-progress class=\"thick\" value=\"60\"></c2-progress>",
+          "css": ".thick {\n  --c2-progress--height: 16px;\n  --c2-progress--border-radius: 8px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Square",
+          "section": "Presets",
+          "html": "<c2-progress class=\"square\" value=\"60\"></c2-progress>",
+          "css": ".square {\n  --c2-progress--height: 10px;\n  --c2-progress--border-radius: 0;\n  --c2-progress__track--background-color: #f4f4f5;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Labelled",
+          "section": "Presets",
+          "html": "<c2-progress value=\"60\" show-value>Uploading files</c2-progress>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Steps",
+          "section": "Presets",
+          "html": "<c2-progress class=\"steps\" value=\"3\" max=\"5\">Onboarding<span slot=\"value\">Step 3 of 5</span></c2-progress>",
+          "css": ".steps {\n  --c2-progress--height: 6px;\n  --c2-progress__label--color: #18181b;\n  --c2-progress__label--font-weight: 500;\n  --c2-progress__value--color: #71717a;\n  --c2-progress__value--font-size: 12px;\n  --c2-progress__value--font-weight: 400;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Success",
+          "section": "Presets",
+          "html": "<c2-progress class=\"success\" value=\"100\" show-value>Upload complete</c2-progress>",
+          "css": ".success {\n  --c2-progress__indicator--background-color: #16a34a;\n  --c2-progress__track--background-color: #dcfce7;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Warning",
+          "section": "Presets",
+          "html": "<c2-progress class=\"warning\">Retrying…</c2-progress>",
+          "css": ".warning {\n  --c2-progress__indicator--background-color: #f59e0b;\n  --c2-progress__track--background-color: #fef3c7;\n  --c2-progress--animation-duration: 2.4s;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Danger",
+          "section": "Presets",
+          "html": "<c2-progress class=\"danger\" value=\"92\" show-value>Storage used</c2-progress>",
+          "css": ".danger {\n  --c2-progress--height: 10px;\n  --c2-progress__indicator--background-color: #dc2626;\n  --c2-progress__track--background-color: #fee2e2;\n  --c2-progress__value--color: #dc2626;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Dark",
+          "section": "Presets",
+          "html": "<div class=\"dark\"><c2-progress value=\"72\" show-value>Syncing workspace</c2-progress></div>",
+          "css": ".dark {\n  width: 100%;\n  padding: 20px;\n  border-radius: 12px;\n  background: #18181b;\n  --c2-progress__indicator--background-color: #5aa3ff;\n  --c2-progress__track--background-color: #3f3f46;\n  --c2-progress__label--color: #a1a1aa;\n  --c2-progress__value--color: #fafafa;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Stacked",
+          "section": "Presets",
+          "html": "<div class=\"stacked\">\n  <c2-progress class=\"storage\" value=\"82\" show-value>Storage</c2-progress>\n  <c2-progress class=\"bandwidth\" value=\"34\" show-value>Bandwidth</c2-progress>\n</div>",
+          "css": ".stacked {\n  display: grid;\n  gap: 14px;\n  width: 100%;\n  --c2-progress--height: 6px;\n  --c2-progress__label--font-size: 13px;\n  --c2-progress__value--font-size: 13px;\n}\n.stacked .storage {\n  --c2-progress__indicator--background-color: #7c3aed;\n}\n.stacked .bandwidth {\n  --c2-progress__indicator--background-color: #0d9488;\n}"
+        },
+        {
+          "kind": "preview",
+          "label": "Preview",
+          "html": "<div style=\"display:grid;gap:12px;width:220px\">\n  <c2-progress value=\"72\" show-value>Uploading files</c2-progress>\n  <c2-progress style=\"--c2-progress--height:4px\"></c2-progress>\n</div>"
+        }
+      ],
+      "hasGallery": true
+    },
     "radio": {
       "id": "radio",
       "package": "@c2n/radio",
@@ -12878,6 +13210,544 @@
       ],
       "hasGallery": true
     },
+    "sheet": {
+      "id": "sheet",
+      "package": "@c2n/sheet",
+      "title": "Sheet",
+      "description": "Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.",
+      "intro": "`c2-sheet` is a dialog that spans one edge of the screen and slides in from it — filters, details, a form beside the record it edits. It is built on the native `<dialog>` like `c2-modal`, so focus is trapped and restored, the page behind is inert and covered by a backdrop, and Escape closes. `side` picks the edge (`right` by default), and `--c2-sheet--size` is the width of a left/right sheet or the height of a top/bottom one while the other axis fills the screen. Open it with the `open` attribute or `show()`, close it with `close(returnValue)`, the × button, a backdrop click or Escape — `hide-close`, `no-backdrop-close` and `no-escape` turn those off. The heading goes in `title` (it labels the sheet; use `label` when there is none), the content in the default slot, the actions in `footer`; only the body scrolls, so the header and footer stay put.",
+      "category": "Feedback",
+      "status": "stable",
+      "docsUrl": "https://code2nguyen.github.io/web-components/components/sheet",
+      "elements": [
+        {
+          "tag": "c2-sheet",
+          "className": "Sheet",
+          "modulePath": "@c2n/sheet",
+          "description": "Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it: filters,\ndetails, a form beside the record it edits. Built on the native `<dialog>` like `c2-modal`, so focus is trapped and\nrestored, the page behind is inert and covered by a backdrop, and Escape closes — but the panel spans its edge and\nslides in from it instead of being centred.\n\n`side` picks the edge (`right` by default). `--c2-sheet--size` is the width of a left/right sheet and the height of\na top/bottom one; the opposite axis always fills the screen. Open it with the `open` attribute or `show()`, close it\nwith `close(returnValue)`, the built-in close button, a click on the backdrop or Escape (each can be turned off).\nContent is split into a `title` slot, the body (default slot) and a `footer` slot for actions, and the body scrolls\non its own so the header and footer stay put in a full-height panel.\n\nUse `c2-modal` for a decision that blocks the page, and `c2-side-nav` for navigation that is part of the layout\nrather than a transient overlay.",
+          "attributes": [
+            {
+              "name": "open",
+              "type": "boolean",
+              "default": "false",
+              "description": "Open state. Setting it shows or closes the sheet."
+            },
+            {
+              "name": "side",
+              "type": "SheetSide",
+              "default": "'right'",
+              "description": "Edge the sheet is pinned to and slides in from."
+            },
+            {
+              "name": "label",
+              "type": "string | undefined",
+              "default": "undefined",
+              "description": "Accessible name when there is no `title` slot."
+            },
+            {
+              "name": "no-backdrop-close",
+              "type": "boolean",
+              "default": "false",
+              "description": "Keep the sheet open when the backdrop is clicked."
+            },
+            {
+              "name": "no-escape",
+              "type": "boolean",
+              "default": "false",
+              "description": "Ignore Escape."
+            },
+            {
+              "name": "hide-close",
+              "type": "boolean",
+              "default": "false",
+              "description": "Hide the built-in × button."
+            },
+            {
+              "name": "no-scroll-lock",
+              "type": "boolean",
+              "default": "false",
+              "description": "Leave the page scrollable while the sheet is open."
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "Body content."
+            },
+            {
+              "name": "title",
+              "description": "Heading shown in the header; the sheet is labelled by it."
+            },
+            {
+              "name": "footer",
+              "description": "Actions row (a flex row, see the `footer--*` variables)."
+            },
+            {
+              "name": "close-icon",
+              "description": "Replaces the default × icon of the close button."
+            }
+          ],
+          "events": [
+            {
+              "name": "open",
+              "type": "Event",
+              "description": "Fired after the sheet has been shown."
+            },
+            {
+              "name": "close",
+              "type": "CustomEvent<{ returnValue: string }>",
+              "description": "Fired after the sheet has closed; `detail.returnValue` is what `close()` received (`''` for Escape / backdrop / the × button)."
+            },
+            {
+              "name": "cancel",
+              "type": "Event",
+              "description": "Native, cancelable: fired on Escape before closing."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--c2-sheet--size",
+              "type": "pixel",
+              "default": "380px",
+              "part": "",
+              "property": "size",
+              "description": "Width of a `left`/`right` sheet, height of a `top`/`bottom` one. The other axis fills the screen."
+            },
+            {
+              "name": "--c2-sheet--background",
+              "type": "background",
+              "default": "#ffffff",
+              "part": "",
+              "property": "background",
+              "token": "--c2-theme--color-surface"
+            },
+            {
+              "name": "--c2-sheet--color",
+              "type": "color",
+              "default": "#18181b",
+              "part": "",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-sheet--border",
+              "type": "border",
+              "default": "none",
+              "part": "",
+              "property": "border"
+            },
+            {
+              "name": "--c2-sheet--border-radius",
+              "type": "border-radius",
+              "default": "0px",
+              "part": "",
+              "property": "border-radius",
+              "description": "Rounds the two corners facing the page; the edge stays square."
+            },
+            {
+              "name": "--c2-sheet--box-shadow",
+              "type": "box-shadow",
+              "default": "0 24px 60px rgba(0, 0, 0, 0.25)",
+              "part": "",
+              "property": "box-shadow",
+              "token": "--c2-theme--shadow-lg"
+            },
+            {
+              "name": "--c2-sheet--transition-duration",
+              "type": "time",
+              "default": "280ms",
+              "part": "",
+              "property": "transition-duration",
+              "token": "--c2-theme--motion-scale",
+              "description": "Slide in and out; `0ms` disables it."
+            },
+            {
+              "name": "--c2-sheet__header--padding-top",
+              "type": "padding",
+              "default": "20px",
+              "part": "header",
+              "property": "padding-top"
+            },
+            {
+              "name": "--c2-sheet__header--padding-right",
+              "type": "padding",
+              "default": "20px",
+              "part": "header",
+              "property": "padding-right"
+            },
+            {
+              "name": "--c2-sheet__header--padding-bottom",
+              "type": "padding",
+              "default": "0px",
+              "part": "header",
+              "property": "padding-bottom"
+            },
+            {
+              "name": "--c2-sheet__header--padding-left",
+              "type": "padding",
+              "default": "24px",
+              "part": "header",
+              "property": "padding-left"
+            },
+            {
+              "name": "--c2-sheet__header--font-size",
+              "type": "font-size",
+              "default": "17px",
+              "part": "header",
+              "property": "font-size"
+            },
+            {
+              "name": "--c2-sheet__header--font-weight",
+              "type": "font-weight",
+              "default": "600",
+              "part": "header",
+              "property": "font-weight",
+              "token": "--c2-theme--font-weight-semibold"
+            },
+            {
+              "name": "--c2-sheet__header--line-height",
+              "type": "line-height",
+              "default": "1.35",
+              "part": "header",
+              "property": "line-height"
+            },
+            {
+              "name": "--c2-sheet__header--border-bottom",
+              "type": "border",
+              "part": "header",
+              "property": "border-bottom",
+              "description": "Divider under the header; raise `header--padding-bottom` with it."
+            },
+            {
+              "name": "--c2-sheet__body--padding-top",
+              "type": "padding",
+              "default": "12px",
+              "part": "body",
+              "property": "padding-top"
+            },
+            {
+              "name": "--c2-sheet__body--padding-right",
+              "type": "padding",
+              "default": "24px",
+              "part": "body",
+              "property": "padding-right"
+            },
+            {
+              "name": "--c2-sheet__body--padding-bottom",
+              "type": "padding",
+              "default": "20px",
+              "part": "body",
+              "property": "padding-bottom"
+            },
+            {
+              "name": "--c2-sheet__body--padding-left",
+              "type": "padding",
+              "default": "24px",
+              "part": "body",
+              "property": "padding-left"
+            },
+            {
+              "name": "--c2-sheet__body--font-size",
+              "type": "font-size",
+              "default": "14px",
+              "part": "body",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-md"
+            },
+            {
+              "name": "--c2-sheet__body--line-height",
+              "type": "line-height",
+              "default": "1.6",
+              "part": "body",
+              "property": "line-height"
+            },
+            {
+              "name": "--c2-sheet__body--color",
+              "type": "color",
+              "part": "body",
+              "property": "color",
+              "description": "Defaults to the sheet colour."
+            },
+            {
+              "name": "--c2-sheet__footer--padding-top",
+              "type": "padding",
+              "default": "12px",
+              "part": "footer",
+              "property": "padding-top"
+            },
+            {
+              "name": "--c2-sheet__footer--padding-right",
+              "type": "padding",
+              "default": "24px",
+              "part": "footer",
+              "property": "padding-right"
+            },
+            {
+              "name": "--c2-sheet__footer--padding-bottom",
+              "type": "padding",
+              "default": "20px",
+              "part": "footer",
+              "property": "padding-bottom"
+            },
+            {
+              "name": "--c2-sheet__footer--padding-left",
+              "type": "padding",
+              "default": "24px",
+              "part": "footer",
+              "property": "padding-left"
+            },
+            {
+              "name": "--c2-sheet__footer--gap",
+              "type": "pixel",
+              "default": "8px",
+              "part": "footer",
+              "property": "gap"
+            },
+            {
+              "name": "--c2-sheet__footer--justify-content",
+              "type": "justify-content",
+              "default": "flex-end",
+              "part": "footer",
+              "property": "justify-content"
+            },
+            {
+              "name": "--c2-sheet__footer--border-top",
+              "type": "border",
+              "part": "footer",
+              "property": "border-top",
+              "description": "Divider above the footer; raise `footer--padding-top` with it."
+            },
+            {
+              "name": "--c2-sheet__close--size",
+              "type": "pixel",
+              "default": "32px",
+              "part": "close",
+              "property": "size"
+            },
+            {
+              "name": "--c2-sheet__close--icon-size",
+              "type": "pixel",
+              "default": "18px",
+              "part": "close",
+              "property": "icon-size"
+            },
+            {
+              "name": "--c2-sheet__close--border-radius",
+              "type": "border-radius",
+              "default": "8px",
+              "part": "close",
+              "property": "border-radius",
+              "token": "--c2-theme--radius-lg"
+            },
+            {
+              "name": "--c2-sheet__close--color",
+              "type": "color",
+              "default": "#71717a",
+              "part": "close",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
+            },
+            {
+              "name": "--c2-sheet__close__hover--background",
+              "type": "background",
+              "default": "#f4f4f5",
+              "part": "close",
+              "state": "hover",
+              "property": "background",
+              "token": "--c2-theme--color-surface-container"
+            },
+            {
+              "name": "--c2-sheet__close__hover--color",
+              "type": "color",
+              "default": "#18181b",
+              "part": "close",
+              "state": "hover",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-sheet__close__focus--outline",
+              "type": "outline",
+              "default": "2px solid rgba(2, 101, 220, 0.4)",
+              "part": "close",
+              "state": "focus",
+              "property": "outline",
+              "token": "--c2-theme--focus-ring"
+            },
+            {
+              "name": "--c2-sheet__backdrop--background",
+              "type": "background",
+              "default": "rgba(9, 9, 11, 0.45)",
+              "part": "backdrop",
+              "property": "background",
+              "token": "--c2-theme--color-scrim"
+            },
+            {
+              "name": "--c2-sheet__backdrop--backdrop-filter",
+              "type": "backdrop-filter",
+              "part": "backdrop",
+              "property": "backdrop-filter",
+              "description": "e.g. `blur(4px)`."
+            }
+          ]
+        }
+      ],
+      "composition": {
+        "internal": [],
+        "slotted": [],
+        "usedBy": []
+      },
+      "install": {
+        "npm": "npm install @c2n/sheet @c2n/theme",
+        "import": "import '@c2n/sheet'",
+        "importClass": "import { Sheet } from '@c2n/sheet'"
+      },
+      "presets": {
+        "html": "<c2-sheet open><span slot=\"title\">Filters</span><div>Panel content</div></c2-sheet>",
+        "items": [
+          {
+            "name": "Wide",
+            "css": {
+              "--c2-sheet--size": "560px"
+            }
+          },
+          {
+            "name": "Rounded",
+            "css": {
+              "--c2-sheet--border-radius": "14px"
+            }
+          },
+          {
+            "name": "Divided",
+            "css": {
+              "--c2-sheet__header--padding-bottom": "14px",
+              "--c2-sheet__header--border-bottom": "1px solid #e4e4e7",
+              "--c2-sheet__footer--border-top": "1px solid #e4e4e7"
+            }
+          },
+          {
+            "name": "Frosted",
+            "css": {
+              "--c2-sheet__backdrop--background": "rgba(255, 255, 255, 0.4)",
+              "--c2-sheet__backdrop--backdrop-filter": "blur(6px)"
+            }
+          },
+          {
+            "name": "Instant",
+            "css": {
+              "--c2-sheet--transition-duration": "0ms"
+            }
+          }
+        ]
+      },
+      "examples": [
+        {
+          "kind": "usage",
+          "label": "Sides",
+          "html": "<c2-button onclick=\"document.getElementById('sh-right').show()\">Right</c2-button>\n<c2-sheet id=\"sh-right\" class=\"sheet\">\n  <span slot=\"title\">Filters</span>\n  <p>The default edge: a panel that complements the page without replacing it.</p>\n</c2-sheet>\n\n<c2-button onclick=\"document.getElementById('sh-left').show()\">Left</c2-button>\n<c2-sheet id=\"sh-left\" side=\"left\" class=\"sheet\">\n  <span slot=\"title\">Navigation</span>\n  <p>Slides in from the left.</p>\n</c2-sheet>\n\n<c2-button onclick=\"document.getElementById('sh-top').show()\">Top</c2-button>\n<c2-sheet id=\"sh-top\" side=\"top\" class=\"sheet short\">\n  <span slot=\"title\">Announcement</span>\n  <p>Full width, pinned to the top; `--c2-sheet--size` is its height.</p>\n</c2-sheet>\n\n<c2-button onclick=\"document.getElementById('sh-bottom').show()\">Bottom</c2-button>\n<c2-sheet id=\"sh-bottom\" side=\"bottom\" class=\"sheet short\">\n  <span slot=\"title\">Share</span>\n  <p>The phone pattern: a bottom sheet for actions on the current screen.</p>\n</c2-sheet>",
+          "css": ".sheet p {\n  margin: 0 0 12px;\n}\n.ghost {\n  --c2-button__container--background-color: transparent;\n  --c2-button__container--color: #18181b;\n  --c2-button__container--border: 1px solid #d4d4d8;\n  --c2-button__container__hover--background-color: #f4f4f5;\n}\n.rounded {\n  --c2-sheet--border-radius: 14px;\n}\n.divided {\n  --c2-sheet__header--padding-bottom: 14px;\n  --c2-sheet__header--border-bottom: 1px solid #e4e4e7;\n  --c2-sheet__footer--border-top: 1px solid #e4e4e7;\n}\n.short {\n  --c2-sheet--size: 280px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "With actions",
+          "html": "<c2-button onclick=\"document.getElementById('sh-form').show()\">Edit record</c2-button>\n<c2-sheet id=\"sh-form\" class=\"sheet divided\">\n  <span slot=\"title\">Edit record</span>\n  <p>Put the form in the body and the actions in the footer. Only the body scrolls, so Save never leaves the screen.</p>\n  <c2-button slot=\"footer\" class=\"ghost\" onclick=\"this.closest('c2-sheet').close('cancel')\">Cancel</c2-button>\n  <c2-button slot=\"footer\" onclick=\"this.closest('c2-sheet').close('saved')\">Save</c2-button>\n</c2-sheet>",
+          "css": ".sheet p {\n  margin: 0 0 12px;\n}\n.ghost {\n  --c2-button__container--background-color: transparent;\n  --c2-button__container--color: #18181b;\n  --c2-button__container--border: 1px solid #d4d4d8;\n  --c2-button__container__hover--background-color: #f4f4f5;\n}\n.rounded {\n  --c2-sheet--border-radius: 14px;\n}\n.divided {\n  --c2-sheet__header--padding-bottom: 14px;\n  --c2-sheet__header--border-bottom: 1px solid #e4e4e7;\n  --c2-sheet__footer--border-top: 1px solid #e4e4e7;\n}\n.short {\n  --c2-sheet--size: 280px;\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Themed",
+          "html": "<c2-button onclick=\"document.getElementById('sh-rounded').show()\">Rounded</c2-button>\n<c2-sheet id=\"sh-rounded\" class=\"sheet rounded\">\n  <span slot=\"title\">Rounded</span>\n  <p>`--c2-sheet--border-radius` rounds the two corners facing the page; the edge stays square.</p>\n</c2-sheet>\n\n<c2-button onclick=\"document.getElementById('sh-wide').show()\">Wide</c2-button>\n<c2-sheet id=\"sh-wide\" class=\"sheet\" style=\"--c2-sheet--size: 560px\">\n  <span slot=\"title\">Wide</span>\n  <p>A detail panel that needs room for a table or a diff.</p>\n</c2-sheet>",
+          "css": ".sheet p {\n  margin: 0 0 12px;\n}\n.ghost {\n  --c2-button__container--background-color: transparent;\n  --c2-button__container--color: #18181b;\n  --c2-button__container--border: 1px solid #d4d4d8;\n  --c2-button__container__hover--background-color: #f4f4f5;\n}\n.rounded {\n  --c2-sheet--border-radius: 14px;\n}\n.divided {\n  --c2-sheet__header--padding-bottom: 14px;\n  --c2-sheet__header--border-bottom: 1px solid #e4e4e7;\n  --c2-sheet__footer--border-top: 1px solid #e4e4e7;\n}\n.short {\n  --c2-sheet--size: 280px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Right",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-right').show()\">Open</c2-button>\n<c2-sheet id=\"sg-right\">\n  <span slot=\"title\">Filters</span>\n  <div>The default edge, 380px wide.</div>\n</c2-sheet>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Left",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-left').show()\">Open</c2-button>\n<c2-sheet id=\"sg-left\" side=\"left\">\n  <span slot=\"title\">Navigation</span>\n  <div>Slides in from the left.</div>\n</c2-sheet>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Top",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-top').show()\">Open</c2-button>\n<c2-sheet id=\"sg-top\" class=\"sg-top\" side=\"top\">\n  <span slot=\"title\">Announcement</span>\n  <div>Full width; the size is its height.</div>\n</c2-sheet>",
+          "css": ".sg-top {\n  --c2-sheet--size: 260px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Bottom sheet",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-bottom').show()\">Open</c2-button>\n<c2-sheet id=\"sg-bottom\" class=\"sg-bottom\" side=\"bottom\">\n  <span slot=\"title\">Share</span>\n  <div>The phone pattern, with rounded top corners.</div>\n</c2-sheet>",
+          "css": ".sg-bottom {\n  --c2-sheet--size: 320px;\n  --c2-sheet--border-radius: 16px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Wide",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-wide').show()\">Open</c2-button>\n<c2-sheet id=\"sg-wide\" class=\"sg-wide\">\n  <span slot=\"title\">Record details</span>\n  <div>Room for a table or a diff.</div>\n</c2-sheet>",
+          "css": ".sg-wide {\n  --c2-sheet--size: 560px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Rounded",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-rounded').show()\">Open</c2-button>\n<c2-sheet id=\"sg-rounded\" class=\"sg-rounded\">\n  <span slot=\"title\">Rounded</span>\n  <div>The two corners facing the page are rounded; the edge stays square.</div>\n</c2-sheet>",
+          "css": ".sg-rounded {\n  --c2-sheet--border-radius: 14px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Divided",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-divided').show()\">Open</c2-button>\n<c2-sheet id=\"sg-divided\" class=\"sg-divided\">\n  <span slot=\"title\">Edit record</span>\n  <div>Rules under the header and above the footer.</div>\n  <c2-button slot=\"footer\" onclick=\"this.closest('c2-sheet').close()\">Save</c2-button>\n</c2-sheet>",
+          "css": ".sg-divided {\n  --c2-sheet__header--padding-bottom: 14px;\n  --c2-sheet__header--border-bottom: 1px solid #e4e4e7;\n  --c2-sheet__footer--border-top: 1px solid #e4e4e7;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Dark",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-dark').show()\">Open</c2-button>\n<c2-sheet id=\"sg-dark\" class=\"sg-dark\">\n  <span slot=\"title\">Dark</span>\n  <div>Recoloured through its own variables.</div>\n</c2-sheet>",
+          "css": ".sg-dark {\n  --c2-sheet--background: #18181b;\n  --c2-sheet--color: #fafafa;\n  --c2-sheet__close--color: #a1a1aa;\n  --c2-sheet__close__hover--background: #27272a;\n  --c2-sheet__close__hover--color: #fafafa;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Frosted",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-frosted').show()\">Open</c2-button>\n<c2-sheet id=\"sg-frosted\" class=\"sg-frosted\">\n  <span slot=\"title\">Frosted</span>\n  <div>The page blurs behind the panel instead of dimming.</div>\n</c2-sheet>",
+          "css": ".sg-frosted {\n  --c2-sheet__backdrop--background: rgba(255, 255, 255, 0.4);\n  --c2-sheet__backdrop--backdrop-filter: blur(6px);\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Floating",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-floating').show()\">Open</c2-button>\n<c2-sheet id=\"sg-floating\" class=\"sg-floating\">\n  <span slot=\"title\">Floating</span>\n  <div>A deeper shadow lifts the panel off the page.</div>\n</c2-sheet>",
+          "css": ".sg-floating {\n  --c2-sheet--border-radius: 16px;\n  --c2-sheet--box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32);\n  --c2-sheet--size: 340px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Instant",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-instant').show()\">Open</c2-button>\n<c2-sheet id=\"sg-instant\" class=\"sg-instant\">\n  <span slot=\"title\">Instant</span>\n  <div>No slide, for interfaces that prefer no motion.</div>\n</c2-sheet>",
+          "css": ".sg-instant {\n  --c2-sheet--transition-duration: 0ms;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Bare",
+          "section": "Presets",
+          "html": "<c2-button onclick=\"document.getElementById('sg-bare').show()\">Open</c2-button>\n<c2-sheet id=\"sg-bare\" label=\"Preview\" hide-close no-backdrop-close>\n  <div>No header and no × button: the sheet is dismissed by its own action.</div>\n  <c2-button slot=\"footer\" onclick=\"this.closest('c2-sheet').close()\">Done</c2-button>\n</c2-sheet>"
+        },
+        {
+          "kind": "preview",
+          "label": "Preview",
+          "html": "<div class=\"preview-row\">\n  <c2-button onclick=\"this.nextElementSibling.show()\">Open sheet</c2-button>\n  <c2-sheet>\n    <span slot=\"title\">Filters</span>\n    <div style=\"font-size:13px;color:#71717a\">A panel pinned to the edge of the screen.</div>\n    <c2-button slot=\"footer\" onclick=\"this.closest('c2-sheet').close()\">Apply</c2-button>\n  </c2-sheet>\n</div>"
+        }
+      ],
+      "hasGallery": true
+    },
     "side-nav": {
       "id": "side-nav",
       "package": "@c2n/side-nav",
@@ -13377,6 +14247,299 @@
           "kind": "preview",
           "label": "Preview",
           "html": "<div style=\"position:relative;width:240px;height:110px;border:1px solid var(--site-color-outline-variant);border-radius:8px;overflow:hidden\">\n  <c2-side-nav opened style=\"height:100%;--c2-side-nav__open--width:88px;--c2-side-nav--padding-top:10px;--c2-side-nav--padding-right:8px;--c2-side-nav--padding-bottom:10px;--c2-side-nav--padding-left:8px;--c2-side-nav--background-color:var(--site-color-surface-container-3);--c2-side-nav__divider--color:var(--site-color-outline-variant)\">\n    <div slot=\"side-nav-content\" style=\"font-size:13px;line-height:1.9;padding-left:4px\">Inbox<br>Drafts<br>Sent</div>\n    <div style=\"padding:12px;font-size:13px\">Main content</div>\n  </c2-side-nav>\n</div>"
+        }
+      ],
+      "hasGallery": true
+    },
+    "skeleton": {
+      "id": "skeleton",
+      "package": "@c2n/skeleton",
+      "title": "Skeleton",
+      "description": "Placeholder block standing in for content that has not arrived, in three shapes and three animations.",
+      "intro": "`c2-skeleton` holds the shape of content while it loads. Three `variant`s cover almost everything: `rect` (the default) for images, cards and buttons, `text` for copy — `lines` repeats it with a shorter last line, the way a paragraph ends — and `circle` for avatars. The `animation` is a `pulse` by default, `wave` for a highlight sweeping across the block, or `none` for a still one; reduced motion stops all three. A skeleton is decoration, so it stays out of the accessibility tree unless you give it a `label`.",
+      "category": "Feedback",
+      "status": "stable",
+      "docsUrl": "https://code2nguyen.github.io/web-components/components/skeleton",
+      "elements": [
+        {
+          "tag": "c2-skeleton",
+          "className": "Skeleton",
+          "modulePath": "@c2n/skeleton",
+          "description": "Placeholder block standing in for content that has not arrived. Three shapes: a `rect` (the default) for images,\ncards and buttons, `text` for one or more lines of copy, and `circle` (sized by its own variable) for avatars.\n`lines` repeats a text skeleton with a shorter last line, the way a paragraph ends. The `animation` is a `pulse`\nby default, `wave` for a sheen sweeping across it, or `none` for a still block; reduced motion stops all three.\n\nA skeleton is decoration, so it is hidden from assistive technology and the region it fills should carry\n`aria-busy=\"true\"` instead. Give one skeleton in a group a `label` to announce the wait itself.",
+          "attributes": [
+            {
+              "name": "variant",
+              "type": "SkeletonVariant",
+              "default": "'rect'",
+              "description": "Shape of the placeholder."
+            },
+            {
+              "name": "animation",
+              "type": "SkeletonAnimation",
+              "default": "'pulse'",
+              "description": "How the block animates while it waits."
+            },
+            {
+              "name": "lines",
+              "type": "number",
+              "default": "1",
+              "description": "Number of lines drawn by the `text` variant; the last one is shortened. Ignored by the other variants."
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "default": "''",
+              "description": "Announce the wait on this skeleton. Leave empty on the rest of a group so the message is not repeated."
+            }
+          ],
+          "slots": [],
+          "events": [],
+          "cssProperties": [
+            {
+              "name": "--c2-skeleton--width",
+              "type": "pixel",
+              "default": "100%",
+              "part": "",
+              "property": "width",
+              "description": "Width of the block. Ignored by `circle`, which sizes itself."
+            },
+            {
+              "name": "--c2-skeleton--height",
+              "type": "pixel",
+              "default": "16px",
+              "part": "",
+              "property": "height",
+              "description": "Height of the block, or of one line of a `text` skeleton."
+            },
+            {
+              "name": "--c2-skeleton--border-radius",
+              "type": "border-radius",
+              "default": "4px",
+              "part": "",
+              "property": "border-radius",
+              "token": "--c2-theme--radius-sm",
+              "description": "Rounding; `circle` overrides it with a full round."
+            },
+            {
+              "name": "--c2-skeleton--background-color",
+              "type": "color",
+              "default": "#e4e4e7",
+              "part": "",
+              "property": "background-color",
+              "token": "--c2-theme--color-outline-variant",
+              "description": "Colour of the block."
+            },
+            {
+              "name": "--c2-skeleton__sheen--color",
+              "type": "color",
+              "default": "rgba(255, 255, 255, 0.55)",
+              "part": "sheen",
+              "property": "color",
+              "description": "Highlight swept across a `wave` skeleton."
+            },
+            {
+              "name": "--c2-skeleton--animation-duration",
+              "type": "time",
+              "default": "1.6s",
+              "part": "",
+              "property": "animation-duration",
+              "token": "--c2-theme--motion-scale",
+              "description": "Length of one pulse or wave cycle."
+            },
+            {
+              "name": "--c2-skeleton__pulse--opacity",
+              "type": "opacity",
+              "default": "0.45",
+              "part": "pulse",
+              "property": "opacity",
+              "description": "Faintest point of the `pulse` animation."
+            },
+            {
+              "name": "--c2-skeleton--gap",
+              "type": "pixel",
+              "default": "8px",
+              "part": "",
+              "property": "gap",
+              "description": "Space between the lines of a `text` skeleton."
+            },
+            {
+              "name": "--c2-skeleton__last-line--width",
+              "type": "pixel",
+              "default": "60%",
+              "part": "last-line",
+              "property": "width",
+              "description": "Width of the final line when `lines` is more than one."
+            },
+            {
+              "name": "--c2-skeleton__circle--size",
+              "type": "pixel",
+              "default": "40px",
+              "part": "circle",
+              "property": "size",
+              "description": "Diameter of a `circle` skeleton; it sets both axes so it cannot go oval."
+            }
+          ]
+        }
+      ],
+      "composition": {
+        "internal": [],
+        "slotted": [],
+        "usedBy": []
+      },
+      "install": {
+        "npm": "npm install @c2n/skeleton @c2n/theme",
+        "import": "import '@c2n/skeleton'",
+        "importClass": "import { Skeleton } from '@c2n/skeleton'"
+      },
+      "presets": {
+        "html": "<c2-skeleton variant=\"text\" lines=\"3\"></c2-skeleton>",
+        "items": [
+          {
+            "name": "Media",
+            "css": {
+              "--c2-skeleton--height": "120px",
+              "--c2-skeleton--border-radius": "10px"
+            }
+          },
+          {
+            "name": "Button",
+            "css": {
+              "--c2-skeleton--width": "120px",
+              "--c2-skeleton--height": "36px",
+              "--c2-skeleton--border-radius": "6px"
+            }
+          },
+          {
+            "name": "Tight",
+            "css": {
+              "--c2-skeleton--height": "10px",
+              "--c2-skeleton--gap": "6px",
+              "--c2-skeleton__last-line--width": "40%"
+            }
+          },
+          {
+            "name": "Subtle",
+            "css": {
+              "--c2-skeleton--background-color": "#f4f4f5",
+              "--c2-skeleton__pulse--opacity": "0.7"
+            }
+          },
+          {
+            "name": "Slow",
+            "css": {
+              "--c2-skeleton--animation-duration": "2.4s"
+            }
+          }
+        ]
+      },
+      "examples": [
+        {
+          "kind": "usage",
+          "label": "Shapes",
+          "html": "<div class=\"stack\">\n  <c2-skeleton></c2-skeleton>\n  <c2-skeleton variant=\"text\" lines=\"3\"></c2-skeleton>\n  <c2-skeleton variant=\"circle\"></c2-skeleton>\n</div>",
+          "css": ".stack {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n}\n.media {\n  --c2-skeleton--height: 120px;\n  --c2-skeleton--border-radius: 10px;\n}\n.card {\n  display: grid;\n  gap: 14px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n}\n.card-head {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n.card-head c2-skeleton[variant='text'] {\n  flex: 1;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-skeleton--background-color: #3f3f46;\n  --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Animations",
+          "html": "<div class=\"stack\">\n  <c2-skeleton animation=\"pulse\"></c2-skeleton>\n  <c2-skeleton animation=\"wave\"></c2-skeleton>\n  <c2-skeleton animation=\"none\"></c2-skeleton>\n</div>",
+          "css": ".stack {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n}\n.media {\n  --c2-skeleton--height: 120px;\n  --c2-skeleton--border-radius: 10px;\n}\n.card {\n  display: grid;\n  gap: 14px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n}\n.card-head {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n.card-head c2-skeleton[variant='text'] {\n  flex: 1;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-skeleton--background-color: #3f3f46;\n  --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "Sizes",
+          "html": "<div class=\"stack\">\n  <c2-skeleton style=\"--c2-skeleton--height: 8px\"></c2-skeleton>\n  <c2-skeleton></c2-skeleton>\n  <c2-skeleton style=\"--c2-skeleton--height: 36px; --c2-skeleton--border-radius: 999px; --c2-skeleton--width: 120px\"></c2-skeleton>\n  <c2-skeleton class=\"media\"></c2-skeleton>\n</div>",
+          "css": ".stack {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n}\n.media {\n  --c2-skeleton--height: 120px;\n  --c2-skeleton--border-radius: 10px;\n}\n.card {\n  display: grid;\n  gap: 14px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n}\n.card-head {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n.card-head c2-skeleton[variant='text'] {\n  flex: 1;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-skeleton--background-color: #3f3f46;\n  --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);\n}"
+        },
+        {
+          "kind": "usage",
+          "label": "In context",
+          "html": "<div class=\"card\" aria-busy=\"true\">\n  <div class=\"card-head\">\n    <c2-skeleton variant=\"circle\" label=\"Loading article\"></c2-skeleton>\n    <c2-skeleton variant=\"text\" lines=\"2\"></c2-skeleton>\n  </div>\n  <c2-skeleton class=\"media\" animation=\"wave\"></c2-skeleton>\n  <c2-skeleton variant=\"text\" lines=\"3\"></c2-skeleton>\n</div>\n<div class=\"inverse\"><c2-skeleton variant=\"text\" lines=\"3\" animation=\"wave\"></c2-skeleton></div>",
+          "css": ".stack {\n  display: grid;\n  gap: 12px;\n  width: 260px;\n  max-width: 100%;\n}\n.media {\n  --c2-skeleton--height: 120px;\n  --c2-skeleton--border-radius: 10px;\n}\n.card {\n  display: grid;\n  gap: 14px;\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n}\n.card-head {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n.card-head c2-skeleton[variant='text'] {\n  flex: 1;\n}\n.inverse {\n  width: 260px;\n  max-width: 100%;\n  padding: 16px;\n  border-radius: 10px;\n  background: #18181b;\n  --c2-skeleton--background-color: #3f3f46;\n  --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-skeleton></c2-skeleton>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Paragraph",
+          "section": "Presets",
+          "html": "<c2-skeleton variant=\"text\" lines=\"3\"></c2-skeleton>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Avatar",
+          "section": "Presets",
+          "html": "<c2-skeleton variant=\"circle\"></c2-skeleton>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Wave",
+          "section": "Presets",
+          "html": "<c2-skeleton animation=\"wave\"></c2-skeleton>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Still",
+          "section": "Presets",
+          "html": "<c2-skeleton animation=\"none\"></c2-skeleton>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Media",
+          "section": "Presets",
+          "html": "<c2-skeleton class=\"media\" animation=\"wave\"></c2-skeleton>",
+          "css": ".media {\n  --c2-skeleton--height: 120px;\n  --c2-skeleton--border-radius: 10px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Button",
+          "section": "Presets",
+          "html": "<c2-skeleton class=\"button\"></c2-skeleton>",
+          "css": ".button {\n  --c2-skeleton--width: 120px;\n  --c2-skeleton--height: 36px;\n  --c2-skeleton--border-radius: 6px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Chip",
+          "section": "Presets",
+          "html": "<c2-skeleton class=\"chip\"></c2-skeleton>",
+          "css": ".chip {\n  --c2-skeleton--width: 88px;\n  --c2-skeleton--height: 24px;\n  --c2-skeleton--border-radius: 999px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Tight",
+          "section": "Presets",
+          "html": "<c2-skeleton class=\"tight\" variant=\"text\" lines=\"4\"></c2-skeleton>",
+          "css": ".tight {\n  --c2-skeleton--height: 10px;\n  --c2-skeleton--gap: 6px;\n  --c2-skeleton__last-line--width: 40%;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Subtle",
+          "section": "Presets",
+          "html": "<c2-skeleton class=\"subtle\" variant=\"text\" lines=\"3\"></c2-skeleton>",
+          "css": ".subtle {\n  --c2-skeleton--background-color: #f4f4f5;\n  --c2-skeleton__pulse--opacity: 0.7;\n  --c2-skeleton--animation-duration: 2.4s;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "List row",
+          "section": "Presets",
+          "html": "<div class=\"row\">\n  <c2-skeleton variant=\"circle\"></c2-skeleton>\n  <c2-skeleton variant=\"text\" lines=\"2\"></c2-skeleton>\n</div>",
+          "css": ".row {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  width: 100%;\n}\n.row c2-skeleton[variant='text'] {\n  flex: 1;\n}\n.row c2-skeleton[variant='circle'] {\n  --c2-skeleton__circle--size: 32px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Dark",
+          "section": "Presets",
+          "html": "<div class=\"dark\"><c2-skeleton variant=\"text\" lines=\"3\" animation=\"wave\"></c2-skeleton></div>",
+          "css": ".dark {\n  width: 100%;\n  padding: 20px;\n  border-radius: 12px;\n  background: #18181b;\n  --c2-skeleton--background-color: #3f3f46;\n  --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);\n}"
+        },
+        {
+          "kind": "preview",
+          "label": "Preview",
+          "html": "<div style=\"display:flex;align-items:center;gap:12px;width:220px\">\n  <c2-skeleton variant=\"circle\"></c2-skeleton>\n  <c2-skeleton variant=\"text\" lines=\"2\" style=\"flex:1\"></c2-skeleton>\n</div>"
         }
       ],
       "hasGallery": true
@@ -19387,12 +20550,15 @@
     "c2-mat-icon": "mat-icon",
     "c2-modal": "modal",
     "c2-overlay": "overlay",
+    "c2-progress": "progress",
     "c2-radio": "radio",
     "c2-radio-group": "radio",
     "c2-reorder-list": "reorder-list",
     "c2-select": "select",
     "c2-seperator": "seperator",
+    "c2-sheet": "sheet",
     "c2-side-nav": "side-nav",
+    "c2-skeleton": "skeleton",
     "c2-slider": "slider",
     "c2-spinner": "spinner",
     "c2-switch": "switch",
@@ -19436,11 +20602,14 @@
     "@c2n/mat-icon": "mat-icon",
     "@c2n/modal": "modal",
     "@c2n/overlay": "overlay",
+    "@c2n/progress": "progress",
     "@c2n/radio": "radio",
     "@c2n/reorder-list": "reorder-list",
     "@c2n/select": "select",
     "@c2n/seperator": "seperator",
+    "@c2n/sheet": "sheet",
     "@c2n/side-nav": "side-nav",
+    "@c2n/skeleton": "skeleton",
     "@c2n/slider": "slider",
     "@c2n/spinner": "spinner",
     "@c2n/switch": "switch",
@@ -19468,7 +20637,7 @@
         "light": "#0265dc",
         "dark": "#5aa3ff",
         "description": "Accent colour: filled buttons, selected states, focused borders, links.",
-        "usedBy": 29
+        "usedBy": 30
       },
       {
         "name": "--c2-theme--color-primary-hover",
@@ -19508,7 +20677,7 @@
         "light": "#ffffff",
         "dark": "#18181b",
         "description": "Default surface of inputs, lists, cards, dialogs.",
-        "usedBy": 16
+        "usedBy": 17
       },
       {
         "name": "--c2-theme--color-surface-container-low",
@@ -19524,7 +20693,7 @@
         "light": "#f4f4f5",
         "dark": "#27272a",
         "description": "Hover surface for rows and icon buttons.",
-        "usedBy": 11
+        "usedBy": 12
       },
       {
         "name": "--c2-theme--color-on-surface",
@@ -19532,7 +20701,7 @@
         "light": "#18181b",
         "dark": "#f4f4f5",
         "description": "Primary text colour.",
-        "usedBy": 18
+        "usedBy": 21
       },
       {
         "name": "--c2-theme--color-on-surface-variant",
@@ -19540,7 +20709,7 @@
         "light": "#71717a",
         "dark": "#a1a1aa",
         "description": "Secondary text, placeholders, icons, supporting text.",
-        "usedBy": 30
+        "usedBy": 32
       },
       {
         "name": "--c2-theme--color-outline",
@@ -19556,7 +20725,7 @@
         "light": "#e4e4e7",
         "dark": "#27272a",
         "description": "Hairline dividers and light borders.",
-        "usedBy": 26
+        "usedBy": 28
       },
       {
         "name": "--c2-theme--color-outline-strong",
@@ -19580,7 +20749,7 @@
         "light": "rgba(9, 9, 11, 0.45)",
         "dark": "rgba(0, 0, 0, 0.6)",
         "description": "Backdrop behind dialogs and drawers.",
-        "usedBy": 2
+        "usedBy": 3
       },
       {
         "name": "--c2-theme--color-inverse-surface",
@@ -19617,28 +20786,28 @@
         "category": "font",
         "light": "14px",
         "description": "Body text: buttons, inputs, list items, dialog content.",
-        "usedBy": 16
+        "usedBy": 19
       },
       {
         "name": "--c2-theme--font-weight-medium",
         "category": "font",
         "light": "500",
         "description": "Medium weight: buttons, headers, tooltips.",
-        "usedBy": 12
+        "usedBy": 13
       },
       {
         "name": "--c2-theme--font-weight-semibold",
         "category": "font",
         "light": "600",
         "description": "Semibold weight: dialog titles, list headings, avatars.",
-        "usedBy": 6
+        "usedBy": 7
       },
       {
         "name": "--c2-theme--radius-sm",
         "category": "radius",
         "light": "4px",
         "description": "Small radius: checkboxes, link buttons, inline controls.",
-        "usedBy": 16
+        "usedBy": 17
       },
       {
         "name": "--c2-theme--radius-md",
@@ -19652,7 +20821,7 @@
         "category": "radius",
         "light": "8px",
         "description": "Large radius: cards, panels, popovers.",
-        "usedBy": 28
+        "usedBy": 29
       },
       {
         "name": "--c2-theme--radius-xl",
@@ -19666,7 +20835,7 @@
         "category": "radius",
         "light": "999px",
         "description": "Pill / circle radius: avatars, icon buttons.",
-        "usedBy": 12
+        "usedBy": 13
       },
       {
         "name": "--c2-theme--border-width",
@@ -19688,7 +20857,7 @@
         "light": "2px solid rgba(2, 101, 220, 0.4)",
         "dark": "2px solid rgba(90, 163, 255, 0.5)",
         "description": "Focus-visible outline of every component.",
-        "usedBy": 18
+        "usedBy": 19
       },
       {
         "name": "--c2-theme--disabled-opacity",
@@ -19702,7 +20871,7 @@
         "category": "motion",
         "light": "1",
         "description": "Multiplier applied to every transition and animation duration (0 disables motion).",
-        "usedBy": 11
+        "usedBy": 14
       },
       {
         "name": "--c2-theme--shadow-md",
@@ -19718,7 +20887,7 @@
         "light": "0 24px 60px rgba(0, 0, 0, 0.25)",
         "dark": "0 24px 60px rgba(0, 0, 0, 0.6)",
         "description": "Shadow of dialogs and drawers.",
-        "usedBy": 2
+        "usedBy": 3
       }
     ],
     "mapping": {
@@ -19919,6 +21088,15 @@
       "--c2-modal__close__focus--outline": "--c2-theme--focus-ring",
       "--c2-modal__backdrop--background": "--c2-theme--color-scrim",
       "--c2-overlay--transition-duration": "--c2-theme--motion-scale",
+      "--c2-progress--border-radius": "--c2-theme--radius-full",
+      "--c2-progress__track--background-color": "--c2-theme--color-outline-variant",
+      "--c2-progress__indicator--background-color": "--c2-theme--color-primary",
+      "--c2-progress--animation-duration": "--c2-theme--motion-scale",
+      "--c2-progress__label--color": "--c2-theme--color-on-surface-variant",
+      "--c2-progress__label--font-size": "--c2-theme--font-size-md",
+      "--c2-progress__value--color": "--c2-theme--color-on-surface",
+      "--c2-progress__value--font-size": "--c2-theme--font-size-md",
+      "--c2-progress__value--font-weight": "--c2-theme--font-weight-medium",
       "--c2-radio__container--border-radius": "--c2-theme--radius-lg",
       "--c2-radio__control--border-radius": "--c2-theme--radius-full",
       "--c2-radio__control--border": "--c2-theme--border",
@@ -19979,11 +21157,26 @@
       "--c2-seperator__label--color": "--c2-theme--color-on-surface-variant",
       "--c2-seperator__label--font-size": "--c2-theme--font-size-sm",
       "--c2-seperator__label--font-weight": "--c2-theme--font-weight-medium",
+      "--c2-sheet--background": "--c2-theme--color-surface",
+      "--c2-sheet--color": "--c2-theme--color-on-surface",
+      "--c2-sheet--box-shadow": "--c2-theme--shadow-lg",
+      "--c2-sheet--transition-duration": "--c2-theme--motion-scale",
+      "--c2-sheet__header--font-weight": "--c2-theme--font-weight-semibold",
+      "--c2-sheet__body--font-size": "--c2-theme--font-size-md",
+      "--c2-sheet__close--border-radius": "--c2-theme--radius-lg",
+      "--c2-sheet__close--color": "--c2-theme--color-on-surface-variant",
+      "--c2-sheet__close__hover--background": "--c2-theme--color-surface-container",
+      "--c2-sheet__close__hover--color": "--c2-theme--color-on-surface",
+      "--c2-sheet__close__focus--outline": "--c2-theme--focus-ring",
+      "--c2-sheet__backdrop--background": "--c2-theme--color-scrim",
       "--c2-side-nav--transition-duration": "--c2-theme--motion-scale",
       "--c2-side-nav--background-color": "--c2-theme--color-surface-container-low",
       "--c2-side-nav__divider--color": "--c2-theme--color-outline-variant",
       "--c2-side-nav__over--box-shadow": "--c2-theme--shadow-lg",
       "--c2-side-nav__backdrop--background-color": "--c2-theme--color-scrim",
+      "--c2-skeleton--border-radius": "--c2-theme--radius-sm",
+      "--c2-skeleton--background-color": "--c2-theme--color-outline-variant",
+      "--c2-skeleton--animation-duration": "--c2-theme--motion-scale",
       "--c2-slider__container__disabled--opacity": "--c2-theme--disabled-opacity",
       "--c2-slider__track--border-radius": "--c2-theme--radius-full",
       "--c2-slider__track--color": "--c2-theme--color-outline-variant",

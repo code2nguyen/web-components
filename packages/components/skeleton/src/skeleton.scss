@@ -1,0 +1,99 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-skeleton,
+  $theme: (
+    width: 100%,
+    height: 16px,
+    border-radius: 4px,
+    background-color: #e4e4e7,
+    sheen--color: rgba(255, 255, 255, 0.55),
+    animation-duration: 1.6s,
+    pulse--opacity: 0.45,
+    gap: 8px,
+    last-line--width: 60%,
+    circle--size: 40px,
+  )
+);
+
+:host {
+  display: block;
+  // On the host, not the inner box: as a flex or grid item the host sizes to its content, and a percentage width on
+  // a child of an auto-width host is indefinite, which would collapse the block to nothing.
+  width: css.cssVar(width);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+.c2-skeleton-block {
+  position: relative;
+  overflow: hidden;
+  height: css.cssVar(height);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+}
+
+// A paragraph rarely ends flush with the margin.
+.c2-skeleton-block[data-last] {
+  width: css.cssVar(last-line--width);
+}
+
+:host([variant='circle']) {
+  // A circle is sized on its own axis-free variable rather than the width/height pair, so it cannot go oval by accident.
+  width: css.cssVar(circle--size);
+}
+
+:host([variant='circle']) .c2-skeleton-block {
+  height: css.cssVar(circle--size);
+  border-radius: 999px;
+}
+
+// Pulse: the whole block fades in and out.
+:host([animation='pulse']) .c2-skeleton-block {
+  animation: c2-skeleton-pulse css.cssVar(animation-duration) ease-in-out infinite;
+}
+
+// Wave: a highlight sweeps across a still block.
+:host([animation='wave']) .c2-skeleton-block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg, transparent, css.cssVar(sheen--color), transparent);
+  transform: translateX(-100%);
+  animation: c2-skeleton-wave css.cssVar(animation-duration) linear infinite;
+}
+
+@keyframes c2-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: css.cssVar(pulse--opacity);
+  }
+}
+
+@keyframes c2-skeleton-wave {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+// Reduced motion: a still block still reads as "not loaded yet", so drop the movement rather than slowing it.
+@media (prefers-reduced-motion: reduce) {
+  :host([animation='pulse']) .c2-skeleton-block {
+    animation: none;
+  }
+  :host([animation='wave']) .c2-skeleton-block::after {
+    display: none;
+  }
+}

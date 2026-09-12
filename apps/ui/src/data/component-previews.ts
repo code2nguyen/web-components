@@ -127,6 +127,10 @@ export const componentPreviews: Record<string, string> = {
     <div class="preview-popover">Anchored overlay content</div>
   </c2-overlay>
 </div>`,
+  progress: `<div style="display:grid;gap:12px;width:220px">
+  <c2-progress value="72" show-value>Uploading files</c2-progress>
+  <c2-progress style="--c2-progress--height:4px"></c2-progress>
+</div>`,
   radio: `<c2-radio-group value="pro" style="width:200px">
   <c2-radio value="free" label="Free"></c2-radio>
   <c2-radio value="pro" label="Pro"></c2-radio>
@@ -143,11 +147,23 @@ export const componentPreviews: Record<string, string> = {
   <c2-list-item value="FR">France</c2-list-item>
   <c2-list-item value="VN">Vietnam</c2-list-item>
 </c2-select>`,
+  sheet: `<div class="preview-row">
+  <c2-button onclick="this.nextElementSibling.show()">Open sheet</c2-button>
+  <c2-sheet>
+    <span slot="title">Filters</span>
+    <div style="font-size:13px;color:#71717a">A panel pinned to the edge of the screen.</div>
+    <c2-button slot="footer" onclick="this.closest('c2-sheet').close()">Apply</c2-button>
+  </c2-sheet>
+</div>`,
   'side-nav': `<div style="position:relative;width:240px;height:110px;border:1px solid var(--site-color-outline-variant);border-radius:8px;overflow:hidden">
   <c2-side-nav opened style="height:100%;--c2-side-nav__open--width:88px;--c2-side-nav--padding-top:10px;--c2-side-nav--padding-right:8px;--c2-side-nav--padding-bottom:10px;--c2-side-nav--padding-left:8px;--c2-side-nav--background-color:var(--site-color-surface-container-3);--c2-side-nav__divider--color:var(--site-color-outline-variant)">
     <div slot="side-nav-content" style="font-size:13px;line-height:1.9;padding-left:4px">Inbox<br>Drafts<br>Sent</div>
     <div style="padding:12px;font-size:13px">Main content</div>
   </c2-side-nav>
+</div>`,
+  skeleton: `<div style="display:flex;align-items:center;gap:12px;width:220px">
+  <c2-skeleton variant="circle"></c2-skeleton>
+  <c2-skeleton variant="text" lines="2" style="flex:1"></c2-skeleton>
 </div>`,
   slider: `<div style="display:grid;gap:12px;width:220px">
   <c2-slider value="40"></c2-slider>

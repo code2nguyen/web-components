@@ -72,7 +72,7 @@ const FONT_SIZE_TOKENS: Record<string, string> = { '12px': 'font-size-sm', '14px
 const FONT_WEIGHT_TOKENS: Record<string, string> = { '500': 'font-weight-medium', '600': 'font-weight-semibold' }
 
 const SHADOW_MD_PREFIXES = new Set(['c2-tooltip', 'c2-select', 'c2-dropdown-list', 'c2-overlay', 'c2-color-select'])
-const SHADOW_LG_PREFIXES = new Set(['c2-modal', 'c2-side-nav'])
+const SHADOW_LG_PREFIXES = new Set(['c2-modal', 'c2-sheet', 'c2-side-nav'])
 
 const EXCLUDED_PARTS = new Set(['theme', 'auto-color'])
 const KEYWORDS = new Set(['transparent', 'none', 'inherit', 'initial', 'unset', 'currentcolor', 'auto'])

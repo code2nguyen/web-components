@@ -54,6 +54,9 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/sheet:build",
+        "../../components/skeleton:build",
+        "../../components/progress:build",
         "../../components/kbd:build",
         "../../components/table:build",
         "../../components/copy-button:build",

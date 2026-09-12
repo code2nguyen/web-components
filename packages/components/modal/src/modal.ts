@@ -2,11 +2,8 @@ import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
 import { customElement, property, query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './modal.scss?inline'
-
-let scrollLocks = 0
-let previousOverflow = ''
 
 /**
  * Modal dialog built on the native `<dialog>` element: focus is trapped and restored, Escape closes, the page behind
@@ -107,7 +104,7 @@ export class Modal extends LitElement {
 
   @query('dialog') private dialog!: HTMLDialogElement
 
-  private locked = false
+  private releaseScroll: (() => void) | undefined
 
   override disconnectedCallback() {
     super.disconnectedCallback()
@@ -127,21 +124,18 @@ export class Modal extends LitElement {
   }
 
   private lockScroll() {
-    if (this.noScrollLock || this.locked || isServer) return
-    if (scrollLocks++ === 0) {
-      previousOverflow = document.documentElement.style.overflow
-      document.documentElement.style.overflow = 'hidden'
-    }
-    this.locked = true
+    if (this.noScrollLock || this.releaseScroll || isServer) return
+    this.releaseScroll = lockPageScroll()
   }
 
   private unlockScroll() {
-    if (!this.locked) return
-    this.locked = false
-    if (--scrollLocks === 0) document.documentElement.style.overflow = previousOverflow
+    this.releaseScroll?.()
+    this.releaseScroll = undefined
   }
 
-  private handleDialogClose = () => {
+  private handleDialogClose = (event: Event) => {
+    // A nested overlay's `close` is composed, so it reaches this listener through the slot; only our own dialog counts.
+    if (event.target !== this.dialog) return
     this.returnValue = this.dialog.returnValue
     this.unlockScroll()
     this.open = false
@@ -149,6 +143,7 @@ export class Modal extends LitElement {
   }
 
   private handleDialogCancel = (event: Event) => {
+    if (event.target !== this.dialog) return
     if (this.noEscape) {
       event.preventDefault()
       return

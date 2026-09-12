@@ -77,6 +77,9 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/sheet:build",
+        "./packages/components/skeleton:build",
+        "./packages/components/progress:build",
         "./packages/components/kbd:build",
         "./packages/components/table:build",
         "./packages/components/copy-button:build",

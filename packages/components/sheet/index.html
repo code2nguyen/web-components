@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-sheet</title>
+    <script type="module" src="/src/sheet.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      main {
+        display: grid;
+        gap: 24px;
+        max-width: 560px;
+      }
+      section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+      h2 {
+        width: 100%;
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #71717a;
+      }
+      button {
+        padding: 8px 14px;
+        border: 1px solid #d4d4d8;
+        border-radius: 6px;
+        background: #fff;
+        font: inherit;
+        cursor: pointer;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      .rounded {
+        --c2-sheet--border-radius: 14px;
+      }
+      .wide {
+        --c2-sheet--size: 560px;
+      }
+      .divided {
+        --c2-sheet__header--padding-bottom: 14px;
+        --c2-sheet__header--border-bottom: 1px solid #e4e4e7;
+        --c2-sheet__footer--border-top: 1px solid #e4e4e7;
+      }
+      .dark {
+        --c2-sheet--background: #18181b;
+        --c2-sheet--color: #fafafa;
+        --c2-sheet__close--color: #a1a1aa;
+        --c2-sheet__close__hover--background: #27272a;
+        --c2-sheet__close__hover--color: #fafafa;
+      }
+      .tall {
+        --c2-sheet--size: 70dvh;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <section>
+        <h2>Sides</h2>
+        <button onclick="document.getElementById('s-right').show()">Right</button>
+        <button onclick="document.getElementById('s-left').show()">Left</button>
+        <button onclick="document.getElementById('s-top').show()">Top</button>
+        <button onclick="document.getElementById('s-bottom').show()">Bottom</button>
+      </section>
+
+      <section>
+        <h2>Looks</h2>
+        <button onclick="document.getElementById('s-rounded').show()">Rounded + wide</button>
+        <button onclick="document.getElementById('s-divided').show()">Divided</button>
+        <button onclick="document.getElementById('s-dark').show()">Dark</button>
+        <button onclick="document.getElementById('s-scroll').show()">Long content</button>
+      </section>
+
+      <section>
+        <h2>Nested</h2>
+        <button onclick="document.getElementById('s-nested').show()">Sheet with a confirm inside</button>
+      </section>
+    </main>
+
+    <c2-sheet id="s-right"
+      ><span slot="title">Right</span>
+      <p>The default edge.</p></c2-sheet
+    >
+    <c2-sheet id="s-left" side="left"
+      ><span slot="title">Left</span>
+      <p>Slides in from the left.</p></c2-sheet
+    >
+    <c2-sheet id="s-top" side="top" class="tall"
+      ><span slot="title">Top</span>
+      <p>Full width, pinned to the top.</p></c2-sheet
+    >
+    <c2-sheet id="s-bottom" side="bottom" class="tall"
+      ><span slot="title">Bottom</span>
+      <p>The phone pattern.</p></c2-sheet
+    >
+
+    <c2-sheet id="s-rounded" class="rounded wide"
+      ><span slot="title">Rounded and wide</span>
+      <p>560px with rounded inner corners.</p></c2-sheet
+    >
+    <c2-sheet id="s-divided" class="divided">
+      <span slot="title">Divided</span>
+      <p>Rules under the header and above the footer.</p>
+      <button slot="footer" onclick="this.closest('c2-sheet').close('cancel')">Cancel</button>
+      <button slot="footer" onclick="this.closest('c2-sheet').close('saved')">Save</button>
+    </c2-sheet>
+    <c2-sheet id="s-dark" class="dark"
+      ><span slot="title">Dark</span>
+      <p>Recoloured through its own variables.</p></c2-sheet
+    >
+    <c2-sheet id="s-scroll">
+      <span slot="title">Long content</span>
+      <div id="filler"></div>
+      <button slot="footer" onclick="this.closest('c2-sheet').close()">Done</button>
+    </c2-sheet>
+
+    <c2-sheet id="s-nested">
+      <span slot="title">Filters</span>
+      <p>The body scrolls on its own; the header and footer stay put.</p>
+      <button onclick="document.getElementById('s-confirm').show()">Discard changes…</button>
+    </c2-sheet>
+    <c2-sheet id="s-confirm" side="bottom" style="--c2-sheet--size: 200px">
+      <span slot="title">Discard?</span>
+      <p>Closing this inner sheet must not close the one behind it.</p>
+      <button slot="footer" onclick="this.closest('c2-sheet').close()">Keep editing</button>
+    </c2-sheet>
+
+    <script type="module">
+      document.querySelector('#filler').innerHTML = Array.from({ length: 30 }, (_, i) => `<p>Paragraph ${i + 1} of the scrolling body.</p>`).join('')
+      for (const sheet of document.querySelectorAll('c2-sheet')) {
+        sheet.addEventListener('close', (event) => console.log(sheet.id, 'closed with', JSON.stringify(event.detail.returnValue)))
+      }
+    </script>
+  </body>
+</html>

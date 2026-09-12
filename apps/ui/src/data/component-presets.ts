@@ -307,6 +307,23 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-sheet': {
+    html: `<c2-sheet open><span slot="title">Filters</span><div>Panel content</div></c2-sheet>`,
+    presets: [
+      { name: 'Wide', css: { '--c2-sheet--size': '560px' } },
+      { name: 'Rounded', css: { '--c2-sheet--border-radius': '14px' } },
+      {
+        name: 'Divided',
+        css: {
+          '--c2-sheet__header--padding-bottom': '14px',
+          '--c2-sheet__header--border-bottom': '1px solid #e4e4e7',
+          '--c2-sheet__footer--border-top': '1px solid #e4e4e7',
+        },
+      },
+      { name: 'Frosted', css: { '--c2-sheet__backdrop--background': 'rgba(255, 255, 255, 0.4)', '--c2-sheet__backdrop--backdrop-filter': 'blur(6px)' } },
+      { name: 'Instant', css: { '--c2-sheet--transition-duration': '0ms' } },
+    ],
+  },
   'c2-side-nav': {
     html: `<div style="position: relative; width: 220px; height: 120px; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden"><c2-side-nav opened style="height: 100%; --c2-side-nav__open--width: 92px; --c2-side-nav--padding-top: 10px; --c2-side-nav--padding-right: 8px; --c2-side-nav--padding-bottom: 10px; --c2-side-nav--padding-left: 8px"><div slot="side-nav-content" style="font-size: 12px; line-height: 2">Inbox<br>Drafts<br>Sent</div><div style="padding: 10px; font-size: 12px; color: #71717a">Content</div></c2-side-nav></div>`,
     presets: [
@@ -835,6 +852,26 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-progress': {
+    html: `<c2-progress value="60" show-value>Uploading files</c2-progress>`,
+    presets: [
+      { name: 'Hairline', css: { '--c2-progress--height': '3px', '--c2-progress--border-radius': '0' } },
+      { name: 'Thick', css: { '--c2-progress--height': '16px', '--c2-progress--border-radius': '8px' } },
+      {
+        name: 'Success',
+        css: { '--c2-progress__indicator--background-color': '#16a34a', '--c2-progress__track--background-color': '#dcfce7' },
+      },
+      {
+        name: 'Danger',
+        css: {
+          '--c2-progress__indicator--background-color': '#dc2626',
+          '--c2-progress__track--background-color': '#fee2e2',
+          '--c2-progress__value--color': '#dc2626',
+        },
+      },
+      { name: 'Slow', css: { '--c2-progress--animation-duration': '2.5s' } },
+    ],
+  },
   'c2-radio': {
     html: `<c2-radio value="a" checked>Option</c2-radio>`,
     presets: [
@@ -914,6 +951,16 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         },
       },
       { name: 'Leading label', css: { '--c2-seperator__line-start--flex': '0 0 24px', '--c2-seperator__label--font-size': '13px' } },
+    ],
+  },
+  'c2-skeleton': {
+    html: `<c2-skeleton variant="text" lines="3"></c2-skeleton>`,
+    presets: [
+      { name: 'Media', css: { '--c2-skeleton--height': '120px', '--c2-skeleton--border-radius': '10px' } },
+      { name: 'Button', css: { '--c2-skeleton--width': '120px', '--c2-skeleton--height': '36px', '--c2-skeleton--border-radius': '6px' } },
+      { name: 'Tight', css: { '--c2-skeleton--height': '10px', '--c2-skeleton--gap': '6px', '--c2-skeleton__last-line--width': '40%' } },
+      { name: 'Subtle', css: { '--c2-skeleton--background-color': '#f4f4f5', '--c2-skeleton__pulse--opacity': '0.7' } },
+      { name: 'Slow', css: { '--c2-skeleton--animation-duration': '2.4s' } },
     ],
   },
   'c2-slider': {

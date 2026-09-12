@@ -1,0 +1,169 @@
+---
+description: 'Ready-made looks for c2-sheet: each edge, rounded and wide panels, dividers, dark and frosted, a bottom sheet. Open a card, then the sheet, to see it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Sheet } from '@c2n/sheet'
+import { Button } from '@c2n/button'
+
+## Presets
+
+Curated looks for `c2-sheet`. Each card shows a trigger; open the sheet to see the look. `side` and `--c2-sheet--size` set the geometry, `--c2-sheet--border-radius`, `--c2-sheet--background` and `--c2-sheet--box-shadow` the panel, and the `__header`, `__body`, `__footer`, `__close` and `__backdrop` groups the rest — the same names `c2-modal` uses.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Right
+<c2-button onclick="document.getElementById('sg-right').show()">Open</c2-button>
+<c2-sheet id="sg-right">
+  <span slot="title">Filters</span>
+  <div>The default edge, 380px wide.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Left
+<c2-button onclick="document.getElementById('sg-left').show()">Open</c2-button>
+<c2-sheet id="sg-left" side="left">
+  <span slot="title">Navigation</span>
+  <div>Slides in from the left.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Top
+<style>
+  .sg-top {
+    --c2-sheet--size: 260px;
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-top').show()">Open</c2-button>
+<c2-sheet id="sg-top" class="sg-top" side="top">
+  <span slot="title">Announcement</span>
+  <div>Full width; the size is its height.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Bottom sheet
+<style>
+  .sg-bottom {
+    --c2-sheet--size: 320px;
+    --c2-sheet--border-radius: 16px;
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-bottom').show()">Open</c2-button>
+<c2-sheet id="sg-bottom" class="sg-bottom" side="bottom">
+  <span slot="title">Share</span>
+  <div>The phone pattern, with rounded top corners.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Wide
+<style>
+  .sg-wide {
+    --c2-sheet--size: 560px;
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-wide').show()">Open</c2-button>
+<c2-sheet id="sg-wide" class="sg-wide">
+  <span slot="title">Record details</span>
+  <div>Room for a table or a diff.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Rounded
+<style>
+  .sg-rounded {
+    --c2-sheet--border-radius: 14px;
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-rounded').show()">Open</c2-button>
+<c2-sheet id="sg-rounded" class="sg-rounded">
+  <span slot="title">Rounded</span>
+  <div>The two corners facing the page are rounded; the edge stays square.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Divided
+<style>
+  .sg-divided {
+    --c2-sheet__header--padding-bottom: 14px;
+    --c2-sheet__header--border-bottom: 1px solid #e4e4e7;
+    --c2-sheet__footer--border-top: 1px solid #e4e4e7;
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-divided').show()">Open</c2-button>
+<c2-sheet id="sg-divided" class="sg-divided">
+  <span slot="title">Edit record</span>
+  <div>Rules under the header and above the footer.</div>
+  <c2-button slot="footer" onclick="this.closest('c2-sheet').close()">Save</c2-button>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .sg-dark {
+    --c2-sheet--background: #18181b;
+    --c2-sheet--color: #fafafa;
+    --c2-sheet__close--color: #a1a1aa;
+    --c2-sheet__close__hover--background: #27272a;
+    --c2-sheet__close__hover--color: #fafafa;
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-dark').show()">Open</c2-button>
+<c2-sheet id="sg-dark" class="sg-dark">
+  <span slot="title">Dark</span>
+  <div>Recoloured through its own variables.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Frosted
+<style>
+  .sg-frosted {
+    --c2-sheet__backdrop--background: rgba(255, 255, 255, 0.4);
+    --c2-sheet__backdrop--backdrop-filter: blur(6px);
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-frosted').show()">Open</c2-button>
+<c2-sheet id="sg-frosted" class="sg-frosted">
+  <span slot="title">Frosted</span>
+  <div>The page blurs behind the panel instead of dimming.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Floating
+<style>
+  .sg-floating {
+    --c2-sheet--border-radius: 16px;
+    --c2-sheet--box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32);
+    --c2-sheet--size: 340px;
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-floating').show()">Open</c2-button>
+<c2-sheet id="sg-floating" class="sg-floating">
+  <span slot="title">Floating</span>
+  <div>A deeper shadow lifts the panel off the page.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Instant
+<style>
+  .sg-instant {
+    --c2-sheet--transition-duration: 0ms;
+  }
+</style>
+<c2-button onclick="document.getElementById('sg-instant').show()">Open</c2-button>
+<c2-sheet id="sg-instant" class="sg-instant">
+  <span slot="title">Instant</span>
+  <div>No slide, for interfaces that prefer no motion.</div>
+</c2-sheet>
+```
+
+```html tag=MdxCodeBlock,label=Bare
+<c2-button onclick="document.getElementById('sg-bare').show()">Open</c2-button>
+<c2-sheet id="sg-bare" label="Preview" hide-close no-backdrop-close>
+  <div>No header and no × button: the sheet is dismissed by its own action.</div>
+  <c2-button slot="footer" onclick="this.closest('c2-sheet').close()">Done</c2-button>
+</c2-sheet>
+```
+
+</GalleryGrid>
