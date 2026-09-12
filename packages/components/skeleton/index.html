@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-skeleton</title>
+    <script type="module" src="/src/skeleton.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      main {
+        display: grid;
+        gap: 32px;
+        max-width: 520px;
+      }
+      section {
+        display: grid;
+        gap: 16px;
+      }
+      h2 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #71717a;
+      }
+      .media {
+        --c2-skeleton--height: 140px;
+        --c2-skeleton--border-radius: 10px;
+      }
+      .card {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid #e4e4e7;
+        border-radius: 10px;
+      }
+      .card-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .card-head c2-skeleton[variant='text'] {
+        flex: 1;
+      }
+      .inverse {
+        padding: 20px;
+        border-radius: 12px;
+        background: #18181b;
+        --c2-skeleton--background-color: #3f3f46;
+        --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <section>
+        <h2>Shapes</h2>
+        <c2-skeleton></c2-skeleton>
+        <c2-skeleton variant="text" lines="3"></c2-skeleton>
+        <c2-skeleton variant="circle"></c2-skeleton>
+        <c2-skeleton class="media"></c2-skeleton>
+      </section>
+
+      <section>
+        <h2>Animations</h2>
+        <c2-skeleton animation="pulse"></c2-skeleton>
+        <c2-skeleton animation="wave"></c2-skeleton>
+        <c2-skeleton animation="none"></c2-skeleton>
+      </section>
+
+      <section>
+        <h2>Card placeholder</h2>
+        <div class="card" aria-busy="true">
+          <div class="card-head">
+            <c2-skeleton variant="circle" label="Loading profile"></c2-skeleton>
+            <c2-skeleton variant="text" lines="2"></c2-skeleton>
+          </div>
+          <c2-skeleton class="media" animation="wave"></c2-skeleton>
+          <c2-skeleton variant="text" lines="3"></c2-skeleton>
+        </div>
+      </section>
+
+      <section>
+        <h2>On a dark surface</h2>
+        <div class="inverse">
+          <c2-skeleton variant="text" lines="3" animation="wave"></c2-skeleton>
+        </div>
+      </section>
+
+      <section>
+        <h2>Swap for content</h2>
+        <div id="slot"><c2-skeleton variant="text" lines="2" label="Loading article"></c2-skeleton></div>
+        <button id="load" type="button">Finish loading</button>
+      </section>
+    </main>
+
+    <script type="module">
+      document.querySelector('#load').addEventListener('click', () => {
+        document.querySelector('#slot').textContent = 'The content has arrived and replaced its placeholder.'
+      })
+    </script>
+  </body>
+</html>

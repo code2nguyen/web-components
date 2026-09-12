@@ -936,6 +936,16 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'Leading label', css: { '--c2-seperator__line-start--flex': '0 0 24px', '--c2-seperator__label--font-size': '13px' } },
     ],
   },
+  'c2-skeleton': {
+    html: `<c2-skeleton variant="text" lines="3"></c2-skeleton>`,
+    presets: [
+      { name: 'Media', css: { '--c2-skeleton--height': '120px', '--c2-skeleton--border-radius': '10px' } },
+      { name: 'Button', css: { '--c2-skeleton--width': '120px', '--c2-skeleton--height': '36px', '--c2-skeleton--border-radius': '6px' } },
+      { name: 'Tight', css: { '--c2-skeleton--height': '10px', '--c2-skeleton--gap': '6px', '--c2-skeleton__last-line--width': '40%' } },
+      { name: 'Subtle', css: { '--c2-skeleton--background-color': '#f4f4f5', '--c2-skeleton__pulse--opacity': '0.7' } },
+      { name: 'Slow', css: { '--c2-skeleton--animation-duration': '2.4s' } },
+    ],
+  },
   'c2-slider': {
     html: `<c2-slider value="40" show-value style="width: 220px"></c2-slider>`,
     presets: [

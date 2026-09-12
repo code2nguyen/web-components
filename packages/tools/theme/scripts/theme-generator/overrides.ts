@@ -27,6 +27,10 @@ export const overrides: Record<string, Override> = {
   // Progress: the unfilled groove is the same hairline grey as the spinner's ring, which the background rule table
   // does not cover; the filled indicator maps to the accent on its own.
   '--c2-progress__track--background-color': { token: 'color-outline-variant' },
+  // Skeleton: the resting block is the same hairline grey as the progress track. The wave highlight is a translucent
+  // white sheen rather than a surface colour, and the theme has no token for one.
+  '--c2-skeleton--background-color': { token: 'color-outline-variant' },
+  '--c2-skeleton__sheen--color': { exclude: 'translucent highlight, not a surface colour' },
   // Tooltip text sits on the inverse surface.
   '--c2-tooltip--color': { token: 'color-on-inverse-surface' },
   // Tabs: the selected indicator is the accent; the baseline is a hairline drawn with an inset shadow.

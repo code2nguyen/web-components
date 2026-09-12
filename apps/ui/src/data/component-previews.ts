@@ -153,6 +153,10 @@ export const componentPreviews: Record<string, string> = {
     <div style="padding:12px;font-size:13px">Main content</div>
   </c2-side-nav>
 </div>`,
+  skeleton: `<div style="display:flex;align-items:center;gap:12px;width:220px">
+  <c2-skeleton variant="circle"></c2-skeleton>
+  <c2-skeleton variant="text" lines="2" style="flex:1"></c2-skeleton>
+</div>`,
   slider: `<div style="display:grid;gap:12px;width:220px">
   <c2-slider value="40"></c2-slider>
   <c2-slider value="60" ticks step="20"></c2-slider>
