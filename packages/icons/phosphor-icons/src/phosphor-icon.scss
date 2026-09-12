@@ -1,0 +1,26 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-phosphor-icon,
+  $theme: (
+    size: 24px,
+    color: currentColor,
+  )
+);
+
+:host {
+  display: inline-flex;
+  width: css.cssVar(size);
+  height: css.cssVar(size);
+  color: css.cssVar(color);
+  line-height: 0;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}

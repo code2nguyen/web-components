@@ -1,0 +1,189 @@
+---
+description: 'Ready-made looks for c2-menu: surface, rows, dark and compact menus, shortcuts and checkable rows. Open a card, then its trigger, to see the look.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Menu } from '@c2n/menu'
+import { Button } from '@c2n/button'
+import { Kbd } from '@c2n/kbd'
+
+## Surface
+
+Each card shows a trigger; open the menu to see the look. `--c2-menu--*` is the surface — background, a border per side, a radius per corner, shadow, padding, `min-width`, `max-height` — and `--c2-menu__separator--*` / `--c2-menu__heading--*` the dividers and group headings.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-menu class="default" aria-label="Default" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="new">New file</c2-menu-item><c2-menu-item value="duplicate">Duplicate</c2-menu-item><hr /><c2-menu-item value="delete" destructive>Delete</c2-menu-item></c2-menu>
+```
+
+```html tag=MdxCodeBlock,label=Soft
+<style>
+  .soft {
+    --c2-menu--border-top: 1px solid transparent;
+    --c2-menu--border-right: 1px solid transparent;
+    --c2-menu--border-bottom: 1px solid transparent;
+    --c2-menu--border-left: 1px solid transparent;
+    --c2-menu--border-top-left-radius: 14px;
+    --c2-menu--border-top-right-radius: 14px;
+    --c2-menu--border-bottom-left-radius: 14px;
+    --c2-menu--border-bottom-right-radius: 14px;
+    --c2-menu--box-shadow: 0 16px 40px rgba(24, 24, 27, 0.16);
+    --c2-menu--padding-top: 8px;
+    --c2-menu--padding-right: 8px;
+    --c2-menu--padding-bottom: 8px;
+    --c2-menu--padding-left: 8px;
+    --c2-menu-item--border-top-left-radius: 10px;
+    --c2-menu-item--border-top-right-radius: 10px;
+    --c2-menu-item--border-bottom-left-radius: 10px;
+    --c2-menu-item--border-bottom-right-radius: 10px;
+  }
+</style>
+<c2-menu class="soft" aria-label="Soft" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="new">New file</c2-menu-item><c2-menu-item value="duplicate">Duplicate</c2-menu-item><hr /><c2-menu-item value="delete" destructive>Delete</c2-menu-item></c2-menu>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-menu--min-width: 150px;
+    --c2-menu--padding-top: 2px;
+    --c2-menu--padding-right: 2px;
+    --c2-menu--padding-bottom: 2px;
+    --c2-menu--padding-left: 2px;
+    --c2-menu--border-top-left-radius: 6px;
+    --c2-menu--border-top-right-radius: 6px;
+    --c2-menu--border-bottom-left-radius: 6px;
+    --c2-menu--border-bottom-right-radius: 6px;
+    --c2-menu__separator--margin: 2px 0;
+    --c2-menu-item--min-height: 26px;
+    --c2-menu-item--font-size: 13px;
+    --c2-menu-item--padding-top: 3px;
+    --c2-menu-item--padding-bottom: 3px;
+    --c2-menu-item--border-top-left-radius: 4px;
+    --c2-menu-item--border-top-right-radius: 4px;
+    --c2-menu-item--border-bottom-left-radius: 4px;
+    --c2-menu-item--border-bottom-right-radius: 4px;
+  }
+</style>
+<c2-menu class="compact" aria-label="Compact" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="cut">Cut</c2-menu-item><c2-menu-item value="copy">Copy</c2-menu-item><c2-menu-item value="paste">Paste</c2-menu-item><hr /><c2-menu-item value="delete" destructive>Delete</c2-menu-item></c2-menu>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    --c2-menu--background: #18181b;
+    --c2-menu--border-top: 1px solid #3f3f46;
+    --c2-menu--border-right: 1px solid #3f3f46;
+    --c2-menu--border-bottom: 1px solid #3f3f46;
+    --c2-menu--border-left: 1px solid #3f3f46;
+    --c2-menu--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --c2-menu__separator--color: #3f3f46;
+    --c2-menu__heading--color: #a1a1aa;
+    --c2-menu-item--color: #fafafa;
+    --c2-menu-item__hover--background: #27272a;
+    --c2-menu-item__icon--color: #a1a1aa;
+    --c2-menu-item__shortcut--color: #71717a;
+    --c2-menu-item__destructive--color: #f87171;
+    --c2-menu-item__destructive__hover--background: rgba(248, 113, 113, 0.14);
+  }
+</style>
+<c2-menu class="dark" aria-label="Dark" client:only="lit"><c2-button slot="trigger">Open</c2-button><h6>Workspace</h6><c2-menu-item value="settings">Settings<c2-kbd slot="shortcut">⌘,</c2-kbd></c2-menu-item><c2-menu-item value="members">Members</c2-menu-item><hr /><c2-menu-item value="leave" destructive>Leave workspace</c2-menu-item></c2-menu>
+```
+
+```html tag=MdxCodeBlock,label=Wide with headings
+<style>
+  .wide {
+    --c2-menu--min-width: 260px;
+    --c2-menu__heading--color: #3f3f46;
+    --c2-menu__heading--font-size: 12px;
+    --c2-menu__heading--text-transform: none;
+    --c2-menu__heading--letter-spacing: 0;
+    --c2-menu__heading--padding-left: 10px;
+    --c2-menu-item--padding-left: 10px;
+    --c2-menu-item--padding-right: 10px;
+  }
+</style>
+<c2-menu class="wide" aria-label="Wide" client:only="lit"><c2-button slot="trigger">Open</c2-button><h6>Recent projects</h6><c2-menu-item value="atlas">Atlas<span slot="description">Edited 2 hours ago</span></c2-menu-item><c2-menu-item value="beacon">Beacon<span slot="description">Edited yesterday</span></c2-menu-item><hr /><h6>Everything else</h6><c2-menu-item value="all">Browse all projects</c2-menu-item></c2-menu>
+```
+
+</GalleryGrid>
+
+## Rows
+
+The rows are your own `c2-menu-item` children, so every `--c2-menu-item--*` variable set on the menu cascades into all of them: `__hover` and `__focus` states, `__destructive` for delete-style commands, and the `__description`, `__shortcut`, `__icon` and `__indicator` parts.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Tinted rows
+<style>
+  .tinted {
+    --c2-menu-item__hover--background: #eef2ff;
+    --c2-menu-item__hover--color: #3730a3;
+    --c2-menu-item__focus--outline: 2px solid rgba(99, 102, 241, 0.4);
+    --c2-menu-item--font-weight: 500;
+  }
+</style>
+<c2-menu class="tinted" aria-label="Tinted" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="edit">Edit</c2-menu-item><c2-menu-item value="share">Share</c2-menu-item><c2-menu-item value="move">Move to…</c2-menu-item></c2-menu>
+```
+
+```html tag=MdxCodeBlock,label=Pill rows
+<style>
+  .pill {
+    --c2-menu--padding-top: 6px;
+    --c2-menu--padding-right: 6px;
+    --c2-menu--padding-bottom: 6px;
+    --c2-menu--padding-left: 6px;
+    --c2-menu-item--border-top-left-radius: 999px;
+    --c2-menu-item--border-top-right-radius: 999px;
+    --c2-menu-item--border-bottom-left-radius: 999px;
+    --c2-menu-item--border-bottom-right-radius: 999px;
+    --c2-menu-item--padding-left: 14px;
+    --c2-menu-item--padding-right: 14px;
+    --c2-menu-item__hover--background: #18181b;
+    --c2-menu-item__hover--color: #ffffff;
+  }
+</style>
+<c2-menu class="pill" aria-label="Pill" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="day">Today</c2-menu-item><c2-menu-item value="week">This week</c2-menu-item><c2-menu-item value="month">This month</c2-menu-item></c2-menu>
+```
+
+```html tag=MdxCodeBlock,label=Shortcuts
+<style>
+  .shortcuts {
+    --c2-menu--min-width: 230px;
+    --c2-menu-item__shortcut--color: #52525b;
+    --c2-menu-item__shortcut--font-size: 11px;
+    --c2-menu-item__shortcut--letter-spacing: 0.08em;
+  }
+</style>
+<c2-menu class="shortcuts" aria-label="Shortcuts" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="new">New file<c2-kbd slot="shortcut">⌘N</c2-kbd></c2-menu-item><c2-menu-item value="open">Open…<c2-kbd slot="shortcut">⌘O</c2-kbd></c2-menu-item><c2-menu-item value="save">Save<c2-kbd slot="shortcut">⌘S</c2-kbd></c2-menu-item></c2-menu>
+```
+
+```html tag=MdxCodeBlock,label=Checkable
+<style>
+  .checkable {
+    --c2-menu-item__indicator--color: #0265dc;
+    --c2-menu-item__indicator--size: 14px;
+    --c2-menu-item__hover--background: #eff6ff;
+  }
+</style>
+<c2-menu class="checkable" aria-label="Checkable" keep-open client:only="lit"><c2-button slot="trigger">Open</c2-button><h6>Panels</h6><c2-menu-item type="checkbox" value="sidebar" checked>Sidebar</c2-menu-item><c2-menu-item type="checkbox" value="terminal">Terminal</c2-menu-item><hr /><h6>Density</h6><c2-menu-item type="radio" name="density" value="comfortable" checked>Comfortable</c2-menu-item><c2-menu-item type="radio" name="density" value="compact">Compact</c2-menu-item></c2-menu>
+```
+
+```html tag=MdxCodeBlock,label=Spacious
+<style>
+  .spacious {
+    --c2-menu--min-width: 250px;
+    --c2-menu-item--min-height: 44px;
+    --c2-menu-item--padding-top: 10px;
+    --c2-menu-item--padding-bottom: 10px;
+    --c2-menu-item--gap: 12px;
+    --c2-menu-item__description--font-size: 12px;
+    --c2-menu-item__description--color: #71717a;
+  }
+</style>
+<c2-menu class="spacious" aria-label="Spacious" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="profile">Profile<span slot="description">Name, avatar and handle</span></c2-menu-item><c2-menu-item value="billing">Billing<span slot="description">Plan, invoices and cards</span></c2-menu-item><c2-menu-item value="team">Team<span slot="description">Members and roles</span></c2-menu-item></c2-menu>
+```
+
+</GalleryGrid>

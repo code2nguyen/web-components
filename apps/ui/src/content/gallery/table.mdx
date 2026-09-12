@@ -1,24 +1,651 @@
 ---
 title: 'Table gallery'
-description: 'Styled variants of c2-table, from a hairline report to a dark spreadsheet.'
+description: 'Ready-made c2-table setups: columns and formats, sorting and selection, toolbars and footers, states, and looks from a hairline report to a trading terminal.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
 
 import { Table } from '@c2n/table'
 import { TableColumn } from '@c2n/table/table-column.js'
 
-## Presets
+{/* The toolbars below put c2 components inside the tables, which are `client:only` islands: this registers them. */}
 
-Curated looks for `c2-table`. Open any one in the studio to start from it. The surface is `--c2-table--*` (background, borders, radius, shadow), the header is `--c2-table__header--*` and `--c2-table__header-cell--*`, the body is `--c2-table__row--*` (plus the `__hover`, `__selected` and `__odd` states) and `--c2-table__cell--*`, and `--c2-table__sort-icon--*` / `--c2-table__pinned-start--box-shadow` cover the affordances.
+<ExampleModules />
 
-<GalleryGrid>
+## Columns and data
+
+Every card is a `rows` array plus a set of `c2-table-column` children: `width` takes any grid track, `align` moves the text, `format` runs the value through `Intl` (`number`, `currency`, `percent`, `date`, `datetime`, `time`), and `pinned` sticks a column to either edge while the rest scrolls. A cell value is text, so a column is dressed up from CSS: `::part(cell-content-status)` is the text of the status column and takes a pill as well as any badge would. Put a component in a cell with a `renderCell` function from script.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .plain {
+    height: 296px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="plain" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Formats
+<style>
+  .formats {
+    height: 296px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="formats" row-key="id" rows='[{"id":"1","order":"#10841","customer":"Northwind Trading","channel":"Online","items":12,"total":8420.5,"margin":0.182,"status":"Paid","placed":"2026-02-11T09:24:00Z"},{"id":"2","order":"#10840","customer":"Contoso Ltd","channel":"Partner","items":4,"total":1290,"margin":0.241,"status":"Pending","placed":"2026-02-11T08:02:00Z"},{"id":"3","order":"#10839","customer":"Fabrikam","channel":"Online","items":31,"total":18640.75,"margin":0.129,"status":"Paid","placed":"2026-02-10T17:41:00Z"},{"id":"4","order":"#10838","customer":"Tailspin Toys","channel":"Retail","items":7,"total":3150.2,"margin":0.204,"status":"Refunded","placed":"2026-02-10T14:15:00Z"},{"id":"5","order":"#10837","customer":"Adventure Works","channel":"Partner","items":19,"total":9875,"margin":0.163,"status":"Paid","placed":"2026-02-09T11:58:00Z"},{"id":"6","order":"#10836","customer":"Wide World Importers","channel":"Online","items":2,"total":480.9,"margin":0.315,"status":"Pending","placed":"2026-02-09T10:07:00Z"}]'>
+  <c2-table-column field="order" header="Order" width="110px"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="items" header="Items" width="90px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="total" header="Total" width="130px" align="end" format="currency" currency="EUR"></c2-table-column>
+  <c2-table-column field="margin" header="Margin" width="100px" align="end" format="percent"></c2-table-column>
+  <c2-table-column field="placed" header="Placed" width="180px" align="end" format="datetime"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Alignment and widths
+<style>
+  .aligned {
+    height: 296px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="aligned" row-key="id" rows='[{"id":"1","service":"api-gateway","region":"eu-west-1","tier":"Edge","uptime":0.9998,"p95":124,"requests":1284000,"state":"Healthy"},{"id":"2","service":"auth","region":"eu-west-1","tier":"Core","uptime":0.9991,"p95":86,"requests":642000,"state":"Healthy"},{"id":"3","service":"billing","region":"us-east-1","tier":"Core","uptime":0.9912,"p95":412,"requests":98400,"state":"Degraded"},{"id":"4","service":"search","region":"us-east-1","tier":"Edge","uptime":0.9975,"p95":238,"requests":874000,"state":"Healthy"},{"id":"5","service":"notifications","region":"ap-south-1","tier":"Async","uptime":0.9834,"p95":1840,"requests":41200,"state":"Down"},{"id":"6","service":"reports","region":"eu-west-1","tier":"Async","uptime":0.9989,"p95":690,"requests":18600,"state":"Healthy"}]'>
+  <c2-table-column field="service" header="Service" width="minmax(140px, 2fr)"></c2-table-column>
+  <c2-table-column field="region" header="Region" width="1fr"></c2-table-column>
+  <c2-table-column field="tier" header="Tier" width="100px" align="center"></c2-table-column>
+  <c2-table-column field="state" header="State" width="110px" align="center"></c2-table-column>
+  <c2-table-column field="uptime" header="Uptime" width="110px" align="end" format="percent" format-options='{"minimumFractionDigits":2}'></c2-table-column>
+  <c2-table-column field="p95" header="p95 (ms)" width="100px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="requests" header="Requests" width="120px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Pinned columns
+<style>
+  .pinned {
+    height: 296px;
+    width: 100%;
+    --c2-table__pinned-start--box-shadow: 2px 0 0 0 #e4e4e7;
+    --c2-table__pinned-end--box-shadow: -2px 0 0 0 #e4e4e7;
+  }
+</style>
+<c2-table client:only="lit" class="pinned" row-key="id" rows='[{"id":"1","order":"#10841","customer":"Northwind Trading","channel":"Online","items":12,"total":8420.5,"margin":0.182,"status":"Paid","placed":"2026-02-11T09:24:00Z"},{"id":"2","order":"#10840","customer":"Contoso Ltd","channel":"Partner","items":4,"total":1290,"margin":0.241,"status":"Pending","placed":"2026-02-11T08:02:00Z"},{"id":"3","order":"#10839","customer":"Fabrikam","channel":"Online","items":31,"total":18640.75,"margin":0.129,"status":"Paid","placed":"2026-02-10T17:41:00Z"},{"id":"4","order":"#10838","customer":"Tailspin Toys","channel":"Retail","items":7,"total":3150.2,"margin":0.204,"status":"Refunded","placed":"2026-02-10T14:15:00Z"},{"id":"5","order":"#10837","customer":"Adventure Works","channel":"Partner","items":19,"total":9875,"margin":0.163,"status":"Paid","placed":"2026-02-09T11:58:00Z"},{"id":"6","order":"#10836","customer":"Wide World Importers","channel":"Online","items":2,"total":480.9,"margin":0.315,"status":"Pending","placed":"2026-02-09T10:07:00Z"}]'>
+  <c2-table-column field="order" header="Order" width="120px" pinned="start"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="260px"></c2-table-column>
+  <c2-table-column field="channel" header="Channel" width="160px"></c2-table-column>
+  <c2-table-column field="items" header="Items" width="140px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="total" header="Total" width="180px" align="end" format="currency"></c2-table-column>
+  <c2-table-column field="margin" header="Margin" width="140px" align="end" format="percent"></c2-table-column>
+  <c2-table-column field="placed" header="Placed" width="200px" align="end" format="date"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="120px" align="center" pinned="end"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Resizable columns
+<style>
+  .resizable {
+    height: 296px;
+    width: 100%;
+    --c2-table__resizer--color: #e4e4e7;
+    --c2-table__resizer__hover--color: rgb(2, 101, 220);
+  }
+</style>
+<c2-table client:only="lit" class="resizable" resizable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Status pills
+<style>
+  .pills {
+    height: 296px;
+    width: 100%;
+  }
+  .pills::part(cell-content-status) {
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #3f3f46;
+    background: #f4f4f5;
+  }
+  .pills::part(cell-content-team) {
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #3730a3;
+    background: #eef2ff;
+  }
+</style>
+<c2-table client:only="lit" class="pills" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="130px" align="start"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="120px" align="start"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Hidden column
+<style>
+  .hidden-col {
+    height: 296px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="hidden-col" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr" hidden></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+## Sorting and selection
+
+`sortable` makes every header a sort control and `sort="field:asc"` sets the starting order; `multi-sort` lets a shift-click add a second key. Selection is `single` or `multiple`, with `checkbox-selection` for a leading checkbox column, and `value` holds the selected row keys — `;`-separated in markup.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Sortable
+<style>
+  .sortable-card {
+    height: 296px;
+    width: 100%;
+    --c2-table__header-cell__hover--background: #f4f4f5;
+  }
+</style>
+<c2-table client:only="lit" class="sortable-card" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Sorted on load
+<style>
+  .sorted {
+    height: 296px;
+    width: 100%;
+    --c2-table__header-cell__sorted--color: rgb(2, 101, 220);
+    --c2-table__sort-icon__active--color: rgb(2, 101, 220);
+  }
+</style>
+<c2-table client:only="lit" class="sorted" sortable sort="score:desc" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Multi-column sort
+<style>
+  .multi {
+    height: 296px;
+    width: 100%;
+    --c2-table__header-cell__sorted--color: #18181b;
+  }
+</style>
+<c2-table client:only="lit" class="multi" sortable multi-sort sort="team:asc;score:desc" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Sortable columns only
+<style>
+  .some-sortable {
+    height: 296px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="some-sortable" row-key="id" rows='[{"id":"1","service":"api-gateway","region":"eu-west-1","tier":"Edge","uptime":0.9998,"p95":124,"requests":1284000,"state":"Healthy"},{"id":"2","service":"auth","region":"eu-west-1","tier":"Core","uptime":0.9991,"p95":86,"requests":642000,"state":"Healthy"},{"id":"3","service":"billing","region":"us-east-1","tier":"Core","uptime":0.9912,"p95":412,"requests":98400,"state":"Degraded"},{"id":"4","service":"search","region":"us-east-1","tier":"Edge","uptime":0.9975,"p95":238,"requests":874000,"state":"Healthy"},{"id":"5","service":"notifications","region":"ap-south-1","tier":"Async","uptime":0.9834,"p95":1840,"requests":41200,"state":"Down"},{"id":"6","service":"reports","region":"eu-west-1","tier":"Async","uptime":0.9989,"p95":690,"requests":18600,"state":"Healthy"}]'>
+  <c2-table-column field="service" header="Service" width="minmax(140px, 2fr)" sortable></c2-table-column>
+  <c2-table-column field="region" header="Region" width="1fr"></c2-table-column>
+  <c2-table-column field="tier" header="Tier" width="100px" align="center"></c2-table-column>
+  <c2-table-column field="uptime" header="Uptime" width="110px" align="end" format="percent" format-options='{"minimumFractionDigits":2}' sortable></c2-table-column>
+  <c2-table-column field="p95" header="p95 (ms)" width="110px" align="end" format="number" sortable></c2-table-column>
+  <c2-table-column field="requests" header="Requests" width="120px" align="end" format="number" sortable></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Checkbox selection
+<style>
+  .checkbox-card {
+    height: 296px;
+    width: 100%;
+    --c2-table__row__selected--background: #edf1fe;
+    --c2-table__row__selected--color: #18181b;
+    --c2-table__selection-cell--width: 44px;
+  }
+</style>
+<c2-table client:only="lit" class="checkbox-card" selection="multiple" checkbox-selection value="2;4" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Single selection
+<style>
+  .single-card {
+    height: 296px;
+    width: 100%;
+    --c2-table__row__selected--background: #18181b;
+    --c2-table__row__selected--color: #ffffff;
+  }
+</style>
+<c2-table client:only="lit" class="single-card" selection="single" value="3" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+## Toolbar and footer
+
+The `toolbar` and `footer` slots are yours, and they are the natural place for the rest of the library: `c2-text-field` for a search, `c2-select` for a filter, `c2-button` and `c2-icon-button` for actions, `c2-badge` for a count. Both bars stay outside the scrolling body and are hidden until something is slotted into them; `--c2-table__toolbar--*` and `--c2-table__footer--*` set their padding, background and divider.
+
+A `c2-pagination` in the `footer` is wired up rather than decorative: the table pages its rows and drives the pager's `page`, `page-size` and `total-items`, so the card below works with nothing but the two elements. With a `dataSource` the same markup pages server-side, one request per page.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Toolbar: title and actions
+<style>
+  .toolbar-title {
+    height: 320px;
+    width: 100%;
+    --c2-table__toolbar--padding: 10px 12px;
+    --c2-table__toolbar--background: #fafafa;
+  }
+  .toolbar-title .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .toolbar-title .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: auto;
+  }
+  .toolbar-title .ghost {
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #e4e4e7;
+    --c2-button__container__hover--background-color: #f4f4f5;
+  }
+</style>
+<c2-table client:only="lit" class="toolbar-title" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <div class="bar" slot="toolbar">
+    <span class="title">Team scorecard</span>
+    <c2-badge variant="neutral">6 people</c2-badge>
+    <c2-button class="ghost" size="sm">Export</c2-button>
+    <c2-button size="sm">Add person</c2-button>
+  </div>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Toolbar: search
+<style>
+  .toolbar-search {
+    height: 320px;
+    width: 100%;
+    --c2-table__toolbar--padding: 10px 12px;
+  }
+  .toolbar-search .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .toolbar-search .search {
+    flex: 1;
+    --c2-text-field__container--min-height: 32px;
+  }
+</style>
+<c2-table client:only="lit" class="toolbar-search" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <div class="bar" slot="toolbar">
+    <c2-text-field
+      class="search"
+      placeholder="Search people"
+      oninput="const table = this.closest('c2-table'); table.allRows ??= table.rows; table.rows = table.allRows.filter((row) => Object.values(row).join(' ').toLowerCase().includes(this.value.toLowerCase())); this.nextElementSibling.textContent = table.rows.length + ' of ' + table.allRows.length"
+    ></c2-text-field>
+    <c2-badge variant="neutral">6 of 6</c2-badge>
+  </div>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Toolbar: filters
+<style>
+  .toolbar-filters {
+    height: 320px;
+    width: 100%;
+    --c2-table__toolbar--padding: 10px 12px;
+    --c2-table__toolbar--border-bottom: 1px solid #e4e4e7;
+  }
+  .toolbar-filters .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .toolbar-filters .picker {
+    width: 150px;
+    --c2-select__button--min-height: 32px;
+  }
+  .toolbar-filters .range {
+    width: 170px;
+    margin-left: auto;
+    --c2-select__button--min-height: 32px;
+  }
+</style>
+<c2-table client:only="lit" class="toolbar-filters" sortable row-key="id" rows='[{"id":"1","service":"api-gateway","region":"eu-west-1","tier":"Edge","uptime":0.9998,"p95":124,"requests":1284000,"state":"Healthy"},{"id":"2","service":"auth","region":"eu-west-1","tier":"Core","uptime":0.9991,"p95":86,"requests":642000,"state":"Healthy"},{"id":"3","service":"billing","region":"us-east-1","tier":"Core","uptime":0.9912,"p95":412,"requests":98400,"state":"Degraded"},{"id":"4","service":"search","region":"us-east-1","tier":"Edge","uptime":0.9975,"p95":238,"requests":874000,"state":"Healthy"},{"id":"5","service":"notifications","region":"ap-south-1","tier":"Async","uptime":0.9834,"p95":1840,"requests":41200,"state":"Down"},{"id":"6","service":"reports","region":"eu-west-1","tier":"Async","uptime":0.9989,"p95":690,"requests":18600,"state":"Healthy"}]'>
+  <div class="bar" slot="toolbar">
+    <c2-select class="picker" value="all" aria-label="Region">
+      <c2-list-item value="all">All regions</c2-list-item>
+      <c2-list-item value="eu">eu-west-1</c2-list-item>
+      <c2-list-item value="us">us-east-1</c2-list-item>
+      <c2-list-item value="ap">ap-south-1</c2-list-item>
+    </c2-select>
+    <c2-badge variant="danger">1 down</c2-badge>
+    <c2-badge variant="warning">1 degraded</c2-badge>
+    <c2-select class="range" value="24h" aria-label="Time range">
+      <c2-list-item value="24h">Last 24 hours</c2-list-item>
+      <c2-list-item value="7d">Last 7 days</c2-list-item>
+      <c2-list-item value="30d">Last 30 days</c2-list-item>
+    </c2-select>
+  </div>
+  <c2-table-column field="service" header="Service" width="minmax(140px, 2fr)"></c2-table-column>
+  <c2-table-column field="region" header="Region" width="1fr"></c2-table-column>
+  <c2-table-column field="tier" header="Tier" width="100px" align="center"></c2-table-column>
+  <c2-table-column field="state" header="State" width="110px" align="center"></c2-table-column>
+  <c2-table-column field="uptime" header="Uptime" width="110px" align="end" format="percent" format-options='{"minimumFractionDigits":2}'></c2-table-column>
+  <c2-table-column field="p95" header="p95 (ms)" width="110px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Footer: totals
+<style>
+  .footer-total {
+    height: 330px;
+    width: 100%;
+    --c2-table__footer--padding: 10px 12px;
+    --c2-table__footer--background: #fafafa;
+    --c2-table__footer--border-top: 1px solid #e4e4e7;
+  }
+  .footer-total .bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .footer-total .label {
+    font-size: 12px;
+    color: #71717a;
+  }
+  .footer-total .total {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+<c2-table client:only="lit" class="footer-total" sortable row-key="id" rows='[{"id":"1","order":"#10841","customer":"Northwind Trading","channel":"Online","items":12,"total":8420.5,"margin":0.182,"status":"Paid","placed":"2026-02-11T09:24:00Z"},{"id":"2","order":"#10840","customer":"Contoso Ltd","channel":"Partner","items":4,"total":1290,"margin":0.241,"status":"Pending","placed":"2026-02-11T08:02:00Z"},{"id":"3","order":"#10839","customer":"Fabrikam","channel":"Online","items":31,"total":18640.75,"margin":0.129,"status":"Paid","placed":"2026-02-10T17:41:00Z"},{"id":"4","order":"#10838","customer":"Tailspin Toys","channel":"Retail","items":7,"total":3150.2,"margin":0.204,"status":"Refunded","placed":"2026-02-10T14:15:00Z"},{"id":"5","order":"#10837","customer":"Adventure Works","channel":"Partner","items":19,"total":9875,"margin":0.163,"status":"Paid","placed":"2026-02-09T11:58:00Z"},{"id":"6","order":"#10836","customer":"Wide World Importers","channel":"Online","items":2,"total":480.9,"margin":0.315,"status":"Pending","placed":"2026-02-09T10:07:00Z"}]'>
+  <div class="bar" slot="footer">
+    <c2-badge variant="neutral">6 orders</c2-badge>
+    <span class="total">€41,857.35</span>
+  </div>
+  <c2-table-column field="order" header="Order" width="110px"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="channel" header="Channel" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px" align="center"></c2-table-column>
+  <c2-table-column field="items" header="Items" width="90px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="total" header="Total" width="130px" align="end" format="currency"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Footer: pager
+<style>
+  .footer-pager {
+    height: 330px;
+    width: 100%;
+    --c2-table__footer--padding: 6px 8px;
+  }
+  .footer-pager c2-pagination {
+    width: 100%;
+    --c2-pagination--justify-content: flex-end;
+    --c2-pagination__label--font-size: 12px;
+  }
+</style>
+<c2-table client:only="lit" class="footer-pager" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"},{"id":"7","name":"Margaret Hamilton","team":"Flight","role":"Principal","score":54300,"status":"Active","updated":"2026-02-08"},{"id":"8","name":"Jean Bartik","team":"Compilers","role":"Senior","score":49700,"status":"Active","updated":"2026-01-30"},{"id":"9","name":"Frances Allen","team":"Compilers","role":"Distinguished","score":47200,"status":"Active","updated":"2026-02-03"}]'>
+  <c2-pagination slot="footer" variant="compact" page-size="4" page-size-options="4,8"></c2-pagination>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+## States
+
+`loading` shows a spinner until the data lands — or whatever you slot into `loading` — `error` replaces the body with a message and a way out, and an empty `rows` array shows `empty-message` or the `empty` slot. Give the host a height and the body scrolls inside it; past `virtual-threshold` rows it virtualizes on its own.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Loading
+<style>
+  .loading-card {
+    height: 296px;
+    width: 100%;
+    --c2-table__skeleton--background: #f4f4f5;
+    --c2-table__skeleton--border-radius: 4px;
+  }
+</style>
+<c2-table client:only="lit" class="loading-card" loading row-key="id" rows='[]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Loading: skeleton rows
+<style>
+  .skeleton-card {
+    height: 296px;
+    width: 100%;
+    --c2-table__state--padding: 0;
+  }
+  .skeleton-card .rows {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    padding: 18px 16px;
+  }
+  .skeleton-card .line {
+    height: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #f4f4f5 0%, #e4e4e7 50%, #f4f4f5 100%);
+  }
+  .skeleton-card .line:nth-child(2) {
+    width: 82%;
+  }
+  .skeleton-card .line:nth-child(3) {
+    width: 91%;
+  }
+  .skeleton-card .line:nth-child(4) {
+    width: 74%;
+  }
+</style>
+<c2-table client:only="lit" class="skeleton-card" loading row-key="id" rows='[]'>
+  <div class="rows" slot="loading">
+    <span class="line"></span>
+    <span class="line"></span>
+    <span class="line"></span>
+    <span class="line"></span>
+  </div>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Empty
+<style>
+  .empty-card {
+    height: 296px;
+    width: 100%;
+    --c2-table__state--color: #71717a;
+    --c2-table__state--padding: 40px 16px;
+  }
+  .empty-card .empty {
+    display: grid;
+    gap: 4px;
+    justify-items: center;
+  }
+  .empty-card .empty strong {
+    font-size: 14px;
+    color: #18181b;
+  }
+</style>
+<c2-table client:only="lit" class="empty-card" row-key="id" rows='[]'>
+  <div class="empty" slot="empty">
+    <strong>No people match those filters</strong>
+    <span>Clear the search to see the whole team.</span>
+    <c2-button size="sm">Clear filters</c2-button>
+  </div>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Error
+<style>
+  .error-card {
+    height: 296px;
+    width: 100%;
+    --c2-table__state__error--color: #dc2626;
+    --c2-table__state--padding: 32px 16px;
+  }
+  .error-card .failed {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+  }
+</style>
+<c2-table client:only="lit" class="error-card" error="The scorecard service did not answer." row-key="id" rows='[]'>
+  <div class="failed" slot="error">
+    <span>The scorecard service did not answer.</span>
+    <c2-button size="sm">
+      <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
+      Retry
+    </c2-button>
+  </div>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Scrolling body
+<style>
+  .scrolling {
+    height: 240px;
+    width: 100%;
+    --c2-table__row--height: 36px;
+  }
+</style>
+<c2-table client:only="lit" class="scrolling" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"},{"id":"7","name":"Ada Lovelace II","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"8","name":"Grace Hopper II","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"9","name":"Alan Turing II","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"10","name":"Radia Perlman II","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"11","name":"Barbara Liskov II","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"12","name":"Katherine Johnson II","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+## Looks
+
+Same data, different surface. The table is one CSS grid, so a look is only variables: `--c2-table--*` for the frame, `--c2-table__header--*` and `--c2-table__header-cell--*` for the head, `--c2-table__row--*` with its `__odd`, `__hover` and `__selected` states, and `--c2-table__cell--*` for the body. Each cell also carries a part named after its column — `::part(cell-pct)` — so one column can be styled on its own.
+
+<GalleryGrid min="560">
 
 ```html tag=MdxCodeBlock,label=Hairline report
 <style>
   .report {
-    height: 208px;
+    height: 296px;
     width: 100%;
     --c2-table--border-top: none;
     --c2-table--border-right: none;
@@ -38,47 +665,55 @@ Curated looks for `c2-table`. Open any one in the studio to start from it. The s
     --c2-table__cell--padding: 0 8px;
   }
 </style>
-<c2-table client:only="lit" class="report" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},{"id":"3","name":"Alan Turing","team":"Research","score":87200},{"id":"4","name":"Radia Perlman","team":"Networks","score":74800}]'>
-  <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+<c2-table client:only="lit" class="report" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
   <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
-  <c2-table-column field="score" header="Score" width="100px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
 </c2-table>
 ```
 
 ```html tag=MdxCodeBlock,label=Spreadsheet
 <style>
   .sheet {
-    height: 208px;
+    height: 296px;
     width: 100%;
-    --c2-table--border-top-left-radius: 4px;
-    --c2-table--border-top-right-radius: 4px;
-    --c2-table--border-bottom-left-radius: 4px;
-    --c2-table--border-bottom-right-radius: 4px;
+    --c2-table--border-top-left-radius: 0;
+    --c2-table--border-top-right-radius: 0;
+    --c2-table--border-bottom-left-radius: 0;
+    --c2-table--border-bottom-right-radius: 0;
     --c2-table__header--background: #f4f4f5;
-    --c2-table__header--height: 28px;
+    --c2-table__header--height: 32px;
     --c2-table__header--font-size: 12px;
-    --c2-table__row--height: 26px;
+    --c2-table__header--border-bottom: 1px solid #d4d4d8;
+    --c2-table__row--height: 30px;
     --c2-table__row--border-bottom: 1px solid #e4e4e7;
     --c2-table__cell--border-right: 1px solid #e4e4e7;
-    --c2-table__cell--font-size: 13px;
     --c2-table__cell--padding: 0 8px;
+    --c2-table__cell--font-size: 12px;
     --c2-table__header-cell--padding: 0 8px;
   }
 </style>
-<c2-table client:only="lit" class="sheet" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},{"id":"3","name":"Alan Turing","team":"Research","score":87200},{"id":"4","name":"Radia Perlman","team":"Networks","score":74800},{"id":"5","name":"Katherine Johnson","team":"Flight","score":143000}]'>
-  <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
-  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
-  <c2-table-column field="score" header="Score" width="100px" align="end" format="number"></c2-table-column>
+<c2-table client:only="lit" class="sheet" sortable resizable row-key="id" rows='[{"id":"1","order":"#10841","customer":"Northwind Trading","channel":"Online","items":12,"total":8420.5,"margin":0.182,"status":"Paid","placed":"2026-02-11T09:24:00Z"},{"id":"2","order":"#10840","customer":"Contoso Ltd","channel":"Partner","items":4,"total":1290,"margin":0.241,"status":"Pending","placed":"2026-02-11T08:02:00Z"},{"id":"3","order":"#10839","customer":"Fabrikam","channel":"Online","items":31,"total":18640.75,"margin":0.129,"status":"Paid","placed":"2026-02-10T17:41:00Z"},{"id":"4","order":"#10838","customer":"Tailspin Toys","channel":"Retail","items":7,"total":3150.2,"margin":0.204,"status":"Refunded","placed":"2026-02-10T14:15:00Z"},{"id":"5","order":"#10837","customer":"Adventure Works","channel":"Partner","items":19,"total":9875,"margin":0.163,"status":"Paid","placed":"2026-02-09T11:58:00Z"},{"id":"6","order":"#10836","customer":"Wide World Importers","channel":"Online","items":2,"total":480.9,"margin":0.315,"status":"Pending","placed":"2026-02-09T10:07:00Z"}]'>
+  <c2-table-column field="order" header="Order" width="100px"></c2-table-column>
+  <c2-table-column field="customer" header="Customer" width="minmax(150px, 2fr)"></c2-table-column>
+  <c2-table-column field="channel" header="Channel" width="1fr"></c2-table-column>
+  <c2-table-column field="items" header="Items" width="80px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="total" header="Total" width="120px" align="end" format="currency"></c2-table-column>
+  <c2-table-column field="margin" header="Margin" width="90px" align="end" format="percent"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="100px" align="center"></c2-table-column>
 </c2-table>
 ```
 
 ```html tag=MdxCodeBlock,label=Dark console
 <style>
   .console {
-    height: 208px;
+    height: 296px;
     width: 100%;
     --c2-table--background: #18181b;
-    --c2-table--color: #f4f4f5;
+    --c2-table--color: #fafafa;
     --c2-table--border-top: 1px solid #3f3f46;
     --c2-table--border-right: 1px solid #3f3f46;
     --c2-table--border-bottom: 1px solid #3f3f46;
@@ -88,24 +723,26 @@ Curated looks for `c2-table`. Open any one in the studio to start from it. The s
     --c2-table__header--border-bottom: 1px solid #3f3f46;
     --c2-table__row--border-bottom: 1px solid #27272a;
     --c2-table__row__hover--background: #27272a;
-    --c2-table__row__selected--background: rgba(2, 101, 220, 0.24);
-    --c2-table__row__selected--color: #ffffff;
-    --c2-table__cell--color: #e4e4e7;
-    --c2-table__cell--font-size: 13px;
-    --c2-table__sort-icon--color: #71717a;
+    --c2-table__cell--color: #fafafa;
+    --c2-table__sort-icon--color: #52525b;
+    --c2-table__sort-icon__active--color: #a1a1aa;
   }
 </style>
-<c2-table client:only="lit" class="console" sortable selection="multiple" row-key="id" value="2" rows='[{"id":"1","name":"api-gateway","team":"200","score":128000},{"id":"2","name":"auth-service","team":"401","score":96500},{"id":"3","name":"worker-queue","team":"503","score":87200},{"id":"4","name":"static-cdn","team":"200","score":74800}]'>
-  <c2-table-column field="name" header="Service" width="2fr"></c2-table-column>
-  <c2-table-column field="team" header="Status" width="90px" align="center"></c2-table-column>
-  <c2-table-column field="score" header="Requests" width="110px" align="end" format="number"></c2-table-column>
+<c2-table client:only="lit" class="console" sortable row-key="id" rows='[{"id":"1","service":"api-gateway","region":"eu-west-1","tier":"Edge","uptime":0.9998,"p95":124,"requests":1284000,"state":"Healthy"},{"id":"2","service":"auth","region":"eu-west-1","tier":"Core","uptime":0.9991,"p95":86,"requests":642000,"state":"Healthy"},{"id":"3","service":"billing","region":"us-east-1","tier":"Core","uptime":0.9912,"p95":412,"requests":98400,"state":"Degraded"},{"id":"4","service":"search","region":"us-east-1","tier":"Edge","uptime":0.9975,"p95":238,"requests":874000,"state":"Healthy"},{"id":"5","service":"notifications","region":"ap-south-1","tier":"Async","uptime":0.9834,"p95":1840,"requests":41200,"state":"Down"},{"id":"6","service":"reports","region":"eu-west-1","tier":"Async","uptime":0.9989,"p95":690,"requests":18600,"state":"Healthy"}]'>
+  <c2-table-column field="service" header="Service" width="minmax(140px, 2fr)"></c2-table-column>
+  <c2-table-column field="region" header="Region" width="1fr"></c2-table-column>
+  <c2-table-column field="tier" header="Tier" width="90px" align="center"></c2-table-column>
+  <c2-table-column field="state" header="State" width="100px" align="center"></c2-table-column>
+  <c2-table-column field="uptime" header="Uptime" width="100px" align="end" format="percent" format-options='{"minimumFractionDigits":2}'></c2-table-column>
+  <c2-table-column field="p95" header="p95" width="90px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="requests" header="Requests" width="110px" align="end" format="number"></c2-table-column>
 </c2-table>
 ```
 
 ```html tag=MdxCodeBlock,label=Soft cards
 <style>
   .soft {
-    height: 208px;
+    height: 310px;
     width: 100%;
     --c2-table--background: #fafafa;
     --c2-table--border-top: none;
@@ -128,10 +765,141 @@ Curated looks for `c2-table`. Open any one in the studio to start from it. The s
     --c2-table__header-cell--padding: 0 16px;
   }
 </style>
-<c2-table client:only="lit" class="soft" stripe sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},{"id":"3","name":"Alan Turing","team":"Research","score":87200},{"id":"4","name":"Radia Perlman","team":"Networks","score":74800}]'>
-  <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+<c2-table client:only="lit" class="soft" stripe sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
   <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
-  <c2-table-column field="score" header="Score" width="100px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Zebra
+<style>
+  .zebra {
+    height: 296px;
+    width: 100%;
+    --c2-table__row--border-bottom: none;
+    --c2-table__row__odd--background: #f4f4f5;
+    --c2-table__row__hover--background: #e4e4e7;
+    --c2-table__header--background: #ffffff;
+    --c2-table__header--border-bottom: 2px solid #18181b;
+  }
+</style>
+<c2-table client:only="lit" class="zebra" stripe sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    height: 244px;
+    width: 100%;
+    --c2-table--font-size: 12px;
+    --c2-table__header--height: 28px;
+    --c2-table__header--font-size: 11px;
+    --c2-table__row--height: 28px;
+    --c2-table__cell--font-size: 12px;
+    --c2-table__cell--padding: 0 8px;
+    --c2-table__header-cell--padding: 0 8px;
+  }
+</style>
+<c2-table client:only="lit" class="compact" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
+  <c2-table-column field="name" header="Name" width="minmax(160px, 2fr)"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="role" header="Role" width="1fr"></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  <c2-table-column field="updated" header="Updated" width="120px" align="end" format="date"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Financial
+<style>
+  .financial {
+    height: 296px;
+    width: 100%;
+    --c2-table--font-size: 13px;
+    --c2-table__header--background: #ffffff;
+    --c2-table__header--border-bottom: 1px solid #e4e4e7;
+    --c2-table__row--height: 36px;
+    --c2-table__row--border-bottom: 1px solid #f4f4f5;
+    --c2-table__row__selected--background: #fffbeb;
+    --c2-table__cell--font-size: 13px;
+  }
+  .financial::part(cell-last), .financial::part(cell-change), .financial::part(cell-pct), .financial::part(cell-volume), .financial::part(cell-cap) {
+    font-variant-numeric: tabular-nums;
+  }
+  .financial::part(cell-change), .financial::part(cell-pct) {
+    color: #15803d;
+    font-weight: 600;
+  }
+  .financial::part(row-selected) {
+    box-shadow: inset 2px 0 0 0 #f59e0b;
+  }
+</style>
+<c2-table client:only="lit" class="financial" sortable sort="pct:desc" selection="multiple" value="3" row-key="id" rows='[{"id":"1","symbol":"ACME","name":"Acme Industrial","last":184.32,"change":2.41,"pct":0.0132,"volume":4820000,"cap":128400000000},{"id":"2","symbol":"NWND","name":"Northwind Energy","last":62.18,"change":-1.07,"pct":-0.0169,"volume":9120000,"cap":48200000000},{"id":"3","symbol":"CNTS","name":"Contoso Systems","last":311.94,"change":7.86,"pct":0.0259,"volume":2310000,"cap":264900000000},{"id":"4","symbol":"FBRK","name":"Fabrikam Materials","last":27.45,"change":-0.62,"pct":-0.0221,"volume":15840000,"cap":8900000000},{"id":"5","symbol":"TSPN","name":"Tailspin Aviation","last":95.7,"change":0.18,"pct":0.0019,"volume":1260000,"cap":19400000000},{"id":"6","symbol":"ADVW","name":"Adventure Works","last":143.06,"change":-3.24,"pct":-0.0221,"volume":3470000,"cap":52700000000}]'>
+  <c2-table-column field="symbol" header="Symbol" width="90px"></c2-table-column>
+  <c2-table-column field="name" header="Name" width="minmax(150px, 2fr)"></c2-table-column>
+  <c2-table-column field="last" header="Last" width="100px" align="end" format="number" format-options='{"minimumFractionDigits":2}'></c2-table-column>
+  <c2-table-column field="change" header="Change" width="100px" align="end" format="number" format-options='{"minimumFractionDigits":2,"signDisplay":"always"}'></c2-table-column>
+  <c2-table-column field="pct" header="%" width="90px" align="end" format="percent" format-options='{"minimumFractionDigits":2,"signDisplay":"always"}'></c2-table-column>
+  <c2-table-column field="volume" header="Volume" width="110px" align="end" format="number" format-options='{"notation":"compact"}'></c2-table-column>
+  <c2-table-column field="cap" header="Market cap" width="120px" align="end" format="currency" format-options='{"notation":"compact"}'></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Trading terminal
+<style>
+  .terminal {
+    height: 296px;
+    width: 100%;
+    --c2-table--background: #09090b;
+    --c2-table--color: #e4e4e7;
+    --c2-table--font-size: 12px;
+    --c2-table--border-top: 1px solid #27272a;
+    --c2-table--border-right: 1px solid #27272a;
+    --c2-table--border-bottom: 1px solid #27272a;
+    --c2-table--border-left: 1px solid #27272a;
+    --c2-table__header--background: #09090b;
+    --c2-table__header--color: #71717a;
+    --c2-table__header--height: 30px;
+    --c2-table__header--letter-spacing: 0.08em;
+    --c2-table__header--border-bottom: 1px solid #27272a;
+    --c2-table__row--height: 30px;
+    --c2-table__row--border-bottom: none;
+    --c2-table__row__odd--background: #111113;
+    --c2-table__row__hover--background: #1c1c1f;
+    --c2-table__cell--color: #e4e4e7;
+    --c2-table__cell--font-size: 12px;
+    --c2-table__sort-icon--color: #3f3f46;
+    --c2-table__sort-icon__active--color: #22c55e;
+  }
+  .terminal::part(cell-symbol) {
+    font-weight: 600;
+    color: #fafafa;
+  }
+  .terminal::part(cell-last), .terminal::part(cell-change), .terminal::part(cell-pct), .terminal::part(cell-volume) {
+    font-variant-numeric: tabular-nums;
+  }
+  .terminal::part(cell-change), .terminal::part(cell-pct) {
+    color: #22c55e;
+  }
+</style>
+<c2-table client:only="lit" class="terminal" stripe sortable sort="volume:desc" row-key="id" rows='[{"id":"1","symbol":"ACME","name":"Acme Industrial","last":184.32,"change":2.41,"pct":0.0132,"volume":4820000,"cap":128400000000},{"id":"2","symbol":"NWND","name":"Northwind Energy","last":62.18,"change":-1.07,"pct":-0.0169,"volume":9120000,"cap":48200000000},{"id":"3","symbol":"CNTS","name":"Contoso Systems","last":311.94,"change":7.86,"pct":0.0259,"volume":2310000,"cap":264900000000},{"id":"4","symbol":"FBRK","name":"Fabrikam Materials","last":27.45,"change":-0.62,"pct":-0.0221,"volume":15840000,"cap":8900000000},{"id":"5","symbol":"TSPN","name":"Tailspin Aviation","last":95.7,"change":0.18,"pct":0.0019,"volume":1260000,"cap":19400000000},{"id":"6","symbol":"ADVW","name":"Adventure Works","last":143.06,"change":-3.24,"pct":-0.0221,"volume":3470000,"cap":52700000000}]'>
+  <c2-table-column field="symbol" header="Symbol" width="80px"></c2-table-column>
+  <c2-table-column field="name" header="Name" width="minmax(140px, 2fr)"></c2-table-column>
+  <c2-table-column field="last" header="Last" width="90px" align="end" format="number" format-options='{"minimumFractionDigits":2}'></c2-table-column>
+  <c2-table-column field="change" header="Chg" width="90px" align="end" format="number" format-options='{"minimumFractionDigits":2,"signDisplay":"always"}'></c2-table-column>
+  <c2-table-column field="pct" header="Chg %" width="90px" align="end" format="percent" format-options='{"minimumFractionDigits":2,"signDisplay":"always"}'></c2-table-column>
+  <c2-table-column field="volume" header="Volume" width="100px" align="end" format="number" format-options='{"notation":"compact"}'></c2-table-column>
 </c2-table>
 ```
 

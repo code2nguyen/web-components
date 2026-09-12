@@ -1,0 +1,68 @@
+{
+  "name": "@c2n/menu",
+  "version": "0.0.5",
+  "type": "module",
+  "main": "dist/menu.js",
+  "exports": {
+    ".": {
+      "default": "./dist/menu.js",
+      "types": "./types/src/menu.d.ts"
+    },
+    "./menu-item.js": {
+      "default": "./dist/menu-item.js",
+      "types": "./types/src/menu-item.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "menu",
+    "dropdown menu",
+    "context menu",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build",
+        "../overlay:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/core": "0.0.5",
+    "@c2n/overlay": "0.0.5",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

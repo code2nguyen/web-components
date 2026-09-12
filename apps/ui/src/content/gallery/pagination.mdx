@@ -1,0 +1,119 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Pagination } from '@c2n/pagination'
+
+## Presets
+
+Curated looks for `c2-pagination`. Open any card in the studio to start from it. `--c2-pagination__item--*` carries
+the page numbers and `--c2-pagination__item__selected--*` the current one; `--c2-pagination__nav--*` styles the
+previous/next controls on their own, and `--c2-pagination--justify-content` places the row in its container.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-pagination client:only="lit" total-pages="9" page="3"></c2-pagination>
+```
+
+```html tag=MdxCodeBlock,label=Accent pills
+<style>
+  .accent-pills {
+    --c2-pagination__item--border-radius: 999px;
+    --c2-pagination__nav--border-radius: 999px;
+    --c2-pagination__item__selected--background-color: #0265dc;
+    --c2-pagination__item__selected--color: #ffffff;
+    --c2-pagination__item__selected--border: 1px solid #0265dc;
+    --c2-pagination__item__hover--background-color: #edf1fe;
+  }
+</style>
+<c2-pagination client:only="lit" class="accent-pills" total-pages="9" page="3" hide-nav-labels></c2-pagination>
+```
+
+```html tag=MdxCodeBlock,label=Outlined
+<style>
+  .outlined {
+    --c2-pagination--gap: 6px;
+    --c2-pagination__item--border: 1px solid #e4e4e7;
+    --c2-pagination__item--border-radius: 6px;
+    --c2-pagination__nav--border: 1px solid #e4e4e7;
+    --c2-pagination__nav--border-radius: 6px;
+    --c2-pagination__item__selected--background-color: #18181b;
+    --c2-pagination__item__selected--color: #ffffff;
+    --c2-pagination__item__selected--border: 1px solid #18181b;
+  }
+</style>
+<c2-pagination client:only="lit" class="outlined" total-pages="9" page="3" hide-nav-labels></c2-pagination>
+```
+
+```html tag=MdxCodeBlock,label=Quiet
+<style>
+  .quiet {
+    --c2-pagination--gap: 2px;
+    --c2-pagination__item--color: #71717a;
+    --c2-pagination__item--font-weight: 400;
+    --c2-pagination__item--min-width: 30px;
+    --c2-pagination__item--height: 30px;
+    --c2-pagination__nav--color: #71717a;
+    --c2-pagination__nav--font-weight: 400;
+    --c2-pagination__item__selected--background-color: transparent;
+    --c2-pagination__item__selected--border: 1px solid transparent;
+    --c2-pagination__item__selected--color: #18181b;
+    --c2-pagination__item__selected--font-weight: 600;
+  }
+</style>
+<c2-pagination client:only="lit" class="quiet" total-pages="9" page="3" hide-nav-labels></c2-pagination>
+```
+
+```html tag=MdxCodeBlock,label=Square
+<style>
+  .square {
+    --c2-pagination--gap: 0px;
+    --c2-pagination__item--border-radius: 0px;
+    --c2-pagination__nav--border-radius: 0px;
+    --c2-pagination__item--border: 1px solid #e4e4e7;
+    --c2-pagination__nav--border: 1px solid #e4e4e7;
+    --c2-pagination__item__selected--background-color: #f4f4f5;
+    --c2-pagination__item__selected--border: 1px solid #e4e4e7;
+    --c2-pagination__item__selected--font-weight: 600;
+  }
+</style>
+<c2-pagination client:only="lit" class="square" total-pages="24" page="12" hide-nav-labels></c2-pagination>
+```
+
+```html tag=MdxCodeBlock,label=Simple
+<c2-pagination client:only="lit" variant="simple" total-pages="12" page="3" show-first-last></c2-pagination>
+```
+
+```html tag=MdxCodeBlock,label=Table footer
+<style>
+  .table-footer {
+    --c2-pagination--justify-content: flex-end;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+  }
+</style>
+<c2-pagination client:only="lit" class="table-footer" variant="compact" total-items="100" page-size="10" page="3"></c2-pagination>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    --c2-pagination__item--color: #e4e4e7;
+    --c2-pagination__nav--color: #e4e4e7;
+    --c2-pagination__item__hover--background-color: #3f3f46;
+    --c2-pagination__nav__hover--background-color: #3f3f46;
+    --c2-pagination__item__selected--background-color: #52525b;
+    --c2-pagination__item__selected--color: #ffffff;
+    --c2-pagination__item__selected--border: 1px solid #52525b;
+    --c2-pagination__ellipsis--color: #a1a1aa;
+    padding: 8px 12px;
+    background: #18181b;
+    border-radius: 10px;
+  }
+</style>
+<c2-pagination client:only="lit" class="dark" total-pages="9" page="3" hide-nav-labels></c2-pagination>
+```
+
+</GalleryGrid>

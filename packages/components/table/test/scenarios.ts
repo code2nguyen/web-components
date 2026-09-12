@@ -1,8 +1,10 @@
 import '../src/table'
 import '../src/table-column'
+// The pager is only ever slotted into the table; the table never imports it.
+import '@c2n/pagination'
 import type { Table } from '../src/table'
 import type { TableRow } from '../src/table-types'
-import type { TableBenchApi, TableBenchStats } from './bench-api'
+import type { PagedRequest, TableBenchApi, TableBenchStats, TableScenarioApi } from './bench-api'
 
 const TEAMS = ['Analytics', 'Compilers', 'Research', 'Flight', 'Networks']
 const STATUSES = ['active', 'invited', 'paused']
@@ -174,4 +176,65 @@ const api: TableBenchApi = {
 }
 
 window.tableBench = api
+
+// --- Paging -------------------------------------------------------------------------------------------------------
+// A fake server the specs drive frame by frame. Requests park on a stored resolver rather than a timer, so nothing
+// here depends on wall-clock timing — which is what keeps the suite honest on all three engines.
+
+let serverRows: TableRow[] = []
+let requestLog: PagedRequest[] = []
+let parked: (() => void) | null = null
+
+const scenarioApi: TableScenarioApi = {
+  async usePagedSource({ total, failAt, manual, pageSize, pager = true }) {
+    serverRows = makeRows(total)
+    requestLog = []
+    parked = null
+    main.innerHTML = `
+      <c2-table id="paged" row-key="id" sortable page-size="${pageSize}" style="height: 240px; width: 560px">
+        <c2-table-column field="name" header="Name" width="2fr" sortable></c2-table-column>
+        <c2-table-column field="score" header="Score" width="120px" align="end" sortable></c2-table-column>
+        ${pager ? '<c2-pagination slot="footer" variant="compact" hide-page-size style="width: 100%"></c2-pagination>' : ''}
+      </c2-table>`
+    table = main.querySelector<Table>('c2-table')!
+    table.dataSource = {
+      async getRows(request) {
+        requestLog.push({ start: request.start, count: request.count, sort: request.sort.map((entry) => ({ ...entry })) })
+        if (manual) await new Promise<void>((resolve) => (parked = resolve))
+        if (failAt !== undefined && request.start === failAt) throw new Error('The request failed')
+        const sort = request.sort[0]
+        const ordered = sort
+          ? [...serverRows].sort((a, b) => {
+              const direction = sort.direction === 'desc' ? -1 : 1
+              return String(a[sort.field]).localeCompare(String(b[sort.field]), undefined, { numeric: true }) * direction
+            })
+          : serverRows
+        return { rows: ordered.slice(request.start, request.start + request.count), total: serverRows.length }
+      },
+    }
+    await customElements.whenDefined('c2-pagination')
+    // Settle either way: with `manual` the render completes while the request stays parked, which is exactly the
+    // state the loading assertions need — and it guarantees `release()` has something to release.
+    await settle()
+  },
+
+  async release() {
+    const resolve = parked
+    parked = null
+    resolve?.()
+    await settle()
+  },
+
+  requests() {
+    return requestLog.map((entry) => ({ ...entry }))
+  },
+
+  setTotal(total: number) {
+    serverRows = makeRows(total)
+  },
+}
+
+window.tableScenario = scenarioApi
 document.documentElement.dataset.benchReady = 'true'
+// The shared `renderScenario` fixture waits for this one.
+document.documentElement.dataset.modulesReady = 'true'

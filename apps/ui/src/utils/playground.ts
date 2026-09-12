@@ -83,6 +83,41 @@ export function toggleExample(uid: string) {
   }
 }
 
+interface IconStudioTarget {
+  uid: string
+  tagName: string
+  textContent?: string
+  attributes?: Record<string, string>
+}
+
+/** Replace an icon gallery's reusable studio target and open the inspector for the selected icon. */
+export function openIconInStudio({ uid, tagName, textContent = '', attributes = {} }: IconStudioTarget): boolean {
+  const current = getComponentByUid(uid)
+  if (!current || !componentManifests[tagName]) return false
+
+  const replacement = document.createElement(tagName)
+  replacement.dataset.targetUid = uid
+  replacement.textContent = textContent
+  for (const [name, value] of Object.entries(attributes)) replacement.setAttribute(name, value)
+  current.replaceWith(replacement)
+  customElements.upgrade(replacement)
+
+  // One gallery frame is reused for many tags. Forget the previous icon's values before initializing its replacement.
+  const configs = new Map($configStore.get().configs)
+  configs.delete(uid)
+  $configStore.setKey('configs', configs)
+
+  const attributeSource = Object.entries(attributes)
+    .map(([name, value]) => ` ${name}="${value}"`)
+    .join('')
+  const code = `<${tagName}${attributeSource}>${textContent}</${tagName}>`
+  $configCodeStore.setKey(uid, { code, lang: 'html' })
+  const codeElement = document.querySelector<HTMLElement>(`.example[data-uid="${uid}"] .example__code pre code`)
+  if (codeElement) codeElement.textContent = code
+
+  return openExample(uid)
+}
+
 // ---------------------------------------------------------------------------
 // Applying / reading configuration
 // ---------------------------------------------------------------------------

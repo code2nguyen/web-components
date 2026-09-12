@@ -43,6 +43,14 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     --c2-table__cell--font-size: 13px;
   }
 </style>
+<div data-label="Paged rows">
+  <c2-table client:only="lit" class="grid" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},{"id":"3","name":"Alan Turing","team":"Research","score":87200},{"id":"4","name":"Radia Perlman","team":"Networks","score":74800},{"id":"5","name":"Barbara Liskov","team":"Research","score":69100},{"id":"6","name":"Katherine Johnson","team":"Flight","score":58400},{"id":"7","name":"Margaret Hamilton","team":"Flight","score":54300}]'>
+    <c2-pagination slot="footer" variant="compact" page-size="3" page-size-options="3,5"></c2-pagination>
+    <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
+    <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+    <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+  </c2-table>
+</div>
 <div data-label="Sortable columns">
   <c2-table client:only="lit" class="grid" sortable stripe row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000,"joined":"2024-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","score":96500,"joined":"2023-11-02"},{"id":"3","name":"Alan Turing","team":"Research","score":87200,"joined":"2024-06-30"},{"id":"4","name":"Katherine Johnson","team":"Flight","score":143000,"joined":"2022-09-14"},{"id":"5","name":"Radia Perlman","team":"Networks","score":74800,"joined":"2025-01-08"}]'>
     <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
@@ -143,3 +151,54 @@ table.dataSource = {
   },
 }
 ```
+
+### Paging with c2-pagination
+
+Slot a `c2-pagination` into the `footer` and the table pages its rows, driving the pager's `page`, `page-size` and
+`total-items` — so the pager needs no configuration of its own, and there is nothing to wire up.
+
+```html tag=CodeBlock
+<c2-table row-key="id" sortable style="height: 300px">
+  <c2-pagination slot="footer" variant="compact" page-size="10"></c2-pagination>
+  <c2-table-column field="name" header="Name" width="2fr" sortable></c2-table-column>
+  <c2-table-column field="score" header="Score" width="120px" align="end" format="number" sortable></c2-table-column>
+</c2-table>
+```
+
+The **Paged rows** card above is exactly that markup, live.
+
+`page-size` is what turns paging on, and the table adopts the pager's own when it has none — which is why the markup
+above needs nothing else. With `rows` the page is sliced in place. With a `dataSource` the same markup pages
+server-side, one request per page:
+
+```typescript tag=CodeBlock
+const table = document.querySelector('c2-table')
+table.pageSize = 25
+
+table.dataSource = {
+  async getRows({ start, count, sort }) {
+    const params = new URLSearchParams({ offset: String(start), limit: String(count) })
+    if (sort[0]) params.set('sort', `${sort[0].field}:${sort[0].direction}`)
+    const response = await fetch(`/api/people?${params}`)
+    const { items, total } = await response.json()
+    return { rows: items, total }
+  },
+}
+
+table.addEventListener('page-change', (event) => {
+  console.log(event.detail.page, event.detail.start, event.detail.count)
+})
+```
+
+One page is one request, so `block-size` does not apply while paging, and revisiting a page you have already seen is
+served from the block cache. `total` in the `getRows` result is what sizes the pager, so a paged source should always
+return it.
+
+The table owns the numbers, so do not set `page`, `total-items` or `total-pages` on a pager in a footer — everything
+else about it (`variant`, the labels, `page-size-options`, the styling) is still yours.
+
+`page` is 1-based and reflected, so `table.page = 3` moves both the table and the pager, and `goToPage()` does the
+same. The table emits one `page-change`: the pager's own event does not leave the table. Sorting starts again at page
+one, since the server order has changed, and a request that fails shows the error until the next page is asked for.
+
+`@c2n/pagination` is deliberately **not** a dependency of `@c2n/table` — install and import it yourself.

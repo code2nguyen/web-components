@@ -1,0 +1,265 @@
+---
+description: 'Ready-made looks for c2-navigation-menu: underline and pill bars, dark headers, panel surfaces and link rows. Open a card, then a trigger, to see the panel.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { NavigationMenu } from '@c2n/navigation-menu'
+
+## Bar
+
+Each card is a small bar; hover or click a trigger to see its panel. `--c2-navigation-menu--*` spaces and frames the bar itself, `--c2-navigation-menu-item--*` styles the triggers, and `__indicator` is the line under the current or open item.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default .stack {
+    display: grid;
+    gap: 2px;
+    width: 200px;
+  }
+</style>
+<c2-navigation-menu class="default" aria-label="Default" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Analytics</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Warehouse</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item><c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=Underline
+<style>
+  .underline {
+    --c2-navigation-menu--gap: 18px;
+    --c2-navigation-menu-item--padding-left: 0px;
+    --c2-navigation-menu-item--padding-right: 0px;
+    --c2-navigation-menu-item__hover--background: transparent;
+    --c2-navigation-menu-item__expanded--background: transparent;
+    --c2-navigation-menu-item__indicator--inset: 0px;
+    --c2-navigation-menu-item__indicator--bottom: -2px;
+    --c2-navigation-menu-item__indicator--color: #18181b;
+    --c2-navigation-menu-item__indicator--border-radius: 0px;
+  }
+  .underline .stack {
+    display: grid;
+    gap: 2px;
+    width: 200px;
+  }
+</style>
+<c2-navigation-menu class="underline" aria-label="Underline" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Analytics</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Warehouse</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item><c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=Pill bar
+<style>
+  .pill {
+    --c2-navigation-menu--gap: 2px;
+    --c2-navigation-menu--background: #f4f4f5;
+    --c2-navigation-menu--padding-top: 4px;
+    --c2-navigation-menu--padding-right: 4px;
+    --c2-navigation-menu--padding-bottom: 4px;
+    --c2-navigation-menu--padding-left: 4px;
+    --c2-navigation-menu--border-top-left-radius: 999px;
+    --c2-navigation-menu--border-top-right-radius: 999px;
+    --c2-navigation-menu--border-bottom-left-radius: 999px;
+    --c2-navigation-menu--border-bottom-right-radius: 999px;
+    --c2-navigation-menu-item--border-top-left-radius: 999px;
+    --c2-navigation-menu-item--border-top-right-radius: 999px;
+    --c2-navigation-menu-item--border-bottom-left-radius: 999px;
+    --c2-navigation-menu-item--border-bottom-right-radius: 999px;
+    --c2-navigation-menu-item__hover--background: #ffffff;
+    --c2-navigation-menu-item__expanded--background: #ffffff;
+    --c2-navigation-menu-item__current--background: #ffffff;
+    --c2-navigation-menu-item__indicator--height: 0px;
+  }
+  .pill .stack {
+    display: grid;
+    gap: 2px;
+    width: 200px;
+  }
+</style>
+<c2-navigation-menu class="pill" aria-label="Pill" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Analytics</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Warehouse</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item><c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=No indicator
+<style>
+  /* `__indicator--height: 0` takes the line away entirely; the open and current items are marked by their chip. */
+  .no-indicator {
+    --c2-navigation-menu-item__indicator--height: 0px;
+    --c2-navigation-menu-item--border-top-left-radius: 8px;
+    --c2-navigation-menu-item--border-top-right-radius: 8px;
+    --c2-navigation-menu-item--border-bottom-left-radius: 8px;
+    --c2-navigation-menu-item--border-bottom-right-radius: 8px;
+    --c2-navigation-menu-item__expanded--border-bottom-left-radius: 8px;
+    --c2-navigation-menu-item__expanded--border-bottom-right-radius: 8px;
+    --c2-navigation-menu-item__expanded--background: #e4e4e7;
+    --c2-navigation-menu-item__current--background: #f4f4f5;
+  }
+  .no-indicator .stack {
+    display: grid;
+    gap: 2px;
+    width: 200px;
+  }
+</style>
+<c2-navigation-menu class="no-indicator" aria-label="No indicator" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Analytics</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Warehouse</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item><c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=Dark header
+<style>
+  .dark {
+    --c2-navigation-menu--background: #09090b;
+    --c2-navigation-menu--padding-top: 6px;
+    --c2-navigation-menu--padding-right: 10px;
+    --c2-navigation-menu--padding-bottom: 6px;
+    --c2-navigation-menu--padding-left: 10px;
+    --c2-navigation-menu--border-top-left-radius: 10px;
+    --c2-navigation-menu--border-top-right-radius: 10px;
+    --c2-navigation-menu--border-bottom-left-radius: 10px;
+    --c2-navigation-menu--border-bottom-right-radius: 10px;
+    --c2-navigation-menu-item--color: #a1a1aa;
+    --c2-navigation-menu-item__hover--color: #fafafa;
+    --c2-navigation-menu-item__hover--background: #27272a;
+    --c2-navigation-menu-item__expanded--color: #fafafa;
+    --c2-navigation-menu-item__expanded--background: #27272a;
+    --c2-navigation-menu-item__current--color: #fafafa;
+    --c2-navigation-menu-item__indicator--color: #a78bfa;
+    --c2-navigation-menu-item__panel--background: #18181b;
+    --c2-navigation-menu-item__panel--border-top: 1px solid #3f3f46;
+    --c2-navigation-menu-item__panel--border-right: 1px solid #3f3f46;
+    --c2-navigation-menu-item__panel--border-bottom: 1px solid #3f3f46;
+    --c2-navigation-menu-item__panel--border-left: 1px solid #3f3f46;
+    --c2-navigation-menu-item__panel--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --c2-navigation-menu-link--color: #fafafa;
+    --c2-navigation-menu-link__hover--background: #27272a;
+    --c2-navigation-menu-link__description--color: #a1a1aa;
+  }
+  .dark .stack {
+    display: grid;
+    gap: 2px;
+    width: 220px;
+  }
+</style>
+<c2-navigation-menu class="dark" aria-label="Dark" client:only="lit"><c2-navigation-menu-item value="platform">Platform<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Overview<span slot="description">What it does</span></c2-navigation-menu-link><c2-navigation-menu-link href="#b">Security<span slot="description">SOC 2 and SSO</span></c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item><c2-navigation-menu-item value="company" href="#company" current>Company</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+</GalleryGrid>
+
+## Panel
+
+The panel surface is `--c2-navigation-menu-item__panel--*` and the rows inside it `--c2-navigation-menu-link--*`. The layout of the panel is your own CSS: these cards use a grid in the slotted wrapper.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Two columns
+<style>
+  .two-columns c2-navigation-menu-item[value='products'] {
+    --c2-navigation-menu-item__panel--min-width: 420px;
+  }
+  .two-columns .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+    gap: 2px;
+  }
+</style>
+<c2-navigation-menu class="two-columns" aria-label="Two columns" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="cards" slot="panel"><c2-navigation-menu-link href="#a"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Analytics<span slot="description">Realtime dashboards</span></c2-navigation-menu-link><c2-navigation-menu-link href="#b"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>Warehouse<span slot="description">Columnar storage</span></c2-navigation-menu-link><c2-navigation-menu-link href="#c"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>Pipelines<span slot="description">Scheduled ETL</span></c2-navigation-menu-link><c2-navigation-menu-link href="#d"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>Catalog<span slot="description">Lineage and quality</span></c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=Soft panel
+<style>
+  .soft {
+    --c2-navigation-menu-item__panel--border-top: 1px solid transparent;
+    --c2-navigation-menu-item__panel--border-right: 1px solid transparent;
+    --c2-navigation-menu-item__panel--border-bottom: 1px solid transparent;
+    --c2-navigation-menu-item__panel--border-left: 1px solid transparent;
+    --c2-navigation-menu-item__panel--border-top-left-radius: 16px;
+    --c2-navigation-menu-item__panel--border-top-right-radius: 16px;
+    --c2-navigation-menu-item__panel--border-bottom-left-radius: 16px;
+    --c2-navigation-menu-item__panel--border-bottom-right-radius: 16px;
+    --c2-navigation-menu-item__panel--box-shadow: 0 18px 44px rgba(24, 24, 27, 0.18);
+    --c2-navigation-menu-item__panel--padding-top: 12px;
+    --c2-navigation-menu-item__panel--padding-right: 12px;
+    --c2-navigation-menu-item__panel--padding-bottom: 12px;
+    --c2-navigation-menu-item__panel--padding-left: 12px;
+    --c2-navigation-menu-link--border-top-left-radius: 10px;
+    --c2-navigation-menu-link--border-top-right-radius: 10px;
+    --c2-navigation-menu-link--border-bottom-left-radius: 10px;
+    --c2-navigation-menu-link--border-bottom-right-radius: 10px;
+  }
+  .soft .stack {
+    display: grid;
+    gap: 4px;
+    width: 240px;
+  }
+</style>
+<c2-navigation-menu class="soft" aria-label="Soft" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>Analytics<span slot="description">Realtime dashboards</span></c2-navigation-menu-link><c2-navigation-menu-link href="#b"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>Warehouse<span slot="description">Columnar storage</span></c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=Tinted rows
+<style>
+  .tinted {
+    --c2-navigation-menu-item__indicator--color: #7c3aed;
+    --c2-navigation-menu-link__hover--background: #f5f3ff;
+    --c2-navigation-menu-link__hover--color: #5b21b6;
+    --c2-navigation-menu-link__current--color: #7c3aed;
+    --c2-navigation-menu-link__current--background: #f5f3ff;
+    --c2-navigation-menu-link__focus--outline: 2px solid rgba(124, 58, 237, 0.4);
+  }
+  .tinted .stack {
+    display: grid;
+    gap: 2px;
+    width: 230px;
+  }
+</style>
+<c2-navigation-menu class="tinted" aria-label="Tinted" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a" current>Analytics<span slot="description">You are here</span></c2-navigation-menu-link><c2-navigation-menu-link href="#b">Warehouse<span slot="description">Columnar storage</span></c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=Mobile
+<style>
+  .mobile-look {
+    --c2-navigation-menu__mobile-panel--min-width: 280px;
+  }
+  .mobile-look .stack {
+    display: grid;
+    gap: 2px;
+  }
+</style>
+<c2-navigation-menu class="mobile-look" aria-label="Mobile" mode="mobile" client:only="lit"><c2-navigation-menu-item value="fixed">Fixed Income Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Reference Data</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Corporate Actions</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="regulatory">Regulatory Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#c">ERISA Portfolio Analytics</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="home" href="#home">Home</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=Mobile, collapsible groups
+<style>
+  .mobile-collapsible {
+    --c2-navigation-menu__mobile-trigger--border-radius: 999px;
+    --c2-navigation-menu__mobile-panel--min-width: 280px;
+  }
+  .mobile-collapsible .stack {
+    display: grid;
+    gap: 2px;
+  }
+</style>
+<c2-navigation-menu class="mobile-collapsible" aria-label="Collapsible" mode="mobile" collapsible client:only="lit"><c2-navigation-menu-item value="fixed">Fixed Income Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Reference Data</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Corporate Actions</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="regulatory">Regulatory Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#c" current>ERISA Portfolio Analytics</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="home" href="#home">Home</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    --c2-navigation-menu-item--font-size: 13px;
+    --c2-navigation-menu-item--padding-top: 6px;
+    --c2-navigation-menu-item--padding-bottom: 6px;
+    --c2-navigation-menu-item--padding-left: 8px;
+    --c2-navigation-menu-item--padding-right: 8px;
+    --c2-navigation-menu-item__panel--min-width: 190px;
+    --c2-navigation-menu-item__panel--padding-top: 4px;
+    --c2-navigation-menu-item__panel--padding-right: 4px;
+    --c2-navigation-menu-item__panel--padding-bottom: 4px;
+    --c2-navigation-menu-item__panel--padding-left: 4px;
+    --c2-navigation-menu-link--font-size: 13px;
+    --c2-navigation-menu-link--padding-top: 5px;
+    --c2-navigation-menu-link--padding-bottom: 5px;
+  }
+  .compact .stack {
+    display: grid;
+    gap: 1px;
+    width: 180px;
+  }
+</style>
+<c2-navigation-menu class="compact" aria-label="Compact" client:only="lit"><c2-navigation-menu-item value="products">Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Analytics</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Warehouse</c2-navigation-menu-link><c2-navigation-menu-link href="#c">Pipelines</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item><c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item></c2-navigation-menu>
+```
+
+</GalleryGrid>

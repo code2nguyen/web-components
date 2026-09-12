@@ -57,6 +57,9 @@
         "../../components/sheet:build",
         "../../components/skeleton:build",
         "../../components/progress:build",
+        "../../components/pagination:build",
+        "../../components/navigation-menu:build",
+        "../../components/menu:build",
         "../../components/kbd:build",
         "../../components/table:build",
         "../../components/copy-button:build",
@@ -98,6 +101,7 @@
         "../../components/text-field:build",
         "../../components/tooltip:build",
         "../../icons/feather-icons:build",
+        "../../icons/phosphor-icons:build",
         "../../../open-packages/chatbot:build"
       ],
       "command": "tsc -p tsconfig.lib.json && node scripts/theme-generator/index.ts"

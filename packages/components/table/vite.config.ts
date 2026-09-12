@@ -11,7 +11,7 @@ export default defineConfig({
     },
     minify: false,
     rollupOptions: {
-      external: /^lit|@c2n/,
+      external: /^lit|@lit\/context|@c2n/,
     },
   },
   plugins: [

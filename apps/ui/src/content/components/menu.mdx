@@ -1,0 +1,202 @@
+---
+title: 'Menu'
+description: 'Commands, links, checkboxes and submenus in a popover anchored to a trigger.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Menu } from '@c2n/menu'
+import { Button } from '@c2n/button'
+import { IconButton } from '@c2n/icon-button'
+import { Kbd } from '@c2n/kbd'
+
+`c2-menu` is a trigger plus a popover of commands. The trigger goes in the `trigger` slot — a `c2-button`, a `c2-icon-button`, a plain `<button>` — or stays anywhere on the page and is named by `anchor`. The rows are `c2-menu-item` children: a command, a link (`href`), a checkbox or a radio (`type`), or the parent of a nested menu slotted into `submenu`. `<hr>` draws a separator between them and `<h1>`–`<h6>` a group heading.
+
+Activating a row fires `menu-select` and closes the menu, unless the menu (or that single row) is marked `keep-open`, which is what a list of `checkbox` rows wants. The surface is a native popover on the top layer positioned by `c2-overlay`, so it flips near the bottom of the viewport, light-dismisses on Escape and outside clicks, and is never clipped by an `overflow: hidden` parent.
+
+Keyboard: Enter, Space or ArrowDown on the trigger opens the menu on its first row (ArrowUp on the last). Inside, the arrows move between enabled rows, Home and End jump to the ends, letters jump to a matching row, ArrowRight opens a submenu and ArrowLeft returns from it, and Escape or Tab closes the menu and hands focus back to the trigger.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/menu
+```
+
+`c2-menu-item` ships in the same package and is registered with it.
+
+## Usage
+
+Click any trigger below to open its menu.
+
+```html tag=UsageBlock,package=@c2n/menu
+<style>
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #16a34a;
+  }
+  .narrow {
+    --c2-menu--min-width: 220px;
+  }
+</style>
+<div data-label="Commands">
+  <c2-menu client:only="lit" aria-label="File">
+    <c2-button slot="trigger">Actions</c2-button>
+    <c2-menu-item value="new">New file<c2-kbd slot="shortcut">⌘N</c2-kbd></c2-menu-item>
+    <c2-menu-item value="duplicate">Duplicate<c2-kbd slot="shortcut">⌘D</c2-kbd></c2-menu-item>
+    <c2-menu-item value="rename" disabled>Rename</c2-menu-item>
+    <hr />
+    <c2-menu-item value="delete" destructive>Delete file</c2-menu-item>
+  </c2-menu>
+</div>
+<div data-label="Groups and descriptions">
+  <c2-menu client:only="lit" aria-label="Account" class="narrow">
+    <c2-button slot="trigger">Account</c2-button>
+    <h6>Signed in as ada</h6>
+    <c2-menu-item value="profile">
+      Profile
+      <span slot="description">Name, avatar and handle</span>
+    </c2-menu-item>
+    <c2-menu-item value="billing">
+      Billing
+      <span slot="description">Plan, invoices and cards</span>
+    </c2-menu-item>
+    <hr />
+    <c2-menu-item value="sign-out" destructive>Sign out</c2-menu-item>
+  </c2-menu>
+</div>
+<div data-label="Icons">
+  <c2-menu client:only="lit" aria-label="Status">
+    <c2-button slot="trigger">Status</c2-button>
+    <c2-menu-item value="active"><span slot="prefix-icon" class="dot"></span>Active</c2-menu-item>
+    <c2-menu-item value="away">
+      <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 6v6l4 2"></path>
+      </svg>
+      Away
+    </c2-menu-item>
+    <c2-menu-item value="docs" href="https://example.com" target="_blank">
+      <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+        <path d="M15 3h6v6"></path>
+        <path d="M10 14 21 3"></path>
+      </svg>
+      Open the guide
+    </c2-menu-item>
+  </c2-menu>
+</div>
+<div data-label="Checkboxes and radios">
+  <c2-menu client:only="lit" aria-label="View" keep-open>
+    <c2-button slot="trigger">View</c2-button>
+    <h6>Panels</h6>
+    <c2-menu-item type="checkbox" value="sidebar" checked>Sidebar</c2-menu-item>
+    <c2-menu-item type="checkbox" value="terminal">Terminal</c2-menu-item>
+    <hr />
+    <h6>Density</h6>
+    <c2-menu-item type="radio" name="density" value="comfortable" checked>Comfortable</c2-menu-item>
+    <c2-menu-item type="radio" name="density" value="compact">Compact</c2-menu-item>
+  </c2-menu>
+</div>
+<div data-label="Submenu">
+  <c2-menu client:only="lit" aria-label="Share">
+    <c2-button slot="trigger">Share</c2-button>
+    <c2-menu-item value="copy-link">Copy link</c2-menu-item>
+    <c2-menu-item value="invite">
+      Invite people
+      <c2-menu slot="submenu" aria-label="Invite">
+        <c2-menu-item value="email">By email</c2-menu-item>
+        <c2-menu-item value="slack">By Slack</c2-menu-item>
+        <c2-menu-item value="more">
+          More channels
+          <c2-menu slot="submenu" aria-label="More channels">
+            <c2-menu-item value="sms">SMS</c2-menu-item>
+            <c2-menu-item value="qr">QR code</c2-menu-item>
+          </c2-menu>
+        </c2-menu-item>
+      </c2-menu>
+    </c2-menu-item>
+    <hr />
+    <c2-menu-item value="embed">Embed</c2-menu-item>
+  </c2-menu>
+</div>
+<div data-label="Icon trigger and placement">
+  <c2-menu client:only="lit" aria-label="Row actions" placement="bottom-end">
+    <c2-icon-button slot="trigger" aria-label="Row actions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="5" r="1.5"></circle>
+        <circle cx="12" cy="12" r="1.5"></circle>
+        <circle cx="12" cy="19" r="1.5"></circle>
+      </svg>
+    </c2-icon-button>
+    <c2-menu-item value="edit">Edit</c2-menu-item>
+    <c2-menu-item value="move">Move to…</c2-menu-item>
+    <hr />
+    <c2-menu-item value="remove" destructive>Remove</c2-menu-item>
+  </c2-menu>
+  <c2-menu client:only="lit" aria-label="Upwards" placement="top-start">
+    <c2-button slot="trigger">Opens above</c2-button>
+    <c2-menu-item value="one">First row</c2-menu-item>
+    <c2-menu-item value="two">Second row</c2-menu-item>
+  </c2-menu>
+</div>
+```
+
+The surface is as wide as its rows: `--c2-menu--min-width` (128px) is only a floor, and a menu that owns its trigger is never narrower than that trigger either — so a wide button opens a wide menu. `fit-anchor` pins it to exactly the trigger's width, and setting the floor to `0` lets a short menu shrink to its content.
+
+## Handling a selection
+
+`menu-select` bubbles from the activated row: `detail.value` is that row's `value`, `detail.checked` its state after the activation, and `detail.data` the payload you put on the row. One listener on the menu covers every row, submenus included.
+
+```ts tag=CodeBlock
+const menu = document.querySelector('c2-menu')
+
+menu.addEventListener('menu-select', (event) => {
+  console.log(event.detail.value) // 'delete'
+  console.log(event.detail.checked) // false for a command, the new state for a checkbox row
+  console.log(event.detail.data) // { id: 7 }
+})
+
+menu.querySelector('c2-menu-item[value="delete"]').data = { id: 7 }
+
+// Open and close it from code; `show('last')` starts on the last row.
+menu.show()
+menu.hide()
+menu.toggle()
+```
+
+A trigger elsewhere on the page is named by `anchor`, and the menu opens beside it:
+
+```html tag=CodeBlock
+<button id="row-7">Actions</button>
+
+<c2-menu anchor="row-7" placement="right-start">
+  <c2-menu-item value="edit">Edit</c2-menu-item>
+</c2-menu>
+```
+
+## Theming
+
+`--c2-menu--*` is the surface: background, a border per side, a radius per corner, shadow, padding, `min-width` and the `max-height` it starts scrolling at. `--c2-menu__separator--*` and `--c2-menu__heading--*` style the `<hr>` and group headings. The rows are your own children, so `--c2-menu-item--*` set on the menu cascades into all of them, with `__hover`, `__focus`, `__disabled`, `__destructive` states and `__description`, `__shortcut`, `__icon` and `__indicator` parts.
+
+```css tag=CodeBlock
+c2-menu.brand {
+  --c2-menu--border-top-left-radius: 12px;
+  --c2-menu--border-top-right-radius: 12px;
+  --c2-menu--border-bottom-left-radius: 12px;
+  --c2-menu--border-bottom-right-radius: 12px;
+  --c2-menu--padding-top: 6px;
+  --c2-menu--padding-right: 6px;
+  --c2-menu--padding-bottom: 6px;
+  --c2-menu--padding-left: 6px;
+
+  --c2-menu-item__hover--background: #eef2ff;
+  --c2-menu-item__hover--color: #3730a3;
+  --c2-menu-item__icon--color: #6366f1;
+}
+```
+
+Every variable, with its default, is listed on the API tab, and the Gallery tab has ready-made looks to start from.

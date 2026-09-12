@@ -1,0 +1,326 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-navigation-menu-item,
+  $theme: (
+    min-height: 36px,
+    gap: 6px,
+
+    padding-top: 8px,
+    padding-right: 12px,
+    padding-bottom: 8px,
+    padding-left: 12px,
+
+    border-top-left-radius: 6px,
+    border-top-right-radius: 6px,
+    border-bottom-left-radius: 6px,
+    border-bottom-right-radius: 6px,
+
+    font-size: 14px,
+    font-weight: 500,
+    font-style: null,
+    font-family: null,
+
+    color: #71717a,
+    background: transparent,
+
+    hover--color: #18181b,
+    hover--background: #f4f4f5,
+
+    expanded--color: #18181b,
+    expanded--background: #f4f4f5,
+    expanded--border-bottom-left-radius: 0px,
+    expanded--border-bottom-right-radius: 0px,
+
+    current--color: #18181b,
+    current--font-weight: 600,
+    current--background: null,
+
+    indicator--color: rgb(2, 101, 220),
+    indicator--height: 2px,
+    indicator--bottom: 0px,
+    indicator--inset: 0px,
+    indicator--border-radius: 999px,
+
+    icon--size: 16px,
+    icon--color: null,
+
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 1px,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    panel--background: #ffffff,
+    panel--min-width: 260px,
+    panel--max-width: null,
+    panel--max-height: min(70vh, var(--c2-overlay--available-height, 70vh)),
+
+    panel--border-top: 1px solid #e4e4e7,
+    panel--border-right: 1px solid #e4e4e7,
+    panel--border-bottom: 1px solid #e4e4e7,
+    panel--border-left: 1px solid #e4e4e7,
+
+    panel--border-top-left-radius: 8px,
+    panel--border-top-right-radius: 8px,
+    panel--border-bottom-left-radius: 8px,
+    panel--border-bottom-right-radius: 8px,
+
+    panel--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+
+    panel--padding-top: 8px,
+    panel--padding-right: 8px,
+    panel--padding-bottom: 8px,
+    panel--padding-left: 8px,
+
+    mobile-heading--color: #71717a,
+    mobile-heading--font-size: 11px,
+    mobile-heading--font-weight: 600,
+    mobile-heading--letter-spacing: 0.06em,
+    mobile-heading--text-transform: uppercase,
+    mobile-heading--padding-top: 10px,
+    mobile-heading--padding-right: 8px,
+    mobile-heading--padding-bottom: 4px,
+    mobile-heading--padding-left: 8px,
+
+    mobile-group--indent: 12px,
+    mobile-heading__chevron--size: 16px,
+  )
+);
+
+:host {
+  display: block;
+  flex: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.trigger {
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  box-sizing: border-box;
+  margin: 0;
+  appearance: none;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+  border: none;
+  outline: none;
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-style: css.cssVar(font-style);
+  font-family: css.cssVar(font-family);
+  line-height: 1.4;
+
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+
+  will-change: background, color;
+  transition: animation.standard(background), animation.standard(color);
+
+  &:hover {
+    color: css.cssVar(hover--color, color);
+    background: css.cssVar(hover--background, background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.label {
+  min-width: 0;
+}
+
+// The line under a current or expanded item. It never takes part in layout.
+.indicator {
+  position: absolute;
+  left: css.cssVar(indicator--inset);
+  right: css.cssVar(indicator--inset);
+  bottom: css.cssVar(indicator--bottom);
+  height: css.cssVar(indicator--height);
+  border-radius: css.cssVar(indicator--border-radius);
+  background: css.cssVar(indicator--color);
+  opacity: 0;
+  transition: animation.standard(opacity);
+}
+
+:host([current]) .trigger,
+:host([current-group]) .trigger {
+  color: css.cssVar(current--color, color);
+  font-weight: css.cssVar(current--font-weight, font-weight);
+  background: css.cssVar(current--background, background);
+
+  .indicator {
+    opacity: 1;
+  }
+}
+
+:host([expanded]) .trigger {
+  color: css.cssVar(expanded--color, color);
+  background: css.cssVar(expanded--background, background);
+  // Square at the bottom while the panel is open, so the trigger and its panel read as one surface.
+  border-bottom-left-radius: css.cssVar(expanded--border-bottom-left-radius, border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(expanded--border-bottom-right-radius, border-bottom-right-radius);
+
+  .chevron {
+    transform: rotate(180deg);
+  }
+
+  .indicator {
+    opacity: 1;
+  }
+}
+
+::slotted([slot='prefix-icon']),
+::slotted([slot='suffix-icon']),
+.chevron {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.chevron {
+  transition: animation.standard(transform);
+}
+
+:host([disabled]) .trigger {
+  pointer-events: none;
+  cursor: default;
+  opacity: css.cssVar(disabled--opacity);
+}
+
+// The panel: the surface inside the overlay popover.
+.panel {
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-width: css.cssVar(panel--min-width);
+  max-width: css.cssVar(panel--max-width);
+  max-height: css.cssVar(panel--max-height);
+
+  background: css.cssVar(panel--background);
+  box-shadow: css.cssVar(panel--box-shadow);
+
+  border-top: css.cssVar(panel--border-top);
+  border-right: css.cssVar(panel--border-right);
+  border-bottom: css.cssVar(panel--border-bottom);
+  border-left: css.cssVar(panel--border-left);
+
+  border-top-left-radius: css.cssVar(panel--border-top-left-radius);
+  border-top-right-radius: css.cssVar(panel--border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(panel--border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(panel--border-bottom-right-radius);
+
+  padding-top: css.cssVar(panel--padding-top);
+  padding-right: css.cssVar(panel--padding-right);
+  padding-bottom: css.cssVar(panel--padding-bottom);
+  padding-left: css.cssVar(panel--padding-left);
+}
+
+// Mobile: the item is one entry of a hierarchy list, so its row fills the width and its panel is laid out inline.
+:host([mobile]) {
+  display: block;
+  width: 100%;
+}
+
+:host([mobile]) .trigger {
+  width: 100%;
+  justify-content: flex-start;
+  // A top-level row lines up with the group headings, one level above the rows inside a group.
+  padding-left: css.cssVar(mobile-heading--padding-left);
+  padding-right: css.cssVar(mobile-heading--padding-right);
+}
+
+// The indicator is a line under a bar item; in a column of rows the current one is marked by its colour instead.
+:host([mobile]) .indicator {
+  display: none;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  gap: css.cssVar(gap);
+  color: css.cssVar(mobile-heading--color);
+  font-size: css.cssVar(mobile-heading--font-size);
+  font-weight: css.cssVar(mobile-heading--font-weight);
+  letter-spacing: css.cssVar(mobile-heading--letter-spacing);
+  text-transform: css.cssVar(mobile-heading--text-transform);
+  line-height: 1.4;
+  user-select: none;
+
+  padding-top: css.cssVar(mobile-heading--padding-top);
+  padding-right: css.cssVar(mobile-heading--padding-right);
+  padding-bottom: css.cssVar(mobile-heading--padding-bottom);
+  padding-left: css.cssVar(mobile-heading--padding-left);
+}
+
+.mobile-group {
+  display: block;
+  padding-left: css.cssVar(mobile-group--indent);
+}
+
+// A collapsible group heading is a real button; the chevron turns as the group opens.
+.heading-button {
+  width: 100%;
+  margin: 0;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  outline: none;
+  text-align: start;
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+  }
+}
+
+.heading-chevron {
+  display: inline-flex;
+  margin-left: auto;
+  width: css.cssVar(mobile-heading__chevron--size);
+  height: css.cssVar(mobile-heading__chevron--size);
+  transition: animation.standard(transform);
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+:host([mobile][expanded]) .heading-chevron {
+  transform: rotate(180deg);
+}
+
+.mobile-group[hidden] {
+  display: none;
+}

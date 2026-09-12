@@ -1,0 +1,320 @@
+---
+import { featherIconNames } from '@c2n/feather-icons/icon-names.js'
+import { phosphorIconNames } from '@c2n/phosphor-icons/icon-names.js'
+import { materialIconNames } from '../data/material-icon-names'
+
+const iconSets = [
+  {
+    id: 'feather-icons',
+    label: 'Feather',
+    names: featherIconNames,
+    tagPrefix: 'c2-feather-',
+  },
+  {
+    id: 'mat-icon',
+    label: 'Material Icons',
+    names: materialIconNames,
+    tagPrefix: 'c2-mat-icon',
+  },
+  {
+    id: 'phosphor-icons',
+    label: 'Phosphor',
+    names: phosphorIconNames,
+    tagPrefix: 'c2-phosphor-',
+  },
+] as const
+
+const searchIndex = iconSets.flatMap(({ id, label, names, tagPrefix }) =>
+  names.map((name) => ({
+    id,
+    label,
+    name,
+    tag: id === 'mat-icon' ? tagPrefix : `${tagPrefix}${name}`,
+  })),
+)
+
+const serializedIndex = JSON.stringify(searchIndex).replaceAll('<', '\\u003c')
+---
+
+<section class="all-icon-search" aria-labelledby="all-icon-search-title">
+  <div class="all-icon-search__heading">
+    <div>
+      <h2 id="all-icon-search-title">Search all icons</h2>
+      <p>Search {searchIndex.length.toLocaleString('en')} icons across every set, then use its copy action to copy the HTML.</p>
+    </div>
+    <span class="all-icon-search__total">{iconSets.length} sets</span>
+  </div>
+
+  <label class="all-icon-search__field">
+    <span class="sr-only">Search all icon sets</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"></circle>
+      <path d="m20 20-4-4"></path>
+    </svg>
+    <input type="search" placeholder="Search icons, for example arrow, heart, user…" autocomplete="off" />
+  </label>
+
+  <div class="all-icon-search__summary" aria-live="polite">Start typing to search all icon sets.</div>
+  <div class="all-icon-search__results"></div>
+</section>
+
+<script type="application/json" id="all-icon-search-index" set:html={serializedIndex} />
+
+<style lang="scss">
+  .all-icon-search {
+    margin: 28px 0 36px;
+
+    &__heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+
+      h2 {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--site-color-on-surface-variant);
+      }
+    }
+
+    &__total {
+      flex: none;
+      padding: 4px 9px;
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--site-color-on-surface-muted);
+    }
+
+    &__field {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 44px;
+      padding: 0 14px;
+      color: var(--site-color-on-surface-muted);
+      background: var(--site-color-surface-container-1);
+      border: 1px solid var(--site-color-outline-variant);
+      border-radius: var(--site-radius-md);
+
+      &:focus-within {
+        border-color: var(--site-color-primary);
+        box-shadow: 0 0 0 3px var(--site-color-primary-soft);
+      }
+
+      svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+      }
+
+      input {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        font: inherit;
+        color: var(--site-color-on-surface);
+        background: transparent;
+        border: 0;
+        outline: 0;
+
+        &::placeholder {
+          color: var(--site-color-on-surface-muted);
+        }
+      }
+    }
+
+    &__summary {
+      min-height: 20px;
+      margin: 10px 0;
+      font-size: 12.5px;
+      color: var(--site-color-on-surface-muted);
+    }
+
+    &__results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+      gap: 8px;
+      --c2-feather-icon--size: 23px;
+      --c2-phosphor-icon--size: 24px;
+      --c2-mat-icon--font-size: 24px;
+
+      :global(.all-icon-search__result) {
+        position: relative;
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 8px 10px;
+        font: inherit;
+        color: var(--site-color-on-surface);
+        background: transparent;
+        border: 1px solid var(--site-color-outline-variant);
+        border-radius: var(--site-radius-md);
+        transition:
+          border-color 150ms var(--site-ease),
+          background-color 150ms var(--site-ease);
+
+        &:hover {
+          background: var(--site-color-surface-container-1);
+          border-color: var(--site-color-outline);
+        }
+      }
+
+      :global(.all-icon-search__copy) {
+        z-index: 1;
+        --c2-copy-button__pin--offset-x: 5px;
+        --c2-copy-button__pin--offset-y: 5px;
+        --c2-copy-button__container--height: 26px;
+        --c2-copy-button__container--min-width: 26px;
+        --c2-copy-button__container--padding-left: 5px;
+        --c2-copy-button__container--padding-right: 5px;
+        --c2-copy-button__container--background-color: var(--site-color-surface);
+        --c2-copy-button__container--border: 1px solid var(--site-color-outline-variant);
+        --c2-copy-button__container__hover--background-color: var(--site-color-surface-container-2);
+        --c2-copy-button__icon--size: 14px;
+      }
+
+      :global(.all-icon-search__name) {
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 11px;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      :global(.all-icon-search__set) {
+        font-size: 10px;
+        color: var(--site-color-on-surface-muted);
+      }
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 599.98px) {
+    .all-icon-search__heading {
+      display: block;
+    }
+
+    .all-icon-search__total {
+      display: inline-block;
+      margin-top: 10px;
+    }
+  }
+</style>
+
+<script>
+  import '@c2n/copy-button'
+
+  interface IconSearchEntry {
+    id: 'feather-icons' | 'mat-icon' | 'phosphor-icons'
+    label: string
+    name: string
+    tag: string
+  }
+
+  const MAX_RESULTS = 120
+  const root = document.querySelector<HTMLElement>('.all-icon-search')
+  const input = root?.querySelector<HTMLInputElement>('input[type="search"]')
+  const results = root?.querySelector<HTMLElement>('.all-icon-search__results')
+  const summary = root?.querySelector<HTMLElement>('.all-icon-search__summary')
+  const data = document.querySelector<HTMLScriptElement>('#all-icon-search-index')
+  const index: IconSearchEntry[] = data?.textContent ? JSON.parse(data.textContent) : []
+
+  const loaders: Record<IconSearchEntry['id'], () => Promise<unknown>> = {
+    'feather-icons': () => import('@c2n/feather-icons'),
+    'mat-icon': () => import('@c2n/mat-icon'),
+    'phosphor-icons': () => import('@c2n/phosphor-icons'),
+  }
+  const loaded = new Map<IconSearchEntry['id'], Promise<unknown>>()
+
+  function normalize(value: string): string {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[\s_-]+/g, '')
+  }
+
+  function loadSet(id: IconSearchEntry['id']): Promise<unknown> {
+    const pending = loaded.get(id) ?? loaders[id]()
+    loaded.set(id, pending)
+    return pending
+  }
+
+  function usage(entry: IconSearchEntry): string {
+    return entry.id === 'mat-icon' ? `<${entry.tag}>${entry.name}</${entry.tag}>` : `<${entry.tag}></${entry.tag}>`
+  }
+
+  function resultCard(entry: IconSearchEntry): HTMLDivElement {
+    const card = document.createElement('div')
+    card.className = 'all-icon-search__result'
+
+    const icon = document.createElement(entry.tag)
+    if (entry.id === 'mat-icon') icon.textContent = entry.name
+
+    const name = document.createElement('span')
+    name.className = 'all-icon-search__name'
+    name.textContent = entry.name
+
+    const set = document.createElement('span')
+    set.className = 'all-icon-search__set'
+    set.textContent = entry.label
+
+    const copy = document.createElement('c2-copy-button')
+    copy.className = 'all-icon-search__copy'
+    copy.setAttribute('pin', '')
+    copy.setAttribute('value', usage(entry))
+    copy.setAttribute('label', `Copy ${entry.name} HTML`)
+
+    card.append(icon, name, set, copy)
+    return card
+  }
+
+  let searchRevision = 0
+  input?.addEventListener('input', async () => {
+    const revision = ++searchRevision
+    const query = normalize(input.value)
+    results?.replaceChildren()
+
+    if (!query) {
+      if (summary) summary.textContent = 'Start typing to search all icon sets.'
+      return
+    }
+
+    const matches = index.filter((entry) => normalize(entry.name).includes(query))
+    const visibleMatches = matches.slice(0, MAX_RESULTS)
+    if (summary) summary.textContent = matches.length === 0 ? 'No icon matches.' : `Loading ${matches.length.toLocaleString('en')} matching icons…`
+
+    await Promise.all([...new Set(visibleMatches.map((entry) => entry.id))].map(loadSet))
+    if (revision !== searchRevision || !results) return
+
+    results.replaceChildren(...visibleMatches.map(resultCard))
+    if (summary) {
+      summary.textContent =
+        matches.length > MAX_RESULTS
+          ? `${matches.length.toLocaleString('en')} matches · showing the first ${MAX_RESULTS}`
+          : `${matches.length.toLocaleString('en')} ${matches.length === 1 ? 'match' : 'matches'}`
+    }
+  })
+</script>

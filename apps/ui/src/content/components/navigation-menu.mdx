@@ -1,0 +1,340 @@
+---
+title: 'Navigation Menu'
+description: 'Site navigation bar whose triggers open panels of links below the header.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { NavigationMenu } from '@c2n/navigation-menu'
+import { Button } from '@c2n/button'
+
+`c2-navigation-menu` is the bar at the top of a site. Each `c2-navigation-menu-item` child is either a plain link (`href`) or, as soon as anything is slotted into its `panel`, a trigger that opens that content below the bar — a stack of `c2-navigation-menu-link` rows, a multi-column mega panel, or any markup you lay out yourself. Mark the entry of the page being shown `current` to get `aria-current="page"` and the indicator line.
+
+A trigger follows its own panel. While the current page is one of the panel's rows — a `current` `c2-navigation-menu-link`, or any element carrying `aria-current` — the item sets `current-group` on itself and wears the same styling as a `current` item, so the closed bar still shows which section the visitor is in. It keeps working as routes change: marking a different row `current` moves the group. Only the row keeps `aria-current`, since the trigger is the group and not the page.
+
+The bar owns which panel is open: `value` holds the `value` of that item and `''` when everything is closed, and `value-change` fires on every change. Panels open on hover after `open-delay` and close `close-delay` after the pointer has left both the item and the panel, so crossing the gap between them is forgiving; a click on a trigger opens its panel straight away. Set `open-on="click"` for a bar that ignores hover, where a second click closes the panel again.
+
+Each panel is a `c2-overlay` popover on the top layer, so a header with `overflow: hidden` or a stacking context never clips it, and it flips or shifts to stay in the viewport. Dismissal belongs to the bar rather than to the browser: a press anywhere outside it, or Escape, closes the open panel.
+
+The bar is always one row — it never wraps. `mode="mobile"` is the other layout: the row becomes a single button that opens the whole navigation as one hierarchy, every plain link a row and every panel item a heading with its rows underneath. Add `collapsible` and those groups open one at a time instead, the open one being `value` exactly as in the bar, and the list opens on the group holding the current page. Set `mobile-breakpoint` to a viewport width and the bar switches itself below it; leave it unset and `mode` is yours to drive.
+
+Keyboard: every item is a tab stop. On a trigger, ArrowLeft / ArrowRight and Home / End walk the bar — and while a panel is open, moving along keeps browsing panels — ArrowDown, Enter or Space opens the panel and moves focus to its first link, and Escape closes it and returns focus to the trigger. Tab from an open trigger walks straight into the panel.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/navigation-menu
+```
+
+`c2-navigation-menu-item` and `c2-navigation-menu-link` ship in the same package and are registered with it.
+
+## Usage
+
+Hover or click a trigger to open its panel.
+
+```html tag=UsageBlock,package=@c2n/navigation-menu
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
+    gap: 2px;
+    width: 460px;
+  }
+  .stack {
+    display: grid;
+    gap: 2px;
+    width: 240px;
+  }
+  /* In the mobile list the rows fill the panel, so they read as one column. */
+  .rows {
+    display: grid;
+    gap: 2px;
+  }
+  .mobile {
+    --c2-navigation-menu__mobile-panel--min-width: 300px;
+  }
+  /* Panel variables belong to the item: on the bar they would widen every panel. */
+  .wide c2-navigation-menu-item[value='products'],
+  .wide c2-navigation-menu-item[value='resources'] {
+    --c2-navigation-menu-item__panel--min-width: 480px;
+  }
+  .full-row {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid #e4e4e7;
+  }
+</style>
+<div data-label="Mega panel and links">
+  <c2-navigation-menu client:only="lit" aria-label="Main" class="wide">
+    <c2-navigation-menu-item value="products">
+      Products
+      <div class="cards" slot="panel">
+        <c2-navigation-menu-link href="#analytics">
+          <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Analytics
+          <span slot="description">Realtime dashboards over live events</span>
+        </c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#warehouse">
+          <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+          Warehouse
+          <span slot="description">Columnar storage that scales</span>
+        </c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#pipelines">
+          <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+          Pipelines
+          <span slot="description">Scheduled and streaming ETL</span>
+        </c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#catalog">
+          <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          Catalog
+          <span slot="description">Lineage, ownership and quality</span>
+        </c2-navigation-menu-link>
+        <div class="full-row">
+          <c2-navigation-menu-link href="#all">
+            See all products
+            <svg slot="suffix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </c2-navigation-menu-link>
+        </div>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="solutions">
+      Solutions
+      <div class="stack" slot="panel">
+        <c2-navigation-menu-link href="#startups"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>Startups</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#enterprise"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>Enterprise</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#public"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>Public sector</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item>
+    <c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item>
+  </c2-navigation-menu>
+</div>
+<div data-label="Icons, descriptions and a disabled item">
+  <c2-navigation-menu client:only="lit" aria-label="Platform">
+    <c2-navigation-menu-item value="platform">
+      <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+      </svg>
+      Platform
+      <div class="stack" slot="panel">
+        <c2-navigation-menu-link href="#overview" current>
+          Overview
+          <span slot="description">What the platform does</span>
+        </c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#security">
+          Security
+          <span slot="description">SOC 2, SSO and audit logs</span>
+        </c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#status" target="_blank">
+          Status
+          <span slot="description">Opens in a new tab</span>
+        </c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="company" href="#company">Company</c2-navigation-menu-item>
+    <c2-navigation-menu-item value="changelog" disabled>Changelog</c2-navigation-menu-item>
+  </c2-navigation-menu>
+</div>
+<div data-label="Mobile mode">
+  <c2-navigation-menu client:only="lit" aria-label="Mobile" class="mobile" mode="mobile">
+    <c2-navigation-menu-item value="fixed-income">
+      Fixed Income Products
+      <div class="rows" slot="panel">
+        <c2-navigation-menu-link href="#reference">Reference Data</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#actions">Corporate Actions</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#pricing">Pricing</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="regulatory">
+      Regulatory Products
+      <div class="rows" slot="panel">
+        <c2-navigation-menu-link href="#erisa">ERISA Portfolio Analytics</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#matching">Matching Adjustment</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="home" href="#home">Home</c2-navigation-menu-item>
+    <c2-navigation-menu-item value="about" href="#about" current>About</c2-navigation-menu-item>
+  </c2-navigation-menu>
+</div>
+<div data-label="Mobile mode, your own button">
+  <c2-navigation-menu client:only="lit" aria-label="Custom trigger" class="mobile" mode="mobile">
+    <c2-button slot="mobile-trigger">
+      <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 7h16M4 12h16M4 17h16"></path>
+      </svg>
+      Menu
+    </c2-button>
+    <c2-navigation-menu-item value="fixed-income">
+      Fixed Income Products
+      <div class="rows" slot="panel">
+        <c2-navigation-menu-link href="#reference">Reference Data</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#actions">Corporate Actions</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="home" href="#home">Home</c2-navigation-menu-item>
+  </c2-navigation-menu>
+</div>
+<div data-label="Mobile mode, collapsible groups">
+  <c2-navigation-menu client:only="lit" aria-label="Collapsible" class="mobile" mode="mobile" collapsible>
+    <c2-navigation-menu-item value="fixed-income">
+      Fixed Income Products
+      <div class="rows" slot="panel">
+        <c2-navigation-menu-link href="#reference">Reference Data</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#actions">Corporate Actions</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="regulatory">
+      Regulatory Products
+      <div class="rows" slot="panel">
+        <c2-navigation-menu-link href="#erisa" current>ERISA Portfolio Analytics</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#matching">Matching Adjustment</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="home" href="#home">Home</c2-navigation-menu-item>
+  </c2-navigation-menu>
+</div>
+<div data-label="Click to open, panels aligned to the bar">
+  <c2-navigation-menu client:only="lit" aria-label="Resources" open-on="click" panel-anchor="menu" class="wide">
+    <c2-navigation-menu-item value="resources">
+      Resources
+      <div class="cards" slot="panel">
+        <c2-navigation-menu-link href="#guides">
+          <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          Guides
+          <span slot="description">Step by step tutorials</span>
+        </c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#api">
+          <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          API reference
+          <span slot="description">Every endpoint and type</span>
+        </c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="community">
+      Community
+      <div class="stack" slot="panel">
+        <c2-navigation-menu-link href="#forum"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Forum</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#discord"><svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Discord</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="blog" href="#blog">Blog</c2-navigation-menu-item>
+  </c2-navigation-menu>
+</div>
+```
+
+## Switching to the mobile layout
+
+`mobile-breakpoint` is a viewport width in pixels: at or below it the bar sets `mode="mobile"` itself, above it it goes back to `bar`. Nothing else changes — the same markup, the same `value`, the same `value-change`.
+
+```html tag=CodeBlock
+<c2-navigation-menu aria-label="Main" mobile-breakpoint="800" collapsible>
+  <c2-navigation-menu-item value="products">…</c2-navigation-menu-item>
+</c2-navigation-menu>
+```
+
+`mode` reflects, so the current layout is in the DOM (`c2-navigation-menu[mode='mobile']`) for your own CSS to hang off.
+
+Leave `mobile-breakpoint` unset when the switch depends on something the window width does not describe — a container width, a user setting, an app-wide breakpoint you already track — and drive `mode` yourself:
+
+```ts tag=CodeBlock
+const nav = document.querySelector('c2-navigation-menu')
+const small = matchMedia('(max-width: 800px)')
+
+const apply = () => {
+  nav.mode = small.matches ? 'mobile' : 'bar'
+  nav.collapsible = small.matches // optional: one group open at a time
+}
+
+apply()
+small.addEventListener('change', apply)
+```
+
+## Customizing the mobile button
+
+The default button is a hamburger named by `mobile-label`, themed through `--c2-navigation-menu__mobile-trigger--*` (size, colour, background, border, radius, icon size, plus `__hover` and `__focus`). Put your own control in the `mobile-trigger` slot to replace it outright — the list still opens from it, anchors to it and returns focus to it.
+
+```html tag=CodeBlock
+<c2-navigation-menu aria-label="Main" mobile-breakpoint="800">
+  <c2-button slot="mobile-trigger">
+    <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M4 7h16M4 12h16M4 17h16"></path>
+    </svg>
+    Menu
+  </c2-button>
+  <c2-navigation-menu-item value="products">…</c2-navigation-menu-item>
+</c2-navigation-menu>
+```
+
+## Reacting to the open panel
+
+`value-change` fires whenever the open panel changes, including when the bar closes. Drive it from code with `open(value)` and `close()`, or by setting `value`.
+
+```ts tag=CodeBlock
+const nav = document.querySelector('c2-navigation-menu')
+
+nav.addEventListener('value-change', (event) => {
+  console.log(event.detail.value) // 'products', then '' when it closes
+})
+
+nav.open('products')
+nav.close()
+
+// An item without a `value` is given `item-<position>` so it stays addressable.
+nav.value = 'item-2'
+```
+
+## Theming
+
+`--c2-navigation-menu--*` covers the bar itself (gap, padding, background, border, radius). `--c2-navigation-menu-item--*` is a trigger, with `__hover`, `__expanded`, `__current`, `__focus` and `__disabled` states, an `__icon` part and the `__indicator` line under the current or open item. The panel surface hangs off the item as `--c2-navigation-menu-item__panel--*`, and the rows inside it are `--c2-navigation-menu-link--*`, including `__description` and `__current`.
+
+`current-group` is an attribute like any other, so a group that should read more quietly than the current page can be styled apart: `c2-navigation-menu-item[current-group] { --c2-navigation-menu-item__indicator--color: #d4d4d8 }`.
+
+The panel surface belongs to the **item**, so set `--c2-navigation-menu-item__panel--*` on the item that needs it. Put a panel width on the bar instead and every panel of that bar inherits it — a mega panel and a short link stack then come out exactly the same width. Left alone, each panel is as wide as its own content, with the 260px floor underneath.
+
+```css tag=CodeBlock
+c2-navigation-menu.header c2-navigation-menu-item[value='products'] {
+  --c2-navigation-menu-item__panel--min-width: 520px;
+}
+
+c2-navigation-menu.header {
+  --c2-navigation-menu--gap: 2px;
+  --c2-navigation-menu-item--color: #52525b;
+  --c2-navigation-menu-item__hover--background: #f4f4f5;
+  --c2-navigation-menu-item__indicator--color: #7c3aed;
+
+  --c2-navigation-menu-item__panel--border-top-left-radius: 14px;
+  --c2-navigation-menu-item__panel--border-top-right-radius: 14px;
+  --c2-navigation-menu-item__panel--border-bottom-left-radius: 14px;
+  --c2-navigation-menu-item__panel--border-bottom-right-radius: 14px;
+
+  --c2-navigation-menu-link__hover--background: #f5f3ff;
+  --c2-navigation-menu-link__current--color: #7c3aed;
+}
+```
+
+The indicator is the line under the item that is current, holds the current page, or has its panel open. It spans the item's whole width and squares off the bottom corners of an open trigger so the two read as one surface. Take it away entirely with a height of `0` — the states are still marked by their colour and background:
+
+```css tag=CodeBlock
+c2-navigation-menu.no-indicator {
+  --c2-navigation-menu-item__indicator--height: 0;
+
+  /* Nothing meets the panel any more, so the open trigger can keep its rounded corners. */
+  --c2-navigation-menu-item__expanded--border-bottom-left-radius: 6px;
+  --c2-navigation-menu-item__expanded--border-bottom-right-radius: 6px;
+  --c2-navigation-menu-item__expanded--background: #e4e4e7;
+}
+```
+
+Or move it: `--c2-navigation-menu-item__indicator--inset` pulls it in from both ends, `--c2-navigation-menu-item__indicator--bottom` lifts it off the edge, and `--c2-navigation-menu-item__indicator--height` and `--c2-navigation-menu-item__indicator--color` do the rest.
+
+The mobile layout has its own families: `--c2-navigation-menu__mobile-trigger--*` for the button, `--c2-navigation-menu__mobile-panel--*` for the list surface (set its `min-width` to `calc(100vw - 32px)` for a sheet that spans the screen), and on the item `--c2-navigation-menu-item__mobile-heading--*` and `--c2-navigation-menu-item__mobile-group--indent` for the group headings and their inset rows.
+
+The panel is positioned by `c2-overlay`: `--c2-overlay--offset-y` sets the gap under the bar and `--c2-overlay--viewport-padding` how close a panel may come to the window edge. The panel content is your own markup, so give it a layout that survives the mobile list: a `repeat(auto-fit, minmax(…, 1fr))` grid stacks on its own, a fixed two-column one does not.
+
+Every variable, with its default, is listed on the API tab, and the Gallery tab has ready-made looks to start from.

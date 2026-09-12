@@ -1,0 +1,76 @@
+---
+title: 'Phosphor Icons'
+description: '1,512 flexible icons in six weights, one web component each.'
+package: '@c2n/phosphor-icons'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+import PhosphorIconGallery from '../../components/PhosphorIconGallery.astro'
+import IconSourceBadge from '../../components/IconSourceBadge.astro'
+
+import {
+  PhosphorArrowRightIcon as PhosphorArrowRight,
+  PhosphorCameraIcon as PhosphorCamera,
+  PhosphorGearIcon as PhosphorGear,
+  PhosphorHeartIcon as PhosphorHeart,
+  phosphorIconSource,
+} from '@c2n/phosphor-icons'
+
+# Phosphor Icons
+
+`@c2n/phosphor-icons` wraps every [Phosphor](https://phosphoricons.com/) icon as its own web component: `c2-phosphor-<icon-name>`.
+Every icon supports the `regular`, `thin`, `light`, `bold`, `fill`, and `duotone` weights.
+
+<IconSourceBadge label={phosphorIconSource.label} href="https://www.npmjs.com/package/@phosphor-icons/core" />
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/phosphor-icons
+```
+
+## Import
+
+Import individual icons to keep bundles small:
+
+```typescript tag=CodeBlock
+import '@c2n/phosphor-icons/icons/heart.js'
+import '@c2n/phosphor-icons/icons/camera.js'
+```
+
+or register the whole set at once:
+
+```typescript tag=CodeBlock
+import '@c2n/phosphor-icons'
+```
+
+## Examples
+
+```html tag=MdxCodeBlock,compact=true
+<c2-phosphor-arrow-right></c2-phosphor-arrow-right>
+<c2-phosphor-camera weight="thin"></c2-phosphor-camera>
+<c2-phosphor-heart weight="fill"></c2-phosphor-heart>
+<c2-phosphor-gear weight="duotone"></c2-phosphor-gear>
+```
+
+Icons inherit `currentColor` and use the shared `--c2-phosphor-icon--*` custom properties.
+
+```html tag=MdxCodeBlock,compact=true
+<c2-phosphor-heart style="--c2-phosphor-icon--size: 48px; --c2-phosphor-icon--color: #dc2626"></c2-phosphor-heart>
+<c2-phosphor-heart weight="thin" style="--c2-phosphor-icon--size: 48px"></c2-phosphor-heart>
+<c2-phosphor-heart weight="duotone" style="--c2-phosphor-icon--size: 48px"></c2-phosphor-heart>
+```
+
+Use the sliders button on an example, or select any icon in the gallery, to open that icon directly in the configuration studio with its selected weight.
+
+## API
+
+Every icon element shares the same API.
+
+<ApiTable componentTag="c2-phosphor-heart"></ApiTable>
+
+## All icons
+
+<PhosphorIconGallery />

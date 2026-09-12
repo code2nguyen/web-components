@@ -2,17 +2,26 @@
 /**
  * Grid wrapper for gallery pages. Put ```html tag=MdxCodeBlock,label=… fences inside it (blank line before and after
  * each fence: MDX requires it); the remark plugin still turns every fence into a live example frame.
+ *
+ * `min` is the narrowest a card may be, in pixels, and so how many fit on a row. The default suits a single control;
+ * something that is a row of its own — a navigation bar, a toolbar — needs more room to be worth looking at.
  */
+interface Props {
+  min?: number | string
+}
+
+const { min = 210 } = Astro.props
 ---
 
-<div class="gallery-grid">
+<div class="gallery-grid" style={`--gallery-card-min: ${min}px`}>
   <slot />
 </div>
 
 <style lang="scss" is:global>
   .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    // `min(100%, …)` keeps the track from forcing a horizontal scrollbar on a screen narrower than a card.
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--gallery-card-min, 210px)), 1fr));
     gap: 16px;
     margin: 16px 0 24px;
     align-items: start;
@@ -25,7 +34,9 @@
       min-height: 140px;
       padding: 28px 16px;
     }
-    > .example:not(.is-configuring) .example__code {
+    // Scroll the code itself rather than the drawer around it: the copy button is pinned to the block, so it stays
+    // in reach however far down the snippet you are.
+    > .example:not(.is-configuring) .example__code pre.astro-code {
       max-height: 320px;
       overflow: auto;
     }
