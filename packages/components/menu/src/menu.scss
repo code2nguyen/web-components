@@ -1,0 +1,124 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-menu,
+  $theme: (
+    background: #ffffff,
+    min-width: 128px,
+    max-height: 320px,
+    gap: null,
+
+    border-top: 1px solid #e4e4e7,
+    border-right: 1px solid #e4e4e7,
+    border-bottom: 1px solid #e4e4e7,
+    border-left: 1px solid #e4e4e7,
+
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
+    box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+
+    padding-top: 4px,
+    padding-right: 4px,
+    padding-bottom: 4px,
+    padding-left: 4px,
+
+    separator--color: #e4e4e7,
+    separator--margin: 4px 0,
+
+    heading--color: #71717a,
+    heading--font-size: 11px,
+    heading--font-weight: 600,
+    heading--letter-spacing: 0.06em,
+    heading--text-transform: uppercase,
+    heading--padding-top: 8px,
+    heading--padding-right: 8px,
+    heading--padding-bottom: 4px,
+    heading--padding-left: 8px,
+  )
+);
+
+// Without a trigger the host is pure plumbing: the overlay lives in the top layer and takes no space in the flow.
+:host {
+  display: contents;
+}
+
+:host([has-trigger]) {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// A submenu opens beside its row, with its first row level with the row that owns it.
+:host([slot='submenu']) {
+  --c2-overlay--offset-y: 2px;
+  --c2-overlay--offset-x: -4px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  margin: 0;
+  gap: css.cssVar(gap);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-width: css.cssVar(min-width);
+  max-height: css.cssVar(max-height);
+
+  background: css.cssVar(background);
+  box-shadow: css.cssVar(box-shadow);
+
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// Separators and group headings slotted between the rows.
+::slotted(hr) {
+  flex: none;
+  border: none;
+  border-top: 1px solid css.cssVar(separator--color);
+  margin: css.cssVar(separator--margin);
+}
+
+::slotted(:is(h1, h2, h3, h4, h5, h6)) {
+  flex: none;
+  margin: 0;
+  color: css.cssVar(heading--color);
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  letter-spacing: css.cssVar(heading--letter-spacing);
+  text-transform: css.cssVar(heading--text-transform);
+  line-height: 1.4;
+  padding-top: css.cssVar(heading--padding-top);
+  padding-right: css.cssVar(heading--padding-right);
+  padding-bottom: css.cssVar(heading--padding-bottom);
+  padding-left: css.cssVar(heading--padding-left);
+  user-select: none;
+}
+
+:host([disabled]) ::slotted([slot='trigger']) {
+  pointer-events: none;
+  opacity: variables.$disabled-content-opacity;
+}

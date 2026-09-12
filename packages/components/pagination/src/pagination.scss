@@ -1,0 +1,284 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-pagination,
+  $theme: (
+    gap: 4px,
+    section-gap: 24px,
+    justify-content: flex-start,
+
+    item--min-width: 36px,
+    item--height: 36px,
+    item--padding-left: 8px,
+    item--padding-right: 8px,
+    item--color: #18181b,
+    item--background-color: transparent,
+    item--border: 1px solid transparent,
+    item--border-radius: 8px,
+    item--font-size: 14px,
+    item--font-weight: 500,
+    item__hover--color: #18181b,
+    item__hover--background-color: #f4f4f5,
+    item__hover--border: 1px solid transparent,
+    item__selected--color: #18181b,
+    item__selected--background-color: #ffffff,
+    item__selected--border: 1px solid #e4e4e7,
+    item__selected--font-weight: 500,
+    item__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    item__focus--outline-offset: 1px,
+    item__disabled--opacity: 0.38,
+
+    nav--gap: 6px,
+    nav--padding-left: 10px,
+    nav--padding-right: 10px,
+    nav--color: #18181b,
+    nav--background-color: transparent,
+    nav--border: 1px solid transparent,
+    nav--border-radius: 8px,
+    nav--font-size: 14px,
+    nav--font-weight: 500,
+    nav__hover--color: #18181b,
+    nav__hover--background-color: #f4f4f5,
+    nav__hover--border: 1px solid transparent,
+
+    icon--size: 16px,
+    icon--color: null,
+
+    ellipsis--color: #71717a,
+    ellipsis--min-width: 36px,
+
+    label--color: #71717a,
+    label--font-size: 14px,
+    label--font-weight: 500,
+    label--gap: 8px,
+    page-size-list--min-width: 56px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// The groups of the compact variant may wrap onto a second line on a phone; the button rows themselves never do.
+.c2-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: css.cssVar(justify-content);
+  gap: css.cssVar(section-gap);
+  min-width: 0;
+}
+
+// One row, always: when the page numbers do not fit, the component sheds them rather than wrapping. `is-measuring`
+// lays the requested numbers out at their natural width for one frame so the component can read it.
+.c2-pagination-list {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: css.cssVar(gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+  overflow: hidden;
+
+  &.is-measuring {
+    visibility: hidden;
+  }
+
+  > li {
+    display: inline-flex;
+    flex: none;
+  }
+}
+
+.c2-pagination-arrows {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: css.cssVar(gap);
+}
+
+// Page numbers and previous/next share one button shape; the `nav` variables let the two be styled apart.
+.c2-pagination-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  flex: none;
+  height: css.cssVar(item--height);
+  margin: 0;
+  font-family: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
+
+  &:focus-visible {
+    outline: css.cssVar(item__focus--outline);
+    outline-offset: css.cssVar(item__focus--outline-offset);
+  }
+
+  &:disabled {
+    opacity: css.cssVar(item__disabled--opacity);
+    cursor: default;
+  }
+}
+
+.c2-pagination-item {
+  min-width: css.cssVar(item--min-width);
+  padding-left: css.cssVar(item--padding-left);
+  padding-right: css.cssVar(item--padding-right);
+  color: css.cssVar(item--color);
+  background-color: css.cssVar(item--background-color);
+  border: css.cssVar(item--border);
+  border-radius: css.cssVar(item--border-radius);
+  font-size: css.cssVar(item--font-size);
+  font-weight: css.cssVar(item--font-weight);
+
+  &:hover:not(:disabled):not([aria-current]) {
+    color: css.cssVar(item__hover--color);
+    background-color: css.cssVar(item__hover--background-color);
+    border: css.cssVar(item__hover--border);
+  }
+
+  &[aria-current] {
+    color: css.cssVar(item__selected--color);
+    background-color: css.cssVar(item__selected--background-color);
+    border: css.cssVar(item__selected--border);
+    font-weight: css.cssVar(item__selected--font-weight);
+    cursor: default;
+  }
+}
+
+.c2-pagination-nav {
+  gap: css.cssVar(nav--gap);
+  min-width: css.cssVar(item--min-width);
+  padding-left: css.cssVar(nav--padding-left);
+  padding-right: css.cssVar(nav--padding-right);
+  color: css.cssVar(nav--color);
+  background-color: css.cssVar(nav--background-color);
+  border: css.cssVar(nav--border);
+  border-radius: css.cssVar(nav--border-radius);
+  font-size: css.cssVar(nav--font-size);
+  font-weight: css.cssVar(nav--font-weight);
+
+  &:hover:not(:disabled) {
+    color: css.cssVar(nav__hover--color);
+    background-color: css.cssVar(nav__hover--background-color);
+    border: css.cssVar(nav__hover--border);
+  }
+}
+
+// Icon-only arrows in the compact variant: square, no room reserved for a label.
+:host([variant='compact']) .c2-pagination-nav {
+  min-width: css.cssVar(item--height);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.c2-pagination-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: css.cssVar(icon--color);
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+    display: block;
+  }
+
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+// A control, not decoration: it jumps into the middle of the pages it hides. The dots turn into the direction of
+// that jump on hover and keyboard focus, so the affordance shows itself before the click.
+.c2-pagination-ellipsis {
+  min-width: css.cssVar(ellipsis--min-width);
+  padding: 0;
+  color: css.cssVar(ellipsis--color);
+  background-color: css.cssVar(item--background-color);
+  border: css.cssVar(item--border);
+  border-radius: css.cssVar(item--border-radius);
+  font-size: css.cssVar(item--font-size);
+  user-select: none;
+
+  .c2-pagination-ellipsis-jump {
+    display: none;
+  }
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    color: css.cssVar(item__hover--color);
+    background-color: css.cssVar(item__hover--background-color);
+    border: css.cssVar(item__hover--border);
+
+    .c2-pagination-ellipsis-dots {
+      display: none;
+    }
+
+    .c2-pagination-ellipsis-jump {
+      display: inline-flex;
+    }
+  }
+}
+
+.c2-pagination-label,
+.c2-pagination-status {
+  display: inline-flex;
+  align-items: center;
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  white-space: nowrap;
+}
+
+.c2-pagination-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(label--gap);
+}
+
+// The rows-per-page dropdown is a `c2-select` wearing the pagination's own label and item variables, so one set of
+// pagination variables themes the whole footer row.
+.c2-pagination-page-size-select {
+  --c2-select__button--background: #{css.cssVar(item--background-color)};
+  --c2-select__button--color: #{css.cssVar(item--color)};
+  --c2-select__button--font-size: #{css.cssVar(label--font-size)};
+  --c2-select__button--font-weight: #{css.cssVar(label--font-weight)};
+  --c2-select__button--min-height: 32px;
+  --c2-select__button--padding: 4px 4px 4px 8px;
+  --c2-select__button--gap: 2px;
+  --c2-select__button--border-top: none;
+  --c2-select__button--border-right: none;
+  --c2-select__button--border-bottom: none;
+  --c2-select__button--border-left: none;
+  --c2-select__button__hover--border-top: none;
+  --c2-select__button__hover--border-right: none;
+  --c2-select__button__hover--border-bottom: none;
+  --c2-select__button__hover--border-left: none;
+  --c2-select__button__open--border-top: none;
+  --c2-select__button__open--border-right: none;
+  --c2-select__button__open--border-bottom: none;
+  --c2-select__button__open--border-left: none;
+  --c2-select__button__hover--background: #{css.cssVar(item__hover--background-color)};
+  --c2-select__button--border-top-left-radius: #{css.cssVar(item--border-radius)};
+  --c2-select__button--border-top-right-radius: #{css.cssVar(item--border-radius)};
+  --c2-select__button--border-bottom-left-radius: #{css.cssVar(item--border-radius)};
+  --c2-select__button--border-bottom-right-radius: #{css.cssVar(item--border-radius)};
+  --c2-select__button__focus--outline: #{css.cssVar(item__focus--outline)};
+  --c2-select__button__suffix-icon--color: #{css.cssVar(label--color)};
+  --c2-select__button__suffix-icon--width: 14px;
+  --c2-select__button__suffix-icon--height: 14px;
+  --c2-select__list--min-width: #{css.cssVar(page-size-list--min-width)};
+  --c2-list-item--font-size: #{css.cssVar(label--font-size)};
+}

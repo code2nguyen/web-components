@@ -130,14 +130,14 @@ Virtualized data grid with declarative columns, sorting, selection, pinning and 
 
 **`c2-table`** (`@c2n/table`)
 
-- Attributes: `rows` (TableRow[]), `columns` (TableColumnConfig[] | undefined), `row-key` (string), `selection` (TableSelectionMode), `checkbox-selection` (boolean), `value` (string[]), `sort` (SortModel[]), `multi-sort` (boolean), `sortable` (boolean), `resizable` (boolean), `stripe` (boolean), `virtual` (TableVirtualMode), `row-height` (number), `overscan` (number), `virtual-threshold` (number), `block-size` (number), `loading` (boolean), `error` (string), `empty-message` (string)
+- Attributes: `rows` (TableRow[]), `columns` (TableColumnConfig[] | undefined), `row-key` (string), `selection` (TableSelectionMode), `checkbox-selection` (boolean), `value` (string[]), `sort` (SortModel[]), `multi-sort` (boolean), `sortable` (boolean), `resizable` (boolean), `stripe` (boolean), `virtual` (TableVirtualMode), `row-height` (number), `overscan` (number), `virtual-threshold` (number), `block-size` (number), `loading` (boolean), `error` (string), `empty-message` (string), `page` (number), `page-size` (number)
 - Slots: `default`, `toolbar`, `footer`, `empty`, `loading`, `error`
-- Events: `sort-change`, `row-click`, `cell-click`, `selection-change`, `column-resize`
-- Key variables (59 total): `--c2-table--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-table--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-table__header--background` = `#fafafa` (→ `--c2-theme--color-surface-container-low`), `--c2-table__header--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-table__header-cell__sorted--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-table__sort-icon--color` = `#a1a1aa` (→ `--c2-theme--color-on-surface-variant`), `--c2-table__row__odd--background` = `#fafafa` (→ `--c2-theme--color-surface-container-low`), `--c2-table__cell--color` = `#18181b` (→ `--c2-theme--color-on-surface`)
+- Events: `page-change`, `sort-change`, `row-click`, `cell-click`, `selection-change`, `column-resize`
+- Key variables (63 total): `--c2-table--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-table--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-table__header--background` = `#fafafa` (→ `--c2-theme--color-surface-container-low`), `--c2-table__header--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-table__header-cell__sorted--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-table__sort-icon--color` = `#a1a1aa` (→ `--c2-theme--color-on-surface-variant`), `--c2-table__resizer--color` = `#e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-table__row__odd--background` = `#fafafa` (→ `--c2-theme--color-surface-container-low`)
 
 **`c2-table-column`** (`@c2n/table/table-column.js`)
 
-- Attributes: `field` (string), `header` (string | undefined), `width` (string), `min-width` (number), `align` (ColumnAlign), `sortable` (boolean), `resizable` (boolean | undefined), `pinned` (ColumnPin | undefined), `hidden` (boolean), `format` (ColumnFormat), `format-options` (Record<string, unknown> | undefined), `currency` (string | undefined), `locale` (string | undefined), `cell-class` (string | undefined)
+- Attributes: `field` (string), `header` (string | undefined), `width` (string), `min-width` (number), `align` (ColumnAlign), `sortable` (boolean | undefined), `resizable` (boolean | undefined), `pinned` (ColumnPin | undefined), `hidden` (boolean), `format` (ColumnFormat), `format-options` (Record<string, unknown> | undefined), `currency` (string | undefined), `locale` (string | undefined), `cell-class` (string | undefined)
 - Events: `COLUMN_CHANGE_EVENT`
 - Presets: Hairline report, Spreadsheet, Dark console, Soft cards
 
@@ -230,15 +230,23 @@ Contextual hint shown when its target is hovered or focused, rendered in the top
 ### Feather Icons — `c2-feather-{name}`
 
 287 open-source Feather icons, one web component each. Package `@c2n/feather-icons`. Register: `import '@c2n/feather-icons/icons/{name}.js'`.
-287 icons; tag `c2-feather-{name}`, module `@c2n/feather-icons/icons/{name}.js`, sized with `--c2-feather-icon--size`, coloured with `--c2-feather-icon--color` (inherits `currentColor`).
+287 icons; tag `c2-feather-{name}`, module `@c2n/feather-icons/icons/{name}.js`. Shared variables: `--c2-feather-icon--color` = `currentColor`, `--c2-feather-icon--size` = `24px`, `--c2-feather-icon--stroke-width` = `2`.
 
 - Key variables (3 total): `--c2-feather-icon--color` = `currentColor`, `--c2-feather-icon--size` = `24px`, `--c2-feather-icon--stroke-width` = `2`
 
 ### Mat Icon — `c2-mat-icon`
 
-Material Icons ligatures rendered through a single element. Package `@c2n/mat-icon`. Register: `import '@c2n/mat-icon'`.
+2,234 Material Icons ligatures rendered through a single element. Package `@c2n/mat-icon`. Register: `import '@c2n/mat-icon'`.
 
 - Key variables (3 total): `--c2-mat-icon--color`, `--c2-mat-icon--font-size` = `24px`, `--c2-mat-icon--font-weight` = `400`
+
+### Phosphor Icons — `c2-phosphor-{name}`
+
+1,512 flexible icons in six weights, one web component each. Package `@c2n/phosphor-icons`. Register: `import '@c2n/phosphor-icons/icons/{name}.js'`.
+1512 icons; tag `c2-phosphor-{name}`, module `@c2n/phosphor-icons/icons/{name}.js`. Shared variables: `--c2-phosphor-icon--color` = `currentColor`, `--c2-phosphor-icon--size` = `24px`.
+
+- Attributes: `weight` (PhosphorIconWeight)
+- Key variables (2 total): `--c2-phosphor-icon--color` = `currentColor`, `--c2-phosphor-icon--size` = `24px`
 
 ## Inputs
 
@@ -311,7 +319,7 @@ Dropdown that pairs a themeable trigger with an anchored list of c2-list-item op
 - Attributes: `open` (boolean), `readonly` (boolean), `disabled` (boolean), `focused` (boolean), `fit-size` (boolean), `placeholder` (string), `aria-label` (string | null), `multiple` (boolean), `required` (boolean), `value` (string[])
 - Slots: `default`, `button-prefix-icon`, `button-suffix-icon`, `button-content`
 - Events: `selection-change`
-- Key variables (55 total): `--c2-select__button--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-select__button--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-select__button__suffix-icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-select__placeholder--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-select__list--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-select__button--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-select__button--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-select__button--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`)
+- Key variables (56 total): `--c2-select__button--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-select__button--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-select__button__suffix-icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-select__placeholder--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-select__list--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-select__button--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-select__button--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-select__button--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`)
 - Presets: Soft filled, Pill, Underline, Brand outline, Dark, Compact, Flat rows
 
 ### Slider — `c2-slider`
@@ -442,6 +450,60 @@ Text-styled control for link and navigation actions, rendered as a real anchor o
 - Slots: `default`, `prefix-icon`, `suffix-icon`
 - Key variables (26 total): `--c2-link-button__container--text-decoration-color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`), `--c2-link-button__container--border-radius` = `4px` (→ `--c2-theme--radius-sm`), `--c2-link-button__container--font-size` = `14px` (→ `--c2-theme--font-size-md`), `--c2-link-button__container--font-weight` = `500` (→ `--c2-theme--font-weight-medium`), `--c2-link-button__container__hover--color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`), `--c2-link-button__container__selected--color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`), `--c2-link-button__container--background-color`, `--c2-link-button__container--color` = `currentColor`
 - Presets: Primary link, Always underlined, Danger, Nav pill
+
+### Menu — `c2-menu`
+
+Commands, links, checkboxes and submenus in a popover anchored to a trigger. Package `@c2n/menu`. Register: `import '@c2n/menu'`.
+
+**`c2-menu`** (`@c2n/menu`)
+
+- Attributes: `open` (boolean), `placement` (Placement), `anchor` (string | HTMLElement | undefined), `fit-anchor` (boolean), `keep-open` (boolean), `disabled` (boolean), `aria-label` (string | null)
+- Slots: `default`, `trigger`
+- Events: `menu-select`, `toggle`
+- Key variables (28 total): `--c2-menu--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-menu__separator--color` = `#e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu__heading--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu--border-top` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu--border-right` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu--border-bottom` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu--border-left` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu--border-top-left-radius` = `8px` (→ `--c2-theme--radius-lg`)
+
+**`c2-menu-item`** (`@c2n/menu/menu-item.js`)
+
+- Attributes: `value` (string), `disabled` (boolean), `type` (MenuItemType), `checked` (boolean), `name` (string | undefined), `href` (string | undefined), `target` (string | undefined), `destructive` (boolean), `keep-open` (boolean), `label` (string | undefined), `expanded` (boolean), `reserve-indicator` (boolean)
+- Slots: `default`, `description`, `prefix-icon`, `suffix-icon`, `shortcut`, `submenu`
+- Events: `menu-select`, `checked-change`
+- Key variables (35 total): `--c2-menu-item--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-menu-item__description--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__shortcut--color` = `#a1a1aa` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__destructive--color` = `#dc2626` (→ `--c2-theme--color-error`), `--c2-menu-item--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-menu-item--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-menu-item--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`)
+- Presets: Soft, Compact, Dark, Tinted rows
+
+### Navigation Menu — `c2-navigation-menu`
+
+Site navigation bar whose triggers open panels of links below the header. Package `@c2n/navigation-menu`. Register: `import '@c2n/navigation-menu'`.
+
+**`c2-navigation-menu`** (`@c2n/navigation-menu`)
+
+- Attributes: `value` (string), `aria-label` (string | null), `open-on` ('hover' | 'click'), `open-delay` (number), `close-delay` (number), `panel-anchor` ('item' | 'menu'), `mode` (NavigationMenuMode), `collapsible` (boolean), `mobile-breakpoint` (number), `mobile-label` (string), `mobile-open` (boolean)
+- Slots: `default`, `mobile-trigger`
+- Events: `value-change`
+- Key variables (43 total): `--c2-navigation-menu__mobile-trigger--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-navigation-menu__mobile-panel--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-navigation-menu__mobile-trigger--border` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-navigation-menu__mobile-trigger--border-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-navigation-menu__mobile-panel--border-top` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-navigation-menu__mobile-panel--border-right` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-navigation-menu__mobile-panel--border-bottom` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-navigation-menu__mobile-panel--border-left` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`)
+
+**`c2-navigation-menu-item`** (`@c2n/navigation-menu/navigation-menu-item.js`)
+
+- Attributes: `value` (string), `href` (string | undefined), `target` (string | undefined), `current` (boolean), `disabled` (boolean), `label` (string | undefined), `expanded` (boolean), `current-group` (boolean), `placement` (Placement), `mobile` (boolean), `collapsible` (boolean)
+- Slots: `default`, `prefix-icon`, `suffix-icon`, `panel`
+- Events: `panel-toggle`
+- Key variables (63 total): `--c2-navigation-menu-item--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-navigation-menu-item__current--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-navigation-menu-item__indicator--color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`), `--c2-navigation-menu-item__mobile-heading--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-navigation-menu-item__panel--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-navigation-menu-item--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-navigation-menu-item--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-navigation-menu-item--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`)
+
+**`c2-navigation-menu-link`** (`@c2n/navigation-menu/navigation-menu-link.js`)
+
+- Attributes: `href` (string | undefined), `target` (string | undefined), `current` (boolean), `disabled` (boolean), `label` (string | undefined)
+- Slots: `default`, `description`, `prefix-icon`, `suffix-icon`
+- Key variables (28 total): `--c2-navigation-menu-link--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-navigation-menu-link__current--color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`), `--c2-navigation-menu-link__current--background` = `#edf1fe` (→ `--c2-theme--color-primary-container`), `--c2-navigation-menu-link__description--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-navigation-menu-link__icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-navigation-menu-link--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-navigation-menu-link--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-navigation-menu-link--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`)
+- Presets: Underline, Pill bar, No indicator, Dark header, Mobile, Mobile, collapsible, Soft panel
+
+### Pagination — `c2-pagination`
+
+Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page. Package `@c2n/pagination`. Register: `import '@c2n/pagination'`.
+
+- Attributes: `variant` (PaginationVariant), `page` (number), `page-size` (number), `total-items` (number), `total-pages` (number), `sibling-count` (number), `boundary-count` (number), `page-size-options` (number[]), `hide-page-size` (boolean), `hide-range` (boolean), `show-first-last` (boolean), `hide-nav-labels` (boolean), `disabled` (boolean), `previous-label` (string), `next-label` (string), `first-label` (string), `last-label` (string), `page-size-label` (string), `range-template` (string), `page-template` (string), `page-label-template` (string), `jump-label-template` (string), `aria-label` (string)
+- Slots: `previous-icon`, `next-icon`, `first-icon`, `last-icon`
+- Events: `page-change`, `page-size-change`, `PAGER_CONNECT_EVENT`
+- Key variables (44 total): `--c2-pagination__item--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-pagination__nav--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-pagination__ellipsis--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-pagination__label--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-pagination__item--border-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-pagination__nav--border-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-pagination__item--font-size` = `14px` (→ `--c2-theme--font-size-md`), `--c2-pagination__item--font-weight` = `500` (→ `--c2-theme--font-weight-medium`)
+- Presets: Accent pills, Outlined, Quiet, Table footer, Simple
 
 ### Side Nav — `c2-side-nav`
 

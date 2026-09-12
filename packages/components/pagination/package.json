@@ -1,0 +1,67 @@
+{
+  "name": "@c2n/pagination",
+  "version": "0.0.5",
+  "type": "module",
+  "main": "dist/pagination.js",
+  "exports": {
+    ".": {
+      "default": "./dist/pagination.js",
+      "types": "./types/src/pagination.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [
+    "pagination",
+    "pager",
+    "navigation",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build",
+        "../select:build",
+        "../list-item:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/core": "0.0.5",
+    "@c2n/list-item": "0.0.5",
+    "@c2n/select": "0.0.5",
+    "@lit/context": "1.1.6",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

@@ -1,0 +1,11 @@
+---
+/**
+ * Registers every c2 element in the browser for a page whose examples use components inside a `client:only` island.
+ * Those children are plain markup — Astro never makes them islands of their own — so nothing else would load their
+ * modules. Drop it once into a gallery or doc page that puts, say, a `c2-select` in a table's toolbar.
+ */
+---
+
+<script>
+  import '../data/component-modules'
+</script>

@@ -16,6 +16,34 @@ export interface TableBenchStats {
   firstCellText: string
 }
 
+/** A deterministic, fully controlled stand-in for a server, so paging can be asserted without timers. */
+export interface PagedSourceOptions {
+  /** Rows the fake server holds. */
+  total: number
+  /** A request whose `start` equals this rejects once, to cover the sticky `error` path. */
+  failAt?: number
+  /** Park every request until `release()` is called, to cover the loading state. */
+  manual?: boolean
+}
+
+/** One `getRows` call the table made, so the specs can assert the request contract, not just the rendered output. */
+export interface PagedRequest {
+  start: number
+  count: number
+  sort: { field: string; direction: string }[]
+}
+
+export interface TableScenarioApi {
+  /** Builds a paged table in `main` with a deterministic source, and waits for its first page. */
+  usePagedSource(options: PagedSourceOptions & { pageSize: number; pager?: boolean }): Promise<void>
+  /** Settles the request currently parked by `manual`. */
+  release(): Promise<void>
+  /** Every request the table has made, in order. */
+  requests(): PagedRequest[]
+  /** Shrinks the fake server to `total` rows, as a delete would. */
+  setTotal(total: number): void
+}
+
 export interface TableBenchApi {
   /**
    * Creates a table, gives it `count` rows and waits for the first paint. Returns the milliseconds that took —
@@ -45,6 +73,7 @@ export interface TableBenchApi {
 
 declare global {
   interface Window {
+    tableScenario: TableScenarioApi
     tableBench: TableBenchApi
   }
 }

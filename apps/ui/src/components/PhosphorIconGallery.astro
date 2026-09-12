@@ -1,0 +1,214 @@
+---
+import { phosphorIconNames, phosphorIconTag } from '@c2n/phosphor-icons'
+import MdxCodeBlock from './MdxCodeBlock.astro'
+
+const items = phosphorIconNames.map((name) => ({ name, markup: `<${phosphorIconTag(name)}></${phosphorIconTag(name)}>` }))
+const studioUid = 'phosphor-icon-gallery-studio'
+const studioTag = 'c2-phosphor-heart'
+const studioCode = `<${studioTag}></${studioTag}>`
+---
+
+<div class="phosphor-icon-gallery__toolbar">
+  <input
+    type="search"
+    class="phosphor-icon-gallery__filter"
+    placeholder={`Filter ${items.length.toLocaleString('en')} icons…`}
+    aria-label="Filter icons"
+    autocomplete="off"
+  />
+  <label class="phosphor-icon-gallery__weight-label">
+    Weight
+    <select class="phosphor-icon-gallery__weight" aria-label="Icon weight">
+      <option value="regular">Regular</option>
+      <option value="thin">Thin</option>
+      <option value="light">Light</option>
+      <option value="bold">Bold</option>
+      <option value="fill">Fill</option>
+      <option value="duotone">Duotone</option>
+    </select>
+  </label>
+  <span class="phosphor-icon-gallery__count">{items.length.toLocaleString('en')} icons · select one to customize</span>
+</div>
+<div class="phosphor-icon-gallery">
+  {
+    items.map(({ name, markup }) => (
+      <div class="phosphor-icon-gallery__item" data-name={name}>
+        <button type="button" class="phosphor-icon-gallery__configure" title={`Customize ${name}`}>
+          <Fragment set:html={markup} />
+          <span class="phosphor-icon-gallery__label">{name}</span>
+        </button>
+        <c2-copy-button class="phosphor-icon-gallery__copy" pin value={markup} label={`Copy ${name} HTML`} />
+      </div>
+    ))
+  }
+  <p class="phosphor-icon-gallery__empty" hidden>No icon matches.</p>
+</div>
+
+<MdxCodeBlock code={studioCode} lang="html" uid={studioUid} style="" label="Selected icon" offscreen>
+  <Fragment set:html={`<${studioTag} data-target-uid="${studioUid}"></${studioTag}>`} />
+</MdxCodeBlock>
+
+<script>
+  import { openIconInStudio } from '../utils/playground.ts'
+
+  import '@c2n/copy-button'
+  import '@c2n/phosphor-icons'
+</script>
+
+<style lang="scss">
+  .phosphor-icon-gallery__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 16px 0 12px;
+  }
+  .phosphor-icon-gallery__filter,
+  .phosphor-icon-gallery__weight {
+    height: 36px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--site-color-on-surface);
+    background: var(--site-color-surface-container-1);
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: var(--site-radius-sm);
+    &:focus {
+      outline: none;
+      border-color: var(--site-color-primary);
+    }
+  }
+  .phosphor-icon-gallery__filter {
+    flex: 1;
+    min-width: 200px;
+    max-width: 360px;
+  }
+  .phosphor-icon-gallery__weight-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--site-color-on-surface-muted);
+  }
+  .phosphor-icon-gallery__weight {
+    padding-right: 28px;
+  }
+  .phosphor-icon-gallery__count {
+    margin-left: auto;
+    font-size: 12.5px;
+    color: var(--site-color-on-surface-muted);
+  }
+  .phosphor-icon-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 8px;
+    margin: 0 0 16px;
+    --c2-phosphor-icon--size: 24px;
+  }
+  .phosphor-icon-gallery__item {
+    position: relative;
+    min-width: 0;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: var(--site-radius-md);
+    transition:
+      border-color 150ms var(--site-ease),
+      background-color 150ms var(--site-ease);
+    &:hover,
+    &:focus-within {
+      border-color: var(--site-color-outline);
+      background: var(--site-color-surface-container-1);
+    }
+    &[hidden] {
+      display: none;
+    }
+  }
+  .phosphor-icon-gallery__configure {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 6px 10px;
+    border: 0;
+    background: transparent;
+    color: var(--site-color-on-surface);
+    cursor: pointer;
+  }
+  .phosphor-icon-gallery__copy {
+    z-index: 1;
+    --c2-copy-button__pin--offset-x: 5px;
+    --c2-copy-button__pin--offset-y: 5px;
+    --c2-copy-button__container--height: 26px;
+    --c2-copy-button__container--min-width: 26px;
+    --c2-copy-button__container--padding-left: 5px;
+    --c2-copy-button__container--padding-right: 5px;
+    --c2-copy-button__container--background-color: var(--site-color-surface);
+    --c2-copy-button__container--border: 1px solid var(--site-color-outline-variant);
+    --c2-copy-button__container__hover--background-color: var(--site-color-surface-container-2);
+    --c2-copy-button__icon--size: 14px;
+  }
+  .phosphor-icon-gallery__label {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--site-color-on-surface-variant);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .phosphor-icon-gallery__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--site-color-on-surface-muted);
+    &[hidden] {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import type { CopyButton } from '@c2n/copy-button'
+  import type { PhosphorIcon, PhosphorIconWeight } from '@c2n/phosphor-icons'
+
+  const filter = document.querySelector<HTMLInputElement>('.phosphor-icon-gallery__filter')
+  const weightSelect = document.querySelector<HTMLSelectElement>('.phosphor-icon-gallery__weight')
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.phosphor-icon-gallery__item'))
+  const empty = document.querySelector<HTMLElement>('.phosphor-icon-gallery__empty')
+
+  filter?.addEventListener('input', () => {
+    const query = filter.value
+      .trim()
+      .toLowerCase()
+      .replace(/[\s_]+/g, '-')
+    let visible = 0
+    items.forEach((item) => {
+      const match = !query || (item.dataset.name ?? '').includes(query)
+      item.hidden = !match
+      if (match) visible++
+    })
+    if (empty) empty.hidden = visible > 0
+  })
+
+  weightSelect?.addEventListener('change', () => {
+    const weight = weightSelect.value as PhosphorIconWeight
+    items.forEach((item) => {
+      const icon = item.querySelector<PhosphorIcon>('c2-phosphor-' + (item.dataset.name ?? ''))
+      if (icon) icon.weight = weight
+      const copyButton = item.querySelector<CopyButton>('c2-copy-button')
+      const name = item.dataset.name ?? ''
+      const tag = `c2-phosphor-${name}`
+      const attribute = weight === 'regular' ? '' : ` weight="${weight}"`
+      if (copyButton) copyButton.value = `<${tag}${attribute}></${tag}>`
+    })
+  })
+
+  items.forEach((item) => {
+    item.querySelector('.phosphor-icon-gallery__configure')?.addEventListener('click', () => {
+      const name = item.dataset.name ?? ''
+      const weight = (weightSelect?.value ?? 'regular') as PhosphorIconWeight
+      const tag = `c2-phosphor-${name}`
+      openIconInStudio({ uid: 'phosphor-icon-gallery-studio', tagName: tag, attributes: weight === 'regular' ? {} : { weight } })
+    })
+  })
+</script>

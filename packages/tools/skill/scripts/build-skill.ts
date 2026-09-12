@@ -82,7 +82,7 @@ function renderCheatsheet(): string {
       )
       if (c.tagPattern)
         out.push(
-          `${c.icons?.length} icons; tag \`${c.tagPattern}\`, module \`${primary.modulePath}\`, sized with \`--c2-feather-icon--size\`, coloured with \`--c2-feather-icon--color\` (inherits \`currentColor\`).`,
+          `${c.icons?.length} icons; tag \`${c.tagPattern}\`, module \`${primary.modulePath}\`. Shared variables: ${keyVariables(primary, 4).join(', ')}.`,
         )
       for (const element of c.elements) {
         if (c.elements.length > 1) out.push(``, `**\`${element.tag}\`** (\`${element.modulePath}\`)`)

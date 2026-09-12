@@ -127,6 +127,11 @@ function renderIconNamesModule(icons: IconSource[]): string {
   const names = icons.map(({ name }) => `'${name}'`).join(', ')
   return `${header}
 export const featherIconTagPrefix = '${TAG_PREFIX}'
+export const featherIconSource = {
+  package: 'feather-icons',
+  version: '${featherVersion}',
+  label: 'feather-icons@${featherVersion}',
+} as const
 
 export const featherIconNames = [${names}] as const
 

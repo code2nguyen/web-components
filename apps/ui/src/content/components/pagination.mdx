@@ -1,0 +1,148 @@
+---
+title: 'Pagination'
+description: 'Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Pagination } from '@c2n/pagination'
+
+`c2-pagination` moves through a list, a table or a set of search results. `variant` picks the layout: `numbered`
+(the default) lays out previous/next around the page numbers, `simple` replaces the numbers with a "Page 3 of 12"
+status, and `compact` is the table-footer row — a rows-per-page select, the range of items on show and two arrows.
+How many pages there are comes from `total-items` and `page-size`, or from `total-pages` when the item count is
+unknown. The element owns `page` and reflects it, so listening to `page-change` is enough to fetch the next slice.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/pagination
+```
+
+Importing `@c2n/pagination` also registers `c2-select` and `c2-list-item`, the rows-per-page control of the
+`compact` variant.
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/pagination
+<style>
+  .footer {
+    --c2-pagination--justify-content: flex-end;
+    width: 100%;
+  }
+  .pills {
+    --c2-pagination__item--border-radius: 999px;
+    --c2-pagination__nav--border-radius: 999px;
+    --c2-pagination__item__selected--background-color: #0265dc;
+    --c2-pagination__item__selected--color: #ffffff;
+    --c2-pagination__item__selected--border: 1px solid #0265dc;
+  }
+</style>
+<div data-label="Numbered">
+  <c2-pagination client:only="lit" total-items="240" page-size="10" page="4"></c2-pagination>
+</div>
+<div data-label="Icon-only controls">
+  <c2-pagination client:only="lit" total-pages="24" page="12" hide-nav-labels></c2-pagination>
+</div>
+<div data-label="Simple">
+  <c2-pagination client:only="lit" variant="simple" total-pages="12" page="3"></c2-pagination>
+</div>
+<div data-label="Simple, with first and last">
+  <c2-pagination client:only="lit" variant="simple" total-pages="12" page="3" show-first-last></c2-pagination>
+</div>
+<div data-label="Compact (table footer)">
+  <c2-pagination client:only="lit" class="footer" variant="compact" total-items="100" page-size="10" page="3"></c2-pagination>
+</div>
+<div data-label="Compact, arrows only">
+  <c2-pagination client:only="lit" variant="compact" total-items="100" page-size="10" page="3" hide-page-size></c2-pagination>
+</div>
+<div data-label="Themed">
+  <c2-pagination client:only="lit" class="pills" total-items="120" page-size="10" page="2"></c2-pagination>
+</div>
+<div data-label="Disabled">
+  <c2-pagination client:only="lit" total-pages="8" page="3" disabled></c2-pagination>
+</div>
+<div data-label="Narrow container (drag the browser narrower)">
+  <div style="width: 260px; max-width: 100%; padding: 4px; border: 1px dashed #d4d4d8; border-radius: 6px">
+    <c2-pagination client:only="lit" total-pages="20" page="10" hide-nav-labels></c2-pagination>
+  </div>
+</div>
+```
+
+### Reading the page
+
+`page-change` fires whenever the shown page moves, from a control or from a rows-per-page change. Its detail carries
+`startIndex` and `endIndex`, which slice the current page straight out of a client-side array:
+
+```js tag=CodeBlock
+const pagination = document.querySelector('c2-pagination')
+pagination.totalItems = rows.length
+
+pagination.addEventListener('page-change', (event) => {
+  const { startIndex, endIndex, page } = event.detail
+  render(rows.slice(startIndex, endIndex))
+})
+```
+
+With a server, use `page` and `pageSize` instead and set `total-items` from the response. `page-size-change` fires
+separately when the user picks another rows-per-page value; the pagination keeps the first item of the old page on
+screen, so showing rows 21–30 and switching to 25 per page lands on page 1, not page 3.
+
+### Inside a table
+
+Slotted into a `c2-table`'s `footer`, the pager becomes a controlled view: the table owns `page`, `page-size` and
+`total-items` and feeds them down, so there is nothing to wire up.
+
+```html tag=CodeBlock
+<c2-table row-key="id" style="height: 420px">
+  <c2-table-column field="name" header="Name"></c2-table-column>
+  <c2-pagination slot="footer" variant="compact"></c2-pagination>
+</c2-table>
+```
+
+A table holding `rows` slices them in place; one with a `dataSource` asks for a page per request — the markup is the
+same either way. See [Table](/web-components/components/table). Everything else — `variant`, the labels,
+`page-size-options`, the styling — is still the pager's own, and a pager anywhere else keeps managing its own state
+exactly as before.
+
+### How many numbers are shown
+
+`boundary-count` (default `1`) is how many numbers stay pinned at each end, and `sibling-count` (default `1`) how
+many surround the current page. Everything left over collapses into an ellipsis, and an ellipsis that would stand
+for a single page is replaced by that page — so the row keeps the same number of slots as the current page moves and
+nothing shifts under the pointer.
+
+The row of controls never wraps. When the numbers those counts ask for do not fit the host's width, the pagination
+sheds them — siblings first, then boundaries — until they do, and puts them back when the container grows again; the
+current page always survives. The counts are a ceiling, in other words, not a promise. With the defaults and 20
+pages, that means `1 … 9 10 11 … 20` down to about 360px, `1 … 10 … 20` down to about 280px, and `… 10 …` below
+that. Only the `compact` variant may drop onto a second line, and then only between its three groups.
+
+The ellipsis is what keeps the shed pages reachable: it is a button, and it jumps into the middle of the range it
+stands for — the `…` between `1` and `9` goes to page 5. It reads as an ellipsis at rest and shows the direction of
+the jump on hover and keyboard focus, so the affordance is visible before the click. `jump-label-template` names it
+for screen readers (`{page}`, `{from}`, `{to}`, `{count}`).
+
+Because `boundary-count="1"` keeps page 1 and the last page one click away, `show-first-last` has nothing to add to
+the `numbered` variant. It is there for `simple` and `compact`, which show no numbers at all — or for
+`boundary-count="0"`, which gives up the pinned ends to save room.
+
+### Labels and translation
+
+Every piece of text is an attribute: `previous-label`, `next-label`, `first-label`, `last-label` and
+`page-size-label`, plus four templates — `range-template` (`{start}`, `{end}`, `{total}`), `page-template`
+(`{page}`, `{pageCount}`), `page-label-template` (`{page}`, the accessible name of a page number) and `jump-label-template` (the accessible name of an ellipsis). The controls
+sit in a `nav` landmark named "Pagination" unless `aria-label` says otherwise, the current page carries
+`aria-current="page"`, and the status text is a polite live region so a page change is announced. `hide-nav-labels`
+drops the visible "Previous"/"Next" text and keeps the accessible name, which is what the `compact` variant does.
+
+### Theming
+
+`--c2-pagination__item--*` styles the page numbers (and `__selected` the current one), `--c2-pagination__nav--*` the
+previous/next/first/last controls, so the two can look different without fighting each other.
+`--c2-pagination__label--*` covers the status text and the rows-per-page label, `--c2-pagination__icon--size` the
+chevrons, and `--c2-pagination--justify-content` decides where the row sits in the host's width — `flex-end` for a
+table footer. The rows-per-page select wears those same variables, so there is no need to reach for
+`--c2-select__*` to style it.

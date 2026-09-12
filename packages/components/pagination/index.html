@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-pagination</title>
+    <script type="module" src="/src/pagination.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+        background: #ffffff;
+      }
+      section {
+        max-width: 760px;
+        margin-bottom: 32px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #71717a;
+      }
+      .footer {
+        --c2-pagination--justify-content: flex-end;
+        padding: 8px 12px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+      .pills {
+        --c2-pagination__item--border-radius: 999px;
+        --c2-pagination__nav--border-radius: 999px;
+        --c2-pagination__item__selected--background-color: #0265dc;
+        --c2-pagination__item__selected--color: #ffffff;
+        --c2-pagination__item__selected--border: 1px solid #0265dc;
+      }
+      #log {
+        font:
+          12px ui-monospace,
+          monospace;
+        color: #71717a;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>Numbered</h2>
+      <c2-pagination total-items="240" page-size="10" page="4"></c2-pagination>
+    </section>
+
+    <section>
+      <h2>Numbered — icon-only controls</h2>
+      <c2-pagination total-pages="24" page="12" hide-nav-labels></c2-pagination>
+    </section>
+
+    <section>
+      <h2>Simple — no numbers, so first/last jumps earn their place</h2>
+      <c2-pagination variant="simple" total-pages="24" page="12" show-first-last></c2-pagination>
+    </section>
+
+    <section>
+      <h2>Compact (table footer)</h2>
+      <div class="footer">
+        <c2-pagination id="compact" variant="compact" total-items="100" page-size="10" page="3"></c2-pagination>
+      </div>
+      <p id="log">page-change / page-size-change details appear here.</p>
+    </section>
+
+    <section>
+      <h2>Themed</h2>
+      <c2-pagination class="pills" total-items="120" page-size="10" page="2"></c2-pagination>
+    </section>
+
+    <section>
+      <h2>Disabled</h2>
+      <c2-pagination total-pages="8" page="3" disabled></c2-pagination>
+    </section>
+
+    <script type="module">
+      const log = document.getElementById('log')
+      const compact = document.getElementById('compact')
+      for (const type of ['page-change', 'page-size-change']) {
+        compact.addEventListener(type, (event) => {
+          log.textContent = `${type}: ${JSON.stringify(event.detail)}`
+        })
+      }
+    </script>
+  </body>
+</html>

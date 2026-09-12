@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content'
 import Main from '../../layouts/Main.astro'
 import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import AllIconSearch from '../../components/AllIconSearch.astro'
 import SiteCard from '../../components/ui/SiteCard.astro'
 import { FeatherArrowRightIcon } from '../../components/ui/icons'
 import { componentPreviews } from '../../data/component-previews'
@@ -17,6 +18,7 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
       Icon sets are packaged separately from UI components. Each set wraps an upstream icon library as web components that inherit
       <code>currentColor</code> and are sized through CSS custom properties, so they drop into any component slot.
     </p>
+    <AllIconSearch />
     <ul class="icon-sets">
       {
         iconSets.map((set) => (
@@ -97,6 +99,10 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
   import '@c2n/feather-icons/icons/camera.js'
   import '@c2n/feather-icons/icons/settings.js'
   import '@c2n/feather-icons/icons/arrow-right.js'
+  import '@c2n/phosphor-icons/icons/heart.js'
+  import '@c2n/phosphor-icons/icons/camera.js'
+  import '@c2n/phosphor-icons/icons/gear.js'
+  import '@c2n/phosphor-icons/icons/arrow-right.js'
   import '@c2n/mat-icon'
   import '@fontsource/material-icons'
 </script>

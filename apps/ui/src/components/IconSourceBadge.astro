@@ -1,0 +1,39 @@
+---
+interface Props {
+  label: string
+  href: string
+}
+
+const { label, href } = Astro.props
+---
+
+<p class="icon-source">
+  Generated from
+  <a href={href} target="_blank" rel="noreferrer"><code>{label}</code></a>
+</p>
+
+<style>
+  .icon-source {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 0 20px;
+    font-size: 12.5px;
+    color: var(--site-color-on-surface-muted);
+  }
+  .icon-source a {
+    text-decoration: none;
+  }
+  .icon-source code {
+    padding: 2px 7px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 999px;
+    background: var(--site-color-surface-container-1);
+    color: var(--site-color-on-surface-variant);
+    font-size: inherit;
+  }
+  .icon-source a:hover code {
+    color: var(--site-color-primary);
+    border-color: var(--site-color-outline);
+  }
+</style>

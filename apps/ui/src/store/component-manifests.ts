@@ -2,6 +2,9 @@ import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import sheet from '@c2n/sheet/custom-elements.json'
 import skeleton from '@c2n/skeleton/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
+import pagination from '@c2n/pagination/custom-elements.json'
+import navigationMenu from '@c2n/navigation-menu/custom-elements.json'
+import menu from '@c2n/menu/custom-elements.json'
 import kbd from '@c2n/kbd/custom-elements.json'
 import table from '@c2n/table/custom-elements.json'
 import copyButton from '@c2n/copy-button/custom-elements.json'
@@ -42,6 +45,7 @@ import linkButton from '@c2n/link-button/custom-elements.json'
 import textField from '@c2n/text-field/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
+import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
@@ -51,6 +55,9 @@ export const componentManifests = (function () {
     sheet,
     skeleton,
     progress,
+    pagination,
+    navigationMenu,
+    menu,
     kbd,
     table,
     copyButton,
@@ -91,6 +98,7 @@ export const componentManifests = (function () {
     codeViewer,
     label,
     featherIcons,
+    phosphorIcons,
   ].reduce((result, item) => {
     const pkg = item as Package
     const tags: string[] = []

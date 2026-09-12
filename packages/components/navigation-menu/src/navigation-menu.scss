@@ -1,0 +1,185 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-navigation-menu,
+  $theme: (
+    gap: 4px,
+    background: null,
+
+    padding-top: 0px,
+    padding-right: 0px,
+    padding-bottom: 0px,
+    padding-left: 0px,
+
+    border-top-left-radius: null,
+    border-top-right-radius: null,
+    border-bottom-left-radius: null,
+    border-bottom-right-radius: null,
+
+    border-top: null,
+    border-right: null,
+    border-bottom: null,
+    border-left: null,
+
+    box-shadow: null,
+
+    mobile-trigger--size: 40px,
+    mobile-trigger--color: #18181b,
+    mobile-trigger--background: transparent,
+    mobile-trigger--border: 1px solid #e4e4e7,
+    mobile-trigger--border-radius: 8px,
+    mobile-trigger__icon--size: 20px,
+    mobile-trigger__hover--background: #f4f4f5,
+    mobile-trigger__hover--color: null,
+    mobile-trigger__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    mobile-trigger__focus--outline-offset: 1px,
+
+    mobile-panel--background: #ffffff,
+    mobile-panel--min-width: 260px,
+    mobile-panel--max-width: null,
+    mobile-panel--max-height: min(80vh, var(--c2-overlay--available-height, 80vh)),
+    mobile-panel--gap: 2px,
+
+    mobile-panel--border-top: 1px solid #e4e4e7,
+    mobile-panel--border-right: 1px solid #e4e4e7,
+    mobile-panel--border-bottom: 1px solid #e4e4e7,
+    mobile-panel--border-left: 1px solid #e4e4e7,
+
+    mobile-panel--border-top-left-radius: 8px,
+    mobile-panel--border-top-right-radius: 8px,
+    mobile-panel--border-bottom-left-radius: 8px,
+    mobile-panel--border-bottom-right-radius: 8px,
+
+    mobile-panel--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+
+    mobile-panel--padding-top: 8px,
+    mobile-panel--padding-right: 8px,
+    mobile-panel--padding-bottom: 8px,
+    mobile-panel--padding-left: 8px,
+  )
+);
+
+:host {
+  display: block;
+  // A flex item only shrinks below its content width when it is allowed to; without this the bar can never overflow,
+  // and an overflow is exactly what tells it to collapse.
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-navigation-menu {
+  display: flex;
+  position: relative;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  // The row never wraps: when it runs out of room it overflows, is measured, and the bar collapses instead.
+  flex-wrap: nowrap;
+  overflow: hidden;
+  box-sizing: border-box;
+  gap: css.cssVar(gap);
+
+  background: css.cssVar(background);
+  box-shadow: css.cssVar(box-shadow);
+
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+}
+
+// The row rendered only to be measured: `left`/`right` give it the width the bar would have, out of flow so the
+// collapsed button keeps its place, and hidden so none of it is ever seen.
+.bar.measuring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mobile {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  width: css.cssVar(mobile-trigger--size);
+  height: css.cssVar(mobile-trigger--size);
+  color: css.cssVar(mobile-trigger--color);
+  background: css.cssVar(mobile-trigger--background);
+  border: css.cssVar(mobile-trigger--border);
+  border-radius: css.cssVar(mobile-trigger--border-radius);
+  transition: animation.standard(background), animation.standard(color);
+
+  &:hover {
+    background: css.cssVar(mobile-trigger__hover--background, mobile-trigger--background);
+    color: css.cssVar(mobile-trigger__hover--color, mobile-trigger--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(mobile-trigger__focus--outline);
+    outline-offset: css.cssVar(mobile-trigger__focus--outline-offset);
+  }
+}
+
+.mobile-icon {
+  width: css.cssVar(mobile-trigger__icon--size);
+  height: css.cssVar(mobile-trigger__icon--size);
+}
+
+// The whole navigation as one hierarchy, behind the collapsed button.
+.mobile-panel {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  gap: css.cssVar(mobile-panel--gap);
+  min-width: css.cssVar(mobile-panel--min-width);
+  max-width: css.cssVar(mobile-panel--max-width);
+  max-height: css.cssVar(mobile-panel--max-height);
+
+  background: css.cssVar(mobile-panel--background);
+  box-shadow: css.cssVar(mobile-panel--box-shadow);
+
+  border-top: css.cssVar(mobile-panel--border-top);
+  border-right: css.cssVar(mobile-panel--border-right);
+  border-bottom: css.cssVar(mobile-panel--border-bottom);
+  border-left: css.cssVar(mobile-panel--border-left);
+
+  border-top-left-radius: css.cssVar(mobile-panel--border-top-left-radius);
+  border-top-right-radius: css.cssVar(mobile-panel--border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(mobile-panel--border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(mobile-panel--border-bottom-right-radius);
+
+  padding-top: css.cssVar(mobile-panel--padding-top);
+  padding-right: css.cssVar(mobile-panel--padding-right);
+  padding-bottom: css.cssVar(mobile-panel--padding-bottom);
+  padding-left: css.cssVar(mobile-panel--padding-left);
+}

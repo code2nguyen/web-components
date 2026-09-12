@@ -1,28 +1,42 @@
 ---
 import { featherIconNames, featherIconTag } from '@c2n/feather-icons'
+import MdxCodeBlock from './MdxCodeBlock.astro'
 
 // Icons are emitted as plain markup (not SSR'd through the Lit renderer) to keep the page light;
 // the client script below registers the elements so they render once the bundle loads.
 const items = featherIconNames.map((name) => ({ name, markup: `<${featherIconTag(name)}></${featherIconTag(name)}>` }))
+const studioUid = 'feather-icon-gallery-studio'
+const studioTag = 'c2-feather-arrow-right'
+const studioCode = `<${studioTag}></${studioTag}>`
 ---
 
 <div class="feather-icon-gallery__toolbar">
   <input type="search" class="feather-icon-gallery__filter" placeholder={`Filter ${items.length} icons…`} aria-label="Filter icons" autocomplete="off" />
-  <span class="feather-icon-gallery__count">{items.length} icons · click one to copy its tag</span>
+  <span class="feather-icon-gallery__count">{items.length} icons · select one to customize</span>
 </div>
 <div class="feather-icon-gallery">
   {
     items.map(({ name, markup }) => (
-      <button type="button" class="feather-icon-gallery__item" data-name={name} title={`Copy <${featherIconTag(name)}>`}>
-        <Fragment set:html={markup} />
-        <span class="feather-icon-gallery__label">{name}</span>
-      </button>
+      <div class="feather-icon-gallery__item" data-name={name}>
+        <button type="button" class="feather-icon-gallery__configure" title={`Customize ${name}`}>
+          <Fragment set:html={markup} />
+          <span class="feather-icon-gallery__label">{name}</span>
+        </button>
+        <c2-copy-button class="feather-icon-gallery__copy" pin value={markup} label={`Copy ${name} HTML`} />
+      </div>
     ))
   }
   <p class="feather-icon-gallery__empty" hidden>No icon matches.</p>
 </div>
 
+<MdxCodeBlock code={studioCode} lang="html" uid={studioUid} style="" label="Selected icon" offscreen>
+  <Fragment set:html={`<${studioTag} data-target-uid="${studioUid}"></${studioTag}>`} />
+</MdxCodeBlock>
+
 <script>
+  import { openIconInStudio } from '../utils/playground.ts'
+
+  import '@c2n/copy-button'
   import '@c2n/feather-icons'
 </script>
 
@@ -64,32 +78,46 @@ const items = featherIconNames.map((name) => ({ name, markup: `<${featherIconTag
     --c2-feather-icon--size: 22px;
   }
   .feather-icon-gallery__item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 6px 10px;
+    position: relative;
+    min-width: 0;
     border: 1px solid var(--site-color-outline-variant);
     border-radius: var(--site-radius-md);
-    background: transparent;
-    color: var(--site-color-on-surface);
-    cursor: pointer;
     transition:
       border-color 150ms var(--site-ease),
       background-color 150ms var(--site-ease);
-    &:hover {
+    &:hover,
+    &:focus-within {
       border-color: var(--site-color-outline);
       background: var(--site-color-surface-container-1);
     }
     &[hidden] {
       display: none;
     }
-    &.copied {
-      border-color: var(--site-color-primary);
-      .feather-icon-gallery__label {
-        color: var(--site-color-primary);
-      }
-    }
+  }
+  .feather-icon-gallery__configure {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 6px 10px;
+    border: 0;
+    background: transparent;
+    color: var(--site-color-on-surface);
+    cursor: pointer;
+  }
+  .feather-icon-gallery__copy {
+    z-index: 1;
+    --c2-copy-button__pin--offset-x: 5px;
+    --c2-copy-button__pin--offset-y: 5px;
+    --c2-copy-button__container--height: 26px;
+    --c2-copy-button__container--min-width: 26px;
+    --c2-copy-button__container--padding-left: 5px;
+    --c2-copy-button__container--padding-right: 5px;
+    --c2-copy-button__container--background-color: var(--site-color-surface);
+    --c2-copy-button__container--border: 1px solid var(--site-color-outline-variant);
+    --c2-copy-button__container__hover--background-color: var(--site-color-surface-container-2);
+    --c2-copy-button__icon--size: 14px;
   }
   .feather-icon-gallery__label {
     font-size: 11px;
@@ -110,7 +138,7 @@ const items = featherIconNames.map((name) => ({ name, markup: `<${featherIconTag
 
 <script>
   const filter = document.querySelector<HTMLInputElement>('.feather-icon-gallery__filter')
-  const items = Array.from(document.querySelectorAll<HTMLButtonElement>('.feather-icon-gallery__item'))
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.feather-icon-gallery__item'))
   const empty = document.querySelector<HTMLElement>('.feather-icon-gallery__empty')
 
   filter?.addEventListener('input', () => {
@@ -125,17 +153,9 @@ const items = featherIconNames.map((name) => ({ name, markup: `<${featherIconTag
   })
 
   items.forEach((item) => {
-    item.addEventListener('click', async () => {
-      const tag = `c2-feather-${item.dataset.name}`
-      await navigator.clipboard.writeText(`<${tag}></${tag}>`)
-      item.classList.add('copied')
-      const label = item.querySelector('.feather-icon-gallery__label')
-      const original = label?.textContent ?? ''
-      if (label) label.textContent = 'copied!'
-      setTimeout(() => {
-        item.classList.remove('copied')
-        if (label) label.textContent = original
-      }, 1000)
+    item.querySelector('.feather-icon-gallery__configure')?.addEventListener('click', () => {
+      const name = item.dataset.name ?? ''
+      openIconInStudio({ uid: 'feather-icon-gallery-studio', tagName: `c2-feather-${name}` })
     })
   })
 </script>

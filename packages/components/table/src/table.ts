@@ -6,6 +6,8 @@ import { styleMap } from 'lit/directives/style-map.js'
 import styles from './table.scss?inline'
 import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
+import { provide } from '@lit/context'
+import { PAGER_CONNECT_EVENT, pagerContext, type PagerConnectEventDetail, type PagerContext } from '@c2n/core/contexts/pager.js'
 import { COLUMN_CHANGE_EVENT, TableColumn } from './table-column.js'
 import {
   getFieldValue,
@@ -40,6 +42,22 @@ interface PinPlacement {
 }
 
 const HEADER_ROW = -1
+
+export interface TablePageChangeEventDetail {
+  /** The page now shown, 1-based. */
+  page: number
+  /** The page shown before. */
+  previousPage: number
+  /** Rows per page. */
+  pageSize: number
+  /** Total number of pages. */
+  pageCount: number
+  /** Index of the first row of the page, and how many were asked for — the `getRows` request that follows. */
+  start: number
+  count: number
+  /** Total rows the data source reports. */
+  totalRows: number
+}
 
 function defaultCompare(a: unknown, b: unknown): number {
   if (a === b) return 0
@@ -85,6 +103,11 @@ function humanize(field: string): string {
  * subgrid`, so columns stay aligned without any scroll syncing, and pinned columns are `position: sticky` cells rather
  * than separate containers. Give the host a height (or `--c2-table--max-height`) — the body scrolls inside it.
  *
+ * **Styling one column.** Every cell carries two parts named after its column — `cell-<field>` on the cell box and
+ * `cell-content-<field>` on the text inside it — so a single column can be given its own colour, alignment or pill
+ * shape from outside: `::part(cell-content-status) { border-radius: 999px; background: #f4f4f5 }`. Rows are
+ * `::part(row)` and `::part(row-selected)`.
+ *
  * **Virtualization** windows the rows to the visible range plus an overscan margin. It needs a uniform row height, which
  * it measures from the first rendered row, so theme the height with `--c2-table__row--height` (`row-height` is only the
  * estimate used for the first paint). It turns on automatically past `virtual-threshold` rows; `virtual="always"` and
@@ -94,18 +117,20 @@ function humanize(field: string): string {
  *
  * @slot default - The column definitions: `c2-table-column` elements. They render nothing themselves.
  * @slot toolbar - Bar above the header, for a title, filters or a column menu. Hidden when empty.
- * @slot footer - Bar below the rows, for a pager or a row count. Hidden when empty.
+ * @slot footer - Bar below the rows, for a row count or a `c2-pagination`. Hidden when empty.
  * @slot empty - Replaces the built-in "no rows" message.
  * @slot loading - Replaces the built-in spinner shown while the first rows load.
  * @slot error - Replaces the built-in message shown when `error` is set.
  *
- * @slotcomponent c2-table-column - One column definition.
+ * @slotcomponent c2-table-column
+ * @slotcomponent c2-pagination
  *
  * @event {CustomEvent<TableSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows.
  * @event {CustomEvent<TableSortChangeEventDetail>} sort-change - Fired after the user clicks a sortable header. `detail.sort` is the new sort model, in priority order.
  * @event {CustomEvent<TableRowEventDetail>} row-click - Fired when a row is clicked, before the selection is applied.
  * @event {CustomEvent<TableCellEventDetail>} cell-click - Fired when a cell is clicked; adds `detail.column` and `detail.value`.
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
+ * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
  * @cssproperty {color} [--c2-table--background=#ffffff]
  * @cssproperty {color} [--c2-table--color=#18181b]
@@ -142,8 +167,12 @@ function humanize(field: string): string {
  * @cssproperty {color} [--c2-table__sort-icon--color=#a1a1aa]
  * @cssproperty {color} [--c2-table__sort-icon__active--color=rgb(2, 101, 220)]
  *
- * @cssproperty {pixel} [--c2-table__resizer--width=5px]
- * @cssproperty {color} [--c2-table__resizer--color=transparent]
+ * @cssproperty {pixel} [--c2-table__resizer--width=9px] - Width of the grab area, not of the visible line.
+ * @cssproperty {pixel} [--c2-table__resizer--height=56%] - Height of the resting divider, as a share of the header.
+ * @cssproperty {pixel} [--c2-table__resizer--line-width=1px]
+ * @cssproperty {color} [--c2-table__resizer--color=#e4e4e7] - The divider drawn at a resizable column's edge.
+ * @cssproperty {pixel} [--c2-table__resizer__hover--height=100%]
+ * @cssproperty {pixel} [--c2-table__resizer__hover--line-width=2px]
  * @cssproperty {color} [--c2-table__resizer__hover--color=rgb(2, 101, 220)]
  *
  * @cssproperty {pixel} [--c2-table__row--height=36px] - Row height; virtualization measures it, so keep it uniform.
@@ -248,6 +277,16 @@ export class Table extends LitElement {
   /** Message shown when there are no rows. */
   @property({ type: String, attribute: 'empty-message' }) emptyMessage = 'No rows'
 
+  /** The page on show, 1-based. Only meaningful while the table is `paginated`; clamped to `pageCount`. */
+  @property({ type: Number, reflect: true }) page = 1
+
+  /**
+   * Rows per page. `0` leaves paging off; a `c2-pagination` slotted into the `footer` sets it from its own
+   * `page-size` when the table has none, which is what makes the nested form work with no configuration.
+   * With `rows` the page is sliced in place; with a `dataSource` each page is one request.
+   */
+  @property({ type: Number, attribute: 'page-size' }) pageSize = 0
+
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
@@ -263,6 +302,16 @@ export class Table extends LitElement {
   #selectionAnchor = -1
   #pendingFocus = false
   #requestToken = 0
+  /** The pagers that have announced themselves, so only their events are swallowed — not a pager inside a cell. */
+  #pagers = new WeakSet<EventTarget>()
+  #pendingScrollTop = false
+
+  /**
+   * Shared with a `c2-pagination` slotted into the `footer`. Rebuilt rather than mutated whenever the paging state
+   * moves: `@lit/context` consumers only re-render on a new object identity.
+   */
+  @provide({ context: pagerContext })
+  private pager: PagerContext | undefined = undefined
 
   #virtualizer = new VirtualScrollController(this, {
     scrollElement: () => this.viewport,
@@ -272,9 +321,48 @@ export class Table extends LitElement {
     enabled: () => this.isVirtualized,
   })
 
-  /** Number of rows the table knows about: `rows.length`, or the `dataSource` total. */
-  get rowCount(): number {
+  /** Total number of rows the table knows about: `rows.length`, or the `dataSource` total. */
+  get totalRows(): number {
     return this.dataSource ? Math.max(0, this.remoteTotal) : this.#sortedRows.length
+  }
+
+  /**
+   * Number of rows on screen right now: the whole dataset, or one page of it while `paginated`. This is what the
+   * virtualizer windows and what `virtual="auto"` measures, so a 25-row page is never virtualized against a
+   * million-row total.
+   */
+  get rowCount(): number {
+    if (!this.paginated) return this.totalRows
+    const onPage = Math.max(0, Math.min(this.pageSize, this.totalRows - this.#pageStart))
+    if (!this.dataSource) return onPage
+    // Once the page is in it is the truth; before that the arithmetic gives the right number of skeleton rows.
+    const loaded = this.#blocks.get(this.page - 1)?.length
+    if (loaded !== undefined) return loaded
+    return this.remoteTotal < 0 ? 0 : onPage
+  }
+
+  /**
+   * Whether the table is paging its rows. `rows` are sliced in place; a `dataSource` is asked for one page per
+   * request. Either way `page-size` is the switch, and a pager slotted into the `footer` sets it.
+   */
+  get paginated(): boolean {
+    return this.pageSize > 0
+  }
+
+  /** Number of pages, at least 1. */
+  get pageCount(): number {
+    if (!this.paginated) return 1
+    return Math.max(1, Math.ceil(this.totalRows / this.pageSize))
+  }
+
+  /** Index of the first row of the current page within the whole dataset. */
+  get #pageStart(): number {
+    return this.paginated ? (this.page - 1) * this.pageSize : 0
+  }
+
+  /** A page is one block, so the existing block cache and request de-duplication carry paging unchanged. */
+  get #effectiveBlockSize(): number {
+    return this.paginated ? this.pageSize : this.blockSize
   }
 
   /** Whether the rows are currently windowed. */
@@ -332,23 +420,100 @@ export class Table extends LitElement {
 
   /** Scrolls the row at `index` into view. */
   scrollToIndex(index: number) {
-    this.#virtualizer.scrollToIndex(index, this.#headerHeight())
+    this.#virtualizer.scrollToIndex(index - this.#pageStart, this.#headerHeight())
   }
 
   /** Drops the `dataSource` cache and reloads the visible rows. */
   refresh() {
+    this.error = ''
     if (this.dataSource) this.#resetRemote()
     this.requestUpdate()
   }
 
   protected override willUpdate(changed: PropertyValues) {
     if (!this.hasUpdated || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements')) this.#applySort()
-    if (changed.has('dataSource') || changed.has('blockSize') || (this.dataSource && changed.has('sortModel'))) this.#resetRemote()
+    // Another page size re-cuts the blocks, so the cache has to go; another page does not — and must not, or
+    // `remoteTotal` would drop back to "unknown" and the pager would collapse to a single page mid-navigation.
+    if (changed.has('dataSource') || changed.has('blockSize') || changed.has('pageSize') || (this.dataSource && changed.has('sortModel'))) {
+      this.#resetRemote()
+    }
+    if (this.paginated) {
+      // A new sort is a new dataset; start it at the top rather than on a page that may no longer exist.
+      if (changed.has('sortModel') && changed.get('sortModel') !== undefined) this.page = 1
+      if (!this.dataSource || this.remoteTotal >= 0) {
+        const clamped = Math.min(Math.max(1, Math.floor(this.page) || 1), this.pageCount)
+        if (clamped !== this.page) this.page = clamped
+      }
+      // `error` is sticky and blocks every further fetch, so asking for another page has to clear it.
+      if ((changed.has('page') || changed.has('pageSize')) && this.error) this.error = ''
+      if (changed.has('page') && this.hasUpdated) {
+        this.#selectionAnchor = -1
+        this.#pendingScrollTop = true
+      }
+    }
+    this.#syncPagerContext()
     if (this.rowCount === 0 && this.focusedCell.row !== HEADER_ROW) this.focusedCell = { row: HEADER_ROW, column: this.focusedCell.column }
+  }
+
+  #syncPagerContext() {
+    const current = this.pager
+    if (!this.paginated) {
+      if (current) this.pager = undefined
+      return
+    }
+    const busy = this.loading || this.#isBootstrapping
+    if (current && current.page === this.page && current.pageSize === this.pageSize && current.totalItems === this.totalRows && current.busy === busy) {
+      return
+    }
+    this.pager = {
+      page: this.page,
+      pageSize: this.pageSize,
+      totalItems: this.totalRows,
+      busy,
+      pageChanged: (page) => this.goToPage(page),
+      pageSizeChanged: (pageSize) => this.setPageSize(pageSize),
+    }
+  }
+
+  /** Shows `page`, clamped to the available range, and loads it. Fires `page-change` when the page actually moves. */
+  goToPage(page: number) {
+    if (!this.paginated) return
+    const previousPage = this.page
+    const next = Math.min(Math.max(1, Math.floor(page) || 1), this.pageCount)
+    if (next === previousPage) return
+    this.page = next
+    this.dispatchEvent(
+      new CustomEvent<TablePageChangeEventDetail>('page-change', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          page: next,
+          previousPage,
+          pageSize: this.pageSize,
+          pageCount: this.pageCount,
+          start: (next - 1) * this.pageSize,
+          count: this.pageSize,
+          totalRows: this.totalRows,
+        },
+      }),
+    )
+  }
+
+  /** Changes the rows per page, keeping the first row of the current page on screen. */
+  setPageSize(pageSize: number) {
+    const next = Math.floor(pageSize)
+    if (!Number.isFinite(next) || next <= 0 || next === this.pageSize) return
+    const firstRow = this.#pageStart
+    this.pageSize = next
+    this.page = Math.floor(firstRow / next) + 1
   }
 
   protected override updated(changed: PropertyValues) {
     super.updated(changed)
+    if (this.#pendingScrollTop) {
+      this.#pendingScrollTop = false
+      if (this.viewport) this.viewport.scrollTop = 0
+    }
     this.#measureRowHeight()
     this.#measureColumnWidths()
     this.#syncFocusToWindow()
@@ -363,7 +528,8 @@ export class Table extends LitElement {
     const columns = this.#renderColumns()
     const pins = this.#pinPlacements(columns)
     const range = this.#virtualizer.range
-    const rowCount = this.rowCount
+    // The virtualizer windows the page; the body renders dataset indices, so shift its range by the page offset.
+    const offset = this.#pageStart
 
     return html`
       <div class="toolbar" part="toolbar" ?hidden=${!this.hasToolbar}>
@@ -374,14 +540,14 @@ export class Table extends LitElement {
           class="grid"
           role="grid"
           part="grid"
-          aria-rowcount=${rowCount + 1}
+          aria-rowcount=${this.totalRows + 1}
           aria-colcount=${columns.length}
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
           style=${styleMap({ '--_grid-template': this.#gridTemplate(columns) })}
           @keydown=${this.#handleKeyDown}
         >
           ${this.#renderHeaderRow(columns, pins)} ${range.paddingTop > 0 ? html`<div class="spacer" style="height:${range.paddingTop}px"></div>` : nothing}
-          ${this.#renderBody(columns, pins, range.start, range.end)}
+          ${this.#renderBody(columns, pins, offset + range.start, offset + range.end)}
           ${range.paddingBottom > 0 ? html`<div class="spacer" style="height:${range.paddingBottom}px"></div>` : nothing}
         </div>
       </div>
@@ -565,17 +731,20 @@ export class Table extends LitElement {
         : this.#formatValue(column, value)
       : html`<span class="skeleton" part="skeleton"></span>`
 
+    // A cell and its content each carry a part named after the column, so one column can be styled from outside —
+    // the cell for its box, the content for the text itself, which is what a pill or a chip needs.
+    const fieldPart = column.field.replace(/[^\w-]/g, '-')
     return html`
       <div
         class=${shared.class}
         role="gridcell"
-        part="cell cell-${column.field.replace(/[^\w-]/g, '-')}"
+        part="cell cell-${fieldPart}"
         aria-colindex=${columnIndex + 1}
         tabindex=${shared.tabindex}
         style=${shared.style}
         @click=${() => this.#handleCellClick(rowIndex, columnIndex, column, value)}
       >
-        <span class="cell-content">${content}</span>
+        <span class="cell-content" part="cell-content cell-content-${fieldPart}">${content}</span>
       </div>
     `
   }
@@ -675,10 +844,11 @@ export class Table extends LitElement {
     }
   }
 
+  /** `index` is the row's position in the whole dataset, on every page. */
   #rowAt(index: number): TableRow | undefined {
     if (this.dataSource) {
-      const block = Math.floor(index / this.blockSize)
-      return this.#blocks.get(block)?.[index % this.blockSize]
+      const size = this.#effectiveBlockSize
+      return this.#blocks.get(Math.floor(index / size))?.[index % size]
     }
     return this.#sortedRows[index]
   }
@@ -716,6 +886,12 @@ export class Table extends LitElement {
 
   #ensureBlocks() {
     if (!this.dataSource || this.error) return
+    // Paged: the block is the page, so exactly one request is ever in flight for the rows on screen. This comes
+    // before the bootstrap below so `<c2-table page="3">` loads page 3 outright instead of page 1 and then page 3.
+    if (this.paginated) {
+      void this.#fetchBlock(this.page - 1)
+      return
+    }
     if (this.remoteTotal < 0) {
       void this.#fetchBlock(0)
       return
@@ -733,11 +909,12 @@ export class Table extends LitElement {
     this.#pendingBlocks.add(block)
     const token = this.#requestToken
     try {
-      const result = await dataSource.getRows({ start: block * this.blockSize, count: this.blockSize, sort: this.sortModel })
+      const size = this.#effectiveBlockSize
+      const result = await dataSource.getRows({ start: block * size, count: size, sort: this.sortModel })
       if (token !== this.#requestToken) return
       this.#blocks.set(block, result.rows ?? [])
       if (typeof result.total === 'number') this.remoteTotal = result.total
-      else if (this.remoteTotal < 0) this.remoteTotal = block * this.blockSize + (result.rows?.length ?? 0)
+      else if (this.remoteTotal < 0) this.remoteTotal = block * size + (result.rows?.length ?? 0)
       this.requestUpdate()
     } catch (error) {
       if (token === this.#requestToken) {
@@ -752,6 +929,10 @@ export class Table extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.addEventListener(COLUMN_CHANGE_EVENT, this.#handleColumnChange)
+    this.addEventListener(PAGER_CONNECT_EVENT, this.#handlePagerConnect)
+    // The table speaks for its pager: swallow the pager's own events so a consumer sees one `page-change`, from here.
+    this.addEventListener('page-change', this.#handlePagerEvent)
+    this.addEventListener('page-size-change', this.#handlePagerEvent)
   }
 
   override disconnectedCallback() {
@@ -767,6 +948,32 @@ export class Table extends LitElement {
   #handleColumnChange = (event: Event) => {
     event.stopPropagation()
     this.#collectColumns()
+  }
+
+  /**
+   * A pager connected somewhere inside the table. Adopt its page size when the table has none, so the nested form
+   * needs no configuration, and keep the event inside the table.
+   */
+  #handlePagerConnect = (event: Event) => {
+    event.stopPropagation()
+    if (event.target) this.#pagers.add(event.target)
+    // Adopt the size unconditionally: `dataSource` is usually assigned by script after the markup has parsed, so the
+    // pager connects first. `paginated` gates on the data source separately, once it arrives.
+    if (this.pageSize === 0) {
+      const pageSize = Math.floor((event as CustomEvent<PagerConnectEventDetail>).detail?.pageSize ?? 0)
+      if (Number.isFinite(pageSize) && pageSize > 0) this.pageSize = pageSize
+    }
+  }
+
+  /**
+   * A pager the table drives re-emits what it just asked for, so the table swallows it and answers with its own
+   * event — one `page-change` leaves the table, not two. Three things must still get through: the table's own event
+   * (it fires this listener at-target), a `c2-pagination` used inside a cell renderer, and any pager on a table that
+   * is not paging, which the author is wiring up by hand.
+   */
+  #handlePagerEvent = (event: Event) => {
+    if (!this.paginated || event.target === this) return
+    if (event.target && this.#pagers.has(event.target)) event.stopImmediatePropagation()
   }
 
   #collectColumns(slot?: HTMLSlotElement) {
@@ -906,16 +1113,20 @@ export class Table extends LitElement {
   #handleKeyDown = (event: KeyboardEvent) => {
     const columns = this.#renderColumns()
     if (columns.length === 0) return
-    const rowCount = this.rowCount
     let { row, column } = this.focusedCell
-    const pageSize = Math.max(1, Math.floor((this.viewport?.clientHeight ?? 0) / this.#rowHeightPx) - 1)
+    // Keyboard movement stays inside the page: rows are numbered across the whole dataset, so page 2 starts at
+    // `first`, not at 0.
+    const first = this.#pageStart
+    const last = first + this.rowCount - 1
+    // Rows per viewport, for PageUp/PageDown — unrelated to the `pageSize` property, which is rows per data page.
+    const viewportRows = Math.max(1, Math.floor((this.viewport?.clientHeight ?? 0) / this.#rowHeightPx) - 1)
 
     switch (event.key) {
       case 'ArrowDown':
-        row = Math.min(rowCount - 1, row + 1)
+        row = Math.min(last, row + 1)
         break
       case 'ArrowUp':
-        row = Math.max(HEADER_ROW, row - 1)
+        row = row <= first ? HEADER_ROW : row - 1
         break
       case 'ArrowRight':
         column = Math.min(columns.length - 1, column + 1)
@@ -928,14 +1139,14 @@ export class Table extends LitElement {
         column = 0
         break
       case 'End':
-        if (event.ctrlKey || event.metaKey) row = rowCount - 1
+        if (event.ctrlKey || event.metaKey) row = last
         column = columns.length - 1
         break
       case 'PageDown':
-        row = Math.min(rowCount - 1, Math.max(0, row) + pageSize)
+        row = Math.min(last, Math.max(first, row) + viewportRows)
         break
       case 'PageUp':
-        row = Math.max(0, row - pageSize)
+        row = Math.max(first, row - viewportRows)
         break
       case 'Enter':
       case ' ': {
@@ -989,7 +1200,9 @@ export class Table extends LitElement {
   #syncFocusToWindow() {
     const { row, column } = this.focusedCell
     if (row < 0) return
-    const { start, end } = this.#virtualizer.range
+    const offset = this.#pageStart
+    const start = offset + this.#virtualizer.range.start
+    const end = offset + this.#virtualizer.range.end
     if (row >= start && row < end) return
     const shadowRoot = this.renderRoot as ShadowRoot
     if (shadowRoot.activeElement) {

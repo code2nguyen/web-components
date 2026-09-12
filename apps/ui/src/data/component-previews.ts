@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,
   accordion: `<c2-accordion style="width:240px">
   <c2-details label="Shipping" expanded>Delivered in 3–5 business days.</c2-details>
   <c2-details label="Returns">Return within 30 days.</c2-details>
@@ -74,6 +75,12 @@ export const componentPreviews: Record<string, string> = {
   <c2-feather-settings></c2-feather-settings>
   <c2-feather-arrow-right></c2-feather-arrow-right>
 </div>`,
+  'phosphor-icons': `<div class="preview-row" style="gap:18px;--c2-phosphor-icon--size:26px">
+  <c2-phosphor-heart weight="fill"></c2-phosphor-heart>
+  <c2-phosphor-camera></c2-phosphor-camera>
+  <c2-phosphor-gear weight="duotone"></c2-phosphor-gear>
+  <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
+</div>`,
   'icon-button': `<div class="preview-row">
   <c2-icon-button tooltip="Camera">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
@@ -113,6 +120,13 @@ export const componentPreviews: Record<string, string> = {
   <c2-mat-icon>settings</c2-mat-icon>
   <c2-mat-icon>search</c2-mat-icon>
 </div>`,
+  menu: `<c2-menu aria-label="Row actions">
+  <c2-button slot="trigger">Actions</c2-button>
+  <c2-menu-item value="edit">Edit</c2-menu-item>
+  <c2-menu-item value="duplicate">Duplicate</c2-menu-item>
+  <hr />
+  <c2-menu-item value="delete" destructive>Delete</c2-menu-item>
+</c2-menu>`,
   modal: `<div class="preview-row">
   <c2-button onclick="this.nextElementSibling.show()">Open modal</c2-button>
   <c2-modal>
@@ -121,6 +135,17 @@ export const componentPreviews: Record<string, string> = {
     <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Done</c2-button>
   </c2-modal>
 </div>`,
+  'navigation-menu': `<c2-navigation-menu aria-label="Main">
+  <c2-navigation-menu-item value="products">
+    Products
+    <div style="display:grid;gap:2px;width:200px" slot="panel">
+      <c2-navigation-menu-link href="#analytics">Analytics<span slot="description">Realtime dashboards</span></c2-navigation-menu-link>
+      <c2-navigation-menu-link href="#warehouse">Warehouse<span slot="description">Columnar storage</span></c2-navigation-menu-link>
+    </div>
+  </c2-navigation-menu-item>
+  <c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item>
+  <c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item>
+</c2-navigation-menu>`,
   overlay: `<div>
   <button class="preview-button" popovertarget="preview-overlay">Open overlay</button>
   <c2-overlay id="preview-overlay" popover="auto" placement="bottom-start">

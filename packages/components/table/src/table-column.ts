@@ -41,8 +41,8 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /** Horizontal alignment of the header and the cells. */
   @property({ type: String }) align: ColumnAlign = 'start'
 
-  /** Lets the user sort by this column. */
-  @property({ type: Boolean }) sortable = false
+  /** Lets the user sort by this column. Defaults to the table's `sortable`. */
+  @property({ type: Boolean, converter: { fromAttribute: (value: string | null) => value !== null } }) sortable?: boolean
 
   /** Lets the user drag the column's trailing edge. Defaults to the table's `resizable`. */
   @property({ type: Boolean, converter: { fromAttribute: (value: string | null) => value !== null } }) resizable?: boolean

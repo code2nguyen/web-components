@@ -216,8 +216,29 @@
       </div>
     </section>
 
+    <section>
+      <h2>Server-side pages</h2>
+      <p class="hint">
+        A fake source of 137 rows, 10 a page. The footer pager drives <code>page</code>; the table asks the source for that page only and emits
+        <code>page-change</code>. Use the buttons to make the next request slow or fail.
+      </p>
+      <p>
+        <button id="paged-slow" type="button">Slow next request</button>
+        <button id="paged-fail" type="button">Fail next request</button>
+      </p>
+      <c2-table id="paged" row-key="id" sortable style="height: 420px">
+        <c2-table-column field="name" header="Name" width="2fr" sortable></c2-table-column>
+        <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+        <c2-table-column field="score" header="Score" width="120px" align="end" format="number" sortable></c2-table-column>
+        <c2-pagination slot="footer" variant="compact" style="--c2-pagination--justify-content: flex-end"></c2-pagination>
+      </c2-table>
+      <p class="hint" id="paged-log">page-change appears here.</p>
+    </section>
+
     <script type="module">
       import { html } from 'lit'
+      // The table never imports the pager; the harness does, the way an app would.
+      import '@c2n/pagination'
 
       const TEAMS = ['Analytics', 'Compilers', 'Research', 'Flight', 'Networks']
       const STATUSES = ['active', 'invited', 'active', 'active', 'invited']
@@ -275,6 +296,35 @@
           }
         },
       }
+
+      // --- Server-side pages -------------------------------------------------------------------------------------
+      const pagedRows = makeRows(137)
+      let delay = 150
+      let failNext = false
+      document.querySelector('#paged-slow').addEventListener('click', () => (delay = 1500))
+      document.querySelector('#paged-fail').addEventListener('click', () => (failNext = true))
+
+      const paged = document.querySelector('#paged')
+      paged.dataSource = {
+        async getRows({ start, count, sort }) {
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          delay = 150
+          if (failNext) {
+            failNext = false
+            throw new Error('The request failed with 503')
+          }
+          const field = sort[0]?.field
+          const ordered = field
+            ? [...pagedRows].sort(
+                (a, b) => String(a[field]).localeCompare(String(b[field]), undefined, { numeric: true }) * (sort[0].direction === 'desc' ? -1 : 1),
+              )
+            : pagedRows
+          return { rows: ordered.slice(start, start + count), total: ordered.length }
+        },
+      }
+      paged.addEventListener('page-change', (event) => {
+        document.querySelector('#paged-log').textContent = `page-change ${JSON.stringify(event.detail)}`
+      })
     </script>
   </body>
 </html>
