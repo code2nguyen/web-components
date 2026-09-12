@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import sheet from '@c2n/sheet/custom-elements.json'
 import skeleton from '@c2n/skeleton/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
 import kbd from '@c2n/kbd/custom-elements.json'
@@ -47,6 +48,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    sheet,
     skeleton,
     progress,
     kbd,

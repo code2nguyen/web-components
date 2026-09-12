@@ -46,6 +46,7 @@
     "@c2n/radio": "*",
     "@c2n/select": "*",
     "@c2n/seperator": "*",
+    "@c2n/sheet": "*",
     "@c2n/side-nav": "*",
     "@c2n/skeleton": "*",
     "@c2n/slider": "*",

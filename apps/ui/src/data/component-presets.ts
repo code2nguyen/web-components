@@ -307,6 +307,23 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-sheet': {
+    html: `<c2-sheet open><span slot="title">Filters</span><div>Panel content</div></c2-sheet>`,
+    presets: [
+      { name: 'Wide', css: { '--c2-sheet--size': '560px' } },
+      { name: 'Rounded', css: { '--c2-sheet--border-radius': '14px' } },
+      {
+        name: 'Divided',
+        css: {
+          '--c2-sheet__header--padding-bottom': '14px',
+          '--c2-sheet__header--border-bottom': '1px solid #e4e4e7',
+          '--c2-sheet__footer--border-top': '1px solid #e4e4e7',
+        },
+      },
+      { name: 'Frosted', css: { '--c2-sheet__backdrop--background': 'rgba(255, 255, 255, 0.4)', '--c2-sheet__backdrop--backdrop-filter': 'blur(6px)' } },
+      { name: 'Instant', css: { '--c2-sheet--transition-duration': '0ms' } },
+    ],
+  },
   'c2-side-nav': {
     html: `<div style="position: relative; width: 220px; height: 120px; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden"><c2-side-nav opened style="height: 100%; --c2-side-nav__open--width: 92px; --c2-side-nav--padding-top: 10px; --c2-side-nav--padding-right: 8px; --c2-side-nav--padding-bottom: 10px; --c2-side-nav--padding-left: 8px"><div slot="side-nav-content" style="font-size: 12px; line-height: 2">Inbox<br>Drafts<br>Sent</div><div style="padding: 10px; font-size: 12px; color: #71717a">Content</div></c2-side-nav></div>`,
     presets: [

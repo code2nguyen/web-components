@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/sheet:build",
         "../../components/skeleton:build",
         "../../components/progress:build",
         "../../components/kbd:build",

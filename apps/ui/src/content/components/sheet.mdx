@@ -1,0 +1,101 @@
+---
+title: 'Sheet'
+description: 'Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Sheet } from '@c2n/sheet'
+import { Button } from '@c2n/button'
+
+`c2-sheet` is a dialog that spans one edge of the screen and slides in from it — filters, details, a form beside the record it edits. It is built on the native `<dialog>` like `c2-modal`, so focus is trapped and restored, the page behind is inert and covered by a backdrop, and Escape closes. `side` picks the edge (`right` by default), and `--c2-sheet--size` is the width of a left/right sheet or the height of a top/bottom one while the other axis fills the screen. Open it with the `open` attribute or `show()`, close it with `close(returnValue)`, the × button, a backdrop click or Escape — `hide-close`, `no-backdrop-close` and `no-escape` turn those off. The heading goes in `title` (it labels the sheet; use `label` when there is none), the content in the default slot, the actions in `footer`; only the body scrolls, so the header and footer stay put.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/sheet
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/sheet
+<style>
+  .sheet p {
+    margin: 0 0 12px;
+  }
+  .ghost {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+  }
+  .rounded {
+    --c2-sheet--border-radius: 14px;
+  }
+  .divided {
+    --c2-sheet__header--padding-bottom: 14px;
+    --c2-sheet__header--border-bottom: 1px solid #e4e4e7;
+    --c2-sheet__footer--border-top: 1px solid #e4e4e7;
+  }
+  .short {
+    --c2-sheet--size: 280px;
+  }
+</style>
+<div data-label="Sides">
+  <c2-button onclick="document.getElementById('sh-right').show()">Right</c2-button>
+  <c2-sheet id="sh-right" class="sheet">
+    <span slot="title">Filters</span>
+    <p>The default edge: a panel that complements the page without replacing it.</p>
+  </c2-sheet>
+
+  <c2-button onclick="document.getElementById('sh-left').show()">Left</c2-button>
+  <c2-sheet id="sh-left" side="left" class="sheet">
+    <span slot="title">Navigation</span>
+    <p>Slides in from the left.</p>
+  </c2-sheet>
+
+  <c2-button onclick="document.getElementById('sh-top').show()">Top</c2-button>
+  <c2-sheet id="sh-top" side="top" class="sheet short">
+    <span slot="title">Announcement</span>
+    <p>Full width, pinned to the top; `--c2-sheet--size` is its height.</p>
+  </c2-sheet>
+
+  <c2-button onclick="document.getElementById('sh-bottom').show()">Bottom</c2-button>
+  <c2-sheet id="sh-bottom" side="bottom" class="sheet short">
+    <span slot="title">Share</span>
+    <p>The phone pattern: a bottom sheet for actions on the current screen.</p>
+  </c2-sheet>
+</div>
+<div data-label="With actions">
+  <c2-button onclick="document.getElementById('sh-form').show()">Edit record</c2-button>
+  <c2-sheet id="sh-form" class="sheet divided">
+    <span slot="title">Edit record</span>
+    <p>Put the form in the body and the actions in the footer. Only the body scrolls, so Save never leaves the screen.</p>
+    <c2-button slot="footer" class="ghost" onclick="this.closest('c2-sheet').close('cancel')">Cancel</c2-button>
+    <c2-button slot="footer" onclick="this.closest('c2-sheet').close('saved')">Save</c2-button>
+  </c2-sheet>
+</div>
+<div data-label="Themed">
+  <c2-button onclick="document.getElementById('sh-rounded').show()">Rounded</c2-button>
+  <c2-sheet id="sh-rounded" class="sheet rounded">
+    <span slot="title">Rounded</span>
+    <p>`--c2-sheet--border-radius` rounds the two corners facing the page; the edge stays square.</p>
+  </c2-sheet>
+
+  <c2-button onclick="document.getElementById('sh-wide').show()">Wide</c2-button>
+  <c2-sheet id="sh-wide" class="sheet" style="--c2-sheet--size: 560px">
+    <span slot="title">Wide</span>
+    <p>A detail panel that needs room for a table or a diff.</p>
+  </c2-sheet>
+</div>
+```
+
+Reach for a sheet when the content belongs *beside* the page: filters over a list, a record's details, a form the user fills in without losing their place. Reach for `c2-modal` when the page must stop for a decision, and for `c2-side-nav` when the panel is navigation that is part of the layout rather than a transient overlay.
+
+Keep the trigger and the sheet next to each other in the markup, and give the sheet a name — a `title` slot labels it automatically, `label` names one without a visible heading. Focus moves into the panel on open and returns to the trigger on close, so a sheet opened from a toolbar button lands the user back where they were.
+
+A sheet can hold another overlay: a confirm dialog opened from inside a sheet keeps the page locked until both have closed, and closing the inner one leaves the sheet standing.
+
+`--c2-sheet--size` is the only geometry variable you normally need; the sheet fills the other axis. `--c2-sheet--border-radius` rounds the inner corners, `--c2-sheet--transition-duration` sets the slide (`0ms` disables it, and reduced motion drops it automatically), and the `__header`, `__body`, `__footer`, `__close` and `__backdrop` groups match `c2-modal`'s so a dialog and a sheet can be themed together.

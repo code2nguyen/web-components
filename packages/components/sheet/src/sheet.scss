@@ -1,0 +1,257 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-sheet,
+  $theme: (
+    size: 380px,
+    background: #ffffff,
+    color: #18181b,
+    border: none,
+    border-radius: 0px,
+    box-shadow: '0 24px 60px rgba(0, 0, 0, 0.25)',
+    transition-duration: 280ms,
+
+    header--padding-top: 20px,
+    header--padding-right: 20px,
+    header--padding-bottom: 0px,
+    header--padding-left: 24px,
+    header--font-size: 17px,
+    header--font-weight: 600,
+    header--line-height: 1.35,
+    header--border-bottom: null,
+
+    body--padding-top: 12px,
+    body--padding-right: 24px,
+    body--padding-bottom: 20px,
+    body--padding-left: 24px,
+    body--font-size: 14px,
+    body--line-height: 1.6,
+    body--color: null,
+
+    footer--padding-top: 12px,
+    footer--padding-right: 24px,
+    footer--padding-bottom: 20px,
+    footer--padding-left: 24px,
+    footer--gap: 8px,
+    footer--justify-content: flex-end,
+    footer--border-top: null,
+
+    close--size: 32px,
+    close--icon-size: 18px,
+    close--border-radius: 8px,
+    close--color: #71717a,
+    close__hover--background: #f4f4f5,
+    close__hover--color: #18181b,
+    close__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    backdrop--background: 'rgba(9, 9, 11, 0.45)',
+    backdrop--backdrop-filter: null,
+  )
+);
+
+:host {
+  display: contents;
+}
+
+.c2-sheet {
+  // The dialog box is the panel itself; padding 0 so a click that targets the dialog is a click on the backdrop.
+  box-sizing: border-box;
+  position: fixed;
+  max-width: 100vw;
+  max-height: 100dvh;
+  padding: 0;
+  border: css.cssVar(border);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  box-shadow: css.cssVar(box-shadow);
+  overflow: hidden;
+
+  // `--_c2-sheet-enter` is the off-screen resting place, set once per side below. Keeping it in a custom property
+  // means the open rule stays a plain `.c2-sheet[open]`: a `:host([side=…]) .c2-sheet` selector is more specific and
+  // would otherwise win, leaving the panel parked off-screen.
+  transform: var(--_c2-sheet-enter);
+  transition:
+    transform css.cssVar(transition-duration) animation.$standard-easing,
+    display css.cssVar(transition-duration) allow-discrete,
+    overlay css.cssVar(transition-duration) allow-discrete;
+
+  &[open] {
+    transform: none;
+  }
+
+  &::backdrop {
+    background: css.cssVar(backdrop--background);
+    backdrop-filter: css.cssVar(backdrop--backdrop-filter);
+    opacity: 0;
+    transition:
+      opacity css.cssVar(transition-duration) animation.$standard-easing,
+      display css.cssVar(transition-duration) allow-discrete,
+      overlay css.cssVar(transition-duration) allow-discrete;
+  }
+
+  &[open]::backdrop {
+    opacity: 1;
+  }
+}
+
+// One edge per side: the panel spans the perpendicular axis and is `size` deep, and it slides in from off-screen.
+// `inset` wins over the UA's centring margins, so no `margin: auto` reset is needed.
+:host([side='right']) .c2-sheet {
+  inset: 0 0 0 auto;
+  width: css.cssVar(size);
+  height: 100dvh;
+  --_c2-sheet-enter: translateX(100%);
+  border-top-left-radius: css.cssVar(border-radius);
+  border-bottom-left-radius: css.cssVar(border-radius);
+}
+
+:host([side='left']) .c2-sheet {
+  inset: 0 auto 0 0;
+  width: css.cssVar(size);
+  height: 100dvh;
+  --_c2-sheet-enter: translateX(-100%);
+  border-top-right-radius: css.cssVar(border-radius);
+  border-bottom-right-radius: css.cssVar(border-radius);
+}
+
+:host([side='top']) .c2-sheet {
+  inset: 0 0 auto 0;
+  width: 100vw;
+  height: css.cssVar(size);
+  --_c2-sheet-enter: translateY(-100%);
+  border-bottom-left-radius: css.cssVar(border-radius);
+  border-bottom-right-radius: css.cssVar(border-radius);
+}
+
+:host([side='bottom']) .c2-sheet {
+  inset: auto 0 0 0;
+  width: 100vw;
+  height: css.cssVar(size);
+  --_c2-sheet-enter: translateY(100%);
+  border-top-left-radius: css.cssVar(border-radius);
+  border-top-right-radius: css.cssVar(border-radius);
+}
+
+// The panel starts off-screen on open as well as ending there on close, so the slide runs both ways.
+@starting-style {
+  .c2-sheet[open] {
+    transform: var(--_c2-sheet-enter);
+  }
+  .c2-sheet[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.c2-sheet__panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.c2-sheet__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: none;
+  padding-top: css.cssVar(header--padding-top);
+  padding-right: css.cssVar(header--padding-right);
+  padding-bottom: css.cssVar(header--padding-bottom);
+  padding-left: css.cssVar(header--padding-left);
+  border-bottom: css.cssVar(header--border-bottom);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-sheet__title {
+  flex: 1;
+  min-width: 0;
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+  line-height: css.cssVar(header--line-height);
+  // Keep the close button aligned with the first line even when there is no title.
+  min-height: css.cssVar(close--size);
+  display: flex;
+  align-items: center;
+
+  ::slotted(*) {
+    margin: 0;
+    font: inherit;
+  }
+}
+
+.c2-sheet__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  width: css.cssVar(close--size);
+  height: css.cssVar(close--size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: css.cssVar(close--border-radius);
+  background: transparent;
+  color: css.cssVar(close--color);
+  cursor: pointer;
+  transition: animation.standard(background), animation.standard(color);
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(close--icon-size);
+    height: css.cssVar(close--icon-size);
+  }
+
+  &:hover {
+    background: css.cssVar(close__hover--background);
+    color: css.cssVar(close__hover--color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(close__focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+// The body is the only part that scrolls, so the header and footer stay put in a full-height panel.
+.c2-sheet__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-top: css.cssVar(body--padding-top);
+  padding-right: css.cssVar(body--padding-right);
+  padding-bottom: css.cssVar(body--padding-bottom);
+  padding-left: css.cssVar(body--padding-left);
+  font-size: css.cssVar(body--font-size);
+  line-height: css.cssVar(body--line-height);
+  color: css.cssVar(body--color);
+}
+
+.c2-sheet__footer {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: css.cssVar(footer--gap);
+  justify-content: css.cssVar(footer--justify-content);
+  padding-top: css.cssVar(footer--padding-top);
+  padding-right: css.cssVar(footer--padding-right);
+  padding-bottom: css.cssVar(footer--padding-bottom);
+  padding-left: css.cssVar(footer--padding-left);
+  border-top: css.cssVar(footer--border-top);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// Reduced motion: the panel appears in place rather than sliding, and the backdrop still fades.
+@media (prefers-reduced-motion: reduce) {
+  .c2-sheet {
+    // One property to neutralise, whichever edge the sheet is on.
+    --_c2-sheet-enter: none;
+    transition:
+      display css.cssVar(transition-duration) allow-discrete,
+      overlay css.cssVar(transition-duration) allow-discrete;
+  }
+}
