@@ -1,6 +1,6 @@
 {
   "name": "@c2n/design-board",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "main": "dist/design-board.js",
   "exports": {
@@ -31,7 +31,7 @@
     "type-check": "tsc -p tsconfig.lib.json --composite false"
   },
   "dependencies": {
-    "@c2n/core": "0.0.5",
+    "@c2n/core": "0.0.6",
     "@lit/context": "1.1.6",
     "lit": "3.3.3"
   },

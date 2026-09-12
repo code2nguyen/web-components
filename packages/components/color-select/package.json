@@ -1,6 +1,6 @@
 {
   "name": "@c2n/color-select",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "main": "dist/color-select.js",
   "exports": {
@@ -53,12 +53,12 @@
     }
   },
   "dependencies": {
-    "@c2n/color-area": "0.0.5",
-    "@c2n/color-slider": "0.0.5",
-    "@c2n/core": "0.0.5",
-    "@c2n/overlay": "0.0.5",
-    "@c2n/select": "0.0.5",
-    "@c2n/text-field": "0.0.5",
+    "@c2n/color-area": "0.0.6",
+    "@c2n/color-slider": "0.0.6",
+    "@c2n/core": "0.0.6",
+    "@c2n/overlay": "0.0.6",
+    "@c2n/select": "0.0.6",
+    "@c2n/text-field": "0.0.6",
     "@ctrl/tinycolor": "4.2.0",
     "lit": "3.3.3"
   },

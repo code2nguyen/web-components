@@ -1,6 +1,6 @@
 {
   "name": "@c2n/json-form",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "keywords": [
     "json form",
     "json schema",
@@ -34,7 +34,7 @@
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/checkbox": "0.0.5",
+    "@c2n/checkbox": "0.0.6",
     "@c2n/config": "*",
     "custom-elements-manifest": "2.1.0"
   },

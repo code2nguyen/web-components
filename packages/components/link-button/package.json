@@ -1,6 +1,6 @@
 {
   "name": "@c2n/link-button",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "main": "dist/link-button.js",
   "exports": {
@@ -48,7 +48,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.5",
+    "@c2n/core": "0.0.6",
     "lit": "3.3.3"
   },
   "devDependencies": {
