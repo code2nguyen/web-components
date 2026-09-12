@@ -1,0 +1,103 @@
+---
+title: 'Progress'
+description: 'Linear progress bar, indeterminate or filling to a value, with an optional label and count.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Progress } from '@c2n/progress'
+
+`c2-progress` is a bar that fills as work completes. Without a `value` its indicator sweeps the track indefinitely; give it a `value` (out of `max`, 100 by default) and it fills from the start edge and animates between values. Text in the default slot labels the bar and doubles as its accessible name, `show-value` prints the percentage on the opposite side, and the `value` slot replaces that text when you are counting steps or megabytes instead. It is a `progressbar` for assistive technology, with `aria-valuenow` when determinate. Track and indicator are two plain boxes, so height, radius, colours and speed are all variables.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/progress
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/progress
+<style>
+  .stack {
+    display: grid;
+    gap: 16px;
+    width: 260px;
+    max-width: 100%;
+  }
+  .card {
+    display: grid;
+    gap: 12px;
+    width: 260px;
+    max-width: 100%;
+    padding: 16px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #52525b;
+  }
+  .card strong {
+    color: #18181b;
+    font-weight: 500;
+  }
+  .success {
+    --c2-progress__indicator--background-color: #16a34a;
+    --c2-progress__track--background-color: #dcfce7;
+  }
+  .inverse {
+    width: 260px;
+    max-width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+    background: #18181b;
+    --c2-progress__indicator--background-color: #5aa3ff;
+    --c2-progress__track--background-color: #3f3f46;
+    --c2-progress__label--color: #a1a1aa;
+    --c2-progress__value--color: #fafafa;
+  }
+</style>
+<div data-label="Indeterminate">
+  <div class="stack">
+    <c2-progress></c2-progress>
+    <c2-progress>Uploading files</c2-progress>
+    <c2-progress label="Connecting"></c2-progress>
+  </div>
+</div>
+<div data-label="Determinate">
+  <div class="stack">
+    <c2-progress value="25"></c2-progress>
+    <c2-progress value="60" show-value>Uploading files</c2-progress>
+    <c2-progress class="success" value="100" show-value>Upload complete</c2-progress>
+  </div>
+</div>
+<div data-label="Heights">
+  <div class="stack">
+    <c2-progress value="45" style="--c2-progress--height: 3px; --c2-progress--border-radius: 0"></c2-progress>
+    <c2-progress value="45"></c2-progress>
+    <c2-progress value="45" style="--c2-progress--height: 16px; --c2-progress--border-radius: 6px"></c2-progress>
+  </div>
+</div>
+<div data-label="Counting something else">
+  <div class="stack">
+    <c2-progress value="3" max="5">Onboarding<span slot="value">Step 3 of 5</span></c2-progress>
+    <c2-progress value="1.2" max="4">Downloading<span slot="value">1.2 / 4 MB</span></c2-progress>
+  </div>
+</div>
+<div data-label="In context">
+  <div class="card">
+    <strong>Deploying</strong>
+    <c2-progress value="60" show-value>Building assets</c2-progress>
+  </div>
+  <div class="inverse"><c2-progress value="72" show-value>Syncing workspace</c2-progress></div>
+</div>
+```
+
+Use an indeterminate bar when you cannot tell how far along the work is, and a `value` when you can: set it as progress comes in and the indicator animates to the new position. `value` is clamped to `0`–`max`, and clearing it returns the bar to the indeterminate sweep.
+
+Always give a bar a name. Slotted text is announced and also shown above the track; `label` names a bare bar without showing anything. The percentage next to the label is presentational — screen readers read `aria-valuenow`, so the `value` slot is free to say "3 of 5" or "1.2 / 4 MB" without repeating the number.
+
+Reach for `c2-spinner` instead when the wait has no natural width to fill — a button, a toolbar, a small card — and for `c2-button`'s own `running` state inside an action.
+
+The label row only appears when there is a label or a value to show, so a bare `<c2-progress>` is exactly `--c2-progress--height` tall. `--c2-progress__indicator--background-color` is the fill and `--c2-progress__track--background-color` the groove behind it, `--c2-progress--border-radius` rounds both (set `0` for a square meter), and `--c2-progress--animation-duration` sets the indeterminate cycle as well as half the determinate fill transition.

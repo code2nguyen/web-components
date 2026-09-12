@@ -1,0 +1,8 @@
+import { test, expect } from './fixture'
+
+// Cover the states and transitions that matter, with real pointer and keyboard input and observable results.
+// See tests/README.md; `npm test` runs the suites of changed packages.
+test('renders its default state', async ({ page, scenario }) => {
+  await scenario()
+  await expect(page.locator('c2-{{ dashCase name}}')).toBeVisible()
+})

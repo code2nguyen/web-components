@@ -1,0 +1,26 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { {{pascalCase name}} } from '@c2n/{{ dashCase name}}'
+
+## Presets
+
+Curated looks for `c2-{{ dashCase name}}`. Open any card in the studio to start from it. Say which variables do the
+most work for this component.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-{{ dashCase name}}></c2-{{ dashCase name}}>
+```
+
+```html tag=MdxCodeBlock,label=Themed
+<style>
+  .themed {
+    /* --c2-{{ dashCase name}}--… */
+  }
+</style>
+<c2-{{ dashCase name}} class="themed"></c2-{{ dashCase name}}>
+```
+
+</GalleryGrid>

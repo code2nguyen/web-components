@@ -1,0 +1,372 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-table,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    font-size: 14px,
+    max-height: none,
+
+    border-top: 1px solid #e4e4e7,
+    border-right: 1px solid #e4e4e7,
+    border-bottom: 1px solid #e4e4e7,
+    border-left: 1px solid #e4e4e7,
+
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
+    box-shadow: none,
+
+    header--background: #fafafa,
+    header--color: #71717a,
+    header--height: 36px,
+    header--font-size: 12px,
+    header--font-weight: 600,
+    header--letter-spacing: 0.02em,
+    header--border-bottom: 1px solid #e4e4e7,
+
+    header-cell--padding: 0 12px,
+    header-cell--gap: 6px,
+    header-cell__hover--background: #f4f4f5,
+    header-cell__sorted--color: #18181b,
+
+    sort-icon--width: 14px,
+    sort-icon--height: 14px,
+    sort-icon--color: #a1a1aa,
+    sort-icon__active--color: rgb(2, 101, 220),
+    resizer--width: 9px,
+    resizer--height: 56%,
+    resizer--line-width: 1px,
+    resizer--color: #e4e4e7,
+    resizer__hover--height: 100%,
+    resizer__hover--line-width: 2px,
+    resizer__hover--color: rgb(2, 101, 220),
+    row--height: 36px,
+    row--border-bottom: 1px solid #e4e4e7,
+    row__hover--background: #fafafa,
+    row__odd--background: #fafafa,
+    row__selected--background: #edf1fe,
+    row__selected--color: #18181b,
+
+    cell--padding: 0 12px,
+    cell--gap: 8px,
+    cell--font-size: 14px,
+    cell--color: #18181b,
+    cell--border-right: none,
+    cell__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    cell__focus--outline-offset: -2px,
+
+    pinned-start--box-shadow: 1px 0 0 0 #e4e4e7,
+    pinned-end--box-shadow: -1px 0 0 0 #e4e4e7,
+
+    selection-cell--width: 44px,
+
+    skeleton--background: #f4f4f5,
+    skeleton--border-radius: 4px,
+
+    state--color: #71717a,
+    state--padding: 32px 12px,
+    state--font-size: 14px,
+    state__error--color: rgb(211, 21, 16),
+    toolbar--background: transparent,
+    toolbar--padding: 8px 12px,
+    toolbar--border-bottom: 1px solid #e4e4e7,
+
+    footer--background: transparent,
+    footer--padding: 8px 12px,
+    footer--border-top: 1px solid #e4e4e7,
+  )
+);
+
+:host {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 0;
+  max-height: css.cssVar(max-height);
+  overflow: hidden;
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  box-shadow: css.cssVar(box-shadow);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.definitions {
+  display: none;
+}
+
+.toolbar,
+.footer {
+  flex: 0 0 auto;
+}
+
+.toolbar {
+  background: css.cssVar(toolbar--background);
+  padding: css.cssVar(toolbar--padding);
+  border-bottom: css.cssVar(toolbar--border-bottom);
+}
+
+.footer {
+  background: css.cssVar(footer--background);
+  padding: css.cssVar(footer--padding);
+  border-top: css.cssVar(footer--border-top);
+}
+
+.viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  // Virtualization replaces the rows above the viewport and resizes the spacer that stands in for them, which is
+  // exactly what the browser's scroll anchoring tries to compensate for. Left on, the two fight during fast scrolling.
+  overflow-anchor: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: var(--_grid-template, 1fr);
+  align-content: start;
+}
+
+.spacer {
+  grid-column: 1 / -1;
+}
+
+.row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  height: css.cssVar(row--height);
+  border-bottom: css.cssVar(row--border-bottom);
+  background: css.cssVar(background);
+}
+
+.row--header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: css.cssVar(header--height);
+  background: css.cssVar(header--background);
+  border-bottom: css.cssVar(header--border-bottom);
+}
+
+:host([stripe]) .row--odd {
+  background: css.cssVar(row__odd--background);
+}
+
+.row--clickable {
+  cursor: pointer;
+}
+
+.row:not(.row--header):not(.row--state):hover {
+  background: css.cssVar(row__hover--background);
+}
+
+.row--selected,
+.row--selected:hover {
+  background: css.cssVar(row__selected--background);
+  color: css.cssVar(row__selected--color);
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(cell--gap);
+  padding: css.cssVar(cell--padding);
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+  font-size: css.cssVar(cell--font-size);
+  color: css.cssVar(cell--color);
+  border-right: css.cssVar(cell--border-right);
+}
+
+.cell:focus {
+  outline: none;
+}
+
+.cell:focus-visible {
+  outline: css.cssVar(cell__focus--outline);
+  outline-offset: css.cssVar(cell__focus--outline-offset);
+}
+
+.cell-content {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cell--align-center {
+  justify-content: center;
+}
+
+.cell--align-end {
+  justify-content: flex-end;
+}
+
+.cell--pinned {
+  position: sticky;
+  z-index: 2;
+  background: inherit;
+}
+
+.cell--pinned-edge-start {
+  box-shadow: css.cssVar(pinned-start--box-shadow);
+}
+
+.cell--pinned-edge-end {
+  box-shadow: css.cssVar(pinned-end--box-shadow);
+}
+
+.cell--selection {
+  justify-content: center;
+  padding: 0;
+}
+
+.cell--header {
+  position: relative;
+  gap: css.cssVar(header-cell--gap);
+  padding: css.cssVar(header-cell--padding);
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+  letter-spacing: css.cssVar(header--letter-spacing);
+  user-select: none;
+}
+
+.row--header .cell--pinned {
+  // `.cell--header` sets `position: relative` after `.cell--pinned`, so the header of a pinned column has to be
+  // made sticky again here or it drifts away from its own cells as the table scrolls sideways.
+  position: sticky;
+  z-index: 4;
+}
+
+.cell--sortable {
+  cursor: pointer;
+}
+
+.cell--sortable:hover {
+  background: css.cssVar(header-cell__hover--background);
+}
+
+.cell--sorted {
+  color: css.cssVar(header-cell__sorted--color);
+}
+
+.sort-icon {
+  flex: 0 0 auto;
+  width: css.cssVar(sort-icon--width);
+  height: css.cssVar(sort-icon--height);
+  color: css.cssVar(sort-icon--color);
+  opacity: 0;
+}
+
+.cell--sortable:hover .sort-icon {
+  opacity: 1;
+}
+
+.sort-icon--active {
+  color: css.cssVar(sort-icon__active--color);
+  opacity: 1;
+}
+
+.sort-icon--desc {
+  transform: rotate(180deg);
+}
+
+.sort-order {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: css.cssVar(sort-icon__active--color);
+}
+
+// The handle is a wide, invisible hit area with a hairline drawn at the column's edge: at rest it reads as the
+// divider between two columns, and grows into a full-height accent bar while it is hovered or dragged. Filling the
+// whole hit area instead would put a 9px slab of accent colour across the header.
+.resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  width: css.cssVar(resizer--width);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.resizer::after {
+  content: '';
+  width: css.cssVar(resizer--line-width);
+  height: css.cssVar(resizer--height);
+  background: css.cssVar(resizer--color);
+  border-radius: 999px;
+  transition:
+    height 120ms ease,
+    width 120ms ease,
+    background-color 120ms ease;
+}
+
+.resizer:hover::after,
+.resizer--active::after {
+  width: css.cssVar(resizer__hover--line-width);
+  height: css.cssVar(resizer__hover--height);
+  background: css.cssVar(resizer__hover--color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resizer::after {
+    transition: none;
+  }
+}
+
+// The placeholder sits in `.cell-content`, a content-sized flex item — a percentage width would resolve against
+// zero and the bar would never be seen, so give it an intrinsic size. The cell's `overflow: hidden` clips it in a
+// narrow column.
+.skeleton {
+  display: block;
+  width: 64px;
+  height: 10px;
+  background: css.cssVar(skeleton--background);
+  border-radius: css.cssVar(skeleton--border-radius);
+}
+
+.row--state {
+  height: auto;
+  border-bottom: none;
+  background: css.cssVar(background);
+}
+
+.cell--state {
+  grid-column: 1 / -1;
+  justify-content: center;
+  padding: css.cssVar(state--padding);
+  color: css.cssVar(state--color);
+  font-size: css.cssVar(state--font-size);
+  white-space: normal;
+  overflow: visible;
+}
+
+.cell--state-error {
+  color: css.cssVar(state__error--color);
+}

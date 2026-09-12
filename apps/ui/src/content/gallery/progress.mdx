@@ -1,0 +1,141 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Progress } from '@c2n/progress'
+
+## Presets
+
+Curated looks for `c2-progress`. Open any card in the studio to start from it. The bar is two boxes: `--c2-progress--height` and `--c2-progress--border-radius` give it its shape, the indicator and track colours give it its tone, and `--c2-progress--animation-duration` sets the pace of both the sweep and the fill.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-progress value="60"></c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Indeterminate
+<c2-progress></c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Hairline
+<style>
+  .hairline {
+    --c2-progress--height: 3px;
+    --c2-progress--border-radius: 0;
+  }
+</style>
+<c2-progress class="hairline" value="60"></c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Thick
+<style>
+  .thick {
+    --c2-progress--height: 16px;
+    --c2-progress--border-radius: 8px;
+  }
+</style>
+<c2-progress class="thick" value="60"></c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Square
+<style>
+  .square {
+    --c2-progress--height: 10px;
+    --c2-progress--border-radius: 0;
+    --c2-progress__track--background-color: #f4f4f5;
+  }
+</style>
+<c2-progress class="square" value="60"></c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Labelled
+<c2-progress value="60" show-value>Uploading files</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Steps
+<style>
+  .steps {
+    --c2-progress--height: 6px;
+    --c2-progress__label--color: #18181b;
+    --c2-progress__label--font-weight: 500;
+    --c2-progress__value--color: #71717a;
+    --c2-progress__value--font-size: 12px;
+    --c2-progress__value--font-weight: 400;
+  }
+</style>
+<c2-progress class="steps" value="3" max="5">Onboarding<span slot="value">Step 3 of 5</span></c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .success {
+    --c2-progress__indicator--background-color: #16a34a;
+    --c2-progress__track--background-color: #dcfce7;
+  }
+</style>
+<c2-progress class="success" value="100" show-value>Upload complete</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Warning
+<style>
+  .warning {
+    --c2-progress__indicator--background-color: #f59e0b;
+    --c2-progress__track--background-color: #fef3c7;
+    --c2-progress--animation-duration: 2.4s;
+  }
+</style>
+<c2-progress class="warning">Retrying…</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Danger
+<style>
+  .danger {
+    --c2-progress--height: 10px;
+    --c2-progress__indicator--background-color: #dc2626;
+    --c2-progress__track--background-color: #fee2e2;
+    --c2-progress__value--color: #dc2626;
+  }
+</style>
+<c2-progress class="danger" value="92" show-value>Storage used</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    width: 100%;
+    padding: 20px;
+    border-radius: 12px;
+    background: #18181b;
+    --c2-progress__indicator--background-color: #5aa3ff;
+    --c2-progress__track--background-color: #3f3f46;
+    --c2-progress__label--color: #a1a1aa;
+    --c2-progress__value--color: #fafafa;
+  }
+</style>
+<div class="dark"><c2-progress value="72" show-value>Syncing workspace</c2-progress></div>
+```
+
+```html tag=MdxCodeBlock,label=Stacked
+<style>
+  .stacked {
+    display: grid;
+    gap: 14px;
+    width: 100%;
+    --c2-progress--height: 6px;
+    --c2-progress__label--font-size: 13px;
+    --c2-progress__value--font-size: 13px;
+  }
+  .stacked .storage {
+    --c2-progress__indicator--background-color: #7c3aed;
+  }
+  .stacked .bandwidth {
+    --c2-progress__indicator--background-color: #0d9488;
+  }
+</style>
+<div class="stacked">
+  <c2-progress class="storage" value="82" show-value>Storage</c2-progress>
+  <c2-progress class="bandwidth" value="34" show-value>Bandwidth</c2-progress>
+</div>
+```
+
+</GalleryGrid>

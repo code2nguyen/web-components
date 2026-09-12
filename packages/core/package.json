@@ -20,6 +20,10 @@
       "types": "./dist/lit-helper.d.ts",
       "default": "./dist/lit-helper.js"
     },
+    "./contexts/pager.js": {
+      "types": "./dist/contexts/pager.d.ts",
+      "default": "./dist/contexts/pager.js"
+    },
     "./controllers/context-consumer.js": {
       "types": "./dist/controllers/context-consumer.d.ts",
       "default": "./dist/controllers/context-consumer.js"
@@ -27,6 +31,10 @@
     "./controllers/breakpoints-observer.js": {
       "types": "./dist/controllers/breakpoints-observer.d.ts",
       "default": "./dist/controllers/breakpoints-observer.js"
+    },
+    "./controllers/virtual-scroll.js": {
+      "types": "./dist/controllers/virtual-scroll.d.ts",
+      "default": "./dist/controllers/virtual-scroll.js"
     }
   },
   "files": [
@@ -40,7 +48,10 @@
     "type": "git",
     "url": "https://github.com/code2nguyen/web-components.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@lit/context": "1.1.6",
+    "@lit/reactive-element": "2.1.2"
+  },
   "devDependencies": {
     "@c2n/config": "*"
   }

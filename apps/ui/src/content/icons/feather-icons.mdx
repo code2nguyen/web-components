@@ -8,18 +8,22 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import ApiTable from '../../components/ApiTable.astro'
 import FeatherIconGallery from '../../components/FeatherIconGallery.astro'
+import IconSourceBadge from '../../components/IconSourceBadge.astro'
 
 import {
   FeatherArrowRightIcon as FeatherArrowRight,
   FeatherCameraIcon as FeatherCamera,
   FeatherHeartIcon as FeatherHeart,
   FeatherSettingsIcon as FeatherSettings,
+  featherIconSource,
 } from '@c2n/feather-icons'
 
 # Feather Icons
 
 `@c2n/feather-icons` wraps every [Feather](https://feathericons.com/) icon as its own web component: `c2-feather-<icon-name>`.
 The components are generated from the `feather-icons` npm package, so the set tracks upstream releases.
+
+<IconSourceBadge label={featherIconSource.label} href="https://www.npmjs.com/package/feather-icons" />
 
 ## Installation
 
@@ -59,12 +63,14 @@ Icons inherit `currentColor` and are themed with the shared `--c2-feather-icon--
 <c2-feather-heart style="--c2-feather-icon--size: 48px; --c2-feather-icon--stroke-width: 3"></c2-feather-heart>
 ```
 
-## All icons
-
-<FeatherIconGallery />
+Use the sliders button on an example, or select any icon in the gallery, to open that icon directly in the configuration studio.
 
 ## API
 
 Every icon element shares the same API.
 
 <ApiTable componentTag="c2-feather-arrow-right"></ApiTable>
+
+## All icons
+
+<FeatherIconGallery />

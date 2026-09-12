@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-navigation-menu</title>
+    <script type="module" src="/src/navigation-menu.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0 0 480px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 10px 24px;
+        border-bottom: 1px solid #e4e4e7;
+      }
+      .brand {
+        font-weight: 600;
+      }
+      section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 24px;
+      }
+      h2 {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #71717a;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 2px;
+        width: 520px;
+      }
+      .stack {
+        display: grid;
+        gap: 2px;
+        width: 260px;
+      }
+      .footer-row {
+        margin-top: 6px;
+        padding-top: 8px;
+        border-top: 1px solid #e4e4e7;
+      }
+      /* Panel variables belong to the item: on the bar they would widen every panel of that bar. */
+      .wide c2-navigation-menu-item[value='products'],
+      .wide c2-navigation-menu-item[value='one'] {
+        --c2-navigation-menu-item__panel--min-width: 640px;
+      }
+      /* In the mobile list the rows fill the panel width. */
+      c2-navigation-menu[mode='mobile'] .stack {
+        width: auto;
+      }
+      .dark {
+        --c2-navigation-menu-item--color: #a1a1aa;
+        --c2-navigation-menu-item__hover--color: #fafafa;
+        --c2-navigation-menu-item__hover--background: #27272a;
+        --c2-navigation-menu-item__expanded--color: #fafafa;
+        --c2-navigation-menu-item__expanded--background: #27272a;
+        --c2-navigation-menu-item__current--color: #fafafa;
+        --c2-navigation-menu-item__panel--background: #18181b;
+        --c2-navigation-menu-item__panel--border-top: 1px solid #3f3f46;
+        --c2-navigation-menu-item__panel--border-right: 1px solid #3f3f46;
+        --c2-navigation-menu-item__panel--border-bottom: 1px solid #3f3f46;
+        --c2-navigation-menu-item__panel--border-left: 1px solid #3f3f46;
+        --c2-navigation-menu-link--color: #fafafa;
+        --c2-navigation-menu-link__hover--background: #27272a;
+        --c2-navigation-menu-link__description--color: #a1a1aa;
+        background: #09090b;
+        padding: 10px 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <span class="brand">Acme</span>
+      <c2-navigation-menu aria-label="Main" class="wide" mobile-breakpoint="800" collapsible>
+        <c2-navigation-menu-item value="products">
+          Products
+          <div class="cards" slot="panel">
+            <c2-navigation-menu-link href="#analytics">Analytics<span slot="description">Realtime dashboards over live events</span></c2-navigation-menu-link>
+            <c2-navigation-menu-link href="#warehouse"
+              >Warehouse<span slot="description">Columnar storage that scales to petabytes</span></c2-navigation-menu-link
+            >
+            <c2-navigation-menu-link href="#pipelines">Pipelines<span slot="description">Scheduled and streaming ETL</span></c2-navigation-menu-link>
+            <c2-navigation-menu-link href="#catalog">Catalog<span slot="description">Lineage, ownership and quality</span></c2-navigation-menu-link>
+            <div class="footer-row" style="grid-column: 1 / -1">
+              <c2-navigation-menu-link href="#all">See all products →</c2-navigation-menu-link>
+            </div>
+          </div>
+        </c2-navigation-menu-item>
+        <c2-navigation-menu-item value="solutions">
+          Solutions
+          <div class="stack" slot="panel">
+            <c2-navigation-menu-link href="#startups">Startups</c2-navigation-menu-link>
+            <c2-navigation-menu-link href="#enterprise">Enterprise</c2-navigation-menu-link>
+            <c2-navigation-menu-link href="#public">Public sector</c2-navigation-menu-link>
+          </div>
+        </c2-navigation-menu-item>
+        <c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item>
+        <c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item>
+        <c2-navigation-menu-item value="soon" disabled>Changelog</c2-navigation-menu-item>
+      </c2-navigation-menu>
+    </header>
+
+    <section>
+      <h2>Click to open, panels aligned to the bar</h2>
+      <c2-navigation-menu aria-label="Click bar" open-on="click" panel-anchor="menu" class="wide">
+        <c2-navigation-menu-item value="one">
+          Resources
+          <div class="cards" slot="panel">
+            <c2-navigation-menu-link href="#guides">Guides<span slot="description">Step by step tutorials</span></c2-navigation-menu-link>
+            <c2-navigation-menu-link href="#api">API reference<span slot="description">Every endpoint and type</span></c2-navigation-menu-link>
+          </div>
+        </c2-navigation-menu-item>
+        <c2-navigation-menu-item value="two">
+          Community
+          <div class="stack" slot="panel">
+            <c2-navigation-menu-link href="#forum">Forum</c2-navigation-menu-link>
+            <c2-navigation-menu-link href="#discord" target="_blank">Discord</c2-navigation-menu-link>
+          </div>
+        </c2-navigation-menu-item>
+      </c2-navigation-menu>
+    </section>
+
+    <section class="dark">
+      <h2 style="color: #a1a1aa">Dark header</h2>
+      <c2-navigation-menu aria-label="Dark bar">
+        <c2-navigation-menu-item value="platform">
+          Platform
+          <div class="stack" slot="panel">
+            <c2-navigation-menu-link href="#overview" current>Overview</c2-navigation-menu-link>
+            <c2-navigation-menu-link href="#security">Security<span slot="description">SOC 2, SSO and audit logs</span></c2-navigation-menu-link>
+          </div>
+        </c2-navigation-menu-item>
+        <c2-navigation-menu-item value="company" href="#company">Company</c2-navigation-menu-item>
+      </c2-navigation-menu>
+    </section>
+
+    <section>
+      <h2>Mobile mode</h2>
+      <div class="row">
+        <c2-navigation-menu aria-label="Mobile bar" mode="mobile">
+          <c2-navigation-menu-item value="fixed-income">
+            Fixed Income Products
+            <div class="stack" slot="panel">
+              <c2-navigation-menu-link href="#reference">Reference Data</c2-navigation-menu-link>
+              <c2-navigation-menu-link href="#actions">Corporate Actions</c2-navigation-menu-link>
+              <c2-navigation-menu-link href="#pricing">Pricing</c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+          <c2-navigation-menu-item value="regulatory">
+            Regulatory Products
+            <div class="stack" slot="panel">
+              <c2-navigation-menu-link href="#erisa">ERISA Portfolio Analytics</c2-navigation-menu-link>
+              <c2-navigation-menu-link href="#matching">Matching Adjustment</c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+          <c2-navigation-menu-item value="home" href="#home">Home</c2-navigation-menu-item>
+          <c2-navigation-menu-item value="about" href="#about" current>About</c2-navigation-menu-item>
+        </c2-navigation-menu>
+
+        <c2-navigation-menu aria-label="Mobile collapsible" mode="mobile" collapsible>
+          <c2-navigation-menu-item value="fixed-income">
+            Fixed Income Products
+            <div class="stack" slot="panel">
+              <c2-navigation-menu-link href="#reference">Reference Data</c2-navigation-menu-link>
+              <c2-navigation-menu-link href="#actions">Corporate Actions</c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+          <c2-navigation-menu-item value="regulatory">
+            Regulatory Products
+            <div class="stack" slot="panel">
+              <c2-navigation-menu-link href="#erisa" current>ERISA Portfolio Analytics</c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+          <c2-navigation-menu-item value="home" href="#home">Home</c2-navigation-menu-item>
+        </c2-navigation-menu>
+      </div>
+    </section>
+
+    <script type="module">
+      document.addEventListener('value-change', (event) => {
+        console.log('value-change', event.detail)
+      })
+
+      // The header bar switches itself: `mobile-breakpoint` is set in the markup above. Narrow the window to see it.
+      document.querySelector('header c2-navigation-menu').addEventListener('value-change', (event) => {
+        console.log('header value-change', event.detail)
+      })
+    </script>
+  </body>
+</html>

@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,
   accordion: `<c2-accordion style="width:240px">
   <c2-details label="Shipping" expanded>Delivered in 3–5 business days.</c2-details>
   <c2-details label="Returns">Return within 30 days.</c2-details>
@@ -74,6 +75,12 @@ export const componentPreviews: Record<string, string> = {
   <c2-feather-settings></c2-feather-settings>
   <c2-feather-arrow-right></c2-feather-arrow-right>
 </div>`,
+  'phosphor-icons': `<div class="preview-row" style="gap:18px;--c2-phosphor-icon--size:26px">
+  <c2-phosphor-heart weight="fill"></c2-phosphor-heart>
+  <c2-phosphor-camera></c2-phosphor-camera>
+  <c2-phosphor-gear weight="duotone"></c2-phosphor-gear>
+  <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
+</div>`,
   'icon-button': `<div class="preview-row">
   <c2-icon-button tooltip="Camera">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
@@ -84,6 +91,12 @@ export const componentPreviews: Record<string, string> = {
   <c2-icon-button tooltip="Settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
   </c2-icon-button>
+</div>`,
+  kbd: `<div class="preview-row">
+  <c2-kbd>⌘</c2-kbd>
+  <c2-kbd>K</c2-kbd>
+  <c2-kbd>Ctrl + Shift + P</c2-kbd>
+  <c2-kbd>Esc</c2-kbd>
 </div>`,
   label: `<div class="preview-row">
   <c2-label for="preview-label-input">Email</c2-label>
@@ -107,6 +120,13 @@ export const componentPreviews: Record<string, string> = {
   <c2-mat-icon>settings</c2-mat-icon>
   <c2-mat-icon>search</c2-mat-icon>
 </div>`,
+  menu: `<c2-menu aria-label="Row actions">
+  <c2-button slot="trigger">Actions</c2-button>
+  <c2-menu-item value="edit">Edit</c2-menu-item>
+  <c2-menu-item value="duplicate">Duplicate</c2-menu-item>
+  <hr />
+  <c2-menu-item value="delete" destructive>Delete</c2-menu-item>
+</c2-menu>`,
   modal: `<div class="preview-row">
   <c2-button onclick="this.nextElementSibling.show()">Open modal</c2-button>
   <c2-modal>
@@ -115,11 +135,26 @@ export const componentPreviews: Record<string, string> = {
     <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Done</c2-button>
   </c2-modal>
 </div>`,
+  'navigation-menu': `<c2-navigation-menu aria-label="Main">
+  <c2-navigation-menu-item value="products">
+    Products
+    <div style="display:grid;gap:2px;width:200px" slot="panel">
+      <c2-navigation-menu-link href="#analytics">Analytics<span slot="description">Realtime dashboards</span></c2-navigation-menu-link>
+      <c2-navigation-menu-link href="#warehouse">Warehouse<span slot="description">Columnar storage</span></c2-navigation-menu-link>
+    </div>
+  </c2-navigation-menu-item>
+  <c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item>
+  <c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item>
+</c2-navigation-menu>`,
   overlay: `<div>
   <button class="preview-button" popovertarget="preview-overlay">Open overlay</button>
   <c2-overlay id="preview-overlay" popover="auto" placement="bottom-start">
     <div class="preview-popover">Anchored overlay content</div>
   </c2-overlay>
+</div>`,
+  progress: `<div style="display:grid;gap:12px;width:220px">
+  <c2-progress value="72" show-value>Uploading files</c2-progress>
+  <c2-progress style="--c2-progress--height:4px"></c2-progress>
 </div>`,
   radio: `<c2-radio-group value="pro" style="width:200px">
   <c2-radio value="free" label="Free"></c2-radio>
@@ -137,11 +172,23 @@ export const componentPreviews: Record<string, string> = {
   <c2-list-item value="FR">France</c2-list-item>
   <c2-list-item value="VN">Vietnam</c2-list-item>
 </c2-select>`,
+  sheet: `<div class="preview-row">
+  <c2-button onclick="this.nextElementSibling.show()">Open sheet</c2-button>
+  <c2-sheet>
+    <span slot="title">Filters</span>
+    <div style="font-size:13px;color:#71717a">A panel pinned to the edge of the screen.</div>
+    <c2-button slot="footer" onclick="this.closest('c2-sheet').close()">Apply</c2-button>
+  </c2-sheet>
+</div>`,
   'side-nav': `<div style="position:relative;width:240px;height:110px;border:1px solid var(--site-color-outline-variant);border-radius:8px;overflow:hidden">
   <c2-side-nav opened style="height:100%;--c2-side-nav__open--width:88px;--c2-side-nav--padding-top:10px;--c2-side-nav--padding-right:8px;--c2-side-nav--padding-bottom:10px;--c2-side-nav--padding-left:8px;--c2-side-nav--background-color:var(--site-color-surface-container-3);--c2-side-nav__divider--color:var(--site-color-outline-variant)">
     <div slot="side-nav-content" style="font-size:13px;line-height:1.9;padding-left:4px">Inbox<br>Drafts<br>Sent</div>
     <div style="padding:12px;font-size:13px">Main content</div>
   </c2-side-nav>
+</div>`,
+  skeleton: `<div style="display:flex;align-items:center;gap:12px;width:220px">
+  <c2-skeleton variant="circle"></c2-skeleton>
+  <c2-skeleton variant="text" lines="2" style="flex:1"></c2-skeleton>
 </div>`,
   slider: `<div style="display:grid;gap:12px;width:220px">
   <c2-slider value="40"></c2-slider>
@@ -157,6 +204,16 @@ export const componentPreviews: Record<string, string> = {
   <c2-switch></c2-switch>
   <c2-switch checked>Notifications</c2-switch>
 </div>`,
+  table: `<c2-table sortable stripe row-key="id" style="height:180px;width:100%" rows='[
+  {"id":"1","name":"Ada Lovelace","team":"Analytics","score":128000},
+  {"id":"2","name":"Grace Hopper","team":"Compilers","score":96500},
+  {"id":"3","name":"Alan Turing","team":"Research","score":87200},
+  {"id":"4","name":"Radia Perlman","team":"Networks","score":74800}
+]'>
+  <c2-table-column field="name" header="Name" width="2fr" sortable></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="90px" align="end" format="number" sortable></c2-table-column>
+</c2-table>`,
   tabs: `<c2-tabs selected-tab="tab2" style="width:240px">
   <c2-tab label="Overview" for="tab1"></c2-tab>
   <c2-tab label="Activity" for="tab2"></c2-tab>

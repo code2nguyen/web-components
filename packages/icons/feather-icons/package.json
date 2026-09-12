@@ -9,6 +9,10 @@
       "types": "./types/src/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./icon-names.js": {
+      "types": "./types/src/icon-names.d.ts",
+      "default": "./dist/icon-names.js"
+    },
     "./icons/*.js": {
       "types": "./types/src/icons/*.d.ts",
       "default": "./dist/icons/*.js"

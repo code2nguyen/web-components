@@ -24,6 +24,13 @@ export const overrides: Record<string, Override> = {
   // Switch: hovered off-track uses the outline colour, the thumb is a surface.
   '--c2-switch__track__hover--color': { token: 'color-outline' },
   '--c2-switch__thumb--color': { token: 'color-surface' },
+  // Progress: the unfilled groove is the same hairline grey as the spinner's ring, which the background rule table
+  // does not cover; the filled indicator maps to the accent on its own.
+  '--c2-progress__track--background-color': { token: 'color-outline-variant' },
+  // Skeleton: the resting block is the same hairline grey as the progress track. The wave highlight is a translucent
+  // white sheen rather than a surface colour, and the theme has no token for one.
+  '--c2-skeleton--background-color': { token: 'color-outline-variant' },
+  '--c2-skeleton__sheen--color': { exclude: 'translucent highlight, not a surface colour' },
   // Tooltip text sits on the inverse surface.
   '--c2-tooltip--color': { token: 'color-on-inverse-surface' },
   // Tabs: the selected indicator is the accent; the baseline is a hairline drawn with an inset shadow.
@@ -74,4 +81,18 @@ export const overrides: Record<string, Override> = {
   '--c2-color-select--border-top-right-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-bottom-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-bottom-right-radius': { exclude: 'swatch detail radius' },
+  // The destructive row tint has no error-container token to hang on; the label itself maps to color-error.
+  '--c2-menu-item__destructive__hover--background': { exclude: 'destructive tint (the label maps to color-error)' },
+  // The panel description is deliberately the normal weight, which the scale has no token for.
+  '--c2-navigation-menu-link__description--font-weight': { exclude: 'normal weight, below the font-weight scale' },
+  // Table: the pinned-column separators are hairlines drawn as shadows, so they follow the outline colour (same trick
+  // as the tabs baseline above) instead of staying a hard-coded grey on a dark table.
+  '--c2-table__pinned-start--box-shadow': {
+    token: 'color-outline-variant',
+    value: '1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-table__pinned-end--box-shadow': {
+    token: 'color-outline-variant',
+    value: '-1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
 }

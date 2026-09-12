@@ -1,6 +1,6 @@
 # Component browser tests
 
-Playwright runs real component scenarios through one shared Vite server. Tests live beside each component in `test/`. The server compiles source and SCSS on demand; component and core imports resolve to source, so the suites need no package build or Astro app. Existing component Vite configs remain the standalone development/build harnesses.
+Playwright runs real component scenarios through one shared Vite server. Tests live beside each component in `test/`. The server compiles source and SCSS on demand; component and core imports resolve to source, so running the suites needs no package build or Astro app. `npm run test:type-check` is the exception: tsc resolves a component's `@c2n/*` imports through each package's `exports`, which point at the generated `dist/*.d.ts`, so it needs `npm run build` first — which is why CI builds before type-checking. Existing component Vite configs remain the standalone development/build harnesses.
 
 ## Run
 
@@ -8,8 +8,10 @@ Playwright runs real component scenarios through one shared Vite server. Tests l
 npm install
 npx playwright install chromium # once, and after Playwright upgrades
 npm run test:button             # button, Chromium
-npm test -- packages/components/button/test # focus any component directory
-npm test -- --grep 'keyboard'   # focus matching test titles
+npm test                       # changed component packages, Chromium
+npm test -- --base=origin/develop # committed changes since a branch/ref
+npm test -- packages/components/button/test # explicitly focus a component
+npm test -- --grep 'keyboard'   # matching tests in changed packages
 npm run test:all -- --list      # list tests without launching browsers
 npm run test:type-check
 
@@ -17,6 +19,8 @@ npx playwright install         # install all three browser engines
 npm run test:all                # all components, Chromium/Firefox/WebKit
 npm run test:report             # inspect the last HTML report
 ```
+
+`npm test` reads staged, unstaged and untracked files, then runs the suites belonging to changed `packages/components/*` and `open-packages/*` packages. On a local feature branch it also includes committed changes since `origin/HEAD` (currently `origin/develop`); pass `--base=<branch-or-sha>` to choose another comparison point. Changes to Playwright infrastructure, root package metadata, core, Sass, shared config or icon packages run every component suite because they can affect every package. If no changed package has a suite, the command exits successfully without starting Vite or a browser.
 
 Playwright starts Vite on `127.0.0.1:4175`, waits for the health page, and stops its server when finished. For repeated local runs, optionally keep `npm run test:serve` running; Playwright reuses it outside CI. A conflicting port fails instead of silently choosing another one. Browser processes are reused across tests, with an isolated browser context/page per test. Override concurrency with `--workers=4` when useful.
 
@@ -36,6 +40,34 @@ For keyboard navigation, destructure the shared `tab` fixture and use `tab()` / 
 
 ## CI and scale
 
-`component-tests.yml` runs on pull requests and main, with one job per browser. Each job starts one shared Vite server, runs with two workers, and uploads the report and failure traces for seven days. Retries are limited to one in CI, and focused tests (`test.only`) fail CI.
+`component-tests.yml` runs on pull requests and pushes to `develop` or `main`, with one job per browser. CI fetches history and compares the change with the event's base commit, so it runs only affected package suites even after changes are committed. Manual workflow runs execute the complete suite. Each browser job uploads its report and failure traces for seven days. Retries are limited to one in CI, and focused tests (`test.only`) fail CI.
 
-Initially CI runs the complete suite. Dependency-aware affected-component selection is intentionally deferred until more suites exist; a shared core, Sass, theme, or dependency change must include consumers. Local directory filtering is available now. At larger scale, distribute the full suite using Playwright's `--shard=1/4` (and corresponding jobs), retaining the full main-branch suite as a backstop. Measure suite timings before increasing workers or sharding.
+Selection is package-based: changing Button runs Button, and changing Button plus Select runs both. Shared inputs run everything rather than trying to infer every transitive consumer. At larger scale, distribute manual full-suite runs using Playwright's `--shard=1/4` and corresponding jobs. Measure timings before increasing workers or sharding.
+
+## Benchmarks
+
+Two different things guard table performance, and they are deliberately separate.
+
+`table.perf.spec.ts` runs with every other suite, on all three engines. It asserts _cost_, never wall-clock: a
+quarter of a million rows must produce exactly as many DOM elements as a thousand, scrolling must not grow that
+window, and a realtime row update must reuse every rendered row element instead of rebuilding the body. Those hold
+on any machine, so they can fail the build. Turning virtualization off in the harness fails all six.
+
+`table.bench.spec.ts` measures wall-clock and is skipped unless `C2_BENCH` is set, because the numbers belong to the
+machine that produced them:
+
+```bash
+npm run bench:table            # measure, and compare against the recorded baseline
+npm run bench:table:baseline   # record the current numbers as the new baseline
+C2_BENCH_REPEATS=15 npm run bench:table   # more samples on a noisy machine
+```
+
+Each case reports the median of seven runs in milliseconds of table work — from the change, through Lit's render, to
+the layout it forces, measured in the page so no driver round-trip is included. The run prints a comparison with
+`packages/components/table/test/bench/baseline.json`, writes `test-results/table-bench.json`, and fails when a metric
+is more than 2.5x its baseline (`C2_BENCH_TOLERANCE` overrides). The tolerance is wide on purpose: this catches a
+regression that changes the shape of the work, not the noise between two runs. Metrics whose baseline is under half a
+millisecond are reported but not gated, since `performance.now()` is quantized to about a tenth of one.
+
+Re-record the baseline only once a change is understood, and commit it in the same change, so the next run compares
+against the version it is meant to.

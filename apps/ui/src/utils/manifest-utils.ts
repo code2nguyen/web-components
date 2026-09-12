@@ -81,12 +81,22 @@ export function normalizeCssDeclaration(cssProperties?: CssCustomProperty[]): CS
  * and makes the change diff compare `" 18px"` against `"18px"`.
  */
 function readCssVariable(element: HTMLElement, name: string): string | undefined {
-  const computedStyleMap = element.computedStyleMap()
-  const value = computedStyleMap.get(name) as CSSUnparsedValue | undefined
-  if (!value || value.length === 0) return undefined
-  const first = [...value.values()][0]
-  const text = (typeof first === 'string' ? first : first.toString()).trim()
-  return text || undefined
+  try {
+    if (typeof element.computedStyleMap === 'function') {
+      const value = element.computedStyleMap().get(name) as CSSUnparsedValue | undefined
+      if (value && value.length > 0) {
+        const first = [...value.values()][0]
+        const text = (typeof first === 'string' ? first : first.toString()).trim()
+        if (text) return text
+      }
+    }
+  } catch {
+    // Some engines expose part of Typed OM but still reject custom-property reads.
+  }
+
+  // Firefox and older WebKit builds do not expose CSS Typed OM. The string API still returns custom properties and
+  // keeps the studio functional instead of aborting before `showConfig` can be set.
+  return getComputedStyle(element).getPropertyValue(name).trim() || undefined
 }
 
 export function updateManifestCssValue(element: HTMLElement, cssProperties: CSSDeclarationItem[]) {

@@ -4,12 +4,17 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Overview
 
-`@c2n/web-components` is an npm-workspaces monorepo of Lit 3 web components. Each component is its own publishable package (`@c2n/<name>`, all versioned together by Lerna at the root `lerna.json` version). Components are registered as custom elements with the `c2-` tag prefix. There are no tests in this repo — verification is done via each package's Vite dev harness and the Astro UI app in `apps/ui`.
+`@c2n/web-components` is an npm-workspaces monorepo of Lit 3 web components. Each component is its own publishable package (`@c2n/<name>`, all versioned together by Lerna at the root `lerna.json` version). Components are registered as custom elements with the `c2-` tag prefix. Component browser tests use Playwright with one shared Vite server; suites live in each package's `test/` directory. See `tests/README.md`. Manual verification also uses each package's Vite dev harness and the Astro UI app in `apps/ui`.
 
 ## Commands
 
 ```bash
 npm install                       # root install wires all workspaces
+
+npm run test:button               # button browser tests in Chromium
+npm test                         # changed component browser tests in Chromium
+npm run test:all                  # all components in Chromium, Firefox and WebKit
+npm run test:type-check           # type-check test infrastructure and scenarios
 
 npm run build                     # wireit: type-check + vite build for every component package
 npm run build -w packages/components/checkbox  # build one package
@@ -52,7 +57,7 @@ CI (`.github/workflows/deploy.yml`, Node 24) runs `npm ci`, `npm run lint`, `npm
 
 ## Build orchestration
 
-Wireit drives everything. The root `package.json` `wireit.build.dependencies` is the **explicit list** of every buildable package — a new package is not built until it is added there (the plop generator appends it for you). Per-package, `build` depends on `type-check`, which depends on `../../core:build` (so `@c2n/core` types are always fresh first); from `open-packages/*` that same dep is `../../packages/core:build`. Component `vite.config.ts` files import the CEM plugin as `../../../scripts/cem-plugin-customize/index`; open packages use `../../scripts/...`.
+Wireit drives everything. The root `package.json` `wireit.build.dependencies` is the **explicit list** of every buildable package — a new package is not built until it is added there (the plop generator appends it for you). Per-package, `build` depends on `type-check`, which depends on `../../core:build` (so `@c2n/core` types are always fresh first); from `open-packages/*` that same dep is `../../packages/core:build`. A package that imports a sibling component must list that sibling's `:build` there too (`../list:build`), or a clean build type-checks it before the sibling's declarations exist. Component `vite.config.ts` files import the CEM plugin as `../../../scripts/cem-plugin-customize/index`; open packages use `../../scripts/...`.
 
 Vite lib config per package: single ES output, `minify: false`, and `external: /^lit|@c2n/` — Lit and sibling `@c2n/*` packages are never bundled into a component. Keep cross-package dependencies minimal; import through the published subpath (`@c2n/core/dom-helper.js`), not relative paths across packages.
 
@@ -96,7 +101,7 @@ then reads values as `css.cssVar(container--width)`, which expands to `var(--c2-
 
 For a new icon-set package, copy `packages/icons/feather-icons` (the plop generator does not know about icon packages), swap the generator's upstream resolution and tag prefix, add `./packages/icons/<name>:build` to the root wireit list, and wire the demo manifest and doc page by hand.
 
-`npm run generate` prompts for a name and package type (`npm package` → `packages/components/`, `open package` → `open-packages/`) and then: scaffolds the package from `scripts/generator/files/wc`, adds a doc stub under `apps/ui/src/content/components/` (or `oepn-components/` — note the existing typo in that directory name), appends the build target to the root `package.json`, and for npm packages wires the manifest into `apps/ui/src/store/component-manifests.ts`. Because the two package types sit at different depths, `plopfile.ts` injects `coreBuildDep` and `cemPluginPath` into the template data rather than hardcoding `../` counts in the templates — update those if the layout changes again.
+`npm run generate` prompts for a name and package type (`npm package` → `packages/components/`, `open package` → `open-packages/`) and then: scaffolds the package from `scripts/generator/files/wc`, scaffolds its Playwright suite from `scripts/generator/files/wc-test` into `<package>/test/`, adds a doc stub under `apps/ui/src/content/components/` (or `oepn-components/` — note the existing typo in that directory name), appends the build target to the root `package.json` and to `packages/tools/theme/package.json`, and for npm packages wires up everything the UI app needs: the manifest import and `normalizedManifests` entry in `apps/ui/src/store/component-manifests.ts`, the `@c2n/<name>` dependency in `apps/ui/package.json`, the side-effect import in `component-modules.ts`, a placeholder in `component-previews.ts`, and a gallery stub under `apps/ui/src/content/gallery/`. **Run `npm install` afterwards** — it creates the `node_modules/@c2n/<name>` workspace symlink, without which `npm run ui:build` fails to resolve the new manifest. The stubs are placeholders: fill in the doc page, the gallery cards, the preview markup and the test suite, or delete the gallery file if the component has no variants worth showing. Because the two package types sit at different depths, `plopfile.ts` injects `coreBuildDep` and `cemPluginPath` into the template data rather than hardcoding `../` counts in the templates — update those if the layout changes again. Plop's `append` inserts `separator + template` directly after the match, so an append pattern must not end in `\n` or the following line is glued to the new entry.
 
 ## Component conventions
 

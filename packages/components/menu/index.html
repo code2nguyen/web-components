@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-menu</title>
+    <script type="module" src="/src/menu.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #18181b;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+      section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      h2 {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #71717a;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .trigger {
+        min-height: 36px;
+        padding: 6px 12px;
+        font: inherit;
+        color: inherit;
+        background: #ffffff;
+        border: 1px solid #bcbcc6;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .trigger:hover {
+        border-color: #a1a1aa;
+        background: #fafafa;
+      }
+      kbd {
+        font: inherit;
+      }
+      .brand {
+        --c2-menu--border-top-left-radius: 12px;
+        --c2-menu--border-top-right-radius: 12px;
+        --c2-menu--border-bottom-left-radius: 12px;
+        --c2-menu--border-bottom-right-radius: 12px;
+        --c2-menu--padding-top: 6px;
+        --c2-menu--padding-right: 6px;
+        --c2-menu--padding-bottom: 6px;
+        --c2-menu--padding-left: 6px;
+        --c2-menu--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14);
+        --c2-menu-item--border-top-left-radius: 8px;
+        --c2-menu-item--border-top-right-radius: 8px;
+        --c2-menu-item--border-bottom-left-radius: 8px;
+        --c2-menu-item--border-bottom-right-radius: 8px;
+        --c2-menu-item__hover--background: #eef2ff;
+        --c2-menu-item__hover--color: #3730a3;
+      }
+      .dark {
+        --c2-menu--background: #18181b;
+        --c2-menu--border-top: 1px solid #3f3f46;
+        --c2-menu--border-right: 1px solid #3f3f46;
+        --c2-menu--border-bottom: 1px solid #3f3f46;
+        --c2-menu--border-left: 1px solid #3f3f46;
+        --c2-menu--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        --c2-menu__separator--color: #3f3f46;
+        --c2-menu__heading--color: #a1a1aa;
+        --c2-menu-item--color: #fafafa;
+        --c2-menu-item__hover--background: #27272a;
+        --c2-menu-item__shortcut--color: #71717a;
+        --c2-menu-item__icon--color: #a1a1aa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>Commands</h2>
+      <div class="row">
+        <c2-menu aria-label="File actions">
+          <button class="trigger" slot="trigger">Actions</button>
+          <c2-menu-item value="new">New file<kbd slot="shortcut">⌘N</kbd></c2-menu-item>
+          <c2-menu-item value="open">Open…<kbd slot="shortcut">⌘O</kbd></c2-menu-item>
+          <c2-menu-item value="save" disabled>Save</c2-menu-item>
+          <hr />
+          <c2-menu-item value="delete" destructive>Delete file</c2-menu-item>
+        </c2-menu>
+      </div>
+    </section>
+
+    <section>
+      <h2>Groups, descriptions and icons</h2>
+      <div class="row">
+        <c2-menu aria-label="Account">
+          <button class="trigger" slot="trigger">Account</button>
+          <h3>Signed in as ada</h3>
+          <c2-menu-item value="profile">
+            <svg slot="prefix-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Profile
+            <span slot="description">Name, avatar and handle</span>
+          </c2-menu-item>
+          <c2-menu-item value="billing">Billing<span slot="description">Plan, invoices and cards</span></c2-menu-item>
+          <hr />
+          <h3>Danger zone</h3>
+          <c2-menu-item value="sign-out" destructive>Sign out</c2-menu-item>
+        </c2-menu>
+      </div>
+    </section>
+
+    <section>
+      <h2>Checkboxes and radios (keep-open)</h2>
+      <div class="row">
+        <c2-menu aria-label="View" keep-open>
+          <button class="trigger" slot="trigger">View</button>
+          <h3>Panels</h3>
+          <c2-menu-item type="checkbox" value="sidebar" checked>Sidebar</c2-menu-item>
+          <c2-menu-item type="checkbox" value="terminal">Terminal</c2-menu-item>
+          <hr />
+          <h3>Density</h3>
+          <c2-menu-item type="radio" name="density" value="comfortable" checked>Comfortable</c2-menu-item>
+          <c2-menu-item type="radio" name="density" value="compact">Compact</c2-menu-item>
+        </c2-menu>
+      </div>
+    </section>
+
+    <section>
+      <h2>Submenu</h2>
+      <div class="row">
+        <c2-menu aria-label="Share">
+          <button class="trigger" slot="trigger">Share</button>
+          <c2-menu-item value="copy-link">Copy link</c2-menu-item>
+          <c2-menu-item value="invite">
+            Invite people
+            <c2-menu slot="submenu" aria-label="Invite">
+              <c2-menu-item value="email">By email</c2-menu-item>
+              <c2-menu-item value="slack">By Slack</c2-menu-item>
+              <c2-menu-item value="more">
+                More
+                <c2-menu slot="submenu" aria-label="More channels">
+                  <c2-menu-item value="sms">SMS</c2-menu-item>
+                  <c2-menu-item value="qr">QR code</c2-menu-item>
+                </c2-menu>
+              </c2-menu-item>
+            </c2-menu>
+          </c2-menu-item>
+          <hr />
+          <c2-menu-item value="docs" href="https://example.com" target="_blank">Sharing guide</c2-menu-item>
+        </c2-menu>
+      </div>
+    </section>
+
+    <section>
+      <h2>Placement and a separate anchor</h2>
+      <div class="row">
+        <button class="trigger" id="remote-anchor">Anchored elsewhere</button>
+        <c2-menu anchor="remote-anchor" placement="top-start" aria-label="Remote">
+          <c2-menu-item value="top-1">Opens above</c2-menu-item>
+          <c2-menu-item value="top-2">Second row</c2-menu-item>
+        </c2-menu>
+        <button class="trigger" onclick="document.querySelector('c2-menu[anchor]').toggle()">Toggle it</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Themed</h2>
+      <div class="row">
+        <c2-menu class="brand" aria-label="Brand">
+          <button class="trigger" slot="trigger">Rounded</button>
+          <c2-menu-item value="a">Duplicate</c2-menu-item>
+          <c2-menu-item value="b">Move to…</c2-menu-item>
+          <c2-menu-item value="c">Archive</c2-menu-item>
+        </c2-menu>
+        <c2-menu class="dark" aria-label="Dark">
+          <button class="trigger" slot="trigger">Dark surface</button>
+          <h3>Workspace</h3>
+          <c2-menu-item value="a">Settings<kbd slot="shortcut">⌘,</kbd></c2-menu-item>
+          <c2-menu-item value="b">Members</c2-menu-item>
+          <hr />
+          <c2-menu-item value="c" destructive>Leave workspace</c2-menu-item>
+        </c2-menu>
+      </div>
+    </section>
+
+    <script type="module">
+      document.addEventListener('menu-select', (event) => {
+        console.log('menu-select', event.detail)
+      })
+    </script>
+  </body>
+</html>

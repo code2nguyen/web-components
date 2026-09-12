@@ -19,6 +19,28 @@ export function redispatchEvent(host: HTMLElement, event: Event) {
   return dispatched
 }
 
+let scrollLocks = 0
+let previousOverflow = ''
+
+/**
+ * Counted page-scroll lock, shared by every overlay so nested ones restore in the right order: a sheet that opens a
+ * modal and closes after it must not hand the page back while the modal is still up. Call the returned function to
+ * release; releasing twice is a no-op.
+ */
+export function lockPageScroll(): () => void {
+  if (isServer) return () => {}
+  if (scrollLocks++ === 0) {
+    previousOverflow = document.documentElement.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+  }
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    if (--scrollLocks === 0) document.documentElement.style.overflow = previousOverflow
+  }
+}
+
 export function smartFixedPosition(fixed: boolean) {
   if (isServer) return
   const el = document.documentElement

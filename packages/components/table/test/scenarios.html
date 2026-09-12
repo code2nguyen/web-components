@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Table test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 16px;
+      }
+      /* A fixed viewport keeps the rendered window the same size on every engine and screen, so the row counts
+         the benchmark asserts on do not depend on the browser window. */
+      c2-table {
+        height: 480px;
+        width: 900px;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Table scenario"></main>
+  </body>
+</html>

@@ -1,0 +1,100 @@
+---
+title: 'Skeleton'
+description: 'Placeholder block standing in for content that has not arrived, in three shapes and three animations.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Skeleton } from '@c2n/skeleton'
+
+`c2-skeleton` holds the shape of content while it loads. Three `variant`s cover almost everything: `rect` (the default) for images, cards and buttons, `text` for copy — `lines` repeats it with a shorter last line, the way a paragraph ends — and `circle` for avatars. The `animation` is a `pulse` by default, `wave` for a highlight sweeping across the block, or `none` for a still one; reduced motion stops all three. A skeleton is decoration, so it stays out of the accessibility tree unless you give it a `label`.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/skeleton
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/skeleton
+<style>
+  .stack {
+    display: grid;
+    gap: 12px;
+    width: 260px;
+    max-width: 100%;
+  }
+  .media {
+    --c2-skeleton--height: 120px;
+    --c2-skeleton--border-radius: 10px;
+  }
+  .card {
+    display: grid;
+    gap: 14px;
+    width: 260px;
+    max-width: 100%;
+    padding: 16px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-head c2-skeleton[variant='text'] {
+    flex: 1;
+  }
+  .inverse {
+    width: 260px;
+    max-width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+    background: #18181b;
+    --c2-skeleton--background-color: #3f3f46;
+    --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);
+  }
+</style>
+<div data-label="Shapes">
+  <div class="stack">
+    <c2-skeleton></c2-skeleton>
+    <c2-skeleton variant="text" lines="3"></c2-skeleton>
+    <c2-skeleton variant="circle"></c2-skeleton>
+  </div>
+</div>
+<div data-label="Animations">
+  <div class="stack">
+    <c2-skeleton animation="pulse"></c2-skeleton>
+    <c2-skeleton animation="wave"></c2-skeleton>
+    <c2-skeleton animation="none"></c2-skeleton>
+  </div>
+</div>
+<div data-label="Sizes">
+  <div class="stack">
+    <c2-skeleton style="--c2-skeleton--height: 8px"></c2-skeleton>
+    <c2-skeleton></c2-skeleton>
+    <c2-skeleton style="--c2-skeleton--height: 36px; --c2-skeleton--border-radius: 999px; --c2-skeleton--width: 120px"></c2-skeleton>
+    <c2-skeleton class="media"></c2-skeleton>
+  </div>
+</div>
+<div data-label="In context">
+  <div class="card" aria-busy="true">
+    <div class="card-head">
+      <c2-skeleton variant="circle" label="Loading article"></c2-skeleton>
+      <c2-skeleton variant="text" lines="2"></c2-skeleton>
+    </div>
+    <c2-skeleton class="media" animation="wave"></c2-skeleton>
+    <c2-skeleton variant="text" lines="3"></c2-skeleton>
+  </div>
+  <div class="inverse"><c2-skeleton variant="text" lines="3" animation="wave"></c2-skeleton></div>
+</div>
+```
+
+Build a skeleton that traces the layout it replaces — same number of blocks, roughly the same sizes, in the same places — and swap the whole thing for the real content when it arrives. A placeholder that does not match what follows reads as a jump rather than a load.
+
+Mark the region `aria-busy="true"` while it waits. The blocks themselves are `aria-hidden`, because a screen reader announcing a row of empty boxes helps nobody; give **one** skeleton in the group a `label` and it becomes a `role="status"` that announces the wait once. Leave the rest unlabelled.
+
+`--c2-skeleton--width` and `--c2-skeleton--height` size a `rect` and set the line height of a `text` skeleton; a `circle` ignores both and uses `--c2-skeleton__circle--size` so it cannot go oval in a container that is not square. `--c2-skeleton--background-color` is the block, `--c2-skeleton__sheen--color` the highlight a `wave` sweeps across it, and `--c2-skeleton--animation-duration` the pace of either animation — on a dark surface set the first to a lighter grey and the second to a much fainter white.

@@ -74,6 +74,7 @@
     list--padding-bottom: 4px,
     list--padding-left: 4px,
 
+    list--min-width: auto,
     list--max-height: 280px,
   )
 );
@@ -211,6 +212,8 @@
 
 // The dropdown: a `c2-list` inside the overlay, themed through the `list--*` variables of the select.
 .list {
+  min-width: css.cssVar(list--min-width);
+
   --c2-list--background: #{css.cssVar(list--background)};
 
   --c2-list--border-top: #{css.cssVar(list--border-top)};

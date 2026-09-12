@@ -1,0 +1,121 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Skeleton } from '@c2n/skeleton'
+
+## Presets
+
+Curated looks for `c2-skeleton`. Open any card in the studio to start from it. Most of the work is done by `variant` and `animation`; `--c2-skeleton--height`, `--c2-skeleton--border-radius` and `--c2-skeleton--background-color` do the rest.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-skeleton></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Paragraph
+<c2-skeleton variant="text" lines="3"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Avatar
+<c2-skeleton variant="circle"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Wave
+<c2-skeleton animation="wave"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Still
+<c2-skeleton animation="none"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Media
+<style>
+  .media {
+    --c2-skeleton--height: 120px;
+    --c2-skeleton--border-radius: 10px;
+  }
+</style>
+<c2-skeleton class="media" animation="wave"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Button
+<style>
+  .button {
+    --c2-skeleton--width: 120px;
+    --c2-skeleton--height: 36px;
+    --c2-skeleton--border-radius: 6px;
+  }
+</style>
+<c2-skeleton class="button"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Chip
+<style>
+  .chip {
+    --c2-skeleton--width: 88px;
+    --c2-skeleton--height: 24px;
+    --c2-skeleton--border-radius: 999px;
+  }
+</style>
+<c2-skeleton class="chip"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Tight
+<style>
+  .tight {
+    --c2-skeleton--height: 10px;
+    --c2-skeleton--gap: 6px;
+    --c2-skeleton__last-line--width: 40%;
+  }
+</style>
+<c2-skeleton class="tight" variant="text" lines="4"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=Subtle
+<style>
+  .subtle {
+    --c2-skeleton--background-color: #f4f4f5;
+    --c2-skeleton__pulse--opacity: 0.7;
+    --c2-skeleton--animation-duration: 2.4s;
+  }
+</style>
+<c2-skeleton class="subtle" variant="text" lines="3"></c2-skeleton>
+```
+
+```html tag=MdxCodeBlock,label=List row
+<style>
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+  .row c2-skeleton[variant='text'] {
+    flex: 1;
+  }
+  .row c2-skeleton[variant='circle'] {
+    --c2-skeleton__circle--size: 32px;
+  }
+</style>
+<div class="row">
+  <c2-skeleton variant="circle"></c2-skeleton>
+  <c2-skeleton variant="text" lines="2"></c2-skeleton>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    width: 100%;
+    padding: 20px;
+    border-radius: 12px;
+    background: #18181b;
+    --c2-skeleton--background-color: #3f3f46;
+    --c2-skeleton__sheen--color: rgba(255, 255, 255, 0.12);
+  }
+</style>
+<div class="dark"><c2-skeleton variant="text" lines="3" animation="wave"></c2-skeleton></div>
+```
+
+</GalleryGrid>

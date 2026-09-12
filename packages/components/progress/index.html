@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-progress</title>
+    <script type="module" src="/src/progress.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      main {
+        display: grid;
+        gap: 32px;
+        max-width: 520px;
+      }
+      section {
+        display: grid;
+        gap: 16px;
+      }
+      h2 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #71717a;
+      }
+      .success {
+        --c2-progress__indicator--background-color: #16a34a;
+        --c2-progress__track--background-color: #dcfce7;
+      }
+      .thick {
+        --c2-progress--height: 16px;
+        --c2-progress--border-radius: 6px;
+      }
+      .hairline {
+        --c2-progress--height: 3px;
+        --c2-progress--border-radius: 0;
+      }
+      .inverse {
+        padding: 20px;
+        border-radius: 12px;
+        background: #18181b;
+        --c2-progress__indicator--background-color: #5aa3ff;
+        --c2-progress__track--background-color: #3f3f46;
+        --c2-progress__label--color: #a1a1aa;
+        --c2-progress__value--color: #fafafa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <section>
+        <h2>Indeterminate</h2>
+        <c2-progress></c2-progress>
+        <c2-progress>Uploading files</c2-progress>
+        <c2-progress label="Connecting" class="hairline"></c2-progress>
+      </section>
+
+      <section>
+        <h2>Determinate</h2>
+        <c2-progress value="0"></c2-progress>
+        <c2-progress value="40" show-value>Uploading files</c2-progress>
+        <c2-progress value="100" show-value class="success">Upload complete</c2-progress>
+      </section>
+
+      <section>
+        <h2>Custom value text</h2>
+        <c2-progress value="3" max="5">Onboarding<span slot="value">Step 3 of 5</span></c2-progress>
+        <c2-progress value="1.2" max="4" class="thick">Downloading<span slot="value">1.2 / 4 MB</span></c2-progress>
+      </section>
+
+      <section>
+        <h2>On a dark surface</h2>
+        <div class="inverse"><c2-progress value="72" show-value>Syncing workspace</c2-progress></div>
+      </section>
+
+      <section>
+        <h2>Live</h2>
+        <c2-progress id="live" value="0" show-value>Rendering</c2-progress>
+      </section>
+    </main>
+
+    <script type="module">
+      const live = document.querySelector('#live')
+      setInterval(() => {
+        live.value = live.value >= 100 ? 0 : live.value + 7
+      }, 700)
+    </script>
+  </body>
+</html>

@@ -91,6 +91,7 @@ import '@c2n/list'
  * @cssproperty {padding} [--c2-select__list--padding-right=4px]
  * @cssproperty {padding} [--c2-select__list--padding-bottom=4px]
  * @cssproperty {padding} [--c2-select__list--padding-left=4px]
+ * @cssproperty {pixel} [--c2-select__list--min-width=auto] - Floor for the dropdown's width; it is never narrower than the trigger.
  * @cssproperty {pixel} [--c2-select__list--max-height=280px] - The dropdown scrolls past this height.
  *
  * @internalcomponent c2-list

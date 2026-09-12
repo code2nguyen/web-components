@@ -1,0 +1,123 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Kbd } from '@c2n/kbd'
+
+## Presets
+
+Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keycap is mostly four variables — `--c2-kbd--background-color`, `--c2-kbd--border`, `--c2-kbd--border-radius` and `--c2-kbd--box-shadow` — and dropping the shadow is what turns a raised key into a flat inline tag.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Keycap
+<c2-kbd>⌘ + K</c2-kbd>
+```
+
+```html tag=MdxCodeBlock,label=Flat
+<style>
+  .flat {
+    --c2-kbd--background-color: transparent;
+    --c2-kbd--border: 1px solid #d4d4d8;
+    --c2-kbd--box-shadow: none;
+  }
+</style>
+<c2-kbd class="flat">Tab</c2-kbd>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    --c2-kbd--background-color: #27272a;
+    --c2-kbd--color: #e4e4e7;
+    --c2-kbd--border: 1px solid #3f3f46;
+    --c2-kbd--box-shadow: 0 1px 0 #18181b;
+  }
+</style>
+<c2-kbd class="dark">⌘ + K</c2-kbd>
+```
+
+```html tag=MdxCodeBlock,label=Mechanical
+<style>
+  .mechanical {
+    --c2-kbd--min-width: 34px;
+    --c2-kbd--height: 34px;
+    --c2-kbd--background-color: #fafafa;
+    --c2-kbd--border: 1px solid #d4d4d8;
+    --c2-kbd--border-radius: 8px;
+    --c2-kbd--box-shadow: 0 3px 0 #d4d4d8;
+    --c2-kbd--font-size: 13px;
+    --c2-kbd--font-weight: 600;
+  }
+</style>
+<c2-kbd class="mechanical">A</c2-kbd>
+```
+
+```html tag=MdxCodeBlock,label=Round
+<style>
+  .round {
+    --c2-kbd--min-width: 28px;
+    --c2-kbd--height: 28px;
+    --c2-kbd--border-radius: 999px;
+    --c2-kbd--box-shadow: none;
+    --c2-kbd--background-color: #eef2ff;
+    --c2-kbd--color: #3730a3;
+    --c2-kbd--border: 1px solid #c7d2fe;
+  }
+</style>
+<c2-kbd class="round">?</c2-kbd>
+```
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .terminal {
+    --c2-kbd--background-color: #0b1020;
+    --c2-kbd--color: #7ee787;
+    --c2-kbd--border: 1px solid #1f2a44;
+    --c2-kbd--border-radius: 4px;
+    --c2-kbd--box-shadow: none;
+    --c2-kbd--text-transform: uppercase;
+    --c2-kbd--letter-spacing: 0.08em;
+  }
+</style>
+<c2-kbd class="terminal">ctrl + c</c2-kbd>
+```
+
+```html tag=MdxCodeBlock,label=Ghost
+<style>
+  .ghost {
+    --c2-kbd--background-color: transparent;
+    --c2-kbd--border: none;
+    --c2-kbd--box-shadow: none;
+    --c2-kbd--color: #71717a;
+    --c2-kbd--font-size: 11px;
+    --c2-kbd--letter-spacing: 0.06em;
+    --c2-kbd--text-transform: uppercase;
+  }
+</style>
+<c2-kbd class="ghost">Esc</c2-kbd>
+```
+
+```html tag=MdxCodeBlock,label=Shortcut row
+<style>
+  .row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #52525b;
+  }
+  .row c2-kbd {
+    --c2-kbd--min-width: 26px;
+    --c2-kbd--height: 26px;
+  }
+</style>
+<span class="row">
+  <c2-kbd>Ctrl</c2-kbd>
+  +
+  <c2-kbd>Shift</c2-kbd>
+  +
+  <c2-kbd>P</c2-kbd>
+</span>
+```
+
+</GalleryGrid>

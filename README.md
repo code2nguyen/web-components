@@ -1,8 +1,13 @@
 # c2n/web-components
 
-A monorepos contains all web components using lit. Each component is released in a separated package.
+[![npm version](https://img.shields.io/npm/v/%40c2n%2Fcore?label=npm%20packages)](https://www.npmjs.com/org/c2n)
+[![Component tests](https://github.com/code2nguyen/web-components/actions/workflows/component-tests.yml/badge.svg)](https://github.com/code2nguyen/web-components/actions/workflows/component-tests.yml)
+[![npm downloads](https://img.shields.io/npm/dm/%40c2n%2Fcore?label=core%20downloads)](https://www.npmjs.com/package/@c2n/core)
+[![License](https://img.shields.io/github/license/code2nguyen/web-components)](LICENSE)
 
-Packages are grouped by role: `packages/components/*` (the web components), `packages/core` (the shared runtime, published as `@c2n/core`) and `packages/tools/*` (`config`, `sass`, `playground`). npm package names stay flat, e.g. `packages/components/avatar` is published as `@c2n/avatar`.
+A monorepo of Lit web components. Each component is released as a separate npm package, and all publishable packages share the same version.
+
+Packages are grouped by role: `packages/components/*` (the web components), `packages/icons/*` (generated icon sets), `packages/core` (the shared runtime, published as `@c2n/core`) and `packages/tools/*` (`config`, `sass`, `playground`). npm package names stay flat, e.g. `packages/components/avatar` is published as `@c2n/avatar`.
 
 ## Development mode
 
@@ -52,7 +57,7 @@ npm run dev -w packages/components/checkbox
 ```bash
 npx playwright install chromium # first run, or after a Playwright upgrade
 npm run test:button             # focused button suite in Chromium
-npm test                       # all component suites in Chromium
+npm test                       # changed component suites in Chromium
 npm run test:all                # Chromium, Firefox and WebKit (install all browsers first)
 ```
 
@@ -78,13 +83,3 @@ npx lerna publish patch --no-private --exact --yes
 # patch | major | minor | premajor | preminor | prepatch | prerelease
 
 ```
-
-```
-
-```
-
-References:
-
-- https://phosphoricons.com/?q=%22copy%22
-
-- Icon: https://feathericons.com/?query=copy
