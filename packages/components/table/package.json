@@ -1,6 +1,6 @@
 {
   "name": "@c2n/table",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "main": "dist/table.js",
   "exports": {
@@ -62,9 +62,9 @@
     }
   },
   "dependencies": {
-    "@c2n/checkbox": "0.0.5",
-    "@c2n/core": "0.0.5",
-    "@c2n/spinner": "0.0.5",
+    "@c2n/checkbox": "0.0.6",
+    "@c2n/core": "0.0.6",
+    "@c2n/spinner": "0.0.6",
     "@lit/context": "1.1.6",
     "lit": "3.3.3"
   },

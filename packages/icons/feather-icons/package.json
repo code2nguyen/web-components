@@ -1,6 +1,6 @@
 {
   "name": "@c2n/feather-icons",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "main": "dist/index.js",
   "sideEffects": true,

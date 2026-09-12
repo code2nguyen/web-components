@@ -1,6 +1,6 @@
 {
   "name": "@c2n/radio",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "main": "dist/index.js",
   "exports": {
@@ -63,7 +63,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.5",
+    "@c2n/core": "0.0.6",
     "@lit/context": "1.1.6",
     "lit": "3.3.3"
   },
