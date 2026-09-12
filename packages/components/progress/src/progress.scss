@@ -1,0 +1,112 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-progress,
+  $theme: (
+    height: 8px,
+    width: 100%,
+    border-radius: 999px,
+    track--background-color: #e4e4e7,
+    indicator--background-color: #0265dc,
+    animation-duration: 1.4s,
+    gap: 8px,
+    label--color: #71717a,
+    label--font-size: 14px,
+    label--font-weight: null,
+    value--color: #18181b,
+    value--font-size: 14px,
+    value--font-weight: 500,
+  )
+);
+
+:host {
+  display: block;
+  // The width lives on the host, not the inner box: as a flex or grid item the host sizes to its content, and a
+  // percentage on a child of an auto-width host is indefinite, which would collapse the bar to nothing.
+  width: css.cssVar(width);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-progress {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+.c2-progress-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 1.4;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-progress-label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  min-width: 0;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-progress-value {
+  flex: none;
+  color: css.cssVar(value--color);
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  font-variant-numeric: tabular-nums;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-progress-track {
+  position: relative;
+  overflow: hidden;
+  height: css.cssVar(height);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(track--background-color);
+}
+
+.c2-progress-indicator {
+  height: 100%;
+  border-radius: inherit;
+  background-color: css.cssVar(indicator--background-color);
+  // Indeterminate: a short bar sweeping the full track. `width` is set inline once a value arrives.
+  width: 40%;
+  animation: c2-progress-slide css.cssVar(animation-duration) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.is-determinate .c2-progress-indicator {
+  animation: none;
+  transition: width calc(#{css.cssVar(animation-duration)} / 2) cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes c2-progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+// Reduced motion: the bar still sweeps so the wait reads as ongoing, just slowly and without the easing snap.
+@media (prefers-reduced-motion: reduce) {
+  .c2-progress-indicator {
+    animation-duration: 3s;
+    animation-timing-function: linear;
+  }
+  .is-determinate .c2-progress-indicator {
+    transition: none;
+  }
+}

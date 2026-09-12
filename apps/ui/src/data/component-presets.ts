@@ -835,6 +835,26 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-progress': {
+    html: `<c2-progress value="60" show-value>Uploading files</c2-progress>`,
+    presets: [
+      { name: 'Hairline', css: { '--c2-progress--height': '3px', '--c2-progress--border-radius': '0' } },
+      { name: 'Thick', css: { '--c2-progress--height': '16px', '--c2-progress--border-radius': '8px' } },
+      {
+        name: 'Success',
+        css: { '--c2-progress__indicator--background-color': '#16a34a', '--c2-progress__track--background-color': '#dcfce7' },
+      },
+      {
+        name: 'Danger',
+        css: {
+          '--c2-progress__indicator--background-color': '#dc2626',
+          '--c2-progress__track--background-color': '#fee2e2',
+          '--c2-progress__value--color': '#dc2626',
+        },
+      },
+      { name: 'Slow', css: { '--c2-progress--animation-duration': '2.5s' } },
+    ],
+  },
   'c2-radio': {
     html: `<c2-radio value="a" checked>Option</c2-radio>`,
     presets: [

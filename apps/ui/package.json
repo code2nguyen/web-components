@@ -42,6 +42,7 @@
     "@c2n/mat-icon": "*",
     "@c2n/modal": "*",
     "@c2n/overlay": "*",
+    "@c2n/progress": "*",
     "@c2n/radio": "*",
     "@c2n/select": "*",
     "@c2n/seperator": "*",

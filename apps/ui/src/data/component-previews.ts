@@ -127,6 +127,10 @@ export const componentPreviews: Record<string, string> = {
     <div class="preview-popover">Anchored overlay content</div>
   </c2-overlay>
 </div>`,
+  progress: `<div style="display:grid;gap:12px;width:220px">
+  <c2-progress value="72" show-value>Uploading files</c2-progress>
+  <c2-progress style="--c2-progress--height:4px"></c2-progress>
+</div>`,
   radio: `<c2-radio-group value="pro" style="width:200px">
   <c2-radio value="free" label="Free"></c2-radio>
   <c2-radio value="pro" label="Pro"></c2-radio>

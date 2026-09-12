@@ -24,6 +24,9 @@ export const overrides: Record<string, Override> = {
   // Switch: hovered off-track uses the outline colour, the thumb is a surface.
   '--c2-switch__track__hover--color': { token: 'color-outline' },
   '--c2-switch__thumb--color': { token: 'color-surface' },
+  // Progress: the unfilled groove is the same hairline grey as the spinner's ring, which the background rule table
+  // does not cover; the filled indicator maps to the accent on its own.
+  '--c2-progress__track--background-color': { token: 'color-outline-variant' },
   // Tooltip text sits on the inverse surface.
   '--c2-tooltip--color': { token: 'color-on-inverse-surface' },
   // Tabs: the selected indicator is the accent; the baseline is a hairline drawn with an inset shadow.
