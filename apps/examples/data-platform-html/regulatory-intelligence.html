@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Regulatory Intelligence | AxiomData AI</title>
+    <meta
+      name="description"
+      content="Empowering insurance firms and plan administrators with ERISA portfolio analytics, Solvency UK Matching Adjustment data, and LEI cross-symbology mapping."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+
+  <body class="antialiased grid-lines">
+    <!-- STICKY HEADER -->
+    <header id="site-header" class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo" aria-label="AxiomData AI Home">
+          <div class="logo-mark">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="24" height="24" rx="6" stroke="url(#cyan-grad)" stroke-width="2" fill="rgba(34,211,238,0.08)" />
+              <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="12" cy="19" r="2" fill="#a78bfa" />
+              <circle cx="17" cy="19" r="2" fill="#6ee7ff" />
+              <defs>
+                <linearGradient id="cyan-grad" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#6ee7ff" />
+                  <stop offset="1" stop-color="#a78bfa" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="brand-name">AxiomData <span class="brand-ai">AI</span></span>
+        </a>
+
+        <!-- C2 NAVIGATION MENU -->
+        <nav class="header-nav">
+          <c2-navigation-menu aria-label="Main Navigation" mobile-breakpoint="820">
+            <c2-navigation-menu-item href="index.html">Home</c2-navigation-menu-item>
+            <c2-navigation-menu-item href="about.html">About</c2-navigation-menu-item>
+
+            <c2-navigation-menu-item value="fixed-income">
+              Fixed Income Products
+              <div slot="panel" class="c2-nav-panel">
+                <span class="nav-panel-label">Fixed Income Universe</span>
+                <c2-navigation-menu-link href="fixed-income.html#reference-api">
+                  Reference Data
+                  <span slot="description">ISINs, LEIs, ratings &amp; instrument classification</span>
+                </c2-navigation-menu-link>
+                <c2-navigation-menu-link href="fixed-income.html#corporate-actions">
+                  Corporate Actions
+                  <span slot="description">Automated event capture &amp; entitlement processing</span>
+                </c2-navigation-menu-link>
+                <c2-navigation-menu-link href="fixed-income.html#pricing">
+                  Pricing
+                  <span slot="description">EOD fixed income pricing feeds</span>
+                </c2-navigation-menu-link>
+              </div>
+            </c2-navigation-menu-item>
+
+            <c2-navigation-menu-item value="regulatory" current>
+              Regulatory Products
+              <div slot="panel" class="c2-nav-panel">
+                <span class="nav-panel-label">Compliance &amp; Risk</span>
+                <c2-navigation-menu-link href="regulatory-intelligence.html#erisa">
+                  ERISA Portfolio Analytics
+                  <span slot="description">Plan asset classification &amp; 5500 reporting data</span>
+                </c2-navigation-menu-link>
+                <c2-navigation-menu-link href="regulatory-intelligence.html#solvency-ma">
+                  Matching Adjustment
+                  <span slot="description">PRA eligibility attestation &amp; spread attribution</span>
+                </c2-navigation-menu-link>
+                <c2-navigation-menu-link href="regulatory-intelligence.html#lei-mapping">
+                  LEI &amp; Instrument Mapping
+                  <span slot="description">Cross-reference LEIs to ISIN, FIGI and other identifiers</span>
+                </c2-navigation-menu-link>
+              </div>
+            </c2-navigation-menu-item>
+
+            <c2-navigation-menu-item href="contact.html">Contact</c2-navigation-menu-item>
+          </c2-navigation-menu>
+        </nav>
+
+        <div class="header-actions">
+          <c2-button id="headerDemoBtn" class="btn-primary" href="contact.html">Get in Touch</c2-button>
+        </div>
+      </div>
+    </header>
+
+    <main class="pt-page">
+      <!-- HERO -->
+      <section class="page-hero">
+        <div class="section-container text-center">
+          <div class="reveal">
+            <c2-badge tone="warning" class="section-pill section-pill--amber">REGULATORY INTELLIGENCE</c2-badge>
+            <h1 class="page-title">Precision Analytics for <span class="gradient-text gradient-text--amber">Global Regimes</span></h1>
+            <p class="section-subtitle">Automated compliance datasets, PRA eligibility attestations, and ERISA fiduciary intelligence.</p>
+
+            <div class="hero-filter-pills">
+              <c2-button class="filter-pill pill-amber" href="#erisa">ERISA Portfolio Analytics</c2-button>
+              <c2-button class="filter-pill pill-amber" href="#solvency-ma">Matching Adjustment (MA)</c2-button>
+              <c2-button class="filter-pill pill-amber" href="#lei-mapping">LEI &amp; Mapping</c2-button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 ERISA ANALYTICS -->
+      <section id="erisa" class="service-section section-soft">
+        <div class="section-container">
+          <div class="service-header reveal">
+            <div class="service-num-badge badge-amber-box">01</div>
+            <div>
+              <span class="service-sub sub-amber">FIDUCIARY COMPLIANCE</span>
+              <h2 class="service-heading">ERISA Portfolio Analytics &amp; Form 5500</h2>
+            </div>
+          </div>
+
+          <div class="grid-split reveal">
+            <div class="service-content">
+              <p class="lead-text">
+                Structured data and analytics supporting ERISA-governed plan fiduciaries, pension managers, and corporate plan sponsors. Covers look-through
+                asset classification, prohibited transaction surveillance, and Schedule C/D reporting.
+              </p>
+              <ul class="feature-checklist checklist-amber">
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Look-through classification under ERISA § 3(42) and DOL plan asset
+                  regulations
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Party-in-interest transaction screening with statutory exemption mapping
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Form 5500 Schedule C, D, and H line-item reporting feeds ready for audit
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Fiduciary benchmarking datasets and 408(b)(2) fee disclosure transparency
+                </li>
+              </ul>
+              <c2-button class="btn-primary" id="erisaReqBtn">
+                Discuss ERISA Requirements
+                <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+              </c2-button>
+            </div>
+
+            <div class="lifecycle-cards-grid">
+              <c2-card class="lifecycle-card card-amber">
+                <h4 class="lc-title text-amber">Plan Asset Classification</h4>
+                <p class="lc-desc">Automated fund look-through analysis verifying equity participation by benefit plan investors.</p>
+              </c2-card>
+              <c2-card class="lifecycle-card card-amber">
+                <h4 class="lc-title text-amber">Prohibited Transactions</h4>
+                <p class="lc-desc">Continuous screening against known party-in-interest registers to prevent fiduciary exposure.</p>
+              </c2-card>
+              <c2-card class="lifecycle-card card-amber">
+                <h4 class="lc-title text-amber">Schedule 5500 Feeds</h4>
+                <p class="lc-desc">Normalized XML and tabular feeds mapped directly to annual filing reporting software.</p>
+              </c2-card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 MATCHING ADJUSTMENT -->
+      <section id="solvency-ma" class="service-section">
+        <div class="section-container">
+          <div class="service-header reveal">
+            <div class="service-num-badge badge-amber-box">02</div>
+            <div>
+              <span class="service-sub sub-amber">SOLVENCY UK / PRA PS2/23</span>
+              <h2 class="service-heading">Matching Adjustment (MA) Framework</h2>
+            </div>
+          </div>
+
+          <div class="reveal mb-8">
+            <h3 class="ma-headline">Unlock <span class="text-amber">Maximum Yield</span> From Your Long-Term Liabilities</h3>
+            <p class="lead-text max-w-3xl">
+              Comprehensive data infrastructure for UK life insurers and annuity writers operating under the PRA's Solvency UK regime. Built specifically around
+              PS2/23, SS3/17, and FSMA 2023 attestation requirements.
+            </p>
+          </div>
+
+          <div class="grid-split reveal">
+            <div class="service-content">
+              <h4 class="section-microhead">Data Capabilities</h4>
+              <ul class="feature-checklist checklist-amber">
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> PRA asset eligibility assessment and formal Senior Management attestation
+                  data
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Spread attribution: fundamental spread vs matching adjustment benefit
+                  decomposition
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Full investment lifecycle surveillance from debt origination to maturity
+                  or exit
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> NLP/LLM assisted covenant verification and restructuring condition
+                  analysis
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Board and Chief Risk Officer supervisory reporting packs aligned to PRA
+                  expectations
+                </li>
+              </ul>
+              <div class="tag-row">
+                <c2-badge tone="warning">PS2/23</c2-badge>
+                <c2-badge tone="warning">SS3/17</c2-badge>
+                <c2-badge tone="warning">Solvency UK</c2-badge>
+                <c2-badge tone="neutral">PRA Attestation</c2-badge>
+              </div>
+              <c2-button class="btn-primary" id="maReqBtn">
+                Discuss MA Solutions
+                <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+              </c2-button>
+            </div>
+
+            <div class="ma-inputs-col">
+              <c2-card class="lifecycle-card card-amber">
+                <h4 class="lc-title text-amber">Static Eligibility Inputs</h4>
+                <p class="lc-desc">Fixed cashflow tests, prepay condition reviews, and Credit Quality Step (CQS) mapping.</p>
+              </c2-card>
+              <c2-card class="lifecycle-card card-amber">
+                <h4 class="lc-title text-amber">Dynamic Spread Attribution</h4>
+                <p class="lc-desc">Daily fundamental spread recalculations and credit risk premium sensitivity matrices.</p>
+              </c2-card>
+              <c2-card class="lifecycle-card card-amber">
+                <h4 class="lc-title text-amber">Annual Attestation Evidence</h4>
+                <p class="lc-desc">Defensible evidentiary audit trails verifying that asset cash flows match liability demands.</p>
+              </c2-card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 LEI MAPPING -->
+      <section id="lei-mapping" class="service-section section-soft">
+        <div class="section-container">
+          <div class="service-header reveal">
+            <div class="service-num-badge badge-amber-box">03</div>
+            <div>
+              <span class="service-sub sub-amber">CROSS-SYMBOLOGY</span>
+              <h2 class="service-heading">LEI &amp; Instrument Mapping Engine</h2>
+            </div>
+          </div>
+
+          <div class="grid-split reveal">
+            <div class="service-content">
+              <p class="lead-text">
+                Universal cross-reference graphs connecting Legal Entity Identifiers (LEIs) to ISINs, FIGIs, CUSIPs, parent trees, and ultimate corporate
+                obligors for EMIR, MiFID II, and SFTR compliance.
+              </p>
+              <ul class="feature-checklist checklist-amber">
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Real-time GLEIF database synchronization with daily corporate action delta
+                  feeds
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Bidirectional lookups: find all issued ISINs from an LEI, or find
+                  guarantor LEIs from an ISIN
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Automated validation of expired, lapsed, or merged entity identifiers
+                </li>
+                <li>
+                  <c2-feather-check class="icon-check icon-amber"></c2-feather-check> Direct integration into trade reporting engines, order management, and
+                  risk warehouses
+                </li>
+              </ul>
+              <c2-button class="btn-primary" id="leiReqBtn">
+                Request LEI Mapping Access
+                <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+              </c2-button>
+            </div>
+
+            <div class="code-box-wrapper">
+              <c2-card class="terminal-card">
+                <div class="terminal-head">
+                  <div class="terminal-controls">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                  </div>
+                  <div class="terminal-url-bar">
+                    <span class="http-method get">GET</span>
+                    <span class="http-endpoint">/v1/symbology/lei/5493006MHB84DD0ZWV18</span>
+                  </div>
+                  <div class="terminal-status-tag">
+                    <span class="status-indicator"></span>
+                    <span>200 OK</span>
+                  </div>
+                </div>
+                <pre class="terminal-code"><code>{
+  "lei": "5493006MHB84DD0ZWV18",
+  "legal_name": "Axiom Global Funding PLC",
+  "status": "ISSUED",
+  "country": "GB",
+  "ultimate_parent": {
+    "lei": "213800XYZ123ABC99901",
+    "name": "Axiom Holdings Limited"
+  },
+  "instruments_count": 48,
+  "instruments": [
+    { "isin": "XS2010034567", "figi": "BBG00V987654", "currency": "GBP" },
+    { "isin": "US053015AA23", "figi": "BBG00W123456", "currency": "USD" }
+  ]
+}</code></pre>
+              </c2-card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA BAND -->
+      <section class="cta-band">
+        <div class="cta-inner reveal">
+          <h2 class="cta-title">Streamline Your Regulatory Burden</h2>
+          <p class="cta-subtitle">Speak with our regulatory specialists about automated Solvency UK, ERISA, and EMIR compliance pipelines.</p>
+          <c2-button id="ctaBandBtn" class="btn-primary-large">
+            Get in Touch
+            <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+          </c2-button>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="index.html" class="brand-logo" aria-label="AxiomData AI Home">
+          <div class="logo-mark logo-mark--small">
+            <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="24" height="24" rx="6" stroke="#6ee7ff" stroke-width="2" fill="rgba(34,211,238,0.1)" />
+              <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+          <span class="footer-brand-name">AxiomData AI</span>
+        </a>
+
+        <nav class="footer-links" aria-label="Footer links">
+          <c2-link-button href="fixed-income.html">Fixed Income</c2-link-button>
+          <c2-link-button href="regulatory-intelligence.html">Regulatory Intelligence</c2-link-button>
+          <c2-link-button href="about.html">About</c2-link-button>
+          <c2-link-button href="contact.html">Contact</c2-link-button>
+          <c2-link-button href="privacy.html">Privacy</c2-link-button>
+          <c2-link-button href="terms.html">Terms</c2-link-button>
+        </nav>
+
+        <div class="footer-meta">
+          <c2-link-button href="https://linkedin.com" external aria-label="LinkedIn" class="social-link">
+            <c2-feather-linkedin slot="prefix-icon"></c2-feather-linkedin>
+          </c2-link-button>
+          <p class="copyright">&copy; 2026 AxiomData AI Technologies Ltd. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- INTERACTIVE DEMO MODAL -->
+    <c2-modal id="demoModal">
+      <div slot="title" class="modal-title-wrap">
+        <h2>Request Institutional Access</h2>
+        <p class="modal-title-sub">Connect with our quantitative data solutions team</p>
+      </div>
+
+      <div class="modal-form">
+        <div class="form-row">
+          <div class="form-field">
+            <c2-label for="modalFullName" required>Full Name</c2-label>
+            <c2-text-field id="modalFullName" placeholder="e.g. Alex Henderson"></c2-text-field>
+          </div>
+
+          <div class="form-field">
+            <c2-label for="modalEmail" required>Corporate Email</c2-label>
+            <c2-text-field id="modalEmail" type="email" placeholder="alex@assetmanagement.com"></c2-text-field>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <c2-label for="modalOrg">Organization / Asset Manager</c2-label>
+          <c2-text-field id="modalOrg" placeholder="e.g. Global Horizon Capital"></c2-text-field>
+        </div>
+
+        <div class="form-field">
+          <c2-label for="modalProduct">Product Focus</c2-label>
+          <c2-select id="modalProduct" value="matching-adjustment">
+            <c2-list-item value="reference">Fixed Income Reference Data</c2-list-item>
+            <c2-list-item value="corporate-actions">Corporate Actions Pipeline</c2-list-item>
+            <c2-list-item value="pricing">EOD Evaluated Pricing</c2-list-item>
+            <c2-list-item value="erisa">ERISA Portfolio Analytics</c2-list-item>
+            <c2-list-item value="matching-adjustment">Matching Adjustment / Solvency UK</c2-list-item>
+            <c2-list-item value="lei-mapping">LEI &amp; Cross-Symbology Mapping</c2-list-item>
+          </c2-select>
+        </div>
+
+        <div class="form-field">
+          <c2-label for="modalNotes">Requirements &amp; Universe Coverage</c2-label>
+          <c2-textarea id="modalNotes" placeholder="Specify your coverage needs..."></c2-textarea>
+        </div>
+
+        <div class="modal-consent">
+          <c2-checkbox id="modalConsent"></c2-checkbox>
+          <c2-label for="modalConsent"> I agree to receive institutional product briefings and dataset updates. </c2-label>
+        </div>
+      </div>
+
+      <div slot="footer" class="modal-actions">
+        <c2-button class="ghost" id="modalCancelBtn">Cancel</c2-button>
+        <c2-button id="modalSubmitBtn" class="btn-primary">Submit Request</c2-button>
+      </div>
+    </c2-modal>
+  </body>
+</html>

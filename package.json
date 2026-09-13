@@ -138,6 +138,7 @@
     "examples:build": {
       "dependencies": [
         "./apps/examples/basic-form-html:build",
+        "./apps/examples/data-platform-html:build",
         "./apps/examples/trading-dashboard-react:build",
         "./apps/examples/orders-admin-angular:build",
         "./apps/examples/support-inbox-vue:build"
