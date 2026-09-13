@@ -4,9 +4,12 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "prestart": "npm run --prefix ../../ build",
+    "sync:examples": "node scripts/sync-examples.mjs",
+    "prestart": "npm run --prefix ../../ build && npm run --prefix ../../ examples:build && npm run sync:examples",
+    "predev": "npm run sync:examples",
     "dev": "astro dev",
     "start": "astro dev",
+    "prebuild": "npm run sync:examples",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",

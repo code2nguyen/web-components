@@ -1,6 +1,6 @@
 import { defineCollection } from 'astro:content'
 import { glob } from 'astro/loaders'
-import { componentSchema, gallerySchema, guideSchema, iconSetSchema } from './schemas'
+import { componentSchema, exampleSchema, gallerySchema, guideSchema, iconSetSchema } from './schemas'
 
 // Content Layer collections. `id` is derived from the file path (e.g. checkbox.mdx -> "checkbox").
 export const componentCollection = defineCollection({
@@ -26,9 +26,21 @@ export const guideCollection = defineCollection({
   schema: guideSchema,
 })
 
+// Example apps (/examples/<id>): complete applications under apps/examples/*, loaded straight from each app's
+// own app.config.json so the metadata has exactly one home. The id is the app's directory name.
+export const exampleCollection = defineCollection({
+  loader: glob({
+    pattern: '*/app.config.json',
+    base: '../examples',
+    generateId: ({ entry }) => entry.split('/')[0],
+  }),
+  schema: exampleSchema,
+})
+
 export const collections = {
   components: componentCollection,
   icons: iconCollection,
   gallery: galleryCollection,
   guides: guideCollection,
+  examples: exampleCollection,
 }

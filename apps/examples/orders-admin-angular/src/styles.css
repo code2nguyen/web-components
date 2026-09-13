@@ -1,0 +1,79 @@
+/* The theme is imported from the package: tokens (light, dark, prefers-color-scheme) plus the mapping of
+   every component variable onto them. */
+@import '@c2n/theme/theme.css';
+
+body {
+  margin: 0;
+  background: var(--c2-theme--color-surface, #ffffff);
+  color: var(--c2-theme--color-on-surface, #18181b);
+  font-family: var(--c2-theme--font-family, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  font-size: 14px;
+}
+
+.app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.app__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.app__head h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.app__head p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant, #52525b);
+}
+
+.app__head c2-text-field {
+  width: 240px;
+}
+
+.orders {
+  height: 420px;
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.detail dt {
+  color: var(--c2-theme--color-on-surface-variant, #52525b);
+}
+
+.detail dd {
+  margin: 0;
+}
+
+.ghost {
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--c2-theme--color-on-surface-variant, #52525b);
+  --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+}
+
+@media (max-width: 640px) {
+  .app__head c2-text-field {
+    width: 100%;
+  }
+}

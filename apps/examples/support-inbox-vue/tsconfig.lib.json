@@ -1,0 +1,10 @@
+{
+  "extends": "@c2n/config/tsconfig.lib.json",
+  "include": ["src/**/*", "src/**/*.vue"],
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./types",
+    "tsBuildInfoFile": "./types/.tsbuildinfo",
+    "jsx": "preserve"
+  }
+}

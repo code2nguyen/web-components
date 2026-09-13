@@ -15,6 +15,7 @@ export default tseslint.config(
       '**/.astro/**',
       '**/.wireit/**',
       '**/custom-elements.json',
+      'apps/ui/public/demo/**',
       'playwright-report/**',
       'test-results/**',
     ],
@@ -22,7 +23,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',

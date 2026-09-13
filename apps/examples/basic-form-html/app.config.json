@@ -1,0 +1,7 @@
+{
+  "title": "Account Form",
+  "description": "A settings form built from c2-card, c2-text-field, c2-select, c2-checkbox, c2-switch and c2-button — no framework, one <script type=\"module\">.",
+  "framework": "html",
+  "tags": ["form", "inputs", "validation"],
+  "order": 10
+}

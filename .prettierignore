@@ -11,3 +11,4 @@ custom-elements.json
 package-lock.json
 /.nx/workspace-data
 packages/tools/mcp/data/registry.json
+apps/ui/public/demo/

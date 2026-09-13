@@ -1,0 +1,59 @@
+{
+  "name": "@c2n/example-basic-form-html",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../../packages/core:build",
+        "../../../packages/components/button:build",
+        "../../../packages/components/card:build",
+        "../../../packages/components/checkbox:build",
+        "../../../packages/components/label:build",
+        "../../../packages/components/list-item:build",
+        "../../../packages/components/select:build",
+        "../../../packages/components/switch:build",
+        "../../../packages/components/text-field:build",
+        "../../../packages/components/toast:build",
+        "../../../packages/tools/theme:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "files": [
+        "src/**",
+        "index.html",
+        "vite.config.ts",
+        "tsconfig*.json"
+      ],
+      "output": [
+        "dist/**"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/button": "*",
+    "@c2n/card": "*",
+    "@c2n/checkbox": "*",
+    "@c2n/label": "*",
+    "@c2n/list-item": "*",
+    "@c2n/select": "*",
+    "@c2n/switch": "*",
+    "@c2n/text-field": "*",
+    "@c2n/theme": "*",
+    "@c2n/toast": "*"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  }
+}

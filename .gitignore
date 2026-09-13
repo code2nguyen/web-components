@@ -8,5 +8,6 @@ scripts/generator/plopfile.js
 scripts/generator/tsconfig.tsbuildinfo
 **/tsconfig.node.tsbuildinfo
 **/.wireit
+apps/ui/public/demo/
 /playwright-report/
 /test-results/

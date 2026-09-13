@@ -28,9 +28,14 @@ Import what you render at the top of the component module (`import '@c2n/text-fi
 
 Custom elements work as JSX tags. React 19 passes primitive props as attributes and functions as event listeners for `on*` names; for custom events attach listeners with a `ref` (`ref.current.addEventListener('selection-change', …)`). Declare the tags in `JSX.IntrinsicElements` for TypeScript. React 18 and older: pass attributes as strings and use refs for events and properties.
 
-## Vue
+## Vue 3
 
-Tell the compiler about the tags: `compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-')`. Bind attributes normally, listen with `@selection-change`. Use `.prop` modifier for array/object properties (`:value.prop="selected"`).
+Tell the compiler about the tags: `compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-')` (in `@vitejs/plugin-vue`'s `template.compilerOptions`); without it every `c2-*` tag is treated as a Vue component and renders nothing. Register the elements at module scope before `mount()`: Vue chooses between a property and an attribute with `key in el`, so a binding on an element that has not upgraded yet falls back to an attribute.
+
+- Events: `@selection-change`, `@submit-message` bind by their real kebab-case name — Vue calls `addEventListener` with the name as written. The handler gets a plain `Event`, so narrow it (`(event as CustomEvent<{ value: string[] }>).detail`).
+- `v-model` works on `c2-text-field` / `c2-textarea`: on a custom element Vue compiles it to the plain-text model directive, which sets `el.value` and listens for `input`, and both components expose `value` and re-emit the native `input` event.
+- `.prop` forces a DOM property (`:value.prop="selected"` for array/object values); `.attr` forces an attribute (`:align.attr="side"`), needed when a property is not reflected but the component styles it with `:host([attr])` — `c2-chat-message`'s `align` is the case to know.
+- A static attribute stays an attribute, so spell it the way the component declares it (`row-key`, not `rowKey`).
 
 ## Svelte / Angular
 

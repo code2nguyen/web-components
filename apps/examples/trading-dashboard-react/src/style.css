@@ -1,0 +1,121 @@
+/* Styled entirely with the @c2n/theme tokens, as a consuming app would be. */
+:root {
+  --delta-up: #16a34a;
+  --delta-down: #dc2626;
+}
+:root[data-theme='dark'] {
+  --delta-up: #4ade80;
+  --delta-down: #f87171;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --delta-up: #4ade80;
+    --delta-down: #f87171;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--c2-theme--color-surface, #ffffff);
+  color: var(--c2-theme--color-on-surface, #18181b);
+  font-family: var(--c2-theme--font-family, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  font-size: 14px;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.app__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  p {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface-variant, #52525b);
+  }
+}
+
+.app__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  c2-text-field {
+    width: 220px;
+  }
+  c2-select {
+    width: 170px;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* Written as flat selectors on purpose: this is plain CSS, and native nesting has no Sass-style `&__label`
+   concatenation — `&` is a standalone compound selector, so such a rule is invalid and silently dropped. */
+.stats__label {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--c2-theme--color-on-surface-variant, #52525b);
+}
+
+.stats__value {
+  display: block;
+  margin-top: 6px;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.positions {
+  height: 420px;
+}
+
+.app__foot {
+  display: flex;
+  gap: 8px;
+}
+
+.ghost {
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--c2-theme--color-on-surface-variant, #52525b);
+  --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+}
+
+@media (max-width: 640px) {
+  .app__head {
+    align-items: stretch;
+  }
+  .app__controls c2-text-field,
+  .app__controls c2-select {
+    width: 100%;
+  }
+}
