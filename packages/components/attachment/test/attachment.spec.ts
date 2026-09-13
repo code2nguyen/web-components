@@ -4,7 +4,7 @@ import { test, expect } from './fixture'
 test('renders file metadata and the built-in remove action', async ({ page, scenario }) => {
   await scenario()
   await expect(page.getByText('project-brief.pdf')).toBeVisible()
-  await expect(page.getByText('PDF')).toBeVisible()
+  await expect(page.getByText('PDF', { exact: true })).toBeVisible()
   await expect(page.getByText('2.4 MB')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Remove project-brief.pdf' })).toBeVisible()
   await accessible(page)
@@ -41,7 +41,7 @@ test('disabled attachments keep built-in actions inert', async ({ page, scenario
 
 test('custom slots replace all fallback regions', async ({ page, scenario }) => {
   await scenario('slots')
-  await expect(page.getByText('CUSTOM')).toBeVisible()
+  await expect(page.getByText('CUSTOM', { exact: true })).toBeVisible()
   await expect(page.getByText('Custom name')).toBeVisible()
   await expect(page.getByText('Reviewed today')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Download' })).toBeVisible()
