@@ -1,6 +1,25 @@
 import { LitElement, html, unsafeCSS, type TemplateResult } from 'lit'
 import styles from './feather-icon.scss?inline'
 
+type IconElementConstructor = new () => HTMLElement
+
+/**
+ * Registers an icon once and reuses the registered constructor if another bundle evaluates the module again.
+ *
+ * Astro can place the same icon in multiple independently hydrated islands. Those islands may receive separate
+ * copies of an icon module, while the browser still has one shared CustomElementRegistry. Returning the constructor
+ * already in that registry keeps both `customElements.define()` and `new Component()` safe.
+ */
+export function safeCustomElement(tagName: string) {
+  return <T extends IconElementConstructor>(elementClass: T): T => {
+    const registeredClass = customElements.get(tagName)
+    if (registeredClass) return registeredClass as T
+    const defineElement = customElements.define.bind(customElements)
+    defineElement(tagName, elementClass)
+    return elementClass
+  }
+}
+
 /**
  * Shared base class for every generated `c2-feather-*` icon element.
  *

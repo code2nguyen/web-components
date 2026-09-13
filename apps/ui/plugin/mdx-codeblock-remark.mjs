@@ -124,9 +124,11 @@ function unwrapParagraphs(node) {
 // of an array, and the element is marked `defer-hydration` for a property that was never really set. Handing the name
 // over capitalized misses that prototype check; `setAttribute` lowercases it again (attribute names are
 // case-insensitive in HTML), so the element ends up with exactly the attribute the fence author wrote.
-// Astro directives (`client:only`, `set:html`) and `class` are its own to interpret, so they are passed through.
+// Astro directives (`client:only`, `set:html`), `class` and `slot` are its own to interpret, so they are passed
+// through. In particular, Astro must copy `slot` onto the `<astro-island>` wrapper; capitalizing it would leave the
+// wrapper in the parent's default slot even though the inner custom element eventually receives a lowercase attribute.
 function asAttributeName(name) {
-  if (name.includes(':') || name.startsWith('data-') || name === 'class') return name
+  if (name.includes(':') || name.startsWith('data-') || name === 'class' || name === 'slot') return name
   return name.charAt(0).toUpperCase() + name.slice(1)
 }
 

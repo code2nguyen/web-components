@@ -1,0 +1,36 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-attachment-group,
+  $theme: (
+    gap: 8px,
+    min-column-width: 240px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+:host([layout='grid']) .group,
+:host([layout='mixed']) .group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, css.cssVar(min-column-width)), 1fr));
+}
+
+:host([layout='mixed']) ::slotted(c2-attachment:not([src]):not([layout='tile'])),
+:host([layout='mixed']) ::slotted(c2-attachment[layout='row']) {
+  grid-column: 1 / -1;
+}
+
+::slotted(c2-attachment) {
+  min-width: 0;
+}

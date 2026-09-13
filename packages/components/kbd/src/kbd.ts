@@ -18,7 +18,7 @@ import styles from './kbd.scss?inline'
  * @cssproperty {padding} [--c2-kbd--padding-right=6px]
  * @cssproperty {pixel} [--c2-kbd--gap=4px] - Space between multiple slotted nodes.
  * @cssproperty {color} [--c2-kbd--background-color=#f4f4f5]
- * @cssproperty {color} [--c2-kbd--color=#3f3f46]
+ * @cssproperty {color} [--c2-kbd--color=#52525b]
  * @cssproperty {border} [--c2-kbd--border=1px solid #d4d4d8]
  * @cssproperty {border-radius} [--c2-kbd--border-radius=5px]
  * @cssproperty {box-shadow} [--c2-kbd--box-shadow=0 1px 0 #a1a1aa]

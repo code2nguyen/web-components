@@ -38,7 +38,16 @@ export class Overlay extends LitElement {
   @property({ type: Boolean, reflect: true }) open = false
 
   /** Preferred placement (floating-ui names). The one in use is reflected as `current-placement`. */
-  @property({ reflect: true }) placement: Placement = 'bottom-start'
+  @property({ reflect: true })
+  placement:
+    'top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' =
+    'bottom-start'
+
+  /** Distance in pixels from the anchor along the placement direction. Falls back to `--c2-overlay--offset-y`. */
+  @property({ type: Number }) offset: number | undefined = undefined
+
+  /** Shift in pixels perpendicular to the placement direction. Falls back to `--c2-overlay--offset-x`. */
+  @property({ type: Number, attribute: 'cross-offset' }) crossOffset: number | undefined = undefined
 
   /** Do not flip across the cross axis when there is no room (only along the main axis). */
   @property({ type: Boolean, reflect: true, attribute: 'disabled-cross-axis' }) disabledCrossAxis = false
@@ -117,8 +126,8 @@ export class Overlay extends LitElement {
   }
 
   private async updatePosition(anchor: HTMLElement) {
-    const mainAxis = this.readPixels('--c2-overlay--offset-y', 8)
-    const crossAxis = this.readPixels('--c2-overlay--offset-x', 0)
+    const mainAxis = Number.isFinite(this.offset) ? this.offset! : this.readPixels('--c2-overlay--offset-y', 8)
+    const crossAxis = Number.isFinite(this.crossOffset) ? this.crossOffset! : this.readPixels('--c2-overlay--offset-x', 0)
     const padding = this.readPixels('--c2-overlay--viewport-padding', 8)
 
     if (this.fitTarget) this.style.width = `${anchor.offsetWidth}px`
@@ -156,7 +165,7 @@ export class Overlay extends LitElement {
         // Not a popover (attribute removed) or not yet rendered: nothing to do.
       }
     }
-    if (changed.has('placement') && this.matches(':popover-open')) this.startPositioning()
+    if ((changed.has('placement') || changed.has('offset') || changed.has('crossOffset')) && this.matches(':popover-open')) this.startPositioning()
   }
 
   override render() {

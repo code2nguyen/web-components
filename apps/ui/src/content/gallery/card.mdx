@@ -11,6 +11,28 @@ Curated looks for `c2-card`. Open any card in the studio to start from it. The s
 
 <GalleryGrid>
 
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-card {
+    width: 240px;
+  }
+  .default-card .title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .default-card .text {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+</style>
+<c2-card class="default-card">
+  <h3 slot="header" class="title">Card title</h3>
+  <p class="text">Supporting text that describes what this card is about.</p>
+</c2-card>
+```
+
 ```html tag=MdxCodeBlock,label=Elevated
 <style>
   .g .title {

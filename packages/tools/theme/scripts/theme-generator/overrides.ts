@@ -10,6 +10,9 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
+  '--c2-attachment__status__complete--color': { exclude: 'success status colour' },
+  '--c2-attachment__progress--background': { token: 'color-outline-variant' },
   // Marks drawn on the accent background of a selected checkbox.
   '--c2-checkbox__checkmark--color': onPrimary,
   '--c2-checkbox__mixedmark--color': onPrimary,

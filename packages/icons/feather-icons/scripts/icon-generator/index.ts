@@ -85,8 +85,7 @@ function renderIconModule({ name, body }: IconSource): string {
   const className = toClassName(name)
   return `${header}
 import { svg } from 'lit'
-import { customElement } from 'lit/decorators.js'
-import { FeatherIcon } from '../feather-icon'
+import { safeCustomElement as customElement, FeatherIcon } from '../feather-icon'
 
 /**
  * Feather \`${name}\` icon.
@@ -117,7 +116,7 @@ function renderIndexModule(icons: IconSource[]): string {
   return `${header}
 // Importing this barrel registers every Feather icon element. Prefer importing
 // individual icons (\`@c2n/feather-icons/icons/<name>.js\`) in production bundles.
-export * from './feather-icon'
+export { FeatherIcon } from './feather-icon'
 export * from './icon-names'
 ${exports}
 `

@@ -33,9 +33,9 @@
     description--line-height: 16px,
     description--margin-top: 1px,
 
-    shortcut--color: #a1a1aa,
-    shortcut--font-size: 12px,
-    shortcut--letter-spacing: 0.04em,
+    shortcut--color: #52525b,
+    shortcut--font-size: 11px,
+    shortcut--letter-spacing: 0.08em,
 
     icon--size: 16px,
     icon--color: #71717a,
@@ -157,6 +157,9 @@
   color: css.cssVar(shortcut--color);
   font-size: css.cssVar(shortcut--font-size);
   letter-spacing: css.cssVar(shortcut--letter-spacing);
+  --c2-kbd--color: #{css.cssVar(shortcut--color)};
+  --c2-kbd--font-size: #{css.cssVar(shortcut--font-size)};
+  --c2-kbd--letter-spacing: #{css.cssVar(shortcut--letter-spacing)};
 }
 
 :host(:focus) {

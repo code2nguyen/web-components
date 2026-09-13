@@ -20,6 +20,19 @@ Curated looks for `c2-list`. Open any card in the studio to start from it. The c
 
 <GalleryGrid>
 
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-list {
+    width: 220px;
+  }
+</style>
+<c2-list class="default-list" value="design" client:only="lit">
+  <c2-list-item value="inbox">Inbox</c2-list-item>
+  <c2-list-item value="design">Design</c2-list-item>
+  <c2-list-item value="archive">Archive</c2-list-item>
+</c2-list>
+```
+
 ```html tag=MdxCodeBlock,label=Bordered menu
 <style>
   .bordered {

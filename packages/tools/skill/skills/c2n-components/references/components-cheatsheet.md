@@ -67,6 +67,23 @@ One chat bubble with avatar, title, timestamp and message body. Package `@c2n/ch
 
 ## Data display
 
+### Attachment — `c2-attachment`
+
+File and image attachments with metadata, upload progress, failure states, and actions. Package `@c2n/attachment`. Register: `import '@c2n/attachment'`.
+
+**`c2-attachment`** (`@c2n/attachment`)
+
+- Attributes: `name` (string), `src` (string | undefined), `alt` (string | undefined), `type` (string | undefined), `size` (string | undefined), `status` ('ready' | 'uploading' | 'complete' | 'error'), `layout` ('auto' | 'row' | 'tile'), `progress` (number), `removable` (boolean), `disabled` (boolean)
+- Slots: `media`, `name`, `metadata`, `actions`
+- Events: `attachment-remove`, `attachment-retry`, `media-error`
+- Key variables (29 total): `--c2-attachment--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-attachment--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-attachment__media--background` = `#f4f4f5` (→ `--c2-theme--color-surface-container`), `--c2-attachment__media--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-attachment__metadata--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-attachment__status--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-attachment__progress--background` = `#e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-attachment__progress--color` = `rgb(2, 101, 220)` (→ `--c2-theme--color-primary`)
+
+**`c2-attachment-group`** (`@c2n/attachment/attachment-group.js`)
+
+- Attributes: `layout` ('list' | 'grid' | 'mixed'), `aria-label` (string | null)
+- Slots: `default`
+- Key variables (2 total): `--c2-attachment-group--gap` = `8px`, `--c2-attachment-group--min-column-width` = `240px`
+
 ### Avatar — `c2-avatar`
 
 Image, initials or icon for a person, with status dot and badge. Package `@c2n/avatar`. Register: `import '@c2n/avatar'`.
@@ -101,7 +118,7 @@ Syntax-highlighted code with line numbers, copy button and dark mode, powered by
 Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element. Package `@c2n/kbd`. Register: `import '@c2n/kbd'`.
 
 - Slots: `default`
-- Key variables (16 total): `--c2-kbd--background-color` = `#f4f4f5` (→ `--c2-theme--color-surface-container`), `--c2-kbd--border` = `1px solid #d4d4d8` (→ `--c2-theme--border`), `--c2-kbd--font-family` = `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace` (→ `--c2-theme--font-family`), `--c2-kbd--font-size` = `12px` (→ `--c2-theme--font-size-sm`), `--c2-kbd--font-weight` = `500` (→ `--c2-theme--font-weight-medium`), `--c2-kbd--color` = `#3f3f46`, `--c2-kbd--border-radius` = `5px`, `--c2-kbd--height` = `24px`
+- Key variables (16 total): `--c2-kbd--background-color` = `#f4f4f5` (→ `--c2-theme--color-surface-container`), `--c2-kbd--color` = `#52525b` (→ `--c2-theme--color-on-surface-variant`), `--c2-kbd--border` = `1px solid #d4d4d8` (→ `--c2-theme--border`), `--c2-kbd--font-family` = `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace` (→ `--c2-theme--font-family`), `--c2-kbd--font-size` = `12px` (→ `--c2-theme--font-size-sm`), `--c2-kbd--font-weight` = `500` (→ `--c2-theme--font-weight-medium`), `--c2-kbd--border-radius` = `5px`, `--c2-kbd--height` = `24px`
 - Presets: Flat, Dark, Mechanical, Round, Terminal, Ghost
 
 ### List — `c2-list`
@@ -166,7 +183,7 @@ Dialog built on the native dialog element: focus trap, backdrop, Escape, title, 
 
 Anchored popup built on the browser Popover API, positioned with floating-ui. Package `@c2n/overlay`. Register: `import '@c2n/overlay'`.
 
-- Attributes: `open` (boolean), `placement` (Placement), `disabled-cross-axis` (boolean), `fit-anchor` (boolean), `free-width` (boolean), `anchor` (string | HTMLElement | undefined)
+- Attributes: `open` (boolean), `placement` ('top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end'), `offset` (number | undefined), `cross-offset` (number | undefined), `disabled-cross-axis` (boolean), `fit-anchor` (boolean), `free-width` (boolean), `anchor` (string | HTMLElement | undefined)
 - Slots: `default`
 - Events: `toggle`, `beforetoggle`
 - Key variables (5 total): `--c2-overlay--transition-duration` = `150ms` (→ `--c2-theme--motion-scale`), `--c2-overlay__backdrop--background` = `transparent`, `--c2-overlay--viewport-padding` = `8px`, `--c2-overlay--offset-y` = `8px`, `--c2-overlay--offset-x` = `0px`
@@ -466,7 +483,7 @@ Commands, links, checkboxes and submenus in a popover anchored to a trigger. Pac
 
 **`c2-menu`** (`@c2n/menu`)
 
-- Attributes: `open` (boolean), `placement` (Placement), `anchor` (string | HTMLElement | undefined), `fit-anchor` (boolean), `keep-open` (boolean), `disabled` (boolean), `aria-label` (string | null)
+- Attributes: `open` (boolean), `placement` ('top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end'), `offset` (number | undefined), `cross-offset` (number | undefined), `anchor` (string | HTMLElement | undefined), `fit-anchor` (boolean), `keep-open` (boolean), `disabled` (boolean), `aria-label` (string | null)
 - Slots: `default`, `trigger`
 - Events: `menu-select`, `toggle`
 - Key variables (28 total): `--c2-menu--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-menu__separator--color` = `#e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu__heading--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu--border-top` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu--border-right` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu--border-bottom` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu--border-left` = `1px solid #e4e4e7` (→ `--c2-theme--color-outline-variant`), `--c2-menu--border-top-left-radius` = `8px` (→ `--c2-theme--radius-lg`)
@@ -476,7 +493,7 @@ Commands, links, checkboxes and submenus in a popover anchored to a trigger. Pac
 - Attributes: `value` (string), `disabled` (boolean), `type` (MenuItemType), `checked` (boolean), `name` (string | undefined), `href` (string | undefined), `target` (string | undefined), `destructive` (boolean), `keep-open` (boolean), `label` (string | undefined), `expanded` (boolean), `reserve-indicator` (boolean)
 - Slots: `default`, `description`, `prefix-icon`, `suffix-icon`, `shortcut`, `submenu`
 - Events: `menu-select`, `checked-change`
-- Key variables (35 total): `--c2-menu-item--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-menu-item__description--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__shortcut--color` = `#a1a1aa` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__destructive--color` = `#dc2626` (→ `--c2-theme--color-error`), `--c2-menu-item--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-menu-item--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-menu-item--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`)
+- Key variables (35 total): `--c2-menu-item--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-menu-item__description--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__shortcut--color` = `#52525b` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__icon--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-menu-item__destructive--color` = `#dc2626` (→ `--c2-theme--color-error`), `--c2-menu-item--border-top-left-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-menu-item--border-top-right-radius` = `6px` (→ `--c2-theme--radius-md`), `--c2-menu-item--border-bottom-left-radius` = `6px` (→ `--c2-theme--radius-md`)
 - Presets: Soft, Compact, Dark, Tinted rows
 
 ### Navigation Menu — `c2-navigation-menu`

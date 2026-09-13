@@ -66,9 +66,9 @@ export interface MenuSelectEventDetail {
  * @cssproperty {pixel} [--c2-menu-item__description--line-height=16px]
  * @cssproperty {pixel} [--c2-menu-item__description--margin-top=1px]
  *
- * @cssproperty {color} [--c2-menu-item__shortcut--color=#a1a1aa]
- * @cssproperty {font-size} [--c2-menu-item__shortcut--font-size=12px]
- * @cssproperty {letter-spacing} [--c2-menu-item__shortcut--letter-spacing=0.04em]
+ * @cssproperty {color} [--c2-menu-item__shortcut--color=#52525b]
+ * @cssproperty {font-size} [--c2-menu-item__shortcut--font-size=11px]
+ * @cssproperty {letter-spacing} [--c2-menu-item__shortcut--letter-spacing=0.08em]
  *
  * @cssproperty {pixel} [--c2-menu-item__icon--size=16px]
  * @cssproperty {color} [--c2-menu-item__icon--color=#71717a]

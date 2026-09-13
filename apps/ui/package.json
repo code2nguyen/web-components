@@ -13,6 +13,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/attachment": "*",
     "@c2n/virtual-list": "*",
     "@c2n/pagination": "*",
     "@astrojs/lit": "^4.3.0",
