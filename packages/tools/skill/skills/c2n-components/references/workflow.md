@@ -13,6 +13,7 @@ Build screens from `@c2n/*` web components with as little code as possible. Thre
 
 - Register an element with a side-effect import (`import '@c2n/button'`) at the application entry, or in the module that renders it.
 - Write plain markup: `<c2-button>Save</c2-button>`. Attributes, slots and events come from the component API (MCP `get_component`, or `node_modules/@c2n/<name>/custom-elements.json`).
+- Retrieve `get_examples` next: begin from the unmodified Default sample, then select gallery examples by use case. Use `get_presets` when structured values are more useful than a complete pattern.
 - Icons are components: `c2-feather-<name>` from `@c2n/feather-icons/icons/<name>.js`, sized and coloured through `--c2-feather-icon--size|color|stroke-width`.
 - A component that appears once with the themed default look needs nothing else.
 
@@ -27,7 +28,7 @@ The decision rule, cheapest first:
 | Same look **and** the same attributes / slots / accessible name repeat            | **wrapper component** in your framework (Astro/React/Vue/Lit) that renders the c2 element                    |
 | The variant must be its own tag (used from strings, other Lit templates, shipped) | **Lit subclass** of the component with the variables baked into `static styles`                              |
 | Several c2 components plus some logic repeat                                      | **composed component**: children's variables set on `:host`/a class, attributes forwarded, events re-emitted |
-| No c2 component fits                                                              | app-level component styled with the same `--c2-theme--*` tokens; never fork a package                        |
+| No c2 component fits                                                              | app-level component styled with the same `--c2-theme--*` tokens; avoid patching installed packages locally   |
 
 Every variant lives in one directory (`src/components/ui/`, `src/ui/`…), one file per variant, under the app's own prefix (`app-*`, `site-*`, `my-*`), never `c2-*`.
 
@@ -35,7 +36,7 @@ Every variant lives in one directory (`src/components/ui/`, `src/ui/`…), one f
 
 - Every element used is registered (no `HTMLUnknownElement`, no empty tags).
 - `@c2n/theme` is imported exactly once; tokens overridden on `:root` and the dark selector.
-- No `::part()` selectors (the components do not expose parts), no repeated inline `style="--c2-…"`.
+- Prefer CSS custom properties. Every `::part()` selector must name a CSS part documented by `get_component`; no repeated inline `style="--c2-…"`.
 - Every variable, attribute, slot and event name exists in the component API.
 - Variant tags contain a hyphen and do not start with `c2-`.
 - Light and dark both look right; build, lint and type-check pass.

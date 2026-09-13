@@ -10,3 +10,4 @@ scripts/generator/tsconfig.tsbuildinfo
 **/.wireit
 /playwright-report/
 /test-results/
+/packages/tools/mcp/data/registry.json

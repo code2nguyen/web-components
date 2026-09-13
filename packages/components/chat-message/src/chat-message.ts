@@ -2,14 +2,16 @@ import { LitElement, html, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './chat-message.scss?inline'
 /**
+ * Message layout with avatar, author and timestamp slots around the message content.
+ *
  * @tag c2-chat-message
  *
- * @slot avatar
- * @slot title
- * @slot header-time
- * @slot message
- * @slot emotion
- * @slot footer-time
+ * @slot avatar - Sender avatar shown beside the message.
+ * @slot title - Sender name or message heading.
+ * @slot header-time - Timestamp displayed beside the title.
+ * @slot message - Main message body.
+ * @slot emotion - Reactions or sentiment controls below the message.
+ * @slot footer-time - Timestamp displayed below the message.
  *
  * @cssproperty {pixel} [--c2-chat-message--gap=16]
  * @cssproperty {font-size} [--c2-chat-message--font-size=14px]
@@ -51,6 +53,7 @@ import styles from './chat-message.scss?inline'
  */
 @customElement('c2-chat-message')
 export class ChatMessage extends LitElement {
+  /** Places the avatar and message on the left or right side of the row. */
   @property() align: 'left' | 'right' = 'left'
 
   static override styles = unsafeCSS(styles)

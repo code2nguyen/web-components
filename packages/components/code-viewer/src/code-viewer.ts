@@ -117,6 +117,7 @@ export class CodeViewer extends LitElement {
   /** Render as an inline `<code>` fragment (no frame, no header). */
   @property({ type: Boolean, reflect: true }) inline = false
 
+  /** Show a line-number gutter. */
   @property({ type: Boolean, reflect: true, attribute: 'line-numbers' }) lineNumbers = false
 
   /** First line number when `line-numbers` is on. */

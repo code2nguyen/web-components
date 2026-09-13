@@ -69,6 +69,7 @@ export class Tooltip extends LitElement {
   /** Delay before hiding, in milliseconds. */
   @property({ type: Number, attribute: 'hide-delay' }) hideDelay = 0
 
+  /** Hides the arrow that points towards the target. */
   @property({ type: Boolean, reflect: true, attribute: 'hide-arrow' }) hideArrow = false
 
   /** `parent` (default) or `previousElement`; ignored when `for` is set. */

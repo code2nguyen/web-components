@@ -82,12 +82,15 @@ export class Switch extends LitElement {
   /** Label text when the default slot is empty. */
   @property() label = ''
 
+  /** Accessible name used when no visible label names the switch. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 
+  /** Id of the element that labels the switch. */
   @property({ type: String, attribute: 'aria-labelledby' })
   ariaLabelledBy!: undefined | string
 
+  /** Id of the element that describes the switch. */
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 

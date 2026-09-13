@@ -61,8 +61,10 @@ export class Slider extends LitElement {
   /** Current value, clamped to `min`/`max` and snapped to `step` by the inner input. */
   @property({ type: Number, reflect: true }) value = 0
 
+  /** Minimum selectable value. */
   @property({ type: Number }) min = 0
 
+  /** Maximum selectable value. */
   @property({ type: Number }) max = 100
 
   /** Increment between values; also the distance between `ticks`. */
@@ -86,9 +88,11 @@ export class Slider extends LitElement {
   /** Formats the value for the bubble and `aria-valuetext`, e.g. `(v) => \`${v}%\``. Property only. */
   @property({ attribute: false }) formatValue: (value: number) => string = (value) => String(value)
 
+  /** Accessible name used when no visible label names the slider. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 
+  /** Id of the element that labels the slider. */
   @property({ type: String, attribute: 'aria-labelledby' })
   ariaLabelledBy!: undefined | string
 

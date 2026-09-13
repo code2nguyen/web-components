@@ -92,7 +92,7 @@ export class DangerButton extends Button {
 customElements.define('app-danger-button', DangerButton)
 ```
 
-Rules that hold for every shape: set child variables on the host element or a class, never through `::part` (the components do not expose parts); register variants under your own prefix (`app-*`, `site-*`), never `c2-*`; one file per variant in one directory (`src/components/ui/` here).
+Rules that hold for every shape: prefer child variables on the host element or a class; use `::part()` only when the component API documents the part and variables cannot express the change; register variants under your own prefix (`app-*`, `site-*`), never `c2-*`; one file per variant in one directory (`src/components/ui/` here).
 
 ## 4. Composed components for repeated patterns
 

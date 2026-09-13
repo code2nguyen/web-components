@@ -33,7 +33,9 @@ export function searchComponents(registry: Registry, query: string, limit = 10):
       for (const s of element.slots) fields.push([`slot:${s.name || 'default'}`, `${s.name} ${s.description ?? ''}`, 2])
       for (const e of element.events) fields.push([`event:${e.name}`, `${e.name} ${e.description ?? ''}`, 2])
     }
-    for (const ex of component.examples) if (ex.kind !== 'preview') fields.push([`example:${ex.label}`, `${ex.label} ${ex.section ?? ''}`, 1])
+    for (const ex of component.examples)
+      if (ex.kind !== 'preview')
+        fields.push([`example:${ex.label}`, `${ex.label} ${ex.section ?? ''} ${ex.description ?? ''} ${ex.useWhen ?? ''} ${ex.accessibility ?? ''}`, 1])
     for (const icon of component.icons ?? []) fields.push([`icon:${icon}`, icon, 3])
     for (const [label, text, weight] of fields) {
       const haystack = tokens(text)

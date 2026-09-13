@@ -93,7 +93,7 @@ npm test                                      # the new package's Playwright sui
 npm run ui:dev                                # open /components/<name>; check example, gallery, API table, inspector
 ```
 
-`build:tools` fails when a docs page has no built package or a preset names an unknown tag; the MCP registry and cheatsheet must be committed with the component (CI diffs them).
+`build:tools` fails when a docs page has no built package or a preset names an unknown tag. The MCP registry is an ignored build artifact included at package time; commit the regenerated skill cheatsheet. `npm run docs:check` also requires complete public API descriptions and a CSS-unchanged Default gallery sample.
 
 Confirm every `$theme` variable appears in the API table and Design tab. In the theme report, every colour/border/radius/focus variable of the new component with a concrete default should be mapped; add an `overrides.ts` entry (token or `exclude` with a reason) for deliberate exceptions. Use `npm run dev -w packages/components/<name>` for the standalone Vite harness.
 
@@ -102,7 +102,8 @@ Confirm every `$theme` variable appears in the API table and Design tab. In the 
 - `packages/components/<name>/` (or `open-packages/<name>/`) scaffolded, implemented, built, `custom-elements.json` generated
 - root `package.json` wireit build list entry + `packages/tools/theme/package.json` build dependency
 - `@c2n/theme` regenerated, new variables mapped or listed in `overrides.ts`
-- `npm run build:tools` run; `packages/tools/mcp/data/registry.json` and `packages/tools/skill/skills/c2n-components/references/components-cheatsheet.md` committed
+- `npm run build:tools` run; generated MCP registry verified and `packages/tools/skill/skills/c2n-components/references/components-cheatsheet.md` committed
+- `npm run docs:check` passes (tag, attribute, slot, event and CSS-part descriptions; Default gallery baseline)
 - `apps/ui/src/store/component-manifests.ts` import + entry
 - `apps/ui/package.json` dependency on `@c2n/<name>`, and `npm install` run so the workspace is linked
 - `apps/ui/src/data/component-modules.ts`, `component-previews.ts` (+ `component-presets.ts` if presets)

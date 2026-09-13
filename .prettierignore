@@ -6,6 +6,7 @@ node_modules/
 .wireit
 /temp
 .idea
+.claude/settings.local.json
 .astro
 custom-elements.json
 package-lock.json
