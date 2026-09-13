@@ -4,6 +4,7 @@
  * hydrating each element as an Astro island.
  */
 import '@c2n/attachment'
+import '@c2n/virtual-list'
 import '@c2n/pagination'
 import '@c2n/accordion'
 import '@c2n/avatar'

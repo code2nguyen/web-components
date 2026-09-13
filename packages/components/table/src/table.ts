@@ -6,6 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js'
 import styles from './table.scss?inline'
 import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
+import { defaultCompare } from '@c2n/core/data-helper.js'
 import { provide } from '@lit/context'
 import { PAGER_CONNECT_EVENT, pagerContext, type PagerConnectEventDetail, type PagerContext } from '@c2n/core/contexts/pager.js'
 import { COLUMN_CHANGE_EVENT, TableColumn } from './table-column.js'
@@ -57,16 +58,6 @@ export interface TablePageChangeEventDetail {
   count: number
   /** Total rows the data source reports. */
   totalRows: number
-}
-
-function defaultCompare(a: unknown, b: unknown): number {
-  if (a === b) return 0
-  if (a === null || a === undefined || a === '') return 1
-  if (b === null || b === undefined || b === '') return -1
-  if (typeof a === 'number' && typeof b === 'number') return a - b
-  if (typeof a === 'boolean' && typeof b === 'boolean') return Number(a) - Number(b)
-  if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime()
-  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
 }
 
 function numberFormatOptions(base: Intl.NumberFormatOptions, extra: Record<string, unknown> | undefined): Intl.NumberFormatOptions {

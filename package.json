@@ -78,6 +78,7 @@
     "build": {
       "dependencies": [
         "./packages/components/attachment:build",
+        "./packages/components/virtual-list:build",
         "./packages/components/sheet:build",
         "./packages/components/skeleton:build",
         "./packages/components/progress:build",

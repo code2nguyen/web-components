@@ -1,0 +1,177 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-virtual-list,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    font-size: 14px,
+    max-height: none,
+
+    border-top: null,
+    border-right: null,
+    border-bottom: null,
+    border-left: null,
+
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
+    box-shadow: null,
+
+    search--background: transparent,
+    search--padding: 8px,
+    search--gap: 8px,
+    search--border-bottom: 1px solid #e4e4e7,
+
+    search-field--background: #ffffff,
+    search-field--border: 1px solid #e4e4e7,
+    search-field--border-radius: 6px,
+    search-field--min-height: 32px,
+
+    viewport--padding: 4px,
+
+    item--height: 36px,
+
+    highlight--background: #fef08a,
+    highlight--color: inherit,
+    highlight--font-weight: 600,
+    highlight--border-radius: 4px,
+
+    skeleton--background: #f4f4f5,
+    skeleton--border-radius: 4px,
+
+    state--color: #71717a,
+    state--padding: 32px 12px,
+    state--font-size: 14px,
+    state__error--color: rgb(211, 21, 16),
+    footer--background: transparent,
+    footer--padding: 8px 12px,
+    footer--border-top: 1px solid #e4e4e7,
+  )
+);
+
+:host {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 0;
+  overflow: hidden;
+
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  max-height: css.cssVar(max-height);
+
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  box-shadow: css.cssVar(box-shadow);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(search--gap);
+  flex: none;
+  background: css.cssVar(search--background);
+  padding: css.cssVar(search--padding);
+  border-bottom: css.cssVar(search--border-bottom);
+}
+
+.search[hidden] {
+  display: none;
+}
+
+.search-field {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  // One variable set themes the composed child: the list's own search-field values drive the text field's.
+  --c2-text-field--background: #{css.cssVar(search-field--background)};
+  --c2-text-field--border-top: #{css.cssVar(search-field--border)};
+  --c2-text-field--border-right: #{css.cssVar(search-field--border)};
+  --c2-text-field--border-bottom: #{css.cssVar(search-field--border)};
+  --c2-text-field--border-left: #{css.cssVar(search-field--border)};
+  --c2-text-field--border-top-left-radius: #{css.cssVar(search-field--border-radius)};
+  --c2-text-field--border-top-right-radius: #{css.cssVar(search-field--border-radius)};
+  --c2-text-field--border-bottom-left-radius: #{css.cssVar(search-field--border-radius)};
+  --c2-text-field--border-bottom-right-radius: #{css.cssVar(search-field--border-radius)};
+  --c2-text-field--min-height: #{css.cssVar(search-field--min-height)};
+}
+
+.viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  // Scroll anchoring fights the spacer that grows and shrinks under the window, and drags the list with it.
+  overflow-anchor: none;
+  padding: css.cssVar(viewport--padding);
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  flex: none;
+  box-sizing: border-box;
+  height: css.cssVar(item--height);
+}
+
+.spacer {
+  flex: none;
+}
+
+mark {
+  background: css.cssVar(highlight--background);
+  color: css.cssVar(highlight--color);
+  font-weight: css.cssVar(highlight--font-weight);
+  border-radius: css.cssVar(highlight--border-radius);
+}
+
+.skeleton {
+  display: block;
+  width: 60%;
+  height: 0.7em;
+  background: css.cssVar(skeleton--background);
+  border-radius: css.cssVar(skeleton--border-radius);
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: css.cssVar(state--color);
+  padding: css.cssVar(state--padding);
+  font-size: css.cssVar(state--font-size);
+}
+
+.state--error {
+  color: css.cssVar(state__error--color);
+}
+
+.footer {
+  flex: none;
+  background: css.cssVar(footer--background);
+  padding: css.cssVar(footer--padding);
+  border-top: css.cssVar(footer--border-top);
+}
+
+.footer[hidden] {
+  display: none;
+}

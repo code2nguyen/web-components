@@ -5,6 +5,7 @@
  */
 export const componentPreviews: Record<string, string> = {
   attachment: `<c2-attachment style="width:240px" name="project-brief.pdf" type="PDF" size="2.4 MB" status="uploading" progress="64" removable></c2-attachment>`,
+  'virtual-list': `<c2-virtual-list aria-label="People" style="width:240px;height:132px" item-key="id" label-field="name" description-field="team" items='[{"id":"1","name":"Ada Lovelace","team":"Analytics"},{"id":"2","name":"Grace Hopper","team":"Compilers"},{"id":"3","name":"Alan Turing","team":"Research"},{"id":"4","name":"Katherine Johnson","team":"Flight"},{"id":"5","name":"Radia Perlman","team":"Networks"},{"id":"6","name":"Barbara Liskov","team":"Research"},{"id":"7","name":"Margaret Hamilton","team":"Flight"}]'></c2-virtual-list>`,
   pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,
   accordion: `<c2-accordion style="width:240px">
   <c2-details label="Shipping" expanded>Delivered in 3–5 business days.</c2-details>

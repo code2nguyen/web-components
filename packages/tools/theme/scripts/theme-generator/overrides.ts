@@ -34,6 +34,9 @@ export const overrides: Record<string, Override> = {
   // white sheen rather than a surface colour, and the theme has no token for one.
   '--c2-skeleton--background-color': { token: 'color-outline-variant' },
   '--c2-skeleton__sheen--color': { exclude: 'translucent highlight, not a surface colour' },
+  // Virtual list: the search highlight is a marker yellow, deliberately outside the surface/accent ramp so a match
+  // stands out in every theme.
+  '--c2-virtual-list__highlight--background': { exclude: 'marker highlight, not a surface colour' },
   // Tooltip text sits on the inverse surface.
   '--c2-tooltip--color': { token: 'color-on-inverse-surface' },
   // Tabs: the selected indicator is the accent; the baseline is a hairline drawn with an inset shadow.

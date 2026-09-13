@@ -10,7 +10,8 @@ import { redispatchEvent } from '@c2n/core/dom-helper.js'
  * A selectable row. On its own it is a toggle: click, Enter or Space flips `selected`. Inside a `c2-list` (and
  * therefore inside a `c2-select`) the list drives the selected state through context, handles the keyboard and the row
  * only reports clicks. The default slot is the primary text, `description` a second, muted line, `prefix-icon` and
- * `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by `--c2-list-item__icon--size`.
+ * `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by
+ * `--c2-list-item__icon--size` — anything else in them, a shortcut hint or a badge, keeps its own size.
  * With `href` the row is a link. In a multiple-selection list, adjacent selected rows lose the corner radius between
  * them (the list marks them `joined-before` / `joined-after`) so a run of selected rows reads as one block.
  *

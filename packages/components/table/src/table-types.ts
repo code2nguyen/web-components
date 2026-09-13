@@ -1,4 +1,5 @@
-export type SortDirection = 'asc' | 'desc'
+export type { SortDirection } from '@c2n/core/data-helper.js'
+import type { SortDirection } from '@c2n/core/data-helper.js'
 
 export interface SortModel {
   field: string
@@ -108,17 +109,8 @@ export interface TableColumnResizeEventDetail {
   width: number
 }
 
-/** Reads a possibly dotted `field` path out of a row. */
-export function getFieldValue(row: TableRow | undefined, field: string): unknown {
-  if (!row || !field) return undefined
-  if (!field.includes('.')) return row[field]
-  let current: unknown = row
-  for (const part of field.split('.')) {
-    if (current === null || current === undefined) return undefined
-    current = (current as TableRow)[part]
-  }
-  return current
-}
+/** Reads a possibly dotted `field` path out of a row. Re-exported from `@c2n/core` so the table keeps its own subpath. */
+export { getFieldValue } from '@c2n/core/data-helper.js'
 
 /** `name:asc;age:desc` ⇄ `SortModel[]`, so the sort can be set from markup. */
 export const sortModelConverter = {

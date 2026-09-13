@@ -233,11 +233,17 @@
 ::slotted([slot='prefix-icon']),
 ::slotted([slot='suffix-icon']) {
   flex: none;
-  width: css.cssVar(icon--size);
-  height: css.cssVar(icon--size);
   color: css.cssVar(icon--color);
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+// A bare `<svg>` is the one thing in these slots with no size of its own to work from, so it is the one thing the
+// field sizes. An adornment — a currency symbol, a unit, a short hint — keeps its natural width instead.
+::slotted(svg[slot='prefix-icon']),
+::slotted(svg[slot='suffix-icon']) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
 }
 
 .clear-button {

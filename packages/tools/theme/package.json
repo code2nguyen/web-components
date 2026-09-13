@@ -55,6 +55,7 @@
       "dependencies": [
         "type-check",
         "../../components/attachment:build",
+        "../../components/virtual-list:build",
         "../../components/sheet:build",
         "../../components/skeleton:build",
         "../../components/progress:build",
