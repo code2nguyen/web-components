@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attachment</title>
+    <script type="module" src="/src/attachment.ts"></script>
+    <style>
+      body {
+        max-width: 760px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: system-ui, sans-serif;
+      }
+      section {
+        margin-bottom: 28px;
+      }
+      c2-attachment-group {
+        max-width: 620px;
+      }
+      .dark {
+        --c2-attachment--background: #18181b;
+        --c2-attachment--border: 1px solid #3f3f46;
+        --c2-attachment--color: #fafafa;
+        --c2-attachment__media--background: #27272a;
+        --c2-attachment__metadata--color: #a1a1aa;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Attachment</h1>
+    <section>
+      <c2-attachment name="project-brief.pdf" type="PDF" size="2.4 MB" removable></c2-attachment>
+    </section>
+    <section>
+      <c2-attachment name="video.mp4" type="MP4" size="18 MB" status="uploading" progress="64" removable></c2-attachment>
+    </section>
+    <section>
+      <c2-attachment class="dark" name="invoice.csv" type="CSV" size="84 KB" status="error" removable></c2-attachment>
+    </section>
+    <section>
+      <c2-attachment-group layout="grid">
+        <c2-attachment name="contract.pdf" type="PDF" size="820 KB" status="complete"></c2-attachment>
+        <c2-attachment name="appendix.xlsx" type="Spreadsheet" size="1.2 MB"></c2-attachment>
+      </c2-attachment-group>
+    </section>
+  </body>
+</html>

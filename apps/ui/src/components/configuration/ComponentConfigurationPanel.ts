@@ -569,7 +569,10 @@ export class ComponentConfigurationPanel extends LitElement {
   /** `"'sm' | 'md' | 'lg'"` -> `['sm', 'md', 'lg']`; anything else -> `null`. */
   private enumOptions(type: string): string[] | null {
     if (!type.includes('|')) return null
-    const parts = type.split('|').map((part) => part.trim())
+    const parts = type
+      .split('|')
+      .map((part) => part.trim())
+      .filter(Boolean)
     const values = parts.filter((part) => /^'[^']*'$/.test(part) || /^"[^"]*"$/.test(part)).map((part) => part.slice(1, -1))
     // A union that also admits `string`/`undefined` is not a closed keyword set.
     return values.length >= 2 && values.length === parts.filter((part) => part !== 'undefined' && part !== 'null').length ? values : null

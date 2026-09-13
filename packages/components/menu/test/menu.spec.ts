@@ -38,6 +38,24 @@ test('a second press on the trigger closes the open menu', async ({ page, render
   await expect(page.locator('c2-menu')).toHaveJSProperty('open', false)
 })
 
+test('placement and offsets are forwarded to the positioning overlay', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-menu placement="right-end" offset="20" cross-offset="-6" aria-label="Positioned">
+    ${trigger}
+    <c2-menu-item value="one">First row</c2-menu-item>
+  </c2-menu>`)
+
+  const positioning = await page.locator('c2-menu').evaluate((element) => {
+    const overlay = element.shadowRoot?.querySelector('c2-overlay') as HTMLElement & {
+      placement?: string
+      offset?: number
+      crossOffset?: number
+    }
+    return { placement: overlay.placement, offset: overlay.offset, crossOffset: overlay.crossOffset }
+  })
+
+  expect(positioning).toEqual({ placement: 'right-end', offset: 20, crossOffset: -6 })
+})
+
 test('a click outside dismisses the menu', async ({ page, renderScenario }) => {
   await renderScenario(commands)
   await page.getByRole('button', { name: 'Actions' }).click()

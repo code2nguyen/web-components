@@ -9,6 +9,17 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
 
 <GalleryGrid>
 
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-viewer {
+    width: 240px;
+  }
+</style>
+<c2-code-viewer class="default-viewer" language="bash" copyable code="npm install\nnpm run ui">
+  <span slot="title">Install and run</span>
+</c2-code-viewer>
+```
+
 ```html tag=MdxCodeBlock,label=Terminal
 <style>
   .terminal {

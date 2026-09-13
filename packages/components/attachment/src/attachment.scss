@@ -1,0 +1,258 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-attachment,
+  $theme: (
+    min-height: 76px,
+    gap: 12px,
+    padding: 10px 12px,
+    background: #ffffff,
+    border: 1px solid #e4e4e7,
+    border-radius: 14px,
+    box-shadow: null,
+    color: #18181b,
+    media--size: 48px,
+    media--background: #f4f4f5,
+    media--color: #71717a,
+    media--border-radius: 10px,
+    media--object-fit: cover,
+    tile--width: 220px,
+    tile--media-aspect-ratio: 1,
+    name--font-size: 14px,
+    name--font-weight: 500,
+    metadata--color: #71717a,
+    metadata--font-size: 12px,
+    status--color: #71717a,
+    status__complete--color: rgb(0, 122, 77),
+    status__error--color: #dc2626,
+    progress--background: #e4e4e7,
+    progress--color: rgb(2, 101, 220),
+    action--size: 28px,
+    action--color: #71717a,
+    action__hover--background: #f4f4f5,
+    action__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    disabled--opacity: 0.38,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.attachment {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+  position: relative;
+}
+
+.media {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: css.cssVar(media--size);
+  height: css.cssVar(media--size);
+  color: css.cssVar(media--color);
+  background: css.cssVar(media--background);
+  border-radius: css.cssVar(media--border-radius);
+
+  img,
+  ::slotted(img),
+  ::slotted(video),
+  ::slotted(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: css.cssVar(media--object-fit);
+  }
+
+  ::slotted([slot='media']) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .file-icon {
+    --c2-phosphor-icon--size: 26px;
+    --c2-phosphor-icon--color: currentColor;
+  }
+}
+
+.has-image .media {
+  background: transparent;
+}
+
+.tile {
+  align-items: stretch;
+  flex-direction: column;
+  width: min(100%, css.cssVar(tile--width));
+  padding: 16px;
+  gap: 14px;
+
+  .media {
+    width: 100%;
+    height: auto;
+    aspect-ratio: css.cssVar(tile--media-aspect-ratio);
+  }
+
+  .actions {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    padding: 2px;
+    border-radius: 8px;
+    background: rgba(24, 24, 27, 0.72);
+    opacity: 0;
+    transition: animation.standard(opacity);
+  }
+
+  &:hover .actions,
+  .actions:focus-within {
+    opacity: 1;
+  }
+
+  button {
+    color: #ffffff;
+  }
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  color: css.cssVar(color);
+  font-size: css.cssVar(name--font-size);
+  font-weight: css.cssVar(name--font-weight);
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metadata,
+.status,
+.uploading {
+  margin-top: 3px;
+  color: css.cssVar(metadata--color);
+  font-size: css.cssVar(metadata--font-size);
+  line-height: 1.35;
+}
+
+.metadata {
+  display: flex;
+  gap: 4px;
+}
+
+.status {
+  color: css.cssVar(status--color);
+
+  &.complete {
+    color: css.cssVar(status__complete--color);
+  }
+
+  &.error {
+    color: css.cssVar(status__error--color);
+  }
+}
+
+.progress-ring {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke-width: 2;
+  transform: rotate(-90deg);
+
+  .progress-track {
+    stroke: css.cssVar(progress--background);
+  }
+
+  .progress-value {
+    stroke: css.cssVar(progress--color);
+    stroke-linecap: round;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.actions,
+.default-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(action--size);
+  height: css.cssVar(action--size);
+  padding: 0;
+  color: css.cssVar(action--color);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: animation.standard(background), animation.standard(color);
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(action__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(action__focus--outline);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+:host([disabled]) .attachment {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+::slotted([slot='actions']) {
+  flex: none;
+}

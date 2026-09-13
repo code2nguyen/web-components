@@ -10,6 +10,20 @@ Curated looks for `c2-chat-message`. Open any card in the studio to start from i
 
 <GalleryGrid>
 
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-message {
+    width: 240px;
+  }
+</style>
+<c2-chat-message class="default-message">
+  <c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar>
+  <div slot="title">Elisa</div>
+  <div slot="header-time">17:29</div>
+  <div slot="message">Bonjour 👋</div>
+</c2-chat-message>
+```
+
 ```html tag=MdxCodeBlock,label=Bubble
 <style>
   .bubble {

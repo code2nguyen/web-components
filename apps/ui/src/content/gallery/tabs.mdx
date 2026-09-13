@@ -16,6 +16,20 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 
 <GalleryGrid>
 
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-tabs {
+    width: 260px;
+  }
+</style>
+<c2-tabs selected-tab="t2" class="default-tabs" client:only="lit"
+  ><c2-tab label="Overview" for="t1"></c2-tab><c2-tab label="Activity" for="t2"></c2-tab><c2-tab label="Settings" for="t3"></c2-tab>
+  <div id="t1"></div>
+  <div id="t2"></div>
+  <div id="t3"></div
+></c2-tabs>
+```
+
 ```html tag=MdxCodeBlock,label=Brand indicator
 <style>
   .brand-indicator {

@@ -16,6 +16,8 @@ import { Kbd } from '@c2n/kbd'
 
 Activating a row fires `menu-select` and closes the menu, unless the menu (or that single row) is marked `keep-open`, which is what a list of `checkbox` rows wants. The surface is a native popover on the top layer positioned by `c2-overlay`, so it flips near the bottom of the viewport, light-dismisses on Escape and outside clicks, and is never clipped by an `overflow: hidden` parent.
 
+Choose where it opens with `placement`: `top`, `right`, `bottom` or `left`, optionally aligned with `-start` or `-end`. `offset` sets the gap from the trigger and `cross-offset` shifts the menu sideways along the trigger. All offsets are pixel numbers, and floating-ui can still flip the menu when the preferred side has no room.
+
 Keyboard: Enter, Space or ArrowDown on the trigger opens the menu on its first row (ArrowUp on the last). Inside, the arrows move between enabled rows, Home and End jump to the ends, letters jump to a matching row, ArrowRight opens a submenu and ArrowLeft returns from it, and Escape or Tab closes the menu and hands focus back to the trigger.
 
 ## Installation
@@ -137,7 +139,7 @@ Click any trigger below to open its menu.
     <hr />
     <c2-menu-item value="remove" destructive>Remove</c2-menu-item>
   </c2-menu>
-  <c2-menu client:only="lit" aria-label="Upwards" placement="top-start">
+  <c2-menu client:only="lit" aria-label="Upwards" placement="top-start" offset="12" cross-offset="8">
     <c2-button slot="trigger">Opens above</c2-button>
     <c2-menu-item value="one">First row</c2-menu-item>
     <c2-menu-item value="two">Second row</c2-menu-item>
@@ -173,7 +175,7 @@ A trigger elsewhere on the page is named by `anchor`, and the menu opens beside 
 ```html tag=CodeBlock
 <button id="row-7">Actions</button>
 
-<c2-menu anchor="row-7" placement="right-start">
+<c2-menu anchor="row-7" placement="right-start" offset="12" cross-offset="4">
   <c2-menu-item value="edit">Edit</c2-menu-item>
 </c2-menu>
 ```

@@ -86,7 +86,16 @@ export class Menu extends LitElement {
   @property({ type: Boolean, reflect: true }) open = false
 
   /** Preferred placement of the surface (floating-ui names). Submenus default to `right-start`. */
-  @property({ reflect: true }) placement: Placement = 'bottom-start'
+  @property({ reflect: true })
+  placement:
+    'top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' =
+    'bottom-start'
+
+  /** Distance in pixels from the trigger along the placement direction. Defaults to the overlay's 8px gap. */
+  @property({ type: Number }) offset: number | undefined = undefined
+
+  /** Shift in pixels perpendicular to the placement direction. Positive values move towards the aligned end. */
+  @property({ type: Number, attribute: 'cross-offset' }) crossOffset: number | undefined = undefined
 
   /** Anchor element, or (attribute) the id of an element in the same tree. Defaults to the slotted trigger. */
   @property() anchor: string | HTMLElement | undefined = undefined
@@ -480,6 +489,8 @@ export class Menu extends LitElement {
         class="overlay"
         .anchor=${this.anchorElement ?? undefined}
         .placement=${this.placement}
+        .offset=${this.offset}
+        .crossOffset=${this.crossOffset}
         .open=${this.open}
         ?fit-anchor=${this.fitAnchor}
         ?free-width=${!this.hasTrigger}

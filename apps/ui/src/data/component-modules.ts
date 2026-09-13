@@ -3,6 +3,7 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/attachment'
 import '@c2n/pagination'
 import '@c2n/accordion'
 import '@c2n/avatar'

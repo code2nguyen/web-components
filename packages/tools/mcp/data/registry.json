@@ -160,6 +160,13 @@
         },
         {
           "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-accordion class=\"default\" client:only=\"lit\">\n  <c2-details label=\"Is there a free trial?\" expanded><p>Try every feature for 14 days. No credit card required.</p></c2-details>\n  <c2-details label=\"Can I change plans?\"><p>Upgrade or downgrade from your account settings.</p></c2-details>\n  <c2-details label=\"Can I cancel anytime?\"><p>Yes. Your plan stays active until the end of the billing period.</p></c2-details>\n</c2-accordion>",
+          "css": ".default {\n  width: 280px;\n  max-width: 100%;\n}\n.default p {\n  margin: 0;\n}"
+        },
+        {
+          "kind": "gallery",
           "label": "Connected",
           "section": "Presets",
           "html": "<c2-accordion class=\"connected\" client:only=\"lit\">\n  <c2-details label=\"Is there a free trial?\" expanded><p>Try every feature for 14 days. No credit card required.</p></c2-details>\n  <c2-details label=\"Can I change plans?\"><p>Upgrade or downgrade from your account settings.</p></c2-details>\n  <c2-details label=\"Can I cancel anytime?\"><p>Yes. Your plan stays active until the end of the billing period.</p></c2-details>\n</c2-accordion>",
@@ -232,6 +239,494 @@
           "kind": "preview",
           "label": "Preview",
           "html": "<c2-accordion style=\"width:240px\">\n  <c2-details label=\"Shipping\" expanded>Delivered in 3–5 business days.</c2-details>\n  <c2-details label=\"Returns\">Return within 30 days.</c2-details>\n</c2-accordion>"
+        }
+      ],
+      "hasGallery": true
+    },
+    "attachment": {
+      "id": "attachment",
+      "package": "@c2n/attachment",
+      "title": "Attachment",
+      "description": "File and image attachments with metadata, upload progress, failure states, and actions.",
+      "intro": "`c2-attachment` presents a file or image without owning the upload itself. Set `status` and `progress` from your uploader, and respond to `attachment-remove` or `attachment-retry` to perform the corresponding operation. `c2-attachment-group` arranges related attachments as a list or responsive grid.",
+      "category": "Data display",
+      "status": "stable",
+      "docsUrl": "https://code2nguyen.github.io/web-components/components/attachment",
+      "elements": [
+        {
+          "tag": "c2-attachment",
+          "className": "Attachment",
+          "modulePath": "@c2n/attachment",
+          "description": "Displays a file or image attachment with a preview, metadata, upload state and optional actions.",
+          "attributes": [
+            {
+              "name": "name",
+              "type": "string",
+              "default": "''",
+              "description": "File name shown as the primary label."
+            },
+            {
+              "name": "src",
+              "type": "string | undefined",
+              "default": "undefined",
+              "description": "Image preview URL. Omit it to show the generic file preview."
+            },
+            {
+              "name": "alt",
+              "type": "string | undefined",
+              "default": "undefined",
+              "description": "Accessible description for the image preview. Defaults to the file name."
+            },
+            {
+              "name": "type",
+              "type": "string | undefined",
+              "default": "undefined",
+              "description": "File type or extension shown in the metadata row."
+            },
+            {
+              "name": "size",
+              "type": "string | undefined",
+              "default": "undefined",
+              "description": "Human-readable file size, for example `2.4 MB`."
+            },
+            {
+              "name": "status",
+              "type": "'ready' | 'uploading' | 'complete' | 'error'",
+              "default": "'ready'",
+              "description": "Current upload state."
+            },
+            {
+              "name": "layout",
+              "type": "'auto' | 'row' | 'tile'",
+              "default": "'auto'",
+              "description": "Auto uses a tile for image previews and a row for files."
+            },
+            {
+              "name": "progress",
+              "type": "number",
+              "default": "0",
+              "description": "Upload completion percentage. Values are clamped between 0 and 100."
+            },
+            {
+              "name": "removable",
+              "type": "boolean",
+              "default": "false",
+              "description": "Show the built-in remove action. During upload it is announced as cancel."
+            },
+            {
+              "name": "disabled",
+              "type": "boolean",
+              "default": "false",
+              "description": "Disable built-in actions and dim the attachment."
+            }
+          ],
+          "slots": [
+            {
+              "name": "media",
+              "description": "Custom thumbnail or file icon. Replaces the image supplied through `src`."
+            },
+            {
+              "name": "name",
+              "description": "Custom file name. Falls back to the `name` attribute."
+            },
+            {
+              "name": "metadata",
+              "description": "Custom metadata. Falls back to the `type` and `size` attributes."
+            },
+            {
+              "name": "actions",
+              "description": "Custom controls shown at the end. Replaces the built-in retry and remove buttons."
+            }
+          ],
+          "events": [
+            {
+              "name": "attachment-remove",
+              "type": "CustomEvent<{ name: string }>",
+              "description": "Fired when the remove or cancel action is pressed."
+            },
+            {
+              "name": "attachment-retry",
+              "type": "CustomEvent<{ name: string }>",
+              "description": "Fired when retry is pressed for a failed upload."
+            },
+            {
+              "name": "media-error",
+              "type": "Event",
+              "description": "Fired when the image preview cannot be loaded; the file fallback is shown."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--c2-attachment--min-height",
+              "type": "pixel",
+              "default": "76px",
+              "part": "",
+              "property": "min-height"
+            },
+            {
+              "name": "--c2-attachment--gap",
+              "type": "pixel",
+              "default": "12px",
+              "part": "",
+              "property": "gap"
+            },
+            {
+              "name": "--c2-attachment--padding",
+              "type": "padding",
+              "default": "10px 12px",
+              "part": "",
+              "property": "padding"
+            },
+            {
+              "name": "--c2-attachment--background",
+              "type": "color",
+              "default": "#ffffff",
+              "part": "",
+              "property": "background",
+              "token": "--c2-theme--color-surface"
+            },
+            {
+              "name": "--c2-attachment--border",
+              "type": "border",
+              "default": "1px solid #e4e4e7",
+              "part": "",
+              "property": "border",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-attachment--border-radius",
+              "type": "border-radius",
+              "default": "14px",
+              "part": "",
+              "property": "border-radius",
+              "token": "--c2-theme--radius-xl"
+            },
+            {
+              "name": "--c2-attachment--box-shadow",
+              "type": "box-shadow",
+              "part": "",
+              "property": "box-shadow"
+            },
+            {
+              "name": "--c2-attachment--color",
+              "type": "color",
+              "default": "#18181b",
+              "part": "",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface"
+            },
+            {
+              "name": "--c2-attachment__media--size",
+              "type": "pixel",
+              "default": "48px",
+              "part": "media",
+              "property": "size"
+            },
+            {
+              "name": "--c2-attachment__media--background",
+              "type": "color",
+              "default": "#f4f4f5",
+              "part": "media",
+              "property": "background",
+              "token": "--c2-theme--color-surface-container"
+            },
+            {
+              "name": "--c2-attachment__media--color",
+              "type": "color",
+              "default": "#71717a",
+              "part": "media",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
+            },
+            {
+              "name": "--c2-attachment__media--border-radius",
+              "type": "border-radius",
+              "default": "10px",
+              "part": "media",
+              "property": "border-radius"
+            },
+            {
+              "name": "--c2-attachment__media--object-fit",
+              "type": "object-fit",
+              "default": "cover",
+              "part": "media",
+              "property": "object-fit"
+            },
+            {
+              "name": "--c2-attachment__tile--width",
+              "type": "pixel",
+              "default": "220px",
+              "part": "tile",
+              "property": "width"
+            },
+            {
+              "name": "--c2-attachment__tile--media-aspect-ratio",
+              "type": "ratio",
+              "default": "1",
+              "part": "tile",
+              "property": "media-aspect-ratio"
+            },
+            {
+              "name": "--c2-attachment__name--font-size",
+              "type": "font-size",
+              "default": "14px",
+              "part": "name",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-md"
+            },
+            {
+              "name": "--c2-attachment__name--font-weight",
+              "type": "font-weight",
+              "default": "500",
+              "part": "name",
+              "property": "font-weight",
+              "token": "--c2-theme--font-weight-medium"
+            },
+            {
+              "name": "--c2-attachment__metadata--color",
+              "type": "color",
+              "default": "#71717a",
+              "part": "metadata",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
+            },
+            {
+              "name": "--c2-attachment__metadata--font-size",
+              "type": "font-size",
+              "default": "12px",
+              "part": "metadata",
+              "property": "font-size",
+              "token": "--c2-theme--font-size-sm"
+            },
+            {
+              "name": "--c2-attachment__status--color",
+              "type": "color",
+              "default": "#71717a",
+              "part": "status",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
+            },
+            {
+              "name": "--c2-attachment__status__complete--color",
+              "type": "color",
+              "default": "rgb(0, 122, 77)",
+              "part": "status/complete",
+              "property": "color"
+            },
+            {
+              "name": "--c2-attachment__status__error--color",
+              "type": "color",
+              "default": "#dc2626",
+              "part": "status",
+              "state": "error",
+              "property": "color",
+              "token": "--c2-theme--color-error"
+            },
+            {
+              "name": "--c2-attachment__progress--background",
+              "type": "color",
+              "default": "#e4e4e7",
+              "part": "progress",
+              "property": "background",
+              "token": "--c2-theme--color-outline-variant"
+            },
+            {
+              "name": "--c2-attachment__progress--color",
+              "type": "color",
+              "default": "rgb(2, 101, 220)",
+              "part": "progress",
+              "property": "color",
+              "token": "--c2-theme--color-primary"
+            },
+            {
+              "name": "--c2-attachment__action--size",
+              "type": "pixel",
+              "default": "28px",
+              "part": "action",
+              "property": "size"
+            },
+            {
+              "name": "--c2-attachment__action--color",
+              "type": "color",
+              "default": "#71717a",
+              "part": "action",
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
+            },
+            {
+              "name": "--c2-attachment__action__hover--background",
+              "type": "color",
+              "default": "#f4f4f5",
+              "part": "action",
+              "state": "hover",
+              "property": "background",
+              "token": "--c2-theme--color-surface-container"
+            },
+            {
+              "name": "--c2-attachment__action__focus--outline",
+              "type": "outline",
+              "default": "2px solid rgba(2, 101, 220, 0.4)",
+              "part": "action",
+              "state": "focus",
+              "property": "outline",
+              "token": "--c2-theme--focus-ring"
+            },
+            {
+              "name": "--c2-attachment__disabled--opacity",
+              "type": "opacity",
+              "default": "0.38",
+              "part": "",
+              "state": "disabled",
+              "property": "opacity",
+              "token": "--c2-theme--disabled-opacity"
+            }
+          ]
+        },
+        {
+          "tag": "c2-attachment-group",
+          "className": "AttachmentGroup",
+          "modulePath": "@c2n/attachment/attachment-group.js",
+          "description": "Arranges related attachments as a responsive list or grid.",
+          "attributes": [
+            {
+              "name": "layout",
+              "type": "'list' | 'grid' | 'mixed'",
+              "default": "'list'",
+              "description": "List stacks rows, grid fills equal columns, and mixed gives image tiles columns while file rows span the group."
+            },
+            {
+              "name": "aria-label",
+              "type": "string | null",
+              "default": "'Attachments'",
+              "description": "Accessible name for the attachment collection."
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "`c2-attachment` elements."
+            }
+          ],
+          "events": [],
+          "cssProperties": [
+            {
+              "name": "--c2-attachment-group--gap",
+              "type": "pixel",
+              "default": "8px",
+              "part": "",
+              "property": "gap"
+            },
+            {
+              "name": "--c2-attachment-group--min-column-width",
+              "type": "pixel",
+              "default": "240px",
+              "part": "",
+              "property": "min-column-width"
+            }
+          ]
+        }
+      ],
+      "composition": {
+        "internal": [],
+        "slotted": [
+          "c2-attachment"
+        ],
+        "usedBy": [
+          "c2-attachment"
+        ]
+      },
+      "install": {
+        "npm": "npm install @c2n/attachment @c2n/theme",
+        "import": "import '@c2n/attachment'",
+        "importClass": "import { Attachment } from '@c2n/attachment'"
+      },
+      "examples": [
+        {
+          "kind": "usage",
+          "label": "File",
+          "html": "<c2-attachment class=\"attachments\" name=\"project-brief.pdf\" type=\"PDF\" size=\"2.4 MB\" removable></c2-attachment>",
+          "css": ".attachments { width: min(100%, 420px); }"
+        },
+        {
+          "kind": "usage",
+          "label": "Image",
+          "html": "<c2-attachment class=\"attachments\" name=\"team-photo.jpg\" type=\"JPG\" size=\"1.8 MB\" src=\"/web-components/chat.avif\" removable></c2-attachment>",
+          "css": ".attachments { width: min(100%, 420px); }"
+        },
+        {
+          "kind": "usage",
+          "label": "Uploading",
+          "html": "<c2-attachment class=\"attachments\" name=\"research.zip\" type=\"ZIP\" size=\"18.6 MB\" status=\"uploading\" progress=\"64\" removable></c2-attachment>",
+          "css": ".attachments { width: min(100%, 420px); }"
+        },
+        {
+          "kind": "usage",
+          "label": "Upload failed",
+          "html": "<c2-attachment class=\"attachments\" name=\"invoice.csv\" type=\"CSV\" size=\"84 KB\" status=\"error\" removable></c2-attachment>",
+          "css": ".attachments { width: min(100%, 420px); }"
+        },
+        {
+          "kind": "usage",
+          "label": "Group",
+          "html": "<c2-attachment-group class=\"attachments\">\n  <c2-attachment name=\"brand-assets.zip\" type=\"ZIP\" size=\"12 MB\" status=\"complete\" removable></c2-attachment>\n  <c2-attachment name=\"readme.md\" type=\"Markdown\" size=\"6 KB\" removable></c2-attachment>\n</c2-attachment-group>",
+          "css": ".attachments { width: min(100%, 420px); }"
+        },
+        {
+          "kind": "gallery",
+          "label": "Default",
+          "html": "<c2-attachment name=\"project-brief.pdf\" type=\"PDF\" size=\"2.4 MB\" removable></c2-attachment>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Image",
+          "html": "<c2-attachment name=\"team-photo.jpg\" type=\"JPG\" size=\"1.8 MB\" src=\"/web-components/chat.avif\" removable></c2-attachment>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Uploading",
+          "html": "<c2-attachment name=\"research.zip\" type=\"ZIP\" size=\"18.6 MB\" status=\"uploading\" progress=\"64\" removable></c2-attachment>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Failed",
+          "html": "<c2-attachment name=\"invoice.csv\" type=\"CSV\" size=\"84 KB\" status=\"error\" removable></c2-attachment>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Compact",
+          "html": "<c2-attachment class=\"compact\" name=\"notes.txt\" type=\"TXT\" size=\"3 KB\" removable></c2-attachment>",
+          "css": ".compact {\n  --c2-attachment--min-height: 48px;\n  --c2-attachment--padding: 6px 8px;\n  --c2-attachment--gap: 8px;\n  --c2-attachment__media--size: 34px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Dark",
+          "html": "<c2-attachment class=\"dark\" name=\"archive.tar.gz\" type=\"Archive\" size=\"32 MB\" removable></c2-attachment>",
+          "css": ".dark {\n  --c2-attachment--background: #18181b;\n  --c2-attachment--border: 1px solid #3f3f46;\n  --c2-attachment--color: #fafafa;\n  --c2-attachment__media--background: #27272a;\n  --c2-attachment__media--color: #d4d4d8;\n  --c2-attachment__metadata--color: #a1a1aa;\n  --c2-attachment__action--color: #d4d4d8;\n  --c2-attachment__action__hover--background: #3f3f46;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "List",
+          "section": "Groups",
+          "html": "<c2-attachment-group>\n  <c2-attachment name=\"contract.pdf\" type=\"PDF\" size=\"820 KB\" status=\"complete\" removable></c2-attachment>\n  <c2-attachment name=\"appendix.xlsx\" type=\"Spreadsheet\" size=\"1.2 MB\" removable></c2-attachment>\n</c2-attachment-group>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Responsive grid",
+          "section": "Groups",
+          "html": "<c2-attachment-group class=\"attachment-grid\" layout=\"grid\">\n  <c2-attachment name=\"cover.jpg\" type=\"JPG\" size=\"640 KB\" src=\"/web-components/chat.avif\"></c2-attachment>\n  <c2-attachment name=\"copy.md\" type=\"Markdown\" size=\"8 KB\"></c2-attachment>\n  <c2-attachment name=\"sources.zip\" type=\"ZIP\" size=\"4.3 MB\"></c2-attachment>\n</c2-attachment-group>",
+          "css": ".attachment-grid {\n  --c2-attachment-group--min-column-width: 190px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Dark mixed attachments",
+          "section": "Mixed media",
+          "html": "<c2-attachment-group class=\"reference-attachments\" layout=\"mixed\" aria-label=\"Reference files\">\n  <c2-attachment layout=\"tile\" name=\"workspace.png\" type=\"PNG\" size=\"820 KB\">\n    <span class=\"reference-media\" slot=\"media\" aria-hidden=\"true\"></span>\n  </c2-attachment>\n  <c2-attachment layout=\"tile\" name=\"desk-reference.jpg\" type=\"JPG\" size=\"1.1 MB\">\n    <span class=\"reference-media desk\" slot=\"media\" aria-hidden=\"true\"></span>\n  </c2-attachment>\n  <c2-attachment layout=\"tile\" name=\"office-reference.jpg\" type=\"JPG\" size=\"940 KB\">\n    <span class=\"reference-media office\" slot=\"media\" aria-hidden=\"true\"></span>\n  </c2-attachment>\n  <c2-attachment name=\"sales-dashboard.pdf\" status=\"uploading\" progress=\"64\" removable></c2-attachment>\n  <c2-attachment name=\"message-renderer.tsx\" type=\"TypeScript\" size=\"12 KB\" removable></c2-attachment>\n</c2-attachment-group>",
+          "css": ".reference-attachments {\n  width: min(100%, 760px);\n  --c2-attachment-group--gap: 14px;\n  --c2-attachment-group--min-column-width: 180px;\n  --c2-attachment--background: #181818;\n  --c2-attachment--border: 1px solid #333333;\n  --c2-attachment--color: #f4f4f5;\n  --c2-attachment__media--background: #282828;\n  --c2-attachment__media--color: #f4f4f5;\n  --c2-attachment__metadata--color: #a1a1aa;\n  --c2-attachment__status--color: #a1a1aa;\n  --c2-attachment__action--color: #e4e4e7;\n  --c2-attachment__action__hover--background: #333333;\n  --c2-attachment__tile--width: 100%;\n}\n.reference-media {\n  display: block;\n  width: 100%;\n  height: 100%;\n  background:\n    linear-gradient(135deg, transparent 38%, rgba(255, 255, 255, 0.16) 39% 42%, transparent 43%),\n    linear-gradient(30deg, #52525b, #18181b 55%, #71717a);\n}\n.reference-media.desk {\n  background:\n    linear-gradient(80deg, transparent 47%, rgba(255, 255, 255, 0.18) 48% 52%, transparent 53%),\n    linear-gradient(160deg, #d4d4d8, #71717a 48%, #27272a 49%);\n}\n.reference-media.office {\n  background:\n    linear-gradient(0deg, #3f3f46 0 22%, transparent 23%),\n    linear-gradient(145deg, #71717a, #27272a 55%, #18181b);\n}"
+        },
+        {
+          "kind": "preview",
+          "label": "Preview",
+          "html": "<c2-attachment style=\"width:240px\" name=\"project-brief.pdf\" type=\"PDF\" size=\"2.4 MB\" status=\"uploading\" progress=\"64\" removable></c2-attachment>"
         }
       ],
       "hasGallery": true
@@ -632,6 +1127,12 @@
           "label": "Stacked group",
           "html": "<div class=\"stack\" style=\"display: flex\">\n  <c2-avatar auto-color name=\"Ada Lovelace\" initial-count=\"2\"></c2-avatar>\n  <c2-avatar auto-color name=\"Grace Hopper\" initial-count=\"2\"></c2-avatar>\n  <c2-avatar auto-color name=\"Alan Turing\" initial-count=\"2\"></c2-avatar>\n  <c2-avatar initials=\"+4\" style=\"--c2-avatar--background: #e4e4e7; --c2-avatar--color: #52525b; --c2-avatar--font-size: 11px\"></c2-avatar>\n</div>",
           "css": ".stack c2-avatar {\n  --c2-avatar--box-shadow: 0 0 0 2px #ffffff;\n}\n.stack c2-avatar + c2-avatar {\n  margin-left: -10px;\n}\n.badge {\n  background: #dc2626;\n  color: #ffffff;\n  font-size: 10px;\n  font-weight: 700;\n  line-height: 1;\n  padding: 2px 5px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-avatar name=\"Elisa Jasmin\" initial-count=\"2\" client:only=\"lit\"></c2-avatar>"
         },
         {
           "kind": "gallery",
@@ -1149,7 +1650,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Soft",
+          "label": "Default",
           "section": "Presets",
           "html": "<c2-badge tone=\"success\">Active</c2-badge>"
         },
@@ -1924,9 +2425,9 @@
         },
         {
           "kind": "gallery",
-          "label": "Filled",
+          "label": "Default",
           "section": "Variants",
-          "html": "<c2-button>Filled</c2-button>"
+          "html": "<c2-button>Default</c2-button>"
         },
         {
           "kind": "gallery",
@@ -2420,7 +2921,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Attached",
+          "label": "Default",
           "section": "Presets",
           "html": "<c2-button-group client:only=\"lit\">\n  <c2-button>Save</c2-button>\n  <c2-button>Publish</c2-button>\n  <c2-button>Archive</c2-button>\n</c2-button-group>"
         },
@@ -3022,6 +3523,13 @@
         },
         {
           "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-card class=\"default-card\">\n  <h3 slot=\"header\" class=\"title\">Card title</h3>\n  <p class=\"text\">Supporting text that describes what this card is about.</p>\n</c2-card>",
+          "css": ".default-card {\n  width: 240px;\n}\n.default-card .title {\n  margin: 0;\n  font-size: 14px;\n  font-weight: 600;\n}\n.default-card .text {\n  margin: 0;\n  font-size: 12px;\n  line-height: 1.5;\n}"
+        },
+        {
+          "kind": "gallery",
           "label": "Elevated",
           "section": "Presets",
           "html": "<c2-card style=\"width: 240px\" class=\"g elevated\">\n  <h3 slot=\"header\" class=\"title\">Card title</h3>\n  <p class=\"text\">Supporting text that describes what this card is about.</p>\n</c2-card>",
@@ -3411,12 +3919,17 @@
           "html": "<c2-chat-input client:only=\"lit\"></c2-chat-input>"
         },
         {
+          "kind": "gallery",
+          "label": "Default",
+          "html": "<c2-chat-input client:only=\"lit\"></c2-chat-input>"
+        },
+        {
           "kind": "preview",
           "label": "Preview",
           "html": "<c2-chat-input style=\"width:240px\" placeholder=\"Type a message…\"></c2-chat-input>"
         }
       ],
-      "hasGallery": false
+      "hasGallery": true
     },
     "chat-message": {
       "id": "chat-message",
@@ -3718,6 +4231,13 @@
           "label": "Custom chat message",
           "html": "<c2-chat-message class=\"custom-chat-message\">\n  <c2-avatar name=\"Chat GPT\" slot=\"avatar\">\n    <img src=\"/web-components/chat.avif\" />\n  </c2-avatar>\n  <div slot=\"title\">Chat GPT</div>\n  <div slot=\"header-time\">10h 29</div>\n  <div slot=\"message\">\n    <div>Hi,</div>\n    <div>What can I help you</div>\n  </div>\n</c2-chat-message>",
           "css": ".custom-chat-message {\n  --c2-chat-message--gap: 8px;\n  --c2-chat-message__message--gap: 8px;\n  --c2-chat-message__message--border-top-left-radius: 4px;\n  --c2-chat-message__message--border-top-right-radius: 4px;\n  --c2-chat-message__message--border-bottom-left-radius: 4px;\n  --c2-chat-message__message--border-bottom-right-radius: 4px;\n  --c2-chat-message__message--padding-top: 12px;\n  --c2-chat-message__message--padding-right: 16px;\n  --c2-chat-message__message--padding-bottom: 12px;\n  --c2-chat-message__message--padding-left: 16px;\n  --c2-chat-message__message--background: rgba(220, 224, 234, 0.59);\n  --c2-chat-message__header--gap: 8px;\n  --c2-chat-message__time--font-size: 10px;\n  --c2-chat-message--line-height: 26px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-chat-message class=\"default-message\">\n  <c2-avatar name=\"Elisa Jasmin\" initial-count=\"2\" slot=\"avatar\"></c2-avatar>\n  <div slot=\"title\">Elisa</div>\n  <div slot=\"header-time\">17:29</div>\n  <div slot=\"message\">Bonjour 👋</div>\n</c2-chat-message>",
+          "css": ".default-message {\n  width: 240px;\n}"
         },
         {
           "kind": "gallery",
@@ -5121,6 +5641,13 @@
         },
         {
           "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-code-viewer class=\"default-viewer\" language=\"bash\" copyable code=\"npm install\\nnpm run ui\">\n  <span slot=\"title\">Install and run</span>\n</c2-code-viewer>",
+          "css": ".default-viewer {\n  width: 240px;\n}"
+        },
+        {
+          "kind": "gallery",
           "label": "Terminal",
           "section": "Presets",
           "html": "<c2-code-viewer style=\"width: 240px\" class=\"terminal\" language=\"bash\" theme=\"vitesse-dark\" copyable code=\"npm install\\nnpm run ui\">\n  <span slot=\"title\">~/web-components</span>\n</c2-code-viewer>",
@@ -5290,12 +5817,17 @@
           "html": "<c2-color-area></c2-color-area>"
         },
         {
+          "kind": "gallery",
+          "label": "Default",
+          "html": "<c2-color-area></c2-color-area>"
+        },
+        {
           "kind": "preview",
           "label": "Preview",
           "html": "<c2-color-area hue=\"210\" saturation=\"0.8\" value=\"0.9\" style=\"width:200px;height:100px\"></c2-color-area>"
         }
       ],
-      "hasGallery": false
+      "hasGallery": true
     },
     "color-select": {
       "id": "color-select",
@@ -5577,12 +6109,17 @@
           "html": "<c2-color-select color=\"#ff726b\"></c2-color-select>"
         },
         {
+          "kind": "gallery",
+          "label": "Default",
+          "html": "<c2-color-select color=\"#ff726b\"></c2-color-select>"
+        },
+        {
           "kind": "preview",
           "label": "Preview",
           "html": "<div class=\"preview-row\">\n  <c2-color-select color=\"#2563eb\"></c2-color-select>\n  <c2-color-select color=\"#ff726b\"></c2-color-select>\n  <c2-color-select color=\"#efc94c\"></c2-color-select>\n  <c2-color-select color=\"#b280c1\"></c2-color-select>\n</div>"
         }
       ],
-      "hasGallery": false
+      "hasGallery": true
     },
     "color-slider": {
       "id": "color-slider",
@@ -5789,12 +6326,17 @@
           "html": "<c2-color-slider></c2-color-slider>"
         },
         {
+          "kind": "gallery",
+          "label": "Default",
+          "html": "<c2-color-slider></c2-color-slider>"
+        },
+        {
           "kind": "preview",
           "label": "Preview",
           "html": "<c2-color-slider value=\"200\" style=\"width:220px\"></c2-color-slider>"
         }
       ],
-      "hasGallery": false
+      "hasGallery": true
     },
     "copy-button": {
       "id": "copy-button",
@@ -6219,7 +6761,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Icon only",
+          "label": "Default",
           "section": "Presets",
           "html": "<c2-copy-button reveal=\"always\" value=\"npx -y @c2n/mcp\"></c2-copy-button>"
         },
@@ -6819,6 +7361,13 @@
           "label": "Disabled",
           "html": "<c2-details class=\"demo\" disabled label=\"Archived section\"><p>Never shown.</p></c2-details>",
           "css": ".demo {\n  width: 300px;\n}\n.demo p {\n  margin: 0;\n  font-size: 13px;\n  line-height: 1.5;\n  color: #52525b;\n}\n.stack {\n  display: grid;\n  gap: 8px;\n  width: 300px;\n}"
+        },
+        {
+          "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-details class=\"default-details\" expanded>\n  <span slot=\"title\">Shipping</span>\n  <p>Delivered in 3–5 business days. Free over $50.</p>\n</c2-details>",
+          "css": ".default-details {\n  width: 240px;\n}\n.default-details p {\n  margin: 0;\n}"
         },
         {
           "kind": "gallery",
@@ -7540,7 +8089,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Standard",
+          "label": "Default",
           "section": "Variants",
           "html": "<c2-icon-button><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg></c2-icon-button>"
         },
@@ -7595,7 +8144,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Default",
+          "label": "Medium",
           "section": "Sizes",
           "html": "<c2-icon-button><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z\"></path></svg></c2-icon-button>"
         },
@@ -7758,9 +8307,10 @@
             {
               "name": "--c2-kbd--color",
               "type": "color",
-              "default": "#3f3f46",
+              "default": "#52525b",
               "part": "",
-              "property": "color"
+              "property": "color",
+              "token": "--c2-theme--color-on-surface-variant"
             },
             {
               "name": "--c2-kbd--border",
@@ -7952,7 +8502,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Keycap",
+          "label": "Default",
           "section": "Presets",
           "html": "<c2-kbd>⌘ + K</c2-kbd>"
         },
@@ -9230,6 +9780,13 @@
         },
         {
           "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-list class=\"default-list\" value=\"design\" client:only=\"lit\">\n  <c2-list-item value=\"inbox\">Inbox</c2-list-item>\n  <c2-list-item value=\"design\">Design</c2-list-item>\n  <c2-list-item value=\"archive\">Archive</c2-list-item>\n</c2-list>",
+          "css": ".default-list {\n  width: 220px;\n}"
+        },
+        {
+          "kind": "gallery",
           "label": "Bordered menu",
           "section": "Presets",
           "html": "<c2-list class=\"bordered\" value=\"design\" client:only=\"lit\">\n  <c2-list-item value=\"inbox\">Inbox</c2-list-item>\n  <c2-list-item value=\"design\">Design</c2-list-item>\n  <c2-list-item value=\"archive\">Archive</c2-list-item>\n</c2-list>",
@@ -10084,9 +10641,21 @@
             },
             {
               "name": "placement",
-              "type": "Placement",
+              "type": "'top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end'",
               "default": "'bottom-start'",
               "description": "Preferred placement of the surface (floating-ui names). Submenus default to `right-start`."
+            },
+            {
+              "name": "offset",
+              "type": "number | undefined",
+              "default": "undefined",
+              "description": "Distance in pixels from the trigger along the placement direction. Defaults to the overlay's 8px gap."
+            },
+            {
+              "name": "cross-offset",
+              "type": "number | undefined",
+              "default": "undefined",
+              "description": "Shift in pixels perpendicular to the placement direction. Positive values move towards the aligned end."
             },
             {
               "name": "anchor",
@@ -10642,7 +11211,7 @@
             {
               "name": "--c2-menu-item__shortcut--color",
               "type": "color",
-              "default": "#a1a1aa",
+              "default": "#52525b",
               "part": "shortcut",
               "property": "color",
               "token": "--c2-theme--color-on-surface-variant"
@@ -10650,15 +11219,14 @@
             {
               "name": "--c2-menu-item__shortcut--font-size",
               "type": "font-size",
-              "default": "12px",
+              "default": "11px",
               "part": "shortcut",
-              "property": "font-size",
-              "token": "--c2-theme--font-size-sm"
+              "property": "font-size"
             },
             {
               "name": "--c2-menu-item__shortcut--letter-spacing",
               "type": "letter-spacing",
-              "default": "0.04em",
+              "default": "0.08em",
               "part": "shortcut",
               "property": "letter-spacing"
             },
@@ -10860,7 +11428,7 @@
         {
           "kind": "usage",
           "label": "Icon trigger and placement",
-          "html": "<c2-menu client:only=\"lit\" aria-label=\"Row actions\" placement=\"bottom-end\">\n  <c2-icon-button slot=\"trigger\" aria-label=\"Row actions\">\n    <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n      <circle cx=\"12\" cy=\"5\" r=\"1.5\"></circle>\n      <circle cx=\"12\" cy=\"12\" r=\"1.5\"></circle>\n      <circle cx=\"12\" cy=\"19\" r=\"1.5\"></circle>\n    </svg>\n  </c2-icon-button>\n  <c2-menu-item value=\"edit\">Edit</c2-menu-item>\n  <c2-menu-item value=\"move\">Move to…</c2-menu-item>\n  <hr />\n  <c2-menu-item value=\"remove\" destructive>Remove</c2-menu-item>\n</c2-menu>\n<c2-menu client:only=\"lit\" aria-label=\"Upwards\" placement=\"top-start\">\n  <c2-button slot=\"trigger\">Opens above</c2-button>\n  <c2-menu-item value=\"one\">First row</c2-menu-item>\n  <c2-menu-item value=\"two\">Second row</c2-menu-item>\n</c2-menu>",
+          "html": "<c2-menu client:only=\"lit\" aria-label=\"Row actions\" placement=\"bottom-end\">\n  <c2-icon-button slot=\"trigger\" aria-label=\"Row actions\">\n    <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n      <circle cx=\"12\" cy=\"5\" r=\"1.5\"></circle>\n      <circle cx=\"12\" cy=\"12\" r=\"1.5\"></circle>\n      <circle cx=\"12\" cy=\"19\" r=\"1.5\"></circle>\n    </svg>\n  </c2-icon-button>\n  <c2-menu-item value=\"edit\">Edit</c2-menu-item>\n  <c2-menu-item value=\"move\">Move to…</c2-menu-item>\n  <hr />\n  <c2-menu-item value=\"remove\" destructive>Remove</c2-menu-item>\n</c2-menu>\n<c2-menu client:only=\"lit\" aria-label=\"Upwards\" placement=\"top-start\" offset=\"12\" cross-offset=\"8\">\n  <c2-button slot=\"trigger\">Opens above</c2-button>\n  <c2-menu-item value=\"one\">First row</c2-menu-item>\n  <c2-menu-item value=\"two\">Second row</c2-menu-item>\n</c2-menu>",
           "css": ".dot {\n  width: 8px;\n  height: 8px;\n  border-radius: 999px;\n  background: #16a34a;\n}\n.narrow {\n  --c2-menu--min-width: 220px;\n}"
         },
         {
@@ -10899,6 +11467,30 @@
         },
         {
           "kind": "gallery",
+          "label": "Top",
+          "section": "Placement and offsets",
+          "html": "<c2-menu aria-label=\"Top\" placement=\"top\" client:only=\"lit\"><c2-button slot=\"trigger\">Open above</c2-button><c2-menu-item value=\"edit\">Edit</c2-menu-item><c2-menu-item value=\"duplicate\">Duplicate</c2-menu-item></c2-menu>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Right",
+          "section": "Placement and offsets",
+          "html": "<c2-menu aria-label=\"Right\" placement=\"right-start\" client:only=\"lit\"><c2-button slot=\"trigger\">Open right</c2-button><c2-menu-item value=\"edit\">Edit</c2-menu-item><c2-menu-item value=\"duplicate\">Duplicate</c2-menu-item></c2-menu>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Bottom",
+          "section": "Placement and offsets",
+          "html": "<c2-menu aria-label=\"Bottom\" placement=\"bottom-end\" client:only=\"lit\"><c2-button slot=\"trigger\">Open below</c2-button><c2-menu-item value=\"edit\">Edit</c2-menu-item><c2-menu-item value=\"duplicate\">Duplicate</c2-menu-item></c2-menu>"
+        },
+        {
+          "kind": "gallery",
+          "label": "Left with offset",
+          "section": "Placement and offsets",
+          "html": "<c2-menu aria-label=\"Left with offset\" placement=\"left-start\" offset=\"20\" cross-offset=\"8\" client:only=\"lit\"><c2-button slot=\"trigger\">Open left</c2-button><c2-menu-item value=\"edit\">Edit</c2-menu-item><c2-menu-item value=\"duplicate\">Duplicate</c2-menu-item></c2-menu>"
+        },
+        {
+          "kind": "gallery",
           "label": "Tinted rows",
           "section": "Rows",
           "html": "<c2-menu class=\"tinted\" aria-label=\"Tinted\" client:only=\"lit\"><c2-button slot=\"trigger\">Open</c2-button><c2-menu-item value=\"edit\">Edit</c2-menu-item><c2-menu-item value=\"share\">Share</c2-menu-item><c2-menu-item value=\"move\">Move to…</c2-menu-item></c2-menu>",
@@ -10916,7 +11508,7 @@
           "label": "Shortcuts",
           "section": "Rows",
           "html": "<c2-menu class=\"shortcuts\" aria-label=\"Shortcuts\" client:only=\"lit\"><c2-button slot=\"trigger\">Open</c2-button><c2-menu-item value=\"new\">New file<c2-kbd slot=\"shortcut\">⌘N</c2-kbd></c2-menu-item><c2-menu-item value=\"open\">Open…<c2-kbd slot=\"shortcut\">⌘O</c2-kbd></c2-menu-item><c2-menu-item value=\"save\">Save<c2-kbd slot=\"shortcut\">⌘S</c2-kbd></c2-menu-item></c2-menu>",
-          "css": ".shortcuts {\n  --c2-menu--min-width: 230px;\n  --c2-menu-item__shortcut--color: #52525b;\n  --c2-menu-item__shortcut--font-size: 11px;\n  --c2-menu-item__shortcut--letter-spacing: 0.08em;\n}"
+          "css": ".shortcuts {\n  --c2-menu--min-width: 230px;\n}"
         },
         {
           "kind": "gallery",
@@ -11479,7 +12071,7 @@
           "label": "Default",
           "section": "Presets",
           "html": "<c2-button onclick=\"document.getElementById('mg-default').show()\">Open</c2-button>\n<c2-modal id=\"mg-default\" class=\"default\">\n  <span slot=\"title\">Invite your team</span>\n  <p>Share the link below with your teammates. They will be added with the Member role.</p>\n  <c2-button slot=\"footer\" onclick=\"this.closest('c2-modal').close()\">Copy link</c2-button>\n</c2-modal>",
-          "css": ".default {\n  --c2-modal--width: min(440px, calc(100vw - 32px));\n}\n.default p {\n  margin: 0;\n}"
+          "css": ".default p {\n  margin: 0;\n}"
         },
         {
           "kind": "gallery",
@@ -13097,9 +13689,21 @@
             },
             {
               "name": "placement",
-              "type": "Placement",
+              "type": "'top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end'",
               "default": "'bottom-start'",
               "description": "Preferred placement (floating-ui names). The one in use is reflected as `current-placement`."
+            },
+            {
+              "name": "offset",
+              "type": "number | undefined",
+              "default": "undefined",
+              "description": "Distance in pixels from the anchor along the placement direction. Falls back to `--c2-overlay--offset-y`."
+            },
+            {
+              "name": "cross-offset",
+              "type": "number | undefined",
+              "default": "undefined",
+              "description": "Shift in pixels perpendicular to the placement direction. Falls back to `--c2-overlay--offset-x`."
             },
             {
               "name": "disabled-cross-axis",
@@ -13230,12 +13834,18 @@
           "css": ".surface {\n  background: #ffffff;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);\n  padding: 12px 14px;\n  font-size: 14px;\n  color: #18181b;\n}\n.menu {\n  display: grid;\n  gap: 2px;\n  padding: 4px;\n}\n.menu button {\n  text-align: left;\n  border: none;\n  background: none;\n  padding: 6px 10px;\n  border-radius: 6px;\n  font: inherit;\n  cursor: pointer;\n  color: inherit;\n}\n.menu button:hover {\n  background: #f4f4f5;\n}\n.trigger {\n  font: inherit;\n  font-size: 13px;\n  padding: 6px 12px;\n  border-radius: 8px;\n  border: 1px solid #d4d4d8;\n  background: #ffffff;\n  color: #18181b;\n  cursor: pointer;\n}\n.trigger:hover {\n  background: #f4f4f5;\n}\n.anchor {\n  padding: 6px 10px;\n  border: 1px dashed #a1a1aa;\n  border-radius: 6px;\n  font-size: 13px;\n}"
         },
         {
+          "kind": "gallery",
+          "label": "Default",
+          "html": "<button class=\"trigger\" popovertarget=\"gallery-overlay-default\">Open</button>\n<c2-overlay id=\"gallery-overlay-default\" client:only=\"lit\"><div class=\"surface\">Default placement</div></c2-overlay>",
+          "css": ".trigger {\n  font: inherit;\n  padding: 6px 12px;\n}\n.surface {\n  padding: 12px 14px;\n  border: 1px solid #e4e4e7;\n  border-radius: 10px;\n  background: #ffffff;\n  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);\n}"
+        },
+        {
           "kind": "preview",
           "label": "Preview",
           "html": "<div>\n  <button class=\"preview-button\" popovertarget=\"preview-overlay\">Open overlay</button>\n  <c2-overlay id=\"preview-overlay\" popover=\"auto\" placement=\"bottom-start\">\n    <div class=\"preview-popover\">Anchored overlay content</div>\n  </c2-overlay>\n</div>"
         }
       ],
-      "hasGallery": false
+      "hasGallery": true
     },
     "pagination": {
       "id": "pagination",
@@ -17876,7 +18486,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Hairline",
+          "label": "Default",
           "section": "Presets",
           "html": "<c2-seperator style=\"width: 240px\"></c2-seperator>"
         },
@@ -18401,7 +19011,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Right",
+          "label": "Default",
           "section": "Presets",
           "html": "<c2-button onclick=\"document.getElementById('sg-right').show()\">Open</c2-button>\n<c2-sheet id=\"sg-right\">\n  <span slot=\"title\">Filters</span>\n  <div>The default edge, 380px wide.</div>\n</c2-sheet>"
         },
@@ -18918,7 +19528,7 @@
           "label": "Default",
           "section": "Drawer styles",
           "html": "<c2-side-nav opened class=\"default\"><div slot=\"side-nav-content\"><a class=\"row active\" href=\"#\">Inbox</a><a class=\"row\" href=\"#\">Drafts</a><a class=\"row\" href=\"#\">Sent</a></div><div class=\"page\">Content</div></c2-side-nav>",
-          "css": ".default {\n  display: block;\n  height: 150px;\n  width: 100%;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  overflow: hidden;\n  --c2-side-nav__open--width: 104px;\n  --c2-side-nav--padding-top: 10px;\n  --c2-side-nav--padding-right: 8px;\n  --c2-side-nav--padding-bottom: 10px;\n  --c2-side-nav--padding-left: 8px;\n}\n.default .row {\n  display: block;\n  padding: 5px 8px;\n  border-radius: 6px;\n  font-size: 12px;\n  color: #18181b;\n  text-decoration: none;\n}\n.default .row.active {\n  background: #e4e4e7;\n}\n.default .page {\n  padding: 10px;\n  font-size: 12px;\n  color: #71717a;\n}"
+          "css": ".default {\n  display: block;\n  height: 150px;\n  width: 100%;\n  border: 1px solid #e4e4e7;\n  border-radius: 8px;\n  overflow: hidden;\n}\n.default .row {\n  display: block;\n  padding: 5px 8px;\n  border-radius: 6px;\n  font-size: 12px;\n  color: #18181b;\n  text-decoration: none;\n}\n.default .row.active {\n  background: #e4e4e7;\n}\n.default .page {\n  padding: 10px;\n  font-size: 12px;\n  color: #71717a;\n}"
         },
         {
           "kind": "gallery",
@@ -22281,6 +22891,13 @@
         },
         {
           "kind": "gallery",
+          "label": "Default",
+          "section": "Presets",
+          "html": "<c2-tabs selected-tab=\"t2\" class=\"default-tabs\" client:only=\"lit\"\n  ><c2-tab label=\"Overview\" for=\"t1\"></c2-tab><c2-tab label=\"Activity\" for=\"t2\"></c2-tab><c2-tab label=\"Settings\" for=\"t3\"></c2-tab>\n  <div id=\"t1\"></div>\n  <div id=\"t2\"></div>\n  <div id=\"t3\"></div\n></c2-tabs>",
+          "css": ".default-tabs {\n  width: 260px;\n}"
+        },
+        {
+          "kind": "gallery",
           "label": "Brand indicator",
           "section": "Presets",
           "html": "<c2-tabs selected-tab=\"t2\" style=\"width: 260px\" class=\"brand-indicator\" client:only=\"lit\"\n  ><c2-tab label=\"Overview\" for=\"t1\"></c2-tab><c2-tab label=\"Activity\" for=\"t2\"></c2-tab><c2-tab label=\"Settings\" for=\"t3\"></c2-tab>\n  <div id=\"t1\"></div>\n  <div id=\"t2\"></div>\n  <div id=\"t3\"></div\n></c2-tabs>",
@@ -24537,7 +25154,7 @@
         },
         {
           "kind": "gallery",
-          "label": "Feedback",
+          "label": "Default",
           "html": "<c2-textarea class=\"feedback\" label=\"Feedback\" placeholder=\"What is on your mind?\" maxlength=\"300\" help=\"Your feedback helps us improve.\"></c2-textarea>",
           "css": ".feedback { width: 280px; }"
         },
@@ -25006,6 +25623,12 @@
         },
         {
           "kind": "gallery",
+          "label": "Default",
+          "html": "<c2-toast class=\"default-toast\" heading=\"Notification\" message=\"Your changes have been saved.\"></c2-toast>",
+          "css": ".default-toast {\n  width: 320px;\n}"
+        },
+        {
+          "kind": "gallery",
           "label": "Success",
           "html": "<c2-toast class=\"success\" variant=\"success\" heading=\"Payment received\" message=\"Your receipt is ready to download.\"></c2-toast>",
           "css": ".success {\n  width: 320px;\n  --c2-toast__container--background: #f0fdf4;\n  --c2-toast__container--color: #14532d;\n  --c2-toast__container--border: 1px solid #bbf7d0;\n}"
@@ -25450,7 +26073,7 @@
           "label": "Default",
           "section": "Presets",
           "html": "<button class=\"trigger default\">Hover me<c2-tooltip delay=\"100\" client:only=\"lit\">Save changes</c2-tooltip></button>",
-          "css": ".default {\n  --c2-tooltip--max-width: 240px;\n}\n.trigger {\n  font: inherit;\n  font-size: 13px;\n  padding: 6px 12px;\n  border-radius: 8px;\n  border: 1px solid #d4d4d8;\n  background: #ffffff;\n  color: #18181b;\n  cursor: pointer;\n}"
+          "css": ".trigger {\n  font: inherit;\n  font-size: 13px;\n  padding: 6px 12px;\n  border-radius: 8px;\n  border: 1px solid #d4d4d8;\n  background: #ffffff;\n  color: #18181b;\n  cursor: pointer;\n}"
         },
         {
           "kind": "gallery",
@@ -25512,6 +26135,8 @@
   },
   "tagIndex": {
     "c2-accordion": "accordion",
+    "c2-attachment": "attachment",
+    "c2-attachment-group": "attachment",
     "c2-avatar": "avatar",
     "c2-badge": "badge",
     "c2-breadcrumb": "breadcrumb",
@@ -25569,6 +26194,7 @@
   },
   "packageIndex": {
     "@c2n/accordion": "accordion",
+    "@c2n/attachment": "attachment",
     "@c2n/avatar": "avatar",
     "@c2n/badge": "badge",
     "@c2n/breadcrumb": "breadcrumb",
@@ -25635,7 +26261,7 @@
         "light": "#0265dc",
         "dark": "#5aa3ff",
         "description": "Accent colour: filled buttons, selected states, focused borders, links.",
-        "usedBy": 32
+        "usedBy": 33
       },
       {
         "name": "--c2-theme--color-primary-hover",
@@ -25675,7 +26301,7 @@
         "light": "#ffffff",
         "dark": "#18181b",
         "description": "Default surface of inputs, lists, cards, dialogs.",
-        "usedBy": 21
+        "usedBy": 22
       },
       {
         "name": "--c2-theme--color-surface-container-low",
@@ -25691,7 +26317,7 @@
         "light": "#f4f4f5",
         "dark": "#27272a",
         "description": "Hover surface for rows and icon buttons.",
-        "usedBy": 19
+        "usedBy": 21
       },
       {
         "name": "--c2-theme--color-on-surface",
@@ -25699,7 +26325,7 @@
         "light": "#18181b",
         "dark": "#f4f4f5",
         "description": "Primary text colour.",
-        "usedBy": 32
+        "usedBy": 33
       },
       {
         "name": "--c2-theme--color-on-surface-variant",
@@ -25707,7 +26333,7 @@
         "light": "#71717a",
         "dark": "#a1a1aa",
         "description": "Secondary text, placeholders, icons, supporting text.",
-        "usedBy": 42
+        "usedBy": 47
       },
       {
         "name": "--c2-theme--color-outline",
@@ -25723,7 +26349,7 @@
         "light": "#e4e4e7",
         "dark": "#27272a",
         "description": "Hairline dividers and light borders.",
-        "usedBy": 44
+        "usedBy": 46
       },
       {
         "name": "--c2-theme--color-outline-strong",
@@ -25739,7 +26365,7 @@
         "light": "#dc2626",
         "dark": "#f87171",
         "description": "Error borders, error text, required indicators.",
-        "usedBy": 12
+        "usedBy": 13
       },
       {
         "name": "--c2-theme--color-scrim",
@@ -25784,14 +26410,14 @@
         "category": "font",
         "light": "14px",
         "description": "Body text: buttons, inputs, list items, dialog content.",
-        "usedBy": 25
+        "usedBy": 26
       },
       {
         "name": "--c2-theme--font-weight-medium",
         "category": "font",
         "light": "500",
         "description": "Medium weight: buttons, headers, tooltips.",
-        "usedBy": 19
+        "usedBy": 20
       },
       {
         "name": "--c2-theme--font-weight-semibold",
@@ -25826,7 +26452,7 @@
         "category": "radius",
         "light": "14px",
         "description": "Extra large radius: dialogs.",
-        "usedBy": 4
+        "usedBy": 5
       },
       {
         "name": "--c2-theme--radius-full",
@@ -25855,14 +26481,14 @@
         "light": "2px solid rgba(2, 101, 220, 0.4)",
         "dark": "2px solid rgba(90, 163, 255, 0.5)",
         "description": "Focus-visible outline of every component.",
-        "usedBy": 24
+        "usedBy": 25
       },
       {
         "name": "--c2-theme--disabled-opacity",
         "category": "disabled",
         "light": "0.38",
         "description": "Opacity of disabled components.",
-        "usedBy": 22
+        "usedBy": 23
       },
       {
         "name": "--c2-theme--motion-scale",
@@ -25891,6 +26517,24 @@
     "mapping": {
       "--c2-accordion--border-radius": "--c2-theme--radius-lg",
       "--c2-accordion--transition-duration": "--c2-theme--motion-scale",
+      "--c2-attachment--background": "--c2-theme--color-surface",
+      "--c2-attachment--border": "--c2-theme--color-outline-variant",
+      "--c2-attachment--border-radius": "--c2-theme--radius-xl",
+      "--c2-attachment--color": "--c2-theme--color-on-surface",
+      "--c2-attachment__media--background": "--c2-theme--color-surface-container",
+      "--c2-attachment__media--color": "--c2-theme--color-on-surface-variant",
+      "--c2-attachment__name--font-size": "--c2-theme--font-size-md",
+      "--c2-attachment__name--font-weight": "--c2-theme--font-weight-medium",
+      "--c2-attachment__metadata--color": "--c2-theme--color-on-surface-variant",
+      "--c2-attachment__metadata--font-size": "--c2-theme--font-size-sm",
+      "--c2-attachment__status--color": "--c2-theme--color-on-surface-variant",
+      "--c2-attachment__status__error--color": "--c2-theme--color-error",
+      "--c2-attachment__progress--background": "--c2-theme--color-outline-variant",
+      "--c2-attachment__progress--color": "--c2-theme--color-primary",
+      "--c2-attachment__action--color": "--c2-theme--color-on-surface-variant",
+      "--c2-attachment__action__hover--background": "--c2-theme--color-surface-container",
+      "--c2-attachment__action__focus--outline": "--c2-theme--focus-ring",
+      "--c2-attachment__disabled--opacity": "--c2-theme--disabled-opacity",
       "--c2-avatar--border-top-left-radius": "--c2-theme--radius-full",
       "--c2-avatar--border-top-right-radius": "--c2-theme--radius-full",
       "--c2-avatar--border-bottom-left-radius": "--c2-theme--radius-full",
@@ -26036,6 +26680,7 @@
       "--c2-icon-button__disabled--opacity": "--c2-theme--disabled-opacity",
       "--c2-icon-button__selected--background-color": "--c2-theme--color-surface-container",
       "--c2-kbd--background-color": "--c2-theme--color-surface-container",
+      "--c2-kbd--color": "--c2-theme--color-on-surface-variant",
       "--c2-kbd--border": "--c2-theme--border",
       "--c2-kbd--font-family": "--c2-theme--font-family",
       "--c2-kbd--font-size": "--c2-theme--font-size-sm",
@@ -26092,7 +26737,6 @@
       "--c2-menu-item__description--color": "--c2-theme--color-on-surface-variant",
       "--c2-menu-item__description--font-size": "--c2-theme--font-size-sm",
       "--c2-menu-item__shortcut--color": "--c2-theme--color-on-surface-variant",
-      "--c2-menu-item__shortcut--font-size": "--c2-theme--font-size-sm",
       "--c2-menu-item__icon--color": "--c2-theme--color-on-surface-variant",
       "--c2-menu-item__destructive--color": "--c2-theme--color-error",
       "--c2-menu-item__focus--outline": "--c2-theme--focus-ring",
