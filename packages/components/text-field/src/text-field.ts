@@ -18,7 +18,7 @@ export type TextFieldType = 'text' | 'email' | 'password' | 'search' | 'tel' | '
  *
  * @tag c2-text-field
  *
- * @slot prefix-icon - Icon (or short adornment text) at the start of the field: an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon`.
+ * @slot prefix-icon - Icon (or short adornment text) at the start of the field: an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon`. Icons are sized by `--c2-text-field__icon--size`; an adornment keeps its own width.
  * @slot suffix-icon - Icon or adornment at the end of the field, after the clear button.
  * @slot clear-icon - Replaces the default cross of the clear button.
  * @slot help-icon - Icon shown beside the field, outside the border, e.g. a tooltip trigger.
