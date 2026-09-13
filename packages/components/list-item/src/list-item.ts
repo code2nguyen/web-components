@@ -26,6 +26,7 @@ import { redispatchEvent } from '@c2n/core/dom-helper.js'
  * @slot suffix-icon - Icon shown after the content, e.g. a check mark or shortcut hint.
  *
  * @event {CustomEvent<{ selected: boolean; value: string }>} selected-change - Fired after `selected` changes, whether from a click or from the parent list.
+ * @event {MouseEvent} click - Fired when an enabled row is activated; a row with `href` also navigates.
  *
  * @cssproperty {pixel} [--c2-list-item--min-height=36px]
  * @cssproperty {pixel} [--c2-list-item--gap=8px] - Space between the icons and the content.
@@ -114,6 +115,7 @@ export class ListItem extends LitElement {
   /** Makes the row a link. Selection still works when the row sits in a list. */
   @property() href: string | undefined = undefined
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target: string | undefined = undefined
 
   /** Arbitrary payload returned alongside `value` in the list's `selection-change` event. Not an attribute. */

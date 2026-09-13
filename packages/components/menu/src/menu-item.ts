@@ -106,6 +106,7 @@ export class MenuItem extends LitElement {
   /** Makes the row a link; Enter and a click navigate, and `menu-select` still fires. */
   @property() href?: string
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target?: string
 
   /** Paints the row in the destructive colour, for delete-style commands. */

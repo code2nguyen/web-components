@@ -6,7 +6,7 @@ import { getCollection, getEntry } from 'astro:content'
 import { componentManifests } from '../../../store/component-manifests'
 import { countGalleryExamples } from '../../../utils/gallery'
 
-/** API reference for a component (attributes, events, CSS custom properties) from its custom-elements manifest. */
+/** API reference for a component (attributes, slots, events, CSS parts and custom properties) from its custom-elements manifest. */
 export async function getStaticPaths() {
   const componentEntries = await getCollection('components')
   return componentEntries.map((entry) => ({
@@ -35,7 +35,9 @@ const headings = elements.flatMap(({ tag, manifest, idPrefix }) =>
   [
     multiple && { depth: 2, slug: idPrefix, text: tag },
     manifest.attributes.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-attributes`, text: 'Attributes' },
+    manifest.slots.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-slots`, text: 'Slots' },
     manifest.events.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-events`, text: 'Events' },
+    manifest.cssParts.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-parts`, text: 'CSS parts' },
     manifest.cssProperties.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-css`, text: 'CSS custom properties' },
   ].filter((heading): heading is Heading => Boolean(heading)),
 )

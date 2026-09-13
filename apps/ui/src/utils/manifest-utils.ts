@@ -33,7 +33,7 @@ export function normalizeManifest(value: CustomElement): ComponentManifest {
 
   const events: EventDeclarationItem[] =
     value.events
-      ?.filter((item) => item.name)
+      ?.filter((item) => item.name && item.name !== 'undefined' && /^[a-z][a-z0-9-]*$/.test(item.name))
       .map((item) => {
         return {
           name: item.name,
@@ -42,11 +42,26 @@ export function normalizeManifest(value: CustomElement): ComponentManifest {
         }
       }) ?? []
 
+  const slots =
+    value.slots?.map((item) => ({
+      name: item.name ?? '',
+      description: item.description,
+    })) ?? []
+
+  const cssParts =
+    value.cssParts?.map((item) => ({
+      name: item.name,
+      description: item.description,
+    })) ?? []
+
   return {
     host: {},
     attributes,
+    slots,
     cssProperties,
     events,
+    cssParts,
+    description: value.description,
     allCssProperties: [...cssProperties],
     internalComponents: value.internalComponents ?? [],
     slotComponents: value.slotComponents ?? [],

@@ -1,0 +1,7 @@
+interface:
+  display_name: 'c2n Components'
+  short_description: 'Build applications with c2n components'
+  default_prompt: 'Use $c2n-components to build this interface with the appropriate c2-* elements and theme tokens.'
+
+policy:
+  allow_implicit_invocation: true

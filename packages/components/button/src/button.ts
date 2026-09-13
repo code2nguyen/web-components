@@ -3,6 +3,8 @@ import { customElement, property } from 'lit/decorators.js'
 import styles from './button.scss?inline'
 
 /**
+ * Action button with optional leading/trailing icons, busy state and toggle-button semantics.
+ *
  * @tag c2-button
  *
  * @slot default - Button label text.

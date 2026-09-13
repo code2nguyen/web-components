@@ -76,12 +76,15 @@ export class Checkbox extends LitElement {
   /** Form field name forwarded to the inner input. */
   @property({ type: String }) name = ''
 
+  /** Accessible name used when no visible label names the checkbox. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 
+  /** Id of the element that labels the checkbox. */
   @property({ type: String, attribute: 'aria-labelledby' })
   ariaLabelledBy!: undefined | string
 
+  /** Id of the element that describes the checkbox. */
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 

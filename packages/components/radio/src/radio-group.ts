@@ -53,6 +53,7 @@ export class RadioGroup extends LitElement {
   /** Lays the options out in a row instead of a column. */
   @property({ reflect: true }) orientation: RadioGroupOrientation = 'vertical'
 
+  /** Accessible name of the radiogroup when its heading does not label it. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 

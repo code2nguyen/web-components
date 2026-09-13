@@ -9,9 +9,11 @@ export interface Point {
 }
 
 /**
+ * Two-dimensional saturation/value picker for a hue, with pointer and keyboard interaction.
+ *
  * @tag c2-color-area
  *
- * @event {CustomEvent} change
+ * @event {CustomEvent<{ saturation: number; value: number }>} change - Fired while the selected saturation or value changes.
  *
  * @cssproperty {pixel} [--c2-color-area--width=240px]
  * @cssproperty {pixel} [--c2-color-area--height=240px]
@@ -26,8 +28,11 @@ export interface Point {
 export class ColorArea extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /** Hue of the colour plane in degrees. */
   @property({ type: Number }) hue = 0
+  /** Selected saturation from 0 to 1. */
   @property({ type: Number }) saturation = 1
+  /** Selected brightness value from 0 to 1. */
   @property({ type: Number }) value = 1
 
   public get tinyColor(): TinyColor {

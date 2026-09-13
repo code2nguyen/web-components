@@ -96,8 +96,10 @@ export class Card extends LitElement {
   /** Makes the whole card a link. */
   @property() href: string | undefined = undefined
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target: string | undefined = undefined
 
+  /** Link relationship forwarded to the anchor when `href` is set. */
   @property() rel: string | undefined = undefined
 
   @state() private hasMedia = false

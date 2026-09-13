@@ -11,7 +11,7 @@ import type { ElementEntry } from './registry-types.ts'
 export interface InstalledInfo {
   version: string
   /** Elements from the installed `custom-elements.json`, keyed by tag, when the package ships one. */
-  elements?: Map<string, Pick<ElementEntry, 'attributes' | 'slots' | 'events' | 'cssProperties'>>
+  elements?: Map<string, Pick<ElementEntry, 'attributes' | 'slots' | 'events' | 'cssParts' | 'cssProperties'>>
 }
 
 const TTL = 10_000
@@ -35,10 +35,17 @@ export function installedPackage(name: string): InstalledInfo | null {
       try {
         const manifest = JSON.parse(readFileSync(join(pkgJsonPath, '..', pkg.customElements), 'utf8')) as {
           modules?: {
-            declarations?: { tagName?: string; attributes?: unknown[]; slots?: unknown[]; events?: unknown[]; cssProperties?: { name?: string }[] }[]
+            declarations?: {
+              tagName?: string
+              attributes?: unknown[]
+              slots?: unknown[]
+              events?: unknown[]
+              cssParts?: unknown[]
+              cssProperties?: { name?: string }[]
+            }[]
           }[]
         }
-        const elements = new Map<string, Pick<ElementEntry, 'attributes' | 'slots' | 'events' | 'cssProperties'>>()
+        const elements = new Map<string, Pick<ElementEntry, 'attributes' | 'slots' | 'events' | 'cssParts' | 'cssProperties'>>()
         for (const mod of manifest.modules ?? []) {
           for (const decl of mod.declarations ?? []) {
             if (!decl.tagName) continue
@@ -46,6 +53,7 @@ export function installedPackage(name: string): InstalledInfo | null {
               attributes: (decl.attributes ?? []) as ElementEntry['attributes'],
               slots: (decl.slots ?? []) as ElementEntry['slots'],
               events: (decl.events ?? []) as ElementEntry['events'],
+              cssParts: (decl.cssParts ?? []) as ElementEntry['cssParts'],
               cssProperties: (decl.cssProperties ?? []).filter((p) => p.name) as ElementEntry['cssProperties'],
             })
           }

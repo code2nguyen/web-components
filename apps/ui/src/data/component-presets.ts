@@ -16,6 +16,21 @@ export interface ComponentPresetGroup {
   presets: ComponentPreset[]
 }
 
+/** Human-readable intent for the inspector and MCP when an older preset has no curated description yet. */
+export function describeComponentPreset(preset: ComponentPreset): string {
+  if (preset.description) return preset.description
+  const properties = [
+    ...new Set(
+      Object.keys(preset.css ?? {})
+        .map((name) => name.split('--').at(-1)?.replaceAll('-', ' '))
+        .filter(Boolean),
+    ),
+  ]
+  const attributes = Object.keys(preset.attributes ?? {}).map((name) => name.replaceAll('-', ' '))
+  const changes = [...properties, ...attributes]
+  return changes.length ? `Adjusts ${new Intl.ListFormat('en').format(changes.slice(0, 4))}.` : `${preset.name} component treatment.`
+}
+
 export const componentPresets: Record<string, ComponentPresetGroup> = {
   'c2-accordion': {
     html: `<c2-accordion style="width:240px"><c2-details label="Shipping" expanded>Delivered in 3–5 business days.</c2-details><c2-details label="Returns">Return within 30 days.</c2-details></c2-accordion>`,

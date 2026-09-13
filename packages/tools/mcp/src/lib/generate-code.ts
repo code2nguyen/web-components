@@ -88,7 +88,7 @@ export function generateCode(format: CodeFormat, input: CodeInput): string {
         ...(attributeLines ? [``, `  override connectedCallback() {`, `    super.connectedCallback()`, attributeLines, `  }`] : []),
         `}`,
         ``,
-        `customElements.define('${name}', ${className})`,
+        `if (!customElements.get('${name}')) customElements.define('${name}', ${className})`,
       ].join('\n')
     }
     case 'json':

@@ -22,6 +22,16 @@ export interface EventDeclarationItem {
   description?: string
 }
 
+export interface SlotDeclarationItem {
+  name: string
+  description?: string
+}
+
+export interface CSSPartDeclarationItem {
+  name: string
+  description?: string
+}
+
 export interface ComponentManifest {
   host: {
     w?: string
@@ -32,7 +42,10 @@ export interface ComponentManifest {
   internalComponents: string[]
   slotComponents: string[]
   attributes: AttributeDeclarationItem[]
+  slots: SlotDeclarationItem[]
   events: EventDeclarationItem[]
+  cssParts: CSSPartDeclarationItem[]
+  description?: string
   tagName: string
   /** Other custom elements declared by the same package (e.g. `c2-tab` for `c2-tabs`), shown on the same API page. */
   siblingTags: string[]

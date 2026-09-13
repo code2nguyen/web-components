@@ -49,7 +49,7 @@ import type { TextField } from '@c2n/text-field'
 import type { Textarea } from '@c2n/textarea'
 import type { SelectionChangeEventDetail } from '@c2n/list'
 import type { ExtraComponentConfigState, InspectorTab } from '../../model/component-config-state.ts'
-import { componentPresets } from '../../data/component-presets.ts'
+import { componentPresets, describeComponentPreset } from '../../data/component-presets.ts'
 import {
   applyPreset,
   closeInspector,
@@ -809,7 +809,7 @@ export class ComponentConfigurationPanel extends LitElement {
                 .value=${[]}
                 @selection-change=${this.handleApplyFromList(builtIn.map((preset) => ({ name: preset.name, config: presetToConfig(preset) })))}
               >
-                ${builtIn.map((preset) => this.renderPresetItem(preset.name, preset.description ?? '', presetToConfig(preset)))}
+                ${builtIn.map((preset) => this.renderPresetItem(preset.name, describeComponentPreset(preset), presetToConfig(preset)))}
               </c2-list>
             </section>`
           : nothing

@@ -8,11 +8,13 @@ import { addClasses } from '@c2n/core/css-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 
 /**
+ * Auto-growing message composer that submits with Enter and inserts a newline with Alt+Enter.
+ *
  * @tag c2-chat-input
  *
- * @slot send-icon
+ * @slot send-icon - Icon button used to submit the current message.
  *
- * @event {CustomEvent} submit-message
+ * @event {CustomEvent<string>} submit-message - Fired when the user submits; `detail` is the message text before the field is cleared.
  * @cssproperty {border-radius} [--c2-chat-input--border-top-left-radius=4px]
  * @cssproperty {border-radius} [--c2-chat-input--border-top-right-radius=4px]
  * @cssproperty {border-radius} [--c2-chat-input--border-bottom-left-radius=4px]
@@ -63,8 +65,11 @@ import { classMap } from 'lit/directives/class-map.js'
 export class ChatInput extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /** Hint shown while the composer is empty. */
   @property({ type: String }) placeholder = ''
+  /** Current message text. */
   @property({ type: String }) value = ''
+  /** Accessible name forwarded to the inner textarea. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   // State
