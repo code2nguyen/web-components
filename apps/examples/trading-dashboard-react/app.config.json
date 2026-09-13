@@ -1,0 +1,7 @@
+{
+  "title": "Trading Dashboard",
+  "description": "A React 19 app driving c2-table with live-ticking state, plus c2-card, c2-badge, c2-select, c2-text-field and c2-switch.",
+  "framework": "react",
+  "tags": ["table", "live data", "filtering"],
+  "order": 20
+}

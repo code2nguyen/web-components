@@ -1,0 +1,100 @@
+---
+import { getCollection } from 'astro:content'
+import Main from '../../layouts/Main.astro'
+import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import SiteCard from '../../components/ui/SiteCard.astro'
+import { EXAMPLE_FRAMEWORKS, EXAMPLE_FRAMEWORK_LABELS } from '../../schemas'
+
+const base = import.meta.env.BASE_URL
+const examples = (await getCollection('examples')).sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title))
+const groups = EXAMPLE_FRAMEWORKS.map((framework) => ({
+  framework,
+  label: EXAMPLE_FRAMEWORK_LABELS[framework],
+  items: examples.filter((example) => example.data.framework === framework),
+})).filter((group) => group.items.length > 0)
+
+const headings = groups.map((group) => ({ depth: 2, slug: group.framework, text: group.label }))
+---
+
+<Main title="Examples · c2n web components" withSidebar section="examples">
+  <DocComponentLayout section="examples" headings={headings}>
+    <h1>Examples</h1>
+    <p>
+      Complete applications built from the <code>@c2n</code> packages — each one a real, standalone consumer with its own build, its own dependencies and its own
+      copy of the custom element registry. The component pages show a component; these show what a whole app looks like.
+    </p>
+    {
+      groups.map((group) => (
+        <section>
+          <h2 id={group.framework}>{group.label}</h2>
+          <ul class="example-index">
+            {group.items.map((example) => (
+              <li>
+                <SiteCard hydrate="defined" href={`${base}/examples/${example.id}`} class="example-index__card">
+                  <span class="example-index__title">
+                    {example.data.title}
+                    <c2-feather-arrow-right class="site-card__arrow" />
+                  </span>
+                  <span class="example-index__desc">{example.data.description}</span>
+                  <span class="example-index__tags">
+                    {example.data.tags.map((tag) => (
+                      <code>{tag}</code>
+                    ))}
+                  </span>
+                </SiteCard>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </DocComponentLayout>
+</Main>
+
+<style lang="scss">
+  .example-index {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+
+    li {
+      display: flex;
+    }
+    :global(.example-index__card) {
+      flex: 1;
+      --c2-card--border-top-left-radius: var(--site-radius-md);
+      --c2-card--border-top-right-radius: var(--site-radius-md);
+      --c2-card--border-bottom-left-radius: var(--site-radius-md);
+      --c2-card--border-bottom-right-radius: var(--site-radius-md);
+      --c2-card--padding-bottom: 14px;
+      --c2-card__hover--background: var(--site-color-surface-container-1);
+      --c2-card__hover--box-shadow: none;
+    }
+    &__title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      color: var(--site-color-on-surface);
+    }
+    &__desc {
+      display: block;
+      margin: 6px 0;
+      font-size: 13px;
+      color: var(--site-color-on-surface-variant);
+      flex: 1;
+    }
+    &__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      code {
+        font-size: 11px;
+        color: var(--site-color-on-surface-muted);
+      }
+    }
+  }
+</style>

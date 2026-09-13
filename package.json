@@ -21,11 +21,12 @@
     "fix": "npm run lint:fix && npm run format:fix",
     "format": "npm run format:fix",
     "version": "node packages/tools/mcp/scripts/stamp-version.ts && node packages/tools/skill/scripts/build-skill.ts && git add packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json",
-    "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --check",
-    "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts}\" --write",
+    "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts,tsx,vue}\" --check",
+    "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts,tsx,vue}\" --write",
     "ui": "npm run start -w apps/ui",
     "ui:dev": "npm run dev -w apps/ui",
     "ui:build": "wireit",
+    "examples:build": "wireit",
     "build": "wireit",
     "build:generator": "npm run build --workspace=scripts/generator",
     "pregenerate": "npm run build:generator",
@@ -53,6 +54,7 @@
     "packages/core",
     "packages/tools/*",
     "apps/ui",
+    "apps/examples/*",
     "scripts/generator"
   ],
   "overrides": {
@@ -133,9 +135,18 @@
         "./packages/tools/theme:build"
       ]
     },
+    "examples:build": {
+      "dependencies": [
+        "./apps/examples/basic-form-html:build",
+        "./apps/examples/trading-dashboard-react:build",
+        "./apps/examples/orders-admin-angular:build",
+        "./apps/examples/support-inbox-vue:build"
+      ]
+    },
     "ui:build": {
       "dependencies": [
-        "build"
+        "build",
+        "examples:build"
       ],
       "command": "npm run build -w apps/ui"
     },
@@ -147,8 +158,8 @@
     }
   },
   "lint-staged": {
-    "**/*.{cjs,html,js,json,md,ts}": "prettier --write",
-    "{*.{js,ts},!(dist)/**/*.{js,ts}}": "eslint --fix"
+    "**/*.{cjs,html,js,json,md,ts,tsx,vue}": "prettier --write",
+    "{*.{js,ts,tsx},!(dist)/**/*.{js,ts,tsx}}": "eslint --fix"
   },
   "optionalDependencies": {
     "@astrojs/compiler-binding-linux-x64-gnu": "0.4.0",

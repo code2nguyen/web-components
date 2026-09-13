@@ -31,3 +31,29 @@ export const guideSchema = z.object({
   /** Sidebar order, ascending. */
   order: z.number().default(100),
 })
+
+export const EXAMPLE_FRAMEWORKS = ['html', 'react', 'angular', 'vue'] as const
+
+export type ExampleFramework = (typeof EXAMPLE_FRAMEWORKS)[number]
+
+/** Human label for an example's framework, used on cards and in the sidebar. */
+export const EXAMPLE_FRAMEWORK_LABELS: Record<ExampleFramework, string> = {
+  html: 'HTML',
+  react: 'React',
+  angular: 'Angular',
+  vue: 'Vue',
+}
+
+/**
+ * Example apps (`apps/examples/<id>/app.config.json`): complete applications that consume the published
+ * packages the way an outside project would. The metadata lives with the app, not in the docs site, so
+ * adding an example is a directory drop plus a wireit entry.
+ */
+export const exampleSchema = z.object({
+  title: z.string(),
+  description: z.string().default(''),
+  framework: z.enum(EXAMPLE_FRAMEWORKS),
+  tags: z.array(z.string()).default([]),
+  /** Card order, ascending. */
+  order: z.number().default(100),
+})

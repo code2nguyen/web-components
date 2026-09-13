@@ -1,10 +1,10 @@
 ---
 import { getCollection } from 'astro:content'
-import { COMPONENT_CATEGORIES } from '../schemas'
+import { COMPONENT_CATEGORIES, EXAMPLE_FRAMEWORKS, EXAMPLE_FRAMEWORK_LABELS } from '../schemas'
 
 interface Props {
   /** Which section this sidebar navigates. */
-  section?: 'components' | 'icons' | 'guides'
+  section?: 'components' | 'icons' | 'guides' | 'examples'
   /** Currently open entry id. */
   currentId?: string
 }
@@ -14,6 +14,7 @@ const base = import.meta.env.BASE_URL
 const components = (await getCollection('components')).sort((a, b) => a.data.title.localeCompare(b.data.title))
 const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.localeCompare(b.data.title))
 const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title))
+const examples = (await getCollection('examples')).sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title))
 
 const groups =
   section === 'components'
@@ -25,17 +26,29 @@ const groups =
       })).filter((group) => group.items.length > 0)
     : section === 'icons'
       ? [{ title: 'Icon sets', items: iconSets.map((set) => ({ id: set.id, title: set.data.title, href: `${base}/icons/${set.id}` })) }]
-      : [{ title: 'Guides', items: guides.map((guide) => ({ id: guide.id, title: guide.data.title, href: `${base}/guides/${guide.id}` })) }]
+      : section === 'examples'
+        ? EXAMPLE_FRAMEWORKS.map((framework) => ({
+            title: EXAMPLE_FRAMEWORK_LABELS[framework],
+            items: examples
+              .filter((example) => example.data.framework === framework)
+              .map((e) => ({ id: e.id, title: e.data.title, href: `${base}/examples/${e.id}` })),
+          })).filter((group) => group.items.length > 0)
+        : [{ title: 'Guides', items: guides.map((guide) => ({ id: guide.id, title: guide.data.title, href: `${base}/guides/${guide.id}` })) }]
 
 const overviews = {
   components: { href: `${base}/components/`, label: 'All components' },
   icons: { href: `${base}/icons/`, label: 'All icon sets' },
   guides: { href: `${base}/guides/`, label: 'All guides' },
+  examples: { href: `${base}/examples/`, label: 'All examples' },
 }
 const overview = overviews[section]
 ---
 
-<nav class="sidebar__nav" data-section={section} aria-label={section === 'components' ? 'Components' : section === 'icons' ? 'Icon sets' : 'Guides'}>
+<nav
+  class="sidebar__nav"
+  data-section={section}
+  aria-label={section === 'components' ? 'Components' : section === 'icons' ? 'Icon sets' : section === 'examples' ? 'Example apps' : 'Guides'}
+>
   <a href={overview.href} class:list={['sidebar__overview', { active: !currentId }]}>{overview.label}</a>
   {
     groups.map((group) => (

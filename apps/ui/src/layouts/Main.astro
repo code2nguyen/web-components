@@ -18,7 +18,7 @@ interface Props {
   /** Render the mobile "open navigation" button (docs pages). */
   withSidebar?: boolean
   /** Which top-level nav item is active. */
-  section?: 'components' | 'icons' | 'guides'
+  section?: 'components' | 'icons' | 'guides' | 'examples'
 }
 const { title, description = 'A library of small, themable Lit web components published as individual npm packages.', withSidebar, section } = Astro.props
 const repoUrl = 'https://github.com/code2nguyen/web-components'
@@ -75,6 +75,7 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
           <LinkButton client:load class="site-header__nav-link" href={`${base}/components/`} selected={section === 'components'}>Components</LinkButton>
           <LinkButton client:load class="site-header__nav-link" href={`${base}/icons/`} selected={section === 'icons'}>Icons</LinkButton>
           <LinkButton client:load class="site-header__nav-link" href={`${base}/guides/`} selected={section === 'guides'}>Guides</LinkButton>
+          <LinkButton client:load class="site-header__nav-link" href={`${base}/examples/`} selected={section === 'examples'}>Examples</LinkButton>
           <LinkButton client:load class="site-header__nav-link" href={`${base}/#getting-started`}>Getting started</LinkButton>
         </nav>
 

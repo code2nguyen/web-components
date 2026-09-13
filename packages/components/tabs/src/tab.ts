@@ -38,7 +38,6 @@ export class Tab extends LitElement {
   constructor() {
     super()
     if (!isServer) {
-      this.setAttribute('slot', 'tab')
       this.addEventListener('click', this.handleClick)
       this.addEventListener('keydown', this.handleKeydown)
     }
@@ -46,6 +45,10 @@ export class Tab extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
+    // A custom element constructor must not set attributes: `document.createElement('c2-tab')` enforces that and
+    // throws `NotSupportedError`. Parser-created tabs never hit the check, so this only shows up when a framework
+    // builds the element imperatively — Angular's renderer does, and the whole tab strip dies with it.
+    if (!isServer) this.setAttribute('slot', 'tab')
     if (!this.hasAttribute('role')) this.setAttribute('role', 'tab')
     if (!this.hasAttribute('tabindex')) this.tabIndex = -1
   }
