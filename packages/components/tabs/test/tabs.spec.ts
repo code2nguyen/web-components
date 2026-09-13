@@ -29,3 +29,37 @@ test('click emits one change and clearing selection restores the first panel', a
   await props(host, { selectedTab: '' })
   await expect(page.getByRole('tabpanel')).toHaveText('First content')
 })
+
+// Every test above renders parsed markup, which is the one path that never checks whether a custom element
+// constructor added attributes. `document.createElement` does check, and it is how React, Angular and every
+// other framework renderer builds an element — so a constructor that called `setAttribute` threw
+// `NotSupportedError` and took the whole tab strip with it, invisibly to the suite.
+test('tabs built with createElement, the way a framework renderer builds them, behave like parsed ones', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-tabs></c2-tabs>')
+  await page.locator('c2-tabs').evaluate(async (tabs) => {
+    for (const [id, label] of [
+      ['one', 'First'],
+      ['two', 'Second'],
+    ]) {
+      const tab = document.createElement('c2-tab')
+      tab.setAttribute('for', id)
+      tab.textContent = label
+      const panel = document.createElement('div')
+      panel.id = id
+      panel.textContent = `${label} content`
+      tabs.append(tab, panel)
+      await customElements.whenDefined('c2-tab')
+      await (tab as Element & { updateComplete?: Promise<boolean> }).updateComplete
+    }
+    await (tabs as Element & { updateComplete?: Promise<boolean> }).updateComplete
+  })
+
+  // The slot is what puts a tab in the tab strip; the constructor used to set it.
+  await expect(page.locator('c2-tab[for="one"]')).toHaveAttribute('slot', 'tab')
+  await expect(page.locator('c2-tab[for="two"]')).toHaveAttribute('slot', 'tab')
+
+  const first = page.getByRole('tab', { name: 'First' })
+  await expect(first).toHaveAttribute('aria-selected', 'true')
+  await page.getByRole('tab', { name: 'Second' }).click()
+  await expect(page.getByRole('tabpanel')).toHaveText('Second content')
+})
