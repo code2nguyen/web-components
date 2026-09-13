@@ -3,17 +3,17 @@ import { customElement, property } from 'lit/decorators.js'
 import styles from './chatbot.scss?inline'
 import '@c2n/avatar'
 /**
+ * Minimal chatbot shell that greets a named user and renders application-provided conversation content.
+ *
  * @tag c2-chatbot
  *
- * @slot default - This is a default/unnamed slot
- *
- * @event
- * @cssproperty
+ * @slot default - Conversation content rendered inside the chatbot shell.
  */
 @customElement('c2-chatbot')
 export class Chatbot extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /** Name included in the chatbot greeting. */
   @property({ type: String }) name = 'Example property'
 
   override render() {

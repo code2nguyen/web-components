@@ -1,11 +1,10 @@
 {
   "name": "@c2n/mcp",
-  "version": "0.0.5",
-  "private": true,
+  "version": "0.0.6",
   "description": "MCP server exposing the c2n web components (API, examples, presets, theme tokens, variant generation) to AI agents",
   "type": "module",
   "bin": {
-    "c2n-mcp": "./dist/cli.js"
+    "c2n-mcp": "dist/cli.js"
   },
   "exports": {
     ".": {
@@ -36,15 +35,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/code2nguyen/web-components.git"
+    "url": "git+https://github.com/code2nguyen/web-components.git"
   },
   "scripts": {
     "build": "wireit",
     "build:registry": "wireit",
     "build:tsc": "wireit",
+    "predev": "npm run build:registry",
     "start": "node dist/cli.js",
     "dev": "node src/cli.ts",
+    "preinspect": "npm run build:registry",
     "inspect": "npx -y @modelcontextprotocol/inspector node src/cli.ts",
+    "presmoke": "npm run build",
+    "prepack": "npm run build",
     "smoke": "node scripts/smoke.ts"
   },
   "wireit": {
@@ -65,7 +68,7 @@
         "../../../apps/ui/src/data/component-previews.ts",
         "../theme/dist/tokens.json",
         "../skill/skills/c2n-components/references/*.md",
-        "!../skill/skills/c2n-components/references/components-cheatsheet.md",
+        "!../skill/skills/c2n-components/references/component-catalog.md",
         "../../../lerna.json",
         "../../../package.json"
       ],

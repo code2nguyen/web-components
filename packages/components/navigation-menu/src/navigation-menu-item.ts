@@ -140,6 +140,7 @@ export class NavigationMenuItem extends LitElement {
   /** Makes the item a link. An item with panel content is always a trigger, even with an `href`. */
   @property() href?: string
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target?: string
 
   /** The entry of the page being shown: announced as `aria-current="page"` and styled with the `__current` variables. */

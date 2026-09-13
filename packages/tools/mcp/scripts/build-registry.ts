@@ -10,7 +10,8 @@
  * - the skill's reference guides (embedded so `npx @c2n/mcp` works offline)
  *
  * Run with `npm run build:registry -w packages/tools/mcp` (Node 24 type stripping: erasable TypeScript only).
- * The output is committed; no timestamp is written so CI can diff it for freshness.
+ * The output is an ignored build artifact included in the published package. No timestamp is written so local builds
+ * remain deterministic.
  */
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
@@ -38,6 +39,7 @@ interface Manifest {
       attributes?: { name: string; type?: { text?: string }; default?: string; description?: string }[]
       slots?: { name?: string; description?: string }[]
       events?: { name: string; type?: { text?: string }; description?: string }[]
+      cssParts?: { name: string; description?: string }[]
       cssProperties?: { name?: string; type?: { text?: string }; default?: string; description?: string }[]
       internalComponents?: string[]
       slotComponents?: string[]
@@ -203,8 +205,9 @@ for (const file of existsSync(galleryDir) ? readdirSync(galleryDir).filter((f) =
   galleryPages.set(basename(file, '.mdx'), { id: basename(file, '.mdx'), section: 'components', frontmatter, body })
 }
 
-const { componentPresets } = (await import(pathToFileURL(join(uiRoot, 'data/component-presets.ts')).href)) as {
+const { componentPresets, describeComponentPreset } = (await import(pathToFileURL(join(uiRoot, 'data/component-presets.ts')).href)) as {
   componentPresets: Record<string, { html: string; presets: Preset[] }>
+  describeComponentPreset: (preset: Preset) => string
 }
 const { componentPreviews } = (await import(pathToFileURL(join(uiRoot, 'data/component-previews.ts')).href)) as { componentPreviews: Record<string, string> }
 
@@ -284,7 +287,10 @@ for (const dir of packageDirs.sort()) {
           description: a.description?.trim() || undefined,
         })),
         slots: (decl.slots ?? []).map((s) => ({ name: s.name ?? '', description: s.description?.trim() || undefined })),
-        events: (decl.events ?? []).map((e) => ({ name: e.name, type: e.type?.text, description: e.description?.trim() || undefined })),
+        events: (decl.events ?? [])
+          .filter((e) => typeof e.name === 'string' && e.name !== 'undefined' && /^[a-z][a-z0-9-]*$/.test(e.name))
+          .map((e) => ({ name: e.name, type: e.type?.text, description: e.description?.trim() || undefined })),
+        cssParts: (decl.cssParts ?? []).map((part) => ({ name: part.name, description: part.description?.trim() || undefined })),
         cssProperties,
       })
     }
@@ -335,7 +341,19 @@ for (const dir of packageDirs.sort()) {
     for (const fence of readFences(gallery.body)) {
       if (fence.meta.tag !== 'MdxCodeBlock') continue
       const { css, html } = splitStyle(fence.body)
-      examples.push({ kind: 'gallery', label: fence.meta.label ?? 'Example', section: fence.section, html, css })
+      const label = fence.meta.label ?? 'Example'
+      examples.push({
+        kind: 'gallery',
+        label,
+        section: fence.section,
+        description: fence.meta.description ?? `${label}${fence.section ? ` ${fence.section}` : ''} example for ${elements[0].tag}.`,
+        useWhen: fence.meta.useWhen,
+        accessibility: fence.meta.accessibility,
+        isDefault: label.toLowerCase() === 'default' && !css?.includes('--c2-'),
+        tags: [...new Set([...html.matchAll(/<(c2-[a-z0-9-]+)/g)].map((match) => match[1]))],
+        html,
+        css,
+      })
     }
   }
   if (componentPreviews[id]) examples.push({ kind: 'preview', label: 'Preview', html: componentPreviews[id] })
@@ -365,7 +383,9 @@ for (const dir of packageDirs.sort()) {
       import: tagPattern ? `import '${elements[0].modulePath}'` : `import '${pkg.name}'`,
       importClass: `import { ${elements[0].className} } from '${elements[0].modulePath}'`,
     },
-    presets: presetGroup ? { html: presetGroup.html, items: presetGroup.presets } : undefined,
+    presets: presetGroup
+      ? { html: presetGroup.html, items: presetGroup.presets.map((preset) => ({ ...preset, description: describeComponentPreset(preset) })) }
+      : undefined,
     examples,
     hasGallery: !!gallery,
   }

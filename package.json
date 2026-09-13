@@ -20,7 +20,7 @@
     "lint:fix": "eslint . --fix",
     "fix": "npm run lint:fix && npm run format:fix",
     "format": "npm run format:fix",
-    "version": "node packages/tools/mcp/scripts/stamp-version.ts && node packages/tools/skill/scripts/build-skill.ts && git add packages/tools/mcp/data/registry.json packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json",
+    "version": "node packages/tools/mcp/scripts/stamp-version.ts && node packages/tools/skill/scripts/build-skill.ts && git add packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json",
     "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts,tsx,vue}\" --check",
     "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts,tsx,vue}\" --write",
     "ui": "npm run start -w apps/ui",
@@ -34,7 +34,8 @@
     "clean": "npx del-cli **/node_modules **/dist **/types **/custom-elements.json package-lock.json -f",
     "build:tools": "wireit",
     "mcp:inspect": "npm run inspect -w packages/tools/mcp",
-    "mcp:smoke": "npm run smoke -w packages/tools/mcp"
+    "mcp:smoke": "npm run smoke -w packages/tools/mcp",
+    "docs:check": "node scripts/check-component-docs.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

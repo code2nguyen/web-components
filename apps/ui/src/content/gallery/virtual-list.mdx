@@ -3,6 +3,27 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { VirtualList } from '@c2n/virtual-list'
 
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default,description=Baseline virtual list without component CSS-variable overrides,useWhen=Start here before selecting a styled preset,accessibility=Provide an aria-label that describes the collection
+<style>
+  .default-list {
+    width: 100%;
+    height: 220px;
+  }
+</style>
+<c2-virtual-list
+  client:only="lit"
+  class="default-list"
+  aria-label="People"
+  item-key="id"
+  label-field="name"
+  items='[{"id":"1","name":"Ada Lovelace"},{"id":"2","name":"Grace Hopper"},{"id":"3","name":"Alan Turing"}]'
+></c2-virtual-list>
+```
+
+</GalleryGrid>
+
 ## Presets
 
 Curated looks for `c2-virtual-list`. Open any card in the studio to start from it. `--c2-virtual-list__item--height`

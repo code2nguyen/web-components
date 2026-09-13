@@ -26,6 +26,7 @@ export class Tab extends LitElement {
   /** `id` of the panel this tab controls. */
   @property({ type: String, reflect: true }) for = ''
 
+  /** Prevents activation and removes this tab from keyboard navigation. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** Set by the parent `<c2-tabs>`; do not set by hand. */

@@ -60,8 +60,10 @@ export class NavigationMenuLink extends LitElement {
 
   static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true }
 
+  /** Destination URL. Without it the row is rendered as non-navigating content. */
   @property() href?: string
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target?: string
 
   /** The link to the page being shown: announced as `aria-current="page"` and styled with the `__current` variables. */

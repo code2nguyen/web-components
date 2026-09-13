@@ -4,14 +4,13 @@ on:
   # Deploy on every push to `main` — merging a pull request into `main` is a push,
   # so this covers the merge-a-PR case as well.
   push:
-    branches: [ main ]
+    branches: [main]
 
 # Allow this job to clone the repo and create a page deployment
 permissions:
   contents: read
   pages: write
   id-token: write
-
 
 jobs:
   build:
@@ -36,24 +35,30 @@ jobs:
 
       - name: Check formatting
         run: npm run format:check
-        
+
       - name: Build UI app
-        shell: "bash"
+        shell: 'bash'
         run: npm run ui:build
 
-      - name: Build tools (MCP registry, skill cheatsheet)
+      - name: Check component documentation coverage
+        run: npm run docs:check
+
+      - name: Build tools (MCP registry, skill catalog)
         run: npm run build:tools
 
       - name: Smoke test the MCP server
         run: npm run mcp:smoke
 
+      - name: Test the cross-agent installer
+        run: npm test -w packages/tools/skill
+
       - name: Generated files are up to date
-        run: git diff --exit-code -- packages/tools/mcp/data packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json
+        run: git diff --exit-code -- packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: "apps/ui/dist/"
+          path: 'apps/ui/dist/'
 
   deploy:
     needs: build
@@ -64,6 +69,6 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5 
+        uses: actions/deploy-pages@v5
         with:
           token: ${{ github.token }}

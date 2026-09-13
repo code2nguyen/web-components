@@ -79,14 +79,20 @@ jobs:
       - name: Build all packages
         run: npm run build
 
-      - name: Build tools (MCP registry, skill cheatsheet)
+      - name: Check component documentation coverage
+        run: npm run docs:check
+
+      - name: Build tools (MCP registry, skill catalog)
         run: npm run build:tools
 
       - name: Smoke test the MCP server
         run: npm run mcp:smoke
 
+      - name: Test the cross-agent installer
+        run: npm test -w packages/tools/skill
+
       - name: Generated files are up to date
-        run: git diff --exit-code -- packages/tools/mcp/data packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json
+        run: git diff --exit-code -- packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json
 
       # Each package ships only what its `files` field lists, and `dist/` is built above and never
       # committed — so this is the one place a missing entry shows up before it reaches the registry.
@@ -112,10 +118,9 @@ jobs:
         if: ${{ !inputs.dry_run }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        # `--no-private` skips the private packages — @c2n/config, @c2n/ui, the generator, and for now
-        # @c2n/mcp and @c2n/skill; `--exact` pins the cross-package
-        # dependencies to the released version instead of a caret range. The `version` lifecycle script
-        # of @c2n/skill re-syncs its plugin.json and .mcp.json pin during this step.
+        # `--no-private` skips internal packages such as @c2n/config, @c2n/ui and the generator. `--exact`
+        # pins cross-package dependencies to the released version. The `version` lifecycle script of
+        # @c2n/skill re-syncs its portable/Claude manifests and MCP pins during this step.
         run: npx lerna publish ${{ inputs.bump }} --dist-tag ${{ inputs.dist_tag }} --no-private --exact --yes --force-publish
 
       # lerna already created and pushed the `v<version>` tag; this turns it into a GitHub Release

@@ -97,9 +97,11 @@ export class Radio extends LitElement {
   /** Whether the inner input is in the tab order. The parent group manages this (roving tabindex); do not set by hand. */
   @property({ type: Boolean, attribute: false }) tabbable = true
 
+  /** Accessible name used when no visible label names the radio. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 
+  /** Id of the element that describes the radio. */
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 

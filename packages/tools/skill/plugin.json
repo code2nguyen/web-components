@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "c2n",
+  "description": "Build UI with the c2n web components (c2-* Lit elements from @c2n/*): theme once with @c2n/theme, use the tags directly, turn repeated looks into variant components. Bundles the @c2n/mcp server.",
+  "version": "0.0.6",
+  "author": {
+    "name": "code2nguyen"
+  },
+  "homepage": "https://code2nguyen.github.io/web-components/",
+  "repository": "https://github.com/code2nguyen/web-components",
+  "license": "MIT",
+  "keywords": ["web components", "lit", "design system", "theme", "c2n"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "c2n Web Components",
+        "shortDescription": "Build and theme applications with c2n components",
+        "longDescription": "Component APIs, examples, theme guidance and reusable workflows for applications built with @c2n web components.",
+        "developerName": "code2nguyen",
+        "category": "Developer Tools",
+        "capabilities": ["Read"],
+        "websiteURL": "https://code2nguyen.github.io/web-components/",
+        "defaultPrompt": ["Use c2n Web Components to build this interface with the appropriate c2-* elements and theme tokens."]
+      }
+    }
+  }
+}

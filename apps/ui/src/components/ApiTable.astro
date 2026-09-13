@@ -14,7 +14,9 @@ const componentManifest = componentManifests[componentTag]
 const groupedCssProperties = groupCssProperties(componentManifest.cssProperties)
 const flattenGroupedCssProperties = deepFlatGroupCssProperties(groupedCssProperties)
 const hasAttributes = componentManifest.attributes && componentManifest.attributes.length > 0
+const hasSlots = componentManifest.slots.length > 0
 const hasEvents = componentManifest.events && componentManifest.events.length > 0
+const hasCssParts = componentManifest.cssParts.length > 0
 const hasCss = flattenGroupedCssProperties.length > 0
 ---
 
@@ -50,6 +52,40 @@ const hasCss = flattenGroupedCssProperties.length > 0
                   <td>{attr.default ? <code>{attr.default}</code> : <span class="api__none">—</span>}</td>
                   <td class="api__col-description">
                     <Fragment set:html={attr.description} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+  {
+    hasSlots && (
+      <section class="api__section">
+        <h3 id={`${idPrefix}-slots`}>Slots</h3>
+        <div class="api__table-wrapper">
+          <table class="api__table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th class="api__col-description">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {componentManifest.slots.map((slot) => (
+                <tr>
+                  <td class="api__name">
+                    <span class="api__name-cell">
+                      <code>{slot.name || '(default)'}</code>
+                      <SiteIconButton hydrate="defined" size="xs" label="Copy" tooltip={false} class="api__copy" data-copy={slot.name}>
+                        <c2-feather-copy />
+                      </SiteIconButton>
+                    </span>
+                  </td>
+                  <td class="api__col-description">
+                    <Fragment set:html={slot.description} />
                   </td>
                 </tr>
               ))}
@@ -98,10 +134,49 @@ const hasCss = flattenGroupedCssProperties.length > 0
     )
   }
   {
+    hasCssParts && (
+      <section class="api__section">
+        <h3 id={`${idPrefix}-parts`}>CSS parts</h3>
+        <p class="api__hint">
+          Shadow DOM styling hooks used with <code>::part(name)</code>. Prefer CSS custom properties when they cover the change.
+        </p>
+        <div class="api__table-wrapper">
+          <table class="api__table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th class="api__col-description">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {componentManifest.cssParts.map((part) => (
+                <tr>
+                  <td class="api__name">
+                    <span class="api__name-cell">
+                      <code>{part.name}</code>
+                      <SiteIconButton hydrate="defined" size="xs" label="Copy" tooltip={false} class="api__copy" data-copy={part.name}>
+                        <c2-feather-copy />
+                      </SiteIconButton>
+                    </span>
+                  </td>
+                  <td class="api__col-description">
+                    <Fragment set:html={part.description} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    )
+  }
+  {
     hasCss && (
       <section class="api__section">
         <h3 id={`${idPrefix}-css`}>CSS custom properties</h3>
-        <p class="api__hint">Grouped by the element and state they target. Click a group to collapse it; click a name to copy it.</p>
+        <p class="api__hint">
+          Grouped by semantic target and state from <code>--c2-component__target__state--property</code>. Click a group to collapse it; click a name to copy it.
+        </p>
         <div class="api__table-wrapper">
           <table class="api__table api__table--css">
             <thead>
