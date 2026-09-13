@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Virtual List test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 16px;
+      }
+      /* A fixed viewport keeps the rendered window the same size on every engine and screen, so the row counts the
+         specs assert on do not depend on the browser window. */
+      c2-virtual-list {
+        height: 480px;
+        width: 420px;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Virtual List scenario"></main>
+  </body>
+</html>

@@ -141,6 +141,15 @@ Virtualized data grid with declarative columns, sorting, selection, pinning and 
 - Events: `COLUMN_CHANGE_EVENT`
 - Presets: Hairline report, Spreadsheet, Dark console, Soft cards
 
+### Virtual List — `c2-virtual-list`
+
+Windowed list with built-in search, sorting, selection and an async data source. Package `@c2n/virtual-list`. Register: `import '@c2n/virtual-list'`.
+
+- Attributes: `items` (unknown[]), `item-key` (string), `label-field` (string), `description-field` (string), `disabled-field` (string), `searchable` (boolean), `search` (string), `search-fields` (string[]), `min-search-length` (number), `search-debounce` (number), `search-placeholder` (string), `highlight` (boolean), `sort` (SortEntry | undefined), `selection` (VirtualListSelectionMode), `value` (string[]), `virtual` (VirtualListVirtualMode), `item-height` (number), `overscan` (number), `virtual-threshold` (number), `block-size` (number), `loading` (boolean), `error` (string), `empty-message` (string), `no-results-message` (string)
+- Slots: `search`, `toolbar`, `footer`, `empty`, `no-results`, `loading`, `error`
+- Events: `search-change`, `item-click`, `selection-change`
+- Key variables (36 total): `--c2-virtual-list--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-virtual-list--color` = `#18181b` (→ `--c2-theme--color-on-surface`), `--c2-virtual-list__search-field--background` = `#ffffff` (→ `--c2-theme--color-surface`), `--c2-virtual-list__skeleton--background` = `#f4f4f5` (→ `--c2-theme--color-surface-container`), `--c2-virtual-list__state--color` = `#71717a` (→ `--c2-theme--color-on-surface-variant`), `--c2-virtual-list--border-top-left-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-virtual-list--border-top-right-radius` = `8px` (→ `--c2-theme--radius-lg`), `--c2-virtual-list--border-bottom-left-radius` = `8px` (→ `--c2-theme--radius-lg`)
+
 ## Feedback
 
 ### Modal — `c2-modal`
