@@ -8,7 +8,7 @@ import '@c2n/card'
 import '@c2n/label'
 import '@c2n/list-item'
 import { type TextField } from '@c2n/text-field'
-import { type Select } from '@c2n/select'
+import '@c2n/select'
 import { type Checkbox } from '@c2n/checkbox'
 import { type Switch } from '@c2n/switch'
 import '@c2n/button'
@@ -16,21 +16,12 @@ import { toast } from '@c2n/toast'
 
 const fullName = document.querySelector<TextField>('#full-name')!
 const email = document.querySelector<TextField>('#email')!
-const country = document.querySelector<Select>('#country')!
 const digest = document.querySelector<Switch>('#digest')!
 const terms = document.querySelector<Checkbox>('#terms')!
+const form = document.querySelector<HTMLFormElement>('#account-form')!
 
-// The c2 inputs are not form-associated elements (no `ElementInternals`), so a native <form> would not collect
-// them: a plain-HTML consumer reads the properties directly, as below. `c2-label` is the exception — it reaches
-// into the target's shadow root and clicks the inner input, so the consent label needs no wiring of its own.
-
-const initial = {
-  fullName: fullName.value,
-  email: email.value,
-  country: country.value,
-  digest: digest.checked,
-  terms: terms.checked,
-}
+// Text fields, selects and checkboxes are form-associated custom elements, so FormData, reset, disabled fieldsets
+// and native constraint validation work exactly where a plain-HTML consumer expects them.
 
 const clearErrors = () => {
   for (const field of [fullName, email]) {
@@ -53,19 +44,18 @@ document.querySelector('#save')!.addEventListener('click', () => {
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email.value)) return fail(email, 'Enter a valid email address.')
   if (!terms.checked) return toast.show({ variant: 'warning', message: 'Please accept the terms of service.' })
 
+  const data = new FormData(form)
+
   toast.show({
     variant: 'success',
     heading: 'Saved',
-    message: `${fullName.value} · ${country.value || 'no country'} · weekly digest ${digest.checked ? 'on' : 'off'}`,
+    message: `${data.get('fullName')} · ${data.get('country') || 'no country'} · weekly digest ${digest.checked ? 'on' : 'off'}`,
   })
 })
 
 document.querySelector('#reset')!.addEventListener('click', () => {
   clearErrors()
-  fullName.value = initial.fullName
-  email.value = initial.email
-  country.value = initial.country
-  digest.checked = initial.digest
-  terms.checked = initial.terms
+  form.reset()
+  digest.checked = true
   toast.show({ message: 'Form reset.' })
 })

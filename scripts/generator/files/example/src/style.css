@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  color: var(--c2-theme--color-on-surface);
+  background: var(--c2-theme--color-surface-container-low);
+  font-family: var(--c2-theme--font-family, system-ui, sans-serif);
+}
+
+main {
+  width: min(100% - 32px, 1120px);
+  margin: 0 auto;
+  padding-block: 48px;
+}

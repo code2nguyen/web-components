@@ -4,6 +4,14 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  header: `<c2-header style="width:280px;--c2-header--padding:8px 12px;--c2-header--min-height:48px">
+  <strong slot="brand">Northstar</strong>
+  <span style="font-size:12px">Markets</span>
+  <button slot="actions" type="button">Sign in</button>
+</c2-header>`,
+  stat: `<c2-stat style="width:240px" value="$18.4M" label="Assets under management" tone="positive">
+  <span slot="trend" style="color:#15803d;font-size:12px;font-weight:600">+12%</span>
+</c2-stat>`,
   attachment: `<c2-attachment style="width:240px" name="project-brief.pdf" type="PDF" size="2.4 MB" status="uploading" progress="64" removable></c2-attachment>`,
   'virtual-list': `<c2-virtual-list aria-label="People" style="width:240px;height:132px" item-key="id" label-field="name" description-field="team" items='[{"id":"1","name":"Ada Lovelace","team":"Analytics"},{"id":"2","name":"Grace Hopper","team":"Compilers"},{"id":"3","name":"Alan Turing","team":"Research"},{"id":"4","name":"Katherine Johnson","team":"Flight"},{"id":"5","name":"Radia Perlman","team":"Networks"},{"id":"6","name":"Barbara Liskov","team":"Research"},{"id":"7","name":"Margaret Hamilton","team":"Flight"}]'></c2-virtual-list>`,
   pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,

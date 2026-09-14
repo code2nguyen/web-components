@@ -92,7 +92,7 @@ npm install @c2n/switch
 </div>
 ```
 
-`checked` reflects the state and `change` fires on every user toggle; call `toggle()` (optionally with `true` or `false`) to flip it from code and fire the same event, or set `checked` to change it silently. The inner input carries `name` and `value` (`on` by default) but lives in a shadow root, so it is not submitted with a surrounding form; read `checked` on submit or mirror it into a hidden input.
+`checked` reflects the state and `change` fires on every user toggle; call `toggle()` (optionally with `true` or `false`) to flip it from code and fire the same event, or set `checked` to change it silently. Give it a `name` and its `value` (`on` by default) appears in `FormData(form)` while checked, just like a native checkbox. It also supports `required`, fieldset disabling, `form.reset()`, constraint validation and custom validity messages.
 
 Name a switch with slotted text or `label`, and use `aria-label` only for a bare track. A `description` is announced through the row label as well. The pressed thumb stretches slightly towards the side it is moving to (`--c2-switch__thumb__active--stretch`, `0px` to disable) and the thumb slides over `--c2-switch--transition-duration`, which is disabled under reduced motion. Dragging works with mouse, pen and touch: after a few pixels of movement the thumb follows the pointer, and releasing it past the middle of the track changes the state (and fires `change`); a shorter press is a normal click.
 

@@ -30,3 +30,20 @@ test('readonly prevents native popover activation', async ({ page, renderScenari
   await expect(page.locator('c2-select')).toHaveJSProperty('open', false)
   await expect(page.getByRole('listbox')).not.toBeVisible()
 })
+
+test('offers a scalar single-select API and submits single and multiple values', async ({ page, renderScenario }) => {
+  await renderScenario(`<form><c2-select name="fruit" value="a">${rows}</c2-select><c2-select name="tags" value="a;b" multiple>${rows}</c2-select></form>`)
+  const selects = page.locator('c2-select')
+  await expect(selects.first()).toHaveJSProperty('selectedValue', 'a')
+  await selects.first().evaluate((el) => ((el as HTMLElement & { selectedValue: string }).selectedValue = 'b'))
+  await expect(selects.first()).toHaveJSProperty('value', ['b'])
+  await expect
+    .poll(() =>
+      page
+        .locator('form')
+        .evaluate((form) => ({ fruit: new FormData(form as HTMLFormElement).get('fruit'), tags: new FormData(form as HTMLFormElement).getAll('tags') })),
+    )
+    .toEqual({ fruit: 'b', tags: ['a', 'b'] })
+  await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
+  await expect(selects.first()).toHaveJSProperty('selectedValue', 'a')
+})

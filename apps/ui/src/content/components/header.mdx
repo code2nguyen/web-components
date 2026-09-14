@@ -1,0 +1,105 @@
+---
+title: 'Header'
+description: 'Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import { Header } from '@c2n/header'
+import { NavigationMenu } from '@c2n/navigation-menu'
+import { LinkButton } from '@c2n/link-button'
+import { Button } from '@c2n/button'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherHexagonIcon as FeatherHexagon } from '@c2n/feather-icons/icons/hexagon.js'
+import { FeatherSearchIcon as FeatherSearch } from '@c2n/feather-icons/icons/search.js'
+import { FeatherGithubIcon as FeatherGithub } from '@c2n/feather-icons/icons/github.js'
+
+`c2-header` owns site-shell layout without owning navigation state. Put a `c2-navigation-menu` in the default slot, use a real `c2-link-button` for navigation actions, and add as many end controls as needed to the `actions` slot. The action area handles spacing and alignment; `sticky` pins the shell and `blurred` adds its translucent backdrop treatment.
+
+## Installation
+
+Install the header plus the controls used by this composition.
+
+```bash tag=CodeBlock
+npm install @c2n/header @c2n/navigation-menu @c2n/link-button @c2n/button @c2n/icon-button @c2n/feather-icons
+```
+
+## Usage
+
+The navigation menu owns desktop panels and its responsive trigger, while the header remains responsible for brand, layout and page-level actions.
+
+```html tag=UsageBlock,package=@c2n/header
+<style>
+  .header-demo {
+    width: min(920px, 100%);
+  }
+  .brand-link {
+    --c2-link-button__container--color: #18181b;
+    --c2-link-button__container--font-weight: 700;
+    --c2-link-button__container__hover--text-decoration: none;
+  }
+  .brand-link c2-feather-hexagon {
+    color: #0265dc;
+  }
+  .header-search {
+    --c2-icon-button__state-layer--size: 36px;
+    --c2-icon-button__icon--width: 18px;
+    --c2-icon-button__icon--height: 18px;
+  }
+  .header-sign-in {
+    --c2-button__container--height: 36px;
+  }
+  .menu-panel {
+    display: grid;
+    gap: 2px;
+    width: 240px;
+  }
+  .glass-header {
+    --c2-header--background: rgba(255, 255, 255, 0.72);
+    --c2-header__blurred--background: rgba(255, 255, 255, 0.72);
+    --c2-header--border-bottom: 1px solid rgba(2, 101, 220, 0.16);
+    --c2-header--box-shadow: 0 14px 40px rgba(24, 24, 27, 0.08);
+  }
+</style>
+<div data-label="Navigation and actions">
+  <c2-header class="header-demo">
+    <c2-link-button class="brand-link" slot="brand" href="#home">
+      <c2-feather-hexagon slot="prefix-icon"></c2-feather-hexagon>
+      Northstar
+    </c2-link-button>
+
+    <c2-navigation-menu client:only="lit" aria-label="Primary" mobile-breakpoint="760">
+      <c2-navigation-menu-item value="products">
+        Products
+        <div class="menu-panel" slot="panel">
+          <c2-navigation-menu-link href="#analytics">Analytics<span slot="description">Realtime market dashboards</span></c2-navigation-menu-link>
+          <c2-navigation-menu-link href="#research">Research<span slot="description">Signals, models and commentary</span></c2-navigation-menu-link>
+        </div>
+      </c2-navigation-menu-item>
+      <c2-navigation-menu-item value="markets" href="#markets" current>Markets</c2-navigation-menu-item>
+      <c2-navigation-menu-item value="company" href="#company">Company</c2-navigation-menu-item>
+    </c2-navigation-menu>
+
+    <c2-link-button slot="actions" href="#docs">Docs</c2-link-button>
+    <c2-icon-button class="header-search" slot="actions" tooltip="Search" aria-label="Search">
+      <c2-feather-search></c2-feather-search>
+    </c2-icon-button>
+    <c2-button class="header-sign-in" slot="actions">Sign in</c2-button>
+  </c2-header>
+</div>
+<div data-label="Sticky glass with several actions">
+  <c2-header class="header-demo glass-header" sticky blurred>
+    <c2-link-button class="brand-link" slot="brand" href="#home">C2N</c2-link-button>
+    <c2-navigation-menu client:only="lit" aria-label="Documentation">
+      <c2-navigation-menu-item value="components" href="#components" current>Components</c2-navigation-menu-item>
+      <c2-navigation-menu-item value="guides" href="#guides">Guides</c2-navigation-menu-item>
+    </c2-navigation-menu>
+    <c2-link-button slot="actions" href="#changelog">Changelog</c2-link-button>
+    <c2-icon-button class="header-search" slot="actions" tooltip="GitHub" aria-label="GitHub">
+      <c2-feather-github></c2-feather-github>
+    </c2-icon-button>
+    <c2-button class="header-sign-in" slot="actions">Get started</c2-button>
+  </c2-header>
+</div>
+```

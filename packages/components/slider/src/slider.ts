@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query } from 'lit/decorators.js'
+import { customElement, property, query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -54,7 +54,15 @@ const MAX_TICKS = 200
  */
 @customElement('c2-slider')
 export class Slider extends LitElement {
+  static formAssociated = true
+
   static override styles = unsafeCSS(styles)
+
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+  @state() private disabledByForm = false
+  private defaultValue = 0
+  private defaultValueCaptured = false
 
   @query('input') protected formElement!: HTMLInputElement
 
@@ -96,6 +104,62 @@ export class Slider extends LitElement {
   @property({ type: String, attribute: 'aria-labelledby' })
   ariaLabelledBy!: undefined | string
 
+  override connectedCallback() {
+    super.connectedCallback()
+    if (!this.defaultValueCaptured) {
+      this.defaultValue = Number(this.getAttribute('value') ?? 0)
+      this.defaultValueCaptured = true
+    }
+  }
+
+  /** The containing form, when this control is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+
+  get validity() {
+    return this.internals.validity
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+
+  get willValidate() {
+    return this.internals.willValidate
+  }
+
+  formResetCallback() {
+    this.value = this.defaultValue
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state === 'string') this.value = Number(state)
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity()
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity()
+  }
+
+  setCustomValidity(message: string) {
+    this.customValidityMessage = message
+    this.formElement?.setCustomValidity(message)
+    this.syncFormState()
+  }
+
   override focus(options?: FocusOptions) {
     this.formElement?.focus(options)
   }
@@ -124,6 +188,23 @@ export class Slider extends LitElement {
       const value = this.formElement.valueAsNumber
       if (Number.isFinite(value) && value !== this.value) this.value = value
     }
+    this.syncFormState()
+  }
+
+  private syncFormState() {
+    if (!this.formElement) return
+    const value = this.formElement.value
+    this.internals.setFormValue(value, value)
+    if (this.effectiveDisabled) {
+      this.internals.setValidity({})
+      return
+    }
+    this.formElement.setCustomValidity(this.customValidityMessage)
+    this.internals.setValidity(this.formElement.validity, this.formElement.validationMessage, this.formElement)
+  }
+
+  private get effectiveDisabled() {
+    return this.disabled || this.disabledByForm
   }
 
   private handleChange(event: Event) {
@@ -167,7 +248,7 @@ export class Slider extends LitElement {
           max=${this.max}
           step=${this.step}
           .value=${String(this.value)}
-          ?disabled=${this.disabled}
+          ?disabled=${this.effectiveDisabled}
           aria-label=${ifDefined(this.ariaLabel)}
           aria-labelledby=${ifDefined(this.ariaLabelledBy)}
           aria-valuetext=${formatted}

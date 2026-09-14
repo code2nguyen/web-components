@@ -31,6 +31,7 @@
     "build:generator": "npm run build --workspace=scripts/generator",
     "pregenerate": "npm run build:generator",
     "generate": "npm run plop --workspace=scripts/generator",
+    "generate:example": "npm run build:generator && npm run plop --workspace=scripts/generator -- example",
     "clean": "npx del-cli **/node_modules **/dist **/types **/custom-elements.json package-lock.json -f",
     "build:tools": "wireit",
     "mcp:inspect": "npm run inspect -w packages/tools/mcp",
@@ -80,6 +81,8 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/header:build",
+        "./packages/components/stat:build",
         "./packages/components/attachment:build",
         "./packages/components/virtual-list:build",
         "./packages/components/sheet:build",

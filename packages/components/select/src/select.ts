@@ -101,9 +101,17 @@ import '@c2n/list'
  */
 @customElement('c2-select')
 export class Select extends LitElement {
+  static formAssociated = true
+
   static override styles = unsafeCSS(styles)
 
   static override shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true }
+
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+  @state() private disabledByForm = false
+  private defaultValue: string[] = []
+  private defaultValueCaptured = false
 
   /** Whether the dropdown is showing. Reflects the popover state; set it to open or close programmatically. */
   @property({ type: Boolean, reflect: true }) open = false
@@ -132,12 +140,46 @@ export class Select extends LitElement {
   /** Keep at least one option selected: picking the only selected option again does not clear it. */
   @property({ type: Boolean }) required: boolean = false
 
+  /** Name used when the select participates in a form. */
+  @property({ type: String }) name = ''
+
   /** Selected values. Written as `value="a;b"` in markup, read as `['a', 'b']` from the property. */
   @property({
     converter: arrayPropertyConverter,
     reflect: true,
   })
   value: string[] = []
+
+  /** Scalar convenience API for a single-select. Setting it replaces the current selection. */
+  get selectedValue(): string {
+    return this.value[0] ?? ''
+  }
+
+  set selectedValue(value: string) {
+    this.value = value ? [value] : []
+  }
+
+  /** The containing form, when this control is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+
+  get validity() {
+    return this.internals.validity
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+
+  get willValidate() {
+    return this.internals.willValidate
+  }
 
   @query('#button', true) public button!: HTMLButtonElement
   @query('#menu-overlay', true) public menu!: HTMLElement
@@ -148,6 +190,39 @@ export class Select extends LitElement {
   protected childItemsUpdated!: Promise<unknown[]>
 
   data: unknown[] = []
+
+  override connectedCallback() {
+    super.connectedCallback()
+    if (!this.defaultValueCaptured) {
+      this.defaultValue = arrayPropertyConverter.fromAttribute(this.getAttribute('value') ?? '')
+      this.defaultValueCaptured = true
+    }
+  }
+
+  formResetCallback() {
+    this.value = [...this.defaultValue]
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state === 'string') this.value = arrayPropertyConverter.fromAttribute(state)
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity()
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity()
+  }
+
+  setCustomValidity(message: string) {
+    this.customValidityMessage = message
+    this.syncFormState()
+  }
 
   private onButtonBlur(): void {
     this.focused = false
@@ -164,7 +239,7 @@ export class Select extends LitElement {
   }
 
   public toggle(value?: boolean): void {
-    if (this.readonly || this.disabled) {
+    if (this.readonly || this.effectiveDisabled) {
       if (this.menu.matches(':popover-open')) this.menu.hidePopover()
       return
     }
@@ -255,6 +330,25 @@ export class Select extends LitElement {
     if (_changedProperties.has('value')) {
       this.updateDisplayText()
     }
+    this.syncFormState()
+  }
+
+  private syncFormState() {
+    if (this.multiple && this.name) {
+      const formData = new FormData()
+      for (const value of this.value) formData.append(this.name, value)
+      this.internals.setFormValue(formData, this.value.join(';'))
+    } else {
+      this.internals.setFormValue(this.selectedValue || null, this.value.join(';'))
+    }
+    const missing = this.required && this.value.length === 0
+    const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
+    const message = this.customValidityMessage || (missing ? 'Please select an option.' : '')
+    this.internals.setValidity(flags, message, this.button)
+  }
+
+  private get effectiveDisabled() {
+    return this.disabled || this.disabledByForm
   }
 
   protected override async getUpdateComplete(): Promise<boolean> {
@@ -275,11 +369,11 @@ export class Select extends LitElement {
         aria-haspopup="listbox"
         aria-expanded=${this.open ? 'true' : 'false'}
         id="button"
-        popovertarget=${this.readonly || this.disabled ? nothing : 'menu-overlay'}
+        popovertarget=${this.readonly || this.effectiveDisabled ? nothing : 'menu-overlay'}
         class="button"
         @blur=${this.onButtonBlur}
         @focus=${this.onButtonFocus}
-        ?disabled=${this.disabled}
+        ?disabled=${this.effectiveDisabled}
       >
         <slot name="button-prefix-icon"></slot>
         <slot name="button-content">${this.renderButtonContent()}</slot>

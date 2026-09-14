@@ -110,7 +110,13 @@ export type TextFieldType = 'text' | 'email' | 'password' | 'search' | 'tel' | '
  */
 @customElement('c2-text-field')
 export class TextField extends LitElement {
+  static formAssociated = true
+
   static override styles: CSSResult | CSSResult[] = unsafeCSS(styles)
+
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+  @state() private disabledByForm = false
 
   // State
 
@@ -176,11 +182,62 @@ export class TextField extends LitElement {
   // Query
   @query('.input') private readonly input?: HTMLInputElement | null
 
+  /** The containing form, when this control is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+
+  get validity() {
+    return this.internals.validity
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+
+  get willValidate() {
+    return this.internals.willValidate
+  }
+
   /** Restores the initial value (the `value` attribute) and clears the dirty and error flags. */
   reset() {
     this.dirty = false
     this.value = this.getAttribute('value') ?? ''
     this.error = false
+  }
+
+  formResetCallback() {
+    this.reset()
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state === 'string') this.value = state
+  }
+
+  /** Checks all current constraints and fires `invalid` on this element when they fail. */
+  checkValidity() {
+    return this.internals.checkValidity()
+  }
+
+  /** Checks all current constraints and asks the browser to show validation feedback. */
+  reportValidity() {
+    return this.internals.reportValidity()
+  }
+
+  /** Sets or clears a custom validation error. */
+  setCustomValidity(message: string) {
+    this.customValidityMessage = message
+    this.input?.setCustomValidity(message)
+    this.syncFormState()
   }
 
   handleFocus = () => {
@@ -269,7 +326,7 @@ export class TextField extends LitElement {
   }
 
   protected renderClearButton() {
-    if (!this.clearable || !this.value || this.disabled || this.readOnly) return nothing
+    if (!this.clearable || !this.value || this.effectiveDisabled || this.readOnly) return nothing
     return html`<button class="clear-button" type="button" aria-label="Clear" tabindex="-1" @click=${this.handleClear}>
       <slot name="clear-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -304,12 +361,27 @@ export class TextField extends LitElement {
     if (changed.has('disabled') || changed.has('error') || changed.has('readOnly') || changed.has('focused')) {
       addClasses(this, this.stateClasses)
     }
+    this.syncFormState()
+  }
+
+  private syncFormState() {
+    this.internals.setFormValue(this.value, this.value)
+    if (!this.input || this.effectiveDisabled) {
+      this.internals.setValidity({})
+      return
+    }
+    this.input.setCustomValidity(this.customValidityMessage)
+    this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
+  }
+
+  private get effectiveDisabled() {
+    return this.disabled || this.disabledByForm
   }
 
   private get stateClasses() {
     return {
-      disabled: this.disabled,
-      error: !this.disabled && this.error,
+      disabled: this.effectiveDisabled,
+      error: !this.effectiveDisabled && this.error,
       'read-only': this.readOnly,
       'focus-within': this.focused,
     }
@@ -329,7 +401,7 @@ export class TextField extends LitElement {
             maxlength=${ifDefined(this.maxLength > -1 ? this.maxLength : undefined)}
             minlength=${ifDefined(this.minLength > -1 ? this.minLength : undefined)}
             pattern=${ifDefined(this.pattern || undefined)}
-            ?disabled=${this.disabled}
+            ?disabled=${this.effectiveDisabled}
             ?readonly=${this.readOnly}
             ?required=${this.required}
             aria-invalid=${this.error ? 'true' : nothing}

@@ -39,7 +39,14 @@ export type RadioGroupOrientation = 'vertical' | 'horizontal'
  */
 @customElement('c2-radio-group')
 export class RadioGroup extends LitElement {
+  static formAssociated = true
+
   static override styles = unsafeCSS(styles)
+
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+  @state() private disabledByForm = false
+  private defaultValue: string | undefined
 
   /** `value` of the checked option; empty when none is checked. Setting it checks the matching option. */
   @property({ reflect: true }) value = ''
@@ -49,6 +56,9 @@ export class RadioGroup extends LitElement {
 
   /** Disables every option. */
   @property({ type: Boolean, reflect: true }) disabled = false
+
+  /** Requires one option to be selected for the form to be valid. */
+  @property({ type: Boolean, reflect: true }) required = false
 
   /** Lays the options out in a row instead of a column. */
   @property({ reflect: true }) orientation: RadioGroupOrientation = 'vertical'
@@ -71,13 +81,67 @@ export class RadioGroup extends LitElement {
     }
   }
 
+  override connectedCallback() {
+    super.connectedCallback()
+    this.defaultValue = this.getAttribute('value') ?? undefined
+  }
+
+  /** The containing form, when this control is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+
+  get validity() {
+    return this.internals.validity
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+
+  get willValidate() {
+    return this.internals.willValidate
+  }
+
+  formResetCallback() {
+    this.value = this.defaultValue ?? ''
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+    this.context = this.createContext()
+    this.syncRadios()
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state === 'string') this.value = state
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity()
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity()
+  }
+
+  setCustomValidity(message: string) {
+    this.customValidityMessage = message
+    this.syncFormState()
+  }
+
   /** The `c2-radio` elements of this group (nested groups keep their own), in DOM order. */
   get radios(): Radio[] {
     return [...this.querySelectorAll<Radio>(RADIO_TAG)].filter((radio) => radio.closest('c2-radio-group') === this)
   }
 
   private createContext(): RadioGroupContext {
-    return { name: this.name, disabled: this.disabled, checkedChanged: (radio) => this.handleCheckedChanged(radio) }
+    return { name: this.name, disabled: this.effectiveDisabled, required: this.required, checkedChanged: (radio) => this.handleCheckedChanged(radio) }
   }
 
   /** `slotchange` does not fire for server-rendered slots, so read them once after the first render. */
@@ -87,11 +151,12 @@ export class RadioGroup extends LitElement {
 
   override willUpdate(changed: PropertyValues<this>) {
     // Context consumers only re-render when the provided value is a new object.
-    if (changed.has('name') || changed.has('disabled')) this.context = this.createContext()
+    if (changed.has('name') || changed.has('disabled') || changed.has('required')) this.context = this.createContext()
   }
 
   override updated(changed: PropertyValues<this>) {
     if (changed.has('value') || changed.has('disabled')) this.syncRadios()
+    this.syncFormState()
   }
 
   private handleSlotChange(event: Event) {
@@ -117,6 +182,7 @@ export class RadioGroup extends LitElement {
       const checked = radios.find((radio) => radio.checked)
       if (checked) this.value = checked.value
     }
+    this.defaultValue ??= this.value
     this.syncRadios()
   }
 
@@ -148,6 +214,18 @@ export class RadioGroup extends LitElement {
     this.dispatchEvent(new CustomEvent('change', { detail: { value: this.value }, bubbles: true, composed: true }))
   }
 
+  private syncFormState() {
+    this.internals.setFormValue(this.value || null, this.value)
+    const missing = this.required && !this.value
+    const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
+    const message = this.customValidityMessage || (missing ? 'Please select an option.' : '')
+    this.internals.setValidity(flags, message)
+  }
+
+  private get effectiveDisabled() {
+    return this.disabled || this.disabledByForm
+  }
+
   private handleRadioChange = (event: Event) => {
     const radio = event.target
     if (radio === this || !(radio instanceof Radio) || radio.closest('c2-radio-group') !== this) return
@@ -157,7 +235,7 @@ export class RadioGroup extends LitElement {
   }
 
   private handleKeydown = (event: KeyboardEvent) => {
-    if (this.disabled) return
+    if (this.effectiveDisabled) return
     const radios = this.radios.filter((radio) => !radio.disabled)
     const current = radios.indexOf(event.target as Radio)
     if (current === -1) return
@@ -194,7 +272,7 @@ export class RadioGroup extends LitElement {
         aria-label=${ifDefined(this.ariaLabel)}
         aria-labelledby=${this.hasLabel ? 'label' : nothing}
         aria-describedby=${this.hasDescription ? 'description' : nothing}
-        aria-disabled=${this.disabled ? 'true' : nothing}
+        aria-disabled=${this.effectiveDisabled ? 'true' : nothing}
         aria-orientation=${this.orientation}
       >
         <div class="c2-radio-group-header" ?hidden=${!this.hasLabel && !this.hasDescription}>

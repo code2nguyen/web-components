@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Slider } from '@c2n/slider'
 
-`c2-slider` wraps a native `<input type="range">`, so dragging, keyboard steps (Arrow keys, Page Up/Down, Home and End), right-to-left layouts and the `slider` role all come from the browser. The component draws the track, the filled part, the thumb, optional step `ticks` and a value bubble that `show-value` reveals while hovering, dragging or focused. `value`, `min`, `max` and `step` behave like the native attributes; `input` fires on every step of a drag and `change` when the value is committed. Set the `formatValue` property to format the bubble and `aria-valuetext` together.
+`c2-slider` wraps a native `<input type="range">`, so dragging, keyboard steps (Arrow keys, Page Up/Down, Home and End), right-to-left layouts and the `slider` role all come from the browser. The component draws the track, the filled part, the thumb, optional step `ticks` and a value bubble that `show-value` reveals while hovering, dragging or focused. `value`, `min`, `max` and `step` behave like the native attributes; `input` fires on every step of a drag and `change` when the value is committed. Add `name` to submit the current value through `FormData(form)`; form reset, fieldset disabling and the standard constraint-validation methods are supported. Set the `formatValue` property to format the bubble and `aria-valuetext` together.
 
 ## Installation
 

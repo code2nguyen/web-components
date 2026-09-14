@@ -14,6 +14,8 @@ import { ListItem } from '@c2n/list-item'
 
 The trigger has no intrinsic width: give the host a `width` (or a grid / flex cell) and the button fills it. Tab to the trigger, then use Space, Enter or the arrow keys to open it.
 
+With `name`, the select participates in `FormData`, reset, disabled fieldsets and required validation. `value` remains an array in both modes; use the scalar `selectedValue` property when working with a single-select. A multiple select submits one form entry per selected value.
+
 ## Installation
 
 ```bash tag=CodeBlock

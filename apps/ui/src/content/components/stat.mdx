@@ -1,0 +1,36 @@
+---
+title: 'Stat'
+description: 'Displays a KPI with an optional icon, trend and supporting description.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import { Stat } from '@c2n/stat'
+
+`c2-stat` packages the recurring dashboard metric pattern into one flexible element. Use `value` and `label` for simple text, or replace them with slots for formatted values. The semantic `tone` changes only the icon treatment; trend meaning remains explicit in the slotted content.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/stat
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/stat
+<style>
+  .stat-demo { width: 280px; }
+  .stat-demo [slot='trend'] { color: #15803d; font-size: 12px; font-weight: 600; }
+</style>
+<div data-label="Default">
+  <c2-stat class="stat-demo" value="2M+" label="Fixed income instruments"></c2-stat>
+</div>
+<div data-label="Icon and trend">
+  <c2-stat class="stat-demo" value="$18.4M" label="Assets under management" tone="positive">
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 16l4-4 3 3 5-7"></path></svg>
+    <span slot="trend">+12% YoY</span>
+    <span slot="description">Updated at market close</span>
+  </c2-stat>
+</div>
+```

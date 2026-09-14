@@ -24,6 +24,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Kbd** — `c2-kbd` · `@c2n/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection.
 - **List Item** — `c2-list-item` · `@c2n/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
+- **Stat** — `c2-stat` · `@c2n/stat` — Displays a KPI with an optional icon, trend and supporting description.
 - **Table** — `c2-table, c2-table-column` · `@c2n/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
 
@@ -65,6 +66,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chatbot** — `c2-chatbot` · `@c2n/chatbot` — Chatbot component for c2n applications.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.
 - **dropdown-list** — `c2-dropdown-list` · `@c2n/dropdown-list` — dropdown-list component for c2n applications.
+- **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **reorder-list** — `c2-reorder-list` · `@c2n/reorder-list` — reorder-list component for c2n applications.
 - **Seperator** — `c2-seperator` · `@c2n/seperator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 
