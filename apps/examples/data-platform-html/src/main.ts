@@ -6,8 +6,9 @@ import '@c2n/avatar'
 import '@c2n/badge'
 import '@c2n/button'
 import '@c2n/card'
-import { type Checkbox } from '@c2n/checkbox'
 import '@c2n/checkbox'
+import '@c2n/code-viewer'
+import '@c2n/header'
 import '@c2n/label'
 import '@c2n/link-button'
 import '@c2n/list-item'
@@ -17,12 +18,10 @@ import '@c2n/navigation-menu'
 import { type Select } from '@c2n/select'
 import '@c2n/select'
 import '@c2n/seperator'
-import { type TextField } from '@c2n/text-field'
+import '@c2n/stat'
 import '@c2n/text-field'
-import { type Textarea } from '@c2n/textarea'
 import '@c2n/textarea'
 import { toast } from '@c2n/toast'
-import '@c2n/tooltip'
 
 // Feather Icons from @c2n/feather-icons
 import '@c2n/feather-icons/icons/arrow-right.js'
@@ -51,18 +50,14 @@ import '@c2n/feather-icons/icons/message-square.js'
 
 // MODAL & FORM ELEMENTS
 const demoModal = document.querySelector<Modal>('#demoModal')!
-const modalFullName = document.querySelector<TextField>('#modalFullName')!
-const modalEmail = document.querySelector<TextField>('#modalEmail')!
-const modalOrg = document.querySelector<TextField>('#modalOrg')!
 const modalProduct = document.querySelector<Select>('#modalProduct')!
-const modalNotes = document.querySelector<Textarea>('#modalNotes')!
-const modalConsent = document.querySelector<Checkbox>('#modalConsent')!
+const demoRequestForm = document.querySelector<HTMLFormElement>('#demoRequestForm')
 const modalSubmitBtn = document.querySelector('#modalSubmitBtn')!
 const modalCancelBtn = document.querySelector('#modalCancelBtn')!
 
 function openDemoModal(productValue?: string) {
   if (productValue && modalProduct) {
-    modalProduct.value = [productValue]
+    modalProduct.selectedValue = productValue
   }
   demoModal?.show()
 }
@@ -77,32 +72,6 @@ document.querySelector('#heroExploreBtn')?.addEventListener('click', () => {
     el.scrollIntoView({ behavior: 'smooth' })
   } else {
     window.location.href = 'fixed-income.html'
-  }
-})
-
-// SUPPORT HREF ON C2-BUTTON (SCROLL OR NAVIGATE)
-document.addEventListener('click', (event) => {
-  const path = event.composedPath()
-  for (const target of path) {
-    if (target instanceof HTMLElement && target.tagName.toLowerCase() === 'c2-button') {
-      const href = target.getAttribute('href')
-      if (href) {
-        event.preventDefault()
-        if (href.startsWith('#')) {
-          const el = document.querySelector(href)
-          el?.scrollIntoView({ behavior: 'smooth' })
-        } else {
-          const currentTheme = new URLSearchParams(window.location.search).get('theme')
-          if (currentTheme && !href.includes('theme=')) {
-            const separator = href.includes('?') ? '&' : '?'
-            window.location.href = `${href}${separator}theme=${currentTheme}`
-          } else {
-            window.location.href = href
-          }
-        }
-        return
-      }
-    }
   }
 })
 
@@ -136,66 +105,16 @@ document.querySelector('#maReqBtn')?.addEventListener('click', () => openDemoMod
 document.querySelector('#leiReqBtn')?.addEventListener('click', () => openDemoModal('lei-mapping'))
 
 // CONTACT PAGE FORM
-const contactFullName = document.querySelector<TextField>('#contactFullName')
-const contactEmail = document.querySelector<TextField>('#contactEmail')
-const contactCompany = document.querySelector<TextField>('#contactCompany')
-const contactMessage = document.querySelector<Textarea>('#contactMessage')
-const contactConsent = document.querySelector<Checkbox>('#contactConsent')
+const contactForm = document.querySelector<HTMLFormElement>('#contactForm')
 const contactSubmitBtn = document.querySelector('#contactSubmitBtn')
 
-contactSubmitBtn?.addEventListener('click', () => {
-  const name = contactFullName?.value?.trim() || ''
-  const email = contactEmail?.value?.trim() || ''
-  const msg = contactMessage?.value?.trim() || ''
+contactSubmitBtn?.addEventListener('click', () => contactForm?.requestSubmit())
 
-  if (!name) {
-    if (contactFullName) {
-      contactFullName.error = true
-      contactFullName.errorText = 'Full name required'
-      contactFullName.focus()
-    }
-    toast.show({ variant: 'error', heading: 'Missing Name', message: 'Please enter your name.' })
-    return
-  }
-
-  if (!email || !/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) {
-    if (contactEmail) {
-      contactEmail.error = true
-      contactEmail.errorText = 'Valid business email required'
-      contactEmail.focus()
-    }
-    toast.show({ variant: 'error', heading: 'Invalid Email', message: 'Please provide a valid corporate email.' })
-    return
-  }
-
-  if (!msg) {
-    if (contactMessage) {
-      contactMessage.error = true
-      contactMessage.errorText = 'Message required'
-      contactMessage.focus()
-    }
-    toast.show({ variant: 'error', heading: 'Empty Message', message: 'Please tell us about your requirements.' })
-    return
-  }
-
-  if (contactConsent && !contactConsent.checked) {
-    toast.show({ variant: 'warning', heading: 'Consent Required', message: 'Please accept communication terms.' })
-    return
-  }
-
-  // Clear errors
-  if (contactFullName) {
-    contactFullName.error = false
-    contactFullName.errorText = ''
-  }
-  if (contactEmail) {
-    contactEmail.error = false
-    contactEmail.errorText = ''
-  }
-  if (contactMessage) {
-    contactMessage.error = false
-    contactMessage.errorText = ''
-  }
+contactForm?.addEventListener('submit', (event) => {
+  event.preventDefault()
+  const data = new FormData(contactForm)
+  const name = String(data.get('fullName') ?? '')
+  const email = String(data.get('email') ?? '')
 
   toast.show({
     variant: 'success',
@@ -204,12 +123,7 @@ contactSubmitBtn?.addEventListener('click', () => {
     duration: 6000,
   })
 
-  // Clear inputs
-  if (contactFullName) contactFullName.value = ''
-  if (contactEmail) contactEmail.value = ''
-  if (contactCompany) contactCompany.value = ''
-  if (contactMessage) contactMessage.value = ''
-  if (contactConsent) contactConsent.checked = false
+  contactForm.reset()
 })
 
 // CLICKABLE PRODUCT CARDS
@@ -235,40 +149,13 @@ modalCancelBtn?.addEventListener('click', () => {
   demoModal.close('cancel')
 })
 
-modalSubmitBtn?.addEventListener('click', () => {
-  const name = modalFullName?.value?.trim() || ''
-  const email = modalEmail?.value?.trim() || ''
+modalSubmitBtn?.addEventListener('click', () => demoRequestForm?.requestSubmit())
 
-  if (!name) {
-    modalFullName.error = true
-    modalFullName.errorText = 'Full name is required'
-    modalFullName.focus()
-    toast.show({ variant: 'error', heading: 'Incomplete Field', message: 'Please provide your full name.' })
-    return
-  }
-
-  if (!email || !/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) {
-    modalEmail.error = true
-    modalEmail.errorText = 'Valid corporate email required'
-    modalEmail.focus()
-    toast.show({ variant: 'error', heading: 'Invalid Email', message: 'Please enter a valid corporate email.' })
-    return
-  }
-
-  if (!modalConsent?.checked) {
-    toast.show({
-      variant: 'warning',
-      heading: 'Consent Required',
-      message: 'Please accept communications to proceed.',
-    })
-    return
-  }
-
-  // Clear form errors
-  modalFullName.error = false
-  modalFullName.errorText = ''
-  modalEmail.error = false
-  modalEmail.errorText = ''
+demoRequestForm?.addEventListener('submit', (event) => {
+  event.preventDefault()
+  const data = new FormData(demoRequestForm)
+  const name = String(data.get('fullName') ?? '')
+  const email = String(data.get('email') ?? '')
 
   demoModal.close('ok')
 
@@ -279,12 +166,7 @@ modalSubmitBtn?.addEventListener('click', () => {
     duration: 6000,
   })
 
-  // Reset fields
-  modalFullName.value = ''
-  modalEmail.value = ''
-  if (modalOrg) modalOrg.value = ''
-  if (modalNotes) modalNotes.value = ''
-  if (modalConsent) modalConsent.checked = false
+  demoRequestForm.reset()
 })
 
 // HEADER SCROLL GLASS EFFECT

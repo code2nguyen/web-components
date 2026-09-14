@@ -265,6 +265,105 @@ test('a bar with nothing current marks no trigger', async ({ page, renderScenari
   await expect(page.locator('c2-navigation-menu-item[current-group]')).toHaveCount(0)
 })
 
+test('auto-current follows the URL hash and marks the containing group', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-navigation-menu aria-label="Main" auto-current>
+    <c2-navigation-menu-item value="products">
+      Products
+      <div class="grid" slot="panel">
+        <c2-navigation-menu-link href="#analytics">Analytics</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#warehouse">Warehouse</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="pricing" href="#pricing">Pricing</c2-navigation-menu-item>
+  </c2-navigation-menu>`)
+
+  // A page made only of section links starts on its first row.
+  await expect(page.locator('c2-navigation-menu-link[href="#analytics"]')).toHaveAttribute('current', '')
+  await expect(page.locator('c2-navigation-menu-item[value="products"]')).toHaveAttribute('current-group', '')
+
+  await page.evaluate(() => {
+    window.location.hash = '#warehouse'
+  })
+  await expect(page.locator('c2-navigation-menu-link[href="#analytics"]')).not.toHaveAttribute('current', '')
+  await expect(page.locator('c2-navigation-menu-link[href="#warehouse"]')).toHaveAttribute('current', '')
+
+  await page.evaluate(() => {
+    window.location.hash = '#pricing'
+  })
+  await expect(page.locator('c2-navigation-menu-item[value="pricing"]')).toHaveAttribute('current', '')
+  await expect(page.locator('c2-navigation-menu-item[value="products"]')).not.toHaveAttribute('current-group', '')
+})
+
+test('current-url supports router-controlled navigation and disabling auto-current restores authored state', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-navigation-menu aria-label="Main" auto-current current-url="#warehouse">
+    <c2-navigation-menu-item value="products">
+      Products
+      <div class="grid" slot="panel">
+        <c2-navigation-menu-link href="#analytics">Analytics</c2-navigation-menu-link>
+        <c2-navigation-menu-link href="#warehouse">Warehouse</c2-navigation-menu-link>
+      </div>
+    </c2-navigation-menu-item>
+    <c2-navigation-menu-item value="pricing" href="#pricing" current>Pricing</c2-navigation-menu-item>
+  </c2-navigation-menu>`)
+
+  const host = page.locator('c2-navigation-menu')
+  const warehouse = page.locator('c2-navigation-menu-link[href="#warehouse"]')
+  const pricing = page.locator('c2-navigation-menu-item[value="pricing"]')
+  await expect(warehouse).toHaveAttribute('current', '')
+  await expect(pricing).not.toHaveAttribute('current', '')
+
+  await host.evaluate(async (element) => {
+    const menu = element as unknown as { currentUrl: string; updateComplete: Promise<boolean> }
+    menu.currentUrl = '#analytics'
+    await menu.updateComplete
+  })
+  await expect(page.locator('c2-navigation-menu-link[href="#analytics"]')).toHaveAttribute('current', '')
+  await expect(warehouse).not.toHaveAttribute('current', '')
+
+  await host.evaluate(async (element) => {
+    const menu = element as unknown as { autoCurrent: boolean; updateComplete: Promise<boolean> }
+    menu.autoCurrent = false
+    await menu.updateComplete
+  })
+  await expect(pricing).toHaveAttribute('current', '')
+  await expect(page.locator('c2-navigation-menu-link[current]')).toHaveCount(0)
+})
+
+test('syncCurrent updates a menu after a history-based route change', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-navigation-menu aria-label="Main" auto-current>
+    <c2-navigation-menu-item value="docs" href="#docs">Docs</c2-navigation-menu-item>
+    <c2-navigation-menu-item value="pricing" href="#pricing">Pricing</c2-navigation-menu-item>
+  </c2-navigation-menu>`)
+
+  const host = page.locator('c2-navigation-menu')
+  await host.evaluate((element) => {
+    history.pushState({}, '', '#pricing')
+    ;(element as unknown as { syncCurrent: () => HTMLElement | null }).syncCurrent()
+  })
+  await expect(page.locator('c2-navigation-menu-item[value="pricing"]')).toHaveAttribute('current', '')
+  await expect(page.getByRole('link', { name: 'Pricing' })).toHaveAttribute('aria-current', 'page')
+})
+
+test('syncCurrent reads href values assigned as element properties', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-navigation-menu aria-label="Main" auto-current>
+    <c2-navigation-menu-item value="docs">Docs</c2-navigation-menu-item>
+    <c2-navigation-menu-item value="pricing">Pricing</c2-navigation-menu-item>
+  </c2-navigation-menu>`)
+
+  const host = page.locator('c2-navigation-menu')
+  const matched = await host.evaluate(async (element) => {
+    const items = element.querySelectorAll('c2-navigation-menu-item') as NodeListOf<HTMLElement & { href?: string; updateComplete: Promise<boolean> }>
+    items[0].href = '#docs'
+    items[1].href = '#pricing'
+    await Promise.all(Array.from(items, (item) => item.updateComplete))
+    return (element as unknown as { syncCurrent: (url: string) => HTMLElement | null }).syncCurrent('#pricing') === items[1]
+  })
+
+  expect(matched).toBe(true)
+  await expect(page.locator('c2-navigation-menu-item[value="pricing"]')).toHaveAttribute('current', '')
+  await expect(page.getByRole('link', { name: 'Pricing' })).toHaveAttribute('aria-current', 'page')
+})
+
 test('a disabled item never opens and the arrows skip it', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-navigation-menu aria-label="Main" open-delay="0" close-delay="0">
     <c2-navigation-menu-item value="products">

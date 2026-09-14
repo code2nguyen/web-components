@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" class="axiom-theme" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,79 +16,75 @@
 
   <body class="antialiased grid-lines">
     <!-- STICKY HEADER -->
-    <header id="site-header" class="site-header">
-      <div class="header-inner">
-        <a href="index.html" class="brand-logo" aria-label="AxiomData AI Home">
-          <div class="logo-mark">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="2" width="24" height="24" rx="6" stroke="url(#cyan-grad)" stroke-width="2" fill="rgba(34,211,238,0.08)" />
-              <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <circle cx="12" cy="19" r="2" fill="#a78bfa" />
-              <circle cx="17" cy="19" r="2" fill="#6ee7ff" />
-              <defs>
-                <linearGradient id="cyan-grad" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#6ee7ff" />
-                  <stop offset="1" stop-color="#a78bfa" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <span class="brand-name">AxiomData <span class="brand-ai">AI</span></span>
-        </a>
-
-        <!-- C2 NAVIGATION MENU -->
-        <nav class="header-nav">
-          <c2-navigation-menu aria-label="Main Navigation" mobile-breakpoint="820">
-            <c2-navigation-menu-item href="index.html">Home</c2-navigation-menu-item>
-            <c2-navigation-menu-item href="about.html">About</c2-navigation-menu-item>
-
-            <c2-navigation-menu-item value="fixed-income">
-              Fixed Income Products
-              <div slot="panel" class="c2-nav-panel">
-                <span class="nav-panel-label">Fixed Income Universe</span>
-                <c2-navigation-menu-link href="fixed-income.html#reference-api">
-                  Reference Data
-                  <span slot="description">ISINs, LEIs, ratings &amp; instrument classification</span>
-                </c2-navigation-menu-link>
-                <c2-navigation-menu-link href="fixed-income.html#corporate-actions">
-                  Corporate Actions
-                  <span slot="description">Automated event capture &amp; entitlement processing</span>
-                </c2-navigation-menu-link>
-                <c2-navigation-menu-link href="fixed-income.html#pricing">
-                  Pricing
-                  <span slot="description">EOD fixed income pricing feeds</span>
-                </c2-navigation-menu-link>
-              </div>
-            </c2-navigation-menu-item>
-
-            <c2-navigation-menu-item value="regulatory">
-              Regulatory Products
-              <div slot="panel" class="c2-nav-panel">
-                <span class="nav-panel-label">Compliance &amp; Risk</span>
-                <c2-navigation-menu-link href="regulatory-intelligence.html#erisa">
-                  ERISA Portfolio Analytics
-                  <span slot="description">Plan asset classification &amp; 5500 reporting data</span>
-                </c2-navigation-menu-link>
-                <c2-navigation-menu-link href="regulatory-intelligence.html#solvency-ma">
-                  Matching Adjustment
-                  <span slot="description">PRA eligibility attestation &amp; spread attribution</span>
-                </c2-navigation-menu-link>
-                <c2-navigation-menu-link href="regulatory-intelligence.html#lei-mapping">
-                  LEI &amp; Instrument Mapping
-                  <span slot="description">Cross-reference LEIs to ISIN, FIGI and other identifiers</span>
-                </c2-navigation-menu-link>
-              </div>
-            </c2-navigation-menu-item>
-
-            <c2-navigation-menu-item href="contact.html" current>Contact</c2-navigation-menu-item>
-          </c2-navigation-menu>
-        </nav>
-
-        <div class="header-actions">
-          <c2-button id="headerDemoBtn" class="btn-primary" href="contact.html">Get in Touch</c2-button>
+    <c2-header id="site-header" class="site-header" navigation-label="Main Navigation" blurred sticky>
+      <a href="index.html" class="brand-logo" slot="brand" aria-label="AxiomData AI Home">
+        <div class="logo-mark">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="24" height="24" rx="6" stroke="url(#cyan-grad)" stroke-width="2" fill="rgba(34,211,238,0.08)" />
+            <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="12" cy="19" r="2" fill="#a78bfa" />
+            <circle cx="17" cy="19" r="2" fill="#6ee7ff" />
+            <defs>
+              <linearGradient id="cyan-grad" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6ee7ff" />
+                <stop offset="1" stop-color="#a78bfa" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
+        <span class="brand-name">AxiomData <span class="brand-ai">AI</span></span>
+      </a>
+
+      <!-- C2 NAVIGATION MENU -->
+      <div class="header-nav">
+        <c2-navigation-menu aria-label="Main Navigation" mobile-breakpoint="1280" auto-current>
+          <c2-navigation-menu-item href="index.html">Home</c2-navigation-menu-item>
+          <c2-navigation-menu-item href="about.html">About</c2-navigation-menu-item>
+
+          <c2-navigation-menu-item value="fixed-income">
+            Fixed Income Products
+            <div slot="panel" class="c2-nav-panel">
+              <span class="nav-panel-label">Fixed Income Universe</span>
+              <c2-navigation-menu-link href="fixed-income.html#reference-api">
+                Reference Data
+                <span slot="description">ISINs, LEIs, ratings &amp; instrument classification</span>
+              </c2-navigation-menu-link>
+              <c2-navigation-menu-link href="fixed-income.html#corporate-actions">
+                Corporate Actions
+                <span slot="description">Automated event capture &amp; entitlement processing</span>
+              </c2-navigation-menu-link>
+              <c2-navigation-menu-link href="fixed-income.html#pricing">
+                Pricing
+                <span slot="description">EOD fixed income pricing feeds</span>
+              </c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+
+          <c2-navigation-menu-item value="regulatory">
+            Regulatory Products
+            <div slot="panel" class="c2-nav-panel">
+              <span class="nav-panel-label">Compliance &amp; Risk</span>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#erisa">
+                ERISA Portfolio Analytics
+                <span slot="description">Plan asset classification &amp; 5500 reporting data</span>
+              </c2-navigation-menu-link>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#solvency-ma">
+                Matching Adjustment
+                <span slot="description">PRA eligibility attestation &amp; spread attribution</span>
+              </c2-navigation-menu-link>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#lei-mapping">
+                LEI &amp; Instrument Mapping
+                <span slot="description">Cross-reference LEIs to ISIN, FIGI and other identifiers</span>
+              </c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+
+          <c2-navigation-menu-item href="contact.html" current>Contact</c2-navigation-menu-item>
+        </c2-navigation-menu>
       </div>
-    </header>
+
+      <c2-link-button slot="actions" class="header-cta" href="contact.html">Get in Touch</c2-link-button>
+    </c2-header>
 
     <main class="pt-page">
       <section class="contact-hero">
@@ -119,17 +115,17 @@
                 </div>
               </div>
 
-              <div class="contact-form-body">
+              <form id="contactForm" class="contact-form-body">
                 <div class="form-row">
                   <div class="form-field">
                     <c2-label for="contactFullName" required>Full Name</c2-label>
-                    <c2-text-field id="contactFullName" placeholder="Your full name">
+                    <c2-text-field id="contactFullName" name="fullName" autocomplete="name" placeholder="Your full name" required>
                       <c2-feather-user slot="prefix-icon"></c2-feather-user>
                     </c2-text-field>
                   </div>
                   <div class="form-field">
                     <c2-label for="contactCompany">Company / Firm</c2-label>
-                    <c2-text-field id="contactCompany" placeholder="Your institution">
+                    <c2-text-field id="contactCompany" name="company" autocomplete="organization" placeholder="Your institution">
                       <c2-feather-briefcase slot="prefix-icon"></c2-feather-briefcase>
                     </c2-text-field>
                   </div>
@@ -137,14 +133,14 @@
 
                 <div class="form-field">
                   <c2-label for="contactEmail" required>Corporate Email</c2-label>
-                  <c2-text-field id="contactEmail" type="email" placeholder="you@institution.com">
+                  <c2-text-field id="contactEmail" name="email" type="email" autocomplete="email" placeholder="you@institution.com" required>
                     <c2-feather-mail slot="prefix-icon"></c2-feather-mail>
                   </c2-text-field>
                 </div>
 
                 <div class="form-field">
                   <c2-label for="contactTopic">Inquiry Topic</c2-label>
-                  <c2-select id="contactTopic" value="reference">
+                  <c2-select id="contactTopic" name="topic" value="reference" required>
                     <c2-feather-sliders slot="prefix-icon"></c2-feather-sliders>
                     <c2-list-item value="reference">Fixed Income Reference Data Engine</c2-list-item>
                     <c2-list-item value="corporate-actions">Corporate Actions Automation Feed</c2-list-item>
@@ -159,12 +155,14 @@
                   <c2-label for="contactMessage" required>Message &amp; Requirements</c2-label>
                   <c2-textarea
                     id="contactMessage"
+                    name="message"
+                    required
                     placeholder="Tell us about your portfolio scope, delivery preferences, or evaluation timeline..."
                   ></c2-textarea>
                 </div>
 
                 <div class="modal-consent">
-                  <c2-checkbox id="contactConsent"></c2-checkbox>
+                  <c2-checkbox id="contactConsent" name="consent" value="accepted" required></c2-checkbox>
                   <c2-label for="contactConsent"> I agree to the processing of my contact details for institutional communications. </c2-label>
                 </div>
 
@@ -172,7 +170,7 @@
                   Send Message
                   <c2-feather-send slot="suffix-icon"></c2-feather-send>
                 </c2-button>
-              </div>
+              </form>
             </c2-card>
 
             <!-- Office & Contacts Info -->
