@@ -49,6 +49,9 @@
     copy--background: null,
     copy__hover--background: rgba(127, 127, 127, 0.15),
     copy__copied--color: rgb(34, 197, 94),
+    terminal__dot__close--color: #ff5f57,
+    terminal__dot__minimize--color: #febc2e,
+    terminal__dot__maximize--color: #28c840,
     line-numbers--min-width: 2ch,
     line-numbers--gap: 16px,
     line-numbers--color: null,
@@ -122,6 +125,33 @@ $fg-dark: css.cssVar(color, --cv-fg, --shiki-dark);
   &[hidden] {
     display: none;
   }
+}
+
+.terminal-dots {
+  display: inline-flex;
+  gap: 6px;
+
+  i {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+  }
+
+  .close {
+    background: css.cssVar(terminal__dot__close--color);
+  }
+  .minimize {
+    background: css.cssVar(terminal__dot__minimize--color);
+  }
+  .maximize {
+    background: css.cssVar(terminal__dot__maximize--color);
+  }
+}
+
+.terminal-language {
+  flex: 1;
+  color: inherit;
+  opacity: 0.7;
 }
 
 .c2-code-viewer-body {

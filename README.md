@@ -24,6 +24,15 @@ All packages have `@c2n/config` as dev dependencies and maybe link with `@c2n/co
 npm run generate
 ```
 
+### Generate example application
+
+Scaffold a plain HTML/Vite example and register it in the root build graph:
+
+```bash
+npm run generate:example -- "market-overview" "Market Overview" "A complete market-data dashboard."
+npm install
+```
+
 ### UI app
 
 The documentation / demo app lives in `apps/ui` and is a static site built with the [Astro Framework](https://astro.build/). It is the home for future app features (backend, database, …).

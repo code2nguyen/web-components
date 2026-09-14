@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { CodeViewer } from '@c2n/code-viewer'
 
-`c2-code-viewer` renders source code highlighted by [shiki](https://shiki.style/). Put the code in the default slot, as text inside a `<pre>` or markup inside a `<template>` (indentation is stripped), or set the `code` property; a literal `\n` in the attribute stands for a newline. `language` accepts any shiki language id or alias, `theme` any built-in theme or `css-variables`. Grammars and themes are loaded on demand into one shared highlighter with shiki's JavaScript engine, and the plain code renders immediately, server-side too, then upgrades in place. Add `dark-theme` for a light and dark pair switched by `color-scheme` (`auto` follows the OS), `line-numbers`, `highlight-lines="2-4,7"`, `copyable` (fires `code-copy`), `wrap`, `inline`, and a `title` slot for a file name header.
+`c2-code-viewer` renders source code highlighted by [shiki](https://shiki.style/). Put the code in the default slot, as text inside a `<pre>` or markup inside a `<template>` (indentation is stripped), or set the `code` property; a literal `\n` in the attribute stands for a newline. `language` accepts any shiki language id or alias, `theme` any built-in theme or `css-variables`. Grammars and themes are loaded on demand into one shared highlighter with shiki's JavaScript engine, and the plain code renders immediately, server-side too, then upgrades in place. Add `dark-theme` for a light and dark pair switched by `color-scheme` (`auto` follows the OS), `line-numbers`, `highlight-lines="2-4,7"`, `copyable` (fires `code-copy`), `wrap`, `inline`, and a `title` slot for a file name header. `variant="terminal"` adds window controls, a language label and an always-visible copy action.
 
 ## Installation
 
@@ -63,6 +63,9 @@ npm install @c2n/code-viewer
 <div data-label="Diff and shell">
   <c2-code-viewer class="demo" language="diff" code="- npm install @c2n/expansion-panel\n+ npm install @c2n/details"></c2-code-viewer>
   <c2-code-viewer class="demo" language="bash" theme="vitesse-dark" code="npm run build -w packages/components/tabs"></c2-code-viewer>
+</div>
+<div data-label="Terminal">
+  <c2-code-viewer class="demo" variant="terminal" language="bash" theme="vitesse-dark" code="curl https://api.example.com/v1/instruments"></c2-code-viewer>
 </div>
 <div data-label="Inline">
   <p class="prose">Call <c2-code-viewer inline language="ts" code="tabs.select('tab2')"></c2-code-viewer> to switch tabs programmatically, or set the <c2-code-viewer inline language="html" code='selected-tab="tab2"'></c2-code-viewer> attribute.</p>

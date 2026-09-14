@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stat examples</title>
+    <script type="module" src="/src/stat.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui;
+      }
+      main {
+        display: grid;
+        gap: 16px;
+        max-width: 360px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <c2-stat value="2M+" label="Fixed income instruments"></c2-stat>
+      <c2-stat value="$18.4M" label="Assets under management" tone="positive">
+        <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 16l4-4 3 3 5-7"></path></svg>
+        <span slot="trend">+12%</span>
+        <span slot="description">Updated at market close</span>
+      </c2-stat>
+    </main>
+  </body>
+</html>

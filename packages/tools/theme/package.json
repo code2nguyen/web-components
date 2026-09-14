@@ -54,6 +54,8 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/header:build",
+        "../../components/stat:build",
         "../../components/attachment:build",
         "../../components/virtual-list:build",
         "../../components/sheet:build",

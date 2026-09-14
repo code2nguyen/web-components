@@ -1,0 +1,25 @@
+{
+  "name": "@c2n/example-{{dashCase name}}",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "wireit",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@c2n/button": "*",
+    "@c2n/theme": "*"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "wireit": {
+    "build": {
+      "dependencies": ["../../../packages/components/button:build", "../../../packages/tools/theme:build"],
+      "command": "vite build",
+      "files": ["src/**", "index.html", "vite.config.ts", "tsconfig*.json", "package.json"],
+      "output": ["dist"]
+    }
+  }
+}

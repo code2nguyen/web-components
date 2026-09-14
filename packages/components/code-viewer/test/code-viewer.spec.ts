@@ -22,3 +22,10 @@ test('copy uses original source and emits code-copy', async ({ page, renderScena
   await expect(page.locator('html')).toHaveAttribute('data-clipboard', 'const answer = 42;')
   await expect(page.getByRole('button', { name: 'Copied', exact: true })).toBeVisible()
 })
+
+test('terminal variant adds window controls, language and copy action', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-code-viewer variant="terminal" language="bash" code="curl https://example.com"></c2-code-viewer>')
+  await expect(page.locator('.terminal-dots i')).toHaveCount(3)
+  await expect(page.getByText('bash', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Copy code' })).toBeVisible()
+})

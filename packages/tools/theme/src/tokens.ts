@@ -35,6 +35,7 @@ export const tokens: TokenDef[] = [
   token('color-primary-active', 'color', '#01469a', 'Accent colour while pressed.', '#9cc9ff'),
   token('color-on-primary', 'color', '#ffffff', 'Text and icons drawn on the accent colour.', '#032a5c'),
   token('color-primary-container', 'color', '#edf1fe', 'Soft accent surface, e.g. a selected list item.', '#0f2d5c'),
+  token('color-primary-glow', 'color', 'rgba(2, 101, 220, 0.2)', 'Accent tint for luminous borders and decorative glows.', 'rgba(90, 163, 255, 0.28)'),
   token('color-surface', 'color', '#ffffff', 'Default surface of inputs, lists, cards, dialogs.', '#18181b'),
   token('color-surface-container-low', 'color', '#fafafa', 'Slightly raised surface: side navigation, read-only fields, subtle hover.', '#1f1f23'),
   token('color-surface-container', 'color', '#f4f4f5', 'Hover surface for rows and icon buttons.', '#27272a'),

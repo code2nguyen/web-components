@@ -1,0 +1,106 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-stat,
+  $theme: (
+    padding: 16px,
+    gap: 12px,
+    background: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: none,
+    icon--size: 40px,
+    icon--background: #f4f4f5,
+    icon--color: #71717a,
+    icon--border-radius: 8px,
+    icon__positive--background: #dcfce7,
+    icon__positive--color: #15803d,
+    icon__negative--background: #fee2e2,
+    icon__negative--color: #b91c1c,
+    icon__warning--background: #fef3c7,
+    icon__warning--color: #a16207,
+    value--font-size: 24px,
+    value--font-weight: 600,
+    value--line-height: 32px,
+    label--font-size: 14px,
+    label--color: #71717a,
+    description--font-size: 12px,
+    description--color: #71717a,
+  )
+);
+
+:host {
+  display: block;
+}
+
+.c2-stat {
+  display: flex;
+  align-items: flex-start;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+}
+
+.icon {
+  display: grid;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  flex: 0 0 css.cssVar(icon--size);
+  place-items: center;
+  color: css.cssVar(icon--color);
+  background: css.cssVar(icon--background);
+  border-radius: css.cssVar(icon--border-radius);
+  ::slotted(*) {
+    width: 50%;
+    height: 50%;
+  }
+}
+
+:host(:not(:has(> [slot='icon']))) .icon,
+:host(:not(:has(> [slot='description']))) .description {
+  display: none;
+}
+
+.content {
+  min-width: 0;
+  margin: 0;
+}
+.value-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.value,
+.trend,
+.description {
+  margin: 0;
+}
+.value {
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  line-height: css.cssVar(value--line-height);
+}
+.label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+}
+.description {
+  margin-top: 4px;
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+}
+:host([tone='positive']) .icon {
+  color: css.cssVar(icon__positive--color);
+  background: css.cssVar(icon__positive--background);
+}
+:host([tone='negative']) .icon {
+  color: css.cssVar(icon__negative--color);
+  background: css.cssVar(icon__negative--background);
+}
+:host([tone='warning']) .icon {
+  color: css.cssVar(icon__warning--color);
+  background: css.cssVar(icon__warning--background);
+}

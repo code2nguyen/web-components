@@ -34,3 +34,12 @@ test('maximum length limits real typing and error feedback is visible', async ({
   await expect(page.getByText('Please revise', { exact: true })).toBeVisible()
   await expect(page.getByText('5 / 5', { exact: true })).toBeVisible()
 })
+
+test('participates in FormData and form reset', async ({ page, renderScenario }) => {
+  await renderScenario('<form><c2-textarea name="notes" value="Original" required></c2-textarea></form>')
+  const host = page.locator('c2-textarea')
+  await page.getByRole('textbox').fill('Edited')
+  await expect.poll(() => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('notes'))).toBe('Edited')
+  await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
+  await expect(host).toHaveJSProperty('value', 'Original')
+})

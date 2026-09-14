@@ -22,6 +22,24 @@ test('disabled prevents toggling and external checked updates restore native sta
   await props(host, { checked: false })
   await expect(page.getByRole('switch')).not.toBeChecked()
 })
+test('participates in forms, validates required and resets checked state', async ({ page, renderScenario }) => {
+  await renderScenario('<form><c2-switch name="alerts" value="enabled" checked required label="Alerts"></c2-switch></form>')
+  const host = page.locator('c2-switch')
+  const input = page.getByRole('switch')
+  const form = page.locator('form')
+  await expect.poll(() => form.evaluate((element) => new FormData(element as HTMLFormElement).get('alerts'))).toBe('enabled')
+  await input.uncheck()
+  await expect.poll(() => form.evaluate((element) => new FormData(element as HTMLFormElement).has('alerts'))).toBe(false)
+  await expect.poll(() => host.evaluate((element) => (element as HTMLElement & { checkValidity(): boolean }).checkValidity())).toBe(false)
+  await form.evaluate((element) => (element as HTMLFormElement).reset())
+  await expect(input).toBeChecked()
+  await expect.poll(() => host.evaluate((element) => (element as HTMLElement & { checkValidity(): boolean }).checkValidity())).toBe(true)
+})
+test('fieldset disabled state prevents submission and interaction', async ({ page, renderScenario }) => {
+  await renderScenario('<form><fieldset disabled><c2-switch name="alerts" checked label="Alerts"></c2-switch></fieldset></form>')
+  await expect(page.getByRole('switch')).toBeDisabled()
+  await expect.poll(() => page.locator('form').evaluate((element) => new FormData(element as HTMLFormElement).has('alerts'))).toBe(false)
+})
 for (const direction of ['ltr', 'rtl']) {
   test(`dragging the thumb chooses the release side in ${direction}`, async ({ page, renderScenario }) => {
     await renderScenario(`<c2-switch dir="${direction}" label="Notifications"></c2-switch>`)

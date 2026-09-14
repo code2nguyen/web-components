@@ -33,3 +33,13 @@ test('disabled blocks clicks and host focus reaches the enabled input', async ({
   await page.locator('c2-checkbox').evaluate((el) => (el as HTMLElement).focus())
   await expect(input).toBeFocused()
 })
+
+test('submits only while checked and resets to its authored state', async ({ page, renderScenario }) => {
+  await renderScenario('<form><c2-checkbox name="terms" value="accepted" checked required aria-label="Terms"></c2-checkbox></form>')
+  const host = page.locator('c2-checkbox')
+  await expect.poll(() => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('terms'))).toBe('accepted')
+  await page.getByRole('checkbox').uncheck()
+  await expect.poll(() => host.evaluate((el) => (el as HTMLElement & { checkValidity(): boolean }).checkValidity())).toBe(false)
+  await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
+  await expect(host).toHaveJSProperty('checked', true)
+})

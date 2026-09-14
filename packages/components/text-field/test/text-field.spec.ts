@@ -61,3 +61,15 @@ test('an adornment in the icon slots keeps its natural width', async ({ page, re
   expect(adornment.clipped).toBe(false)
   await expect(page.locator('#field svg')).toHaveCSS('width', '16px')
 })
+
+test('participates in FormData, native validation, reset and disabled fieldsets', async ({ page, renderScenario }) => {
+  await renderScenario('<form><fieldset><c2-text-field name="message" value="Original" required></c2-text-field></fieldset></form>')
+  const host = page.locator('c2-text-field')
+  await expect(host).toHaveJSProperty('willValidate', true)
+  await host.evaluate((el) => ((el as HTMLElement & { value: string }).value = 'Edited'))
+  await expect.poll(() => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('message'))).toBe('Edited')
+  await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
+  await expect(host).toHaveJSProperty('value', 'Original')
+  await page.locator('fieldset').evaluate((fieldset) => ((fieldset as HTMLFieldSetElement).disabled = true))
+  await expect(page.getByRole('textbox')).toBeDisabled()
+})
