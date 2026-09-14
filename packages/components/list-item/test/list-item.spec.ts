@@ -56,3 +56,32 @@ test('--c2-list-item__icon--size still drives the svg and the icon elements', as
   await expect(page.locator('#row svg')).toHaveCSS('width', '24px')
   await expect(page.locator('#row svg')).toHaveCSS('height', '24px')
 })
+
+test('a slotted description shows, and an absent one stays hidden', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-list-item value="with">Inbox<span slot="description">12 unread</span></c2-list-item>
+    <c2-list-item value="without">Archive</c2-list-item>
+  `)
+
+  const visible = page.locator('c2-list-item[value="with"]')
+  const empty = page.locator('c2-list-item[value="without"]')
+  const hidden = (item: typeof visible) => item.evaluate((element) => element.shadowRoot?.querySelector('.c2-list-item__description')?.hasAttribute('hidden'))
+
+  await expect.poll(() => hidden(visible)).toBe(false)
+  await expect.poll(() => hidden(empty)).toBe(true)
+  await expect(page.getByText('12 unread')).toBeVisible()
+})
+
+test('renders without tripping Lit’s change-in-update warning', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('scheduled an update')) warnings.push(message.text())
+  })
+
+  // Reading a slot in `firstUpdated` and writing a reactive property from it schedules a second update as a
+  // side effect of the first, which is what this warning reports. The description is driven by `slotchange`.
+  await renderScenario('<c2-list-item value="a">Inbox<span slot="description">12 unread</span></c2-list-item>')
+  await expect(page.getByText('12 unread')).toBeVisible()
+
+  expect(warnings).toEqual([])
+})

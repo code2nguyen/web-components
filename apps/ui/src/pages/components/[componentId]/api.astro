@@ -16,13 +16,16 @@ export async function getStaticPaths() {
 }
 
 const { component } = Astro.props
-const componentTag = `c2-${component.id}`
+// Most packages are named after their element; one whose name is not a tag names its primary one instead.
+const componentTag = component.data.tag ?? `c2-${component.id}`
 const manifest = componentManifests[componentTag]
 if (!manifest) throw new Error(`No custom-elements manifest registered for ${componentTag} (see src/store/component-manifests.ts)`)
 const gallery = await getEntry('gallery', component.id)
 
 // One API table per element of the package (`c2-tabs` + `c2-tab`, `c2-radio` + `c2-radio-group`); the page's own tag first.
-const elements = [componentTag, ...manifest.siblingTags].map((tag, index) => ({
+// A page may name the set itself — the five `@c2n/chart` pages each document one chart plus `c2-chart-series`.
+const apiTags = component.data.apiTags ?? [componentTag, ...manifest.siblingTags]
+const elements = apiTags.map((tag, index) => ({
   tag,
   manifest: componentManifests[tag],
   idPrefix: index === 0 ? 'api' : `api-${tag}`,

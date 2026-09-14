@@ -10,6 +10,14 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Copy Button** — `c2-copy-button` · `@c2n/copy-button` — Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.
 - **Icon Button** — `c2-icon-button` · `@c2n/icon-button` — Round, hoverable button wrapping a slotted SVG icon.
 
+## Chart
+
+- **Area chart** — `c2-area-chart, c2-chart-series` · `@c2n/chart` — A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity.
+- **Bar chart** — `c2-bar-chart, c2-chart-series` · `@c2n/chart` — Bars over categories or time buckets, with several series drawn side by side within each band.
+- **Line chart** — `c2-line-chart, c2-chart-series` · `@c2n/chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children.
+- **Pie chart** — `c2-pie-chart, c2-chart-series` · `@c2n/chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it.
+- **Sparkline** — `c2-sparkline, c2-chart-series` · `@c2n/chart` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat.
+
 ## Chat
 
 - **Chat Input** — `c2-chat-input` · `@c2n/chat-input` — Auto-growing message box with a send button for chat interfaces.

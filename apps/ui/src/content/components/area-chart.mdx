@@ -1,0 +1,104 @@
+---
+title: 'Area chart'
+description: 'A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-area-chart'
+apiTags: ['c2-area-chart', 'c2-chart-series']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { AreaChart } from '@c2n/chart/area-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+An area chart *is* a line chart plus a fill, so `c2-area-chart` extends `c2-line-chart` and every one of
+its attributes — `curve`, `points`, `zoom`, `x-type`, the axis bounds — means exactly the same thing here.
+The one addition is `fill-opacity`.
+
+Reach for it when the quantity under the line is the point (volume, sessions, spend accumulating over a
+period) and for a single series or two. Stacked bands are not drawn: several filled series overlap, so past
+two or three the [line chart](/web-components/components/line-chart) reads better.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart uplot
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .plot {
+    width: 100%;
+    --c2-chart--height: 220px;
+  }
+</style>
+
+<div data-label="Smoothed area">
+  <c2-area-chart
+    class="plot"
+    x-field="t"
+    curve="smooth"
+    fill-opacity="0.2"
+    data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
+  >
+    <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
+  </c2-area-chart>
+</div>
+
+<div data-label="Two overlapping bands">
+  <c2-area-chart
+    class="plot"
+    x-field="month"
+    curve="smooth"
+    fill-opacity="0.16"
+    data='[{"month":1,"paid":128,"organic":74},{"month":2,"paid":141,"organic":92},{"month":3,"paid":132,"organic":101},{"month":4,"paid":167,"organic":118},{"month":5,"paid":183,"organic":142},{"month":6,"paid":204,"organic":171}]'
+  >
+    <c2-chart-series field="paid" label="Paid"></c2-chart-series>
+    <c2-chart-series field="organic" label="Organic"></c2-chart-series>
+  </c2-area-chart>
+</div>
+
+<div data-label="Solid fill on a time axis">
+  <c2-area-chart
+    class="plot"
+    x-type="time"
+    x-field="at"
+    fill-opacity="0.45"
+    legend="none"
+    data='[{"at":1704067200000,"mb":210},{"at":1704672000000,"mb":268},{"at":1705276800000,"mb":244},{"at":1705881600000,"mb":331},{"at":1706486400000,"mb":390},{"at":1707091200000,"mb":362}]'
+  >
+    <c2-chart-series field="mb" label="Egress (MB)"></c2-chart-series>
+  </c2-area-chart>
+</div>
+```
+
+## The fill
+
+`fill-opacity` takes a number from 0 to 1 and is applied to each series' palette colour. Left unset, the
+chart reads `--c2-chart__area--opacity` from the host instead (0.15 by default), which is the variable to
+set when the value belongs to the theme rather than to one chart.
+
+```css tag=CodeBlock
+.reports c2-area-chart {
+  --c2-chart__area--opacity: 0.28;
+  --c2-chart__line--width: 3px;
+}
+```
+
+## Data, realtime and sizing
+
+Identical to the line chart: rows plus `c2-chart-series` children, `appendPoint()` for a live feed,
+`max-points` for a bounded window, and `--c2-chart--height` plus the layout's width for the box. See
+[Line chart](/web-components/components/line-chart) for the details.
+
+## Theming
+
+Every chart in the package reads the same `--c2-chart__*` variables, so setting them once themes all of
+them. The series palette is `--c2-chart__series-1--color` through `--c2-chart__series-8--color`, wired by
+`@c2n/theme` to the `--c2-theme--chart-series-*` tokens. Because the plot is a canvas, these are read with
+`getComputedStyle` and handed to the engine — so they behave like any other CSS variable, including under a
+dark theme, but cannot be reached with `::part()`.

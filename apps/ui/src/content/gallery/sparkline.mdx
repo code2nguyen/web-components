@@ -1,0 +1,88 @@
+---
+title: 'Sparkline gallery'
+description: 'Chromeless trend lines: a KPI stack, dense table cells, filled areas and a tinted pill.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { Sparkline } from '@c2n/chart/sparkline.js'
+
+<ExampleModules />
+
+<GalleryGrid min="320">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]"></c2-sparkline>
+```
+
+```html tag=MdxCodeBlock,label=KPI rows
+<style>
+  .kpis {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px 16px;
+    align-items: center;
+    font: 14px system-ui;
+  }
+  .kpis c2-sparkline {
+    --c2-chart--height: 28px;
+    --c2-chart--width: 140px;
+  }
+</style>
+<div class="kpis">
+  <span>Requests</span>
+  <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline>
+  <span>Latency</span>
+  <c2-sparkline data="[91, 88, 94, 85, 79, 74, 70]" tone="auto"></c2-sparkline>
+  <span>Errors</span>
+  <c2-sparkline data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Dense cells
+<style>
+  .cells {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .cells c2-sparkline {
+    --c2-chart--width: 72px;
+    --c2-chart--height: 20px;
+    --c2-chart__line--width: 1px;
+  }
+</style>
+<div class="cells">
+  <c2-sparkline data="[4, 6, 5, 9, 8, 12]" tone="auto"></c2-sparkline>
+  <c2-sparkline data="[12, 9, 10, 7, 6, 4]" tone="auto"></c2-sparkline>
+  <c2-sparkline data="[7, 7, 8, 7, 8, 7]" tone="auto"></c2-sparkline>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Tinted pill
+<style>
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #f0fdf4;
+    color: #166534;
+    font: 600 13px system-ui;
+  }
+  .pill c2-sparkline {
+    --c2-chart--width: 96px;
+    --c2-chart--height: 24px;
+    --c2-chart__line--width: 2px;
+  }
+</style>
+<div class="pill">
+  <span>+18%</span>
+  <c2-sparkline data="[8, 11, 10, 14, 13, 18, 21]" tone="positive" type="area"></c2-sparkline>
+</div>
+```
+
+</GalleryGrid>

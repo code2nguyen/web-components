@@ -1,0 +1,111 @@
+---
+title: 'Pie chart'
+description: 'A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-pie-chart'
+apiTags: ['c2-pie-chart', 'c2-chart-series']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { PieChart } from '@c2n/chart/pie-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+Parts of a whole. `label-field` names each slice, a single `c2-chart-series` supplies its value, and one row
+is one slice. `inner-radius` above 0 turns the pie into a donut, which is where the interesting typography
+usually goes.
+
+**A different engine.** The pie is drawn by [ECharts](https://echarts.apache.org/) rather than uPlot — a pie
+has no axes to share with the cartesian charts, and ECharts' label placement is worth the weight here.
+ECharts is an optional peer dependency reached through a dynamic `import()` on first paint, so a page that
+only shows lines and sparklines never downloads it.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .plot {
+    width: 100%;
+    --c2-chart--height: 240px;
+  }
+</style>
+
+<div data-label="Donut with a legend">
+  <c2-pie-chart
+    class="plot"
+    label-field="channel"
+    inner-radius="0.58"
+    legend="end"
+    data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  </c2-pie-chart>
+</div>
+
+<div data-label="Full pie with outside labels">
+  <c2-pie-chart
+    class="plot"
+    label-field="stage"
+    labels="outside"
+    sort="desc"
+    legend="none"
+    data='[{"stage":"Qualified","deals":48},{"stage":"Proposal","deals":31},{"stage":"Won","deals":22},{"stage":"Lost","deals":14}]'
+  >
+    <c2-chart-series field="deals" label="Deals"></c2-chart-series>
+  </c2-pie-chart>
+</div>
+
+<div data-label="Thick ring, labels inside">
+  <c2-pie-chart
+    class="plot"
+    label-field="tier"
+    inner-radius="0.6"
+    outer-radius="0.95"
+    start-angle="180"
+    labels="inside"
+    legend="bottom"
+    data='[{"tier":"Free","users":6200},{"tier":"Pro","users":2400},{"tier":"Team","users":900}]'
+  >
+    <c2-chart-series field="users" label="Users"></c2-chart-series>
+  </c2-pie-chart>
+</div>
+```
+
+## Shaping the ring
+
+`inner-radius` and `outer-radius` are shares of the available box, from 0 to 1: `0` for a solid pie, `0.6`
+for a classic donut, `0.9` for a thin ring. `start-angle` is measured in degrees counter-clockwise from
+three o'clock, so `90` (the default) starts at the top and `180` starts at nine o'clock. `sort` orders the
+slices by value — `desc` is worth setting whenever the data order carries no meaning.
+
+`labels` draws the slice names on the chart (`inside` or `outside`) and defaults to `none`, since a legend
+usually reads better in a dashboard. Adjacent slices are separated by a hairline in the surface colour, so a
+donut sitting on a dark card keeps its separation without any extra styling.
+
+## Data
+
+One series, one value per row. Everything a pie needs comes from `label-field` plus that series' `field`:
+
+```html tag=CodeBlock
+<c2-pie-chart label-field="channel" data='[{"channel":"Direct","revenue":4200}]'>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+</c2-pie-chart>
+```
+
+A pie has one dimension, so keep it to one series: a second measure belongs in its own chart, or in a
+[bar chart](/web-components/components/bar-chart) where the two can sit side by side.
+
+## Theming
+
+Slices take the shared palette, `--c2-chart__series-1--color` through `--c2-chart__series-8--color`, wired by
+`@c2n/theme` to the `--c2-theme--chart-series-*` tokens — so a pie and a line chart on the same page agree on
+colour without any extra configuration. Because the plot is a canvas, these are read with `getComputedStyle`
+and handed to the engine, and cannot be reached with `::part()`.

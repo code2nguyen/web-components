@@ -63,7 +63,8 @@ export interface Details {
  *
  * @cssproperty {pixel} [--c2-details__header__icon--width=20px]
  * @cssproperty {pixel} [--c2-details__header__icon--height=20px]
- * @cssproperty {pixel} [--c2-details__header__icon--rotate=180deg]
+ * @cssproperty {pixel} [--c2-details__header__icon--rotate=180deg] - Icon angle while open.
+ * @cssproperty {pixel} [--c2-details__header__icon--rotate-collapsed=0deg] - Icon angle while closed. `-90deg` with the default chevron gives the nav idiom: right when closed, down when open.
  * @cssproperty {color} [--c2-details__header__icon--color=rgb(109, 109, 109)]
  *
  * @cssproperty {pixel} [--c2-details__header__content--margin-top=4px]

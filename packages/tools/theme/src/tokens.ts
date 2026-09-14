@@ -11,7 +11,7 @@
 
 export const TOKEN_PREFIX = '--c2-theme--'
 
-export type TokenCategory = 'color' | 'font' | 'radius' | 'border' | 'focus' | 'disabled' | 'motion' | 'shadow'
+export type TokenCategory = 'color' | 'font' | 'radius' | 'border' | 'focus' | 'disabled' | 'motion' | 'shadow' | 'chart'
 
 export interface TokenDef {
   /** Full custom property name, e.g. `--c2-theme--color-primary`. */
@@ -70,6 +70,32 @@ export const tokens: TokenDef[] = [
   // Elevation
   token('shadow-md', 'shadow', '0 8px 24px rgba(24, 24, 27, 0.08)', 'Shadow of popovers, menus and tooltips.', '0 8px 24px rgba(0, 0, 0, 0.45)'),
   token('shadow-lg', 'shadow', '0 24px 60px rgba(0, 0, 0, 0.25)', 'Shadow of dialogs and drawers.', '0 24px 60px rgba(0, 0, 0, 0.6)'),
+  // Data visualisation. The categorical palette is a set: recolour it as a whole, never one slot at a time.
+  // Slots 1-4 are the Okabe-Ito core and stay distinguishable under protanopia, deuteranopia and tritanopia;
+  // 5-7 add hue and lightness separation, and slot 8 is neutral grey, which no colour deficiency collapses
+  // into a chromatic slot. Past four series, label the marks directly rather than relying on hue alone.
+  token('chart-series-1', 'chart', '#0265dc', 'First categorical series. Matches the accent, so a single-series chart reads as brand.', '#5aa3ff'),
+  token('chart-series-2', 'chart', '#ea580c', 'Second categorical series: orange, the Okabe-Ito counterpart to the blue.', '#fb923c'),
+  token('chart-series-3', 'chart', '#0f766e', 'Third categorical series: teal.', '#2dd4bf'),
+  token('chart-series-4', 'chart', '#db2777', 'Fourth categorical series: pink.', '#f472b6'),
+  token('chart-series-5', 'chart', '#a16207', 'Fifth categorical series: gold, dark enough not to collapse into the orange.', '#fbbf24'),
+  token('chart-series-6', 'chart', '#7c3aed', 'Sixth categorical series: violet.', '#a78bfa'),
+  token('chart-series-7', 'chart', '#0891b2', 'Seventh categorical series: cyan.', '#22d3ee'),
+  token('chart-series-8', 'chart', '#52525b', 'Eighth categorical series: neutral grey, for an "other" or residual bucket.', '#a1a1aa'),
+  token(
+    'chart-positive',
+    'chart',
+    '#16a34a',
+    'Rising values: an up candle, a positive sparkline. Separate from the accent so direction and brand move independently.',
+    '#4ade80',
+  ),
+  token(
+    'chart-negative',
+    'chart',
+    '#dc2626',
+    'Falling values: a down candle, a negative sparkline. Separate from `color-error` so a brand can recolour direction without recolouring failure.',
+    '#f87171',
+  ),
 ]
 
 export const tokenNames = tokens.map((t) => t.name)

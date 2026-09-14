@@ -1,0 +1,93 @@
+---
+// Site variant of `c2-select`: the site's control height, radius, border and focus ring, on a class of
+// `--c2-select__*` values. Options are `c2-list-item` children, passed through the default slot.
+// Used by ToastManagerDemo and PhosphorIconGallery.
+import { Select } from '@c2n/select'
+import { rawElement, type AttributeValue } from '../../utils/raw-element'
+
+interface Props {
+  /** Accessible name. Omit it when a `c2-label[for]` or a wrapping `<label>` already names the control —
+   * `c2-select` is form-associated, so it is labelable. */
+  label?: string
+  /** sm 30px, md 36px. */
+  size?: 'sm' | 'md'
+  /** `island` (default) or `defined` (plain tag upgraded by `data/chrome-modules.ts`, for repeated chrome). */
+  hydrate?: 'island' | 'defined'
+  class?: string
+  [attr: string]: unknown
+}
+const { label, size = 'md', hydrate = 'island', class: className = '', ...rest } = Astro.props
+const classes = ['site-select', `site-select--${size}`, className].filter(Boolean).join(' ')
+// `c2-list-item` children of a raw select must stay raw too, or the Lit renderer half-hydrates them.
+const raw =
+  hydrate === 'defined'
+    ? rawElement('c2-select', { class: classes, 'aria-label': label, ...(rest as Record<string, AttributeValue>) }, await Astro.slots.render('default'))
+    : ''
+---
+
+{
+  hydrate === 'island' ? (
+    <Select client:load class={classes} aria-label={label} {...rest}>
+      <slot />
+    </Select>
+  ) : (
+    <Fragment set:html={raw} />
+  )
+}
+
+<style lang="scss" is:global>
+  .site-select {
+    --c2-select__button--font-size: 13px;
+    --c2-select__button--background: var(--site-color-surface);
+    --c2-select__button--color: var(--site-color-on-surface);
+    --c2-select__button--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-select__button--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-select__button--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-select__button--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-select__button__hover--border-top: 1px solid var(--site-color-outline);
+    --c2-select__button__hover--border-right: 1px solid var(--site-color-outline);
+    --c2-select__button__hover--border-bottom: 1px solid var(--site-color-outline);
+    --c2-select__button__hover--border-left: 1px solid var(--site-color-outline);
+    --c2-select__button__hover--background: var(--site-color-surface-container-1);
+    --c2-select__button--border-top-left-radius: var(--site-radius-sm);
+    --c2-select__button--border-top-right-radius: var(--site-radius-sm);
+    --c2-select__button--border-bottom-left-radius: var(--site-radius-sm);
+    --c2-select__button--border-bottom-right-radius: var(--site-radius-sm);
+    // A halo, not a line: `[open]` already turns the button border accent, so a solid ring on top of it would
+    // read as a second border. The component defaults the offset to 0, which keeps the two as one ring.
+    --c2-select__button__focus--outline: 2px solid color-mix(in srgb, var(--site-color-primary) 45%, transparent);
+    --c2-select__button__suffix-icon--color: var(--site-color-on-surface-muted);
+    --c2-select__list--background: var(--site-color-surface);
+    --c2-select__list--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-select__list--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-select__list--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-select__list--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-select__list--border-top-left-radius: var(--site-radius-md);
+    --c2-select__list--border-top-right-radius: var(--site-radius-md);
+    --c2-select__list--border-bottom-left-radius: var(--site-radius-md);
+    --c2-select__list--border-bottom-right-radius: var(--site-radius-md);
+    --c2-select__list--box-shadow: var(--site-elevation-2);
+    --c2-list-item--font-size: 13px;
+    --c2-list-item--color: var(--site-color-on-surface-variant);
+    --c2-list-item__hover--background-color: var(--site-color-surface-container-2);
+    --c2-list-item__selected--background-color: var(--site-color-primary-soft);
+    --c2-list-item__selected--color: var(--site-color-primary);
+
+    &--md {
+      --c2-select__button--min-height: 36px;
+      --c2-select__button--padding: 0 10px;
+    }
+    &--sm {
+      --c2-select__button--min-height: 30px;
+      --c2-select__button--padding: 0 8px;
+    }
+
+    &:not(:defined) {
+      visibility: hidden;
+    }
+  }
+</style>
+
+<script>
+  import '../../data/chrome-modules'
+</script>

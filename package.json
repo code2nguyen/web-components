@@ -23,8 +23,8 @@
     "version": "node packages/tools/mcp/scripts/stamp-version.ts && node packages/tools/skill/scripts/build-skill.ts && git add packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json",
     "format:check": "prettier \"**/*.{cjs,html,js,json,md,ts,tsx,vue}\" --check",
     "format:fix": "prettier \"**/*.{cjs,html,js,json,md,ts,tsx,vue}\" --write",
-    "ui": "npm run start -w apps/ui",
-    "ui:dev": "npm run dev -w apps/ui",
+    "ui": "npm run start -w apps/ui --",
+    "ui:dev": "npm run dev -w apps/ui --",
     "ui:build": "wireit",
     "examples:build": "wireit",
     "build": "wireit",
@@ -36,7 +36,8 @@
     "build:tools": "wireit",
     "mcp:inspect": "npm run inspect -w packages/tools/mcp",
     "mcp:smoke": "npm run smoke -w packages/tools/mcp",
-    "docs:check": "node scripts/check-component-docs.mjs"
+    "docs:check": "node scripts/check-component-docs.mjs",
+    "check:dogfood": "node scripts/check-dogfooding.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
@@ -82,6 +83,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/chart:build",
         "./packages/components/autocomplete:build",
         "./packages/components/header:build",
         "./packages/components/stat:build",

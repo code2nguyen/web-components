@@ -10,6 +10,27 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
+  // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
+  '--c2-chart__series-1--color': { token: 'chart-series-1' },
+  '--c2-chart__series-2--color': { token: 'chart-series-2' },
+  '--c2-chart__series-3--color': { token: 'chart-series-3' },
+  '--c2-chart__series-4--color': { token: 'chart-series-4' },
+  '--c2-chart__series-5--color': { token: 'chart-series-5' },
+  '--c2-chart__series-6--color': { token: 'chart-series-6' },
+  '--c2-chart__series-7--color': { token: 'chart-series-7' },
+  '--c2-chart__series-8--color': { token: 'chart-series-8' },
+  // Direction is not status: a falling candle is not an error, and a brand must be able to recolour the
+  // pair (green/red, or blue/orange in Japan) without touching what an error looks like.
+  '--c2-chart__positive--color': { token: 'chart-positive' },
+  '--c2-chart__negative--color': { token: 'chart-negative' },
+  '--c2-chart__tone-positive--color': { token: 'chart-positive' },
+  '--c2-chart__tone-negative--color': { token: 'chart-negative' },
+  // Handed to the engine to draw marker and slice borders against the card, so it follows the surface
+  // rather than reading as white text, which is how the colour rule would otherwise classify it.
+  '--c2-chart__surface--color': { token: 'color-surface' },
+  // The tooltip is an inverse surface, so its text follows the inverse pair rather than the body colour.
+  '--c2-chart__tooltip--color': { token: 'color-on-inverse-surface' },
   // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
   '--c2-attachment__status__complete--color': { exclude: 'success status colour' },
   '--c2-attachment__progress--background': { token: 'color-outline-variant' },

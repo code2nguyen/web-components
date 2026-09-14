@@ -43,6 +43,9 @@ jobs:
       - name: Check component documentation coverage
         run: npm run docs:check
 
+      - name: Check the docs site dogfoods c2n components
+        run: npm run check:dogfood
+
       - name: Build tools (MCP registry, skill catalog)
         run: npm run build:tools
 

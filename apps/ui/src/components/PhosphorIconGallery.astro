@@ -1,31 +1,36 @@
 ---
 import { phosphorIconNames, phosphorIconTag } from '@c2n/phosphor-icons'
 import MdxCodeBlock from './MdxCodeBlock.astro'
+import SiteSelect from './ui/SiteSelect.astro'
+import SiteTextField from './ui/SiteTextField.astro'
 
 const items = phosphorIconNames.map((name) => ({ name, markup: `<${phosphorIconTag(name)}></${phosphorIconTag(name)}>` }))
 const studioUid = 'phosphor-icon-gallery-studio'
 const studioTag = 'c2-phosphor-heart'
 const studioCode = `<${studioTag}></${studioTag}>`
+const weights = [
+  ['regular', 'Regular'],
+  ['thin', 'Thin'],
+  ['light', 'Light'],
+  ['bold', 'Bold'],
+  ['fill', 'Fill'],
+  ['duotone', 'Duotone'],
+]
 ---
 
 <div class="phosphor-icon-gallery__toolbar">
-  <input
-    type="search"
+  <SiteTextField
     class="phosphor-icon-gallery__filter"
+    label="Filter icons"
+    search
+    size="sm"
     placeholder={`Filter ${items.length.toLocaleString('en')} icons…`}
-    aria-label="Filter icons"
-    autocomplete="off"
   />
   <label class="phosphor-icon-gallery__weight-label">
     Weight
-    <select class="phosphor-icon-gallery__weight" aria-label="Icon weight">
-      <option value="regular">Regular</option>
-      <option value="thin">Thin</option>
-      <option value="light">Light</option>
-      <option value="bold">Bold</option>
-      <option value="fill">Fill</option>
-      <option value="duotone">Duotone</option>
-    </select>
+    <SiteSelect class="phosphor-icon-gallery__weight" hydrate="defined" value="regular">
+      <Fragment set:html={weights.map(([value, text]) => `<c2-list-item value="${value}">${text}</c2-list-item>`).join('')} />
+    </SiteSelect>
   </label>
   <span class="phosphor-icon-gallery__count">{items.length.toLocaleString('en')} icons · select one to customize</span>
 </div>
@@ -33,6 +38,7 @@ const studioCode = `<${studioTag}></${studioTag}>`
   {
     items.map(({ name, markup }) => (
       <div class="phosphor-icon-gallery__item" data-name={name}>
+        {/* dogfood-exempt: one cell per icon — a c2-icon-button here is 1,512 shadow roots on one page. */}
         <button type="button" class="phosphor-icon-gallery__configure" title={`Customize ${name}`}>
           <Fragment set:html={markup} />
           <span class="phosphor-icon-gallery__label">{name}</span>
@@ -63,21 +69,8 @@ const studioCode = `<${studioTag}></${studioTag}>`
     flex-wrap: wrap;
     margin: 16px 0 12px;
   }
-  .phosphor-icon-gallery__filter,
-  .phosphor-icon-gallery__weight {
-    height: 36px;
-    padding: 0 12px;
-    font: inherit;
-    font-size: 14px;
-    color: var(--site-color-on-surface);
-    background: var(--site-color-surface-container-1);
-    border: 1px solid var(--site-color-outline-variant);
-    border-radius: var(--site-radius-sm);
-    &:focus {
-      outline: none;
-      border-color: var(--site-color-primary);
-    }
-  }
+  // Layout only. The box, the border and the focus ring belong to each component — drawing them on the host
+  // as well puts a second, inset frame inside the control.
   .phosphor-icon-gallery__filter {
     flex: 1;
     min-width: 200px;
@@ -89,9 +82,6 @@ const studioCode = `<${studioTag}></${studioTag}>`
     gap: 7px;
     font-size: 12.5px;
     color: var(--site-color-on-surface-muted);
-  }
-  .phosphor-icon-gallery__weight {
-    padding-right: 28px;
   }
   .phosphor-icon-gallery__count {
     margin-left: auto;
@@ -170,9 +160,12 @@ const studioCode = `<${studioTag}></${studioTag}>`
 <script>
   import type { CopyButton } from '@c2n/copy-button'
   import type { PhosphorIcon, PhosphorIconWeight } from '@c2n/phosphor-icons'
+  import type { TextField } from '@c2n/text-field'
+  import type { Select } from '@c2n/select'
 
-  const filter = document.querySelector<HTMLInputElement>('.phosphor-icon-gallery__filter')
-  const weightSelect = document.querySelector<HTMLSelectElement>('.phosphor-icon-gallery__weight')
+  const filter = document.querySelector<TextField>('.phosphor-icon-gallery__filter')
+  // `c2-select.value` is an array (one entry unless `multiple`); `selectedValue` is the single-value view.
+  const weightSelect = document.querySelector<Select>('.phosphor-icon-gallery__weight')
   const items = Array.from(document.querySelectorAll<HTMLElement>('.phosphor-icon-gallery__item'))
   const empty = document.querySelector<HTMLElement>('.phosphor-icon-gallery__empty')
 
@@ -191,7 +184,7 @@ const studioCode = `<${studioTag}></${studioTag}>`
   })
 
   weightSelect?.addEventListener('change', () => {
-    const weight = weightSelect.value as PhosphorIconWeight
+    const weight = weightSelect.selectedValue as PhosphorIconWeight
     items.forEach((item) => {
       const icon = item.querySelector<PhosphorIcon>('c2-phosphor-' + (item.dataset.name ?? ''))
       if (icon) icon.weight = weight
@@ -206,7 +199,7 @@ const studioCode = `<${studioTag}></${studioTag}>`
   items.forEach((item) => {
     item.querySelector('.phosphor-icon-gallery__configure')?.addEventListener('click', () => {
       const name = item.dataset.name ?? ''
-      const weight = (weightSelect?.value ?? 'regular') as PhosphorIconWeight
+      const weight = (weightSelect?.selectedValue || 'regular') as PhosphorIconWeight
       const tag = `c2-phosphor-${name}`
       openIconInStudio({ uid: 'phosphor-icon-gallery-studio', tagName: tag, attributes: weight === 'regular' ? {} : { weight } })
     })

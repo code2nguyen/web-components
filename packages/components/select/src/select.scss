@@ -47,7 +47,9 @@
     button__open--border-left: 1px solid #476ef9,
 
     button__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
-    button__focus--outline-offset: 1px,
+    // Flush, not offset: `[open]` already turns the border accent, and a ring standing 1px off it reads as a
+    // second border whenever the dropdown is opened from the keyboard (both states apply at once).
+    button__focus--outline-offset: 0px,
 
     button__disabled--opacity: variables.$disabled-content-opacity,
 
@@ -68,7 +70,6 @@
     list--border-bottom-right-radius: 8px,
 
     list--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
-
     list--padding-top: 4px,
     list--padding-right: 4px,
     list--padding-bottom: 4px,

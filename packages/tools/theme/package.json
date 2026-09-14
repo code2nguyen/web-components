@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/chart:build",
         "../../components/autocomplete:build",
         "../../components/header:build",
         "../../components/stat:build",

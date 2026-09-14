@@ -1,0 +1,412 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    width: 100%,
+    height: 320px,
+    background: #ffffff,
+    color: #18181b,
+    font-family: inherit,
+    font-size: 12px,
+    padding: 12px,
+
+    border-top: 1px solid #e4e4e7,
+    border-right: 1px solid #e4e4e7,
+    border-bottom: 1px solid #e4e4e7,
+    border-left: 1px solid #e4e4e7,
+
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
+    series-1--color: #0265dc,
+    series-2--color: #ea580c,
+    series-3--color: #0f766e,
+    series-4--color: #db2777,
+    series-5--color: #a16207,
+    series-6--color: #7c3aed,
+    series-7--color: #0891b2,
+    series-8--color: #52525b,
+
+    line--width: 2px,
+    point--radius: 2.5px,
+    area--opacity: 0.15,
+
+    axis--color: #71717a,
+    axis--font-size: 12px,
+    grid--color: #e4e4e7,
+    grid--width: 1px,
+    crosshair--color: #a1a1aa,
+    crosshair--width: 1px,
+
+    surface--color: #ffffff,
+    muted--color: #71717a,
+    positive--color: #16a34a,
+    negative--color: #dc2626,
+
+    legend--gap: 12px,
+    legend--padding: 8px 0 0,
+    legend--color: #71717a,
+    legend--font-size: 12px,
+    legend__disabled--opacity: 0.38,
+    legend-marker--size: 10px,
+    legend-marker--border-radius: 999px,
+
+    tooltip--background-color: #18181b,
+    tooltip--color: #fafafa,
+    tooltip--font-size: 12px,
+    tooltip--padding: 8px 10px,
+    tooltip--border-radius: 6px,
+    tooltip--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    tooltip--gap: 6px,
+
+    state--color: #71717a,
+    state--font-size: 14px,
+  )
+);
+
+:host {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: css.cssVar(width);
+  height: css.cssVar(height);
+  /*
+   * The plot is absolutely positioned, so nothing inside the host contributes intrinsic width. As a flex
+   * item — which is what every example frame in the docs site makes it — the host would otherwise shrink
+   * to its legend, and to nothing at all when there is no legend. `min-width: 0` keeps it able to shrink
+   * below its content when a layout genuinely needs that.
+   */
+  min-width: 0;
+  padding: css.cssVar(padding);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/*
+ * The plot area is the engine's territory. `contain: strict` plus absolute positioning means the canvas
+ * the engine sizes inside it can never feed its own size back into the ResizeObserver watching this box,
+ * which is what makes the resize loop structurally impossible rather than merely unlikely.
+ */
+.plot-area {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.plot {
+  position: absolute;
+  inset: 0;
+  contain: strict;
+}
+
+.plot canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform;
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(tooltip--gap);
+  padding: css.cssVar(tooltip--padding);
+  border-radius: css.cssVar(tooltip--border-radius);
+  background: css.cssVar(tooltip--background-color);
+  color: css.cssVar(tooltip--color);
+  font-size: css.cssVar(tooltip--font-size);
+  box-shadow: css.cssVar(tooltip--box-shadow);
+  white-space: nowrap;
+}
+
+.tooltip[hidden] {
+  display: none;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltip-marker {
+  width: css.cssVar(legend-marker--size);
+  height: css.cssVar(legend-marker--size);
+  border-radius: css.cssVar(legend-marker--border-radius);
+  flex: none;
+}
+
+.tooltip-label {
+  flex: 1 1 auto;
+}
+
+.tooltip-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  pointer-events: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: css.cssVar(state--color);
+  font-size: css.cssVar(state--font-size);
+  background: css.cssVar(background);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: css.cssVar(legend--gap);
+  padding: css.cssVar(legend--padding);
+  color: css.cssVar(legend--color);
+  font-size: css.cssVar(legend--font-size);
+}
+
+.legend--start,
+.legend--end {
+  flex-direction: column;
+  align-content: flex-start;
+  flex: 0 0 auto;
+  align-self: center;
+  // A side legend must not eat the plot: it wraps into more columns rather than growing without limit.
+  max-height: 100%;
+  overflow: auto;
+}
+
+/* The legend is on an inline edge, so the frame runs as a row. */
+.frame--side {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.legend-item[aria-pressed='false'] {
+  opacity: css.cssVar(legend__disabled--opacity);
+}
+
+.legend-marker {
+  width: css.cssVar(legend-marker--size);
+  height: css.cssVar(legend-marker--size);
+  border-radius: css.cssVar(legend-marker--border-radius);
+  flex: none;
+}
+
+.definitions {
+  display: none;
+}
+
+/*
+ * Colour probes. `getComputedStyle().getPropertyValue()` hands back the author's text for a `var()` or
+ * `color-mix()` chain, which no canvas engine can parse; the computed `color` of an element always
+ * resolves to `rgb(…)`. `display: none` keeps them free.
+ */
+.theme-probe {
+  display: none;
+
+  i:nth-child(1) {
+    color: css.cssVar(series-1--color);
+  }
+  i:nth-child(2) {
+    color: css.cssVar(series-2--color);
+  }
+  i:nth-child(3) {
+    color: css.cssVar(series-3--color);
+  }
+  i:nth-child(4) {
+    color: css.cssVar(series-4--color);
+  }
+  i:nth-child(5) {
+    color: css.cssVar(series-5--color);
+  }
+  i:nth-child(6) {
+    color: css.cssVar(series-6--color);
+  }
+  i:nth-child(7) {
+    color: css.cssVar(series-7--color);
+  }
+  i:nth-child(8) {
+    color: css.cssVar(series-8--color);
+  }
+  i:nth-child(9) {
+    color: css.cssVar(axis--color);
+  }
+  i:nth-child(10) {
+    color: css.cssVar(grid--color);
+  }
+  i:nth-child(11) {
+    color: css.cssVar(color);
+  }
+  i:nth-child(12) {
+    color: css.cssVar(muted--color);
+  }
+  i:nth-child(13) {
+    color: css.cssVar(tooltip--background-color);
+  }
+  i:nth-child(14) {
+    color: css.cssVar(tooltip--color);
+  }
+  i:nth-child(15) {
+    color: css.cssVar(crosshair--color);
+  }
+  i:nth-child(16) {
+    color: css.cssVar(positive--color);
+  }
+  i:nth-child(17) {
+    color: css.cssVar(negative--color);
+  }
+  i:nth-child(18) {
+    color: css.cssVar(surface--color);
+  }
+}
+
+/*
+ * uPlot's structural CSS, hand-ported.
+ *
+ * `uplot/dist/uPlot.min.css` is a global stylesheet and a shadow root cannot see it, so the rules the
+ * engine's DOM depends on live here instead. Only the structural half is kept: the legend and title rules
+ * are dropped because this component renders its own. Version-coupled to the `uplot` peer range — re-check
+ * after an upgrade.
+ */
+.uplot,
+.uplot *,
+.uplot *::before,
+.uplot *::after {
+  box-sizing: border-box;
+}
+
+.uplot {
+  font-family: css.cssVar(font-family);
+  line-height: 1.5;
+  width: min-content;
+}
+
+.u-wrap {
+  position: relative;
+  user-select: none;
+}
+
+.u-over,
+.u-under {
+  position: absolute;
+}
+
+.u-under {
+  overflow: hidden;
+}
+
+.uplot canvas {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.u-axis {
+  position: absolute;
+}
+
+.u-select {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.u-cursor-x,
+.u-cursor-y {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.u-hz .u-cursor-x,
+.u-vt .u-cursor-y {
+  height: 100%;
+  border-right: css.cssVar(crosshair--width) dashed css.cssVar(crosshair--color);
+}
+
+.u-hz .u-cursor-y,
+.u-vt .u-cursor-x {
+  width: 100%;
+  border-bottom: css.cssVar(crosshair--width) dashed css.cssVar(crosshair--color);
+}
+
+.u-cursor-pt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  border: 0 solid;
+  pointer-events: none;
+  will-change: transform;
+  /* Must stay !important: uPlot sets the `background` shorthand inline. */
+  background-clip: padding-box !important;
+}
+
+.u-axis.u-off,
+.u-select.u-off,
+.u-cursor-x.u-off,
+.u-cursor-y.u-off,
+.u-cursor-pt.u-off {
+  display: none;
+}

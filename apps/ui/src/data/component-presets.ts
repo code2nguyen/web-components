@@ -32,6 +32,108 @@ export function describeComponentPreset(preset: ComponentPreset): string {
 }
 
 export const componentPresets: Record<string, ComponentPresetGroup> = {
+  'c2-line-chart': {
+    html: `<c2-line-chart style="width:420px;height:220px" x-field="month" legend="bottom" data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series><c2-chart-series field="cost" label="Cost"></c2-chart-series></c2-line-chart>`,
+    presets: [
+      {
+        name: 'Hairline',
+        description: 'Drops the card entirely and fades the grid, for a chart that sits inside another surface.',
+        css: {
+          '--c2-chart--border-top': 'none',
+          '--c2-chart--border-right': 'none',
+          '--c2-chart--border-bottom': 'none',
+          '--c2-chart--border-left': 'none',
+          '--c2-chart--padding': '4px',
+          '--c2-chart__grid--color': 'transparent',
+        },
+      },
+      {
+        name: 'Terminal',
+        description: 'Dark plot with a cyan and violet pair, for a monitoring wall.',
+        css: {
+          '--c2-chart--background': '#0b0f17',
+          '--c2-chart--color': '#e5e7eb',
+          '--c2-chart__grid--color': '#1f2937',
+          '--c2-chart__axis--color': '#6b7280',
+          '--c2-chart__series-1--color': '#22d3ee',
+          '--c2-chart__series-2--color': '#a78bfa',
+        },
+      },
+      {
+        name: 'Bold',
+        description: 'Thicker strokes and a larger tooltip, for a chart read from across a room.',
+        css: { '--c2-chart__line--width': '3px', '--c2-chart__point--radius': '4px', '--c2-chart__tooltip--font-size': '14px' },
+      },
+    ],
+  },
+  'c2-area-chart': {
+    html: `<c2-area-chart style="width:420px;height:220px" x-field="t" curve="smooth" data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'><c2-chart-series field="sessions" label="Sessions"></c2-chart-series></c2-area-chart>`,
+    presets: [
+      {
+        name: 'Heavy fill',
+        description: 'A denser band under a thicker line, for a single headline metric.',
+        css: { '--c2-chart__area--opacity': '0.28', '--c2-chart__line--width': '3px' },
+      },
+      {
+        name: 'Card insert',
+        description: 'No frame and no grid, for an area that sits inside another surface.',
+        css: {
+          '--c2-chart--border-top': 'none',
+          '--c2-chart--border-right': 'none',
+          '--c2-chart--border-bottom': 'none',
+          '--c2-chart--border-left': 'none',
+          '--c2-chart--background': 'transparent',
+          '--c2-chart--padding': '0px',
+          '--c2-chart__grid--color': 'transparent',
+        },
+      },
+    ],
+  },
+  'c2-bar-chart': {
+    html: `<c2-bar-chart style="width:420px;height:220px" label-field="team" x-type="category" data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'><c2-chart-series field="shipped" label="Shipped"></c2-chart-series></c2-bar-chart>`,
+    presets: [
+      {
+        name: 'Soft grid',
+        description: 'A pale grid behind a single blue series.',
+        css: { '--c2-chart__grid--color': '#f4f4f5', '--c2-chart__series-1--color': '#0ea5e9' },
+      },
+      {
+        name: 'Editorial',
+        description: 'Thin ink-black bars on a bare canvas, for a report.',
+        css: {
+          '--c2-chart--border-top': 'none',
+          '--c2-chart--border-right': 'none',
+          '--c2-chart--border-bottom': 'none',
+          '--c2-chart--border-left': 'none',
+          '--c2-chart__grid--color': 'transparent',
+          '--c2-chart__axis--color': '#a1a1aa',
+          '--c2-chart__series-1--color': '#18181b',
+        },
+        attributes: { 'bar-width': '0.35', legend: 'none' },
+      },
+    ],
+  },
+  'c2-pie-chart': {
+    html: `<c2-pie-chart style="width:420px;height:240px" label-field="channel" legend="end" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
+    presets: [
+      { name: 'Donut', description: 'A hole in the middle, where a headline number usually goes.', attributes: { 'inner-radius': '0.62' } },
+      {
+        name: 'Labelled',
+        description: 'Slice names drawn outside and ordered by value, with no legend.',
+        attributes: { labels: 'outside', sort: 'desc', legend: 'none' },
+      },
+      {
+        name: 'Muted',
+        description: 'A slate-to-indigo ramp, for a chart that should not shout.',
+        css: {
+          '--c2-chart__series-1--color': '#64748b',
+          '--c2-chart__series-2--color': '#0ea5e9',
+          '--c2-chart__series-3--color': '#6366f1',
+          '--c2-chart__series-4--color': '#a78bfa',
+        },
+      },
+    ],
+  },
   'c2-autocomplete': {
     html: `<c2-autocomplete style="width:240px" aria-label="Search" placeholder="Search…" item-key="value" label-field="label" description-field="description" suggestions='[{"value":"ada","label":"Ada Lovelace","description":"Platform engineering"},{"value":"api","label":"Autocomplete API notes","description":"Updated yesterday"}]'></c2-autocomplete>`,
     presets: [
@@ -82,6 +184,13 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-autocomplete__description--font-size': '11px',
         },
       },
+    ],
+  },
+  'c2-sparkline': {
+    html: `<c2-sparkline style="width:140px" data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline>`,
+    presets: [
+      { name: 'Tall', description: 'A taller box for a roomier KPI row.', css: { '--c2-chart--height': '44px', '--c2-chart--width': '180px' } },
+      { name: 'Hairline', description: 'A thinner stroke, for a dense table.', css: { '--c2-chart__line--width': '1px' } },
     ],
   },
   'c2-accordion': {

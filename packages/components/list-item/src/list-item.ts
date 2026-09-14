@@ -229,11 +229,6 @@ export class ListItem extends LitElement {
     }
   }
 
-  protected override firstUpdated(): void {
-    const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="description"]')
-    if (slot) this.updateDescription(slot)
-  }
-
   protected override updated(changedProperties: PropertyValueMap<this>): void {
     // Only report real changes, not the initial render.
     if (changedProperties.has('selected') && changedProperties.get('selected') !== undefined) {

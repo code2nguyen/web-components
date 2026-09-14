@@ -1,0 +1,72 @@
+---
+title: 'Pie chart gallery'
+description: 'Parts of a whole: a pie, a donut with a legend, outside labels and a muted thick ring.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { PieChart } from '@c2n/chart/pie-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+<ExampleModules />
+
+<GalleryGrid min="440">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-pie-chart
+  label-field="channel"
+  legend="end"
+  data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'
+>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+</c2-pie-chart>
+```
+
+```html tag=MdxCodeBlock,label=Donut
+<c2-pie-chart
+  label-field="channel"
+  inner-radius="0.62"
+  legend="end"
+  data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'
+>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+</c2-pie-chart>
+```
+
+```html tag=MdxCodeBlock,label=Pie with labels
+<c2-pie-chart
+  label-field="stage"
+  labels="outside"
+  sort="desc"
+  legend="none"
+  data='[{"stage":"Qualified","deals":48},{"stage":"Proposal","deals":31},{"stage":"Won","deals":22},{"stage":"Lost","deals":14}]'
+>
+  <c2-chart-series field="deals" label="Deals"></c2-chart-series>
+</c2-pie-chart>
+```
+
+```html tag=MdxCodeBlock,label=Thick ring
+<style>
+  .ring {
+    --c2-chart__series-1--color: #64748b;
+    --c2-chart__series-2--color: #0ea5e9;
+    --c2-chart__series-3--color: #6366f1;
+  }
+</style>
+<c2-pie-chart
+  class="ring"
+  label-field="tier"
+  inner-radius="0.6"
+  outer-radius="0.95"
+  start-angle="180"
+  labels="inside"
+  legend="bottom"
+  data='[{"tier":"Free","users":6200},{"tier":"Pro","users":2400},{"tier":"Team","users":900}]'
+>
+  <c2-chart-series field="users" label="Users"></c2-chart-series>
+</c2-pie-chart>
+```
+
+</GalleryGrid>
