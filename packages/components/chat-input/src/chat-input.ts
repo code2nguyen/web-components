@@ -1,17 +1,17 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { eventOptions, property, query, state } from 'lit/decorators.js'
+import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { property, query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import styles from './chat-input.scss?inline'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
-import { live } from 'lit/directives/live.js'
-import { styleMap, type StyleInfo } from 'lit/directives/style-map.js'
-import { addClasses } from '@c2n/core/css-helper.js'
-import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
+import { live } from 'lit/directives/live.js'
+import styles from './chat-input.scss?inline'
 
 /** Events fired by {@link ChatInput}, keyed for `addEventListener`. */
 export interface ChatInputEventMap {
+  input: InputEvent
+  change: Event
+  select: Event
   'submit-message': CustomEvent<string>
 }
 
@@ -21,75 +21,62 @@ export interface ChatInput {
 }
 
 /**
- * Auto-growing message composer that submits with Enter and inserts a newline with Alt+Enter.
+ * Auto-growing message composer with slotted actions and an accessible send button.
  *
  * @tag c2-chat-input
- *
- * @slot send-icon - Icon button used to submit the current message.
- *
- * @event {CustomEvent<string>} submit-message - Fired when the user submits; `detail` is the message text before the field is cleared.
- * @cssproperty {border-radius} [--c2-chat-input--border-top-left-radius=4px]
- * @cssproperty {border-radius} [--c2-chat-input--border-top-right-radius=4px]
- * @cssproperty {border-radius} [--c2-chat-input--border-bottom-left-radius=4px]
- * @cssproperty {border-radius} [--c2-chat-input--border-bottom-right-radius=4px]
- *
- * @cssproperty {padding} [--c2-chat-input--padding-top=8px]
- * @cssproperty {padding} [--c2-chat-input--padding-right=8px]
- * @cssproperty {padding} [--c2-chat-input--padding-bottom=8px]
- * @cssproperty {padding} [--c2-chat-input--padding-left=8px]
- *
- * @cssproperty {border} [--c2-chat-input--border-top=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-chat-input--border-right=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-chat-input--border-bottom=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-chat-input--border-left=1px solid rgb(177, 177, 177)]
- *
- * @cssproperty {color} [--c2-chat-input--color=rgb(34, 34, 34)]
- * @cssproperty {background} [--c2-chat-input--background=rgb(255, 255, 255)]
- *
- * @cssproperty {font-size} [--c2-chat-input--font-size=14px]
- * @cssproperty {font-weight} --c2-chat-input--font-weight
- * @cssproperty {font-style} --c2-chat-input--font-style
- * @cssproperty {font-family} --c2-chat-input--font-family
- * @cssproperty {line-height} [--c2-chat-input--line-height=24px]
- * @cssproperty {max-height} [--c2-chat-input--max-height=25vh]
- *
- * @cssproperty {opacity} [--c2-chat-input__placeholder--opacity=0.5]
- * @cssproperty {font-weight} --c2-chat-input__placeholder--font-weight
- * @cssproperty {font-style} --c2-chat-input__placeholder--font-style
- * @cssproperty {color} --c2-chat-input__placeholder--color
- *
- * @cssproperty {pixel} [--c2-chat-input__send-icon--width=24px]
- * @cssproperty {pixel} [--c2-chat-input__send-icon--height=24px]
- * @cssproperty {opacity} [--c2-chat-input__send-icon--opacity=0.5]
- * @cssproperty {color} --c2-chat-input__send-icon--color
- * @cssproperty {color} --c2-chat-input__send-icon__active--color
- *
- * @cssproperty {border} --c2-chat-input__focus--border-top
- * @cssproperty {border} --c2-chat-input__focus--border-right
- * @cssproperty {border} --c2-chat-input__focus--border-bottom
- * @cssproperty {border} --c2-chat-input__focus--border-left
- *
- * @cssproperty {color} --c2-chat-input__focus--color
- * @cssproperty {background} --c2-chat-input__focus--background
- *
- *
+ * @slot toolbar - Actions displayed before the send button, such as attachment or voice controls.
+ * @slot send-icon - Icon displayed inside the send button.
+ * @event {InputEvent} input - Fired on each edit, after `value` is updated.
+ * @event {Event} change - Fired when an edit is committed.
+ * @event {Event} select - Fired when text is selected.
+ * @event {CustomEvent<string>} submit-message - Fired with the current message. Cancel the event to keep the value in the composer.
+ * @cssproperty {border} [--c2-chat-input__container--border=1px solid #bcbcc6]
+ * @cssproperty {border-radius} [--c2-chat-input__container--border-radius=16px]
+ * @cssproperty {color} [--c2-chat-input__container--background=#ffffff]
+ * @cssproperty {color} [--c2-chat-input__container--color=#18181b]
+ * @cssproperty {padding} [--c2-chat-input__container--padding=10px]
+ * @cssproperty {pixel} [--c2-chat-input__container--gap=8px]
+ * @cssproperty {border} [--c2-chat-input__container__hover--border=1px solid #a1a1aa]
+ * @cssproperty {border} [--c2-chat-input__container__focus--border=1px solid #476ef9]
+ * @cssproperty {box-shadow} [--c2-chat-input__container__focus--box-shadow=0 0 0 3px rgba(71, 110, 249, 0.2)]
+ * @cssproperty {border} [--c2-chat-input__container__invalid--border=1px solid #dc2626]
+ * @cssproperty {box-shadow} [--c2-chat-input__container__invalid__focus--box-shadow=0 0 0 3px rgba(220, 38, 38, 0.2)]
+ * @cssproperty {opacity} [--c2-chat-input__container__disabled--opacity=0.5]
+ * @cssproperty {pixel} [--c2-chat-input__textarea--max-height=192px]
+ * @cssproperty {padding} [--c2-chat-input__textarea--padding=2px]
+ * @cssproperty {font-family} [--c2-chat-input__textarea--font-family=inherit]
+ * @cssproperty {font-size} [--c2-chat-input__textarea--font-size=14px]
+ * @cssproperty {pixel} [--c2-chat-input__textarea--line-height=22px]
+ * @cssproperty {color} [--c2-chat-input__textarea--caret-color=currentColor]
+ * @cssproperty {color} [--c2-chat-input__placeholder--color=#71717a]
+ * @cssproperty {pixel} [--c2-chat-input__actions--gap=6px]
+ * @cssproperty {pixel} [--c2-chat-input__send-button--size=32px]
+ * @cssproperty {border-radius} [--c2-chat-input__send-button--border-radius=10px]
+ * @cssproperty {color} [--c2-chat-input__send-button--background=rgb(2, 101, 220)]
+ * @cssproperty {color} [--c2-chat-input__send-button--color=#ffffff]
+ * @cssproperty {color} [--c2-chat-input__send-button__hover--background=rgb(1, 84, 184)]
+ * @cssproperty {color} [--c2-chat-input__send-button__active--background=rgb(1, 70, 154)]
+ * @cssproperty {outline} [--c2-chat-input__send-button__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {opacity} [--c2-chat-input__send-button__disabled--opacity=0.38]
+ * @cssproperty {pixel} [--c2-chat-input__send-icon--size=18px]
  */
 @customElement('c2-chat-input')
 export class ChatInput extends LitElement {
   static formAssociated = true
 
   static override styles = unsafeCSS(styles)
+  static override shadowRootOptions: ShadowRootInit = { ...LitElement.shadowRootOptions, delegatesFocus: true }
 
   private readonly internals = this.attachInternals()
   private customValidityMessage = ''
 
   /** Hint shown while the composer is empty. */
-  @property({ type: String }) placeholder = ''
-  /** Current message text. */
-  @property({ type: String }) value = ''
+  @property() placeholder = ''
+  /** Current message text. Set this property to update the composer programmatically. */
+  @property() value = ''
   /** Name used when the composer participates in a form. */
-  @property({ type: String }) name = ''
-  /** Disables editing and form submission. */
+  @property() name = ''
+  /** Disables editing, sending, and form submission. */
   @property({ type: Boolean, reflect: true }) disabled = false
   /** Requires a nonempty message for form validation. */
   @property({ type: Boolean, reflect: true }) required = false
@@ -97,225 +84,104 @@ export class ChatInput extends LitElement {
   @property({ type: Number }) maxLength = -1
   /** Minimum message length; -1 means no minimum. */
   @property({ type: Number }) minLength = -1
+  /** Minimum number of visible text rows before the composer grows. */
+  @property({ type: Number, attribute: 'min-rows' }) minRows = 1
+  /** Controls whether unmodified Enter submits or inserts a newline. */
+  @property({ attribute: 'enter-behavior' }) enterBehavior: 'submit' | 'newline' = 'submit'
   /** Accessible name forwarded to the inner textarea. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+  /** Accessible name for the send button. */
+  @property({ attribute: 'send-label' }) sendLabel = 'Send message'
 
-  // State
   @state() private dirty = false
-  @state() private scrollBarPosition = 0
-  @state() private scrollBarHeight = 0
-  @state() private focused = false
   @state() private disabledByForm = false
-
-  // Query
-  @query('.input') private readonly input?: HTMLTextAreaElement
+  @query('textarea') private input?: HTMLTextAreaElement
+  private resizeFrame = 0
 
   /** The containing form, when this control is associated with one. */
   get form() {
     return this.internals.form
   }
-
   /** Labels associated with this form control. */
   get labels() {
     return this.internals.labels
   }
-
   get validity() {
     return this.internals.validity
   }
-
   get validationMessage() {
     return this.internals.validationMessage
   }
-
   get willValidate() {
     return this.internals.willValidate
   }
 
+  override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+    if (name === 'value' && this.dirty) return
+    super.attributeChangedCallback(name, oldValue, newValue)
+  }
+
+  /** Focuses the native textarea. */
+  override focus(options?: FocusOptions) {
+    this.input?.focus(options)
+  }
+  override blur() {
+    this.input?.blur()
+  }
+  /** Selects all message text. */
+  select() {
+    this.input?.select()
+  }
+  /** Selects a range using native UTF-16 character offsets. */
+  setSelectionRange(start: number, end: number, direction?: 'forward' | 'backward' | 'none') {
+    this.input?.setSelectionRange(start, end, direction)
+  }
+  /** Whether the user has edited the value since the last reset. */
+  isDirty() {
+    return this.dirty
+  }
   /** Restores the initial `value` attribute and clears the dirty state. */
   reset() {
     this.dirty = false
     this.value = this.getAttribute('value') ?? ''
   }
-
   formResetCallback() {
     this.reset()
   }
-
   formDisabledCallback(disabled: boolean) {
     this.disabledByForm = disabled && !this.hasAttribute('disabled')
   }
-
   formStateRestoreCallback(state: string | File | FormData | null) {
     if (typeof state === 'string') this.value = state
   }
-
+  /** Checks the native textarea constraints. Await `updateComplete` after changing properties. */
   checkValidity() {
     return this.internals.checkValidity()
   }
-
+  /** Shows the browser's native validation feedback. */
   reportValidity() {
     return this.internals.reportValidity()
   }
-
+  /** Sets or clears the native validation message. */
   setCustomValidity(message: string) {
     this.customValidityMessage = message
     this.input?.setCustomValidity(message)
     this.syncFormState()
+    this.requestUpdate()
   }
 
-  handleFocus = () => {
-    this.focus()
-  }
-
-  isDirty() {
-    return this.dirty
-  }
-
-  private inputDimensions: { top: number; bottom: number } | null = null
-
-  override focus(options?: FocusOptions | undefined): void {
-    this.focused = true
-    this.input?.focus(options)
-  }
-
-  override blur(): void {
-    this.input?.blur()
-    this.focused = false
-  }
-
-  private async handleKeydown(event: KeyboardEvent) {
-    this.dirty = true
-    if (event.altKey) {
-      if (event.key == 'Enter') {
-        this.value = this.value + '\n'
-        event.preventDefault()
-      }
-    } else if (event.key == 'Enter') {
-      this.dispatchSubmitEvent()
-      this.value = ''
-      event.preventDefault()
-    }
-    await this.updateComplete
-    this.updateInputHeight()
-  }
-
-  protected async handleInput(event: InputEvent) {
-    this.dirty = true
-    this.value = (event.target as HTMLInputElement).value
-    this.updateInputHeight()
-    redispatchEvent(this, event)
-  }
-
-  private updateInputHeight() {
-    const input = this.input
-    if (input) {
-      if (!this.inputDimensions) {
-        const computedStyle = getComputedStyle(input)
-        this.inputDimensions = {
-          top: parseFloat(computedStyle.paddingTop) || 0,
-          bottom: parseFloat(computedStyle.paddingBottom) || 0,
-        }
-      }
-      this.input.style.height = ''
-      this.input.style.height = `${this.input?.scrollHeight - this.inputDimensions.top - this.inputDimensions.bottom}px`
-      this.calculateScrollbarPosition()
-    }
-  }
-
-  protected handleFocusin(event: Event) {
-    this.focused = true
-    redispatchEvent(this, event)
-  }
-
-  protected forwardFocusin(event: Event) {
-    if (!event.defaultPrevented) this.focus()
-  }
-
-  private redispatchEvent(event: Event) {
-    redispatchEvent(this, event)
-  }
-
-  protected handleFocusout(event: Event) {
-    this.focused = false
-    redispatchEvent(this, event)
-  }
-
-  // private async handleSendClickEvent() {
-  //   this.dispatchSubmitEvent()
-  //   this.value = ''
-  //   await this.updateComplete
-  //   this.updateInputHeight()
-  // }
-
-  private dispatchSubmitEvent() {
-    this.dispatchEvent(
-      new CustomEvent('submit-message', {
-        bubbles: true,
-        cancelable: true,
-        detail: this.value,
-      }),
-    )
-  }
-  @eventOptions({ passive: true })
-  private handleNavContentScroll() {
-    this.calculateScrollbarPosition()
-  }
-
-  private calculateScrollbarPosition() {
-    const traceWidth = this.input!.scrollHeight - this.input!.clientHeight
-    if (traceWidth > 0) {
-      const ratio = this.input!.clientHeight / this.input!.scrollHeight
-      this.scrollBarHeight = this.input!.clientHeight * ratio
-      this.scrollBarPosition = this.input!.scrollTop * ratio
-    } else {
-      this.scrollBarHeight = 0
-    }
-  }
-
-  private renderScrollbar() {
-    if (!this.scrollBarHeight) {
-      return nothing
-    }
-
-    const style: StyleInfo = {
-      transform: `translate3d(0px, ${this.scrollBarPosition}px,  0px)`,
-      height: `${this.scrollBarHeight}px`,
-    }
-
-    return html`<div class="scrollbar-track">
-      <div class="scrollbar-thumb" style="${styleMap(style)}"></div>
-    </div>`
-  }
-
-  // renderSendIcon() {
-  //   return html`<button active=${ifDefined(this.value ? true : undefined)} @click=${this.handleSendClickEvent}>
-  //     <slot name="send-icon">
-  //       <svg fill="currentColor" viewBox="0 0 256 256">
-  //         <path
-  //           d="M237.9,200.1,141.85,32.18a16,16,0,0,0-27.89,0l-95.89,168a16,16,0,0,0,19.26,22.92L128,192.45l90.67,30.63A16.22,16.22,0,0,0,224,224a16,16,0,0,0,13.86-23.9Zm-14.05,7.84L136,178.26V120a8,8,0,0,0-16,0v58.26L32.16,207.94,32,208,127.86,40,224,208Z"
-  //         ></path>
-  //       </svg>
-  //     </slot>
-  //   </button>`
-  // }
-
-  override attributeChangedCallback(attribute: string, newValue: string | null, oldValue: string | null) {
-    if (attribute === 'value' && this.dirty) {
-      // After user input, changing the value attribute no longer updates the
-      // text field's value (until reset). This matches native <input> behavior.
-      return
-    }
-
-    super.attributeChangedCallback(attribute, newValue, oldValue)
-  }
-
-  protected override updated(_changed: PropertyValues<this>) {
+  protected override updated(changed: PropertyValues<this>) {
     this.syncFormState()
+    if (changed.has('value') || changed.has('minRows')) this.scheduleInputHeightUpdate()
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    cancelAnimationFrame(this.resizeFrame)
   }
 
   private syncFormState() {
-    this.internals.setFormValue(this.value, this.value)
+    this.internals.setFormValue(this.effectiveDisabled ? null : this.value, this.value)
     if (!this.input || this.effectiveDisabled) {
       this.internals.setValidity({})
       return
@@ -328,40 +194,117 @@ export class ChatInput extends LitElement {
     return this.disabled || this.disabledByForm
   }
 
-  override render() {
-    const classes = {
-      'focus-within': this.focused,
+  private get canSubmit() {
+    const lengthIsValid = (this.minLength < 0 || this.value.length >= this.minLength) && (this.maxLength < 0 || this.value.length <= this.maxLength)
+    return !this.effectiveDisabled && !!this.value.trim() && !this.customValidityMessage && lengthIsValid && (this.input?.validity.valid ?? true)
+  }
+
+  private handleInput(event: InputEvent) {
+    this.dirty = true
+    this.value = (event.target as HTMLTextAreaElement).value
+    this.updateInputHeight()
+    redispatchEvent(this, event)
+  }
+
+  private handleChange(event: Event) {
+    redispatchEvent(this, event)
+  }
+
+  private handleSelect(event: Event) {
+    redispatchEvent(this, event)
+  }
+
+  private handleKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Enter' || event.isComposing || event.keyCode === 229) return
+    if (event.altKey) {
+      event.preventDefault()
+      const input = this.input
+      if (!input) return
+      input.setRangeText('\n', input.selectionStart, input.selectionEnd, 'end')
+      input.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, data: '\n', inputType: 'insertLineBreak' }))
+      return
     }
-    addClasses(this, classes)
+    if (this.enterBehavior !== 'submit' || event.shiftKey) return
+    event.preventDefault()
+    void this.submitMessage()
+  }
+
+  private async submitMessage() {
+    if (!this.canSubmit) return
+    const accepted = this.dispatchEvent(
+      new CustomEvent('submit-message', {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        detail: this.value,
+      }),
+    )
+    if (!accepted) return
+
+    this.dirty = true
+    this.value = ''
+    await this.updateComplete
+    this.updateInputHeight()
+    this.focus()
+  }
+
+  private updateInputHeight() {
+    if (!this.input) return
+    this.input.style.height = 'auto'
+    const height = this.input.scrollHeight
+    if (height > 0) this.input.style.height = `${height}px`
+  }
+
+  private scheduleInputHeightUpdate() {
+    cancelAnimationFrame(this.resizeFrame)
+    this.resizeFrame = requestAnimationFrame(() => {
+      this.resizeFrame = 0
+      this.updateInputHeight()
+    })
+  }
+
+  override render() {
     return html`
-      <div class="c2-chat-input ${classMap(classes)}">
-        <div class="c2-chat-input-wrapper">
-          <textarea
-            aria-label=${this.ariaLabel || nothing}
-            class="input"
-            tabindex="0"
-            name=${ifDefined(this.name || undefined)}
-            .value=${live(this.value)}
-            placeholder=${this.placeholder || ''}
-            autocomplete="off"
-            rows="1"
-            maxlength=${ifDefined(this.maxLength >= 0 ? this.maxLength : undefined)}
-            minlength=${ifDefined(this.minLength >= 0 ? this.minLength : undefined)}
-            ?disabled=${this.effectiveDisabled}
-            ?required=${this.required}
-            @change=${this.redispatchEvent}
-            @select=${this.redispatchEvent}
-            @focusin=${this.handleFocusin}
-            @focusout=${this.handleFocusout}
-            @keydown=${this.handleKeydown}
-            @input=${this.handleInput}
-            @scroll=${this.handleNavContentScroll}
-          >
-          </textarea>
-          <div class="toolbar">
+      <div class="container" part="container">
+        <textarea
+          class="textarea"
+          part="textarea"
+          name=${ifDefined(this.name || undefined)}
+          aria-label=${ifDefined(this.ariaLabel || undefined)}
+          .value=${live(this.value)}
+          placeholder=${this.placeholder}
+          rows=${Math.max(1, this.minRows)}
+          autocomplete="off"
+          enterkeyhint=${this.enterBehavior === 'submit' ? 'send' : 'enter'}
+          maxlength=${ifDefined(this.maxLength >= 0 ? this.maxLength : undefined)}
+          minlength=${ifDefined(this.minLength >= 0 ? this.minLength : undefined)}
+          ?disabled=${this.effectiveDisabled}
+          ?required=${this.required}
+          @input=${this.handleInput}
+          @change=${this.handleChange}
+          @select=${this.handleSelect}
+          @keydown=${this.handleKeydown}
+        ></textarea>
+        <div class="actions" part="actions">
+          <div class="toolbar" part="toolbar">
             <slot name="toolbar"></slot>
           </div>
-          ${this.renderScrollbar()}
+          <button
+            class="send-button"
+            part="send-button"
+            type="button"
+            aria-label=${this.sendLabel}
+            title=${this.sendLabel}
+            ?disabled=${!this.canSubmit}
+            @click=${this.submitMessage}
+          >
+            <slot name="send-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m22 2-7 20-4-9-9-4Z"></path>
+                <path d="M22 2 11 13"></path>
+              </svg>
+            </slot>
+          </button>
         </div>
       </div>
     `

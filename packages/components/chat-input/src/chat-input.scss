@@ -3,215 +3,184 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-chat-input,
   $theme: (
-    border-top-left-radius: 4px,
-    border-top-right-radius: 4px,
-    border-bottom-left-radius: 4px,
-    border-bottom-right-radius: 4px,
+    container--border: 1px solid #bcbcc6,
+    container--border-radius: 16px,
+    container--background: #ffffff,
+    container--color: #18181b,
+    container--padding: 10px,
+    container--gap: 8px,
+    container__hover--border: 1px solid #a1a1aa,
+    container__focus--border: 1px solid #476ef9,
+    container__focus--box-shadow: 0 0 0 3px rgba(71, 110, 249, 0.2),
+    container__invalid--border: 1px solid #dc2626,
+    container__invalid__focus--box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2),
+    container__disabled--opacity: 0.5,
 
-    padding-top: 8px,
-    padding-right: 8px,
-    padding-bottom: 8px,
-    padding-left: 8px,
+    textarea--max-height: 192px,
+    textarea--padding: 2px,
+    textarea--font-family: inherit,
+    textarea--font-size: 14px,
+    textarea--line-height: 22px,
+    textarea--caret-color: currentColor,
+    placeholder--color: #71717a,
 
-    border-top: 1px solid variables.$color-border,
-    border-bottom: 1px solid variables.$color-border,
-    border-right: 1px solid variables.$color-border,
-    border-left: 1px solid variables.$color-border,
-
-    color: variables.$color-text,
-    background: variables.$color-bg-lighter,
-
-    font-size: 14px,
-    font-weight: null,
-    font-style: null,
-    font-family: null,
-    line-height: 24px,
-    max-height: 25vh,
-
-    placeholder--opacity: 0.5,
-    placeholder--font-weight: null,
-    placeholder--font-style: null,
-    placeholder--color: null,
-
-    send-icon--width: 24px,
-    send-icon--height: 24px,
-    send-icon--opacity: 0.5,
-
-    send-icon--color: null,
-    send-icon__active--color: null,
-
-    focus--border-top: null,
-    focus--border-bottom: null,
-    focus--border-right: null,
-    focus--border-left: null,
-
-    focus--color: null,
-    focus--background: null,
+    actions--gap: 6px,
+    send-button--size: 32px,
+    send-button--border-radius: 10px,
+    send-button--background: variables.$color-blue,
+    send-button--color: #ffffff,
+    send-button__hover--background: rgb(1, 84, 184),
+    send-button__active--background: rgb(1, 70, 154),
+    send-button__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    send-button__disabled--opacity: variables.$disabled-content-opacity,
+    send-icon--size: 18px,
   )
 );
 
 :host {
   display: block;
+  max-width: 100%;
 }
 
-.c2-chat-input {
+:host([hidden]) {
+  display: none;
+}
+
+.container {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  .c2-chat-input-wrapper {
-    flex: 1;
-    display: flex;
-    cursor: text;
-    position: relative;
-    align-self: stretch;
-    justify-self: stretch;
+  gap: css.cssVar(container--gap);
+  width: 100%;
+  padding: css.cssVar(container--padding);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background: css.cssVar(container--background);
+  color: css.cssVar(container--color);
+  cursor: text;
+  transition: animation.standard(border-color), animation.standard(box-shadow);
+}
 
-    border-top: css.cssVar(border-top);
-    border-bottom: css.cssVar(border-bottom);
-    border-right: css.cssVar(border-right);
-    border-left: css.cssVar(border-left);
+.container:hover {
+  border: css.cssVar(container__hover--border);
+}
 
-    border-top-left-radius: css.cssVar(border-top-left-radius);
-    border-top-right-radius: css.cssVar(border-top-right-radius);
-    border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
-    border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+.container:focus-within {
+  border: css.cssVar(container__focus--border);
+  box-shadow: css.cssVar(container__focus--box-shadow);
+}
 
-    color: css.cssVar(color);
-    background: css.cssVar(background);
-    gap: 4px;
+.container:has(.textarea:invalid) {
+  border: css.cssVar(container__invalid--border);
+}
 
-    .input {
-      resize: none;
-      scrollbar-width: none;
-      overscroll-behavior: none;
-      touch-action: pan-y;
-      z-index: 0;
-      width: 100%;
-      flex: 1;
-      border: none;
-      outline: none;
-      caret-color: inherit;
-      text-align: inherit;
-      border-radius: inherit;
-      color: inherit;
-      background: transparent;
-      overflow: visible;
-      text-wrap: wrap;
-      text-indent: 0;
-      max-height: css.cssVar(max-height);
-      padding-top: css.cssVar(padding-top);
-      padding-bottom: css.cssVar(padding-bottom);
-      padding-left: css.cssVar(padding-left);
-      padding-right: calc(#{css.cssVar(send-icon--width)} + 2 * #{css.cssVar(padding-right)} + 6px);
+.container:has(.textarea:invalid):focus-within {
+  box-shadow: css.cssVar(container__invalid__focus--box-shadow);
+}
 
-      font-size: css.cssVar(font-size);
-      font-weight: css.cssVar(font-weight);
-      font-style: css.cssVar(font-style);
-      font-family: css.cssVar(font-family);
-      line-height: css.cssVar(line-height);
+.textarea {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-height: css.cssVar(textarea--max-height);
+  margin: 0;
+  padding: css.cssVar(textarea--padding);
+  resize: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font-family: css.cssVar(textarea--font-family);
+  font-size: css.cssVar(textarea--font-size);
+  line-height: css.cssVar(textarea--line-height);
+  caret-color: css.cssVar(textarea--caret-color);
+  text-align: inherit;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, currentColor 22%, transparent) transparent;
+}
 
-      &::placeholder {
-        font-weight: css.cssVar(placeholder--font-weight);
-        font-style: css.cssVar(placeholder--font-style);
-        color: css.cssVar(placeholder--color);
-        opacity: css.cssVar(placeholder--opacity);
-      }
-      &::-webkit-scrollbar {
-        display: none;
-      }
-    }
+.textarea::placeholder {
+  color: css.cssVar(placeholder--color);
+  opacity: 1;
+}
 
-    .scrollbar-track {
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 6px;
-      cursor: default;
-      z-index: 7;
-      padding: 2px;
-      .scrollbar-thumb {
-        display: none;
-        position: absolute;
-        width: 6px;
-        right: 2px;
-        top: 0;
-        &:after {
-          content: '';
-          position: absolute;
-          inset: 2px 0;
-          width: 100%;
-          border-radius: 6px;
-          background: var(--color-scrollbar, rgba(0, 0, 0, 0.15));
-        }
-      }
-    }
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: css.cssVar(actions--gap);
+  min-width: 0;
+}
 
-    &:hover {
-      .scrollbar-track {
-        .scrollbar-thumb {
-          display: block;
-        }
-      }
-    }
+.toolbar {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+  min-width: 0;
+}
 
-    .send-button-wrapper {
-      display: flex;
-      position: absolute;
-      right: 0px;
-      bottom: 0px;
-      padding-right: calc(#{css.cssVar(padding-right)} + 6px);
-      padding-top: css.cssVar(padding-top);
-      padding-bottom: css.cssVar(padding-bottom);
-      padding-left: css.cssVar(padding-right);
-      button {
-        border: none;
-        outline: none;
-        cursor: pointer;
-        padding: 0px;
-        margin: 0px;
-        background: none;
-        line-height: 0px;
-        opacity: css.cssVar(send-icon--opacity);
-        slot[name='send-icon'] {
-          svg {
-            color: css.cssVar(send-icon--opacity);
-            width: css.cssVar(send-icon--width);
-            height: css.cssVar(send-icon--height);
-          }
-        }
-        ::slotted(svg) {
-          color: css.cssVar(send-icon--opacity);
-          width: css.cssVar(send-icon--width);
-          height: css.cssVar(send-icon--height);
-        }
+.send-button {
+  --c2-feather-icon--size: #{css.cssVar(send-icon--size)};
 
-        &:hover {
-          opacity: 1;
-        }
-      }
-      button[active] {
-        opacity: 1;
-        slot[name='send-icon'] {
-          svg {
-            color: css.cssVar(send-icon__active--color);
-          }
-        }
-        ::slotted(svg) {
-          color: css.cssVar(send-icon__active--color);
-        }
-      }
-    }
-  }
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: css.cssVar(send-button--size);
+  height: css.cssVar(send-button--size);
+  border-radius: css.cssVar(send-button--border-radius);
+  background: css.cssVar(send-button--background);
+  color: css.cssVar(send-button--color);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: animation.standard(background-color), animation.standard(opacity), animation.standard(transform);
+}
 
-  // Focus
-  &.focus-within {
-    .c2-chat-input-wrapper {
-      border-top: css.cssVar(focus--border-top, border-top);
-      border-bottom: css.cssVar(focus--border-bottom, border-bottom);
-      border-right: css.cssVar(focus--border-right, border-right);
-      border-left: css.cssVar(focus--border-left, border-left);
-      color: css.cssVar(focus--color, color);
-      background: css.cssVar(focus--background, background);
-    }
+.send-button:hover:not(:disabled) {
+  background: css.cssVar(send-button__hover--background);
+}
+
+.send-button:active:not(:disabled) {
+  background: css.cssVar(send-button__active--background);
+  transform: scale(0.96);
+}
+
+.send-button:focus-visible {
+  outline: css.cssVar(send-button__focus--outline);
+  outline-offset: 2px;
+}
+
+.send-button:disabled {
+  cursor: default;
+  opacity: css.cssVar(send-button__disabled--opacity);
+}
+
+.send-button slot,
+.send-button svg,
+.send-button ::slotted(*) {
+  display: block;
+  width: css.cssVar(send-icon--size);
+  height: css.cssVar(send-icon--size);
+}
+
+:host([disabled]) .container {
+  cursor: not-allowed;
+  opacity: css.cssVar(container__disabled--opacity);
+}
+
+:host([disabled]) .container:hover {
+  border: css.cssVar(container--border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .container,
+  .send-button {
+    transition: none;
   }
 }

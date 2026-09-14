@@ -1,6 +1,6 @@
 ---
 title: 'Chat Input'
-description: 'Auto-growing message box with a send button for chat interfaces.'
+description: 'Auto-growing message composer with keyboard submission, toolbar actions and native form support.'
 category: 'Chat'
 ---
 
@@ -8,8 +8,11 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ChatInput } from '@c2n/chat-input'
+import { FeatherArrowUpIcon as FeatherArrowUp } from '@c2n/feather-icons/icons/arrow-up.js'
 
-`c2-chat-input` is an auto-growing message composer. Enter fires `submit-message` and clears the message; Alt+Enter inserts a newline. It is also a form-associated textarea: `name` contributes its current text to `FormData(form)`, while `required`, `minlength`, `maxlength`, fieldset disabling, form reset and the standard validation methods follow native form behavior.
+`c2-chat-input` grows with its message until it reaches the configured maximum height. Enter fires `submit-message`; Shift+Enter or Alt+Enter inserts a newline. Empty messages are ignored, and canceling the event keeps the draft in place. The component also participates in forms through `name`, validation constraints, fieldset disabling and form reset.
+
+Set `enter-behavior="newline"` when the composer should reserve Enter for multiline writing; users can still send with the button.
 
 ## Installation
 
@@ -20,7 +23,58 @@ npm install @c2n/chat-input
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/chat-input
-<div data-label="Default">
-  <c2-chat-input client:only="lit"></c2-chat-input>
+<style>
+  .usage-assistant {
+    box-sizing: border-box;
+    display: grid;
+    gap: 18px;
+    width: min(100%, 560px);
+    padding: 24px;
+    border: 1px solid #e4e4e7;
+    border-radius: 22px;
+    background: linear-gradient(145deg, #fafafa, #f4f4f5);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .usage-assistant__heading {
+    display: grid;
+    gap: 4px;
+  }
+  .usage-assistant__heading strong {
+    color: #18181b;
+    font-size: 18px;
+    letter-spacing: -0.025em;
+  }
+  .usage-assistant__heading span {
+    color: #71717a;
+    font-size: 12px;
+  }
+  .usage-assistant__composer {
+    --c2-chat-input__container--border-radius: 18px;
+    --c2-chat-input__container--background: #ffffff;
+    --c2-chat-input__container--padding: 12px;
+    --c2-chat-input__send-button--border-radius: 999px;
+    --c2-chat-input__send-button--background: #18181b;
+    --c2-chat-input__send-button__hover--background: #3f3f46;
+    --c2-chat-input__send-button__active--background: #09090b;
+  }
+</style>
+
+<div data-label="Assistant">
+  <section class="usage-assistant">
+    <div class="usage-assistant__heading"><strong>Start a conversation</strong><span>Ask, create or explore an idea</span></div>
+    <c2-chat-input class="usage-assistant__composer" client:load aria-label="Message" placeholder="Ask anything…">
+      <c2-feather-arrow-up slot="send-icon"></c2-feather-arrow-up>
+    </c2-chat-input>
+  </section>
 </div>
+```
+
+Listen for `submit-message` to send the value. Call `preventDefault()` when a send fails or requires confirmation—the current draft will remain in the composer.
+
+```js tag=CodeBlock
+const composer = document.querySelector('c2-chat-input')
+
+composer.addEventListener('submit-message', async (event) => {
+  await sendMessage(event.detail)
+})
 ```

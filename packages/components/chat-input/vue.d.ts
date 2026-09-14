@@ -17,8 +17,14 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-chat-input': DefineComponent<
       C2Props<ChatInput> & {
+        'min-rows'?: unknown
+        'enter-behavior'?: unknown
         'aria-label'?: unknown
+        'send-label'?: unknown
         onSubmitMessage?: (event: ChatInputEventMap['submit-message']) => void
+        onInput?: (event: ChatInputEventMap['input']) => void
+        onChange?: (event: ChatInputEventMap['change']) => void
+        onSelect?: (event: ChatInputEventMap['select']) => void
       }
     >
   }
