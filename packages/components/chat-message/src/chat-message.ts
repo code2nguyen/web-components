@@ -1,88 +1,108 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './chat-message.scss?inline'
+
+export type ChatMessageAlign = 'left' | 'right'
+
 /**
- * Message layout with avatar, author and timestamp slots around the message content.
+ * Flexible message row for conversations, assistant answers and activity updates.
  *
  * @tag c2-chat-message
  *
+ * @slot - Main message body. Prefer this slot for new usage.
  * @slot avatar - Sender avatar shown beside the message.
  * @slot title - Sender name or message heading.
  * @slot header-time - Timestamp displayed beside the title.
- * @slot message - Main message body.
+ * @slot message - Named main message body, retained for compatibility.
  * @slot emotion - Reactions or sentiment controls below the message.
  * @slot footer-time - Timestamp displayed below the message.
  *
- * @cssproperty {pixel} [--c2-chat-message--gap=16]
+ * @csspart base - The complete message row.
+ * @csspart avatar - Avatar region.
+ * @csspart body - Header, content and footer column.
+ * @csspart header - Title and header timestamp row.
+ * @csspart content - Main message content.
+ * @csspart footer - Reactions and footer timestamp row.
+ * @csspart actions - Reaction/action region.
+ *
+ * @cssproperty {pixel} [--c2-chat-message--gap=12px]
  * @cssproperty {font-size} [--c2-chat-message--font-size=14px]
- * @cssproperty {font-weight} --c2-chat-message--font-weight
- * @cssproperty {font-family} --c2-chat-message--font-family
- * @cssproperty {line-height} --c2-chat-message--line-height
- * @cssproperty {pixel} [--c2-chat-message__message--gap=4px]
+ * @cssproperty {font-weight} [--c2-chat-message--font-weight=400]
+ * @cssproperty {font-family} [--c2-chat-message--font-family=inherit]
+ * @cssproperty {line-height} [--c2-chat-message--line-height=1.55]
+ * @cssproperty {pixel} [--c2-chat-message__avatar--margin-top=2px]
+ * @cssproperty {pixel} [--c2-chat-message__message--gap=6px]
+ * @cssproperty {length} [--c2-chat-message__message--max-width=44rem]
  *
- * @cssproperty {border} --c2-chat-message__message--border-top
- * @cssproperty {border} --c2-chat-message__message--border-right
- * @cssproperty {border} --c2-chat-message__message--border-bottom
- * @cssproperty {border} --c2-chat-message__message--border-left
+ * @cssproperty {border} [--c2-chat-message__message--border-top=0 solid transparent]
+ * @cssproperty {border} [--c2-chat-message__message--border-right=0 solid transparent]
+ * @cssproperty {border} [--c2-chat-message__message--border-bottom=0 solid transparent]
+ * @cssproperty {border} [--c2-chat-message__message--border-left=0 solid transparent]
  *
- * @cssproperty {border-radius} --c2-chat-message__message--border-top-left-radius
- * @cssproperty {border-radius} --c2-chat-message__message--border-top-right-radius
- * @cssproperty {border-radius} --c2-chat-message__message--border-bottom-left-radius
- * @cssproperty {border-radius} --c2-chat-message__message--border-bottom-right-radius
+ * @cssproperty {border-radius} [--c2-chat-message__message--border-top-left-radius=0]
+ * @cssproperty {border-radius} [--c2-chat-message__message--border-top-right-radius=0]
+ * @cssproperty {border-radius} [--c2-chat-message__message--border-bottom-left-radius=0]
+ * @cssproperty {border-radius} [--c2-chat-message__message--border-bottom-right-radius=0]
  *
- * @cssproperty {padding} --c2-chat-message__message--padding-top
- * @cssproperty {padding} --c2-chat-message__message--padding-right
- * @cssproperty {padding} --c2-chat-message__message--padding-bottom
- * @cssproperty {padding} --c2-chat-message__message--padding-left
+ * @cssproperty {padding} [--c2-chat-message__message--padding-top=0]
+ * @cssproperty {padding} [--c2-chat-message__message--padding-right=0]
+ * @cssproperty {padding} [--c2-chat-message__message--padding-bottom=0]
+ * @cssproperty {padding} [--c2-chat-message__message--padding-left=0]
  *
- * @cssproperty {color} --c2-chat-message__message--color
- * @cssproperty {background} --c2-chat-message__message--background
+ * @cssproperty {color} [--c2-chat-message__message--color=#27272a]
+ * @cssproperty {background} [--c2-chat-message__message--background=transparent]
  *
  * @cssproperty {pixel} [--c2-chat-message__header--gap=8px]
- * @cssproperty {color} --c2-chat-message__header__title---color
- * @cssproperty {font-size} [--c2-chat-message__header__title---font-size=15px]
- * @cssproperty {font-weight} [--c2-chat-message__header__title---font-weight=600]
- * @cssproperty {font-style} --c2-chat-message__header__title---font-style
+ * @cssproperty {color} [--c2-chat-message__header__title--color=#18181b]
+ * @cssproperty {font-size} [--c2-chat-message__header__title--font-size=13px]
+ * @cssproperty {font-weight} [--c2-chat-message__header__title--font-weight=600]
+ * @cssproperty {font-style} [--c2-chat-message__header__title--font-style=normal]
  *
- * @cssproperty {color} --c2-chat-message__time--color
+ * @cssproperty {color} [--c2-chat-message__time--color=#71717a]
  * @cssproperty {font-size} [--c2-chat-message__time--font-size=12px]
- * @cssproperty {font-weight} --c2-chat-message__time--font-weight
- * @cssproperty {font-style} --c2-chat-message__time--font-style
+ * @cssproperty {font-weight} [--c2-chat-message__time--font-weight=400]
+ * @cssproperty {font-style} [--c2-chat-message__time--font-style=normal]
+ * @cssproperty {pixel} [--c2-chat-message__footer--gap=8px]
  *
  * @slotcomponent c2-avatar
  */
 @customElement('c2-chat-message')
 export class ChatMessage extends LitElement {
   /** Places the avatar and message on the left or right side of the row. */
-  @property() align: 'left' | 'right' = 'left'
+  @property({ reflect: true }) align: ChatMessageAlign = 'left'
+
+  @state() private hasHeader = true
+  @state() private hasFooter = true
 
   static override styles = unsafeCSS(styles)
 
+  private syncOptionalRegions() {
+    const assigned = (name: string) => {
+      const slot = this.renderRoot.querySelector<HTMLSlotElement>(`slot[name='${name}']`)
+      return Boolean(slot?.assignedNodes({ flatten: true }).some((node) => node.nodeType !== Node.TEXT_NODE || Boolean(node.textContent?.trim())))
+    }
+
+    this.hasHeader = assigned('title') || assigned('header-time')
+    this.hasFooter = assigned('emotion') || assigned('footer-time')
+  }
+
   override render() {
     return html`
-      <div class="c2-chat-message">
-        <div class="c2-chat-message__avatar">
-          <slot name="avatar"></slot>
+      <article class="c2-chat-message" part="base">
+        <div class="c2-chat-message__avatar" part="avatar"><slot name="avatar"></slot></div>
+        <div class="c2-chat-message__body" part="body">
+          <header class="c2-chat-message__header" part="header" ?hidden=${!this.hasHeader}>
+            <slot name="title" @slotchange=${this.syncOptionalRegions}></slot>
+            <slot name="header-time" @slotchange=${this.syncOptionalRegions}></slot>
+          </header>
+          <div class="c2-chat-message__content" part="content"><slot name="message"></slot><slot></slot></div>
+          <footer class="c2-chat-message__footer" part="footer" ?hidden=${!this.hasFooter}>
+            <div class="c2-chat-message__emotion" part="actions"><slot name="emotion" @slotchange=${this.syncOptionalRegions}></slot></div>
+            <div class="c2-chat-message__footer-time"><slot name="footer-time" @slotchange=${this.syncOptionalRegions}></slot></div>
+          </footer>
         </div>
-        <div class="c2-chat-message-container">
-          <div class="c2-chat-message__header">
-            <slot name="title"></slot>
-            <slot name="header-time"></slot>
-          </div>
-          <div class="c2-chat-message__content">
-            <slot name="message"></slot>
-          </div>
-          <div class="c2-chat-message__footer">
-            <div class="c2-chat-message__emotion">
-              <slot name="emotion"></slot>
-            </div>
-            <div class="c2-chat-message__footer-time">
-              <slot name="footer-time"></slot>
-            </div>
-          </div>
-        </div>
-      </div>
+      </article>
     `
   }
 }

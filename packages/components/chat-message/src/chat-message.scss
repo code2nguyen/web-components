@@ -3,136 +3,174 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-chat-message,
   $theme: (
-    gap: 16px,
+    gap: 12px,
 
     font-size: 14px,
-    font-weight: null,
-    font-family: null,
-    line-height: null,
+    font-weight: 400,
+    font-family: inherit,
+    line-height: 1.55,
 
-    message--gap: 4px,
+    avatar--margin-top: 2px,
+    message--gap: 6px,
+    message--max-width: 44rem,
 
-    message--border-top: null,
-    message--border-bottom: null,
-    message--border-right: null,
-    message--border-left: null,
+    message--border-top: 0 solid transparent,
+    message--border-bottom: 0 solid transparent,
+    message--border-right: 0 solid transparent,
+    message--border-left: 0 solid transparent,
 
-    message--border-top-left-radius: null,
-    message--border-top-right-radius: null,
-    message--border-bottom-left-radius: null,
-    message--border-bottom-right-radius: null,
+    message--border-top-left-radius: 0,
+    message--border-top-right-radius: 0,
+    message--border-bottom-left-radius: 0,
+    message--border-bottom-right-radius: 0,
 
-    message--padding-top: null,
-    message--padding-bottom: null,
-    message--padding-right: null,
-    message--padding-left: null,
+    message--padding-top: 0,
+    message--padding-bottom: 0,
+    message--padding-right: 0,
+    message--padding-left: 0,
 
-    message--color: null,
-    message--background: null,
+    message--color: #27272a,
+    message--background: transparent,
 
     header--gap: 8px,
-    header__title--color: null,
-    header__title--font-size: 15px,
+    header__title--color: #18181b,
+    header__title--font-size: 13px,
     header__title--font-weight: 600,
-    header__title--font-style: null,
+    header__title--font-style: normal,
 
-    time--color: null,
+    time--color: #71717a,
     time--font-size: 12px,
-    time--font-weight: null,
-    time--font-style: null,
+    time--font-weight: 400,
+    time--font-style: normal,
+    footer--gap: 8px,
   )
 );
 
 :host {
   display: block;
-  .c2-chat-message {
-    display: flex;
-    align-items: flex-start;
-    gap: css.cssVar(gap);
+  max-width: 100%;
+}
 
-    .c2-chat-message-container {
-      display: flex;
-      flex-direction: column;
-      gap: css.cssVar(message--gap);
-      font-variant-ligatures: common-ligatures;
-      font-size: css.cssVar(font-size);
-      font-weight: css.cssVar(font-weight);
-      font-family: css.cssVar(font-family);
-      line-height: css.cssVar(line-height);
+.c2-chat-message {
+  display: flex;
+  align-items: flex-start;
+  gap: css.cssVar(gap);
+  width: 100%;
+}
 
-      border-top: css.cssVar(message--border-top);
-      border-right: css.cssVar(message--border-right);
-      border-bottom: css.cssVar(message--border-bottom);
-      border-left: css.cssVar(message--border-left);
+.c2-chat-message__avatar {
+  display: contents;
+}
 
-      padding-top: css.cssVar(message--padding-top);
-      padding-right: css.cssVar(message--padding-right);
-      padding-bottom: css.cssVar(message--padding-bottom);
-      padding-left: css.cssVar(message--padding-left);
+slot[name='avatar']::slotted(*) {
+  flex: none;
+  margin-top: css.cssVar(avatar--margin-top);
+}
 
-      border-top-left-radius: css.cssVar(message--border-top-left-radius);
-      border-top-right-radius: css.cssVar(message--border-top-right-radius);
-      border-bottom-left-radius: css.cssVar(message--border-bottom-left-radius);
-      border-bottom-right-radius: css.cssVar(message--border-bottom-right-radius);
+.c2-chat-message__body {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  gap: css.cssVar(message--gap);
+  min-width: 0;
+  max-width: min(100%, css.cssVar(message--max-width));
 
-      background: css.cssVar(message--background);
+  padding-top: css.cssVar(message--padding-top);
+  padding-right: css.cssVar(message--padding-right);
+  padding-bottom: css.cssVar(message--padding-bottom);
+  padding-left: css.cssVar(message--padding-left);
 
-      .c2-chat-message__header {
-        display: flex;
-        align-items: center;
-        gap: css.cssVar(header--gap);
+  border-top: css.cssVar(message--border-top);
+  border-right: css.cssVar(message--border-right);
+  border-bottom: css.cssVar(message--border-bottom);
+  border-left: css.cssVar(message--border-left);
+  border-top-left-radius: css.cssVar(message--border-top-left-radius);
+  border-top-right-radius: css.cssVar(message--border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(message--border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(message--border-bottom-right-radius);
 
-        slot[name='title'] {
-          color: css.cssVar(header__title--color);
-          font-size: css.cssVar(header__title--font-size);
-          font-weight: css.cssVar(header__title--font-weight);
-          font-style: css.cssVar(header__title--font-style);
-          line-height: css.cssVar(header__title--font-size);
-        }
+  background: css.cssVar(message--background);
+  color: css.cssVar(message--color);
+  font-variant-ligatures: common-ligatures;
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+}
 
-        slot[name='header-time'] {
-          color: css.cssVar(time--color);
-          line-height: css.cssVar(time--font-size);
-          font-size: css.cssVar(time--font-size);
-          font-weight: css.cssVar(time--font-weight);
-          font-style: css.cssVar(time--font-style);
-        }
-      }
-      .c2-chat-message__content {
-        color: css.cssVar(message--color);
-        ::slotted([slot='message']) {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-        }
-      }
+.c2-chat-message__header,
+.c2-chat-message__footer {
+  display: flex;
+  align-items: center;
+}
 
-      .c2-chat-message__footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+.c2-chat-message__header {
+  gap: css.cssVar(header--gap);
+}
 
-        slot[name='footer-time'] {
-          color: css.cssVar(time--color);
-          font-size: css.cssVar(time--font-size);
-          font-weight: css.cssVar(time--font-weight);
-          font-style: css.cssVar(time--font-style);
-        }
-      }
-    }
-  }
+.c2-chat-message__header[hidden],
+.c2-chat-message__footer[hidden] {
+  display: none;
+}
+
+slot[name='title'] {
+  color: css.cssVar(header__title--color);
+  font-size: css.cssVar(header__title--font-size);
+  font-weight: css.cssVar(header__title--font-weight);
+  font-style: css.cssVar(header__title--font-style);
+  line-height: 1.25;
+}
+
+slot[name='header-time'],
+slot[name='footer-time'] {
+  color: css.cssVar(time--color);
+  font-size: css.cssVar(time--font-size);
+  font-weight: css.cssVar(time--font-weight);
+  font-style: css.cssVar(time--font-style);
+  line-height: 1.25;
+}
+
+.c2-chat-message__content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.c2-chat-message__content ::slotted(*) {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.c2-chat-message__footer {
+  justify-content: space-between;
+  gap: css.cssVar(footer--gap);
+}
+
+.c2-chat-message__emotion {
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 
 :host([align='right']) {
   .c2-chat-message {
     flex-direction: row-reverse;
-    .c2-chat-message__header {
-      flex-direction: row-reverse;
-    }
-    .c2-chat-message__content {
-      ::slotted([slot='message']) {
-        align-items: flex-end;
-      }
-    }
+  }
+
+  .c2-chat-message__body {
+    align-items: flex-end;
+    margin-left: auto;
+  }
+
+  .c2-chat-message__header {
+    flex-direction: row-reverse;
+  }
+
+  .c2-chat-message__content {
+    text-align: right;
+  }
+
+  .c2-chat-message__footer {
+    flex-direction: row-reverse;
   }
 }
