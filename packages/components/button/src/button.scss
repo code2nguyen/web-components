@@ -38,6 +38,7 @@
 
 :host {
   display: inline-flex;
+  border-radius: css.cssVar(container--border-radius);
 }
 
 :host([hidden]) {

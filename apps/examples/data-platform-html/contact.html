@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Us | AxiomData AI</title>
+    <meta
+      name="description"
+      content="Get in touch with AxiomData AI's institutional data specialists to discuss requirements, regulatory needs, or schedule a product walkthrough."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+
+  <body class="antialiased grid-lines">
+    <!-- STICKY HEADER -->
+    <header id="site-header" class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo" aria-label="AxiomData AI Home">
+          <div class="logo-mark">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="24" height="24" rx="6" stroke="url(#cyan-grad)" stroke-width="2" fill="rgba(34,211,238,0.08)" />
+              <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <circle cx="12" cy="19" r="2" fill="#a78bfa" />
+              <circle cx="17" cy="19" r="2" fill="#6ee7ff" />
+              <defs>
+                <linearGradient id="cyan-grad" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#6ee7ff" />
+                  <stop offset="1" stop-color="#a78bfa" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="brand-name">AxiomData <span class="brand-ai">AI</span></span>
+        </a>
+
+        <!-- C2 NAVIGATION MENU -->
+        <nav class="header-nav">
+          <c2-navigation-menu aria-label="Main Navigation" mobile-breakpoint="820">
+            <c2-navigation-menu-item href="index.html">Home</c2-navigation-menu-item>
+            <c2-navigation-menu-item href="about.html">About</c2-navigation-menu-item>
+
+            <c2-navigation-menu-item value="fixed-income">
+              Fixed Income Products
+              <div slot="panel" class="c2-nav-panel">
+                <span class="nav-panel-label">Fixed Income Universe</span>
+                <c2-navigation-menu-link href="fixed-income.html#reference-api">
+                  Reference Data
+                  <span slot="description">ISINs, LEIs, ratings &amp; instrument classification</span>
+                </c2-navigation-menu-link>
+                <c2-navigation-menu-link href="fixed-income.html#corporate-actions">
+                  Corporate Actions
+                  <span slot="description">Automated event capture &amp; entitlement processing</span>
+                </c2-navigation-menu-link>
+                <c2-navigation-menu-link href="fixed-income.html#pricing">
+                  Pricing
+                  <span slot="description">EOD fixed income pricing feeds</span>
+                </c2-navigation-menu-link>
+              </div>
+            </c2-navigation-menu-item>
+
+            <c2-navigation-menu-item value="regulatory">
+              Regulatory Products
+              <div slot="panel" class="c2-nav-panel">
+                <span class="nav-panel-label">Compliance &amp; Risk</span>
+                <c2-navigation-menu-link href="regulatory-intelligence.html#erisa">
+                  ERISA Portfolio Analytics
+                  <span slot="description">Plan asset classification &amp; 5500 reporting data</span>
+                </c2-navigation-menu-link>
+                <c2-navigation-menu-link href="regulatory-intelligence.html#solvency-ma">
+                  Matching Adjustment
+                  <span slot="description">PRA eligibility attestation &amp; spread attribution</span>
+                </c2-navigation-menu-link>
+                <c2-navigation-menu-link href="regulatory-intelligence.html#lei-mapping">
+                  LEI &amp; Instrument Mapping
+                  <span slot="description">Cross-reference LEIs to ISIN, FIGI and other identifiers</span>
+                </c2-navigation-menu-link>
+              </div>
+            </c2-navigation-menu-item>
+
+            <c2-navigation-menu-item href="contact.html" current>Contact</c2-navigation-menu-item>
+          </c2-navigation-menu>
+        </nav>
+
+        <div class="header-actions">
+          <c2-button id="headerDemoBtn" class="btn-primary" href="contact.html">Get in Touch</c2-button>
+        </div>
+      </div>
+    </header>
+
+    <main class="pt-page">
+      <section class="contact-hero">
+        <div class="section-container">
+          <div class="capabilities-header reveal">
+            <div class="capabilities-header-left">
+              <c2-badge tone="info" class="section-pill">CONTACT US</c2-badge>
+              <h1 class="page-title">Get in <span class="gradient-text">Touch</span></h1>
+            </div>
+            <div class="capabilities-header-right">
+              <p class="capabilities-subtitle">
+                Reach out to discuss customized universe feeds, regulatory analytics, or to schedule an architectural demo with our quantitative solutions team.
+              </p>
+            </div>
+          </div>
+
+          <div class="contact-grid reveal">
+            <!-- Contact Form Card -->
+            <c2-card class="contact-form-card">
+              <div class="contact-card-header">
+                <div>
+                  <h2 class="contact-card-title">Send us a message</h2>
+                  <p class="contact-card-subtitle">Direct line to our institutional quantitative solutions team</p>
+                </div>
+                <div class="contact-status-badge">
+                  <span class="pulse-dot"></span>
+                  <span class="status-label">Online</span>
+                </div>
+              </div>
+
+              <div class="contact-form-body">
+                <div class="form-row">
+                  <div class="form-field">
+                    <c2-label for="contactFullName" required>Full Name</c2-label>
+                    <c2-text-field id="contactFullName" placeholder="Your full name">
+                      <c2-feather-user slot="prefix-icon"></c2-feather-user>
+                    </c2-text-field>
+                  </div>
+                  <div class="form-field">
+                    <c2-label for="contactCompany">Company / Firm</c2-label>
+                    <c2-text-field id="contactCompany" placeholder="Your institution">
+                      <c2-feather-briefcase slot="prefix-icon"></c2-feather-briefcase>
+                    </c2-text-field>
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <c2-label for="contactEmail" required>Corporate Email</c2-label>
+                  <c2-text-field id="contactEmail" type="email" placeholder="you@institution.com">
+                    <c2-feather-mail slot="prefix-icon"></c2-feather-mail>
+                  </c2-text-field>
+                </div>
+
+                <div class="form-field">
+                  <c2-label for="contactTopic">Inquiry Topic</c2-label>
+                  <c2-select id="contactTopic" value="reference">
+                    <c2-feather-sliders slot="prefix-icon"></c2-feather-sliders>
+                    <c2-list-item value="reference">Fixed Income Reference Data Engine</c2-list-item>
+                    <c2-list-item value="corporate-actions">Corporate Actions Automation Feed</c2-list-item>
+                    <c2-list-item value="pricing">Evaluated EOD Pricing &amp; Curves</c2-list-item>
+                    <c2-list-item value="solvency">Solvency UK / Matching Adjustment Analytics</c2-list-item>
+                    <c2-list-item value="erisa">ERISA Portfolio Compliance &amp; Form 5500</c2-list-item>
+                    <c2-list-item value="partnership">Institutional Partnership</c2-list-item>
+                  </c2-select>
+                </div>
+
+                <div class="form-field">
+                  <c2-label for="contactMessage" required>Message &amp; Requirements</c2-label>
+                  <c2-textarea
+                    id="contactMessage"
+                    placeholder="Tell us about your portfolio scope, delivery preferences, or evaluation timeline..."
+                  ></c2-textarea>
+                </div>
+
+                <div class="modal-consent">
+                  <c2-checkbox id="contactConsent"></c2-checkbox>
+                  <c2-label for="contactConsent"> I agree to the processing of my contact details for institutional communications. </c2-label>
+                </div>
+
+                <c2-button id="contactSubmitBtn" class="btn-primary-large btn-full-width">
+                  Send Message
+                  <c2-feather-send slot="suffix-icon"></c2-feather-send>
+                </c2-button>
+              </div>
+            </c2-card>
+
+            <!-- Office & Contacts Info -->
+            <div class="contact-info-col">
+              <c2-card class="contact-detail-card">
+                <div class="contact-detail-head">
+                  <div class="contact-icon-box cyan-icon">
+                    <c2-feather-globe></c2-feather-globe>
+                  </div>
+                  <h4 class="detail-label">Global Headquarters</h4>
+                </div>
+                <p class="detail-text">
+                  AxiomData AI Technologies Ltd.<br />
+                  100 Bishopsgate, Level 24<br />
+                  London, EC2N 4AG<br />
+                  United Kingdom
+                </p>
+              </c2-card>
+
+              <c2-card class="contact-detail-card">
+                <div class="contact-detail-head">
+                  <div class="contact-icon-box violet-icon">
+                    <c2-feather-activity></c2-feather-activity>
+                  </div>
+                  <h4 class="detail-label">Direct Correspondence</h4>
+                </div>
+                <p class="detail-text">
+                  General: <a href="mailto:solutions@axiomdata.ai" class="text-cyan">solutions@axiomdata.ai</a><br />
+                  Data Support: <a href="mailto:support@axiomdata.ai" class="text-cyan">support@axiomdata.ai</a><br />
+                  Quantitative Desk: +44 (0) 20 7946 0912
+                </p>
+              </c2-card>
+
+              <c2-card class="contact-detail-card">
+                <div class="contact-detail-head">
+                  <div class="contact-icon-box cyan-icon">
+                    <c2-feather-check-circle></c2-feather-check-circle>
+                  </div>
+                  <h4 class="detail-label">Support Hours</h4>
+                </div>
+                <p class="detail-text">
+                  24/7 Global Follow-the-Sun Support for enterprise clients.<br />
+                  Dedicated Quantitative Engineering desk active throughout London, New York &amp; Tokyo trading hours.
+                </p>
+              </c2-card>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="index.html" class="brand-logo" aria-label="AxiomData AI Home">
+          <div class="logo-mark logo-mark--small">
+            <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="24" height="24" rx="6" stroke="#6ee7ff" stroke-width="2" fill="rgba(34,211,238,0.1)" />
+              <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+          <span class="footer-brand-name">AxiomData AI</span>
+        </a>
+
+        <nav class="footer-links" aria-label="Footer links">
+          <c2-link-button href="fixed-income.html">Fixed Income</c2-link-button>
+          <c2-link-button href="regulatory-intelligence.html">Regulatory Intelligence</c2-link-button>
+          <c2-link-button href="about.html">About</c2-link-button>
+          <c2-link-button href="contact.html" current>Contact</c2-link-button>
+          <c2-link-button href="privacy.html">Privacy</c2-link-button>
+          <c2-link-button href="terms.html">Terms</c2-link-button>
+        </nav>
+
+        <div class="footer-meta">
+          <c2-link-button href="https://linkedin.com" external aria-label="LinkedIn" class="social-link">
+            <c2-feather-linkedin slot="prefix-icon"></c2-feather-linkedin>
+          </c2-link-button>
+          <p class="copyright">&copy; 2026 AxiomData AI Technologies Ltd. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

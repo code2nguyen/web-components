@@ -13,7 +13,7 @@
  * The output is an ignored build artifact included in the published package. No timestamp is written so local builds
  * remain deterministic.
  */
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { parseCssVarName } from '../src/lib/css-var-name.ts'
@@ -440,6 +440,7 @@ if (problems.length) {
   console.error(`[build-registry] ${problems.length} problem(s):\n  ${problems.join('\n  ')}`)
   process.exitCode = 1
 } else {
+  mkdirSync(dirname(outFile), { recursive: true })
   writeFileSync(outFile, JSON.stringify(registry, null, 2) + '\n')
   const total = Object.keys(components).length
   const examplesCount = Object.values(components).reduce((n, c) => n + c.examples.length, 0)
