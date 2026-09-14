@@ -16,6 +16,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/autocomplete": "*",
     "@c2n/header": "*",
     "@c2n/stat": "*",
     "@c2n/attachment": "*",

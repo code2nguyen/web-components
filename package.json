@@ -82,6 +82,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/autocomplete:build",
         "./packages/components/header:build",
         "./packages/components/stat:build",
         "./packages/components/attachment:build",

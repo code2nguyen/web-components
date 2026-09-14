@@ -1,0 +1,218 @@
+---
+description: 'Production-shaped autocomplete patterns: people mentions, issue navigation, asynchronous catalog search and a command launcher.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import AutocompleteExamplesRuntime from '../../components/AutocompleteExamplesRuntime.astro'
+
+import { Autocomplete } from '@c2n/autocomplete'
+
+## Use cases
+
+These examples exercise different capabilities instead of repeating the same dataset with another colour: custom Lit renderers, actionable header and footer slots, remote loading, disabled rows, field mapping, and both selection behaviours.
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .mention-picker {
+    width: 100%;
+  }
+  .mention-header,
+  .mention-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .mention-header button,
+  .mention-footer button {
+    border: 0;
+    padding: 0;
+    color: #7c3aed;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+</style>
+<c2-autocomplete
+  client:only="lit"
+  class="mention-picker"
+  data-autocomplete-example="team"
+  aria-label="Mention a teammate"
+  placeholder="Type a name or role…"
+  selection-behavior="preserve"
+  item-key="id"
+  label-field="name"
+  description-field="role"
+  search-fields="name;role;location"
+  suggestions='[{"id":"ada","name":"Ada Lovelace","role":"Staff engineer","location":"London","status":"online"},{"id":"grace","name":"Grace Hopper","role":"Compiler lead","location":"New York","status":"busy"},{"id":"katherine","name":"Katherine Johnson","role":"Data scientist","location":"Hampton","status":"away"}]'
+>
+  <div slot="header" class="mention-header"><strong>People in this workspace</strong><button type="button" data-invite-person>Invite person</button></div>
+  <div slot="footer" class="mention-footer"><span data-example-status>Selection keeps the @ query</span><button type="button" data-view-team>View team</button></div>
+</c2-autocomplete>
+```
+
+```html tag=MdxCodeBlock,label=Jump to an issue
+<style>
+  .issue-jump {
+    width: 100%;
+    --c2-autocomplete--background: #18181b;
+    --c2-autocomplete--color: #fafafa;
+    --c2-autocomplete--border: 1px solid #3f3f46;
+    --c2-autocomplete__placeholder--color: #a1a1aa;
+    --c2-autocomplete__panel--background: #18181b;
+    --c2-autocomplete__panel--border: 1px solid #3f3f46;
+    --c2-autocomplete__option__active--background: #27272a;
+    --c2-autocomplete__option__active--color: #fafafa;
+    --c2-autocomplete__description--color: #a1a1aa;
+    --c2-autocomplete__header--color: #d4d4d8;
+    --c2-autocomplete__footer--color: #a1a1aa;
+  }
+  .issue-filters {
+    display: flex;
+    gap: 6px;
+  }
+  .issue-filters button {
+    border: 1px solid #52525b;
+    border-radius: 999px;
+    padding: 3px 9px;
+    color: #d4d4d8;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+  }
+  .issue-filters button[aria-pressed='true'] {
+    border-color: #818cf8;
+    color: #ffffff;
+    background: #3730a3;
+  }
+</style>
+<c2-autocomplete
+  client:only="lit"
+  class="issue-jump"
+  data-autocomplete-example="issues"
+  aria-label="Jump to an issue"
+  placeholder="Search key, title or project…"
+  item-key="key"
+  label-field="title"
+  description-field="project"
+  disabled-field="blocked"
+  search-fields="key;title;project"
+  suggestions='[{"key":"WEB-248","title":"Search panel closes on focus","project":"Web","updated":"2m ago","priority":"High"},{"key":"API-91","title":"Add cursor pagination","project":"Platform","updated":"1h ago","priority":"Medium"},{"key":"WEB-231","title":"Document custom row rendering","project":"Web","updated":"Yesterday","priority":"Low"},{"key":"OPS-44","title":"Rotate production credentials","project":"Operations","updated":"Monday","priority":"High","blocked":true}]'
+>
+  <div slot="header" class="issue-filters"><button type="button" aria-pressed="true" data-issue-filter="all">All issues</button><button type="button" aria-pressed="false" data-issue-filter="mine">My project</button></div>
+  <span slot="footer" data-example-status>Blocked issues remain visible but cannot be selected</span>
+</c2-autocomplete>
+```
+
+```html tag=MdxCodeBlock,label=Search a remote catalog
+<style>
+  .catalog-search {
+    width: 100%;
+    --c2-autocomplete--border-radius: 12px;
+    --c2-autocomplete__focus--border: 1px solid #d97706;
+    --c2-autocomplete__focus--outline: 3px solid rgba(245, 158, 11, 0.2);
+    --c2-autocomplete__highlight--color: #b45309;
+    --c2-autocomplete__option__active--background: #fffbeb;
+    --c2-autocomplete__header--background: #fffbeb;
+  }
+  .catalog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .catalog-header button {
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #92400e;
+    background: #ffffff;
+    font: inherit;
+    cursor: pointer;
+  }
+</style>
+<c2-autocomplete
+  client:only="lit"
+  class="catalog-search"
+  data-autocomplete-example="products"
+  aria-label="Add a product"
+  placeholder="Search product, SKU or category…"
+  item-key="sku"
+  label-field="name"
+  description-field="category"
+  disabled-field="unavailable"
+  debounce="250"
+  show-empty
+>
+  <div slot="header" class="catalog-header"><strong>Product catalog</strong><button type="button" data-scan-product>Scan barcode</button></div>
+  <span slot="loading">Checking live inventory…</span>
+  <span slot="empty">No products match this search.</span>
+  <span slot="footer" data-example-status>Inventory comes from an asynchronous data source</span>
+</c2-autocomplete>
+```
+
+```html tag=MdxCodeBlock,label=Run a command
+<style>
+  .command-launcher {
+    width: 100%;
+    --c2-autocomplete--border-radius: 999px;
+    --c2-autocomplete__option__active--background: #eef2ff;
+    --c2-autocomplete__option__active--color: #312e81;
+    --c2-autocomplete__panel--box-shadow: 0 24px 70px rgba(30, 41, 59, 0.2);
+  }
+  .command-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .command-header button {
+    border: 0;
+    color: #4f46e5;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+  }
+</style>
+<c2-autocomplete
+  client:only="lit"
+  class="command-launcher"
+  data-autocomplete-example="commands"
+  aria-label="Run a command"
+  placeholder="What do you want to do?"
+  selection-behavior="preserve"
+  item-key="id"
+  label-field="label"
+  description-field="section"
+  suggestions='[{"id":"new-file","label":"Create a new file","section":"File","shortcut":"⌘N"},{"id":"switch-theme","label":"Switch colour theme","section":"Appearance","shortcut":"⌘⇧L"},{"id":"open-settings","label":"Open workspace settings","section":"Settings","shortcut":"⌘,"},{"id":"invite","label":"Invite a collaborator","section":"Team","shortcut":"⌘I"}]'
+>
+  <div slot="header" class="command-header"><strong>Quick actions</strong><button type="button" data-clear-commands>Clear recent</button></div>
+  <span slot="empty">No recent commands. Start typing to search all actions.</span>
+  <span slot="footer" data-example-status>Enter runs the highlighted command without replacing the query</span>
+</c2-autocomplete>
+```
+
+</GalleryGrid>
+
+<AutocompleteExamplesRuntime />
+
+## Custom row renderer
+
+The live cards above assign `renderItem` as a property. The autocomplete still creates and controls each `c2-list-item`; the renderer supplies only the row content and may use the list-item slots.
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+autocomplete.renderItem = ({ item }) => html`
+  <c2-avatar slot="prefix-icon" name=${item.name} status=${item.status} auto-color aria-hidden="true"></c2-avatar>
+  <span>${item.name}</span>
+  <span slot="description">${item.role} · ${item.location}</span>
+  <c2-badge slot="suffix-icon" tone=${item.status === 'online' ? 'success' : 'neutral'}>
+    ${item.status}
+  </c2-badge>
+`
+```

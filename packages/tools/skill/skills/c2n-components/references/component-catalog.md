@@ -47,6 +47,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Inputs
 
+- **Autocomplete** — `c2-autocomplete` · `@c2n/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
 - **Checkbox** — `c2-checkbox` · `@c2n/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
 - **Color Area** — `c2-color-area` · `@c2n/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/color-select` — Colour swatch that opens a full picker built from area and slider.
