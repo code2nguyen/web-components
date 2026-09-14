@@ -1,6 +1,7 @@
 import { animate, type Options } from '@lit-labs/motion'
 import { html, LitElement, type PropertyValueMap, type TemplateResult, unsafeCSS } from 'lit'
-import { customElement, eventOptions, property, query, queryAll, state } from 'lit/decorators.js'
+import { eventOptions, property, query, queryAll, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import styles from './reorder-list.scss?inline'

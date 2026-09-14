@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './link-button.scss?inline'
 

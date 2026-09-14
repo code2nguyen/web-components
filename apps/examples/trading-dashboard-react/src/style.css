@@ -119,3 +119,17 @@ body {
     width: 100%;
   }
 }
+
+/* The cell bodies of the `cell-slot` column live in this document, so plain CSS reaches them — no need for the
+   inherited-custom-property dance a `renderCell` node inside the shadow root would require. */
+.delta {
+  font-variant-numeric: tabular-nums;
+}
+
+.delta--up {
+  color: var(--delta-up);
+}
+
+.delta--down {
+  color: var(--delta-down);
+}

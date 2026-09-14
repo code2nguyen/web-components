@@ -1,6 +1,8 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { computePosition, autoUpdate, autoPlacement, flip, shift, offset, arrow, type Placement } from '@floating-ui/dom'
 import styles from './tooltip.scss?inline'
 
@@ -10,6 +12,17 @@ const ENTER_EVENTS = ['pointerenter', 'focus'] as const
 const LEAVE_EVENTS = ['pointerleave', 'blur', 'pointerdown'] as const
 
 let uid = 0
+
+/** Events fired by {@link Tooltip}, keyed for `addEventListener`. */
+export interface TooltipEventMap {
+  show: Event
+  hide: Event
+}
+
+export interface Tooltip {
+  addEventListener: TypedAddEventListener<Tooltip, TooltipEventMap>
+  removeEventListener: TypedRemoveEventListener<Tooltip, TooltipEventMap>
+}
 
 /**
  * Contextual hint shown when its target is hovered or focused. Drop it inside the element it describes (the parent is

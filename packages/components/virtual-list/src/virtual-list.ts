@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './virtual-list.scss?inline'
 import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { defaultCompare, getFieldValue, sortEntryConverter, type SortEntry } from '@c2n/core/data-helper.js'
@@ -29,6 +31,18 @@ const IMPLICIT_LABEL_FIELDS = ['label', 'name', 'title', 'value']
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/** Events fired by {@link VirtualList}, keyed for `addEventListener`. */
+export interface VirtualListEventMap {
+  'selection-change': CustomEvent<VirtualListSelectionChangeEventDetail>
+  'item-click': CustomEvent<VirtualListItemEventDetail>
+  'search-change': CustomEvent<VirtualListSearchChangeEventDetail>
+}
+
+export interface VirtualList {
+  addEventListener: TypedAddEventListener<VirtualList, VirtualListEventMap>
+  removeEventListener: TypedRemoveEventListener<VirtualList, VirtualListEventMap>
 }
 
 /**
@@ -82,7 +96,7 @@ function escapeRegExp(value: string): string {
  * @internalcomponent c2-text-field
  * @internalcomponent c2-spinner
  *
- * @event {CustomEvent<VirtualListSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected keys, `detail.items` the matching items.
+ * @event {CustomEvent<VirtualListSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected keys, `detail.items` the matching items. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  * @event {CustomEvent<VirtualListItemEventDetail>} item-click - Fired when a row is clicked, before the selection is applied.
  * @event {CustomEvent<VirtualListSearchChangeEventDetail>} search-change - Fired after the query settles, with the number of items that match.
  *
@@ -750,7 +764,7 @@ export class VirtualList extends LitElement {
     this.value = next
     this.dispatchEvent(
       new CustomEvent<VirtualListSelectionChangeEventDetail>('selection-change', {
-        bubbles: true,
+        bubbles: false,
         composed: true,
         detail: { value: [...next], items: this.getSelectedItems() },
       }),

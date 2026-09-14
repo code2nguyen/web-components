@@ -5,14 +5,26 @@
   "main": "dist/dropdown-list.js",
   "exports": {
     ".": {
-      "default": "./dist/dropdown-list.js",
-      "types": "./types/src/dropdown-list.d.ts"
+      "types": "./types/src/dropdown-list.d.ts",
+      "default": "./dist/dropdown-list.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "dropdown-list",

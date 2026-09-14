@@ -1,5 +1,7 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { consume } from '@lit/context'
@@ -79,6 +81,17 @@ const chevronsRight = html`<svg viewBox="0 0 24 24" fill="none" stroke="currentC
   <polyline points="13 17 18 12 13 7"></polyline>
   <polyline points="6 17 11 12 6 7"></polyline>
 </svg>`
+
+/** Events fired by {@link Pagination}, keyed for `addEventListener`. */
+export interface PaginationEventMap {
+  'page-change': CustomEvent<PageChangeEventDetail>
+  'page-size-change': CustomEvent<PageSizeChangeEventDetail>
+}
+
+export interface Pagination {
+  addEventListener: TypedAddEventListener<Pagination, PaginationEventMap>
+  removeEventListener: TypedRemoveEventListener<Pagination, PaginationEventMap>
+}
 
 /**
  * Page navigation for a list, a table or search results, in three layouts chosen with `variant`:

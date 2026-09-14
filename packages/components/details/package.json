@@ -5,18 +5,30 @@
   "main": "dist/details.js",
   "exports": {
     ".": {
-      "default": "./dist/details.js",
-      "types": "./types/src/details.d.ts"
+      "types": "./types/src/details.d.ts",
+      "default": "./dist/details.js"
     },
     "./details-context.js": {
-      "default": "./dist/details-context.js",
-      "types": "./types/src/details-context.d.ts"
+      "types": "./types/src/details-context.d.ts",
+      "default": "./dist/details-context.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "details",

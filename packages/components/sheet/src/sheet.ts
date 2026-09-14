@@ -1,11 +1,25 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './sheet.scss?inline'
 
 export type SheetSide = 'right' | 'left' | 'top' | 'bottom'
+
+/** Events fired by {@link Sheet}, keyed for `addEventListener`. */
+export interface SheetEventMap {
+  open: Event
+  close: CustomEvent<{ returnValue: string }>
+  cancel: Event
+}
+
+export interface Sheet {
+  addEventListener: TypedAddEventListener<Sheet, SheetEventMap>
+  removeEventListener: TypedRemoveEventListener<Sheet, SheetEventMap>
+}
 
 /**
  * Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it: filters,

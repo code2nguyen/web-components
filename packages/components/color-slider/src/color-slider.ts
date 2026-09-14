@@ -1,9 +1,21 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property, query } from 'lit/decorators.js'
+import { property, query } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './color-slider.scss?inline'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import { TinyColor } from '@ctrl/tinycolor'
+/** Events fired by {@link ColorSlider}, keyed for `addEventListener`. */
+export interface ColorSliderEventMap {
+  input: Event
+}
+
+export interface ColorSlider {
+  addEventListener: TypedAddEventListener<ColorSlider, ColorSliderEventMap>
+  removeEventListener: TypedRemoveEventListener<ColorSlider, ColorSliderEventMap>
+}
+
 /**
  * Horizontal numeric slider rendered as a colour-gradient track, typically used for hue.
  *

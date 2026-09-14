@@ -1,3 +1,5 @@
+import type { BadgeTone } from '@c2n/badge'
+
 export type Status = 'open' | 'waiting' | 'closed'
 
 export interface Message {
@@ -21,7 +23,9 @@ export interface Conversation {
   messages: Message[]
 }
 
-export const STATUS_TONE: Record<Status, string> = {
+// `BadgeTone` rather than `string`: the generated Vue types check `:tone`, so the union is what keeps a typo here
+// from reaching the template.
+export const STATUS_TONE: Record<Status, BadgeTone> = {
   open: 'primary',
   waiting: 'warning',
   closed: 'neutral',

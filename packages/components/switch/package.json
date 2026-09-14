@@ -5,14 +5,26 @@
   "main": "dist/switch.js",
   "exports": {
     ".": {
-      "default": "./dist/switch.js",
-      "types": "./types/src/switch.d.ts"
+      "types": "./types/src/switch.d.ts",
+      "default": "./dist/switch.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "switch",

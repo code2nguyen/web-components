@@ -1,10 +1,23 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './list-item.scss?inline'
 import { selectedItemValueContext } from './list-item-context'
 import { ContextConsumer } from '@c2n/core/controllers/context-consumer.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+
+/** Events fired by {@link ListItem}, keyed for `addEventListener`. */
+export interface ListItemEventMap {
+  'selected-change': CustomEvent<{ selected: boolean; value: string }>
+  click: MouseEvent
+}
+
+export interface ListItem {
+  addEventListener: TypedAddEventListener<ListItem, ListItemEventMap>
+  removeEventListener: TypedRemoveEventListener<ListItem, ListItemEventMap>
+}
 
 /**
  * A selectable row. On its own it is a toggle: click, Enter or Space flips `selected`. Inside a `c2-list` (and

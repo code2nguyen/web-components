@@ -1,9 +1,23 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './modal.scss?inline'
+
+/** Events fired by {@link Modal}, keyed for `addEventListener`. */
+export interface ModalEventMap {
+  open: Event
+  close: CustomEvent<{ returnValue: string }>
+  cancel: Event
+}
+
+export interface Modal {
+  addEventListener: TypedAddEventListener<Modal, ModalEventMap>
+  removeEventListener: TypedRemoveEventListener<Modal, ModalEventMap>
+}
 
 /**
  * Modal dialog built on the native `<dialog>` element: focus is trapped and restored, Escape closes, the page behind

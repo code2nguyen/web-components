@@ -53,6 +53,15 @@ export interface TableColumnConfig {
   locale?: string
   /** Class set on every cell of the column, for `::part(cell)`-free styling from the light DOM. */
   cellClass?: string
+  /**
+   * Renders each cell of the column from a light-DOM child instead of a function, so a framework can build the
+   * body with its own template language. The table puts a `<slot name="cell:<row key>:<field>">` in the cell;
+   * `renderCell` (or the formatted value) stays as the fallback while nothing is slotted into it.
+   *
+   * Requires `rowKey`. Only the rows the virtualizer has rendered have a slot, so children for the rest simply
+   * wait — write one child per row and let the table pick.
+   */
+  cellSlot?: boolean
   renderCell?: TableCellRenderer
   renderHeader?: TableHeaderRenderer
   /** Client-side sort comparator for the column's values. */

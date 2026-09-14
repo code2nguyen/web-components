@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { customElement } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import styles from './mat-icon.scss?inline'
 /**
  * @tag c2-mat-icon

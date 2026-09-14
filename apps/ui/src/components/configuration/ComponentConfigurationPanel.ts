@@ -290,7 +290,7 @@ export class ComponentConfigurationPanel extends LitElement {
           </c2-icon-button>
         </div>
       </header>
-      <c2-tabs class="inspector__tabs" selected-tab=${activeTab} @change=${this.handleTabChange}>
+      <c2-tabs class="inspector__tabs" selected-tab=${activeTab} @selection-change=${this.handleTabChange}>
         <c2-tab label="Design" for="design"></c2-tab>
         <c2-tab label="Props" for="props"></c2-tab>
         <c2-tab label="Collection" for="presets"></c2-tab>

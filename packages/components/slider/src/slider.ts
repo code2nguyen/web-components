@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -9,6 +11,17 @@ import styles from './slider.scss?inline'
 export type SliderOrientation = 'horizontal' | 'vertical'
 
 const MAX_TICKS = 200
+
+/** Events fired by {@link Slider}, keyed for `addEventListener`. */
+export interface SliderEventMap {
+  input: Event
+  change: Event
+}
+
+export interface Slider {
+  addEventListener: TypedAddEventListener<Slider, SliderEventMap>
+  removeEventListener: TypedRemoveEventListener<Slider, SliderEventMap>
+}
 
 /**
  * Single-value slider built on a native `<input type="range">`, so dragging, keyboard steps (Arrow keys, Page Up/Down,

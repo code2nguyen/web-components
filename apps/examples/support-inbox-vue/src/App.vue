@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import type { SelectEventMap } from '@c2n/select'
 import { toast } from '@c2n/toast'
 import ConversationList from './components/ConversationList.vue'
 import ThreadPanel from './components/ThreadPanel.vue'
@@ -30,9 +31,10 @@ const visible = computed(() => {
 const active = computed(() => conversations.value.find((conversation) => conversation.id === activeId.value) ?? null)
 const unread = computed(() => conversations.value.reduce((total, conversation) => total + conversation.unread, 0))
 
-function handleFilter(event: Event) {
-  const { value } = (event as CustomEvent<{ value: string[] }>).detail
-  filter.value = (value[0] as Filter) ?? 'all'
+// No cast: the generated Vue types declare `@selection-change` with the detail the component actually fires.
+function handleFilter(event: SelectEventMap['selection-change']) {
+  const [selected] = event.detail.value
+  filter.value = (selected as Filter) ?? 'all'
 }
 
 function update(id: string, patch: Partial<Conversation>) {

@@ -1,16 +1,30 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { Overlay, Placement } from '@c2n/overlay'
 import styles from './menu.scss?inline'
 import { MenuItem } from './menu-item'
+import type { MenuSelectEventDetail } from './menu-item'
 
 import '@c2n/overlay'
 import './menu-item'
 
 export type { Placement }
 export type { MenuItemType, MenuSelectEventDetail } from './menu-item'
+
+/** Events fired by {@link Menu}, keyed for `addEventListener`. */
+export interface MenuEventMap {
+  'menu-select': CustomEvent<MenuSelectEventDetail>
+  toggle: ToggleEvent
+}
+
+export interface Menu {
+  addEventListener: TypedAddEventListener<Menu, MenuEventMap>
+  removeEventListener: TypedRemoveEventListener<Menu, MenuEventMap>
+}
 
 /**
  * A menu of commands anchored to a trigger. The trigger is slotted into `trigger` (a `c2-button`, a `c2-icon-button`,

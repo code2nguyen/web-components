@@ -1,4 +1,8 @@
 import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, computed, signal } from '@angular/core'
+import { FormsModule } from '@angular/forms'
+import type { TableEventMap } from '@c2n/table'
+import type { TabsEventMap } from '@c2n/tabs'
+import { C2_FORM_ACCESSORS } from '@c2n/angular'
 import { toast } from '@c2n/toast'
 import { ORDERS, STATUS_TONE, type Order, type OrderStatus } from './orders'
 
@@ -18,6 +22,10 @@ const FILTERS: { id: Filter; label: string }[] = [
   // Without this Angular rejects every `c2-*` tag as an unknown element. It is the one piece of Angular
   // configuration these components need; property and event bindings then work with no wrapper at all.
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  // `C2_FORM_ACCESSORS` is what lets `ngModel` reach a c2 form control. Angular's built-in value accessors match
+  // `input`, `select` and `textarea` only, so without them the components are invisible to Angular forms however
+  // correct their `ElementInternals` are — the binding silently does nothing.
+  imports: [FormsModule, ...C2_FORM_ACCESSORS],
   template: `
     <div class="app">
       <header class="app__head">
@@ -25,12 +33,28 @@ const FILTERS: { id: Filter; label: string }[] = [
           <h1>Orders</h1>
           <p>{{ visible().length }} of {{ orders().length }} orders · {{ currency.format(revenue()) }} in revenue</p>
         </div>
-        <c2-text-field type="search" clearable placeholder="Filter customer or id" (input)="query.set($any($event.target).value)"></c2-text-field>
+        <div class="app__controls">
+          <!-- Two-way binding through the ControlValueAccessor in @c2n/angular. A banana-in-a-box needs a plain
+               writable reference, so the signal is written from (ngModelChange) instead. -->
+          <c2-text-field
+            type="search"
+            clearable
+            placeholder="Filter customer or id"
+            [ngModel]="query()"
+            (ngModelChange)="query.set($any($event))"
+            name="query"
+          ></c2-text-field>
+          <c2-switch [ngModel]="openOnly()" (ngModelChange)="openOnly.set($any($event))" name="openOnly">Unshipped only</c2-switch>
+        </div>
       </header>
 
-      <!-- A kebab-case custom event binds by its real name: Angular calls addEventListener('change', …) and
-           hands the CustomEvent straight through. No wrapper, no synthetic event system in the way. -->
-      <c2-tabs [attr.selected-tab]="filter()" (change)="filter.set($any($event).detail.value)">
+      <!-- A kebab-case custom event binds by its real name: Angular calls addEventListener('selection-change', …)
+           and hands the CustomEvent straight through. No wrapper, no synthetic event system in the way.
+
+           CUSTOM_ELEMENTS_SCHEMA turns off type checking for these tags, so $event is a bare Event in the
+           template. The handlers below take the component's own event-map type, which is where the detail gets
+           its shape — one cast in one place instead of $any at every call site. -->
+      <c2-tabs [selectedTab]="filter()" (selection-change)="handleFilterChange($event)">
         @for (tab of filters; track tab.id) {
           <c2-tab [attr.for]="tab.id">{{ tab.label }}</c2-tab>
         }
@@ -54,7 +78,7 @@ const FILTERS: { id: Filter; label: string }[] = [
         selection="single"
         sortable
         stripe
-        (row-click)="openOrder($any($event).detail.row)"
+        (row-click)="handleRowClick($event)"
       >
         <c2-table-column field="id" header="Order" width="130px" pinned="start"></c2-table-column>
         <c2-table-column field="customer" header="Customer" width="minmax(160px, 2fr)"></c2-table-column>
@@ -101,6 +125,7 @@ export class App {
   protected readonly orders = signal<Order[]>(ORDERS)
   protected readonly filter = signal<Filter>('all')
   protected readonly query = signal('')
+  protected readonly openOnly = signal(false)
   protected readonly selected = signal<Order | null>(null)
 
   protected readonly visible = computed(() => {
@@ -108,6 +133,7 @@ export class App {
     const status = this.filter()
     return this.orders()
       .filter((order) => status === 'all' || order.status === status)
+      .filter((order) => !this.openOnly() || order.status === 'pending' || order.status === 'paid')
       .filter((order) => !needle || `${order.id} ${order.customer}`.toLowerCase().includes(needle))
   })
 
@@ -117,8 +143,12 @@ export class App {
     return STATUS_TONE[status]
   }
 
-  protected openOrder(order: Order): void {
-    this.selected.set(order)
+  protected handleFilterChange(event: Event): void {
+    this.filter.set((event as TabsEventMap['selection-change']).detail.value as Filter)
+  }
+
+  protected handleRowClick(event: Event): void {
+    this.selected.set((event as TableEventMap['row-click']).detail.row as Order)
   }
 
   /**

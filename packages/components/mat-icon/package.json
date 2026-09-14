@@ -5,14 +5,26 @@
   "main": "dist/mat-icon.js",
   "exports": {
     ".": {
-      "default": "./dist/mat-icon.js",
-      "types": "./types/src/mat-icon.d.ts"
+      "types": "./types/src/mat-icon.d.ts",
+      "default": "./dist/mat-icon.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "mat-icon",

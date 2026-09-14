@@ -5,14 +5,26 @@
   "main": "dist/reorder-list.js",
   "exports": {
     ".": {
-      "default": "./dist/reorder-list.js",
-      "types": "./types/src/reorder-list.d.ts"
+      "types": "./types/src/reorder-list.d.ts",
+      "default": "./dist/reorder-list.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "reorder-list",

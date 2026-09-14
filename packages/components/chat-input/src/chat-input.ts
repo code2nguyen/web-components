@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, eventOptions, property, query, state } from 'lit/decorators.js'
+import { eventOptions, property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './chat-input.scss?inline'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import { live } from 'lit/directives/live.js'
@@ -7,6 +9,16 @@ import { styleMap, type StyleInfo } from 'lit/directives/style-map.js'
 import { addClasses } from '@c2n/core/css-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
+
+/** Events fired by {@link ChatInput}, keyed for `addEventListener`. */
+export interface ChatInputEventMap {
+  'submit-message': CustomEvent<string>
+}
+
+export interface ChatInput {
+  addEventListener: TypedAddEventListener<ChatInput, ChatInputEventMap>
+  removeEventListener: TypedRemoveEventListener<ChatInput, ChatInputEventMap>
+}
 
 /**
  * Auto-growing message composer that submits with Enter and inserts a newline with Alt+Enter.

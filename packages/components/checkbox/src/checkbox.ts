@@ -1,8 +1,20 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './checkbox.scss?inline'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+
+/** Events fired by {@link Checkbox}, keyed for `addEventListener`. */
+export interface CheckboxEventMap {
+  change: Event
+}
+
+export interface Checkbox {
+  addEventListener: TypedAddEventListener<Checkbox, CheckboxEventMap>
+  removeEventListener: TypedRemoveEventListener<Checkbox, CheckboxEventMap>
+}
 
 /**
  * A checkbox with native `<input type="checkbox">` behaviour. The visible box sits centred in a square touch target

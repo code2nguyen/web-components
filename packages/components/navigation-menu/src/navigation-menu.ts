@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './navigation-menu.scss?inline'
 import { NavigationMenuItem, type PanelToggleEventDetail } from './navigation-menu-item'
 
@@ -15,6 +17,16 @@ export type NavigationMenuMode = 'bar' | 'mobile'
 export interface ValueChangeEventDetail {
   /** The `value` of the item whose panel is open, or `''` when the bar is closed. */
   value: string
+}
+
+/** Events fired by {@link NavigationMenu}, keyed for `addEventListener`. */
+export interface NavigationMenuEventMap {
+  'value-change': CustomEvent<ValueChangeEventDetail>
+}
+
+export interface NavigationMenu {
+  addEventListener: TypedAddEventListener<NavigationMenu, NavigationMenuEventMap>
+  removeEventListener: TypedRemoveEventListener<NavigationMenu, NavigationMenuEventMap>
 }
 
 /**

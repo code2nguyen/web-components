@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Table } from '@c2n/table'
-import type { TableCellContext } from '@c2n/table/table-types.js'
 import type { Select } from '@c2n/select'
 import type { TextField } from '@c2n/text-field'
 import type { Switch } from '@c2n/switch'
@@ -14,18 +13,19 @@ const currency = new Intl.NumberFormat(undefined, { style: 'currency', currency:
 const percent = new Intl.NumberFormat(undefined, { style: 'percent', minimumFractionDigits: 2 })
 
 /**
- * Per-cell styling goes through `renderCell`, which is handed to Lit — so it cannot return JSX. It can return a
- * plain DOM node, which keeps this framework-neutral. The node lands inside the table's shadow root, where a
- * stylesheet from this document cannot reach it, so the colour comes from an inherited custom property
- * (custom properties cross the shadow boundary; selectors do not).
+ * A cell rendered by React rather than by the table.
+ *
+ * `renderCell` is handed to Lit, so it cannot return JSX — it would have to build DOM nodes by hand. A column
+ * marked `cellSlot` puts a `<slot name="cell:<row key>:<field>">` in each cell instead, and anything the app
+ * renders into that slot is the cell body. The element stays in this document's light DOM, so ordinary CSS
+ * reaches it.
  */
-function renderDelta({ value }: TableCellContext) {
-  const change = Number(value)
-  const span = document.createElement('span')
-  span.textContent = `${change >= 0 ? '▲' : '▼'} ${percent.format(Math.abs(change))}`
-  span.style.color = change >= 0 ? 'var(--delta-up)' : 'var(--delta-down)'
-  span.style.fontVariantNumeric = 'tabular-nums'
-  return span
+function Delta({ row }: { row: Row }) {
+  return (
+    <span slot={`cell:${row.symbol}:change`} className={row.change >= 0 ? 'delta delta--up' : 'delta delta--down'}>
+      {row.change >= 0 ? '▲' : '▼'} {percent.format(Math.abs(row.change))}
+    </span>
+  )
 }
 
 export function App() {
@@ -65,10 +65,13 @@ export function App() {
   // Kebab-case custom events have no `on*` spelling in JSX, so they are wired through refs. `input` and `change`
   // go the same way on purpose: React's `onChange` is its own synthetic event with form-control semantics that
   // these elements do not participate in.
-  useCustomEvent<Table, CustomEvent<{ value: string[] }>>(tableRef, 'selection-change', (event) => setSelected(event.detail.value))
-  useCustomEvent<TextField>(searchRef, 'input', () => setQuery(searchRef.current?.value ?? ''))
-  useCustomEvent<Select, CustomEvent<{ value: string[] }>>(sectorRef, 'selection-change', (event) => setSector(event.detail.value[0] ?? ''))
-  useCustomEvent<Switch>(liveRef, 'change', () => setLive(liveRef.current?.checked ?? false))
+  //
+  // No cast on the event: each component declares its own event map, so the detail is already narrowed — and
+  // narrowed differently for the same name on two components.
+  useCustomEvent(tableRef, 'selection-change', (event) => setSelected(event.detail.value))
+  useCustomEvent(searchRef, 'input', () => setQuery(searchRef.current?.value ?? ''))
+  useCustomEvent(sectorRef, 'selection-change', (event) => setSector(event.detail.value[0] ?? ''))
+  useCustomEvent(liveRef, 'change', () => setLive(liveRef.current?.checked ?? false))
 
   return (
     <div className="app">
@@ -135,8 +138,13 @@ export function App() {
         <c2-table-column field="sector" header="Sector" width="140px" />
         <c2-table-column field="quantity" header="Qty" width="100px" align="end" format="number" />
         <c2-table-column field="price" header="Price" width="110px" align="end" format="currency" currency="USD" />
-        <c2-table-column field="change" header="Day" width="120px" align="end" renderCell={renderDelta} />
+        <c2-table-column field="change" header="Day" width="120px" align="end" cellSlot />
         <c2-table-column field="value" header="Market value" width="150px" align="end" format="currency" currency="USD" />
+
+        {/* One child per row; the table slots each into the cell whose key matches and ignores the rest. */}
+        {rows.map((row) => (
+          <Delta key={row.symbol} row={row} />
+        ))}
       </c2-table>
 
       <footer className="app__foot">

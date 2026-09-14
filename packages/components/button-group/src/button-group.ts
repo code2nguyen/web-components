@@ -1,5 +1,7 @@
 import { LitElement, html, isServer, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 // Registers `c2-button`, the usual item element.
 import '@c2n/button'
 import styles from './button-group.scss?inline'
@@ -8,6 +10,16 @@ export type ButtonGroupSelection = 'none' | 'single' | 'multiple'
 export type ButtonGroupOrientation = 'horizontal' | 'vertical'
 
 const GROUP_DISABLED = 'data-c2-button-group-disabled'
+
+/** Events fired by {@link ButtonGroup}, keyed for `addEventListener`. */
+export interface ButtonGroupEventMap {
+  change: CustomEvent<{ value: string }>
+}
+
+export interface ButtonGroup {
+  addEventListener: TypedAddEventListener<ButtonGroup, ButtonGroupEventMap>
+  removeEventListener: TypedRemoveEventListener<ButtonGroup, ButtonGroupEventMap>
+}
 
 /**
  * Attaches related buttons into one control: shared borders, outside corners only, a divider between items. Children

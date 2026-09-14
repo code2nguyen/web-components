@@ -1,11 +1,23 @@
 import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
-import { customElement, property, query } from 'lit/decorators.js'
+import { property, query } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './color-area.scss?inline'
 import { TinyColor } from '@ctrl/tinycolor'
 
 export interface Point {
   x: number
   y: number
+}
+
+/** Events fired by {@link ColorArea}, keyed for `addEventListener`. */
+export interface ColorAreaEventMap {
+  change: CustomEvent<{ saturation: number; value: number }>
+}
+
+export interface ColorArea {
+  addEventListener: TypedAddEventListener<ColorArea, ColorAreaEventMap>
+  removeEventListener: TypedRemoveEventListener<ColorArea, ColorAreaEventMap>
 }
 
 /**

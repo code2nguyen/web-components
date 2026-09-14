@@ -1,11 +1,23 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { consume } from '@lit/context'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import { radioGroupContext, type RadioGroupContext } from './radio-context'
 import styles from './radio.scss?inline'
+
+/** Events fired by {@link Radio}, keyed for `addEventListener`. */
+export interface RadioEventMap {
+  change: Event
+}
+
+export interface Radio {
+  addEventListener: TypedAddEventListener<Radio, RadioEventMap>
+  removeEventListener: TypedRemoveEventListener<Radio, RadioEventMap>
+}
 
 /**
  * A single radio option built on a native `<input type="radio">`, with its label and an optional description beside

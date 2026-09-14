@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -74,6 +76,21 @@ function humanize(field: string): string {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
 }
 
+/** Events fired by {@link Table}, keyed for `addEventListener`. */
+export interface TableEventMap {
+  'selection-change': CustomEvent<TableSelectionChangeEventDetail>
+  'sort-change': CustomEvent<TableSortChangeEventDetail>
+  'row-click': CustomEvent<TableRowEventDetail>
+  'cell-click': CustomEvent<TableCellEventDetail>
+  'column-resize': CustomEvent<TableColumnResizeEventDetail>
+  'page-change': CustomEvent<TablePageChangeEventDetail>
+}
+
+export interface Table {
+  addEventListener: TypedAddEventListener<Table, TableEventMap>
+  removeEventListener: TypedRemoveEventListener<Table, TableEventMap>
+}
+
 /**
  * A data grid: a scrolling, virtualized table built from a `rows` array (or an async `dataSource`) and a set of
  * `c2-table-column` definitions given as light-DOM children. Sorting, row selection, column pinning, column resizing
@@ -112,11 +129,12 @@ function humanize(field: string): string {
  * @slot empty - Replaces the built-in "no rows" message.
  * @slot loading - Replaces the built-in spinner shown while the first rows load.
  * @slot error - Replaces the built-in message shown when `error` is set.
+ * @slot cell:{rowKey}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:AAPL:change"`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback.
  *
  * @slotcomponent c2-table-column
  * @slotcomponent c2-pagination
  *
- * @event {CustomEvent<TableSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows.
+ * @event {CustomEvent<TableSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  * @event {CustomEvent<TableSortChangeEventDetail>} sort-change - Fired after the user clicks a sortable header. `detail.sort` is the new sort model, in priority order.
  * @event {CustomEvent<TableRowEventDetail>} row-click - Fired when a row is clicked, before the selection is applied.
  * @event {CustomEvent<TableCellEventDetail>} cell-click - Fired when a cell is clicked; adds `detail.column` and `detail.value`.
@@ -716,10 +734,14 @@ export class Table extends LitElement {
     }
 
     const value = getFieldValue(row, column.field)
+    const rendered = row ? (column.renderCell ? column.renderCell({ value, row, rowIndex, column }) : this.#formatValue(column, value)) : undefined
+    // A `cell-slot` column takes its body from a light-DOM child, which is how React, Vue and Angular render a
+    // cell with their own template language instead of building DOM nodes by hand. Whatever `renderCell` or the
+    // formatter produced stays as the slot's fallback, so a row with no child still shows its value.
     const content = row
-      ? column.renderCell
-        ? column.renderCell({ value, row, rowIndex, column })
-        : this.#formatValue(column, value)
+      ? column.cellSlot
+        ? html`<slot name=${`cell:${this.#keyAt(rowIndex, row)}:${column.field}`}>${rendered}</slot>`
+        : rendered
       : html`<span class="skeleton" part="skeleton"></span>`
 
     // A cell and its content each carry a part named after the column, so one column can be styled from outside —
@@ -1062,7 +1084,7 @@ export class Table extends LitElement {
     this.dispatchEvent(
       new CustomEvent<TableSelectionChangeEventDetail>('selection-change', {
         detail: { value: keys, rows: this.getSelectedRows() },
-        bubbles: true,
+        bubbles: false,
         composed: true,
       }),
     )

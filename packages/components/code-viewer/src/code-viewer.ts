@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { unsafeHTML } from 'lit/directives/unsafe-html.js'
 import { Task } from '@lit/task'
@@ -9,6 +11,16 @@ import { highlight, isKnownTheme, normalizeLang, type HighlightResult, type Them
 export type { ThemeName } from './shiki'
 
 const LEGACY_LANG_ATTRIBUTE = 'langage'
+
+/** Events fired by {@link CodeViewer}, keyed for `addEventListener`. */
+export interface CodeViewerEventMap {
+  'code-copy': CustomEvent<{ code: string }>
+}
+
+export interface CodeViewer {
+  addEventListener: TypedAddEventListener<CodeViewer, CodeViewerEventMap>
+  removeEventListener: TypedRemoveEventListener<CodeViewer, CodeViewerEventMap>
+}
 
 /**
  * Syntax-highlighted source code powered by shiki. Grammars and themes are loaded on demand into one shared

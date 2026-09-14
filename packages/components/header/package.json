@@ -5,14 +5,26 @@
   "main": "dist/header.js",
   "exports": {
     ".": {
-      "default": "./dist/header.js",
-      "types": "./types/src/header.d.ts"
+      "types": "./types/src/header.d.ts",
+      "default": "./dist/header.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "header",

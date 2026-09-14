@@ -1,5 +1,6 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { customElement, eventOptions } from 'lit/decorators.js'
+import { eventOptions } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import styles from './design-board.scss?inline'
 import { DesignBoardItem } from './design-board-item/design-board-item'
 
