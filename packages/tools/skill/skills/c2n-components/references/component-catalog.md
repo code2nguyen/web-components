@@ -20,8 +20,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Chat
 
-- **Chat Input** — `c2-chat-input` · `@c2n/chat-input` — Auto-growing message box with a send button for chat interfaces.
-- **Chat Message** — `c2-chat-message` · `@c2n/chat-message` — One chat bubble with avatar, title, timestamp and message body.
+- **Chat Input** — `c2-chat-input` · `@c2n/chat-input` — Auto-growing message composer with keyboard submission, toolbar actions and native form support.
+- **Chat Message** — `c2-chat-message` · `@c2n/chat-message` — Flexible message row for conversations, assistant answers and activity updates.
 
 ## Data display
 

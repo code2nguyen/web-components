@@ -13,6 +13,7 @@
         "textarea": true,
         "select": true,
         "c2-autocomplete": true,
+        "c2-chat-input": true,
         "c2-radio-group": true,
         "c2-select": true,
         "c2-slider": true,
