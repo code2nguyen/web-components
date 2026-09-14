@@ -1,6 +1,6 @@
 import { z } from 'astro:content'
 
-export const COMPONENT_CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Feedback', 'Chat'] as const
+export const COMPONENT_CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Feedback', 'Chat'] as const
 
 export type ComponentCategory = (typeof COMPONENT_CATEGORIES)[number]
 
@@ -10,6 +10,17 @@ export const componentSchema = z.object({
   category: z.enum(COMPONENT_CATEGORIES).default('Layout'),
   /** npm package name, e.g. `@c2n/checkbox`. Defaults to `@c2n/<id>` when omitted. */
   package: z.string().optional(),
+  /**
+   * The package's primary custom element, when the package name is not itself a tag — `@c2n/chart` ships
+   * `c2-line-chart` and four siblings, and has no `c2-chart`. Defaults to `c2-<id>`.
+   */
+  tag: z.string().optional(),
+  /**
+   * Elements to document on the API page, when `[tag, ...siblingTags]` is not the right set — `@c2n/chart`
+   * ships five chart tags on five pages, each of which documents only itself and `c2-chart-series`.
+   * Defaults to the page's tag followed by every other tag of its package.
+   */
+  apiTags: z.array(z.string()).optional(),
 })
 
 export const iconSetSchema = z.object({

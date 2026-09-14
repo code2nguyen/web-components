@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import { COMPONENT_CATEGORIES, EXAMPLE_FRAMEWORKS, EXAMPLE_FRAMEWORK_LABELS } from '../schemas'
+import SiteTextField from './ui/SiteTextField.astro'
 
 interface Props {
   /** Which section this sidebar navigates. */
@@ -22,26 +23,40 @@ const groups =
         title: category,
         items: components
           .filter((component) => component.data.category === category)
-          .map((c) => ({ id: c.id, title: c.data.title, href: `${base}/components/${c.id}` })),
+          .map((c) => ({ id: c.id, title: c.data.title, href: `${base}/components/${c.id}`, search: `${c.data.title} c2-${c.id} ${c.data.category}` })),
       })).filter((group) => group.items.length > 0)
     : section === 'icons'
-      ? [{ title: 'Icon sets', items: iconSets.map((set) => ({ id: set.id, title: set.data.title, href: `${base}/icons/${set.id}` })) }]
+      ? [{ title: 'Icon sets', items: iconSets.map((set) => ({ id: set.id, title: set.data.title, href: `${base}/icons/${set.id}`, search: set.data.title })) }]
       : section === 'examples'
         ? EXAMPLE_FRAMEWORKS.map((framework) => ({
             title: EXAMPLE_FRAMEWORK_LABELS[framework],
             items: examples
               .filter((example) => example.data.framework === framework)
-              .map((e) => ({ id: e.id, title: e.data.title, href: `${base}/examples/${e.id}` })),
+              .map((e) => ({
+                id: e.id,
+                title: e.data.title,
+                href: `${base}/examples/${e.id}`,
+                search: `${e.data.title} ${EXAMPLE_FRAMEWORK_LABELS[framework]} ${e.data.tags.join(' ')}`,
+              })),
           })).filter((group) => group.items.length > 0)
-        : [{ title: 'Guides', items: guides.map((guide) => ({ id: guide.id, title: guide.data.title, href: `${base}/guides/${guide.id}` })) }]
+        : [
+            {
+              title: 'Guides',
+              items: guides.map((guide) => ({ id: guide.id, title: guide.data.title, href: `${base}/guides/${guide.id}`, search: guide.data.title })),
+            },
+          ]
 
 const overviews = {
-  components: { href: `${base}/components/`, label: 'All components' },
-  icons: { href: `${base}/icons/`, label: 'All icon sets' },
-  guides: { href: `${base}/guides/`, label: 'All guides' },
-  examples: { href: `${base}/examples/`, label: 'All examples' },
+  components: { href: `${base}/components/`, label: 'All components', noun: 'components' },
+  icons: { href: `${base}/icons/`, label: 'All icon sets', noun: 'icon sets' },
+  guides: { href: `${base}/guides/`, label: 'All guides', noun: 'guides' },
+  examples: { href: `${base}/examples/`, label: 'All examples', noun: 'examples' },
 }
 const overview = overviews[section]
+const total = groups.reduce((count, group) => count + group.items.length, 0)
+
+// One group is just a list with a heading: nothing to collapse, nothing worth filtering.
+const collapsible = groups.length > 1
 ---
 
 <nav
@@ -49,22 +64,64 @@ const overview = overviews[section]
   data-section={section}
   aria-label={section === 'components' ? 'Components' : section === 'icons' ? 'Icon sets' : section === 'examples' ? 'Example apps' : 'Guides'}
 >
-  <a href={overview.href} class:list={['sidebar__overview', { active: !currentId }]}>{overview.label}</a>
   {
-    groups.map((group) => (
-      <div class="sidebar__group">
-        <div class="sidebar__group-title">{group.title}</div>
-        <ul>
+    collapsible && (
+      <div class="sidebar__filter">
+        <SiteTextField
+          class="sidebar__filter-field"
+          label={`Filter ${overview.noun}`}
+          search
+          size="sm"
+          hydrate="defined"
+          placeholder={`Filter ${overview.noun}…`}
+        />
+      </div>
+    )
+  }
+
+  <a href={overview.href} class:list={['sidebar__overview', { active: !currentId }]}>
+    <span>{overview.label}</span>
+    <span class="sidebar__count">{total}</span>
+  </a>
+
+  {
+    groups.map((group) => {
+      const items = (
+        <ul class="sidebar__items">
           {group.items.map((item) => (
             <li>
-              <a href={item.href} aria-current={currentId === item.id ? 'page' : undefined}>
+              <a href={item.href} data-search={item.search.toLowerCase()} aria-current={currentId === item.id ? 'page' : undefined}>
                 {item.title}
               </a>
             </li>
           ))}
         </ul>
-      </div>
-    ))
+      )
+      // `c2-details` is the site's own disclosure: native `<details>` semantics underneath, plus the height/fade
+      // animation and the themed header we would otherwise hand-roll here.
+      return collapsible ? (
+        <c2-details class="sidebar__group" data-group={group.title} expanded={group.items.some((item) => item.id === currentId) || undefined}>
+          <span slot="title" class="sidebar__group-title">
+            {group.title}
+            <span class="sidebar__count" data-total={group.items.length}>
+              {group.items.length}
+            </span>
+          </span>
+          {items}
+        </c2-details>
+      ) : (
+        // One group carries no information the "All …" link above it does not already give, so it goes unlabelled.
+        <div class="sidebar__group">{items}</div>
+      )
+    })
+  }
+
+  {
+    collapsible && (
+      <p class="sidebar__empty" hidden>
+        Nothing matches that filter.
+      </p>
+    )
   }
 </nav>
 
@@ -72,16 +129,31 @@ const overview = overviews[section]
   .sidebar__nav {
     display: flex;
     flex-direction: column;
-    gap: 20px;
     font-size: 13.5px;
     padding-bottom: 32px;
   }
+
+  // Stays put while the list scrolls under it, so the filter is always one click away.
+  .sidebar__filter {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-bottom: 12px;
+    background: var(--site-color-surface);
+  }
+
   .sidebar__overview {
-    display: block;
-    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    margin-bottom: 10px;
     border-radius: var(--site-radius-sm);
     color: var(--site-color-on-surface-variant);
     font-weight: 500;
+    > span:first-child {
+      flex: 1;
+    }
     &:hover {
       text-decoration: none;
       background: var(--site-color-surface-container-2);
@@ -92,48 +164,219 @@ const overview = overviews[section]
       background: var(--site-color-primary-soft);
     }
   }
+
+  .sidebar__group[hidden] {
+    display: none;
+  }
+
+  // c2-details ships as a bordered card; a nav group is the opposite of that. Everything here is one of its
+  // documented variables, so the component itself stays untouched.
+  c2-details.sidebar__group {
+    display: block;
+    // Per side, not a shorthand: `@c2n/theme`'s base.css sets each of these, so a shorthand the component
+    // falls back to would never be consulted.
+    --c2-details--border-top: none;
+    --c2-details--border-right: none;
+    --c2-details--border-bottom: none;
+    --c2-details--border-left: none;
+    --c2-details--background: transparent;
+    --c2-details--border-top-left-radius: var(--site-radius-sm);
+    --c2-details--border-top-right-radius: var(--site-radius-sm);
+    --c2-details--border-bottom-left-radius: var(--site-radius-sm);
+    --c2-details--border-bottom-right-radius: var(--site-radius-sm);
+    --c2-details--transition-duration: 180ms;
+    --c2-details__header--padding-top: 5px;
+    --c2-details__header--padding-right: 8px;
+    --c2-details__header--padding-bottom: 5px;
+    --c2-details__header--padding-left: 8px;
+    --c2-details__header--gap: 6px;
+    // Chevron first, so the group reads as a disclosure rather than as a label with a stray affordance.
+    --c2-details__header--flex-direction: row-reverse;
+    // Right when closed, down when open — the component's own chevron, at both angles.
+    --c2-details__header__icon--rotate-collapsed: -90deg;
+    --c2-details__header__icon--rotate: 0deg;
+    --c2-details__header--font-size: 13px;
+    --c2-details__header--font-weight: 600;
+    --c2-details__header--color: var(--site-color-on-surface);
+    --c2-details__header__hover--background: var(--site-color-surface-container-2);
+    --c2-details__header__icon--width: 14px;
+    --c2-details__header__icon--height: 14px;
+    --c2-details__header__icon--color: var(--site-color-on-surface-muted);
+    --c2-details__header__focus--outline: 2px solid var(--site-color-primary);
+    --c2-details__content--padding-top: 2px;
+    --c2-details__content--padding-right: 0px;
+    --c2-details__content--padding-bottom: 0px;
+    --c2-details__content--padding-left: 0px;
+  }
+  // Slotted content renders before the element upgrades; without this the whole list flashes open on every load.
+  c2-details:not(:defined) > :not([slot]) {
+    display: none;
+  }
+
   .sidebar__group-title {
-    padding: 0 10px 6px;
-    font-size: 11.5px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    .sidebar__count {
+      margin-left: auto;
+    }
+  }
+
+  .sidebar__count {
+    flex: none;
+    font-size: 11px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
     color: var(--site-color-on-surface-muted);
   }
-  ul {
+
+  .sidebar__items {
     list-style: none;
-    margin: 0;
-    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    margin: 0 0 8px 15px;
+    padding: 0;
+    li[hidden] {
+      display: none;
+    }
   }
-  li a {
+  // The rail is built from one segment per row, so the current row can thicken and colour its own piece of it.
+  .sidebar__items a {
     display: block;
-    padding: 5px 10px;
-    border-radius: var(--site-radius-sm);
+    padding: 4px 10px 4px 14px;
+    border-left: 2px solid var(--site-color-outline-variant);
+    border-radius: 0 var(--site-radius-sm) var(--site-radius-sm) 0;
     color: var(--site-color-on-surface-variant);
     &:hover {
       text-decoration: none;
       background: var(--site-color-surface-container-2);
+      border-left-color: var(--site-color-outline);
       color: var(--site-color-on-surface);
     }
     &[aria-current='page'] {
+      border-left-color: var(--site-color-primary);
       color: var(--site-color-primary);
-      background: var(--site-color-primary-soft);
       font-weight: 500;
     }
+  }
+
+  .sidebar__empty {
+    margin: 4px 8px;
+    color: var(--site-color-on-surface-muted);
   }
 </style>
 
 <script>
+  import '../data/chrome-modules'
+  import '@c2n/details'
+
+  type Nav = HTMLElement & { dataset: { section?: string } }
+
+  // Private browsing and blocked site data both make storage throw rather than return null.
+  function read(key: string): string | null {
+    try {
+      return localStorage.getItem(key)
+    } catch {
+      return null
+    }
+  }
+  function write(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value)
+    } catch {
+      /* not worth reporting: the groups simply open where they always did */
+    }
+  }
+
+  /**
+   * Collapsing and filtering, for every copy of the nav on the page — the desktop grid sidebar and the
+   * `c2-side-nav` drawer render the same markup.
+   */
+  function enhance(nav: Nav): void {
+    const groups = [...nav.querySelectorAll<HTMLElement & { expanded: boolean }>('c2-details.sidebar__group')]
+    if (groups.length === 0) return
+
+    const key = `c2n-sidebar-groups:${nav.dataset.section ?? 'components'}`
+    const current = nav.querySelector<HTMLElement>('a[aria-current="page"]')
+    const currentGroup = current?.closest('c2-details.sidebar__group')
+
+    // Restore what the visitor left open, and always open the group they are actually in.
+    const stored = read(key)
+    if (stored !== null) {
+      const open = new Set(stored.split('\n').filter(Boolean))
+      for (const group of groups) group.expanded = open.has(group.dataset.group ?? '') || group === currentGroup
+    }
+
+    // Filtering forces groups open, so remember the real state to put back when the query is cleared.
+    let filtering = false
+    let restore: boolean[] = []
+
+    for (const group of groups) {
+      group.addEventListener('toggle', () => {
+        if (filtering) return
+        write(
+          key,
+          groups
+            .filter((item) => item.expanded)
+            .map((item) => item.dataset.group ?? '')
+            .join('\n'),
+        )
+      })
+    }
+
+    const field = nav.querySelector<HTMLElement & { value: string }>('.sidebar__filter-field')
+    const empty = nav.querySelector<HTMLElement>('.sidebar__empty')
+    if (!field) return
+
+    const apply = () => {
+      const query = field.value.trim().toLowerCase()
+      if (query && !filtering) {
+        filtering = true
+        restore = groups.map((group) => group.expanded)
+      }
+
+      let matches = 0
+      for (const group of groups) {
+        let visible = 0
+        for (const item of group.querySelectorAll<HTMLLIElement>('li')) {
+          const hit = !query || (item.firstElementChild as HTMLElement | null)?.dataset.search?.includes(query) === true
+          item.hidden = !hit
+          if (hit) visible += 1
+        }
+        group.hidden = visible === 0
+        // A filtered group has to be open or its hits stay hidden inside it.
+        if (query) group.expanded = visible > 0
+        // A group that says 11 while showing three rows reads as a bug.
+        const count = group.querySelector<HTMLElement>('.sidebar__count')
+        if (count) count.textContent = query ? String(visible) : (count.dataset.total ?? count.textContent)
+        matches += visible
+      }
+      if (empty) empty.hidden = matches > 0
+
+      if (!query && filtering) {
+        filtering = false
+        groups.forEach((group, index) => (group.expanded = restore[index] ?? group.expanded))
+      }
+    }
+
+    field.addEventListener('input', apply)
+    // A search input's native clear button fires `search`, not `input`, in Safari.
+    field.addEventListener('search', apply)
+    field.addEventListener('keydown', (event) => {
+      if ((event as KeyboardEvent).key !== 'Escape' || !field.value) return
+      event.stopPropagation()
+      field.value = ''
+      apply()
+    })
+  }
+
+  for (const nav of document.querySelectorAll<Nav>('.sidebar__nav')) enhance(nav)
+
   // The docs site is a plain MPA — every sidebar link is a full page load — so the sidebar's own scroll offset is
   // thrown away on each navigation unless we carry it across ourselves. Restore what the visitor left behind, and
   // only fall back to revealing the current entry when there is nothing to restore (first visit, deep link, or a
   // stored offset that would leave the current entry off screen).
-  //
-  // Two copies of this nav exist on docs pages: the desktop grid sidebar (its own scroll container) and the
-  // c2-side-nav drawer, which takes over below 960px where `.docs__sidebar` is `display: none`.
   const sidebar = document.querySelector<HTMLElement>('.docs__sidebar')
   const nav = sidebar?.querySelector<HTMLElement>('.sidebar__nav')
 
@@ -141,8 +384,7 @@ const overview = overviews[section]
     const key = `c2n-sidebar-scroll:${nav.dataset.section ?? 'components'}`
     const current = nav.querySelector<HTMLElement>('a[aria-current="page"]')
 
-    // Private browsing and blocked site data both make sessionStorage throw rather than return null.
-    const read = () => {
+    const readScroll = () => {
       try {
         // `Number(null)` is 0, which is indistinguishable from a visitor who really is at the top.
         const stored = sessionStorage.getItem(key)
@@ -151,7 +393,7 @@ const overview = overviews[section]
         return NaN
       }
     }
-    const write = (value: number) => {
+    const writeScroll = (value: number) => {
       try {
         sessionStorage.setItem(key, String(value))
       } catch {
@@ -166,7 +408,7 @@ const overview = overviews[section]
       return top >= 0 && top + current.offsetHeight <= sidebar.clientHeight
     }
 
-    const restored = read()
+    const restored = readScroll()
     const apply = () => {
       if (Number.isFinite(restored) && restored >= 0) {
         sidebar.scrollTop = restored
@@ -198,7 +440,7 @@ const overview = overviews[section]
         if (frame) return
         frame = requestAnimationFrame(() => {
           frame = 0
-          write(sidebar.scrollTop)
+          writeScroll(sidebar.scrollTop)
         })
       },
       { passive: true },

@@ -1,0 +1,114 @@
+---
+title: 'Sparkline'
+description: 'A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-sparkline'
+apiTags: ['c2-sparkline', 'c2-chart-series']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Sparkline } from '@c2n/chart/sparkline.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+No axes, no grid, no legend, no tooltip and no card: the whole box is the data. `c2-sparkline` is an
+`inline-flex` element 120×32px by default, which is the size a table cell, a list row or the `trend` slot of
+a [`c2-stat`](/web-components/components/stat) actually has.
+
+It takes the bare `number[]` shape as well as rows, which is usually all a cell has:
+
+```html tag=CodeBlock
+<c2-sparkline data="[3, 5, 4, 8, 6, 11]" tone="auto"></c2-sparkline>
+```
+
+uPlot is what makes a sparkline per row affordable — the engine loads once for the page, and each instance
+is a single canvas.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart uplot
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .kpis {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 10px 16px;
+    align-items: center;
+    font: 14px system-ui;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font: 14px system-ui;
+  }
+</style>
+
+<div data-label="Line and area">
+  <div class="row">
+    <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]"></c2-sparkline>
+    <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]" type="area"></c2-sparkline>
+  </div>
+</div>
+
+<div data-label="Tone by direction">
+  <div class="kpis">
+    <span>Requests</span>
+    <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline>
+    <span>Latency</span>
+    <c2-sparkline data="[91, 88, 94, 85, 79, 74, 70]" tone="auto"></c2-sparkline>
+    <span>Errors</span>
+    <c2-sparkline data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline>
+  </div>
+</div>
+
+<div data-label="Sized for a dense row">
+  <div class="row">
+    <c2-sparkline style="--c2-chart--width: 72px; --c2-chart--height: 20px" data="[4, 6, 5, 9, 8, 12]"></c2-sparkline>
+    <c2-sparkline style="--c2-chart--width: 180px; --c2-chart--height: 44px" data="[4, 6, 5, 9, 8, 12]" tone="positive"></c2-sparkline>
+  </div>
+</div>
+```
+
+## Tone
+
+`tone="auto"` compares the last value with the first and paints the line with the positive or negative tone
+— `--c2-chart__tone-positive--color` and `--c2-chart__tone-negative--color`. `positive` and `negative` force
+one of them, and `neutral` (the default) keeps the series' palette colour, which is what you want when the
+sparkline sits next to other charts that share it.
+
+A flat series, a series with fewer than two points, or a non-numeric end falls back to the palette colour
+rather than guessing a direction.
+
+## Sizing
+
+The size is the API: `--c2-chart--width` (120px) and `--c2-chart--height` (32px), both redefined on the host
+rather than merely defaulted, so an author rule on the element still wins. Padding is `0` and the border and
+background are removed, so the line reaches the edges of the box.
+
+```css tag=CodeBlock
+c2-table c2-sparkline {
+  --c2-chart--width: 88px;
+  --c2-chart--height: 24px;
+  --c2-chart__line--width: 1px;
+}
+```
+
+## What it leaves out, and putting it back
+
+The axes, grid, cursor, legend and tooltip are switched off in the constructor rather than made impossible,
+so a sparkline that does want a hover readout can set `tooltip="axis"` and `cursor="x"` back on. Series
+children work too, when the row shape is what you have rather than a bare array.
+
+## Theming
+
+The stroke colour, the two tone colours and everything else come from the shared `--c2-chart__*` namespace,
+so a sparkline in a table and a [line chart](/web-components/components/line-chart) above it agree on colour
+without any extra configuration.

@@ -1,0 +1,145 @@
+{
+  "name": "@c2n/chart",
+  "version": "0.0.6",
+  "type": "module",
+  "main": "dist/chart.js",
+  "exports": {
+    ".": {
+      "types": "./types/src/chart.d.ts",
+      "default": "./dist/chart.js"
+    },
+    "./line-chart.js": {
+      "types": "./types/src/line-chart.d.ts",
+      "default": "./dist/line-chart.js"
+    },
+    "./area-chart.js": {
+      "types": "./types/src/area-chart.d.ts",
+      "default": "./dist/area-chart.js"
+    },
+    "./bar-chart.js": {
+      "types": "./types/src/bar-chart.d.ts",
+      "default": "./dist/bar-chart.js"
+    },
+    "./sparkline.js": {
+      "types": "./types/src/sparkline.d.ts",
+      "default": "./dist/sparkline.js"
+    },
+    "./pie-chart.js": {
+      "types": "./types/src/pie-chart.d.ts",
+      "default": "./dist/pie-chart.js"
+    },
+    "./chart-series.js": {
+      "types": "./types/src/chart-series.d.ts",
+      "default": "./dist/chart-series.js"
+    },
+    "./chart-base.js": {
+      "types": "./types/src/chart-base.d.ts",
+      "default": "./dist/chart-base.js"
+    },
+    "./uplot-chart-base.js": {
+      "types": "./types/src/uplot-chart-base.d.ts",
+      "default": "./dist/uplot-chart-base.js"
+    },
+    "./echarts-chart-base.js": {
+      "types": "./types/src/echarts-chart-base.d.ts",
+      "default": "./dist/echarts-chart-base.js"
+    },
+    "./chart-types.js": {
+      "types": "./types/src/chart-types.d.ts",
+      "default": "./dist/chart-types.js"
+    },
+    "./chart-adapter.js": {
+      "types": "./types/src/chart-adapter.d.ts",
+      "default": "./dist/chart-adapter.js"
+    },
+    "./chart-theme.js": {
+      "types": "./types/src/chart-theme.d.ts",
+      "default": "./dist/chart-theme.js"
+    },
+    "./chart-data.js": {
+      "types": "./types/src/chart-data.d.ts",
+      "default": "./dist/chart-data.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
+  ],
+  "keywords": [
+    "chart",
+    "charts",
+    "graph",
+    "data visualization",
+    "line chart",
+    "sparkline",
+    "uplot",
+    "echarts",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/core": "0.0.6",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "echarts": "^6.1.0",
+    "uplot": "^1.6.32"
+  },
+  "customElements": "custom-elements.json",
+  "peerDependencies": {
+    "echarts": "^5.5.0 || ^6.0.0",
+    "uplot": "^1.6.31"
+  },
+  "peerDependenciesMeta": {
+    "echarts": {
+      "optional": true
+    },
+    "uplot": {
+      "optional": true
+    }
+  }
+}

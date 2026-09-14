@@ -4,7 +4,8 @@
  * - every `custom-elements.json` of `packages/components/*`, `packages/icons/*`, `open-packages/*` that is in the
  *   root wireit build list (tags, attributes, slots, events, CSS variables, composition)
  * - the docs pages `apps/ui/src/content/{components,icons,oepn-components}/*.mdx` (title, description, category,
- *   the UsageBlock rows) and `apps/ui/src/content/gallery/*.mdx` (styled variants)
+ *   the UsageBlock rows) and `apps/ui/src/content/gallery/*.mdx` (styled variants). One page is one entry, so a
+ *   package documented on several pages (`@c2n/chart`) yields one entry per page over its own elements.
  * - `apps/ui/src/data/component-presets.ts` and `component-previews.ts`
  * - `@c2n/theme` `dist/tokens.json` (tokens + variable → token mapping)
  * - the skill's reference guides (embedded so `npx @c2n/mcp` works offline)
@@ -24,7 +25,7 @@ const repoRoot = resolve(packageRoot, '../../..')
 const uiRoot = join(repoRoot, 'apps/ui/src')
 const outFile = join(packageRoot, 'data/registry.json')
 const DOCS_BASE = 'https://code2nguyen.github.io/web-components'
-const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Feedback', 'Chat', 'Icons']
+const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Feedback', 'Chat', 'Icons']
 const GUIDES: GuideTopic[] = ['workflow', 'theming', 'variant-components', 'frameworks']
 
 interface Manifest {
@@ -88,6 +89,27 @@ function parseFrontmatter(source: string): { frontmatter: Record<string, string>
     frontmatter[kv[1]] = kv[2].replace(/^(['"])(.*)\1$/, '$2')
   }
   return { frontmatter, body: source.slice(match[0].length) }
+}
+
+/** Where a docs page sits in the package's own declaration order, by the element its `tag` frontmatter names. */
+function pageOrder(doc: DocPage, elements: ElementEntry[]): number {
+  const index = elements.findIndex((element) => element.tag === (doc.frontmatter.tag ?? `c2-${doc.id}`))
+  return index < 0 ? elements.length : index
+}
+
+/**
+ * The elements one docs page of a multi-page package documents: its `tag` first, then whatever its `apiTags`
+ * frontmatter lists. Mirrors `apps/ui/src/pages/components/[componentId]/api.astro`, which builds the same set.
+ */
+function pageElements(doc: DocPage, elements: ElementEntry[], problems: string[]): ElementEntry[] {
+  const primary = doc.frontmatter.tag ?? `c2-${doc.id}`
+  const listed = [...(doc.frontmatter.apiTags ?? '').matchAll(/c2-[a-z0-9-]+/g)].map((match) => match[0])
+  const wanted = [primary, ...listed.filter((tag) => tag !== primary)]
+  const found = wanted.map((tag) => elements.find((element) => element.tag === tag))
+  found.forEach((element, index) => {
+    if (!element) problems.push(`docs page ${doc.section}/${doc.id}.mdx: ${wanted[index]} is not in the package manifest`)
+  })
+  return found.filter((element): element is ElementEntry => !!element)
 }
 
 function parseFenceMeta(meta: string): Record<string, string> {
@@ -249,8 +271,9 @@ for (const dir of packageDirs.sort()) {
   }
   const manifest = readJson<Manifest>(manifestFile)
   const shortName = pkg.name.replace(/^@c2n\//, '')
-  const doc = docPages.find((d) => (d.frontmatter.package ?? `@c2n/${d.id}`) === pkg.name)
-  const id = doc?.id ?? shortName
+  // Usually one docs page per package. A package may split its elements over several pages — `@c2n/chart`
+  // documents each of its five chart tags on its own — and each page then becomes its own entry.
+  const docs = docPages.filter((d) => (d.frontmatter.package ?? `@c2n/${d.id}`) === pkg.name)
 
   const elements: ElementEntry[] = []
   const internal = new Set<string>()
@@ -327,72 +350,88 @@ for (const dir of packageDirs.sort()) {
     }
   }
 
-  const examples: Example[] = []
-  if (doc) {
-    for (const fence of readFences(doc.body)) {
-      if (fence.meta.tag === 'UsageBlock') {
-        const { css, html } = splitStyle(fence.body)
-        for (const row of usageRows(html)) examples.push({ kind: 'usage', label: row.label, html: row.html, css })
+  // The page that represents the package — its `@c2n/chart` lookup, and any element several pages share — is the
+  // one documenting the manifest's first element, so the package's declaration order decides, not the filename's.
+  const orderedDocs = docs.length > 1 ? [...docs].sort((a, b) => pageOrder(a, elements) - pageOrder(b, elements)) : docs
+
+  for (const doc of orderedDocs.length > 0 ? orderedDocs : [undefined]) {
+    const id = doc?.id ?? shortName
+    // A page of a multi-page package documents only its own elements, which is what its `apiTags` frontmatter
+    // lists; a package documented on one page keeps every element it ships.
+    const docElements = doc && docs.length > 1 ? pageElements(doc, elements, problems) : elements
+    if (docElements.length === 0) continue
+
+    const examples: Example[] = []
+    if (doc) {
+      for (const fence of readFences(doc.body)) {
+        if (fence.meta.tag === 'UsageBlock') {
+          const { css, html } = splitStyle(fence.body)
+          for (const row of usageRows(html)) examples.push({ kind: 'usage', label: row.label, html: row.html, css })
+        }
       }
     }
-  }
-  const gallery = galleryPages.get(id)
-  if (gallery) {
-    for (const fence of readFences(gallery.body)) {
-      if (fence.meta.tag !== 'MdxCodeBlock') continue
-      const { css, html } = splitStyle(fence.body)
-      const label = fence.meta.label ?? 'Example'
-      examples.push({
-        kind: 'gallery',
-        label,
-        section: fence.section,
-        description: fence.meta.description ?? `${label}${fence.section ? ` ${fence.section}` : ''} example for ${elements[0].tag}.`,
-        useWhen: fence.meta.useWhen,
-        accessibility: fence.meta.accessibility,
-        isDefault: label.toLowerCase() === 'default' && !css?.includes('--c2-'),
-        tags: [...new Set([...html.matchAll(/<(c2-[a-z0-9-]+)/g)].map((match) => match[1]))],
-        html,
-        css,
-      })
+    const gallery = galleryPages.get(id)
+    if (gallery) {
+      for (const fence of readFences(gallery.body)) {
+        if (fence.meta.tag !== 'MdxCodeBlock') continue
+        const { css, html } = splitStyle(fence.body)
+        const label = fence.meta.label ?? 'Example'
+        examples.push({
+          kind: 'gallery',
+          label,
+          section: fence.section,
+          description: fence.meta.description ?? `${label}${fence.section ? ` ${fence.section}` : ''} example for ${docElements[0].tag}.`,
+          useWhen: fence.meta.useWhen,
+          accessibility: fence.meta.accessibility,
+          isDefault: label.toLowerCase() === 'default' && !css?.includes('--c2-'),
+          tags: [...new Set([...html.matchAll(/<(c2-[a-z0-9-]+)/g)].map((match) => match[1]))],
+          html,
+          css,
+        })
+      }
     }
-  }
-  if (componentPreviews[id]) examples.push({ kind: 'preview', label: 'Preview', html: componentPreviews[id] })
+    if (componentPreviews[id]) examples.push({ kind: 'preview', label: 'Preview', html: componentPreviews[id] })
 
-  const presetGroup = componentPresets[elements[0].tag]
-  const category = doc?.section === 'icons' ? 'Icons' : (doc?.frontmatter.category ?? 'Layout')
-  const intro = doc?.body
-    .split('\n')
-    .map((l) => l.trim())
-    .find((l) => l && !l.startsWith('import ') && !l.startsWith('#') && !l.startsWith('```') && !l.startsWith('<'))
-  const firstTag = elements[0].tag
-  const entry: ComponentEntry = {
-    id,
-    package: pkg.name,
-    title: doc?.frontmatter.title ?? shortName,
-    description: doc?.frontmatter.description ?? '',
-    intro,
-    category,
-    status: doc ? 'stable' : 'undocumented',
-    docsUrl: `${DOCS_BASE}/${doc?.section === 'icons' ? 'icons' : 'components'}/${id}`,
-    elements,
-    tagPattern,
-    icons,
-    composition: { internal: [...internal].sort(), slotted: [...slotted].sort(), usedBy: [] },
-    install: {
-      npm: `npm install ${pkg.name} @c2n/theme`,
-      import: tagPattern ? `import '${elements[0].modulePath}'` : `import '${pkg.name}'`,
-      importClass: `import { ${elements[0].className} } from '${elements[0].modulePath}'`,
-    },
-    presets: presetGroup
-      ? { html: presetGroup.html, items: presetGroup.presets.map((preset) => ({ ...preset, description: describeComponentPreset(preset) })) }
-      : undefined,
-    examples,
-    hasGallery: !!gallery,
+    const presetGroup = componentPresets[docElements[0].tag]
+    const category = doc?.section === 'icons' ? 'Icons' : (doc?.frontmatter.category ?? 'Layout')
+    const intro = doc?.body
+      .split('\n')
+      .map((l) => l.trim())
+      .find((l) => l && !l.startsWith('import ') && !l.startsWith('#') && !l.startsWith('```') && !l.startsWith('<'))
+    const firstTag = docElements[0].tag
+    const entry: ComponentEntry = {
+      id,
+      package: pkg.name,
+      title: doc?.frontmatter.title ?? shortName,
+      description: doc?.frontmatter.description ?? '',
+      intro,
+      category,
+      status: doc ? 'stable' : 'undocumented',
+      docsUrl: `${DOCS_BASE}/${doc?.section === 'icons' ? 'icons' : 'components'}/${id}`,
+      elements: docElements,
+      tagPattern,
+      icons,
+      composition: { internal: [...internal].sort(), slotted: [...slotted].sort(), usedBy: [] },
+      install: {
+        npm: `npm install ${pkg.name} @c2n/theme`,
+        // A package whose elements are documented one page at a time is also imported one element at a time.
+        import: tagPattern || docs.length > 1 ? `import '${docElements[0].modulePath}'` : `import '${pkg.name}'`,
+        importClass: `import { ${docElements[0].className} } from '${docElements[0].modulePath}'`,
+      },
+      presets: presetGroup
+        ? { html: presetGroup.html, items: presetGroup.presets.map((preset) => ({ ...preset, description: describeComponentPreset(preset) })) }
+        : undefined,
+      examples,
+      hasGallery: !!gallery,
+    }
+    components[id] = entry
+    packageIndex[pkg.name] ??= id
+    // The page's own element always resolves to that page; an element shared by several pages (`c2-chart-series`)
+    // falls to the first that documents it.
+    if (!firstTag.includes('{')) tagIndex[firstTag] = id
+    for (const element of docElements) if (!element.tag.includes('{')) tagIndex[element.tag] ??= id
+    if (firstTag && !tagIndex[firstTag] && !tagPattern) tagIndex[firstTag] = id
   }
-  components[id] = entry
-  packageIndex[pkg.name] = id
-  for (const element of elements) if (!element.tag.includes('{')) tagIndex[element.tag] = id
-  if (firstTag && !tagIndex[firstTag] && !tagPattern) tagIndex[firstTag] = id
 }
 
 // Inverse composition graph.

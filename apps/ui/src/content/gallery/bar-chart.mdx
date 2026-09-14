@@ -1,0 +1,82 @@
+---
+title: 'Bar chart gallery'
+description: 'Bars over categories: a rounded default, grouped series, thin editorial bars and a dark board.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { BarChart } from '@c2n/chart/bar-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+<ExampleModules />
+
+<GalleryGrid min="440">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-bar-chart
+  label-field="team"
+  x-type="category"
+  data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'
+>
+  <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
+</c2-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Soft grid
+<style>
+  .soft {
+    --c2-chart__grid--color: #f4f4f5;
+    --c2-chart__series-1--color: #0ea5e9;
+  }
+</style>
+<c2-bar-chart
+  class="soft"
+  label-field="team"
+  x-type="category"
+  data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'
+>
+  <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
+</c2-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Grouped
+<c2-bar-chart
+  label-field="quarter"
+  x-type="category"
+  bar-width="0.7"
+  bar-gap="0.15"
+  data='[{"quarter":"Q1","new":42,"renewed":58},{"quarter":"Q2","new":51,"renewed":61},{"quarter":"Q3","new":38,"renewed":74},{"quarter":"Q4","new":66,"renewed":80}]'
+>
+  <c2-chart-series field="new" label="New"></c2-chart-series>
+  <c2-chart-series field="renewed" label="Renewed"></c2-chart-series>
+</c2-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Editorial
+<style>
+  .editorial {
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--padding: 4px;
+    --c2-chart__grid--color: transparent;
+    --c2-chart__axis--color: #a1a1aa;
+    --c2-chart__series-1--color: #18181b;
+  }
+</style>
+<c2-bar-chart
+  class="editorial"
+  label-field="day"
+  x-type="category"
+  bar-width="0.35"
+  legend="none"
+  data='[{"day":"Mon","runs":124},{"day":"Tue","runs":168},{"day":"Wed","runs":151},{"day":"Thu","runs":193},{"day":"Fri","runs":142},{"day":"Sat","runs":61},{"day":"Sun","runs":48}]'
+>
+  <c2-chart-series field="runs" label="Runs"></c2-chart-series>
+</c2-bar-chart>
+```
+
+</GalleryGrid>

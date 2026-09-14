@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chart test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        margin: 0;
+      }
+      /*
+       * A canvas has no intrinsic size, so every scenario gets the same fixed plot box. Sized with plain
+       * width/height rather than --c2-chart--* so the variables stay free for the theming tests.
+       */
+      main > * {
+        width: 640px;
+        height: 320px;
+      }
+      main c2-sparkline {
+        width: 120px;
+        height: 32px;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Chart scenario"></main>
+  </body>
+</html>

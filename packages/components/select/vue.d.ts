@@ -19,6 +19,7 @@ declare module 'vue' {
       C2Props<Select> & {
         'fit-size'?: unknown
         'aria-label'?: unknown
+        'aria-labelledby'?: unknown
         onInput?: (event: SelectEventMap['input']) => void
         onChange?: (event: SelectEventMap['change']) => void
         onSelectionChange?: (event: SelectEventMap['selection-change']) => void

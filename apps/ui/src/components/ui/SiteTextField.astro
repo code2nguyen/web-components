@@ -1,0 +1,71 @@
+---
+// Site variant of `c2-text-field`: the site's control height, radius, border and focus ring on a class of
+// `--c2-text-field__*` values, plus an optional leading search icon.
+// Used by SiteSidebar (the nav filter), FeatherIconGallery and AllIconSearch.
+import { TextField } from '@c2n/text-field'
+import { FeatherSearchIcon } from './icons'
+import { rawElement, type AttributeValue } from '../../utils/raw-element'
+
+interface Props {
+  /** Accessible name. */
+  label: string
+  /** sm 30px, md 36px. */
+  size?: 'sm' | 'md'
+  /** Renders a leading magnifier and `type="search"`. */
+  search?: boolean
+  /** `island` (default) or `defined` (plain tag upgraded by `data/chrome-modules.ts`, for repeated chrome). */
+  hydrate?: 'island' | 'defined'
+  class?: string
+  [attr: string]: unknown
+}
+const { label, size = 'md', search = false, hydrate = 'island', class: className = '', ...rest } = Astro.props
+const classes = ['site-text-field', `site-text-field--${size}`, className].filter(Boolean).join(' ')
+const attributes = { 'aria-label': label, ...(search ? { type: 'search', autocomplete: 'off' } : {}), ...(rest as Record<string, AttributeValue>) }
+const raw =
+  hydrate === 'defined'
+    ? rawElement('c2-text-field', { class: classes, ...attributes }, search ? '<c2-feather-search slot="prefix-icon"></c2-feather-search>' : '')
+    : ''
+---
+
+{
+  hydrate === 'island' ? (
+    <TextField client:load class={classes} {...attributes}>
+      {search && <FeatherSearchIcon slot="prefix-icon" />}
+    </TextField>
+  ) : (
+    <Fragment set:html={raw} />
+  )
+}
+
+<style lang="scss" is:global>
+  .site-text-field {
+    display: block;
+    --c2-text-field--font-size: 13px;
+    --c2-text-field--gap: 6px;
+    --c2-text-field--background: var(--site-color-surface-container-1);
+    --c2-text-field--color: var(--site-color-on-surface);
+    --c2-text-field__focus--outline: 2px solid var(--site-color-primary);
+    --c2-text-field__placeholder--color: var(--site-color-on-surface-muted);
+    --c2-feather-icon--size: 14px;
+    --c2-feather-icon--color: var(--site-color-on-surface-muted);
+
+    &--md {
+      --c2-text-field--min-height: 36px;
+      --c2-text-field--padding-left: 10px;
+      --c2-text-field--padding-right: 10px;
+    }
+    &--sm {
+      --c2-text-field--min-height: 30px;
+      --c2-text-field--padding-left: 8px;
+      --c2-text-field--padding-right: 8px;
+    }
+
+    &:not(:defined) {
+      visibility: hidden;
+    }
+  }
+</style>
+
+<script>
+  import '../../data/chrome-modules'
+</script>

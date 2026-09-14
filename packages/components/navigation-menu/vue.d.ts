@@ -27,6 +27,8 @@ declare module 'vue' {
         'mobile-breakpoint'?: unknown
         'mobile-label'?: unknown
         'mobile-open'?: unknown
+        'auto-current'?: unknown
+        'current-url'?: unknown
         onValueChange?: (event: NavigationMenuEventMap['value-change']) => void
       }
     >

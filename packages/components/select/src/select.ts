@@ -24,6 +24,9 @@ export interface Select {
   removeEventListener: TypedRemoveEventListener<Select, SelectEventMap>
 }
 
+/** Once per page: the cause is always the same, and one select with the problem usually means all of them. */
+let warnedUnupgraded = false
+
 /**
  * A dropdown built from a trigger button and a `c2-list` of `c2-list-item` rows inside a `c2-overlay` popover. The
  * rows are the light-DOM children of the select, so they are themed with the `--c2-list-item--*` variables directly on
@@ -76,7 +79,7 @@ export interface Select {
  * @cssproperty {border} [--c2-select__button__open--border-left=1px solid #476ef9]
  *
  * @cssproperty {outline} [--c2-select__button__focus--outline=2px solid rgba(71, 110, 249, 0.4)]
- * @cssproperty {pixel} [--c2-select__button__focus--outline-offset=1px]
+ * @cssproperty {pixel} [--c2-select__button__focus--outline-offset=0px] - Flush by default: `[open]` already turns the border accent, so an offset ring reads as a second border.
  *
  * @cssproperty {opacity} [--c2-select__button__disabled--opacity=0.38]
  *
@@ -150,6 +153,15 @@ export class Select extends LitElement {
   /** Accessible name of the trigger and option list. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
+  /**
+   * Mirrors the host's `aria-labelledby` so the trigger re-renders when a label claims the element — a
+   * `c2-label[for]` sets it after both have upgraded.
+   */
+  @property({ attribute: 'aria-labelledby' }) ariaLabelledByAttr: string | null = null
+
+  /** Text of whatever labels the host, resolved once the DOM settles; see {@link triggerLabel}. */
+  @state() private labelText = ''
+
   /** Allow several options to be selected; the dropdown stays open after a pick and the trigger lists every label. */
   @property({ type: Boolean }) multiple: boolean = false
 
@@ -209,6 +221,8 @@ export class Select extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
+    // A label may upgrade after this element does, so read it again once the current task has drained.
+    queueMicrotask(() => this.isConnected && this.syncLabelText())
     if (!this.defaultValueCaptured) {
       this.defaultValue = arrayPropertyConverter.fromAttribute(this.getAttribute('value') ?? '')
       this.defaultValueCaptured = true
@@ -295,13 +309,26 @@ export class Select extends LitElement {
     this.prepareGetDisplayText()
     await this.updateComplete
     const displayText: string[] = []
+    let unupgraded = 0
     if (this.listItemSlot) {
       for (const slotItem of this.listItemSlot.assignedElements({ flatten: true })) {
         const listItem = slotItem instanceof ListItem ? slotItem : (slotItem.firstChild as ListItem)
-        if (listItem instanceof ListItem && this.value.includes(listItem.value)) {
-          displayText.push(listItem.displayText)
+        if (listItem instanceof ListItem) {
+          if (this.value.includes(listItem.value)) displayText.push(listItem.displayText)
+        } else if (slotItem.localName === 'c2-list-item' || slotItem.firstElementChild?.localName === 'c2-list-item') {
+          // The tag is there but the class is not: a `c2-list-item` server-rendered without a client directive,
+          // or one whose module was never imported. Reading it gives nothing, and the trigger renders empty —
+          // which looks like a styling problem rather than the hydration one it is.
+          unupgraded += 1
         }
       }
+    }
+    if (unupgraded > 0 && !warnedUnupgraded) {
+      warnedUnupgraded = true
+      console.warn(
+        `<c2-select> has ${unupgraded} c2-list-item child(ren) that have not been upgraded, so it cannot read a label off them and its trigger will render empty. ` +
+          `Import '@c2n/list-item' on the client, and make sure the options reach the DOM as plain tags rather than as server-rendered, never-hydrated elements.`,
+      )
     }
     this.displayText = displayText.join(', ')
   }
@@ -346,6 +373,7 @@ export class Select extends LitElement {
   }
 
   protected override updated(_changedProperties: PropertyValueMap<this>): void {
+    if (_changedProperties.has('ariaLabelledByAttr')) this.syncLabelText()
     if (_changedProperties.has('open') || _changedProperties.has('readonly') || _changedProperties.has('disabled')) {
       this.toggle(this.open)
     }
@@ -383,11 +411,38 @@ export class Select extends LitElement {
     this.updateDisplayText()
   }
 
+  /**
+   * The accessible name for the trigger.
+   *
+   * The focusable control is a `<button>` inside the shadow root, and neither of the two ways an author
+   * names this element reaches it on its own: `aria-labelledby` on the host points at an id in the light DOM,
+   * which ARIA cannot resolve across the shadow boundary, and a wrapping `<label>` names the host rather than
+   * the button. So the label's *text* is copied onto the button instead.
+   */
+  private get triggerLabel(): string {
+    return this.ariaLabel || this.labelText
+  }
+
+  /** Reads the text of whatever labels the host: `aria-labelledby` first, then any associated `<label>`. */
+  private syncLabelText(): void {
+    const root = this.getRootNode() as Document | ShadowRoot
+    const ids = (this.ariaLabelledByAttr ?? '').split(/\s+/).filter(Boolean)
+    const fromIds = ids.map((id) => root.getElementById?.(id)?.textContent?.trim()).filter(Boolean)
+    const text =
+      fromIds.length > 0
+        ? fromIds.join(' ')
+        : [...this.internals.labels]
+            .map((label) => label.textContent?.trim())
+            .filter(Boolean)
+            .join(' ')
+    this.labelText = text ?? ''
+  }
+
   override render() {
     return html`<div class="c2-select">
       <button
         type="button"
-        aria-label=${this.ariaLabel || nothing}
+        aria-label=${this.triggerLabel || nothing}
         aria-haspopup="listbox"
         aria-expanded=${this.open ? 'true' : 'false'}
         id="button"

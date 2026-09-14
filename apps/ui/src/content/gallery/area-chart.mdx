@@ -1,0 +1,89 @@
+---
+title: 'Area chart gallery'
+description: 'Filled trends: a smoothed default, a heavy fill, two overlapping bands and a chromeless card insert.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { AreaChart } from '@c2n/chart/area-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+<ExampleModules />
+
+<GalleryGrid min="440">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-area-chart
+  x-field="t"
+  curve="smooth"
+  data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
+>
+  <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
+</c2-area-chart>
+```
+
+```html tag=MdxCodeBlock,label=Filled area
+<style>
+  .filled {
+    --c2-chart__area--opacity: 0.28;
+    --c2-chart__line--width: 3px;
+  }
+</style>
+<c2-area-chart
+  class="filled"
+  x-field="t"
+  curve="smooth"
+  data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
+>
+  <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
+</c2-area-chart>
+```
+
+```html tag=MdxCodeBlock,label=Two bands
+<style>
+  .bands {
+    --c2-chart__series-1--color: #6366f1;
+    --c2-chart__series-2--color: #14b8a6;
+    --c2-chart__area--opacity: 0.16;
+  }
+</style>
+<c2-area-chart
+  class="bands"
+  x-field="month"
+  curve="smooth"
+  data='[{"month":1,"paid":128,"organic":74},{"month":2,"paid":141,"organic":92},{"month":3,"paid":132,"organic":101},{"month":4,"paid":167,"organic":118},{"month":5,"paid":183,"organic":142},{"month":6,"paid":204,"organic":171}]'
+>
+  <c2-chart-series field="paid" label="Paid"></c2-chart-series>
+  <c2-chart-series field="organic" label="Organic"></c2-chart-series>
+</c2-area-chart>
+```
+
+```html tag=MdxCodeBlock,label=Card insert
+<style>
+  .insert {
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart--padding: 0px;
+    --c2-chart--height: 120px;
+    --c2-chart__area--opacity: 0.35;
+    --c2-chart__grid--color: transparent;
+  }
+</style>
+<c2-area-chart
+  class="insert"
+  x-type="time"
+  x-field="at"
+  axes="none"
+  legend="none"
+  data='[{"at":1704067200000,"mb":210},{"at":1704672000000,"mb":268},{"at":1705276800000,"mb":244},{"at":1705881600000,"mb":331},{"at":1706486400000,"mb":390},{"at":1707091200000,"mb":362}]'
+>
+  <c2-chart-series field="mb" label="Egress"></c2-chart-series>
+</c2-area-chart>
+```
+
+</GalleryGrid>

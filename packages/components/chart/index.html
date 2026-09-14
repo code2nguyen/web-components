@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-chart</title>
+    <script type="module" src="/src/chart.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+      }
+      h2 {
+        margin: 0 0 4px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #71717a;
+      }
+      p.hint {
+        margin: 0 0 12px;
+        font-size: 13px;
+        color: #71717a;
+      }
+      .plot {
+        width: 100%;
+        max-width: 720px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+      }
+      /* A themed variant: only CSS variables, nothing reaching into the shadow root. */
+      c2-line-chart.terminal {
+        --c2-chart--background: #0b0f17;
+        --c2-chart--color: #e5e7eb;
+        --c2-chart__grid--color: #1f2937;
+        --c2-chart__axis--color: #6b7280;
+        --c2-chart__series-1--color: #22d3ee;
+        --c2-chart__series-2--color: #a78bfa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>Two series from markup</h2>
+      <p class="hint">Series are light-DOM children, the way a table declares its columns. No script at all.</p>
+      <c2-line-chart
+        class="plot"
+        x-field="month"
+        data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'
+      >
+        <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+        <c2-chart-series field="cost" label="Cost"></c2-chart-series>
+      </c2-line-chart>
+    </section>
+
+    <section>
+      <h2>Realtime</h2>
+      <p class="hint">
+        Ten ticks a second through <code>appendPoint()</code>. The engine is never rebuilt and Lit never re-renders — watch the counter: it is the number of
+        engine redraws, and nothing else happens per tick.
+      </p>
+      <c2-line-chart id="live" class="plot" x-field="t" max-points="120">
+        <c2-chart-series field="a" label="Inbound"></c2-chart-series>
+        <c2-chart-series field="b" label="Outbound"></c2-chart-series>
+      </c2-line-chart>
+      <div class="row">
+        <button type="button" id="toggle">Start</button>
+        <span id="ticks">0 ticks</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Smoothed area</h2>
+      <p class="hint">An area chart is a line chart plus a fill, so it takes every line attribute too.</p>
+      <c2-area-chart
+        class="plot"
+        x-field="t"
+        curve="smooth"
+        fill-opacity="0.22"
+        data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
+      >
+        <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
+      </c2-area-chart>
+    </section>
+
+    <section>
+      <h2>Categories</h2>
+      <p class="hint">Bars read their labels from <code>label-field</code>; the axis shows the label, not the index.</p>
+      <c2-bar-chart
+        class="plot"
+        label-field="team"
+        x-type="category"
+        data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'
+      >
+        <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
+      </c2-bar-chart>
+    </section>
+
+    <section>
+      <h2>Donut, drawn by ECharts</h2>
+      <p class="hint">The only chart on this page that loads ECharts. Everything above it is uPlot.</p>
+      <c2-pie-chart
+        class="plot"
+        label-field="channel"
+        inner-radius="0.6"
+        legend="end"
+        data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'
+      >
+        <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+      </c2-pie-chart>
+    </section>
+
+    <section>
+      <h2>Sparklines</h2>
+      <p class="hint">Chromeless and inline-sized, for a table cell or a KPI row. <code>tone="auto"</code> colours by direction.</p>
+      <div class="row">
+        <span>Requests</span>
+        <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline>
+        <span>Errors</span>
+        <c2-sparkline data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline>
+      </div>
+    </section>
+
+    <section>
+      <h2>Themed</h2>
+      <p class="hint">Only CSS custom properties. The palette reaches the canvas because the element resolves it and hands it over.</p>
+      <c2-line-chart
+        class="plot terminal"
+        x-field="t"
+        data='[{"t":1,"cpu":32,"mem":54},{"t":2,"cpu":48,"mem":57},{"t":3,"cpu":41,"mem":61},{"t":4,"cpu":63,"mem":58},{"t":5,"cpu":57,"mem":66},{"t":6,"cpu":72,"mem":69}]'
+      >
+        <c2-chart-series field="cpu" label="CPU"></c2-chart-series>
+        <c2-chart-series field="mem" label="Memory"></c2-chart-series>
+      </c2-line-chart>
+    </section>
+
+    <section>
+      <h2>States</h2>
+      <p class="hint">Empty, loading and error, each replaceable through its slot.</p>
+      <div class="row">
+        <c2-line-chart style="width: 200px; --c2-chart--height: 120px" data="[]"></c2-line-chart>
+        <c2-line-chart style="width: 200px; --c2-chart--height: 120px" loading></c2-line-chart>
+        <c2-line-chart style="width: 200px; --c2-chart--height: 120px" error="Metrics unavailable"></c2-line-chart>
+      </div>
+    </section>
+
+    <script type="module">
+      const live = document.querySelector('#live')
+      const button = document.querySelector('#toggle')
+      const label = document.querySelector('#ticks')
+
+      // Seed the chart, then feed it. Only `appendPoint` runs per tick.
+      let t = 0
+      live.data = Array.from({ length: 60 }, () => ({ t: t++, a: 50 + Math.random() * 20, b: 30 + Math.random() * 15 }))
+
+      let timer
+      let ticks = 0
+      button.addEventListener('click', () => {
+        if (timer) {
+          clearInterval(timer)
+          timer = undefined
+          button.textContent = 'Start'
+          return
+        }
+        button.textContent = 'Stop'
+        timer = setInterval(() => {
+          live.appendPoint(t++, [50 + Math.random() * 20, 30 + Math.random() * 15])
+          label.textContent = `${++ticks} ticks`
+        }, 100)
+      })
+    </script>
+  </body>
+</html>

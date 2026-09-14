@@ -210,10 +210,10 @@ const hasCss = flattenGroupedCssProperties.length > 0
                 ) : (
                   <tr class="api__group" data-level={group.level} style={`--level:${group.level}`}>
                     <td colspan="4">
-                      <button class="api__group-toggle" type="button" aria-expanded="true">
-                        <c2-feather-chevron-down />
+                      <c2-button class="api__group-toggle" aria-expanded="true">
+                        <c2-feather-chevron-down slot="prefix-icon" />
                         <span>{group.fullGroupName}</span>
-                      </button>
+                      </c2-button>
                     </td>
                   </tr>
                 ),
@@ -324,23 +324,29 @@ const hasCss = flattenGroupedCssProperties.length > 0
         background: var(--site-color-surface-container-2);
       }
     }
+    // A row-shaped button: full width with the label at the left, which is what `container--width` and
+    // `container--justify-content` are for.
     &__group-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      padding: 9px 14px;
-      padding-left: calc(14px + var(--level, 0) * 16px);
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--site-color-on-surface);
+      display: block;
+      --c2-button__container--width: 100%;
+      --c2-button__container--justify-content: flex-start;
+      --c2-button__container--height: 38px;
+      --c2-button__container--gap: 8px;
+      --c2-button__container--border-radius: 0px;
+      --c2-button__container--border: none;
+      --c2-button__container--background-color: transparent;
+      --c2-button__container--color: var(--site-color-on-surface);
+      --c2-button__container--font-size: 13px;
+      --c2-button__container--font-weight: 600;
+      --c2-button__container__hover--background-color: var(--site-color-surface-container-2);
+      --c2-button__container--padding-left: calc(14px + var(--level, 0) * 16px);
+      --c2-button__container--padding-right: 14px;
+      --c2-button__container__focus--outline: 2px solid var(--site-color-primary);
+      --c2-button__icon--size: 14px;
       c2-feather-chevron-down {
         --c2-feather-icon--size: 14px;
+        --c2-feather-icon--color: var(--site-color-on-surface-muted);
         transition: transform 200ms var(--site-ease);
-        color: var(--site-color-on-surface-muted);
       }
       &[aria-expanded='false'] c2-feather-chevron-down {
         transform: rotate(-90deg);
@@ -372,7 +378,7 @@ const hasCss = flattenGroupedCssProperties.length > 0
 
   // Collapse / expand css variable groups. A group hides every following row until a row at the same or shallower level.
   document.querySelectorAll<HTMLTableRowElement>('tr.api__group').forEach((groupRow) => {
-    const toggle = groupRow.querySelector<HTMLButtonElement>('.api__group-toggle')
+    const toggle = groupRow.querySelector<HTMLElement>('.api__group-toggle')
     toggle?.addEventListener('click', () => {
       const collapsed = toggle.getAttribute('aria-expanded') === 'true'
       toggle.setAttribute('aria-expanded', String(!collapsed))

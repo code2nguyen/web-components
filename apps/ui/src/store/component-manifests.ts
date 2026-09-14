@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import chart from '@c2n/chart/custom-elements.json'
 import header from '@c2n/header/custom-elements.json'
 import stat from '@c2n/stat/custom-elements.json'
 import attachment from '@c2n/attachment/custom-elements.json'
@@ -56,6 +57,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    chart,
     header,
     stat,
     attachment,
