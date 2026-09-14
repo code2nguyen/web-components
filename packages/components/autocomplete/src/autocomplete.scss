@@ -1,0 +1,221 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-autocomplete,
+  $theme: (
+    min-height: 40px,
+    padding: 8px 10px,
+    gap: 8px,
+    background: #ffffff,
+    color: #18181b,
+    font-size: 14px,
+    border: 1px solid #bcbcc6,
+    border-radius: 8px,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid rgb(2, 101, 220),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    placeholder--color: #71717a,
+    disabled--opacity: 0.38,
+    icon--size: 18px,
+    icon--color: #71717a,
+    panel--background: #ffffff,
+    panel--border: 1px solid #e4e4e7,
+    panel--border-radius: 8px,
+    panel--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14),
+    panel--max-height: 320px,
+    list--padding: 4px,
+    header--background: transparent,
+    header--color: #71717a,
+    header--padding: 10px 12px,
+    header--border-bottom: 1px solid #e4e4e7,
+    footer--background: transparent,
+    footer--color: #71717a,
+    footer--padding: 10px 12px,
+    footer--border-top: 1px solid #e4e4e7,
+    option--min-height: 44px,
+    option--padding-top: 8px,
+    option--padding-right: 10px,
+    option--padding-bottom: 8px,
+    option--padding-left: 10px,
+    option--gap: 10px,
+    option--border-radius: 6px,
+    option__active--background: #f4f4f5,
+    option__active--color: #18181b,
+    description--color: #71717a,
+    description--font-size: 12px,
+    highlight--color: rgb(2, 101, 220),
+    highlight--font-weight: 600,
+    status--color: #71717a,
+    status--padding: 14px 12px,
+  )
+);
+
+:host {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: css.cssVar(min-height);
+  align-items: center;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  transition: animation.standard(border), animation.standard(outline);
+  cursor: text;
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &:focus-within {
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+:host([disabled]) .field {
+  cursor: default;
+  opacity: css.cssVar(disabled--opacity);
+}
+
+:host([readonly]) .field {
+  cursor: default;
+}
+
+.input {
+  min-width: 0;
+  flex: 1;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: css.cssVar(font-size);
+  line-height: 20px;
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+  }
+}
+
+::slotted([slot='prefix-icon']),
+::slotted([slot='suffix-icon']),
+.clear {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+}
+
+::slotted([slot='prefix-icon']),
+::slotted([slot='suffix-icon']) {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.clear {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+c2-overlay {
+  --c2-overlay--offset-y: 6px;
+}
+
+.panel {
+  display: flex;
+  box-sizing: border-box;
+  overflow: hidden;
+  max-height: min(css.cssVar(panel--max-height), var(--c2-overlay--available-height, #{css.cssVar(panel--max-height)}));
+  flex-direction: column;
+  color: css.cssVar(color);
+  background: css.cssVar(panel--background);
+  border: css.cssVar(panel--border);
+  border-radius: css.cssVar(panel--border-radius);
+  box-shadow: css.cssVar(panel--box-shadow);
+  font-size: css.cssVar(font-size);
+}
+
+.panel-header,
+.panel-footer {
+  flex: none;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.panel-header {
+  padding: css.cssVar(header--padding);
+  color: css.cssVar(header--color);
+  background: css.cssVar(header--background);
+  border-bottom: css.cssVar(header--border-bottom);
+}
+
+.panel-footer {
+  padding: css.cssVar(footer--padding);
+  color: css.cssVar(footer--color);
+  background: css.cssVar(footer--background);
+  border-top: css.cssVar(footer--border-top);
+}
+
+.list {
+  min-height: 0;
+  flex: 1 1 auto;
+
+  --c2-list--background: transparent;
+  --c2-list--padding-top: #{css.cssVar(list--padding)};
+  --c2-list--padding-right: #{css.cssVar(list--padding)};
+  --c2-list--padding-bottom: #{css.cssVar(list--padding)};
+  --c2-list--padding-left: #{css.cssVar(list--padding)};
+  --c2-list-item--min-height: #{css.cssVar(option--min-height)};
+  --c2-list-item--padding-top: #{css.cssVar(option--padding-top)};
+  --c2-list-item--padding-right: #{css.cssVar(option--padding-right)};
+  --c2-list-item--padding-bottom: #{css.cssVar(option--padding-bottom)};
+  --c2-list-item--padding-left: #{css.cssVar(option--padding-left)};
+  --c2-list-item--gap: #{css.cssVar(option--gap)};
+  --c2-list-item--border-top-left-radius: #{css.cssVar(option--border-radius)};
+  --c2-list-item--border-top-right-radius: #{css.cssVar(option--border-radius)};
+  --c2-list-item--border-bottom-left-radius: #{css.cssVar(option--border-radius)};
+  --c2-list-item--border-bottom-right-radius: #{css.cssVar(option--border-radius)};
+  --c2-list-item__selected--background: #{css.cssVar(option__active--background)};
+  --c2-list-item__selected--color: #{css.cssVar(option__active--color)};
+  --c2-list-item__selected__hover--background: #{css.cssVar(option__active--background)};
+  --c2-list-item__description--color: #{css.cssVar(description--color)};
+  --c2-list-item__description--font-size: #{css.cssVar(description--font-size)};
+  --c2-list-item__icon--size: #{css.cssVar(icon--size)};
+  --c2-list-item__icon--color: #{css.cssVar(icon--color)};
+}
+
+mark {
+  color: css.cssVar(highlight--color);
+  background: transparent;
+  font-weight: css.cssVar(highlight--font-weight);
+}
+
+.status {
+  padding: css.cssVar(status--padding);
+  color: css.cssVar(status--color);
+  text-align: center;
+}

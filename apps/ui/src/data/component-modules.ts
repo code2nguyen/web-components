@@ -4,6 +4,7 @@
  * hydrating each element as an Astro island.
  */
 import '@c2n/chart'
+import '@c2n/autocomplete'
 import '@c2n/header'
 import '@c2n/stat'
 import '@c2n/attachment'

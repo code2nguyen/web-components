@@ -134,6 +134,58 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-autocomplete': {
+    html: `<c2-autocomplete style="width:240px" aria-label="Search" placeholder="Search…" item-key="value" label-field="label" description-field="description" suggestions='[{"value":"ada","label":"Ada Lovelace","description":"Platform engineering"},{"value":"api","label":"Autocomplete API notes","description":"Updated yesterday"}]'></c2-autocomplete>`,
+    presets: [
+      {
+        name: 'Command palette',
+        description: 'Dark, pill-shaped launcher for commands and navigation.',
+        css: {
+          '--c2-autocomplete--border-radius': '999px',
+          '--c2-autocomplete--background': '#18181b',
+          '--c2-autocomplete--color': '#fafafa',
+          '--c2-autocomplete--border': '1px solid #3f3f46',
+          '--c2-autocomplete__hover--border': '1px solid #52525b',
+          '--c2-autocomplete__focus--border': '1px solid #71717a',
+          '--c2-autocomplete__focus--outline': '2px solid rgba(113, 113, 122, 0.35)',
+          '--c2-autocomplete__placeholder--color': '#a1a1aa',
+          '--c2-autocomplete__panel--background': '#18181b',
+          '--c2-autocomplete__panel--border': '1px solid #3f3f46',
+          '--c2-autocomplete__option__active--background': '#27272a',
+          '--c2-autocomplete__option__active--color': '#fafafa',
+        },
+      },
+      {
+        name: 'Directory search',
+        description: 'Soft blue focus and active state for people or resource lookup.',
+        css: {
+          '--c2-autocomplete--background': '#f8fafc',
+          '--c2-autocomplete--border': '1px solid #cbd5e1',
+          '--c2-autocomplete__focus--border': '1px solid #0284c7',
+          '--c2-autocomplete__focus--outline': '2px solid rgba(2, 132, 199, 0.25)',
+          '--c2-autocomplete__highlight--color': '#0369a1',
+          '--c2-autocomplete__option__active--background': '#e0f2fe',
+          '--c2-autocomplete__option__active--color': '#0c4a6e',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'Smaller control and result rows for dense toolbars.',
+        css: {
+          '--c2-autocomplete--min-height': '32px',
+          '--c2-autocomplete--padding': '5px 8px',
+          '--c2-autocomplete--font-size': '12px',
+          '--c2-autocomplete__icon--size': '14px',
+          '--c2-autocomplete__option--min-height': '34px',
+          '--c2-autocomplete__option--padding-top': '5px',
+          '--c2-autocomplete__option--padding-right': '8px',
+          '--c2-autocomplete__option--padding-bottom': '5px',
+          '--c2-autocomplete__option--padding-left': '8px',
+          '--c2-autocomplete__description--font-size': '11px',
+        },
+      },
+    ],
+  },
   'c2-sparkline': {
     html: `<c2-sparkline style="width:140px" data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline>`,
     presets: [

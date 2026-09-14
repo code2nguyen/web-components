@@ -9,6 +9,7 @@ export const componentPreviews: Record<string, string> = {
   'bar-chart': `<c2-bar-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="team" x-type="category" legend="none" data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'><c2-chart-series field="shipped" label="Shipped"></c2-chart-series></c2-bar-chart>`,
   'pie-chart': `<c2-pie-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="channel" inner-radius="0.58" legend="none" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
   sparkline: `<div class="preview-row"><c2-sparkline style="--c2-chart--width:120px" data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline><c2-sparkline style="--c2-chart--width:120px" data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline></div>`,
+  autocomplete: `<c2-autocomplete style="width:240px" aria-label="Search workspace" placeholder="Search people, files…" suggestions='[{"label":"Ada Lovelace"},{"label":"Product roadmap"}]'></c2-autocomplete>`,
   header: `<c2-header style="width:280px;--c2-header--padding:8px 12px;--c2-header--min-height:48px">
   <strong slot="brand">Northstar</strong>
   <span style="font-size:12px">Markets</span>
