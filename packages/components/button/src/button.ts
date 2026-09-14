@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import styles from './button.scss?inline'
 
 /**

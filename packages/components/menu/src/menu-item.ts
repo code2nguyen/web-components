@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './menu-item.scss?inline'
 
@@ -13,6 +15,17 @@ export interface MenuSelectEventDetail {
   checked: boolean
   /** The `data` payload of the activated row. */
   data: unknown
+}
+
+/** Events fired by {@link MenuItem}, keyed for `addEventListener`. */
+export interface MenuItemEventMap {
+  'menu-select': CustomEvent<MenuSelectEventDetail>
+  'checked-change': CustomEvent<{ checked: boolean; value: string }>
+}
+
+export interface MenuItem {
+  addEventListener: TypedAddEventListener<MenuItem, MenuItemEventMap>
+  removeEventListener: TypedRemoveEventListener<MenuItem, MenuItemEventMap>
 }
 
 /**

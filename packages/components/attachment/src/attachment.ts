@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import '@c2n/phosphor-icons/icons/file.js'
 import '@c2n/phosphor-icons/icons/file-archive.js'
@@ -33,6 +35,18 @@ export { AttachmentGroup, type AttachmentGroupLayout } from './attachment-group.
 
 export type AttachmentStatus = 'ready' | 'uploading' | 'complete' | 'error'
 export type AttachmentLayout = 'auto' | 'row' | 'tile'
+
+/** Events fired by {@link Attachment}, keyed for `addEventListener`. */
+export interface AttachmentEventMap {
+  'attachment-remove': CustomEvent<{ name: string }>
+  'attachment-retry': CustomEvent<{ name: string }>
+  'media-error': Event
+}
+
+export interface Attachment {
+  addEventListener: TypedAddEventListener<Attachment, AttachmentEventMap>
+  removeEventListener: TypedRemoveEventListener<Attachment, AttachmentEventMap>
+}
 
 /**
  * Displays a file or image attachment with a preview, metadata, upload state and optional actions.

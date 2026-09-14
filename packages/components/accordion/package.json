@@ -5,14 +5,26 @@
   "main": "dist/accordion.js",
   "exports": {
     ".": {
-      "default": "./dist/accordion.js",
-      "types": "./types/src/accordion.d.ts"
+      "types": "./types/src/accordion.d.ts",
+      "default": "./dist/accordion.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "accordion",

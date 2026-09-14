@@ -1,0 +1,173 @@
+---
+title: 'Frameworks'
+description: 'Use the components from React, Vue, Angular, Lit or plain HTML — typed events, generated template types, and the one piece of configuration each framework needs.'
+order: 15
+---
+
+import CodeBlock from '../../components/CodeBlock.astro'
+
+Every `c2-*` component is a standard custom element, so nothing here is a wrapper: the same element runs in every framework. What differs is how each one decides between an attribute and a property, and how it binds an event whose name has a hyphen in it. This guide is the short version of the three example apps — [React](../examples/trading-dashboard-react), [Vue](../examples/support-inbox-vue) and [Angular](../examples/orders-admin-angular) — which are complete applications built the way an outside project would build one.
+
+Two rules hold everywhere:
+
+- **Register the elements at module scope, before the framework renders.** Frameworks decide "attribute or property" by looking for the property on the element, and an element that has not upgraded yet has none — an object handed to `rows` would be stringified into an attribute.
+- **Load the theme once.** `import '@c2n/theme/theme.css'` in the entry module.
+
+## Typed events
+
+Every component that fires events declares an event map, so `addEventListener` narrows the detail with no cast:
+
+```typescript tag=CodeBlock
+import type { Table } from '@c2n/table'
+
+const table = document.querySelector('c2-table') as Table
+
+table.addEventListener('selection-change', (event) => {
+  event.detail.rows // TableRow[] — no cast
+})
+```
+
+The map is per element rather than global, because the DOM's single `HTMLElementEventMap` cannot describe two components that fire the same name with different details: `selection-change` carries row keys on `c2-table` and option values on `c2-list`.
+
+For code that is generic over elements — a React hook, a helper that awaits an event — `EventMapOf` reads a component's map back out of its type:
+
+```typescript tag=CodeBlock
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+
+function on<T extends HTMLElement, Type extends keyof EventMapOf<T> & string>(element: T, type: Type, listener: (event: EventMapOf<T>[Type]) => void) {
+  element.addEventListener(type, listener as EventListener)
+}
+```
+
+Selection events **do not bubble**. Five components fire `selection-change`, so a bubbling one would reach a listener meant for whatever the component is nested in — a select inside a tab panel would look like a tab switch. Put the listener on the element itself.
+
+## React
+
+Two packages, no wrapper. `@c2n/<name>/react` declares the tags in JSX; the props are derived from the element class, so a renamed property is a build error rather than a silent no-op.
+
+```tsx tag=CodeBlock
+// src/c2-elements.d.ts — one import per package you use
+import '@c2n/table/react'
+import '@c2n/select/react'
+```
+
+```tsx tag=CodeBlock
+// src/main.tsx — registration must happen before the first render
+import '@c2n/theme/theme.css'
+import '@c2n/table'
+import '@c2n/table/table-column.js'
+```
+
+React 19 assigns a prop as a property when the element has one, so `rows={rows}` lands as an object. Events are the exception: JSX has no spelling for `onSelection-change`, and React's `onChange` is its own synthetic form-control event, so custom events — and `input`/`change` — go through a ref:
+
+```tsx tag=CodeBlock
+const tableRef = useRef<Table>(null)
+
+useEffect(() => {
+  const table = tableRef.current
+  if (!table) return
+  const listener = (event: TableEventMap['selection-change']) => setSelected(event.detail.value)
+  table.addEventListener('selection-change', listener)
+  return () => table.removeEventListener('selection-change', listener)
+}, [])
+```
+
+## Rendering a table cell with the framework
+
+`renderCell` is handed to Lit, so it cannot return JSX, an Angular template or a Vue node — only a string, a DOM node, or a Lit template. For anything the framework should own, mark the column `cell-slot`: the table puts a `<slot name="cell:<row key>:<field>">` in each cell of that column, and the app renders one child per row into the table's light DOM.
+
+```tsx tag=CodeBlock
+<c2-table rows={rows} rowKey="symbol">
+  <c2-table-column field="change" header="Day" cellSlot />
+  {rows.map((row) => (
+    <span key={row.symbol} slot={`cell:${row.symbol}:change`} className={row.change >= 0 ? 'up' : 'down'}>
+      {formatDelta(row.change)}
+    </span>
+  ))}
+</c2-table>
+```
+
+The children stay in the document's light DOM, so ordinary CSS reaches them — a `renderCell` node lands inside the shadow root, where a stylesheet cannot, and has to be coloured through an inherited custom property. `cell-slot` needs `row-key`, and only the rows the virtualizer has rendered claim a child; the rest simply wait, so it suits paged and modest tables rather than a hundred thousand rows. `renderCell`, or the column's own formatting, stays as the slot's fallback.
+
+## Vue
+
+One required piece of configuration, or every `c2-*` tag is resolved as a Vue component and renders nothing:
+
+```typescript tag=CodeBlock
+// vite.config.ts
+vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('c2-') } } })
+```
+
+`@c2n/<name>/vue` registers the tags with Volar so templates can be checked strictly, and `@c2n/framework-types/tsconfig.vue.json` carries the compiler options that go with them:
+
+```json tag=CodeBlock
+{
+  "extends": ["./tsconfig.base.json", "@c2n/framework-types/tsconfig.vue.json"]
+}
+```
+
+Declare no `vueCompilerOptions` of your own alongside it — a local one replaces the inherited object rather than merging with it. What the fragment turns on:
+
+- `strictTemplates`, which is what makes the generated types do anything at all;
+- `experimentalModelPropName`, so `v-model` on a c2 control binds `value` (or `checked` on the toggles) instead of the `modelValue` Volar assumes for a component.
+
+Vue picks between a property and an attribute with `key in el`, so registering the elements before `mount()` is what makes plain bindings land as properties. Two escape hatches, both worth knowing:
+
+- `.prop` forces a DOM property — `:value.prop="[activeId]"` for an array or object value;
+- `.attr` forces an attribute, needed when a component does not reflect a property but styles it with `:host([attr])` — `c2-chat-message`'s `align` is that case, and is silently inert without it.
+
+Kebab-case events bind by their real name (`@selection-change`), and the handler is typed from the component's event map.
+
+## Angular
+
+`CUSTOM_ELEMENTS_SCHEMA` on the component is the only configuration:
+
+```typescript tag=CodeBlock
+@Component({
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [FormsModule, ...C2_FORM_ACCESSORS],
+  template: `<c2-table [rows]="orders()" [rowKey]="'id'" (row-click)="handleRowClick($event)"></c2-table>`,
+})
+```
+
+`[rows]="…"` writes a property through `setProperty`, and `(selection-change)` / `(row-click)` bind kebab-case events by their real name. The trap is the reverse of React's: a **static** attribute in a template stays an attribute, so `rowKey="id"` sets `rowkey` and is ignored — use `[rowKey]="'id'"` or the real attribute name, `row-key`. The component warns in the console when it sees one of those lookalikes, instead of dropping the value in silence.
+
+Angular's built-in value accessors match `input`, `select` and `textarea` only, so a form-associated custom element is invisible to `ngModel` and reactive forms however correct its `ElementInternals` are. `@c2n/angular` supplies the missing half:
+
+```bash tag=CodeBlock
+npm install @c2n/angular
+```
+
+```typescript tag=CodeBlock
+import { C2_FORM_ACCESSORS } from '@c2n/angular'
+// then in the template
+// <c2-text-field [(ngModel)]="query" name="query"></c2-text-field>
+// <c2-switch [(ngModel)]="openOnly" name="openOnly"></c2-switch>
+```
+
+Because the schema turns off type checking for these tags, `$event` is a bare `Event` in the template. Take the component's event-map type in the handler and cast once there, rather than `$any` at every call site.
+
+## Editor support for templates TypeScript never sees
+
+Plain `.html`, Angular templates and Vue SFCs get completion and documentation from two generated metadata files:
+
+- **VS Code / Volar** — point `html.customData` at `./node_modules/@c2n/framework-types/dist/html-custom-data.json`;
+- **WebStorm and the JetBrains IDEs** — nothing to configure: `@c2n/framework-types` declares `web-types` in its `package.json`.
+
+Both are generated from the same custom-elements manifests as the API tables on this site, so they cannot drift from the components.
+
+## Lit and plain HTML
+
+Import what you render at the top of the module and use the tags. Extend a component for a variant (`class AppField extends TextField`), re-emit child events with `redispatchEvent` from `@c2n/core/dom-helper.js`, and set child variables in `static styles` on `:host` or on a class.
+
+```html tag=CodeBlock
+<script type="module">
+  import '@c2n/theme/theme.css'
+  import '@c2n/button'
+</script>
+<c2-button>Save</c2-button>
+```
+
+## Duplicate registration
+
+`customElements.define` throws when a tag is already taken, which takes down the page. A second definition of a c2 element warns and keeps the first instead — so two versions of a package in one dependency tree, two micro-frontends, or a hot reload do not break the app. Fix the duplicate when you see the warning; the two copies are still two different classes.

@@ -1,9 +1,21 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './switch.scss?inline'
+
+/** Events fired by {@link Switch}, keyed for `addEventListener`. */
+export interface SwitchEventMap {
+  change: Event
+}
+
+export interface Switch {
+  addEventListener: TypedAddEventListener<Switch, SwitchEventMap>
+  removeEventListener: TypedRemoveEventListener<Switch, SwitchEventMap>
+}
 
 /**
  * On/off toggle built on a native `<input type="checkbox" role="switch">`, so keyboard activation (Space), form value

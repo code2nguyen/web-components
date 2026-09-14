@@ -10,17 +10,19 @@
   "wireit": {
     "build": {
       "dependencies": [
-        "../../../packages/core:build",
+        "../../../packages/adapters/angular:build",
         "../../../packages/components/badge:build",
         "../../../packages/components/button:build",
         "../../../packages/components/card:build",
         "../../../packages/components/list-item:build",
         "../../../packages/components/modal:build",
         "../../../packages/components/select:build",
+        "../../../packages/components/switch:build",
         "../../../packages/components/table:build",
         "../../../packages/components/tabs:build",
         "../../../packages/components/text-field:build",
         "../../../packages/components/toast:build",
+        "../../../packages/core:build",
         "../../../packages/tools/theme:build"
       ],
       "files": [
@@ -38,13 +40,16 @@
     "@angular/common": "22.1.6",
     "@angular/compiler": "22.1.6",
     "@angular/core": "22.1.6",
+    "@angular/forms": "22.1.6",
     "@angular/platform-browser": "22.1.6",
+    "@c2n/angular": "*",
     "@c2n/badge": "*",
     "@c2n/button": "*",
     "@c2n/card": "*",
     "@c2n/list-item": "*",
     "@c2n/modal": "*",
     "@c2n/select": "*",
+    "@c2n/switch": "*",
     "@c2n/table": "*",
     "@c2n/tabs": "*",
     "@c2n/text-field": "*",

@@ -40,6 +40,10 @@ export default tseslint.config(
       // into the two rules below; both stay off to preserve the previous behaviour.
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
+      // Every component merges an interface into its class to declare typed `addEventListener` overloads
+      // (see `@c2n/core/event-helper.js`). That is the one sanctioned use of class/interface merging — the
+      // members are inherited from `HTMLElement`, not left unimplemented — and it is the repo's idiom.
+      '@typescript-eslint/no-unsafe-declaration-merging': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
   },

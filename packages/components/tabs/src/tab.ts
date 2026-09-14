@@ -1,9 +1,21 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { consume } from '@lit/context'
 import styles from './tab.scss?inline'
 import { selectedTabContext } from './tab-context'
+
+/** Events fired by {@link Tab}, keyed for `addEventListener`. */
+export interface TabEventMap {
+  'tab-change': CustomEvent<string>
+}
+
+export interface Tab {
+  addEventListener: TypedAddEventListener<Tab, TabEventMap>
+  removeEventListener: TypedRemoveEventListener<Tab, TabEventMap>
+}
 
 /**
  * A single tab inside `<c2-tabs>`. Its `for` attribute names the `id` of the panel it controls.

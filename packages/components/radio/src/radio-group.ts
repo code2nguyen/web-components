@@ -1,5 +1,7 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { provide } from '@lit/context'
 import { radioGroupContext, type RadioGroupContext } from './radio-context'
@@ -10,6 +12,16 @@ import styles from './radio-group.scss?inline'
 const RADIO_TAG = 'c2-radio'
 
 export type RadioGroupOrientation = 'vertical' | 'horizontal'
+
+/** Events fired by {@link RadioGroup}, keyed for `addEventListener`. */
+export interface RadioGroupEventMap {
+  change: CustomEvent<{ value: string }>
+}
+
+export interface RadioGroup {
+  addEventListener: TypedAddEventListener<RadioGroup, RadioGroupEventMap>
+  removeEventListener: TypedRemoveEventListener<RadioGroup, RadioGroupEventMap>
+}
 
 /**
  * Groups `c2-radio` options into one control: a single `value`, one `name` for every option, group-level `disabled`,

@@ -5,22 +5,34 @@
   "main": "dist/navigation-menu.js",
   "exports": {
     ".": {
-      "default": "./dist/navigation-menu.js",
-      "types": "./types/src/navigation-menu.d.ts"
+      "types": "./types/src/navigation-menu.d.ts",
+      "default": "./dist/navigation-menu.js"
     },
     "./navigation-menu-item.js": {
-      "default": "./dist/navigation-menu-item.js",
-      "types": "./types/src/navigation-menu-item.d.ts"
+      "types": "./types/src/navigation-menu-item.d.ts",
+      "default": "./dist/navigation-menu-item.js"
     },
     "./navigation-menu-link.js": {
-      "default": "./dist/navigation-menu-link.js",
-      "types": "./types/src/navigation-menu-link.d.ts"
+      "types": "./types/src/navigation-menu-link.d.ts",
+      "default": "./dist/navigation-menu-link.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "navigation menu",

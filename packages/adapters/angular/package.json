@@ -1,0 +1,70 @@
+{
+  "name": "@c2n/angular",
+  "version": "0.0.6",
+  "description": "Angular bindings for the c2n web components: ControlValueAccessor directives so ngModel and reactive forms work with c2-* form controls",
+  "type": "module",
+  "main": "dist/index.js",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "angular",
+    "web components",
+    "custom elements",
+    "forms",
+    "ControlValueAccessor"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "build": "wireit",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "command": "tsc -p tsconfig.lib.json --noEmit --emitDeclarationOnly false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "files": [
+        "src/**",
+        "tsconfig.lib.json"
+      ],
+      "output": [
+        "dist/**"
+      ],
+      "command": "ngc -p tsconfig.lib.json"
+    }
+  },
+  "peerDependencies": {
+    "@angular/core": ">=20",
+    "@angular/forms": ">=20"
+  },
+  "devDependencies": {
+    "@angular/compiler": "22.1.6",
+    "@angular/compiler-cli": "22.1.6",
+    "@angular/core": "22.1.6",
+    "@angular/forms": "22.1.6",
+    "@c2n/config": "*"
+  },
+  "dependencies": {
+    "tslib": "2.8.1"
+  }
+}

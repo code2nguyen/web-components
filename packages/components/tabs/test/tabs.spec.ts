@@ -23,7 +23,7 @@ test('consumer cancellation prevents a tab switch', async ({ page, renderScenari
 test('click emits one change and clearing selection restores the first panel', async ({ page, renderScenario }) => {
   await renderScenario(markup)
   const host = page.locator('c2-tabs')
-  await watch(host, 'change')
+  await watch(host, 'selection-change')
   await page.getByRole('tab', { name: 'Third' }).click()
   await expect(host).toHaveAttribute('data-events', '[{"value":"three"}]')
   await props(host, { selectedTab: '' })
@@ -62,4 +62,20 @@ test('tabs built with createElement, the way a framework renderer builds them, b
   await expect(first).toHaveAttribute('aria-selected', 'true')
   await page.getByRole('tab', { name: 'Second' }).click()
   await expect(page.getByRole('tabpanel')).toHaveText('Second content')
+})
+
+// `c2-list`, `c2-select`, `c2-table`, `c2-tabs` and `c2-virtual-list` all fire `selection-change`. If it bubbled,
+// a selection made inside a tab panel would arrive at the tab strip's own listener and look like a tab switch,
+// which is exactly the trap the event used to have while it was called `change`.
+test('selection-change does not reach an ancestor', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="wrapper">${markup}</div>`)
+  const wrapper = page.locator('#wrapper')
+  await watch(wrapper, 'selection-change')
+  const host = page.locator('c2-tabs')
+  await watch(host, 'selection-change')
+
+  await page.getByRole('tab', { name: 'Third' }).click()
+
+  await expect(host).toHaveAttribute('data-events', '[{"value":"three"}]')
+  await expect(wrapper).toHaveAttribute('data-events', '[]')
 })

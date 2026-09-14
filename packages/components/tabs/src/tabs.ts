@@ -1,5 +1,7 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { provide } from '@lit/context'
 import { isServer } from 'lit-html/is-server.js'
@@ -10,6 +12,22 @@ import './tab'
 import type { Tab } from './tab'
 
 const TAB_TAG = 'c2-tab'
+
+/** Detail of the `selection-change` event of {@link Tabs}. */
+export interface TabsSelectionChangeEventDetail {
+  /** `for` value of the tab that is now selected — the new `selected-tab`. */
+  value: string
+}
+
+/** Events fired by {@link Tabs}, keyed for `addEventListener`. */
+export interface TabsEventMap {
+  'selection-change': CustomEvent<TabsSelectionChangeEventDetail>
+}
+
+export interface Tabs {
+  addEventListener: TypedAddEventListener<Tabs, TabsEventMap>
+  removeEventListener: TypedRemoveEventListener<Tabs, TabsEventMap>
+}
 
 /**
  * Tab strip that shows one content panel at a time.
@@ -24,7 +42,10 @@ const TAB_TAG = 'c2-tab'
  * @slot tab - The `<c2-tab>` elements (assigned automatically).
  * @slot tab-content - The panel of the selected tab (assigned automatically from the child whose `id` matches `selected-tab`).
  *
- * @event {CustomEvent<{ value: string }>} change - Fired after the user selects another tab. `detail.value` is the new `selected-tab`. Not fired for programmatic changes.
+ * @event {CustomEvent<TabsSelectionChangeEventDetail>} selection-change - Fired after the user selects another tab. `detail.value` is the new `selected-tab`. Not fired for programmatic changes. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
+ *
+ * The name matches `c2-list`, `c2-select` and `c2-table`; it is deliberately not `change`, which every native form
+ * control bubbles — a `c2-text-field` inside a panel would otherwise reach a listener meant for the tab strip.
  *
  * @cssproperty {box-shadow} [--c2-tabs--box-shadow=inset 0px -2px 0px 0px rgb(230, 230, 230)]
  * @cssproperty {justify-content} [--c2-tabs--justify-content=flex-start]
@@ -122,7 +143,7 @@ export class Tabs extends LitElement {
     const tab = this.tabs.find((t) => t.for === value)
     if (!tab || tab.disabled) return
     this.selectedTab = value
-    this.dispatchEvent(new CustomEvent('change', { detail: { value }, bubbles: true, composed: true }))
+    this.dispatchEvent(new CustomEvent<TabsSelectionChangeEventDetail>('selection-change', { detail: { value }, bubbles: false, composed: true }))
   }
 
   private handleTabChange(event: CustomEvent<string>) {

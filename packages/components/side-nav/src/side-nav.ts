@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { isServer } from 'lit-html/is-server.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './side-nav.scss?inline'
@@ -16,6 +18,16 @@ export interface OpenedChangeEventDetail {
 
 const BREAKPOINT_QUERIES = [Breakpoints.Phone, Breakpoints.Tablet, Breakpoints.Desktop]
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+/** Events fired by {@link SideNav}, keyed for `addEventListener`. */
+export interface SideNavEventMap {
+  'opened-change': CustomEvent<OpenedChangeEventDetail>
+}
+
+export interface SideNav {
+  addEventListener: TypedAddEventListener<SideNav, SideNavEventMap>
+  removeEventListener: TypedRemoveEventListener<SideNav, SideNavEventMap>
+}
 
 /**
  * A layout shell with a navigation drawer beside the page content. The drawer goes in the `side-nav-content` slot, the

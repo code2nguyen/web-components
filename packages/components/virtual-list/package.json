@@ -5,18 +5,30 @@
   "main": "dist/virtual-list.js",
   "exports": {
     ".": {
-      "default": "./dist/virtual-list.js",
-      "types": "./types/src/virtual-list.d.ts"
+      "types": "./types/src/virtual-list.d.ts",
+      "default": "./dist/virtual-list.js"
     },
     "./virtual-list-types.js": {
-      "default": "./dist/virtual-list-types.js",
-      "types": "./types/src/virtual-list-types.d.ts"
+      "types": "./types/src/virtual-list-types.d.ts",
+      "default": "./dist/virtual-list-types.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "virtual-list",

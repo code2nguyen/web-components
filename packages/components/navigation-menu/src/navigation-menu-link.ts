@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './navigation-menu-link.scss?inline'
 

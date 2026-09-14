@@ -335,3 +335,52 @@ test('a resizable column edge reads as a divider, and drags the column', async (
   expect(events[0].field).toBe('name')
   expect(events[0].width).toBeGreaterThan(60)
 })
+
+// A camelCase attribute in markup is lowercased by the parser, and by every framework that writes a *static*
+// attribute — Angular's `rowKey="id"` reaches the element as `rowkey`. The component does not observe it, so the
+// value used to disappear without a trace; `@c2n/core/element-helper.js` turns that into one console line.
+test('a lowercased camelCase attribute is ignored, with a warning naming the real one', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning') warnings.push(message.text())
+  })
+
+  await renderScenario(
+    `<c2-table style="height:240px;width:520px" rowkey="id" rows='${rows}'><c2-table-column field="name" header="Name"></c2-table-column></c2-table>`,
+  )
+
+  await expect(page.locator('c2-table')).toHaveJSProperty('rowKey', '')
+  expect(warnings.some((warning) => warning.includes('<c2-table rowkey>') && warning.includes('row-key'))).toBe(true)
+})
+
+// Selection is announced on the table, not up the tree: five components fire `selection-change`, so a bubbling
+// one would reach a listener meant for whatever the table is nested in.
+test('selection-change does not reach an ancestor', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="wrapper">${table('selection="multiple" checkbox-selection')}</div>`)
+  const wrapper = page.locator('#wrapper')
+  await watch(wrapper, 'selection-change')
+  const host = page.locator('c2-table')
+  await watch(host, 'selection-change')
+
+  await page
+    .getByRole('row', { name: /Grace Hopper/ })
+    .getByRole('checkbox')
+    .click()
+
+  await expect(host).not.toHaveAttribute('data-events', '[]')
+  await expect(wrapper).toHaveAttribute('data-events', '[]')
+})
+
+// The framework-agnostic escape hatch for a cell body: `renderCell` is handed to Lit, so it cannot return JSX,
+// an Angular template or a Vue node. A slot can hold whatever the consuming framework rendered.
+test('a cell-slot column takes its body from a light-DOM child and falls back to the formatted value', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" rows='${rows}'>
+    <c2-table-column field="name" header="Name" width="240px"></c2-table-column>
+    <c2-table-column field="score" header="Score" width="240px" align="end" format="number" cell-slot></c2-table-column>
+    <b slot="cell:2:score" data-testid="slotted">record</b>
+  </c2-table>`)
+
+  await expect(page.getByTestId('slotted')).toHaveText('record')
+  // Row 1 has no child, so the column's own formatting still shows.
+  await expect(page.getByRole('row', { name: /Ada Lovelace/ })).toContainText('128,000')
+})

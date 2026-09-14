@@ -1,9 +1,23 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './textarea.scss?inline'
+
+/** Events fired by {@link Textarea}, keyed for `addEventListener`. */
+export interface TextareaEventMap {
+  input: InputEvent
+  change: Event
+  select: Event
+}
+
+export interface Textarea {
+  addEventListener: TypedAddEventListener<Textarea, TextareaEventMap>
+  removeEventListener: TypedRemoveEventListener<Textarea, TextareaEventMap>
+}
 
 /**
  * Multiline text input with native resizing, helper text, error feedback and a character counter.

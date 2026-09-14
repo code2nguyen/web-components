@@ -1,10 +1,23 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { computePosition, autoUpdate, flip, offset, shift, size, type Placement } from '@floating-ui/dom'
 import styles from './overlay.scss?inline'
 
 export type { Placement }
+
+/** Events fired by {@link Overlay}, keyed for `addEventListener`. */
+export interface OverlayEventMap {
+  toggle: ToggleEvent
+  beforetoggle: ToggleEvent
+}
+
+export interface Overlay {
+  addEventListener: TypedAddEventListener<Overlay, OverlayEventMap>
+  removeEventListener: TypedRemoveEventListener<Overlay, OverlayEventMap>
+}
 
 /**
  * Anchored popup built on the browser Popover API: the element sits in the top layer, opens and light-dismisses

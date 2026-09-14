@@ -1,5 +1,6 @@
 import { LitElement, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import styles from './table-column.scss?inline'
 import { jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { ColumnAlign, ColumnFormat, ColumnPin, TableCellRenderer, TableColumnConfig, TableHeaderRenderer } from './table-types.js'
@@ -67,6 +68,13 @@ export class TableColumn extends LitElement implements TableColumnConfig {
 
   /** Class set on every cell of this column, so light-DOM CSS can target it through `::part(cell)`. */
   @property({ type: String, attribute: 'cell-class' }) cellClass?: string
+
+  /**
+   * Renders each cell from a light-DOM child of the table rather than from `renderCell`: the cell holds a
+   * `<slot name="cell:<row key>:<field>">`, so a framework can build the body with its own template language.
+   * Requires the table's `row-key`.
+   */
+  @property({ type: Boolean, attribute: 'cell-slot' }) cellSlot = false
 
   /** Renders the cell body. Property only. */
   @property({ attribute: false }) renderCell?: TableCellRenderer

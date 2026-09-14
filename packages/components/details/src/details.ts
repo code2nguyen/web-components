@@ -1,10 +1,22 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { consume } from '@lit/context'
 import { accordionContext, type AccordionContext } from './details-context'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './details.scss?inline'
+
+/** Events fired by {@link Details}, keyed for `addEventListener`. */
+export interface DetailsEventMap {
+  toggle: ToggleEvent
+}
+
+export interface Details {
+  addEventListener: TypedAddEventListener<Details, DetailsEventMap>
+  removeEventListener: TypedRemoveEventListener<Details, DetailsEventMap>
+}
 
 /**
  * Collapsible disclosure built on native `<details>` / `<summary>`, so keyboard access, screen-reader semantics and

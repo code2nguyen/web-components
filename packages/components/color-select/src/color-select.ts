@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { TinyColor } from '@ctrl/tinycolor'
 
 import styles from './color-select.scss?inline'
@@ -21,6 +23,16 @@ export interface ColorSelectChangeEventDetail {
   v: number
   a: number
 }
+/** Events fired by {@link ColorSelect}, keyed for `addEventListener`. */
+export interface ColorSelectEventMap {
+  change: CustomEvent<string>
+}
+
+export interface ColorSelect {
+  addEventListener: TypedAddEventListener<ColorSelect, ColorSelectEventMap>
+  removeEventListener: TypedRemoveEventListener<ColorSelect, ColorSelectEventMap>
+}
+
 /**
  * Popup colour picker combining a colour area, hue control and editable colour value.
  *

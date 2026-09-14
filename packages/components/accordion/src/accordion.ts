@@ -1,5 +1,6 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import '@c2n/details'
 import type { Details } from '@c2n/details'
 import { provide } from '@lit/context'

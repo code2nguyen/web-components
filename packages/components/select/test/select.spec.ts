@@ -47,3 +47,21 @@ test('offers a scalar single-select API and submits single and multiple values',
   await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
   await expect(selects.first()).toHaveJSProperty('selectedValue', 'a')
 })
+
+// A form control is expected to announce a new value as `input`/`change`, which is what a framework's two-way
+// binding listens for: `v-model`, and Angular's `ControlValueAccessor`, know nothing about `selection-change`.
+test('picking an option fires input and change as well as selection-change', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-select placeholder="Choose fruit">${rows}</c2-select>`)
+  const host = page.locator('c2-select')
+  await host.evaluate((element) => {
+    const seen: string[] = []
+    for (const name of ['selection-change', 'input', 'change']) element.addEventListener(name, (event) => seen.push(event.type))
+    element.setAttribute('data-seen', '[]')
+    element.addEventListener('change', () => element.setAttribute('data-seen', JSON.stringify(seen)))
+  })
+
+  await page.getByRole('button', { name: 'Choose fruit' }).click()
+  await page.getByRole('option', { name: 'Berry' }).click()
+
+  await expect(host).toHaveAttribute('data-seen', '["selection-change","input","change"]')
+})

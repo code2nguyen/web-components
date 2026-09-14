@@ -1,5 +1,5 @@
 {
-  "extends": "@c2n/config/tsconfig.lib.json",
+  "extends": ["@c2n/config/tsconfig.lib.json", "@c2n/framework-types/tsconfig.vue.json"],
   "include": ["src/**/*", "src/**/*.vue"],
   "compilerOptions": {
     "rootDir": ".",

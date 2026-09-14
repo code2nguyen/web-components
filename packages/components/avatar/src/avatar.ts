@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './avatar.scss?inline'
@@ -7,6 +9,16 @@ import styles from './avatar.scss?inline'
 export type AvatarStatus = 'online' | 'away' | 'busy' | 'offline'
 
 const LEGACY_COUNT_ATTRIBUTE = 'initialcount'
+
+/** Events fired by {@link Avatar}, keyed for `addEventListener`. */
+export interface AvatarEventMap {
+  error: Event
+}
+
+export interface Avatar {
+  addEventListener: TypedAddEventListener<Avatar, AvatarEventMap>
+  removeEventListener: TypedRemoveEventListener<Avatar, AvatarEventMap>
+}
 
 /**
  * Shows a person or entity as an image, initials or any slotted content, with an optional status dot or badge.

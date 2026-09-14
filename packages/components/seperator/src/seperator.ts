@@ -1,5 +1,6 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './seperator.scss?inline'
 

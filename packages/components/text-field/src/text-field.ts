@@ -1,5 +1,7 @@
 import { CSSResult, LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './text-field.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
@@ -8,6 +10,18 @@ import { addClasses } from '@c2n/core/css-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 
 export type TextFieldType = 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' | 'number'
+
+/** Events fired by {@link TextField}, keyed for `addEventListener`. */
+export interface TextFieldEventMap {
+  input: InputEvent
+  change: Event
+  clear: Event
+}
+
+export interface TextField {
+  addEventListener: TypedAddEventListener<TextField, TextFieldEventMap>
+  removeEventListener: TypedRemoveEventListener<TextField, TextFieldEventMap>
+}
 
 /**
  * A single-line input wrapped in a themeable field. The native `<input>` keeps its behaviour (`type`, `name`,

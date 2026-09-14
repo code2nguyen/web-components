@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValueMap } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './select.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import type { SelectionChangeEventDetail } from '@c2n/list'
@@ -9,6 +11,18 @@ import { redispatchEvent } from '@c2n/core/dom-helper.js'
 
 import '@c2n/overlay'
 import '@c2n/list'
+
+/** Events fired by {@link Select}, keyed for `addEventListener`. */
+export interface SelectEventMap {
+  'selection-change': CustomEvent<SelectionChangeEventDetail>
+  input: Event
+  change: Event
+}
+
+export interface Select {
+  addEventListener: TypedAddEventListener<Select, SelectEventMap>
+  removeEventListener: TypedRemoveEventListener<Select, SelectEventMap>
+}
 
 /**
  * A dropdown built from a trigger button and a `c2-list` of `c2-list-item` rows inside a `c2-overlay` popover. The
@@ -24,7 +38,9 @@ import '@c2n/list'
  * @slot button-suffix-icon - Icon shown at the end of the trigger. Defaults to a chevron that flips while open.
  * @slot button-content - Replaces the trigger text entirely (selected labels or placeholder) with custom markup.
  *
- * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user picks an option. `detail.value` is the array of selected values (one entry unless `multiple`), `detail.data` the `data` of each selected row.
+ * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user picks an option. `detail.value` is the array of selected values (one entry unless `multiple`), `detail.data` the `data` of each selected row. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
+ * @event {Event} input - Fired with `selection-change`, after `value` is updated. Carries no detail: it exists so the select behaves like the other form controls, which is what `v-model`, `ngModel` and any generic form binding listen for.
+ * @event {Event} change - Fired with `input`. A select commits on every pick, so the two always fire together.
  *
  * @cssproperty {pixel} [--c2-select__button--min-height=36px]
  * @cssproperty {padding} [--c2-select__button--padding=6px 10px 6px 12px]
@@ -309,6 +325,12 @@ export class Select extends LitElement {
     }
 
     redispatchEvent(this, event)
+
+    // A form control is expected to fire `input`/`change` when its value changes, and every framework's two-way
+    // binding is written against those names rather than a component-specific one. Firing them alongside
+    // `selection-change` is what makes `v-model` and a `ControlValueAccessor` work with no adapter.
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
   private handleOverlayToggle(event: Event) {
