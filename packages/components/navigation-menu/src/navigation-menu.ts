@@ -41,6 +41,11 @@ export interface ValueChangeEventDetail {
  * own below that viewport width; leave it unset and `mode` is yours to set, from a media query of your own or from
  * anything else that knows better.
  *
+ * Add `auto-current` to derive the current link from the browser URL. Exact hash links win, a hashless page link is
+ * the fallback, and on a page made only of hash links the first row is the default. The menu follows `hashchange` and
+ * `popstate`; SPA routers can set `current-url` or call `syncCurrent(url)` after navigation. Without `auto-current`,
+ * authored `current` attributes remain fully controlled by the application.
+ *
  * @tag c2-navigation-menu
  *
  * @slot default - The items: `c2-navigation-menu-item` elements.
@@ -139,6 +144,12 @@ export class NavigationMenu extends LitElement {
   /** Whether the `mobile` button's list is showing. */
   @property({ type: Boolean, reflect: true, attribute: 'mobile-open' }) mobileOpen = false
 
+  /** Derives the current item or panel row from the browser URL and keeps it synchronized. */
+  @property({ type: Boolean, reflect: true, attribute: 'auto-current' }) autoCurrent = false
+
+  /** Router-controlled URL used by `auto-current`; an empty value follows `window.location`. */
+  @property({ attribute: 'current-url' }) currentUrl = ''
+
   @query('.bar') private bar?: HTMLElement
 
   @query('.mobile-trigger') private defaultMobileTrigger?: HTMLElement
@@ -148,6 +159,11 @@ export class NavigationMenu extends LitElement {
   @state() private slottedMobileTrigger: HTMLElement | null = null
 
   private mediaQuery?: MediaQueryList
+
+  private autoCurrentObserver?: MutationObserver
+
+  /** The current attributes present before this menu started managing them. */
+  private authoredCurrent = new Map<HTMLElement, boolean>()
 
   private openTimer: ReturnType<typeof setTimeout> | undefined
   private closeTimer: ReturnType<typeof setTimeout> | undefined
@@ -179,6 +195,7 @@ export class NavigationMenu extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.watchBreakpoint()
+    if (this.autoCurrent) this.startAutoCurrent()
   }
 
   override disconnectedCallback() {
@@ -187,6 +204,7 @@ export class NavigationMenu extends LitElement {
     this.listenForDismiss(false)
     this.mediaQuery?.removeEventListener('change', this.handleBreakpointChange)
     this.mediaQuery = undefined
+    this.stopAutoCurrent(false)
   }
 
   /** Follows `mobile-breakpoint`, when there is one, by driving `mode` from a media query. */
@@ -201,6 +219,95 @@ export class NavigationMenu extends LitElement {
 
   private handleBreakpointChange = (event: MediaQueryListEvent) => {
     this.mode = event.matches ? 'mobile' : 'bar'
+  }
+
+  private currentCandidates(): HTMLElement[] {
+    return Array.from(this.querySelectorAll<HTMLElement>('c2-navigation-menu-item, c2-navigation-menu-link')).filter(
+      (candidate) => !!this.candidateHref(candidate),
+    )
+  }
+
+  private candidateHref(candidate: HTMLElement): string {
+    return (candidate as HTMLElement & { href?: string }).href ?? candidate.getAttribute('href') ?? ''
+  }
+
+  private resolveCurrentUrl(url?: string | URL, base?: string): URL | undefined {
+    if (typeof window === 'undefined') return undefined
+    try {
+      return new URL(url || this.currentUrl || window.location.href, base || window.location.href)
+    } catch {
+      return undefined
+    }
+  }
+
+  /**
+   * Marks the link that best matches `url` and returns it. Call this after a router changes history without emitting
+   * `popstate`, or set `current-url` and let the menu react to that property instead.
+   */
+  syncCurrent(url?: string | URL): HTMLElement | null {
+    const activeUrl = this.resolveCurrentUrl(url)
+    if (!activeUrl) return null
+
+    const candidates = this.currentCandidates()
+    for (const candidate of this.authoredCurrent.keys()) {
+      if (!this.contains(candidate)) this.authoredCurrent.delete(candidate)
+    }
+    for (const candidate of candidates) {
+      if (!this.authoredCurrent.has(candidate)) {
+        const authored = (candidate as HTMLElement & { current?: boolean }).current ?? candidate.hasAttribute('current')
+        this.authoredCurrent.set(candidate, authored)
+      }
+    }
+
+    const sameRoute = candidates.filter((candidate) => {
+      const href = this.candidateHref(candidate)
+      if (!href) return false
+      const target = this.resolveCurrentUrl(href, candidate.baseURI)
+      return !!target && target.origin === activeUrl.origin && target.pathname === activeUrl.pathname && target.search === activeUrl.search
+    })
+
+    let current: HTMLElement | undefined
+    if (activeUrl.hash) {
+      current = sameRoute.find((candidate) => this.resolveCurrentUrl(this.candidateHref(candidate), candidate.baseURI)?.hash === activeUrl.hash)
+      current ??= sameRoute.find((candidate) => !this.resolveCurrentUrl(this.candidateHref(candidate), candidate.baseURI)?.hash)
+    } else {
+      current = sameRoute.find((candidate) => !this.resolveCurrentUrl(this.candidateHref(candidate), candidate.baseURI)?.hash) ?? sameRoute[0]
+    }
+
+    for (const candidate of candidates) {
+      const managedValue = current ? candidate === current : (this.authoredCurrent.get(candidate) ?? false)
+      candidate.toggleAttribute('current', managedValue)
+    }
+    return current ?? null
+  }
+
+  private handleLocationChange = () => {
+    this.syncCurrent()
+  }
+
+  private startAutoCurrent() {
+    this.stopAutoCurrent(false)
+    if (typeof window !== 'undefined' && !this.currentUrl) {
+      window.addEventListener('hashchange', this.handleLocationChange)
+      window.addEventListener('popstate', this.handleLocationChange)
+    }
+    if (typeof MutationObserver !== 'undefined') {
+      this.autoCurrentObserver = new MutationObserver(() => this.syncCurrent())
+      this.autoCurrentObserver.observe(this, { childList: true, subtree: true, attributes: true, attributeFilter: ['href'] })
+    }
+    this.syncCurrent()
+  }
+
+  private stopAutoCurrent(restore: boolean) {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('hashchange', this.handleLocationChange)
+      window.removeEventListener('popstate', this.handleLocationChange)
+    }
+    this.autoCurrentObserver?.disconnect()
+    this.autoCurrentObserver = undefined
+    if (!restore) return
+    for (const [candidate, current] of this.authoredCurrent) candidate.toggleAttribute('current', current)
+    this.authoredCurrent.clear()
   }
 
   /** Opens the panel of `value` (`''` closes the bar) and fires `value-change`. */
@@ -466,6 +573,7 @@ export class NavigationMenu extends LitElement {
 
   private handleSlotChange = () => {
     this.syncItems()
+    if (this.autoCurrent) this.syncCurrent()
   }
 
   protected override willUpdate(changed: PropertyValues): void {
@@ -487,6 +595,10 @@ export class NavigationMenu extends LitElement {
     // Opening the list picks the section the visitor is in, unless a group was already chosen.
     if (changed.has('mobileOpen') && this.mobileOpen && this.collapsible && !this.value) this.value = this.currentGroupValue()
     if (changed.has('value') || changed.has('mobileOpen')) this.listenForDismiss(!!this.value || this.mobileOpen)
+    if (changed.has('autoCurrent') || changed.has('currentUrl')) {
+      if (this.autoCurrent) this.startAutoCurrent()
+      else this.stopAutoCurrent(true)
+    }
   }
 
   private renderMobileIcon() {

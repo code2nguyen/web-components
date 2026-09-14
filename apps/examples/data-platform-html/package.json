@@ -17,7 +17,8 @@
         "../../../packages/components/button:build",
         "../../../packages/components/card:build",
         "../../../packages/components/checkbox:build",
-        "../../../packages/components/icon-button:build",
+        "../../../packages/components/code-viewer:build",
+        "../../../packages/components/header:build",
         "../../../packages/components/label:build",
         "../../../packages/components/link-button:build",
         "../../../packages/components/list-item:build",
@@ -25,10 +26,10 @@
         "../../../packages/components/navigation-menu:build",
         "../../../packages/components/select:build",
         "../../../packages/components/seperator:build",
+        "../../../packages/components/stat:build",
         "../../../packages/components/text-field:build",
         "../../../packages/components/textarea:build",
         "../../../packages/components/toast:build",
-        "../../../packages/components/tooltip:build",
         "../../../packages/icons/feather-icons:build",
         "../../../packages/tools/theme:build"
       ],
@@ -56,8 +57,9 @@
     "@c2n/button": "*",
     "@c2n/card": "*",
     "@c2n/checkbox": "*",
+    "@c2n/code-viewer": "*",
     "@c2n/feather-icons": "*",
-    "@c2n/icon-button": "*",
+    "@c2n/header": "*",
     "@c2n/label": "*",
     "@c2n/link-button": "*",
     "@c2n/list-item": "*",
@@ -65,11 +67,11 @@
     "@c2n/navigation-menu": "*",
     "@c2n/select": "*",
     "@c2n/seperator": "*",
+    "@c2n/stat": "*",
     "@c2n/text-field": "*",
     "@c2n/textarea": "*",
     "@c2n/theme": "*",
-    "@c2n/toast": "*",
-    "@c2n/tooltip": "*"
+    "@c2n/toast": "*"
   },
   "devDependencies": {
     "@c2n/config": "*"

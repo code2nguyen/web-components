@@ -1,7 +1,7 @@
 {
   "title": "Data Platform Landing",
-  "description": "Institutional fixed income landing page cloning modern dark financial data architectures with c2-navigation-menu, c2-cards, c2-modal, c2-badge, and c2-toast.",
+  "description": "Institutional fixed income data platform showcasing c2-header, c2-navigation-menu, c2-stat, terminal code viewers, form-associated controls, modals, and toast feedback.",
   "framework": "html",
-  "tags": ["landing", "dark-mode", "navigation-menu", "modal", "cards", "forms"],
+  "tags": ["landing", "dark-mode", "header", "navigation-menu", "stats", "code-viewer", "modal", "forms"],
   "order": 20
 }
