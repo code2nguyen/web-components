@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  autocomplete: `<c2-autocomplete style="width:240px" aria-label="Search workspace" placeholder="Search people, files…" suggestions='[{"label":"Ada Lovelace"},{"label":"Product roadmap"}]'></c2-autocomplete>`,
   header: `<c2-header style="width:280px;--c2-header--padding:8px 12px;--c2-header--min-height:48px">
   <strong slot="brand">Northstar</strong>
   <span style="font-size:12px">Markets</span>

@@ -1,0 +1,157 @@
+---
+title: 'Autocomplete'
+description: 'Searchable combobox for local or remote items with customizable list rows.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import AutocompleteExamplesRuntime from '../../components/AutocompleteExamplesRuntime.astro'
+
+import { Autocomplete } from '@c2n/autocomplete'
+
+`c2-autocomplete` filters a local `suggestions` array or asks an asynchronous `dataSource` for matches. Its overlay composes an optional header, a real `c2-list` of `c2-list-item` rows, and an optional footer. Like `c2-virtual-list`, the default renderer reads only `labelField` and optional `descriptionField`. Arbitrary objects use field mappings and `renderItem`; no group, icon, meta or type fields receive special treatment. The component keeps selection and keyboard accessibility around custom content, cancels stale server requests and returns the original selected item.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/autocomplete
+```
+
+`@c2n/overlay`, `@c2n/list` and `@c2n/list-item` are dependencies and are registered automatically.
+
+## Usage
+
+The examples below are real application patterns rather than visual variants. The teammate picker combines field mapping, a custom renderer, actionable header/footer slots and `selection-behavior="preserve"`. The catalog search uses an asynchronous `dataSource`, cancellable requests and custom loading/empty content.
+
+```html tag=UsageBlock,package=@c2n/autocomplete
+<style>
+  .autocomplete-example {
+    width: min(100%, 520px);
+  }
+  .autocomplete-example [slot='header'],
+  .autocomplete-example [slot='footer'] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .autocomplete-example [slot] button {
+    border: 1px solid #c4b5fd;
+    border-radius: 999px;
+    padding: 4px 9px;
+    color: #6d28d9;
+    background: #f5f3ff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+</style>
+<div data-label="Mention teammate">
+  <c2-autocomplete
+    client:only="lit"
+    class="autocomplete-example"
+    data-autocomplete-example="team"
+    aria-label="Mention a teammate"
+    placeholder="Type a name or role…"
+    selection-behavior="preserve"
+    item-key="id"
+    label-field="name"
+    description-field="role"
+    search-fields="name;role;location"
+    suggestions='[{"id":"ada","name":"Ada Lovelace","role":"Staff engineer","location":"London","status":"online"},{"id":"grace","name":"Grace Hopper","role":"Compiler lead","location":"New York","status":"busy"},{"id":"katherine","name":"Katherine Johnson","role":"Data scientist","location":"Hampton","status":"away"}]'
+  >
+    <div slot="header"><strong>People in this workspace</strong> · <button type="button" data-invite-person>Invite person</button></div>
+    <div slot="footer"><span data-example-status>Selection keeps the @ query</span> · <button type="button" data-view-team>View team</button></div>
+  </c2-autocomplete>
+</div>
+<div data-label="Remote catalog">
+  <c2-autocomplete
+    client:only="lit"
+    class="autocomplete-example"
+    data-autocomplete-example="products"
+    aria-label="Add a product"
+    placeholder="Search product, SKU or category…"
+    item-key="sku"
+    label-field="name"
+    description-field="category"
+    disabled-field="unavailable"
+    debounce="250"
+    show-empty
+  >
+    <div slot="header"><strong>Product catalog</strong> · <button type="button" data-scan-product>Scan barcode</button></div>
+    <span slot="loading">Checking live inventory…</span>
+    <span slot="empty">No products match this search.</span>
+    <span slot="footer" data-example-status>Inventory comes from an asynchronous data source</span>
+  </c2-autocomplete>
+</div>
+```
+
+<AutocompleteExamplesRuntime />
+
+`renderItem`, `dataSource` and event listeners are JavaScript properties, so they are assigned after the declarative structure. This is the essential setup behind the two live examples:
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+teamPicker.renderItem = ({ item }) => html`
+  <c2-avatar slot="prefix-icon" name=${item.name} status=${item.status} auto-color aria-hidden="true"></c2-avatar>
+  <span>${item.name}</span>
+  <span slot="description">${item.role} · ${item.location}</span>
+  <c2-badge slot="suffix-icon" tone=${item.status === 'online' ? 'success' : 'neutral'}>${item.status}</c2-badge>
+`
+
+teamPicker.addEventListener('suggestion-select', ({ detail }) => mention(detail.item))
+
+catalog.dataSource = async (query, signal) => {
+  const response = await fetch(`/api/products?q=${encodeURIComponent(query)}`, { signal })
+  return response.json()
+}
+
+catalog.renderItem = ({ item }) => html`
+  <c2-avatar slot="prefix-icon">${item.emoji}</c2-avatar>
+  <span>${item.name}</span>
+  <span slot="description">${item.sku} · ${item.category} · ${item.price}</span>
+  <c2-badge slot="suffix-icon" tone=${item.stock ? 'success' : 'danger'}>${item.stock ? `${item.stock} left` : 'Sold out'}</c2-badge>
+`
+```
+
+`selection-behavior="replace"` is the default: choosing a suggestion replaces the input with its key and fires `input`, `change` and `suggestion-select`. Use `selection-behavior="preserve"` for command palettes or search results: choosing a row fires only `suggestion-select`, keeps the query unchanged and lets the same result list reopen when the input is clicked again.
+
+For remote data, assign a function to `dataSource`. The component debounces calls and aborts the previous signal whenever the query changes:
+
+```js tag=CodeBlock
+const autocomplete = document.querySelector('c2-autocomplete')
+
+autocomplete.dataSource = async (query, signal) => {
+  const response = await fetch(`/api/suggestions?q=${encodeURIComponent(query)}`, { signal })
+  return response.json()
+}
+
+autocomplete.addEventListener('suggestion-select', (event) => {
+  console.log(event.detail.value, event.detail.item)
+})
+```
+
+### Arbitrary item structures
+
+Map identity and text with dotted field paths, then use `renderItem({ item, index, search })` for complex markup. The returned content is placed inside `c2-list-item`, so prefix, description and suffix slots work exactly as they do in a standalone list.
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+autocomplete.itemKey = 'id'
+autocomplete.labelField = 'profile.name'
+autocomplete.descriptionField = 'profile.team'
+autocomplete.searchFields = ['profile.name', 'profile.team', 'code']
+autocomplete.suggestions = serverObjects
+
+autocomplete.renderItem = ({ item }) => html`
+  <c2-avatar slot="prefix-icon" name=${item.profile.name}></c2-avatar>
+  <strong>${item.profile.name}</strong>
+  <span slot="description">${item.profile.team}</span>
+  <c2-badge slot="suffix-icon">${item.code}</c2-badge>
+`
+```
+
+For structures that cannot be described by fields, set `matcher(item, normalizedQuery)` to replace local matching. Remote `dataSource` results are assumed to be filtered by the server.

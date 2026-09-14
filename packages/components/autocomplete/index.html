@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-autocomplete</title>
+    <script type="module" src="/src/autocomplete.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+      }
+      section {
+        max-width: 640px;
+        margin-bottom: 32px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        color: #71717a;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      c2-autocomplete {
+        width: 100%;
+      }
+      #log {
+        margin-top: 8px;
+        color: #71717a;
+        font:
+          12px ui-monospace,
+          monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Mixed local suggestions</h2>
+      <c2-autocomplete
+        id="local"
+        aria-label="Search workspace"
+        placeholder="Search people, files and messages…"
+        item-key="value"
+        label-field="label"
+        description-field="description"
+      >
+        <span slot="header">Workspace results</span>
+        <span slot="footer">Use ↑↓ to move and Enter to select</span>
+      </c2-autocomplete>
+      <div id="log">Type “api”, “ada” or “release”.</div>
+    </section>
+    <section>
+      <h2>Remote data source</h2>
+      <c2-autocomplete
+        id="remote"
+        aria-label="Search server"
+        placeholder="Results arrive from a simulated server…"
+        item-key="value"
+        label-field="label"
+        description-field="description"
+        show-empty
+      ></c2-autocomplete>
+    </section>
+    <script type="module">
+      const suggestions = [
+        { value: 'ada', label: 'Ada Lovelace', description: 'Platform engineering' },
+        { value: 'grace', label: 'Grace Hopper', description: 'Compiler team' },
+        { value: 'api', label: 'Autocomplete API notes', description: 'Updated yesterday' },
+        { value: 'release', label: 'Release checklist', description: 'Vinh · 14 Sep' },
+      ]
+      const local = document.querySelector('#local')
+      const remote = document.querySelector('#remote')
+      local.suggestions = suggestions
+      remote.dataSource = async (query, signal) => {
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(resolve, 450)
+          signal.addEventListener('abort', () => {
+            clearTimeout(timer)
+            reject(new DOMException('Aborted', 'AbortError'))
+          })
+        })
+        return suggestions.filter((item) => item.label.toLowerCase().includes(query.toLowerCase()))
+      }
+      local.addEventListener('suggestion-select', (event) => {
+        document.querySelector('#log').textContent = `Selected: ${event.detail.item.label}`
+      })
+    </script>
+  </body>
+</html>

@@ -19,7 +19,7 @@ interface FormControlElement extends HTMLElement {
  */
 @Directive({
   selector:
-    'c2-radio-group[ngModel], c2-radio-group[formControl], c2-radio-group[formControlName], c2-select[ngModel], c2-select[formControl], c2-select[formControlName], c2-slider[ngModel], c2-slider[formControl], c2-slider[formControlName], c2-text-field[ngModel], c2-text-field[formControl], c2-text-field[formControlName], c2-text-field-clear[ngModel], c2-text-field-clear[formControl], c2-text-field-clear[formControlName], c2-textarea[ngModel], c2-textarea[formControl], c2-textarea[formControlName]',
+    'c2-autocomplete[ngModel], c2-autocomplete[formControl], c2-autocomplete[formControlName], c2-radio-group[ngModel], c2-radio-group[formControl], c2-radio-group[formControlName], c2-select[ngModel], c2-select[formControl], c2-select[formControlName], c2-slider[ngModel], c2-slider[formControl], c2-slider[formControlName], c2-text-field[ngModel], c2-text-field[formControl], c2-text-field[formControlName], c2-text-field-clear[ngModel], c2-text-field-clear[formControl], c2-text-field-clear[formControlName], c2-textarea[ngModel], c2-textarea[formControl], c2-textarea[formControlName]',
   host: {
     '(input)': 'handleInput()',
     '(focusout)': 'handleTouched()',
