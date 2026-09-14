@@ -2372,7 +2372,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
     ],
   },
   'c2-chat-message': {
-    html: `<c2-chat-message style="width: 240px"><c2-avatar name="Elisa Jasmin" initialCount="2" slot="avatar"></c2-avatar><div slot="title">Elisa</div><div slot="header-time">17:29</div><div slot="message">Bonjour 👋</div></c2-chat-message>`,
+    html: `<c2-chat-message style="width: 320px"><c2-avatar name="Nova AI" initials="AI" slot="avatar"></c2-avatar><span slot="title">Nova</span><time slot="header-time">Now</time><div>I found three ways to simplify this flow.</div></c2-chat-message>`,
     presets: [
       {
         name: 'Bubble',
@@ -2407,9 +2407,9 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       {
         name: 'Compact',
         css: {
-          '--c2-chat-message--gap': '8',
+          '--c2-chat-message--gap': '8px',
           '--c2-chat-message--font-size': '13px',
-          '--c2-chat-message__header__title---font-size': '13px',
+          '--c2-chat-message__header__title--font-size': '13px',
           '--c2-chat-message__time--font-size': '11px',
         },
       },

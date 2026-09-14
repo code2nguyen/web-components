@@ -1,6 +1,6 @@
 ---
 title: 'Chat Message'
-description: 'One chat bubble with avatar, title, timestamp and message body.'
+description: 'Flexible message row for conversations, assistant answers and activity updates.'
 category: 'Chat'
 ---
 
@@ -9,6 +9,8 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ChatMessage } from '@c2n/chat-message'
 import { Avatar } from '@c2n/avatar'
+
+`c2-chat-message` arranges an optional avatar, sender details, rich message content and footer actions. Put new message content directly inside the element; the named `message` slot remains available for compatibility. Set `align="right"` for outgoing messages.
 
 ## Installation
 
@@ -20,42 +22,51 @@ npm install @c2n/chat-message
 
 ```html tag=UsageBlock,package=@c2n/chat-message
 <style>
-  .custom-chat-message {
-    --c2-chat-message--gap: 8px;
+  .assistant-surface {
+    box-sizing: border-box;
+    width: min(100%, 620px);
+    padding: 28px;
+    border: 1px solid #e4e4e7;
+    border-radius: 22px;
+    background: linear-gradient(145deg, #ffffff, #f7f7f8);
+    color: #27272a;
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .assistant-message {
+    --c2-chat-message--gap: 12px;
+    --c2-chat-message__message--max-width: 34rem;
     --c2-chat-message__message--gap: 8px;
-    --c2-chat-message__message--border-top-left-radius: 4px;
-    --c2-chat-message__message--border-top-right-radius: 4px;
-    --c2-chat-message__message--border-bottom-left-radius: 4px;
-    --c2-chat-message__message--border-bottom-right-radius: 4px;
-    --c2-chat-message__message--padding-top: 12px;
-    --c2-chat-message__message--padding-right: 16px;
-    --c2-chat-message__message--padding-bottom: 12px;
-    --c2-chat-message__message--padding-left: 16px;
-    --c2-chat-message__message--background: rgba(220, 224, 234, 0.59);
-    --c2-chat-message__header--gap: 8px;
-    --c2-chat-message__time--font-size: 10px;
-    --c2-chat-message--line-height: 26px;
+    --c2-chat-message--line-height: 1.65;
+  }
+  .assistant-avatar {
+    --c2-avatar--size: 34px;
+    --c2-avatar--background: #18181b;
+  }
+  .assistant-copy {
+    display: grid;
+    gap: 10px;
+  }
+  .assistant-copy p {
+    margin: 0;
+  }
+  .assistant-copy strong {
+    color: #18181b;
   }
 </style>
-<div data-label="Default">
-  <c2-chat-message>
-    <c2-avatar name="Nguyen Thai Vinh" slot="avatar"></c2-avatar>
-    <div slot="title">You</div>
-    <div slot="header-time">17h 29</div>
-    <div slot="message">Bonjour</div>
-  </c2-chat-message>
-</div>
-<div data-label="Custom chat message">
-  <c2-chat-message class="custom-chat-message">
-    <c2-avatar name="Chat GPT" slot="avatar">
-      <img src="/web-components/chat.avif" />
-    </c2-avatar>
-    <div slot="title">Chat GPT</div>
-    <div slot="header-time">10h 29</div>
-    <div slot="message">
-      <div>Hi,</div>
-      <div>What can I help you</div>
-    </div>
-  </c2-chat-message>
+
+<div data-label="Assistant answer">
+  <section class="assistant-surface">
+    <c2-chat-message class="assistant-message" client:load>
+      <c2-avatar class="assistant-avatar" client:load name="Nova AI" initials="AI" slot="avatar"></c2-avatar>
+      <span slot="title">Nova</span>
+      <time slot="header-time">Now</time>
+      <div class="assistant-copy">
+        <p><strong>A clearer structure would help.</strong></p>
+        <p>Start with the outcome, group related controls, and keep secondary actions visually quiet until they are needed.</p>
+      </div>
+    </c2-chat-message>
+  </section>
 </div>
 ```
+
+Use semantic elements inside the slots when useful—such as `time`, paragraphs, lists and links. The component only owns the message layout, so rich content remains fully under your control.

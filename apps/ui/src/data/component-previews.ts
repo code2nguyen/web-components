@@ -51,12 +51,12 @@ export const componentPreviews: Record<string, string> = {
   <div slot="header" style="font-size:14px;font-weight:600">Card title</div>
   <div style="font-size:12px;line-height:1.5;color:#71717a">Supporting text that describes what this card is about.</div>
 </c2-card>`,
-  'chat-input': `<c2-chat-input style="width:240px" placeholder="Type a message…"></c2-chat-input>`,
-  'chat-message': `<c2-chat-message style="width:240px">
-  <c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar>
-  <div slot="title">Elisa</div>
-  <div slot="header-time">17:29</div>
-  <div slot="message">Bonjour 👋</div>
+  'chat-input': `<c2-chat-input style="width:240px" aria-label="Message" placeholder="Ask anything…" value="Can you summarize this?"></c2-chat-input>`,
+  'chat-message': `<c2-chat-message style="width:240px;--c2-chat-message__message--max-width:190px">
+  <c2-avatar name="Nova AI" initials="AI" slot="avatar" style="--c2-avatar--background:#18181b"></c2-avatar>
+  <span slot="title">Nova</span>
+  <time slot="header-time">Now</time>
+  <div>I found three ways to simplify this flow.</div>
 </c2-chat-message>`,
   checkbox: `<div class="preview-row">
   <c2-checkbox checked></c2-checkbox>

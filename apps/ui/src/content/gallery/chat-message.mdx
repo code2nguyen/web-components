@@ -1,74 +1,303 @@
+---
+description: 'Real-world assistant, outgoing, research and agent message compositions built with c2-chat-message.'
+---
+
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { ChatMessage } from '@c2n/chat-message'
 import { Avatar } from '@c2n/avatar'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
+import { FeatherCopyIcon as FeatherCopy } from '@c2n/feather-icons/icons/copy.js'
+import { FeatherRotateCcwIcon as FeatherRotateCcw } from '@c2n/feather-icons/icons/rotate-ccw.js'
+import { FeatherThumbsUpIcon as FeatherThumbsUp } from '@c2n/feather-icons/icons/thumbs-up.js'
 
-## Presets
+Each card treats the message as part of a believable conversation. The examples stay full-width so typography and long-form content have room to breathe.
 
-Curated looks for `c2-chat-message`. Open any card in the studio to start from it.
-
-<GalleryGrid>
+<GalleryGrid min={9999}>
 
 ```html tag=MdxCodeBlock,label=Default
 <style>
-  .default-message {
-    width: 240px;
+  .default-message-stage {
+    box-sizing: border-box;
+    width: min(100%, 720px);
+    padding: 30px;
+    border: 1px solid #e4e4e7;
+    border-radius: 24px;
+    background: #ffffff;
+    color: #27272a;
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .default-message-copy {
+    display: grid;
+    gap: 8px;
+  }
+  .default-message-copy p {
+    margin: 0;
   }
 </style>
-<c2-chat-message class="default-message">
-  <c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar>
-  <div slot="title">Elisa</div>
-  <div slot="header-time">17:29</div>
-  <div slot="message">Bonjour 👋</div>
-</c2-chat-message>
+
+<section class="default-message-stage">
+  <c2-chat-message client:load>
+    <c2-avatar client:load auto-color name="Maya Chen" initial-count="2" slot="avatar"></c2-avatar>
+    <span slot="title">Maya</span>
+    <time slot="header-time">A moment ago</time>
+    <div class="default-message-copy">
+      <p>I’ve reviewed the latest prototype.</p>
+      <p>The new hierarchy is easier to scan, especially around the primary action.</p>
+    </div>
+  </c2-chat-message>
+</section>
 ```
 
-```html tag=MdxCodeBlock,label=Bubble
+```html tag=MdxCodeBlock,label=Assistant answer
 <style>
-  .bubble {
-    --c2-chat-message__message--background: #eff6ff;
-    --c2-chat-message__message--padding-top: 8px;
-    --c2-chat-message__message--padding-bottom: 8px;
-    --c2-chat-message__message--padding-left: 12px;
-    --c2-chat-message__message--padding-right: 12px;
-    --c2-chat-message__message--border-top-left-radius: 4px;
-    --c2-chat-message__message--border-top-right-radius: 14px;
-    --c2-chat-message__message--border-bottom-left-radius: 14px;
-    --c2-chat-message__message--border-bottom-right-radius: 14px;
+  .answer-stage {
+    box-sizing: border-box;
+    width: min(100%, 720px);
+    padding: 30px;
+    border: 1px solid #e4e4e7;
+    border-radius: 24px;
+    background: linear-gradient(145deg, #ffffff, #f7f7f8);
+    color: #27272a;
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .answer-message {
+    --c2-chat-message__message--max-width: 38rem;
+    --c2-chat-message__message--gap: 9px;
+    --c2-chat-message--line-height: 1.65;
+  }
+  .answer-avatar {
+    --c2-avatar--size: 36px;
+    --c2-avatar--background: #18181b;
+  }
+  .answer-copy {
+    display: grid;
+    gap: 12px;
+  }
+  .answer-copy p {
+    margin: 0;
+  }
+  .answer-copy ul {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 20px;
+  }
+  .answer-actions {
+    display: flex;
+    gap: 2px;
+    margin-left: -7px;
+  }
+  .answer-action {
+    --c2-icon-button__state-layer--size: 30px;
+    --c2-icon-button__icon--width: 15px;
+    --c2-icon-button__icon--height: 15px;
+    --c2-icon-button__icon--color: #71717a;
+    --c2-icon-button__hover--background-color: #eeeeef;
   }
 </style>
-<c2-chat-message style="width: 240px" class="bubble"><c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar><div slot="title">Elisa</div><div slot="header-time">17:29</div><div slot="message">Bonjour 👋</div></c2-chat-message>
+
+<section class="answer-stage">
+  <c2-chat-message class="answer-message" client:load>
+    <c2-avatar class="answer-avatar" client:load name="Nova AI" initials="AI" slot="avatar"></c2-avatar>
+    <span slot="title">Nova</span>
+    <time slot="header-time">Just now</time>
+    <div class="answer-copy">
+      <p>The strongest version keeps the interaction focused on one decision at a time.</p>
+      <ul>
+        <li>Lead with the recommended action.</li>
+        <li>Reveal advanced options only when they become relevant.</li>
+        <li>Keep status feedback close to the control that caused it.</li>
+      </ul>
+    </div>
+    <div class="answer-actions" slot="emotion">
+      <c2-icon-button class="answer-action" client:load tooltip="Copy answer"><c2-feather-copy></c2-feather-copy></c2-icon-button>
+      <c2-icon-button class="answer-action" client:load tooltip="Good answer"><c2-feather-thumbs-up></c2-feather-thumbs-up></c2-icon-button>
+      <c2-icon-button class="answer-action" client:load tooltip="Try again"><c2-feather-rotate-ccw></c2-feather-rotate-ccw></c2-icon-button>
+    </div>
+  </c2-chat-message>
+</section>
 ```
 
-```html tag=MdxCodeBlock,label=Outgoing
+```html tag=MdxCodeBlock,label=Outgoing bubble
 <style>
-  .outgoing {
-    --c2-chat-message__message--background: #2563eb;
-    --c2-chat-message__message--color: #ffffff;
-    --c2-chat-message__message--padding-top: 8px;
-    --c2-chat-message__message--padding-bottom: 8px;
-    --c2-chat-message__message--padding-left: 12px;
-    --c2-chat-message__message--padding-right: 12px;
-    --c2-chat-message__message--border-top-left-radius: 14px;
-    --c2-chat-message__message--border-top-right-radius: 4px;
-    --c2-chat-message__message--border-bottom-left-radius: 14px;
-    --c2-chat-message__message--border-bottom-right-radius: 14px;
+  .outgoing-stage {
+    box-sizing: border-box;
+    width: min(100%, 720px);
+    padding: 30px;
+    border-radius: 24px;
+    background: #f4f4f5;
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .outgoing-message {
+    --c2-chat-message--gap: 10px;
+    --c2-chat-message__message--max-width: min(30rem, 78%);
+    --c2-chat-message__message--gap: 5px;
+    --c2-chat-message__message--padding-top: 10px;
+    --c2-chat-message__message--padding-right: 14px;
+    --c2-chat-message__message--padding-bottom: 10px;
+    --c2-chat-message__message--padding-left: 14px;
+    --c2-chat-message__message--border-top-left-radius: 18px;
+    --c2-chat-message__message--border-top-right-radius: 5px;
+    --c2-chat-message__message--border-bottom-left-radius: 18px;
+    --c2-chat-message__message--border-bottom-right-radius: 18px;
+    --c2-chat-message__message--background: #18181b;
+    --c2-chat-message__message--color: #fafafa;
+    --c2-chat-message__header__title--color: #52525b;
+    --c2-chat-message__time--color: #71717a;
+  }
+  .outgoing-message p {
+    margin: 0;
   }
 </style>
-<c2-chat-message style="width: 240px" class="outgoing" align="right"><c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar><div slot="title">Elisa</div><div slot="header-time">17:29</div><div slot="message">Bonjour 👋</div></c2-chat-message>
+
+<section class="outgoing-stage">
+  <c2-chat-message class="outgoing-message" client:load align="right">
+    <span slot="title">You</span>
+    <time slot="header-time">2:42 PM</time>
+    <p>Compare the two onboarding directions and recommend the calmer one.</p>
+    <span slot="footer-time">Delivered</span>
+  </c2-chat-message>
+</section>
 ```
 
-```html tag=MdxCodeBlock,label=Compact
+```html tag=MdxCodeBlock,label=Research note
 <style>
-  .compact {
-    --c2-chat-message--gap: 8;
+  .research-message-stage {
+    box-sizing: border-box;
+    width: min(100%, 720px);
+    padding: 30px;
+    border: 1px solid #e8e1d5;
+    border-radius: 24px;
+    background: #f8f5ef;
+    color: #302b25;
+    font-family: Georgia, serif;
+  }
+  .research-message {
+    --c2-chat-message--gap: 13px;
+    --c2-chat-message__message--max-width: 39rem;
+    --c2-chat-message--font-family: Georgia, serif;
+    --c2-chat-message--font-size: 15px;
+    --c2-chat-message--line-height: 1.7;
+    --c2-chat-message__header__title--color: #302b25;
+    --c2-chat-message__time--color: #8a7d6b;
+  }
+  .research-message-avatar {
+    --c2-avatar--size: 36px;
+    --c2-avatar--background: #7c5c3e;
+  }
+  .research-message-copy {
+    display: grid;
+    gap: 12px;
+  }
+  .research-message-copy p {
+    margin: 0;
+  }
+  .research-sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .research-source {
+    padding: 5px 9px;
+    border: 1px solid #ded4c4;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.58);
+    color: #6d5f4d;
+    font: 600 11px/1.2 Inter, system-ui, sans-serif;
+    text-decoration: none;
+  }
+</style>
+
+<section class="research-message-stage">
+  <c2-chat-message class="research-message" client:load>
+    <c2-avatar class="research-message-avatar" client:load name="Research assistant" initials="R" slot="avatar"></c2-avatar>
+    <span slot="title">Research assistant</span>
+    <time slot="header-time">3 sources</time>
+    <div class="research-message-copy">
+      <p>Retention improved most when teams shortened setup and delayed optional personalization until after the first successful outcome.</p>
+      <div class="research-sources">
+        <a class="research-source" href="#source-1">1 · Product report</a>
+        <a class="research-source" href="#source-2">2 · User interviews</a>
+        <a class="research-source" href="#source-3">3 · Cohort analysis</a>
+      </div>
+    </div>
+  </c2-chat-message>
+</section>
+```
+
+```html tag=MdxCodeBlock,label=Agent activity
+<style>
+  .agent-stage {
+    box-sizing: border-box;
+    width: min(100%, 720px);
+    padding: 28px;
+    border: 1px solid #27272a;
+    border-radius: 20px;
+    background: #09090b;
+    color: #e4e4e7;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .agent-message {
+    --c2-chat-message--gap: 11px;
+    --c2-chat-message--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     --c2-chat-message--font-size: 13px;
-    --c2-chat-message__header__title---font-size: 13px;
-    --c2-chat-message__time--font-size: 11px;
+    --c2-chat-message__message--max-width: 38rem;
+    --c2-chat-message__message--gap: 8px;
+    --c2-chat-message__message--padding-top: 12px;
+    --c2-chat-message__message--padding-right: 14px;
+    --c2-chat-message__message--padding-bottom: 12px;
+    --c2-chat-message__message--padding-left: 14px;
+    --c2-chat-message__message--border-top-left-radius: 10px;
+    --c2-chat-message__message--border-top-right-radius: 10px;
+    --c2-chat-message__message--border-bottom-left-radius: 10px;
+    --c2-chat-message__message--border-bottom-right-radius: 10px;
+    --c2-chat-message__message--border-top: 1px solid #3f3f46;
+    --c2-chat-message__message--border-right: 1px solid #3f3f46;
+    --c2-chat-message__message--border-bottom: 1px solid #3f3f46;
+    --c2-chat-message__message--border-left: 1px solid #3f3f46;
+    --c2-chat-message__message--background: #18181b;
+    --c2-chat-message__message--color: #e4e4e7;
+    --c2-chat-message__header__title--color: #f4f4f5;
+    --c2-chat-message__time--color: #71717a;
+  }
+  .agent-status {
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-top: 2px;
+    border-radius: 9px;
+    background: #14532d;
+    color: #86efac;
+    --c2-feather-icon--size: 16px;
+  }
+  .agent-copy {
+    display: grid;
+    gap: 8px;
+  }
+  .agent-copy p {
+    margin: 0;
+  }
+  .agent-command {
+    color: #86efac;
   }
 </style>
-<c2-chat-message style="width: 240px" class="compact"><c2-avatar name="Elisa Jasmin" initial-count="2" slot="avatar"></c2-avatar><div slot="title">Elisa</div><div slot="header-time">17:29</div><div slot="message">Bonjour 👋</div></c2-chat-message>
+
+<section class="agent-stage">
+  <c2-chat-message class="agent-message" client:load>
+    <span class="agent-status" slot="avatar"><c2-feather-check></c2-feather-check></span>
+    <span slot="title">Codex</span>
+    <time slot="header-time">Completed in 8s</time>
+    <div class="agent-copy">
+      <p>Updated the message layout and regenerated its component manifest.</p>
+      <p class="agent-command">✓ 5 browser tests passed</p>
+    </div>
+  </c2-chat-message>
+</section>
 ```
 
 </GalleryGrid>

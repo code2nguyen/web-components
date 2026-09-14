@@ -4,17 +4,35 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Lit + TS</title>
+    <title>Chat input</title>
     <script type="module" src="/src/chat-input.ts"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
-        padding: 24px;
+        margin: 0;
+        min-height: 100vh;
+        padding: 48px 24px;
+        background: #f4f4f5;
+        color: #18181b;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      main {
+        width: min(100%, 640px);
+        margin: 0 auto;
+      }
+      h1 {
+        margin: 0 0 24px;
+        font-size: 24px;
       }
     </style>
   </head>
 
   <body>
-    <c2-chat-input></c2-chat-input>
+    <main>
+      <h1>Chat input</h1>
+      <c2-chat-input aria-label="Message" placeholder="Ask anything…"></c2-chat-input>
+    </main>
   </body>
 </html>
