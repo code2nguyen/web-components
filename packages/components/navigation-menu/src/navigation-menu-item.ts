@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, svg, unsafeCSS } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import type { Overlay, Placement } from '@c2n/overlay'
 import styles from './navigation-menu-item.scss?inline'
@@ -17,6 +19,16 @@ const PANEL_FOCUSABLE = 'a[href], button:not([disabled]), c2-navigation-menu-lin
 
 /** What marks the current page inside a panel: a `current` row, or any element announcing `aria-current`. */
 const PANEL_CURRENT = '[current], [aria-current]:not([aria-current="false"])'
+
+/** Events fired by {@link NavigationMenuItem}, keyed for `addEventListener`. */
+export interface NavigationMenuItemEventMap {
+  'panel-toggle': CustomEvent<PanelToggleEventDetail>
+}
+
+export interface NavigationMenuItem {
+  addEventListener: TypedAddEventListener<NavigationMenuItem, NavigationMenuItemEventMap>
+  removeEventListener: TypedRemoveEventListener<NavigationMenuItem, NavigationMenuItemEventMap>
+}
 
 /**
  * One entry of a `c2-navigation-menu`. With an `href` and nothing in the `panel` slot it is a plain link; with content
@@ -140,6 +152,7 @@ export class NavigationMenuItem extends LitElement {
   /** Makes the item a link. An item with panel content is always a trigger, even with an `href`. */
   @property() href?: string
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target?: string
 
   /** The entry of the page being shown: announced as `aria-current="page"` and styled with the `__current` variables. */

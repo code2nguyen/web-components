@@ -114,6 +114,46 @@ Follow the shape in `packages/checkbox/src/checkbox.ts`:
 - Expose customization points as named `<slot>`s with inline SVG defaults (see the checkmark/mixedmark/uncheckmark slots).
 - `@typescript-eslint/no-explicit-any` is an error; `noUnusedLocals`/`noUnusedParameters` are on (prefix intentionally unused args with `_`).
 
+## Using c2n components in the UI app
+
+**In `apps/ui` (and any app under `apps/`), reach for a `c2-*` component before writing markup of your own.** The
+docs site is the shop window for these packages: every hand-rolled button, select or disclosure in its chrome is a
+component the library either has (and should be used) or is missing (and should be filed). This is not a style
+preference — it is how the components get exercised against real usage.
+
+The rule, in order:
+
+1. **Use the `c2-*` element.** Find it with the `c2n` MCP server (`search_components`, `get_component`), or
+   `packages/tools/skill/skills/c2n-components/references/component-catalog.md` for a name, then the package's
+   `custom-elements.json` for the exact API. There are 52 of them; assume one exists before concluding it does not.
+2. **Style it through its own CSS variables** (`--c2-<component>__<part>--<property>`), bridged to the site's
+   `--site-*` tokens. Never fork a component's internals or reach into its shadow DOM. An app-level variant belongs
+   in `src/components/ui/` (`SiteButton.astro`, `SiteCard.astro`, `SiteIconButton.astro` are the pattern: a `c2-*`
+   element plus a class block of `--c2-*` values).
+3. **Only then write plain HTML**, and say why in a `<!-- dogfood-exempt: reason -->` comment on the line.
+4. **If no component fits, that is a finding** — say so rather than quietly hand-rolling one.
+
+`npm run check:dogfood` enforces this (also a CI gate): it fails on a native `<button>`, `<select>`, `<input>`,
+`<textarea>`, `<dialog>`, `<details>` or `<progress>` in `apps/ui/src/{components,layouts,pages}` that is neither
+exempted nor in the script's `KNOWN` list of pre-existing chrome. That list is a ratchet — shrink it, never grow it.
+
+When you replace a native control with a c2 component, **delete the old rule's box styling**. A leftover
+`border` / `padding` / `background` / `height` on the class stays on the _host_, and the component draws its
+own box inside it — two nested frames, most visible as a second focus ring inset by the old padding. Keep
+only layout (`flex`, `min-width`, `margin`) on the host and move sizing to the component's own variables.
+
+### Report back what you hit
+
+Using a component is also how it gets improved. **Whenever you consume a `c2-*` component from an app and hit
+friction — a bug, something documented that does not work, an API that makes the common case hard, or a case
+where you had to fall back to plain HTML — append an entry to `COMPONENT-FEEDBACK.md`.** Every
+`dogfood-exempt` comment you write should have an entry there saying what was missing. Keep it concrete: what
+you were building, what you expected, what happened, and the smallest change that would have avoided it. If
+you fix the component in the same change, skip the log — the commit and the test are the record.
+
+Repeated chrome renders as plain tags upgraded by `src/data/chrome-modules.ts` (`hydrate="defined"`); unique chrome
+renders as an Astro island. Add the package to `chrome-modules.ts` when you introduce a new one.
+
 ## Code style
 
 Prettier: single quotes, no semicolons, print width 160, 2-space tabs. Astro files use `prettier-plugin-astro`.

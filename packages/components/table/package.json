@@ -5,22 +5,34 @@
   "main": "dist/table.js",
   "exports": {
     ".": {
-      "default": "./dist/table.js",
-      "types": "./types/src/table.d.ts"
+      "types": "./types/src/table.d.ts",
+      "default": "./dist/table.js"
     },
     "./table-column.js": {
-      "default": "./dist/table-column.js",
-      "types": "./types/src/table-column.d.ts"
+      "types": "./types/src/table-column.d.ts",
+      "default": "./dist/table-column.js"
     },
     "./table-types.js": {
-      "default": "./dist/table-types.js",
-      "types": "./types/src/table-types.d.ts"
+      "types": "./types/src/table-types.d.ts",
+      "default": "./dist/table-types.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "table",

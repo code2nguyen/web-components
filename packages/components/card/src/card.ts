@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './card.scss?inline'
@@ -96,8 +97,10 @@ export class Card extends LitElement {
   /** Makes the whole card a link. */
   @property() href: string | undefined = undefined
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target: string | undefined = undefined
 
+  /** Link relationship forwarded to the anchor when `href` is set. */
   @property() rel: string | undefined = undefined
 
   @state() private hasMedia = false

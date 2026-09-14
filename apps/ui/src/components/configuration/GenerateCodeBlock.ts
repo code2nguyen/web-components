@@ -153,7 +153,7 @@ export class GenerateCodeBLock extends LitElement {
     const format = FORMATS.find((entry) => entry.id === this.format)!
     const language = this.format === 'lit' ? 'ts' : this.format === 'json' ? 'json' : this.format
     return html`
-      <c2-tabs class="formats" selected-tab=${`format-${this.format}`} @change=${this.handleFormatChange}>
+      <c2-tabs class="formats" selected-tab=${`format-${this.format}`} @selection-change=${this.handleFormatChange}>
         ${FORMATS.map((entry) => html`<c2-tab label=${entry.label} for=${`format-${entry.id}`}></c2-tab>`)}
       </c2-tabs>
       <label class="name">

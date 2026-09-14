@@ -1,8 +1,20 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './checkbox.scss?inline'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
+
+/** Events fired by {@link Checkbox}, keyed for `addEventListener`. */
+export interface CheckboxEventMap {
+  change: Event
+}
+
+export interface Checkbox {
+  addEventListener: TypedAddEventListener<Checkbox, CheckboxEventMap>
+  removeEventListener: TypedRemoveEventListener<Checkbox, CheckboxEventMap>
+}
 
 /**
  * A checkbox with native `<input type="checkbox">` behaviour. The visible box sits centred in a square touch target
@@ -62,10 +74,16 @@ import { redispatchEvent } from '@c2n/core/dom-helper.js'
  */
 @customElement('c2-checkbox')
 export class Checkbox extends LitElement {
+  static formAssociated = true
+
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+  @state() private disabledByForm = false
+
   @query('input') protected formElement!: HTMLInputElement
 
   /** Whether the checkbox is checked. */
-  @property({ type: Boolean, reflect: true }) checked = false
+  @property({ type: Boolean }) checked = false
 
   /** Shows the mixed state (neither checked nor unchecked), e.g. for a parent of a partially selected group. */
   @property({ type: Boolean, reflect: true }) indeterminate = false
@@ -76,14 +94,71 @@ export class Checkbox extends LitElement {
   /** Form field name forwarded to the inner input. */
   @property({ type: String }) name = ''
 
+  /** Value submitted while checked. */
+  @property({ type: String }) value = 'on'
+
+  /** Requires the checkbox to be checked for the form to be valid. */
+  @property({ type: Boolean, reflect: true }) required = false
+
+  /** Accessible name used when no visible label names the checkbox. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 
+  /** Id of the element that labels the checkbox. */
   @property({ type: String, attribute: 'aria-labelledby' })
   ariaLabelledBy!: undefined | string
 
+  /** Id of the element that describes the checkbox. */
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
+
+  /** The containing form, when this control is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+
+  get validity() {
+    return this.internals.validity
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+
+  get willValidate() {
+    return this.internals.willValidate
+  }
+
+  formResetCallback() {
+    this.checked = this.hasAttribute('checked')
+    this.indeterminate = false
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    this.checked = state === 'checked'
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity()
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity()
+  }
+
+  setCustomValidity(message: string) {
+    this.customValidityMessage = message
+    this.requestUpdate()
+  }
 
   override render() {
     const ariaChecked = this.indeterminate ? 'mixed' : undefined
@@ -97,7 +172,9 @@ export class Checkbox extends LitElement {
           aria-label="${ifDefined(this.ariaLabel)}"
           aria-labelledby="${ifDefined(this.ariaLabelledBy)}"
           aria-describedby="${ifDefined(this.ariaDescribedBy)}"
-          ?disabled="${this.disabled}"
+          ?disabled="${this.effectiveDisabled}"
+          ?required="${this.required}"
+          .value="${this.value}"
           .indeterminate="${this.indeterminate}"
           ?checked="${this.checked}"
           @change="${this.handleChange}"
@@ -137,6 +214,18 @@ export class Checkbox extends LitElement {
       this.formElement.checked = this.checked
     }
     super.update(changedProperties)
+  }
+
+  protected override updated(_changedProperties: PropertyValues) {
+    this.internals.setFormValue(this.checked ? this.value : null, this.checked ? 'checked' : 'unchecked')
+    const missing = this.required && !this.checked
+    const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
+    const message = this.customValidityMessage || (missing ? 'Please check this box.' : '')
+    this.internals.setValidity(flags, message, this.formElement)
+  }
+
+  private get effectiveDisabled() {
+    return this.disabled || this.disabledByForm
   }
 
   protected handleChange(event: Event) {

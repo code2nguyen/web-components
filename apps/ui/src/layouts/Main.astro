@@ -5,6 +5,7 @@ import '@c2n/theme/base.css'
 import '../assets/global.scss'
 import SiteIconButton from '../components/ui/SiteIconButton.astro'
 import { FeatherGithubIcon, FeatherMenuIcon, FeatherSearchIcon } from '../components/ui/icons'
+import { Button } from '@c2n/button'
 import { LinkButton } from '@c2n/link-button'
 import ThemeToggle from '../components/ThemeToggle.astro'
 import SearchPalette from '../components/SearchPalette.astro'
@@ -18,7 +19,7 @@ interface Props {
   /** Render the mobile "open navigation" button (docs pages). */
   withSidebar?: boolean
   /** Which top-level nav item is active. */
-  section?: 'components' | 'icons' | 'guides'
+  section?: 'components' | 'icons' | 'guides' | 'examples'
 }
 const { title, description = 'A library of small, themable Lit web components published as individual npm packages.', withSidebar, section } = Astro.props
 const repoUrl = 'https://github.com/code2nguyen/web-components'
@@ -75,16 +76,17 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
           <LinkButton client:load class="site-header__nav-link" href={`${base}/components/`} selected={section === 'components'}>Components</LinkButton>
           <LinkButton client:load class="site-header__nav-link" href={`${base}/icons/`} selected={section === 'icons'}>Icons</LinkButton>
           <LinkButton client:load class="site-header__nav-link" href={`${base}/guides/`} selected={section === 'guides'}>Guides</LinkButton>
+          <LinkButton client:load class="site-header__nav-link" href={`${base}/examples/`} selected={section === 'examples'}>Examples</LinkButton>
           <LinkButton client:load class="site-header__nav-link" href={`${base}/#getting-started`}>Getting started</LinkButton>
         </nav>
 
         <div class="site-header__spacer"></div>
 
-        <button class="site-header__search" type="button" data-open-search aria-label="Search components">
-          <FeatherSearchIcon client:load />
+        <Button client:load class="site-header__search" data-open-search aria-label="Search components">
+          <FeatherSearchIcon slot="prefix-icon" />
           <span class="site-header__search-label">Search</span>
-          <kbd class="kbd">⌘K</kbd>
-        </button>
+          <kbd slot="suffix-icon" class="kbd">⌘K</kbd>
+        </Button>
         <SiteIconButton label="Search components" class="site-header__search-compact" data-open-search>
           <FeatherSearchIcon client:load />
         </SiteIconButton>
@@ -243,29 +245,31 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
           flex: 1;
         }
 
-        &__search {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          height: 34px;
-          padding: 0 10px 0 12px;
+        // A field-shaped button: fixed width, label at the left, shortcut pushed to the far edge — which is
+        // what `container--width` and `container--justify-content` exist for.
+        :global(.site-header__search) {
           margin-right: 4px;
-          min-width: 220px;
-          border: 1px solid var(--site-color-outline-variant);
-          border-radius: var(--site-radius-sm);
-          background: var(--site-color-surface-container-1);
-          color: var(--site-color-on-surface-muted);
-          font-size: 13px;
-          cursor: pointer;
-          transition: border-color 150ms var(--site-ease);
-          &:hover {
-            border-color: var(--site-color-outline);
-            color: var(--site-color-on-surface-variant);
-          }
+          --c2-button__container--width: 220px;
+          --c2-button__container--justify-content: flex-start;
+          // The label takes the slack, so the shortcut lands at the right edge rather than beside the text.
+          --c2-button__label--flex-grow: 1;
+          --c2-button__label--justify-content: flex-start;
+          --c2-button__container--height: 34px;
+          --c2-button__container--padding-left: 12px;
+          --c2-button__container--padding-right: 10px;
+          --c2-button__container--gap: 8px;
+          --c2-button__container--border-radius: var(--site-radius-sm);
+          --c2-button__container--border: 1px solid var(--site-color-outline-variant);
+          --c2-button__container--background-color: var(--site-color-surface-container-1);
+          --c2-button__container--color: var(--site-color-on-surface-muted);
+          --c2-button__container--font-size: 13px;
+          --c2-button__container--font-weight: 400;
+          --c2-button__container__hover--background-color: var(--site-color-surface-container-1);
+          --c2-button__container__hover--border: 1px solid var(--site-color-outline);
+          --c2-button__container__hover--color: var(--site-color-on-surface-variant);
+          --c2-button__container__focus--outline: 2px solid var(--site-color-primary);
+          --c2-button__icon--size: 16px;
           --c2-feather-icon--size: 16px;
-          .kbd {
-            margin-left: auto;
-          }
         }
         :global(.site-header__search-compact) {
           display: none;
@@ -306,7 +310,7 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
           &__nav {
             display: none;
           }
-          &__search {
+          :global(.site-header__search) {
             display: none;
           }
           :global(.site-header__search-compact) {

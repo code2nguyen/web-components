@@ -5,14 +5,26 @@
   "main": "dist/card.js",
   "exports": {
     ".": {
-      "default": "./dist/card.js",
-      "types": "./types/src/card.d.ts"
+      "types": "./types/src/card.d.ts",
+      "default": "./dist/card.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "card",

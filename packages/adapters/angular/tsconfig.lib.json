@@ -1,0 +1,23 @@
+{
+  "extends": "@c2n/config/tsconfig.lib.json",
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "composite": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "emitDeclarationOnly": false,
+    "declarationMap": false,
+    "experimentalDecorators": false,
+    "useDefineForClassFields": false,
+    "importHelpers": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "allowImportingTsExtensions": false,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "partial",
+    "strictTemplates": true,
+    "enableI18nLegacyMessageIdFormat": false
+  }
+}

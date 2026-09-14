@@ -5,14 +5,26 @@
   "main": "dist/button-group.js",
   "exports": {
     ".": {
-      "default": "./dist/button-group.js",
-      "types": "./types/src/button-group.d.ts"
+      "types": "./types/src/button-group.d.ts",
+      "default": "./dist/button-group.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "button group",

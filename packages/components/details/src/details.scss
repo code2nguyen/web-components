@@ -33,6 +33,7 @@
     header__icon--height: 20px,
     header__icon--color: variables.$color-border-dark,
     header__icon--rotate: 180deg,
+    header__icon--rotate-collapsed: 0deg,
 
     header__content--margin-top: 4px,
     header__content--color: variables.$color-border-dark,
@@ -145,6 +146,9 @@ summary {
     display: block;
     width: css.cssVar(header__icon--width);
     height: css.cssVar(header__icon--height);
+    // The closed angle is settable too: a nav group wants its chevron pointing right when collapsed, and
+    // rotating only on open would otherwise force the author to slot a different icon.
+    transform: rotate(css.cssVar(header__icon--rotate-collapsed));
     transition: transform css.cssVar(transition-duration) animation.$standard-easing;
   }
 

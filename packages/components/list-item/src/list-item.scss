@@ -147,11 +147,18 @@
 ::slotted([slot='prefix-icon']),
 ::slotted([slot='suffix-icon']) {
   flex: none;
-  width: css.cssVar(icon--size);
-  height: css.cssVar(icon--size);
   color: css.cssVar(icon--color);
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+// A bare `<svg>` is the one thing in these slots with no size of its own to work from, so it is the one thing the row
+// sizes. A `c2-feather-*` or `c2-mat-icon` reads the variables set above, and anything else — a shortcut hint, a
+// badge, an avatar — keeps its natural size instead of being squared off to an icon's.
+::slotted(svg[slot='prefix-icon']),
+::slotted(svg[slot='suffix-icon']) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
 }
 
 :host([selected]) {

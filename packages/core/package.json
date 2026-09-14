@@ -16,6 +16,18 @@
       "types": "./dist/dom-helper.d.ts",
       "default": "./dist/dom-helper.js"
     },
+    "./element-helper.js": {
+      "types": "./dist/element-helper.d.ts",
+      "default": "./dist/element-helper.js"
+    },
+    "./event-helper.js": {
+      "types": "./dist/event-helper.d.ts",
+      "default": "./dist/event-helper.js"
+    },
+    "./data-helper.js": {
+      "types": "./dist/data-helper.d.ts",
+      "default": "./dist/data-helper.js"
+    },
     "./lit-helper.js": {
       "types": "./dist/lit-helper.d.ts",
       "default": "./dist/lit-helper.js"

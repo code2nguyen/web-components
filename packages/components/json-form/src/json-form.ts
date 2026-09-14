@@ -1,5 +1,6 @@
 import { LitElement, html, type TemplateResult } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import COMPONENT_REGISTRY from './component-registry'
 import type { JsonFormGroup, JsonFormItem, UIDefinition } from './types'
 import { FORM_DATA_CHANGE, FORM_ITEM_DATA_CHANGE, isJsonFormGroup, isJsonFormItem, renderUI } from './utils'

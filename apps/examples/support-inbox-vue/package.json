@@ -1,0 +1,73 @@
+{
+  "name": "@c2n/example-support-inbox-vue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../../packages/core:build",
+        "../../../packages/components/avatar:build",
+        "../../../packages/components/badge:build",
+        "../../../packages/components/button:build",
+        "../../../packages/components/chat-message:build",
+        "../../../packages/components/icon-button:build",
+        "../../../packages/components/list:build",
+        "../../../packages/components/list-item:build",
+        "../../../packages/components/select:build",
+        "../../../packages/components/sheet:build",
+        "../../../packages/components/text-field:build",
+        "../../../packages/components/textarea:build",
+        "../../../packages/components/toast:build",
+        "../../../packages/components/tooltip:build",
+        "../../../packages/icons/feather-icons:build",
+        "../../../packages/tools/theme:build"
+      ],
+      "command": "vue-tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "files": [
+        "src/**",
+        "index.html",
+        "vite.config.ts",
+        "tsconfig*.json"
+      ],
+      "output": [
+        "dist/**"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/avatar": "*",
+    "@c2n/badge": "*",
+    "@c2n/button": "*",
+    "@c2n/chat-message": "*",
+    "@c2n/feather-icons": "*",
+    "@c2n/icon-button": "*",
+    "@c2n/list": "*",
+    "@c2n/list-item": "*",
+    "@c2n/select": "*",
+    "@c2n/sheet": "*",
+    "@c2n/text-field": "*",
+    "@c2n/textarea": "*",
+    "@c2n/theme": "*",
+    "@c2n/toast": "*",
+    "@c2n/tooltip": "*",
+    "vue": "3.5.42"
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "@c2n/framework-types": "0.0.6",
+    "@vitejs/plugin-vue": "6.0.8",
+    "vue-tsc": "3.3.11"
+  }
+}

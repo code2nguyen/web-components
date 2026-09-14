@@ -4,6 +4,22 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'line-chart': `<c2-line-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="month" data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series><c2-chart-series field="cost" label="Cost"></c2-chart-series></c2-line-chart>`,
+  'area-chart': `<c2-area-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="t" curve="smooth" fill-opacity="0.22" legend="none" data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'><c2-chart-series field="sessions" label="Sessions"></c2-chart-series></c2-area-chart>`,
+  'bar-chart': `<c2-bar-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="team" x-type="category" legend="none" data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'><c2-chart-series field="shipped" label="Shipped"></c2-chart-series></c2-bar-chart>`,
+  'pie-chart': `<c2-pie-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="channel" inner-radius="0.58" legend="none" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
+  sparkline: `<div class="preview-row"><c2-sparkline style="--c2-chart--width:120px" data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline><c2-sparkline style="--c2-chart--width:120px" data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline></div>`,
+  autocomplete: `<c2-autocomplete style="width:240px" aria-label="Search workspace" placeholder="Search people, files…" suggestions='[{"label":"Ada Lovelace"},{"label":"Product roadmap"}]'></c2-autocomplete>`,
+  header: `<c2-header style="width:280px;--c2-header--padding:8px 12px;--c2-header--min-height:48px">
+  <strong slot="brand">Northstar</strong>
+  <span style="font-size:12px">Markets</span>
+  <button slot="actions" type="button">Sign in</button>
+</c2-header>`,
+  stat: `<c2-stat style="width:240px" value="$18.4M" label="Assets under management" tone="positive">
+  <span slot="trend" style="color:#15803d;font-size:12px;font-weight:600">+12%</span>
+</c2-stat>`,
+  attachment: `<c2-attachment style="width:240px" name="project-brief.pdf" type="PDF" size="2.4 MB" status="uploading" progress="64" removable></c2-attachment>`,
+  'virtual-list': `<c2-virtual-list aria-label="People" style="width:240px;height:132px" item-key="id" label-field="name" description-field="team" items='[{"id":"1","name":"Ada Lovelace","team":"Analytics"},{"id":"2","name":"Grace Hopper","team":"Compilers"},{"id":"3","name":"Alan Turing","team":"Research"},{"id":"4","name":"Katherine Johnson","team":"Flight"},{"id":"5","name":"Radia Perlman","team":"Networks"},{"id":"6","name":"Barbara Liskov","team":"Research"},{"id":"7","name":"Margaret Hamilton","team":"Flight"}]'></c2-virtual-list>`,
   pagination: `<c2-pagination total-pages="9" page="3" hide-nav-labels></c2-pagination>`,
   accordion: `<c2-accordion style="width:240px">
   <c2-details label="Shipping" expanded>Delivered in 3–5 business days.</c2-details>

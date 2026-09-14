@@ -23,9 +23,59 @@ test('consumer cancellation prevents a tab switch', async ({ page, renderScenari
 test('click emits one change and clearing selection restores the first panel', async ({ page, renderScenario }) => {
   await renderScenario(markup)
   const host = page.locator('c2-tabs')
-  await watch(host, 'change')
+  await watch(host, 'selection-change')
   await page.getByRole('tab', { name: 'Third' }).click()
   await expect(host).toHaveAttribute('data-events', '[{"value":"three"}]')
   await props(host, { selectedTab: '' })
   await expect(page.getByRole('tabpanel')).toHaveText('First content')
+})
+
+// Every test above renders parsed markup, which is the one path that never checks whether a custom element
+// constructor added attributes. `document.createElement` does check, and it is how React, Angular and every
+// other framework renderer builds an element — so a constructor that called `setAttribute` threw
+// `NotSupportedError` and took the whole tab strip with it, invisibly to the suite.
+test('tabs built with createElement, the way a framework renderer builds them, behave like parsed ones', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-tabs></c2-tabs>')
+  await page.locator('c2-tabs').evaluate(async (tabs) => {
+    for (const [id, label] of [
+      ['one', 'First'],
+      ['two', 'Second'],
+    ]) {
+      const tab = document.createElement('c2-tab')
+      tab.setAttribute('for', id)
+      tab.textContent = label
+      const panel = document.createElement('div')
+      panel.id = id
+      panel.textContent = `${label} content`
+      tabs.append(tab, panel)
+      await customElements.whenDefined('c2-tab')
+      await (tab as Element & { updateComplete?: Promise<boolean> }).updateComplete
+    }
+    await (tabs as Element & { updateComplete?: Promise<boolean> }).updateComplete
+  })
+
+  // The slot is what puts a tab in the tab strip; the constructor used to set it.
+  await expect(page.locator('c2-tab[for="one"]')).toHaveAttribute('slot', 'tab')
+  await expect(page.locator('c2-tab[for="two"]')).toHaveAttribute('slot', 'tab')
+
+  const first = page.getByRole('tab', { name: 'First' })
+  await expect(first).toHaveAttribute('aria-selected', 'true')
+  await page.getByRole('tab', { name: 'Second' }).click()
+  await expect(page.getByRole('tabpanel')).toHaveText('Second content')
+})
+
+// `c2-list`, `c2-select`, `c2-table`, `c2-tabs` and `c2-virtual-list` all fire `selection-change`. If it bubbled,
+// a selection made inside a tab panel would arrive at the tab strip's own listener and look like a tab switch,
+// which is exactly the trap the event used to have while it was called `change`.
+test('selection-change does not reach an ancestor', async ({ page, renderScenario }) => {
+  await renderScenario(`<div id="wrapper">${markup}</div>`)
+  const wrapper = page.locator('#wrapper')
+  await watch(wrapper, 'selection-change')
+  const host = page.locator('c2-tabs')
+  await watch(host, 'selection-change')
+
+  await page.getByRole('tab', { name: 'Third' }).click()
+
+  await expect(host).toHaveAttribute('data-events', '[{"value":"three"}]')
+  await expect(wrapper).toHaveAttribute('data-events', '[]')
 })

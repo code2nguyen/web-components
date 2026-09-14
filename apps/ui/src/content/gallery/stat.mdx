@@ -1,0 +1,174 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import { Stat } from '@c2n/stat'
+import { Badge } from '@c2n/badge'
+
+## Presets
+
+These presets move from restrained dashboard tiles to richer finance, glass and high-contrast treatments. Pair `c2-stat` with `c2-badge` when the trend needs an explicit semantic state.
+
+<GalleryGrid min={280}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-stat value="2M+" label="Fixed income instruments"></c2-stat>
+```
+
+```html tag=MdxCodeBlock,label=Executive KPI
+<style>
+  .executive-stat {
+    width: 290px;
+    --c2-stat--padding: 20px;
+    --c2-stat--border: 1px solid #e2e8f0;
+    --c2-stat--border-radius: 16px;
+    --c2-stat--box-shadow: 0 18px 45px rgba(15, 23, 42, 0.09);
+    --c2-stat__icon--size: 46px;
+    --c2-stat__icon--border-radius: 13px;
+    --c2-stat__value--font-size: 30px;
+    --c2-stat__value--line-height: 36px;
+  }
+</style>
+<c2-stat class="executive-stat" value="$18.4M" label="Assets under management" tone="positive">
+  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M7 16l4-4 3 3 5-7"></path></svg>
+  <c2-badge slot="trend" tone="success">+12.4%</c2-badge>
+  <span slot="description">Compared with the previous quarter</span>
+</c2-stat>
+```
+
+```html tag=MdxCodeBlock,label=Midnight terminal
+<style>
+  .terminal-stat {
+    width: 290px;
+    --c2-stat--padding: 20px;
+    --c2-stat--background: linear-gradient(145deg, #111827 0%, #09111e 100%);
+    --c2-stat--color: #f8fafc;
+    --c2-stat--border: 1px solid rgba(34, 211, 238, 0.24);
+    --c2-stat--border-radius: 16px;
+    --c2-stat--box-shadow: 0 20px 50px rgba(2, 8, 23, 0.38), inset 0 1px rgba(255, 255, 255, 0.04);
+    --c2-stat__icon--size: 46px;
+    --c2-stat__icon--background: rgba(34, 211, 238, 0.12);
+    --c2-stat__icon--color: #67e8f9;
+    --c2-stat__icon--border-radius: 13px;
+    --c2-stat__value--font-size: 30px;
+    --c2-stat__value--line-height: 36px;
+    --c2-stat__label--color: #94a3b8;
+    --c2-stat__description--color: #64748b;
+  }
+  .terminal-stat c2-badge {
+    --c2-badge--background: rgba(34, 197, 94, 0.14);
+    --c2-badge--color: #86efac;
+  }
+</style>
+<c2-stat class="terminal-stat" value="99.98%" label="Pricing coverage">
+  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V9m5 10V5m6 14v-7m5 7V3"></path></svg>
+  <c2-badge slot="trend" tone="success">Live</c2-badge>
+  <span slot="description">1.82M instruments priced today</span>
+</c2-stat>
+```
+
+```html tag=MdxCodeBlock,label=Market drawdown
+<style>
+  .drawdown-stat {
+    width: 290px;
+    --c2-stat--padding: 20px;
+    --c2-stat--background: #fff7f7;
+    --c2-stat--border: 1px solid #fecaca;
+    --c2-stat--border-radius: 16px;
+    --c2-stat--box-shadow: 0 18px 40px rgba(185, 28, 28, 0.08);
+    --c2-stat__icon--size: 46px;
+    --c2-stat__icon--border-radius: 13px;
+    --c2-stat__value--font-size: 30px;
+    --c2-stat__value--line-height: 36px;
+  }
+</style>
+<c2-stat class="drawdown-stat" value="−3.82%" label="Portfolio drawdown" tone="negative">
+  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l6 6 4-4 8 8"></path><path d="M15 15h6V9"></path></svg>
+  <c2-badge slot="trend" tone="danger">−84 bps</c2-badge>
+  <span slot="description">Inside the 5% risk limit</span>
+</c2-stat>
+```
+
+```html tag=MdxCodeBlock,label=Aurora glass
+<style>
+  .aurora-wrap {
+    display: grid;
+    padding: 28px;
+    border-radius: 22px;
+    background: radial-gradient(circle at 10% 15%, rgba(34, 211, 238, 0.52), transparent 38%), radial-gradient(circle at 90% 85%, rgba(139, 92, 246, 0.48), transparent 42%), #0f172a;
+  }
+  .aurora-stat {
+    width: 260px;
+    --c2-stat--padding: 20px;
+    --c2-stat--background: rgba(255, 255, 255, 0.1);
+    --c2-stat--color: #ffffff;
+    --c2-stat--border: 1px solid rgba(255, 255, 255, 0.2);
+    --c2-stat--border-radius: 16px;
+    --c2-stat--box-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
+    --c2-stat__icon--background: rgba(255, 255, 255, 0.14);
+    --c2-stat__icon--color: #ffffff;
+    --c2-stat__icon--border-radius: 12px;
+    --c2-stat__value--font-size: 30px;
+    --c2-stat__label--color: rgba(255, 255, 255, 0.72);
+    --c2-stat__description--color: rgba(255, 255, 255, 0.55);
+  }
+  .aurora-stat c2-badge {
+    --c2-badge--background: rgba(255, 255, 255, 0.16);
+    --c2-badge--color: #ffffff;
+    --c2-badge--border: 1px solid rgba(255, 255, 255, 0.16);
+  }
+</style>
+<div class="aurora-wrap">
+  <c2-stat class="aurora-stat" value="2.4B" label="Events processed">
+    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+    <c2-badge slot="trend">+28%</c2-badge>
+    <span slot="description">Across all realtime pipelines</span>
+  </c2-stat>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Risk watch
+<style>
+  .risk-stat {
+    width: 290px;
+    --c2-stat--padding: 20px;
+    --c2-stat--background: linear-gradient(135deg, #fffbeb, #ffffff 62%);
+    --c2-stat--border: 1px solid #fde68a;
+    --c2-stat--border-radius: 16px;
+    --c2-stat--box-shadow: 0 18px 40px rgba(161, 98, 7, 0.1);
+    --c2-stat__icon--size: 46px;
+    --c2-stat__icon--border-radius: 13px;
+    --c2-stat__value--font-size: 30px;
+    --c2-stat__value--line-height: 36px;
+  }
+</style>
+<c2-stat class="risk-stat" value="74.2" label="Liquidity stress score" tone="warning">
+  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01"></path><path d="M10.3 3.7L2.2 18a2 2 0 001.8 3h16a2 2 0 001.8-3L13.7 3.7a2 2 0 00-3.4 0z"></path></svg>
+  <c2-badge slot="trend" tone="warning">Elevated</c2-badge>
+  <span slot="description">Three positions need review</span>
+</c2-stat>
+```
+
+```html tag=MdxCodeBlock,label=Minimal editorial
+<style>
+  .editorial-stat {
+    width: 290px;
+    --c2-stat--padding: 4px 0 16px;
+    --c2-stat--gap: 16px;
+    --c2-stat--border: none;
+    --c2-stat--border-radius: 0;
+    --c2-stat__icon--size: 34px;
+    --c2-stat__icon--background: #18181b;
+    --c2-stat__icon--color: #ffffff;
+    --c2-stat__icon--border-radius: 999px;
+    --c2-stat__value--font-size: 36px;
+    --c2-stat__value--font-weight: 500;
+    --c2-stat__value--line-height: 40px;
+    --c2-stat__label--color: #3f3f46;
+  }
+</style>
+<c2-stat class="editorial-stat" value="48 ms" label="Median API latency">
+  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+  <span slot="description">p50 · Frankfurt region</span>
+</c2-stat>
+```
+
+</GalleryGrid>

@@ -1,0 +1,29 @@
+---
+title: 'Overlay gallery'
+---
+
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import { Overlay } from '@c2n/overlay'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .trigger {
+    font: inherit;
+    padding: 6px 12px;
+  }
+  .surface {
+    padding: 12px 14px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+</style>
+<button class="trigger" popovertarget="gallery-overlay-default">Open</button>
+<c2-overlay id="gallery-overlay-default" client:only="lit"><div class="surface">Default placement</div></c2-overlay>
+```
+
+</GalleryGrid>

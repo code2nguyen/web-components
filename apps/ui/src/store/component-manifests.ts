@@ -1,4 +1,10 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import chart from '@c2n/chart/custom-elements.json'
+import autocomplete from '@c2n/autocomplete/custom-elements.json'
+import header from '@c2n/header/custom-elements.json'
+import stat from '@c2n/stat/custom-elements.json'
+import attachment from '@c2n/attachment/custom-elements.json'
+import virtualList from '@c2n/virtual-list/custom-elements.json'
 import sheet from '@c2n/sheet/custom-elements.json'
 import skeleton from '@c2n/skeleton/custom-elements.json'
 import progress from '@c2n/progress/custom-elements.json'
@@ -52,6 +58,12 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    chart,
+    autocomplete,
+    header,
+    stat,
+    attachment,
+    virtualList,
     sheet,
     skeleton,
     progress,

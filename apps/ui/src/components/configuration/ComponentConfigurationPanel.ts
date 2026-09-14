@@ -49,7 +49,7 @@ import type { TextField } from '@c2n/text-field'
 import type { Textarea } from '@c2n/textarea'
 import type { SelectionChangeEventDetail } from '@c2n/list'
 import type { ExtraComponentConfigState, InspectorTab } from '../../model/component-config-state.ts'
-import { componentPresets } from '../../data/component-presets.ts'
+import { componentPresets, describeComponentPreset } from '../../data/component-presets.ts'
 import {
   applyPreset,
   closeInspector,
@@ -290,7 +290,7 @@ export class ComponentConfigurationPanel extends LitElement {
           </c2-icon-button>
         </div>
       </header>
-      <c2-tabs class="inspector__tabs" selected-tab=${activeTab} @change=${this.handleTabChange}>
+      <c2-tabs class="inspector__tabs" selected-tab=${activeTab} @selection-change=${this.handleTabChange}>
         <c2-tab label="Design" for="design"></c2-tab>
         <c2-tab label="Props" for="props"></c2-tab>
         <c2-tab label="Collection" for="presets"></c2-tab>
@@ -569,7 +569,10 @@ export class ComponentConfigurationPanel extends LitElement {
   /** `"'sm' | 'md' | 'lg'"` -> `['sm', 'md', 'lg']`; anything else -> `null`. */
   private enumOptions(type: string): string[] | null {
     if (!type.includes('|')) return null
-    const parts = type.split('|').map((part) => part.trim())
+    const parts = type
+      .split('|')
+      .map((part) => part.trim())
+      .filter(Boolean)
     const values = parts.filter((part) => /^'[^']*'$/.test(part) || /^"[^"]*"$/.test(part)).map((part) => part.slice(1, -1))
     // A union that also admits `string`/`undefined` is not a closed keyword set.
     return values.length >= 2 && values.length === parts.filter((part) => part !== 'undefined' && part !== 'null').length ? values : null
@@ -806,7 +809,7 @@ export class ComponentConfigurationPanel extends LitElement {
                 .value=${[]}
                 @selection-change=${this.handleApplyFromList(builtIn.map((preset) => ({ name: preset.name, config: presetToConfig(preset) })))}
               >
-                ${builtIn.map((preset) => this.renderPresetItem(preset.name, preset.description ?? '', presetToConfig(preset)))}
+                ${builtIn.map((preset) => this.renderPresetItem(preset.name, describeComponentPreset(preset), presetToConfig(preset)))}
               </c2-list>
             </section>`
           : nothing

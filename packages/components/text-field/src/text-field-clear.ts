@@ -1,5 +1,6 @@
 import { CSSResult, html, nothing, unsafeCSS } from 'lit'
-import { customElement, state } from 'lit/decorators.js'
+import { state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import styles from './text-field-clear.scss?inline'
 
 import { TextField } from './text-field'

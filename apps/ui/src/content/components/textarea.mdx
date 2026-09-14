@@ -8,7 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import { Textarea } from '@c2n/textarea'
 
-`c2-textarea` wraps a native textarea. It supports keyboard editing, text selection, length constraints, and native resizing. Set `rows` for the initial height and `resize` to `vertical` (the default), `horizontal`, `both`, or `none`. Set a CSS width on the host to fit your layout.
+`c2-textarea` wraps a native textarea. It supports keyboard editing, text selection, length constraints, and native resizing, and participates automatically in `FormData`, form reset, disabled fieldsets and native constraint validation. Set `rows` for the initial height and `resize` to `vertical` (the default), `horizontal`, `both`, or `none`. Set a CSS width on the host to fit your layout.
 
 Give the control an accessible name using `label` or `aria-label`. Use `help` for guidance, `error` with `error-text` for feedback, and `maxlength` to enable a character counter. The `supporting-text` slot accepts rich helper content; an active error message takes precedence.
 

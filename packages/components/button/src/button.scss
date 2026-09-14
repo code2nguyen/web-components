@@ -4,6 +4,10 @@
   $prefix: c2-button,
   $theme: (
     container--height: 36px,
+    container--width: auto,
+    container--justify-content: center,
+    label--flex-grow: 0,
+    label--justify-content: center,
     container--padding-left: 16px,
     container--padding-right: 16px,
     container--gap: 8px,
@@ -38,6 +42,8 @@
 
 :host {
   display: inline-flex;
+  width: css.cssVar(container--width);
+  border-radius: css.cssVar(container--border-radius);
 }
 
 :host([hidden]) {
@@ -50,7 +56,7 @@
   display: inline-flex;
   flex: 1;
   align-items: center;
-  justify-content: center;
+  justify-content: css.cssVar(container--justify-content);
   gap: css.cssVar(container--gap);
   height: css.cssVar(container--height);
   padding-left: css.cssVar(container--padding-left);
@@ -106,6 +112,10 @@
 .label {
   display: inline-flex;
   align-items: center;
+  // A row-shaped button needs its label to take the slack, so a trailing icon lands at the far edge rather
+  // than beside the text. `justify-content` on the container alone cannot do it: the label is a flex item.
+  flex-grow: css.cssVar(label--flex-grow);
+  justify-content: css.cssVar(label--justify-content);
 }
 
 .icon::slotted(*) {

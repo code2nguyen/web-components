@@ -37,7 +37,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       instructions: [
         'c2n web components (Lit custom elements, tag prefix c2-, npm scope @c2n).',
         'Start with list_components or search_components, then get_component for the API and get_examples for markup.',
-        'Call get_theme before writing CSS: apps set ~35 --c2-theme--* tokens once; per-component variables go on a class or the element, never ::part().',
+        'Call get_theme before writing CSS: apps set ~35 --c2-theme--* tokens once; prefer per-component variables on a class or element, and use only documented ::part() hooks when variables cannot express the change.',
         'When a look repeats, call generate_variant (css | html | lit) instead of repeating inline styles.',
         'get_workflow_guide explains the application workflow, theming, variant components and framework notes.',
       ].join(' '),
@@ -95,11 +95,11 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       title: 'Get component API',
       description:
-        'Full API of one component: install/import lines, attributes, slots, events, CSS variables grouped by part and state (with the theme token each follows), composition and preset names. Examples are served by get_examples.',
+        'Full API of one component: install/import lines, attributes, slots, events, native CSS parts, CSS variables grouped by semantic target and state (with the theme token each follows), composition and preset names. Examples are served by get_examples.',
       inputSchema: {
         tag: tagSchema,
         include: z
-          .array(z.enum(['attributes', 'slots', 'events', 'css', 'composition', 'presets']))
+          .array(z.enum(['attributes', 'slots', 'events', 'parts', 'css', 'composition', 'presets']))
           .optional()
           .describe('Sections to include (default: all)'),
         format: formatSchema,
@@ -119,7 +119,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         })
       return text(
         renderComponent(resolved.component, {
-          include: new Set(include ?? ['attributes', 'slots', 'events', 'css', 'composition', 'presets']),
+          include: new Set(include ?? ['attributes', 'slots', 'events', 'parts', 'css', 'composition', 'presets']),
           installed,
           concrete: { tag: resolved.tag, modulePath: resolved.modulePath, className: resolved.className },
         }),
@@ -156,27 +156,33 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       title: 'Get examples',
       description:
-        'Markup examples of a component: usage rows from the docs, styled gallery variants (each with the CSS that produces the look) and the landing preview.',
+        'Markup examples of a component: usage rows from the docs, styled gallery variants (with intent, use-when and accessibility metadata when curated) and the landing preview.',
       inputSchema: {
         tag: tagSchema,
         kind: z.enum(['usage', 'gallery', 'preview']).optional().describe('Only this kind'),
         label: z.string().optional().describe('Substring filter on the example label'),
         section: z.string().optional().describe('Gallery section filter (e.g. "Variants", "Sizes")'),
+        query: z.string().optional().describe('Search label, section, description, use case, accessibility note and component tags'),
         limit: z.number().int().min(1).max(20).default(8),
         offset: z.number().int().min(0).default(0),
         format: formatSchema,
       },
       annotations: readOnly,
     },
-    ({ tag, kind, label, section, limit, offset, format }) => {
+    ({ tag, kind, label, section, query, limit, offset, format }) => {
       const resolved = resolveElement(registry, tag)
       if (!resolved) return notFound(registry, tag)
-      const all = resolved.component.examples.filter(
-        (e) =>
+      const needle = query?.toLowerCase()
+      const all = resolved.component.examples.filter((e) => {
+        const searchable =
+          `${e.label} ${e.section ?? ''} ${e.description ?? ''} ${e.useWhen ?? ''} ${e.accessibility ?? ''} ${(e.tags ?? []).join(' ')}`.toLowerCase()
+        return (
           (!kind || e.kind === kind) &&
           (!label || e.label.toLowerCase().includes(label.toLowerCase())) &&
-          (!section || (e.section ?? '').toLowerCase().includes(section.toLowerCase())),
-      )
+          (!section || (e.section ?? '').toLowerCase().includes(section.toLowerCase())) &&
+          (!needle || searchable.includes(needle))
+        )
+      })
       const page = all.slice(offset, offset + limit)
       if (format === 'json') return json({ total: all.length, offset, examples: page })
       return text(all.length ? renderExamples(resolved.component, page, all.length, offset) : `No examples match for ${resolved.tag}.`)

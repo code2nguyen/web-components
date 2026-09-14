@@ -6,7 +6,7 @@ import { getCollection, getEntry } from 'astro:content'
 import { componentManifests } from '../../../store/component-manifests'
 import { countGalleryExamples } from '../../../utils/gallery'
 
-/** API reference for a component (attributes, events, CSS custom properties) from its custom-elements manifest. */
+/** API reference for a component (attributes, slots, events, CSS parts and custom properties) from its custom-elements manifest. */
 export async function getStaticPaths() {
   const componentEntries = await getCollection('components')
   return componentEntries.map((entry) => ({
@@ -16,13 +16,16 @@ export async function getStaticPaths() {
 }
 
 const { component } = Astro.props
-const componentTag = `c2-${component.id}`
+// Most packages are named after their element; one whose name is not a tag names its primary one instead.
+const componentTag = component.data.tag ?? `c2-${component.id}`
 const manifest = componentManifests[componentTag]
 if (!manifest) throw new Error(`No custom-elements manifest registered for ${componentTag} (see src/store/component-manifests.ts)`)
 const gallery = await getEntry('gallery', component.id)
 
 // One API table per element of the package (`c2-tabs` + `c2-tab`, `c2-radio` + `c2-radio-group`); the page's own tag first.
-const elements = [componentTag, ...manifest.siblingTags].map((tag, index) => ({
+// A page may name the set itself — the five `@c2n/chart` pages each document one chart plus `c2-chart-series`.
+const apiTags = component.data.apiTags ?? [componentTag, ...manifest.siblingTags]
+const elements = apiTags.map((tag, index) => ({
   tag,
   manifest: componentManifests[tag],
   idPrefix: index === 0 ? 'api' : `api-${tag}`,
@@ -35,7 +38,9 @@ const headings = elements.flatMap(({ tag, manifest, idPrefix }) =>
   [
     multiple && { depth: 2, slug: idPrefix, text: tag },
     manifest.attributes.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-attributes`, text: 'Attributes' },
+    manifest.slots.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-slots`, text: 'Slots' },
     manifest.events.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-events`, text: 'Events' },
+    manifest.cssParts.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-parts`, text: 'CSS parts' },
     manifest.cssProperties.length > 0 && { depth: multiple ? 3 : 2, slug: `${idPrefix}-css`, text: 'CSS custom properties' },
   ].filter((heading): heading is Heading => Boolean(heading)),
 )

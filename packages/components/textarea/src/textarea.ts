@@ -1,9 +1,23 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './textarea.scss?inline'
+
+/** Events fired by {@link Textarea}, keyed for `addEventListener`. */
+export interface TextareaEventMap {
+  input: InputEvent
+  change: Event
+  select: Event
+}
+
+export interface Textarea {
+  addEventListener: TypedAddEventListener<Textarea, TextareaEventMap>
+  removeEventListener: TypedRemoveEventListener<Textarea, TextareaEventMap>
+}
 
 /**
  * Multiline text input with native resizing, helper text, error feedback and a character counter.
@@ -37,7 +51,13 @@ import styles from './textarea.scss?inline'
  */
 @customElement('c2-textarea')
 export class Textarea extends LitElement {
+  static formAssociated = true
+
   static override styles = unsafeCSS(styles)
+
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+  @state() private disabledByForm = false
 
   /** Current text. Set this property to update the value programmatically. */
   @property() value = ''
@@ -80,6 +100,24 @@ export class Textarea extends LitElement {
   @state() private hasSupportingSlot = false
   @query('textarea') private input?: HTMLTextAreaElement
 
+  /** The containing form, when this control is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+  get validity() {
+    return this.internals.validity
+  }
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+  get willValidate() {
+    return this.internals.willValidate
+  }
+
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (name === 'value' && this.dirty) return
     super.attributeChangedCallback(name, oldValue, newValue)
@@ -110,17 +148,46 @@ export class Textarea extends LitElement {
     this.value = this.getAttribute('value') ?? ''
     this.error = false
   }
+  formResetCallback() {
+    this.reset()
+  }
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+  }
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state === 'string') this.value = state
+  }
   /** Checks the native textarea constraints. Await updateComplete after changing properties. */
   checkValidity() {
-    return this.input?.checkValidity() ?? true
+    return this.internals.checkValidity()
   }
   /** Shows the browser's validation feedback. */
   reportValidity() {
-    return this.input?.reportValidity() ?? true
+    return this.internals.reportValidity()
   }
   /** Sets or clears the native validation message. */
   setCustomValidity(message: string) {
+    this.customValidityMessage = message
     this.input?.setCustomValidity(message)
+    this.syncFormState()
+  }
+
+  protected override updated(_changed: PropertyValues) {
+    this.syncFormState()
+  }
+
+  private syncFormState() {
+    this.internals.setFormValue(this.value, this.value)
+    if (!this.input || this.effectiveDisabled) {
+      this.internals.setValidity({})
+      return
+    }
+    this.input.setCustomValidity(this.customValidityMessage)
+    this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
+  }
+
+  private get effectiveDisabled() {
+    return this.disabled || this.disabledByForm
   }
 
   private handleInput(event: Event) {
@@ -140,7 +207,7 @@ export class Textarea extends LitElement {
   }
 
   override render() {
-    const invalid = this.error && !this.disabled
+    const invalid = this.error && !this.effectiveDisabled
     const showError = invalid && !!this.errorText
     const supporting = !!this.help || this.hasSupportingSlot || showError || this.maxLength >= 0
     return html` <textarea
@@ -156,7 +223,7 @@ export class Textarea extends LitElement {
         autocomplete=${ifDefined(this.autocomplete || undefined)}
         maxlength=${ifDefined(this.maxLength >= 0 ? this.maxLength : undefined)}
         minlength=${ifDefined(this.minLength >= 0 ? this.minLength : undefined)}
-        ?disabled=${this.disabled}
+        ?disabled=${this.effectiveDisabled}
         ?readonly=${this.readOnly}
         ?required=${this.required}
         .value=${live(this.value)}

@@ -96,7 +96,7 @@
         seg.addEventListener('tab-change', (e) => {
           if (e.detail === 's3') e.preventDefault()
         })
-        seg.addEventListener('change', (e) => {
+        seg.addEventListener('selection-change', (e) => {
           document.getElementById('log').textContent = `change → ${e.detail.value}`
         })
       </script>

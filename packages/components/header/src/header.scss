@@ -1,0 +1,65 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-header,
+  $theme: (
+    min-height: 64px,
+    padding: 8px 24px,
+    gap: 24px,
+    background: #ffffff,
+    color: #18181b,
+    border-bottom: 1px solid #e4e4e7,
+    box-shadow: none,
+    sticky-top: 0px,
+    backdrop-filter: blur(16px),
+    blurred--background: rgba(255, 255, 255, 0.82),
+    brand--gap: 8px,
+    actions--gap: 8px,
+  )
+);
+
+:host {
+  display: block;
+}
+:host([sticky]) {
+  position: sticky;
+  z-index: 10;
+  top: css.cssVar(sticky-top);
+}
+.c2-header {
+  display: flex;
+  min-height: css.cssVar(min-height);
+  box-sizing: border-box;
+  align-items: center;
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  border-bottom: css.cssVar(border-bottom);
+  box-shadow: css.cssVar(box-shadow);
+}
+:host([blurred]) .c2-header {
+  background: css.cssVar(blurred--background);
+  backdrop-filter: css.cssVar(backdrop-filter);
+}
+.brand,
+.actions {
+  display: flex;
+  align-items: center;
+}
+.brand {
+  flex: 0 0 auto;
+  gap: css.cssVar(brand--gap);
+}
+.navigation {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+}
+.actions {
+  margin-inline-start: auto;
+  gap: css.cssVar(actions--gap);
+}
+.mobile-trigger {
+  display: flex;
+  align-items: center;
+}

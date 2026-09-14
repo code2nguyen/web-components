@@ -9,6 +9,23 @@ One connected surface by default, with shared dividers and animated panels. The 
 
 <GalleryGrid>
 
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 280px;
+    max-width: 100%;
+  }
+  .default p {
+    margin: 0;
+  }
+</style>
+<c2-accordion class="default" client:only="lit">
+  <c2-details label="Is there a free trial?" expanded><p>Try every feature for 14 days. No credit card required.</p></c2-details>
+  <c2-details label="Can I change plans?"><p>Upgrade or downgrade from your account settings.</p></c2-details>
+  <c2-details label="Can I cancel anytime?"><p>Yes. Your plan stays active until the end of the billing period.</p></c2-details>
+</c2-accordion>
+```
+
 ```html tag=MdxCodeBlock,label=Connected
 <style>
   .connected {

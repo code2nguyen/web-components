@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Radio, RadioGroup } from '@c2n/radio'
 
-`c2-radio` is one option: a native `<input type="radio">` with its label beside it and an optional `description` slot underneath. `c2-radio-group` turns several of them into a single control with one `value` and one `name`, disables them together, and restores the native keyboard model across the shadow boundary: Arrow keys move and select, and only the selected option is a tab stop. Radios can sit anywhere inside the group, including in wrapper elements. Standalone radios sharing a `name` in the same root still uncheck each other, but only the group provides arrow-key navigation and a single `change` event with the new value.
+`c2-radio` is one option: a native `<input type="radio">` with its label beside it and an optional `description` slot underneath. `c2-radio-group` turns several of them into one form-associated control with one `value` and one `name`, disables them together, and restores the native keyboard model across the shadow boundary: Arrow keys move and select, and only the selected option is a tab stop. Radios can sit anywhere inside the group, including in wrapper elements. Standalone radios sharing a `name` in the same root still uncheck each other and participate in forms individually, but only the group provides arrow-key navigation and a single `change` event with the new value.
 
 ## Installation
 
@@ -134,7 +134,7 @@ Importing `@c2n/radio` registers both `c2-radio-group` and `c2-radio`.
 
 Set the group's `value` to select an option from code, or set `checked` on a radio: the group adopts it and unchecks the rest. Listen for `change` on the group (`detail.value`); the options' own `change` events are stopped at the group so a listener above it hears exactly one event per selection. Every option needs a `value`, and an option without a checked sibling leaves the group `value` empty.
 
-The inner inputs live in shadow roots, so they do not take part in a surrounding `<form>`; read `value` from the group on submit or mirror it into a hidden input. The `label` slot names the group for assistive technology (`aria-label` works too); give a standalone radio without visible text an `aria-label`.
+Give a group `name` and its selected value appears once in `FormData(form)`; standalone radios submit their own value only while checked. `required`, fieldset disabling, `form.reset()`, `checkValidity()`, `reportValidity()` and `setCustomValidity()` follow the native form contract. The `label` slot names the group for assistive technology (`aria-label` works too); give a standalone radio without visible text an `aria-label`.
 
 The indicator is not tied to the ring. `--c2-radio__control--border-radius` reshapes the ring and its dot (a square control at `4px`); the `dot` slot replaces the filled dot with a mark such as a check, drawn in `--c2-radio__dot--color`; and the `icon` and `checked-icon` slots replace the whole control with an icon per state, coloured by `--c2-radio__icon--color` and `--c2-radio__icon__checked--color` and sized by `--c2-radio__icon--size`. With only `icon`, the same icon shows in both states and changes colour; with only `checked-icon`, the ring stays for the unchecked state. Hide that ring with `--c2-radio__control--border: none` and move the indicator after the text with `--c2-radio__container--flex-direction: row-reverse` to get a menu-style check list, as in the row above.
 

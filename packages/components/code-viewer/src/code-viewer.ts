@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { unsafeHTML } from 'lit/directives/unsafe-html.js'
 import { Task } from '@lit/task'
@@ -9,6 +11,16 @@ import { highlight, isKnownTheme, normalizeLang, type HighlightResult, type Them
 export type { ThemeName } from './shiki'
 
 const LEGACY_LANG_ATTRIBUTE = 'langage'
+
+/** Events fired by {@link CodeViewer}, keyed for `addEventListener`. */
+export interface CodeViewerEventMap {
+  'code-copy': CustomEvent<{ code: string }>
+}
+
+export interface CodeViewer {
+  addEventListener: TypedAddEventListener<CodeViewer, CodeViewerEventMap>
+  removeEventListener: TypedRemoveEventListener<CodeViewer, CodeViewerEventMap>
+}
 
 /**
  * Syntax-highlighted source code powered by shiki. Grammars and themes are loaded on demand into one shared
@@ -69,6 +81,9 @@ const LEGACY_LANG_ATTRIBUTE = 'langage'
  * @cssproperty {background} --c2-code-viewer__copy--background
  * @cssproperty {background} [--c2-code-viewer__copy__hover--background=rgba(127, 127, 127, 0.15)]
  * @cssproperty {color} [--c2-code-viewer__copy__copied--color=rgb(34, 197, 94)]
+ * @cssproperty {color} [--c2-code-viewer__terminal__dot__close--color=#ff5f57]
+ * @cssproperty {color} [--c2-code-viewer__terminal__dot__minimize--color=#febc2e]
+ * @cssproperty {color} [--c2-code-viewer__terminal__dot__maximize--color=#28c840]
  *
  * @cssproperty {pixel} [--c2-code-viewer__line-numbers--min-width=2ch]
  * @cssproperty {pixel} [--c2-code-viewer__line-numbers--gap=16px]
@@ -117,6 +132,7 @@ export class CodeViewer extends LitElement {
   /** Render as an inline `<code>` fragment (no frame, no header). */
   @property({ type: Boolean, reflect: true }) inline = false
 
+  /** Show a line-number gutter. */
   @property({ type: Boolean, reflect: true, attribute: 'line-numbers' }) lineNumbers = false
 
   /** First line number when `line-numbers` is on. */
@@ -127,6 +143,9 @@ export class CodeViewer extends LitElement {
 
   /** Show a copy-to-clipboard button. */
   @property({ type: Boolean, reflect: true }) copyable = false
+
+  /** `terminal` adds window controls, a language label and an always-visible copy action. */
+  @property({ reflect: true }) variant: 'code' | 'terminal' = 'code'
 
   @state() private slotCode = ''
   @state() private hasTitle = false
@@ -261,14 +280,25 @@ export class CodeViewer extends LitElement {
           >${this.renderCode()}</code
         >`
     }
+    const terminal = this.variant === 'terminal'
+    const showCopy = this.copyable || terminal
     return html`
       ${source}
-      <div class=${classMap({ 'c2-code-viewer': true, 'has-title': this.hasTitle })} style=${this.highlighted?.style || nothing}>
-        <div class="c2-code-viewer-header" ?hidden=${!this.hasTitle}>
+      <div
+        class=${classMap({ 'c2-code-viewer': true, 'has-title': this.hasTitle || terminal, 'is-terminal': terminal })}
+        style=${this.highlighted?.style || nothing}
+      >
+        <div class="c2-code-viewer-header" ?hidden=${!this.hasTitle && !terminal}>
+          ${
+            terminal
+              ? html`<span class="terminal-dots" aria-hidden="true"><i class="close"></i><i class="minimize"></i><i class="maximize"></i></span>`
+              : nothing
+          }
           <slot name="title" @slotchange=${this.handleSlotChange}></slot>
-          ${this.copyable ? this.renderCopyButton() : nothing}
+          ${terminal && !this.hasTitle ? html`<span class="terminal-language">${normalizeLang(this.language)}</span>` : nothing}
+          ${showCopy ? this.renderCopyButton() : nothing}
         </div>
-        <div class="c2-code-viewer-body">${this.renderCode()} ${this.copyable && !this.hasTitle ? this.renderCopyButton() : nothing}</div>
+        <div class="c2-code-viewer-body">${this.renderCode()} ${showCopy && !this.hasTitle && !terminal ? this.renderCopyButton() : nothing}</div>
       </div>
     `
   }

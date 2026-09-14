@@ -1,17 +1,25 @@
 {
   "name": "@c2n/skill",
-  "version": "0.0.5",
-  "private": true,
-  "description": "Claude Code plugin for the c2n web components: a skill that teaches the application workflow plus the @c2n/mcp server",
+  "version": "0.0.6",
+  "description": "Portable agent skill and MCP tooling for building applications with c2n web components",
   "type": "module",
+  "bin": {
+    "c2n-skill": "bin/install.js"
+  },
   "files": [
     ".claude-plugin",
     ".mcp.json",
+    "bin",
+    "mcp.json",
+    "plugin.json",
     "skills",
     "README.md"
   ],
   "keywords": [
+    "agent-skills",
+    "antigravity",
     "claude-code",
+    "codex",
     "plugin",
     "skill",
     "mcp",
@@ -26,11 +34,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/code2nguyen/web-components.git"
+    "url": "git+https://github.com/code2nguyen/web-components.git"
   },
   "scripts": {
     "build": "wireit",
-    "version": "node scripts/build-skill.ts && git add .claude-plugin/plugin.json .mcp.json skills"
+    "prepack": "npm run build",
+    "test": "node --test scripts/install.test.ts",
+    "version": "node scripts/build-skill.ts && git add .claude-plugin/plugin.json .mcp.json mcp.json plugin.json skills"
   },
   "wireit": {
     "build": {
@@ -44,16 +54,18 @@
         "package.json"
       ],
       "output": [
-        "skills/c2n-components/references/components-cheatsheet.md",
+        "skills/c2n-components/references/component-catalog.md",
         ".claude-plugin/plugin.json",
-        ".mcp.json"
+        ".mcp.json",
+        "mcp.json",
+        "plugin.json"
       ],
       "clean": false
     }
   },
   "devDependencies": {
     "@c2n/config": "*",
-    "@c2n/mcp": "0.0.5",
+    "@c2n/mcp": "0.0.6",
     "prettier": "3.9.6"
   }
 }

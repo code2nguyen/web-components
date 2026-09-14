@@ -1,0 +1,7 @@
+{
+  "title": "Support Inbox",
+  "description": "A Vue 3 inbox over c2-list, c2-chat-message, c2-sheet and c2-toast — v-model, .prop bindings and kebab-case events straight on the custom elements.",
+  "framework": "vue",
+  "tags": ["list", "chat", "drawer"],
+  "order": 40
+}

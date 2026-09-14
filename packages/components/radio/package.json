@@ -5,26 +5,38 @@
   "main": "dist/index.js",
   "exports": {
     ".": {
-      "default": "./dist/index.js",
-      "types": "./types/src/index.d.ts"
+      "types": "./types/src/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./radio.js": {
-      "default": "./dist/radio.js",
-      "types": "./types/src/radio.d.ts"
+      "types": "./types/src/radio.d.ts",
+      "default": "./dist/radio.js"
     },
     "./radio-group.js": {
-      "default": "./dist/radio-group.js",
-      "types": "./types/src/radio-group.d.ts"
+      "types": "./types/src/radio-group.d.ts",
+      "default": "./dist/radio-group.js"
     },
     "./radio-context.js": {
-      "default": "./dist/radio-context.js",
-      "types": "./types/src/radio-context.d.ts"
+      "types": "./types/src/radio-context.d.ts",
+      "default": "./dist/radio-context.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "radio",

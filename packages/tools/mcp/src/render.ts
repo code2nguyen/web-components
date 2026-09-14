@@ -30,7 +30,7 @@ export function renderComponentList(components: ComponentEntry[], installed: (pk
 }
 
 export interface ComponentRenderOptions {
-  include: Set<'attributes' | 'slots' | 'events' | 'css' | 'composition' | 'presets'>
+  include: Set<'attributes' | 'slots' | 'events' | 'parts' | 'css' | 'composition' | 'presets'>
   installed: InstalledInfo | null
   /** Concrete tag / module when the request named an icon. */
   concrete?: { tag: string; modulePath: string; className: string }
@@ -77,6 +77,16 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
         table(
           ['Event', 'Type', 'Description'],
           api.events.map((e) => [code(e.name), code(e.type), e.description ?? '']),
+        ),
+      )
+    }
+    if (include.has('parts') && api.cssParts.length) {
+      out.push('\n### CSS parts\n')
+      out.push('Use with `::part(name)` when CSS custom properties do not cover the required change.\n')
+      out.push(
+        table(
+          ['Part', 'Description'],
+          api.cssParts.map((part) => [code(part.name), part.description ?? '']),
         ),
       )
     }
@@ -143,7 +153,13 @@ export function renderCssGroups(properties: CssProperty[]): string {
 export function renderExamples(component: ComponentEntry, examples: Example[], total: number, offset: number): string {
   const out = [`# ${component.title} examples (${offset + 1}–${offset + examples.length} of ${total})`, '']
   for (const ex of examples) {
-    out.push(`#### ${ex.label}${ex.kind === 'gallery' ? ` (gallery${ex.section ? ` · ${ex.section}` : ''})` : ex.kind === 'usage' ? ' (usage)' : ''}`)
+    out.push(
+      `#### ${ex.label}${ex.kind === 'gallery' ? ` (gallery${ex.section ? ` · ${ex.section}` : ''}${ex.isDefault ? ' · default without component overrides' : ''})` : ex.kind === 'usage' ? ' (usage)' : ''}`,
+    )
+    if (ex.tags?.length) out.push(`Components: ${ex.tags.map((tag) => `\`${tag}\``).join(', ')}`)
+    if (ex.description) out.push(`Demonstrates: ${ex.description}`)
+    if (ex.useWhen) out.push(`Use when: ${ex.useWhen}`)
+    if (ex.accessibility) out.push(`Accessibility: ${ex.accessibility}`)
     out.push('```html')
     out.push(ex.html.length > 4000 ? `${ex.html.slice(0, 4000)}\n<!-- … truncated -->` : ex.html)
     out.push('```')

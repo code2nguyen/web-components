@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './menu-item.scss?inline'
 
@@ -13,6 +15,17 @@ export interface MenuSelectEventDetail {
   checked: boolean
   /** The `data` payload of the activated row. */
   data: unknown
+}
+
+/** Events fired by {@link MenuItem}, keyed for `addEventListener`. */
+export interface MenuItemEventMap {
+  'menu-select': CustomEvent<MenuSelectEventDetail>
+  'checked-change': CustomEvent<{ checked: boolean; value: string }>
+}
+
+export interface MenuItem {
+  addEventListener: TypedAddEventListener<MenuItem, MenuItemEventMap>
+  removeEventListener: TypedRemoveEventListener<MenuItem, MenuItemEventMap>
 }
 
 /**
@@ -66,9 +79,9 @@ export interface MenuSelectEventDetail {
  * @cssproperty {pixel} [--c2-menu-item__description--line-height=16px]
  * @cssproperty {pixel} [--c2-menu-item__description--margin-top=1px]
  *
- * @cssproperty {color} [--c2-menu-item__shortcut--color=#a1a1aa]
- * @cssproperty {font-size} [--c2-menu-item__shortcut--font-size=12px]
- * @cssproperty {letter-spacing} [--c2-menu-item__shortcut--letter-spacing=0.04em]
+ * @cssproperty {color} [--c2-menu-item__shortcut--color=#52525b]
+ * @cssproperty {font-size} [--c2-menu-item__shortcut--font-size=11px]
+ * @cssproperty {letter-spacing} [--c2-menu-item__shortcut--letter-spacing=0.08em]
  *
  * @cssproperty {pixel} [--c2-menu-item__icon--size=16px]
  * @cssproperty {color} [--c2-menu-item__icon--color=#71717a]
@@ -106,6 +119,7 @@ export class MenuItem extends LitElement {
   /** Makes the row a link; Enter and a click navigate, and `menu-select` still fires. */
   @property() href?: string
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target?: string
 
   /** Paints the row in the destructive colour, for delete-style commands. */

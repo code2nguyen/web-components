@@ -5,22 +5,34 @@
   "main": "dist/tabs.js",
   "exports": {
     ".": {
-      "default": "./dist/tabs.js",
-      "types": "./types/src/tabs.d.ts"
+      "types": "./types/src/tabs.d.ts",
+      "default": "./dist/tabs.js"
     },
     "./tab.js": {
-      "default": "./dist/tab.js",
-      "types": "./types/src/tab.d.ts"
+      "types": "./types/src/tab.d.ts",
+      "default": "./dist/tab.js"
     },
     "./tab-context.js": {
-      "default": "./dist/tab-context.js",
-      "types": "./types/src/tab-context.d.ts"
+      "types": "./types/src/tab-context.d.ts",
+      "default": "./dist/tab-context.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "tabs",

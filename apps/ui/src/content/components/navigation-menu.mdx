@@ -14,6 +14,8 @@ import { Button } from '@c2n/button'
 
 A trigger follows its own panel. While the current page is one of the panel's rows — a `current` `c2-navigation-menu-link`, or any element carrying `aria-current` — the item sets `current-group` on itself and wears the same styling as a `current` item, so the closed bar still shows which section the visitor is in. It keeps working as routes change: marking a different row `current` moves the group. Only the row keeps `aria-current`, since the trigger is the group and not the page.
 
+For document navigation, add `auto-current` and the menu derives that state from the URL. It follows hash changes and browser history, chooses an exact section link before a page-level link, and treats the first same-page hash link as the default when the URL has no hash. Router-controlled applications can instead update `current-url` or call `syncCurrent()` after changing history. Without `auto-current`, React, Vue, Angular, and other application code retain full control of each link's `current` property.
+
 The bar owns which panel is open: `value` holds the `value` of that item and `''` when everything is closed, and `value-change` fires on every change. Panels open on hover after `open-delay` and close `close-delay` after the pointer has left both the item and the panel, so crossing the gap between them is forgiving; a click on a trigger opens its panel straight away. Set `open-on="click"` for a bar that ignores hover, where a second click closes the panel again.
 
 Each panel is a `c2-overlay` popover on the top layer, so a header with `overflow: hidden` or a stacking context never clips it, and it flips or shifts to stay in the viewport. Dismissal belongs to the bar rather than to the browser: a press anywhere outside it, or Escape, closes the open panel.
@@ -254,6 +256,35 @@ const apply = () => {
 apply()
 small.addEventListener('change', apply)
 ```
+
+## Following the current URL
+
+Use `auto-current` for ordinary document navigation. The matching link receives `current`, including `aria-current="page"`, and a panel trigger automatically receives `current-group` when one of its rows matches.
+
+```html tag=CodeBlock
+<c2-navigation-menu aria-label="Main" auto-current>
+  <c2-navigation-menu-item value="products">
+    Products
+    <div slot="panel">
+      <c2-navigation-menu-link href="/products#overview">Overview</c2-navigation-menu-link>
+      <c2-navigation-menu-link href="/products#security">Security</c2-navigation-menu-link>
+    </div>
+  </c2-navigation-menu-item>
+  <c2-navigation-menu-item href="/pricing">Pricing</c2-navigation-menu-item>
+</c2-navigation-menu>
+```
+
+`hashchange` and `popstate` are handled automatically. Routers that call `history.pushState()` can provide their current URL as controlled state or explicitly synchronize after navigation:
+
+```ts tag=CodeBlock
+const nav = document.querySelector('c2-navigation-menu')
+
+nav.currentUrl = router.currentUrl
+// Or, after changing history without a popstate event:
+nav.syncCurrent(router.currentUrl)
+```
+
+Turning `auto-current` off restores the `current` attributes originally authored in the menu.
 
 ## Customizing the mobile button
 

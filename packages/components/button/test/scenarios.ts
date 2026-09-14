@@ -1,4 +1,17 @@
 import '../src/button'
+import { customElement } from '@c2n/core/element-helper.js'
+
+// Exposed for the duplicate-registration test: this is what a second copy of a @c2n package does when it is
+// evaluated — two versions in one dependency tree, two micro-frontends, or a hot reload.
+declare global {
+  interface Window {
+    defineButtonAgain: () => void
+  }
+}
+window.defineButtonAgain = () => {
+  class SecondButton extends HTMLElement {}
+  customElement('c2-button')(SecondButton)
+}
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "c2n": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@c2n/mcp@0.0.6"]
+    }
+  }
+}

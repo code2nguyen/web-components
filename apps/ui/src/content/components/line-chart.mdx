@@ -1,0 +1,132 @@
+---
+title: 'Line chart'
+description: 'A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-line-chart'
+apiTags: ['c2-line-chart', 'c2-chart-series']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { LineChart } from '@c2n/chart/line-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+One line per series over a time or numeric x axis. Data is rows plus `c2-chart-series` children — the same
+authoring shape as `c2-table`'s rows and columns — and presentation is ordinary attributes: `curve`,
+`points`, `legend`, `zoom`, the axis bounds.
+
+`c2-line-chart` is the base of the family. [Area chart](/web-components/components/area-chart) extends it
+with a fill, and [bar](/web-components/components/bar-chart),
+[sparkline](/web-components/components/sparkline) and [pie](/web-components/components/pie-chart) share the
+same data contract and the same `--c2-chart__*` theme namespace, so an app styles every chart at once.
+
+**One engine, loaded on demand.** Lines are drawn by [uPlot](https://github.com/leeoniya/uPlot), an optional
+peer dependency reached through a dynamic `import()` on first paint — nothing is bundled into the component,
+and a page that shows no chart downloads no engine.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart uplot
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .plot {
+    width: 100%;
+    --c2-chart--height: 220px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+</style>
+
+<div data-label="Two series">
+  <c2-line-chart
+    class="plot"
+    x-field="month"
+    data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    <c2-chart-series field="cost" label="Cost"></c2-chart-series>
+  </c2-line-chart>
+</div>
+
+<div data-label="Smoothed, with point markers">
+  <c2-line-chart
+    class="plot"
+    x-field="t"
+    curve="smooth"
+    points="always"
+    data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
+  >
+    <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
+  </c2-line-chart>
+</div>
+
+<div data-label="Stepped, on a time axis">
+  <c2-line-chart
+    class="plot"
+    x-type="time"
+    x-field="at"
+    curve="step"
+    legend="none"
+    data='[{"at":1704067200000,"queue":4},{"at":1704672000000,"queue":9},{"at":1705276800000,"queue":7},{"at":1705881600000,"queue":16},{"at":1706486400000,"queue":12}]'
+  >
+    <c2-chart-series field="queue" label="Queue depth"></c2-chart-series>
+  </c2-line-chart>
+</div>
+
+<div data-label="Empty, loading and error">
+  <div class="row">
+    <c2-line-chart style="width:180px;--c2-chart--height:110px" data="[]"></c2-line-chart>
+    <c2-line-chart style="width:180px;--c2-chart--height:110px" loading></c2-line-chart>
+    <c2-line-chart style="width:180px;--c2-chart--height:110px" error="Metrics unavailable"></c2-line-chart>
+  </div>
+</div>
+```
+
+## Data and series
+
+`data` is an array of row objects. `x-field` names the key holding the x value (the row index is used when
+it is omitted) and `x-type` says how to read it — `linear` by default, `time` for epoch milliseconds,
+`category` for discrete slots. Each `c2-chart-series` child names a `field` — a dotted path such as
+`stats.cpu` works — and optionally a `label`, a `color` and a `line-width`. With no children at all, one
+line is drawn per numeric key of the first row.
+
+The children are definitions, not rendered elements: they are read the way `c2-table` reads its columns, so
+adding, hiding or re-colouring one is an ordinary attribute change.
+
+## Realtime
+
+`data` is compared by identity, and a change to it alone is pushed straight into the engine without
+re-rendering anything. For a live feed call `appendPoint()` instead, which writes into the frame's spare
+capacity and redraws with no reallocation and no Lit update. `max-points` keeps the window bounded, dropping
+the oldest points off the front.
+
+```js tag=CodeBlock
+const chart = document.querySelector('c2-line-chart')
+chart.maxPoints = 600
+setInterval(() => chart.appendPoint(Date.now(), [readCpu()]), 1000)
+```
+
+## Sizing
+
+A canvas has no intrinsic size, so a chart is sized by its host rather than by its content:
+`--c2-chart--height` (320px by default) plus whatever width the layout gives it. A `ResizeObserver` keeps the
+canvas in step, and the plot box is `contain: strict` so a resize can never feed back into itself. Use
+`lazy-render` to defer loading the engine until the chart first scrolls into view.
+
+## Theming
+
+Every chart in the package reads the same variables, so setting them once themes all of them. The series
+palette is `--c2-chart__series-1--color` through `--c2-chart__series-8--color`, wired by `@c2n/theme` to the
+`--c2-theme--chart-series-*` tokens, which carry light and dark values. Because the plot is a canvas, these
+are read with `getComputedStyle` and handed to the engine — so they behave like any other CSS variable,
+including under a dark theme, but cannot be reached with `::part()`.

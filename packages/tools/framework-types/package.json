@@ -1,0 +1,54 @@
+{
+  "name": "@c2n/framework-types",
+  "version": "0.0.6",
+  "description": "Editor metadata for the c2n web components: VS Code / Volar HTML custom data and JetBrains web-types, generated from the custom-elements manifests",
+  "type": "module",
+  "exports": {
+    "./tsconfig.vue.json": "./tsconfig.vue.json",
+    "./html-custom-data.json": "./dist/html-custom-data.json",
+    "./web-types.json": "./dist/web-types.json"
+  },
+  "web-types": "./dist/web-types.json",
+  "files": [
+    "dist",
+    "tsconfig.vue.json"
+  ],
+  "keywords": [
+    "web components",
+    "custom elements",
+    "react",
+    "vue",
+    "web-types"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "build": "wireit",
+    "type-check": "wireit",
+    "generate": "node scripts/framework-types/index.ts"
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "prettier": "3.6.2"
+  },
+  "wireit": {
+    "type-check": {
+      "command": "tsc -p tsconfig.node.json"
+    },
+    "build": {
+      "dependencies": [
+        "type-check",
+        "../../..:build"
+      ],
+      "command": "node scripts/framework-types/index.ts"
+    }
+  }
+}

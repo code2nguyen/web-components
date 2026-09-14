@@ -1,18 +1,33 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, eventOptions, property, query, state } from 'lit/decorators.js'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
+import { eventOptions, property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './chat-input.scss?inline'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import { live } from 'lit/directives/live.js'
 import { styleMap, type StyleInfo } from 'lit/directives/style-map.js'
 import { addClasses } from '@c2n/core/css-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
+import { ifDefined } from 'lit/directives/if-defined.js'
+
+/** Events fired by {@link ChatInput}, keyed for `addEventListener`. */
+export interface ChatInputEventMap {
+  'submit-message': CustomEvent<string>
+}
+
+export interface ChatInput {
+  addEventListener: TypedAddEventListener<ChatInput, ChatInputEventMap>
+  removeEventListener: TypedRemoveEventListener<ChatInput, ChatInputEventMap>
+}
 
 /**
+ * Auto-growing message composer that submits with Enter and inserts a newline with Alt+Enter.
+ *
  * @tag c2-chat-input
  *
- * @slot send-icon
+ * @slot send-icon - Icon button used to submit the current message.
  *
- * @event {CustomEvent} submit-message
+ * @event {CustomEvent<string>} submit-message - Fired when the user submits; `detail` is the message text before the field is cleared.
  * @cssproperty {border-radius} [--c2-chat-input--border-top-left-radius=4px]
  * @cssproperty {border-radius} [--c2-chat-input--border-top-right-radius=4px]
  * @cssproperty {border-radius} [--c2-chat-input--border-bottom-left-radius=4px]
@@ -61,10 +76,28 @@ import { classMap } from 'lit/directives/class-map.js'
  */
 @customElement('c2-chat-input')
 export class ChatInput extends LitElement {
+  static formAssociated = true
+
   static override styles = unsafeCSS(styles)
 
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+
+  /** Hint shown while the composer is empty. */
   @property({ type: String }) placeholder = ''
+  /** Current message text. */
   @property({ type: String }) value = ''
+  /** Name used when the composer participates in a form. */
+  @property({ type: String }) name = ''
+  /** Disables editing and form submission. */
+  @property({ type: Boolean, reflect: true }) disabled = false
+  /** Requires a nonempty message for form validation. */
+  @property({ type: Boolean, reflect: true }) required = false
+  /** Maximum message length; -1 means unlimited. */
+  @property({ type: Number }) maxLength = -1
+  /** Minimum message length; -1 means no minimum. */
+  @property({ type: Number }) minLength = -1
+  /** Accessible name forwarded to the inner textarea. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   // State
@@ -72,9 +105,64 @@ export class ChatInput extends LitElement {
   @state() private scrollBarPosition = 0
   @state() private scrollBarHeight = 0
   @state() private focused = false
+  @state() private disabledByForm = false
 
   // Query
   @query('.input') private readonly input?: HTMLTextAreaElement
+
+  /** The containing form, when this control is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+
+  get validity() {
+    return this.internals.validity
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+
+  get willValidate() {
+    return this.internals.willValidate
+  }
+
+  /** Restores the initial `value` attribute and clears the dirty state. */
+  reset() {
+    this.dirty = false
+    this.value = this.getAttribute('value') ?? ''
+  }
+
+  formResetCallback() {
+    this.reset()
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (typeof state === 'string') this.value = state
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity()
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity()
+  }
+
+  setCustomValidity(message: string) {
+    this.customValidityMessage = message
+    this.input?.setCustomValidity(message)
+    this.syncFormState()
+  }
 
   handleFocus = () => {
     this.focus()
@@ -89,6 +177,11 @@ export class ChatInput extends LitElement {
   override focus(options?: FocusOptions | undefined): void {
     this.focused = true
     this.input?.focus(options)
+  }
+
+  override blur(): void {
+    this.input?.blur()
+    this.focused = false
   }
 
   private async handleKeydown(event: KeyboardEvent) {
@@ -217,6 +310,24 @@ export class ChatInput extends LitElement {
     super.attributeChangedCallback(attribute, newValue, oldValue)
   }
 
+  protected override updated(_changed: PropertyValues<this>) {
+    this.syncFormState()
+  }
+
+  private syncFormState() {
+    this.internals.setFormValue(this.value, this.value)
+    if (!this.input || this.effectiveDisabled) {
+      this.internals.setValidity({})
+      return
+    }
+    this.input.setCustomValidity(this.customValidityMessage)
+    this.internals.setValidity(this.input.validity, this.input.validationMessage, this.input)
+  }
+
+  private get effectiveDisabled() {
+    return this.disabled || this.disabledByForm
+  }
+
   override render() {
     const classes = {
       'focus-within': this.focused,
@@ -229,10 +340,15 @@ export class ChatInput extends LitElement {
             aria-label=${this.ariaLabel || nothing}
             class="input"
             tabindex="0"
+            name=${ifDefined(this.name || undefined)}
             .value=${live(this.value)}
             placeholder=${this.placeholder || ''}
             autocomplete="off"
             rows="1"
+            maxlength=${ifDefined(this.maxLength >= 0 ? this.maxLength : undefined)}
+            minlength=${ifDefined(this.minLength >= 0 ? this.minLength : undefined)}
+            ?disabled=${this.effectiveDisabled}
+            ?required=${this.required}
             @change=${this.redispatchEvent}
             @select=${this.redispatchEvent}
             @focusin=${this.handleFocusin}

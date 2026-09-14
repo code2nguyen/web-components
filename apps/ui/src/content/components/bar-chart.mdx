@@ -1,0 +1,101 @@
+---
+title: 'Bar chart'
+description: 'Bars over categories or time buckets, with several series drawn side by side within each band.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-bar-chart'
+apiTags: ['c2-bar-chart', 'c2-chart-series']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { BarChart } from '@c2n/chart/bar-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+Bars for comparing discrete things: teams, plans, weekdays, buckets. Several series are drawn side by side
+within each band, and `bar-width` and `bar-gap` decide how much of the band the group takes and how much of
+the group is air between the bars.
+
+A bar chart reads its x as discrete slots rather than as a continuous scale, so the axis is padded by half a
+band at each end and the cursor snaps to the band instead of landing between two points.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart uplot
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .plot {
+    width: 100%;
+    --c2-chart--height: 220px;
+  }
+</style>
+
+<div data-label="One series over categories">
+  <c2-bar-chart
+    class="plot"
+    label-field="team"
+    x-type="category"
+    data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'
+  >
+    <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
+  </c2-bar-chart>
+</div>
+
+<div data-label="Grouped bars">
+  <c2-bar-chart
+    class="plot"
+    label-field="quarter"
+    x-type="category"
+    data='[{"quarter":"Q1","new":42,"renewed":58},{"quarter":"Q2","new":51,"renewed":61},{"quarter":"Q3","new":38,"renewed":74},{"quarter":"Q4","new":66,"renewed":80}]'
+  >
+    <c2-chart-series field="new" label="New"></c2-chart-series>
+    <c2-chart-series field="renewed" label="Renewed"></c2-chart-series>
+  </c2-bar-chart>
+</div>
+
+<div data-label="Thin bars, no grid">
+  <c2-bar-chart
+    class="plot"
+    style="--c2-chart__grid--color: transparent"
+    label-field="day"
+    x-type="category"
+    bar-width="0.35"
+    legend="none"
+    data='[{"day":"Mon","runs":124},{"day":"Tue","runs":168},{"day":"Wed","runs":151},{"day":"Thu","runs":193},{"day":"Fri","runs":142},{"day":"Sat","runs":61},{"day":"Sun","runs":48}]'
+  >
+    <c2-chart-series field="runs" label="Runs"></c2-chart-series>
+  </c2-bar-chart>
+</div>
+```
+
+## Labelling the bands
+
+`label-field` names the key that holds each band's label, and `x-type="category"` reads the x as slots. The
+tick shows the label rather than the slot index, and the tooltip follows the band. Without a `label-field`
+the bars fall back to `x-field` (or the row index), which is what a time-bucketed histogram usually wants.
+
+## Bar geometry
+
+`bar-width` is the share of the band a group occupies and `bar-gap` the share of that group taken by the
+gaps between grouped bars, both from 0 to 1. The defaults — `0.6` and `0.1` — give comfortable bars with a
+small gutter between the series of a group. Narrow the width for a sparse, editorial look; widen it to `1`
+for a histogram with no air between bands.
+
+```html tag=CodeBlock
+<c2-bar-chart label-field="bucket" x-type="category" bar-width="1" bar-gap="0">
+  <c2-chart-series field="count"></c2-chart-series>
+</c2-bar-chart>
+```
+
+## Theming
+
+Bars use the shared palette, `--c2-chart__series-1--color` through `--c2-chart__series-8--color`, wired by
+`@c2n/theme` to the `--c2-theme--chart-series-*` tokens; a single series can override its slot with
+`<c2-chart-series color="…">`. Every other `--c2-chart__*` variable — the grid, the axis, the tooltip, the
+card around the plot — is shared with the rest of the package, so setting them once themes every chart.

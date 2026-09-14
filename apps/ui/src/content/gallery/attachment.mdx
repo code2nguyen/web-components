@@ -1,0 +1,139 @@
+---
+title: 'Attachment gallery'
+description: 'File cards, image previews, upload states, and responsive attachment groups.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import { Attachment, AttachmentGroup } from '@c2n/attachment'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default,description=Baseline file row with metadata and a remove action,useWhen=Start here before applying component overrides,accessibility=Give the attachment an accessible name and keep removal keyboard operable
+<c2-attachment name="project-brief.pdf" type="PDF" size="2.4 MB" removable></c2-attachment>
+```
+
+```html tag=MdxCodeBlock,label=Image,description=Image attachment using the built-in media preview,useWhen=The file has a safe thumbnail URL
+<c2-attachment name="team-photo.jpg" type="JPG" size="1.8 MB" src="/web-components/chat.avif" removable></c2-attachment>
+```
+
+```html tag=MdxCodeBlock,label=Uploading,description=File row reporting upload progress,useWhen=An upload is still in progress,accessibility=Keep progress synchronized with the real upload state
+<c2-attachment name="research.zip" type="ZIP" size="18.6 MB" status="uploading" progress="64" removable></c2-attachment>
+```
+
+```html tag=MdxCodeBlock,label=Failed,description=Failed upload with a visible error state,useWhen=The upload failed and the user can retry or remove it
+<c2-attachment name="invoice.csv" type="CSV" size="84 KB" status="error" removable></c2-attachment>
+```
+
+```html tag=MdxCodeBlock,label=Compact,description=Dense attachment row for constrained surfaces,useWhen=Several files must fit in a compact list
+<style>
+  .compact {
+    --c2-attachment--min-height: 48px;
+    --c2-attachment--padding: 6px 8px;
+    --c2-attachment--gap: 8px;
+    --c2-attachment__media--size: 34px;
+  }
+</style>
+<c2-attachment class="compact" name="notes.txt" type="TXT" size="3 KB" removable></c2-attachment>
+```
+
+```html tag=MdxCodeBlock,label=Dark,description=Dark surface using component-level variables,useWhen=The attachment sits on a permanently dark region
+<style>
+  .dark {
+    --c2-attachment--background: #18181b;
+    --c2-attachment--border: 1px solid #3f3f46;
+    --c2-attachment--color: #fafafa;
+    --c2-attachment__media--background: #27272a;
+    --c2-attachment__media--color: #d4d4d8;
+    --c2-attachment__metadata--color: #a1a1aa;
+    --c2-attachment__action--color: #d4d4d8;
+    --c2-attachment__action__hover--background: #3f3f46;
+  }
+</style>
+<c2-attachment class="dark" name="archive.tar.gz" type="Archive" size="32 MB" removable></c2-attachment>
+```
+
+</GalleryGrid>
+
+## Groups
+
+Groups provide spacing and collection semantics without changing the attachments themselves. Use the default list for narrow surfaces and `layout="grid"` when the available width should determine the column count.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=List,description=Related file rows with list semantics,useWhen=Attachments should span the available width
+<c2-attachment-group>
+  <c2-attachment name="contract.pdf" type="PDF" size="820 KB" status="complete" removable></c2-attachment>
+  <c2-attachment name="appendix.xlsx" type="Spreadsheet" size="1.2 MB" removable></c2-attachment>
+</c2-attachment-group>
+```
+
+```html tag=MdxCodeBlock,label=Responsive grid,description=Responsive attachment tiles sized by the available width,useWhen=Several visual files should scan as a gallery
+<style>
+  .attachment-grid {
+    --c2-attachment-group--min-column-width: 190px;
+  }
+</style>
+<c2-attachment-group class="attachment-grid" layout="grid">
+  <c2-attachment name="cover.jpg" type="JPG" size="640 KB" src="/web-components/chat.avif"></c2-attachment>
+  <c2-attachment name="copy.md" type="Markdown" size="8 KB"></c2-attachment>
+  <c2-attachment name="sources.zip" type="ZIP" size="4.3 MB"></c2-attachment>
+</c2-attachment-group>
+```
+
+</GalleryGrid>
+
+## Mixed media
+
+The mixed layout follows the reference composition: visual files form a tile row, while ordinary attachments and upload states span the full width below it.
+
+```html tag=MdxCodeBlock,label=Dark mixed attachments,description=Image tiles followed by full-width file and upload rows,useWhen=A message or record contains mixed visual and document attachments
+<style>
+  .reference-attachments {
+    width: min(100%, 760px);
+    --c2-attachment-group--gap: 14px;
+    --c2-attachment-group--min-column-width: 180px;
+    --c2-attachment--background: #181818;
+    --c2-attachment--border: 1px solid #333333;
+    --c2-attachment--color: #f4f4f5;
+    --c2-attachment__media--background: #282828;
+    --c2-attachment__media--color: #f4f4f5;
+    --c2-attachment__metadata--color: #a1a1aa;
+    --c2-attachment__status--color: #a1a1aa;
+    --c2-attachment__action--color: #e4e4e7;
+    --c2-attachment__action__hover--background: #333333;
+    --c2-attachment__tile--width: 100%;
+  }
+  .reference-media {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(135deg, transparent 38%, rgba(255, 255, 255, 0.16) 39% 42%, transparent 43%),
+      linear-gradient(30deg, #52525b, #18181b 55%, #71717a);
+  }
+  .reference-media.desk {
+    background:
+      linear-gradient(80deg, transparent 47%, rgba(255, 255, 255, 0.18) 48% 52%, transparent 53%),
+      linear-gradient(160deg, #d4d4d8, #71717a 48%, #27272a 49%);
+  }
+  .reference-media.office {
+    background:
+      linear-gradient(0deg, #3f3f46 0 22%, transparent 23%),
+      linear-gradient(145deg, #71717a, #27272a 55%, #18181b);
+  }
+</style>
+<c2-attachment-group class="reference-attachments" layout="mixed" aria-label="Reference files">
+  <c2-attachment layout="tile" name="workspace.png" type="PNG" size="820 KB">
+    <span class="reference-media" slot="media" aria-hidden="true"></span>
+  </c2-attachment>
+  <c2-attachment layout="tile" name="desk-reference.jpg" type="JPG" size="1.1 MB">
+    <span class="reference-media desk" slot="media" aria-hidden="true"></span>
+  </c2-attachment>
+  <c2-attachment layout="tile" name="office-reference.jpg" type="JPG" size="940 KB">
+    <span class="reference-media office" slot="media" aria-hidden="true"></span>
+  </c2-attachment>
+  <c2-attachment name="sales-dashboard.pdf" status="uploading" progress="64" removable></c2-attachment>
+  <c2-attachment name="message-renderer.tsx" type="TypeScript" size="12 KB" removable></c2-attachment>
+</c2-attachment-group>
+```

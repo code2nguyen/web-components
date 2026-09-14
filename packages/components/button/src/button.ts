@@ -1,8 +1,11 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
 import styles from './button.scss?inline'
 
 /**
+ * Action button with optional leading/trailing icons, busy state and toggle-button semantics.
+ *
  * @tag c2-button
  *
  * @slot default - Button label text.
@@ -11,6 +14,10 @@ import styles from './button.scss?inline'
  * @slot running-icon - Icon shown in place of the prefix icon while `running` is set. Defaults to a spinner; the slot wrapper rotates, so slotted content spins too.
  *
  * @cssproperty {pixel} [--c2-button__container--height=36px]
+ * @cssproperty {width} [--c2-button__container--width=auto] - Width of the host. `100%` makes a full-width button.
+ * @cssproperty {justify-content} [--c2-button__container--justify-content=center] - How the label and its icons sit in the button. `flex-start` for a row-shaped button (a list entry, a group header), `space-between` to push a trailing hint to the far edge.
+ * @cssproperty {number} [--c2-button__label--flex-grow=0] - Whether the label takes the leftover width. `1` pushes a suffix icon to the far edge of a fixed-width button.
+ * @cssproperty {justify-content} [--c2-button__label--justify-content=center] - How the label sits once it has grown. `flex-start` keeps the text next to a prefix icon.
  * @cssproperty {padding} [--c2-button__container--padding-left=16px]
  * @cssproperty {padding} [--c2-button__container--padding-right=16px]
  * @cssproperty {pixel} [--c2-button__container--gap=8px]

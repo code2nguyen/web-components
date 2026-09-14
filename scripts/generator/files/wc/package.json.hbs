@@ -4,10 +4,12 @@
   "type": "module",
   "main": "dist/{{dashCase name}}.js",
   "exports": {
-    ".": { "default": "./dist/{{dashCase name}}.js", "types": "./types/src/{{dashCase name}}.d.ts" },
+    ".": { "types": "./types/src/{{dashCase name}}.d.ts", "default": "./dist/{{dashCase name}}.js" },
+    "./react": { "types": "./react.d.ts", "default": "./react.js" },
+    "./vue": { "types": "./vue.d.ts", "default": "./vue.js" },
     "./custom-elements.json": "./custom-elements.json"
   },
-  "files": ["dist", "types"],
+  "files": ["dist", "types", "react.d.ts", "react.js", "vue.d.ts", "vue.js"],
   "keywords": ["{{dashCase name}}", "web component", "lit"],
   "license": "MIT",
   "author": "code2nguyen@gmail.com",

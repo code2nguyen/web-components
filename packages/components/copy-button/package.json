@@ -5,14 +5,26 @@
   "main": "dist/copy-button.js",
   "exports": {
     ".": {
-      "default": "./dist/copy-button.js",
-      "types": "./types/src/copy-button.d.ts"
+      "types": "./types/src/copy-button.d.ts",
+      "default": "./dist/copy-button.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "copy-button",

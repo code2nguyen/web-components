@@ -1,16 +1,30 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './list-item.scss?inline'
 import { selectedItemValueContext } from './list-item-context'
 import { ContextConsumer } from '@c2n/core/controllers/context-consumer.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 
+/** Events fired by {@link ListItem}, keyed for `addEventListener`. */
+export interface ListItemEventMap {
+  'selected-change': CustomEvent<{ selected: boolean; value: string }>
+  click: MouseEvent
+}
+
+export interface ListItem {
+  addEventListener: TypedAddEventListener<ListItem, ListItemEventMap>
+  removeEventListener: TypedRemoveEventListener<ListItem, ListItemEventMap>
+}
+
 /**
  * A selectable row. On its own it is a toggle: click, Enter or Space flips `selected`. Inside a `c2-list` (and
  * therefore inside a `c2-select`) the list drives the selected state through context, handles the keyboard and the row
  * only reports clicks. The default slot is the primary text, `description` a second, muted line, `prefix-icon` and
- * `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by `--c2-list-item__icon--size`.
+ * `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by
+ * `--c2-list-item__icon--size` — anything else in them, a shortcut hint or a badge, keeps its own size.
  * With `href` the row is a link. In a multiple-selection list, adjacent selected rows lose the corner radius between
  * them (the list marks them `joined-before` / `joined-after`) so a run of selected rows reads as one block.
  *
@@ -25,6 +39,7 @@ import { redispatchEvent } from '@c2n/core/dom-helper.js'
  * @slot suffix-icon - Icon shown after the content, e.g. a check mark or shortcut hint.
  *
  * @event {CustomEvent<{ selected: boolean; value: string }>} selected-change - Fired after `selected` changes, whether from a click or from the parent list.
+ * @event {MouseEvent} click - Fired when an enabled row is activated; a row with `href` also navigates.
  *
  * @cssproperty {pixel} [--c2-list-item--min-height=36px]
  * @cssproperty {pixel} [--c2-list-item--gap=8px] - Space between the icons and the content.
@@ -113,6 +128,7 @@ export class ListItem extends LitElement {
   /** Makes the row a link. Selection still works when the row sits in a list. */
   @property() href: string | undefined = undefined
 
+  /** Browsing context used when `href` is set, such as `_blank`. */
   @property() target: string | undefined = undefined
 
   /** Arbitrary payload returned alongside `value` in the list's `selection-change` event. Not an attribute. */
@@ -211,11 +227,6 @@ export class ListItem extends LitElement {
         this.contextConsumer.unApplyContext()
       }
     }
-  }
-
-  protected override firstUpdated(): void {
-    const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="description"]')
-    if (slot) this.updateDescription(slot)
   }
 
   protected override updated(changedProperties: PropertyValueMap<this>): void {

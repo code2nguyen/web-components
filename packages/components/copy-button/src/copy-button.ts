@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { property, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './copy-button.scss?inline'
 
@@ -10,6 +12,17 @@ const TEXT_PROPERTY_TAGS = ['input', 'textarea', 'select']
 export type CopyButtonPin = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
 
 const SCROLLABLE_OVERFLOW = ['auto', 'scroll', 'overlay']
+
+/** Events fired by {@link CopyButton}, keyed for `addEventListener`. */
+export interface CopyButtonEventMap {
+  copied: CustomEvent<{ text: string }>
+  'copy-error': CustomEvent<{ error: unknown }>
+}
+
+export interface CopyButton {
+  addEventListener: TypedAddEventListener<CopyButton, CopyButtonEventMap>
+  removeEventListener: TypedRemoveEventListener<CopyButton, CopyButtonEventMap>
+}
 
 /**
  * Copies text to the clipboard.

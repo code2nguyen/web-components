@@ -5,14 +5,26 @@
   "main": "dist/avatar.js",
   "exports": {
     ".": {
-      "default": "./dist/avatar.js",
-      "types": "./types/src/avatar.d.ts"
+      "types": "./types/src/avatar.d.ts",
+      "default": "./dist/avatar.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
     },
     "./custom-elements.json": "./custom-elements.json"
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
   ],
   "keywords": [
     "avatar",

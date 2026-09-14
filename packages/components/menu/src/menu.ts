@@ -1,16 +1,30 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import type { Overlay, Placement } from '@c2n/overlay'
 import styles from './menu.scss?inline'
 import { MenuItem } from './menu-item'
+import type { MenuSelectEventDetail } from './menu-item'
 
 import '@c2n/overlay'
 import './menu-item'
 
 export type { Placement }
 export type { MenuItemType, MenuSelectEventDetail } from './menu-item'
+
+/** Events fired by {@link Menu}, keyed for `addEventListener`. */
+export interface MenuEventMap {
+  'menu-select': CustomEvent<MenuSelectEventDetail>
+  toggle: ToggleEvent
+}
+
+export interface Menu {
+  addEventListener: TypedAddEventListener<Menu, MenuEventMap>
+  removeEventListener: TypedRemoveEventListener<Menu, MenuEventMap>
+}
 
 /**
  * A menu of commands anchored to a trigger. The trigger is slotted into `trigger` (a `c2-button`, a `c2-icon-button`,
@@ -86,7 +100,16 @@ export class Menu extends LitElement {
   @property({ type: Boolean, reflect: true }) open = false
 
   /** Preferred placement of the surface (floating-ui names). Submenus default to `right-start`. */
-  @property({ reflect: true }) placement: Placement = 'bottom-start'
+  @property({ reflect: true })
+  placement:
+    'top' | 'top-start' | 'top-end' | 'right' | 'right-start' | 'right-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' =
+    'bottom-start'
+
+  /** Distance in pixels from the trigger along the placement direction. Defaults to the overlay's 8px gap. */
+  @property({ type: Number }) offset: number | undefined = undefined
+
+  /** Shift in pixels perpendicular to the placement direction. Positive values move towards the aligned end. */
+  @property({ type: Number, attribute: 'cross-offset' }) crossOffset: number | undefined = undefined
 
   /** Anchor element, or (attribute) the id of an element in the same tree. Defaults to the slotted trigger. */
   @property() anchor: string | HTMLElement | undefined = undefined
@@ -480,6 +503,8 @@ export class Menu extends LitElement {
         class="overlay"
         .anchor=${this.anchorElement ?? undefined}
         .placement=${this.placement}
+        .offset=${this.offset}
+        .crossOffset=${this.crossOffset}
         .open=${this.open}
         ?fit-anchor=${this.fitAnchor}
         ?free-width=${!this.hasTrigger}

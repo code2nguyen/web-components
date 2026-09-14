@@ -2,6 +2,7 @@
 import { featherIconNames } from '@c2n/feather-icons/icon-names.js'
 import { phosphorIconNames } from '@c2n/phosphor-icons/icon-names.js'
 import { materialIconNames } from '../data/material-icon-names'
+import SiteTextField from './ui/SiteTextField.astro'
 
 const iconSets = [
   {
@@ -45,14 +46,7 @@ const serializedIndex = JSON.stringify(searchIndex).replaceAll('<', '\\u003c')
     <span class="all-icon-search__total">{iconSets.length} sets</span>
   </div>
 
-  <label class="all-icon-search__field">
-    <span class="sr-only">Search all icon sets</span>
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="11" cy="11" r="7"></circle>
-      <path d="m20 20-4-4"></path>
-    </svg>
-    <input type="search" placeholder="Search icons, for example arrow, heart, user…" autocomplete="off" />
-  </label>
+  <SiteTextField class="all-icon-search__field" label="Search all icon sets" search placeholder="Search icons, for example arrow, heart, user…" />
 
   <div class="all-icon-search__summary" aria-live="polite">Start typing to search all icon sets.</div>
   <div class="all-icon-search__results"></div>
@@ -91,45 +85,18 @@ const serializedIndex = JSON.stringify(searchIndex).replaceAll('<', '\\u003c')
       color: var(--site-color-on-surface-muted);
     }
 
+    // The box, the focus ring and the magnifier are the text field's own; this is only the page-level size.
     &__field {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      height: 44px;
-      padding: 0 14px;
-      color: var(--site-color-on-surface-muted);
-      background: var(--site-color-surface-container-1);
-      border: 1px solid var(--site-color-outline-variant);
-      border-radius: var(--site-radius-md);
-
-      &:focus-within {
-        border-color: var(--site-color-primary);
-        box-shadow: 0 0 0 3px var(--site-color-primary-soft);
-      }
-
-      svg {
-        width: 18px;
-        height: 18px;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 2;
-        stroke-linecap: round;
-      }
-
-      input {
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        font: inherit;
-        color: var(--site-color-on-surface);
-        background: transparent;
-        border: 0;
-        outline: 0;
-
-        &::placeholder {
-          color: var(--site-color-on-surface-muted);
-        }
-      }
+      --c2-text-field--min-height: 44px;
+      --c2-text-field--font-size: 15px;
+      --c2-text-field--padding-left: 14px;
+      --c2-text-field--padding-right: 14px;
+      --c2-text-field--gap: 10px;
+      --c2-feather-icon--size: 18px;
+      --c2-text-field--border-top-left-radius: var(--site-radius-md);
+      --c2-text-field--border-top-right-radius: var(--site-radius-md);
+      --c2-text-field--border-bottom-left-radius: var(--site-radius-md);
+      --c2-text-field--border-bottom-right-radius: var(--site-radius-md);
     }
 
     &__summary {
@@ -225,6 +192,8 @@ const serializedIndex = JSON.stringify(searchIndex).replaceAll('<', '\\u003c')
 </style>
 
 <script>
+  import type { TextField } from '@c2n/text-field'
+
   import '@c2n/copy-button'
 
   interface IconSearchEntry {
@@ -236,7 +205,7 @@ const serializedIndex = JSON.stringify(searchIndex).replaceAll('<', '\\u003c')
 
   const MAX_RESULTS = 120
   const root = document.querySelector<HTMLElement>('.all-icon-search')
-  const input = root?.querySelector<HTMLInputElement>('input[type="search"]')
+  const input = root?.querySelector<TextField>('.all-icon-search__field')
   const results = root?.querySelector<HTMLElement>('.all-icon-search__results')
   const summary = root?.querySelector<HTMLElement>('.all-icon-search__summary')
   const data = document.querySelector<HTMLScriptElement>('#all-icon-search-index')

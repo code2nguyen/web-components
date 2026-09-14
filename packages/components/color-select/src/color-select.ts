@@ -1,5 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { TinyColor } from '@ctrl/tinycolor'
 
 import styles from './color-select.scss?inline'
@@ -21,10 +23,22 @@ export interface ColorSelectChangeEventDetail {
   v: number
   a: number
 }
+/** Events fired by {@link ColorSelect}, keyed for `addEventListener`. */
+export interface ColorSelectEventMap {
+  change: CustomEvent<string>
+}
+
+export interface ColorSelect {
+  addEventListener: TypedAddEventListener<ColorSelect, ColorSelectEventMap>
+  removeEventListener: TypedRemoveEventListener<ColorSelect, ColorSelectEventMap>
+}
+
 /**
+ * Popup colour picker combining a colour area, hue control and editable colour value.
+ *
  * @tag c2-color-select
  *
- * @event {CustomEvent} change
+ * @event {CustomEvent<string>} change - Fired when the selected colour changes; `detail` is the serialized colour.
  *
  * @cssproperty {pixel} [--c2-color-select--width=16px]
  * @cssproperty {pixel} [--c2-color-select--height=16px]
@@ -74,6 +88,7 @@ export interface ColorSelectChangeEventDetail {
 export class ColorSelect extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /** Preferred popup placement relative to the trigger. */
   @property({ type: String, reflect: true }) placement = 'bottom-start'
 
   private _color: string = '#000000'
@@ -81,6 +96,7 @@ export class ColorSelect extends LitElement {
     return this._color
   }
 
+  /** Selected CSS colour value. */
   @property({ reflect: true })
   public set color(value: string) {
     if (this._color != value) {

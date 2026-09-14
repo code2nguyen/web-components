@@ -1,11 +1,23 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { consume } from '@lit/context'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import { radioGroupContext, type RadioGroupContext } from './radio-context'
 import styles from './radio.scss?inline'
+
+/** Events fired by {@link Radio}, keyed for `addEventListener`. */
+export interface RadioEventMap {
+  change: Event
+}
+
+export interface Radio {
+  addEventListener: TypedAddEventListener<Radio, RadioEventMap>
+  removeEventListener: TypedRemoveEventListener<Radio, RadioEventMap>
+}
 
 /**
  * A single radio option built on a native `<input type="radio">`, with its label and an optional description beside
@@ -75,7 +87,15 @@ import styles from './radio.scss?inline'
  */
 @customElement('c2-radio')
 export class Radio extends LitElement {
+  static formAssociated = true
+
   static override styles = unsafeCSS(styles)
+
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+  @state() private disabledByForm = false
+  private defaultChecked = false
+  private defaultCheckedCaptured = false
 
   @query('input') protected formElement!: HTMLInputElement
 
@@ -91,15 +111,20 @@ export class Radio extends LitElement {
   /** Form field name. Inside a group, the group's `name` wins. */
   @property() name = ''
 
+  /** Requires this standalone radio, or its containing group, to have a selected option. */
+  @property({ type: Boolean, reflect: true }) required = false
+
   /** Label text when the default slot is empty. */
   @property() label = ''
 
   /** Whether the inner input is in the tab order. The parent group manages this (roving tabindex); do not set by hand. */
   @property({ type: Boolean, attribute: false }) tabbable = true
 
+  /** Accessible name used when no visible label names the radio. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 
+  /** Id of the element that describes the radio. */
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 
@@ -111,6 +136,14 @@ export class Radio extends LitElement {
   @consume({ context: radioGroupContext, subscribe: true })
   private group: RadioGroupContext | undefined
 
+  override connectedCallback() {
+    super.connectedCallback()
+    if (!this.defaultCheckedCaptured) {
+      this.defaultChecked = this.hasAttribute('checked')
+      this.defaultCheckedCaptured = true
+    }
+  }
+
   /** Field name in effect: the group's, or this radio's own. */
   get effectiveName(): string {
     return this.group?.name || this.name
@@ -118,7 +151,56 @@ export class Radio extends LitElement {
 
   /** Disabled by its own attribute or by the group. */
   get effectiveDisabled(): boolean {
-    return this.disabled || !!this.group?.disabled
+    return this.disabled || this.disabledByForm || !!this.group?.disabled
+  }
+
+  /** The containing form, when this standalone radio is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+
+  get validity() {
+    return this.internals.validity
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+
+  get willValidate() {
+    return this.internals.willValidate
+  }
+
+  formResetCallback() {
+    if (this.group) return
+    this.checked = this.defaultChecked
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    if (this.group) return
+    this.checked = state === 'checked'
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity()
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity()
+  }
+
+  setCustomValidity(message: string) {
+    this.customValidityMessage = message
+    this.requestUpdate()
   }
 
   override focus(options?: FocusOptions) {
@@ -145,7 +227,9 @@ export class Radio extends LitElement {
     if (changed.has('checked') && changed.get('checked') !== undefined && this.isConnected) {
       if (this.group) this.group.checkedChanged(this)
       else if (this.checked) this.uncheckSiblings()
+      else this.requestSiblingValidityUpdates()
     }
+    this.syncFormState()
   }
 
   /** Standalone radios sharing a `name` in the same root behave as one group. */
@@ -154,8 +238,45 @@ export class Radio extends LitElement {
     const root = this.getRootNode() as Document | ShadowRoot
     if (typeof root.querySelectorAll !== 'function') return
     for (const radio of root.querySelectorAll<Radio>('c2-radio')) {
-      if (radio !== this && radio.checked && radio.name === this.name && !radio.group) radio.checked = false
+      if (this.isStandalonePeer(radio)) {
+        if (radio.checked) radio.checked = false
+        else radio.requestUpdate()
+      }
     }
+  }
+
+  private requestSiblingValidityUpdates() {
+    if (!this.name) return
+    const root = this.getRootNode() as Document | ShadowRoot
+    if (typeof root.querySelectorAll !== 'function') return
+    for (const radio of root.querySelectorAll<Radio>('c2-radio')) {
+      if (this.isStandalonePeer(radio)) radio.requestUpdate()
+    }
+  }
+
+  private syncFormState() {
+    // The group owns one form entry for its options; standalone radios submit themselves.
+    this.internals.setFormValue(!this.group && this.checked ? this.value : null, this.checked ? 'checked' : 'unchecked')
+    if (this.group) {
+      this.internals.setValidity({})
+      return
+    }
+    const missing = this.required && !this.hasCheckedStandaloneSibling()
+    const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
+    const message = this.customValidityMessage || (missing ? 'Please select an option.' : '')
+    this.internals.setValidity(flags, message, this.formElement)
+  }
+
+  private hasCheckedStandaloneSibling() {
+    if (this.checked) return true
+    if (!this.name) return false
+    const root = this.getRootNode() as Document | ShadowRoot
+    if (typeof root.querySelectorAll !== 'function') return false
+    return [...root.querySelectorAll<Radio>('c2-radio')].some((radio) => this.isStandalonePeer(radio) && radio.checked)
+  }
+
+  private isStandalonePeer(radio: Radio) {
+    return radio !== this && radio.name === this.name && !radio.group && radio.form === this.form
   }
 
   private handleSlotChange(event: Event) {
@@ -198,6 +319,7 @@ export class Radio extends LitElement {
             aria-describedby=${ifDefined(this.ariaDescribedBy)}
             ?checked=${this.checked}
             ?disabled=${disabled}
+            ?required=${this.group?.required || this.required}
             @change=${this.handleChange}
           />
           <span class="c2-radio__background" part="control">

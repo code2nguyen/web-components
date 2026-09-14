@@ -1,13 +1,27 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property, query } from 'lit/decorators.js'
+import { property, query } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './color-slider.scss?inline'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import { TinyColor } from '@ctrl/tinycolor'
+/** Events fired by {@link ColorSlider}, keyed for `addEventListener`. */
+export interface ColorSliderEventMap {
+  input: Event
+}
+
+export interface ColorSlider {
+  addEventListener: TypedAddEventListener<ColorSlider, ColorSliderEventMap>
+  removeEventListener: TypedRemoveEventListener<ColorSlider, ColorSliderEventMap>
+}
+
 /**
+ * Horizontal numeric slider rendered as a colour-gradient track, typically used for hue.
+ *
  * @tag c2-color-slider
  *
- * @event {CustomEvent} input
+ * @event {Event} input - Re-dispatched from the inner range input while its value changes.
  *
  *
  * @cssproperty {border-radius} [--c2-color-slider--border-radius=8px]
@@ -39,10 +53,14 @@ import { TinyColor } from '@ctrl/tinycolor'
 export class ColorSlider extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  /** Current numeric value. */
   @property({ type: Number, reflect: true }) value: number = 0
+  /** Minimum selectable value. */
   @property({ type: Number, reflect: true }) min: number = 0
+  /** Maximum selectable value. */
   @property({ type: Number, reflect: true }) max: number = 360
 
+  /** Accessible name forwarded to the inner range input. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   @query('.color-handle') colorHandle!: HTMLElement

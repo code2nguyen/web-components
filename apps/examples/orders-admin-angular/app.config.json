@@ -1,0 +1,7 @@
+{
+  "title": "Orders Admin",
+  "description": "A zoneless Angular 22 console over c2-table, c2-tabs, c2-modal and c2-toast — property and event bindings straight onto the custom elements.",
+  "framework": "angular",
+  "tags": ["table", "modal", "tabs"],
+  "order": 30
+}

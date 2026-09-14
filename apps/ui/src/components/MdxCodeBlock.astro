@@ -19,6 +19,10 @@ interface Props {
   id?: string
   /** Studio title label ("Button · <label>"); defaults to the nearest heading above the frame. */
   label?: string
+  /** Optional machine-readable gallery context, also bundled into the MCP registry. */
+  description?: string
+  useWhen?: string
+  accessibility?: string
   /** Render hidden on the page; the frame only appears when expanded into the studio (preset cards use this). */
   offscreen?: boolean
 }

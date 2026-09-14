@@ -7,6 +7,30 @@ const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const { version: packageVersion } = JSON.parse(readFileSync(resolve(repositoryRoot, 'lerna.json'), 'utf8')) as { version: string }
 
 export default function (plop: NodePlopAPI) {
+  plop.setGenerator('example', {
+    description: 'generate a plain HTML example application',
+    prompts: [
+      { type: 'input', name: 'name', message: 'example id (ex: market-overview):' },
+      { type: 'input', name: 'title', message: 'display title:' },
+      { type: 'input', name: 'description', message: 'description:' },
+    ],
+    actions: [
+      {
+        type: 'addMany',
+        destination: '../../apps/examples/{{dashCase name}}',
+        base: 'files/example',
+        templateFiles: 'files/example/**/*.*',
+        skipIfExists: true,
+      },
+      {
+        type: 'append',
+        path: '../../package.json',
+        pattern: /"examples:build": \{\n\s*"dependencies": \[/,
+        template: '        "./apps/examples/{{ dashCase name }}:build",',
+      },
+    ],
+  })
+
   plop.setGenerator('wc', {
     description: 'generate web component',
     prompts: [

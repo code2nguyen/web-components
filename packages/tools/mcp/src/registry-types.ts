@@ -50,6 +50,7 @@ export interface ElementEntry {
   attributes: { name: string; type: string; default?: string; description?: string }[]
   slots: { name: string; description?: string }[]
   events: { name: string; type?: string; description?: string }[]
+  cssParts: { name: string; description?: string }[]
   cssProperties: CssProperty[]
 }
 
@@ -70,6 +71,16 @@ export interface Example {
   kind: 'usage' | 'gallery' | 'preview'
   label: string
   section?: string
+  /** What the example demonstrates. */
+  description?: string
+  /** Situation in which this pattern is appropriate. */
+  useWhen?: string
+  /** Accessibility behavior or responsibility worth preserving. */
+  accessibility?: string
+  /** True only for a gallery baseline named Default with no c2n CSS-variable overrides. */
+  isDefault?: boolean
+  /** c2 custom-element tags present in the example markup. */
+  tags?: string[]
   html: string
   css?: string
 }

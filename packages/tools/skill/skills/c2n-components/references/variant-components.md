@@ -1,6 +1,6 @@
 # Variant and composed components
 
-A variant is one c2 component with a fixed look (CSS variables) and, sometimes, fixed attributes, slots or accessible name. A composed component is several c2 components plus glue. Both set children's CSS variables on the host element or a class — never through `::part()`, which the components do not expose.
+A variant is one c2 component with a fixed look (CSS variables) and, sometimes, fixed attributes, slots or accessible name. A composed component is several c2 components plus glue. Both normally set children's CSS variables on the host element or a class. Use `::part()` only for a part documented by `get_component` and only when the public variables cannot express the change.
 
 ## Shape 1: CSS-class variant
 
@@ -78,10 +78,11 @@ export class DangerButton extends Button {
     this.setAttribute('running', '') // fixed attributes go here
   }
 }
-customElements.define('app-danger-button', DangerButton)
+if (!customElements.get('app-danger-button')) customElements.define('app-danger-button', DangerButton)
 ```
 
 Import the class from the module that defines the element (`@c2n/tabs/tab.js` for `c2-tab`, `@c2n/feather-icons/icons/<name>.js` for icons). Importing it also registers the original `c2-*` tag, which is fine. Never `customElements.define` a `c2-` name.
+Guard registration with `customElements.get()` so development HMR or repeated module evaluation cannot define the same tag twice.
 
 ## Composed components
 

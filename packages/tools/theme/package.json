@@ -54,6 +54,12 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/chart:build",
+        "../../components/autocomplete:build",
+        "../../components/header:build",
+        "../../components/stat:build",
+        "../../components/attachment:build",
+        "../../components/virtual-list:build",
         "../../components/sheet:build",
         "../../components/skeleton:build",
         "../../components/progress:build",

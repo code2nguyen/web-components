@@ -7,6 +7,8 @@ export interface RadioGroupContext {
   name: string
   /** Disables every radio of the group. */
   disabled: boolean
+  /** Requires the group to have a selected radio. */
+  required: boolean
   /** Called by a radio after its `checked` state changed, so the group can update `value` and uncheck the others. */
   checkedChanged(radio: Radio): void
 }

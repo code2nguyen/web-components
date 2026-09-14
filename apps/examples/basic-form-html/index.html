@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Form · c2n example</title>
+    <script>
+      // The gallery embeds this page in an iframe and passes its own resolved theme through `?theme=`.
+      // Applied before first paint so an embedded demo never flashes light inside a dark page.
+      // Opened standalone with no parameter, `@c2n/theme`'s prefers-color-scheme fallback takes over.
+      ;(function () {
+        try {
+          var theme = new URLSearchParams(location.search).get('theme')
+          if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme
+        } catch (e) {
+          /* the prefers-color-scheme fallback still applies */
+        }
+      })()
+    </script>
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+
+  <body>
+    <main class="page">
+      <form id="account-form">
+        <c2-card class="form-card">
+          <div slot="header" class="form-card__head">
+            <h1>Account settings</h1>
+            <p>Update the profile shown to your teammates.</p>
+          </div>
+
+          <div class="form-card__body">
+            <div class="field">
+              <c2-label for="full-name" required>Full name</c2-label>
+              <c2-text-field id="full-name" name="fullName" value="Ada Lovelace"></c2-text-field>
+            </div>
+
+            <div class="field">
+              <c2-label for="email" required>Email</c2-label>
+              <c2-text-field id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email"></c2-text-field>
+            </div>
+
+            <div class="field">
+              <c2-label for="country">Country</c2-label>
+              <c2-select id="country" name="country" placeholder="Select a country" value="GB">
+                <c2-list-item value="US">United States</c2-list-item>
+                <c2-list-item value="GB">United Kingdom</c2-list-item>
+                <c2-list-item value="FR">France</c2-list-item>
+                <c2-list-item value="DE">Germany</c2-list-item>
+                <c2-list-item value="VN">Vietnam</c2-list-item>
+              </c2-select>
+            </div>
+
+            <c2-switch id="digest" checked>
+              Weekly digest
+              <span slot="description">A summary of your team's activity every Monday.</span>
+            </c2-switch>
+
+            <div class="consent">
+              <c2-checkbox id="terms" name="terms" value="accepted" required></c2-checkbox>
+              <c2-label for="terms">I agree to the terms of service</c2-label>
+            </div>
+          </div>
+
+          <div slot="footer" class="form-card__actions">
+            <c2-button class="ghost" id="reset">Reset</c2-button>
+            <c2-button id="save">Save changes</c2-button>
+          </div>
+        </c2-card>
+      </form>
+    </main>
+  </body>
+</html>

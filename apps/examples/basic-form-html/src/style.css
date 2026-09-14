@@ -1,0 +1,68 @@
+/* The demo styles its own page chrome with the @c2n/theme tokens, exactly as a consuming app would —
+   no --site-* variables, nothing borrowed from the docs site. */
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  box-sizing: border-box;
+  background: var(--c2-theme--color-surface, #ffffff);
+  color: var(--c2-theme--color-on-surface, #18181b);
+  font-family: var(--c2-theme--font-family, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  font-size: 14px;
+}
+
+.page {
+  width: 100%;
+  max-width: 460px;
+}
+
+.form-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-card__head h1 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+.form-card__head p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--c2-theme--color-on-surface-variant, #52525b);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field c2-text-field,
+.field c2-select {
+  width: 100%;
+}
+
+.consent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.consent c2-label {
+  cursor: pointer;
+}
+
+.form-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ghost {
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: var(--c2-theme--color-on-surface-variant, #52525b);
+  --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+  --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+}

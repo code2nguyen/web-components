@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en" class="axiom-theme" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fixed Income Products | AxiomData AI</title>
+    <meta
+      name="description"
+      content="Comprehensive fixed income reference data, corporate actions pipelines, and evaluated EOD pricing feeds for institutional investors."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+
+  <body class="antialiased grid-lines">
+    <!-- STICKY HEADER -->
+    <c2-header id="site-header" class="site-header" navigation-label="Main Navigation" blurred sticky>
+      <a href="index.html" class="brand-logo" slot="brand" aria-label="AxiomData AI Home">
+        <div class="logo-mark">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="24" height="24" rx="6" stroke="url(#cyan-grad)" stroke-width="2" fill="rgba(34,211,238,0.08)" />
+            <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="12" cy="19" r="2" fill="#a78bfa" />
+            <circle cx="17" cy="19" r="2" fill="#6ee7ff" />
+            <defs>
+              <linearGradient id="cyan-grad" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6ee7ff" />
+                <stop offset="1" stop-color="#a78bfa" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="brand-name">AxiomData <span class="brand-ai">AI</span></span>
+      </a>
+
+      <!-- C2 NAVIGATION MENU -->
+      <div class="header-nav">
+        <c2-navigation-menu aria-label="Main Navigation" mobile-breakpoint="1280" auto-current>
+          <c2-navigation-menu-item href="index.html">Home</c2-navigation-menu-item>
+          <c2-navigation-menu-item href="about.html">About</c2-navigation-menu-item>
+
+          <c2-navigation-menu-item value="fixed-income" current>
+            Fixed Income Products
+            <div slot="panel" class="c2-nav-panel">
+              <span class="nav-panel-label">Fixed Income Universe</span>
+              <c2-navigation-menu-link href="fixed-income.html#reference-api">
+                Reference Data
+                <span slot="description">ISINs, LEIs, ratings &amp; instrument classification</span>
+              </c2-navigation-menu-link>
+              <c2-navigation-menu-link href="fixed-income.html#corporate-actions">
+                Corporate Actions
+                <span slot="description">Automated event capture &amp; entitlement processing</span>
+              </c2-navigation-menu-link>
+              <c2-navigation-menu-link href="fixed-income.html#pricing">
+                Pricing
+                <span slot="description">EOD fixed income pricing feeds</span>
+              </c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+
+          <c2-navigation-menu-item value="regulatory">
+            Regulatory Products
+            <div slot="panel" class="c2-nav-panel">
+              <span class="nav-panel-label">Compliance &amp; Risk</span>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#erisa">
+                ERISA Portfolio Analytics
+                <span slot="description">Plan asset classification &amp; 5500 reporting data</span>
+              </c2-navigation-menu-link>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#solvency-ma">
+                Matching Adjustment
+                <span slot="description">PRA eligibility attestation &amp; spread attribution</span>
+              </c2-navigation-menu-link>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#lei-mapping">
+                LEI &amp; Instrument Mapping
+                <span slot="description">Cross-reference LEIs to ISIN, FIGI and other identifiers</span>
+              </c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+
+          <c2-navigation-menu-item href="contact.html">Contact</c2-navigation-menu-item>
+        </c2-navigation-menu>
+      </div>
+
+      <c2-link-button slot="actions" class="header-cta" href="contact.html">Get in Touch</c2-link-button>
+    </c2-header>
+
+    <main class="pt-page">
+      <!-- HERO -->
+      <section class="page-hero">
+        <div class="section-container text-center">
+          <div class="reveal">
+            <c2-badge tone="info" class="section-pill">DATA INFRASTRUCTURE</c2-badge>
+            <h1 class="page-title">Fixed Income <span class="gradient-text">Product Suite</span></h1>
+            <p class="section-subtitle">High-fidelity reference databases, automated entitlement tracking, and institutional evaluated curves.</p>
+
+            <div class="hero-filter-pills">
+              <c2-link-button class="filter-pill" href="#reference-api">Reference Data</c2-link-button>
+              <c2-link-button class="filter-pill" href="#corporate-actions">Corporate Actions</c2-link-button>
+              <c2-link-button class="filter-pill" href="#pricing">Evaluated Pricing</c2-link-button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 REFERENCE DATA -->
+      <section id="reference-api" class="service-section">
+        <div class="section-container">
+          <div class="service-header reveal">
+            <div class="service-num-badge">01</div>
+            <div>
+              <div class="service-badge-row">
+                <c2-badge tone="info">MASTER DATA MANAGEMENT</c2-badge>
+                <span class="service-tag-label">REST &amp; STREAMING</span>
+              </div>
+              <h2 class="service-heading">Reference Data <span class="gradient-text">Engine</span></h2>
+            </div>
+          </div>
+
+          <div class="grid-split reveal">
+            <div class="service-content">
+              <p class="lead-text">
+                Unmatched global debt universe coverage spanning sovereigns, sub-sovereigns, corporates, convertibles, munis, and structured notes. Accessible
+                via low-latency REST, streaming WebSocket, and bulk data drops.
+              </p>
+              <ul class="feature-checklist">
+                <li><c2-feather-check class="icon-check"></c2-feather-check> REST &amp; streaming endpoints with native JSON, Arrow, and FIX support</li>
+                <li>
+                  <c2-feather-check class="icon-check"></c2-feather-check> Multi-symbology resolution: ISIN, LEI, FIGI, CUSIP, SEDOL &amp; internal tickers
+                </li>
+                <li><c2-feather-check class="icon-check"></c2-feather-check> Dynamic ultimate parent hierarchy &amp; credit rating lineage mapping</li>
+                <li><c2-feather-check class="icon-check"></c2-feather-check> Enterprise SLA guaranteeing 99.9% uptime and sub-second response times</li>
+                <li><c2-feather-check class="icon-check"></c2-feather-check> Granular role-based API credentials with key rotation policies</li>
+              </ul>
+              <c2-button class="btn-primary" id="refReqBtn">
+                Request API Access
+                <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+              </c2-button>
+            </div>
+
+            <div class="code-box-wrapper">
+              <c2-code-viewer class="terminal-viewer" variant="terminal" language="json" dark-theme="github-dark" color-scheme="dark">
+                <span slot="title" class="terminal-title">
+                  <span class="http-method get">GET</span>
+                  <span class="http-endpoint">/v1/instruments/XS2010034567</span>
+                  <span class="terminal-status-tag"><span class="status-indicator"></span>200 OK</span>
+                </span>
+                <pre>
+{
+  "isin": "XS2010034567",
+  "issuer": "Axiom Global Funding PLC",
+  "lei": "5493006MHB84DD0ZWV18",
+  "currency": "GBP",
+  "maturity_date": "2036-06-20",
+  "coupon_rate": 4.625,
+  "coupon_frequency": "SEMI-ANNUAL",
+  "credit_rating": {
+    "composite": "A+",
+    "moodys": "A1",
+    "sp": "A+",
+    "fitch": "A+"
+  },
+  "asset_class": "corporate_debt",
+  "solvency_ma_eligible": true
+}</pre>
+              </c2-code-viewer>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 CORPORATE ACTIONS -->
+      <section id="corporate-actions" class="service-section section-soft">
+        <div class="section-container">
+          <div class="service-header reveal">
+            <div class="service-num-badge">02</div>
+            <div>
+              <div class="service-badge-row">
+                <c2-badge tone="info">LIFECYCLE AUTOMATION</c2-badge>
+                <span class="service-tag-label">CORPORATE ACTIONS</span>
+              </div>
+              <h2 class="service-heading">Corporate Actions <span class="gradient-text">Pipeline</span></h2>
+            </div>
+          </div>
+
+          <div class="grid-split reveal">
+            <div class="service-content">
+              <p class="lead-text">
+                Automated event extraction, standardization, and downstream notification across the entire bond lifecycle. Eliminates missed coupon payments,
+                call exercises, and settlement surprises.
+              </p>
+              <ul class="feature-checklist">
+                <li><c2-feather-check class="icon-check"></c2-feather-check> Automated prospectuses and regulatory announcement scraping via GenAI</li>
+                <li><c2-feather-check class="icon-check"></c2-feather-check> Entitlement calculations: variable coupons, step-ups, PIK, and sinking funds</li>
+                <li><c2-feather-check class="icon-check"></c2-feather-check> Webhook triggers &amp; pub/sub alerts pushed directly to portfolio accounting</li>
+                <li><c2-feather-check class="icon-check"></c2-feather-check> Complete immutable audit trail for compliance verification and audit signoff</li>
+              </ul>
+              <c2-button class="btn-primary" id="corpReqBtn">
+                Enquire About Corporate Actions
+                <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+              </c2-button>
+            </div>
+
+            <div class="lifecycle-cards-grid">
+              <c2-card class="lifecycle-card">
+                <h4 class="lc-title">Coupon Payments</h4>
+                <p class="lc-desc">Scheduled, floating, and stepped rate entitlement calculations with record-date ledger matching.</p>
+              </c2-card>
+              <c2-card class="lifecycle-card">
+                <h4 class="lc-title">Call &amp; Put Options</h4>
+                <p class="lc-desc">Early exercise alerts with yield-to-call impact projections and duration adjustment models.</p>
+              </c2-card>
+              <c2-card class="lifecycle-card">
+                <h4 class="lc-title">Sinking Funds &amp; Amortisation</h4>
+                <p class="lc-desc">Scheduled principal draws tracked with prospective cashflow schedule recalculation.</p>
+              </c2-card>
+              <c2-card class="lifecycle-card">
+                <h4 class="lc-title">Maturities &amp; Redemptions</h4>
+                <p class="lc-desc">Full settlement data dissemination and post-redemption instrument status retirement.</p>
+              </c2-card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 PRICING -->
+      <section id="pricing" class="service-section section-pricing">
+        <div class="section-container">
+          <div class="service-header reveal">
+            <div class="service-num-badge">03</div>
+            <div>
+              <div class="service-badge-row">
+                <c2-badge tone="info">VALUATION &amp; RISK</c2-badge>
+                <span class="service-tag-label">EOD INSTITUTIONAL PRICING</span>
+              </div>
+              <h2 class="service-heading">Evaluated Pricing <span class="gradient-text">Feeds</span></h2>
+            </div>
+          </div>
+
+          <div class="grid-split reveal">
+            <div class="service-content">
+              <p class="lead-text">
+                End-of-day evaluated fixed income pricing derived from trade prints, dealer quote streams, and multi-factor curve attribution models for
+                institutional NAV and risk engines.
+              </p>
+
+              <div class="feature-checklist">
+                <div class="checklist-item">
+                  <div class="checklist-icon-circle">
+                    <c2-feather-check></c2-feather-check>
+                  </div>
+                  <div class="checklist-body">
+                    <span class="checklist-title">Multi-Source Price Validation</span>
+                    <span class="checklist-desc">Consensus pricing across illiquid, private placement, and sovereign benchmark issues worldwide.</span>
+                  </div>
+                </div>
+
+                <div class="checklist-item">
+                  <div class="checklist-icon-circle">
+                    <c2-feather-check></c2-feather-check>
+                  </div>
+                  <div class="checklist-body">
+                    <span class="checklist-title">Yield Curves &amp; Spread Attribution</span>
+                    <span class="checklist-desc">Dynamic benchmark sovereign curves and sector spread attribution grids calibrated intraday.</span>
+                  </div>
+                </div>
+
+                <div class="checklist-item">
+                  <div class="checklist-icon-circle">
+                    <c2-feather-check></c2-feather-check>
+                  </div>
+                  <div class="checklist-body">
+                    <span class="checklist-title">Clean &amp; Dirty Price Delivery at 17:00 UTC</span>
+                    <span class="checklist-desc">Bid, mid, ask, accrued interest, and duration matrices published daily with zero lag.</span>
+                  </div>
+                </div>
+
+                <div class="checklist-item">
+                  <div class="checklist-icon-circle">
+                    <c2-feather-check></c2-feather-check>
+                  </div>
+                  <div class="checklist-body">
+                    <span class="checklist-title">IFRS 13 &amp; US GAAP Fair Value Tagging</span>
+                    <span class="checklist-desc">Automated Level 1, 2, and 3 valuation hierarchy classification ready for internal and regulatory audit.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="service-action-row">
+                <c2-button class="btn-primary" id="priceReqBtn">
+                  Request Pricing Demo
+                  <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+                </c2-button>
+                <span class="sla-micro-badge">
+                  <c2-feather-shield class="micro-icon"></c2-feather-shield>
+                  Institutional SLA Guaranteed
+                </span>
+              </div>
+            </div>
+
+            <div class="pricing-cards-stack">
+              <!-- Card 1 -->
+              <c2-card class="pricing-metric-card" interactive>
+                <div class="pm-top-row">
+                  <div class="pm-icon-box pm-icon-cyan">
+                    <c2-feather-database></c2-feather-database>
+                  </div>
+                  <c2-badge tone="info">GLOBAL COVERAGE</c2-badge>
+                </div>
+                <div class="pm-metric gradient-text">1.8M+</div>
+                <h4 class="pm-label">Daily Evaluated Securities</h4>
+                <p class="pm-detail">Sovereign benchmarks, corporate debt, convertibles, and illiquid issues evaluated daily across 85+ global currencies.</p>
+                <div class="pm-tags">
+                  <span class="pm-tag">Level 1, 2 &amp; 3 Tagging</span>
+                  <span class="pm-tag">Daily Re-eval</span>
+                </div>
+              </c2-card>
+
+              <!-- Card 2 -->
+              <c2-card class="pricing-metric-card" interactive>
+                <div class="pm-top-row">
+                  <div class="pm-icon-box pm-icon-violet">
+                    <c2-feather-bar-chart-2></c2-feather-bar-chart-2>
+                  </div>
+                  <c2-badge tone="primary">HIGH FIDELITY</c2-badge>
+                </div>
+                <div class="pm-metric text-cyan">&lt; 0.02%</div>
+                <h4 class="pm-label">Pricing Variance vs Final Cleared</h4>
+                <p class="pm-detail">
+                  Multi-dealer quote aggregation and curve interpolation ensures minimum tracking error against central clearinghouse trades.
+                </p>
+                <div class="pm-tags">
+                  <span class="pm-tag">Multi-dealer Quotes</span>
+                  <span class="pm-tag">Audit Trail</span>
+                </div>
+              </c2-card>
+
+              <!-- Card 3 -->
+              <c2-card class="pricing-metric-card" interactive>
+                <div class="pm-top-row">
+                  <div class="pm-icon-box pm-icon-cyan">
+                    <c2-feather-clock></c2-feather-clock>
+                  </div>
+                  <c2-badge tone="neutral">EOD DISPATCH</c2-badge>
+                </div>
+                <div class="pm-metric text-violet">17:00 UTC</div>
+                <h4 class="pm-label">Guaranteed EOD Delivery Window</h4>
+                <p class="pm-detail">
+                  Available via streaming WebSocket, automated SFTP drops, and REST APIs within 30 minutes of London &amp; NY market close.
+                </p>
+                <div class="pm-tags">
+                  <span class="pm-tag">99.9% Uptime SLA</span>
+                  <span class="pm-tag">REST / SFTP / S3</span>
+                </div>
+              </c2-card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA BAND -->
+      <section class="cta-band">
+        <div class="cta-inner reveal">
+          <h2 class="cta-title">Upgrade Your Bond Data Feeds</h2>
+          <p class="cta-subtitle">Request sample endpoints and explore how AxiomData AI integrates into your quantitative platform.</p>
+          <c2-button id="ctaBandBtn" class="btn-primary-large">
+            Get in Touch
+            <c2-feather-arrow-right slot="suffix-icon"></c2-feather-arrow-right>
+          </c2-button>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="index.html" class="brand-logo" aria-label="AxiomData AI Home">
+          <div class="logo-mark logo-mark--small">
+            <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="24" height="24" rx="6" stroke="#6ee7ff" stroke-width="2" fill="rgba(34,211,238,0.1)" />
+              <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+          <span class="footer-brand-name">AxiomData AI</span>
+        </a>
+
+        <nav class="footer-links" aria-label="Footer links">
+          <c2-link-button href="fixed-income.html">Fixed Income</c2-link-button>
+          <c2-link-button href="regulatory-intelligence.html">Regulatory Intelligence</c2-link-button>
+          <c2-link-button href="about.html">About</c2-link-button>
+          <c2-link-button href="contact.html">Contact</c2-link-button>
+          <c2-link-button href="privacy.html">Privacy</c2-link-button>
+          <c2-link-button href="terms.html">Terms</c2-link-button>
+        </nav>
+
+        <div class="footer-meta">
+          <c2-link-button href="https://linkedin.com" external aria-label="LinkedIn" class="social-link">
+            <c2-feather-linkedin slot="prefix-icon"></c2-feather-linkedin>
+          </c2-link-button>
+          <p class="copyright">&copy; 2026 AxiomData AI Technologies Ltd. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- INTERACTIVE DEMO MODAL -->
+    <c2-modal id="demoModal">
+      <div slot="title" class="modal-title-wrap">
+        <h2>Request Institutional Access</h2>
+        <p class="modal-title-sub">Connect with our quantitative data solutions team</p>
+      </div>
+
+      <form id="demoRequestForm" class="modal-form">
+        <div class="form-row">
+          <div class="form-field">
+            <c2-label for="modalFullName" required>Full Name</c2-label>
+            <c2-text-field id="modalFullName" name="fullName" autocomplete="name" placeholder="e.g. Alex Henderson" required></c2-text-field>
+          </div>
+
+          <div class="form-field">
+            <c2-label for="modalEmail" required>Corporate Email</c2-label>
+            <c2-text-field id="modalEmail" name="email" type="email" autocomplete="email" placeholder="alex@assetmanagement.com" required></c2-text-field>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <c2-label for="modalOrg">Organization / Asset Manager</c2-label>
+          <c2-text-field id="modalOrg" name="organization" autocomplete="organization" placeholder="e.g. Global Horizon Capital"></c2-text-field>
+        </div>
+
+        <div class="form-field">
+          <c2-label for="modalProduct">Product Focus</c2-label>
+          <c2-select id="modalProduct" name="product" value="reference" required>
+            <c2-list-item value="reference">Fixed Income Reference Data</c2-list-item>
+            <c2-list-item value="corporate-actions">Corporate Actions Pipeline</c2-list-item>
+            <c2-list-item value="pricing">EOD Evaluated Pricing</c2-list-item>
+            <c2-list-item value="erisa">ERISA Portfolio Analytics</c2-list-item>
+            <c2-list-item value="matching-adjustment">Matching Adjustment / Solvency UK</c2-list-item>
+            <c2-list-item value="lei-mapping">LEI &amp; Cross-Symbology Mapping</c2-list-item>
+          </c2-select>
+        </div>
+
+        <div class="form-field">
+          <c2-label for="modalNotes">Requirements &amp; Universe Coverage</c2-label>
+          <c2-textarea id="modalNotes" name="requirements" placeholder="Specify your coverage needs..."></c2-textarea>
+        </div>
+
+        <div class="modal-consent">
+          <c2-checkbox id="modalConsent" name="consent" value="accepted" required></c2-checkbox>
+          <c2-label for="modalConsent"> I agree to receive institutional product briefings and dataset updates. </c2-label>
+        </div>
+      </form>
+
+      <div slot="footer" class="modal-actions">
+        <c2-button class="ghost" id="modalCancelBtn">Cancel</c2-button>
+        <c2-button id="modalSubmitBtn" class="btn-primary">Submit Request</c2-button>
+      </div>
+    </c2-modal>
+  </body>
+</html>

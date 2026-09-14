@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-virtual-list</title>
+    <script type="module" src="/src/virtual-list.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+        background: #ffffff;
+      }
+      section {
+        max-width: 760px;
+        margin-bottom: 32px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #71717a;
+      }
+      p.note {
+        margin: 0 0 8px;
+        font-size: 13px;
+        color: #71717a;
+      }
+      c2-virtual-list {
+        --c2-virtual-list--border-top: 1px solid #e4e4e7;
+        --c2-virtual-list--border-right: 1px solid #e4e4e7;
+        --c2-virtual-list--border-bottom: 1px solid #e4e4e7;
+        --c2-virtual-list--border-left: 1px solid #e4e4e7;
+        height: 320px;
+      }
+      .two-line {
+        /* Rows must stay uniform, so a description needs a taller row. */
+        --c2-virtual-list__item--height: 52px;
+      }
+      .dense {
+        --c2-virtual-list__item--height: 26px;
+        --c2-list-item--font-size: 12px;
+        --c2-list-item--line-height: 16px;
+        --c2-list-item--padding-top: 2px;
+        --c2-list-item--padding-bottom: 2px;
+      }
+      .divided {
+        --c2-virtual-list__viewport--padding: 0;
+        --c2-list-item--border-bottom: 1px solid #f1f1f4;
+        --c2-list-item--border-top-left-radius: 0;
+        --c2-list-item--border-top-right-radius: 0;
+        --c2-list-item--border-bottom-left-radius: 0;
+        --c2-list-item--border-bottom-right-radius: 0;
+        --c2-list-item--padding-left: 14px;
+        --c2-list-item--padding-right: 14px;
+      }
+      #log {
+        font:
+          12px ui-monospace,
+          monospace;
+        color: #71717a;
+        white-space: pre-wrap;
+        margin-top: 8px;
+      }
+      button {
+        font: inherit;
+        padding: 4px 10px;
+        border: 1px solid #e4e4e7;
+        border-radius: 6px;
+        background: #ffffff;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Plain list</h2>
+      <p class="note">A list of bare strings — no configuration at all.</p>
+      <c2-virtual-list aria-label="Fruit" id="fruit"></c2-virtual-list>
+    </section>
+
+    <section>
+      <h2>Search over 50 000 people</h2>
+      <p class="note">The built-in field filters `name` and `team`, and highlights what matched.</p>
+      <c2-virtual-list
+        aria-label="People"
+        id="searchable"
+        class="two-line"
+        searchable
+        highlight
+        selection="single"
+        item-key="id"
+        label-field="name"
+        description-field="team"
+        search-placeholder="Search people"
+      >
+        <span slot="toolbar" id="count"></span>
+      </c2-virtual-list>
+      <div id="log"></div>
+    </section>
+
+    <section>
+      <h2>Multiple selection</h2>
+      <p class="note">⌘/Ctrl-click toggles, shift-click extends, ⌘/Ctrl-A selects everything. A run of adjacent selected rows reads as one block.</p>
+      <c2-virtual-list aria-label="People" id="multiple" selection="multiple" item-key="id" label-field="name" value="2;3;4;7"></c2-virtual-list>
+    </section>
+
+    <section>
+      <h2>Dense rows</h2>
+      <c2-virtual-list aria-label="People" id="dense" class="dense" item-key="id" label-field="name"></c2-virtual-list>
+    </section>
+
+    <section>
+      <h2>Divided rows, full bleed</h2>
+      <c2-virtual-list aria-label="People" id="divided" class="divided" item-key="id" label-field="name"></c2-virtual-list>
+    </section>
+
+    <section>
+      <h2>Disabled items</h2>
+      <p class="note">`disabled-field` marks a row unselectable; the keyboard and the pointer both skip it.</p>
+      <c2-virtual-list
+        aria-label="People"
+        id="disabled"
+        selection="single"
+        item-key="id"
+        label-field="name"
+        description-field="team"
+        disabled-field="away"
+      ></c2-virtual-list>
+    </section>
+
+    <section>
+      <h2>Custom rows with renderItem</h2>
+      <c2-virtual-list aria-label="Scores" id="custom" class="two-line" item-key="id"></c2-virtual-list>
+    </section>
+
+    <section>
+      <h2>Sorted</h2>
+      <c2-virtual-list
+        aria-label="Scores"
+        id="sorted"
+        sort="score:desc"
+        item-key="id"
+        label-field="name"
+        description-field="score"
+        class="two-line"
+      ></c2-virtual-list>
+    </section>
+
+    <section>
+      <h2>1 000 000 rows from a data source, searched and sorted server-side</h2>
+      <p class="note">Only the blocks under the window are ever requested; the rest are skeletons until they arrive.</p>
+      <c2-virtual-list
+        aria-label="People"
+        id="remote"
+        searchable
+        item-key="id"
+        label-field="name"
+        block-size="200"
+        search-placeholder="Search a million people"
+      ></c2-virtual-list>
+      <div id="remote-log"></div>
+    </section>
+
+    <section>
+      <h2>Empty, loading and error</h2>
+      <p>
+        <button id="to-empty">Empty</button>
+        <button id="to-loading">Loading</button>
+        <button id="to-error">Error</button>
+      </p>
+      <c2-virtual-list aria-label="States" id="states" empty-message="Nothing here yet" style="height: 160px"></c2-virtual-list>
+    </section>
+
+    <script type="module">
+      import { html } from 'lit'
+
+      const TEAMS = ['Analytics', 'Compilers', 'Research', 'Flight', 'Networks']
+      const NAMES = ['Ada Lovelace', 'Grace Hopper', 'Alan Turing', 'Katherine Johnson', 'Radia Perlman', 'Barbara Liskov', 'Margaret Hamilton']
+
+      const person = (seed) => ({
+        id: String(seed + 1),
+        name: `${NAMES[seed % NAMES.length]} ${seed + 1}`,
+        team: TEAMS[seed % TEAMS.length],
+        score: ((seed * 7919) % 90000) + 10000,
+      })
+      const people = (count) => Array.from({ length: count }, (_, index) => person(index))
+
+      document.querySelector('#fruit').items = ['Apple', 'Apricot', 'Banana', 'Blackberry', 'Cherry', 'Date', 'Elderberry', 'Fig', 'Grape', 'Lemon']
+
+      const searchable = document.querySelector('#searchable')
+      searchable.items = people(50_000)
+      const count = document.querySelector('#count')
+      const log = document.querySelector('#log')
+      const report = () => (count.textContent = `${searchable.itemCount.toLocaleString()} shown`)
+      report()
+      searchable.addEventListener('search-change', (event) => {
+        report()
+        log.textContent = `search-change ${JSON.stringify(event.detail)}`
+      })
+      searchable.addEventListener('selection-change', (event) => (log.textContent = `selection-change ${JSON.stringify(event.detail.value)}`))
+
+      document.querySelector('#multiple').items = people(2_000)
+      document.querySelector('#dense').items = people(2_000)
+      document.querySelector('#divided').items = people(2_000)
+      document.querySelector('#disabled').items = people(40).map((entry, index) => ({ ...entry, away: index % 3 === 1 }))
+      document.querySelector('#sorted').items = people(2_000)
+
+      const custom = document.querySelector('#custom')
+      custom.items = people(5_000)
+      custom.renderItem = ({ item }) => html`
+        <strong>${item.name}</strong>
+        <span slot="description">${item.team} · ${item.score.toLocaleString()}</span>
+      `
+
+      const remote = document.querySelector('#remote')
+      const everything = people(1_000_000)
+      const remoteLog = document.querySelector('#remote-log')
+      let requests = 0
+      remote.dataSource = {
+        async getItems({ start, count, search, sort }) {
+          requests++
+          remoteLog.textContent = `${requests} block request(s) · last: start ${start}, count ${count}, search "${search}"`
+          await new Promise((resolve) => setTimeout(resolve, 250))
+          let matching = search ? everything.filter((entry) => entry.name.toLowerCase().includes(search.toLowerCase())) : everything
+          if (sort?.field === 'score') {
+            const direction = sort.direction === 'desc' ? -1 : 1
+            matching = [...matching].sort((a, b) => direction * (a.score - b.score))
+          }
+          return { items: matching.slice(start, start + count), total: matching.length }
+        },
+      }
+
+      const states = document.querySelector('#states')
+      document.querySelector('#to-empty').addEventListener('click', () => Object.assign(states, { items: [], loading: false, error: '' }))
+      document.querySelector('#to-loading').addEventListener('click', () => Object.assign(states, { items: [], loading: true, error: '' }))
+      document.querySelector('#to-error').addEventListener('click', () => Object.assign(states, { loading: false, error: 'The server said no' }))
+    </script>
+  </body>
+</html>

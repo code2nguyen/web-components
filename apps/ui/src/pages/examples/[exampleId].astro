@@ -1,0 +1,115 @@
+---
+import { getCollection } from 'astro:content'
+import Main from '../../layouts/Main.astro'
+import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import SiteButton from '../../components/ui/SiteButton.astro'
+import { EXAMPLE_FRAMEWORK_LABELS } from '../../schemas'
+
+export async function getStaticPaths() {
+  const examples = await getCollection('examples')
+  return examples.map((example) => ({ params: { exampleId: example.id }, props: { example } }))
+}
+
+const { example } = Astro.props
+const base = import.meta.env.BASE_URL
+const { title, description, framework, tags } = example.data
+
+// The built app is copied verbatim out of `apps/ui/public/`, so it is a plain static file, not an Astro route —
+// link to `index.html` explicitly: the dev server does not resolve a directory index inside `public/`.
+const appUrl = `${base}/demo/${example.id}/index.html`
+const sourceUrl = `https://github.com/code2nguyen/web-components/tree/main/apps/examples/${example.id}`
+---
+
+<Main title={`${title} · Examples · c2n web components`} description={description} withSidebar section="examples">
+  <DocComponentLayout section="examples" currentId={example.id} title={title} description={description}>
+    <div class="example-meta">
+      <span class="example-meta__framework">{EXAMPLE_FRAMEWORK_LABELS[framework]}</span>
+      {tags.map((tag) => <code>{tag}</code>)}
+    </div>
+
+    {
+      /* The demo runs in an iframe on purpose. Two demos sharing one document would share one CustomElementRegistry,
+      and the second `customElements.define('c2-button', …)` throws — quite apart from the CSS the demos bring with
+      them. The iframe also makes each demo behave exactly as it does when opened on its own. */
+    }
+    <div class="example-frame">
+      <div class="example-frame__bar">
+        <span class="example-frame__url">{`/demo/${example.id}/`}</span>
+        <SiteButton hydrate="defined" variant="ghost" size="sm" href={appUrl} target="_blank" rel="noreferrer">Open full screen</SiteButton>
+        <SiteButton hydrate="defined" variant="ghost" size="sm" href={sourceUrl} target="_blank" rel="noreferrer">Source</SiteButton>
+      </div>
+      <iframe class="example-frame__view" data-app-url={appUrl} title={`${title} demo`} loading="lazy"></iframe>
+    </div>
+  </DocComponentLayout>
+</Main>
+
+<style lang="scss">
+  .example-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    &__framework {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--site-color-primary-soft);
+      color: var(--site-color-primary);
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+    code {
+      font-size: 11.5px;
+      color: var(--site-color-on-surface-muted);
+    }
+  }
+
+  .example-frame {
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: var(--site-radius-md);
+    overflow: hidden;
+    background: var(--site-color-surface-container-1);
+
+    &__bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--site-color-outline-variant);
+    }
+    &__url {
+      flex: 1;
+      font-family: var(--site-font-mono, ui-monospace, monospace);
+      font-size: 12px;
+      color: var(--site-color-on-surface-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    &__view {
+      display: block;
+      width: 100%;
+      height: min(80vh, 720px);
+      border: 0;
+      background: var(--site-color-surface);
+    }
+  }
+</style>
+
+<script>
+  // The demo is a separate document, so it cannot read the site's theme. Hand it over through `?theme=` — the
+  // example applies it before first paint — and re-point the frame when the visitor flips the site toggle.
+  const frame = document.querySelector<HTMLIFrameElement>('.example-frame__view')
+  const appUrl = frame?.dataset.appUrl
+
+  if (frame && appUrl) {
+    const srcFor = (theme: string) => `${appUrl}?theme=${theme === 'dark' ? 'dark' : 'light'}`
+    frame.src = srcFor(document.documentElement.dataset.theme ?? 'light')
+
+    window.addEventListener('c2n-theme-change', (event) => {
+      // Replacing `src` reloads the demo, which also resets whatever state the visitor left in it. That is the
+      // intended behaviour: a theme flip should show the demo as a fresh visitor would see it.
+      frame.src = srcFor(String((event as CustomEvent).detail))
+    })
+  }
+</script>

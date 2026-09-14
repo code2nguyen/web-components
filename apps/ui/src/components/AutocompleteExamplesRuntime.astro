@@ -1,0 +1,183 @@
+---
+/** Enhances autocomplete examples whose property-only APIs cannot be expressed as HTML attributes. */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { Autocomplete, AutocompleteSelectEventDetail } from '@c2n/autocomplete'
+  import '@c2n/autocomplete'
+  import '@c2n/avatar'
+  import '@c2n/badge'
+  import '@c2n/kbd'
+
+  interface TeamMember {
+    id: string
+    name: string
+    role: string
+    location: string
+    status: 'online' | 'away' | 'busy' | 'offline'
+  }
+
+  interface Issue {
+    key: string
+    title: string
+    project: string
+    updated: string
+    priority: 'Low' | 'Medium' | 'High'
+    blocked?: boolean
+  }
+
+  interface Product {
+    sku: string
+    name: string
+    category: string
+    price: string
+    stock: number
+    emoji: string
+    unavailable?: boolean
+  }
+
+  interface Command {
+    id: string
+    label: string
+    section: string
+    shortcut: string
+  }
+
+  const products: Product[] = [
+    { sku: 'WH-1000XM6', name: 'Noise-cancelling headphones', category: 'Audio', price: '€449', stock: 18, emoji: '🎧' },
+    { sku: 'MX-MINI', name: 'Compact wireless keyboard', category: 'Accessories', price: '€119', stock: 7, emoji: '⌨️' },
+    { sku: 'STUDIO-4K', name: 'Studio 4K display', category: 'Displays', price: '€699', stock: 0, emoji: '🖥️', unavailable: true },
+    { sku: 'TRAVEL-65', name: '65W travel charger', category: 'Power', price: '€59', stock: 42, emoji: '🔌' },
+  ]
+
+  const initialized = new WeakSet<Autocomplete>()
+
+  function setStatus(field: Autocomplete, message: string) {
+    const status = field.querySelector<HTMLElement>('[data-example-status]')
+    if (status) status.textContent = message
+  }
+
+  function onSelection(field: Autocomplete, callback: (detail: AutocompleteSelectEventDetail) => void) {
+    field.addEventListener('suggestion-select', (event) => callback(event.detail))
+  }
+
+  function setupTeamPicker(field: Autocomplete) {
+    field.renderItem = ({ item }) => {
+      const person = item as TeamMember
+      return html`
+        <c2-avatar slot="prefix-icon" name=${person.name} status=${person.status} auto-color aria-hidden="true"></c2-avatar>
+        <span>${person.name}</span>
+        <span slot="description">${person.role} · ${person.location}</span>
+        <c2-badge slot="suffix-icon" tone=${person.status === 'online' ? 'success' : person.status === 'busy' ? 'danger' : 'neutral'}
+          >${person.status}</c2-badge
+        >
+      `
+    }
+    onSelection(field, ({ item }) => setStatus(field, `Mentioned ${(item as TeamMember).name}`))
+    field.querySelector<HTMLButtonElement>('[data-invite-person]')?.addEventListener('click', () => setStatus(field, 'Invite flow opened'))
+    field.querySelector<HTMLButtonElement>('[data-view-team]')?.addEventListener('click', () => setStatus(field, 'Opening the full team directory…'))
+  }
+
+  function setupIssueNavigator(field: Autocomplete) {
+    const allIssues = field.suggestions as Issue[]
+    field.renderItem = ({ item }) => {
+      const issue = item as Issue
+      return html`
+        <c2-badge slot="prefix-icon" tone=${issue.priority === 'High' ? 'danger' : issue.priority === 'Medium' ? 'warning' : 'neutral'}
+          >${issue.priority}</c2-badge
+        >
+        <span>${issue.title}</span>
+        <span slot="description">${issue.key} · ${issue.project} · ${issue.updated}</span>
+        ${issue.blocked ? html`<c2-badge slot="suffix-icon" tone="danger">Blocked</c2-badge>` : html`<c2-kbd slot="suffix-icon" aria-hidden="true">↵</c2-kbd>`}
+      `
+    }
+    field.querySelectorAll<HTMLButtonElement>('[data-issue-filter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const filter = button.dataset.issueFilter
+        field.suggestions = filter === 'mine' ? allIssues.filter((issue) => issue.project === 'Web') : allIssues
+        field
+          .querySelectorAll<HTMLButtonElement>('[data-issue-filter]')
+          .forEach((candidate) => candidate.setAttribute('aria-pressed', String(candidate === button)))
+        field.focus()
+        void field.load()
+      })
+    })
+    onSelection(field, ({ item }) => setStatus(field, `Opening ${(item as Issue).key}…`))
+  }
+
+  function setupProductSearch(field: Autocomplete) {
+    field.dataSource = async (query, signal) => {
+      await new Promise<void>((resolve, reject) => {
+        const timer = window.setTimeout(resolve, 450)
+        signal.addEventListener(
+          'abort',
+          () => {
+            window.clearTimeout(timer)
+            reject(new DOMException('Aborted', 'AbortError'))
+          },
+          { once: true },
+        )
+      })
+      const search = query.toLocaleLowerCase()
+      return products.filter((product) => [product.name, product.category, product.sku].some((value) => value.toLocaleLowerCase().includes(search)))
+    }
+    field.renderItem = ({ item }) => {
+      const product = item as Product
+      return html`
+        <c2-avatar slot="prefix-icon" aria-hidden="true">${product.emoji}</c2-avatar>
+        <span>${product.name}</span>
+        <span slot="description">${product.sku} · ${product.category} · ${product.price}</span>
+        <c2-badge slot="suffix-icon" tone=${product.stock ? 'success' : 'danger'}>${product.stock ? `${product.stock} left` : 'Sold out'}</c2-badge>
+      `
+    }
+    onSelection(field, ({ item }) => setStatus(field, `Added ${(item as Product).name} to the order`))
+    field.querySelector<HTMLButtonElement>('[data-scan-product]')?.addEventListener('click', () => setStatus(field, 'Barcode scanner ready'))
+  }
+
+  function setupCommandLauncher(field: Autocomplete) {
+    field.renderItem = ({ item }) => {
+      const command = item as Command
+      return html`
+        <span>${command.label}</span>
+        <span slot="description">${command.section}</span>
+        <c2-kbd slot="suffix-icon" aria-hidden="true">${command.shortcut}</c2-kbd>
+      `
+    }
+    onSelection(field, ({ item }) => setStatus(field, `Ran “${(item as Command).label}”`))
+    field.querySelector<HTMLButtonElement>('[data-clear-commands]')?.addEventListener('click', () => {
+      field.suggestions = []
+      field.showEmpty = true
+      setStatus(field, 'Recent commands cleared')
+      field.focus()
+      void field.load()
+    })
+  }
+
+  function setup() {
+    document.querySelectorAll<Autocomplete>('[data-autocomplete-example]').forEach((field) => {
+      if (initialized.has(field)) return
+      initialized.add(field)
+      field.querySelectorAll<HTMLButtonElement>('button').forEach((button) => button.addEventListener('pointerdown', (event) => event.preventDefault()))
+      switch (field.dataset.autocompleteExample) {
+        case 'team':
+          setupTeamPicker(field)
+          break
+        case 'issues':
+          setupIssueNavigator(field)
+          break
+        case 'products':
+          setupProductSearch(field)
+          break
+        case 'commands':
+          setupCommandLauncher(field)
+          break
+      }
+    })
+  }
+
+  setup()
+  const observer = new MutationObserver(setup)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setup)
+</script>

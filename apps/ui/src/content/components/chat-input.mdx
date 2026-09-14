@@ -9,6 +9,8 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ChatInput } from '@c2n/chat-input'
 
+`c2-chat-input` is an auto-growing message composer. Enter fires `submit-message` and clears the message; Alt+Enter inserts a newline. It is also a form-associated textarea: `name` contributes its current text to `FormData(form)`, while `required`, `minlength`, `maxlength`, fieldset disabling, form reset and the standard validation methods follow native form behavior.
+
 ## Installation
 
 ```bash tag=CodeBlock

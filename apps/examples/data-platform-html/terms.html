@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" class="axiom-theme" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terms of Service | AxiomData AI</title>
+    <meta name="description" content="Terms of Service governing access to AxiomData AI financial market data feeds, APIs, and analytics." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+
+  <body class="antialiased grid-lines">
+    <!-- STICKY HEADER -->
+    <c2-header id="site-header" class="site-header" navigation-label="Main Navigation" blurred sticky>
+      <a href="index.html" class="brand-logo" slot="brand" aria-label="AxiomData AI Home">
+        <div class="logo-mark">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="24" height="24" rx="6" stroke="url(#cyan-grad)" stroke-width="2" fill="rgba(34,211,238,0.08)" />
+            <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="12" cy="19" r="2" fill="#a78bfa" />
+            <circle cx="17" cy="19" r="2" fill="#6ee7ff" />
+            <defs>
+              <linearGradient id="cyan-grad" x1="2" y1="2" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6ee7ff" />
+                <stop offset="1" stop-color="#a78bfa" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="brand-name">AxiomData <span class="brand-ai">AI</span></span>
+      </a>
+
+      <!-- C2 NAVIGATION MENU -->
+      <div class="header-nav">
+        <c2-navigation-menu aria-label="Main Navigation" mobile-breakpoint="1280" auto-current>
+          <c2-navigation-menu-item href="index.html">Home</c2-navigation-menu-item>
+          <c2-navigation-menu-item href="about.html">About</c2-navigation-menu-item>
+
+          <c2-navigation-menu-item value="fixed-income">
+            Fixed Income Products
+            <div slot="panel" class="c2-nav-panel">
+              <span class="nav-panel-label">Fixed Income Universe</span>
+              <c2-navigation-menu-link href="fixed-income.html#reference-api">Reference Data</c2-navigation-menu-link>
+              <c2-navigation-menu-link href="fixed-income.html#corporate-actions">Corporate Actions</c2-navigation-menu-link>
+              <c2-navigation-menu-link href="fixed-income.html#pricing">Pricing</c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+
+          <c2-navigation-menu-item value="regulatory">
+            Regulatory Products
+            <div slot="panel" class="c2-nav-panel">
+              <span class="nav-panel-label">Compliance &amp; Risk</span>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#erisa">ERISA Analytics</c2-navigation-menu-link>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#solvency-ma">Matching Adjustment</c2-navigation-menu-link>
+              <c2-navigation-menu-link href="regulatory-intelligence.html#lei-mapping">LEI &amp; Mapping</c2-navigation-menu-link>
+            </div>
+          </c2-navigation-menu-item>
+
+          <c2-navigation-menu-item href="contact.html">Contact</c2-navigation-menu-item>
+        </c2-navigation-menu>
+      </div>
+
+      <c2-link-button slot="actions" class="header-cta" href="contact.html">Get in Touch</c2-link-button>
+    </c2-header>
+
+    <main class="pt-page">
+      <section class="legal-section">
+        <div class="section-container legal-container">
+          <div class="reveal text-center mb-10">
+            <c2-badge tone="neutral" class="section-pill">LEGAL &amp; COMPLIANCE</c2-badge>
+            <h1 class="page-title">Terms of Service</h1>
+            <p class="section-subtitle">Last updated: September 2026</p>
+          </div>
+
+          <c2-card class="legal-card reveal">
+            <h3 class="legal-heading">1. Scope of Agreement</h3>
+            <p class="legal-text">
+              These Terms of Service govern your organization's access to and use of AxiomData AI reference data, pricing feeds, corporate actions intelligence,
+              APIs, and associated web interfaces. By accessing our platform or endpoints, your organization agrees to be legally bound by these terms.
+            </p>
+
+            <c2-seperator></c2-seperator>
+
+            <h3 class="legal-heading">2. Proprietary Data Rights &amp; Licenses</h3>
+            <p class="legal-text">
+              All data models, parsed prospectus ontologies, algorithmic identifiers, and documentation provided by AxiomData are the intellectual property of
+              AxiomData AI Technologies Ltd or its licensors. Subscriptions grant an institutional, non-exclusive, non-transferable license for internal
+              business evaluation, trading, risk management, and regulatory compliance.
+            </p>
+
+            <c2-seperator></c2-seperator>
+
+            <h3 class="legal-heading">3. Permitted &amp; Prohibited Use</h3>
+            <p class="legal-text">
+              Redistribution, public reselling, unapproved sub-licensing, or bulk web scraping of raw AxiomData feeds to third parties without an express
+              Enterprise Redistribution Agreement is strictly prohibited.
+            </p>
+
+            <c2-seperator></c2-seperator>
+
+            <h3 class="legal-heading">4. Disclaimer of Financial Advice</h3>
+            <p class="legal-text">
+              AxiomData is a financial technology and master data provider. Our data feeds, corporate action summaries, and Solvency UK analytics do not
+              constitute investment advice, credit rating issuances, or legal fiduciary advice. Institutional clients are responsible for their independent
+              investment and regulatory attestations.
+            </p>
+          </c2-card>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <a href="index.html" class="brand-logo" aria-label="AxiomData AI Home">
+          <div class="logo-mark logo-mark--small">
+            <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="24" height="24" rx="6" stroke="#6ee7ff" stroke-width="2" fill="rgba(34,211,238,0.1)" />
+              <path d="M7 14L12 9L17 14L22 9" stroke="#6ee7ff" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+          <span class="footer-brand-name">AxiomData AI</span>
+        </a>
+
+        <nav class="footer-links" aria-label="Footer links">
+          <c2-link-button href="fixed-income.html">Fixed Income</c2-link-button>
+          <c2-link-button href="regulatory-intelligence.html">Regulatory Intelligence</c2-link-button>
+          <c2-link-button href="about.html">About</c2-link-button>
+          <c2-link-button href="contact.html">Contact</c2-link-button>
+          <c2-link-button href="privacy.html">Privacy</c2-link-button>
+          <c2-link-button href="terms.html" current>Terms</c2-link-button>
+        </nav>
+
+        <div class="footer-meta">
+          <c2-link-button href="https://linkedin.com" external aria-label="LinkedIn" class="social-link">
+            <c2-feather-linkedin slot="prefix-icon"></c2-feather-linkedin>
+          </c2-link-button>
+          <p class="copyright">&copy; 2026 AxiomData AI Technologies Ltd. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

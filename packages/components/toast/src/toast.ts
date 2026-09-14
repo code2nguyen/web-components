@@ -1,5 +1,7 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { ToastController, type ToastOptions, type ToastDismissReason } from './toast-controller.js'
@@ -9,6 +11,17 @@ import regionStyles from './toast-region.scss?inline'
 export type ToastAnimation = 'none' | 'fade' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'scale'
 
 export type { ToastOptions, ToastRecord, ToastVariant, ToastDismissReason } from './toast-controller.js'
+
+/** Events fired by {@link Toast}, keyed for `addEventListener`. */
+export interface ToastEventMap {
+  'toast-close': CustomEvent
+  'toast-action': CustomEvent
+}
+
+export interface Toast {
+  addEventListener: TypedAddEventListener<Toast, ToastEventMap>
+  removeEventListener: TypedRemoveEventListener<Toast, ToastEventMap>
+}
 
 /**
  * A notification card. Use c2-toast-region to manage stacking, queueing and timed dismissal.
@@ -117,6 +130,17 @@ export class Toast extends LitElement {
       ${this.showProgress ? html`<div class="progress" part="progress" aria-hidden="true"><div class="progress__bar" part="progress-bar" style=${styleMap({ transform: `scaleX(${Number.isFinite(this.progress) ? Math.max(0, Math.min(1, this.progress)) : 1})` })}></div></div>` : nothing}
     </div>`
   }
+}
+
+/** Events fired by {@link ToastRegion}, keyed for `addEventListener`. */
+export interface ToastRegionEventMap {
+  'toast-dismiss': CustomEvent
+  'toast-action': CustomEvent
+}
+
+export interface ToastRegion {
+  addEventListener: TypedAddEventListener<ToastRegion, ToastRegionEventMap>
+  removeEventListener: TypedRemoveEventListener<ToastRegion, ToastRegionEventMap>
 }
 
 /**

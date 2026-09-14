@@ -1,0 +1,135 @@
+---
+title: 'AI tools'
+description: 'Give Claude Code, Codex or Google Antigravity the c2n skill, live component APIs, examples and application conventions.'
+order: 30
+---
+
+import CodeBlock from '../../components/CodeBlock.astro'
+
+c2n provides two complementary tools for coding agents:
+
+- **`@c2n/skill`** teaches the agent how to build with c2n: inspect the project, load the theme once, check component APIs, and turn repeated styles or patterns into application components.
+- **`@c2n/mcp`** exposes structured, version-aware component APIs, examples, gallery variants, presets, theme tokens and code generation through the Model Context Protocol.
+
+When MCP is unavailable, the skill uses a compact bundled catalog for component discovery and reads installed packages' `custom-elements.json` manifests for exact, version-correct APIs. MCP can also run by itself, but installing both gives an agent the component facts and the conventions for applying them well.
+
+## Install in an application
+
+From the root of the application that will use c2n:
+
+```bash tag=CodeBlock
+npm install --save-dev @c2n/skill
+npx c2n-skill install
+```
+
+The installer defaults to all supported agents. It copies project-scoped skills and merges the c2n MCP server into existing configuration without replacing other servers.
+
+| Agent              | Skill location                   | MCP configuration         |
+| ------------------ | -------------------------------- | ------------------------- |
+| Claude Code        | `.claude/skills/c2n-components/` | `.mcp.json`               |
+| Codex              | `.agents/skills/c2n-components/` | `.codex/config.toml`      |
+| Google Antigravity | `.agents/skills/c2n-components/` | `.agents/mcp_config.json` |
+
+Install for only one agent when the project does not need every configuration:
+
+```bash tag=CodeBlock
+npx c2n-skill install --agent claude
+npx c2n-skill install --agent codex
+npx c2n-skill install --agent antigravity
+```
+
+Comma-separated agents and a different project directory are supported. Use `--no-mcp` when only the offline skill is wanted.
+
+```bash tag=CodeBlock
+npx c2n-skill install --agent codex,antigravity --project ./my-app
+npx c2n-skill install --agent codex --no-mcp
+```
+
+Re-run the installer after upgrading `@c2n/skill`; c2n-owned files are refreshed while unrelated MCP entries are preserved. Restart the agent after installation so it reloads project skills and MCP configuration.
+
+## Verify the setup
+
+Ask the agent to use the c2n MCP server to list components, then inspect one component:
+
+```text tag=CodeBlock
+Use the c2n MCP server to list the available button components. Then inspect c2-button and tell me its attributes, slots and CSS variables.
+```
+
+A connected agent should use `list_components` or `search_components`, followed by `get_component`. The server detects installed `@c2n/*` packages from the application root and reports their versions while serving its bundled offline registry.
+
+If the MCP server does not appear, verify that it can start in the same project:
+
+```bash tag=CodeBlock
+npx -y @c2n/mcp --version
+```
+
+If that succeeds, restart the agent and check that its project root is the directory containing the generated configuration. Run `npx c2n-skill install` again if configuration was deleted or the package was upgraded.
+
+## A productive first prompt
+
+Describe the application outcome and ask the agent to use both c2n tools. It can then select components from evidence instead of guessing their API.
+
+```text tag=CodeBlock
+Use the c2n-components skill and c2n MCP server to build a profile settings form.
+Inspect each component before using it, install only the required @c2n packages,
+load @c2n/theme once, and create app-level variants for styles that repeat.
+```
+
+For an existing application, ask the agent to inspect the current token bridge and installed packages before changing code:
+
+```text tag=CodeBlock
+Use c2n to add an attachment picker to this application. Preserve its existing theme,
+check the installed c2n versions, and verify the attachment API and examples through MCP first.
+```
+
+The recommended sequence is `search_components` → `get_component` → `get_examples` → optionally `get_presets` → `get_theme` → `generate_variant`. Gallery examples provide complete usage and composition context; presets provide structured attributes and CSS values that are easier to turn directly into an application variant.
+
+## Manual MCP-only configuration
+
+The installer is recommended, but any stdio MCP client can launch:
+
+```bash tag=CodeBlock
+npx -y @c2n/mcp
+```
+
+Claude Code project `.mcp.json`:
+
+```json tag=CodeBlock
+{
+  "mcpServers": {
+    "c2n": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@c2n/mcp"]
+    }
+  }
+}
+```
+
+Codex project `.codex/config.toml`:
+
+```toml tag=CodeBlock
+[mcp_servers.c2n]
+command = "npx"
+args = ["-y", "@c2n/mcp"]
+```
+
+Google Antigravity project `.agents/mcp_config.json` uses the same `mcpServers.c2n` command and arguments as the Claude JSON example, without requiring the `type` field.
+
+## Add c2n components to the application
+
+The AI tools provide guidance and metadata; component packages remain normal application dependencies. Install the theme and only the components the application uses:
+
+```bash tag=CodeBlock
+npm install @c2n/theme @c2n/button @c2n/text-field
+```
+
+Load the theme once near the application entry point, then import component modules before their tags render:
+
+```typescript tag=CodeBlock
+import '@c2n/theme/theme.css'
+import '@c2n/button'
+import '@c2n/text-field'
+```
+
+Continue with [Using c2n in an application](./application-workflow) for the application architecture and [Theming](./theming) for tokens, dark mode and component-level overrides.

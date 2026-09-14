@@ -1,4 +1,5 @@
-export type SortDirection = 'asc' | 'desc'
+export type { SortDirection } from '@c2n/core/data-helper.js'
+import type { SortDirection } from '@c2n/core/data-helper.js'
 
 export interface SortModel {
   field: string
@@ -52,6 +53,15 @@ export interface TableColumnConfig {
   locale?: string
   /** Class set on every cell of the column, for `::part(cell)`-free styling from the light DOM. */
   cellClass?: string
+  /**
+   * Renders each cell of the column from a light-DOM child instead of a function, so a framework can build the
+   * body with its own template language. The table puts a `<slot name="cell:<row key>:<field>">` in the cell;
+   * `renderCell` (or the formatted value) stays as the fallback while nothing is slotted into it.
+   *
+   * Requires `rowKey`. Only the rows the virtualizer has rendered have a slot, so children for the rest simply
+   * wait — write one child per row and let the table pick.
+   */
+  cellSlot?: boolean
   renderCell?: TableCellRenderer
   renderHeader?: TableHeaderRenderer
   /** Client-side sort comparator for the column's values. */
@@ -108,17 +118,8 @@ export interface TableColumnResizeEventDetail {
   width: number
 }
 
-/** Reads a possibly dotted `field` path out of a row. */
-export function getFieldValue(row: TableRow | undefined, field: string): unknown {
-  if (!row || !field) return undefined
-  if (!field.includes('.')) return row[field]
-  let current: unknown = row
-  for (const part of field.split('.')) {
-    if (current === null || current === undefined) return undefined
-    current = (current as TableRow)[part]
-  }
-  return current
-}
+/** Reads a possibly dotted `field` path out of a row. Re-exported from `@c2n/core` so the table keeps its own subpath. */
+export { getFieldValue } from '@c2n/core/data-helper.js'
 
 /** `name:asc;age:desc` ⇄ `SortModel[]`, so the sort can be set from markup. */
 export const sortModelConverter = {

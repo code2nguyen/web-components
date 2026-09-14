@@ -1,0 +1,21 @@
+{
+  "extends": "@c2n/config/tsconfig.lib.json",
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./types",
+    "tsBuildInfoFile": "./types/.tsbuildinfo",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "noEmit": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInjectionParameters": true
+  }
+}

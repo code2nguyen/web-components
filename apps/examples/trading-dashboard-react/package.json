@@ -1,0 +1,62 @@
+{
+  "name": "@c2n/example-trading-dashboard-react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../../packages/core:build",
+        "../../../packages/components/badge:build",
+        "../../../packages/components/button:build",
+        "../../../packages/components/card:build",
+        "../../../packages/components/list-item:build",
+        "../../../packages/components/select:build",
+        "../../../packages/components/switch:build",
+        "../../../packages/components/table:build",
+        "../../../packages/components/text-field:build",
+        "../../../packages/tools/theme:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "files": [
+        "src/**",
+        "index.html",
+        "vite.config.ts",
+        "tsconfig*.json"
+      ],
+      "output": [
+        "dist/**"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/badge": "*",
+    "@c2n/button": "*",
+    "@c2n/card": "*",
+    "@c2n/list-item": "*",
+    "@c2n/select": "*",
+    "@c2n/switch": "*",
+    "@c2n/table": "*",
+    "@c2n/text-field": "*",
+    "@c2n/theme": "*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@c2n/config": "*",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1"
+  }
+}

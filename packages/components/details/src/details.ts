@@ -1,10 +1,22 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { consume } from '@lit/context'
 import { accordionContext, type AccordionContext } from './details-context'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './details.scss?inline'
+
+/** Events fired by {@link Details}, keyed for `addEventListener`. */
+export interface DetailsEventMap {
+  toggle: ToggleEvent
+}
+
+export interface Details {
+  addEventListener: TypedAddEventListener<Details, DetailsEventMap>
+  removeEventListener: TypedRemoveEventListener<Details, DetailsEventMap>
+}
 
 /**
  * Collapsible disclosure built on native `<details>` / `<summary>`, so keyboard access, screen-reader semantics and
@@ -51,7 +63,8 @@ import styles from './details.scss?inline'
  *
  * @cssproperty {pixel} [--c2-details__header__icon--width=20px]
  * @cssproperty {pixel} [--c2-details__header__icon--height=20px]
- * @cssproperty {pixel} [--c2-details__header__icon--rotate=180deg]
+ * @cssproperty {pixel} [--c2-details__header__icon--rotate=180deg] - Icon angle while open.
+ * @cssproperty {pixel} [--c2-details__header__icon--rotate-collapsed=0deg] - Icon angle while closed. `-90deg` with the default chevron gives the nav idiom: right when closed, down when open.
  * @cssproperty {color} [--c2-details__header__icon--color=rgb(109, 109, 109)]
  *
  * @cssproperty {pixel} [--c2-details__header__content--margin-top=4px]

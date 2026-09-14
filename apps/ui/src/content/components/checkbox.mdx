@@ -14,7 +14,7 @@ import { MatIcon } from '@c2n/mat-icon'
 import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check.js'
 import { FeatherHeartIcon as FeatherHeart } from '@c2n/feather-icons/icons/heart.js'
 
-`c2-checkbox` wraps a native `<input type="checkbox">`, so `checked`, `indeterminate`, `disabled`, `name` and the `change` event behave exactly like the built-in control. The visible box sits centred in a square touch target whose size is `--c2-checkbox__state-layer--size`; that same square is the hover layer, transparent by default. Set a `state-layer__hover__*--color` to tint it, or shrink it to the box size for a compact inline checkbox. Keyboard focus draws a ring around the box. The three marks are slots that take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` ligature.
+`c2-checkbox` wraps a native `<input type="checkbox">`, so `checked`, `indeterminate`, `disabled`, `name`, `value`, `required` and the `change` event behave like the built-in control. It contributes its value to `FormData` only while checked and follows form reset, disabled fieldsets and native required validation. The visible box sits centred in a square touch target whose size is `--c2-checkbox__state-layer--size`; that same square is the hover layer, transparent by default. Set a `state-layer__hover__*--color` to tint it, or shrink it to the box size for a compact inline checkbox. Keyboard focus draws a ring around the box. The three marks are slots that take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` ligature.
 
 ## Installation
 

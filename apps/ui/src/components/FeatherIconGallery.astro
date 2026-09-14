@@ -1,6 +1,7 @@
 ---
 import { featherIconNames, featherIconTag } from '@c2n/feather-icons'
 import MdxCodeBlock from './MdxCodeBlock.astro'
+import SiteTextField from './ui/SiteTextField.astro'
 
 // Icons are emitted as plain markup (not SSR'd through the Lit renderer) to keep the page light;
 // the client script below registers the elements so they render once the bundle loads.
@@ -11,13 +12,14 @@ const studioCode = `<${studioTag}></${studioTag}>`
 ---
 
 <div class="feather-icon-gallery__toolbar">
-  <input type="search" class="feather-icon-gallery__filter" placeholder={`Filter ${items.length} icons…`} aria-label="Filter icons" autocomplete="off" />
+  <SiteTextField class="feather-icon-gallery__filter" label="Filter icons" search size="sm" placeholder={`Filter ${items.length} icons…`} />
   <span class="feather-icon-gallery__count">{items.length} icons · select one to customize</span>
 </div>
 <div class="feather-icon-gallery">
   {
     items.map(({ name, markup }) => (
       <div class="feather-icon-gallery__item" data-name={name}>
+        {/* dogfood-exempt: one cell per icon — a c2-icon-button here is 287 shadow roots on one page. */}
         <button type="button" class="feather-icon-gallery__configure" title={`Customize ${name}`}>
           <Fragment set:html={markup} />
           <span class="feather-icon-gallery__label">{name}</span>
@@ -49,22 +51,13 @@ const studioCode = `<${studioTag}></${studioTag}>`
     flex-wrap: wrap;
     margin: 16px 0 12px;
   }
+  // The box, focus ring and magnifier are the text field's own; this is only where it sits in the toolbar.
   .feather-icon-gallery__filter {
     flex: 1;
     min-width: 200px;
     max-width: 360px;
-    height: 36px;
-    padding: 0 12px;
-    font: inherit;
-    font-size: 14px;
-    color: var(--site-color-on-surface);
-    background: var(--site-color-surface-container-1);
-    border: 1px solid var(--site-color-outline-variant);
-    border-radius: var(--site-radius-sm);
-    &:focus {
-      outline: none;
-      border-color: var(--site-color-primary);
-    }
+    --c2-text-field--min-height: 36px;
+    --c2-text-field--font-size: 14px;
   }
   .feather-icon-gallery__count {
     font-size: 12.5px;
@@ -137,7 +130,9 @@ const studioCode = `<${studioTag}></${studioTag}>`
 </style>
 
 <script>
-  const filter = document.querySelector<HTMLInputElement>('.feather-icon-gallery__filter')
+  import type { TextField } from '@c2n/text-field'
+
+  const filter = document.querySelector<TextField>('.feather-icon-gallery__filter')
   const items = Array.from(document.querySelectorAll<HTMLElement>('.feather-icon-gallery__item'))
   const empty = document.querySelector<HTMLElement>('.feather-icon-gallery__empty')
 

@@ -1,9 +1,21 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { customElement, property } from 'lit/decorators.js'
+import { property } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { consume } from '@lit/context'
 import styles from './tab.scss?inline'
 import { selectedTabContext } from './tab-context'
+
+/** Events fired by {@link Tab}, keyed for `addEventListener`. */
+export interface TabEventMap {
+  'tab-change': CustomEvent<string>
+}
+
+export interface Tab {
+  addEventListener: TypedAddEventListener<Tab, TabEventMap>
+  removeEventListener: TypedRemoveEventListener<Tab, TabEventMap>
+}
 
 /**
  * A single tab inside `<c2-tabs>`. Its `for` attribute names the `id` of the panel it controls.
@@ -26,6 +38,7 @@ export class Tab extends LitElement {
   /** `id` of the panel this tab controls. */
   @property({ type: String, reflect: true }) for = ''
 
+  /** Prevents activation and removes this tab from keyboard navigation. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
   /** Set by the parent `<c2-tabs>`; do not set by hand. */
@@ -37,7 +50,6 @@ export class Tab extends LitElement {
   constructor() {
     super()
     if (!isServer) {
-      this.setAttribute('slot', 'tab')
       this.addEventListener('click', this.handleClick)
       this.addEventListener('keydown', this.handleKeydown)
     }
@@ -45,6 +57,10 @@ export class Tab extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
+    // A custom element constructor must not set attributes: `document.createElement('c2-tab')` enforces that and
+    // throws `NotSupportedError`. Parser-created tabs never hit the check, so this only shows up when a framework
+    // builds the element imperatively — Angular's renderer does, and the whole tab strip dies with it.
+    if (!isServer) this.setAttribute('slot', 'tab')
     if (!this.hasAttribute('role')) this.setAttribute('role', 'tab')
     if (!this.hasAttribute('tabindex')) this.tabIndex = -1
   }

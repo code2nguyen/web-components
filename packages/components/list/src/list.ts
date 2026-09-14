@@ -1,5 +1,7 @@
 import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
-import { customElement, property, query } from 'lit/decorators.js'
+import { property, query } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './list.scss?inline'
 import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
 import { ListItem } from '@c2n/list-item'
@@ -9,6 +11,16 @@ import { arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 export interface SelectionChangeEventDetail {
   value: string[]
   data: unknown[]
+}
+
+/** Events fired by {@link List}, keyed for `addEventListener`. */
+export interface ListEventMap {
+  'selection-change': CustomEvent<SelectionChangeEventDetail>
+}
+
+export interface List {
+  addEventListener: TypedAddEventListener<List, ListEventMap>
+  removeEventListener: TypedRemoveEventListener<List, ListEventMap>
 }
 
 /**
@@ -27,7 +39,7 @@ export interface SelectionChangeEventDetail {
  *
  * @slot default - The rows: `c2-list-item` elements (or wrappers whose first child is a `c2-list-item`), plus `<hr>` dividers and heading elements.
  *
- * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected values, `detail.data` the matching `data` of each row.
+ * @event {CustomEvent<SelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected values, `detail.data` the matching `data` of each row. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  *
  * @cssproperty {color} [--c2-list--background=#ffffff]
  * @cssproperty {pixel} --c2-list--gap
@@ -220,7 +232,7 @@ export class List extends LitElement {
   private dispatchSelectionChangeEvent() {
     this.dispatchEvent(
       new CustomEvent<SelectionChangeEventDetail>('selection-change', {
-        bubbles: true,
+        bubbles: false,
         cancelable: true,
         detail: {
           value: this.value,

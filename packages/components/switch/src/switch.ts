@@ -1,9 +1,21 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './switch.scss?inline'
+
+/** Events fired by {@link Switch}, keyed for `addEventListener`. */
+export interface SwitchEventMap {
+  change: Event
+}
+
+export interface Switch {
+  addEventListener: TypedAddEventListener<Switch, SwitchEventMap>
+  removeEventListener: TypedRemoveEventListener<Switch, SwitchEventMap>
+}
 
 /**
  * On/off toggle built on a native `<input type="checkbox" role="switch">`, so keyboard activation (Space), form value
@@ -61,7 +73,15 @@ import styles from './switch.scss?inline'
  */
 @customElement('c2-switch')
 export class Switch extends LitElement {
+  static formAssociated = true
+
   static override styles = unsafeCSS(styles)
+
+  private readonly internals = this.attachInternals()
+  private customValidityMessage = ''
+  @state() private disabledByForm = false
+  private defaultChecked = false
+  private defaultCheckedCaptured = false
 
   @query('input') protected formElement!: HTMLInputElement
   @query('.c2-switch-track') private trackElement!: HTMLElement
@@ -79,15 +99,21 @@ export class Switch extends LitElement {
   /** Form value submitted while on. Defaults to `on`, like a native checkbox. */
   @property() value = 'on'
 
+  /** Requires the switch to be on for the form to be valid. */
+  @property({ type: Boolean, reflect: true }) required = false
+
   /** Label text when the default slot is empty. */
   @property() label = ''
 
+  /** Accessible name used when no visible label names the switch. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 
+  /** Id of the element that labels the switch. */
   @property({ type: String, attribute: 'aria-labelledby' })
   ariaLabelledBy!: undefined | string
 
+  /** Id of the element that describes the switch. */
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 
@@ -99,13 +125,68 @@ export class Switch extends LitElement {
   /** The click that follows a drag must not toggle the input again. */
   private suppressClick = false
 
+  override connectedCallback() {
+    super.connectedCallback()
+    if (!this.defaultCheckedCaptured) {
+      this.defaultChecked = this.hasAttribute('checked')
+      this.defaultCheckedCaptured = true
+    }
+  }
+
+  /** The containing form, when this control is associated with one. */
+  get form() {
+    return this.internals.form
+  }
+
+  /** Labels associated with this form control. */
+  get labels() {
+    return this.internals.labels
+  }
+
+  get validity() {
+    return this.internals.validity
+  }
+
+  get validationMessage() {
+    return this.internals.validationMessage
+  }
+
+  get willValidate() {
+    return this.internals.willValidate
+  }
+
+  formResetCallback() {
+    this.checked = this.defaultChecked
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.disabledByForm = disabled && !this.hasAttribute('disabled')
+  }
+
+  formStateRestoreCallback(state: string | File | FormData | null) {
+    this.checked = state === 'checked'
+  }
+
+  checkValidity() {
+    return this.internals.checkValidity()
+  }
+
+  reportValidity() {
+    return this.internals.reportValidity()
+  }
+
+  setCustomValidity(message: string) {
+    this.customValidityMessage = message
+    this.requestUpdate()
+  }
+
   override focus(options?: FocusOptions) {
     this.formElement?.focus(options)
   }
 
   /** Flips the state (or forces it) and fires `change`, as a click would. */
   toggle(force?: boolean) {
-    if (this.disabled) return
+    if (this.effectiveDisabled) return
     const next = force ?? !this.checked
     if (next === this.checked) return
     this.checked = next
@@ -121,6 +202,18 @@ export class Switch extends LitElement {
   protected override update(changed: PropertyValues<this>) {
     if (changed.has('checked') && this.formElement) this.formElement.checked = this.checked
     super.update(changed)
+  }
+
+  protected override updated(_changed: PropertyValues<this>) {
+    this.internals.setFormValue(this.checked ? this.value : null, this.checked ? 'checked' : 'unchecked')
+    const missing = this.required && !this.checked
+    const flags = this.customValidityMessage ? { customError: true } : missing ? { valueMissing: true } : {}
+    const message = this.customValidityMessage || (missing ? 'Please turn on this switch.' : '')
+    this.internals.setValidity(flags, message, this.formElement)
+  }
+
+  private get effectiveDisabled() {
+    return this.disabled || this.disabledByForm
   }
 
   private handleDescriptionChange(event: Event) {
@@ -141,7 +234,7 @@ export class Switch extends LitElement {
   }
 
   private handlePointerDown(event: PointerEvent) {
-    if (this.disabled || event.button !== 0) return
+    if (this.effectiveDisabled || event.button !== 0) return
     const track = this.trackElement
     const padding = parseFloat(getComputedStyle(track).paddingLeft) || 0
     // The thumb is square; its height is not affected by the press stretch, unlike its width.
@@ -210,7 +303,8 @@ export class Switch extends LitElement {
             aria-labelledby=${ifDefined(this.ariaLabelledBy)}
             aria-describedby=${ifDefined(this.ariaDescribedBy)}
             ?checked=${this.checked}
-            ?disabled=${this.disabled}
+            ?disabled=${this.effectiveDisabled}
+            ?required=${this.required}
             @change=${this.handleChange}
             @click=${this.handleClick}
             @pointerdown=${this.handlePointerDown}

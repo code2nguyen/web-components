@@ -1,5 +1,7 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { property, query, state } from 'lit/decorators.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { consume } from '@lit/context'
@@ -79,6 +81,17 @@ const chevronsRight = html`<svg viewBox="0 0 24 24" fill="none" stroke="currentC
   <polyline points="13 17 18 12 13 7"></polyline>
   <polyline points="6 17 11 12 6 7"></polyline>
 </svg>`
+
+/** Events fired by {@link Pagination}, keyed for `addEventListener`. */
+export interface PaginationEventMap {
+  'page-change': CustomEvent<PageChangeEventDetail>
+  'page-size-change': CustomEvent<PageSizeChangeEventDetail>
+}
+
+export interface Pagination {
+  addEventListener: TypedAddEventListener<Pagination, PaginationEventMap>
+  removeEventListener: TypedRemoveEventListener<Pagination, PaginationEventMap>
+}
 
 /**
  * Page navigation for a list, a table or search results, in three layouts chosen with `variant`:
@@ -217,9 +230,13 @@ export class Pagination extends LitElement {
   /** Dim every control and ignore interaction. */
   @property({ type: Boolean, reflect: true }) disabled = false
 
+  /** Visible and accessible label of the previous-page control. */
   @property({ type: String, attribute: 'previous-label' }) previousLabel = 'Previous'
+  /** Visible and accessible label of the next-page control. */
   @property({ type: String, attribute: 'next-label' }) nextLabel = 'Next'
+  /** Visible and accessible label of the first-page control. */
   @property({ type: String, attribute: 'first-label' }) firstLabel = 'First'
+  /** Visible and accessible label of the last-page control. */
   @property({ type: String, attribute: 'last-label' }) lastLabel = 'Last'
   /** Text before the rows-per-page select. A trailing colon is dropped from the select's accessible name. */
   @property({ type: String, attribute: 'page-size-label' }) pageSizeLabel = 'Rows per page:'
