@@ -160,6 +160,8 @@ jobs:
             echo "Lerna produced version $actual_version; expected $VERSION" >&2
             exit 1
           fi
+          # Some generated public metadata embeds its package version. Regenerate it after Lerna updates package.json.
+          npm run build:tools
 
       # Each package ships only what its `files` field lists, and `dist/` is built above and never
       # committed — so this is the one place a missing entry shows up before it reaches the registry.
@@ -177,8 +179,23 @@ jobs:
         env:
           VERSION: ${{ steps.release.outputs.version }}
         run: |
-          git add --all
+          git add --update
           git commit -m "chore(release): publish v$VERSION"
+
+      # The original v0.0.7 workflow generated framework metadata before versioning. Rebuilding that immutable tag
+      # therefore repairs a stale version comment. Commit build output only in the runner so Lerna gets a clean tree;
+      # publication still records the immutable release tag below as gitHead.
+      - name: Checkpoint repaired output for an existing tag
+        if: ${{ !inputs.dry_run && steps.release.outputs.checkpoint == 'tag' }}
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          git add --update
+          if git diff --cached --quiet; then
+            echo "The tagged release already has current generated output."
+          else
+            git commit -m "chore(release): repair generated output for v$VERSION"
+          fi
 
       # A tag created by an older failed workflow can contain a historical workflow file. GitHub's Actions token is
       # deliberately not allowed to create a branch from that commit, so tagged attempts publish first and create a
@@ -193,9 +210,16 @@ jobs:
         if: ${{ !inputs.dry_run }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          CHECKPOINT: ${{ steps.release.outputs.checkpoint }}
+          VERSION: ${{ steps.release.outputs.version }}
         # `from-package` queries npm and publishes only versions that are still absent. This makes both a partial
         # registry failure and a failure in a later GitHub step safe to rerun.
-        run: npx lerna publish from-package --dist-tag ${{ inputs.dist_tag }} --no-private --yes
+        run: |
+          git_head="$(git rev-parse HEAD)"
+          if [ "$CHECKPOINT" = 'tag' ]; then
+            git_head="$(git rev-list -n 1 "v$VERSION")"
+          fi
+          npx lerna publish from-package --dist-tag ${{ inputs.dist_tag }} --git-head "$git_head" --no-private --yes
 
       - name: Prepare version sync for an existing tag
         if: ${{ !inputs.dry_run && steps.release.outputs.checkpoint == 'tag' }}
@@ -214,7 +238,8 @@ jobs:
             echo "Lerna produced version $actual_version; expected $VERSION" >&2
             exit 1
           fi
-          git add --all
+          npm run build:tools
+          git add --update
           git commit -m "chore(release): publish v$VERSION"
 
       - name: Push version sync for an existing tag
