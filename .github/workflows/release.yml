@@ -95,12 +95,12 @@ jobs:
           release_branch="release/v$version"
           checkpoint='new'
 
-          if git show-ref --verify --quiet "refs/tags/v$version"; then
-            git checkout --force --detach "v$version^{commit}"
-            checkpoint='tag'
-          elif git show-ref --verify --quiet "refs/remotes/origin/$release_branch"; then
+          if git show-ref --verify --quiet "refs/remotes/origin/$release_branch"; then
             git checkout --force --detach "refs/remotes/origin/$release_branch"
             checkpoint='branch'
+          elif git show-ref --verify --quiet "refs/tags/v$version"; then
+            git checkout --force --detach "v$version^{commit}"
+            checkpoint='tag'
           fi
 
           if [ "$checkpoint" != 'new' ]; then
@@ -180,10 +180,45 @@ jobs:
           git add --all
           git commit -m "chore(release): publish v$VERSION"
 
-      # This branch is the durable checkpoint and the protected source branch receives the version through a PR.
-      # Publishing can therefore fail at any package and safely continue from the same commit on the next run.
+      # A tag created by an older failed workflow can contain a historical workflow file. GitHub's Actions token is
+      # deliberately not allowed to create a branch from that commit, so tagged attempts publish first and create a
+      # clean version-sync branch from the current source branch below.
       - name: Push release checkpoint
+        if: ${{ !inputs.dry_run && steps.release.outputs.checkpoint != 'tag' }}
+        env:
+          RELEASE_BRANCH: ${{ steps.release.outputs.release_branch }}
+        run: git push origin "HEAD:refs/heads/$RELEASE_BRANCH"
+
+      - name: Publish missing packages
         if: ${{ !inputs.dry_run }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # `from-package` queries npm and publishes only versions that are still absent. This makes both a partial
+        # registry failure and a failure in a later GitHub step safe to rerun.
+        run: npx lerna publish from-package --dist-tag ${{ inputs.dist_tag }} --no-private --yes
+
+      - name: Prepare version sync for an existing tag
+        if: ${{ !inputs.dry_run && steps.release.outputs.checkpoint == 'tag' }}
+        env:
+          BUMP: ${{ inputs.bump }}
+          RELEASE_BRANCH: ${{ steps.release.outputs.release_branch }}
+          SOURCE_BRANCH: ${{ steps.release.outputs.source_branch }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          git checkout --force -B "$RELEASE_BRANCH" "origin/$SOURCE_BRANCH"
+          npm ci
+          npm run build:tools
+          npx lerna version "$BUMP" --no-private --exact --yes --force-publish --no-push --no-git-tag-version
+          actual_version="$(node -p "require('./lerna.json').version")"
+          if [ "$actual_version" != "$VERSION" ]; then
+            echo "Lerna produced version $actual_version; expected $VERSION" >&2
+            exit 1
+          fi
+          git add --all
+          git commit -m "chore(release): publish v$VERSION"
+
+      - name: Push version sync for an existing tag
+        if: ${{ !inputs.dry_run && steps.release.outputs.checkpoint == 'tag' }}
         env:
           RELEASE_BRANCH: ${{ steps.release.outputs.release_branch }}
         run: git push origin "HEAD:refs/heads/$RELEASE_BRANCH"
@@ -208,14 +243,6 @@ jobs:
           else
             echo "Version PR already exists: $pr_url"
           fi
-
-      - name: Publish missing packages
-        if: ${{ !inputs.dry_run }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        # `from-package` queries npm and publishes only versions that are still absent. This makes both a partial
-        # registry failure and a failure in a later GitHub step safe to rerun.
-        run: npx lerna publish from-package --dist-tag ${{ inputs.dist_tag }} --no-private --yes
 
       - name: Push release tag
         if: ${{ !inputs.dry_run }}
