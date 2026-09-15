@@ -1,6 +1,6 @@
 {
   "name": "@c2n/autocomplete",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "main": "dist/autocomplete.js",
   "exports": {
@@ -65,10 +65,10 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.6",
-    "@c2n/list": "0.0.6",
-    "@c2n/list-item": "0.0.6",
-    "@c2n/overlay": "0.0.6",
+    "@c2n/core": "0.0.7",
+    "@c2n/list": "0.0.7",
+    "@c2n/list-item": "0.0.7",
+    "@c2n/overlay": "0.0.7",
     "lit": "3.3.3"
   },
   "devDependencies": {
