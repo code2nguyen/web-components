@@ -91,8 +91,11 @@ test('links independently positioned legend and tooltip elements by id', async (
   await legend.evaluate((element) => (element.shadowRoot?.querySelector('.item') as HTMLButtonElement).click())
   await expect.poll(() => legend.evaluate((element) => element.shadowRoot?.querySelector('.item')?.getAttribute('aria-pressed'))).toBe('false')
 
-  const box = await chart.boundingBox()
-  if (!box) throw new Error('the chart has no box')
+  // The host also contains padding and a legend, so its geometric centre is not guaranteed to land on
+  // uPlot's pointer surface. WebKit correctly emitted only the leave event when that happened. Target the
+  // engine overlay itself so this tests the event contract rather than incidental chart layout.
+  const box = await chart.locator('.u-over').boundingBox()
+  if (!box) throw new Error('the chart plot has no box')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await expect(tooltip).not.toHaveAttribute('hidden', '')
   expect(await tooltip.evaluate((element) => element.shadowRoot?.querySelectorAll('.row').length)).toBe(1)
@@ -109,8 +112,8 @@ test('keeps point-hover events available when the built-in tooltip is disabled',
     element.setAttribute('tooltip', 'none')
     await (element as unknown as { updateComplete: Promise<unknown> }).updateComplete
   })
-  const box = await chart.boundingBox()
-  if (!box) throw new Error('the chart has no box')
+  const box = await chart.locator('.u-over').boundingBox()
+  if (!box) throw new Error('the chart plot has no box')
 
   const details = chart.evaluate(
     (element) =>
