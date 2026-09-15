@@ -14,4 +14,5 @@ test('supports sticky and blurred surface treatments', async ({ page, scenario }
   await scenario('glass')
   await expect(page.locator('c2-header')).toHaveCSS('position', 'sticky')
   await expect(page.locator('[part="header"]')).toHaveCSS('backdrop-filter', 'blur(16px)')
+  await expect(page.locator('[part="content"]')).toHaveCSS('max-width', '640px')
 })

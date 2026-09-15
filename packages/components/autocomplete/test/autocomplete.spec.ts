@@ -1,4 +1,5 @@
 import { accessible } from '../../../../tests/component-fixture'
+import type { Autocomplete } from '../src/autocomplete'
 import { test, expect } from './fixture'
 
 test('filters label and description fields, then selects with the keyboard', async ({ page, scenario }) => {
@@ -63,6 +64,27 @@ test('loads remote suggestions and aborts a stale request', async ({ page, scena
   await expect(host).toHaveAttribute('data-aborted', 'p')
   await expect(page.getByRole('option')).toHaveCount(3)
   await expect(host).toHaveAttribute('data-request', 'par')
+})
+
+test('reuses the last successful remote results when reopening an unchanged query', async ({ page, scenario }) => {
+  await scenario('remote')
+  const host = page.locator('c2-autocomplete')
+  const input = page.getByRole('combobox')
+
+  await input.fill('par')
+  await expect(page.getByRole('option')).toHaveCount(3)
+  await expect(host).toHaveAttribute('data-request-count', '1')
+
+  await page.mouse.click(5, 5)
+  await expect(input).toHaveAttribute('aria-expanded', 'false')
+  await input.click()
+
+  await expect(host).toHaveAttribute('data-request-count', '1')
+  await expect(page.getByRole('option')).toHaveCount(3)
+  await expect(page.getByRole('status')).toHaveCount(0)
+
+  await host.evaluate((element) => (element as Autocomplete).load())
+  await expect(host).toHaveAttribute('data-request-count', '2')
 })
 
 test('supports pointer selection, clear, query events and form submission', async ({ page, scenario }) => {

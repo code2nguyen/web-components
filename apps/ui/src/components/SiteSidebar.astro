@@ -19,12 +19,31 @@ const examples = (await getCollection('examples')).sort((a, b) => a.data.order -
 
 const groups =
   section === 'components'
-    ? COMPONENT_CATEGORIES.map((category) => ({
-        title: category,
-        items: components
-          .filter((component) => component.data.category === category)
-          .map((c) => ({ id: c.id, title: c.data.title, href: `${base}/components/${c.id}`, search: `${c.data.title} c2-${c.id} ${c.data.category}` })),
-      })).filter((group) => group.items.length > 0)
+    ? COMPONENT_CATEGORIES.map((category) => {
+        const categoryComponents = components.filter((component) => component.data.category === category)
+        return {
+          title: category,
+          count: categoryComponents.length,
+          items: [
+            ...(category === 'Chart'
+              ? [
+                  {
+                    id: 'chart-overview',
+                    title: 'Overview',
+                    href: `${base}/components/chart`,
+                    search: 'chart overview architecture data engine legend tooltip realtime events states theming',
+                  },
+                ]
+              : []),
+            ...categoryComponents.map((c) => ({
+              id: c.id,
+              title: c.data.title,
+              href: `${base}/components/${c.id}`,
+              search: `${c.data.title} c2-${c.id} ${c.data.category}`,
+            })),
+          ],
+        }
+      }).filter((group) => group.items.length > 0)
     : section === 'icons'
       ? [{ title: 'Icon sets', items: iconSets.map((set) => ({ id: set.id, title: set.data.title, href: `${base}/icons/${set.id}`, search: set.data.title })) }]
       : section === 'examples'
@@ -53,7 +72,7 @@ const overviews = {
   examples: { href: `${base}/examples/`, label: 'All examples', noun: 'examples' },
 }
 const overview = overviews[section]
-const total = groups.reduce((count, group) => count + group.items.length, 0)
+const total = section === 'components' ? components.length : groups.reduce((count, group) => count + group.items.length, 0)
 
 // One group is just a list with a heading: nothing to collapse, nothing worth filtering.
 const collapsible = groups.length > 1
@@ -103,8 +122,8 @@ const collapsible = groups.length > 1
         <c2-details class="sidebar__group" data-group={group.title} expanded={group.items.some((item) => item.id === currentId) || undefined}>
           <span slot="title" class="sidebar__group-title">
             {group.title}
-            <span class="sidebar__count" data-total={group.items.length}>
-              {group.items.length}
+            <span class="sidebar__count" data-total={'count' in group ? group.count : group.items.length}>
+              {'count' in group ? group.count : group.items.length}
             </span>
           </span>
           {items}
@@ -138,6 +157,10 @@ const collapsible = groups.length > 1
     position: sticky;
     top: 0;
     z-index: 1;
+    // On desktop this extends the filter's opaque sticky surface through the navigation's top spacing,
+    // while leaving the field itself at the same visual offset below the header.
+    margin-top: calc(0px - var(--sidebar-filter-top-space, 0px));
+    padding-top: var(--sidebar-filter-top-space, 0px);
     padding-bottom: 12px;
     background: var(--site-color-surface);
   }
@@ -269,9 +292,9 @@ const collapsible = groups.length > 1
 
 <script>
   import '../data/chrome-modules'
-  import '@c2n/details'
 
   type Nav = HTMLElement & { dataset: { section?: string } }
+  type SidebarGroup = HTMLElement & { expanded: boolean; updateComplete: Promise<unknown> }
 
   // Private browsing and blocked site data both make storage throw rather than return null.
   function read(key: string): string | null {
@@ -293,9 +316,13 @@ const collapsible = groups.length > 1
    * Collapsing and filtering, for every copy of the nav on the page — the desktop grid sidebar and the
    * `c2-side-nav` drawer render the same markup.
    */
-  function enhance(nav: Nav): void {
-    const groups = [...nav.querySelectorAll<HTMLElement & { expanded: boolean }>('c2-details.sidebar__group')]
+  async function enhance(nav: Nav): Promise<void> {
+    const groups = [...nav.querySelectorAll<SidebarGroup>('c2-details.sidebar__group')]
     if (groups.length === 0) return
+
+    // The nav is server-rendered, then each c2-details creates its native disclosure asynchronously. Let that first
+    // render settle before restoring state so `expanded` and the internal `<details open>` cannot disagree on click.
+    await Promise.all(groups.map((group) => group.updateComplete))
 
     const key = `c2n-sidebar-groups:${nav.dataset.section ?? 'components'}`
     const current = nav.querySelector<HTMLElement>('a[aria-current="page"]')
@@ -306,6 +333,7 @@ const collapsible = groups.length > 1
     if (stored !== null) {
       const open = new Set(stored.split('\n').filter(Boolean))
       for (const group of groups) group.expanded = open.has(group.dataset.group ?? '') || group === currentGroup
+      await Promise.all(groups.map((group) => group.updateComplete))
     }
 
     // Filtering forces groups open, so remember the real state to put back when the query is cleared.
@@ -371,7 +399,7 @@ const collapsible = groups.length > 1
     })
   }
 
-  for (const nav of document.querySelectorAll<Nav>('.sidebar__nav')) enhance(nav)
+  for (const nav of document.querySelectorAll<Nav>('.sidebar__nav')) void enhance(nav)
 
   // The docs site is a plain MPA — every sidebar link is a full page load — so the sidebar's own scroll offset is
   // thrown away on each navigation unless we carry it across ourselves. Restore what the visitor left behind, and

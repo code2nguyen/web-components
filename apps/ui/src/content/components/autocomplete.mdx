@@ -118,7 +118,7 @@ catalog.renderItem = ({ item }) => html`
 
 `selection-behavior="replace"` is the default: choosing a suggestion replaces the input with its key and fires `input`, `change` and `suggestion-select`. Use `selection-behavior="preserve"` for command palettes or search results: choosing a row fires only `suggestion-select`, keeps the query unchanged and lets the same result list reopen when the input is clicked again.
 
-For remote data, assign a function to `dataSource`. The component debounces calls and aborts the previous signal whenever the query changes:
+For remote data, assign a function to `dataSource`. The component debounces calls and aborts the previous signal whenever the query changes. Reopening an unchanged query reuses its last successful results immediately; call `load()` when you need to force a refresh:
 
 ```js tag=CodeBlock
 const autocomplete = document.querySelector('c2-autocomplete')
