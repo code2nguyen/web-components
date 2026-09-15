@@ -2,6 +2,9 @@ name: Release to npm
 
 # Manual only: publishing is deliberate. Run it from the Actions tab, pick the bump, and the whole
 # monorepo is versioned together (fixed versioning, see the `version` field in lerna.json).
+# A real release writes its version commit to `release/v<version>` and opens a PR back to the selected
+# source branch. Merge that PR before starting the next version. If any step fails, rerun the same run:
+# it resumes the release branch or tag and publishes only packages that are still missing from npm.
 #
 # Requires a repository secret named NPM_TOKEN: an npm **automation** token (Access Tokens ->
 # Generate New Token -> Automation). A classic "publish" token is refused when the account or the
@@ -31,8 +34,9 @@ on:
         default: false
 
 permissions:
-  # lerna commits the version bump and pushes the tags back to the branch.
+  # The workflow pushes an unprotected release branch and opens the version PR itself.
   contents: write
+  pull-requests: write
   # npm provenance: lerna turns it on by itself for a public repo running in GitHub Actions, but only
   # if it can mint an OIDC token. Without this the publish still works, just unattested.
   id-token: write
@@ -69,6 +73,46 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Lerna's normal publish command versions, commits, tags, pushes and publishes as one operation. A protected
+      # source branch can reject that push after the tag has already reached GitHub, leaving every rerun stuck on
+      # "tag already exists". Version first without Git side effects, then resume from either durable checkpoint.
+      - name: Resolve release attempt
+        id: release
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          source_branch="$GITHUB_REF_NAME"
+          npx lerna version "$BUMP" --no-private --exact --yes --force-publish --no-push --no-git-tag-version
+          version="$(node -p "require('./lerna.json').version")"
+          release_branch="release/v$version"
+          checkpoint='new'
+
+          if git show-ref --verify --quiet "refs/tags/v$version"; then
+            git checkout --force --detach "v$version^{commit}"
+            checkpoint='tag'
+          elif git show-ref --verify --quiet "refs/remotes/origin/$release_branch"; then
+            git checkout --force --detach "refs/remotes/origin/$release_branch"
+            checkpoint='branch'
+          fi
+
+          actual_version="$(node -p "require('./lerna.json').version")"
+          if [ "$actual_version" != "$version" ]; then
+            echo "Checkpoint version $actual_version does not match requested version $version" >&2
+            exit 1
+          fi
+
+          {
+            echo "version=$version"
+            echo "source_branch=$source_branch"
+            echo "release_branch=$release_branch"
+            echo "checkpoint=$checkpoint"
+          } >> "$GITHUB_OUTPUT"
+
+      # A resumed attempt may have checked out a release commit with a different lockfile.
+      - name: Reinstall dependencies from the release checkpoint
+        if: ${{ steps.release.outputs.checkpoint != 'new' }}
+        run: npm ci
+
       # The same gates as the deploy workflow: a release must not be able to ship what CI would reject.
       - name: Lint
         run: npm run lint
@@ -99,47 +143,85 @@ jobs:
       - name: Show what every package would publish
         run: npx lerna exec --no-private --concurrency 1 -- npm pack --dry-run
 
-      - name: Version locally (dry run)
-        if: ${{ inputs.dry_run }}
-        run: |
-          npx lerna version ${{ inputs.bump }} --no-private --exact --yes --force-publish --no-push --no-git-tag-version
-          echo "--- versions that would be published ---"
-          npx lerna list --no-private --long
-          echo
-          echo "Dry run: nothing was published, tagged or pushed."
-
       - name: Configure git author for the version commit
         if: ${{ !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Publish
+      - name: Commit the new version
+        if: ${{ !inputs.dry_run && steps.release.outputs.checkpoint == 'new' }}
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          git add --all
+          git commit -m "chore(release): publish v$VERSION"
+
+      # This branch is the durable checkpoint and the protected source branch receives the version through a PR.
+      # Publishing can therefore fail at any package and safely continue from the same commit on the next run.
+      - name: Push release checkpoint
+        if: ${{ !inputs.dry_run }}
+        env:
+          RELEASE_BRANCH: ${{ steps.release.outputs.release_branch }}
+        run: git push origin "HEAD:refs/heads/$RELEASE_BRANCH"
+
+      - name: Open version pull request
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BRANCH: ${{ steps.release.outputs.release_branch }}
+          SOURCE_BRANCH: ${{ steps.release.outputs.source_branch }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          pr_url="$(gh pr list --head "$RELEASE_BRANCH" --base "$SOURCE_BRANCH" --state all --json url --jq '.[0].url')"
+          if [ -z "$pr_url" ]; then
+            if ! gh pr create \
+              --head "$RELEASE_BRANCH" \
+              --base "$SOURCE_BRANCH" \
+              --title "chore(release): publish v$VERSION" \
+              --body "Records the version metadata for the retryable v$VERSION npm release."; then
+              echo "::warning::Could not open the version PR automatically. Create it from $RELEASE_BRANCH into $SOURCE_BRANCH."
+            fi
+          else
+            echo "Version PR already exists: $pr_url"
+          fi
+
+      - name: Publish missing packages
         if: ${{ !inputs.dry_run }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        # `--no-private` skips internal packages such as @c2n/config, @c2n/ui and the generator. `--exact`
-        # pins cross-package dependencies to the released version. The `version` lifecycle script of
-        # @c2n/skill re-syncs its portable/Claude manifests and MCP pins during this step.
-        run: npx lerna publish ${{ inputs.bump }} --dist-tag ${{ inputs.dist_tag }} --no-private --exact --yes --force-publish
+        # `from-package` queries npm and publishes only versions that are still absent. This makes both a partial
+        # registry failure and a failure in a later GitHub step safe to rerun.
+        run: npx lerna publish from-package --dist-tag ${{ inputs.dist_tag }} --no-private --yes
 
-      # lerna already created and pushed the `v<version>` tag; this turns it into a GitHub Release
-      # with notes generated from the commits/PRs since the previous one. Kept out of lerna itself
-      # because its `--create-release github` also forces `--conventional-commits`, which would take
-      # the bump out of the workflow input's hands.
+      - name: Push release tag
+        if: ${{ !inputs.dry_run }}
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          if ! git show-ref --verify --quiet "refs/tags/v$VERSION"; then
+            git tag -a "v$VERSION" -m "v$VERSION"
+          fi
+          git push origin "refs/tags/v$VERSION"
+
+      # Turn the successfully published tag into a GitHub Release. A rerun treats an existing release as success.
       - name: Create the GitHub release
         if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.release.outputs.version }}
         run: |
-          version="$(node -p "require('./lerna.json').version")"
           prerelease=''
-          case "$version" in *-*) prerelease='--prerelease' ;; esac
-          gh release create "v$version" \
-            --title "v$version" \
-            --generate-notes \
-            --verify-tag \
-            $prerelease
+          case "$VERSION" in *-*) prerelease='--prerelease' ;; esac
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "GitHub release v$VERSION already exists."
+          else
+            gh release create "v$VERSION" \
+              --title "v$VERSION" \
+              --generate-notes \
+              --verify-tag \
+              $prerelease
+          fi
 
       - name: Summary
         if: ${{ always() }}
@@ -150,5 +232,6 @@ jobs:
             echo "- bump: \`${{ inputs.bump }}\`"
             echo "- dist-tag: \`${{ inputs.dist_tag }}\`"
             echo "- dry run: \`${{ inputs.dry_run }}\`"
+            echo "- checkpoint: \`${{ steps.release.outputs.checkpoint }}\`"
             echo "- version now in lerna.json: \`$(node -p "require('./lerna.json').version")\`"
           } >> "$GITHUB_STEP_SUMMARY"
