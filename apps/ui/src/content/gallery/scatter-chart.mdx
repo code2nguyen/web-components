@@ -1,0 +1,53 @@
+---
+title: 'Scatter chart gallery'
+description: 'Investment and operating relationships from Apple’s public filings.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
+
+import { ScatterChart } from '@c2n/chart/scatter-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+
+<ExampleModules />
+<ChartFinancialGallery />
+
+Figures are USD billions from Apple's public [SEC Company Facts API](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json).
+
+<GalleryGrid min="440">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-scatter-chart x-field="rd" data='[{"year":2021,"rd":21.914,"revenue":365.817},{"year":2022,"rd":26.251,"revenue":394.328},{"year":2023,"rd":29.915,"revenue":383.285},{"year":2024,"rd":31.37,"revenue":391.035},{"year":2025,"rd":34.55,"revenue":416.161}]'>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+</c2-scatter-chart>
+```
+
+```html tag=MdxCodeBlock,label=R&D versus revenue · analyst context
+<style>
+  .investment-scatter {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+    --c2-chart__series-1--color: #2563eb;
+  }
+</style>
+<div class="investment-scatter" data-finance-demo>
+  <c2-scatter-chart id="gallery-investment-scatter" x-field="rd" symbol="diamond" symbol-size="15" data='[{"year":2021,"rd":21.914,"revenue":365.817},{"year":2022,"rd":26.251,"revenue":394.328},{"year":2023,"rd":29.915,"revenue":383.285},{"year":2024,"rd":31.37,"revenue":391.035},{"year":2025,"rd":34.55,"revenue":416.161}]'>
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  </c2-scatter-chart>
+  <c2-chart-legend for="gallery-investment-scatter"></c2-chart-legend>
+  <c2-chart-tooltip for="gallery-investment-scatter"></c2-chart-tooltip>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Operating leverage
+<c2-scatter-chart x-field="revenue" symbol-size="13" data='[{"year":2021,"revenue":365.817,"income":108.949},{"year":2022,"revenue":394.328,"income":119.437},{"year":2023,"revenue":383.285,"income":114.301},{"year":2024,"revenue":391.035,"income":123.216},{"year":2025,"revenue":416.161,"income":133.05}]'>
+  <c2-chart-series field="income" label="Operating income"></c2-chart-series>
+</c2-scatter-chart>
+```
+
+</GalleryGrid>

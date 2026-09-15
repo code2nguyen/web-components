@@ -1,0 +1,288 @@
+---
+/** Renderers and deterministic realtime ticks for the Sparkline gallery's market table. */
+---
+
+<script>
+  import { html } from 'lit'
+  import { styleMap } from 'lit/directives/style-map.js'
+  import '@c2n/button'
+  import '@c2n/chart/sparkline.js'
+  import '@c2n/table'
+  import type { TableColumnConfig, TableRow, TableRowStyler } from '@c2n/table/table-types.js'
+
+  interface QuoteRow extends TableRow {
+    symbol: string
+    company: string
+    price: number
+    previousClose: number
+    low: number
+    high: number
+    history: number[]
+  }
+
+  interface MarketTable extends HTMLElement {
+    columns?: TableColumnConfig[]
+    rows: QuoteRow[]
+    animateUpdates: boolean
+    updateDuration: number
+    rowStyle?: TableRowStyler
+    updateComplete: Promise<unknown>
+  }
+
+  const initialRows: QuoteRow[] = [
+    {
+      symbol: 'AAPL',
+      company: 'Apple',
+      price: 255.46,
+      previousClose: 256.87,
+      low: 251.04,
+      high: 257.6,
+      history: [248.3, 256.08, 254.43, 252.31, 256.87, 255.46],
+    },
+    {
+      symbol: 'MSFT',
+      company: 'Microsoft',
+      price: 506.22,
+      previousClose: 510.15,
+      low: 505.04,
+      high: 517.1,
+      history: [507.2, 510.14, 514.45, 508.29, 510.15, 506.22],
+    },
+    {
+      symbol: 'NVDA',
+      company: 'NVIDIA',
+      price: 175.31,
+      previousClose: 177.69,
+      low: 174.72,
+      high: 180.31,
+      history: [176.52, 178.43, 176.97, 175.64, 177.69, 175.31],
+    },
+    {
+      symbol: 'AMZN',
+      company: 'Amazon',
+      price: 219.78,
+      previousClose: 218.15,
+      low: 215.42,
+      high: 221.56,
+      history: [217.93, 216.49, 219.87, 217.11, 218.15, 219.78],
+    },
+    {
+      symbol: 'GOOGL',
+      company: 'Alphabet',
+      price: 246.54,
+      previousClose: 245.12,
+      low: 241.88,
+      high: 248.32,
+      history: [242.7, 244.16, 241.98, 247.14, 245.12, 246.54],
+    },
+  ]
+
+  const reserveRows: QuoteRow[] = [
+    {
+      symbol: 'META',
+      company: 'Meta Platforms',
+      price: 768.42,
+      previousClose: 762.88,
+      low: 754.2,
+      high: 773.91,
+      history: [742.18, 751.64, 748.91, 759.32, 762.88, 768.42],
+    },
+    {
+      symbol: 'TSLA',
+      company: 'Tesla',
+      price: 421.66,
+      previousClose: 417.3,
+      low: 409.82,
+      high: 426.14,
+      history: [405.72, 412.56, 408.11, 419.84, 417.3, 421.66],
+    },
+  ]
+
+  const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const percentage = new Intl.NumberFormat(undefined, { style: 'percent', signDisplay: 'always', minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  const columns: TableColumnConfig[] = [
+    {
+      field: 'symbol',
+      header: 'Instrument',
+      width: 'minmax(132px, 1fr)',
+      renderCell: ({ row }) => {
+        const quote = row as QuoteRow
+        return html`<span style="display:grid;line-height:1.2"
+          ><strong>${quote.symbol}</strong><small style="color:var(--c2-table__header--color);font-size:11px">${quote.company}</small></span
+        >`
+      },
+    },
+    {
+      field: 'price',
+      header: 'Last',
+      width: '112px',
+      align: 'end',
+      renderCell: ({ row }) => {
+        const quote = row as QuoteRow
+        const position = Math.max(0, Math.min(1, (quote.price - quote.low) / Math.max(0.01, quote.high - quote.low)))
+        return html`
+          <span
+            style=${styleMap({
+              display: 'flex',
+              'justify-content': 'flex-end',
+              'min-width': '82px',
+              margin: '-9px -12px',
+              padding: '9px 12px',
+              'border-radius': '5px',
+              color: position <= 0.3 ? '#b91c1c' : position >= 0.7 ? '#047857' : 'inherit',
+              'font-variant-numeric': 'tabular-nums',
+              'font-weight': '650',
+              transition: 'color 240ms ease-out',
+            })}
+          >
+            ${money.format(quote.price)}
+          </span>
+        `
+      },
+    },
+    {
+      field: 'change',
+      header: 'Change',
+      width: '104px',
+      align: 'end',
+      renderCell: ({ row }) => {
+        const quote = row as QuoteRow
+        const change = quote.price / quote.previousClose - 1
+        return html`<span
+          style=${styleMap({
+            color: change >= 0 ? '#047857' : '#b91c1c',
+            'font-variant-numeric': 'tabular-nums',
+            'font-size': '12px',
+            'font-weight': '650',
+          })}
+          >${change >= 0 ? '▲' : '▼'} ${percentage.format(change)}</span
+        >`
+      },
+    },
+    {
+      field: 'range',
+      header: 'Day range',
+      width: '142px',
+      align: 'end',
+      renderCell: ({ row }) => {
+        const quote = row as QuoteRow
+        return html`<span style="color:var(--c2-table__header--color);font-size:11px">${money.format(quote.low)}–${money.format(quote.high)}</span>`
+      },
+    },
+    {
+      field: 'history',
+      header: 'Recent evolution',
+      width: '180px',
+      renderCell: ({ row }) => {
+        const quote = row as QuoteRow
+        return html`<c2-sparkline aria-label=${`${quote.symbol} recent price evolution`} .data=${quote.history} tone="auto"></c2-sparkline>`
+      },
+    },
+  ]
+
+  const styleQuoteRow: TableRowStyler = ({ row }) => {
+    const quote = row as QuoteRow
+    const position = Math.max(0, Math.min(1, (quote.price - quote.low) / Math.max(0.01, quote.high - quote.low)))
+    const background =
+      position <= 0.3 ? 'color-mix(in srgb, #dc2626 9%, transparent)' : position >= 0.7 ? 'color-mix(in srgb, #16a34a 9%, transparent)' : 'transparent'
+    return { background, transition: 'background 240ms ease-out' }
+  }
+
+  let randomState = 0x2f6e2b1
+  const random = () => {
+    randomState = (1664525 * randomState + 1013904223) >>> 0
+    return randomState / 0x100000000
+  }
+
+  let marketTick = 0
+  const nextRows = (rows: QuoteRow[]): { rows: QuoteRow[]; summary: string } => {
+    marketTick++
+    const next = rows.map((row, index) => {
+      // A quiet tape is easier to read: at most ~0.08% per tick, rather than making every row change regime.
+      const drift = Math.sin((row.history.length + index * 2.3) / 3) * 0.00018
+      const move = drift + (random() - 0.5) * 0.0012
+      const price = Math.max(1, row.price * (1 + move))
+      return {
+        ...row,
+        price,
+        low: Math.min(row.low, price),
+        high: Math.max(row.high, price),
+        history: [...row.history.slice(-17), price],
+      }
+    })
+
+    let summary = `Modified ${next.length} prices`
+    if (marketTick % 3 === 0) {
+      if (next.length < 6) {
+        const universe = [...initialRows, ...reserveRows]
+        const added = universe.find((candidate) => !next.some((row) => row.symbol === candidate.symbol))
+        if (added) {
+          next.push({ ...added, history: [...added.history] })
+          summary += ` · added ${added.symbol}`
+        }
+      } else {
+        const removedIndex = (marketTick / 3) % next.length
+        const [removed] = next.splice(removedIndex, 1)
+        summary += ` · removed ${removed.symbol}`
+      }
+    }
+    return { rows: next, summary }
+  }
+
+  const findTable = (demo: HTMLElement): Promise<MarketTable> => {
+    const table = demo.querySelector<MarketTable>('c2-table')
+    if (table) return Promise.resolve(table)
+    return new Promise((resolve) => {
+      const observer = new MutationObserver(() => {
+        const hydrated = demo.querySelector<MarketTable>('c2-table')
+        if (!hydrated) return
+        observer.disconnect()
+        resolve(hydrated)
+      })
+      observer.observe(demo, { childList: true, subtree: true })
+    })
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-market-table]').forEach((demo) => {
+    const toggle = demo.querySelector<HTMLElement>('c2-button')
+    const status = demo.querySelector<HTMLElement>('[data-market-status]')
+    if (!toggle || !status) return
+
+    void Promise.all([customElements.whenDefined('c2-table'), customElements.whenDefined('c2-sparkline'), findTable(demo)]).then(async ([, , table]) => {
+      table.columns = columns
+      table.animateUpdates = true
+      table.updateDuration = 720
+      table.rowStyle = styleQuoteRow
+      table.rows = initialRows.map((row) => ({ ...row, history: [...row.history] }))
+      await table.updateComplete
+
+      let timer: number | undefined
+      let running = false
+
+      const updatePrices = () => {
+        const update = nextRows(table.rows)
+        table.rows = update.rows
+        status.textContent = update.summary
+      }
+
+      const start = () => {
+        if (running) return
+        running = true
+        toggle.textContent = 'Pause'
+        updatePrices()
+        timer = window.setInterval(updatePrices, 1200)
+      }
+      const stop = () => {
+        if (timer !== undefined) window.clearInterval(timer)
+        timer = undefined
+        running = false
+        toggle.textContent = 'Resume'
+        status.textContent = 'Replay paused'
+      }
+
+      toggle.addEventListener('click', () => (running ? stop() : start()))
+      start()
+    })
+  })
+</script>

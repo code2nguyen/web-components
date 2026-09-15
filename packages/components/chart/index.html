@@ -132,6 +132,31 @@
     </section>
 
     <section>
+      <h2>Specialized ECharts series</h2>
+      <p class="hint">The same data, theme and events API also drives gauge, scatter and candlestick series.</p>
+      <c2-gauge-chart
+        class="plot"
+        min="0"
+        max="40"
+        precision="1"
+        value-suffix="%"
+        legend="none"
+        label-field="metric"
+        data='[{"metric":"Services mix","value":26.23}]'
+      >
+        <c2-chart-series field="value" label="Services mix"></c2-chart-series>
+      </c2-gauge-chart>
+      <c2-scatter-chart class="plot" x-field="rd" data='[{"rd":21.9,"revenue":365.8},{"rd":26.3,"revenue":394.3},{"rd":34.6,"revenue":416.2}]'>
+        <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+      </c2-scatter-chart>
+      <c2-candlestick-chart
+        class="plot"
+        label-field="date"
+        data='[{"date":"Mon","open":248.3,"close":256.08,"low":248.12,"high":256.64},{"date":"Tue","open":255.88,"close":254.43,"low":253.58,"high":257.34},{"date":"Wed","open":255.22,"close":252.31,"low":251.04,"high":255.74}]'
+      ></c2-candlestick-chart>
+    </section>
+
+    <section>
       <h2>Themed</h2>
       <p class="hint">Only CSS custom properties. The palette reaches the canvas because the element resolves it and hands it over.</p>
       <c2-line-chart

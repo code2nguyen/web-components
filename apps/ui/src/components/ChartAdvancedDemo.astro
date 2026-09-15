@@ -1,0 +1,123 @@
+---
+/** Smooth, repeatable financial-data replays for the ECharts chart documentation. */
+---
+
+<script>
+  import '@c2n/button'
+
+  interface ReplayChart extends HTMLElement {
+    series?: { field: string; label: string }[]
+    updateData(data: Record<string, string | number>[]): void
+    updateComplete: Promise<unknown>
+  }
+
+  const fiscal = [
+    { year: 2021, revenue: 365.817, rd: 21.914, iphone: 191.973, mac: 35.19, ipad: 31.862, services: 68.425 },
+    { year: 2022, revenue: 394.328, rd: 26.251, iphone: 205.489, mac: 40.177, ipad: 29.292, services: 78.129 },
+    { year: 2023, revenue: 383.285, rd: 29.915, iphone: 200.583, mac: 29.357, ipad: 28.3, services: 85.2 },
+    { year: 2024, revenue: 391.035, rd: 31.37, iphone: 201.183, mac: 29.984, ipad: 26.694, services: 96.169 },
+    { year: 2025, revenue: 416.161, rd: 34.55, iphone: 209.586, mac: 33.708, ipad: 28.023, services: 109.158 },
+  ]
+  const candles = [
+    { date: 'Sep 22', open: 248.3, close: 256.08, low: 248.12, high: 256.64 },
+    { date: 'Sep 23', open: 255.88, close: 254.43, low: 253.58, high: 257.34 },
+    { date: 'Sep 24', open: 255.22, close: 252.31, low: 251.04, high: 255.74 },
+    { date: 'Sep 25', open: 253.21, close: 256.87, low: 252.4, high: 257.17 },
+    { date: 'Sep 26', open: 254.1, close: 255.46, low: 253.05, high: 257.6 },
+  ]
+
+  const tween = async (draw: (progress: number) => void, duration = 520): Promise<void> => {
+    const started = performance.now()
+    await new Promise<void>((resolve) => {
+      const frame = (now: number) => {
+        const progress = Math.min(1, (now - started) / duration)
+        draw(1 - Math.pow(1 - progress, 3))
+        if (progress < 1) requestAnimationFrame(frame)
+        else resolve()
+      }
+      requestAnimationFrame(frame)
+    })
+  }
+  const mix = (from: number, to: number, progress: number) => from + (to - from) * progress
+
+  const waitUntilReady = (chart: ReplayChart): Promise<void> => {
+    if (chart.hasAttribute('data-chart-ready')) return Promise.resolve()
+    return new Promise((resolve) => {
+      chart.addEventListener('chart-ready', () => resolve(), { once: true })
+      chart.addEventListener('chart-error', () => resolve(), { once: true })
+    })
+  }
+
+  const seed = (chart: ReplayChart, status: HTMLElement): void => {
+    if (chart.localName === 'c2-gauge-chart') {
+      const point = fiscal[0]
+      chart.updateData([{ metric: 'Services mix', value: (point.services / point.revenue) * 100 }])
+      status.textContent = `FY ${point.year} · ${((point.services / point.revenue) * 100).toFixed(1)}% of revenue`
+    } else if (chart.localName === 'c2-scatter-chart') {
+      const point = fiscal[0]
+      chart.updateData([{ year: point.year, rd: point.rd, revenue: point.revenue }])
+      status.textContent = `FY ${point.year} · R&D $${point.rd.toFixed(1)}B · revenue $${point.revenue.toFixed(1)}B`
+    } else {
+      chart.updateData([candles[0]])
+      status.textContent = `${candles[0].date} · $${candles[0].close.toFixed(2)}`
+    }
+  }
+
+  const replay = async (chart: ReplayChart, status: HTMLElement, button: HTMLElement): Promise<void> => {
+    button.toggleAttribute('disabled', true)
+    const kind = chart.localName
+
+    if (kind === 'c2-gauge-chart') {
+      for (let index = 0; index < fiscal.length; index += 1) {
+        const previous = index ? fiscal[index - 1].services / fiscal[index - 1].revenue : 0
+        const next = fiscal[index].services / fiscal[index].revenue
+        await tween((progress) => chart.updateData([{ metric: 'Services mix', value: mix(previous, next, progress) * 100 }]))
+        status.textContent = `FY ${fiscal[index].year} · ${(next * 100).toFixed(1)}% of revenue`
+      }
+    } else if (kind === 'c2-scatter-chart') {
+      const first = fiscal[0]
+      const shown: Record<string, number>[] = [{ year: first.year, rd: first.rd, revenue: first.revenue }]
+      chart.updateData(shown)
+      status.textContent = `FY ${first.year} · R&D $${first.rd.toFixed(1)}B · revenue $${first.revenue.toFixed(1)}B`
+      for (let index = 1; index < fiscal.length; index += 1) {
+        const previous = fiscal[index - 1]
+        const point = fiscal[index]
+        await tween((progress) =>
+          chart.updateData([...shown, { year: point.year, rd: mix(previous.rd, point.rd, progress), revenue: mix(previous.revenue, point.revenue, progress) }]),
+        )
+        shown.push({ year: point.year, rd: point.rd, revenue: point.revenue })
+        status.textContent = `FY ${point.year} · R&D $${point.rd.toFixed(1)}B · revenue $${point.revenue.toFixed(1)}B`
+      }
+    } else {
+      const shown: Record<string, string | number>[] = []
+      for (const candle of candles) {
+        await tween((progress) => {
+          const close = mix(candle.open, candle.close, progress)
+          const low = mix(candle.open, candle.low, progress)
+          const high = mix(candle.open, candle.high, progress)
+          chart.updateData([...shown, { ...candle, close, low: Math.min(candle.open, close, low), high: Math.max(candle.open, close, high) }])
+        })
+        shown.push(candle)
+        status.textContent = `${candle.date} · $${candle.close.toFixed(2)}`
+      }
+    }
+
+    button.removeAttribute('disabled')
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-advanced-realtime]').forEach((demo) => {
+    const chart = demo.querySelector<ReplayChart>('c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart')
+    const button = demo.querySelector<HTMLElement>('c2-button')
+    const status = demo.querySelector<HTMLElement>('[data-advanced-status]')
+    if (!chart || !button || !status) return
+    void customElements.whenDefined(chart.localName).then(async () => {
+      if (chart.localName === 'c2-gauge-chart') chart.series = [{ field: 'value', label: 'Services mix' }]
+      if (chart.localName === 'c2-scatter-chart') chart.series = [{ field: 'revenue', label: 'Revenue' }]
+      seed(chart, status)
+      await chart.updateComplete
+      await waitUntilReady(chart)
+      button.addEventListener('click', () => void replay(chart, status, button))
+      await replay(chart, status, button)
+    })
+  })
+</script>

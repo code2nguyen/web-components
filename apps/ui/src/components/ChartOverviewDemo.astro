@@ -1,0 +1,119 @@
+---
+/** Interactive controllers used only by the chart-family overview examples. */
+---
+
+<script>
+  type FinancialRow = { year: number; revenue: number; grossProfit: number; operatingIncome: number; netIncome: number }
+  type DemoChart = HTMLElement & {
+    updateComplete: Promise<unknown>
+    updateData(data: FinancialRow[]): void
+    appendPoint(x: number, values: readonly number[]): void
+  }
+
+  const annual: FinancialRow[] = [
+    { year: 2021, revenue: 365.817, grossProfit: 152.836, operatingIncome: 108.949, netIncome: 94.68 },
+    { year: 2022, revenue: 394.328, grossProfit: 170.782, operatingIncome: 119.437, netIncome: 99.803 },
+    { year: 2023, revenue: 383.285, grossProfit: 169.148, operatingIncome: 114.301, netIncome: 96.995 },
+    { year: 2024, revenue: 391.035, grossProfit: 180.683, operatingIncome: 123.216, netIncome: 93.736 },
+    { year: 2025, revenue: 416.161, grossProfit: 195.201, operatingIncome: 133.05, netIncome: 112.01 },
+  ]
+
+  document.querySelectorAll<HTMLElement>('[data-chart-overview-realtime]').forEach((demo) => {
+    const chart = demo.querySelector<DemoChart>('c2-line-chart')
+    const button = demo.querySelector<HTMLElement>('c2-button')
+    const status = demo.querySelector<HTMLElement>('[data-chart-overview-status]')
+    if (!chart || !button || !status) return
+
+    let rowIndex = 2
+    let frame: number | undefined
+    let started = 0
+    let elapsed = 0
+    const duration = 1400
+
+    const reset = () => {
+      rowIndex = 2
+      chart.updateData(annual.slice(0, 2))
+      status.textContent = 'Ready at FY2022'
+      started = 0
+      elapsed = 0
+    }
+
+    const stop = (label = 'Replay') => {
+      if (frame !== undefined) cancelAnimationFrame(frame)
+      frame = undefined
+      button.textContent = label
+    }
+
+    const tick = (now: number) => {
+      frame = undefined
+      if (rowIndex >= annual.length) {
+        stop()
+        status.textContent = 'Replay complete · FY2025'
+        return
+      }
+      if (!started) started = now
+      const progress = Math.min(1, (now - started) / duration)
+      const previous = annual[rowIndex - 1]
+      const next = annual[rowIndex]
+      const interpolate = (field: keyof Omit<FinancialRow, 'year'>) => previous[field] + (next[field] - previous[field]) * progress
+      chart.updateData([
+        ...annual.slice(0, rowIndex),
+        {
+          year: next.year,
+          revenue: interpolate('revenue'),
+          grossProfit: interpolate('grossProfit'),
+          operatingIncome: interpolate('operatingIncome'),
+          netIncome: interpolate('netIncome'),
+        },
+      ])
+      status.textContent = `Replaying FY${previous.year} → FY${next.year} · ${Math.round(progress * 100)}%`
+      if (progress === 1) {
+        rowIndex += 1
+        started = now
+        elapsed = 0
+      }
+      frame = requestAnimationFrame(tick)
+    }
+
+    void customElements.whenDefined('c2-line-chart').then(async () => {
+      await chart.updateComplete
+      reset()
+    })
+    button.addEventListener('click', () => {
+      if (frame !== undefined) {
+        elapsed = started ? performance.now() - started : 0
+        stop('Resume')
+        status.textContent = `Paused before FY${annual[rowIndex]?.year ?? 2025}`
+        return
+      }
+      if (rowIndex >= annual.length) reset()
+      button.textContent = 'Pause'
+      started = elapsed ? performance.now() - elapsed : 0
+      frame = requestAnimationFrame(tick)
+    })
+  })
+
+  document.querySelectorAll<HTMLElement>('[data-chart-overview-events]').forEach((demo) => {
+    const chart = demo.querySelector<HTMLElement>('c2-line-chart')
+    const output = demo.querySelector<HTMLOutputElement>('output')
+    if (!chart || !output) return
+
+    chart.addEventListener('chart-ready', (event) => {
+      const detail = (event as CustomEvent<{ engine: string }>).detail
+      output.textContent = `chart-ready · engine: ${detail.engine}`
+    })
+    chart.addEventListener('point-hover', (event) => {
+      const detail = (event as CustomEvent<{ x: number; y: number | null; series: { label?: string; field: string } } | null>).detail
+      if (!detail) return
+      output.textContent = `point-hover · FY${detail.x} · ${detail.series.label ?? detail.series.field}: ${detail.y === null ? 'gap' : `$${detail.y.toFixed(1)}B`}`
+    })
+    chart.addEventListener('series-toggle', (event) => {
+      const detail = (event as CustomEvent<{ visible: boolean; series: { label?: string; field: string } }>).detail
+      output.textContent = `series-toggle · ${detail.series.label ?? detail.series.field}: ${detail.visible ? 'visible' : 'hidden'}`
+    })
+    chart.addEventListener('range-change', (event) => {
+      const detail = (event as CustomEvent<{ min: number; max: number }>).detail
+      output.textContent = `range-change · ${detail.min.toFixed(1)} → ${detail.max.toFixed(1)}`
+    })
+  })
+</script>

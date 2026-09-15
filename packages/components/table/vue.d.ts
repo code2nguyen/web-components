@@ -22,6 +22,10 @@ declare module 'vue' {
         'checkbox-selection'?: unknown
         sort?: unknown
         'multi-sort'?: unknown
+        'animate-updates'?: unknown
+        'update-duration'?: unknown
+        'highlight-updates'?: unknown
+        'update-highlight-field'?: unknown
         'row-height'?: unknown
         'virtual-threshold'?: unknown
         'block-size'?: unknown

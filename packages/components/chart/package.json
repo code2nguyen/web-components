@@ -28,9 +28,29 @@
       "types": "./types/src/pie-chart.d.ts",
       "default": "./dist/pie-chart.js"
     },
+    "./gauge-chart.js": {
+      "types": "./types/src/gauge-chart.d.ts",
+      "default": "./dist/gauge-chart.js"
+    },
+    "./scatter-chart.js": {
+      "types": "./types/src/scatter-chart.d.ts",
+      "default": "./dist/scatter-chart.js"
+    },
+    "./candlestick-chart.js": {
+      "types": "./types/src/candlestick-chart.d.ts",
+      "default": "./dist/candlestick-chart.js"
+    },
     "./chart-series.js": {
       "types": "./types/src/chart-series.d.ts",
       "default": "./dist/chart-series.js"
+    },
+    "./chart-legend.js": {
+      "types": "./types/src/chart-legend.d.ts",
+      "default": "./dist/chart-legend.js"
+    },
+    "./chart-tooltip.js": {
+      "types": "./types/src/chart-tooltip.d.ts",
+      "default": "./dist/chart-tooltip.js"
     },
     "./chart-base.js": {
       "types": "./types/src/chart-base.d.ts",
@@ -84,6 +104,9 @@
     "graph",
     "data visualization",
     "line chart",
+    "gauge chart",
+    "scatter plot",
+    "candlestick chart",
     "sparkline",
     "uplot",
     "echarts",

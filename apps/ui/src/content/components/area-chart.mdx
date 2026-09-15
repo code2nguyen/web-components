@@ -4,16 +4,22 @@ description: 'A line chart with the region under each line filled — every line
 category: 'Chart'
 package: '@c2n/chart'
 tag: 'c2-area-chart'
-apiTags: ['c2-area-chart', 'c2-chart-series']
+apiTags: ['c2-area-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ChartEnergyDemo from '../../components/ChartEnergyDemo.astro'
 
 import { AreaChart } from '@c2n/chart/area-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
 
-An area chart *is* a line chart plus a fill, so `c2-area-chart` extends `c2-line-chart` and every one of
+<ChartEnergyDemo />
+
+An area chart _is_ a line chart plus a fill, so `c2-area-chart` extends `c2-line-chart` and every one of
 its attributes — `curve`, `points`, `zoom`, `x-type`, the axis bounds — means exactly the same thing here.
 The one addition is `fill-opacity`.
 
@@ -33,48 +39,72 @@ npm install @c2n/chart uplot
 <style>
   .plot {
     width: 100%;
-    --c2-chart--height: 220px;
+    --c2-chart--height: 240px;
+  }
+  .energy-linked,
+  .energy-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .energy-live__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--site-color-on-surface-muted);
   }
 </style>
 
-<div data-label="Smoothed area">
+<div data-label="Default">
   <c2-area-chart
     class="plot"
-    x-field="t"
+    x-field="year"
     curve="smooth"
-    fill-opacity="0.2"
-    data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
+    data='[{"year":2015,"hydro":55.56,"wind":21.42,"solar":7.75},{"year":2016,"hydro":60.84,"wind":21.38,"solar":8.66},{"year":2017,"hydro":50,"wind":24.61,"solar":8.87},{"year":2018,"hydro":65.11,"wind":28.6,"solar":11.15},{"year":2019,"hydro":56.91,"wind":34.72,"solar":12.02},{"year":2020,"hydro":62.52,"wind":40.05,"solar":13.09},{"year":2021,"hydro":59.54,"wind":37.12,"solar":15.28},{"year":2022,"hydro":45.56,"wind":38.2,"solar":19.34},{"year":2023,"hydro":55.9,"wind":50.48,"solar":22.59},{"year":2024,"hydro":71.12,"wind":45.43,"solar":24.87}]'
   >
-    <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
+    <c2-chart-series field="hydro" label="Hydro"></c2-chart-series>
+    <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+    <c2-chart-series field="solar" label="Solar"></c2-chart-series>
   </c2-area-chart>
 </div>
 
-<div data-label="Two overlapping bands">
-  <c2-area-chart
-    class="plot"
-    x-field="month"
-    curve="smooth"
-    fill-opacity="0.16"
-    data='[{"month":1,"paid":128,"organic":74},{"month":2,"paid":141,"organic":92},{"month":3,"paid":132,"organic":101},{"month":4,"paid":167,"organic":118},{"month":5,"paid":183,"organic":142},{"month":6,"paid":204,"organic":171}]'
-  >
-    <c2-chart-series field="paid" label="Paid"></c2-chart-series>
-    <c2-chart-series field="organic" label="Organic"></c2-chart-series>
-  </c2-area-chart>
+<div data-label="Custom legend + tooltip" data-energy-custom>
+  <div class="energy-linked">
+    <c2-area-chart
+      id="area-energy-custom"
+      class="plot"
+      x-field="year"
+      curve="smooth"
+      fill-opacity="0.12"
+      data='[{"year":2019,"nuclear":399.01,"hydro":56.91,"wind":34.72,"solar":12.02},{"year":2020,"nuclear":353.83,"hydro":62.52,"wind":40.05,"solar":13.09},{"year":2021,"nuclear":379.36,"hydro":59.54,"wind":37.12,"solar":15.28},{"year":2022,"nuclear":294.73,"hydro":45.56,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"hydro":55.9,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"hydro":71.12,"wind":45.43,"solar":24.87}]'
+    >
+      <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+      <c2-chart-series field="hydro" label="Hydro"></c2-chart-series>
+      <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+      <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+    </c2-area-chart>
+    <c2-chart-legend for="area-energy-custom"></c2-chart-legend>
+    <c2-chart-tooltip for="area-energy-custom"></c2-chart-tooltip>
+  </div>
 </div>
 
-<div data-label="Solid fill on a time axis">
-  <c2-area-chart
-    class="plot"
-    x-type="time"
-    x-field="at"
-    fill-opacity="0.45"
-    legend="none"
-    data='[{"at":1704067200000,"mb":210},{"at":1704672000000,"mb":268},{"at":1705276800000,"mb":244},{"at":1705881600000,"mb":331},{"at":1706486400000,"mb":390},{"at":1707091200000,"mb":362}]'
-  >
-    <c2-chart-series field="mb" label="Egress (MB)"></c2-chart-series>
-  </c2-area-chart>
+<div data-label="Realtime replay" data-energy-realtime>
+  <div class="energy-live">
+    <c2-area-chart class="plot" x-field="year" curve="smooth" max-points="180" data-energy-fields="hydro,wind,solar">
+      <c2-chart-series field="hydro" label="Hydro"></c2-chart-series>
+      <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+      <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+    </c2-area-chart>
+    <div class="energy-live__controls">
+      <c2-button>Replay</c2-button>
+      <span data-energy-status>Ready at 2018</span>
+    </div>
+  </div>
 </div>
 ```
+
+These are different views of the same France 2015–2024 extract from the public [Our World in Data Energy dataset](https://github.com/owid/energy-data), measured in terawatt-hours. The shared source keeps the area, line, bar, pie and sparkline examples directly comparable.
 
 ## The fill
 

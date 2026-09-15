@@ -1,0 +1,64 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    tooltip--background-color: #18181b,
+    tooltip--color: #fafafa,
+    tooltip--font-size: 12px,
+    tooltip--padding: 8px 10px,
+    tooltip--border-radius: 6px,
+    tooltip--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    tooltip--gap: 6px,
+    legend-marker--size: 10px,
+    legend-marker--border-radius: 999px,
+  )
+);
+
+:host {
+  position: fixed;
+  z-index: 1000;
+  display: block;
+  pointer-events: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([position='inline']) {
+  position: static;
+}
+
+.bubble {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(tooltip--gap);
+  padding: css.cssVar(tooltip--padding);
+  border-radius: css.cssVar(tooltip--border-radius);
+  background: css.cssVar(tooltip--background-color);
+  color: css.cssVar(tooltip--color);
+  font-size: css.cssVar(tooltip--font-size);
+  box-shadow: css.cssVar(tooltip--box-shadow);
+  white-space: nowrap;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.marker {
+  width: css.cssVar(legend-marker--size);
+  height: css.cssVar(legend-marker--size);
+  border-radius: css.cssVar(legend-marker--border-radius);
+  flex: none;
+}
+
+.label {
+  flex: 1 1 auto;
+}
+
+.value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}

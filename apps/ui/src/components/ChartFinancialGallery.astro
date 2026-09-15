@@ -1,0 +1,166 @@
+---
+/** Finance-aware legend and tooltip renderers for the SEC-backed chart gallery examples. */
+---
+
+<script>
+  import { html } from 'lit'
+  import '@c2n/phosphor-icons/icons/briefcase.js'
+  import '@c2n/phosphor-icons/icons/chart-line-up.js'
+  import '@c2n/phosphor-icons/icons/cloud.js'
+  import '@c2n/phosphor-icons/icons/currency-dollar.js'
+  import '@c2n/phosphor-icons/icons/device-mobile.js'
+  import '@c2n/phosphor-icons/icons/device-tablet.js'
+  import '@c2n/phosphor-icons/icons/flask.js'
+  import '@c2n/phosphor-icons/icons/laptop.js'
+  import '@c2n/phosphor-icons/icons/money.js'
+  import '@c2n/phosphor-icons/icons/users-three.js'
+  import '@c2n/phosphor-icons/icons/watch.js'
+
+  type FinancialRow = Record<string, string | number>
+  interface GalleryChart extends HTMLElement {
+    data?: FinancialRow[]
+    getLegendItems?: () => { label: string }[]
+    updateComplete: Promise<unknown>
+  }
+  interface LegendItem {
+    color: string
+    label: string
+    visible: boolean
+    index: number
+    series: { field: string }
+  }
+  interface TooltipEntry {
+    color: string
+    formatted: string
+    value: number | null
+    series: { field: string; label?: string }
+  }
+  interface TooltipContext {
+    index: number
+    formattedX: string
+    entries: TooltipEntry[]
+  }
+
+  const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1 })
+  const percent = new Intl.NumberFormat(undefined, { style: 'percent', signDisplay: 'exceptZero', maximumFractionDigits: 1 })
+  const plainPercent = new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 1 })
+  const iconStyle = (color: string) => `--c2-phosphor-icon--size:18px;--c2-phosphor-icon--color:${color}`
+
+  const metricIcon = (label: string, color: string) => {
+    const style = iconStyle(color)
+    const key = label.toLowerCase()
+    if (key.includes('iphone')) return html`<c2-phosphor-device-mobile style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-device-mobile>`
+    if (key.includes('mac')) return html`<c2-phosphor-laptop style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-laptop>`
+    if (key.includes('ipad')) return html`<c2-phosphor-device-tablet style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-device-tablet>`
+    if (key.includes('wearable')) return html`<c2-phosphor-watch style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-watch>`
+    if (key.includes('service')) return html`<c2-phosphor-cloud style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-cloud>`
+    if (key.includes('research') || key === 'r&d') return html`<c2-phosphor-flask style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-flask>`
+    if (key.includes('selling') || key.includes('sg&a'))
+      return html`<c2-phosphor-users-three style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-users-three>`
+    if (key.includes('gross')) return html`<c2-phosphor-chart-line-up style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-chart-line-up>`
+    if (key.includes('operating')) return html`<c2-phosphor-briefcase style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-briefcase>`
+    if (key.includes('net income')) return html`<c2-phosphor-money style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-money>`
+    return html`<c2-phosphor-currency-dollar style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-currency-dollar>`
+  }
+
+  const numberValue = (row: FinancialRow | undefined, field: string): number | undefined => {
+    const value = row?.[field]
+    return typeof value === 'number' ? value : undefined
+  }
+
+  const initialize = async (demo: HTMLElement): Promise<void> => {
+    const chart = demo.querySelector<GalleryChart>(
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-pie-chart, c2-sparkline, c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart',
+    )
+    const legend = demo.querySelector<HTMLElement & { renderLegendItem?: (item: LegendItem) => unknown }>('c2-chart-legend')
+    const tooltip = demo.querySelector<HTMLElement & { renderTooltip?: (context: TooltipContext) => unknown }>('c2-chart-tooltip')
+    if (!chart || !legend || !tooltip) return
+
+    await Promise.all([
+      customElements.whenDefined(chart.localName),
+      customElements.whenDefined('c2-chart-legend'),
+      customElements.whenDefined('c2-chart-tooltip'),
+    ])
+    await chart.updateComplete
+    const declaredLabels = [...demo.querySelectorAll('c2-chart-series')].map((series) => series.getAttribute('label')).filter(Boolean)
+    for (let attempt = 0; attempt < 3 && declaredLabels.length > 0; attempt += 1) {
+      if (chart.getLegendItems?.().some((item) => declaredLabels.includes(item.label))) break
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+      await chart.updateComplete
+    }
+    const rows = chart.data ?? []
+    const isPie = chart.localName === 'c2-pie-chart'
+    const isGauge = chart.localName === 'c2-gauge-chart'
+
+    legend.renderLegendItem = (item) => {
+      const first = isPie ? undefined : numberValue(rows[0], item.series.field)
+      const latest = isPie
+        ? numberValue(
+            rows.find((row) => row.category === item.label),
+            'sales',
+          )
+        : numberValue(rows.at(-1), item.series.field)
+      const pieTotal = isPie ? rows.reduce((total, row) => total + (numberValue(row, 'sales') ?? 0), 0) : 0
+      const comparison = isGauge
+        ? `${latest?.toFixed(1) ?? '—'}% of FY2025 revenue`
+        : isPie
+          ? latest !== undefined && pieTotal > 0
+            ? `${plainPercent.format(latest / pieTotal)} of sales`
+            : ''
+          : first !== undefined && latest !== undefined
+            ? `${percent.format(latest / first - 1)} ${rows[0]?.year ? `since FY${String(rows[0].year).slice(-2)}` : 'from first point'}`
+            : ''
+      const formattedLatest = latest === undefined ? '' : isGauge ? `${latest.toFixed(1)}%` : money.format(latest * 1e9)
+      return html`
+        ${metricIcon(item.label, item.color)}
+        <span style="display:grid;text-align:left;line-height:1.2">
+          <strong style="color:var(--c2-chart--color)">${item.label}</strong>
+          <small>${formattedLatest}${comparison ? ` · ${comparison}` : ''}</small>
+        </span>
+      `
+    }
+
+    tooltip.renderTooltip = (context) => {
+      const row = rows[context.index]
+      const previous = rows[context.index - 1]
+      const revenue = numberValue(row, 'revenue')
+      const pieTotal = isPie ? rows.reduce((total, item) => total + (numberValue(item, 'sales') ?? 0), 0) : undefined
+      const heading = isPie
+        ? context.formattedX
+        : chart.localName === 'c2-scatter-chart'
+          ? `R&D ${money.format(Number(context.formattedX) * 1e9)}`
+          : chart.localName === 'c2-candlestick-chart'
+            ? String(row?.date ?? context.formattedX)
+            : row?.year
+              ? `FY ${row.year}`
+              : context.formattedX
+      return html`
+        <span style="display:flex;justify-content:space-between;gap:24px;align-items:baseline">
+          <strong>${heading}</strong>
+          <small style="opacity:.7">${isGauge ? 'share of revenue' : 'USD'}</small>
+        </span>
+        <span style="display:grid;gap:8px;margin-top:9px">
+          ${context.entries.map((entry) => {
+            const label = isPie ? context.formattedX : (entry.series.label ?? entry.series.field)
+            const value = entry.value ?? 0
+            const prior = numberValue(previous, entry.series.field)
+            const isMargin = ['grossProfit', 'operatingIncome', 'netIncome'].includes(entry.series.field)
+            const isExpense = ['rd', 'sga'].includes(entry.series.field)
+            const ratio = revenue && (isMargin || isExpense) ? `${plainPercent.format(value / revenue)} ${isExpense ? 'of revenue' : 'margin'}` : ''
+            const change = prior ? `${percent.format(value / prior - 1)} YoY` : ''
+            const insight = isPie && pieTotal ? `${plainPercent.format(value / pieTotal)} mix` : [ratio, change].filter(Boolean).join(' · ') || 'Base year'
+            return html`
+              <span style="display:grid;grid-template-columns:18px minmax(92px,1fr) auto;align-items:center;gap:8px">
+                ${metricIcon(label, entry.color)}
+                <span>${label}<small style="display:block;opacity:.7">${insight}</small></span>
+                <b>${isGauge ? `${value.toFixed(1)}%` : money.format(value * 1e9)}</b>
+              </span>
+            `
+          })}
+        </span>
+      `
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-finance-demo]').forEach((demo) => void initialize(demo))
+</script>

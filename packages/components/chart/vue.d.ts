@@ -10,9 +10,14 @@
 import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { AreaChart, AreaChartEventMap } from '@c2n/chart/area-chart.js'
 import type { BarChart, BarChartEventMap } from '@c2n/chart/bar-chart.js'
+import type { CandlestickChart, CandlestickChartEventMap } from '@c2n/chart/candlestick-chart.js'
+import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries, ChartSeriesEventMap } from '@c2n/chart/chart-series.js'
+import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import type { GaugeChart, GaugeChartEventMap } from '@c2n/chart/gauge-chart.js'
 import type { LineChart, LineChartEventMap } from '@c2n/chart/line-chart.js'
 import type { PieChart, PieChartEventMap } from '@c2n/chart/pie-chart.js'
+import type { ScatterChart, ScatterChartEventMap } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline, SparklineEventMap } from '@c2n/chart/sparkline.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
@@ -31,7 +36,9 @@ declare module 'vue' {
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
+        onTooltipChange?: (event: AreaChartEventMap['tooltip-change']) => void
         onSeriesToggle?: (event: AreaChartEventMap['series-toggle']) => void
+        onLegendChange?: (event: AreaChartEventMap['legend-change']) => void
         onRangeChange?: (event: AreaChartEventMap['range-change']) => void
         onChartReady?: (event: AreaChartEventMap['chart-ready']) => void
         onChartError?: (event: AreaChartEventMap['chart-error']) => void
@@ -51,7 +58,9 @@ declare module 'vue' {
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
+        onTooltipChange?: (event: BarChartEventMap['tooltip-change']) => void
         onSeriesToggle?: (event: BarChartEventMap['series-toggle']) => void
+        onLegendChange?: (event: BarChartEventMap['legend-change']) => void
         onRangeChange?: (event: BarChartEventMap['range-change']) => void
         onChartReady?: (event: BarChartEventMap['chart-ready']) => void
         onChartError?: (event: BarChartEventMap['chart-error']) => void
@@ -59,11 +68,57 @@ declare module 'vue' {
         onPointClick?: (event: BarChartEventMap['point-click']) => void
       }
     >
+    'c2-candlestick-chart': DefineComponent<
+      C2Props<CandlestickChart> & {
+        'open-field'?: unknown
+        'close-field'?: unknown
+        'low-field'?: unknown
+        'high-field'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: CandlestickChartEventMap['tooltip-change']) => void
+        onSeriesToggle?: (event: CandlestickChartEventMap['series-toggle']) => void
+        onLegendChange?: (event: CandlestickChartEventMap['legend-change']) => void
+        onRangeChange?: (event: CandlestickChartEventMap['range-change']) => void
+        onChartReady?: (event: CandlestickChartEventMap['chart-ready']) => void
+        onChartError?: (event: CandlestickChartEventMap['chart-error']) => void
+        onPointHover?: (event: CandlestickChartEventMap['point-hover']) => void
+        onPointClick?: (event: CandlestickChartEventMap['point-click']) => void
+      }
+    >
+    'c2-chart-legend': DefineComponent<C2Props<ChartLegend>>
     'c2-chart-series': DefineComponent<
       C2Props<ChartSeries> & {
         'line-width'?: unknown
         'span-gaps'?: unknown
         onSERIES_CHANGE_EVENT?: (event: ChartSeriesEventMap['SERIES_CHANGE_EVENT']) => void
+      }
+    >
+    'c2-chart-tooltip': DefineComponent<C2Props<ChartTooltip>>
+    'c2-gauge-chart': DefineComponent<
+      C2Props<GaugeChart> & {
+        'start-angle'?: unknown
+        'end-angle'?: unknown
+        'split-number'?: unknown
+        'value-suffix'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: GaugeChartEventMap['tooltip-change']) => void
+        onSeriesToggle?: (event: GaugeChartEventMap['series-toggle']) => void
+        onLegendChange?: (event: GaugeChartEventMap['legend-change']) => void
+        onRangeChange?: (event: GaugeChartEventMap['range-change']) => void
+        onChartReady?: (event: GaugeChartEventMap['chart-ready']) => void
+        onChartError?: (event: GaugeChartEventMap['chart-error']) => void
+        onPointHover?: (event: GaugeChartEventMap['point-hover']) => void
+        onPointClick?: (event: GaugeChartEventMap['point-click']) => void
       }
     >
     'c2-line-chart': DefineComponent<
@@ -76,7 +131,9 @@ declare module 'vue' {
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
+        onTooltipChange?: (event: LineChartEventMap['tooltip-change']) => void
         onSeriesToggle?: (event: LineChartEventMap['series-toggle']) => void
+        onLegendChange?: (event: LineChartEventMap['legend-change']) => void
         onRangeChange?: (event: LineChartEventMap['range-change']) => void
         onChartReady?: (event: LineChartEventMap['chart-ready']) => void
         onChartError?: (event: LineChartEventMap['chart-error']) => void
@@ -95,12 +152,34 @@ declare module 'vue' {
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
+        onTooltipChange?: (event: PieChartEventMap['tooltip-change']) => void
         onSeriesToggle?: (event: PieChartEventMap['series-toggle']) => void
+        onLegendChange?: (event: PieChartEventMap['legend-change']) => void
         onRangeChange?: (event: PieChartEventMap['range-change']) => void
         onChartReady?: (event: PieChartEventMap['chart-ready']) => void
         onChartError?: (event: PieChartEventMap['chart-error']) => void
         onPointHover?: (event: PieChartEventMap['point-hover']) => void
         onPointClick?: (event: PieChartEventMap['point-click']) => void
+      }
+    >
+    'c2-scatter-chart': DefineComponent<
+      C2Props<ScatterChart> & {
+        'symbol-size'?: unknown
+        'large-threshold'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: ScatterChartEventMap['tooltip-change']) => void
+        onSeriesToggle?: (event: ScatterChartEventMap['series-toggle']) => void
+        onLegendChange?: (event: ScatterChartEventMap['legend-change']) => void
+        onRangeChange?: (event: ScatterChartEventMap['range-change']) => void
+        onChartReady?: (event: ScatterChartEventMap['chart-ready']) => void
+        onChartError?: (event: ScatterChartEventMap['chart-error']) => void
+        onPointHover?: (event: ScatterChartEventMap['point-hover']) => void
+        onPointClick?: (event: ScatterChartEventMap['point-click']) => void
       }
     >
     'c2-sparkline': DefineComponent<
@@ -113,7 +192,9 @@ declare module 'vue' {
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
+        onTooltipChange?: (event: SparklineEventMap['tooltip-change']) => void
         onSeriesToggle?: (event: SparklineEventMap['series-toggle']) => void
+        onLegendChange?: (event: SparklineEventMap['legend-change']) => void
         onRangeChange?: (event: SparklineEventMap['range-change']) => void
         onChartReady?: (event: SparklineEventMap['chart-ready']) => void
         onChartError?: (event: SparklineEventMap['chart-error']) => void

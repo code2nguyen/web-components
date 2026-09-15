@@ -4,14 +4,20 @@ description: 'A line chart over a time or numeric x axis, drawn on canvas by uPl
 category: 'Chart'
 package: '@c2n/chart'
 tag: 'c2-line-chart'
-apiTags: ['c2-line-chart', 'c2-chart-series']
+apiTags: ['c2-line-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ChartEnergyDemo from '../../components/ChartEnergyDemo.astro'
 
 import { LineChart } from '@c2n/chart/line-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
+
+<ChartEnergyDemo />
 
 One line per series over a time or numeric x axis. Data is rows plus `c2-chart-series` children — the same
 authoring shape as `c2-table`'s rows and columns — and presentation is ordinary attributes: `curve`,
@@ -38,59 +44,69 @@ npm install @c2n/chart uplot
 <style>
   .plot {
     width: 100%;
-    --c2-chart--height: 220px;
+    --c2-chart--height: 240px;
   }
-  .row {
+  .energy-linked,
+  .energy-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .energy-live__controls {
     display: flex;
     align-items: center;
     gap: 12px;
+    font-size: 12px;
+    color: var(--site-color-on-surface-muted);
   }
 </style>
 
-<div data-label="Two series">
+<div data-label="Default">
   <c2-line-chart
     class="plot"
-    x-field="month"
-    data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'
+    x-field="year"
+    data='[{"year":2015,"nuclear":437.43,"wind":21.42,"solar":7.75},{"year":2016,"nuclear":403.2,"wind":21.38,"solar":8.66},{"year":2017,"nuclear":398.36,"wind":24.61,"solar":8.87},{"year":2018,"nuclear":412.94,"wind":28.6,"solar":11.15},{"year":2019,"nuclear":399.01,"wind":34.72,"solar":12.02},{"year":2020,"nuclear":353.83,"wind":40.05,"solar":13.09},{"year":2021,"nuclear":379.36,"wind":37.12,"solar":15.28},{"year":2022,"nuclear":294.73,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"wind":45.43,"solar":24.87}]'
   >
-    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
-    <c2-chart-series field="cost" label="Cost"></c2-chart-series>
+    <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+    <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+    <c2-chart-series field="solar" label="Solar"></c2-chart-series>
   </c2-line-chart>
 </div>
 
-<div data-label="Smoothed, with point markers">
-  <c2-line-chart
-    class="plot"
-    x-field="t"
-    curve="smooth"
-    points="always"
-    data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
-  >
-    <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
-  </c2-line-chart>
+<div data-label="Custom legend + tooltip" data-energy-custom>
+  <div class="energy-linked">
+    <c2-line-chart
+      id="line-energy-custom"
+      class="plot"
+      x-field="year"
+      data='[{"year":2019,"nuclear":399.01,"hydro":56.91,"wind":34.72,"solar":12.02},{"year":2020,"nuclear":353.83,"hydro":62.52,"wind":40.05,"solar":13.09},{"year":2021,"nuclear":379.36,"hydro":59.54,"wind":37.12,"solar":15.28},{"year":2022,"nuclear":294.73,"hydro":45.56,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"hydro":55.9,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"hydro":71.12,"wind":45.43,"solar":24.87}]'
+    >
+      <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+      <c2-chart-series field="hydro" label="Hydro"></c2-chart-series>
+      <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+      <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+    </c2-line-chart>
+    <c2-chart-legend for="line-energy-custom"></c2-chart-legend>
+    <c2-chart-tooltip for="line-energy-custom"></c2-chart-tooltip>
+  </div>
 </div>
 
-<div data-label="Stepped, on a time axis">
-  <c2-line-chart
-    class="plot"
-    x-type="time"
-    x-field="at"
-    curve="step"
-    legend="none"
-    data='[{"at":1704067200000,"queue":4},{"at":1704672000000,"queue":9},{"at":1705276800000,"queue":7},{"at":1705881600000,"queue":16},{"at":1706486400000,"queue":12}]'
-  >
-    <c2-chart-series field="queue" label="Queue depth"></c2-chart-series>
-  </c2-line-chart>
-</div>
-
-<div data-label="Empty, loading and error">
-  <div class="row">
-    <c2-line-chart style="width:180px;--c2-chart--height:110px" data="[]"></c2-line-chart>
-    <c2-line-chart style="width:180px;--c2-chart--height:110px" loading></c2-line-chart>
-    <c2-line-chart style="width:180px;--c2-chart--height:110px" error="Metrics unavailable"></c2-line-chart>
+<div data-label="Realtime replay" data-energy-realtime>
+  <div class="energy-live">
+    <c2-line-chart class="plot" x-field="year" max-points="180" data-energy-fields="nuclear,wind,solar">
+      <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+      <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+      <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+    </c2-line-chart>
+    <div class="energy-live__controls">
+      <c2-button>Replay</c2-button>
+      <span data-energy-status>Ready at 2018</span>
+    </div>
   </div>
 </div>
 ```
+
+All three demos use a France extract from the public [Our World in Data Energy dataset](https://github.com/owid/energy-data): annual electricity generation in terawatt-hours, one row per year. The source publishes a codebook and traces these electricity fields to Ember and the Energy Institute. Keeping the same rows across the chart family makes the examples comparable rather than decorative.
 
 ## Data and series
 
@@ -110,10 +126,47 @@ re-rendering anything. For a live feed call `appendPoint()` instead, which write
 capacity and redraws with no reallocation and no Lit update. `max-points` keeps the window bounded, dropping
 the oldest points off the front.
 
+uPlot redraws immediately rather than tweening between samples. That is useful for honest live telemetry,
+but a slow feed will look stepped. The realtime demos interpolate each annual sample with
+`requestAnimationFrame()` and append those intermediate points; this keeps the engine's inexpensive data
+path while making the moving window visually smooth. ECharts supports `animation="auto"`, but it is better
+left off for a high-frequency feed so animations do not overlap.
+
 ```js tag=CodeBlock
 const chart = document.querySelector('c2-line-chart')
-chart.maxPoints = 600
-setInterval(() => chart.appendPoint(Date.now(), [readCpu()]), 1000)
+chart.maxPoints = 6
+for (const row of incomingYears) {
+  chart.appendPoint(row.year, [row.nuclear, row.wind, row.solar])
+}
+```
+
+## Independent legend and tooltip
+
+The built-in legend and tooltip are convenient defaults. For full layout control, place
+`c2-chart-legend` and `c2-chart-tooltip` anywhere in the same document or shadow root. Their `for` attribute
+targets the chart's `id`, like a label targets a form control, and automatically replaces the corresponding
+built-in display. The tooltip defaults to a viewport-safe floating
+position; set `position="inline"` to keep it exactly where its HTML is authored. The `renderLegend`,
+`renderLegendItem` and `renderTooltip` properties accept Lit render functions for application-specific content.
+The custom demo maps each source to a Phosphor icon (`atom`, `drop`, `wind`, `sun`, or `factory`) and computes
+each value's share of the five tracked generation sources.
+
+```js tag=CodeBlock
+import { html } from 'lit'
+
+legend.renderLegendItem = (item) => html`
+  ${energyIcon(item.label, item.color)}
+  <strong>${item.label}</strong>
+`
+tooltip.renderTooltip = (context) => {
+  const total = trackedTotalFor(context.formattedX)
+  return html`
+    <strong>${context.formattedX}</strong>
+    ${context.entries.map((entry) => html`
+      <span>${energyIcon(entry.series.label, entry.color)} ${entry.formatted} TWh · ${formatPercent(entry.value / total)}</span>
+    `)}
+  `
+}
 ```
 
 ## Sizing

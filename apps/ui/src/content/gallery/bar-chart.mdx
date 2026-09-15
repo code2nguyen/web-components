@@ -1,81 +1,91 @@
 ---
 title: 'Bar chart gallery'
-description: 'Bars over categories: a rounded default, grouped series, thin editorial bars and a dark board.'
+description: 'Financial comparisons built from Apple fiscal statements filed with the SEC.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
 
 import { BarChart } from '@c2n/chart/bar-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 
 <ExampleModules />
+<ChartFinancialGallery />
+
+Figures are USD billions from Apple's public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm) and [SEC company facts](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json).
 
 <GalleryGrid min="440">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-bar-chart
-  label-field="team"
+  label-field="year"
   x-type="category"
-  data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'
+  bar-width="0.74"
+  data='[{"year":2023,"iphone":200.583,"mac":29.357,"ipad":28.3,"wearables":39.845,"services":85.2},{"year":2024,"iphone":201.183,"mac":29.984,"ipad":26.694,"wearables":37.005,"services":96.169},{"year":2025,"iphone":209.586,"mac":33.708,"ipad":28.023,"wearables":35.686,"services":109.158}]'
 >
-  <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
+  <c2-chart-series field="iphone" label="iPhone"></c2-chart-series>
+  <c2-chart-series field="mac" label="Mac"></c2-chart-series>
+  <c2-chart-series field="ipad" label="iPad"></c2-chart-series>
+  <c2-chart-series field="wearables" label="Wearables"></c2-chart-series>
+  <c2-chart-series field="services" label="Services"></c2-chart-series>
 </c2-bar-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Soft grid
+```html tag=MdxCodeBlock,label=Income bridge — rich legend and tooltip
 <style>
-  .soft {
-    --c2-chart__grid--color: #f4f4f5;
-    --c2-chart__series-1--color: #0ea5e9;
+  .income-bars {
+    display: grid;
+    width: 100%;
+    gap: 12px;
+  }
+  .income-bars c2-bar-chart {
+    --c2-chart__series-1--color: #2563eb;
+    --c2-chart__series-2--color: #7c3aed;
+    --c2-chart__series-3--color: #0f766e;
+    --c2-chart__series-4--color: #ca8a04;
   }
 </style>
-<c2-bar-chart
-  class="soft"
-  label-field="team"
-  x-type="category"
-  data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'
->
-  <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
-</c2-bar-chart>
+<div class="income-bars" data-finance-demo>
+  <c2-bar-chart
+    id="financial-bar-income"
+    label-field="year"
+    x-type="category"
+    data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"operatingIncome":108.949,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"operatingIncome":119.437,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"operatingIncome":114.301,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"operatingIncome":123.216,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"operatingIncome":133.05,"netIncome":112.01}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+    <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
+    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+  </c2-bar-chart>
+  <c2-chart-legend for="financial-bar-income"></c2-chart-legend>
+  <c2-chart-tooltip for="financial-bar-income"></c2-chart-tooltip>
+</div>
 ```
 
-```html tag=MdxCodeBlock,label=Grouped
-<c2-bar-chart
-  label-field="quarter"
-  x-type="category"
-  bar-width="0.7"
-  bar-gap="0.15"
-  data='[{"quarter":"Q1","new":42,"renewed":58},{"quarter":"Q2","new":51,"renewed":61},{"quarter":"Q3","new":38,"renewed":74},{"quarter":"Q4","new":66,"renewed":80}]'
->
-  <c2-chart-series field="new" label="New"></c2-chart-series>
-  <c2-chart-series field="renewed" label="Renewed"></c2-chart-series>
-</c2-bar-chart>
-```
-
-```html tag=MdxCodeBlock,label=Editorial
+```html tag=MdxCodeBlock,label=Investment intensity
 <style>
-  .editorial {
+  .expense-bars {
     --c2-chart--border-top: none;
     --c2-chart--border-right: none;
     --c2-chart--border-bottom: none;
     --c2-chart--border-left: none;
-    --c2-chart--padding: 4px;
-    --c2-chart__grid--color: transparent;
-    --c2-chart__axis--color: #a1a1aa;
-    --c2-chart__series-1--color: #18181b;
+    --c2-chart__grid--color: #f4f4f5;
+    --c2-chart__series-1--color: #7c3aed;
+    --c2-chart__series-2--color: #db2777;
   }
 </style>
 <c2-bar-chart
-  class="editorial"
-  label-field="day"
+  class="expense-bars"
+  label-field="year"
   x-type="category"
-  bar-width="0.35"
-  legend="none"
-  data='[{"day":"Mon","runs":124},{"day":"Tue","runs":168},{"day":"Wed","runs":151},{"day":"Thu","runs":193},{"day":"Fri","runs":142},{"day":"Sat","runs":61},{"day":"Sun","runs":48}]'
+  data='[{"year":2021,"rd":21.914,"sga":21.973},{"year":2022,"rd":26.251,"sga":25.094},{"year":2023,"rd":29.915,"sga":24.932},{"year":2024,"rd":31.37,"sga":26.097},{"year":2025,"rd":34.55,"sga":27.601}]'
 >
-  <c2-chart-series field="runs" label="Runs"></c2-chart-series>
+  <c2-chart-series field="rd" label="R&amp;D"></c2-chart-series>
+  <c2-chart-series field="sga" label="SG&amp;A"></c2-chart-series>
 </c2-bar-chart>
 ```
 

@@ -1,0 +1,28 @@
+---
+import Main from '../../layouts/Main.astro'
+import DocComponentLayout from '../../layouts/DocComponentLayout.astro'
+import ChartOverviewContent from '../../content/chart-overview.mdx'
+import { ComponentConfigurationPanel } from '../../components/configuration/ComponentConfigurationPanel'
+
+const title = 'Chart overview'
+const description = 'One architecture for data, series, interaction and presentation across every chart component.'
+const headings = [
+  { depth: 2, slug: 'architecture', text: 'Architecture' },
+  { depth: 2, slug: 'engines', text: 'Engines' },
+  { depth: 2, slug: 'data-and-series', text: 'Data and series' },
+  { depth: 2, slug: 'legend-and-tooltip', text: 'Legend and tooltip' },
+  { depth: 2, slug: 'realtime-updates', text: 'Realtime updates' },
+  { depth: 2, slug: 'events-and-interaction', text: 'Events and interaction' },
+  { depth: 2, slug: 'responsive-and-lazy-rendering', text: 'Responsive and lazy rendering' },
+  { depth: 2, slug: 'theming', text: 'Theming' },
+  { depth: 2, slug: 'states-and-slots', text: 'States and slots' },
+  { depth: 2, slug: 'shared-api', text: 'Shared API' },
+]
+---
+
+<Main title={`${title} · c2n web components`} description={description} withSidebar section="components">
+  <DocComponentLayout section="components" currentId="chart-overview" headings={headings} title={title} description={description}>
+    <ComponentConfigurationPanel client:load slot="panel" />
+    <ChartOverviewContent />
+  </DocComponentLayout>
+</Main>

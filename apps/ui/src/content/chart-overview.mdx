@@ -1,0 +1,404 @@
+import CodeBlock from '../components/CodeBlock.astro'
+import MdxCodeBlock from '../components/MdxCodeBlock.astro'
+import ChartFinancialGallery from '../components/ChartFinancialGallery.astro'
+import ChartOverviewDemo from '../components/ChartOverviewDemo.astro'
+import ChartOverviewTable from '../components/ChartOverviewTable.astro'
+
+import { LineChart } from '@c2n/chart/line-chart.js'
+import { AreaChart } from '@c2n/chart/area-chart.js'
+import { BarChart } from '@c2n/chart/bar-chart.js'
+import { PieChart } from '@c2n/chart/pie-chart.js'
+import { Sparkline } from '@c2n/chart/sparkline.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
+
+<ChartFinancialGallery />
+<ChartOverviewDemo />
+
+The family contains [line](../line-chart), [area](../area-chart), [bar](../bar-chart), [scatter](../scatter-chart),
+[candlestick](../candlestick-chart), [gauge](../gauge-chart), [pie](../pie-chart) and
+[sparkline](../sparkline). They are separate custom elements, but they inherit the same `ChartBase` and use the same
+normalized frame, series definitions, theme tokens, presenters, state UI, events and update pipeline.
+
+Every example on this page uses Apple fiscal-year data published in the public
+[SEC Company Facts API](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) or the product mix in
+[Apple's 2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
+Amounts are USD billions. It is a useful common dataset: trends suit Cartesian charts, product mix suits a pie,
+and annual values make realtime interpolation easy to see.
+
+## Architecture
+
+The shared architecture keeps application code independent from the drawing engine:
+
+1. `data`, `revision` or a `dataSource` enters the data path.
+2. `ChartFrameBuilder` normalizes rows, arrays or columns into one typed frame.
+3. `c2-chart-series` adds labels, colors, axes and formatting without changing the data.
+4. The concrete chart projects that frame through its uPlot or ECharts adapter.
+5. `ChartBase` owns resize, lazy loading, states, legend, tooltip and semantic events around the canvas.
+
+<ChartOverviewTable variant="capabilities" />
+
+## Engines
+
+The components lazy-load optional peer engines only when first rendered. Line, area, bar and sparkline use
+[uPlot](https://github.com/leeoniya/uPlot) for a small, fast Cartesian path. Pie, gauge, scatter and candlestick use modular
+[Apache ECharts](https://echarts.apache.org/) for specialized series, labels, visual maps and canvas/SVG renderers.
+`chart-ready` reports the active engine; application code still sees the same chart API.
+
+```html tag=MdxCodeBlock,label=Two engines · one API
+<style>
+  .engine-pair {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    width: 100%;
+    gap: 16px;
+  }
+  .engine-pair c2-line-chart,
+  .engine-pair c2-pie-chart {
+    --c2-chart--height: 260px;
+  }
+</style>
+
+<div class="engine-pair">
+  <c2-line-chart
+    x-field="year"
+    data='[{"year":2021,"revenue":365.817,"netIncome":94.68},{"year":2022,"revenue":394.328,"netIncome":99.803},{"year":2023,"revenue":383.285,"netIncome":96.995},{"year":2024,"revenue":391.035,"netIncome":93.736},{"year":2025,"revenue":416.161,"netIncome":112.01}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+  </c2-line-chart>
+
+  <c2-pie-chart
+    label-field="category"
+    inner-radius="0.52"
+    animation="auto"
+    data='[{"category":"iPhone","sales":209.586},{"category":"Services","sales":109.158},{"category":"Wearables","sales":35.686},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023}]'
+  >
+    <c2-chart-series field="sales" label="FY2025 sales"></c2-chart-series>
+  </c2-pie-chart>
+</div>
+```
+
+Install only the engine your selected elements need:
+
+```bash tag=CodeBlock
+npm install @c2n/chart uplot          # line, area, bar, sparkline
+npm install @c2n/chart echarts        # pie, gauge, scatter, candlestick
+npm install @c2n/chart uplot echarts  # the full family
+```
+
+## Data and series
+
+Every chart accepts row objects, `number[]`, columnar `[xs, ys…]`, or an already normalized `ChartFrame`.
+Rows are the readable default; columnar data is the zero-conversion path for large numeric datasets. Declare
+series as `c2-chart-series` children or assign the `series` property. Children win when both are present.
+
+`x-field`, `x-type`, `label-field` and `locale` control interpretation and display. A series can add a label,
+explicit color, second axis, gap behavior and a property-only `format(value)` function. With no definitions,
+numeric fields are inferred from the first row.
+
+```html tag=MdxCodeBlock,label=Shared rows and series
+<style>
+  .shared-data-chart {
+    width: 100%;
+    --c2-chart--height: 270px;
+  }
+</style>
+
+<c2-area-chart
+  class="shared-data-chart"
+  x-field="year"
+  fill-opacity="0.12"
+  data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"operatingIncome":108.949},{"year":2022,"revenue":394.328,"grossProfit":170.782,"operatingIncome":119.437},{"year":2023,"revenue":383.285,"grossProfit":169.148,"operatingIncome":114.301},{"year":2024,"revenue":391.035,"grossProfit":180.683,"operatingIncome":123.216},{"year":2025,"revenue":416.161,"grossProfit":195.201,"operatingIncome":133.05}]'
+>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+  <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
+</c2-area-chart>
+```
+
+## Legend and tooltip
+
+`legend="top|bottom|start|end|none"` and `tooltip="axis|item|none"` provide useful built-ins. For product UI,
+link independent `c2-chart-legend` and `c2-chart-tooltip` elements with `for="chart-id"`. They can live anywhere
+in the same document or shadow root and automatically suppress the corresponding built-in presenter.
+
+The linked elements expose `renderLegend`, `renderLegendItem` and `renderTooltip` properties for data-driven Lit
+templates. This example uses recognizable finance/product icons, current values, growth, margin, mix and percentage
+context rather than repeating the chart labels.
+
+```html tag=MdxCodeBlock,label=Useful custom legend and tooltip
+<style>
+  .finance-presenters {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .finance-presenters c2-bar-chart {
+    --c2-chart--height: 285px;
+  }
+</style>
+
+<div class="finance-presenters" data-finance-demo>
+  <c2-bar-chart
+    id="overview-finance-chart"
+    x-field="year"
+    data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"netIncome":112.01}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+  </c2-bar-chart>
+  <c2-chart-legend for="overview-finance-chart"></c2-chart-legend>
+  <c2-chart-tooltip for="overview-finance-chart"></c2-chart-tooltip>
+</div>
+```
+
+```js tag=CodeBlock
+legend.renderLegendItem = (item) => html`
+  ${metricIcon(item.label, item.color)}
+  <span><strong>${item.label}</strong><small>${latestValueAndGrowth(item)}</small></span>
+`
+
+tooltip.renderTooltip = (context) => html`
+  <strong>FY ${context.formattedX}</strong>
+  ${context.entries.map((entry) => html`
+    <span>${metricIcon(entry.series.label, entry.color)} ${entry.formatted} · ${percentageOrYoY(entry)}</span>
+  `)}
+`
+```
+
+## Realtime updates
+
+The realtime path is shared and intentionally separate from presentation updates:
+
+- `updateData(next)` replaces a dataset immediately without waiting for Lit.
+- `appendPoint(x, values)` writes into spare frame capacity and redraws once.
+- increment `revision` after mutating an owned input buffer in place.
+- `dataSource.getWindow()` pulls lazy ranges; optional `subscribe()` pushes points through the append path.
+- `max-points` bounds a moving window.
+
+uPlot redraws immediately; it does not invent values between samples. A slow annual feed therefore looks stepped.
+The demo interpolates consecutive SEC observations with `requestAnimationFrame()` and calls `updateData` on each
+frame. That smoothness comes from the feed policy, not a chart-engine limitation. For high-frequency telemetry,
+append real samples directly and leave animation off so transitions never overlap.
+
+```html tag=MdxCodeBlock,label=Smooth realtime replay
+<style>
+  .overview-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .overview-live c2-line-chart {
+    --c2-chart--height: 270px;
+  }
+  .overview-live__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+</style>
+
+<div class="overview-live" data-chart-overview-realtime>
+  <c2-line-chart x-field="year" max-points="5">
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+  </c2-line-chart>
+  <div class="overview-live__controls">
+    <c2-button size="sm">Replay</c2-button>
+    <span data-chart-overview-status>Loading data…</span>
+  </div>
+</div>
+```
+
+```js tag=CodeBlock
+const source = {
+  async getWindow({ xMin, xMax, maxPoints, signal }) {
+    return { data: await fetchWindow({ xMin, xMax, maxPoints, signal }) }
+  },
+  subscribe(push) {
+    return marketFeed.subscribe(({ time, revenue, income }) => push(time, [revenue, income]))
+  },
+}
+chart.dataSource = source
+```
+
+## Events and interaction
+
+Every chart reports `chart-ready`, `chart-error`, `point-click`, `point-hover`, `tooltip-change`,
+`legend-change` and `series-toggle`. Cartesian charts also emit `range-change` after zooming or brushing.
+Point and range events do not bubble, so attach listeners to the chart itself. Use `data-chart-ready` as the
+stable test signal after the first frame is drawn.
+
+Hover a point or toggle a legend item below to see the same semantic event model used by external presenters.
+
+```html tag=MdxCodeBlock,label=Semantic event stream
+<style>
+  .event-demo {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .event-demo c2-line-chart {
+    --c2-chart--height: 250px;
+  }
+  .event-demo output {
+    min-height: 20px;
+    padding: 8px 10px;
+    border-radius: var(--site-radius-sm);
+    background: var(--site-color-surface-container-2);
+    color: var(--site-color-on-surface-variant);
+    font: 12px/1.4 var(--site-font-mono);
+  }
+</style>
+
+<div class="event-demo" data-chart-overview-events>
+  <c2-line-chart
+    zoom
+    x-field="year"
+    data='[{"year":2021,"revenue":365.817,"netIncome":94.68},{"year":2022,"revenue":394.328,"netIncome":99.803},{"year":2023,"revenue":383.285,"netIncome":96.995},{"year":2024,"revenue":391.035,"netIncome":93.736},{"year":2025,"revenue":416.161,"netIncome":112.01}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+  </c2-line-chart>
+  <output aria-live="polite">Waiting for chart-ready…</output>
+</div>
+```
+
+## Responsive and lazy rendering
+
+Canvas has no intrinsic size. The host gets width from layout and height from `--c2-chart--height` (320px by
+default, 32px for a sparkline). A `ResizeObserver` keeps the engine canvas synchronized without resize loops.
+`lazy-render` defers both engine import and first draw until the host enters the viewport.
+
+```html tag=MdxCodeBlock,label=Responsive composition
+<style>
+  .responsive-finance {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 0.35fr);
+    align-items: center;
+    width: 100%;
+    gap: 16px;
+  }
+  .responsive-finance c2-bar-chart {
+    --c2-chart--height: clamp(220px, 32vw, 300px);
+  }
+  .responsive-finance c2-sparkline {
+    --c2-chart--height: 56px;
+  }
+  @media (max-width: 560px) {
+    .responsive-finance {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="responsive-finance">
+  <c2-bar-chart
+    lazy-render
+    x-field="year"
+    data='[{"year":2021,"revenue":365.817},{"year":2022,"revenue":394.328},{"year":2023,"revenue":383.285},{"year":2024,"revenue":391.035},{"year":2025,"revenue":416.161}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  </c2-bar-chart>
+  <c2-sparkline data="[94.68,99.803,96.995,93.736,112.01]" type="area" tone="positive"></c2-sparkline>
+</div>
+```
+
+## Theming
+
+All elements use the `--c2-chart__*` namespace. Set the palette, typography, axes, grid, crosshair, legend,
+tooltip and state variables once on a container and every chart beneath it inherits them. Canvas marks cannot be
+reached with `::part()`, so the component resolves CSS variables with `getComputedStyle` and gives the result to
+the engine. Theme changes redraw without replacing data.
+
+```html tag=MdxCodeBlock,label=One theme · different chart types
+<style>
+  .executive-theme {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    width: 100%;
+    gap: 14px;
+    --c2-chart--height: 250px;
+    --c2-chart--background: color-mix(in srgb, var(--site-color-primary) 6%, var(--site-color-surface));
+    --c2-chart__series-1--color: #7c3aed;
+    --c2-chart__series-2--color: #06b6d4;
+    --c2-chart__series-3--color: #f59e0b;
+    --c2-chart__grid--color: color-mix(in srgb, var(--site-color-primary) 14%, transparent);
+    --c2-chart__line--width: 3px;
+    --c2-chart__area--opacity: 0.2;
+  }
+</style>
+
+<div class="executive-theme">
+  <c2-area-chart
+    x-field="year"
+    data='[{"year":2021,"grossProfit":152.836,"operatingIncome":108.949},{"year":2022,"grossProfit":170.782,"operatingIncome":119.437},{"year":2023,"grossProfit":169.148,"operatingIncome":114.301},{"year":2024,"grossProfit":180.683,"operatingIncome":123.216},{"year":2025,"grossProfit":195.201,"operatingIncome":133.05}]'
+  >
+    <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+    <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
+  </c2-area-chart>
+  <c2-pie-chart
+    label-field="category"
+    inner-radius="0.58"
+    data='[{"category":"iPhone","sales":209.586},{"category":"Services","sales":109.158},{"category":"Wearables","sales":35.686},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023}]'
+  >
+    <c2-chart-series field="sales" label="FY2025 sales"></c2-chart-series>
+  </c2-pie-chart>
+</div>
+```
+
+## States and slots
+
+`loading`, `error` and empty data replace the plot with a consistent state layer. Each state has a named slot,
+and `empty-message` changes the default copy. The shared `actions` slot places controls above the plot; `legend`
+and `tooltip` slots replace their built-ins. Series definitions occupy the default slot.
+
+```html tag=MdxCodeBlock,label=Loading · empty · error
+<style>
+  .state-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    width: 100%;
+    gap: 12px;
+  }
+  .state-grid c2-line-chart {
+    --c2-chart--height: 170px;
+  }
+  .state-card {
+    display: grid;
+    place-items: center;
+    gap: 5px;
+    text-align: center;
+  }
+  .state-card strong {
+    color: var(--c2-chart--color);
+  }
+</style>
+
+<div class="state-grid">
+  <c2-line-chart loading>
+    <span slot="loading" class="state-card"><strong>Loading filing</strong><small>Reading SEC Company Facts…</small></span>
+  </c2-line-chart>
+  <c2-line-chart data="[]">
+    <span slot="empty" class="state-card"><strong>No comparable period</strong><small>Choose another fiscal range.</small></span>
+  </c2-line-chart>
+  <c2-line-chart error="The filing could not be loaded">
+    <span slot="error" class="state-card"><strong>SEC request failed</strong><small>Keep the last valid frame and retry.</small></span>
+  </c2-line-chart>
+</div>
+```
+
+## Shared API
+
+<ChartOverviewTable variant="api" />
+
+Use each component's **API** tab for its additions: line curve/points, area fill, bar sizing, pie radii/labels,
+and sparkline type/tone. Cartesian charts also share axes, grid, cursor, zoom and y-domain controls through their
+uPlot base; pie instead adds ECharts renderer and polar-layout options.
