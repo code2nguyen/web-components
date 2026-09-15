@@ -75,15 +75,23 @@ jobs:
 
       # Lerna's normal publish command versions, commits, tags, pushes and publishes as one operation. A protected
       # source branch can reject that push after the tag has already reached GitHub, leaving every rerun stuck on
-      # "tag already exists". Version first without Git side effects, then resume from either durable checkpoint.
+      # "tag already exists". Resolve the target without running version lifecycle scripts, then resume from either
+      # durable checkpoint. The actual versioning happens after the MCP registry it consumes has been built.
       - name: Resolve release attempt
         id: release
         env:
           BUMP: ${{ inputs.bump }}
         run: |
           source_branch="$GITHUB_REF_NAME"
-          npx lerna version "$BUMP" --no-private --exact --yes --force-publish --no-push --no-git-tag-version
-          version="$(node -p "require('./lerna.json').version")"
+          current_version="$(node -p "require('./lerna.json').version")"
+          version="$(node -e '
+            const semver = require("semver")
+            const prerelease = semver.prerelease(process.argv[1])
+            const preid = typeof prerelease?.[0] === "string" ? prerelease[0] : "alpha"
+            const next = semver.inc(process.argv[1], process.argv[2], preid)
+            if (!next) process.exit(1)
+            console.log(next)
+          ' "$current_version" "$BUMP")"
           release_branch="release/v$version"
           checkpoint='new'
 
@@ -95,10 +103,12 @@ jobs:
             checkpoint='branch'
           fi
 
-          actual_version="$(node -p "require('./lerna.json').version")"
-          if [ "$actual_version" != "$version" ]; then
-            echo "Checkpoint version $actual_version does not match requested version $version" >&2
-            exit 1
+          if [ "$checkpoint" != 'new' ]; then
+            actual_version="$(node -p "require('./lerna.json').version")"
+            if [ "$actual_version" != "$version" ]; then
+              echo "Checkpoint version $actual_version does not match requested version $version" >&2
+              exit 1
+            fi
           fi
 
           {
@@ -137,6 +147,19 @@ jobs:
 
       - name: Generated files are up to date
         run: git diff --exit-code -- packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json
+
+      - name: Version new release
+        if: ${{ steps.release.outputs.checkpoint == 'new' }}
+        env:
+          BUMP: ${{ inputs.bump }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          npx lerna version "$BUMP" --no-private --exact --yes --force-publish --no-push --no-git-tag-version
+          actual_version="$(node -p "require('./lerna.json').version")"
+          if [ "$actual_version" != "$VERSION" ]; then
+            echo "Lerna produced version $actual_version; expected $VERSION" >&2
+            exit 1
+          fi
 
       # Each package ships only what its `files` field lists, and `dist/` is built above and never
       # committed — so this is the one place a missing entry shows up before it reaches the registry.
