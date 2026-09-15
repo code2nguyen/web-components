@@ -109,7 +109,9 @@
 input {
   flex: 1;
   min-width: 0;
-  width: 100%;
+  // A character-based intrinsic width prevents WebKit from collapsing the percentage/flex sizing cycle to zero
+  // when an un-sized number input is nested directly in a form. It still grows to fill any width set on the host.
+  width: 8ch;
   margin: 0;
   padding: 0;
   border: 0;
