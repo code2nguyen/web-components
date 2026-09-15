@@ -10,6 +10,8 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // A date selector is commonly used as a floating booking panel, so its surface follows the shared popover shadow.
+  '--c2-date-selector--box-shadow': { token: 'shadow-md' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },

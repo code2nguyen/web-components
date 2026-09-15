@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Date selector</title>
+    <script type="module" src="/src/date-selector.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        background: #f4f4f5;
+        color: #18181b;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        display: grid;
+        gap: 32px;
+        justify-items: start;
+      }
+      .compact {
+        --c2-date-selector__day--size: 34px;
+        --c2-date-selector--box-shadow: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <c2-date-selector from="2026-09-10" to="2026-09-15" locale="en-US"></c2-date-selector>
+      <c2-date-selector class="compact" months="1" from="2026-10-05" min="2026-10-01" max="2026-10-24" locale="en-US"></c2-date-selector>
+      <c2-date-selector months="1" disabled locale="en-US"></c2-date-selector>
+    </main>
+  </body>
+</html>
