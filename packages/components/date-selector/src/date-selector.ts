@@ -315,7 +315,7 @@ export class DateSelector extends LitElement {
     const cells = Array.from({ length: 42 }, (_, cellIndex) => {
       const day = cellIndex - offset + 1
       return day < 1 || day > days
-        ? html`<span class="empty" role="presentation"></span>`
+        ? html`<span class="empty" role="gridcell" aria-disabled="true"></span>`
         : this.renderDay(new Date(year, monthIndex, day, 12), cellIndex % 7, dateLabel, today)
     })
     return html`<section class="month" aria-label=${monthLabel}>

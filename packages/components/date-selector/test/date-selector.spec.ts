@@ -11,14 +11,14 @@ test('completes a range, then starts a new one', async ({ page, scenario }) => {
 
   await page.getByRole('gridcell', { name: /September 18, 2026/ }).click()
   await expect(selector).toHaveAttribute('from', '2026-09-18')
-  await expect(selector).not.toHaveAttribute('to')
+  await expect(selector).toHaveAttribute('to', '')
 })
 
 test('an earlier second date restarts the range', async ({ page, scenario }) => {
   await scenario()
   await page.getByRole('gridcell', { name: /September 7, 2026/ }).click()
   await expect(page.locator('c2-date-selector')).toHaveAttribute('from', '2026-09-07')
-  await expect(page.locator('c2-date-selector')).not.toHaveAttribute('to')
+  await expect(page.locator('c2-date-selector')).toHaveAttribute('to', '')
 })
 
 test('moves through the calendar with arrow and page keys', async ({ page, scenario }) => {
