@@ -29,22 +29,40 @@ test('renders a grid of the rows and columns it is given', async ({ page, render
 
 test('animate-updates interpolates numeric row fields before settling on the new snapshot', async ({ page, renderScenario }) => {
   await renderScenario(table('animate-updates update-duration="240"'))
-  const score = page
-    .getByRole('row', { name: /Ada Lovelace/ })
-    .getByRole('gridcell')
-    .last()
+  const observedScores = await page.locator('c2-table').evaluate(
+    (element, nextRows) =>
+      new Promise<number[]>((resolve, reject) => {
+        const subject = element as HTMLElement & { rows: typeof nextRows }
+        const scores: number[] = []
+        const scoreCell = [...subject.shadowRoot!.querySelectorAll<HTMLElement>('[role="row"]')]
+          .find((row) => row.textContent?.includes('Ada Lovelace'))!
+          .querySelector<HTMLElement>('[role="gridcell"]:last-child')!
 
-  await page.locator('c2-table').evaluate(
-    async (element, nextRows) => {
-      const subject = element as HTMLElement & { rows: typeof nextRows; updateComplete: Promise<unknown> }
-      subject.rows = nextRows
-      await subject.updateComplete
-    },
+        const readScore = () => {
+          const score = Number(scoreCell.textContent?.trim().replaceAll(',', ''))
+          if (Number.isFinite(score) && score !== scores.at(-1)) scores.push(score)
+          if (score === 256000) {
+            observer.disconnect()
+            clearTimeout(timeout)
+            resolve(scores)
+          }
+        }
+        const observer = new MutationObserver(readScore)
+        const timeout = window.setTimeout(() => {
+          observer.disconnect()
+          reject(new Error(`Animation did not settle; observed ${scores.join(', ')}`))
+        }, 1000)
+
+        observer.observe(scoreCell, { childList: true, characterData: true, subtree: true })
+        readScore()
+        subject.rows = nextRows
+      }),
     PEOPLE.map((person) => (person.id === '1' ? { ...person, score: 256000 } : person)),
   )
 
-  await expect(score).toHaveText('128,000')
-  await expect(score).toHaveText('256,000', { timeout: 1000 })
+  expect(observedScores[0]).toBe(128000)
+  expect(observedScores.at(-1)).toBe(256000)
+  expect(observedScores.some((score) => score > 128000 && score < 256000)).toBe(true)
 })
 
 test('animate-updates expands additions, collapses deletions and marks modified row direction', async ({ page, renderScenario }) => {
