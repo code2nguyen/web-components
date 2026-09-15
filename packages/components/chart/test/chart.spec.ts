@@ -77,6 +77,54 @@ test('legend toggles a series and fires series-toggle without bubbling', async (
   expect(result.pressed).toBe('false')
 })
 
+test('links independently positioned legend and tooltip elements by id', async ({ page, scenario }) => {
+  await scenario('linked-chrome')
+  const chart = page.locator('c2-line-chart')
+  const legend = page.locator('c2-chart-legend')
+  const tooltip = page.locator('c2-chart-tooltip')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('.legend-item').length)).toBe(0)
+  const labels = await legend.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.item') ?? [])].map((item) => item.textContent?.trim()))
+  expect(labels).toEqual(['First', 'Second'])
+
+  await legend.evaluate((element) => (element.shadowRoot?.querySelector('.item') as HTMLButtonElement).click())
+  await expect.poll(() => legend.evaluate((element) => element.shadowRoot?.querySelector('.item')?.getAttribute('aria-pressed'))).toBe('false')
+
+  // The host also contains padding and a legend, so its geometric centre is not guaranteed to land on
+  // uPlot's pointer surface. WebKit correctly emitted only the leave event when that happened. Target the
+  // engine overlay itself so this tests the event contract rather than incidental chart layout.
+  const box = await chart.locator('.u-over').boundingBox()
+  if (!box) throw new Error('the chart plot has no box')
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await expect(tooltip).not.toHaveAttribute('hidden', '')
+  expect(await tooltip.evaluate((element) => element.shadowRoot?.querySelectorAll('.row').length)).toBe(1)
+
+  await page.mouse.move(box.x - 20, box.y - 20)
+  await expect(tooltip).toHaveAttribute('hidden', '')
+})
+
+test('keeps point-hover events available when the built-in tooltip is disabled', async ({ page, scenario }) => {
+  await scenario('linked-chrome')
+  const chart = page.locator('c2-line-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await chart.evaluate(async (element) => {
+    element.setAttribute('tooltip', 'none')
+    await (element as unknown as { updateComplete: Promise<unknown> }).updateComplete
+  })
+  const details = await chart.evaluate((element) => {
+    const seen: Array<number | null> = []
+    element.addEventListener('point-hover', (event) => {
+      const detail = (event as CustomEvent<{ seriesIndex: number } | null>).detail
+      seen.push(detail?.seriesIndex ?? null)
+    })
+    window.chartScenario.hover({ index: 10, seriesIndex: 0, px: 120, py: 80 })
+    window.chartScenario.hover(null)
+    return seen
+  })
+  expect(details).toEqual(expect.arrayContaining([expect.any(Number), null]))
+})
+
 test('shows the empty, loading and error states in precedence order', async ({ page, scenario }) => {
   await scenario('empty')
   await expect(page.locator('c2-line-chart')).toBeVisible()
@@ -108,6 +156,57 @@ test('draws a donut through the ECharts engine', async ({ page, scenario }) => {
   const pie = page.locator('c2-pie-chart')
   await expect(pie).toHaveAttribute('data-chart-ready', 'true')
   expect(await pie.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBeGreaterThan(0)
+})
+
+for (const [scenarioName, tag] of [
+  ['gauge', 'c2-gauge-chart'],
+  ['scatter', 'c2-scatter-chart'],
+  ['candlestick', 'c2-candlestick-chart'],
+] as const) {
+  test(`draws the ${scenarioName} through the ECharts engine`, async ({ page, scenario }) => {
+    await scenario(scenarioName)
+    const chart = page.locator(tag)
+    await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+    expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBeGreaterThan(0)
+  })
+}
+
+test('supports disabling gauge marks from markup', async ({ page, scenario }) => {
+  await scenario('gauge')
+  const gaugeConfiguration = await page.locator('c2-gauge-chart').evaluate((element) => {
+    const gauge = element as unknown as {
+      pointer: string
+      progress: string
+      buildContext(): unknown
+      seriesOption(index: number, context: unknown): { detail: { formatter: (value: number) => string } }
+    }
+    return {
+      pointer: gauge.pointer,
+      progress: gauge.progress,
+      formatted: gauge.seriesOption(0, gauge.buildContext()).detail.formatter(26.22975242754607),
+    }
+  })
+  expect(gaugeConfiguration).toEqual({
+    pointer: 'none',
+    progress: 'show',
+    formatted: '26.2%',
+  })
+})
+
+test('assembles the four normalized OHLC columns into one candlestick series', async ({ page, scenario }) => {
+  await scenario('candlestick')
+  const chart = page.locator('c2-candlestick-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const projected = await chart.evaluate((element) => {
+    const chartElement = element as unknown as { frame: unknown; projectData(frame: unknown): number[][][] }
+    return chartElement.projectData(chartElement.frame)
+  })
+  expect(projected[0]).toEqual([
+    [182, 187, 180, 189],
+    [187, 184, 182, 190],
+    [184, 191, 183, 193],
+    [191, 188, 186, 194],
+  ])
 })
 
 test('infers one series per numeric field and never plots the x field', async ({ page, scenario }) => {

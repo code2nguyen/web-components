@@ -1,0 +1,84 @@
+---
+title: 'Gauge chart'
+description: 'A focused radial KPI gauge drawn by ECharts, with a configurable scale, progress arc and pointer.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-gauge-chart'
+apiTags: ['c2-gauge-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
+import ChartAdvancedDemo from '../../components/ChartAdvancedDemo.astro'
+
+import { GaugeChart } from '@c2n/chart/gauge-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
+
+<ChartFinancialGallery />
+<ChartAdvancedDemo />
+
+Use a gauge for one decision-grade number with a meaningful lower and upper bound—not as a decorative replacement for every KPI. These examples track Services as a share of Apple revenue using the public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .finance-gauge,
+  .finance-gauge-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .finance-gauge c2-gauge-chart,
+  .finance-gauge-live c2-gauge-chart {
+    --c2-chart--height: 280px;
+  }
+  .finance-gauge-live__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+</style>
+
+<div data-label="Default">
+  <c2-gauge-chart min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
+    <c2-chart-series field="value" label="Services mix"></c2-chart-series>
+  </c2-gauge-chart>
+</div>
+
+<div data-label="Custom legend + tooltip" data-finance-demo>
+  <div class="finance-gauge">
+    <c2-gauge-chart id="gauge-services" min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
+      <c2-chart-series field="value" label="Services"></c2-chart-series>
+    </c2-gauge-chart>
+    <c2-chart-legend for="gauge-services"></c2-chart-legend>
+    <c2-chart-tooltip for="gauge-services"></c2-chart-tooltip>
+  </div>
+</div>
+
+<div data-label="Realtime replay" data-advanced-realtime>
+  <div class="finance-gauge-live">
+    <c2-gauge-chart min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric">
+      <c2-chart-series field="value" label="Services mix"></c2-chart-series>
+    </c2-gauge-chart>
+    <div class="finance-gauge-live__controls">
+      <c2-button size="sm">Replay</c2-button>
+      <span data-advanced-status>Preparing FY 2021–2025…</span>
+    </div>
+  </div>
+</div>
+```
+
+`min` and `max` define the decision range. `precision` prevents floating-point noise and `value-suffix` gives the value and scale a visible unit. `start-angle`, `end-angle`, `split-number`, `progress="show|none"` and `pointer="show|none"` control the instrument without changing the shared data, presenter or realtime APIs. The replay interpolates observations with `requestAnimationFrame()` and `updateData()`; smoothness is a feed policy, not an engine limit.

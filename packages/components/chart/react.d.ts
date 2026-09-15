@@ -10,9 +10,14 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
 import type { BarChart } from '@c2n/chart/bar-chart.js'
+import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
+import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
+import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
+import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -23,9 +28,14 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-area-chart': C2Props<AreaChart>
       'c2-bar-chart': C2Props<BarChart>
+      'c2-candlestick-chart': C2Props<CandlestickChart>
+      'c2-chart-legend': C2Props<ChartLegend>
       'c2-chart-series': C2Props<ChartSeries>
+      'c2-chart-tooltip': C2Props<ChartTooltip>
+      'c2-gauge-chart': C2Props<GaugeChart>
       'c2-line-chart': C2Props<LineChart>
       'c2-pie-chart': C2Props<PieChart>
+      'c2-scatter-chart': C2Props<ScatterChart>
       'c2-sparkline': C2Props<Sparkline>
     }
   }

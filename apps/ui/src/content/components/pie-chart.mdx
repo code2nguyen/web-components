@@ -4,14 +4,20 @@ description: 'A pie or donut chart drawn by ECharts, where one row is one slice 
 category: 'Chart'
 package: '@c2n/chart'
 tag: 'c2-pie-chart'
-apiTags: ['c2-pie-chart', 'c2-chart-series']
+apiTags: ['c2-pie-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ChartEnergyDemo from '../../components/ChartEnergyDemo.astro'
 
 import { PieChart } from '@c2n/chart/pie-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
+
+<ChartEnergyDemo />
 
 Parts of a whole. `label-field` names each slice, a single `c2-chart-series` supplies its value, and one row
 is one slice. `inner-radius` above 0 turns the pie into a donut, which is where the interesting typography
@@ -34,50 +40,65 @@ npm install @c2n/chart echarts
 <style>
   .plot {
     width: 100%;
-    --c2-chart--height: 240px;
+    --c2-chart--height: 280px;
+  }
+  .energy-linked,
+  .energy-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .energy-live__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--site-color-on-surface-muted);
   }
 </style>
 
-<div data-label="Donut with a legend">
+<div data-label="Default">
   <c2-pie-chart
     class="plot"
-    label-field="channel"
+    label-field="source"
     inner-radius="0.58"
     legend="end"
-    data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'
+    data='[{"source":"Nuclear","generation":380.45},{"source":"Hydro","generation":71.12},{"source":"Wind","generation":45.43},{"source":"Solar","generation":24.87},{"source":"Fossil","generation":28.66}]'
   >
-    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    <c2-chart-series field="generation" label="Generation"></c2-chart-series>
   </c2-pie-chart>
 </div>
 
-<div data-label="Full pie with outside labels">
-  <c2-pie-chart
-    class="plot"
-    label-field="stage"
-    labels="outside"
-    sort="desc"
-    legend="none"
-    data='[{"stage":"Qualified","deals":48},{"stage":"Proposal","deals":31},{"stage":"Won","deals":22},{"stage":"Lost","deals":14}]'
-  >
-    <c2-chart-series field="deals" label="Deals"></c2-chart-series>
-  </c2-pie-chart>
+<div data-label="Custom legend + tooltip" data-energy-custom data-energy-year="2023">
+  <div class="energy-linked">
+    <c2-pie-chart
+      id="pie-energy-custom"
+      class="plot"
+      label-field="source"
+      inner-radius="0.64"
+      data='[{"source":"Nuclear","generation":338.2},{"source":"Hydro","generation":55.9},{"source":"Wind","generation":50.48},{"source":"Solar","generation":22.59},{"source":"Fossil","generation":41.06}]'
+    >
+      <c2-chart-series field="generation" label="Generation"></c2-chart-series>
+    </c2-pie-chart>
+    <c2-chart-legend for="pie-energy-custom"></c2-chart-legend>
+    <c2-chart-tooltip for="pie-energy-custom"></c2-chart-tooltip>
+  </div>
 </div>
 
-<div data-label="Thick ring, labels inside">
-  <c2-pie-chart
-    class="plot"
-    label-field="tier"
-    inner-radius="0.6"
-    outer-radius="0.95"
-    start-angle="180"
-    labels="inside"
-    legend="bottom"
-    data='[{"tier":"Free","users":6200},{"tier":"Pro","users":2400},{"tier":"Team","users":900}]'
-  >
-    <c2-chart-series field="users" label="Users"></c2-chart-series>
-  </c2-pie-chart>
+<div data-label="Realtime replay" data-energy-realtime>
+  <div class="energy-live">
+    <c2-pie-chart class="plot" label-field="source" inner-radius="0.58">
+      <c2-chart-series field="generation" label="Generation"></c2-chart-series>
+    </c2-pie-chart>
+    <div class="energy-live__controls">
+      <c2-button>Replay</c2-button>
+      <span data-energy-status>Ready at 2015</span>
+    </div>
+  </div>
 </div>
 ```
+
+Each slice is derived from the France row in the public [Our World in Data Energy dataset](https://github.com/owid/energy-data). The default shows the 2024 electricity mix in terawatt-hours; the realtime demo replays the annual rows from 2015 through 2024.
 
 ## Shaping the ring
 

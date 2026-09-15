@@ -27,6 +27,18 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.category.toLower
         <section>
           <h2 id={group.category.toLowerCase().replace(/\s+/g, '-')}>{group.category}</h2>
           <ul class="component-index">
+            {group.category === 'Chart' && (
+              <li>
+                <SiteCard hydrate="defined" href={`${base}/components/chart`} class="component-index__card component-index__card--overview">
+                  <span class="component-index__title">
+                    Chart overview
+                    <c2-feather-arrow-right class="site-card__arrow" />
+                  </span>
+                  <span class="component-index__desc">Shared data, engines, legends, tooltips, realtime updates, events, states and theming.</span>
+                  <code class="component-index__pkg">@c2n/chart</code>
+                </SiteCard>
+              </li>
+            )}
             {group.items.map((component) => (
               <li>
                 <SiteCard hydrate="defined" href={`${base}/components/${component.id}`} class="component-index__card">
@@ -67,6 +79,13 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.category.toLower
       --c2-card--padding-bottom: 14px;
       --c2-card__hover--background: var(--site-color-surface-container-1);
       --c2-card__hover--box-shadow: none;
+    }
+    :global(.component-index__card--overview) {
+      --c2-card--border-top-color: var(--site-color-primary);
+      --c2-card--border-right-color: var(--site-color-primary);
+      --c2-card--border-bottom-color: var(--site-color-primary);
+      --c2-card--border-left-color: var(--site-color-primary);
+      --c2-card--background: var(--site-color-primary-soft);
     }
     &__title {
       display: flex;

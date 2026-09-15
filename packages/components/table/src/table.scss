@@ -48,7 +48,11 @@
     row__odd--background: #fafafa,
     row__selected--background: #edf1fe,
     row__selected--color: #18181b,
-
+    row__added--background: rgba(22, 163, 74, 0.16),
+    row__removed--background: rgba(220, 38, 38, 0.14),
+    row__increased--background: rgba(22, 163, 74, 0.14),
+    row__decreased--background: rgba(220, 38, 38, 0.12),
+    row__modified--background: rgba(2, 101, 220, 0.1),
     cell--padding: 0 12px,
     cell--gap: 8px,
     cell--font-size: 14px,
@@ -182,6 +186,98 @@
 .row--selected:hover {
   background: css.cssVar(row__selected--background);
   color: css.cssVar(row__selected--color);
+}
+
+.row--added {
+  animation: row-added var(--_update-duration, 400ms) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.row--removed {
+  overflow: hidden;
+  pointer-events: none;
+  animation: row-removed var(--_update-duration, 400ms) cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.row--highlighted.row--added {
+  animation-name: row-added-highlighted;
+}
+
+.row--highlighted.row--removed {
+  animation-name: row-removed-highlighted;
+}
+
+.row--highlighted.row--increased {
+  animation: row-highlight-increased var(--_update-duration, 400ms) ease-out both;
+}
+
+.row--highlighted.row--decreased {
+  animation: row-highlight-decreased var(--_update-duration, 400ms) ease-out both;
+}
+
+.row--highlighted.row--modified {
+  animation: row-highlight-modified var(--_update-duration, 400ms) ease-out both;
+}
+
+@keyframes row-added {
+  from {
+    height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes row-removed {
+  to {
+    height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    border-bottom-width: 0;
+  }
+}
+
+@keyframes row-added-highlighted {
+  from {
+    height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    background: css.cssVar(row__added--background);
+  }
+}
+
+@keyframes row-removed-highlighted {
+  to {
+    height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    border-bottom-width: 0;
+    background: css.cssVar(row__removed--background);
+  }
+}
+
+@keyframes row-highlight-increased {
+  from {
+    background: css.cssVar(row__increased--background);
+  }
+}
+
+@keyframes row-highlight-decreased {
+  from {
+    background: css.cssVar(row__decreased--background);
+  }
+}
+
+@keyframes row-highlight-modified {
+  from {
+    background: css.cssVar(row__modified--background);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row--added,
+  .row--removed,
+  .row--highlighted {
+    animation: none;
+  }
 }
 
 .cell {

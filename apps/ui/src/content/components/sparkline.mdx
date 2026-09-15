@@ -4,14 +4,20 @@ description: 'A chromeless trend line sized for a table cell, a list row or the 
 category: 'Chart'
 package: '@c2n/chart'
 tag: 'c2-sparkline'
-apiTags: ['c2-sparkline', 'c2-chart-series']
+apiTags: ['c2-sparkline', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ChartEnergyDemo from '../../components/ChartEnergyDemo.astro'
 
 import { Sparkline } from '@c2n/chart/sparkline.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
+
+<ChartEnergyDemo />
 
 No axes, no grid, no legend, no tooltip and no card: the whole box is the data. `c2-sparkline` is an
 `inline-flex` element 120×32px by default, which is the size a table cell, a list row or the `trend` slot of
@@ -49,33 +55,63 @@ npm install @c2n/chart uplot
     gap: 12px;
     font: 14px system-ui;
   }
+  .energy-linked,
+  .energy-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .energy-expanded {
+    --c2-chart--width: 100%;
+    --c2-chart--height: 120px;
+  }
+  .energy-live__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--site-color-on-surface-muted);
+  }
 </style>
 
-<div data-label="Line and area">
+<div data-label="Default">
   <div class="row">
-    <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]"></c2-sparkline>
-    <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]" type="area"></c2-sparkline>
+    <c2-sparkline data="[437.43,403.2,398.36,412.94,399.01,353.83,379.36,294.73,338.2,380.45]" tone="auto"></c2-sparkline>
+    <span>France nuclear generation, 2015–2024</span>
   </div>
 </div>
 
-<div data-label="Tone by direction">
-  <div class="kpis">
-    <span>Requests</span>
-    <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline>
-    <span>Latency</span>
-    <c2-sparkline data="[91, 88, 94, 85, 79, 74, 70]" tone="auto"></c2-sparkline>
-    <span>Errors</span>
-    <c2-sparkline data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline>
+<div data-label="Custom legend + tooltip" data-energy-custom>
+  <div class="energy-linked">
+    <c2-sparkline
+      id="sparkline-energy-custom"
+      class="energy-expanded"
+      x-field="year"
+      cursor="x"
+      tooltip="axis"
+      data='[{"year":2015,"nuclear":437.43},{"year":2016,"nuclear":403.2},{"year":2017,"nuclear":398.36},{"year":2018,"nuclear":412.94},{"year":2019,"nuclear":399.01},{"year":2020,"nuclear":353.83},{"year":2021,"nuclear":379.36},{"year":2022,"nuclear":294.73},{"year":2023,"nuclear":338.2},{"year":2024,"nuclear":380.45}]'
+    >
+      <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+    </c2-sparkline>
+    <c2-chart-legend for="sparkline-energy-custom"></c2-chart-legend>
+    <c2-chart-tooltip for="sparkline-energy-custom"></c2-chart-tooltip>
   </div>
 </div>
 
-<div data-label="Sized for a dense row">
-  <div class="row">
-    <c2-sparkline style="--c2-chart--width: 72px; --c2-chart--height: 20px" data="[4, 6, 5, 9, 8, 12]"></c2-sparkline>
-    <c2-sparkline style="--c2-chart--width: 180px; --c2-chart--height: 44px" data="[4, 6, 5, 9, 8, 12]" tone="positive"></c2-sparkline>
+<div data-label="Realtime replay" data-energy-realtime>
+  <div class="energy-live">
+    <c2-sparkline class="energy-expanded" x-field="year" max-points="180" data-energy-fields="nuclear">
+      <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+    </c2-sparkline>
+    <div class="energy-live__controls">
+      <c2-button>Replay</c2-button>
+      <span data-energy-status>Ready at 2018</span>
+    </div>
   </div>
 </div>
 ```
+
+The values are a France 2015–2024 extract from the public [Our World in Data Energy dataset](https://github.com/owid/energy-data), measured in terawatt-hours. The same extract drives every chart page; the sparkline simply removes the axes and surrounding chrome.
 
 ## Tone
 

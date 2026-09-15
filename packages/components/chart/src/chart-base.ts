@@ -45,6 +45,8 @@ const VIEW_ONLY_KEYS: ReadonlySet<string> = new Set([
   'lazyRender',
   'renderTooltip',
   'renderLegendItem',
+  'hasLinkedLegend',
+  'hasLinkedTooltip',
   'dataSource',
 ])
 
@@ -56,6 +58,11 @@ export interface ChartLegendItem {
   toggle: () => void
   series: ChartSeriesConfig
   index: number
+}
+
+/** Detail emitted whenever the component-owned legend model changes. */
+export interface ChartLegendChangeEventDetail {
+  items: ChartLegendItem[]
 }
 
 /** `stats.cpu` -> `Cpu`, `unit_price` -> `Unit price`: a readable label for an inferred field. */
@@ -74,6 +81,8 @@ export interface ChartEventMap {
   'chart-error': CustomEvent<{ error: unknown }>
   'point-click': CustomEvent<ChartPointEventDetail>
   'point-hover': CustomEvent<ChartPointEventDetail | null>
+  'tooltip-change': CustomEvent<ChartTooltipContext | null>
+  'legend-change': CustomEvent<ChartLegendChangeEventDetail>
   'range-change': CustomEvent<ChartRangeEventDetail>
   'series-toggle': CustomEvent<ChartSeriesToggleEventDetail>
 }
@@ -111,7 +120,9 @@ export interface ChartBase {
  * @event {CustomEvent<{ engine: string }>} chart-ready - Fired after the engine has loaded and drawn for the first time. The host also gains `data-chart-ready`, which is what a test should wait on.
  * @event {CustomEvent<{ error: unknown }>} chart-error - Fired when the engine fails to load or to draw. `detail.error` is the underlying failure.
  * @event {CustomEvent<ChartPointEventDetail>} point-click - Fired when a datum is clicked. Does not bubble: several components fire point events, so a listener belongs on the element itself.
- * @event {CustomEvent<ChartPointEventDetail>} point-hover - Fired as the pointer moves between data points, and with a `null` detail when it leaves the plot. Does not bubble.
+ * @event {CustomEvent<ChartPointEventDetail | null>} point-hover - Fired as the pointer moves between data points, and with a `null` detail when it leaves the plot. Does not bubble.
+ * @event {CustomEvent<ChartTooltipContext | null>} tooltip-change - Fired with the complete tooltip model as the pointer moves, and with `null` when it leaves. Used by `c2-chart-tooltip`.
+ * @event {CustomEvent<ChartLegendChangeEventDetail>} legend-change - Fired when legend entries or visibility change. Used by `c2-chart-legend`.
  * @event {CustomEvent<ChartRangeEventDetail>} range-change - Fired after the user zooms or brushes. `detail.min` and `detail.max` are the new x bounds. Does not bubble.
  * @event {CustomEvent<ChartSeriesToggleEventDetail>} series-toggle - Fired when a legend entry is toggled. Does not bubble.
  *
@@ -267,6 +278,8 @@ export abstract class ChartBase extends LitElement {
   @state() protected hiddenSeries = new Set<number>()
   @state() protected hoverContext: ChartTooltipContext | null = null
   @state() private engineFailed = false
+  @state() private hasLinkedLegend = false
+  @state() private hasLinkedTooltip = false
 
   protected themeController = new ChartThemeController(this, () => this.handleThemeChange())
   protected frameBuilder = new ChartFrameBuilder()
@@ -284,6 +297,9 @@ export abstract class ChartBase extends LitElement {
   #intersectionObserver?: IntersectionObserver
   #visible = false
   #unsubscribe?: () => void
+  #tooltipContext: ChartTooltipContext | null = null
+  #legendPresenters = new Set<HTMLElement>()
+  #tooltipPresenters = new Set<HTMLElement>()
 
   // ------------------------------------------------ the engine layer's job ---
 
@@ -298,6 +314,16 @@ export abstract class ChartBase extends LitElement {
 
   /** Projects the normalised frame into the shape this engine consumes. */
   protected abstract projectData(frame: ChartFrame, context: ChartBuildContext): unknown
+
+  /** Restores interaction state after an engine instance is created or replaced. */
+  protected restoreVisibility(adapter: ChartAdapter): void {
+    for (const index of this.hiddenSeries) adapter.setSeriesVisibility(index, false)
+  }
+
+  /** Whether changing chart data can change the legend model. Pie charts use row labels as entries. */
+  protected get legendDependsOnData(): boolean {
+    return false
+  }
 
   // ------------------------------------------------------------ lifecycle ---
 
@@ -374,6 +400,12 @@ export abstract class ChartBase extends LitElement {
     super.updated(changed)
     if (isServer) return
     void this.#sync()
+    if (changed.has('tooltip') && this.tooltip === 'none') {
+      this.#tooltipContext = null
+      this.#setHover(null)
+      this.dispatchEvent(new CustomEvent<ChartTooltipContext | null>('tooltip-change', { detail: null }))
+    }
+    if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.notifyLegendChange()
   }
 
   // ----------------------------------------------------------- public API ---
@@ -409,6 +441,7 @@ export abstract class ChartBase extends LitElement {
     else next.add(index)
     this.hiddenSeries = next
     this.adapter?.setSeriesVisibility(index, visible)
+    this.notifyLegendChange()
 
     const series = this.resolvedSeries[index]
     if (!series) return
@@ -417,6 +450,50 @@ export abstract class ChartBase extends LitElement {
         detail: { seriesIndex: index, series, visible, hidden: [...next] },
       }),
     )
+  }
+
+  /** Current entries for a linked `c2-chart-legend`. */
+  getLegendItems(): ChartLegendItem[] {
+    return this.legendItems()
+  }
+
+  /** Current hover model for a linked `c2-chart-tooltip`. */
+  getTooltipContext(): ChartTooltipContext | null {
+    return this.#tooltipContext
+  }
+
+  /** Plot bounds used to place a linked floating tooltip in viewport coordinates. */
+  getPlotBounds(): DOMRect {
+    return (this.plotElement ?? this).getBoundingClientRect()
+  }
+
+  /** Registers an external legend and suppresses the built-in legend until it disconnects. */
+  registerLegendPresenter(presenter: HTMLElement): void {
+    this.#legendPresenters.add(presenter)
+    this.hasLinkedLegend = this.#legendPresenters.size > 0
+  }
+
+  /** Removes an external legend registration. */
+  unregisterLegendPresenter(presenter: HTMLElement): void {
+    this.#legendPresenters.delete(presenter)
+    this.hasLinkedLegend = this.#legendPresenters.size > 0
+  }
+
+  /** Registers an external tooltip and suppresses the built-in tooltip until it disconnects. */
+  registerTooltipPresenter(presenter: HTMLElement): void {
+    this.#tooltipPresenters.add(presenter)
+    this.hasLinkedTooltip = this.#tooltipPresenters.size > 0
+  }
+
+  /** Removes an external tooltip registration. */
+  unregisterTooltipPresenter(presenter: HTMLElement): void {
+    this.#tooltipPresenters.delete(presenter)
+    this.hasLinkedTooltip = this.#tooltipPresenters.size > 0
+  }
+
+  /** Notifies linked legends after a subclass changes a data-shaped legend such as pie slices. */
+  protected notifyLegendChange(): void {
+    this.dispatchEvent(new CustomEvent<ChartLegendChangeEventDetail>('legend-change', { detail: { items: this.getLegendItems() } }))
   }
 
   /** The series in draw order: `c2-chart-series` children when present, otherwise the `series` property. */
@@ -497,14 +574,18 @@ export abstract class ChartBase extends LitElement {
       await this.#createChart()
       return
     }
+    let restoreAfterData = false
     if (this.#optionsDirty) {
       this.#optionsDirty = false
-      this.adapter.setOptions(this.buildOptions(this.buildContext()), this.#optionsMode)
+      const mode = this.#optionsMode
+      this.adapter.setOptions(this.buildOptions(this.buildContext()), mode)
       this.#optionsMode = 'merge'
+      restoreAfterData = mode === 'replace'
       // uPlot rebuilds the instance inside `setOptions`, so the data has to go back in.
       this.#dataDirty = true
     }
     if (this.#dataDirty) this.#flushData()
+    if (restoreAfterData) this.restoreVisibility(this.adapter)
   }
 
   async #createChart(): Promise<void> {
@@ -526,7 +607,7 @@ export abstract class ChartBase extends LitElement {
       this.adapter = adapter
       this.#optionsDirty = false
       this.#dataDirty = false
-      for (const index of this.hiddenSeries) adapter.setSeriesVisibility(index, false)
+      this.restoreVisibility(adapter)
       this.setAttribute('data-chart-ready', 'true')
       this.dispatchEvent(new CustomEvent('chart-ready', { detail: { engine: this.engineName } }))
     } catch (error) {
@@ -544,6 +625,7 @@ export abstract class ChartBase extends LitElement {
     if (this.#appended > 0 && this.adapter.appendData) this.adapter.appendData(projected, this.#appended)
     else this.adapter.setData(projected)
     this.#appended = 0
+    if (this.legendDependsOnData) this.notifyLegendChange()
   }
 
   #handleResize(entries: ResizeObserverEntry[]): void {
@@ -616,12 +698,18 @@ export abstract class ChartBase extends LitElement {
   }
 
   #handleHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
-    if (!detail || !this.frame || this.tooltip === 'none') {
+    if (!detail || !this.frame) {
+      this.#tooltipContext = null
       this.#setHover(null)
+      this.dispatchEvent(new CustomEvent<ChartTooltipContext | null>('tooltip-change', { detail: null }))
+      this.dispatchEvent(new CustomEvent<ChartPointEventDetail | null>('point-hover', { detail: null }))
       return
     }
     const context = this.#tooltipContextAt(detail)
-    this.#setHover(context)
+    const tooltipContext = this.tooltip === 'none' ? null : context
+    this.#tooltipContext = tooltipContext
+    this.#setHover(this.hasLinkedTooltip ? null : tooltipContext)
+    this.dispatchEvent(new CustomEvent<ChartTooltipContext | null>('tooltip-change', { detail: tooltipContext }))
     const point = this.#pointAt(detail.index, detail.seriesIndex)
     if (point) this.dispatchEvent(new CustomEvent<ChartPointEventDetail>('point-hover', { detail: point }))
   }
@@ -639,7 +727,13 @@ export abstract class ChartBase extends LitElement {
     // Same datum, new position: the transform above is the whole update, so the template is left alone and
     // a 60 Hz pointer move costs no Lit work at all. Assigning the state property is what schedules a
     // render, so the early return has to skip the assignment too.
-    if (previous && context && previous.index === context.index) return
+    if (
+      previous &&
+      context &&
+      previous.index === context.index &&
+      (this.tooltip !== 'item' || previous.entries[0]?.seriesIndex === context.entries[0]?.seriesIndex)
+    )
+      return
     this.hoverContext = context
   }
 
@@ -722,8 +816,8 @@ export abstract class ChartBase extends LitElement {
   // --------------------------------------------------------------- render ---
 
   protected override render(): TemplateResult {
-    const legendBefore = this.legend === 'top' || this.legend === 'start'
-    const legendAfter = this.legend === 'bottom' || this.legend === 'end'
+    const legendBefore = !this.hasLinkedLegend && (this.legend === 'top' || this.legend === 'start')
+    const legendAfter = !this.hasLinkedLegend && (this.legend === 'bottom' || this.legend === 'end')
     // `start`/`end` are the inline edges: the legend sits beside the plot, not above or below it. Without
     // this the frame stays a column and they differ from `top`/`bottom` only in stacking their own entries.
     const side = this.legend === 'start' || this.legend === 'end'
@@ -734,7 +828,9 @@ export abstract class ChartBase extends LitElement {
           <!-- No bindings inside: Lit never patches this node, so the engine's canvas survives updates. -->
           <div class="plot" part="plot"></div>
           <div class="overlay" part="overlay">
-            <div class="tooltip" part="tooltip" role="tooltip" ?hidden=${!this.hoverContext || this.tooltip === 'none'}>${this.renderTooltipBody()}</div>
+            <div class="tooltip" part="tooltip" role="tooltip" ?hidden=${!this.hoverContext || this.tooltip === 'none' || this.hasLinkedTooltip}>
+              ${this.renderTooltipBody()}
+            </div>
             <div class="actions" part="actions"><slot name="actions"></slot></div>
           </div>
           ${this.renderState()}

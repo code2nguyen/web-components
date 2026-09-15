@@ -1,88 +1,82 @@
 ---
 title: 'Area chart gallery'
-description: 'Filled trends: a smoothed default, a heavy fill, two overlapping bands and a chromeless card insert.'
+description: 'Revenue and investment trajectories built from Apple fiscal statements filed with the SEC.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
 
 import { AreaChart } from '@c2n/chart/area-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 
 <ExampleModules />
+<ChartFinancialGallery />
+
+Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
 
 <GalleryGrid min="440">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-area-chart
-  x-field="t"
+  x-field="year"
   curve="smooth"
-  data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
+  fill-opacity="0.18"
+  data='[{"year":2021,"revenue":365.817},{"year":2022,"revenue":394.328},{"year":2023,"revenue":383.285},{"year":2024,"revenue":391.035},{"year":2025,"revenue":416.161}]'
 >
-  <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
 </c2-area-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Filled area
+```html tag=MdxCodeBlock,label=Capital allocation — rich legend and tooltip
 <style>
-  .filled {
-    --c2-chart__area--opacity: 0.28;
-    --c2-chart__line--width: 3px;
+  .investment-area {
+    display: grid;
+    width: 100%;
+    gap: 12px;
+  }
+  .investment-area c2-area-chart {
+    --c2-chart__area--opacity: 0.13;
+    --c2-chart__series-1--color: #7c3aed;
+    --c2-chart__series-2--color: #db2777;
   }
 </style>
-<c2-area-chart
-  class="filled"
-  x-field="t"
-  curve="smooth"
-  data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'
->
-  <c2-chart-series field="sessions" label="Sessions"></c2-chart-series>
-</c2-area-chart>
+<div class="investment-area" data-finance-demo>
+  <c2-area-chart
+    id="financial-area-investment"
+    x-field="year"
+    curve="smooth"
+    data='[{"year":2021,"revenue":365.817,"rd":21.914,"sga":21.973},{"year":2022,"revenue":394.328,"rd":26.251,"sga":25.094},{"year":2023,"revenue":383.285,"rd":29.915,"sga":24.932},{"year":2024,"revenue":391.035,"rd":31.37,"sga":26.097},{"year":2025,"revenue":416.161,"rd":34.55,"sga":27.601}]'
+  >
+    <c2-chart-series field="rd" label="R&amp;D"></c2-chart-series>
+    <c2-chart-series field="sga" label="SG&amp;A"></c2-chart-series>
+  </c2-area-chart>
+  <c2-chart-legend for="financial-area-investment"></c2-chart-legend>
+  <c2-chart-tooltip for="financial-area-investment"></c2-chart-tooltip>
+</div>
 ```
 
-```html tag=MdxCodeBlock,label=Two bands
+```html tag=MdxCodeBlock,label=Profit pool
 <style>
-  .bands {
-    --c2-chart__series-1--color: #6366f1;
-    --c2-chart__series-2--color: #14b8a6;
-    --c2-chart__area--opacity: 0.16;
+  .profit-area {
+    --c2-chart__area--opacity: 0.1;
+    --c2-chart__series-1--color: #2563eb;
+    --c2-chart__series-2--color: #0f766e;
+    --c2-chart__series-3--color: #ca8a04;
   }
 </style>
 <c2-area-chart
-  class="bands"
-  x-field="month"
+  class="profit-area"
+  x-field="year"
   curve="smooth"
-  data='[{"month":1,"paid":128,"organic":74},{"month":2,"paid":141,"organic":92},{"month":3,"paid":132,"organic":101},{"month":4,"paid":167,"organic":118},{"month":5,"paid":183,"organic":142},{"month":6,"paid":204,"organic":171}]'
+  data='[{"year":2021,"grossProfit":152.836,"operatingIncome":108.949,"netIncome":94.68},{"year":2022,"grossProfit":170.782,"operatingIncome":119.437,"netIncome":99.803},{"year":2023,"grossProfit":169.148,"operatingIncome":114.301,"netIncome":96.995},{"year":2024,"grossProfit":180.683,"operatingIncome":123.216,"netIncome":93.736},{"year":2025,"grossProfit":195.201,"operatingIncome":133.05,"netIncome":112.01}]'
 >
-  <c2-chart-series field="paid" label="Paid"></c2-chart-series>
-  <c2-chart-series field="organic" label="Organic"></c2-chart-series>
-</c2-area-chart>
-```
-
-```html tag=MdxCodeBlock,label=Card insert
-<style>
-  .insert {
-    --c2-chart--border-top: none;
-    --c2-chart--border-right: none;
-    --c2-chart--border-bottom: none;
-    --c2-chart--border-left: none;
-    --c2-chart--background: transparent;
-    --c2-chart--padding: 0px;
-    --c2-chart--height: 120px;
-    --c2-chart__area--opacity: 0.35;
-    --c2-chart__grid--color: transparent;
-  }
-</style>
-<c2-area-chart
-  class="insert"
-  x-type="time"
-  x-field="at"
-  axes="none"
-  legend="none"
-  data='[{"at":1704067200000,"mb":210},{"at":1704672000000,"mb":268},{"at":1705276800000,"mb":244},{"at":1705881600000,"mb":331},{"at":1706486400000,"mb":390},{"at":1707091200000,"mb":362}]'
->
-  <c2-chart-series field="mb" label="Egress"></c2-chart-series>
+  <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+  <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
+  <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
 </c2-area-chart>
 ```
 

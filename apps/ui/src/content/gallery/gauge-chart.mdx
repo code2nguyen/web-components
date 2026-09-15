@@ -1,0 +1,58 @@
+---
+title: 'Gauge chart gallery'
+description: 'Bounded KPI views built from Apple’s public 2025 filing.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
+
+import { GaugeChart } from '@c2n/chart/gauge-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+
+<ExampleModules />
+<ChartFinancialGallery />
+
+Values are derived from Apple's public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-gauge-chart min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
+  <c2-chart-series field="value" label="Services mix"></c2-chart-series>
+</c2-gauge-chart>
+```
+
+```html tag=MdxCodeBlock,label=Services mix · decision context
+<style>
+  .services-gauge {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+    --c2-chart__series-1--color: #7c3aed;
+  }
+</style>
+<div class="services-gauge" data-finance-demo>
+  <c2-gauge-chart id="gallery-services-gauge" min="0" max="40" precision="1" value-suffix="%" legend="none" split-number="4" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
+    <c2-chart-series field="value" label="Services"></c2-chart-series>
+  </c2-gauge-chart>
+  <c2-chart-legend for="gallery-services-gauge"></c2-chart-legend>
+  <c2-chart-tooltip for="gallery-services-gauge"></c2-chart-tooltip>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Gross margin · pointerless progress
+<style>
+  .margin-gauge {
+    --c2-chart__series-1--color: #0f9f6e;
+  }
+</style>
+<c2-gauge-chart class="margin-gauge" min="0" max="60" precision="1" value-suffix="%" pointer="none" legend="none" label-field="metric" data='[{"metric":"Gross margin","value":46.91}]'>
+  <c2-chart-series field="value" label="Gross margin"></c2-chart-series>
+</c2-gauge-chart>
+```
+
+</GalleryGrid>

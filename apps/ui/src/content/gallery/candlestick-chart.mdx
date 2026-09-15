@@ -1,0 +1,53 @@
+---
+title: 'Candlestick chart gallery'
+description: 'Market-session and range views using public AAPL historical prices.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
+
+import { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+
+<ExampleModules />
+<ChartFinancialGallery />
+
+OHLC observations are from the public [Nasdaq AAPL historical-data service](https://www.nasdaq.com/market-activity/stocks/aapl/historical).
+
+<GalleryGrid min="460">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-candlestick-chart label-field="date" data='[{"date":"Sep 22","open":248.3,"close":256.08,"low":248.12,"high":256.64},{"date":"Sep 23","open":255.88,"close":254.43,"low":253.58,"high":257.34},{"date":"Sep 24","open":255.22,"close":252.31,"low":251.04,"high":255.74},{"date":"Sep 25","open":253.21,"close":256.87,"low":252.4,"high":257.17},{"date":"Sep 26","open":254.1,"close":255.46,"low":253.05,"high":257.6}]'></c2-candlestick-chart>
+```
+
+```html tag=MdxCodeBlock,label=AAPL sessions · complete OHLC tooltip
+<style>
+  .aapl-candles {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+    --c2-chart__positive--color: #0f9f6e;
+    --c2-chart__negative--color: #dc2626;
+  }
+</style>
+<div class="aapl-candles" data-finance-demo>
+  <c2-candlestick-chart id="gallery-aapl-candles" name="AAPL" label-field="date" data='[{"date":"Sep 22","open":248.3,"close":256.08,"low":248.12,"high":256.64},{"date":"Sep 23","open":255.88,"close":254.43,"low":253.58,"high":257.34},{"date":"Sep 24","open":255.22,"close":252.31,"low":251.04,"high":255.74},{"date":"Sep 25","open":253.21,"close":256.87,"low":252.4,"high":257.17},{"date":"Sep 26","open":254.1,"close":255.46,"low":253.05,"high":257.6}]'></c2-candlestick-chart>
+  <c2-chart-legend for="gallery-aapl-candles"></c2-chart-legend>
+  <c2-chart-tooltip for="gallery-aapl-candles"></c2-chart-tooltip>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Compact trading blotter
+<style>
+  .compact-candles {
+    --c2-chart--height: 220px;
+    --c2-chart--padding: 8px;
+  }
+</style>
+<c2-candlestick-chart class="compact-candles" name="AAPL" label-field="date" tooltip="item" data='[{"date":"Sep 22","open":248.3,"close":256.08,"low":248.12,"high":256.64},{"date":"Sep 23","open":255.88,"close":254.43,"low":253.58,"high":257.34},{"date":"Sep 24","open":255.22,"close":252.31,"low":251.04,"high":255.74},{"date":"Sep 25","open":253.21,"close":256.87,"low":252.4,"high":257.17},{"date":"Sep 26","open":254.1,"close":255.46,"low":253.05,"high":257.6}]'></c2-candlestick-chart>
+```
+
+</GalleryGrid>

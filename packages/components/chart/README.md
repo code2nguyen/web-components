@@ -1,16 +1,20 @@
 # @c2n/chart
 
-Line, area, bar, sparkline and pie charts as custom elements, from one package.
+Line, area, bar, sparkline, pie, gauge, scatter and candlestick charts as custom elements, from one package.
 
 ```bash
 npm install @c2n/chart uplot     # line, area, bar, sparkline
-npm install @c2n/chart echarts   # pie
+npm install @c2n/chart echarts   # pie, gauge, scatter, candlestick
 ```
 
 ```html
-<c2-line-chart x-field="month" legend="bottom" data='[{ "month": 1, "revenue": 128, "cost": 74 }]'>
-  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
-  <c2-chart-series field="cost" label="Cost"></c2-chart-series>
+<c2-line-chart
+  x-field="year"
+  data='[{"year":2022,"nuclear":294.73,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"wind":45.43,"solar":24.87}]'
+>
+  <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+  <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+  <c2-chart-series field="solar" label="Solar"></c2-chart-series>
 </c2-line-chart>
 ```
 
@@ -21,14 +25,34 @@ import '@c2n/chart' // all of them
 
 ## Elements
 
-| Tag               | Engine  | For                                             |
-| ----------------- | ------- | ----------------------------------------------- |
-| `c2-line-chart`   | uPlot   | Time or numeric trends                          |
-| `c2-area-chart`   | uPlot   | The same, with the region under the line filled |
-| `c2-bar-chart`    | uPlot   | Categorical or time-bucketed values             |
-| `c2-sparkline`    | uPlot   | A chromeless trend for a table cell or KPI row  |
-| `c2-pie-chart`    | ECharts | Parts of a whole, with a donut mode             |
-| `c2-chart-series` | —       | A series definition; renders nothing            |
+| Tag                    | Engine  | For                                             |
+| ---------------------- | ------- | ----------------------------------------------- |
+| `c2-line-chart`        | uPlot   | Time or numeric trends                          |
+| `c2-area-chart`        | uPlot   | The same, with the region under the line filled |
+| `c2-bar-chart`         | uPlot   | Categorical or time-bucketed values             |
+| `c2-sparkline`         | uPlot   | A chromeless trend for a table cell or KPI row  |
+| `c2-pie-chart`         | ECharts | Parts of a whole, with a donut mode             |
+| `c2-gauge-chart`       | ECharts | A bounded current value or target               |
+| `c2-scatter-chart`     | ECharts | Relationships, clusters and outliers            |
+| `c2-candlestick-chart` | ECharts | Open-high-low-close financial sessions          |
+| `c2-chart-series`      | —       | A series definition; renders nothing            |
+| `c2-chart-legend`      | —       | A linked legend placed anywhere in the layout   |
+| `c2-chart-tooltip`     | —       | A linked floating or inline tooltip             |
+
+## Independent legend and tooltip
+
+The chart renders built-in chrome by default. To own its layout, link companion elements to the chart by id;
+each companion automatically replaces its corresponding built-in display:
+
+```html
+<c2-line-chart id="sales" data="..."></c2-line-chart>
+<c2-chart-legend for="sales"></c2-chart-legend>
+<c2-chart-tooltip for="sales"></c2-chart-tooltip>
+```
+
+The legend occupies its normal HTML position. The tooltip floats beside the hovered point by default and
+flips at viewport edges; `position="inline"` makes it occupy its authored position. Assign `renderLegend`,
+`renderLegendItem` or `renderTooltip` for data-driven custom Lit templates.
 
 ## Engines
 
@@ -41,6 +65,11 @@ whichever engines your charts need.
 `data` accepts row objects, a bare `number[]`, columnar `[xs, ys…]`, or an already-normalised frame.
 Internally everything becomes one columnar frame of `Float64Array`s, which is the shape uPlot draws
 natively and what makes appending O(1).
+
+The documentation examples share a France 2015–2024 extract from the public
+[Our World in Data Energy dataset](https://github.com/owid/energy-data), measured in terawatt-hours. Line,
+area, bar, scatter and sparkline charts read the annual rows directly; radial charts derive a focused
+metric or one slice per energy source from a selected year. Candlesticks use public OHLC observations.
 
 ```js
 chart.data = rows // full replace
@@ -75,7 +104,8 @@ messages) is ordinary DOM and does expose parts.
 
 ## Events
 
-`chart-ready`, `chart-error`, `point-click`, `point-hover`, `range-change` and `series-toggle`. The
+`chart-ready`, `chart-error`, `point-click`, `point-hover`, `range-change`, `series-toggle`, `legend-change`
+and `tooltip-change`. The
 semantic ones do not bubble: several components fire similarly named events, so a listener belongs on the
 element itself. The host also carries `data-chart-ready` once the first frame is drawn, which is the
 signal to wait on in a test.

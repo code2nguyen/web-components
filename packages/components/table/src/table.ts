@@ -1,9 +1,10 @@
-import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { property, query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
+import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import styles from './table.scss?inline'
 import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
@@ -24,6 +25,7 @@ import {
   type TableDataSource,
   type TableRow,
   type TableRowEventDetail,
+  type TableRowStyler,
   type TableSelectionChangeEventDetail,
   type TableSortChangeEventDetail,
 } from './table-types.js'
@@ -43,6 +45,8 @@ interface PinPlacement {
   offset: number
   edge: boolean
 }
+
+type RowUpdateState = 'added' | 'removed' | 'increased' | 'decreased' | 'modified'
 
 const HEADER_ROW = -1
 
@@ -74,6 +78,47 @@ function humanize(field: string): string {
   const last = field.split('.').pop() ?? field
   const spaced = last.replace(/[_-]+/g, ' ').replace(/([a-z\d])([A-Z])/g, '$1 $2')
   return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
+  const prototype = Object.getPrototypeOf(value)
+  return prototype === Object.prototype || prototype === null
+}
+
+/**
+ * Builds the transient value shown during a row update. Target shape and non-numeric values win immediately; finite
+ * numbers are the only values with a meaningful generic interpolation, including numbers nested in arrays/objects.
+ */
+function interpolateValue(from: unknown, to: unknown, progress: number): unknown {
+  if (typeof from === 'number' && typeof to === 'number' && Number.isFinite(from) && Number.isFinite(to)) return from + (to - from) * progress
+  if (Array.isArray(from) && Array.isArray(to)) return to.map((value, index) => interpolateValue(from[index], value, progress))
+  if (isRecord(from) && isRecord(to)) return Object.fromEntries(Object.entries(to).map(([key, value]) => [key, interpolateValue(from[key], value, progress)]))
+  return to
+}
+
+function hasNumericChange(from: unknown, to: unknown): boolean {
+  if (typeof from === 'number' && typeof to === 'number') return Number.isFinite(from) && Number.isFinite(to) && from !== to
+  if (Array.isArray(from) && Array.isArray(to)) return to.some((value, index) => hasNumericChange(from[index], value))
+  if (isRecord(from) && isRecord(to)) return Object.entries(to).some(([key, value]) => hasNumericChange(from[key], value))
+  return false
+}
+
+function firstNumericDelta(from: unknown, to: unknown): number | undefined {
+  if (typeof from === 'number' && typeof to === 'number' && Number.isFinite(from) && Number.isFinite(to) && from !== to) return to - from
+  if (Array.isArray(from) && Array.isArray(to)) {
+    for (let index = 0; index < to.length; index++) {
+      const delta = firstNumericDelta(from[index], to[index])
+      if (delta !== undefined) return delta
+    }
+  }
+  if (isRecord(from) && isRecord(to)) {
+    for (const [key, value] of Object.entries(to)) {
+      const delta = firstNumericDelta(from[key], value)
+      if (delta !== undefined) return delta
+    }
+  }
+  return undefined
 }
 
 /** Events fired by {@link Table}, keyed for `addEventListener`. */
@@ -120,6 +165,13 @@ export interface Table {
  * it measures from the first rendered row, so theme the height with `--c2-table__row--height` (`row-height` is only the
  * estimate used for the first paint). It turns on automatically past `virtual-threshold` rows; `virtual="always"` and
  * `virtual="never"` force it.
+ *
+ * **Realtime updates.** Add `animate-updates` when replacing `rows` with successive snapshots. Matching rows are found
+ * by `row-key` (or index), and their finite numeric fields are interpolated over `update-duration`. With a stable key,
+ * added rows expand in and deleted rows collapse out. Nested numbers in arrays and objects animate too, so a custom
+ * `renderCell` such as a sparkline receives the same transient row as the formatted cells around it. Add
+ * `highlight-updates` to pulse row backgrounds, and optionally choose its numeric direction with
+ * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected.
  *
  * @tag c2-table
  *
@@ -190,6 +242,11 @@ export interface Table {
  * @cssproperty {color} [--c2-table__row__odd--background=#fafafa] - Applies with the `stripe` attribute.
  * @cssproperty {color} [--c2-table__row__selected--background=#edf1fe]
  * @cssproperty {color} [--c2-table__row__selected--color=#18181b]
+ * @cssproperty {color} [--c2-table__row__added--background=rgba(22,163,74,0.16)] - Highlight used while a realtime row expands into the table.
+ * @cssproperty {color} [--c2-table__row__removed--background=rgba(220,38,38,0.14)] - Highlight used while a realtime row collapses out of the table.
+ * @cssproperty {color} [--c2-table__row__increased--background=rgba(22,163,74,0.14)] - Pulse used when the watched numeric value increases.
+ * @cssproperty {color} [--c2-table__row__decreased--background=rgba(220,38,38,0.12)] - Pulse used when the watched numeric value decreases.
+ * @cssproperty {color} [--c2-table__row__modified--background=rgba(2,101,220,0.1)] - Pulse used when a change has no numeric direction.
  *
  * @cssproperty {padding} [--c2-table__cell--padding=0 12px]
  * @cssproperty {pixel} [--c2-table__cell--gap=8px]
@@ -259,6 +316,21 @@ export class Table extends LitElement {
   /** Tints odd rows with `--c2-table__row__odd--background`. */
   @property({ type: Boolean, reflect: true }) stripe = false
 
+  /** Smoothly interpolates changed finite numbers when `rows` is replaced. Rows are matched by `row-key`, or by index. */
+  @property({ type: Boolean, attribute: 'animate-updates', reflect: true }) animateUpdates = false
+
+  /** Duration of an animated rows update in milliseconds. */
+  @property({ type: Number, attribute: 'update-duration' }) updateDuration = 400
+
+  /** Returns inline styles for a row from its current data. Property only; animated updates pass the intermediate row. */
+  @property({ attribute: false }) rowStyle?: TableRowStyler
+
+  /** Pulses changed row backgrounds: green for additions/increases, red for removals/decreases, blue otherwise. */
+  @property({ type: Boolean, attribute: 'highlight-updates', reflect: true }) highlightUpdates = false
+
+  /** Numeric field that determines whether a modified row highlights as increased or decreased. Defaults to its first changed number. */
+  @property({ type: String, attribute: 'update-highlight-field' }) updateHighlightField = ''
+
   /** `auto` virtualizes past `virtual-threshold` rows; `always` and `never` force it. */
   @property({ type: String }) virtual: TableVirtualMode = 'auto'
 
@@ -314,6 +386,11 @@ export class Table extends LitElement {
   /** The pagers that have announced themselves, so only their events are swallowed — not a pager inside a cell. */
   #pagers = new WeakSet<EventTarget>()
   #pendingScrollTop = false
+  #animationFrom = new Map<string, TableRow>()
+  #animationProgress = 1
+  #animationFrame?: number
+  #transitionRows?: TableRow[]
+  #rowUpdateStates = new Map<string, RowUpdateState>()
 
   /**
    * Shared with a `c2-pagination` slotted into the `footer`. Rebuilt rather than mutated whenever the paging state
@@ -341,7 +418,7 @@ export class Table extends LitElement {
    * million-row total.
    */
   get rowCount(): number {
-    if (!this.paginated) return this.totalRows
+    if (!this.paginated) return this.dataSource ? this.totalRows : (this.#transitionRows?.length ?? this.totalRows)
     const onPage = Math.max(0, Math.min(this.pageSize, this.totalRows - this.#pageStart))
     if (!this.dataSource) return onPage
     // Once the page is in it is the truth; before that the arithmetic gives the right number of skeleton rows.
@@ -440,6 +517,8 @@ export class Table extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues) {
+    if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#cancelRowsAnimation()
+    if (changed.has('rows')) this.#prepareRowsAnimation(changed.get('rows'))
     if (!this.hasUpdated || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements')) this.#applySort()
     // Another page size re-cuts the blocks, so the cache has to go; another page does not — and must not, or
     // `remoteTotal` would drop back to "unknown" and the pager would collapse to a single page mid-navigation.
@@ -581,9 +660,16 @@ export class Table extends LitElement {
         </div>
       </div>`
     }
-    const rows: TemplateResult[] = []
-    for (let index = start; index < end; index++) rows.push(this.#renderRow(index, columns, pins))
-    return rows
+    const indices: number[] = []
+    for (let index = start; index < end; index++) indices.push(index)
+    return repeat(
+      indices,
+      (index) => {
+        const row = this.#rowAt(index)
+        return row ? this.#keyAt(index, row) : `skeleton:${index}`
+      },
+      (index) => this.#renderRow(index, columns, pins),
+    )
   }
 
   #renderHeaderRow(columns: TableColumnConfig[], pins: Map<string, PinPlacement>) {
@@ -679,14 +765,27 @@ export class Table extends LitElement {
     const key = row ? this.#keyAt(index, row) : ''
     const selected = key !== '' && this.value.includes(key)
     const selectable = this.selection !== 'none'
+    const updateState = key ? this.#rowUpdateStates.get(key) : undefined
+    const rowStyle = row && updateState !== 'removed' ? this.rowStyle?.({ row, rowIndex: index, key }) : undefined
 
     return html`
       <div
-        class=${classMap({ row: true, 'row--odd': index % 2 === 1, 'row--selected': selected, 'row--clickable': selectable })}
+        class=${classMap({
+          row: true,
+          'row--odd': index % 2 === 1,
+          'row--selected': selected,
+          'row--clickable': selectable,
+          'row--highlighted': Boolean(updateState && this.highlightUpdates),
+          [`row--${updateState}`]: Boolean(updateState),
+        })}
         role="row"
-        part=${selected ? 'row row-selected' : 'row'}
+        part=${['row', selected ? 'row-selected' : '', updateState ? `row-${updateState}` : ''].filter(Boolean).join(' ')}
+        data-row-key=${key}
+        data-update-state=${ifDefined(updateState)}
         aria-rowindex=${index + 2}
         aria-selected=${ifDefined(selectable ? String(selected) : undefined)}
+        aria-hidden=${ifDefined(updateState === 'removed' ? 'true' : undefined)}
+        style=${styleMap({ ...rowStyle, '--_update-duration': `${Math.max(0, this.updateDuration)}ms` })}
         @click=${(event: MouseEvent) => this.#handleRowClick(event, index)}
       >
         ${columns.map((column, columnIndex) => this.#renderCell(row, index, column, columnIndex, pins))}
@@ -863,7 +962,10 @@ export class Table extends LitElement {
       const size = this.#effectiveBlockSize
       return this.#blocks.get(Math.floor(index / size))?.[index % size]
     }
-    return this.#sortedRows[index]
+    const row = (this.#transitionRows ?? this.#sortedRows)[index]
+    if (!row || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
+    const from = this.#animationFrom.get(this.#keyAt(index, row))
+    return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
   }
 
   #keyAt(index: number, row: TableRow): string {
@@ -874,12 +976,13 @@ export class Table extends LitElement {
 
   #applySort() {
     const rows = Array.isArray(this.rows) ? this.rows : []
-    if (this.dataSource || this.sortModel.length === 0) {
-      this.#sortedRows = rows
-      return
-    }
+    this.#sortedRows = this.#sortRows(rows)
+  }
+
+  #sortRows(rows: TableRow[]): TableRow[] {
+    if (this.dataSource || this.sortModel.length === 0) return rows
     const columns = this.resolvedColumns
-    this.#sortedRows = [...rows].sort((left, right) => {
+    return [...rows].sort((left, right) => {
       for (const entry of this.sortModel) {
         const column = columns.find((candidate) => candidate.field === entry.field)
         const comparator = column?.comparator ?? defaultCompare
@@ -888,6 +991,95 @@ export class Table extends LitElement {
       }
       return 0
     })
+  }
+
+  #prepareRowsAnimation(previous: unknown) {
+    const displayedPrevious = Array.isArray(previous)
+      ? previous.map((row, index) => {
+          if (!isRecord(row) || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
+          const from = this.#animationFrom.get(this.#keyAt(index, row))
+          return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
+        })
+      : previous
+    this.#cancelRowsAnimation()
+    if (
+      !this.hasUpdated ||
+      !this.animateUpdates ||
+      this.updateDuration <= 0 ||
+      !Array.isArray(displayedPrevious) ||
+      !Array.isArray(this.rows) ||
+      typeof requestAnimationFrame === 'undefined' ||
+      (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches)
+    ) {
+      return
+    }
+
+    const previousByKey = new Map<string, TableRow>()
+    displayedPrevious.forEach((row, index) => {
+      if (isRecord(row)) previousByKey.set(this.#keyAt(index, row), row)
+    })
+    const nextKeys = new Set(this.rows.map((row, index) => this.#keyAt(index, row)))
+    const previousKeys = new Set(previousByKey.keys())
+    const hasAdded = this.rows.some((row, index) => !previousKeys.has(this.#keyAt(index, row)))
+    const hasRemoved = displayedPrevious.some((row, index) => isRecord(row) && !nextKeys.has(this.#keyAt(index, row)))
+    const hasModified = this.rows.some((row, index) => hasNumericChange(previousByKey.get(this.#keyAt(index, row)), row))
+    if (!hasAdded && !hasRemoved && !hasModified) return
+
+    this.#animationFrom = previousByKey
+    this.#animationProgress = 0
+    this.rows.forEach((row, index) => {
+      const key = this.#keyAt(index, row)
+      const from = previousByKey.get(key)
+      if (!from) {
+        this.#rowUpdateStates.set(key, 'added')
+        return
+      }
+      if (!hasNumericChange(from, row)) return
+      const watchedFrom = this.updateHighlightField ? getFieldValue(from, this.updateHighlightField) : from
+      const watchedTo = this.updateHighlightField ? getFieldValue(row, this.updateHighlightField) : row
+      const delta = firstNumericDelta(watchedFrom, watchedTo)
+      this.#rowUpdateStates.set(key, delta === undefined ? 'modified' : delta > 0 ? 'increased' : 'decreased')
+    })
+
+    // A stable key lets a removed row remain in its former visual position long enough to collapse. Without one,
+    // identity is positional, so structural updates stay immediate while numeric modification can still interpolate.
+    if (this.rowKey && !this.paginated) {
+      const previousRows = this.#sortRows(displayedPrevious.filter(isRecord))
+      const transitionRows = [...this.#sortRows(this.rows)]
+      previousRows.forEach((row, index) => {
+        const key = this.#keyAt(index, row)
+        if (nextKeys.has(key)) return
+        transitionRows.splice(Math.min(index, transitionRows.length), 0, row)
+        this.#rowUpdateStates.set(key, 'removed')
+      })
+      this.#transitionRows = transitionRows
+    }
+
+    let started: number | undefined
+    const draw = (now: number) => {
+      started ??= now
+      const progress = Math.min(1, (now - started) / this.updateDuration)
+      this.#animationProgress = 1 - Math.pow(1 - progress, 3)
+      this.requestUpdate()
+      if (progress < 1) this.#animationFrame = requestAnimationFrame(draw)
+      else {
+        this.#animationFrame = undefined
+        this.#animationFrom.clear()
+        this.#transitionRows = undefined
+        this.#rowUpdateStates.clear()
+        this.requestUpdate()
+      }
+    }
+    this.#animationFrame = requestAnimationFrame(draw)
+  }
+
+  #cancelRowsAnimation() {
+    if (this.#animationFrame !== undefined) cancelAnimationFrame(this.#animationFrame)
+    this.#animationFrame = undefined
+    this.#animationFrom.clear()
+    this.#animationProgress = 1
+    this.#transitionRows = undefined
+    this.#rowUpdateStates.clear()
   }
 
   #resetRemote() {
@@ -950,6 +1142,7 @@ export class Table extends LitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback()
+    this.#cancelRowsAnimation()
     this.removeEventListener(COLUMN_CHANGE_EVENT, this.#handleColumnChange)
   }
 

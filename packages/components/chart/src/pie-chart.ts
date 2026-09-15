@@ -5,6 +5,7 @@ import { EchartsChartBase } from './echarts-chart-base.js'
 import type { ChartLegendItem } from './chart-base.js'
 import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
+import type { ChartAdapter } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import './chart-series.js'
 
@@ -57,6 +58,10 @@ export class PieChart extends EchartsChartBase {
   /** Slices the reader has switched off from the legend, by label. */
   @state() private hiddenSlices = new Set<string>()
 
+  protected override get legendDependsOnData(): boolean {
+    return true
+  }
+
   /** A pie has no grid and no axes at all: contributing them would draw an empty cartesian frame. */
   protected override coordinateSystem(): Record<string, unknown> {
     return {}
@@ -88,6 +93,12 @@ export class PieChart extends EchartsChartBase {
     else next.add(label)
     this.hiddenSlices = next
     this.adapter?.setDatumVisibility?.(label, visible)
+    this.notifyLegendChange()
+  }
+
+  protected override restoreVisibility(adapter: ChartAdapter): void {
+    super.restoreVisibility(adapter)
+    for (const label of this.hiddenSlices) adapter.setDatumVisibility?.(label, false)
   }
 
   protected override dataShape(): 'pairs' | 'values' | 'named' {
