@@ -1,0 +1,52 @@
+---
+description: 'Ready-made numeric fields with default, compact and accounting treatments.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { NumberInput } from '@c2n/number-input'
+
+## Presets
+
+Use the public field, value, adornment and stepper variables to fit different data-entry densities.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 190px;
+  }
+</style>
+<c2-number-input class="default" aria-label="Quantity" value="4" min="0"></c2-number-input>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 150px;
+    --c2-number-input--min-height: 30px;
+    --c2-number-input__value--padding: 3px 8px;
+    --c2-number-input__stepper--width: 24px;
+    --c2-number-input--font-size: 13px;
+  }
+</style>
+<c2-number-input class="compact" aria-label="Quantity" value="4" min="0"></c2-number-input>
+```
+
+```html tag=MdxCodeBlock,label=Accounting
+<style>
+  .accounting {
+    width: 220px;
+    --c2-number-input--border-radius: 8px;
+    --c2-number-input__adornment--color: #166534;
+    --c2-number-input__stepper__hover--background: #dcfce7;
+    --c2-number-input__focus--border: 1px solid #16a34a;
+    --c2-number-input__focus--outline: 2px solid rgba(22, 163, 74, 0.25);
+  }
+</style>
+<c2-number-input class="accounting" aria-label="Amount" value="1250" min="0" step="50"><span slot="prefix">$</span><span slot="suffix">USD</span></c2-number-input>
+```
+
+</GalleryGrid>

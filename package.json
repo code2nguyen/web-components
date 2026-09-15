@@ -84,6 +84,8 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/number-input:build",
+        "./packages/components/date-input:build",
         "./packages/components/date-selector:build",
         "./packages/components/chart:build",
         "./packages/components/autocomplete:build",

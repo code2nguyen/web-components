@@ -107,6 +107,8 @@ export const overrides: Record<string, Override> = {
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   // Error focus ring stays red on purpose.
   '--c2-text-field__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
+  '--c2-date-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
+  '--c2-number-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
   // 1px radii on the colour picker swatch are a detail, not a shape token.
   '--c2-color-select--border-top-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-top-right-radius': { exclude: 'swatch detail radius' },

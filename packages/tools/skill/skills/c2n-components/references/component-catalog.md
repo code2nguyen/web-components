@@ -63,8 +63,10 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Color Area** — `c2-color-area` · `@c2n/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/color-select` — Colour swatch that opens a full picker built from area and slider.
 - **Color Slider** — `c2-color-slider` · `@c2n/color-slider` — Horizontal slider for choosing a hue from 0 to 360.
+- **Date Input** — `c2-date-input` · `@c2n/date-input` — Form-associated single-date input with native picker, constraints, helper text and error states.
 - **Date Selector** — `c2-date-selector` · `@c2n/date-selector` — Accessible one- or two-month calendar for choosing a date range.
 - **Label** — `c2-label` · `@c2n/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
+- **Number Input** — `c2-number-input` · `@c2n/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation.
 - **Select** — `c2-select` · `@c2n/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options.
 - **Slider** — `c2-slider` · `@c2n/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
