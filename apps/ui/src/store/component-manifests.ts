@@ -1,4 +1,6 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import numberInput from '@c2n/number-input/custom-elements.json'
+import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
 import chart from '@c2n/chart/custom-elements.json'
 import autocomplete from '@c2n/autocomplete/custom-elements.json'
@@ -59,6 +61,8 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    numberInput,
+    dateInput,
     dateSelector,
     chart,
     autocomplete,

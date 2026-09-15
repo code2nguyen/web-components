@@ -1,0 +1,53 @@
+---
+title: 'Number Input'
+description: 'Form-associated numeric input with native validation, step controls, adornments and helper states.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { NumberInput } from '@c2n/number-input'
+
+`c2-number-input` keeps native number parsing, constraints and Arrow Up/Down behavior, then replaces browser-specific spinners with consistent step controls. Use `min`, `max` and `step` for the range, add currency or units through the `prefix` and `suffix` slots, or set `hide-steppers` for a plain numeric field.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/number-input
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/number-input
+<style>
+  .number-width {
+    width: 190px;
+  }
+  .unit {
+    white-space: nowrap;
+  }
+</style>
+<div data-label="Default">
+  <c2-number-input class="number-width" aria-label="Quantity" value="1" min="0"></c2-number-input>
+  <c2-number-input class="number-width" aria-label="Guests" value="4" min="1" max="12"></c2-number-input>
+</div>
+<div data-label="Decimal step">
+  <c2-number-input class="number-width" aria-label="Rating" value="4.5" min="0" max="5" step="0.1"></c2-number-input>
+</div>
+<div data-label="Adornments">
+  <c2-number-input class="number-width" aria-label="Price" value="49.99" min="0" step="0.01"><span slot="prefix">$</span><span slot="suffix" class="unit">USD</span></c2-number-input>
+  <c2-number-input class="number-width" aria-label="Weight" value="72"><span slot="suffix" class="unit">kg</span></c2-number-input>
+</div>
+<div data-label="Supporting text">
+  <c2-number-input class="number-width" aria-label="Team size" help="Between 2 and 12." value="6" min="2" max="12"></c2-number-input>
+  <c2-number-input class="number-width" aria-label="Invalid team size" error error-text="Enter at least 2." value="1" min="2"></c2-number-input>
+</div>
+<div data-label="States">
+  <c2-number-input class="number-width" aria-label="Read-only total" value="24" readonly></c2-number-input>
+  <c2-number-input class="number-width" aria-label="Disabled total" value="24" disabled></c2-number-input>
+  <c2-number-input class="number-width" aria-label="No steppers" value="24" hide-steppers></c2-number-input>
+</div>
+```
+
+The string `value` preserves an empty field; `valueAsNumber` returns the parsed number or `NaN`. The `stepUp()` and `stepDown()` methods use the same native step algorithm as the controls and emit `input` and `change`.

@@ -1,0 +1,45 @@
+---
+title: 'Date Input'
+description: 'Form-associated single-date input with native picker, constraints, helper text and error states.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DateInput } from '@c2n/date-input'
+
+`c2-date-input` wraps the browser's native date control in a consistent, themeable field. Its `value`, `min` and `max` are local-calendar ISO dates (`YYYY-MM-DD`), while form submission, reset, required validation, keyboard editing and the platform date picker remain native.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/date-input
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/date-input
+<style>
+  .date-width {
+    width: 220px;
+  }
+</style>
+<div data-label="Default">
+  <c2-date-input class="date-width" aria-label="Start date"></c2-date-input>
+  <c2-date-input class="date-width" aria-label="Due date" value="2026-09-15"></c2-date-input>
+</div>
+<div data-label="Constraints">
+  <c2-date-input class="date-width" aria-label="Booking date" value="2026-09-18" min="2026-09-15" max="2026-10-15" required></c2-date-input>
+</div>
+<div data-label="Supporting text">
+  <c2-date-input class="date-width" aria-label="Delivery date" help="Weekdays only."></c2-date-input>
+  <c2-date-input class="date-width" aria-label="Delivery date with error" value="2026-09-20" error error-text="Choose a weekday."></c2-date-input>
+</div>
+<div data-label="States">
+  <c2-date-input class="date-width" aria-label="Read-only date" value="2026-09-15" readonly></c2-date-input>
+  <c2-date-input class="date-width" aria-label="Disabled date" value="2026-09-15" disabled></c2-date-input>
+</div>
+```
+
+Listen for `input` while the value changes and `change` when it is committed. Call `showPicker()` from a user gesture to open the platform picker programmatically; `valueAsDate` exposes the selected value as a `Date`.

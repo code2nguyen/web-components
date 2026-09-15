@@ -54,6 +54,8 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/number-input:build",
+        "../../components/date-input:build",
         "../../components/date-selector:build",
         "../../components/chart:build",
         "../../components/autocomplete:build",
