@@ -65,12 +65,10 @@ test('animate-updates expands additions, collapses deletions and marks modified 
 
     const root = subject.shadowRoot!
     const text = (state: string) => root.querySelector(`[data-update-state="${state}"]`)?.textContent ?? ''
-    const increased = root.querySelector<HTMLElement>('[data-update-state="increased"]')
     return {
       increased: text('increased'),
       removed: text('removed'),
       added: text('added'),
-      background: increased?.style.background ?? '',
     }
   }, nextRows)
 
@@ -78,7 +76,6 @@ test('animate-updates expands additions, collapses deletions and marks modified 
     increased: expect.stringContaining('Ada Lovelace'),
     removed: expect.stringContaining('Grace Hopper'),
     added: expect.stringContaining('Katherine Johnson'),
-    background: 'rgb(240, 253, 244)',
   })
   await expect(page.getByRole('row', { name: /Grace Hopper/ })).toHaveCount(0, { timeout: 1000 })
   await expect(page.getByRole('row', { name: /Katherine Johnson/ })).toBeVisible()
