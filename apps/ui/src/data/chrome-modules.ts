@@ -7,6 +7,7 @@
 import '@c2n/button'
 import '@c2n/checkbox'
 import '@c2n/card'
+import '@c2n/details'
 import '@c2n/icon-button'
 import '@c2n/link-button'
 import '@c2n/label'

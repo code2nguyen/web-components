@@ -11,6 +11,7 @@
     sticky-top: 0px,
     backdrop-filter: blur(16px),
     blurred--background: rgba(255, 255, 255, 0.82),
+    content--max-width: none,
     brand--gap: 8px,
     actions--gap: 8px,
   )
@@ -25,20 +26,28 @@
   top: css.cssVar(sticky-top);
 }
 .c2-header {
-  display: flex;
   min-height: css.cssVar(min-height);
   box-sizing: border-box;
-  align-items: center;
-  gap: css.cssVar(gap);
-  padding: css.cssVar(padding);
   color: css.cssVar(color);
   background: css.cssVar(background);
   border-bottom: css.cssVar(border-bottom);
   box-shadow: css.cssVar(box-shadow);
 }
+.content {
+  display: flex;
+  width: 100%;
+  max-width: css.cssVar(content--max-width);
+  min-height: inherit;
+  box-sizing: border-box;
+  align-items: center;
+  gap: css.cssVar(gap);
+  margin-inline: auto;
+  padding: css.cssVar(padding);
+}
 :host([blurred]) .c2-header {
   background: css.cssVar(blurred--background);
   backdrop-filter: css.cssVar(backdrop-filter);
+  -webkit-backdrop-filter: css.cssVar(backdrop-filter);
 }
 .brand,
 .actions {

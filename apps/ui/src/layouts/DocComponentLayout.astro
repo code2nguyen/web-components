@@ -122,14 +122,24 @@ const { componentId, currentId = componentId, section = 'components', headings =
 
     &__sidebar {
       grid-column: 1;
-      position: sticky;
+      position: fixed;
       top: var(--site-header-height);
-      height: calc(100vh - var(--site-header-height));
+      bottom: var(--docs-sidebar-footer-offset, 0px);
+      inset-inline-start: max(var(--site-gutter), calc((100vw - var(--site-page-max-width)) / 2 + var(--site-gutter)));
+      width: var(--site-sidebar-width);
       overflow-y: auto;
-      padding: 24px 12px 0 0;
+      overscroll-behavior: contain;
+      // Keep the scrollport flush with the header. If this spacing lives on the scroll container, its sticky
+      // filter cannot cover the padding strip and scrolled links show through above the field.
+      padding: 0 12px 0 0;
+      background: var(--site-color-surface);
       border-right: 1px solid var(--site-color-outline-variant);
       scrollbar-width: thin;
       scrollbar-color: transparent transparent;
+      > :global(.sidebar__nav) {
+        --sidebar-filter-top-space: 24px;
+        padding-top: 24px;
+      }
       &:hover {
         scrollbar-color: var(--site-color-outline) transparent;
       }
@@ -256,6 +266,28 @@ const { componentId, currentId = componentId, section = 'components', headings =
 
   const docs = document.querySelector('.docs')
   const shell = document.querySelector<SideNav>('c2-side-nav.docs-shell')
+  const desktopSidebar = document.querySelector<HTMLElement>('.docs__sidebar')
+  const footer = document.querySelector<HTMLElement>('.site-footer')
+
+  // The desktop rail is fixed so the document cannot push it upward. When the footer enters the viewport, shrink the
+  // rail from the bottom by exactly the visible footer height so both regions remain independently usable.
+  if (desktopSidebar && footer) {
+    let footerFrame = 0
+    const updateFooterOffset = () => {
+      footerFrame = 0
+      const offset = Math.max(0, document.documentElement.clientHeight - footer.getBoundingClientRect().top)
+      desktopSidebar.style.setProperty('--docs-sidebar-footer-offset', `${offset}px`)
+    }
+    const scheduleFooterOffset = () => {
+      if (footerFrame) return
+      footerFrame = requestAnimationFrame(updateFooterOffset)
+    }
+
+    updateFooterOffset()
+    window.addEventListener('scroll', scheduleFooterOffset, { passive: true })
+    window.addEventListener('resize', scheduleFooterOffset, { passive: true })
+    new ResizeObserver(scheduleFooterOffset).observe(footer)
+  }
 
   // The header menu button lives outside the side nav, so it cannot use `side-nav-toggle`; toggle from here.
   document.querySelectorAll('[data-toggle-sidebar]').forEach((el) => {

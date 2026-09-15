@@ -101,6 +101,8 @@ export const overrides: Record<string, Override> = {
   '--c2-code-viewer__line__highlighted--background': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-code-viewer__line__highlighted--border-left': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
+  // Autocomplete uses its accent border as the focus indicator; adding the global ring creates a doubled border.
+  '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   // Error focus ring stays red on purpose.
   '--c2-text-field__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
   // 1px radii on the colour picker swatch are a detail, not a shape token.

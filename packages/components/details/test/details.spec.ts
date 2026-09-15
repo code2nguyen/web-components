@@ -1,4 +1,5 @@
 import { test, expect, accessible } from '../../../../tests/component-fixture'
+import type { Details } from '../src/details'
 
 test('click and keyboard expand and collapse content', async ({ page, renderScenario }) => {
   await renderScenario('<c2-details label="Shipping"><p>Arrives tomorrow</p></c2-details>')
@@ -21,4 +22,15 @@ test('interactive header content does not toggle the panel', async ({ page, rend
   await renderScenario('<c2-details label="Settings"><button slot="header-content">Edit</button>Panel</c2-details>')
   await page.getByRole('button', { name: 'Edit' }).click()
   await expect(page.locator('c2-details')).toHaveJSProperty('expanded', false)
+})
+
+test('opens on the first activation while restored state is waiting to render', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details label="Shipping"><p>Arrives tomorrow</p></c2-details>')
+  await page.locator('c2-details').evaluate((element) => {
+    const details = element as Details
+    details.expanded = true
+    details.shadowRoot?.querySelector('summary')?.click()
+  })
+  await expect(page.getByText('Arrives tomorrow')).toBeVisible()
+  await expect(page.locator('c2-details')).toHaveJSProperty('expanded', true)
 })

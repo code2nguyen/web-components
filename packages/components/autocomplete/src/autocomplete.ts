@@ -94,7 +94,7 @@ let autocompleteId = 0
  * @cssproperty {border-radius} [--c2-autocomplete--border-radius=8px]
  * @cssproperty {border} [--c2-autocomplete__hover--border=1px solid #a1a1aa]
  * @cssproperty {border} [--c2-autocomplete__focus--border=1px solid rgb(2, 101, 220)]
- * @cssproperty {outline} [--c2-autocomplete__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {outline} [--c2-autocomplete__focus--outline=none]
  * @cssproperty {color} [--c2-autocomplete__placeholder--color=#71717a]
  * @cssproperty {opacity} [--c2-autocomplete__disabled--opacity=0.38]
  * @cssproperty {pixel} [--c2-autocomplete__icon--size=18px]
@@ -146,7 +146,11 @@ export class Autocomplete extends LitElement {
   private defaultValueCaptured = false
   private debounceTimer: ReturnType<typeof setTimeout> | undefined
   private requestController: AbortController | undefined
+  private pendingQuery: string | undefined
   private requestSequence = 0
+  private cachedDataSource: AutocompleteDataSource | undefined
+  private cachedQuery: string | undefined
+  private cachedResults: unknown[] = []
   private customValidityMessage = ''
 
   /** Current input text and form value. A selection replaces it only when `selectionBehavior` is `replace`. */
@@ -182,7 +186,10 @@ export class Autocomplete extends LitElement {
   /** Custom local matching for arbitrary item structures. */
   @property({ attribute: false }) matcher: AutocompleteMatcher | undefined
 
-  /** Async item provider. It receives the query and an abort signal; server results are not filtered again locally. */
+  /**
+   * Async item provider. It receives the query and an abort signal; server results are not filtered again locally.
+   * Reopening an unchanged query reuses its last successful results; call `load()` to force a refresh.
+   */
   @property({ attribute: false }) dataSource: AutocompleteDataSource | undefined
 
   /** Replaces a row's content. The returned content is wrapped in a selectable `c2-list-item`. */
@@ -321,23 +328,30 @@ export class Autocomplete extends LitElement {
       return
     }
 
+    const dataSource = this.dataSource
     const controller = new AbortController()
     const sequence = ++this.requestSequence
     this.requestController = controller
+    this.pendingQuery = normalizedQuery
     this.loading = true
     this.loadError = undefined
     this.results = []
     this.open = this.focused
     try {
-      const loaded = await this.dataSource(normalizedQuery, controller.signal)
-      if (controller.signal.aborted || sequence !== this.requestSequence) return
-      this.results = loaded.slice(0, Math.max(0, this.maxResults))
+      const loaded = await dataSource(normalizedQuery, controller.signal)
+      if (controller.signal.aborted || sequence !== this.requestSequence || dataSource !== this.dataSource) return
+      this.cachedDataSource = dataSource
+      this.cachedQuery = normalizedQuery
+      this.cachedResults = loaded
+      this.results = this.cachedResults.slice(0, Math.max(0, this.maxResults))
     } catch (error) {
       if (controller.signal.aborted || sequence !== this.requestSequence) return
       this.results = []
       this.loadError = error
     } finally {
       if (!controller.signal.aborted && sequence === this.requestSequence) {
+        this.requestController = undefined
+        this.pendingQuery = undefined
         this.loading = false
         this.finishResults()
       }
@@ -403,12 +417,27 @@ export class Autocomplete extends LitElement {
     this.open = this.focused && (this.results.length > 0 || this.showEmpty || !!this.loadError)
   }
 
+  private restoreCachedResults(query: string): boolean {
+    if (!this.dataSource || this.cachedDataSource !== this.dataSource || this.cachedQuery !== query) return false
+    this.loading = false
+    this.loadError = undefined
+    this.results = this.cachedResults.slice(0, Math.max(0, this.maxResults))
+    this.finishResults()
+    return true
+  }
+
   private scheduleLoad() {
+    const normalizedQuery = this.value.trim()
+    if (this.pendingQuery === normalizedQuery) {
+      this.open = this.focused
+      return
+    }
     this.cancelPendingRequest()
-    if (this.value.trim().length < this.minQueryLength) {
+    if (normalizedQuery.length < this.minQueryLength) {
       void this.load()
       return
     }
+    if (this.restoreCachedResults(normalizedQuery)) return
     if (!this.dataSource || this.debounce <= 0) {
       void this.load()
       return
@@ -417,6 +446,7 @@ export class Autocomplete extends LitElement {
     this.results = []
     this.loadError = undefined
     this.open = this.focused
+    this.pendingQuery = normalizedQuery
     this.debounceTimer = setTimeout(() => void this.load(), this.debounce)
   }
 
@@ -425,6 +455,7 @@ export class Autocomplete extends LitElement {
     this.debounceTimer = undefined
     this.requestController?.abort()
     this.requestController = undefined
+    this.pendingQuery = undefined
   }
 
   private handleInput = (event: InputEvent) => {
@@ -601,6 +632,13 @@ export class Autocomplete extends LitElement {
   }
 
   protected override updated(changed: PropertyValues) {
+    if (changed.has('dataSource')) {
+      this.cancelPendingRequest()
+      this.cachedDataSource = undefined
+      this.cachedQuery = undefined
+      this.cachedResults = []
+      if (this.focused && this.value.trim().length >= this.minQueryLength) this.scheduleLoad()
+    }
     if (changed.has('suggestions') && !this.dataSource && this.focused && this.value.trim().length >= this.minQueryLength) void this.load()
     if (changed.has('open') && this.overlay && this.overlay.open !== this.open) this.overlay.open = this.open
     if (changed.has('activeIndex') && this.activeIndex >= 0) {
