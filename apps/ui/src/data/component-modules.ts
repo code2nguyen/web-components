@@ -3,6 +3,7 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/date-selector'
 import '@c2n/chart'
 import '@c2n/autocomplete'
 import '@c2n/header'

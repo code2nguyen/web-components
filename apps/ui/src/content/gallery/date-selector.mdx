@@ -1,0 +1,46 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { DateSelector } from '@c2n/date-selector'
+
+## Presets
+
+Change the selection and range variables together: endpoints remain strong while the days between them read as one
+continuous interval.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-date-selector from="2026-09-10" to="2026-09-15" locale="en-US"></c2-date-selector>
+```
+
+```html tag=MdxCodeBlock,label=Compact indigo
+<style>
+  .compact-indigo {
+    --c2-date-selector__day--size: 34px;
+    --c2-date-selector--month-gap: 24px;
+    --c2-date-selector--border-radius: 8px;
+    --c2-date-selector--box-shadow: none;
+    --c2-date-selector__day__selected--background: #4f46e5;
+    --c2-date-selector__day__today--color: #4f46e5;
+    --c2-date-selector__range--background: #eef2ff;
+  }
+</style>
+<c2-date-selector class="compact-indigo" from="2026-10-04" to="2026-10-12" locale="en-US"></c2-date-selector>
+```
+
+```html tag=MdxCodeBlock,label=Warm single month
+<style>
+  .warm-calendar {
+    --c2-date-selector--background: #fffbeb;
+    --c2-date-selector--border: 1px solid #fde68a;
+    --c2-date-selector--box-shadow: 0 12px 30px rgba(120, 53, 15, 0.1);
+    --c2-date-selector__day__selected--background: #b45309;
+    --c2-date-selector__day__today--color: #b45309;
+    --c2-date-selector__range--background: #fef3c7;
+  }
+</style>
+<c2-date-selector class="warm-calendar" months="1" from="2026-11-08" to="2026-11-16" locale="en-US"></c2-date-selector>
+```
+
+</GalleryGrid>

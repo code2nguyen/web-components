@@ -84,6 +84,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/date-selector:build",
         "./packages/components/chart:build",
         "./packages/components/autocomplete:build",
         "./packages/components/header:build",
