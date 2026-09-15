@@ -1,0 +1,84 @@
+---
+title: 'Scatter chart'
+description: 'An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-scatter-chart'
+apiTags: ['c2-scatter-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
+import ChartAdvancedDemo from '../../components/ChartAdvancedDemo.astro'
+
+import { ScatterChart } from '@c2n/chart/scatter-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
+
+<ChartFinancialGallery />
+<ChartAdvancedDemo />
+
+This view pairs Apple R&D expense with annual revenue from the public [SEC Company Facts data](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json). It answers a real question a time-series chart cannot: whether larger investment years also occupy a different revenue range.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .finance-scatter,
+  .finance-scatter-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .finance-scatter c2-scatter-chart,
+  .finance-scatter-live c2-scatter-chart {
+    --c2-chart--height: 300px;
+  }
+  .finance-scatter-live__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+</style>
+
+<div data-label="Default">
+  <c2-scatter-chart x-field="rd" data='[{"year":2021,"rd":21.914,"revenue":365.817},{"year":2022,"rd":26.251,"revenue":394.328},{"year":2023,"rd":29.915,"revenue":383.285},{"year":2024,"rd":31.37,"revenue":391.035},{"year":2025,"rd":34.55,"revenue":416.161}]'>
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  </c2-scatter-chart>
+</div>
+
+<div data-label="Custom legend + tooltip" data-finance-demo>
+  <div class="finance-scatter">
+    <c2-scatter-chart id="scatter-investment" x-field="rd" symbol-size="14" data='[{"year":2021,"rd":21.914,"revenue":365.817},{"year":2022,"rd":26.251,"revenue":394.328},{"year":2023,"rd":29.915,"revenue":383.285},{"year":2024,"rd":31.37,"revenue":391.035},{"year":2025,"rd":34.55,"revenue":416.161}]'>
+      <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    </c2-scatter-chart>
+    <c2-chart-legend for="scatter-investment"></c2-chart-legend>
+    <c2-chart-tooltip for="scatter-investment"></c2-chart-tooltip>
+  </div>
+</div>
+
+<div data-label="Realtime replay" data-advanced-realtime>
+  <div class="finance-scatter-live">
+    <c2-scatter-chart x-field="rd" symbol-size="13" data='[{"year":2021,"rd":21.914,"revenue":365.817}]'>
+      <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    </c2-scatter-chart>
+    <div class="finance-scatter-live__controls">
+      <c2-button size="sm">Replay</c2-button>
+      <span data-advanced-status>Preparing FY 2021–2025…</span>
+    </div>
+  </div>
+</div>
+```
+
+`x-field` supplies the horizontal measure and each `c2-chart-series` supplies a vertical measure. `symbol`, `symbol-size`, `large` and `large-threshold` tune the marks and opt into ECharts' high-volume rendering path. The replay seeds its first observation, waits for `chart-ready`, then interpolates each new point from the preceding year; a streaming UI should use the same readiness boundary before starting a high-frequency feed.

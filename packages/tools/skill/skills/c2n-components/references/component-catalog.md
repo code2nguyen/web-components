@@ -12,11 +12,14 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Chart
 
-- **Area chart** — `c2-area-chart, c2-chart-series` · `@c2n/chart` — A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity.
-- **Bar chart** — `c2-bar-chart, c2-chart-series` · `@c2n/chart` — Bars over categories or time buckets, with several series drawn side by side within each band.
-- **Line chart** — `c2-line-chart, c2-chart-series` · `@c2n/chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children.
-- **Pie chart** — `c2-pie-chart, c2-chart-series` · `@c2n/chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it.
-- **Sparkline** — `c2-sparkline, c2-chart-series` · `@c2n/chart` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat.
+- **Area chart** — `c2-area-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity.
+- **Bar chart** — `c2-bar-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — Bars over categories or time buckets, with several series drawn side by side within each band.
+- **Candlestick chart** — `c2-candlestick-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts OHLC chart for market sessions and other open-close ranges, with semantic positive and negative colours.
+- **Gauge chart** — `c2-gauge-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A focused radial KPI gauge drawn by ECharts, with a configurable scale, progress arc and pointer.
+- **Line chart** — `c2-line-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children.
+- **Pie chart** — `c2-pie-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it.
+- **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures.
+- **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat.
 
 ## Chat
 

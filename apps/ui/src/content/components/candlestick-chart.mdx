@@ -1,0 +1,77 @@
+---
+title: 'Candlestick chart'
+description: 'An ECharts OHLC chart for market sessions and other open-close ranges, with semantic positive and negative colours.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-candlestick-chart'
+apiTags: ['c2-candlestick-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
+import ChartAdvancedDemo from '../../components/ChartAdvancedDemo.astro'
+
+import { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
+
+<ChartFinancialGallery />
+<ChartAdvancedDemo />
+
+The examples use AAPL daily open, high, low and close observations from the public [Nasdaq historical-data service](https://www.nasdaq.com/market-activity/stocks/aapl/historical). The default field convention is `open`, `close`, `low`, `high`; rename those with the four `*-field` attributes when adapting a feed.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .finance-candles,
+  .finance-candles-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .finance-candles c2-candlestick-chart,
+  .finance-candles-live c2-candlestick-chart {
+    --c2-chart--height: 310px;
+  }
+  .finance-candles-live__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+</style>
+
+<div data-label="Default">
+  <c2-candlestick-chart label-field="date" data='[{"date":"Sep 22","open":248.3,"close":256.08,"low":248.12,"high":256.64},{"date":"Sep 23","open":255.88,"close":254.43,"low":253.58,"high":257.34},{"date":"Sep 24","open":255.22,"close":252.31,"low":251.04,"high":255.74},{"date":"Sep 25","open":253.21,"close":256.87,"low":252.4,"high":257.17},{"date":"Sep 26","open":254.1,"close":255.46,"low":253.05,"high":257.6}]'></c2-candlestick-chart>
+</div>
+
+<div data-label="Custom legend + tooltip" data-finance-demo>
+  <div class="finance-candles">
+    <c2-candlestick-chart id="candles-aapl" name="AAPL" label-field="date" data='[{"date":"Sep 22","open":248.3,"close":256.08,"low":248.12,"high":256.64},{"date":"Sep 23","open":255.88,"close":254.43,"low":253.58,"high":257.34},{"date":"Sep 24","open":255.22,"close":252.31,"low":251.04,"high":255.74},{"date":"Sep 25","open":253.21,"close":256.87,"low":252.4,"high":257.17},{"date":"Sep 26","open":254.1,"close":255.46,"low":253.05,"high":257.6}]'></c2-candlestick-chart>
+    <c2-chart-legend for="candles-aapl"></c2-chart-legend>
+    <c2-chart-tooltip for="candles-aapl"></c2-chart-tooltip>
+  </div>
+</div>
+
+<div data-label="Realtime replay" data-advanced-realtime>
+  <div class="finance-candles-live">
+    <c2-candlestick-chart name="AAPL" label-field="date"></c2-candlestick-chart>
+    <div class="finance-candles-live__controls">
+      <c2-button size="sm">Replay</c2-button>
+      <span data-advanced-status>Preparing market sessions…</span>
+    </div>
+  </div>
+</div>
+```
+
+With no children, the component infers the four OHLC fields. If you declare series explicitly, provide exactly four in open, close, low, high order. Positive and negative candles use the shared chart theme tokens, and the linked tooltip reports the complete session instead of a single mark.

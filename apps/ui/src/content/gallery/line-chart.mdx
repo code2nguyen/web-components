@@ -1,92 +1,90 @@
 ---
 title: 'Line chart gallery'
-description: 'Trend lines from a plain two-series plot to a hairline report, a dark monitoring wall and a stepped time axis.'
+description: 'Investor-grade trend views built from Apple fiscal statements filed with the SEC.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
 
 import { LineChart } from '@c2n/chart/line-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 
 <ExampleModules />
+<ChartFinancialGallery />
+
+Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
 
 <GalleryGrid min="440">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-line-chart
-  x-field="month"
-  data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'
+  x-field="year"
+  points="always"
+  data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"netIncome":112.01}]'
 >
   <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
-  <c2-chart-series field="cost" label="Cost"></c2-chart-series>
+  <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+  <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
 </c2-line-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Hairline report
+```html tag=MdxCodeBlock,label=Investor lens — rich legend and tooltip
 <style>
-  .hairline {
+  .investor-line {
+    display: grid;
+    width: 100%;
+    gap: 12px;
+  }
+  .investor-line c2-line-chart {
+    --c2-chart__line--width: 2.5px;
+    --c2-chart__point--radius: 3px;
+  }
+</style>
+<div class="investor-line" data-finance-demo>
+  <c2-line-chart
+    id="financial-line-investor"
+    x-field="year"
+    curve="smooth"
+    points="hover"
+    data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"operatingIncome":108.949,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"operatingIncome":119.437,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"operatingIncome":114.301,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"operatingIncome":123.216,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"operatingIncome":133.05,"netIncome":112.01}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+    <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
+    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+  </c2-line-chart>
+  <c2-chart-legend for="financial-line-investor"></c2-chart-legend>
+  <c2-chart-tooltip for="financial-line-investor"></c2-chart-tooltip>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Margin expansion
+<style>
+  .margin-line {
     --c2-chart--border-top: none;
     --c2-chart--border-right: none;
     --c2-chart--border-bottom: none;
     --c2-chart--border-left: none;
-    --c2-chart--padding: 4px;
-    --c2-chart__grid--color: transparent;
-    --c2-chart__axis--color: #a1a1aa;
-  }
-</style>
-<c2-line-chart
-  class="hairline"
-  x-field="t"
-  curve="smooth"
-  data='[{"t":1,"v":18},{"t":2,"v":24},{"t":3,"v":21},{"t":4,"v":33},{"t":5,"v":29},{"t":6,"v":41}]'
->
-  <c2-chart-series field="v" label="Throughput"></c2-chart-series>
-</c2-line-chart>
-```
-
-```html tag=MdxCodeBlock,label=Dark terminal
-<style>
-  .terminal {
-    --c2-chart--background: #0b0f17;
-    --c2-chart--color: #e5e7eb;
-    --c2-chart--border-top: 1px solid #1f2937;
-    --c2-chart--border-right: 1px solid #1f2937;
-    --c2-chart--border-bottom: 1px solid #1f2937;
-    --c2-chart--border-left: 1px solid #1f2937;
-    --c2-chart__grid--color: #1f2937;
-    --c2-chart__axis--color: #6b7280;
-    --c2-chart__series-1--color: #22d3ee;
-    --c2-chart__series-2--color: #a78bfa;
-  }
-</style>
-<c2-line-chart
-  class="terminal"
-  x-field="t"
-  data='[{"t":1,"cpu":32,"mem":54},{"t":2,"cpu":48,"mem":57},{"t":3,"cpu":41,"mem":61},{"t":4,"cpu":63,"mem":58},{"t":5,"cpu":57,"mem":66},{"t":6,"cpu":72,"mem":69}]'
->
-  <c2-chart-series field="cpu" label="CPU"></c2-chart-series>
-  <c2-chart-series field="mem" label="Memory"></c2-chart-series>
-</c2-line-chart>
-```
-
-```html tag=MdxCodeBlock,label=Stepped time axis
-<style>
-  .stepped {
-    --c2-chart__line--width: 2.5px;
     --c2-chart__grid--color: #f4f4f5;
+    --c2-chart__series-1--color: #2563eb;
+    --c2-chart__series-2--color: #7c3aed;
+    --c2-chart__series-3--color: #0f766e;
   }
 </style>
 <c2-line-chart
-  class="stepped"
-  x-type="time"
-  x-field="at"
-  curve="step"
-  legend="none"
-  data='[{"at":1704067200000,"queue":4},{"at":1704672000000,"queue":9},{"at":1705276800000,"queue":7},{"at":1705881600000,"queue":16},{"at":1706486400000,"queue":12},{"at":1707091200000,"queue":6}]'
+  class="margin-line"
+  x-field="year"
+  y-min="20"
+  points="always"
+  data='[{"year":2021,"grossMargin":41.8,"operatingMargin":29.8,"netMargin":25.9},{"year":2022,"grossMargin":43.3,"operatingMargin":30.3,"netMargin":25.3},{"year":2023,"grossMargin":44.1,"operatingMargin":29.8,"netMargin":25.3},{"year":2024,"grossMargin":46.2,"operatingMargin":31.5,"netMargin":24},{"year":2025,"grossMargin":46.9,"operatingMargin":32,"netMargin":26.9}]'
 >
-  <c2-chart-series field="queue" label="Queue depth"></c2-chart-series>
+  <c2-chart-series field="grossMargin" label="Gross margin %"></c2-chart-series>
+  <c2-chart-series field="operatingMargin" label="Operating margin %"></c2-chart-series>
+  <c2-chart-series field="netMargin" label="Net margin %"></c2-chart-series>
 </c2-line-chart>
 ```
 

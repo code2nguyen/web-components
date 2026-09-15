@@ -1,0 +1,203 @@
+---
+/**
+ * Wires the interactive examples shared by the chart documentation pages.
+ * The values are a compact France 2015–2024 extract from the public OWID Energy dataset.
+ */
+---
+
+<script>
+  import { html } from 'lit'
+  import '@c2n/phosphor-icons/icons/atom.js'
+  import '@c2n/phosphor-icons/icons/chart-line.js'
+  import '@c2n/phosphor-icons/icons/drop.js'
+  import '@c2n/phosphor-icons/icons/factory.js'
+  import '@c2n/phosphor-icons/icons/sun.js'
+  import '@c2n/phosphor-icons/icons/wind.js'
+
+  const energy = [
+    { year: 2015, fossil: 44.87, nuclear: 437.43, hydro: 55.56, wind: 21.42, solar: 7.75 },
+    { year: 2016, fossil: 56.64, nuclear: 403.2, hydro: 60.84, wind: 21.38, solar: 8.66 },
+    { year: 2017, fossil: 65.47, nuclear: 398.36, hydro: 50, wind: 24.61, solar: 8.87 },
+    { year: 2018, fossil: 49.45, nuclear: 412.94, hydro: 65.11, wind: 28.6, solar: 11.15 },
+    { year: 2019, fossil: 53.61, nuclear: 399.01, hydro: 56.91, wind: 34.72, solar: 12.02 },
+    { year: 2020, fossil: 48.39, nuclear: 353.83, hydro: 62.52, wind: 40.05, solar: 13.09 },
+    { year: 2021, fossil: 48.85, nuclear: 379.36, hydro: 59.54, wind: 37.12, solar: 15.28 },
+    { year: 2022, fossil: 60.35, nuclear: 294.73, hydro: 45.56, wind: 38.2, solar: 19.34 },
+    { year: 2023, fossil: 41.06, nuclear: 338.2, hydro: 55.9, wind: 50.48, solar: 22.59 },
+    { year: 2024, fossil: 28.66, nuclear: 380.45, hydro: 71.12, wind: 45.43, solar: 24.87 },
+  ]
+
+  const sources = ['nuclear', 'hydro', 'wind', 'solar', 'fossil'] as const
+  type EnergyRow = (typeof energy)[number]
+  type EnergyField = (typeof sources)[number]
+  type DemoChart = HTMLElement & {
+    updateComplete: Promise<unknown>
+    updateData(data: unknown): void
+    appendPoint(x: number, values: readonly number[]): void
+  }
+  interface LegendItem {
+    color: string
+    label: string
+    visible: boolean
+  }
+  interface TooltipContext {
+    formattedX: string
+    entries: Array<{
+      color: string
+      formatted: string
+      value: number | null
+      series: { field: string; label?: string }
+    }>
+  }
+
+  const pieRows = (row: EnergyRow) => sources.map((source) => ({ source: source[0].toUpperCase() + source.slice(1), generation: row[source] }))
+  const iconStyle = (color: string) => `--c2-phosphor-icon--size:17px;--c2-phosphor-icon--color:${color}`
+  const sourceIcon = (label: string, color: string) => {
+    const style = iconStyle(color)
+    switch (label.toLowerCase()) {
+      case 'nuclear':
+        return html`<c2-phosphor-atom style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-atom>`
+      case 'hydro':
+        return html`<c2-phosphor-drop style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-drop>`
+      case 'wind':
+        return html`<c2-phosphor-wind style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-wind>`
+      case 'solar':
+        return html`<c2-phosphor-sun style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-sun>`
+      case 'fossil':
+        return html`<c2-phosphor-factory style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-factory>`
+      default:
+        return html`<c2-phosphor-chart-line style=${style} weight="duotone" aria-hidden="true"></c2-phosphor-chart-line>`
+    }
+  }
+  const percentage = new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 1 })
+
+  const initializeCustomDemo = async (demo: HTMLElement): Promise<void> => {
+    await Promise.all([customElements.whenDefined('c2-chart-legend'), customElements.whenDefined('c2-chart-tooltip')])
+    const legend = demo.querySelector<HTMLElement & { renderLegendItem?: (item: LegendItem) => unknown }>('c2-chart-legend')
+    const tooltip = demo.querySelector<HTMLElement & { renderTooltip?: (context: TooltipContext) => unknown }>('c2-chart-tooltip')
+    if (legend) {
+      legend.renderLegendItem = (item) => html`
+        ${sourceIcon(item.label, item.color)}
+        <span style="display:grid;text-align:left;line-height:1.15">
+          <strong style="font-size:12px;color:var(--c2-chart--color)">${item.label}</strong>
+          <small>${item.visible ? 'included' : 'hidden'}</small>
+        </span>
+      `
+    }
+    if (tooltip) {
+      tooltip.renderTooltip = (context) => {
+        const isPie = demo.dataset.energyYear !== undefined
+        const fixedYear = Number(demo.dataset.energyYear)
+        const contextYear = Number(context.formattedX.replace(/[^\d.-]/g, ''))
+        const year = Number.isFinite(fixedYear) ? fixedYear : contextYear
+        const energyRow = energy.find((row) => row.year === year)
+        const energyTotal = energyRow ? sources.reduce((total, source) => total + energyRow[source], 0) : undefined
+        const shownTotal = context.entries.reduce((total, entry) => total + (entry.value ?? 0), 0)
+        const total = energyTotal ?? shownTotal
+        return html`
+          <strong>${context.formattedX}</strong>
+          <span style="display:grid;gap:7px;margin-top:8px">
+            ${context.entries.map((entry) => {
+              const label = isPie ? context.formattedX : (entry.series.label ?? entry.series.field)
+              const share = total > 0 && entry.value !== null ? percentage.format(entry.value / total) : '—'
+              return html`
+                <span style="display:grid;grid-template-columns:16px minmax(72px,1fr) auto;align-items:center;gap:7px">
+                  ${sourceIcon(label, entry.color)}
+                  <span>${label}</span>
+                  <span style="display:flex;gap:8px"><b>${entry.formatted} TWh</b><small style="opacity:.72">${share}</small></span>
+                </span>
+              `
+            })}
+          </span>
+          <small style="display:block;margin-top:7px;opacity:.72">Share of tracked generation</small>
+        `
+      }
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-energy-custom]').forEach((demo) => void initializeCustomDemo(demo))
+
+  const initializeRealtimeDemo = async (demo: HTMLElement): Promise<void> => {
+    const chart = demo.querySelector<DemoChart>('c2-line-chart, c2-area-chart, c2-bar-chart, c2-pie-chart, c2-sparkline')
+    const button = demo.querySelector<HTMLElement>('c2-button')
+    const status = demo.querySelector<HTMLElement>('[data-energy-status]')
+    if (!chart || !button || !status) return
+    await Promise.all([customElements.whenDefined(chart.localName), customElements.whenDefined('c2-button')])
+    await chart.updateComplete
+
+    const fields = (chart.dataset.energyFields ?? 'nuclear').split(',') as EnergyField[]
+    const initialCount = chart.localName === 'c2-pie-chart' ? 1 : 4
+    const segmentDuration = 850
+    let index = initialCount
+    let animationFrame: number | undefined
+    let segmentStarted = 0
+    let segmentElapsed = 0
+
+    const reset = () => {
+      index = initialCount
+      if (chart.localName === 'c2-pie-chart') chart.updateData(pieRows(energy[0]))
+      else chart.updateData(energy.slice(0, initialCount))
+      segmentStarted = 0
+      segmentElapsed = 0
+      status.textContent = `Ready at ${energy[initialCount - 1].year}`
+    }
+
+    const stop = (label = 'Replay') => {
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame)
+      animationFrame = undefined
+      button.textContent = label
+    }
+
+    const drawFrame = (now: number) => {
+      animationFrame = undefined
+      if (index >= energy.length) {
+        stop()
+        status.textContent = 'Replay complete · 2024'
+        return
+      }
+      if (segmentStarted === 0) segmentStarted = now - segmentElapsed
+      const progress = Math.min(1, (now - segmentStarted) / segmentDuration)
+      const previous = energy[index - 1]
+      const next = energy[index]
+      const row = Object.fromEntries(
+        Object.keys(next).map((key) => {
+          const field = key as keyof EnergyRow
+          return [field, previous[field] + (next[field] - previous[field]) * progress]
+        }),
+      ) as EnergyRow
+      if (chart.localName === 'c2-pie-chart') chart.updateData(pieRows(row))
+      else if (chart.localName === 'c2-bar-chart') {
+        const completed = energy.slice(Math.max(0, index - 4), index)
+        chart.updateData([...completed, { ...row, year: next.year }])
+      } else if (chart.localName === 'c2-sparkline') chart.appendPoint(row.year, [row[fields[0]]])
+      else
+        chart.appendPoint(
+          row.year,
+          fields.map((field) => row[field]),
+        )
+      status.textContent = `Replaying ${previous.year} → ${next.year} · ${Math.round(progress * 100)}%`
+      if (progress === 1) {
+        index += 1
+        segmentStarted = now
+        segmentElapsed = 0
+      }
+      animationFrame = requestAnimationFrame(drawFrame)
+    }
+
+    reset()
+    button.addEventListener('click', () => {
+      if (animationFrame !== undefined) {
+        segmentElapsed = performance.now() - segmentStarted
+        stop('Resume')
+        status.textContent = `Paused at ${energy[index - 1].year}`
+        return
+      }
+      if (index >= energy.length) reset()
+      button.textContent = 'Pause'
+      segmentStarted = performance.now() - segmentElapsed
+      animationFrame = requestAnimationFrame(drawFrame)
+    })
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-energy-realtime]').forEach((demo) => void initializeRealtimeDemo(demo))
+</script>

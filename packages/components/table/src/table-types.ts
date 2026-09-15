@@ -24,6 +24,15 @@ export interface TableHeaderContext {
   column: TableColumnConfig
 }
 
+export interface TableRowContext {
+  row: TableRow
+  rowIndex: number
+  key: string
+}
+
+export type TableRowStyle = Record<string, string | number | null | undefined>
+export type TableRowStyler = (context: TableRowContext) => TableRowStyle | undefined
+
 /** Returns anything Lit can render: a `TemplateResult`, a string, a number, a node. */
 export type TableCellRenderer = (context: TableCellContext) => unknown
 export type TableHeaderRenderer = (context: TableHeaderContext) => unknown

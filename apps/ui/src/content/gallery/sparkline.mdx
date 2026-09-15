@@ -1,88 +1,163 @@
 ---
 title: 'Sparkline gallery'
-description: 'Chromeless trend lines: a KPI stack, dense table cells, filled areas and a tinted pill.'
+description: 'Compact investor KPIs built from Apple fiscal statements filed with the SEC.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
+import SparklineMarketTable from '../../components/SparklineMarketTable.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Sparkline } from '@c2n/chart/sparkline.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Table } from '@c2n/table'
+import { Button } from '@c2n/button'
 
 <ExampleModules />
+<ChartFinancialGallery />
+<SparklineMarketTable />
 
-<GalleryGrid min="320">
+Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
+
+<GalleryGrid min="360">
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]"></c2-sparkline>
+<c2-sparkline data="[365.817,394.328,383.285,391.035,416.161]"></c2-sparkline>
 ```
 
-```html tag=MdxCodeBlock,label=KPI rows
+```html tag=MdxCodeBlock,label=Net-income pulse — rich legend and tooltip
 <style>
-  .kpis {
+  .income-pulse {
+    display: grid;
+    width: 100%;
+    gap: 12px;
+  }
+  .income-pulse c2-sparkline {
+    --c2-chart--width: 100%;
+    --c2-chart--height: 112px;
+    --c2-chart__line--width: 2.5px;
+  }
+</style>
+<div class="income-pulse" data-finance-demo>
+  <c2-sparkline
+    id="financial-sparkline-income"
+    x-field="year"
+    cursor="x"
+    tooltip="axis"
+    type="area"
+    data='[{"year":2021,"revenue":365.817,"netIncome":94.68},{"year":2022,"revenue":394.328,"netIncome":99.803},{"year":2023,"revenue":383.285,"netIncome":96.995},{"year":2024,"revenue":391.035,"netIncome":93.736},{"year":2025,"revenue":416.161,"netIncome":112.01}]'
+  >
+    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+  </c2-sparkline>
+  <c2-chart-legend for="financial-sparkline-income"></c2-chart-legend>
+  <c2-chart-tooltip for="financial-sparkline-income"></c2-chart-tooltip>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Executive KPI strip
+<style>
+  .finance-kpis {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 10px 16px;
+    gap: 12px 18px;
     align-items: center;
-    font: 14px system-ui;
+    width: 100%;
+    font: 13px system-ui;
   }
-  .kpis c2-sparkline {
-    --c2-chart--height: 28px;
-    --c2-chart--width: 140px;
+  .finance-kpis span {
+    display: grid;
+  }
+  .finance-kpis strong {
+    font-size: 15px;
+  }
+  .finance-kpis small {
+    color: #71717a;
+  }
+  .finance-kpis c2-sparkline {
+    --c2-chart--width: 128px;
+    --c2-chart--height: 30px;
   }
 </style>
-<div class="kpis">
-  <span>Requests</span>
-  <c2-sparkline data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline>
-  <span>Latency</span>
-  <c2-sparkline data="[91, 88, 94, 85, 79, 74, 70]" tone="auto"></c2-sparkline>
-  <span>Errors</span>
-  <c2-sparkline data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline>
-</div>
-```
-
-```html tag=MdxCodeBlock,label=Dense cells
-<style>
-  .cells {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-  .cells c2-sparkline {
-    --c2-chart--width: 72px;
-    --c2-chart--height: 20px;
-    --c2-chart__line--width: 1px;
-  }
-</style>
-<div class="cells">
-  <c2-sparkline data="[4, 6, 5, 9, 8, 12]" tone="auto"></c2-sparkline>
-  <c2-sparkline data="[12, 9, 10, 7, 6, 4]" tone="auto"></c2-sparkline>
-  <c2-sparkline data="[7, 7, 8, 7, 8, 7]" tone="auto"></c2-sparkline>
-</div>
-```
-
-```html tag=MdxCodeBlock,label=Tinted pill
-<style>
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    background: #f0fdf4;
-    color: #166534;
-    font: 600 13px system-ui;
-  }
-  .pill c2-sparkline {
-    --c2-chart--width: 96px;
-    --c2-chart--height: 24px;
-    --c2-chart__line--width: 2px;
-  }
-</style>
-<div class="pill">
-  <span>+18%</span>
-  <c2-sparkline data="[8, 11, 10, 14, 13, 18, 21]" tone="positive" type="area"></c2-sparkline>
+<div class="finance-kpis">
+  <span><strong>$416.2B</strong><small>Revenue · FY2025</small></span>
+  <c2-sparkline data="[365.817,394.328,383.285,391.035,416.161]" tone="positive"></c2-sparkline>
+  <span><strong>$112.0B</strong><small>Net income · FY2025</small></span>
+  <c2-sparkline data="[94.68,99.803,96.995,93.736,112.01]" tone="positive"></c2-sparkline>
+  <span><strong>$34.6B</strong><small>R&amp;D · FY2025</small></span>
+  <c2-sparkline data="[21.914,26.251,29.915,31.37,34.55]" tone="positive"></c2-sparkline>
 </div>
 ```
 
 </GalleryGrid>
+
+## Realtime market table
+
+`c2-table` calls its item-rendering hook `renderCell`. The trend column returns a real `c2-sparkline` for each row. The table's `animate-updates` feature matches each replacement row by `row-key` and interpolates its numeric fields over `update-duration`. Because `renderCell` and `rowStyle` receive those intermediate rows, the visible price, newest sparkline point, persistent threshold background and percentage move together. Rows at or below 30% of their day range stay softly red, rows at or above 70% stay green, and the middle stays neutral. Every third tick also adds or removes an instrument; additions expand in and removals collapse out.
+
+The starting watchlist is a fixed illustrative snapshot for a repeatable demo. Subsequent 1.2-second targets are deterministic local simulation—not a live trading feed. Only rendered rows are interpolated, so the feature keeps the table's virtualization model and does not walk an off-screen dataset on every animation frame. It also honors the user's reduced-motion preference.
+
+<GalleryGrid min="720">
+
+```html tag=MdxCodeBlock,label=Live watchlist · renderCell sparklines
+<style>
+  .market-watchlist {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+    --c2-chart--width: 156px;
+    --c2-chart--height: 34px;
+    --c2-chart--padding: 2px;
+    --c2-chart--border-top: 0;
+    --c2-chart--border-right: 0;
+    --c2-chart--border-bottom: 0;
+    --c2-chart--border-left: 0;
+    --c2-chart--background: transparent;
+  }
+  .market-watchlist c2-table {
+    width: 100%;
+    height: 326px;
+    --c2-table__header--height: 42px;
+    --c2-table__row--height: 56px;
+    --c2-table__row--border-bottom: 1px solid var(--site-color-outline-variant);
+  }
+  .market-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+</style>
+
+<div class="market-watchlist" data-market-table>
+  <c2-table client:only="lit" row-key="symbol" animate-updates update-duration="720"></c2-table>
+  <div class="market-controls">
+    <c2-button size="sm">Pause</c2-button>
+    <span data-market-status>Preparing replay…</span>
+  </div>
+</div>
+```
+
+</GalleryGrid>
+
+The essential renderer and update loop are:
+
+```js tag=CodeBlock
+trendColumn.renderCell = ({ row }) => html`
+  <c2-sparkline .data=${row.history} tone="auto"></c2-sparkline>
+`
+
+table.animateUpdates = true
+table.updateDuration = 720
+table.rowStyle = ({ row }) => ({
+  background: priceBandColor(row.price, row.low, row.high),
+  transition: 'background 240ms ease-out',
+})
+
+// The snapshot may add, remove, or modify rows. The table owns every transition.
+table.rows = nextMarketTick(table.rows)
+```

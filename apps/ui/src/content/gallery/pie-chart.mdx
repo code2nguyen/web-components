@@ -1,71 +1,79 @@
 ---
 title: 'Pie chart gallery'
-description: 'Parts of a whole: a pie, a donut with a legend, outside labels and a muted thick ring.'
+description: 'Revenue-mix and profit-pool views built from Apple’s 2025 SEC filing.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
+import ChartFinancialGallery from '../../components/ChartFinancialGallery.astro'
 
 import { PieChart } from '@c2n/chart/pie-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 
 <ExampleModules />
+<ChartFinancialGallery />
+
+Figures are USD billions from the product, service, and gross-margin tables in Apple's public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
 
 <GalleryGrid min="440">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-pie-chart
-  label-field="channel"
+  label-field="category"
+  inner-radius="0.58"
   legend="end"
-  data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'
+  data='[{"category":"iPhone","sales":209.586},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023},{"category":"Wearables","sales":35.686},{"category":"Services","sales":109.158}]'
 >
-  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  <c2-chart-series field="sales" label="Net sales"></c2-chart-series>
 </c2-pie-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Donut
-<c2-pie-chart
-  label-field="channel"
-  inner-radius="0.62"
-  legend="end"
-  data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'
->
-  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
-</c2-pie-chart>
-```
-
-```html tag=MdxCodeBlock,label=Pie with labels
-<c2-pie-chart
-  label-field="stage"
-  labels="outside"
-  sort="desc"
-  legend="none"
-  data='[{"stage":"Qualified","deals":48},{"stage":"Proposal","deals":31},{"stage":"Won","deals":22},{"stage":"Lost","deals":14}]'
->
-  <c2-chart-series field="deals" label="Deals"></c2-chart-series>
-</c2-pie-chart>
-```
-
-```html tag=MdxCodeBlock,label=Thick ring
+```html tag=MdxCodeBlock,label=Revenue mix — rich legend and tooltip
 <style>
-  .ring {
-    --c2-chart__series-1--color: #64748b;
-    --c2-chart__series-2--color: #0ea5e9;
-    --c2-chart__series-3--color: #6366f1;
+  .revenue-mix {
+    display: grid;
+    width: 100%;
+    gap: 12px;
+  }
+  .revenue-mix c2-pie-chart {
+    --c2-chart--height: 300px;
+    --c2-chart__slice--border: 3px solid var(--site-color-surface);
+  }
+</style>
+<div class="revenue-mix" data-finance-demo>
+  <c2-pie-chart
+    id="financial-pie-mix"
+    label-field="category"
+    inner-radius="0.64"
+    outer-radius="0.9"
+    data='[{"category":"iPhone","sales":209.586},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023},{"category":"Wearables","sales":35.686},{"category":"Services","sales":109.158}]'
+  >
+    <c2-chart-series field="sales" label="Net sales"></c2-chart-series>
+  </c2-pie-chart>
+  <c2-chart-legend for="financial-pie-mix"></c2-chart-legend>
+  <c2-chart-tooltip for="financial-pie-mix"></c2-chart-tooltip>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Where gross profit comes from
+<style>
+  .profit-mix {
+    --c2-chart__series-1--color: #2563eb;
+    --c2-chart__series-2--color: #7c3aed;
   }
 </style>
 <c2-pie-chart
-  class="ring"
-  label-field="tier"
-  inner-radius="0.6"
-  outer-radius="0.95"
-  start-angle="180"
-  labels="inside"
+  class="profit-mix"
+  label-field="category"
+  inner-radius="0.68"
+  labels="outside"
   legend="bottom"
-  data='[{"tier":"Free","users":6200},{"tier":"Pro","users":2400},{"tier":"Team","users":900}]'
+  data='[{"category":"Products","sales":112.887},{"category":"Services","sales":82.314}]'
 >
-  <c2-chart-series field="users" label="Users"></c2-chart-series>
+  <c2-chart-series field="sales" label="Gross profit"></c2-chart-series>
 </c2-pie-chart>
 ```
 

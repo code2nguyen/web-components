@@ -34,11 +34,27 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
             events?.hover(null)
             return
           }
+          let nearestSeriesIndex = 0
+          let nearestDistance = Number.POSITIVE_INFINITY
+          const cursorY = self.cursor.top ?? 0
+          for (let engineIndex = 1; engineIndex < self.series.length; engineIndex += 1) {
+            const series = self.series[engineIndex]
+            const value = data[engineIndex]?.[index]
+            if (!series?.show || value === null || value === undefined || !Number.isFinite(value)) continue
+            const pointY = self.valToPos(value, series.scale ?? 'y', true)
+            const distance = Math.abs(pointY - cursorY)
+            if (distance < nearestDistance) {
+              nearestDistance = distance
+              nearestSeriesIndex = engineIndex - 1
+            }
+          }
+          const pointer = self.cursor.event
+          const bounds = container?.getBoundingClientRect()
           events?.hover({
             index,
-            seriesIndex: Math.max(1, self.cursor.idxs?.findIndex((value) => value !== null && value !== undefined) ?? 1) - 1,
-            px: self.cursor.left ?? 0,
-            py: self.cursor.top ?? 0,
+            seriesIndex: nearestSeriesIndex,
+            px: pointer && bounds ? pointer.clientX - bounds.left : (self.cursor.left ?? 0),
+            py: pointer && bounds ? pointer.clientY - bounds.top : (self.cursor.top ?? 0),
           })
         },
       ],

@@ -1,0 +1,104 @@
+---
+import type { TableColumnConfig, TableRow } from '@c2n/table/table-types.js'
+
+interface Props {
+  variant: 'capabilities' | 'api'
+}
+
+const { variant } = Astro.props
+
+const capabilitiesColumns: TableColumnConfig[] = [
+  { field: 'capability', header: 'Capability', width: 'minmax(240px, 2fr)' },
+  { field: 'cartesian', header: 'Cartesian charts', width: 'minmax(160px, 1.2fr)' },
+  { field: 'sparkline', header: 'Sparkline', width: 'minmax(150px, 1fr)' },
+  { field: 'radial', header: 'Gauge / pie', width: 'minmax(180px, 1.2fr)' },
+]
+const capabilitiesRows: TableRow[] = [
+  { capability: 'Data frame, series and formatters', cartesian: 'Yes', sparkline: 'Yes', radial: 'Yes' },
+  { capability: 'Built-in or linked legend and tooltip', cartesian: 'Yes', sparkline: 'Yes, opt in', radial: 'Yes' },
+  {
+    capability: 'updateData, appendPoint, revision, dataSource',
+    cartesian: 'Yes',
+    sparkline: 'Yes',
+    radial: 'Yes; prefer updateData when labels change',
+  },
+  { capability: 'Resize, lazy rendering, states, slots and theme', cartesian: 'Yes', sparkline: 'Yes', radial: 'Yes' },
+  { capability: 'Hover, click, ready, error and series events', cartesian: 'Yes', sparkline: 'Yes', radial: 'Yes' },
+  {
+    capability: 'Axes, grid, cursor, zoom and range events',
+    cartesian: 'Axes and grid; uPlot adds range events',
+    sparkline: 'Available, hidden by default',
+    radial: 'Not applicable',
+  },
+  {
+    capability: 'Entry/update animation',
+    cartesian: 'ECharts: animation=auto; uPlot: immediate',
+    sparkline: 'Immediate redraw',
+    radial: 'animation=auto available',
+  },
+]
+
+const apiColumns: TableColumnConfig[] = [
+  { field: 'kind', header: 'Kind', width: 'minmax(130px, 0.6fr)' },
+  { field: 'surface', header: 'Shared surface', width: 'minmax(480px, 3fr)' },
+]
+const apiRows: TableRow[] = [
+  { kind: 'Data', surface: 'data, revision, dataSource, series, x-field, x-type, label-field, max-points' },
+  { kind: 'Presentation', surface: 'legend, tooltip, animation, locale, renderLegendItem, renderTooltip' },
+  { kind: 'Lifecycle', surface: 'loading, error, empty-message, lazy-render' },
+  { kind: 'Methods', surface: 'updateData, appendPoint, setSeriesVisible, getLegendItems, getTooltipContext' },
+  { kind: 'Events', surface: 'chart-ready, chart-error, point-click, point-hover, tooltip-change, legend-change, series-toggle, range-change' },
+  { kind: 'Slots', surface: 'default series, legend, tooltip, actions, empty, loading, error' },
+  { kind: 'Parts', surface: 'frame, plot-area, plot, overlay, tooltip, actions, state, legend, legend-item, legend-marker' },
+]
+
+const columns = variant === 'capabilities' ? capabilitiesColumns : apiColumns
+const rows = variant === 'capabilities' ? capabilitiesRows : apiRows
+---
+
+<c2-table stripe class={`chart-overview-table chart-overview-table--${variant}`} columns={JSON.stringify(columns)} rows={JSON.stringify(rows)}></c2-table>
+
+<script>
+  import '@c2n/table'
+</script>
+
+<style is:global>
+  c2-table.chart-overview-table {
+    display: block;
+    width: 100%;
+    margin: 18px 0 26px;
+    --c2-table--font-size: 13px;
+    --c2-table__cell--font-size: 13px;
+    --c2-table__header--height: 42px;
+    --c2-table__header--background: var(--site-color-surface-container-1);
+    --c2-table__row__odd--background: var(--site-color-surface-container-1);
+    --c2-table__row__hover--background: var(--site-color-surface-container-2);
+    --c2-table--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-table--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-table--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-table--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-table__header--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-table__row--border-bottom: 1px solid var(--site-color-outline-variant);
+  }
+
+  c2-table.chart-overview-table--capabilities {
+    height: 492px;
+    --c2-table__row--height: 64px;
+  }
+
+  c2-table.chart-overview-table--api {
+    height: 422px;
+    --c2-table__row--height: 54px;
+  }
+
+  c2-table.chart-overview-table::part(cell-content-capability),
+  c2-table.chart-overview-table::part(cell-content-cartesian),
+  c2-table.chart-overview-table::part(cell-content-sparkline),
+  c2-table.chart-overview-table::part(cell-content-radial),
+  c2-table.chart-overview-table::part(cell-content-surface) {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+    line-height: 1.35;
+  }
+</style>

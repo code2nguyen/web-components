@@ -136,6 +136,51 @@ const status = table.querySelector<HTMLElement & { renderCell?: unknown }>('c2-t
 status.renderCell = ({ value }) => html`<c2-badge tone=${value === 'active' ? 'success' : 'warning'}>${value}</c2-badge>`
 ```
 
+### Animating realtime row updates
+
+Add `animate-updates` when `rows` represents successive snapshots from a realtime feed. The table matches rows using
+`row-key` and smoothly interpolates every changed finite number, including numbers nested in arrays and objects. A
+custom `renderCell` receives the same intermediate row, which keeps prices, derived percentages, heat colors and
+embedded sparklines synchronized. With a stable `row-key`, additions expand into place and deletions remain briefly to
+collapse out instead of making the surrounding rows jump.
+
+```html tag=CodeBlock
+<c2-table row-key="symbol" animate-updates update-duration="600" highlight-updates update-highlight-field="price">
+  <c2-table-column field="symbol" header="Instrument"></c2-table-column>
+  <c2-table-column field="price" header="Last" format="currency" currency="USD"></c2-table-column>
+</c2-table>
+
+<script type="module">
+  const table = document.querySelector('c2-table')
+  table.rows = quotes
+
+  feed.addEventListener('snapshot', (event) => {
+    // Rows may be added, removed or modified. Assign once; the table owns the transitions.
+    table.rows = event.detail.rows
+  })
+</script>
+```
+
+Animation remains proportional to the rendered window rather than the whole dataset, and automatically becomes an
+immediate update when the user prefers reduced motion. Set `animateUpdates = false` or `update-duration="0"` when an
+individual feed should jump directly to its latest state.
+
+For a background that represents durable data state instead of a temporary update pulse, set the property-only
+`rowStyle` callback. It receives intermediate rows during animation, so a threshold transition is smooth too:
+
+```js tag=CodeBlock
+table.rowStyle = ({ row }) => {
+  const position = (row.price - row.low) / (row.high - row.low)
+  return {
+    background: position <= 0.3 ? '#fef2f2' : position >= 0.7 ? '#f0fdf4' : 'transparent',
+    transition: 'background 240ms ease-out',
+  }
+}
+```
+
+Use `highlight-updates` for a short acknowledgement pulse; use `rowStyle` when color encodes a state that should
+remain until the underlying data crosses another threshold.
+
 ### Loading rows lazily
 
 Set `dataSource` instead of `rows` and the table asks for one block at a time as rows scroll into view, using the total to size the scrollbar. Sorting is delegated to the source: it arrives as `request.sort`, and the cache is dropped whenever the sort changes.

@@ -1,0 +1,45 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    legend--gap: 12px,
+    legend--padding: 0,
+    legend--color: #71717a,
+    legend--font-size: 12px,
+    legend__disabled--opacity: 0.38,
+    legend-marker--size: 10px,
+    legend-marker--border-radius: 999px,
+  )
+);
+
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(legend--gap);
+  padding: css.cssVar(legend--padding);
+  color: css.cssVar(legend--color);
+  font-size: css.cssVar(legend--font-size);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.item[aria-pressed='false'] {
+  opacity: css.cssVar(legend__disabled--opacity);
+}
+
+.marker {
+  width: css.cssVar(legend-marker--size);
+  height: css.cssVar(legend-marker--size);
+  border-radius: css.cssVar(legend-marker--border-radius);
+  flex: none;
+}

@@ -8,20 +8,18 @@
 import type * as echarts from 'echarts/core'
 
 /** A registerable ECharts module, keyed by the chart type or component that needs it. */
-export type EchartsFeature = 'pie' | 'gauge' | 'scatter' | 'heatmap' | 'candlestick' | 'bar' | 'line' | 'grid' | 'legend' | 'tooltip' | 'visualMap' | 'dataZoom'
+export type EchartsFeature = 'pie' | 'gauge' | 'scatter' | 'candlestick' | 'bar' | 'line' | 'grid' | 'legend' | 'tooltip' | 'dataZoom'
 
 const LOADERS: Record<EchartsFeature, () => Promise<unknown[]>> = {
   pie: () => import('echarts/charts').then((m) => [m.PieChart]),
   gauge: () => import('echarts/charts').then((m) => [m.GaugeChart]),
   scatter: () => import('echarts/charts').then((m) => [m.ScatterChart]),
-  heatmap: () => import('echarts/charts').then((m) => [m.HeatmapChart]),
   candlestick: () => import('echarts/charts').then((m) => [m.CandlestickChart]),
   bar: () => import('echarts/charts').then((m) => [m.BarChart]),
   line: () => import('echarts/charts').then((m) => [m.LineChart]),
   grid: () => import('echarts/components').then((m) => [m.GridComponent]),
   legend: () => import('echarts/components').then((m) => [m.LegendComponent]),
   tooltip: () => import('echarts/components').then((m) => [m.TooltipComponent]),
-  visualMap: () => import('echarts/components').then((m) => [m.VisualMapComponent]),
   dataZoom: () => import('echarts/components').then((m) => [m.DataZoomComponent]),
 }
 

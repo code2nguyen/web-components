@@ -4,14 +4,20 @@ description: 'Bars over categories or time buckets, with several series drawn si
 category: 'Chart'
 package: '@c2n/chart'
 tag: 'c2-bar-chart'
-apiTags: ['c2-bar-chart', 'c2-chart-series']
+apiTags: ['c2-bar-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ChartEnergyDemo from '../../components/ChartEnergyDemo.astro'
 
 import { BarChart } from '@c2n/chart/bar-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Button } from '@c2n/button'
+
+<ChartEnergyDemo />
 
 Bars for comparing discrete things: teams, plans, weekdays, buckets. Several series are drawn side by side
 within each band, and `bar-width` and `bar-gap` decide how much of the band the group takes and how much of
@@ -32,47 +38,71 @@ npm install @c2n/chart uplot
 <style>
   .plot {
     width: 100%;
-    --c2-chart--height: 220px;
+    --c2-chart--height: 240px;
+  }
+  .energy-linked,
+  .energy-live {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+  .energy-live__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--site-color-on-surface-muted);
   }
 </style>
 
-<div data-label="One series over categories">
+<div data-label="Default">
   <c2-bar-chart
     class="plot"
-    label-field="team"
+    label-field="year"
     x-type="category"
-    data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'
+    data='[{"year":2020,"hydro":62.52,"wind":40.05,"solar":13.09},{"year":2021,"hydro":59.54,"wind":37.12,"solar":15.28},{"year":2022,"hydro":45.56,"wind":38.2,"solar":19.34},{"year":2023,"hydro":55.9,"wind":50.48,"solar":22.59},{"year":2024,"hydro":71.12,"wind":45.43,"solar":24.87}]'
   >
-    <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
+    <c2-chart-series field="hydro" label="Hydro"></c2-chart-series>
+    <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+    <c2-chart-series field="solar" label="Solar"></c2-chart-series>
   </c2-bar-chart>
 </div>
 
-<div data-label="Grouped bars">
-  <c2-bar-chart
-    class="plot"
-    label-field="quarter"
-    x-type="category"
-    data='[{"quarter":"Q1","new":42,"renewed":58},{"quarter":"Q2","new":51,"renewed":61},{"quarter":"Q3","new":38,"renewed":74},{"quarter":"Q4","new":66,"renewed":80}]'
-  >
-    <c2-chart-series field="new" label="New"></c2-chart-series>
-    <c2-chart-series field="renewed" label="Renewed"></c2-chart-series>
-  </c2-bar-chart>
+<div data-label="Custom legend + tooltip" data-energy-custom>
+  <div class="energy-linked">
+    <c2-bar-chart
+      id="bar-energy-custom"
+      class="plot"
+      label-field="year"
+      x-type="category"
+      data='[{"year":2020,"nuclear":353.83,"hydro":62.52,"wind":40.05,"solar":13.09},{"year":2021,"nuclear":379.36,"hydro":59.54,"wind":37.12,"solar":15.28},{"year":2022,"nuclear":294.73,"hydro":45.56,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"hydro":55.9,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"hydro":71.12,"wind":45.43,"solar":24.87}]'
+    >
+      <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+      <c2-chart-series field="hydro" label="Hydro"></c2-chart-series>
+      <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+      <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+    </c2-bar-chart>
+    <c2-chart-legend for="bar-energy-custom"></c2-chart-legend>
+    <c2-chart-tooltip for="bar-energy-custom"></c2-chart-tooltip>
+  </div>
 </div>
 
-<div data-label="Thin bars, no grid">
-  <c2-bar-chart
-    class="plot"
-    style="--c2-chart__grid--color: transparent"
-    label-field="day"
-    x-type="category"
-    bar-width="0.35"
-    legend="none"
-    data='[{"day":"Mon","runs":124},{"day":"Tue","runs":168},{"day":"Wed","runs":151},{"day":"Thu","runs":193},{"day":"Fri","runs":142},{"day":"Sat","runs":61},{"day":"Sun","runs":48}]'
-  >
-    <c2-chart-series field="runs" label="Runs"></c2-chart-series>
-  </c2-bar-chart>
+<div data-label="Realtime replay" data-energy-realtime>
+  <div class="energy-live">
+    <c2-bar-chart class="plot" label-field="year" x-type="category" data-energy-fields="hydro,wind,solar">
+      <c2-chart-series field="hydro" label="Hydro"></c2-chart-series>
+      <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+      <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+    </c2-bar-chart>
+    <div class="energy-live__controls">
+      <c2-button>Replay</c2-button>
+      <span data-energy-status>Ready at 2018</span>
+    </div>
+  </div>
 </div>
 ```
+
+The values come from one France 2015–2024 extract of the public [Our World in Data Energy dataset](https://github.com/owid/energy-data), in terawatt-hours. Here the same yearly rows used by the other chart pages are interpreted as categorical groups.
 
 ## Labelling the bands
 

@@ -27,6 +27,49 @@ test('renders a grid of the rows and columns it is given', async ({ page, render
   await accessible(page)
 })
 
+test('animate-updates interpolates numeric row fields before settling on the new snapshot', async ({ page, renderScenario }) => {
+  await renderScenario(table('animate-updates update-duration="240"'))
+  const score = page
+    .getByRole('row', { name: /Ada Lovelace/ })
+    .getByRole('gridcell')
+    .last()
+
+  await page.locator('c2-table').evaluate(
+    async (element, nextRows) => {
+      const subject = element as HTMLElement & { rows: typeof nextRows; updateComplete: Promise<unknown> }
+      subject.rows = nextRows
+      await subject.updateComplete
+    },
+    PEOPLE.map((person) => (person.id === '1' ? { ...person, score: 256000 } : person)),
+  )
+
+  await expect(score).toHaveText('128,000')
+  await expect(score).toHaveText('256,000', { timeout: 1000 })
+})
+
+test('animate-updates expands additions, collapses deletions and marks modified row direction', async ({ page, renderScenario }) => {
+  await renderScenario(table('animate-updates update-duration="240" highlight-updates update-highlight-field="score"'))
+  const nextRows = [{ ...PEOPLE[0], score: 256000 }, PEOPLE[2], { id: '4', name: 'Katherine Johnson', team: 'Flight', score: 143000 }]
+
+  await page.locator('c2-table').evaluate(async (element, rows) => {
+    const subject = element as HTMLElement & {
+      rows: typeof rows
+      rowStyle: (context: { row: (typeof rows)[number] }) => Record<string, string>
+      updateComplete: Promise<unknown>
+    }
+    subject.rowStyle = ({ row }) => ({ background: row.score >= 200000 ? 'rgb(240, 253, 244)' : 'transparent' })
+    subject.rows = rows
+    await subject.updateComplete
+  }, nextRows)
+
+  await expect(page.locator('[data-update-state="increased"]')).toContainText('Ada Lovelace')
+  await expect(page.locator('[data-row-key="1"]')).toHaveCSS('background-color', 'rgb(240, 253, 244)')
+  await expect(page.locator('[data-update-state="removed"]')).toContainText('Grace Hopper')
+  await expect(page.locator('[data-update-state="added"]')).toContainText('Katherine Johnson')
+  await expect(page.getByRole('row', { name: /Grace Hopper/ })).toHaveCount(0, { timeout: 1000 })
+  await expect(page.getByRole('row', { name: /Katherine Johnson/ })).toBeVisible()
+})
+
 test('a pinned column stays put, header and cells together, while the rest scrolls', async ({ page, renderScenario }) => {
   await renderScenario(
     table(

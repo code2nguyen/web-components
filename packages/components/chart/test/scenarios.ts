@@ -13,8 +13,12 @@ import '../src/area-chart'
 import '../src/bar-chart'
 import '../src/sparkline'
 import '../src/pie-chart'
+import '../src/gauge-chart'
+import '../src/scatter-chart'
+import '../src/candlestick-chart'
 import '../src/chart-series'
-import type { LineChart } from '../src/line-chart'
+import '../src/chart-legend'
+import '../src/chart-tooltip'
 import type { ChartBase } from '../src/chart-base'
 
 import type { EngineCounts } from './scenario-api'
@@ -79,6 +83,15 @@ function build(): void {
           <c2-chart-series field="s1" label="Second"></c2-chart-series>
         </c2-line-chart>`
       break
+    case 'linked-chrome':
+      main.innerHTML = `
+        <c2-line-chart id="linked-chart" x-field="t">
+          <c2-chart-series field="s0" label="First"></c2-chart-series>
+          <c2-chart-series field="s1" label="Second"></c2-chart-series>
+        </c2-line-chart>
+        <c2-chart-legend for="linked-chart"></c2-chart-legend>
+        <c2-chart-tooltip for="linked-chart" position="inline"></c2-chart-tooltip>`
+      break
     case 'empty':
       main.innerHTML = `<c2-line-chart id="chart" data="[]"></c2-line-chart>`
       break
@@ -131,6 +144,21 @@ function build(): void {
           <c2-chart-series field="revenue"></c2-chart-series>
         </c2-pie-chart>`
       break
+    case 'gauge':
+      main.innerHTML = `
+        <c2-gauge-chart id="chart" label-field="metric" max="100" pointer="none" precision="1" value-suffix="%">
+          <c2-chart-series field="value" label="Attainment"></c2-chart-series>
+        </c2-gauge-chart>`
+      break
+    case 'scatter':
+      main.innerHTML = `
+        <c2-scatter-chart id="chart" x-field="risk" symbol-size="14">
+          <c2-chart-series field="return" label="Portfolio"></c2-chart-series>
+        </c2-scatter-chart>`
+      break
+    case 'candlestick':
+      main.innerHTML = `<c2-candlestick-chart id="chart" label-field="date"></c2-candlestick-chart>`
+      break
     case 'inferred':
       // No series children at all: the chart must work out what to plot from the rows themselves.
       main.innerHTML = `<c2-line-chart id="chart" x-field="month"></c2-line-chart>`
@@ -181,7 +209,9 @@ function build(): void {
         </c2-line-chart>`
   }
 
-  const chart = main.querySelector('#chart') as LineChart | null
+  const chart = main.querySelector(
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart',
+  ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
 
@@ -196,6 +226,22 @@ function build(): void {
       { channel: 'Direct', revenue: 4200 },
       { channel: 'Search', revenue: 3100 },
       { channel: 'Social', revenue: 1800 },
+    ]
+  } else if (scenario === 'gauge') {
+    chart.data = [{ metric: 'Target', value: 78 }]
+  } else if (scenario === 'scatter') {
+    chart.data = [
+      { risk: 8, return: 6.2 },
+      { risk: 12, return: 9.1 },
+      { risk: 18, return: 11.8 },
+      { risk: 23, return: 8.7 },
+    ]
+  } else if (scenario === 'candlestick') {
+    chart.data = [
+      { date: 'Mon', open: 182, close: 187, low: 180, high: 189 },
+      { date: 'Tue', open: 187, close: 184, low: 182, high: 190 },
+      { date: 'Wed', open: 184, close: 191, low: 183, high: 193 },
+      { date: 'Thu', open: 191, close: 188, low: 186, high: 194 },
     ]
   } else if (scenario === 'dual-axis') {
     chart.data = [
@@ -240,13 +286,17 @@ function build(): void {
     setData: (points: number) => {
       chart.data = series(1, points)
     },
-    element: () => chart as unknown as ChartBase,
+    element: () => chart,
   }
 }
 
 build()
 
-void whenDrawn(Array.from(main.children)).then(() => {
+void whenDrawn(
+  Array.from(
+    main.querySelectorAll('c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart'),
+  ),
+).then(() => {
   main.dataset.ready = 'true'
   document.documentElement.dataset.modulesReady = 'true'
 })
