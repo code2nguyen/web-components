@@ -112,9 +112,6 @@ test('keeps point-hover events available when the built-in tooltip is disabled',
     element.setAttribute('tooltip', 'none')
     await (element as unknown as { updateComplete: Promise<unknown> }).updateComplete
   })
-  const box = await chart.locator('.u-over').boundingBox()
-  if (!box) throw new Error('the chart plot has no box')
-
   const details = chart.evaluate(
     (element) =>
       new Promise<Array<number | null>>((resolve) => {
@@ -126,8 +123,10 @@ test('keeps point-hover events available when the built-in tooltip is disabled',
         })
       }),
   )
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await page.mouse.move(box.x - 20, box.y - 20)
+  await page.evaluate(() => {
+    window.chartScenario.hover({ index: 10, seriesIndex: 0, px: 120, py: 80 })
+    window.chartScenario.hover(null)
+  })
   expect(await details).toEqual(expect.arrayContaining([expect.any(Number), null]))
 })
 

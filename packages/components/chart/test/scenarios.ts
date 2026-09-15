@@ -19,28 +19,43 @@ import '../src/candlestick-chart'
 import '../src/chart-series'
 import '../src/chart-legend'
 import '../src/chart-tooltip'
+import type { ChartAdapter, ChartAdapterEvents } from '../src/chart-adapter'
 import type { ChartBase } from '../src/chart-base'
 
 import type { EngineCounts } from './scenario-api'
 
 const counts: EngineCounts = { created: 0, setData: 0, setOptions: 0, resize: 0 }
+let adapterEvents: ChartAdapterEvents | undefined
 
 /**
  * Wraps the adapter an element creates so every engine call is counted. Patching the prototype keeps the
  * production code free of test hooks.
  */
 function instrument(element: ChartBase): void {
-  const target = element as unknown as { createAdapter(): Promise<Record<string, (...args: unknown[]) => unknown>> }
+  const target = element as unknown as { createAdapter(): Promise<ChartAdapter> }
   const original = target.createAdapter.bind(target)
   target.createAdapter = async () => {
     const adapter = await original()
     counts.created += 1
-    for (const method of ['setData', 'setOptions', 'resize'] as const) {
-      const inner = adapter[method]
-      adapter[method] = (...args: unknown[]) => {
-        counts[method] += 1
-        return inner.apply(adapter, args)
-      }
+    const create = adapter.create.bind(adapter)
+    adapter.create = (host, options, data, events) => {
+      adapterEvents = events
+      return create(host, options, data, events)
+    }
+    const setData = adapter.setData.bind(adapter)
+    adapter.setData = (data) => {
+      counts.setData += 1
+      setData(data)
+    }
+    const setOptions = adapter.setOptions.bind(adapter)
+    adapter.setOptions = (options, mode) => {
+      counts.setOptions += 1
+      setOptions(options, mode)
+    }
+    const resize = adapter.resize.bind(adapter)
+    adapter.resize = (width, height) => {
+      counts.resize += 1
+      resize(width, height)
     }
     return adapter
   }
@@ -286,6 +301,7 @@ function build(): void {
     setData: (points: number) => {
       chart.data = series(1, points)
     },
+    hover: (detail) => adapterEvents?.hover(detail),
     element: () => chart,
   }
 }

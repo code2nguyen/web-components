@@ -23,6 +23,8 @@ export interface ChartScenarioApi {
   append(count: number): void
   /** Replaces the dataset with `points` freshly generated rows. */
   setData(points: number): void
+  /** Sends a normalized hover callback through the adapter boundary. */
+  hover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void
   element(): HTMLElement
 }
 

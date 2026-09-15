@@ -51,7 +51,7 @@ test('animate-updates expands additions, collapses deletions and marks modified 
   await renderScenario(table('animate-updates update-duration="240" highlight-updates update-highlight-field="score"'))
   const nextRows = [{ ...PEOPLE[0], score: 256000 }, PEOPLE[2], { id: '4', name: 'Katherine Johnson', team: 'Flight', score: 143000 }]
 
-  await page.locator('c2-table').evaluate(async (element, rows) => {
+  const transition = await page.locator('c2-table').evaluate(async (element, rows) => {
     const subject = element as HTMLElement & {
       rows: typeof rows
       rowStyle: (context: { row: (typeof rows)[number] }) => Record<string, string>
@@ -60,12 +60,24 @@ test('animate-updates expands additions, collapses deletions and marks modified 
     subject.rowStyle = ({ row }) => ({ background: row.score >= 200000 ? 'rgb(240, 253, 244)' : 'transparent' })
     subject.rows = rows
     await subject.updateComplete
+
+    const root = subject.shadowRoot!
+    const text = (state: string) => root.querySelector(`[data-update-state="${state}"]`)?.textContent ?? ''
+    const increased = root.querySelector<HTMLElement>('[data-update-state="increased"]')
+    return {
+      increased: text('increased'),
+      removed: text('removed'),
+      added: text('added'),
+      background: increased ? getComputedStyle(increased).backgroundColor : '',
+    }
   }, nextRows)
 
-  await expect(page.locator('[data-update-state="increased"]')).toContainText('Ada Lovelace')
-  await expect(page.locator('[data-row-key="1"]')).toHaveCSS('background-color', 'rgb(240, 253, 244)')
-  await expect(page.locator('[data-update-state="removed"]')).toContainText('Grace Hopper')
-  await expect(page.locator('[data-update-state="added"]')).toContainText('Katherine Johnson')
+  expect(transition).toEqual({
+    increased: expect.stringContaining('Ada Lovelace'),
+    removed: expect.stringContaining('Grace Hopper'),
+    added: expect.stringContaining('Katherine Johnson'),
+    background: 'rgb(240, 253, 244)',
+  })
   await expect(page.getByRole('row', { name: /Grace Hopper/ })).toHaveCount(0, { timeout: 1000 })
   await expect(page.getByRole('row', { name: /Katherine Johnson/ })).toBeVisible()
 })
