@@ -233,7 +233,15 @@ export class Details extends LitElement {
   /** Opens or closes the panel. */
   toggle(force?: boolean) {
     if (this.disabled) return
-    this.expanded = force ?? !this.expanded
+    // `expanded` can be one Lit render ahead of the native disclosure when an app restores state. Toggle from what
+    // the visitor can currently see so the first activation never only reconciles those two states.
+    const currentlyExpanded = this.closing ? false : this.detailsElement.open
+    const expanded = force ?? !currentlyExpanded
+    if (expanded) {
+      this.closing = false
+      this.detailsElement.open = true
+    }
+    this.expanded = expanded
   }
 
   protected renderIcon() {

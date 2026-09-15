@@ -5,7 +5,7 @@ import '@c2n/theme/base.css'
 import '../assets/global.scss'
 import SiteIconButton from '../components/ui/SiteIconButton.astro'
 import { FeatherGithubIcon, FeatherMenuIcon, FeatherSearchIcon } from '../components/ui/icons'
-import { Button } from '@c2n/button'
+import { Header } from '@c2n/header'
 import { LinkButton } from '@c2n/link-button'
 import ThemeToggle from '../components/ThemeToggle.astro'
 import SearchPalette from '../components/SearchPalette.astro'
@@ -49,15 +49,8 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header">
-      <div class="site-header__inner">
-        {
-          withSidebar && (
-            <SiteIconButton label="Open navigation" tooltip={false} class="site-header__menu" data-toggle-sidebar>
-              <FeatherMenuIcon client:load />
-            </SiteIconButton>
-          )
-        }
+    <Header client:load class="site-header" sticky blurred navigation-label="Primary">
+      <div slot="brand" class="site-header__brand-group">
         <a href={`${base}/`} class="site-header__brand" aria-label="c2n web components home">
           <Fragment set:html={logoRef} />
           <span class="site-header__wordmark">c2n<span class="site-header__wordmark-muted">/web-components</span></span>
@@ -71,23 +64,18 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
         >
           v{packageVersion}
         </a>
+      </div>
 
-        <nav class="site-header__nav" aria-label="Primary">
-          <LinkButton client:load class="site-header__nav-link" href={`${base}/components/`} selected={section === 'components'}>Components</LinkButton>
-          <LinkButton client:load class="site-header__nav-link" href={`${base}/icons/`} selected={section === 'icons'}>Icons</LinkButton>
-          <LinkButton client:load class="site-header__nav-link" href={`${base}/guides/`} selected={section === 'guides'}>Guides</LinkButton>
-          <LinkButton client:load class="site-header__nav-link" href={`${base}/examples/`} selected={section === 'examples'}>Examples</LinkButton>
-          <LinkButton client:load class="site-header__nav-link" href={`${base}/#getting-started`}>Getting started</LinkButton>
-        </nav>
+      <div class="site-header__nav">
+        <LinkButton client:load class="site-header__nav-link" href={`${base}/components/`} selected={section === 'components'}>Components</LinkButton>
+        <LinkButton client:load class="site-header__nav-link" href={`${base}/icons/`} selected={section === 'icons'}>Icons</LinkButton>
+        <LinkButton client:load class="site-header__nav-link" href={`${base}/guides/`} selected={section === 'guides'}>Guides</LinkButton>
+        <LinkButton client:load class="site-header__nav-link" href={`${base}/examples/`} selected={section === 'examples'}>Examples</LinkButton>
+        <LinkButton client:load class="site-header__nav-link" href={`${base}/#getting-started`}>Getting started</LinkButton>
+      </div>
 
-        <div class="site-header__spacer"></div>
-
-        <Button client:load class="site-header__search" data-open-search aria-label="Search components">
-          <FeatherSearchIcon slot="prefix-icon" />
-          <span class="site-header__search-label">Search</span>
-          <kbd slot="suffix-icon" class="kbd">⌘K</kbd>
-        </Button>
-        <SiteIconButton label="Search components" class="site-header__search-compact" data-open-search>
+      <div slot="actions" class="site-header__actions">
+        <SiteIconButton label="Search components" tooltip="Search components (⌘K)" class="site-header__search" data-open-search>
           <FeatherSearchIcon client:load />
         </SiteIconButton>
         <ThemeToggle />
@@ -96,7 +84,17 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
           <c2-tooltip>GitHub repository</c2-tooltip>
         </LinkButton>
       </div>
-    </header>
+
+      {
+        withSidebar && (
+          <div slot="mobile-trigger" class="site-header__mobile-trigger">
+            <SiteIconButton label="Open navigation" tooltip={false} class="site-header__menu" data-toggle-sidebar>
+              <FeatherMenuIcon client:load />
+            </SiteIconButton>
+          </div>
+        )
+      }
+    </Header>
 
     <main id="main" class="site-main">
       <slot />
@@ -131,30 +129,39 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
         }
       }
 
-      .site-header {
-        position: sticky;
-        top: 0;
+      // Theme the Lit island host globally, matching the site's other component wrappers.
+      :global(.site-header) {
         z-index: 1000;
-        height: var(--site-header-height);
-        background: color-mix(in srgb, var(--site-color-surface) 85%, transparent);
-        backdrop-filter: saturate(180%) blur(12px);
-        -webkit-backdrop-filter: saturate(180%) blur(12px);
-        border-bottom: 1px solid var(--site-color-outline-variant);
+        --c2-header--min-height: var(--site-header-height);
+        --c2-header--padding: 0 var(--site-gutter);
+        --c2-header--gap: 8px;
+        --c2-header--background: var(--site-color-surface);
+        --c2-header--border-bottom: 1px solid var(--site-color-outline-variant);
+        --c2-header--backdrop-filter: saturate(180%) blur(12px);
+        --c2-header__blurred--background: color-mix(in srgb, var(--site-color-surface) 85%, transparent);
+        --c2-header__content--max-width: var(--site-page-max-width);
+        --c2-header__brand--gap: 0;
+        --c2-header__actions--gap: 0;
+      }
 
-        &__inner {
-          height: 100%;
-          max-width: var(--site-page-max-width);
-          margin: 0 auto;
-          padding: 0 var(--site-gutter);
+      .site-header {
+        &__brand-group,
+        &__actions,
+        &__mobile-trigger {
           display: flex;
           align-items: center;
           gap: 8px;
         }
+        &__actions {
+          gap: 4px;
+        }
+        &__mobile-trigger {
+          display: none;
+        }
 
         // Hosts rendered by SiteIconButton / LinkButton carry no scoped attribute, hence :global().
         :global(.site-header__menu) {
-          display: none;
-          margin-left: -8px;
+          display: inline-flex;
         }
         :global(.site-header__github) {
           --c2-link-button__container--padding-top: 9px;
@@ -241,38 +248,9 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
           }
         }
 
-        &__spacer {
-          flex: 1;
-        }
-
-        // A field-shaped button: fixed width, label at the left, shortcut pushed to the far edge — which is
-        // what `container--width` and `container--justify-content` exist for.
         :global(.site-header__search) {
-          margin-right: 4px;
-          --c2-button__container--width: 220px;
-          --c2-button__container--justify-content: flex-start;
-          // The label takes the slack, so the shortcut lands at the right edge rather than beside the text.
-          --c2-button__label--flex-grow: 1;
-          --c2-button__label--justify-content: flex-start;
-          --c2-button__container--height: 34px;
-          --c2-button__container--padding-left: 12px;
-          --c2-button__container--padding-right: 10px;
-          --c2-button__container--gap: 8px;
-          --c2-button__container--border-radius: var(--site-radius-sm);
-          --c2-button__container--border: 1px solid var(--site-color-outline-variant);
-          --c2-button__container--background-color: var(--site-color-surface-container-1);
-          --c2-button__container--color: var(--site-color-on-surface-muted);
-          --c2-button__container--font-size: 13px;
-          --c2-button__container--font-weight: 400;
-          --c2-button__container__hover--background-color: var(--site-color-surface-container-1);
-          --c2-button__container__hover--border: 1px solid var(--site-color-outline);
-          --c2-button__container__hover--color: var(--site-color-on-surface-variant);
-          --c2-button__container__focus--outline: 2px solid var(--site-color-primary);
-          --c2-button__icon--size: 16px;
-          --c2-feather-icon--size: 16px;
-        }
-        :global(.site-header__search-compact) {
-          display: none;
+          --c2-icon-button__icon--width: 16px;
+          --c2-icon-button__icon--height: 16px;
         }
       }
 
@@ -304,17 +282,11 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
 
       @media (max-width: 959.98px) {
         .site-header {
-          :global(.site-header__menu) {
-            display: inline-flex;
-          }
           &__nav {
             display: none;
           }
-          :global(.site-header__search) {
-            display: none;
-          }
-          :global(.site-header__search-compact) {
-            display: inline-flex;
+          &__mobile-trigger {
+            display: flex;
           }
         }
       }

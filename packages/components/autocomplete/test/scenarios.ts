@@ -30,6 +30,7 @@ if (scenario === 'remote') {
   subject.debounce = 0
   subject.dataSource = async (query, signal) => {
     subject.dataset.request = query
+    subject.dataset.requestCount = String(Number(subject.dataset.requestCount ?? 0) + 1)
     await new Promise<void>((resolve, reject) => {
       const timer = setTimeout(resolve, query === 'p' ? 120 : 10)
       signal.addEventListener('abort', () => {

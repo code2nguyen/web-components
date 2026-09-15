@@ -22,6 +22,7 @@ import styles from './header.scss?inline'
  * @cssproperty {pixel} [--c2-header--sticky-top=0px]
  * @cssproperty {backdrop-filter} [--c2-header--backdrop-filter=blur(16px)]
  * @cssproperty {color} [--c2-header__blurred--background=rgba(255, 255, 255, 0.82)]
+ * @cssproperty {max-width} [--c2-header__content--max-width=none] - Constrains the inner content while the header surface remains full-width.
  * @cssproperty {pixel} [--c2-header__brand--gap=8px]
  * @cssproperty {pixel} [--c2-header__actions--gap=8px]
  */
@@ -41,10 +42,12 @@ export class Header extends LitElement {
   override render() {
     return html`
       <header class="c2-header" part="header">
-        <div class="brand" part="brand"><slot name="brand"></slot></div>
-        <nav class="navigation" part="navigation" aria-label=${this.navigationLabel}><slot></slot></nav>
-        <div class="actions" part="actions"><slot name="actions"></slot></div>
-        <div class="mobile-trigger" part="mobile-trigger"><slot name="mobile-trigger"></slot></div>
+        <div class="content" part="content">
+          <div class="brand" part="brand"><slot name="brand"></slot></div>
+          <nav class="navigation" part="navigation" aria-label=${this.navigationLabel}><slot></slot></nav>
+          <div class="actions" part="actions"><slot name="actions"></slot></div>
+          <div class="mobile-trigger" part="mobile-trigger"><slot name="mobile-trigger"></slot></div>
+        </div>
       </header>
     `
   }

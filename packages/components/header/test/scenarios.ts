@@ -14,6 +14,7 @@ const subject = document.querySelector('c2-header')!
 if (scenario === 'glass') {
   subject.toggleAttribute('sticky', true)
   subject.toggleAttribute('blurred', true)
+  subject.style.setProperty('--c2-header__content--max-width', '640px')
 }
 
 await subject.updateComplete
