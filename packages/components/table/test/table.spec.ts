@@ -60,6 +60,8 @@ test('animate-updates expands additions, collapses deletions and marks modified 
     subject.rowStyle = ({ row }) => ({ background: row.score >= 200000 ? 'rgb(240, 253, 244)' : 'transparent' })
     subject.rows = rows
     await subject.updateComplete
+    // The virtualizer observes the longer transition list after the first render and schedules its expanded range.
+    await subject.updateComplete
 
     const root = subject.shadowRoot!
     const text = (state: string) => root.querySelector(`[data-update-state="${state}"]`)?.textContent ?? ''
@@ -68,7 +70,7 @@ test('animate-updates expands additions, collapses deletions and marks modified 
       increased: text('increased'),
       removed: text('removed'),
       added: text('added'),
-      background: increased ? getComputedStyle(increased).backgroundColor : '',
+      background: increased?.style.background ?? '',
     }
   }, nextRows)
 
@@ -80,6 +82,7 @@ test('animate-updates expands additions, collapses deletions and marks modified 
   })
   await expect(page.getByRole('row', { name: /Grace Hopper/ })).toHaveCount(0, { timeout: 1000 })
   await expect(page.getByRole('row', { name: /Katherine Johnson/ })).toBeVisible()
+  await expect(page.locator('c2-table').locator('[data-row-key="1"]')).toHaveCSS('background-color', 'rgb(240, 253, 244)')
 })
 
 test('a pinned column stays put, header and cells together, while the rest scrolls', async ({ page, renderScenario }) => {

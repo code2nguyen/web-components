@@ -112,22 +112,17 @@ test('keeps point-hover events available when the built-in tooltip is disabled',
     element.setAttribute('tooltip', 'none')
     await (element as unknown as { updateComplete: Promise<unknown> }).updateComplete
   })
-  const details = chart.evaluate(
-    (element) =>
-      new Promise<Array<number | null>>((resolve) => {
-        const seen: Array<number | null> = []
-        element.addEventListener('point-hover', (event) => {
-          const detail = (event as CustomEvent<{ seriesIndex: number } | null>).detail
-          seen.push(detail?.seriesIndex ?? null)
-          if (detail === null) resolve(seen)
-        })
-      }),
-  )
-  await page.evaluate(() => {
+  const details = await chart.evaluate((element) => {
+    const seen: Array<number | null> = []
+    element.addEventListener('point-hover', (event) => {
+      const detail = (event as CustomEvent<{ seriesIndex: number } | null>).detail
+      seen.push(detail?.seriesIndex ?? null)
+    })
     window.chartScenario.hover({ index: 10, seriesIndex: 0, px: 120, py: 80 })
     window.chartScenario.hover(null)
+    return seen
   })
-  expect(await details).toEqual(expect.arrayContaining([expect.any(Number), null]))
+  expect(details).toEqual(expect.arrayContaining([expect.any(Number), null]))
 })
 
 test('shows the empty, loading and error states in precedence order', async ({ page, scenario }) => {
