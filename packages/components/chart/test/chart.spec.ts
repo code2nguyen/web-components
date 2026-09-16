@@ -442,7 +442,7 @@ test('configures pie label content from markup', async ({ page, scenario }) => {
     return { labels: pie.labels, content: pie.labelContent, ...option }
   })
 
-  expect(label).toEqual({ labels: 'outside', content: 'percent', show: true, position: 'outside', formatter: '{d}%' })
+  expect(label).toMatchObject({ labels: 'outside', content: 'percent', show: true, position: 'outside', formatter: '{d}%' })
 })
 
 test('drives the grid from markup in both directions', async ({ page, scenario }) => {

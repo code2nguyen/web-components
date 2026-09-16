@@ -361,6 +361,9 @@ export abstract class ChartBase extends LitElement {
    */
   protected override firstUpdated(): void {
     if (this.plotElement) this.#resizeObserver?.observe(this.plotElement)
+    // The controller may have been read before the shadow-root probes existed, in which case it cached
+    // the fallback theme. Resolve it again now so first-paint CSS variables reach the engine.
+    this.themeController.invalidate()
   }
 
   override disconnectedCallback(): void {
