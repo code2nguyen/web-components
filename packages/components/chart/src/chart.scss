@@ -126,12 +126,12 @@
 }
 
 /* uPlot has no entry animation. Reveal its already-rendered canvas once, when the adapter becomes ready. */
-:host([data-chart-engine='uplot'][animation='auto']) .plot {
+:host([data-chart-engine='uplot'][animation='auto']) .plot .u-under {
   animation: c2-chart-plot-reveal 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Bars enter from their baseline instead of using the line/area chart's horizontal reveal. */
-:host(c2-bar-chart[data-chart-engine='uplot'][animation='auto']) .plot {
+:host(c2-bar-chart[data-chart-engine='uplot'][animation='auto']) .plot .u-under {
   animation-name: c2-chart-bar-grow;
   animation-duration: 600ms;
 }
@@ -159,8 +159,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :host([data-chart-engine='uplot'][animation='auto']) .plot,
-  :host(c2-bar-chart[data-chart-engine='uplot'][animation='auto']) .plot {
+  :host([data-chart-engine='uplot'][animation='auto']) .plot .u-under,
+  :host(c2-bar-chart[data-chart-engine='uplot'][animation='auto']) .plot .u-under {
     animation: none;
   }
 }
