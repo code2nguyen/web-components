@@ -107,9 +107,10 @@ for a classic donut, `0.9` for a thin ring. `start-angle` is measured in degrees
 three o'clock, so `90` (the default) starts at the top and `180` starts at nine o'clock. `sort` orders the
 slices by value — `desc` is worth setting whenever the data order carries no meaning.
 
-`labels` draws the slice names on the chart (`inside` or `outside`) and defaults to `none`, since a legend
-usually reads better in a dashboard. Adjacent slices are separated by a hairline in the surface colour, so a
-donut sitting on a dark card keeps its separation without any extra styling.
+`labels` places annotations on the chart (`inside` or `outside`) and defaults to `none`, since a legend usually
+reads better in a dashboard. `label-content` chooses what those annotations show: `name`, `value`, `percent`,
+or `name-percent`. Adjacent slices are separated by a hairline in the surface colour, so a donut sitting on a
+dark card keeps its separation without any extra styling.
 
 ## Data
 

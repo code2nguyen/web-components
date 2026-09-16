@@ -1,6 +1,6 @@
 ---
 title: 'Gauge chart gallery'
-description: 'Bounded KPI views built from Apple’s public 2025 filing.'
+description: 'Focused KPI gauges for mix, margin, growth and target attainment.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -12,47 +12,161 @@ import { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
 import { ChartLegend } from '@c2n/chart/chart-legend.js'
 import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Card } from '@c2n/card'
 
 <ExampleModules />
 <ChartFinancialGallery />
 
-Values are derived from Apple's public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
+Values are derived from Apple's public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm). The clean progress-ring examples use `marks="none"`, `pointer="none"` and one labelled division so only the scale endpoints remain.
 
-<GalleryGrid min="420">
+<GalleryGrid min="280">
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-gauge-chart min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
-  <c2-chart-series field="value" label="Services mix"></c2-chart-series>
+<c2-gauge-chart data='[{"metric":"Progress","value":68}]'>
+  <c2-chart-series field="value" label="Progress"></c2-chart-series>
 </c2-gauge-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Services mix · decision context
+```html tag=MdxCodeBlock,label=Compact services mix
 <style>
-  .services-gauge {
-    display: grid;
-    width: 100%;
-    gap: 10px;
-    --c2-chart__series-1--color: #7c3aed;
-  }
+  .compact-gauge-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 2px; --c2-card--padding-right: 14px; --c2-card--padding-bottom: 8px; --c2-card--padding-left: 14px; --c2-card__header--padding-top: 16px; --c2-card__header--padding-right: 16px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 16px; --c2-card__footer--padding-top: 0; --c2-card__footer--padding-right: 16px; --c2-card__footer--padding-bottom: 16px; --c2-card__footer--padding-left: 16px; }
+  .compact-gauge-card__heading, .compact-gauge-card__footer { display: grid; gap: 3px; }
+  .compact-gauge-card__heading strong { font-size: 14px; }
+  .compact-gauge-card__heading span, .compact-gauge-card__footer span { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .compact-gauge-card c2-gauge-chart { width: 100%; --c2-chart--height: 180px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__series-1--color: #f59e0b; --c2-chart__grid--color: #f1f1f4; }
 </style>
-<div class="services-gauge" data-finance-demo>
-  <c2-gauge-chart id="gallery-services-gauge" min="0" max="40" precision="1" value-suffix="%" legend="none" split-number="4" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'>
-    <c2-chart-series field="value" label="Services"></c2-chart-series>
+<c2-card class="compact-gauge-card">
+  <div slot="header" class="compact-gauge-card__heading">
+    <strong>Services mix · Compact</strong>
+    <span>Share of FY2025 revenue</span>
+  </div>
+  <c2-gauge-chart
+    min="0"
+    max="100"
+    precision="1"
+    value-suffix="%"
+    pointer="none"
+    marks="none"
+    split-number="1"
+    legend="none"
+    label-field="metric"
+    data='[{"metric":"Services mix","value":26.23}]'
+  >
+    <c2-chart-series field="value" label="Services mix"></c2-chart-series>
   </c2-gauge-chart>
-  <c2-chart-legend for="gallery-services-gauge"></c2-chart-legend>
-  <c2-chart-tooltip for="gallery-services-gauge"></c2-chart-tooltip>
-</div>
+  <div slot="footer" class="compact-gauge-card__footer">
+    <strong>Up from 18.7% in FY2021</strong>
+    <span>+7.5 percentage points ↗</span>
+  </div>
+</c2-card>
 ```
 
-```html tag=MdxCodeBlock,label=Gross margin · pointerless progress
+```html tag=MdxCodeBlock,label=Standard gross margin
 <style>
-  .margin-gauge {
-    --c2-chart__series-1--color: #0f9f6e;
-  }
+  .standard-gauge-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 2px; --c2-card--padding-right: 16px; --c2-card--padding-bottom: 8px; --c2-card--padding-left: 16px; --c2-card__header--padding-top: 18px; --c2-card__header--padding-right: 18px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 18px; --c2-card__footer--padding-top: 0; --c2-card__footer--padding-right: 18px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 18px; }
+  .standard-gauge-card__heading, .standard-gauge-card__footer { display: grid; gap: 3px; }
+  .standard-gauge-card__heading strong { font-size: 15px; }
+  .standard-gauge-card__heading span, .standard-gauge-card__footer span { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .standard-gauge-card c2-gauge-chart { width: 100%; --c2-chart--height: 220px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__series-1--color: #8b5cf6; --c2-chart__grid--color: #f1f1f4; }
 </style>
-<c2-gauge-chart class="margin-gauge" min="0" max="60" precision="1" value-suffix="%" pointer="none" legend="none" label-field="metric" data='[{"metric":"Gross margin","value":46.91}]'>
-  <c2-chart-series field="value" label="Gross margin"></c2-chart-series>
-</c2-gauge-chart>
+<c2-card class="standard-gauge-card">
+  <div slot="header" class="standard-gauge-card__heading">
+    <strong>Gross margin · Standard</strong>
+    <span>FY2025 profitability</span>
+  </div>
+  <c2-gauge-chart
+    min="0"
+    max="100"
+    precision="1"
+    value-suffix="%"
+    pointer="none"
+    marks="none"
+    split-number="1"
+    legend="none"
+    label-field="metric"
+    data='[{"metric":"Gross margin","value":46.91}]'
+  >
+    <c2-chart-series field="value" label="Gross margin"></c2-chart-series>
+  </c2-gauge-chart>
+  <div slot="footer" class="standard-gauge-card__footer">
+    <strong>Expanded 0.7 points year over year</strong>
+    <span>Gross profit ÷ net sales</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Large net income KPI
+<style>
+  .large-gauge-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 2px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 8px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 0; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 20px; --c2-card__footer--padding-left: 20px; }
+  .large-gauge-card__heading, .large-gauge-card__footer { display: grid; gap: 3px; }
+  .large-gauge-card__heading strong { font-size: 16px; }
+  .large-gauge-card__heading span, .large-gauge-card__footer span { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .large-gauge-card c2-gauge-chart { width: 100%; --c2-chart--height: 260px; --c2-chart--font-size: 14px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__series-1--color: #2563eb; --c2-chart__grid--color: #f1f1f4; }
+</style>
+<c2-card class="large-gauge-card">
+  <div slot="header" class="large-gauge-card__heading">
+    <strong>Net income margin · Large</strong>
+    <span>Decision-grade profitability KPI</span>
+  </div>
+  <c2-gauge-chart
+    min="0"
+    max="100"
+    precision="1"
+    value-suffix="%"
+    pointer="none"
+    marks="none"
+    split-number="1"
+    legend="none"
+    label-field="metric"
+    data='[{"metric":"Net margin","value":26.91}]'
+  >
+    <c2-chart-series field="value" label="Net margin"></c2-chart-series>
+  </c2-gauge-chart>
+  <div slot="footer" class="large-gauge-card__footer">
+    <strong>$112.0B net income in FY2025</strong>
+    <span>Up 19.5% year over year ↗</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Decision context with rich legend
+<style>
+  .rich-gauge-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 2px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 8px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 0; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 20px; --c2-card__footer--padding-left: 20px; }
+  .rich-gauge-card__heading, .rich-gauge-card__footer, .rich-gauge-card__plot { display: grid; gap: 4px; }
+  .rich-gauge-card__heading strong { font-size: 15px; }
+  .rich-gauge-card__heading span, .rich-gauge-card__footer span { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .rich-gauge-card__plot { gap: 10px; }
+  .rich-gauge-card c2-gauge-chart { width: 100%; --c2-chart--height: 230px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__series-1--color: #0d9488; --c2-chart__grid--color: #f1f1f4; }
+</style>
+<c2-card class="rich-gauge-card" data-finance-demo>
+  <div slot="header" class="rich-gauge-card__heading">
+    <strong>Services mix · Decision context</strong>
+    <span>Linked presenter components</span>
+  </div>
+  <div class="rich-gauge-card__plot">
+    <c2-gauge-chart
+      id="gallery-services-gauge"
+      min="0"
+      max="100"
+      precision="1"
+      value-suffix="%"
+      pointer="none"
+      marks="none"
+      split-number="1"
+      legend="none"
+      label-field="metric"
+      data='[{"metric":"Services mix","value":26.23}]'
+    >
+      <c2-chart-series field="value" label="Services"></c2-chart-series>
+    </c2-gauge-chart>
+    <c2-chart-legend for="gallery-services-gauge"></c2-chart-legend>
+    <c2-chart-tooltip for="gallery-services-gauge"></c2-chart-tooltip>
+  </div>
+  <div slot="footer" class="rich-gauge-card__footer">
+    <strong>Hover the arc for source context</strong>
+    <span>Legend and tooltip stay synchronized</span>
+  </div>
+</c2-card>
 ```
 
 </GalleryGrid>

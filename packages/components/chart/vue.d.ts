@@ -17,6 +17,7 @@ import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart, GaugeChartEventMap } from '@c2n/chart/gauge-chart.js'
 import type { LineChart, LineChartEventMap } from '@c2n/chart/line-chart.js'
 import type { PieChart, PieChartEventMap } from '@c2n/chart/pie-chart.js'
+import type { RadarChart, RadarChartEventMap } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart, ScatterChartEventMap } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline, SparklineEventMap } from '@c2n/chart/sparkline.js'
 
@@ -146,6 +147,7 @@ declare module 'vue' {
         'inner-radius'?: unknown
         'outer-radius'?: unknown
         'start-angle'?: unknown
+        'label-content'?: unknown
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
@@ -160,6 +162,27 @@ declare module 'vue' {
         onChartError?: (event: PieChartEventMap['chart-error']) => void
         onPointHover?: (event: PieChartEventMap['point-hover']) => void
         onPointClick?: (event: PieChartEventMap['point-click']) => void
+      }
+    >
+    'c2-radar-chart': DefineComponent<
+      C2Props<RadarChart> & {
+        'start-angle'?: unknown
+        'split-number'?: unknown
+        'fill-opacity'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: RadarChartEventMap['tooltip-change']) => void
+        onSeriesToggle?: (event: RadarChartEventMap['series-toggle']) => void
+        onLegendChange?: (event: RadarChartEventMap['legend-change']) => void
+        onRangeChange?: (event: RadarChartEventMap['range-change']) => void
+        onChartReady?: (event: RadarChartEventMap['chart-ready']) => void
+        onChartError?: (event: RadarChartEventMap['chart-error']) => void
+        onPointHover?: (event: RadarChartEventMap['point-hover']) => void
+        onPointClick?: (event: RadarChartEventMap['point-click']) => void
       }
     >
     'c2-scatter-chart': DefineComponent<

@@ -17,6 +17,7 @@ import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
+import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
 
@@ -35,6 +36,7 @@ declare module 'react' {
       'c2-gauge-chart': C2Props<GaugeChart>
       'c2-line-chart': C2Props<LineChart>
       'c2-pie-chart': C2Props<PieChart>
+      'c2-radar-chart': C2Props<RadarChart>
       'c2-scatter-chart': C2Props<ScatterChart>
       'c2-sparkline': C2Props<Sparkline>
     }

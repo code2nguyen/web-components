@@ -14,6 +14,7 @@ import '../src/bar-chart'
 import '../src/sparkline'
 import '../src/pie-chart'
 import '../src/gauge-chart'
+import '../src/radar-chart'
 import '../src/scatter-chart'
 import '../src/candlestick-chart'
 import '../src/chart-series'
@@ -133,6 +134,12 @@ function build(): void {
           <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
         </c2-bar-chart>`
       break
+    case 'rounded-bar':
+      main.innerHTML = `
+        <c2-bar-chart id="chart" style="--c2-chart__bar--border-radius:0.5" label-field="team" x-type="category">
+          <c2-chart-series field="shipped" label="Shipped"></c2-chart-series>
+        </c2-bar-chart>`
+      break
     case 'grouped-bars':
       // The first series is smaller than the second in every band: if the two were drawn on the same x
       // rather than side by side, the second would cover the first completely and its colour would vanish.
@@ -155,15 +162,22 @@ function build(): void {
       break
     case 'pie':
       main.innerHTML = `
-        <c2-pie-chart id="chart" label-field="channel" inner-radius="0.5">
+        <c2-pie-chart id="chart" label-field="channel" inner-radius="0.5" labels="outside" label-content="percent">
           <c2-chart-series field="revenue"></c2-chart-series>
         </c2-pie-chart>`
       break
     case 'gauge':
       main.innerHTML = `
-        <c2-gauge-chart id="chart" label-field="metric" max="100" pointer="none" precision="1" value-suffix="%">
+        <c2-gauge-chart id="chart" label-field="metric" max="100" pointer="none" marks="none" precision="1" value-suffix="%">
           <c2-chart-series field="value" label="Attainment"></c2-chart-series>
         </c2-gauge-chart>`
+      break
+    case 'radar':
+      main.innerHTML = `
+        <c2-radar-chart id="chart" label-field="metric" max="100" shape="circle" points="none">
+          <c2-chart-series field="current" label="Current"></c2-chart-series>
+          <c2-chart-series field="target" label="Target"></c2-chart-series>
+        </c2-radar-chart>`
       break
     case 'scatter':
       main.innerHTML = `
@@ -211,6 +225,14 @@ function build(): void {
           <c2-line-chart id="chart" x-field="month" legend="none"></c2-line-chart>
         </div>`
       break
+    case 'deferred-layout':
+      // Mirrors an island inside a responsive app shell: the chart connects while its container has no width,
+      // then becomes measurable after the surrounding layout settles.
+      main.innerHTML = `
+        <div id="deferred-layout" style="width:0">
+          <c2-line-chart id="chart" x-field="month" legend="none"></c2-line-chart>
+        </div>`
+      break
     case 'perf':
       main.innerHTML = `
         <c2-line-chart id="chart" x-field="t">
@@ -225,12 +247,12 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart, c2-candlestick-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
 
-  if (scenario === 'bar') {
+  if (scenario === 'bar' || scenario === 'rounded-bar') {
     chart.data = [
       { team: 'Core', shipped: 18 },
       { team: 'Web', shipped: 24 },
@@ -244,6 +266,14 @@ function build(): void {
     ]
   } else if (scenario === 'gauge') {
     chart.data = [{ metric: 'Target', value: 78 }]
+  } else if (scenario === 'radar') {
+    chart.data = [
+      { metric: 'Quality', current: 82, target: 90 },
+      { metric: 'Speed', current: 74, target: 85 },
+      { metric: 'Reliability', current: 91, target: 88 },
+      { metric: 'Efficiency', current: 68, target: 80 },
+      { metric: 'Coverage', current: 77, target: 84 },
+    ]
   } else if (scenario === 'scatter') {
     chart.data = [
       { risk: 8, return: 6.2 },
@@ -279,7 +309,7 @@ function build(): void {
       { month: 2, revenue: 60 },
       { month: 3, revenue: 40 },
     ]
-  } else if (scenario === 'inferred' || scenario === 'wrapped' || scenario === 'centred') {
+  } else if (scenario === 'inferred' || scenario === 'wrapped' || scenario === 'centred' || scenario === 'deferred-layout') {
     chart.data = [
       { month: 1, revenue: 128, cost: 74 },
       { month: 2, revenue: 141, cost: 79 },
@@ -289,6 +319,13 @@ function build(): void {
     chart.data = series(1, 100)
   } else if (!['empty', 'loading', 'error', 'sparkline'].includes(scenario)) {
     chart.data = series(2, 40)
+  }
+
+  if (scenario === 'deferred-layout') {
+    requestAnimationFrame(() => {
+      const container = document.querySelector<HTMLElement>('#deferred-layout')
+      if (container) container.style.width = '900px'
+    })
   }
 
   window.chartScenario = {
