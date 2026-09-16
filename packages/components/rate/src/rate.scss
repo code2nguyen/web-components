@@ -1,0 +1,95 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-rate,
+  $theme: (
+    icon--size: 24px,
+    container--gap: 4px,
+    icon--color: #e4e4e7,
+    icon__filled--color: #facc15,
+    icon__preview--color: #fbbf24,
+    icon__hover--scale: 1.12,
+    icon--transition-duration: 150ms,
+    container__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    container__focus--outline-offset: 3px,
+    container--border-radius: 4px,
+    container__disabled--opacity: variables.$disabled-content-opacity,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.rate {
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(container--gap);
+  border-radius: css.cssVar(container--border-radius);
+  cursor: pointer;
+  touch-action: manipulation;
+
+  &:focus-visible {
+    outline: css.cssVar(container__focus--outline);
+    outline-offset: css.cssVar(container__focus--outline-offset);
+  }
+}
+
+.item {
+  position: relative;
+  display: inline-flex;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  flex: none;
+  transition: transform css.cssVar(icon--transition-duration) ease;
+
+  &:hover {
+    transform: scale(css.cssVar(icon__hover--scale));
+  }
+}
+
+.star {
+  display: block;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  fill: currentColor;
+}
+
+.star--empty {
+  color: css.cssVar(icon--color);
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+  overflow: hidden;
+  color: css.cssVar(icon__filled--color);
+  transition: width css.cssVar(icon--transition-duration) ease;
+}
+
+.item--preview .fill {
+  color: css.cssVar(icon__preview--color);
+}
+
+:host([readonly]) .rate {
+  cursor: default;
+}
+
+:host([readonly]) .item:hover {
+  transform: none;
+}
+
+:host([disabled]) .rate {
+  cursor: default;
+  opacity: css.cssVar(container__disabled--opacity);
+}
+
+:host([disabled]) .item:hover {
+  transform: none;
+}

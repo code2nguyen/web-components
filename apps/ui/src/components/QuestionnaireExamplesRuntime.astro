@@ -1,0 +1,57 @@
+---
+/** Enhances questionnaire gallery examples whose renderer and answer APIs must be assigned as JavaScript properties. */
+---
+
+<script>
+  import { html } from 'lit'
+  import type { Questionnaire, QuestionnaireAnswers, QuestionnaireItemRenderContext } from '@c2n/questionnaire'
+  import '@c2n/questionnaire'
+
+  const initialized = new WeakSet<Questionnaire>()
+
+  const superpowerIcons: Record<string, string> = {
+    teleport: '🚀',
+    pause: '⏸️',
+    translate: '🐙',
+    snacks: '🍕',
+  }
+
+  const sundaeIcons: Record<string, string> = {
+    chocolate: '🍫',
+    berries: '🍓',
+    sprinkles: '✨',
+    cherry: '🍒',
+  }
+
+  function renderPlayfulOption(context: QuestionnaireItemRenderContext, icons: Record<string, string>) {
+    const { option, selected } = context
+    return html`
+      <span class="option-label"><span aria-hidden="true">${icons[option.value] ?? '✨'}</span> ${option.label}</span>
+      <span class="option-description">${selected ? 'Excellent choice — locked in!' : option.description}</span>
+    `
+  }
+
+  function setup(questionnaire: Questionnaire) {
+    if (initialized.has(questionnaire)) return
+    initialized.add(questionnaire)
+
+    if (questionnaire.dataset.questionnaireRender === 'superpower') {
+      questionnaire.questionItemRender = (context) => renderPlayfulOption(context, superpowerIcons)
+    }
+    if (questionnaire.dataset.questionnaireRender === 'sundae') {
+      questionnaire.questionItemRender = (context) => renderPlayfulOption(context, sundaeIcons)
+    }
+
+    const answers = questionnaire.dataset.questionnaireAnswers
+    if (answers) questionnaire.answers = JSON.parse(answers) as QuestionnaireAnswers
+  }
+
+  function setupAll() {
+    document.querySelectorAll<Questionnaire>('[data-questionnaire-render], [data-questionnaire-answers]').forEach(setup)
+  }
+
+  setupAll()
+  const observer = new MutationObserver(setupAll)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setupAll)
+</script>

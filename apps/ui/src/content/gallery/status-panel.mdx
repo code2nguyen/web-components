@@ -1,0 +1,199 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { StatusPanel } from '@c2n/status-panel'
+import { Button } from '@c2n/button'
+
+## Presets
+
+Status panels work best with one clear message and a small number of useful next steps. The media, surface and content regions can be themed independently without changing the semantic structure.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-status-panel client:load heading="No projects yet" description="Create your first project or import one from another workspace.">
+  <c2-button slot="actions">Create project</c2-button>
+</c2-status-panel>
+```
+
+```html tag=MdxCodeBlock,label=Success
+<style>
+  .secondary-action {
+    --c2-button__container--border: 1px solid #bcbcc6;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #18181b;
+    --c2-button__container__hover--background-color: #f4f4f5;
+  }
+</style>
+<c2-status-panel client:load status="success" heading="Your workspace is ready" description="Invite teammates now, or continue setting things up on your own.">
+  <c2-button slot="actions">Invite teammates</c2-button>
+  <c2-button slot="actions" class="secondary-action">Go to workspace</c2-button>
+</c2-status-panel>
+```
+
+```html tag=MdxCodeBlock,label=Recovery
+<style>
+  .recovery {
+    --c2-status-panel__container--max-width: 560px;
+    --c2-status-panel__container--min-height: 0px;
+    --c2-status-panel__container--padding: 36px;
+    --c2-status-panel__container--gap: 20px;
+    --c2-status-panel__container--border: 1px solid #e4e4e7;
+    --c2-status-panel__container--background-color: #ffffff;
+    --c2-status-panel__media--size: 150px;
+    --c2-status-panel__media-icon--size: 150px;
+    --c2-status-panel__media__error--background-color: transparent;
+    --c2-status-panel__media--border-radius: 0px;
+    --c2-status-panel__title--font-size: 20px;
+    --c2-status-panel__title--line-height: 28px;
+    --c2-status-panel__content--background-color: transparent;
+    --c2-status-panel__content--padding: 0px;
+  }
+  .recovery > img[slot='media'] {
+    object-fit: contain;
+  }
+  .import-summary {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #fafafa;
+    text-align: left;
+  }
+  .import-summary__row {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 16px;
+    padding: 12px 14px;
+    color: #52525b;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .import-summary__row + .import-summary__row {
+    border-top: 1px solid #e4e4e7;
+  }
+  .import-summary__label {
+    color: #71717a;
+  }
+  .import-summary strong {
+    color: #18181b;
+    font-weight: 600;
+  }
+  .recovery-secondary {
+    --c2-button__container--border: 1px solid #bcbcc6;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #18181b;
+    --c2-button__container__hover--background-color: #f4f4f5;
+  }
+</style>
+<c2-status-panel client:load class="recovery" status="error">
+  <img slot="media" src="/web-components/status-panel-recovery.svg" alt="" />
+  <span slot="title">Your import needs attention</span>
+  <span slot="description">One invalid email stopped the import. The rows already processed are safely saved.</span>
+  <div slot="content" class="import-summary">
+    <div class="import-summary__row"><span class="import-summary__label">File</span><strong>customers.csv</strong></div>
+    <div class="import-summary__row"><span class="import-summary__label">Progress</span><strong>41 of 120 rows imported</strong></div>
+  </div>
+  <c2-button slot="actions">Review row 42</c2-button>
+  <c2-button slot="actions" class="recovery-secondary">Download report</c2-button>
+</c2-status-panel>
+```
+
+```html tag=MdxCodeBlock,label=404
+<style>
+  .not-found {
+    --c2-status-panel__media--size: 88px;
+    --c2-status-panel__media-icon--size: 44px;
+    --c2-status-panel__media--border-radius: 14px;
+    --c2-status-panel__media--background-color: #edf1fe;
+    --c2-status-panel__media--color: #0265dc;
+  }
+  .not-found > [slot='media'] {
+    font-size: 18px;
+    font-weight: 700;
+  }
+</style>
+<c2-status-panel client:load class="not-found" heading="This page wandered off" description="The address may have changed, or the page may no longer exist.">
+  <span slot="media" aria-hidden="true">404</span>
+  <c2-button slot="actions">Back home</c2-button>
+</c2-status-panel>
+```
+
+```html tag=MdxCodeBlock,label=Compact inline
+<style>
+  .compact-inline {
+    --c2-status-panel__container--min-height: 0px;
+    --c2-status-panel__container--padding: 20px;
+    --c2-status-panel__container--gap: 16px;
+    --c2-status-panel__container--border: 1px dashed #bcbcc6;
+    --c2-status-panel__media--size: 44px;
+    --c2-status-panel__media-icon--size: 22px;
+    --c2-status-panel__title--font-size: 16px;
+    --c2-status-panel__title--line-height: 22px;
+  }
+</style>
+<c2-status-panel client:load class="compact-inline" align="start" heading="No saved filters" description="Save the current filters to reuse this view later.">
+  <c2-button slot="actions">Save filters</c2-button>
+</c2-status-panel>
+```
+
+```html tag=MdxCodeBlock,label=Custom media
+<style>
+  .celebration {
+    --c2-status-panel__container--background-color: #fffbeb;
+    --c2-status-panel__media--background-color: #ffffff;
+    --c2-status-panel__media--size: 72px;
+    --c2-status-panel__media-icon--size: 36px;
+  }
+  .celebration > [slot='media'] {
+    font-size: 30px;
+  }
+</style>
+<c2-status-panel client:load class="celebration" heading="You've cleared your inbox" description="Everything is handled. Take a well-earned break.">
+  <span slot="media" aria-hidden="true">🎉</span>
+  <c2-button slot="actions">View completed</c2-button>
+</c2-status-panel>
+```
+
+```html tag=MdxCodeBlock,label=Illustrated empty state
+<style>
+  .illustrated-empty {
+    --c2-status-panel__container--min-height: 0px;
+    --c2-status-panel__container--padding: 28px 24px;
+    --c2-status-panel__media--size: 160px;
+    --c2-status-panel__media-icon--size: 160px;
+    --c2-status-panel__media--background-color: transparent;
+    --c2-status-panel__media--border-radius: 0px;
+  }
+  .illustrated-empty > img[slot='media'] {
+    object-fit: contain;
+  }
+</style>
+<c2-status-panel client:load class="illustrated-empty" heading="No matching projects" description="Try a broader search or clear the active filters.">
+  <img slot="media" src="/web-components/status-panel-search.svg" alt="" />
+  <c2-button slot="actions">Clear filters</c2-button>
+</c2-status-panel>
+```
+
+```html tag=MdxCodeBlock,label=Illustrated success
+<style>
+  .illustrated-success {
+    --c2-status-panel__container--min-height: 0px;
+    --c2-status-panel__container--padding: 28px 24px;
+    --c2-status-panel__container--background-color: #f8fbff;
+    --c2-status-panel__media--size: 160px;
+    --c2-status-panel__media-icon--size: 160px;
+    --c2-status-panel__media__success--background-color: transparent;
+    --c2-status-panel__media--border-radius: 0px;
+  }
+  .illustrated-success > img[slot='media'] {
+    object-fit: contain;
+  }
+</style>
+<c2-status-panel client:load class="illustrated-success" status="success" heading="Your launch is live" description="The new experience is now available to everyone.">
+  <img slot="media" src="/web-components/status-panel-launch.svg" alt="" />
+  <c2-button slot="actions">View release</c2-button>
+</c2-status-panel>
+```
+
+</GalleryGrid>

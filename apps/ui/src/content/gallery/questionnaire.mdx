@@ -1,0 +1,128 @@
+---
+description: 'Playful, production-shaped questionnaire flows with single choice, multiple choice, custom item renderers and a completed answer summary.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import QuestionnaireExamplesRuntime from '../../components/QuestionnaireExamplesRuntime.astro'
+
+import { Questionnaire } from '@c2n/questionnaire'
+
+## Guided flows
+
+Each example gets a full row so the question, options and navigation can breathe. The flows use different data, states and themes; two also assign a custom `questionItemRender` callback.
+
+<GalleryGrid min="900">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-questionnaire
+  questions='[{"id":"goal","title":"What are we shipping this week?","description":"Pick the outcome that would make Friday feel successful.","otherPlaceholder":"Describe another win…","options":[{"value":"onboarding","label":"A smoother onboarding","description":"Help new users reach their first success faster."},{"value":"performance","label":"A faster experience","description":"Remove the slow moments people notice most."},{"value":"delight","label":"One memorable detail","description":"Polish a small interaction until it feels exceptional."}]},{"id":"signals","title":"How will we know it worked?","description":"Select every signal the team should watch.","type":"choice","skippable":true,"options":[{"value":"activation","label":"Activation rate"},{"value":"speed","label":"Page speed"},{"value":"feedback","label":"Customer feedback"},{"value":"confetti","label":"Spontaneous confetti"}]},{"id":"celebrate","title":"How should the team celebrate?","options":[{"value":"pastries","label":"Breakfast pastries"},{"value":"playlist","label":"A victory playlist"},{"value":"early","label":"Finish early on Friday"}]}]'
+></c2-questionnaire>
+```
+
+```html tag=MdxCodeBlock,label=Choose a superpower
+<style>
+  .superpower-quiz {
+    --c2-questionnaire--max-width: 620px;
+    --c2-questionnaire--color: #3b0764;
+    --c2-questionnaire__option--border: 1px solid #e9d5ff;
+    --c2-questionnaire__option--border-radius: 18px;
+    --c2-questionnaire__option--background-color: #fdfaff;
+    --c2-questionnaire__option__hover--border: 1px solid #c084fc;
+    --c2-questionnaire__option__selected--border: 1px solid #9333ea;
+    --c2-questionnaire__option__selected--background-color: #f3e8ff;
+    --c2-questionnaire__control__selected--background-color: #9333ea;
+    --c2-questionnaire__primary-action--background-color: #7e22ce;
+  }
+</style>
+<c2-questionnaire
+  client:only="lit"
+  class="superpower-quiz"
+  data-questionnaire-render="superpower"
+  next-label="Reveal next question"
+  complete-label="Claim my power"
+  questions='[{"id":"power","title":"Choose your everyday superpower","description":"Use the letter shortcuts if your secret identity is in a hurry.","type":"select","options":[{"value":"teleport","label":"Teleport anywhere","description":"Commutes become a thing of the past."},{"value":"pause","label":"Pause time","description":"Finally finish a coffee while it is hot."},{"value":"translate","label":"Speak every language","description":"Including octopus, obviously."},{"value":"snacks","label":"Summon perfect snacks","description":"Exactly what you want, exactly when you want it."}]},{"id":"sidekick","title":"Pick a loyal sidekick","options":[{"value":"raccoon","label":"A resourceful raccoon"},{"value":"robot","label":"A tiny optimistic robot"},{"value":"dragon","label":"A pocket-sized dragon"}]},{"id":"mission","title":"Choose your first mission","options":[{"value":"mondays","label":"Make Mondays optional"},{"value":"socks","label":"Recover every missing sock"},{"value":"meetings","label":"Shorten every meeting"}]}]'
+></c2-questionnaire>
+```
+
+```html tag=MdxCodeBlock,label=Build an ice-cream masterpiece
+<style>
+  .sundae-builder {
+    --c2-questionnaire--max-width: 620px;
+    --c2-questionnaire__option--padding: 14px 16px;
+    --c2-questionnaire__option--border: 1px solid #fed7aa;
+    --c2-questionnaire__option--border-radius: 14px;
+    --c2-questionnaire__option--background-color: #fffaf5;
+    --c2-questionnaire__option__hover--border: 1px solid #fb923c;
+    --c2-questionnaire__option__selected--border: 1px solid #ea580c;
+    --c2-questionnaire__option__selected--background-color: #fff7ed;
+    --c2-questionnaire__control__selected--background-color: #ea580c;
+    --c2-questionnaire__primary-action--background-color: #c2410c;
+  }
+</style>
+<c2-questionnaire
+  client:only="lit"
+  class="sundae-builder"
+  current="1"
+  data-questionnaire-render="sundae"
+  complete-label="Place delicious order"
+  questions='[{"id":"base","title":"Start with a scoop","options":[{"value":"vanilla","label":"Vanilla cloud"},{"value":"pistachio","label":"Pistachio dream"},{"value":"mango","label":"Mango sunshine"}]},{"id":"toppings","title":"Now make it spectacular","description":"Choose as many toppings as your heart demands.","type":"choice","options":[{"value":"chocolate","label":"Chocolate river","description":"A generous warm drizzle."},{"value":"berries","label":"Berry parade","description":"Strawberries, raspberries and blueberries."},{"value":"sprinkles","label":"Cosmic sprinkles","description":"Tiny, colourful and scientifically joyful."},{"value":"cherry","label":"The essential cherry","description":"A classic finale on top."}]},{"id":"delivery","title":"Where should it land?","options":[{"value":"table","label":"At my table"},{"value":"garden","label":"In the sunny garden"},{"value":"moon","label":"On the moon, please"}]}]'
+></c2-questionnaire>
+```
+
+```html tag=MdxCodeBlock,label=Adventure confirmed
+<style>
+  .adventure-summary {
+    --c2-questionnaire--max-width: 620px;
+    --c2-questionnaire__primary-action--background-color: #0f766e;
+  }
+  .trip-ticket {
+    border: 1px dashed #0f766e;
+    border-radius: 18px;
+    padding: 24px;
+    color: #134e4a;
+    background: #f0fdfa;
+  }
+  .trip-ticket p {
+    margin: 8px 0 0;
+    color: #115e59;
+  }
+</style>
+<c2-questionnaire
+  client:only="lit"
+  class="adventure-summary"
+  completed
+  data-questionnaire-answers='{"destination":"forest","pace":["hike","picnic"],"companion":"dog"}'
+  questions='[{"id":"destination","title":"Where are we escaping to?","options":[{"value":"forest","label":"Misty forest"},{"value":"coast","label":"Wild coast"},{"value":"city","label":"A new city"}]},{"id":"pace","title":"What belongs in the itinerary?","type":"choice","options":[{"value":"hike","label":"A sunrise hike"},{"value":"picnic","label":"An unnecessarily fancy picnic"},{"value":"nap","label":"A world-class nap"}]},{"id":"companion","title":"Who gets the spare ticket?","options":[{"value":"dog","label":"The dog"},{"value":"friend","label":"My funniest friend"},{"value":"book","label":"A very long book"}]}]'
+>
+  <section slot="summary" class="trip-ticket">
+    <strong>🎫 Your tiny adventure is booked!</strong>
+    <p>Misty forest · Sunrise hike + fancy picnic · The dog has the spare ticket.</p>
+  </section>
+</c2-questionnaire>
+```
+
+</GalleryGrid>
+
+<QuestionnaireExamplesRuntime />
+
+## Custom option renderer
+
+The superpower and sundae examples assign `questionItemRender` as a JavaScript property. The questionnaire still owns selection, validation, keyboard shortcuts and navigation; the callback only supplies the expressive label area.
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+
+const icons = {
+  teleport: '🚀',
+  pause: '⏸️',
+  translate: '🐙',
+  snacks: '🍕',
+}
+
+questionnaire.questionItemRender = ({ option, selected }) => html`
+  <span class="option-label">${icons[option.value]} ${option.label}</span>
+  <span class="option-description">${selected ? 'Excellent choice — locked in!' : option.description}</span>
+`
+```

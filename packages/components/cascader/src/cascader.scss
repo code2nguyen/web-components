@@ -1,0 +1,224 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-cascader,
+  $theme: (
+    trigger--min-height: 36px,
+    trigger--width: 220px,
+    trigger--padding: 6px 10px 6px 12px,
+    trigger--gap: 8px,
+    trigger--background: #ffffff,
+    trigger--color: #18181b,
+    trigger--font-size: 14px,
+    trigger--border: 1px solid #bcbcc6,
+    trigger--border-radius: 6px,
+    trigger__hover--border: 1px solid #a1a1aa,
+    trigger__hover--background: #fafafa,
+    trigger__open--border: 1px solid rgb(2, 101, 220),
+    trigger__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    trigger__focus--outline-offset: 0px,
+    trigger__disabled--opacity: variables.$disabled-content-opacity,
+    placeholder--color: #71717a,
+    icon--size: 16px,
+    icon--color: #71717a,
+    panel--background: #ffffff,
+    panel--border: 1px solid #e4e4e7,
+    panel--border-radius: 8px,
+    panel--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.14),
+    panel--max-width: 720px,
+    column--min-width: 150px,
+    column--max-width: 240px,
+    column--max-height: 280px,
+    column--padding: 4px,
+    column--border: 1px solid #e4e4e7,
+    option--min-height: 36px,
+    option--padding: 8px 10px,
+    option--gap: 8px,
+    option--border-radius: 6px,
+    option--color: #18181b,
+    option--font-size: 14px,
+    option__hover--background: #f4f4f5,
+    option__active--background: #e8f2ff,
+    option__active--color: #18181b,
+    option__selected--color: rgb(2, 101, 220),
+    option__disabled--opacity: variables.$disabled-content-opacity,
+    empty--padding: 18px,
+    empty--color: #71717a,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.trigger {
+  box-sizing: border-box;
+  display: inline-flex;
+  width: css.cssVar(trigger--width);
+  min-height: css.cssVar(trigger--min-height);
+  margin: 0;
+  padding: css.cssVar(trigger--padding);
+  align-items: center;
+  gap: css.cssVar(trigger--gap);
+  border: css.cssVar(trigger--border);
+  border-radius: css.cssVar(trigger--border-radius);
+  background: css.cssVar(trigger--background);
+  color: css.cssVar(trigger--color);
+  font-family: inherit;
+  font-size: css.cssVar(trigger--font-size);
+  line-height: 1.4;
+  text-align: start;
+  cursor: pointer;
+  transition: animation.standard(background), animation.standard(border);
+
+  &:hover:not(:disabled) {
+    border: css.cssVar(trigger__hover--border);
+    background: css.cssVar(trigger__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(trigger__focus--outline);
+    outline-offset: css.cssVar(trigger__focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(trigger__disabled--opacity);
+  }
+}
+
+:host([open]) .trigger {
+  border: css.cssVar(trigger__open--border);
+
+  .trigger-icon {
+    transform: rotate(180deg);
+  }
+}
+
+:host([readonly]) .trigger {
+  cursor: default;
+}
+
+.value {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeholder {
+  color: css.cssVar(placeholder--color);
+}
+
+::slotted([slot='prefix-icon']),
+::slotted([slot='suffix-icon']),
+.trigger-icon,
+.option-chevron,
+.option-check {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  flex: none;
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.trigger-icon {
+  display: block;
+  transition: animation.standard(transform);
+}
+
+.panel {
+  box-sizing: border-box;
+  display: flex;
+  max-width: min(css.cssVar(panel--max-width), var(--c2-overlay--available-width, 100vw));
+  overflow-x: auto;
+  border: css.cssVar(panel--border);
+  border-radius: css.cssVar(panel--border-radius);
+  background: css.cssVar(panel--background);
+  box-shadow: css.cssVar(panel--box-shadow);
+}
+
+.column {
+  box-sizing: border-box;
+  min-width: css.cssVar(column--min-width);
+  max-width: css.cssVar(column--max-width);
+  max-height: min(css.cssVar(column--max-height), var(--c2-overlay--available-height, 100vh));
+  padding: css.cssVar(column--padding);
+  overflow-y: auto;
+  border-right: css.cssVar(column--border);
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.option {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-height: css.cssVar(option--min-height);
+  margin: 0;
+  padding: css.cssVar(option--padding);
+  align-items: center;
+  gap: css.cssVar(option--gap);
+  border: 0;
+  border-radius: css.cssVar(option--border-radius);
+  background: transparent;
+  color: css.cssVar(option--color);
+  font-family: inherit;
+  font-size: css.cssVar(option--font-size);
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    background: css.cssVar(option__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(trigger__focus--outline);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(option__disabled--opacity);
+  }
+}
+
+.option--active {
+  background: css.cssVar(option__active--background);
+  color: css.cssVar(option__active--color);
+  font-weight: 600;
+}
+
+.option--selected {
+  color: css.cssVar(option__selected--color);
+}
+
+.option-content {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-check {
+  color: css.cssVar(option__selected--color);
+}
+
+.empty {
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  font-size: css.cssVar(option--font-size);
+  white-space: nowrap;
+}

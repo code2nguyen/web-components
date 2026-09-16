@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload</title>
+    <script type="module" src="/src/upload.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 48px 24px;
+        background: #f4f4f5;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        display: grid;
+        max-width: 460px;
+        margin: auto;
+        gap: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Upload project files</h1>
+      <c2-upload id="upload" multiple max-files="5" max-size="10485760" aria-label="Upload project files"></c2-upload>
+    </main>
+    <script type="module">
+      const upload = document.querySelector('#upload')
+      upload.uploadHandler = async (file, { signal, onProgress }) => {
+        for (const progress of [15, 38, 67, 88, 100]) {
+          await new Promise((resolve, reject) => {
+            const timer = setTimeout(resolve, 350)
+            signal.addEventListener(
+              'abort',
+              () => {
+                clearTimeout(timer)
+                reject(new DOMException('Cancelled', 'AbortError'))
+              },
+              { once: true },
+            )
+          })
+          onProgress(progress)
+        }
+        return { name: file.name }
+      }
+    </script>
+  </body>
+</html>

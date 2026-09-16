@@ -84,6 +84,12 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/status-panel:build",
+        "./packages/components/qr-code:build",
+        "./packages/components/upload:build",
+        "./packages/components/rate:build",
+        "./packages/components/cascader:build",
+        "./packages/components/questionnaire:build",
         "./packages/components/number-input:build",
         "./packages/components/date-input:build",
         "./packages/components/date-selector:build",

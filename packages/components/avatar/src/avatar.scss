@@ -1,3 +1,4 @@
+@use '@c2n/sass/animation';
 @use '@c2n/sass/variables';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-avatar,
@@ -31,6 +32,16 @@
 
     image--object-fit: cover,
 
+    editor--background: rgba(0, 0, 0, 0.5),
+    editor--color: #ffffff,
+    editor__focus--outline: 2px solid rgba(2, 101, 220, 0.45),
+    editor__focus--outline-offset: 2px,
+    editor-icon--size: 18px,
+    remove--size: 22px,
+    remove--background: #ffffff,
+    remove--color: #52525b,
+    remove--border: 1px solid #e4e4e7,
+    remove--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18),
     badge--size: 10px,
     badge--border: 2px solid #ffffff,
     badge--offset: 0px,
@@ -46,6 +57,18 @@
   position: relative;
   vertical-align: middle;
   flex: none;
+}
+
+input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .c2-avatar {
@@ -104,6 +127,89 @@
   width: 100%;
   height: 100%;
   object-fit: css.cssVar(image--object-fit);
+}
+
+.avatar-trigger {
+  all: unset;
+  position: relative;
+  display: inline-flex;
+  border-radius: css.cssVar(border-top-left-radius) css.cssVar(border-top-right-radius) css.cssVar(border-bottom-right-radius)
+    css.cssVar(border-bottom-left-radius);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: css.cssVar(editor__focus--outline);
+    outline-offset: css.cssVar(editor__focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.edit-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+  background: css.cssVar(editor--background);
+  color: css.cssVar(editor--color);
+  opacity: 0;
+  transition: animation.standard(opacity);
+
+  svg,
+  ::slotted(*) {
+    display: block;
+    width: css.cssVar(editor-icon--size);
+    height: css.cssVar(editor-icon--size);
+  }
+}
+
+.avatar-trigger:hover:not(:disabled) .edit-overlay,
+.avatar-trigger:focus-visible .edit-overlay {
+  opacity: 1;
+}
+
+.remove-action {
+  all: unset;
+  position: absolute;
+  z-index: 2;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(remove--size);
+  height: css.cssVar(remove--size);
+  border: css.cssVar(remove--border);
+  border-radius: 999px;
+  background: css.cssVar(remove--background);
+  color: css.cssVar(remove--color);
+  box-shadow: css.cssVar(remove--box-shadow);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: css.cssVar(editor__focus--outline);
+    outline-offset: css.cssVar(editor__focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: variables.$disabled-content-opacity;
+  }
+
+  svg,
+  ::slotted(*) {
+    display: block;
+    width: 60%;
+    height: 60%;
+  }
 }
 
 .c2-avatar-badge {

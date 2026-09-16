@@ -12,6 +12,7 @@ import { MatIcon } from '@c2n/mat-icon'
 import { FeatherPlusIcon as FeatherPlus } from '@c2n/feather-icons/icons/plus.js'
 import { FeatherArrowRightIcon as FeatherArrowRight } from '@c2n/feather-icons/icons/arrow-right.js'
 import { FeatherDownloadIcon as FeatherDownload } from '@c2n/feather-icons/icons/download.js'
+import { FeatherEdit3Icon as FeatherEdit_3 } from '@c2n/feather-icons/icons/edit-3.js'
 import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
 import { FeatherLoaderIcon as FeatherLoader } from '@c2n/feather-icons/icons/loader.js'
 import { FeatherTrash2Icon as FeatherTrash_2 } from '@c2n/feather-icons/icons/trash-2.js'
@@ -334,6 +335,101 @@ Icons go in the `prefix-icon` and `suffix-icon` slots; they inherit the label co
   </svg>
   Upgrade
 </c2-button>
+```
+
+</GalleryGrid>
+
+## Floating actions
+
+Place icon-only buttons in a positioned wrapper to create a floating action button or a compact action stack. The shadow belongs on the button host; size, shape and colours stay themeable through `--c2-button__*` variables.
+
+<GalleryGrid min="520">
+
+```html tag=MdxCodeBlock,label=Floating action stack
+<style>
+  .floating-surface {
+    position: relative;
+    width: min(100%, 360px);
+    height: 220px;
+    overflow: hidden;
+    border: 1px solid #e4e4e7;
+    border-radius: 18px;
+    background: #ffffff;
+  }
+  .floating-actions {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .floating-button {
+    border-radius: 999px;
+    box-shadow:
+      0 12px 28px rgba(24, 24, 27, 0.16),
+      0 3px 8px rgba(24, 24, 27, 0.1);
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease;
+    will-change: transform;
+    --c2-button__container--width: 44px;
+    --c2-button__container--height: 44px;
+    --c2-button__container--padding-left: 0;
+    --c2-button__container--padding-right: 0;
+    --c2-button__container--gap: 0;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--border: 1px solid #e4e4e7;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #18181b;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__icon--size: 20px;
+  }
+  .floating-button:hover,
+  .floating-button:focus-within {
+    transform: translateY(-3px);
+    box-shadow:
+      0 18px 34px rgba(24, 24, 27, 0.2),
+      0 5px 10px rgba(24, 24, 27, 0.1);
+  }
+  .floating-button:active {
+    transform: translateY(0) scale(0.96);
+    box-shadow: 0 6px 14px rgba(24, 24, 27, 0.16);
+  }
+  .floating-button--primary {
+    --c2-button__container--width: 56px;
+    --c2-button__container--height: 56px;
+    --c2-button__container--background-color: #2563eb;
+    --c2-button__container--color: #ffffff;
+    --c2-button__container--border: 1px solid #2563eb;
+    --c2-button__container__hover--background-color: #1d4ed8;
+    --c2-button__container__active--background-color: #1e40af;
+    --c2-button__icon--size: 24px;
+  }
+  .floating-button-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+<div class="floating-surface">
+  <div class="floating-actions">
+    <c2-button class="floating-button">
+      <c2-feather-edit-3 slot="prefix-icon"></c2-feather-edit-3>
+      <span class="floating-button-label">Quick edit</span>
+    </c2-button>
+    <c2-button class="floating-button floating-button--primary">
+      <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+      <span class="floating-button-label">Create new item</span>
+    </c2-button>
+  </div>
+</div>
 ```
 
 </GalleryGrid>

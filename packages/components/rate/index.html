@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-rate</title>
+    <script type="module" src="/src/rate.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+      }
+      section {
+        margin-bottom: 28px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        color: #71717a;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px;
+      }
+      .large {
+        --c2-rate__icon--size: 36px;
+        --c2-rate__container--gap: 8px;
+      }
+      #log {
+        margin-top: 12px;
+        color: #71717a;
+        font:
+          12px ui-monospace,
+          monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Basic and half stars</h2>
+      <div class="row">
+        <c2-rate id="basic" aria-label="Basic rating" value="3"></c2-rate>
+        <c2-rate aria-label="Half-star rating" value="2.5" allow-half></c2-rate>
+        <c2-rate class="large" aria-label="Large rating" value="4"></c2-rate>
+      </div>
+      <div id="log">Choose a rating.</div>
+    </section>
+    <section>
+      <h2>Display states</h2>
+      <div class="row">
+        <c2-rate aria-label="Readonly rating" value="4.5" allow-half readonly></c2-rate>
+        <c2-rate aria-label="Disabled rating" value="2" disabled></c2-rate>
+      </div>
+    </section>
+    <script type="module">
+      document.querySelector('#basic').addEventListener('rate-change', (event) => {
+        document.querySelector('#log').textContent = `Selected: ${event.detail.value} / 5`
+      })
+    </script>
+  </body>
+</html>

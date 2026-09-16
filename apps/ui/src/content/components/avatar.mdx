@@ -35,6 +35,9 @@ npm install @c2n/avatar
     line-height: 1;
     padding: 2px 5px;
   }
+  .editable-avatar {
+    --c2-avatar--size: 72px;
+  }
 </style>
 <div data-label="Initials">
   <c2-avatar name="Nguyen Thai Vinh"></c2-avatar>
@@ -68,6 +71,10 @@ npm install @c2n/avatar
   <c2-avatar name="Ada Lovelace" initial-count="2" status="offline"></c2-avatar>
   <c2-avatar name="Ada Lovelace" initial-count="2" style="--c2-avatar--size: 40px"><span slot="badge" class="badge">3</span></c2-avatar>
 </div>
+<div data-label="Editable">
+  <c2-avatar class="editable-avatar" editable name="Elisa Jasmin" src="/web-components/chat.avif"></c2-avatar>
+  <c2-avatar class="editable-avatar" editable auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
+</div>
 <div data-label="Stacked group">
   <div class="stack" style="display: flex">
     <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
@@ -77,3 +84,20 @@ npm install @c2n/avatar
   </div>
 </div>
 ```
+
+Add `editable` when the person should be able to choose, replace, or remove their own avatar. Clicking the avatar opens an image picker and immediately previews the local file. Existing images receive a separate remove action; removing one restores initials or slotted fallback content. Use `accept` and `max-size` to constrain the file before your application uploads it.
+
+```js tag=CodeBlock
+const avatar = document.querySelector('c2-avatar')
+
+avatar.addEventListener('avatar-change', async event => {
+  const remoteUrl = await uploadAvatar(event.detail.file)
+  avatar.src = remoteUrl
+})
+
+avatar.addEventListener('avatar-remove', () => {
+  deleteAvatar()
+})
+```
+
+The component owns selection and the local preview, not network transport. `avatar-change` provides the selected `File`; `avatar-remove` identifies the previous source. Invalid files emit `file-reject`. Call `browse()` or `removeImage()` when external controls need to trigger the same actions, and customize their graphics with the `edit-icon` and `remove-icon` slots.

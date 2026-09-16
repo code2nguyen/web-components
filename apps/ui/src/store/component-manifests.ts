@@ -1,4 +1,10 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import statusPanel from '@c2n/status-panel/custom-elements.json'
+import qrCode from '@c2n/qr-code/custom-elements.json'
+import upload from '@c2n/upload/custom-elements.json'
+import rate from '@c2n/rate/custom-elements.json'
+import cascader from '@c2n/cascader/custom-elements.json'
+import questionnaire from '@c2n/questionnaire/custom-elements.json'
 import numberInput from '@c2n/number-input/custom-elements.json'
 import dateInput from '@c2n/date-input/custom-elements.json'
 import dateSelector from '@c2n/date-selector/custom-elements.json'
@@ -61,6 +67,12 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    statusPanel,
+    qrCode,
+    upload,
+    rate,
+    cascader,
+    questionnaire,
     numberInput,
     dateInput,
     dateSelector,

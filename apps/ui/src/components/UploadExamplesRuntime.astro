@@ -1,0 +1,47 @@
+---
+/** Adds a local simulated transport to upload documentation examples. */
+---
+
+<script>
+  import type { Upload, UploadHandlerContext } from '@c2n/upload'
+  import '@c2n/upload'
+
+  const initialized = new WeakSet<Upload>()
+
+  function wait(duration: number, signal: AbortSignal) {
+    return new Promise<void>((resolve, reject) => {
+      const timer = window.setTimeout(resolve, duration)
+      signal.addEventListener(
+        'abort',
+        () => {
+          window.clearTimeout(timer)
+          reject(new DOMException('Upload cancelled', 'AbortError'))
+        },
+        { once: true },
+      )
+    })
+  }
+
+  async function simulatedUpload(file: File, { signal, onProgress }: UploadHandlerContext) {
+    for (const progress of [18, 42, 68, 86, 100]) {
+      await wait(360, signal)
+      onProgress(progress)
+    }
+    return { name: file.name }
+  }
+
+  function setup(upload: Upload) {
+    if (initialized.has(upload)) return
+    initialized.add(upload)
+    upload.uploadHandler = simulatedUpload
+  }
+
+  function setupAll() {
+    document.querySelectorAll<Upload>('[data-upload-demo]').forEach(setup)
+  }
+
+  setupAll()
+  const observer = new MutationObserver(setupAll)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setupAll)
+</script>

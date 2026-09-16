@@ -945,20 +945,33 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
       {
         name: 'Segmented',
-        attributes: { selection: 'single', value: '1' },
-        css: {
-          '--c2-button-group--border-radius': '8px',
-          '--c2-button-group__divider--color': 'transparent',
-          '--c2-button__container--background-color': '#f4f4f5',
-          '--c2-button__container--color': '#52525b',
-          '--c2-button__container__hover--background-color': '#e4e4e7',
-          '--c2-button__container__selected--background-color': '#ffffff',
-          '--c2-button__container__selected--color': '#18181b',
-          '--c2-button__container__selected--border': '1px solid #d4d4d8',
-        },
+        attributes: { appearance: 'segmented', value: '1' },
       },
       { name: 'Separated', css: { '--c2-button-group--gap': '8px', '--c2-button-group--border-radius': '999px' } },
-      { name: 'Full width', css: { '--c2-button-group__item--flex': '1 1 0', width: '320px' } },
+      { name: 'Full width', attributes: { appearance: 'segmented', stretched: true }, css: { width: '320px' } },
+    ],
+  },
+  'c2-questionnaire': {
+    html: `<c2-questionnaire questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","options":[{"value":"timeline","label":"Tool call timeline"},{"value":"approvals","label":"Approval checkpoints"},{"value":"handoffs","label":"Sub-agent handoffs"}]},{"id":"updates","title":"What should every progress update include?","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"}]},{"id":"timing","title":"When should work begin?","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"}]}]'></c2-questionnaire>`,
+    presets: [
+      {
+        name: 'Soft blue',
+        css: {
+          '--c2-questionnaire__option__selected--border': '1px solid #5aa3ff',
+          '--c2-questionnaire__option__selected--background-color': '#f2f7ff',
+          '--c2-questionnaire__control__selected--background-color': '#0265dc',
+          '--c2-questionnaire__primary-action--background-color': '#0265dc',
+        },
+      },
+      {
+        name: 'Compact',
+        css: {
+          '--c2-questionnaire--max-width': '360px',
+          '--c2-questionnaire__options--gap': '6px',
+          '--c2-questionnaire__option--padding': '8px 10px',
+          '--c2-questionnaire__option--border-radius': '6px',
+        },
+      },
     ],
   },
   'c2-copy-button': {

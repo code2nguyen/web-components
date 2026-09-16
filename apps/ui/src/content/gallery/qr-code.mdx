@@ -1,0 +1,57 @@
+---
+title: 'QR Code gallery'
+description: 'Scan-ready codes for links, tickets, contact cards, and branded flows.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { QrCode } from '@c2n/qr-code'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default,description=A crisp high-contrast code with the recommended quiet zone,useWhen=Links and general-purpose payloads
+<c2-qr-code value="https://github.com/code2nguyen/web-components" aria-label="Project QR code"></c2-qr-code>
+```
+
+```html tag=MdxCodeBlock,label=Ocean blue,description=A restrained brand color on a pale background,useWhen=The brand palette still provides strong contrast
+<style>
+  .ocean-code {
+    --c2-qr-code__module--color: #075985;
+    --c2-qr-code__background--color: #ecfeff;
+    --c2-qr-code__container--border-radius: 14px;
+  }
+</style>
+<c2-qr-code class="ocean-code" value="https://example.com/ocean" aria-label="Ocean campaign QR code"></c2-qr-code>
+```
+
+```html tag=MdxCodeBlock,label=Event ticket,description=High error correction protects a code with a small center mark,useWhen=Tickets, passes, and branded handoffs
+<style>
+  .ticket-code {
+    --c2-qr-code__module--color: #4c1d95;
+    --c2-qr-code__background--color: #faf5ff;
+    --c2-qr-code__center--background-color: #ffffff;
+    --c2-qr-code__center--border-radius: 999px;
+  }
+
+  .ticket-mark {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    border-radius: 999px;
+    background: #6d28d9;
+    color: #ffffff;
+    font: 700 9px/1 system-ui;
+  }
+</style>
+<c2-qr-code class="ticket-code" value="https://example.com/tickets/C2N-2048" error-correction="H" aria-label="Event ticket QR code">
+  <span class="ticket-mark" slot="center">VIP</span>
+</c2-qr-code>
+```
+
+```html tag=MdxCodeBlock,label=Compact contact,description=A smaller code suitable for a contact card,useWhen=Space is limited but the code remains physically scannable
+<c2-qr-code value="MECARD:N:Nguyen,Vinh;EMAIL:hello@example.com;;" size="128" error-correction="Q" aria-label="Contact details QR code"></c2-qr-code>
+```
+
+</GalleryGrid>
