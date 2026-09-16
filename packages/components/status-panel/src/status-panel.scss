@@ -1,0 +1,175 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-status-panel,
+  $theme: (
+    container--width: 100%,
+    container--max-width: 720px,
+    container--min-height: 240px,
+    container--padding: 40px 24px,
+    container--gap: 24px,
+    container--border: 1px solid transparent,
+    container--border-radius: 14px,
+    container--background-color: transparent,
+    media--size: 64px,
+    media--border-radius: 999px,
+    media--background-color: #f4f4f5,
+    media--color: #71717a,
+    media-icon--size: 32px,
+    media__info--background-color: #edf1fe,
+    media__info--color: rgb(2, 101, 220),
+    media__success--background-color: #ecfdf3,
+    media__success--color: #15803d,
+    media__warning--background-color: #fffbeb,
+    media__warning--color: #b45309,
+    media__error--background-color: #fef2f2,
+    media__error--color: #b91c1c,
+    header--gap: 6px,
+    title--color: #18181b,
+    title--font-size: 20px,
+    title--font-weight: 600,
+    title--line-height: 28px,
+    description--color: #71717a,
+    description--font-size: 14px,
+    description--line-height: 20px,
+    description--max-width: 480px,
+    actions--gap: 8px,
+    content--max-width: 560px,
+    content--padding: 16px,
+    content--border-radius: 8px,
+    content--background-color: #f4f4f5,
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(container--width);
+  max-width: css.cssVar(container--max-width);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+[hidden] {
+  display: none;
+}
+
+.container {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: css.cssVar(container--min-height);
+  padding: css.cssVar(container--padding);
+  gap: css.cssVar(container--gap);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  background-color: css.cssVar(container--background-color);
+  text-align: center;
+}
+
+.message,
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.message {
+  gap: css.cssVar(container--gap);
+}
+
+.header {
+  gap: css.cssVar(header--gap);
+}
+
+.media {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(media--size);
+  height: css.cssVar(media--size);
+  overflow: hidden;
+  border-radius: css.cssVar(media--border-radius);
+  background-color: css.cssVar(media--background-color);
+  color: css.cssVar(media--color);
+}
+
+:host([status='info']) .media {
+  background-color: css.cssVar(media__info--background-color);
+  color: css.cssVar(media__info--color);
+}
+
+:host([status='success']) .media {
+  background-color: css.cssVar(media__success--background-color);
+  color: css.cssVar(media__success--color);
+}
+
+:host([status='warning']) .media {
+  background-color: css.cssVar(media__warning--background-color);
+  color: css.cssVar(media__warning--color);
+}
+
+:host([status='error']) .media {
+  background-color: css.cssVar(media__error--background-color);
+  color: css.cssVar(media__error--color);
+}
+
+.media svg,
+::slotted([slot='media']) {
+  display: grid;
+  place-items: center;
+  width: css.cssVar(media-icon--size);
+  height: css.cssVar(media-icon--size);
+}
+
+.media svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.title {
+  color: css.cssVar(title--color);
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  line-height: css.cssVar(title--line-height);
+}
+
+.description {
+  max-width: css.cssVar(description--max-width);
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: css.cssVar(description--line-height);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: css.cssVar(actions--gap);
+}
+
+.content {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: css.cssVar(content--max-width);
+  padding: css.cssVar(content--padding);
+  border-radius: css.cssVar(content--border-radius);
+  background-color: css.cssVar(content--background-color);
+}
+
+:host([align='start']) .container,
+:host([align='start']) .message,
+:host([align='start']) .header {
+  align-items: flex-start;
+  text-align: start;
+}
+
+:host([align='start']) .actions {
+  justify-content: flex-start;
+}

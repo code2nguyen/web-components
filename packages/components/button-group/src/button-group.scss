@@ -1,3 +1,4 @@
+@use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-button-group,
   $theme: (
@@ -7,6 +8,19 @@
     divider--width: 1px,
     divider--color: rgba(255, 255, 255, 0.35),
     item--flex: 0 0 auto,
+    segmented--background-color: #f4f4f5,
+    segmented--border: 1px solid transparent,
+    segmented--padding: 3px,
+    segmented--gap: 2px,
+    segmented-item--color: #52525b,
+    segmented-item__hover--background-color: rgba(0, 0, 0, 0.05),
+    segmented-item__active--background-color: rgba(0, 0, 0, 0.08),
+    segmented-item__selected--color: #18181b,
+    indicator--background-color: #ffffff,
+    indicator--border: 1px solid rgba(24, 24, 27, 0.08),
+    indicator--border-radius: 6px,
+    indicator--box-shadow: 0 1px 3px rgba(24, 24, 27, 0.16),
+    indicator--transition-duration: 200ms,
   )
 );
 
@@ -25,6 +39,10 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
 }
 
 :host([hidden]) {
+  display: none;
+}
+
+.indicator {
   display: none;
 }
 
@@ -107,4 +125,101 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
 ::slotted(:focus-within),
 ::slotted([selected]) {
   z-index: 1;
+}
+
+// Segmented is a purpose-built single-selection surface. The selected button stays transparent while the
+// absolutely positioned indicator moves underneath it, so arbitrary button content can sit above the animation.
+:host([appearance='segmented']) {
+  position: relative;
+  box-sizing: border-box;
+  padding: css.cssVar(segmented--padding);
+  gap: css.cssVar(segmented--gap);
+  border: css.cssVar(segmented--border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(segmented--background-color);
+  isolation: isolate;
+}
+
+:host([appearance='segmented'][stretched]) {
+  display: flex;
+  width: 100%;
+}
+
+:host([appearance='segmented']) .indicator {
+  position: absolute;
+  inset: 0 auto auto 0;
+  z-index: 0;
+  display: block;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: css.cssVar(indicator--border);
+  border-radius: css.cssVar(indicator--border-radius);
+  background-color: css.cssVar(indicator--background-color);
+  box-shadow: css.cssVar(indicator--box-shadow);
+  will-change: transform;
+  transition:
+    transform css.cssVar(indicator--transition-duration) animation.$standard-easing,
+    width css.cssVar(indicator--transition-duration) animation.$standard-easing,
+    height css.cssVar(indicator--transition-duration) animation.$standard-easing;
+}
+
+:host([appearance='segmented']) ::slotted(*) {
+  z-index: 1;
+  margin: 0;
+  box-shadow: none;
+  flex: css.cssVar(item--flex);
+  --c2-button__container--border: 1px solid transparent;
+  --c2-button__container--border-radius: #{css.cssVar(indicator--border-radius)};
+  --c2-button__container--background-color: transparent;
+  --c2-button__container--color: #{css.cssVar(segmented-item--color)};
+  --c2-button__container__hover--background-color: #{css.cssVar(segmented-item__hover--background-color)};
+  --c2-button__container__active--background-color: #{css.cssVar(segmented-item__active--background-color)};
+  --c2-button__container__selected--background-color: transparent;
+  --c2-button__container__selected--color: #{css.cssVar(segmented-item__selected--color)};
+  --c2-button__container__selected--border: 1px solid transparent;
+  --c2-icon-button--border: 1px solid transparent;
+  --c2-icon-button--border-radius: #{css.cssVar(indicator--border-radius)};
+  --c2-icon-button--background-color: transparent;
+  --c2-icon-button__hover--background-color: #{css.cssVar(segmented-item__hover--background-color)};
+  --c2-icon-button__selected--background-color: transparent;
+}
+
+:host([appearance='segmented'][stretched]) ::slotted(*) {
+  flex: 1 1 0;
+}
+
+:host([appearance='segmented'][size='s']) ::slotted(*) {
+  --c2-button__container--height: 28px;
+  --c2-button__container--padding-left: 10px;
+  --c2-button__container--padding-right: 10px;
+  --c2-button__container--font-size: 12px;
+  --c2-icon-button__state-layer--size: 28px;
+  --c2-icon-button__icon--width: 16px;
+  --c2-icon-button__icon--height: 16px;
+}
+
+:host([appearance='segmented'][size='m']) ::slotted(*) {
+  --c2-button__container--height: 32px;
+  --c2-button__container--padding-left: 14px;
+  --c2-button__container--padding-right: 14px;
+  --c2-button__container--font-size: 14px;
+  --c2-icon-button__state-layer--size: 32px;
+  --c2-icon-button__icon--width: 18px;
+  --c2-icon-button__icon--height: 18px;
+}
+
+:host([appearance='segmented'][size='l']) ::slotted(*) {
+  --c2-button__container--height: 40px;
+  --c2-button__container--padding-left: 18px;
+  --c2-button__container--padding-right: 18px;
+  --c2-button__container--font-size: 15px;
+  --c2-icon-button__state-layer--size: 40px;
+  --c2-icon-button__icon--width: 20px;
+  --c2-icon-button__icon--height: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host([appearance='segmented']) .indicator {
+    transition: none;
+  }
 }

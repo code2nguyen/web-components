@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/status-panel.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        margin: 0;
+        display: grid;
+        gap: 24px;
+        justify-items: center;
+        font-family: Arial, sans-serif;
+        color: #18181b;
+        background: #fafafa;
+      }
+      .outlined {
+        --c2-status-panel__container--border: 1px solid #e4e4e7;
+        --c2-status-panel__container--background-color: #fff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <c2-status-panel class="outlined" heading="No projects yet" description="Create your first project to get started.">
+      <button slot="actions">Create project</button>
+    </c2-status-panel>
+    <c2-status-panel class="outlined" status="success" heading="Workspace ready" description="Everything is configured and ready to use."></c2-status-panel>
+    <c2-status-panel class="outlined" status="error" align="start" heading="Import failed" description="Review the invalid row and try again.">
+      <div slot="content">customers.csv · row 42</div>
+    </c2-status-panel>
+  </body>
+</html>

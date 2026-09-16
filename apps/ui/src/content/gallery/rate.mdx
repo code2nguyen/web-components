@@ -1,0 +1,80 @@
+---
+description: 'Star ratings in different sizes, colours and precision levels.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Rate } from '@c2n/rate'
+
+## Ratings
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-rate aria-label="Rating" value="3"></c2-rate>
+```
+
+```html tag=MdxCodeBlock,label=Half star
+<c2-rate aria-label="Precise rating" value="2.5" allow-half></c2-rate>
+```
+
+```html tag=MdxCodeBlock,label=Small
+<style>
+  .rate-small {
+    --c2-rate__icon--size: 18px;
+    --c2-rate__container--gap: 2px;
+  }
+</style>
+<c2-rate class="rate-small" aria-label="Compact rating" value="4"></c2-rate>
+```
+
+```html tag=MdxCodeBlock,label=Large
+<style>
+  .rate-large {
+    --c2-rate__icon--size: 36px;
+    --c2-rate__container--gap: 8px;
+  }
+</style>
+<c2-rate class="rate-large" aria-label="Large rating" value="3"></c2-rate>
+```
+
+```html tag=MdxCodeBlock,label=Rose
+<style>
+  .rate-rose {
+    --c2-rate__icon--color: #fce7f3;
+    --c2-rate__icon__filled--color: #ec4899;
+    --c2-rate__icon__preview--color: #db2777;
+    --c2-rate__container__focus--outline: 2px solid rgba(236, 72, 153, 0.35);
+  }
+</style>
+<c2-rate class="rate-rose" aria-label="Favorite rating" value="4"></c2-rate>
+```
+
+```html tag=MdxCodeBlock,label=Ten point
+<style>
+  .rate-ten {
+    --c2-rate__icon--size: 20px;
+    --c2-rate__container--gap: 2px;
+    --c2-rate__icon__filled--color: #2563eb;
+    --c2-rate__icon__preview--color: #1d4ed8;
+  }
+</style>
+<c2-rate class="rate-ten" aria-label="Ten point rating" max="10" value="7"></c2-rate>
+```
+
+```html tag=MdxCodeBlock,label=Readonly score
+<style>
+  .rate-readonly {
+    --c2-rate__icon--size: 28px;
+    --c2-rate__icon__filled--color: #16a34a;
+  }
+</style>
+<c2-rate class="rate-readonly" aria-label="Review score" value="4.5" allow-half readonly></c2-rate>
+```
+
+```html tag=MdxCodeBlock,label=Clearable
+<c2-rate aria-label="Clearable rating" value="3" clearable></c2-rate>
+```
+
+</GalleryGrid>

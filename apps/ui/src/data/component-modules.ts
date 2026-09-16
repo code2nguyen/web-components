@@ -3,6 +3,12 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/status-panel'
+import '@c2n/qr-code'
+import '@c2n/upload'
+import '@c2n/rate'
+import '@c2n/cascader'
+import '@c2n/questionnaire'
 import '@c2n/number-input'
 import '@c2n/date-input'
 import '@c2n/date-selector'

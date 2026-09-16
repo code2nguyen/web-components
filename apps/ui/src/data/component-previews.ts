@@ -4,6 +4,12 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'status-panel': `<c2-status-panel status="success" heading="Workspace ready" description="Everything is set up and ready to use." style="--c2-status-panel__container--min-height:170px;--c2-status-panel__container--padding:20px;--c2-status-panel__container--gap:14px;--c2-status-panel__media--size:48px;--c2-status-panel__media-icon--size:24px;--c2-status-panel__title--font-size:16px;--c2-status-panel__title--line-height:22px"></c2-status-panel>`,
+  'qr-code': `<c2-qr-code value="https://github.com/code2nguyen/web-components" size="132" aria-label="Project QR code"></c2-qr-code>`,
+  upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,
+  rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
+  cascader: `<c2-cascader aria-label="Choose a location" placeholder="Choose a district" options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing"}]}]'></c2-cascader>`,
+  questionnaire: `<c2-questionnaire questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","options":[{"value":"timeline","label":"Tool call timeline"},{"value":"approvals","label":"Approval checkpoints"},{"value":"handoffs","label":"Sub-agent handoffs"}]},{"id":"updates","title":"What should every progress update include?","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"}]},{"id":"timing","title":"When should work begin?","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"}]}]'></c2-questionnaire>`,
   'number-input': `<c2-number-input value="4" min="0" max="12" aria-label="Quantity" style="width:190px"><span slot="suffix">items</span></c2-number-input>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
   'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
@@ -54,7 +60,7 @@ export const componentPreviews: Record<string, string> = {
   <c2-button running>Saving…</c2-button>
 </div>`,
   'button-group': `<div style="display:grid;gap:12px;justify-items:start">
-  <c2-button-group selection="single" value="week" style="--c2-button-group--border: 1px solid #d4d4d8; --c2-button-group__divider--color: #d4d4d8; --c2-button__container--background-color: transparent; --c2-button__container--color: #3f3f46; --c2-button__container__hover--background-color: #f4f4f5; --c2-button__container__selected--background-color: #edf1fe; --c2-button__container__selected--color: #0265dc">
+  <c2-button-group appearance="segmented" value="week">
     <c2-button value="day">Day</c2-button><c2-button value="week">Week</c2-button><c2-button value="month">Month</c2-button>
   </c2-button-group>
   <c2-button-group><c2-button>Save</c2-button><c2-button>Publish</c2-button></c2-button-group>

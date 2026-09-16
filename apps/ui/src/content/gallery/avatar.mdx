@@ -90,6 +90,27 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
 <c2-avatar name="Elisa Jasmin" src="/web-components/chat.avif" class="photo" client:only="lit"></c2-avatar>
 ```
 
+```html tag=MdxCodeBlock,label=Editable photo,description=Avatar that can be replaced or removed in place,useWhen=People manage their own profile image,accessibility=Keep the visible change and remove actions keyboard accessible
+<style>
+  .editable-photo {
+    --c2-avatar--size: 72px;
+    --c2-avatar--box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px #d4d4d8;
+  }
+</style>
+<c2-avatar editable name="Elisa Jasmin" src="/web-components/chat.avif" class="editable-photo" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Editable fallback,description=Initials remain useful before a profile photo is chosen,useWhen=Photo upload is optional during onboarding
+<style>
+  .editable-fallback {
+    --c2-avatar--size: 72px;
+    --c2-avatar__auto-color--saturation: 65%;
+    --c2-avatar__auto-color--lightness: 45%;
+  }
+</style>
+<c2-avatar editable auto-color name="Ada Lovelace" initial-count="2" class="editable-fallback" client:only="lit"></c2-avatar>
+```
+
 ```html tag=MdxCodeBlock,label=Online
 <style>
   .online {

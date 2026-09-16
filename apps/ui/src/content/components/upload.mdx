@@ -1,0 +1,85 @@
+---
+title: 'Upload'
+description: 'Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import UploadExamplesRuntime from '../../components/UploadExamplesRuntime.astro'
+
+import { Upload } from '@c2n/upload'
+
+`c2-upload` owns file selection, drag-and-drop, validation, a multiple-file queue, and the UI around an application-provided upload function. Queue entries are rendered with `c2-attachment`, so progress, completion, failure, retry, cancellation, metadata, and image previews stay consistent with standalone attachments.
+
+<UploadExamplesRuntime />
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/upload
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/upload
+<style>
+  .custom-compact-upload {
+    --c2-button__container--height: 40px;
+    --c2-button__container--padding-left: 14px;
+    --c2-button__container--padding-right: 16px;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--background-color: rgb(2, 101, 220);
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: rgb(1, 84, 184);
+    --c2-button__container__active--background-color: rgb(1, 70, 154);
+    --c2-upload__icon--color: #ffffff;
+  }
+</style>
+<div data-label="Single file">
+  <c2-upload data-upload-demo aria-label="Upload a document" accept=".pdf,.doc,.docx" max-size="10485760"></c2-upload>
+</div>
+<div data-label="Multiple files">
+  <c2-upload data-upload-demo multiple max-files="5" aria-label="Upload project files">
+    <span slot="prompt">Drop project files or <strong>choose files</strong></span>
+    <span slot="hint">Up to 5 files · 10 MB each</span>
+  </c2-upload>
+</div>
+<div data-label="Images">
+  <c2-upload data-upload-demo multiple accept="image/*" aria-label="Upload images"></c2-upload>
+</div>
+<div data-label="Compact">
+  <c2-upload data-upload-demo variant="compact" multiple max-files="4" aria-label="Attach files"></c2-upload>
+</div>
+<div data-label="Custom compact">
+  <c2-upload class="custom-compact-upload" data-upload-demo variant="compact" accept=".csv" aria-label="Import customer CSV">
+    <svg slot="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3v12M7 10l5 5 5-5"></path><path d="M5 21h14"></path>
+    </svg>
+    <span slot="action">Import CSV</span>
+  </c2-upload>
+</div>
+```
+
+The examples use a simulated transport so you can select or drop local files and watch their attachment rows progress. In an application, assign your own `uploadHandler` as a JavaScript property. Resolve with any server result you need later; throw to enter the retry state, and observe `signal` to cancel active network work when the user removes an attachment.
+
+A single-file uploader hides its picker after accepting a file, leaving the attachment result in its place. Removing that attachment restores the picker. Multiple uploaders stay available until `max-files` is reached and change their default copy to **Upload more**, including the remaining capacity. Use `variant="compact"` for a button-only picker without a drag-and-drop zone; its button uses `c2-button` and follows the same capacity rules.
+
+```js tag=CodeBlock
+const upload = document.querySelector('c2-upload')
+
+upload.uploadHandler = (file, { signal, onProgress }) =>
+  new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open('POST', '/api/uploads')
+    request.upload.addEventListener('progress', event => {
+      if (event.lengthComputable) onProgress((event.loaded / event.total) * 100)
+    })
+    request.addEventListener('load', () => resolve(JSON.parse(request.responseText)))
+    request.addEventListener('error', () => reject(new Error('Upload failed')))
+    signal.addEventListener('abort', () => request.abort(), { once: true })
+    request.send(file)
+  })
+```
+
+Use `multiple`, `max-files`, `max-size`, and the native `accept` syntax to constrain selection. Rejected files remain outside the queue and are reported through `file-reject`. Set `auto-upload="false"` to prepare a queue first, then call `upload()` when the user confirms. The `value` property returns the selected `File[]`, and a named uploader contributes each file to native `FormData`. The `action` and `drop-icon` slots customize the compact button, while inherited `--c2-button__*` variables control its appearance. Leave the `action` slot empty for multiple uploads when you want the built-in remaining-file count.

@@ -16,6 +16,12 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/status-panel": "*",
+    "@c2n/qr-code": "*",
+    "@c2n/upload": "*",
+    "@c2n/rate": "*",
+    "@c2n/cascader": "*",
+    "@c2n/questionnaire": "*",
     "@c2n/number-input": "*",
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",

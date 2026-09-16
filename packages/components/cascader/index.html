@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-cascader</title>
+    <script type="module" src="/src/cascader.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+      }
+      section {
+        max-width: 720px;
+        margin-bottom: 32px;
+      }
+      h2 {
+        margin: 0 0 12px;
+        color: #71717a;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      #log {
+        margin-top: 12px;
+        color: #71717a;
+        font:
+          12px ui-monospace,
+          monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Location</h2>
+      <div class="row">
+        <c2-cascader id="location" aria-label="Choose a location" placeholder="Choose a district"></c2-cascader>
+        <c2-cascader id="hover" aria-label="Choose a location on hover" placeholder="Hover to explore" expand-trigger="hover"></c2-cascader>
+        <c2-cascader id="selected" aria-label="Current location" value="zhejiang;hangzhou;west-lake"></c2-cascader>
+        <c2-cascader aria-label="Unavailable location" disabled></c2-cascader>
+      </div>
+      <div id="log">Choose a location.</div>
+    </section>
+    <script type="module">
+      const options = [
+        {
+          value: 'zhejiang',
+          label: 'Zhejiang',
+          children: [
+            {
+              value: 'hangzhou',
+              label: 'Hangzhou',
+              children: [
+                { value: 'west-lake', label: 'West Lake' },
+                { value: 'xiaoshan', label: 'Xiaoshan' },
+              ],
+            },
+            { value: 'ningbo', label: 'Ningbo' },
+          ],
+        },
+        {
+          value: 'jiangsu',
+          label: 'Jiangsu',
+          children: [{ value: 'nanjing', label: 'Nanjing' }],
+        },
+      ]
+      document.querySelectorAll('c2-cascader').forEach((cascader) => (cascader.options = options))
+      document.querySelector('#location').addEventListener('cascader-change', (event) => {
+        document.querySelector('#log').textContent = `Selected: ${event.detail.labels.join(' → ')}`
+      })
+    </script>
+  </body>
+</html>

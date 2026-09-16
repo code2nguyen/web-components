@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code</title>
+    <script type="module" src="/src/qr-code.ts"></script>
+    <style>
+      body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+        padding: 32px;
+        font-family: system-ui;
+      }
+      .blue {
+        --c2-qr-code__module--color: #1d4ed8;
+        --c2-qr-code__background--color: #eff6ff;
+      }
+      .mark {
+        display: grid;
+        place-items: center;
+        border-radius: 4px;
+        background: #18181b;
+        color: white;
+        font: 700 10px system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-qr-code value="https://github.com/code2nguyen/web-components" aria-label="Project QR code"></c2-qr-code>
+    <c2-qr-code class="blue" value="mailto:hello@example.com" size="160" aria-label="Email QR code"></c2-qr-code>
+    <c2-qr-code value="https://example.com/tickets/42" error-correction="H" aria-label="Ticket QR code">
+      <span class="mark" slot="center">C2</span>
+    </c2-qr-code>
+  </body>
+</html>

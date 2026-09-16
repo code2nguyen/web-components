@@ -19,7 +19,11 @@ declare module 'vue' {
       C2Props<Avatar> & {
         'initial-count'?: unknown
         'auto-color'?: unknown
+        'max-size'?: unknown
+        onAvatarRemove?: (event: AvatarEventMap['avatar-remove']) => void
         onError?: (event: AvatarEventMap['error']) => void
+        onFileReject?: (event: AvatarEventMap['file-reject']) => void
+        onAvatarChange?: (event: AvatarEventMap['avatar-change']) => void
       }
     >
   }

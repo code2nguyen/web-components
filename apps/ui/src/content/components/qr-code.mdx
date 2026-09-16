@@ -1,0 +1,63 @@
+---
+title: 'QR Code'
+description: 'Generate accessible, themeable QR codes locally as crisp SVG graphics.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { QrCode } from '@c2n/qr-code'
+
+`c2-qr-code` encodes text, URLs, contact details, Wi-Fi credentials, and other payloads entirely in the browser. It renders a scalable SVG, offers four error-correction levels and a reliable quiet zone, and can export the result as SVG or PNG.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/qr-code
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/qr-code
+<style>
+  .brand-code {
+    --c2-qr-code__module--color: #1d4ed8;
+    --c2-qr-code__background--color: #eff6ff;
+  }
+
+  .qr-mark {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    border-radius: 4px;
+    background: #18181b;
+    color: #ffffff;
+    font: 700 10px/1 system-ui;
+  }
+</style>
+<div data-label="URL">
+  <c2-qr-code value="https://github.com/code2nguyen/web-components" size="160" aria-label="Project website QR code"></c2-qr-code>
+</div>
+<div data-label="Branded">
+  <c2-qr-code class="brand-code" value="mailto:hello@example.com" size="160" aria-label="Email address QR code"></c2-qr-code>
+</div>
+<div data-label="Center mark">
+  <c2-qr-code value="https://example.com/tickets/42" size="160" error-correction="H" aria-label="Ticket QR code">
+    <span class="qr-mark" slot="center">C2</span>
+  </c2-qr-code>
+</div>
+```
+
+Use `error-correction="H"` when adding center content, and keep that content small. The default four-module margin is the recommended quiet zone; avoid reducing it unless the surrounding layout provides equivalent empty space.
+
+Export the generated artwork from JavaScript:
+
+```js tag=CodeBlock
+const code = document.querySelector('c2-qr-code')
+
+const svg = code.toSVG()
+const pngDataUrl = await code.toDataURL('png', 4)
+await code.download('event-ticket', 'png')
+```

@@ -1,0 +1,107 @@
+---
+title: 'Questionnaire'
+description: 'A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Questionnaire } from '@c2n/questionnaire'
+
+`c2-questionnaire` turns a question array into a complete guided flow. It preserves answers between steps, supports single and multiple selection, optional free text and explicit skipping, validates before advancing, and emits `answer-change`, `step-change`, `skip` and `complete`. Give it a form `name` to submit the complete answer object as JSON.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/questionnaire
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/questionnaire
+<div data-label="Full flow — question 1">
+  <c2-questionnaire
+    questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","otherPlaceholder":"Describe another feature…","options":[{"value":"timeline","label":"Tool call timeline","description":"Show what the agent ran and what came back."},{"value":"approvals","label":"Approval checkpoints","description":"Ask before sensitive or destructive actions."},{"value":"handoffs","label":"Sub-agent handoffs","description":"Make delegated work and results easier to follow."}]},{"id":"updates","title":"What should every progress update include?","description":"Select all that apply, or skip this question.","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"},{"value":"next","label":"Next step"}]},{"id":"timing","title":"When should work begin?","description":"Choose when the agent should begin the work.","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"},{"value":"backlog","label":"Add it to the backlog"}]}]'
+  ></c2-questionnaire>
+</div>
+<div data-label="Full flow — question 2">
+  <c2-questionnaire
+    current="1"
+    questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","otherPlaceholder":"Describe another feature…","options":[{"value":"timeline","label":"Tool call timeline","description":"Show what the agent ran and what came back."},{"value":"approvals","label":"Approval checkpoints","description":"Ask before sensitive or destructive actions."},{"value":"handoffs","label":"Sub-agent handoffs","description":"Make delegated work and results easier to follow."}]},{"id":"updates","title":"What should every progress update include?","description":"Select all that apply, or skip this question.","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"},{"value":"next","label":"Next step"}]},{"id":"timing","title":"When should work begin?","description":"Choose when the agent should begin the work.","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"},{"value":"backlog","label":"Add it to the backlog"}]}]'
+  ></c2-questionnaire>
+</div>
+<div data-label="Full flow — question 3 disabled">
+  <c2-questionnaire
+    current="2"
+    disabled
+    questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","otherPlaceholder":"Describe another feature…","options":[{"value":"timeline","label":"Tool call timeline","description":"Show what the agent ran and what came back."},{"value":"approvals","label":"Approval checkpoints","description":"Ask before sensitive or destructive actions."},{"value":"handoffs","label":"Sub-agent handoffs","description":"Make delegated work and results easier to follow."}]},{"id":"updates","title":"What should every progress update include?","description":"Select all that apply, or skip this question.","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"},{"value":"next","label":"Next step"}]},{"id":"timing","title":"When should work begin?","description":"Choose when the agent should begin the work.","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"},{"value":"backlog","label":"Add it to the backlog"}]}]'
+  ></c2-questionnaire>
+</div>
+```
+
+Set `questions` as a JavaScript array for normal application use. The JSON attribute form shown above is useful in plain HTML. Use `type: 'select'` for one answer and `type: 'choice'` for multiple answers; `single` and `multiple` remain supported aliases. Use `skippable: true` to show Skip, `required: false` to permit an empty Next action, and `otherPlaceholder` to add a free-text alternative. Options accept `value`, `label`, `description`, `shortcut` and `disabled`.
+
+Call `next()`, `previous()`, `skip()` or `reset()` to control the flow. The `answers` object and zero-based `current` property can also be controlled directly. On the last question, the primary action uses `complete-label` and emits `complete` without discarding the current answers.
+
+### Data and custom item rendering
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import type { Questionnaire, QuestionnaireQuestion } from '@c2n/questionnaire'
+
+const questions: QuestionnaireQuestion[] = [
+  {
+    id: 'direction',
+    type: 'select',
+    title: 'What should the agent build next?',
+    options: [
+      { value: 'timeline', label: 'Tool call timeline', description: 'Show what the agent ran.' },
+      { value: 'approvals', label: 'Approval checkpoints', description: 'Ask before sensitive actions.' },
+    ],
+  },
+  {
+    id: 'updates',
+    type: 'choice',
+    title: 'What should every progress update include?',
+    options: [
+      { value: 'progress', label: 'Progress' },
+      { value: 'risks', label: 'Risks' },
+    ],
+  },
+]
+
+const questionnaire = document.querySelector<Questionnaire>('c2-questionnaire')!
+questionnaire.questions = questions
+questionnaire.questionItemRender = ({ option, selected }) => html`
+  <strong>${option.label}</strong>
+  <span>${selected ? 'Selected' : option.description}</span>
+`
+```
+
+`questionItemRender` is a JavaScript property rather than an HTML attribute because attributes can only contain strings, not renderer functions. It customizes the label area of each option while the questionnaire retains the native radio or checkbox, selection state, keyboard handling, shortcut badge and validation.
+
+### Custom actions and answer summary
+
+```html tag=CodeBlock
+<c2-questionnaire id="planning-questionnaire">
+  <button slot="previous-button" type="button">← Back</button>
+  <button slot="skip-button" type="button">Not now</button>
+  <button slot="next-button" type="button">Continue →</button>
+  <button slot="submit-button" type="button">Save plan</button>
+
+  <section slot="summary">
+    <h2>Your plan</h2>
+    <output id="plan-summary"></output>
+  </section>
+</c2-questionnaire>
+
+<script type="module">
+  const questionnaire = document.querySelector('#planning-questionnaire')
+  questionnaire.addEventListener('complete', ({ detail }) => {
+    document.querySelector('#plan-summary').textContent = JSON.stringify(detail.answers, null, 2)
+  })
+</script>
+```
+
+The four button slots replace the complete interactive control, but their clicks still run the questionnaire's built-in navigation and validation. After a successful submit, `completed` becomes true and the component shows either its default answer list or the custom `summary` slot. Call `reset()` to clear the answers and return to the questions.

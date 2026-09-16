@@ -6,7 +6,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Buttons
 
 - **Button** — `c2-button` · `@c2n/button` — Themeable button with slots for text, prefix, suffix and running icons.
-- **Button Group** — `c2-button-group` · `@c2n/button-group` — Attached buttons with shared borders, optionally a segmented control with single or multiple selection.
+- **Button Group** — `c2-button-group` · `@c2n/button-group` — Joined actions and polished segmented controls with single or multiple selection.
 - **Copy Button** — `c2-copy-button` · `@c2n/copy-button` — Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.
 - **Icon Button** — `c2-icon-button` · `@c2n/icon-button` — Round, hoverable button wrapping a slotted SVG icon.
 
@@ -36,6 +36,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Kbd** — `c2-kbd` · `@c2n/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection.
 - **List Item** — `c2-list-item` · `@c2n/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
+- **QR Code** — `c2-qr-code` · `@c2n/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Stat** — `c2-stat` · `@c2n/stat` — Displays a KPI with an optional icon, trend and supporting description.
 - **Table** — `c2-table, c2-table-column` · `@c2n/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
@@ -48,6 +49,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Sheet** — `c2-sheet` · `@c2n/sheet` — Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.
 - **Skeleton** — `c2-skeleton` · `@c2n/skeleton` — Placeholder block standing in for content that has not arrived, in three shapes and three animations.
 - **Spinner** — `c2-spinner` · `@c2n/spinner` — Circular progress indicator, indeterminate or showing a value, with optional text.
+- **Status Panel** — `c2-status-panel` · `@c2n/status-panel` — Communicate empty states, operation outcomes and recoverable errors with clear next steps.
 - **Toast** — `c2-toast, c2-toast-region` · `@c2n/toast` — Notification cards and a manager for stacked, queued notifications with independent lifetimes.
 - **Tooltip** — `c2-tooltip` · `@c2n/tooltip` — Contextual hint shown when its target is hovered or focused, rendered in the top layer.
 
@@ -60,6 +62,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Inputs
 
 - **Autocomplete** — `c2-autocomplete` · `@c2n/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
+- **Cascader** — `c2-cascader` · `@c2n/cascader` — Select a value from related, multi-level data in one floating panel.
 - **Checkbox** — `c2-checkbox` · `@c2n/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
 - **Color Area** — `c2-color-area` · `@c2n/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/color-select` — Colour swatch that opens a full picker built from area and slider.
@@ -68,12 +71,15 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Date Selector** — `c2-date-selector` · `@c2n/date-selector` — Accessible one- or two-month calendar for choosing a date range.
 - **Label** — `c2-label` · `@c2n/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Number Input** — `c2-number-input` · `@c2n/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
+- **Questionnaire** — `c2-questionnaire` · `@c2n/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation.
+- **Rate** — `c2-rate` · `@c2n/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
 - **Select** — `c2-select` · `@c2n/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options.
 - **Slider** — `c2-slider` · `@c2n/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
 - **Switch** — `c2-switch` · `@c2n/switch` — On/off toggle on a native switch input, with label, description and thumb icons.
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
 - **Textarea** — `c2-textarea` · `@c2n/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
+- **Upload** — `c2-upload` · `@c2n/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 
 ## Layout
 

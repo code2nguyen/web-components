@@ -1,0 +1,94 @@
+---
+description: 'Hierarchical pickers for locations, teams and catalogues, with click or hover expansion.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Cascader } from '@c2n/cascader'
+
+## Selection patterns
+
+Every example is driven by nested `options`. Open a trigger to see each hierarchy rendered as adjacent columns in one floating panel.
+
+<GalleryGrid min="420">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-cascader
+  aria-label="Choose a location"
+  placeholder="Choose a district"
+  options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]},{"value":"ningbo","label":"Ningbo"}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing","children":[{"value":"xuanwu","label":"Xuanwu"},{"value":"qinhuai","label":"Qinhuai"}]}]}]'
+></c2-cascader>
+```
+
+```html tag=MdxCodeBlock,label=Hover explorer
+<style>
+  .team-cascader {
+    --c2-cascader__trigger--width: 260px;
+    --c2-cascader__trigger--border-radius: 999px;
+    --c2-cascader__trigger--padding: 8px 12px 8px 16px;
+    --c2-cascader__option__active--background: #f3e8ff;
+    --c2-cascader__option__selected--color: #7e22ce;
+    --c2-cascader__trigger__open--border: 1px solid #9333ea;
+    --c2-cascader__trigger__focus--outline: 2px solid rgba(147, 51, 234, 0.35);
+  }
+</style>
+<c2-cascader
+  class="team-cascader"
+  aria-label="Choose a team"
+  expand-trigger="hover"
+  placeholder="Find your team"
+  options='[{"value":"product","label":"✨ Product","children":[{"value":"design","label":"Design","children":[{"value":"research","label":"Research"},{"value":"systems","label":"Design systems"}]},{"value":"engineering","label":"Engineering","children":[{"value":"web","label":"Web platform"},{"value":"mobile","label":"Mobile"}]}]},{"value":"operations","label":"⚙️ Operations","children":[{"value":"people","label":"People"},{"value":"finance","label":"Finance"}]}]'
+></c2-cascader>
+```
+
+```html tag=MdxCodeBlock,label=Dark catalogue
+<style>
+  .catalog-cascader {
+    --c2-cascader__trigger--width: 250px;
+    --c2-cascader__trigger--background: #18181b;
+    --c2-cascader__trigger--color: #fafafa;
+    --c2-cascader__trigger--border: 1px solid #3f3f46;
+    --c2-cascader__trigger__hover--background: #27272a;
+    --c2-cascader__trigger__hover--border: 1px solid #52525b;
+    --c2-cascader__trigger__open--border: 1px solid #f59e0b;
+    --c2-cascader__placeholder--color: #a1a1aa;
+    --c2-cascader__icon--color: #a1a1aa;
+    --c2-cascader__panel--background: #18181b;
+    --c2-cascader__panel--border: 1px solid #3f3f46;
+    --c2-cascader__column--border: 1px solid #3f3f46;
+    --c2-cascader__option--color: #e4e4e7;
+    --c2-cascader__option__hover--background: #27272a;
+    --c2-cascader__option__active--background: #3f3f46;
+    --c2-cascader__option__active--color: #ffffff;
+    --c2-cascader__option__selected--color: #fbbf24;
+  }
+</style>
+<c2-cascader
+  class="catalog-cascader"
+  aria-label="Choose a product category"
+  placeholder="Browse catalogue"
+  value="electronics;computers;laptops"
+  options='[{"value":"electronics","label":"Electronics","children":[{"value":"computers","label":"Computers","children":[{"value":"laptops","label":"Laptops"},{"value":"desktops","label":"Desktops"}]},{"value":"audio","label":"Audio","children":[{"value":"headphones","label":"Headphones"},{"value":"speakers","label":"Speakers"}]}]},{"value":"home","label":"Home","children":[{"value":"lighting","label":"Lighting"},{"value":"furniture","label":"Furniture"}]}]'
+></c2-cascader>
+```
+
+```html tag=MdxCodeBlock,label=Choose any level
+<style>
+  .level-cascader {
+    --c2-cascader__trigger--width: 280px;
+    --c2-cascader__option__active--background: #ecfdf5;
+    --c2-cascader__option__selected--color: #047857;
+    --c2-cascader__trigger__open--border: 1px solid #10b981;
+  }
+</style>
+<c2-cascader
+  class="level-cascader"
+  aria-label="Choose an organisation level"
+  placeholder="Choose any organisation level"
+  change-on-select
+  options='[{"value":"company","label":"Company","children":[{"value":"division","label":"Product division","children":[{"value":"team-a","label":"Team Atlas"},{"value":"team-b","label":"Team Beacon"}]},{"value":"operations","label":"Operations division","children":[{"value":"people","label":"People team"},{"value":"finance","label":"Finance team"}]}]}]'
+></c2-cascader>
+```
+
+</GalleryGrid>
