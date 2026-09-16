@@ -22,6 +22,16 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### `c2-bar-chart` cannot express common horizontal, stacked, or labelled bar variants
+
+- **Severity:** gap
+- **Hit while:** translating the bar-chart gallery reference into supported docs examples, 2026-09-16.
+- **What happens:** the component only draws vertical grouped bars. There is no orientation option, cumulative
+  stack mode, or value/data-label renderer, so three common variants in the reference could not be represented
+  without drawing a separate chart by hand. The gallery keeps only truthful grouped-bar examples.
+- **Where the fix belongs:** `packages/components/chart` — add explicit orientation and grouping/stacking APIs,
+  plus a formatter or render hook for bar labels.
+
 ### A component-level shorthand variable cannot be reached once `@c2n/theme` is loaded
 
 - **Severity:** gap (theme pipeline)

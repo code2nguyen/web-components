@@ -6,6 +6,8 @@ test('draws a line chart from series children and reports itself ready', async (
   await expect(chart).toBeVisible()
   // The engine arrives through a dynamic import, so readiness is an explicit signal rather than a paint.
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveAttribute('data-chart-engine', 'uplot')
+  await expect(chart).toHaveAttribute('animation', 'auto')
   // One canvas, created by the engine inside the plot container.
   expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBe(1)
 })
@@ -151,6 +153,25 @@ test('draws a bar chart over category labels', async ({ page, scenario }) => {
   await expect(page.locator('c2-bar-chart')).toHaveAttribute('data-chart-ready', 'true')
 })
 
+test('reads the bar radius token and gives rounded bars their own path builder', async ({ page, scenario }) => {
+  await scenario('rounded-bar')
+  const chart = page.locator('c2-bar-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const result = await chart.evaluate((element) => {
+    const bar = element as unknown as {
+      buildContext(): { series: unknown[]; theme: { barRadius: number } }
+      seriesStyle(series: unknown, index: number, context: unknown): { paths?: unknown }
+    }
+    const context = bar.buildContext()
+    const rounded = bar.seriesStyle(context.series[0], 0, context).paths
+    const square = bar.seriesStyle(context.series[0], 0, { ...context, theme: { ...context.theme, barRadius: 0 } }).paths
+    return { radius: context.theme.barRadius, distinctBuilder: rounded !== square }
+  })
+
+  expect(result).toEqual({ radius: 0.5, distinctBuilder: true })
+})
+
 test('draws a donut through the ECharts engine', async ({ page, scenario }) => {
   await scenario('pie')
   const pie = page.locator('c2-pie-chart')
@@ -160,6 +181,7 @@ test('draws a donut through the ECharts engine', async ({ page, scenario }) => {
 
 for (const [scenarioName, tag] of [
   ['gauge', 'c2-gauge-chart'],
+  ['radar', 'c2-radar-chart'],
   ['scatter', 'c2-scatter-chart'],
   ['candlestick', 'c2-candlestick-chart'],
 ] as const) {
@@ -171,24 +193,84 @@ for (const [scenarioName, tag] of [
   })
 }
 
+test('builds radar indicators and one profile per declared series', async ({ page, scenario }) => {
+  await scenario('radar')
+  const radar = page.locator('c2-radar-chart')
+  await expect(radar).toHaveAttribute('data-chart-ready', 'true')
+  await expect(radar).toHaveAttribute('data-chart-engine', 'echarts')
+
+  const configuration = await radar.evaluate((element) => {
+    const chart = element as unknown as {
+      animation: string
+      frame: unknown
+      buildContext(): unknown
+      buildOptions(context: unknown): {
+        animationDurationUpdate: number
+        radar: { shape: string; indicator: { name: string; min: number; max: number }[] }
+      }
+      projectData(frame: unknown, context: unknown): { name: string; value: (number | null)[] }[][]
+    }
+    const context = chart.buildContext()
+    const options = chart.buildOptions(context)
+    return {
+      animation: chart.animation,
+      animationDurationUpdate: options.animationDurationUpdate,
+      radar: options.radar,
+      data: chart.projectData(chart.frame, context),
+    }
+  })
+
+  expect(configuration.animation).toBe('auto')
+  expect(configuration.animationDurationUpdate).toBe(0)
+  expect(configuration.radar.shape).toBe('circle')
+  expect(configuration.radar.indicator).toEqual([
+    { name: 'Quality', min: 0, max: 100 },
+    { name: 'Speed', min: 0, max: 100 },
+    { name: 'Reliability', min: 0, max: 100 },
+    { name: 'Efficiency', min: 0, max: 100 },
+    { name: 'Coverage', min: 0, max: 100 },
+  ])
+  expect(configuration.data).toEqual([[{ name: 'Current', value: [82, 74, 91, 68, 77] }], [{ name: 'Target', value: [90, 85, 88, 80, 84] }]])
+})
+
 test('supports disabling gauge marks from markup', async ({ page, scenario }) => {
   await scenario('gauge')
   const gaugeConfiguration = await page.locator('c2-gauge-chart').evaluate((element) => {
     const gauge = element as unknown as {
       pointer: string
       progress: string
+      marks: string
       buildContext(): unknown
-      seriesOption(index: number, context: unknown): { detail: { formatter: (value: number) => string } }
+      seriesOption(
+        index: number,
+        context: unknown,
+      ): {
+        axisTick: { show: boolean }
+        splitLine: { show: boolean }
+        title: { offsetCenter: [number, string] }
+        detail: { offsetCenter: [number, string]; formatter: (value: number) => string }
+      }
     }
+    const options = gauge.seriesOption(0, gauge.buildContext())
     return {
       pointer: gauge.pointer,
       progress: gauge.progress,
-      formatted: gauge.seriesOption(0, gauge.buildContext()).detail.formatter(26.22975242754607),
+      marks: gauge.marks,
+      axisTick: options.axisTick.show,
+      splitLine: options.splitLine.show,
+      titleOffset: options.title.offsetCenter,
+      detailOffset: options.detail.offsetCenter,
+      formatted: options.detail.formatter(26.22975242754607),
     }
   })
   expect(gaugeConfiguration).toEqual({
     pointer: 'none',
     progress: 'show',
+    marks: 'none',
+    axisTick: false,
+    splitLine: false,
+    titleOffset: [0, '25%'],
+    detailOffset: [0, '-3%'],
     formatted: '26.2%',
   })
 })
@@ -344,6 +426,25 @@ test("lists a pie chart's slices in the legend, and toggles one", async ({ page,
     .toBe('false')
 })
 
+test('configures pie label content from markup', async ({ page, scenario }) => {
+  await scenario('pie')
+  const chart = page.locator('c2-pie-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const label = await chart.evaluate((element) => {
+    const pie = element as unknown as {
+      labels: string
+      labelContent: string
+      buildContext(): unknown
+      seriesOption(index: number, context: unknown): { label: { show: boolean; position: string; formatter: string } }
+    }
+    const option = pie.seriesOption(0, pie.buildContext()).label
+    return { labels: pie.labels, content: pie.labelContent, ...option }
+  })
+
+  expect(label).toEqual({ labels: 'outside', content: 'percent', show: true, position: 'outside', formatter: '{d}%' })
+})
+
 test('drives the grid from markup in both directions', async ({ page, scenario }) => {
   await scenario('grid')
   const chart = page.locator('c2-line-chart')
@@ -401,6 +502,13 @@ test('fills the width of a centring flex frame, even with no legend', async ({ p
   // width the host collapses to its legend — and to zero when there is none, which renders nothing at all.
   const width = await chart.evaluate((element) => element.getBoundingClientRect().width)
   expect(width).toBeGreaterThan(600)
+})
+
+test('draws after a zero-width app shell becomes measurable', async ({ page, scenario }) => {
+  await scenario('deferred-layout')
+  const chart = page.locator('c2-line-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBe(1)
 })
 
 test('shows a tooltip listing every series at the hovered position', async ({ page, scenario }) => {

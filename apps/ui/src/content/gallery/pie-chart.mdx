@@ -1,6 +1,6 @@
 ---
 title: 'Pie chart gallery'
-description: 'Revenue-mix and profit-pool views built from Apple’s 2025 SEC filing.'
+description: 'Editorial pie and donut cards for product mix, profit pool and labelled share views.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -12,69 +12,207 @@ import { PieChart } from '@c2n/chart/pie-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
 import { ChartLegend } from '@c2n/chart/chart-legend.js'
 import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Card } from '@c2n/card'
 
 <ExampleModules />
 <ChartFinancialGallery />
 
 Figures are USD billions from the product, service, and gross-margin tables in Apple's public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
 
-<GalleryGrid min="440">
+<GalleryGrid min="300">
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-pie-chart
-  label-field="category"
-  inner-radius="0.58"
-  legend="end"
-  data='[{"category":"iPhone","sales":209.586},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023},{"category":"Wearables","sales":35.686},{"category":"Services","sales":109.158}]'
->
-  <c2-chart-series field="sales" label="Net sales"></c2-chart-series>
+<c2-pie-chart label-field="browser" data='[{"browser":"Chrome","visitors":275},{"browser":"Safari","visitors":200},{"browser":"Firefox","visitors":187},{"browser":"Edge","visitors":173},{"browser":"Other","visitors":90}]'>
+  <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
 </c2-pie-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Revenue mix — rich legend and tooltip
+```html tag=MdxCodeBlock,label=Product revenue mix
 <style>
-  .revenue-mix {
-    display: grid;
-    width: 100%;
-    gap: 12px;
-  }
-  .revenue-mix c2-pie-chart {
-    --c2-chart--height: 300px;
-    --c2-chart__slice--border: 3px solid var(--site-color-surface);
-  }
+  .pie-story { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .pie-story__heading, .pie-story__footer { display: grid; gap: 4px; }
+  .pie-story__heading strong { font-size: 15px; }
+  .pie-story__heading span, .pie-story__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .pie-story__footer { font-size: 12px; }
+  .pie-story c2-pie-chart { width: 100%; --c2-chart--height: 230px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__slice--border: 2px solid var(--site-color-surface); --c2-chart__series-1--color: #93c5fd; --c2-chart__series-2--color: #60a5fa; --c2-chart__series-3--color: #3b82f6; --c2-chart__series-4--color: #2563eb; --c2-chart__series-5--color: #1d4ed8; }
 </style>
-<div class="revenue-mix" data-finance-demo>
+<c2-card class="pie-story">
+  <div slot="header" class="pie-story__heading">
+    <strong>Product revenue mix · Pie</strong>
+    <span>FY2025 net sales by reportable product</span>
+  </div>
   <c2-pie-chart
-    id="financial-pie-mix"
     label-field="category"
-    inner-radius="0.64"
-    outer-radius="0.9"
+    inner-radius="0"
+    outer-radius="0.78"
+    legend="none"
     data='[{"category":"iPhone","sales":209.586},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023},{"category":"Wearables","sales":35.686},{"category":"Services","sales":109.158}]'
   >
     <c2-chart-series field="sales" label="Net sales"></c2-chart-series>
   </c2-pie-chart>
-  <c2-chart-legend for="financial-pie-mix"></c2-chart-legend>
-  <c2-chart-tooltip for="financial-pie-mix"></c2-chart-tooltip>
-</div>
+  <div slot="footer" class="pie-story__footer">
+    <strong>iPhone contributes 50.4% of net sales</strong>
+    <span>FY2025 · USD billions</span>
+  </div>
+</c2-card>
 ```
 
-```html tag=MdxCodeBlock,label=Where gross profit comes from
+```html tag=MdxCodeBlock,label=Revenue donut
 <style>
-  .profit-mix {
-    --c2-chart__series-1--color: #2563eb;
-    --c2-chart__series-2--color: #7c3aed;
-  }
+  .donut-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .donut-card__heading, .donut-card__footer { display: grid; gap: 4px; }
+  .donut-card__heading strong { font-size: 15px; }
+  .donut-card__heading span, .donut-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .donut-card__footer { font-size: 12px; }
+  .donut-card c2-pie-chart { width: 100%; --c2-chart--height: 230px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__slice--border: 3px solid var(--site-color-surface); --c2-chart__series-1--color: #93c5fd; --c2-chart__series-2--color: #60a5fa; --c2-chart__series-3--color: #3b82f6; --c2-chart__series-4--color: #2563eb; --c2-chart__series-5--color: #1d4ed8; }
 </style>
-<c2-pie-chart
-  class="profit-mix"
-  label-field="category"
-  inner-radius="0.68"
-  labels="outside"
-  legend="bottom"
-  data='[{"category":"Products","sales":112.887},{"category":"Services","sales":82.314}]'
->
-  <c2-chart-series field="sales" label="Gross profit"></c2-chart-series>
-</c2-pie-chart>
+<c2-card class="donut-card">
+  <div slot="header" class="donut-card__heading">
+    <strong>Product revenue mix · Donut</strong>
+    <span>A quieter shape for dashboard layouts</span>
+  </div>
+  <c2-pie-chart
+    label-field="category"
+    inner-radius="0.58"
+    outer-radius="0.82"
+    legend="none"
+    data='[{"category":"iPhone","sales":209.586},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023},{"category":"Wearables","sales":35.686},{"category":"Services","sales":109.158}]'
+  >
+    <c2-chart-series field="sales" label="Net sales"></c2-chart-series>
+  </c2-pie-chart>
+  <div slot="footer" class="donut-card__footer">
+    <strong>Services is the second-largest segment</strong>
+    <span>26.2% of FY2025 net sales</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Outside percentage labels
+<style>
+  .outside-label-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .outside-label-card__heading, .outside-label-card__footer { display: grid; gap: 4px; }
+  .outside-label-card__heading strong { font-size: 15px; }
+  .outside-label-card__heading span, .outside-label-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .outside-label-card__footer { font-size: 12px; }
+  .outside-label-card c2-pie-chart { width: 100%; --c2-chart--height: 230px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__slice--border: 2px solid var(--site-color-surface); --c2-chart__series-1--color: #93c5fd; --c2-chart__series-2--color: #60a5fa; --c2-chart__series-3--color: #3b82f6; --c2-chart__series-4--color: #2563eb; --c2-chart__series-5--color: #1d4ed8; }
+</style>
+<c2-card class="outside-label-card">
+  <div slot="header" class="outside-label-card__heading">
+    <strong>Revenue mix · Outside labels</strong>
+    <span>Direct percentage annotation</span>
+  </div>
+  <c2-pie-chart
+    label-field="category"
+    labels="outside"
+    label-content="percent"
+    outer-radius="0.68"
+    legend="none"
+    data='[{"category":"iPhone","sales":209.586},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023},{"category":"Wearables","sales":35.686},{"category":"Services","sales":109.158}]'
+  >
+    <c2-chart-series field="sales" label="Net sales"></c2-chart-series>
+  </c2-pie-chart>
+  <div slot="footer" class="outside-label-card__footer">
+    <strong>Best when exact shares matter</strong>
+    <span>Leader lines preserve slice association</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Inside category labels
+<style>
+  .inside-label-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .inside-label-card__heading, .inside-label-card__footer { display: grid; gap: 4px; }
+  .inside-label-card__heading strong { font-size: 15px; }
+  .inside-label-card__heading span, .inside-label-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .inside-label-card__footer { font-size: 12px; }
+  .inside-label-card c2-pie-chart { width: 100%; --c2-chart--height: 230px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__slice--border: 2px solid var(--site-color-surface); --c2-chart__series-1--color: #93c5fd; --c2-chart__series-2--color: #60a5fa; --c2-chart__series-3--color: #3b82f6; --c2-chart__series-4--color: #2563eb; --c2-chart__series-5--color: #1d4ed8; }
+</style>
+<c2-card class="inside-label-card">
+  <div slot="header" class="inside-label-card__heading">
+    <strong>Revenue mix · Inside labels</strong>
+    <span>Categories embedded in the slices</span>
+  </div>
+  <c2-pie-chart
+    label-field="category"
+    labels="inside"
+    label-content="name"
+    outer-radius="0.78"
+    legend="none"
+    data='[{"category":"iPhone","sales":209.586},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023},{"category":"Wearables","sales":35.686},{"category":"Services","sales":109.158}]'
+  >
+    <c2-chart-series field="sales" label="Net sales"></c2-chart-series>
+  </c2-pie-chart>
+  <div slot="footer" class="inside-label-card__footer">
+    <strong>Use when slices have enough room</strong>
+    <span>Small categories may read better in a legend</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Profit pool with legend
+<style>
+  .profit-pie-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .profit-pie-card__heading, .profit-pie-card__footer { display: grid; gap: 4px; }
+  .profit-pie-card__heading strong { font-size: 15px; }
+  .profit-pie-card__heading span, .profit-pie-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .profit-pie-card__footer { font-size: 12px; }
+  .profit-pie-card c2-pie-chart { width: 100%; --c2-chart--height: 230px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__slice--border: 3px solid var(--site-color-surface); --c2-chart__series-1--color: #2563eb; --c2-chart__series-2--color: #8b5cf6; }
+</style>
+<c2-card class="profit-pie-card">
+  <div slot="header" class="profit-pie-card__heading">
+    <strong>Gross profit pool · Legend</strong>
+    <span>Products compared with Services</span>
+  </div>
+  <c2-pie-chart
+    label-field="category"
+    inner-radius="0.62"
+    outer-radius="0.8"
+    legend="bottom"
+    data='[{"category":"Products","sales":112.887},{"category":"Services","sales":82.314}]'
+  >
+    <c2-chart-series field="sales" label="Gross profit"></c2-chart-series>
+  </c2-pie-chart>
+  <div slot="footer" class="profit-pie-card__footer">
+    <strong>Services delivers 42.2% of gross profit</strong>
+    <span>Select a legend item to isolate a segment</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Revenue mix with rich legend
+<style>
+  .rich-pie-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .rich-pie-card__heading, .rich-pie-card__footer, .rich-pie-card__plot { display: grid; gap: 4px; }
+  .rich-pie-card__heading strong { font-size: 15px; }
+  .rich-pie-card__heading span, .rich-pie-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .rich-pie-card__footer { font-size: 12px; }
+  .rich-pie-card__plot { gap: 10px; }
+  .rich-pie-card c2-pie-chart { width: 100%; --c2-chart--height: 230px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__slice--border: 3px solid var(--site-color-surface); }
+</style>
+<c2-card class="rich-pie-card" data-finance-demo>
+  <div slot="header" class="rich-pie-card__heading">
+    <strong>Revenue mix · Rich presenters</strong>
+    <span>FY2025 product and Services mix</span>
+  </div>
+  <div class="rich-pie-card__plot">
+    <c2-pie-chart
+      id="financial-pie-mix"
+      label-field="category"
+      inner-radius="0.64"
+      outer-radius="0.82"
+      legend="none"
+      data='[{"category":"iPhone","sales":209.586},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023},{"category":"Wearables","sales":35.686},{"category":"Services","sales":109.158}]'
+    >
+      <c2-chart-series field="sales" label="Net sales"></c2-chart-series>
+    </c2-pie-chart>
+    <c2-chart-legend for="financial-pie-mix"></c2-chart-legend>
+    <c2-chart-tooltip for="financial-pie-mix"></c2-chart-tooltip>
+  </div>
+  <div slot="footer" class="rich-pie-card__footer">
+    <strong>Hover for value and percentage context</strong>
+    <span>Legend entries can toggle individual slices</span>
+  </div>
+</c2-card>
 ```
 
 </GalleryGrid>

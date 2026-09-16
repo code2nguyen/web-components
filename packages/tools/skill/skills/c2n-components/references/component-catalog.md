@@ -18,6 +18,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Gauge chart** — `c2-gauge-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A focused radial KPI gauge drawn by ECharts, with a configurable scale, progress arc and pointer.
 - **Line chart** — `c2-line-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children.
 - **Pie chart** — `c2-pie-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it.
+- **Radar chart** — `c2-radar-chart, c2-chart-series, c2-chart-legend` · `@c2n/chart` — Compare several profiles across the same set of normalized indicators.
 - **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures.
 - **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat.
 

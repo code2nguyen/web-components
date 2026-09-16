@@ -31,6 +31,7 @@
     line--width: 2px,
     point--radius: 2.5px,
     area--opacity: 0.15,
+    bar--border-radius: 0,
 
     axis--color: #71717a,
     axis--font-size: 12px,
@@ -122,6 +123,46 @@
   position: absolute;
   inset: 0;
   contain: strict;
+}
+
+/* uPlot has no entry animation. Reveal its already-rendered canvas once, when the adapter becomes ready. */
+:host([data-chart-engine='uplot'][animation='auto']) .plot {
+  animation: c2-chart-plot-reveal 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Bars enter from their baseline instead of using the line/area chart's horizontal reveal. */
+:host(c2-bar-chart[data-chart-engine='uplot'][animation='auto']) .plot {
+  animation-name: c2-chart-bar-grow;
+  animation-duration: 600ms;
+}
+
+@keyframes c2-chart-plot-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.65;
+  }
+  to {
+    clip-path: inset(0);
+    opacity: 1;
+  }
+}
+
+@keyframes c2-chart-bar-grow {
+  from {
+    clip-path: inset(100% 0 0);
+    opacity: 0.65;
+  }
+  to {
+    clip-path: inset(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host([data-chart-engine='uplot'][animation='auto']) .plot,
+  :host(c2-bar-chart[data-chart-engine='uplot'][animation='auto']) .plot {
+    animation: none;
+  }
 }
 
 .plot canvas {
