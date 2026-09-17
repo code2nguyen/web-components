@@ -53,8 +53,12 @@ export abstract class EchartsChartBase extends ChartBase {
 
   protected override buildOptions(context: ChartBuildContext): unknown {
     const { theme, series } = context
+    const animate = this.animation === 'auto' && !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     const options: EchartsOptions = {
-      animation: this.animation === 'auto',
+      animation: animate,
+      animationDuration: animate ? 500 : 0,
+      animationDurationUpdate: 0,
+      animationEasing: 'cubicOut',
       color: theme.palette,
       textStyle: {
         fontFamily: theme.fontFamily === 'inherit' ? undefined : theme.fontFamily,

@@ -1,6 +1,6 @@
 ---
 title: 'Bar chart gallery'
-description: 'Financial comparisons built from Apple fiscal statements filed with the SEC.'
+description: 'Editorial bar-chart cards for revenue, product mix, investment and profitability.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -12,81 +12,346 @@ import { BarChart } from '@c2n/chart/bar-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
 import { ChartLegend } from '@c2n/chart/chart-legend.js'
 import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Card } from '@c2n/card'
 
 <ExampleModules />
 <ChartFinancialGallery />
 
-Figures are USD billions from Apple's public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm) and [SEC company facts](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json).
+Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm). The component currently draws vertical, grouped bars; horizontal orientation, cumulative stacking and on-bar labels are not yet part of its public API.
 
-<GalleryGrid min="440">
+<GalleryGrid min="340">
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-bar-chart
-  label-field="year"
-  x-type="category"
-  bar-width="0.74"
-  data='[{"year":2023,"iphone":200.583,"mac":29.357,"ipad":28.3,"wearables":39.845,"services":85.2},{"year":2024,"iphone":201.183,"mac":29.984,"ipad":26.694,"wearables":37.005,"services":96.169},{"year":2025,"iphone":209.586,"mac":33.708,"ipad":28.023,"wearables":35.686,"services":109.158}]'
->
-  <c2-chart-series field="iphone" label="iPhone"></c2-chart-series>
-  <c2-chart-series field="mac" label="Mac"></c2-chart-series>
-  <c2-chart-series field="ipad" label="iPad"></c2-chart-series>
-  <c2-chart-series field="wearables" label="Wearables"></c2-chart-series>
-  <c2-chart-series field="services" label="Services"></c2-chart-series>
+<c2-bar-chart label-field="month" data='[{"month":"Jan","visitors":186},{"month":"Feb","visitors":305},{"month":"Mar","visitors":237},{"month":"Apr","visitors":73},{"month":"May","visitors":209},{"month":"Jun","visitors":214}]'>
+  <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
 </c2-bar-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Income bridge — rich legend and tooltip
+```html tag=MdxCodeBlock,label=Revenue overview
 <style>
-  .income-bars {
-    display: grid;
+  .bar-story {
     width: 100%;
-    gap: 12px;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
   }
-  .income-bars c2-bar-chart {
-    --c2-chart__series-1--color: #2563eb;
-    --c2-chart__series-2--color: #7c3aed;
-    --c2-chart__series-3--color: #0f766e;
-    --c2-chart__series-4--color: #ca8a04;
+  .bar-story__heading,
+  .bar-story__footer {
+    display: grid;
+    gap: 4px;
   }
-</style>
-<div class="income-bars" data-finance-demo>
-  <c2-bar-chart
-    id="financial-bar-income"
-    label-field="year"
-    x-type="category"
-    data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"operatingIncome":108.949,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"operatingIncome":119.437,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"operatingIncome":114.301,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"operatingIncome":123.216,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"operatingIncome":133.05,"netIncome":112.01}]'
-  >
-    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
-    <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
-    <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
-    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
-  </c2-bar-chart>
-  <c2-chart-legend for="financial-bar-income"></c2-chart-legend>
-  <c2-chart-tooltip for="financial-bar-income"></c2-chart-tooltip>
-</div>
-```
-
-```html tag=MdxCodeBlock,label=Investment intensity
-<style>
-  .expense-bars {
+  .bar-story__heading strong {
+    font-size: 15px;
+  }
+  .bar-story__heading span,
+  .bar-story__footer span:last-child {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .bar-story__footer {
+    font-size: 12px;
+  }
+  .bar-story c2-bar-chart {
+    width: 100%;
+    --c2-chart--height: 220px;
+    --c2-chart--padding: 4px;
     --c2-chart--border-top: none;
     --c2-chart--border-right: none;
     --c2-chart--border-bottom: none;
     --c2-chart--border-left: none;
-    --c2-chart__grid--color: #f4f4f5;
-    --c2-chart__series-1--color: #7c3aed;
-    --c2-chart__series-2--color: #db2777;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #60a5fa;
+    --c2-chart__bar--border-radius: 0.16;
   }
 </style>
-<c2-bar-chart
-  class="expense-bars"
-  label-field="year"
-  x-type="category"
-  data='[{"year":2021,"rd":21.914,"sga":21.973},{"year":2022,"rd":26.251,"sga":25.094},{"year":2023,"rd":29.915,"sga":24.932},{"year":2024,"rd":31.37,"sga":26.097},{"year":2025,"rd":34.55,"sga":27.601}]'
->
-  <c2-chart-series field="rd" label="R&amp;D"></c2-chart-series>
-  <c2-chart-series field="sga" label="SG&amp;A"></c2-chart-series>
-</c2-bar-chart>
+<c2-card class="bar-story">
+  <div slot="header" class="bar-story__heading">
+    <strong>Revenue overview</strong>
+    <span>Annual net sales, FY2021–25</span>
+  </div>
+  <c2-bar-chart
+    label-field="year"
+    x-type="category"
+    legend="none"
+    bar-width="0.72"
+    data='[{"year":2021,"revenue":365.817},{"year":2022,"revenue":394.328},{"year":2023,"revenue":383.285},{"year":2024,"revenue":391.035},{"year":2025,"revenue":416.161}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  </c2-bar-chart>
+  <div slot="footer" class="bar-story__footer">
+    <strong>Revenue increased 6.4% in FY2025 ↗</strong>
+    <span>FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Product mix
+<style>
+  .product-bars-card {
+    width: 100%;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
+  }
+  .product-bars-card__heading,
+  .product-bars-card__footer {
+    display: grid;
+    gap: 4px;
+  }
+  .product-bars-card__heading strong {
+    font-size: 15px;
+  }
+  .product-bars-card__heading span,
+  .product-bars-card__footer span:last-child {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .product-bars-card__footer {
+    font-size: 12px;
+  }
+  .product-bars-card c2-bar-chart {
+    width: 100%;
+    --c2-chart--height: 220px;
+    --c2-chart--padding: 4px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #60a5fa;
+    --c2-chart__series-2--color: #2563eb;
+    --c2-chart__bar--border-radius: 0.18;
+  }
+</style>
+<c2-card class="product-bars-card">
+  <div slot="header" class="product-bars-card__heading">
+    <strong>Product mix · Multiple</strong>
+    <span>iPhone and Services net sales</span>
+  </div>
+  <c2-bar-chart
+    label-field="year"
+    x-type="category"
+    legend="none"
+    bar-width="0.76"
+    bar-gap="0.12"
+    data='[{"year":2021,"iphone":191.973,"services":68.425},{"year":2022,"iphone":205.489,"services":78.129},{"year":2023,"iphone":200.583,"services":85.2},{"year":2024,"iphone":201.183,"services":96.169},{"year":2025,"iphone":209.586,"services":109.158}]'
+  >
+    <c2-chart-series field="iphone" label="iPhone"></c2-chart-series>
+    <c2-chart-series field="services" label="Services"></c2-chart-series>
+  </c2-bar-chart>
+  <div slot="footer" class="product-bars-card__footer">
+    <strong>Services has grown 59.5% since FY2021 ↗</strong>
+    <span>FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Investment comparison
+<style>
+  .investment-bars-card {
+    width: 100%;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
+  }
+  .investment-bars-card__heading,
+  .investment-bars-card__footer {
+    display: grid;
+    gap: 4px;
+  }
+  .investment-bars-card__heading strong {
+    font-size: 15px;
+  }
+  .investment-bars-card__heading span,
+  .investment-bars-card__footer span:last-child {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .investment-bars-card__footer {
+    font-size: 12px;
+  }
+  .investment-bars-card c2-bar-chart {
+    width: 100%;
+    --c2-chart--height: 220px;
+    --c2-chart--padding: 4px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #8b5cf6;
+    --c2-chart__series-2--color: #c4b5fd;
+    --c2-chart__bar--border-radius: 0.18;
+  }
+</style>
+<c2-card class="investment-bars-card">
+  <div slot="header" class="investment-bars-card__heading">
+    <strong>Operating investment</strong>
+    <span>R&amp;D compared with SG&amp;A expense</span>
+  </div>
+  <c2-bar-chart
+    label-field="year"
+    x-type="category"
+    legend="bottom"
+    bar-width="0.78"
+    bar-gap="0.1"
+    data='[{"year":2021,"rd":21.914,"sga":21.973},{"year":2022,"rd":26.251,"sga":25.094},{"year":2023,"rd":29.915,"sga":24.932},{"year":2024,"rd":31.37,"sga":26.097},{"year":2025,"rd":34.55,"sga":27.601}]'
+  >
+    <c2-chart-series field="rd" label="R&amp;D"></c2-chart-series>
+    <c2-chart-series field="sga" label="SG&amp;A"></c2-chart-series>
+  </c2-bar-chart>
+  <div slot="footer" class="investment-bars-card__footer">
+    <strong>R&amp;D outpaced SG&amp;A by $6.9B in FY2025</strong>
+    <span>FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Income bridge with rich legend
+<style>
+  .income-bars-card {
+    width: 100%;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
+  }
+  .income-bars-card__heading,
+  .income-bars-card__footer,
+  .income-bars-card__plot {
+    display: grid;
+    gap: 4px;
+  }
+  .income-bars-card__heading strong {
+    font-size: 15px;
+  }
+  .income-bars-card__heading span,
+  .income-bars-card__footer span:last-child {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .income-bars-card__footer {
+    font-size: 12px;
+  }
+  .income-bars-card__plot {
+    gap: 12px;
+  }
+  .income-bars-card c2-bar-chart {
+    width: 100%;
+    --c2-chart--height: 220px;
+    --c2-chart--padding: 4px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #60a5fa;
+    --c2-chart__series-2--color: #8b5cf6;
+    --c2-chart__series-3--color: #14b8a6;
+    --c2-chart__bar--border-radius: 0.14;
+  }
+</style>
+<c2-card class="income-bars-card" data-finance-demo>
+  <div slot="header" class="income-bars-card__heading">
+    <strong>Income bridge · Rich legend</strong>
+    <span>Profitability across the last five fiscal years</span>
+  </div>
+  <div class="income-bars-card__plot">
+    <c2-bar-chart
+      id="financial-bar-income"
+      label-field="year"
+      x-type="category"
+      legend="none"
+      bar-width="0.8"
+      data='[{"year":2021,"grossProfit":152.836,"operatingIncome":108.949,"netIncome":94.68},{"year":2022,"grossProfit":170.782,"operatingIncome":119.437,"netIncome":99.803},{"year":2023,"grossProfit":169.148,"operatingIncome":114.301,"netIncome":96.995},{"year":2024,"grossProfit":180.683,"operatingIncome":123.216,"netIncome":93.736},{"year":2025,"grossProfit":195.201,"operatingIncome":133.05,"netIncome":112.01}]'
+    >
+      <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+      <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
+      <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+    </c2-bar-chart>
+    <c2-chart-legend for="financial-bar-income"></c2-chart-legend>
+    <c2-chart-tooltip for="financial-bar-income"></c2-chart-tooltip>
+  </div>
+  <div slot="footer" class="income-bars-card__footer">
+    <strong>Net income reached $112.0B in FY2025 ↗</strong>
+    <span>Select a legend item to compare the measures</span>
+  </div>
+</c2-card>
 ```
 
 </GalleryGrid>

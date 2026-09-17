@@ -166,6 +166,7 @@ export interface ChartBase {
  * @cssproperty {pixel} [--c2-chart__line--width=2px] - Stroke width of a line series.
  * @cssproperty {pixel} [--c2-chart__point--radius=2.5px] - Radius of a data point marker.
  * @cssproperty {opacity} [--c2-chart__area--opacity=0.15] - Opacity of the fill under an area series.
+ * @cssproperty {number} [--c2-chart__bar--border-radius=0] - Roundedness of a bar's value end, from 0 (square) to 0.5 (fully rounded).
  *
  * @cssproperty {color} [--c2-chart__axis--color=#71717a] - Colour of the axis lines and tick labels.
  * @cssproperty {font-size} [--c2-chart__axis--font-size=12px] - Font size of the tick labels.
@@ -242,11 +243,12 @@ export abstract class ChartBase extends LitElement {
   @property({ type: String }) tooltip: 'none' | 'item' | 'axis' = 'axis'
 
   /**
-   * Whether the engine animates entry and updates. `none` by default: a chart fed by a live source should
-   * not animate every tick. Named `animation` rather than `animate` because `HTMLElement.animate()` is a
-   * method every element already has, and shadowing it breaks the Web Animations API on the host.
+   * Whether the chart animates its initial draw. ECharts uses its native shape animation and uPlot uses a
+   * lightweight plot reveal; subsequent data updates stay immediate so a live source does not animate
+   * every tick. Named `animation` rather than `animate` because `HTMLElement.animate()` is a method every
+   * element already has, and shadowing it breaks the Web Animations API on the host.
    */
-  @property({ type: String }) animation: 'none' | 'auto' = 'none'
+  @property({ type: String, reflect: true }) animation: 'none' | 'auto' = 'auto'
 
   /** BCP 47 locale for the axis and tooltip formatting. Defaults to the browser locale. */
   @property({ type: String }) locale?: string
@@ -353,6 +355,17 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
+  /**
+   * Client-rendered charts connect before Lit creates their plot node. Observe it after the first render as
+   * well, so a chart whose initial layout is zero-sized still draws when its container becomes measurable.
+   */
+  protected override firstUpdated(): void {
+    if (this.plotElement) this.#resizeObserver?.observe(this.plotElement)
+    // The controller may have been read before the shadow-root probes existed, in which case it cached
+    // the fallback theme. Resolve it again now so first-paint CSS variables reach the engine.
+    this.themeController.invalidate()
+  }
+
   override disconnectedCallback(): void {
     super.disconnectedCallback()
     this.removeEventListener(SERIES_CHANGE_EVENT, this.#handleSeriesChange)
@@ -363,6 +376,7 @@ export abstract class ChartBase extends LitElement {
     // uPlot registers its own listeners and ECharts leaks without `dispose`, so the instance goes too.
     this.adapter?.destroy()
     this.adapter = undefined
+    this.removeAttribute('data-chart-engine')
     this.removeAttribute('data-chart-ready')
   }
 
@@ -608,6 +622,7 @@ export abstract class ChartBase extends LitElement {
       this.#optionsDirty = false
       this.#dataDirty = false
       this.restoreVisibility(adapter)
+      this.setAttribute('data-chart-engine', this.engineName)
       this.setAttribute('data-chart-ready', 'true')
       this.dispatchEvent(new CustomEvent('chart-ready', { detail: { engine: this.engineName } }))
     } catch (error) {

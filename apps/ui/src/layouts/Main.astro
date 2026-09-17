@@ -281,6 +281,9 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
       }
 
       @media (max-width: 959.98px) {
+        :global(.site-header::part(mobile-trigger)) {
+          order: -1;
+        }
         .site-header {
           &__nav {
             display: none;

@@ -70,15 +70,15 @@ npm install @c2n/chart echarts
 
 <div data-label="Realtime replay" data-advanced-realtime>
   <div class="finance-gauge-live">
-    <c2-gauge-chart min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric">
+    <c2-gauge-chart min="0" max="40" precision="1" value-suffix="%" legend="none" label-field="metric" data='[{"metric":"Services mix","value":18.7047}]'>
       <c2-chart-series field="value" label="Services mix"></c2-chart-series>
     </c2-gauge-chart>
     <div class="finance-gauge-live__controls">
       <c2-button size="sm">Replay</c2-button>
-      <span data-advanced-status>Preparing FY 2021–2025…</span>
+      <span data-advanced-status>FY 2021 · 18.7% of revenue</span>
     </div>
   </div>
 </div>
 ```
 
-`min` and `max` define the decision range. `precision` prevents floating-point noise and `value-suffix` gives the value and scale a visible unit. `start-angle`, `end-angle`, `split-number`, `progress="show|none"` and `pointer="show|none"` control the instrument without changing the shared data, presenter or realtime APIs. The replay interpolates observations with `requestAnimationFrame()` and `updateData()`; smoothness is a feed policy, not an engine limit.
+`min` and `max` define the decision range. `precision` prevents floating-point noise and `value-suffix` gives the value and scale a visible unit. `start-angle`, `end-angle`, `split-number`, `progress="show|none"`, `pointer="show|none"` and `marks="show|none"` control the instrument without changing the shared data, presenter or realtime APIs. Use `marks="none"` with `split-number="1"` for a clean progress ring that keeps only the minimum and maximum labels. The replay interpolates observations with `requestAnimationFrame()` and `updateData()`; smoothness is a feed policy, not an engine limit.

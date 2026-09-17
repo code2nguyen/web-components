@@ -1,0 +1,93 @@
+---
+title: 'Radar chart'
+description: 'Compare several profiles across the same set of normalized indicators.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-radar-chart'
+apiTags: ['c2-radar-chart', 'c2-chart-series', 'c2-chart-legend']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { RadarChart } from '@c2n/chart/radar-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+
+Radar charts compare profiles across a shared set of indicators. Each data row defines one indicator through
+`label-field`, while each `c2-chart-series` becomes a polygon drawn across those rows. Use a common `max` when
+the indicators share a scale; omit it to let every indicator receive a padded automatic maximum.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .radar-plot {
+    width: 100%;
+    --c2-chart--height: 300px;
+  }
+  .radar-linked {
+    display: grid;
+    width: 100%;
+    gap: 10px;
+  }
+</style>
+
+<div data-label="Current vs target">
+  <c2-radar-chart
+    class="radar-plot"
+    label-field="metric"
+    max="100"
+    data='[{"metric":"Quality","current":82,"target":90},{"metric":"Speed","current":74,"target":85},{"metric":"Reliability","current":91,"target":88},{"metric":"Efficiency","current":68,"target":80},{"metric":"Coverage","current":77,"target":84}]'
+  >
+    <c2-chart-series field="current" label="Current"></c2-chart-series>
+    <c2-chart-series field="target" label="Target"></c2-chart-series>
+  </c2-radar-chart>
+</div>
+
+<div data-label="Circular grid">
+  <c2-radar-chart
+    class="radar-plot"
+    label-field="metric"
+    max="100"
+    shape="circle"
+    points="none"
+    fill-opacity="0.2"
+    data='[{"metric":"Quality","desktop":88,"mobile":76},{"metric":"Speed","desktop":79,"mobile":91},{"metric":"Reliability","desktop":93,"mobile":86},{"metric":"Efficiency","desktop":72,"mobile":84},{"metric":"Coverage","desktop":81,"mobile":78}]'
+  >
+    <c2-chart-series field="desktop" label="Desktop"></c2-chart-series>
+    <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
+  </c2-radar-chart>
+</div>
+
+<div data-label="Linked legend">
+  <div class="radar-linked">
+    <c2-radar-chart
+      id="radar-linked"
+      class="radar-plot"
+      label-field="metric"
+      max="100"
+      legend="none"
+      data='[{"metric":"Quality","current":82,"target":90},{"metric":"Speed","current":74,"target":85},{"metric":"Reliability","current":91,"target":88},{"metric":"Efficiency","current":68,"target":80},{"metric":"Coverage","current":77,"target":84}]'
+    >
+      <c2-chart-series field="current" label="Current"></c2-chart-series>
+      <c2-chart-series field="target" label="Target"></c2-chart-series>
+    </c2-radar-chart>
+    <c2-chart-legend for="radar-linked"></c2-chart-legend>
+  </div>
+</div>
+```
+
+`shape="polygon|circle"` controls the grid, `split-number` its concentric divisions, and `start-angle` the
+first indicator's position. `points="none"` removes the vertex markers for a quieter comparison.
+`fill-opacity` overrides `--c2-chart__area--opacity` for the profile fills.
+
+Radar charts are most readable with three to eight indicators and a small number of profiles. When the axes
+are unrelated quantities, normalize them to a common score or let the chart auto-range each indicator rather
+than comparing raw values that only look commensurate.

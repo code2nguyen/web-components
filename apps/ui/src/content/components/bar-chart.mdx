@@ -26,6 +26,9 @@ the group is air between the bars.
 A bar chart reads its x as discrete slots rather than as a continuous scale, so the axis is padded by half a
 band at each end and the cursor snaps to the band instead of landing between two points.
 
+On first display the plot reveals from the zero baseline upward, so grouped bars grow together. Later data
+updates stay immediate; set `animation="none"` when even the initial entrance should be disabled.
+
 ## Installation
 
 ```bash tag=CodeBlock
@@ -129,3 +132,12 @@ Bars use the shared palette, `--c2-chart__series-1--color` through `--c2-chart__
 `@c2n/theme` to the `--c2-theme--chart-series-*` tokens; a single series can override its slot with
 `<c2-chart-series color="…">`. Every other `--c2-chart__*` variable — the grid, the axis, the tooltip, the
 card around the plot — is shared with the rest of the package, so setting them once themes every chart.
+
+Round the value end of each bar with `--c2-chart__bar--border-radius`. It accepts a unitless value from `0`
+(square) to `0.5` (fully rounded) and keeps the end at the zero baseline square:
+
+```css tag=CodeBlock
+c2-bar-chart {
+  --c2-chart__bar--border-radius: 0.18;
+}
+```
