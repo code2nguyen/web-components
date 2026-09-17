@@ -136,6 +136,11 @@ function asAttributeName(name) {
 // the Lit SSR renderer, losing non-reflected attributes and gaining defer-hydration without a child island to
 // restore them. Raw HTML also keeps the children directly slotted, without nested astro-island wrappers.
 // The parent module registers its child elements (e.g. accordion imports details).
+// Tags that stay plain inside an island rather than becoming islands of their own: their parent's module
+// registers them, and nesting an island per row would wrap every one in an element that breaks the parent's
+// walk over its own children.
+const NESTED_CHILD_TAGS = new Set(['c2-tab', 'c2-tree-item'])
+
 function changeComponentName(vnode, uid, componentName, markup) {
   let mainComponent = componentName && vnode.name == componentName ? vnode : null
   const classAttributeIndex = vnode.attributes?.findIndex((item) => item.name == 'class')
@@ -143,7 +148,7 @@ function changeComponentName(vnode, uid, componentName, markup) {
     const classAttribute = vnode.attributes[classAttributeIndex]
     classAttribute.value = classAttribute.value + ` ${uid}`
   }
-  if (vnode.name?.startsWith('c2-') && vnode.name != 'c2-tab') {
+  if (vnode.name?.startsWith('c2-') && !NESTED_CHILD_TAGS.has(vnode.name)) {
     vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
     vnode.attributes = vnode.attributes || []
     for (const attribute of vnode.attributes) attribute.name = asAttributeName(attribute.name)

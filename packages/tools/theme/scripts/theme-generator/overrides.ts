@@ -154,6 +154,11 @@ export const overrides: Record<string, Override> = {
     token: 'color-primary-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
   },
+  // Selected + hovered tree row: the same stronger tint of the selected surface as the list item.
+  '--c2-tree-item__selected__hover--background': {
+    token: 'color-primary-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
+  },
   // Typo in the component's variable name (`borde-leftr`); it is the real name the slider reads, so theme it like its siblings.
   '--c2-color-slider--borde-leftr': {
     token: 'border',

@@ -1,0 +1,75 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tree,
+  $theme: (
+    background: #ffffff,
+
+    padding-top: 4px,
+    padding-right: 0px,
+    padding-bottom: 4px,
+    padding-left: 0px,
+
+    border-top: null,
+    border-right: null,
+    border-bottom: null,
+    border-left: null,
+
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
+    max-height: null,
+
+    font-size: 14px,
+    font-family: null,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    empty--color: #71717a,
+    empty--padding: 18px,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  background: css.cssVar(background);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([disabled]) {
+  opacity: css.cssVar(disabled--opacity);
+  pointer-events: none;
+}
+
+.c2-tree {
+  box-sizing: border-box;
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+  max-height: css.cssVar(max-height);
+  overflow: auto;
+}
+
+.empty {
+  color: css.cssVar(empty--color);
+  padding: css.cssVar(empty--padding);
+  text-align: center;
+}

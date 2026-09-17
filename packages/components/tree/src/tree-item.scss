@@ -1,0 +1,239 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tree-item,
+  $theme: (
+    row--min-height: 28px,
+    row--indent: 16px,
+    row--padding-top: 0px,
+    row--padding-bottom: 0px,
+    row--padding-inline-start: 8px,
+    row--padding-inline-end: 8px,
+    row--gap: 6px,
+    row--border-radius: 4px,
+
+    color: #18181b,
+    background: transparent,
+
+    font-size: 14px,
+    font-weight: null,
+    font-family: null,
+    line-height: 20px,
+
+    hover--color: null,
+    hover--background: #f4f4f5,
+
+    selected--color: rgb(2, 101, 220),
+    selected--background: #edf1fe,
+    selected__hover--background: #e2e9fd,
+
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: -2px,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    toggle--size: 16px,
+    toggle--color: #71717a,
+    toggle--rotate: 90deg,
+    toggle--rotate-collapsed: 0deg,
+    toggle--transition-duration: animation.$standard-acceleration-duration,
+
+    icon--size: 16px,
+    icon--color: null,
+
+    guide--color: #e4e4e7,
+    guide--width: 1px,
+
+    actions--gap: 2px,
+    actions--opacity: 0,
+    actions__hover--opacity: 1,
+
+    checkbox--margin-inline-end: 2px,
+  )
+);
+
+:host {
+  display: block;
+  color: css.cssVar(color);
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// The tree owns focus through a roving tabindex and draws the ring on the row, so drop the UA outline.
+:host(:focus) {
+  outline: none;
+}
+
+.row {
+  position: relative;
+  // The row is an `<a>` when `href` is set; it must still look like a row, not a link.
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  gap: css.cssVar(row--gap);
+  min-height: css.cssVar(row--min-height);
+  border-radius: css.cssVar(row--border-radius);
+  background: css.cssVar(background);
+  cursor: pointer;
+  user-select: none;
+  transition: animation.standard(background-color), animation.standard(color);
+
+  // The indent is padding on a full-width row rather than margin on a nested group, so the hover and selected
+  // backgrounds bleed the whole width — the Figma/VS Code behaviour. `--level` is internal state written by
+  // the tree during its sync pass; CSS cannot read `aria-level` (typed `attr()` is Chromium-only).
+  padding-inline-start: calc(#{css.cssVar(row--indent)} * var(--level, 0) + #{css.cssVar(row--padding-inline-start)});
+  padding-inline-end: css.cssVar(row--padding-inline-end);
+  // `row--min-height` is a floor, so vertical padding only grows the row once content + padding passes it.
+  padding-top: css.cssVar(row--padding-top);
+  padding-bottom: css.cssVar(row--padding-bottom);
+
+  // Keeps the highlight running under the full content when the tree scrolls sideways past its box.
+  inline-size: 100%;
+  min-inline-size: max-content;
+}
+
+// One vertical rule per ancestor level, each sitting where that ancestor's own toggle sits.
+//
+// The box starts at the first ancestor's toggle centre and is `level * indent` wide, so the repeating tile lands
+// a rule exactly on every ancestor and none anywhere else. Offsetting the gradient inside a box that starts at 0
+// does not work: the tile repeats in both directions, which both drops the rule outside the box and draws a
+// spurious one before the first level — landing it on the row's rounded corner.
+:host([children-outline]) .row::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(#{css.cssVar(row--padding-inline-start)} + #{css.cssVar(toggle--size)} / 2);
+  inline-size: calc(#{css.cssVar(row--indent)} * var(--level, 0));
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to right,
+    css.cssVar(guide--color) 0 css.cssVar(guide--width),
+    transparent css.cssVar(guide--width) css.cssVar(row--indent)
+  );
+}
+
+// Gradients ignore `direction`, so the guide stack has to be mirrored explicitly.
+:host([children-outline]:dir(rtl)) .row::before {
+  background-image: repeating-linear-gradient(
+    to left,
+    css.cssVar(guide--color) 0 css.cssVar(guide--width),
+    transparent css.cssVar(guide--width) css.cssVar(row--indent)
+  );
+}
+
+:host(:not([disabled])) .row:hover {
+  color: css.cssVar(hover--color, color);
+  background: css.cssVar(hover--background);
+}
+
+:host([selected]) .row {
+  color: css.cssVar(selected--color);
+  background: css.cssVar(selected--background);
+}
+
+:host([selected]:not([disabled])) .row:hover {
+  background: css.cssVar(selected__hover--background, selected--background);
+}
+
+:host(:focus-visible) .row {
+  outline: css.cssVar(focus--outline);
+  outline-offset: css.cssVar(focus--outline-offset);
+}
+
+:host([disabled]) {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+:host([disabled]) .row {
+  cursor: default;
+}
+
+.toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: css.cssVar(toggle--size);
+  block-size: css.cssVar(toggle--size);
+  color: css.cssVar(toggle--color);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: inherit;
+  transform: rotate(css.cssVar(toggle--rotate-collapsed));
+  transition: transform css.cssVar(toggle--transition-duration) animation.$standard-easing;
+}
+
+:host([expanded]) .toggle {
+  transform: rotate(css.cssVar(toggle--rotate));
+}
+
+// A leaf keeps the toggle's box so every label on a level lines up.
+.toggle.is-leaf {
+  visibility: hidden;
+}
+
+.toggle svg,
+slot[name='toggle-icon']::slotted(*) {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.spinner {
+  flex: none;
+  --c2-spinner--size: #{css.cssVar(toggle--size)};
+  --c2-spinner--stroke-width: 6px;
+}
+
+.checkbox {
+  flex: none;
+  margin-inline-end: css.cssVar(checkbox--margin-inline-end);
+}
+
+slot[name='icon']::slotted(*) {
+  flex: none;
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--size: #{css.cssVar(icon--size)};
+  inline-size: css.cssVar(icon--size);
+  block-size: css.cssVar(icon--size);
+}
+
+.label {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+  opacity: css.cssVar(actions--opacity);
+  transition: animation.standard(opacity);
+}
+
+.row:hover .actions,
+:host(:focus-visible) .actions,
+.actions:focus-within {
+  opacity: css.cssVar(actions__hover--opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .toggle,
+  .actions {
+    transition: none;
+  }
+}

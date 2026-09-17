@@ -16,6 +16,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/tree": "*",
     "@c2n/status-panel": "*",
     "@c2n/qr-code": "*",
     "@c2n/upload": "*",

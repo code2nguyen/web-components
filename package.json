@@ -84,6 +84,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/tree:build",
         "./packages/components/status-panel:build",
         "./packages/components/qr-code:build",
         "./packages/components/upload:build",

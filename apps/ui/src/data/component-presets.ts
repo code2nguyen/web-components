@@ -32,6 +32,58 @@ export function describeComponentPreset(preset: ComponentPreset): string {
 }
 
 export const componentPresets: Record<string, ComponentPresetGroup> = {
+  'c2-tree': {
+    html: `<c2-tree style="width:220px" aria-label="Files" expanded-items="src" value="app"><c2-tree-item value="src" label="src"><c2-tree-item value="app" label="app.ts"></c2-tree-item><c2-tree-item value="main" label="main.ts"></c2-tree-item></c2-tree-item><c2-tree-item value="readme" label="README.md"></c2-tree-item></c2-tree>`,
+    presets: [
+      {
+        name: 'Figma layers',
+        description: 'Dark panel with edge-to-edge bands, tight rows and dim indent guides.',
+        css: {
+          '--c2-tree--background': '#1e1e1e',
+          '--c2-tree-item--color': '#cccccc',
+          '--c2-tree-item--font-size': '12px',
+          '--c2-tree-item__row--min-height': '26px',
+          '--c2-tree-item__row--border-radius': '0px',
+          '--c2-tree-item__row--indent': '14px',
+          '--c2-tree-item__hover--background': '#2c2c2c',
+          '--c2-tree-item__selected--color': '#ffffff',
+          '--c2-tree-item__selected--background': '#0d5a8e',
+          '--c2-tree-item__selected__hover--background': '#0d5a8e',
+          '--c2-tree-item__toggle--color': '#8a8a8a',
+          '--c2-tree-item__guide--color': '#3a3a3a',
+          '--c2-tree-item__actions--opacity': '0.55',
+        },
+      },
+      {
+        name: 'File explorer',
+        description: 'Framed, full-width rows on a muted surface, with visible indent guides.',
+        css: {
+          '--c2-tree--background': '#fafafa',
+          '--c2-tree--border-top': '1px solid #e4e4e7',
+          '--c2-tree--border-right': '1px solid #e4e4e7',
+          '--c2-tree--border-bottom': '1px solid #e4e4e7',
+          '--c2-tree--border-left': '1px solid #e4e4e7',
+          '--c2-tree-item__row--border-radius': '0px',
+          '--c2-tree-item__row--min-height': '26px',
+          '--c2-tree-item__guide--color': '#d4d4d8',
+        },
+      },
+      {
+        name: 'Docs sidebar',
+        description: 'Transparent, roomy pill rows in the accent colour — navigation rather than data.',
+        css: {
+          '--c2-tree--background': 'transparent',
+          '--c2-tree-item--color': '#52525b',
+          '--c2-tree-item__row--min-height': '30px',
+          '--c2-tree-item__row--border-radius': '6px',
+          '--c2-tree-item__row--indent': '12px',
+          '--c2-tree-item__selected--background': '#edf1fe',
+          '--c2-tree-item__selected--color': '#2f56e6',
+          '--c2-tree-item__toggle--size': '14px',
+        },
+      },
+    ],
+  },
   'c2-line-chart': {
     html: `<c2-line-chart style="width:420px;height:220px" x-field="month" legend="bottom" data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series><c2-chart-series field="cost" label="Cost"></c2-chart-series></c2-line-chart>`,
     presets: [

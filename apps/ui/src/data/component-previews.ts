@@ -4,6 +4,13 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  tree: `<c2-tree style="width:200px" aria-label="Files" expanded-items="src" value="app">
+  <c2-tree-item value="src" label="src">
+    <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+    <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="readme" label="README.md"></c2-tree-item>
+</c2-tree>`,
   'status-panel': `<c2-status-panel status="success" heading="Workspace ready" description="Everything is set up and ready to use." style="--c2-status-panel__container--min-height:170px;--c2-status-panel__container--padding:20px;--c2-status-panel__container--gap:14px;--c2-status-panel__media--size:48px;--c2-status-panel__media-icon--size:24px;--c2-status-panel__title--font-size:16px;--c2-status-panel__title--line-height:22px"></c2-status-panel>`,
   'qr-code': `<c2-qr-code value="https://github.com/code2nguyen/web-components" size="132" aria-label="Project QR code"></c2-qr-code>`,
   upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,

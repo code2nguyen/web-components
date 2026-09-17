@@ -58,7 +58,11 @@ pre {
   font-feature-settings: 'liga' 0;
 }
 
-:focus-visible {
+// Scoped to native focusables on purpose. Every `c2-*` component draws its own themeable focus ring inside its
+// shadow root and clears the host's with `:host(:focus)` — but for the host element a document-level rule beats
+// that shadow `:host` rule, whatever the specificity. A blanket `:focus-visible` here therefore gave a focused
+// list row, tab, menu item or tree row two rings: the component's own inside its box, and this one 2px outside.
+:is(a, button, input, select, textarea, summary, [contenteditable]):focus-visible {
   outline: 2px solid var(--site-color-primary);
   outline-offset: 2px;
   border-radius: 4px;
