@@ -1,6 +1,6 @@
 {
   "name": "@c2n/reorder-list",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
   "main": "dist/reorder-list.js",
   "exports": {
@@ -60,7 +60,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.8",
+    "@c2n/core": "0.0.9",
     "@lit-labs/motion": "1.1.0",
     "lit": "3.3.3"
   },
