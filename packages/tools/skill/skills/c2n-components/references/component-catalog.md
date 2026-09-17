@@ -38,6 +38,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **QR Code** — `c2-qr-code` · `@c2n/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Stat** — `c2-stat` · `@c2n/stat` — Displays a KPI with an optional icon, trend and supporting description.
 - **Table** — `c2-table, c2-table-column` · `@c2n/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.
+- **Tree** — `c2-tree, c2-tree-item` · `@c2n/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
 
 ## Feedback

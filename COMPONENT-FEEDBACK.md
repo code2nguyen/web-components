@@ -22,6 +22,32 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### A many-row component cannot be SSR'd chrome: declarative shadow DOM duplicates its stylesheet per instance
+
+- **Severity:** gap (rendering strategy, not a component defect)
+- **Hit while:** converting the docs sidebar from eight `c2-details` + `<ul><li><a>` to one `c2-tree`, 2026-09-17.
+- **What happens:** a plain `<c2-tree>` tag in an `.astro` file is picked up by `@astrojs/lit` and
+  server-rendered as declarative shadow DOM. Each of the 138 `c2-tree-item` rows (69 pages × the desktop
+  sidebar and the drawer) inlines the whole `tree-item` stylesheet into its own `<template shadowrootmode>`,
+  taking a component page from **606 KB to 2193 KB of HTML** — on all 220 pages. The rows also arrive inert:
+  `@astrojs/lit` stamps `defer-hydration`, and a plain tag has no island script to remove it, so the
+  server-rendered `is-leaf` toggle state sticks and nothing expands.
+- **Neither escape hatch is free.** `utils/raw-element.ts` (the `hydrate="defined"` path the site uses for
+  repeated chrome) skips SSR and fixes both problems, but then the nav paints nothing until JS runs and the
+  static HTML carries no `<a href>` at all — on a documentation site that is the internal link graph a crawler
+  follows. Keeping SSR keeps the links, inside shadow roots, at +1.6 MB per page.
+- **Outcome:** shipped, on the second attempt. The tree is emitted through `rawElement` (no SSR, so no
+  duplicated stylesheets and no `defer-hydration`) and each row's link is slotted into `label` rather than set
+  as the item's `href`, keeping the anchors in the light DOM. A component page went from **606 KB to 403 KB**
+  of HTML — smaller than the `c2-details` version it replaced, because 69 `<ul><li><a>` rows and eight
+  disclosure shadow roots collapse into one tree. 68 crawlable anchors, arrow-key navigation, and one tab stop
+  instead of 69.
+- **Still open:** the underlying gap. Any component with more than a handful of instances has to go through
+  `rawElement` and give up server rendering, because declarative shadow DOM has no way to share one adopted
+  stylesheet across instances. `c2-table` and `c2-virtual-list` will hit the same wall as chrome. The fix
+  belongs in the theme/build pipeline, or in documenting `rawElement` as the required path above a certain
+  instance count.
+
 ### A component-level shorthand variable cannot be reached once `@c2n/theme` is loaded
 
 - **Severity:** gap (theme pipeline)

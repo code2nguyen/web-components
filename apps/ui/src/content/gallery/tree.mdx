@@ -1,0 +1,161 @@
+---
+description: 'Ready-made looks for c2-tree: a Figma layers panel, a file explorer, a permissions checklist and a docs sidebar. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { Tree } from '@c2n/tree'
+import { TreeItem } from '@c2n/tree/tree-item.js'
+
+<ExampleModules />
+
+## Presets
+
+Curated looks for `c2-tree`. Open any card in the studio to start from it. The container is `--c2-tree--*` (background, padding, borders, radius, `max-height`); every row is `--c2-tree-item--*`, where `row--indent` and `row--border-radius` do most of the work — set `row--border-radius` to `0` for the edge-to-edge bands of a layers panel, and `actions--opacity` to `1` to stop the trailing actions hiding until hover. Add `children-outline` for the indent rules, then colour them with `guide--color`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-tree client:only="lit" aria-label="Files" expanded-items="src" value="app">
+  <c2-tree-item value="src" label="src">
+    <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+    <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="readme" label="README.md"></c2-tree-item>
+</c2-tree>
+```
+
+```html tag=MdxCodeBlock,label=Figma layers
+<style>
+  .layers {
+    width: 100%;
+    --c2-tree--background: #1e1e1e;
+    --c2-tree--padding-top: 6px;
+    --c2-tree--padding-bottom: 6px;
+    --c2-tree--border-top-left-radius: 6px;
+    --c2-tree--border-top-right-radius: 6px;
+    --c2-tree--border-bottom-left-radius: 6px;
+    --c2-tree--border-bottom-right-radius: 6px;
+    --c2-tree-item--color: #cccccc;
+    --c2-tree-item--font-size: 12px;
+    --c2-tree-item__row--min-height: 26px;
+    --c2-tree-item__row--border-radius: 0px;
+    --c2-tree-item__row--indent: 14px;
+    --c2-tree-item__hover--background: #2c2c2c;
+    --c2-tree-item__selected--color: #ffffff;
+    --c2-tree-item__selected--background: #0d5a8e;
+    --c2-tree-item__selected__hover--background: #0d5a8e;
+    --c2-tree-item__toggle--color: #8a8a8a;
+    --c2-tree-item__guide--color: #3a3a3a;
+    --c2-tree-item__icon--color: #9a9a9a;
+    --c2-tree-item__icon--size: 12px;
+    --c2-feather-icon--size: 12px;
+    --c2-tree-item__actions--opacity: 0.55;
+  }
+</style>
+<c2-tree client:only="lit" class="layers" children-outline aria-label="Layers" expanded-items="page;card" value="title">
+  <c2-tree-item value="page" label="Page 1">
+    <c2-feather-layers slot="icon"></c2-feather-layers>
+    <c2-tree-item value="card" label="Card">
+      <c2-feather-hash slot="icon"></c2-feather-hash>
+      <c2-tree-item value="title" label="Title">
+        <c2-feather-type slot="icon"></c2-feather-type>
+        <c2-feather-eye slot="actions"></c2-feather-eye>
+      </c2-tree-item>
+      <c2-tree-item value="body" label="Body">
+        <c2-feather-type slot="icon"></c2-feather-type>
+        <c2-feather-eye slot="actions"></c2-feather-eye>
+      </c2-tree-item>
+    </c2-tree-item>
+    <c2-tree-item value="bg" label="Background">
+      <c2-feather-square slot="icon"></c2-feather-square>
+      <c2-feather-lock slot="actions"></c2-feather-lock>
+    </c2-tree-item>
+  </c2-tree-item>
+</c2-tree>
+```
+
+```html tag=MdxCodeBlock,label=File explorer
+<style>
+  .explorer {
+    width: 100%;
+    --c2-tree--background: #fafafa;
+    --c2-tree--border-top: 1px solid #e4e4e7;
+    --c2-tree--border-right: 1px solid #e4e4e7;
+    --c2-tree--border-bottom: 1px solid #e4e4e7;
+    --c2-tree--border-left: 1px solid #e4e4e7;
+    --c2-tree-item__row--border-radius: 0px;
+    --c2-tree-item__row--min-height: 26px;
+    --c2-tree-item__guide--color: #d4d4d8;
+  }
+</style>
+<c2-tree client:only="lit" class="explorer" children-outline aria-label="Explorer" expanded-items="src;components" value="button">
+  <c2-tree-item value="src" label="src">
+    <c2-feather-folder slot="icon"></c2-feather-folder>
+    <c2-tree-item value="components" label="components">
+      <c2-feather-folder slot="icon"></c2-feather-folder>
+      <c2-tree-item value="button" label="button.ts"><c2-feather-file-text slot="icon"></c2-feather-file-text></c2-tree-item>
+      <c2-tree-item value="card" label="card.ts"><c2-feather-file-text slot="icon"></c2-feather-file-text></c2-tree-item>
+    </c2-tree-item>
+    <c2-tree-item value="index" label="index.ts"><c2-feather-file-text slot="icon"></c2-feather-file-text></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="pkg" label="package.json"><c2-feather-file-text slot="icon"></c2-feather-file-text></c2-tree-item>
+</c2-tree>
+```
+
+```html tag=MdxCodeBlock,label=Permissions
+<style>
+  .permissions {
+    width: 100%;
+    --c2-tree--border-top: 1px solid #e4e4e7;
+    --c2-tree--border-right: 1px solid #e4e4e7;
+    --c2-tree--border-bottom: 1px solid #e4e4e7;
+    --c2-tree--border-left: 1px solid #e4e4e7;
+    --c2-tree--padding-top: 8px;
+    --c2-tree--padding-bottom: 8px;
+    --c2-tree-item__row--min-height: 32px;
+  }
+</style>
+<c2-tree client:only="lit" class="permissions" aria-label="Permissions" checkbox-selection expanded-items="content;billing" value="read;view">
+  <c2-tree-item value="content" label="Content">
+    <c2-tree-item value="read" label="Read"></c2-tree-item>
+    <c2-tree-item value="write" label="Write"></c2-tree-item>
+    <c2-tree-item value="publish" label="Publish"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="billing" label="Billing">
+    <c2-tree-item value="view" label="View invoices"></c2-tree-item>
+    <c2-tree-item value="refund" label="Issue refunds" disabled></c2-tree-item>
+  </c2-tree-item>
+</c2-tree>
+```
+
+```html tag=MdxCodeBlock,label=Docs sidebar
+<style>
+  .sidebar {
+    width: 100%;
+    --c2-tree--background: transparent;
+    --c2-tree-item--color: #52525b;
+    --c2-tree-item__row--min-height: 30px;
+    --c2-tree-item__row--border-radius: 6px;
+    --c2-tree-item__row--indent: 12px;
+    --c2-tree-item__guide--color: #e4e4e7;
+    --c2-tree-item__selected--background: #edf1fe;
+    --c2-tree-item__selected--color: #2f56e6;
+    --c2-tree-item__toggle--size: 14px;
+  }
+</style>
+<c2-tree client:only="lit" class="sidebar" children-outline aria-label="Documentation" expanded-items="guides;components" value="theming">
+  <c2-tree-item value="guides" label="Guides">
+    <c2-tree-item value="start" label="Getting started"></c2-tree-item>
+    <c2-tree-item value="theming" label="Theming"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="components" label="Components">
+    <c2-tree-item value="button" label="Button"></c2-tree-item>
+    <c2-tree-item value="tree" label="Tree"></c2-tree-item>
+  </c2-tree-item>
+</c2-tree>
+```
+
+</GalleryGrid>

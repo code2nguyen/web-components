@@ -1,0 +1,84 @@
+{
+  "name": "@c2n/tree",
+  "version": "0.0.8",
+  "type": "module",
+  "main": "dist/tree.js",
+  "exports": {
+    ".": {
+      "types": "./types/src/tree.d.ts",
+      "default": "./dist/tree.js"
+    },
+    "./tree-item.js": {
+      "types": "./types/src/tree-item.d.ts",
+      "default": "./dist/tree-item.js"
+    },
+    "./tree-types.js": {
+      "types": "./types/src/tree-types.d.ts",
+      "default": "./dist/tree-types.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
+  ],
+  "keywords": [
+    "tree",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build",
+        "../checkbox:build",
+        "../spinner:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/checkbox": "0.0.8",
+    "@c2n/core": "0.0.8",
+    "@c2n/spinner": "0.0.8",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

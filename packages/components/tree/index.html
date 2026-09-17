@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-tree</title>
+    <script type="module" src="/src/tree.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font: 14px system-ui;
+      }
+      .frame {
+        width: 260px;
+        --c2-tree--border-top: 1px solid #e4e4e7;
+        --c2-tree--border-right: 1px solid #e4e4e7;
+        --c2-tree--border-bottom: 1px solid #e4e4e7;
+        --c2-tree--border-left: 1px solid #e4e4e7;
+      }
+      .layers {
+        width: 260px;
+        --c2-tree--background: #1e1e1e;
+        --c2-tree--padding-top: 6px;
+        --c2-tree--padding-bottom: 6px;
+        --c2-tree-item--color: #cccccc;
+        --c2-tree-item__row--border-radius: 0px;
+        --c2-tree-item__hover--background: #2a2a2a;
+        --c2-tree-item__selected--color: #ffffff;
+        --c2-tree-item__selected--background: #0d5a8e;
+        --c2-tree-item__selected__hover--background: #0d5a8e;
+        --c2-tree-item__toggle--color: #8a8a8a;
+        --c2-tree-item__guide--color: #3a3a3a;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Basic</h3>
+    <c2-tree class="frame" children-outline aria-label="Files" expanded-items="src">
+      <c2-tree-item value="src" label="src">
+        <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+        <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+      </c2-tree-item>
+      <c2-tree-item value="readme" label="README.md"></c2-tree-item>
+    </c2-tree>
+
+    <h3>Checkbox selection</h3>
+    <c2-tree class="frame" aria-label="Permissions" checkbox-selection expanded-items="content" value="read">
+      <c2-tree-item value="content" label="Content">
+        <c2-tree-item value="read" label="Read"></c2-tree-item>
+        <c2-tree-item value="write" label="Write"></c2-tree-item>
+        <c2-tree-item value="audit" label="Audit log" disabled></c2-tree-item>
+      </c2-tree-item>
+    </c2-tree>
+
+    <h3>Figma-style layers, with trailing actions</h3>
+    <c2-tree class="layers" children-outline aria-label="Layers" expanded-items="page;card" value="title">
+      <c2-tree-item value="page" label="Page 1">
+        <c2-tree-item value="card" label="Card">
+          <c2-tree-item value="title" label="Title">
+            <span slot="actions">👁</span>
+          </c2-tree-item>
+          <c2-tree-item value="body" label="Body">
+            <span slot="actions">👁</span>
+          </c2-tree-item>
+        </c2-tree-item>
+        <c2-tree-item value="bg" label="Background"></c2-tree-item>
+      </c2-tree-item>
+    </c2-tree>
+
+    <h3>Data-driven, multiple selection</h3>
+    <c2-tree class="frame" id="data" aria-label="Teams" selection="multiple" expanded-items="eng"></c2-tree>
+
+    <h3>Lazy loading</h3>
+    <c2-tree class="frame" id="lazy" aria-label="Remote"></c2-tree>
+
+    <script type="module">
+      document.querySelector('#data').items = [
+        {
+          value: 'eng',
+          label: 'Engineering',
+          children: [
+            { value: 'web', label: 'Web' },
+            { value: 'infra', label: 'Infrastructure' },
+          ],
+        },
+        { value: 'design', label: 'Design' },
+      ]
+
+      const lazy = document.querySelector('#lazy')
+      lazy.items = [{ value: 'remote', label: 'Remote folder', hasChildren: true }]
+      lazy.loadChildren = ({ node }) =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve([
+                { value: `${node.value}-a`, label: 'fetched-a.ts' },
+                { value: `${node.value}-b`, label: 'fetched-b.ts' },
+              ]),
+            900,
+          ),
+        )
+    </script>
+  </body>
+</html>
