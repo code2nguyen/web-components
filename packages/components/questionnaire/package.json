@@ -1,6 +1,6 @@
 {
   "name": "@c2n/questionnaire",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
   "main": "dist/questionnaire.js",
   "exports": {
@@ -62,7 +62,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.8",
+    "@c2n/core": "0.0.9",
     "lit": "3.3.3"
   },
   "devDependencies": {
