@@ -1,6 +1,6 @@
 {
   "name": "@c2n/textarea",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "type": "module",
   "main": "dist/textarea.js",
   "exports": {
@@ -62,7 +62,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.11",
+    "@c2n/core": "0.0.12",
     "lit": "3.3.3"
   },
   "devDependencies": {
