@@ -33,6 +33,7 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="alternate" type="text/plain" href={`${base}/llms.txt`} title="llms.txt" />
     <title>{title}</title>
     <script is:inline>
       // Resolve the theme before first paint to avoid a flash.
@@ -107,6 +108,7 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
           <span class="site-footer__links">
             <a href={repoUrl} target="_blank" rel="noreferrer">GitHub</a>
             <a href="https://www.npmjs.com/org/c2n" target="_blank" rel="noreferrer">npm</a>
+            <a href={`${base}/llms.txt`}>llms.txt</a>
           </span>
         </div>
       </footer>

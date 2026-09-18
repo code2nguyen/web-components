@@ -435,6 +435,50 @@ The rows are your own `c2-list-item` children: style them with `--c2-list-item--
 <c2-select multiple value="design;engineering" placeholder="Teams" class="multiple" client:only="lit"><c2-list-item value="design">Design</c2-list-item><c2-list-item value="engineering">Engineering</c2-list-item><c2-list-item value="marketing">Marketing</c2-list-item><c2-list-item value="sales">Sales</c2-list-item></c2-select>
 ```
 
+```html tag=MdxCodeBlock,label=Checkbox multiple
+<style>
+  .checkbox-multiple {
+    width: 220px;
+    --c2-list-item--gap: 10px;
+    --c2-list-item__selected--background: transparent;
+    --c2-list-item__selected--color: #18181b;
+    --c2-list-item__selected__hover--background: #f4f4f5;
+  }
+  .checkbox-multiple .box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #bcbcc6;
+    border-radius: 4px;
+    color: #ffffff;
+    transition:
+      background 120ms ease,
+      border-color 120ms ease;
+  }
+  .checkbox-multiple .box svg {
+    width: 12px;
+    height: 12px;
+    visibility: hidden;
+  }
+  .checkbox-multiple c2-list-item[selected] .box {
+    background: #476ef9;
+    border-color: #476ef9;
+  }
+  .checkbox-multiple c2-list-item[selected] .box svg {
+    visibility: visible;
+  }
+</style>
+<c2-select multiple value="design;engineering" placeholder="Teams" class="checkbox-multiple" client:only="lit">
+  <c2-list-item value="design"><span slot="prefix-icon" class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Design</c2-list-item>
+  <c2-list-item value="engineering"><span slot="prefix-icon" class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Engineering</c2-list-item>
+  <c2-list-item value="marketing"><span slot="prefix-icon" class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Marketing</c2-list-item>
+  <c2-list-item value="sales"><span slot="prefix-icon" class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Sales</c2-list-item>
+</c2-select>
+```
+
 ```html tag=MdxCodeBlock,label=Flat rows
 <style>
   .flat {
