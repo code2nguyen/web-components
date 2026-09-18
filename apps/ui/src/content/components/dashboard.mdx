@@ -114,4 +114,11 @@ resolves when it is gone, which is where a data-driven app drops the row). Cards
 `--c2-dash-card__enter--animation-duration` / `--c2-dash-card__leave--animation-duration` set the timing, and
 `prefers-reduced-motion` turns both off.
 
+**Placement stays yours.** The grid never re-places cards on its own. A pane that is removed or hidden leaves its
+cells empty and its neighbours where they were; a pane added at runtime lands exactly where its `col` / `row` say,
+over whatever already occupies that cell. If the gap should close, or room should be made, the application decides
+how: set the remaining cards' `col` / `row` / `col-span` / `row-span`, or hand the grid a `layout` record keyed by
+`card-id`. Both are applied in place, and the animations run alongside. The demo below does the simple version —
+it looks for the first free cell before adding.
+
 <DashboardMotionDemo />

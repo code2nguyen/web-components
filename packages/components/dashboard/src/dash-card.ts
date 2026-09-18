@@ -317,7 +317,11 @@ export class DashCard extends LitElement {
     }
   }
 
-  /** Plays the leave animation, then removes the element from the document. Resolves once it is gone. */
+  /**
+   * Plays the leave animation, then removes the element from the document. Resolves once it is gone. The other
+   * cards keep their placement — the grid does not close the gap; re-place them (`col`/`row` or the grid's
+   * `layout`) once the promise resolves if it should.
+   */
   async dismiss(): Promise<void> {
     if (!this.isConnected) return
     if (await this.leave()) this.remove()

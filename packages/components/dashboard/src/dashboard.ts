@@ -87,6 +87,11 @@ function toTracks(input: number | string | string[]): string[] {
  * placements to use while it matches, the first match wins, and every entry keeps its own stored sizes under
  * `<storage-key>@<media>`.
  *
+ * Placement is the application's: the grid never re-places cards on its own. A pane removed or hidden at runtime
+ * leaves its cells empty and its neighbours where they were, and a pane added at runtime lands exactly where its
+ * `col`/`row` say, on top of whatever is already there if that cell is taken. To close a gap, or to make room, set
+ * the cards' `col`/`row`/`col-span`/`row-span` or hand the grid a `layout` record — both are applied in place.
+ *
  * The grid is the sizing authority: a card never sets its own width. Give the element a height (or place it in a
  * flex/grid parent that does) whenever the rows use `fr`, since the row tracks divide the host's height.
  *
@@ -126,7 +131,8 @@ export class Dashboard extends LitElement {
 
   /**
    * Placement overrides keyed by the cards' `card-id`, for a layout that is chosen at runtime rather than authored
-   * in the markup. Each entry wins over the card's own `col`/`row`/`col-span`/`row-span`/visibility.
+   * in the markup. Each entry wins over the card's own `col`/`row`/`col-span`/`row-span`/visibility. This is also
+   * how an app re-flows the remaining panes after one was removed: the grid does not do that by itself.
    */
   @property({ attribute: false }) layout: Record<string, DashCardPlacement> | undefined = undefined
 
