@@ -1,6 +1,6 @@
 {
   "name": "@c2n/code-viewer",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "main": "dist/code-viewer.js",
   "exports": {
@@ -61,7 +61,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.12",
+    "@c2n/core": "0.0.13",
     "@lit/task": "1.0.3",
     "lit": "3.3.3",
     "shiki": "4.4.3"
