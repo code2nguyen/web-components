@@ -30,6 +30,8 @@ export interface Sparkline {
  *
  * @tag c2-sparkline
  *
+ * @slotcomponent c2-chart-series
+ *
  * @cssproperty {color} [--c2-chart__tone-positive--color=#16a34a] - Stroke when `tone` resolves to positive.
  * @cssproperty {color} [--c2-chart__tone-negative--color=#dc2626] - Stroke when `tone` resolves to negative.
  */

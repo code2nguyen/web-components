@@ -27,6 +27,8 @@ export interface RadarChart {
  * ```
  *
  * @tag c2-radar-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-radar-chart')
 export class RadarChart extends EchartsChartBase {

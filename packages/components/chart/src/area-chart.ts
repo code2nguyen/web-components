@@ -25,6 +25,8 @@ export interface AreaChart {
  * ```
  *
  * @tag c2-area-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-area-chart')
 export class AreaChart extends LineChart {

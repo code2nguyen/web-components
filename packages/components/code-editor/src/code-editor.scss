@@ -1,0 +1,317 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-code-editor,
+  $theme: (
+    background: #ffffff,
+    color: #24292e,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    box-shadow: null,
+    gap: 6px,
+
+    font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    font-size: 13px,
+    line-height: 1.6,
+    min-height: 120px,
+    max-height: 420px,
+    padding-block: 10px,
+    padding-inline: 12px,
+
+    focus--border: 1px solid rgb(2, 101, 220),
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    gutter--background: transparent,
+    gutter--color: #71717a,
+    gutter__active--color: #18181b,
+    gutter--border-right: 1px solid #e4e4e7,
+    gutter--min-width: 32px,
+
+    active-line--background: rgba(2, 101, 220, 0.04),
+    selection--background: rgba(2, 101, 220, 0.18),
+    cursor--color: #18181b,
+    matching-bracket--background: rgba(2, 101, 220, 0.16),
+    placeholder--color: #71717a,
+
+    theme--token-keyword: #cf222e,
+    theme--token-string: #032f62,
+    theme--token-comment: #636c76,
+    theme--token-constant: #0550ae,
+    theme--token-function: #6f42c1,
+    theme--token-type: #953800,
+    theme--token-property: #0550ae,
+    theme--token-variable: #24292e,
+    theme--token-tag: #116329,
+    theme--token-punctuation: #24292e,
+    theme--token-link: #032f62,
+    theme--token-invalid: #cf222e,
+
+    label--color: #18181b,
+    label--font-size: 12px,
+    label--font-weight: 500,
+    supporting-text--color: #71717a,
+    supporting-text--font-size: 12px,
+    error--color: #dc2626,
+    error--border: 1px solid #dc2626,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-code-editor {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+}
+
+.c2-code-editor__label {
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// The frame is drawn here, once, so CodeMirror and the fallback textarea share one box.
+.c2-code-editor__surface,
+.c2-code-editor__fallback,
+.c2-code-editor__pending {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: css.cssVar(min-height);
+  max-height: css.cssVar(max-height);
+  margin: 0;
+  overflow: auto;
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  line-height: css.cssVar(line-height);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-code-editor__fallback,
+.c2-code-editor__pending {
+  padding: css.cssVar(padding-block) css.cssVar(padding-inline);
+  white-space: pre;
+  tab-size: 2;
+}
+
+.c2-code-editor__fallback {
+  display: block;
+  resize: vertical;
+
+  &:focus {
+    border: css.cssVar(focus--border, border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: -1px;
+  }
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+  }
+}
+
+// The pre-engine placeholder: the code is visible (and server-rendered) before CodeMirror arrives, at the same
+// metrics as the editor, so the box does not jump when it mounts.
+.c2-code-editor__pending {
+  color: css.cssVar(placeholder--color);
+}
+
+.c2-code-editor.is-focused .c2-code-editor__surface {
+  border: css.cssVar(focus--border, border);
+  outline: css.cssVar(focus--outline);
+  outline-offset: -1px;
+}
+
+.c2-code-editor.is-invalid {
+  .c2-code-editor__surface,
+  .c2-code-editor__fallback {
+    border: css.cssVar(error--border, border);
+  }
+}
+
+.c2-code-editor.is-disabled {
+  opacity: css.cssVar(disabled--opacity);
+
+  .c2-code-editor__surface {
+    cursor: default;
+  }
+}
+
+/**
+ * CodeMirror's own DOM.
+ *
+ * Its base styles are injected as a `<style>` element into this shadow root, and Lit's `static styles` are an
+ * adopted stylesheet — adopted sheets come last in the shadow root's cascade, so these rules win on equal
+ * specificity without `!important`, and the extra `.c2-code-editor__surface` ancestor settles the rest. Only the
+ * class names CodeMirror documents as stable are used.
+ */
+.c2-code-editor__surface {
+  .cm-editor {
+    height: 100%;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  .cm-editor.cm-focused {
+    // The frame above already draws the focus ring; CodeMirror's own would sit inside it.
+    outline: none;
+  }
+
+  .cm-scroller {
+    font-family: inherit;
+    line-height: inherit;
+    overflow: auto;
+  }
+
+  .cm-content {
+    padding: css.cssVar(padding-block) 0;
+    caret-color: css.cssVar(cursor--color);
+  }
+
+  .cm-line {
+    padding: 0 css.cssVar(padding-inline);
+  }
+
+  .cm-gutters {
+    min-width: css.cssVar(gutter--min-width);
+    background: css.cssVar(gutter--background);
+    color: css.cssVar(gutter--color);
+    border-right: css.cssVar(gutter--border-right);
+  }
+
+  .cm-activeLineGutter {
+    background: transparent;
+    color: css.cssVar(gutter__active--color);
+  }
+
+  .cm-activeLine {
+    background: css.cssVar(active-line--background);
+  }
+
+  // CodeMirror draws the selection itself (`drawSelection`), so both spellings have to be covered.
+  .cm-selectionBackground,
+  .cm-content ::selection,
+  .cm-editor.cm-focused .cm-selectionBackground {
+    background: css.cssVar(selection--background);
+  }
+
+  .cm-cursor,
+  .cm-dropCursor {
+    border-left-color: css.cssVar(cursor--color);
+  }
+
+  .cm-matchingBracket,
+  .cm-editor.cm-focused .cm-matchingBracket {
+    background: css.cssVar(matching-bracket--background);
+    outline: none;
+  }
+
+  .cm-nonmatchingBracket {
+    color: css.cssVar(error--color);
+  }
+
+  .cm-placeholder {
+    color: css.cssVar(placeholder--color);
+  }
+
+  .cm-tooltip {
+    background: css.cssVar(background);
+    color: css.cssVar(color);
+    border: css.cssVar(border);
+    border-radius: css.cssVar(border-radius);
+  }
+
+  .cm-tooltip-autocomplete ul li[aria-selected] {
+    background: css.cssVar(selection--background);
+    color: css.cssVar(color);
+  }
+}
+
+/**
+ * The syntax palette. `engine.ts` maps Lezer tags to these classes instead of to inline styles, which is what keeps
+ * the whole theme in CSS: dark mode is different variable values and no JavaScript. The names match
+ * `--c2-code-viewer__theme--token-*` so one palette can drive the viewer and the editor.
+ */
+.c2-code-editor__surface {
+  .c2tok-keyword {
+    color: css.cssVar(theme--token-keyword);
+  }
+  .c2tok-string {
+    color: css.cssVar(theme--token-string);
+  }
+  .c2tok-comment {
+    color: css.cssVar(theme--token-comment);
+    font-style: italic;
+  }
+  .c2tok-constant {
+    color: css.cssVar(theme--token-constant);
+  }
+  .c2tok-function {
+    color: css.cssVar(theme--token-function);
+  }
+  .c2tok-type {
+    color: css.cssVar(theme--token-type);
+  }
+  .c2tok-property {
+    color: css.cssVar(theme--token-property);
+  }
+  .c2tok-variable {
+    color: css.cssVar(theme--token-variable);
+  }
+  .c2tok-tag {
+    color: css.cssVar(theme--token-tag);
+  }
+  .c2tok-punctuation {
+    color: css.cssVar(theme--token-punctuation);
+  }
+  .c2tok-link {
+    color: css.cssVar(theme--token-link);
+    text-decoration: underline;
+  }
+  .c2tok-invalid {
+    color: css.cssVar(theme--token-invalid);
+  }
+  .c2tok-strong {
+    font-weight: 600;
+  }
+  .c2tok-emphasis {
+    font-style: italic;
+  }
+}
+
+.c2-code-editor__supporting-text {
+  color: css.cssVar(supporting-text--color);
+  font-size: css.cssVar(supporting-text--font-size);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-code-editor.is-invalid .c2-code-editor__supporting-text {
+  color: css.cssVar(error--color);
+}

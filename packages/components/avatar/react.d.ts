@@ -8,7 +8,7 @@
 // attribute and it stringifies.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
-import type { Avatar } from '@c2n/avatar'
+import type { Avatar, AvatarGroup } from '@c2n/avatar'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
@@ -17,6 +17,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-avatar': C2Props<Avatar>
+      'c2-avatar-group': C2Props<AvatarGroup>
     }
   }
 }

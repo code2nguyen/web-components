@@ -23,6 +23,8 @@ export interface ScatterChart {
  * ```
  *
  * @tag c2-scatter-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-scatter-chart')
 export class ScatterChart extends EchartsChartBase {

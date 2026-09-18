@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-code-editor</title>
+    <script type="module" src="/src/code-editor.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        background: #ffffff;
+        color: #18181b;
+        display: grid;
+        gap: 32px;
+        max-width: 860px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.6;
+      }
+      /* A dark palette is only different variable values — there is no JavaScript theme to switch. */
+      .midnight {
+        --c2-code-editor--background: #0d1117;
+        --c2-code-editor--color: #c9d1d9;
+        --c2-code-editor--border: 1px solid #30363d;
+        --c2-code-editor__gutter--color: #6e7681;
+        --c2-code-editor__gutter__active--color: #c9d1d9;
+        --c2-code-editor__gutter--border-right: 1px solid #21262d;
+        --c2-code-editor__active-line--background: rgba(110, 118, 129, 0.1);
+        --c2-code-editor__selection--background: rgba(56, 139, 253, 0.3);
+        --c2-code-editor__cursor--color: #c9d1d9;
+        --c2-code-editor__theme--token-keyword: #ff7b72;
+        --c2-code-editor__theme--token-string: #a5d6ff;
+        --c2-code-editor__theme--token-comment: #8b949e;
+        --c2-code-editor__theme--token-constant: #79c0ff;
+        --c2-code-editor__theme--token-function: #d2a8ff;
+        --c2-code-editor__theme--token-type: #ffa657;
+        --c2-code-editor__theme--token-property: #79c0ff;
+        --c2-code-editor__theme--token-variable: #c9d1d9;
+        --c2-code-editor__theme--token-tag: #7ee787;
+        --c2-code-editor__theme--token-punctuation: #c9d1d9;
+      }
+      .compact {
+        --c2-code-editor--min-height: 72px;
+        --c2-code-editor--font-size: 12px;
+        --c2-code-editor--border-radius: 4px;
+      }
+      form {
+        display: grid;
+        gap: 12px;
+      }
+      output {
+        font-family: ui-monospace, monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>JavaScript, line numbers, autocomplete</h2>
+      <c2-code-editor id="js" label="Handler" language="javascript" line-numbers autocomplete help="Tab indents, ⌘F searches."></c2-code-editor>
+    </section>
+
+    <section>
+      <h2>JSON, wrapped, dark palette</h2>
+      <c2-code-editor id="json" class="midnight" language="json" line-numbers wrap label="Configuration"></c2-code-editor>
+    </section>
+
+    <section>
+      <h2>Read-only, compact</h2>
+      <c2-code-editor id="ro" class="compact" language="css" readonly label="Generated"></c2-code-editor>
+    </section>
+
+    <section>
+      <h2>Empty with a placeholder, and an error state</h2>
+      <c2-code-editor class="compact" language="html" placeholder="Paste your markup here…"></c2-code-editor>
+      <c2-code-editor class="compact" language="css" error error-text="Unexpected token at line 2." value=".a { color }"></c2-code-editor>
+    </section>
+
+    <section>
+      <h2>In a form — reset, validation and the submitted value</h2>
+      <form id="demo">
+        <c2-code-editor name="snippet" language="typescript" required label="Snippet" line-numbers value="export const answer: number = 42"></c2-code-editor>
+        <div>
+          <button type="submit">Submit</button>
+          <button type="reset">Reset</button>
+        </div>
+        <output id="out">—</output>
+      </form>
+    </section>
+
+    <script type="module">
+      document.querySelector('#js').value = `import { render } from 'lit'
+
+// Click the button to count.
+export function counter(host) {
+  let count = 0
+  host.addEventListener('click', () => {
+    count += 1
+    render(\`Clicked \${count} times\`, host)
+  })
+  return () => count
+}
+`
+      document.querySelector('#json').value = JSON.stringify({ name: '@c2n/code-editor', private: false, keywords: ['lit', 'codemirror'] }, null, 2)
+      document.querySelector('#ro').value = `.card {\n  border-radius: 8px;\n  box-shadow: 0 8px 24px rgb(24 24 27 / 8%);\n}`
+
+      const form = document.querySelector('#demo')
+      const out = document.querySelector('#out')
+      form.addEventListener('submit', (event) => {
+        event.preventDefault()
+        out.textContent = JSON.stringify(Object.fromEntries(new FormData(form)), null, 2)
+      })
+      form.addEventListener('reset', () => (out.textContent = '—'))
+
+      for (const editor of document.querySelectorAll('c2-code-editor')) {
+        editor.ready.then((state) => console.log(editor.id || '(unnamed)', 'engine:', state))
+      }
+    </script>
+  </body>
+</html>

@@ -1,45 +1,66 @@
 ---
-// Site variant: a `c2-icon-button` (via SiteIconButton) whose sun / moon icons swap with the resolved theme.
-import SiteIconButton from './ui/SiteIconButton.astro'
-import { FeatherMoonIcon, FeatherSunIcon } from './ui/icons'
+// Site variant of `c2-theme-select`: system / light / dark, the component's own sizes and colours mapped onto the
+// site tokens. It owns the page theme — `data-theme` on `<html>` and the `c2n-theme` localStorage key, the same key
+// the pre-paint script in layouts/Main.astro reads — so this file only re-broadcasts `c2n-theme-change` for the
+// listeners that predate it (the example iframes, GenerateCodeBlock, the chart theme controller).
+//
+// Emitted as a raw plain tag rather than an island: which mode is in effect comes from localStorage, so a
+// server-rendered shadow root would paint the wrong icon until hydration. `:not(:defined)` holds its box instead.
+import { rawElement } from '../utils/raw-element'
+
+const raw = rawElement('c2-theme-select', {
+  class: 'theme-toggle',
+  'aria-label': 'Colour theme',
+  modes: 'system,light,dark',
+  placement: 'bottom-end',
+})
 ---
 
-<SiteIconButton label="Toggle color theme" tooltip="Toggle theme" class="theme-toggle">
-  <FeatherSunIcon client:load class="theme-toggle__sun" />
-  <FeatherMoonIcon client:load class="theme-toggle__moon" />
-</SiteIconButton>
+<Fragment set:html={raw} />
 
 <style lang="scss" is:global>
-  .theme-toggle__moon {
-    display: none;
-  }
-  html[data-theme='dark'] {
-    .theme-toggle__sun {
-      display: none;
-    }
-    .theme-toggle__moon {
+  .theme-toggle {
+    --c2-theme-select__trigger--size: 36px;
+    --c2-theme-select__trigger--border-radius: var(--site-radius-sm);
+    --c2-theme-select__trigger--background: transparent;
+    --c2-theme-select__trigger--color: var(--site-color-on-surface-variant);
+    --c2-theme-select__trigger__hover--background: var(--site-color-surface-container-3);
+    --c2-theme-select__trigger__hover--color: var(--site-color-on-surface);
+    --c2-theme-select__trigger__active--background: var(--site-color-surface-container-4);
+    --c2-theme-select__trigger__focus--outline: 2px solid var(--site-color-primary);
+    --c2-theme-select__icon--size: 18px;
+
+    --c2-theme-select__menu--background: var(--site-color-surface);
+    --c2-theme-select__menu--border: 1px solid var(--site-color-outline-variant);
+    --c2-theme-select__menu--border-radius: var(--site-radius-md);
+    --c2-theme-select__menu--box-shadow: var(--site-elevation-2);
+    --c2-theme-select__menu--min-width: 152px;
+
+    --c2-theme-select__menu-item--border-radius: var(--site-radius-sm);
+    --c2-theme-select__menu-item--color: var(--site-color-on-surface);
+    --c2-theme-select__menu-item--font-size: 13.5px;
+    --c2-theme-select__menu-item__hover--background: var(--site-color-surface-container-2);
+    --c2-theme-select__menu-item__selected--color: var(--site-color-primary);
+    --c2-theme-select__menu-item__selected--background: var(--site-color-primary-soft);
+
+    // Plain tag: hold the trigger's box until the element upgrades, so the header does not shift.
+    &:not(:defined) {
       display: inline-flex;
+      width: 36px;
+      height: 36px;
+      visibility: hidden;
     }
   }
 </style>
 
 <script>
-  const STORAGE_KEY = 'c2n-theme'
-  const root = document.documentElement
+  import '../data/chrome-modules'
 
-  function apply(theme: 'light' | 'dark') {
-    root.dataset.theme = theme
-    try {
-      localStorage.setItem(STORAGE_KEY, theme)
-    } catch {
-      /* storage unavailable */
-    }
-    window.dispatchEvent(new CustomEvent('c2n-theme-change', { detail: theme }))
-  }
-
-  document.querySelectorAll<HTMLElement>('.theme-toggle').forEach((button) => {
-    button.addEventListener('click', () => {
-      apply(root.dataset.theme === 'dark' ? 'light' : 'dark')
+  // `c2-theme-select` writes `data-theme` and localStorage itself; this only fans the change out to the
+  // window listeners that already existed (example iframes, the code generator, ChartThemeController).
+  document.querySelectorAll('.theme-toggle').forEach((element) => {
+    element.addEventListener('theme-change', (event) => {
+      window.dispatchEvent(new CustomEvent('c2n-theme-change', { detail: (event as CustomEvent<{ theme: string }>).detail.theme }))
     })
   })
 </script>

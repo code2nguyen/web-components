@@ -1,0 +1,155 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-border-beam,
+  $theme: (
+    outset: 0px,
+    beam--size: 100px,
+    beam--width: 1px,
+    beam--radius: 12px,
+    beam--color-from: #0265dc,
+    beam--color-to: #60a5fa,
+    beam--opacity: 0.95,
+    beam--filter: drop-shadow(0 0 3px rgba(2, 101, 220, 0.35)),
+    beam--duration: 6s,
+    beam--delay: 0s,
+    z-index: 1,
+  )
+);
+
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: css.cssVar(z-index);
+  display: block;
+  overflow: visible;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.border-beam {
+  position: absolute;
+  inset: calc(-1 * #{css.cssVar(outset)});
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: css.cssVar(beam--width);
+  border-radius: inherit;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+}
+
+.border-beam--top {
+  clip-path: inset(0 0 calc(100% - #{css.cssVar(beam--width)}) 0);
+}
+
+.border-beam--right {
+  clip-path: inset(0 0 0 calc(100% - #{css.cssVar(beam--width)}));
+}
+
+.border-beam--bottom {
+  clip-path: inset(calc(100% - #{css.cssVar(beam--width)}) 0 0 0);
+}
+
+.border-beam--left {
+  clip-path: inset(0 calc(100% - #{css.cssVar(beam--width)}) 0 0);
+}
+
+.border-beam--top .beam,
+.border-beam--bottom .beam {
+  inset: 0 auto auto calc(-1 * #{css.cssVar(beam--size)});
+  offset-path: none;
+  transform: translateY(-50%);
+  animation-name: c2-border-beam-horizontal;
+  animation-direction: alternate;
+}
+
+.border-beam--bottom .beam {
+  top: 100%;
+}
+
+.border-beam--right .beam,
+.border-beam--left .beam {
+  inset: calc(-1 * #{css.cssVar(beam--size)}) auto auto 0;
+  background: linear-gradient(180deg, transparent 5%, css.cssVar(beam--color-from) 42%, css.cssVar(beam--color-to) 72%, transparent 100%);
+  offset-path: none;
+  transform: translateX(-50%);
+  animation-name: c2-border-beam-vertical;
+  animation-direction: alternate;
+}
+
+.border-beam--right .beam {
+  left: 100%;
+}
+
+.beam {
+  position: absolute;
+  inset: 0 auto auto 0;
+  display: block;
+  width: css.cssVar(beam--size);
+  aspect-ratio: 1;
+  background: linear-gradient(90deg, transparent 5%, css.cssVar(beam--color-from) 42%, css.cssVar(beam--color-to) 72%, transparent 100%);
+  offset-path: rect(0 auto auto 0 round #{css.cssVar(beam--radius)});
+  offset-anchor: center;
+  opacity: css.cssVar(beam--opacity);
+  filter: css.cssVar(beam--filter);
+  animation-name: c2-border-beam-travel;
+  animation-duration: css.cssVar(beam--duration);
+  animation-timing-function: linear;
+  animation-delay: css.cssVar(beam--delay);
+  animation-iteration-count: infinite;
+}
+
+.beam--staggered {
+  animation-delay: calc(#{css.cssVar(beam--delay)} - (#{css.cssVar(beam--duration)} * var(--c2-border-beam--phase, 0)));
+}
+
+:host([reverse]) .beam {
+  animation-direction: reverse;
+}
+
+:host([reverse]) .border-beam--top .beam,
+:host([reverse]) .border-beam--right .beam,
+:host([reverse]) .border-beam--bottom .beam,
+:host([reverse]) .border-beam--left .beam {
+  animation-direction: alternate-reverse;
+}
+
+:host([paused]) .beam {
+  animation-play-state: paused;
+}
+
+@keyframes c2-border-beam-travel {
+  from {
+    offset-distance: 0%;
+  }
+
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes c2-border-beam-horizontal {
+  to {
+    left: 100%;
+  }
+}
+
+@keyframes c2-border-beam-vertical {
+  to {
+    top: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam {
+    display: none;
+  }
+}

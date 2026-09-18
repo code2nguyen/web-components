@@ -1,0 +1,81 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-avatar-group,
+  $theme: (
+    max-width: 320px,
+    overlap: 10px,
+    avatar--box-shadow: 0 0 0 2px #ffffff,
+    overflow--size: 32px,
+    overflow--background: #52525b,
+    overflow--color: #ffffff,
+    overflow--border: 2px solid #ffffff,
+    overflow--border-radius: 999px,
+    overflow--font-size: 12px,
+    overflow--font-weight: 600,
+  )
+);
+
+:host {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: css.cssVar(max-width);
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.group,
+slot {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.group {
+  width: 100%;
+  overflow: hidden;
+}
+
+slot {
+  flex: none;
+  padding-inline-start: css.cssVar(overlap);
+}
+
+::slotted(c2-avatar) {
+  flex: none;
+  margin-inline-start: calc(-1 * #{css.cssVar(overlap)});
+  --c2-avatar--box-shadow: #{css.cssVar(avatar--box-shadow)};
+}
+
+::slotted([data-c2-avatar-group-hidden]) {
+  display: none;
+}
+
+.overflow {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(overflow--size);
+  height: css.cssVar(overflow--size);
+  margin-inline-start: calc(-1 * #{css.cssVar(overlap)});
+  border: css.cssVar(overflow--border);
+  border-radius: css.cssVar(overflow--border-radius);
+  background: css.cssVar(overflow--background);
+  color: css.cssVar(overflow--color);
+  font-size: css.cssVar(overflow--font-size);
+  font-weight: css.cssVar(overflow--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.overflow[data-empty] {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}

@@ -4,6 +4,20 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  steps: `<c2-steps style="width:300px;--c2-steps--background:#faf9f5;--c2-steps--border:1px solid #e8e6dd;--c2-steps--border-radius:8px;--c2-steps--padding-block:2px;--c2-step__row--border-bottom:1px solid #ecebe3;--c2-step__marker--size:12px;--c2-step__row--padding-block:5px;--c2-step__label--font-size:12px;--c2-step__label--font-weight:400;--c2-step__success--color:#3f3f46" aria-label="Run trace">
+  <c2-step status="success" label="build" trailing="24 s"></c2-step>
+  <c2-step label="test">
+    <c2-step status="success" label="unit" trailing="8 s"></c2-step>
+    <c2-step status="running" label="e2e"></c2-step>
+  </c2-step>
+  <c2-step status="pending" label="ship"></c2-step>
+</c2-steps>`,
+  'code-editor': `<c2-code-editor style="width:300px;--c2-code-editor--min-height:132px;--c2-code-editor--font-size:12px" language="javascript" line-numbers aria-label="Example editor" value="const greet = (name) =>
+  \`hello \${name}\`
+
+// editable, highlighted
+greet('world')"></c2-code-editor>`,
+  'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid #bcbcc6;--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:#f4f4f5"></c2-theme-select></div>`,
   tree: `<c2-tree style="width:200px" aria-label="Files" expanded-items="src" value="app">
   <c2-tree-item value="src" label="src">
     <c2-tree-item value="app" label="app.ts"></c2-tree-item>
@@ -11,6 +25,7 @@ export const componentPreviews: Record<string, string> = {
   </c2-tree-item>
   <c2-tree-item value="readme" label="README.md"></c2-tree-item>
 </c2-tree>`,
+  'border-beam': `<div style="position:relative;box-sizing:border-box;width:270px;overflow:hidden;padding:20px;border:1px solid #e4e4e7;border-radius:12px;background:#fff"><strong style="display:block;margin-bottom:7px;font-size:14px">Workspace overview</strong><span style="color:#71717a;font-size:12px;line-height:1.45">Review task status and deployment health.</span><c2-border-beam></c2-border-beam></div>`,
   'status-panel': `<c2-status-panel status="success" heading="Workspace ready" description="Everything is set up and ready to use." style="--c2-status-panel__container--min-height:170px;--c2-status-panel__container--padding:20px;--c2-status-panel__container--gap:14px;--c2-status-panel__media--size:48px;--c2-status-panel__media-icon--size:24px;--c2-status-panel__title--font-size:16px;--c2-status-panel__title--line-height:22px"></c2-status-panel>`,
   'qr-code': `<c2-qr-code value="https://github.com/code2nguyen/web-components" size="132" aria-label="Project QR code"></c2-qr-code>`,
   upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,
@@ -45,12 +60,14 @@ export const componentPreviews: Record<string, string> = {
   <c2-details label="Shipping" expanded>Delivered in 3–5 business days.</c2-details>
   <c2-details label="Returns">Return within 30 days.</c2-details>
 </c2-accordion>`,
-  avatar: `<div class="preview-row">
+  avatar: `<c2-avatar-group aria-label="Project contributors" style="--c2-avatar-group--max-width:150px">
   <c2-avatar name="Nguyen Thai Vinh" status="online"></c2-avatar>
   <c2-avatar auto-color name="Elisa Jasmin" initial-count="2"></c2-avatar>
   <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
   <c2-avatar name="Grace Hopper" src="/web-components/chat.avif"></c2-avatar>
-</div>`,
+  <c2-avatar auto-color name="Katherine Johnson" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Margaret Hamilton" initial-count="2"></c2-avatar>
+</c2-avatar-group>`,
   badge: `<div class="preview-row">
   <c2-badge tone="success">Active</c2-badge>
   <c2-badge tone="warning">Pending</c2-badge>

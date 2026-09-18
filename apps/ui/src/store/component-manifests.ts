@@ -1,5 +1,9 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import steps from '@c2n/steps/custom-elements.json'
+import codeEditor from '@c2n/code-editor/custom-elements.json'
+import themeSelect from '@c2n/theme-select/custom-elements.json'
 import tree from '@c2n/tree/custom-elements.json'
+import borderBeam from '@c2n/border-beam/custom-elements.json'
 import statusPanel from '@c2n/status-panel/custom-elements.json'
 import qrCode from '@c2n/qr-code/custom-elements.json'
 import upload from '@c2n/upload/custom-elements.json'
@@ -68,7 +72,11 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    steps,
+    codeEditor,
+    themeSelect,
     tree,
+    borderBeam,
     statusPanel,
     qrCode,
     upload,

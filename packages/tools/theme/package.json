@@ -54,7 +54,11 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/steps:build",
+        "../../components/code-editor:build",
+        "../../components/theme-select:build",
         "../../components/tree:build",
+        "../../components/border-beam:build",
         "../../components/status-panel:build",
         "../../components/qr-code:build",
         "../../components/upload:build",
