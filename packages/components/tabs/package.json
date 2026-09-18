@@ -1,6 +1,6 @@
 {
   "name": "@c2n/tabs",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "type": "module",
   "main": "dist/tabs.js",
   "exports": {
@@ -68,7 +68,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.9",
+    "@c2n/core": "0.0.10",
     "@lit/context": "1.1.6",
     "lit": "3.3.3"
   },

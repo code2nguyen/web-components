@@ -1,6 +1,6 @@
 {
   "name": "@c2n/color-slider",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "type": "module",
   "main": "dist/color-slider.js",
   "exports": {
@@ -60,7 +60,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.9",
+    "@c2n/core": "0.0.10",
     "@ctrl/tinycolor": "4.2.0",
     "lit": "3.3.3"
   },

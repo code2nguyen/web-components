@@ -1,6 +1,6 @@
 {
   "name": "@c2n/code-editor",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "type": "module",
   "main": "dist/code-editor.js",
   "exports": {
@@ -63,7 +63,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.9",
+    "@c2n/core": "0.0.10",
     "lit": "3.3.3"
   },
   "devDependencies": {
