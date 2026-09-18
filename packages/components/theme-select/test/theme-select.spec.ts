@@ -89,6 +89,32 @@ test('the menu closes when the pointer leaves and when a press lands outside', a
   await expect(menu).toBeHidden()
 })
 
+test('the menu survives a slow trip across the gap and back onto the trigger', async ({ page, scenario }) => {
+  await scenario()
+  const subject = page.getByRole('button', { name: 'Theme: System', exact: true })
+  await subject.hover()
+  const menu = page.getByRole('menu')
+  await expect(menu).toBeVisible()
+
+  // Crossing the offset between the trigger and the menu one pixel at a time leaves the component, which is what
+  // a real slow hand does; the menu has to still be there when the pointer arrives.
+  const row = page.getByRole('menuitemradio', { name: 'Dark' })
+  const start = (await subject.boundingBox())!
+  const target = (await row.boundingBox())!
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
+  await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 24 })
+  await page.waitForTimeout(400)
+  await expect(menu).toBeVisible()
+
+  // And back the other way: the pointer is on the trigger, so leaving the menu must not close it either.
+  await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2, { steps: 24 })
+  await page.waitForTimeout(400)
+  await expect(menu).toBeVisible()
+
+  await row.click()
+  await expect(page.getByRole('status')).toHaveText('1 dark dark')
+})
+
 test('click keeps advancing while the menu is open', async ({ page, scenario }) => {
   await scenario()
   await page.getByRole('button', { name: 'Theme: System', exact: true }).hover()

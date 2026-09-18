@@ -271,4 +271,9 @@ export const overrides: Record<string, Override> = {
   // The secondary runs are deliberately the normal weight, which the scale has no token for.
   '--c2-step__detail--font-weight': { exclude: 'normal weight, below the font-weight scale' },
   '--c2-step__trailing--font-weight': { exclude: 'normal weight, below the font-weight scale' },
+  // A dashboard pane is bare by design — the surface it holds owns the radius — while its resize handle floats over
+  // that content, so the bar under the pointer is an accent tint rather than one of the surfaces.
+  '--c2-dashboard--border-radius': { exclude: 'square by default; the grid is a frame only once an app fills it' },
+  '--c2-dash-card--border-radius': { exclude: 'bare pane; the surface inside it owns the radius' },
+  '--c2-dash-card__handle__hover--background': { token: 'color-primary-glow' },
 }

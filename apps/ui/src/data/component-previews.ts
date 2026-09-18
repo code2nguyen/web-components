@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  dashboard: `<c2-dashboard columns="1fr 1fr" rows="1fr 1fr" style="width:260px;height:150px;--c2-dashboard--gap:6px;--c2-dashboard--padding:6px;--c2-dashboard--background:var(--c2-theme--color-surface-container);--c2-dashboard--border-radius:10px;--c2-dash-card--background:var(--c2-theme--color-surface);--c2-dash-card--border:var(--c2-theme--border);--c2-dash-card--border-radius:6px;--c2-dash-card__header--font-size:11px;--c2-dash-card__header--min-height:0;--c2-dash-card__header--padding-block:6px;--c2-dash-card__header--padding-inline:8px">
+  <c2-dash-card col="1" row="1" row-span="2"><span slot="header">Watchlist</span></c2-dash-card>
+  <c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card>
+  <c2-dash-card col="2" row="2"><span slot="header">Orders</span></c2-dash-card>
+</c2-dashboard>`,
   steps: `<c2-steps style="width:300px;--c2-steps--background:#faf9f5;--c2-steps--border:1px solid #e8e6dd;--c2-steps--border-radius:8px;--c2-steps--padding-block:2px;--c2-step__row--border-bottom:1px solid #ecebe3;--c2-step__marker--size:12px;--c2-step__row--padding-block:5px;--c2-step__label--font-size:12px;--c2-step__label--font-weight:400;--c2-step__success--color:#3f3f46" aria-label="Run trace">
   <c2-step status="success" label="build" trailing="24 s"></c2-step>
   <c2-step label="test">

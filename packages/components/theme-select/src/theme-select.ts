@@ -459,10 +459,12 @@ export class ThemeSelect extends LitElement {
   /** The pointer is over the trigger or the menu: cancel a pending close, schedule the open. */
   private handlePointerEnter = (event: PointerEvent) => {
     // A touch tap also fires `pointerenter`; opening on it would fight the click that follows.
-    if (event.pointerType === 'touch' || !this.hasMenu || this.disabled || this.open) return
+    if (event.pointerType === 'touch' || !this.hasMenu || this.disabled) return
+    // Crossing the gap between the trigger and the menu leaves the wrapper and starts the close timer; entering
+    // either one again has to cancel it, open or not, or a slow trip into the menu closes it halfway there.
     clearTimeout(this.closeTimer)
     this.closeTimer = undefined
-    if (this.openTimer) return
+    if (this.open || this.openTimer) return
     this.openTimer = setTimeout(
       () => {
         this.openTimer = undefined
@@ -616,6 +618,7 @@ export class ThemeSelect extends LitElement {
           aria-expanded=${ifDefined(hasMenu ? String(this.open) : undefined)}
           @click=${this.handleTriggerClick}
           @keydown=${this.handleTriggerKeydown}
+          @pointerenter=${this.handlePointerEnter}
         >
           <span class="c2-theme-select__icon" part="icon" aria-hidden="true">${this.renderIcon(current, 'trigger')}</span>
           ${this.showLabel ? html`<span class="c2-theme-select__label" part="label">${current.label}</span>` : nothing}

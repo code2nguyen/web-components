@@ -1,0 +1,90 @@
+---
+title: 'Dashboard'
+description: 'Grid of resizable panes, dragged by the edges they share.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Dashboard } from '@c2n/dashboard'
+
+`c2-dashboard` is a CSS grid whose tracks the user can drag. Its children are `c2-dash-card` panes, each placed by
+`col` / `row` / `col-span` / `row-span`; a pane draws a handle on every edge it shares with a neighbour, and dragging
+one resizes the whole track, so the panes on either side of it stay aligned. `columns` and `rows` take either a track
+count (`columns="3"` is three equal columns) or an explicit list (`columns="320px 1fr"`). The first drag switches a
+track to pixels and the `fr` tracks around it give up the space in proportion to their weight, down to
+`min-column-width` / `min-row-height` and to whatever `min-width` / `min-height` the panes over those tracks ask for.
+Give the grid a height whenever its rows use `fr` — the row tracks divide the host's height.
+
+A pane draws no surface of its own: put a `c2-card`, or any markup, in its default slot. Filling `header`,
+`actions` or `footer` turns that row on; with `header` and `actions` both empty, the optional `expand-width` /
+`expand-height` / `expand-full` controls float over the top-right corner instead. Your own buttons go in `actions`
+(at the end of the header row) or in `controls` (inside the built-in group, right next to the expand buttons), and
+each built-in icon is a slot of its own — `expand-full-icon`, `collapse-full-icon` and the width and height pairs —
+whose fallback is the default drawing, so a pane can use the application's icon set and keep the behaviour. An
+expanded pane covers its neighbours, so set `--c2-dash-card__expanded--background` on it (or on the card inside).
+
+Set `storage-key` and the track sizes are written to `localStorage` at the end of each gesture and restored on the
+next load; `layout-change` reports them either way, and `reset()` puts the authored tracks back. A handle is a
+window splitter: it is in the tab order and the arrow keys move it, 10px a step and 1px with Shift.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/dashboard
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/dashboard
+<style>
+  .demo-grid {
+    height: 220px;
+    --c2-dashboard--gap: 10px;
+    --c2-dashboard--padding: 10px;
+    --c2-dashboard--background: var(--c2-theme--color-surface-container);
+    --c2-dashboard--border-radius: var(--c2-theme--radius-lg);
+    --c2-dash-card--background: var(--c2-theme--color-surface);
+    --c2-dash-card--border: var(--c2-theme--border);
+    --c2-dash-card--border-radius: var(--c2-theme--radius-md);
+    --c2-dash-card__expanded--background: var(--c2-theme--color-surface);
+    --c2-dash-card__header--border-bottom: var(--c2-theme--border);
+  }
+
+  .demo-pane {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface-variant);
+  }
+</style>
+<div data-label="Three panes, drag any shared edge">
+  <c2-dashboard client:only="lit" class="demo-grid" columns="320px 1fr" rows="1fr 1fr">
+    <c2-dash-card col="1" row="1" row-span="2" min-width="200">
+      <span slot="header">Watchlist</span>
+      <div class="demo-pane">column, both rows</div>
+    </c2-dash-card>
+    <c2-dash-card col="2" row="1" min-height="60">
+      <span slot="header">Price</span>
+      <div class="demo-pane">top right</div>
+    </c2-dash-card>
+    <c2-dash-card col="2" row="2">
+      <span slot="header">Orders</span>
+      <div class="demo-pane">bottom right</div>
+    </c2-dash-card>
+  </c2-dashboard>
+</div>
+<div data-label="Expand controls, and a pane that cannot be resized">
+  <c2-dashboard client:only="lit" class="demo-grid" columns="2" rows="1">
+    <c2-dash-card col="1" row="1" expand-full>
+      <span slot="header">Chart</span>
+      <div class="demo-pane">expand me over the grid</div>
+    </c2-dash-card>
+    <c2-dash-card col="2" row="1" resize="none">
+      <div class="demo-pane">resize="none", controls float</div>
+    </c2-dash-card>
+  </c2-dashboard>
+</div>
+```
