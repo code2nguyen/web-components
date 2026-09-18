@@ -1,6 +1,6 @@
 {
   "name": "@c2n/feather-icons",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "main": "dist/index.js",
   "sideEffects": true,
@@ -30,6 +30,7 @@
   "files": [
     "dist",
     "types",
+    "custom-elements.json",
     "react.d.ts",
     "react.js",
     "vue.d.ts",

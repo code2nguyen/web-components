@@ -1,6 +1,6 @@
 {
   "name": "@c2n/virtual-list",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "main": "dist/virtual-list.js",
   "exports": {
@@ -25,6 +25,7 @@
   "files": [
     "dist",
     "types",
+    "custom-elements.json",
     "react.d.ts",
     "react.js",
     "vue.d.ts",
@@ -72,10 +73,10 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.12",
-    "@c2n/list-item": "0.0.12",
-    "@c2n/spinner": "0.0.12",
-    "@c2n/text-field": "0.0.12",
+    "@c2n/core": "0.0.13",
+    "@c2n/list-item": "0.0.13",
+    "@c2n/spinner": "0.0.13",
+    "@c2n/text-field": "0.0.13",
     "lit": "3.3.3"
   },
   "devDependencies": {

@@ -116,6 +116,15 @@ args = ["-y", "@c2n/mcp"]
 
 Google Antigravity project `.agents/mcp_config.json` uses the same `mcpServers.c2n` command and arguments as the Claude JSON example, without requiring the `type` field.
 
+## llms.txt
+
+Agents that can fetch a URL but have neither the MCP server nor the skill installed can read the site itself:
+
+- [`/llms.txt`](../llms.txt) is the documentation map: every component with its tag, package, docs, API and gallery link, plus the guides, icon sets and example apps. It is generated from the same content the site renders.
+- [`/llms-full.txt`](../llms-full.txt) is the full text of the `c2n-components` skill in one document: workflow, theming, variants, framework notes and the compact component catalog.
+
+Both files point back to the MCP server and the installed manifests for exact APIs; neither replaces them.
+
 ## Add c2n components to the application
 
 The AI tools provide guidance and metadata; component packages remain normal application dependencies. Install the theme and only the components the application uses:

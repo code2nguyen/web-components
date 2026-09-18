@@ -1,6 +1,6 @@
 {
   "name": "@c2n/modal",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "main": "dist/modal.js",
   "exports": {
@@ -21,6 +21,7 @@
   "files": [
     "dist",
     "types",
+    "custom-elements.json",
     "react.d.ts",
     "react.js",
     "vue.d.ts",
@@ -62,7 +63,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.12",
+    "@c2n/core": "0.0.13",
     "lit": "3.3.3"
   },
   "devDependencies": {
