@@ -10,8 +10,11 @@
 );
 
 // The cards are light-DOM children, so the grid has to be the host itself; `--_columns` / `--_rows` are written by
-// the element on every update and are private to it.
+// the element on every update and are private to it. `--_c2-dashboard-gap` hands the gutter width down to the
+// cards, whose drag handles grow to cover it.
 :host {
+  --_c2-dashboard-gap: #{css.cssVar(gap)};
+
   display: grid;
   box-sizing: border-box;
   grid-template-columns: var(--_columns, 1fr);

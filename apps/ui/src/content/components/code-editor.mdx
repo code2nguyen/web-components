@@ -26,6 +26,10 @@ editor is different variable values and nothing else.
 Grammars for `javascript`, `typescript`, `jsx`, `tsx`, `html`, `css` and `json` are built in and loaded on demand;
 any other language comes from the `languageLoader` property.
 
+The editor sizes itself to its content between `--c2-code-editor--min-height` and `--c2-code-editor--max-height`. A
+height set on the element reaches the editor — the label and the supporting text keep theirs — so in a pane or a
+split view give it `height: 100%` (or let a flex parent stretch it) and set the max height to `none`.
+
 ## Installation
 
 ```bash tag=CodeBlock

@@ -1,0 +1,164 @@
+---
+/**
+ * Live example for the dashboard page: panes added and dismissed at runtime, with the enter and leave animations.
+ * It is an Astro component rather than an MDX fence because the "add" behaviour needs a script (pick a free cell,
+ * append a card), and a fence body is compiled as MDX where a `<script>` cannot hold JavaScript. The grid is
+ * emitted as raw markup so `@astrojs/lit` does not server-render it (see utils/raw-element.ts); the script below
+ * registers the elements and wires the button.
+ */
+import MdxCodeBlock from './MdxCodeBlock.astro'
+import SiteButton from './ui/SiteButton.astro'
+
+const closeIcon =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+
+const card = (name: string, col: number, row: number) => `  <c2-dash-card col="${col}" row="${row}">
+    <span slot="header">${name}</span>
+    <c2-icon-button slot="controls" aria-label="Close ${name}" onclick="this.closest('c2-dash-card').dismiss()">
+      ${closeIcon}
+    </c2-icon-button>
+    <div class="motion-pane">${name}</div>
+  </c2-dash-card>`
+
+const grid = `<c2-dashboard class="motion-grid" columns="3" rows="2">
+${[card('Watchlist', 1, 1), card('Price', 2, 1), card('Orders', 3, 1)].join('\n')}
+</c2-dashboard>`
+
+// What the code panel shows: the markup above plus the script, as an app would write them.
+const code = `<c2-button class="motion-add">Add pane</c2-button>
+
+${grid}
+
+<script type="module">
+  import '@c2n/dashboard'
+
+  const grid = document.querySelector('c2-dashboard')
+  const names = ['Positions', 'News', 'Alerts', 'Watchlist', 'Price', 'Orders']
+
+  // The first cell no visible card covers; the grid's tracks are the bounds.
+  function freeCell() {
+    const taken = new Set([...grid.querySelectorAll('c2-dash-card:not([hidden])')].map((card) => \`\${card.col}:\${card.row}\`))
+    for (let row = 1; row <= grid.rowCount; row++) {
+      for (let col = 1; col <= grid.columnCount; col++) if (!taken.has(\`\${col}:\${row}\`)) return { col, row }
+    }
+  }
+
+  document.querySelector('.motion-add').addEventListener('click', () => {
+    const cell = freeCell()
+    if (!cell) return
+    const card = document.createElement('c2-dash-card')
+    card.col = cell.col
+    card.row = cell.row
+    card.innerHTML = \`<span slot="header">\${names[0]}</span>
+      <c2-icon-button slot="controls" aria-label="Close" onclick="this.closest('c2-dash-card').dismiss()">…</c2-icon-button>
+      <div class="motion-pane">\${names[0]}</div>\`
+    grid.append(card) // a card appended to a live grid animates in
+  })
+</script>`
+---
+
+<MdxCodeBlock code={code} lang="html" uid="dashboard-motion" style="" label="Panes added and dismissed at runtime">
+  <div class="motion-demo">
+    <div class="motion-demo__bar">
+      <SiteButton hydrate="defined" size="sm" variant="ghost" class="motion-add">Add pane</SiteButton>
+      <span class="motion-demo__hint">Close a pane with its × — it fades out before it goes.</span>
+    </div>
+    <Fragment set:html={grid} />
+  </div>
+</MdxCodeBlock>
+
+<script>
+  import '@c2n/dashboard'
+  import '@c2n/icon-button'
+  import type { Dashboard } from '@c2n/dashboard'
+  import type { DashCard } from '@c2n/dashboard/dash-card.js'
+
+  const NAMES = ['Positions', 'News', 'Alerts', 'Watchlist', 'Price', 'Orders']
+  const CLOSE_ICON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+
+  function freeCell(grid: Dashboard): { col: number; row: number } | undefined {
+    const taken = new Set([...grid.querySelectorAll<DashCard>('c2-dash-card:not([hidden])')].map((card) => `${card.col}:${card.row}`))
+    for (let row = 1; row <= grid.rowCount; row++) {
+      for (let col = 1; col <= grid.columnCount; col++) if (!taken.has(`${col}:${row}`)) return { col, row }
+    }
+    return undefined
+  }
+
+  function nextName(grid: Dashboard): string {
+    const used = new Set([...grid.querySelectorAll('c2-dash-card .motion-pane')].map((pane) => pane.textContent?.trim()))
+    return NAMES.find((name) => !used.has(name)) ?? `Pane ${grid.querySelectorAll('c2-dash-card').length + 1}`
+  }
+
+  for (const demo of document.querySelectorAll<HTMLElement>('.motion-demo')) {
+    const grid = demo.querySelector<Dashboard>('c2-dashboard')
+    const button = demo.querySelector<HTMLElement>('.motion-add')
+    if (!grid || !button) continue
+    button.addEventListener('click', async () => {
+      await customElements.whenDefined('c2-dashboard')
+      const cell = freeCell(grid)
+      if (!cell) return
+      const name = nextName(grid)
+      const card = document.createElement('c2-dash-card') as DashCard
+      card.col = cell.col
+      card.row = cell.row
+      card.innerHTML = `<span slot="header">${name}</span>
+        <c2-icon-button slot="controls" aria-label="Close ${name}" onclick="this.closest('c2-dash-card').dismiss()">${CLOSE_ICON}</c2-icon-button>
+        <div class="motion-pane">${name}</div>`
+      grid.append(card)
+    })
+  }
+</script>
+
+<style lang="scss" is:global>
+  .motion-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+
+    &__bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    &__hint {
+      font-size: 13px;
+      color: var(--site-color-on-surface-variant);
+    }
+  }
+
+  .motion-grid {
+    height: 260px;
+    --c2-dashboard--gap: 10px;
+    --c2-dashboard--padding: 10px;
+    --c2-dashboard--background: var(--c2-theme--color-surface-container);
+    --c2-dashboard--border-radius: var(--c2-theme--radius-lg);
+    --c2-dash-card--background: var(--c2-theme--color-surface);
+    --c2-dash-card--border: var(--c2-theme--border);
+    --c2-dash-card--border-radius: var(--c2-theme--radius-md);
+    --c2-dash-card__header--min-height: 40px;
+    --c2-dash-card__header--font-size: 13px;
+    --c2-dash-card__header--border-bottom: var(--c2-theme--border);
+
+    // Not defined until the module runs: keep the tracks' height so the frame does not jump when it does.
+    &:not(:defined) {
+      display: block;
+    }
+  }
+
+  .motion-grid c2-icon-button {
+    --c2-icon-button__state-layer--size: 24px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface-variant);
+  }
+
+  .motion-pane {
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface-variant);
+  }
+</style>

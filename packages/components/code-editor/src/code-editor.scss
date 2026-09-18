@@ -70,13 +70,19 @@
   display: none;
 }
 
+// A height set on the host reaches the surface: the label and the supporting text keep their size and the editor
+// takes the rest (`100%` of an auto height is auto, so without one nothing changes). `max-height` still caps it;
+// set it to `none` to fill.
 .c2-code-editor {
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
   gap: css.cssVar(gap);
 }
 
 .c2-code-editor__label {
+  flex: none;
   color: css.cssVar(label--color);
   font-size: css.cssVar(label--font-size);
   font-weight: css.cssVar(label--font-weight);
@@ -90,6 +96,7 @@
 .c2-code-editor__surface,
 .c2-code-editor__fallback,
 .c2-code-editor__pending {
+  flex: 1 1 auto;
   box-sizing: border-box;
   width: 100%;
   min-height: css.cssVar(min-height);
@@ -304,6 +311,7 @@
 }
 
 .c2-code-editor__supporting-text {
+  flex: none;
   color: css.cssVar(supporting-text--color);
   font-size: css.cssVar(supporting-text--font-size);
 

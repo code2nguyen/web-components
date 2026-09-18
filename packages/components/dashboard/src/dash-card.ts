@@ -3,6 +3,7 @@ import { property, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { isServer } from 'lit-html/is-server.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { hasSlottedContent } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { DASHBOARD_TAG, type DashCardConstraint, type DashboardHost } from './dashboard-host'
 import styles from './dash-card.scss?inline'
@@ -53,6 +54,25 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
+/** First entry of a comma-separated CSS list, leaving the commas inside `cubic-bezier(…)` alone. */
+function firstListEntry(value: string): string {
+  let depth = 0
+  for (let i = 0; i < value.length; i++) {
+    const char = value[i]
+    if (char === '(') depth++
+    else if (char === ')') depth--
+    else if (char === ',' && depth === 0) return value.slice(0, i).trim()
+  }
+  return value.trim()
+}
+
+/** `'200ms'` → 200, `'0.2s'` → 200. */
+function parseDuration(value: string): number {
+  const amount = parseFloat(value)
+  if (Number.isNaN(amount)) return 0
+  return value.endsWith('ms') ? amount : amount * 1000
+}
+
 /**
  * One pane of a `c2-dashboard`. It owns its place in the grid (`col`, `row`, `col-span`, `row-span`), the drag
  * handles on the edges it shares with a neighbour, and the optional expand controls; it draws no surface of its
@@ -63,15 +83,22 @@ function clamp(value: number, min: number, max: number): number {
  * it, or focus it and use the arrow keys (10px a step, 1px with Shift).
  *
  * Filling the `header`, `actions` or `footer` slot turns on that row; with the header and actions both empty the
- * expand controls float over the top-right corner of the pane instead. An expanded card covers its neighbours, so
- * give it — or the card inside it — a background.
+ * expand controls float over the top-right corner of the pane instead. An expanded card covers its neighbours on
+ * an opaque `--c2-dash-card__expanded--background` (the theme's surface colour), while the card itself stays
+ * transparent at rest.
+ *
+ * A card that arrives while the grid is already on screen fades and scales in; one that leaves — through the
+ * grid's `layout` record (`visible: false`) or through `dismiss()`, which removes the element once the animation
+ * has played — fades out the same way. Cards present at load do not animate, and `prefers-reduced-motion` turns
+ * both off.
  *
  * Every built-in icon is a slot whose fallback is the default drawing, so a pane can use the host application's own
  * icon set without giving up the behaviour.
  *
  * @tag c2-dash-card
  *
- * @slot - Pane content. Give it `height: 100%` (a `c2-card` already stretches) so it follows the row track.
+ * @slot - Pane content. It fills the pane: the body is a column flex box and every slotted child is a `flex: 1`
+ * item with `min-height: 0`, so a chart or an editor follows the row track without a `height: 100%` chain.
  * @slot header - Title area of the header row; filling it turns the row on.
  * @slot actions - Your own controls at the end of the header row, before the built-in expand buttons and separated
  * from them by `--c2-dash-card__actions--gap`.
@@ -107,9 +134,13 @@ function clamp(value: number, min: number, max: number): number {
  * @cssproperty {overflow} [--c2-dash-card--overflow=hidden] - `hidden` keeps the content inside the track; switch
  * it to `visible` for a pane that has to overflow, such as one holding a menu.
  *
- * @cssproperty {background} --c2-dash-card__expanded--background - Fill while the card is expanded over its
- * neighbours; falls back to `--c2-dash-card--background`, which is transparent, so set one of the two.
+ * @cssproperty {background} [--c2-dash-card__expanded--background=#ffffff] - Fill while the card is expanded over
+ * its neighbours, so they do not show through; the card's own `background` stays transparent.
  * @cssproperty {number} [--c2-dash-card__expanded--z-index=20]
+ * @cssproperty {duration} [--c2-dash-card__enter--animation-duration=200ms] - Fade and scale-in of a card added to
+ * a grid that is already on screen, or shown again through the layout record. `0ms` disables it.
+ * @cssproperty {duration} [--c2-dash-card__leave--animation-duration=160ms] - Fade-out before a card is hidden by
+ * the layout record or removed by `dismiss()`. `0ms` disables it.
  * @cssproperty {duration} [--c2-dash-card__expanded--animation-duration=200ms] - Length of the scale-in the card
  * plays when it expands or collapses. Ignored under `prefers-reduced-motion`.
  *
@@ -147,8 +178,8 @@ function clamp(value: number, min: number, max: number): number {
  * @cssproperty {outline} [--c2-dash-card__control__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-dash-card__control__focus--outline-offset=2px]
  *
- * @cssproperty {pixel} [--c2-dash-card__handle--size=6px] - Thickness of the grab area on an edge. It reaches into
- * the pane, so it stays grabbable however wide the grid gutter is.
+ * @cssproperty {pixel} [--c2-dash-card__handle--size=6px] - Smallest thickness of the grab area on an edge. Inside a
+ * grid the handle is as thick as the gutter when that is wider, centred on the edge, so the whole gutter drags.
  * @cssproperty {pixel} [--c2-dash-card__handle--inset=2px] - Gap between the handle's visible bar and the ends of
  * the edge.
  * @cssproperty {background} [--c2-dash-card__handle--background=transparent]
@@ -203,6 +234,13 @@ export class DashCard extends LitElement {
   @state() private hasSlottedControls = false
   @state() private hasFooter = false
   @state() private dashboard: DashboardHost | undefined = undefined
+  /** `true` while the leave animation plays: the handles are gone, the placement is kept until it ends. */
+  @state() private leaving = false
+
+  /** The enter or leave animation in flight — or the finished leave, kept so a return can cancel its fill. */
+  private motion: Animation | undefined
+  /** Set when the card should animate in after its next render. */
+  private enterPending = false
 
   /** The grid reads this during a drag; a hidden card asks for nothing. */
   get constraint(): DashCardConstraint | undefined {
@@ -226,6 +264,7 @@ export class DashCard extends LitElement {
   override disconnectedCallback() {
     this.dashboard?.unregisterCard(this)
     this.dashboard = undefined
+    this.motion = undefined
     super.disconnectedCallback()
   }
 
@@ -235,8 +274,15 @@ export class DashCard extends LitElement {
   }
 
   override willUpdate() {
-    const visible = this.dashboard?.placementOf(this.cardId)?.visible
-    if (visible !== undefined) this.hidden = !visible
+    // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
+    // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
+    if (!this.hasUpdated) {
+      this.hasHeader = hasSlottedContent(this, 'header')
+      this.hasActions = hasSlottedContent(this, 'actions')
+      this.hasSlottedControls = hasSlottedContent(this, 'controls')
+      this.hasFooter = hasSlottedContent(this, 'footer')
+    }
+    this.syncVisibility()
   }
 
   override updated() {
@@ -244,6 +290,116 @@ export class DashCard extends LitElement {
     this.style.setProperty('--_grid-column', `${placement.col} / span ${placement.colSpan}`)
     this.style.setProperty('--_grid-row', `${placement.row} / span ${placement.rowSpan}`)
     this.syncHandleValues()
+    if (this.enterPending) {
+      this.enterPending = false
+      this.playEnter()
+    }
+  }
+
+  /**
+   * Applies the layout record's `visible`. Hiding is deferred until the leave animation has played; showing again
+   * cancels a leave in flight and animates in. Before the first render, and outside a grid, nothing animates.
+   */
+  private syncVisibility() {
+    const visible = this.dashboard?.placementOf(this.cardId)?.visible
+    if (visible === undefined) return
+    if (visible) {
+      if (this.leaving || this.motion) this.cancelMotion()
+      if (this.hidden && this.hasUpdated) this.enterPending = true
+      this.hidden = false
+    } else if (!this.hidden && !this.leaving) {
+      if (!this.hasUpdated) this.hidden = true
+      else {
+        void this.leave().then((done) => {
+          if (done) this.hidden = true
+        })
+      }
+    }
+  }
+
+  /** Plays the leave animation, then removes the element from the document. Resolves once it is gone. */
+  async dismiss(): Promise<void> {
+    if (!this.isConnected) return
+    if (await this.leave()) this.remove()
+  }
+
+  private get surface(): HTMLElement | null {
+    return this.renderRoot.querySelector('.c2-dash-card')
+  }
+
+  /** Enter and leave timing, read back from the stylesheet so the variables and `prefers-reduced-motion` apply. */
+  private timing(target: HTMLElement, phase: 'enter' | 'leave'): { duration: number; easing: string } {
+    const style = getComputedStyle(target)
+    const durations = style.transitionDuration.split(',').map((value) => parseDuration(value.trim()))
+    return { duration: durations[phase === 'enter' ? 0 : 1] ?? 0, easing: firstListEntry(style.transitionTimingFunction) || 'ease' }
+  }
+
+  private cancelMotion() {
+    this.motion?.cancel()
+    this.motion = undefined
+    this.leaving = false
+  }
+
+  private playEnter() {
+    if (isServer) return
+    this.cancelMotion()
+    const target = this.surface
+    if (!target || typeof target.animate !== 'function') return
+    const { duration, easing } = this.timing(target, 'enter')
+    if (duration <= 0) return
+    const motion = target.animate(
+      [
+        { opacity: 0, transform: 'scale(0.96)' },
+        { opacity: 1, transform: 'scale(1)' },
+      ],
+      { duration, easing },
+    )
+    this.motion = motion
+    motion.finished
+      .then(() => {
+        if (this.motion === motion) this.motion = undefined
+      })
+      .catch(() => {
+        // Cancelled by a leave that started meanwhile; that one owns the cleanup.
+      })
+  }
+
+  /**
+   * Fades the card out. Resolves `true` once it has finished — the caller then hides or removes the element — and
+   * `false` when a return cancelled it. The end state is held (`fill: forwards`) until the next enter cancels it,
+   * so nothing flashes between the last frame and the hide.
+   */
+  private async leave(): Promise<boolean> {
+    if (this.motion) this.cancelMotion()
+    this.leaving = true
+    await this.updateComplete
+    if (!this.leaving) return false
+    const target = this.surface
+    if (isServer || !target || typeof target.animate !== 'function') {
+      this.leaving = false
+      return true
+    }
+    const { duration, easing } = this.timing(target, 'leave')
+    if (duration <= 0) {
+      this.leaving = false
+      return true
+    }
+    const motion = target.animate(
+      [
+        { opacity: 1, transform: 'scale(1)' },
+        { opacity: 0, transform: 'scale(0.96)' },
+      ],
+      { duration, easing, fill: 'forwards' },
+    )
+    this.motion = motion
+    try {
+      await motion.finished
+    } catch {
+      return false
+    }
+    if (this.motion !== motion) return false
+    this.leaving = false
+    return true
   }
 
   /**
@@ -261,27 +417,24 @@ export class DashCard extends LitElement {
     }
   }
 
-  /** `slotchange` does not fire for a server-rendered shadow root, so read every slot once. */
-  override firstUpdated() {
-    for (const slot of this.renderRoot.querySelectorAll('slot')) this.updateSection(slot)
-  }
-
   /**
    * The grid may upgrade after its cards do — the card element is in the document either way, so find it and wait
    * for the definition rather than for a parent that is already alive.
    */
-  private attachToDashboard() {
+  private attachToDashboard(late = true) {
     const host = this.closest(DASHBOARD_TAG) as DashboardHost | null
     if (!host) return
     if (typeof host.registerCard !== 'function') {
       if (isServer) return
+      // The grid was not defined yet, so this card was in the document before it: part of the initial page.
       void customElements.whenDefined(DASHBOARD_TAG).then(() => {
-        if (this.isConnected) this.attachToDashboard()
+        if (this.isConnected) this.attachToDashboard(false)
       })
       return
     }
     this.dashboard = host
     host.registerCard(this)
+    if (late && host.hasUpdated) this.enterPending = true
   }
 
   private get placement(): EffectivePlacement {
@@ -474,7 +627,7 @@ export class DashCard extends LitElement {
   }
 
   private renderHandles() {
-    if (!this.dashboard || this.resize === 'none') return nothing
+    if (!this.dashboard || this.resize === 'none' || this.leaving) return nothing
     const placement = this.placement
     const horizontal = this.resize === 'both' || this.resize === 'horizontal'
     const vertical = this.resize === 'both' || this.resize === 'vertical'

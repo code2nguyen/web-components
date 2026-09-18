@@ -5,7 +5,7 @@ import { property, query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { hasSlottedContent, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './details.scss?inline'
 
 /** Events fired by {@link Details}, keyed for `addEventListener`. */
@@ -131,6 +131,12 @@ export class Details extends LitElement {
   }
 
   override willUpdate(changed: PropertyValues<this>) {
+    // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over
+    // from there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
+    if (!this.hasUpdated) {
+      this.hasHeaderContent = hasSlottedContent(this, 'header-content')
+      this.hasExpandedIcon = hasSlottedContent(this, 'expanded-icon')
+    }
     if (changed.has('expanded') && this.hasUpdated) {
       if (this.expanded) this.closing = false
       else if (changed.get('expanded')) this.closing = true
@@ -188,11 +194,6 @@ export class Details extends LitElement {
       .catch(() => {
         // Cancelled by a newer toggle; that toggle owns the cleanup.
       })
-  }
-
-  /** `slotchange` does not fire for server-rendered slots, so read them once after the first render. */
-  override firstUpdated() {
-    for (const slot of this.renderRoot.querySelectorAll('slot')) this.updateSlot(slot)
   }
 
   private handleSlotChange(event: Event) {

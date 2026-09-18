@@ -1,3 +1,4 @@
+@use 'sass:string';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-dash-card,
   $theme: (
@@ -7,8 +8,11 @@
     box-shadow: none,
     padding: 0px,
     overflow: hidden,
+    expanded--background: #ffffff,
     expanded--z-index: 20,
     expanded--animation-duration: 200ms,
+    enter--animation-duration: 200ms,
+    leave--animation-duration: 160ms,
     header--min-height: 44px,
     header--padding-block: 8px,
     header--padding-inline: 12px,
@@ -71,7 +75,7 @@
   // An expanded card is drawn over its neighbours, not next to them.
   isolation: isolate;
   z-index: css.cssVar(expanded--z-index);
-  background: css.cssVar(expanded--background, background);
+  background: css.cssVar(expanded--background);
   animation: c2-dash-card-expand css.cssVar(expanded--animation-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
@@ -91,14 +95,20 @@
   :host([expanded='full']) {
     animation: none;
   }
+
 }
 
+// The enter and leave animations are played by the element with the Web Animations API; the timing lives here so
+// the variables and `prefers-reduced-motion` drive them. Two durations: enter, then leave.
 .c2-dash-card {
   position: relative;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   height: 100%;
+  transition-property: none;
+  transition-duration: css.cssVar(enter--animation-duration), css.cssVar(leave--animation-duration);
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   min-width: 0;
   min-height: 0;
   padding: css.cssVar(padding);
@@ -204,6 +214,16 @@
 }
 
 .c2-dash-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+// What is slotted into the pane fills it. `height: 100%` dies partway down a chain of auto-height boxes; a flex
+// item with `min-height: 0` does not. Several children share the height between them.
+.c2-dash-card__body ::slotted(*) {
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
@@ -224,8 +244,22 @@
   border-top: css.cssVar(footer--border-top);
 }
 
-// The grab area reaches into the pane so it stays usable whatever the grid gutter is; the bar inside it is what
-// lights up.
+// The rows are toggled with the `hidden` attribute. Their own `display: flex` above outranks the browser's
+// `[hidden]` default, so without this an empty footer still drew a blank row at its minimum height.
+.c2-dash-card__header[hidden],
+.c2-dash-card__controls[hidden],
+.c2-dash-card__footer[hidden] {
+  display: none;
+}
+
+// The grab area is centred on the pane's edge and as thick as the grid gutter (`--_c2-dashboard-gap` is what the
+// grid lays its gutters out with), so it meets the neighbour's handle in the middle and the whole gutter is
+// draggable; it never gets thinner than `handle--size`, which is also what it is outside a grid. The bar inside it
+// is what lights up.
+@function handle-thickness() {
+  @return string.unquote('max(#{css.cssVar(handle--size)}, var(--_c2-dashboard-gap, 0px))');
+}
+
 .c2-dash-card__handle {
   position: absolute;
   z-index: 3;
@@ -259,7 +293,7 @@
 .c2-dash-card__handle--left,
 .c2-dash-card__handle--right {
   top: 0;
-  width: css.cssVar(handle--size);
+  width: handle-thickness();
   height: 100%;
   cursor: col-resize;
 
@@ -270,18 +304,18 @@
 }
 
 .c2-dash-card__handle--left {
-  left: calc(-1 * #{css.cssVar(handle--size)} / 2);
+  left: calc(-0.5 * #{handle-thickness()});
 }
 
 .c2-dash-card__handle--right {
-  right: calc(-1 * #{css.cssVar(handle--size)} / 2);
+  right: calc(-0.5 * #{handle-thickness()});
 }
 
 .c2-dash-card__handle--top,
 .c2-dash-card__handle--bottom {
   left: 0;
   width: 100%;
-  height: css.cssVar(handle--size);
+  height: handle-thickness();
   cursor: row-resize;
 
   .c2-dash-card__handle-bar {
@@ -291,15 +325,19 @@
 }
 
 .c2-dash-card__handle--top {
-  top: calc(-1 * #{css.cssVar(handle--size)} / 2);
+  top: calc(-0.5 * #{handle-thickness()});
 }
 
 .c2-dash-card__handle--bottom {
-  bottom: calc(-1 * #{css.cssVar(handle--size)} / 2);
+  bottom: calc(-0.5 * #{handle-thickness()});
 }
 
 @media (prefers-reduced-motion: reduce) {
   .c2-dash-card__handle-bar {
     transition: none;
+  }
+
+  .c2-dash-card {
+    transition-duration: 0s, 0s;
   }
 }

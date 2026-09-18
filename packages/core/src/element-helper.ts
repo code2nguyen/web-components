@@ -24,7 +24,9 @@ function warnOnce(key: string, message: string): void {
  * property whose attribute was renamed to kebab-case (`rowkey` for `rowKey`, whose attribute is `row-key`).
  *
  * The lowercased spelling is what a framework produces from a *static* attribute in a template — Angular and
- * plain HTML both do it — and because the component never observes it, the value is silently dropped.
+ * plain HTML both do it, and so does React when it renders a custom element on the server (the prop name is
+ * written verbatim and the parser lowercases it; hydration never sets the property). The component does not
+ * observe it, so without help the value is silently dropped.
  */
 function ambiguousAttributes(elementClass: ReactiveElementClassLike): Map<string, string> {
   const aliases = new Map<string, string>()
@@ -38,8 +40,9 @@ function ambiguousAttributes(elementClass: ReactiveElementClassLike): Map<string
 }
 
 /**
- * Warns, once per tag and attribute, when an element carries the lowercased spelling of one of its camelCase
- * properties. Installed by {@link customElement} and skipped entirely for components that have none.
+ * Forwards the lowercased spelling of a camelCase property to the attribute the component observes, and warns
+ * once per tag and attribute so the author can fix the template. The real attribute wins when both are present.
+ * Installed by {@link customElement} and skipped entirely for components that have none.
  */
 function installAttributeCheck(tagName: string, elementClass: ReactiveElementClassLike): void {
   const prototype = elementClass.prototype as HTMLElement & { connectedCallback?: () => void }
@@ -53,11 +56,14 @@ function installAttributeCheck(tagName: string, elementClass: ReactiveElementCla
     aliases ??= ambiguousAttributes(elementClass)
     if (aliases.size === 0 || !this.hasAttributes()) return
 
-    for (const { name } of this.attributes) {
+    for (const { name, value } of [...this.attributes]) {
       const attribute = aliases.get(name)
-      if (attribute) {
-        warnOnce(`${tagName}:${name}`, `<${tagName} ${name}> is not an attribute of this component — did you mean "${attribute}"? The value was ignored.`)
-      }
+      if (!attribute) continue
+      if (!this.hasAttribute(attribute)) this.setAttribute(attribute, value)
+      warnOnce(
+        `${tagName}:${name}`,
+        `<${tagName} ${name}> is not an attribute of this component — did you mean "${attribute}"? The value was forwarded to it; write "${attribute}" so it is read directly.`,
+      )
     }
   }
 }
@@ -70,7 +76,7 @@ function installAttributeCheck(tagName: string, elementClass: ReactiveElementCla
  * micro-frontends, a module graph loaded twice, a dev server's hot reload. Keeping the first definition and
  * warning leaves the page working; the element still behaves like whichever copy won the race.
  *
- * It also installs a development warning for camelCase attributes that silently do nothing (see
+ * It also forwards the lowercased spelling of a camelCase attribute to the real one, with a warning (see
  * {@link installAttributeCheck}).
  */
 export const customElement =

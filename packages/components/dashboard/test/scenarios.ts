@@ -1,6 +1,6 @@
 import '../src/dashboard'
 import type { Dashboard, DashboardLayoutChangeDetail } from '../src/dashboard'
-import type { DashCardExpandChangeDetail } from '../src/dash-card'
+import type { DashCard, DashCardExpandChangeDetail } from '../src/dash-card'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
@@ -60,11 +60,20 @@ const markup: Record<string, string> = {
   late: `<c2-dashboard id="subject" columns="2" rows="1">
       <c2-dash-card id="one" col="1" row="1"><div class="pane">One</div></c2-dash-card>
     </c2-dashboard>`,
+  // Two columns by default, one column of two rows under 600px; the spec resizes the viewport across that line.
+  responsive: `<c2-dashboard id="subject" columns="2" rows="1" storage-key="${STORAGE_KEY}">
+      <c2-dash-card id="one" card-id="one" col="1" row="1"><div class="pane">One</div></c2-dash-card>
+      <c2-dash-card id="two" card-id="two" col="2" row="1"><div class="pane">Two</div></c2-dash-card>
+    </c2-dashboard>`,
 }
 
 markup['storage-restored'] = markup.storage
+markup.motion = markup.layout
 
-if (scenario !== 'storage-restored') localStorage.removeItem(STORAGE_KEY)
+if (scenario !== 'storage-restored') {
+  localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(`${STORAGE_KEY}@(max-width: 600px)`)
+}
 
 main.innerHTML = markup[scenario] ?? markup.default
 
@@ -72,6 +81,25 @@ const subject = document.querySelector<Dashboard>('#subject')!
 
 if (scenario === 'layout') {
   subject.layout = { one: { col: 2 }, two: { visible: false } }
+}
+
+// Buttons the spec drives: hide and show `#two` through the layout record, and dismiss it.
+if (scenario === 'motion') {
+  const controls = document.createElement('div')
+  controls.innerHTML = `<button id="hide" type="button">Hide</button><button id="show" type="button">Show</button><button id="dismiss" type="button">Dismiss</button>`
+  main.after(controls)
+  controls.querySelector('#hide')!.addEventListener('click', () => (subject.layout = { two: { visible: false } }))
+  controls.querySelector('#show')!.addEventListener('click', () => (subject.layout = { two: { visible: true } }))
+  controls.querySelector('#dismiss')!.addEventListener('click', () => {
+    void document
+      .querySelector<DashCard>('#two')!
+      .dismiss()
+      .then(() => (output.textContent = 'dismissed'))
+  })
+}
+
+if (scenario === 'responsive') {
+  subject.layouts = [{ media: '(max-width: 600px)', columns: 1, rows: 2, layout: { one: { col: 1, row: 1 }, two: { col: 1, row: 2 } } }]
 }
 
 let changes = 0
@@ -87,6 +115,8 @@ for (const card of main.querySelectorAll('c2-dash-card')) {
 }
 
 if (scenario === 'late') {
+  // After the grid's first render, as a card added by the app at runtime would be.
+  await subject.updateComplete
   const card = document.createElement('c2-dash-card')
   card.id = 'two'
   card.col = 2

@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 import { test, expect } from './fixture'
+import type { Dashboard } from '../src/dashboard'
 
 /** Real pointer drag: press on the handle, move in steps, release. */
 async function drag(page: Page, handle: Locator, dx: number, dy: number) {
@@ -145,6 +146,89 @@ test('a pane composes its own actions, controls, footer and icons around the bui
   expect(names).toEqual(['Refresh', 'Close pane', 'Collapse the card'])
 })
 
+// The rows are toggled with `hidden`; the footer's own `display: flex` used to outrank it and a blank 36px row
+// showed under every pane without a footer.
+test('a pane without a footer draws no footer row', async ({ page, scenario }) => {
+  await scenario('slots')
+  const filled = page.locator('#one').locator('[part="footer"]')
+  await expect(filled).toBeVisible()
+  const empty = page.locator('#two').locator('[part="footer"]')
+  await expect(empty).toBeHidden()
+  expect(await empty.evaluate((node) => getComputedStyle(node).display)).toBe('none')
+  expect(
+    await page
+      .locator('#two')
+      .locator('[part="header"]')
+      .evaluate((node) => getComputedStyle(node).display),
+  ).toBe('none')
+})
+
+// The pane content follows the row track without a `height: 100%` chain: the body is a column flex box and the
+// slotted child is a flex item.
+test('the slotted content fills the pane', async ({ page, scenario }) => {
+  await scenario('slots')
+  const two = page.locator('#two')
+  // The body is the card minus its 1px border on each side.
+  await expect.poll(() => height(two.locator('[part="body"]'))).toBe((await height(two)) - 2)
+  await expect.poll(() => height(two.locator('.pane'))).toBe(await height(two.locator('[part="body"]')))
+  // With a header and a footer the content takes what is left between them.
+  const one = page.locator('#one')
+  const header = await height(one.locator('[part="header"]'))
+  const footer = await height(one.locator('[part="footer"]'))
+  expect(header).toBeGreaterThan(0)
+  expect(footer).toBeGreaterThan(0)
+  await expect.poll(() => height(one.locator('.pane'))).toBe((await height(one)) - 2 - header - footer)
+})
+
+// Each card's handle is centred on its edge and as thick as the gutter, so the two meet in the middle and a drag can
+// start anywhere in the gap between the panes.
+test('the whole gutter drags', async ({ page, scenario }) => {
+  await scenario()
+  const one = page.locator('#one')
+  const two = page.locator('#two')
+  const before = (await one.boundingBox())!
+  const next = (await two.boundingBox())!
+  const gutter = next.x - (before.x + before.width)
+  expect(gutter).toBe(10)
+  // The right handle of the first card covers the first half of the gutter, the left handle of the second the rest.
+  const first = page.locator('#one [part~="handle-right"]')
+  const second = page.locator('#two [part~="handle-left"]')
+  const firstBox = (await first.boundingBox())!
+  const secondBox = (await second.boundingBox())!
+  expect(firstBox.width).toBe(10)
+  expect(firstBox.x + firstBox.width).toBeCloseTo(secondBox.x, 1)
+
+  await page.mouse.move(before.x + before.width + 8, before.y + before.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(before.x + before.width + 68, before.y + before.height / 2, { steps: 4 })
+  await page.mouse.up()
+  const after = (await one.boundingBox())!
+  expect(Math.round(after.width - before.width)).toBe(60)
+})
+
+// A stored layout describes one grid; when the authored tracks change, it is dropped rather than applied to a grid it
+// does not fit.
+test('a stored track list of another length is ignored', async ({ page, scenario }) => {
+  await scenario()
+  await page.evaluate(() => localStorage.setItem('c2n-dashboard-test', JSON.stringify({ columns: ['100px', '100px', '1fr'], rows: ['1fr'] })))
+  await scenario('storage')
+  const subject = page.locator('#subject')
+  expect(await subject.evaluate((node) => (node as Dashboard).columnSizes)).toEqual(['1fr', '1fr'])
+  await page.evaluate(() => localStorage.removeItem('c2n-dashboard-test'))
+})
+
+// The section flags are read from the light DOM before the first render, not from the slots after it, so the first
+// paint is right and there is no second render (Lit's change-in-update warning).
+test('a card renders once, with no update scheduled after the first one', async ({ page, scenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('scheduled an update')) warnings.push(message.text())
+  })
+  await scenario('slots')
+  await expect(page.locator('#one').getByText('Updated 2 minutes ago')).toBeVisible()
+  expect(warnings.filter((warning) => warning.includes('c2-dash-card'))).toEqual([])
+})
+
 test('resize="none" leaves no handles', async ({ page, scenario }) => {
   await scenario('fixed')
   await expect(page.getByRole('separator')).toHaveCount(0)
@@ -177,6 +261,83 @@ test('the layout record overrides the placement and the visibility', async ({ pa
     )
     .toBe(349)
   await expect(page.locator('#one').getByRole('separator')).toHaveCount(1)
+})
+
+// `layouts` swaps the tracks and the placements as the viewport crosses a breakpoint, in place: no remount, and each
+// breakpoint remembers its own sizes.
+test('a matching entry of layouts takes over as the viewport changes, with its own stored sizes', async ({ page, scenario }) => {
+  await page.setViewportSize({ width: 1000, height: 600 })
+  await scenario('responsive')
+  const subject = page.locator('#subject')
+  const one = page.locator('#one')
+  const two = page.locator('#two')
+  const columns = () => subject.evaluate((node) => (node as Dashboard).columnSizes)
+  expect(await columns()).toEqual(['1fr', '1fr'])
+  const wide = (await one.boundingBox())!
+  expect((await two.boundingBox())!.x).toBeGreaterThan(wide.x + wide.width)
+
+  // Below the breakpoint the two cards stack; the event reports the switch.
+  await page.setViewportSize({ width: 500, height: 600 })
+  await expect.poll(columns).toEqual(['1fr'])
+  expect(await subject.evaluate((node) => (node as Dashboard).rowSizes)).toEqual(['1fr', '1fr'])
+  await expect.poll(() => two.boundingBox().then((box) => Math.round(box?.x ?? 0))).toBe(Math.round((await one.boundingBox())!.x))
+  expect((await two.boundingBox())!.y).toBeGreaterThan((await one.boundingBox())!.y + (await one.boundingBox())!.height - 1)
+  await expect(page.locator('output')).toHaveText(/^1 1fr 1fr\|1fr$/)
+
+  // A drag on the narrow layout is stored under its own key and leaves the wide one alone.
+  await drag(page, page.locator('#one [part~="handle-bottom"]'), 0, 40)
+  const stored = await page.evaluate(() => ({
+    wide: localStorage.getItem('c2n-dashboard-test'),
+    narrow: localStorage.getItem('c2n-dashboard-test@(max-width: 600px)'),
+  }))
+  expect(stored.wide).toBeNull()
+  expect(JSON.parse(stored.narrow!).rows[0]).toMatch(/px$/)
+
+  await page.setViewportSize({ width: 1000, height: 600 })
+  await expect.poll(columns).toEqual(['1fr', '1fr'])
+  expect(await subject.evaluate((node) => (node as Dashboard).rowSizes)).toEqual(['1fr'])
+
+  // Back down, the dragged row comes back.
+  await page.setViewportSize({ width: 500, height: 600 })
+  await expect.poll(() => subject.evaluate((node) => (node as Dashboard).rowSizes[0])).toMatch(/px$/)
+  await page.evaluate(() => localStorage.removeItem('c2n-dashboard-test@(max-width: 600px)'))
+})
+
+// The scenario page stretches the enter animation to 2s so it is still running when the checks run.
+const animations = (card: Locator) => card.evaluate((node) => node.shadowRoot!.querySelector('.c2-dash-card')!.getAnimations().length)
+
+test('a card added at runtime animates in; the cards of the initial page do not', async ({ page, scenario }) => {
+  await scenario('late')
+  expect(await animations(page.locator('#one'))).toBe(0)
+  expect(await animations(page.locator('#two'))).toBe(1)
+})
+
+test('hiding a card through the layout record plays the leave animation first, and showing it again animates in', async ({ page, scenario }) => {
+  await scenario('motion')
+  const two = page.locator('#two')
+  await expect(two).toBeVisible()
+  await page.locator('#hide').click()
+  // Still on screen, fading, with its handle already gone.
+  await expect.poll(() => animations(two)).toBe(1)
+  await expect(two).toBeVisible()
+  await expect(two.getByRole('separator')).toHaveCount(0)
+  await expect(two).toBeHidden()
+  await expect(two).toHaveAttribute('hidden', '')
+
+  await page.locator('#show').click()
+  await expect(two).toBeVisible()
+  await expect.poll(() => animations(two)).toBe(1)
+  await expect(two.getByRole('separator')).toHaveCount(1)
+})
+
+test('dismiss() removes the card once the leave animation has played', async ({ page, scenario }) => {
+  await scenario('motion')
+  const two = page.locator('#two')
+  await page.locator('#dismiss').click()
+  await expect.poll(() => animations(two)).toBe(1)
+  await expect(two).toHaveCount(1)
+  await expect(page.locator('output')).toHaveText('dismissed')
+  await expect(two).toHaveCount(0)
 })
 
 test('a card added after the grid is alive registers with it', async ({ page, scenario }) => {

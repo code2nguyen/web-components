@@ -44,7 +44,9 @@ Import what you render at the top of the component module (`import '@c2n/text-fi
 
 Custom elements work as JSX tags. React 19 passes primitive props as attributes and functions as event listeners for `on*` names; for custom events attach listeners with a `ref` (`ref.current.addEventListener('selection-change', …)`).
 
-Types: `import '@c2n/<name>/react'` — one line per package, in any `.d.ts` — declares the tags in `JSX.IntrinsicElements` with props derived from the element class. Do not hand-write the mapping. React 18 and older: pass attributes as strings and use refs for events and properties.
+Types: `import '@c2n/<name>/react'` — one line per package, in any `.d.ts` — declares the tags in `JSX.IntrinsicElements` with props derived from the element class, plus each kebab-case attribute name (`row-key` next to `rowKey`). Do not hand-write the mapping. React 18 and older: pass attributes as strings and use refs for events and properties.
+
+**Server-rendered React (Next.js, React Router SSR):** write a camelCase property by its kebab-case attribute name — `min-width`, `expand-full`, `storage-key`, not `minWidth`. The server writes a custom element's props into the HTML verbatim, the parser lowercases them (`minwidth`) and hydration does not set properties, so the camelCase spelling reaches the element as an attribute it does not declare. The component forwards that lookalike to the real attribute and logs a warning, so the value is not lost, but the kebab-case name is what the types list and what needs no forwarding. Object and array props (`rows`) stringify on the server: set them in an effect through a ref.
 
 ## Vue 3
 
@@ -59,7 +61,7 @@ Types: `import '@c2n/<name>/vue'` registers the tags with Volar, and `"extends":
 
 ## Angular
 
-`CUSTOM_ELEMENTS_SCHEMA` on the component is the only required configuration. `[rows]="…"` writes a property with `setProperty`; `(selection-change)` binds the event by its real name. A **static** attribute stays an attribute, so a camelCase property needs `[rowKey]="'id'"` or the real attribute name (`row-key`) — the lowercase spelling `rowkey` is ignored and logs a warning.
+`CUSTOM_ELEMENTS_SCHEMA` on the component is the only required configuration. `[rows]="…"` writes a property with `setProperty`; `(selection-change)` binds the event by its real name. A **static** attribute stays an attribute, so a camelCase property needs `[rowKey]="'id'"` or the real attribute name (`row-key`) — the lowercase spelling `rowkey` is forwarded to `row-key` with a warning.
 
 Forms: Angular's built-in value accessors match `input`/`select`/`textarea` only, so `ngModel` and `formControlName` do nothing on a c2 control without `@c2n/angular`. Add `imports: [FormsModule, ...C2_FORM_ACCESSORS]`.
 
@@ -81,4 +83,6 @@ Svelte binds attributes and `on:` events directly.
 
 - Components must not touch `document`/`window` at module scope; the c2 components guard with `isServer`.
 - Without SSR of the shadow DOM, hide unregistered tags until they upgrade: `c2-modal:not(:defined) { display: none }` (dialogs, lists) or `visibility: hidden` (layout-stable chrome).
+- Server-rendered markup only carries attributes, so spell camelCase properties as their kebab-case attribute (`row-key`); see the React section for why the camelCase spelling is lost on the way.
 - Theme CSS is plain CSS; load it in the document head so the first paint is themed.
+- "Lit is in dev mode. Not recommended for production!" in a dev server (Next.js, Vite) is expected: Lit publishes a `development` export condition with extra checks and warnings, and dev servers resolve it. A production build resolves the default condition and the message is gone; nothing to configure.

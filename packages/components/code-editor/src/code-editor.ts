@@ -76,7 +76,8 @@ export interface CodeEditor {
  * @cssproperty {font-size} [--c2-code-editor--font-size=13px]
  * @cssproperty {line-height} [--c2-code-editor--line-height=1.6]
  * @cssproperty {pixel} [--c2-code-editor--min-height=120px]
- * @cssproperty {pixel} [--c2-code-editor--max-height=420px] - The editor scrolls past this height.
+ * @cssproperty {pixel} [--c2-code-editor--max-height=420px] - The editor scrolls past this height. A height set on
+ * the element itself reaches the editor (the label and supporting text keep theirs); set this to `none` to fill it.
  * @cssproperty {padding} [--c2-code-editor--padding-block=10px]
  * @cssproperty {padding} [--c2-code-editor--padding-inline=12px]
  *

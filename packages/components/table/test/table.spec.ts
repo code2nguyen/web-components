@@ -410,9 +410,10 @@ test('a resizable column edge reads as a divider, and drags the column', async (
 })
 
 // A camelCase attribute in markup is lowercased by the parser, and by every framework that writes a *static*
-// attribute — Angular's `rowKey="id"` reaches the element as `rowkey`. The component does not observe it, so the
-// value used to disappear without a trace; `@c2n/core/element-helper.js` turns that into one console line.
-test('a lowercased camelCase attribute is ignored, with a warning naming the real one', async ({ page, renderScenario }) => {
+// attribute — Angular's `rowKey="id"` and a server-rendered React `rowKey="id"` both reach the element as `rowkey`.
+// The component does not observe it, so the value used to disappear without a trace; `@c2n/core/element-helper.js`
+// forwards it to the real attribute and says so in one console line.
+test('a lowercased camelCase attribute is forwarded to the real one, with a warning naming it', async ({ page, renderScenario }) => {
   const warnings: string[] = []
   page.on('console', (message) => {
     if (message.type() === 'warning') warnings.push(message.text())
@@ -422,7 +423,8 @@ test('a lowercased camelCase attribute is ignored, with a warning naming the rea
     `<c2-table style="height:240px;width:520px" rowkey="id" rows='${rows}'><c2-table-column field="name" header="Name"></c2-table-column></c2-table>`,
   )
 
-  await expect(page.locator('c2-table')).toHaveJSProperty('rowKey', '')
+  await expect(page.locator('c2-table')).toHaveJSProperty('rowKey', 'id')
+  await expect(page.locator('c2-table')).toHaveAttribute('row-key', 'id')
   expect(warnings.some((warning) => warning.includes('<c2-table rowkey>') && warning.includes('row-key'))).toBe(true)
 })
 

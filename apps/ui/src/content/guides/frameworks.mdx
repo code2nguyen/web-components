@@ -58,7 +58,14 @@ import '@c2n/table'
 import '@c2n/table/table-column.js'
 ```
 
-React 19 assigns a prop as a property when the element has one, so `rows={rows}` lands as an object. Events are the exception: JSX has no spelling for `onSelection-change`, and React's `onChange` is its own synthetic form-control event, so custom events — and `input`/`change` — go through a ref:
+React 19 assigns a prop as a property when the element has one, so `rows={rows}` lands as an object. That holds on the client only. On a **server-rendered page** — Next.js, React Router in SSR mode — React writes a custom element's props into the HTML verbatim, the parser lowercases them, and hydration does not set properties: `minWidth="240"` reaches the element as `minwidth`, an attribute it does not declare. Write the kebab-case attribute name instead, `min-width`, `expand-full`, `storage-key`; the generated types list it next to the property. The component forwards the lowercase lookalike to the real attribute and warns in the console, so the value survives, but the warning is telling you to fix the spelling. An object or array prop stringifies on the server, so set it in an effect through a ref.
+
+```tsx tag=CodeBlock
+// Server-rendered: attributes by their markup name, objects through a ref
+<c2-dash-card col="1" row="1" min-width="240" expand-full>
+```
+
+Events are the exception on the client too: JSX has no spelling for `onSelection-change`, and React's `onChange` is its own synthetic form-control event, so custom events — and `input`/`change` — go through a ref:
 
 ```tsx tag=CodeBlock
 const tableRef = useRef<Table>(null)
@@ -130,7 +137,7 @@ Kebab-case events bind by their real name (`@selection-change`), and the handler
 })
 ```
 
-`[rows]="…"` writes a property through `setProperty`, and `(selection-change)` / `(row-click)` bind kebab-case events by their real name. The trap is the reverse of React's: a **static** attribute in a template stays an attribute, so `rowKey="id"` sets `rowkey` and is ignored — use `[rowKey]="'id'"` or the real attribute name, `row-key`. The component warns in the console when it sees one of those lookalikes, instead of dropping the value in silence.
+`[rows]="…"` writes a property through `setProperty`, and `(selection-change)` / `(row-click)` bind kebab-case events by their real name. The trap is the reverse of React's: a **static** attribute in a template stays an attribute, so `rowKey="id"` sets `rowkey`, which the component does not declare — use `[rowKey]="'id'"` or the real attribute name, `row-key`. The component forwards one of those lookalikes to the real attribute and warns in the console, instead of dropping the value in silence.
 
 Angular's built-in value accessors match `input`, `select` and `textarea` only, so a form-associated custom element is invisible to `ngModel` and reactive forms however correct its `ElementInternals` are. `@c2n/angular` supplies the missing half:
 
@@ -167,6 +174,13 @@ Import what you render at the top of the module and use the tags. Extend a compo
 </script>
 <c2-button>Save</c2-button>
 ```
+
+## "Lit is in dev mode"
+
+A dev server — Next.js, Vite, the Angular CLI — logs `Lit is in dev mode. Not recommended for production!` once per
+page. That is expected: Lit publishes a `development` export condition with extra checks and clearer warnings, and
+dev servers resolve it. A production build resolves the default condition and the message is gone. There is nothing to
+configure, and silencing it in development would also silence the warnings it exists for.
 
 ## Duplicate registration
 
