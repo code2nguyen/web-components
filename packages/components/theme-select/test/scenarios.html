@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Theme Select test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+      }
+      main {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .themed {
+        --c2-theme-select__trigger--size: 44px;
+        --c2-theme-select__trigger--border-radius: 22px;
+        --c2-theme-select__trigger--background: rgb(20, 30, 40);
+        --c2-theme-select__trigger--color: rgb(250, 250, 250);
+        --c2-theme-select__menu--background: rgb(20, 30, 40);
+        --c2-theme-select__menu-item--color: rgb(250, 250, 250);
+        --c2-theme-select__menu-item__selected--color: rgb(120, 200, 255);
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Theme Select scenario"></main>
+  </body>
+</html>

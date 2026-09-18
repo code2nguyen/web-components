@@ -10,6 +10,19 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // Border Beam geometry and timing belong to the decorative effect. Its principal colour and radius follow the
+  // active theme while the second gradient stop remains an intentionally coordinated accent.
+  '--c2-border-beam--outset': { exclude: 'container border alignment geometry' },
+  '--c2-border-beam__beam--width': { exclude: 'decorative stroke geometry' },
+  '--c2-border-beam__beam--size': { exclude: 'decorative highlight length' },
+  '--c2-border-beam__beam--radius': { token: 'radius-lg' },
+  '--c2-border-beam__beam--color-from': { token: 'color-primary' },
+  '--c2-border-beam__beam--color-to': { exclude: 'coordinated decorative gradient stop' },
+  '--c2-border-beam__beam--opacity': { exclude: 'decorative effect opacity' },
+  '--c2-border-beam__beam--filter': { exclude: 'decorative glow effect' },
+  '--c2-border-beam__beam--duration': { exclude: 'decorative animation timing' },
+  '--c2-border-beam__beam--delay': { exclude: 'decorative animation timing' },
+  '--c2-border-beam--z-index': { exclude: 'consumer stacking context' },
   // Status-panel dimensions follow the surrounding page/card composition. Semantic outcome colours stay stable across
   // brand themes so success, warning and error do not inherit unrelated accent colours.
   '--c2-status-panel__container--width': { exclude: 'responsive status-panel width' },
@@ -188,6 +201,14 @@ export const overrides: Record<string, Override> = {
   '--c2-avatar__editor-icon--size': { exclude: 'avatar editor icon size' },
   '--c2-avatar__remove--size': { exclude: 'avatar remove action geometry' },
   '--c2-avatar__remove--box-shadow': { token: 'shadow-sm' },
+  // Avatar-group width, overlap and item measurements are responsive composition controls. The overflow badge uses
+  // the inverse surface pair so it remains legible in both light and dark themes.
+  '--c2-avatar-group--max-width': { exclude: 'responsive avatar-group width' },
+  '--c2-avatar-group--overlap': { exclude: 'avatar stacking geometry' },
+  '--c2-avatar-group__avatar--box-shadow': { exclude: 'overlap separation ring' },
+  '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
+  '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
+  '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
   // Code viewer: monospace font and theme-neutral translucent greys / status colours that work on any syntax theme.
   '--c2-code-viewer--font-family': { exclude: 'monospace font, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -222,4 +243,32 @@ export const overrides: Record<string, Override> = {
     token: 'color-outline-variant',
     value: '-1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
   },
+  // The pressed trigger sits one step darker than the hover surface; the ramp has no token for that step.
+  '--c2-theme-select__trigger__active--background': { exclude: 'pressed tint one step below color-surface-container' },
+  // Code editor: the foreground and the code font size belong to the syntax palette, which is themed as one unit
+  // through `--c2-code-editor__theme--token-*` (the `theme` part is excluded wholesale, as it is for the viewer).
+  // Splitting the foreground off would leave a theme-aware body colour over a fixed token palette.
+  '--c2-code-editor--color': { exclude: 'code foreground; the syntax palette is themed as a unit' },
+  '--c2-code-editor--font-size': { exclude: 'code font size, off the 12/14 text scale' },
+  // The editor's three accent tints are alpha blends the colour ramp has no entries for, but they should still
+  // follow the app's accent — `color-mix` expresses that without a token per opacity step.
+  '--c2-code-editor__active-line--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 4%, transparent)',
+  },
+  '--c2-code-editor__selection--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 18%, transparent)',
+  },
+  '--c2-code-editor__matching-bracket--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 16%, transparent)',
+  },
+  // Steps: success and warning are outcomes, and stay stable across brand themes the way status-panel's do — the
+  // ramp has no token for either. `error`, `running` and `current` do map, to color-error and color-primary.
+  '--c2-step__success--color': { exclude: 'semantic success colour' },
+  '--c2-step__warning--color': { exclude: 'semantic warning colour' },
+  // The secondary runs are deliberately the normal weight, which the scale has no token for.
+  '--c2-step__detail--font-weight': { exclude: 'normal weight, below the font-weight scale' },
+  '--c2-step__trailing--font-weight': { exclude: 'normal weight, below the font-weight scale' },
 }

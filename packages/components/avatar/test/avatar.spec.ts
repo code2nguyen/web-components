@@ -100,3 +100,41 @@ test('editable avatars have no detectable accessibility violations', async ({ pa
   await renderScenario('<c2-avatar editable name="Ada Lovelace" initial-count="2" style="--c2-avatar--size:72px"></c2-avatar>')
   await accessible(page)
 })
+
+test('avatar group hides only the avatars that do not fit and responds to width changes', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-avatar-group aria-label="Contributors" style="width:78px;--c2-avatar-group--max-width:78px">
+      <c2-avatar name="Ada Lovelace"></c2-avatar>
+      <c2-avatar name="Grace Hopper"></c2-avatar>
+      <c2-avatar name="Alan Turing"></c2-avatar>
+      <c2-avatar name="Katherine Johnson"></c2-avatar>
+    </c2-avatar-group>
+  `)
+  const group = page.locator('c2-avatar-group')
+
+  await expect.poll(() => group.evaluate((element) => (element as HTMLElement & { visible: number }).visible)).toBe(2)
+  await expect(group.locator('[part="overflow"]')).toHaveText('+2')
+
+  await group.evaluate((element) => {
+    element.style.width = '120px'
+    element.style.setProperty('--c2-avatar-group--max-width', '120px')
+  })
+  await expect.poll(() => group.evaluate((element) => (element as HTMLElement & { hiddenCount: number }).hiddenCount)).toBe(0)
+})
+
+test('avatar group supports a hard visible limit and total count mode', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-avatar-group count-mode="total" max-visible="2" aria-label="Design team" style="--c2-avatar-group--max-width:200px">
+      <c2-avatar name="Dieter Rams"></c2-avatar>
+      <c2-avatar name="Susan Kare"></c2-avatar>
+      <c2-avatar name="Paula Scher"></c2-avatar>
+      <c2-avatar name="Don Norman"></c2-avatar>
+    </c2-avatar-group>
+  `)
+  const group = page.locator('c2-avatar-group')
+
+  await expect.poll(() => group.evaluate((element) => (element as HTMLElement & { hiddenCount: number }).hiddenCount)).toBe(2)
+  await expect(group.locator('[part="overflow"]')).toHaveText('4')
+  await expect(group.locator('[part="overflow"]')).toHaveAttribute('aria-label', '4 avatars total')
+  await accessible(page)
+})

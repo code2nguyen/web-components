@@ -1,0 +1,89 @@
+---
+title: 'Border Beam'
+description: 'A decorative beam that travels around the border of any positioned container.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { BorderBeam } from '@c2n/border-beam'
+
+`c2-border-beam` is a pointer-transparent decorative overlay for cards, panels and callouts. Place it inside a container with `position: relative`; a masked gradient follows the real border and inherits its corner radius without drawing a second outline. The default `side="all"` loops around the full perimeter. Set one edge, such as `side="top"`, and the beam travels forward then backward along only that border. Geometry and timing are presentation concerns configured with CSS variables; `side`, `count`, `reverse` and `paused` remain behavioral attributes. Reduced-motion preferences hide the decorative effect automatically.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/border-beam
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/border-beam
+<style>
+  .beam-card {
+    position: relative;
+    box-sizing: border-box;
+    width: min(100%, 420px);
+    overflow: hidden;
+    padding: 22px;
+    border: 1px solid #e4e4e7;
+    border-radius: 12px;
+    background: #ffffff;
+  }
+  .beam-card strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+  .beam-card p {
+    margin: 0;
+    color: #71717a;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .violet-beam {
+    --c2-border-beam__beam--color-from: #7c3aed;
+    --c2-border-beam__beam--color-to: #ec4899;
+    --c2-border-beam__beam--size: 120px;
+    --c2-border-beam__beam--filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.55));
+    --c2-border-beam__beam--duration: 4s;
+  }
+  .slow-beam {
+    --c2-border-beam__beam--size: 72px;
+    --c2-border-beam__beam--duration: 7s;
+  }
+  .single-beam {
+    --c2-border-beam__beam--size: 72px;
+    --c2-border-beam__beam--duration: 5s;
+  }
+</style>
+<div data-label="Default">
+  <div class="beam-card">
+    <strong>Workspace overview</strong>
+    <p>Review task status, deployment health, and recent automation activity.</p>
+    <c2-border-beam></c2-border-beam>
+  </div>
+</div>
+<div data-label="Reverse">
+  <div class="beam-card">
+    <strong>Protected checkout</strong>
+    <p>The beam can travel in either direction without changing the layout.</p>
+    <c2-border-beam class="slow-beam" reverse></c2-border-beam>
+  </div>
+</div>
+<div data-label="Themed">
+  <div class="beam-card">
+    <strong>New automation</strong>
+    <p>Use CSS variables to create a stronger accent for important content.</p>
+    <c2-border-beam class="violet-beam" count="2"></c2-border-beam>
+  </div>
+</div>
+<div data-label="Single border">
+  <div class="beam-card">
+    <strong>Active workspace</strong>
+    <p>The highlight moves forward and backward along the top edge.</p>
+    <c2-border-beam class="single-beam" side="top"></c2-border-beam>
+  </div>
+</div>
+```

@@ -29,7 +29,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Data display
 
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/attachment` — File and image attachments with metadata, upload progress, failure states, and actions.
-- **Avatar** — `c2-avatar` · `@c2n/avatar` — Image, initials or icon for a person, with status dot and badge.
+- **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/avatar` — Image, initials or icon for a person, with status dot and badge.
 - **Badge** — `c2-badge` · `@c2n/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
 - **Code Viewer** — `c2-code-viewer` · `@c2n/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Kbd** — `c2-kbd` · `@c2n/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
@@ -37,6 +37,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **List Item** — `c2-list-item` · `@c2n/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
 - **QR Code** — `c2-qr-code` · `@c2n/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Stat** — `c2-stat` · `@c2n/stat` — Displays a KPI with an optional icon, trend and supporting description.
+- **Steps** — `c2-steps, c2-step` · `@c2n/steps` — A vertical trace of a task as it runs: statuses, durations, and stages that open while they work and close when they are done.
 - **Table** — `c2-table, c2-table-column` · `@c2n/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
@@ -64,6 +65,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Autocomplete** — `c2-autocomplete` · `@c2n/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
 - **Cascader** — `c2-cascader` · `@c2n/cascader` — Select a value from related, multi-level data in one floating panel.
 - **Checkbox** — `c2-checkbox` · `@c2n/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
+- **Code Editor** — `c2-code-editor` · `@c2n/code-editor` — Editable, syntax-highlighted source field on CodeMirror 6, themed entirely through CSS variables.
 - **Color Area** — `c2-color-area` · `@c2n/color-area` — Two-dimensional area for picking saturation and value of a colour.
 - **Color Select** — `c2-color-select` · `@c2n/color-select` — Colour swatch that opens a full picker built from area and slider.
 - **Color Slider** — `c2-color-slider` · `@c2n/color-slider` — Horizontal slider for choosing a hue from 0 to 360.
@@ -79,11 +81,13 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Switch** — `c2-switch` · `@c2n/switch` — On/off toggle on a native switch input, with label, description and thumb icons.
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
 - **Textarea** — `c2-textarea` · `@c2n/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
+- **Theme Select** — `c2-theme-select` · `@c2n/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
 - **Upload** — `c2-upload` · `@c2n/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 
 ## Layout
 
 - **Accordion** — `c2-accordion` · `@c2n/accordion` — Connected, animated panels with shared borders and single or multiple expansion.
+- **Border Beam** — `c2-border-beam` · `@c2n/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/card` — Groups related content and actions on a single bordered surface.
 - **Chatbot** — `c2-chatbot` · `@c2n/chatbot` — Chatbot component for c2n applications.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.

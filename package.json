@@ -84,7 +84,11 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/steps:build",
+        "./packages/components/code-editor:build",
+        "./packages/components/theme-select:build",
         "./packages/components/tree:build",
+        "./packages/components/border-beam:build",
         "./packages/components/status-panel:build",
         "./packages/components/qr-code:build",
         "./packages/components/upload:build",

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-steps</title>
+    <script type="module" src="/src/steps.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        background: #ffffff;
+        color: #18181b;
+        display: grid;
+        gap: 40px;
+        max-width: 780px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.6;
+      }
+      /* The trace look: a warm panel, hairlines, no rail. */
+      .trace {
+        --c2-steps--background: #faf9f5;
+        --c2-steps--border: 1px solid #e8e6dd;
+        --c2-steps--border-radius: 8px;
+        --c2-steps--padding-block: 4px;
+        --c2-step__row--border-bottom: 1px solid #ecebe3;
+        --c2-step__row__hover--background: #f3f1e8;
+        --c2-step__marker--border: 1px solid transparent;
+        --c2-step__marker--size: 14px;
+      }
+      /* A wizard: give the rail a width and the markers room to breathe. */
+      .wizard {
+        --c2-step__rail--width: 2px;
+        --c2-step__marker--size: 24px;
+        --c2-step__marker--font-size: 12px;
+        --c2-step__row--border-bottom: none;
+        --c2-step__row--padding-block: 4px;
+        --c2-step__label--font-family: inherit;
+        --c2-step__label--font-size: 14px;
+        --c2-step__detail--color: #71717a;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      button {
+        font: inherit;
+        font-size: 13px;
+        padding: 5px 12px;
+        border: 1px solid #d4d4d8;
+        border-radius: 6px;
+        background: #ffffff;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>A task running — every step stays a visible row</h2>
+      <c2-steps class="trace" id="run" aria-label="Pipeline"></c2-steps>
+      <div class="controls">
+        <button id="start">Run</button>
+        <button id="reset">Reset</button>
+        <button id="expand">Expand all</button>
+        <button id="collapse">Collapse all</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>The same trace as markup, finished — 9 rows, nothing hidden</h2>
+      <c2-steps class="trace" aria-label="Run trace">
+        <c2-step status="success" label="goto" detail="[0].goto" trailing="500 ms"></c2-step>
+        <c2-step status="success" label="set" detail="[1].set" trailing="0 ms"></c2-step>
+        <c2-step label="pagination" detail="[2].pagination" trailing="1.53 s">
+          <c2-step status="success" label="collect" detail="[2].pagination[1][0].collect" trailing="1 ms"></c2-step>
+          <c2-step status="success" label="append" detail="[2].pagination[1][1].append" trailing="1 ms"></c2-step>
+          <c2-step status="success" label="collect" detail="[2].pagination[2][0].collect" trailing="2 ms"></c2-step>
+          <c2-step status="success" label="append" detail="[2].pagination[2][1].append" trailing="1 ms"></c2-step>
+          <c2-step status="success" label="collect" detail="[2].pagination[3][0].collect" trailing="2 ms"></c2-step>
+          <c2-step status="success" label="append" detail="[2].pagination[3][1].append" trailing="1 ms"></c2-step>
+        </c2-step>
+      </c2-steps>
+    </section>
+
+    <section>
+      <h2>Numbered, so a sub-step reads 2.3.1</h2>
+      <c2-steps class="trace" marker="number" aria-label="Numbered trace">
+        <c2-step status="success" label="goto"></c2-step>
+        <c2-step label="pagination">
+          <c2-step status="success" label="collect"></c2-step>
+          <c2-step status="running" label="append"></c2-step>
+        </c2-step>
+      </c2-steps>
+    </section>
+
+    <section>
+      <h2>A wizard — no groups, so no chevron column</h2>
+      <c2-steps class="wizard" marker="number" current="1" aria-label="Checkout">
+        <c2-step label="Account" detail="Signed in as ada@example.com"></c2-step>
+        <c2-step label="Plan" detail="Team, billed yearly"></c2-step>
+        <c2-step label="Payment" detail="Card or invoice"></c2-step>
+        <c2-step label="Confirm" detail="Review and place the order"></c2-step>
+      </c2-steps>
+    </section>
+
+    <section>
+      <h2>Every status</h2>
+      <c2-steps class="wizard" aria-label="Statuses">
+        <c2-step status="success" label="Completed"></c2-step>
+        <c2-step status="warning" label="Completed with warnings"></c2-step>
+        <c2-step status="error" label="Failed"></c2-step>
+        <c2-step status="running" label="Running"></c2-step>
+        <c2-step status="current" label="Current"></c2-step>
+        <c2-step status="pending" label="Pending"></c2-step>
+        <c2-step status="skipped" label="Skipped"></c2-step>
+      </c2-steps>
+    </section>
+
+    <script type="module">
+      const run = document.querySelector('#run')
+
+      // The shape of the task, and the order a runner would work through it.
+      const PLAN = [
+        { stage: 'build', steps: ['install dependencies', 'compile'] },
+        { stage: 'test', steps: ['unit', 'e2e', 'visual'] },
+        { stage: 'ship', steps: ['upload', 'announce'] },
+      ]
+      const FAILS = 'e2e'
+
+      let timer
+      let generation = 0
+      const wait = (ms) => new Promise((resolve) => (timer = setTimeout(resolve, ms)))
+      const reset = () => {
+        clearTimeout(timer)
+        generation += 1
+        run.steps = []
+      }
+      reset()
+
+      document.querySelector('#reset').addEventListener('click', reset)
+      document.querySelector('#expand').addEventListener('click', () => run.expandAll())
+      document.querySelector('#collapse').addEventListener('click', () => run.collapseAll())
+
+      document.querySelector('#start').addEventListener('click', async () => {
+        reset()
+        const mine = generation
+        // Each stage and each step appears as the runner reaches it, so the list grows while you watch it.
+        for (const { stage, steps } of PLAN) {
+          if (generation !== mine) return
+          run.steps = [...run.steps, { id: stage, label: stage, children: [] }]
+          const parent = run.steps.at(-1)
+          for (const label of steps) {
+            parent.children = [...parent.children, { id: label, label, status: 'running' }]
+            run.steps = [...run.steps]
+            await wait(650)
+            if (generation !== mine) return
+            run.updateStep(label, { status: label === FAILS ? 'error' : 'success', trailing: `${(Math.random() * 900 + 100) | 0} ms` })
+            await wait(200)
+            if (label === FAILS) return
+          }
+        }
+      })
+
+      run.addEventListener('step-toggle', (event) => console.log('step-toggle', event.target.id ?? event.detail.path, event.detail.collapsed))
+    </script>
+  </body>
+</html>

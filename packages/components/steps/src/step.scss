@@ -1,0 +1,496 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-step,
+  $theme: (
+    row--gap: 10px,
+    row--padding-block: 7px,
+    row--padding-inline: 12px,
+    // A sub-step's marker lands under its parent's label, which is what makes the nesting read with nothing
+    // drawn. Spelled out rather than through `css.cssVar`, which is not bound yet inside its own configuration.
+    row--indent: calc(var(--c2-step__marker--size, 16px) + var(--c2-step__row--gap, 10px)),
+    row--border-radius: null,
+    row--background: null,
+    row__hover--background: null,
+    row--border-bottom: 1px solid #e4e4e7,
+    row--outline: 2px solid rgb(2, 101, 220),
+
+    toggle--size: 14px,
+    toggle--gap: 4px,
+    toggle--color: #a1a1aa,
+
+    guide--color: #e4e4e7,
+    guide--width: 0px,
+
+    marker--size: 16px,
+    marker--font-size: 10px,
+    marker--padding-inline: 3px,
+    marker--font-weight: 600,
+    marker--border-radius: 999px,
+    marker--border: 1px solid #bcbcc6,
+    marker--background: transparent,
+    marker--color: #71717a,
+
+    rail--width: 0px,
+    rail--color: #e4e4e7,
+    rail--gap: 4px,
+
+    label--color: #18181b,
+    label--font-size: 13px,
+    label--font-weight: 500,
+    label--font-family: (
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      monospace,
+    ),
+    detail--color: #71717a,
+    detail--font-size: null,
+    detail--font-weight: 400,
+    detail--gap: 8px,
+    detail--row-gap: 2px,
+    text--flex-direction: row,
+    text--align-items: baseline,
+    trailing--color: #71717a,
+    trailing--font-size: null,
+    trailing--font-weight: 400,
+
+    success--color: #16a34a,
+    error--color: #dc2626,
+    warning--color: #d97706,
+    running--color: rgb(2, 101, 220),
+    current--color: rgb(2, 101, 220),
+    skipped--color: #71717a,
+
+    transition-duration: 150ms,
+    enter-duration: 260ms,
+    enter-translate: -4px,
+  )
+);
+
+$_duration: css.cssVar(transition-duration);
+
+/**
+ * A grid of one row rather than a block, so a step arriving in a running trace can grow from `0fr` to `1fr` —
+ * the one way to animate to a height nobody knows in advance.
+ */
+:host {
+  display: grid;
+  // A grid track is `auto` by default, which means max-content — the long labels would stop shrinking and the
+  // list would grow a scrollbar instead of cutting them.
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-step__frame {
+  min-width: 0;
+  min-height: 0;
+}
+
+// Written by the list on a step that arrived after it was already on screen, and taken off again by the step
+// itself when the animation ends. The clipping only lasts as long as the growing does.
+:host([entering]) {
+  animation: c2-step-enter css.cssVar(enter-duration) animation.$standard-easing;
+}
+
+:host([entering]) .c2-step__frame {
+  overflow: hidden;
+}
+
+@keyframes c2-step-enter {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    translate: 0 css.cssVar(enter-translate);
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    translate: none;
+  }
+}
+
+.c2-step__details {
+  display: block;
+}
+
+// The sub-steps are light DOM projected into a slot inside the `<details>`, and WebKit's closed state does not
+// reach through the slot to hide them. Saying it here makes the disclosure behave the same in every engine.
+.c2-step__details:not([open]) .c2-step__children {
+  display: none;
+}
+
+.c2-step__row {
+  display: flex;
+  align-items: flex-start;
+  gap: css.cssVar(row--gap);
+  box-sizing: border-box;
+  // The indent is padding on a full-width row, so a row background bleeds the whole width at every depth.
+  padding: css.cssVar(row--padding-block) css.cssVar(row--padding-inline);
+  padding-inline-start: calc(#{css.cssVar(row--indent)} * var(--level, 0) + #{css.cssVar(row--padding-inline)});
+  position: relative;
+  background: css.cssVar(row--background);
+  border-radius: css.cssVar(row--border-radius);
+  border-bottom: css.cssVar(row--border-bottom);
+  transition: background-color $_duration animation.$standard-easing;
+
+  &:hover {
+    background: css.cssVar(row__hover--background, row--background);
+  }
+}
+
+/**
+ * One vertical rule per ancestor level, each sitting where that ancestor's own chevron sits, so the nesting reads
+ * as a tree rather than as rows that happen to start further in.
+ *
+ * The box starts at the first ancestor's chevron centre and is `level * indent` wide, so the repeating tile lands
+ * a rule exactly on every ancestor and none anywhere else — offsetting the gradient inside a box that starts at 0
+ * repeats in both directions and draws a spurious rule before the first level. `--c2-step__guide--width: 0px`
+ * turns them off: a zero-wide colour band paints nothing.
+ */
+.c2-step__row::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(#{css.cssVar(row--padding-inline)} + #{css.cssVar(toggle--size)} / 2);
+  inline-size: calc(#{css.cssVar(row--indent)} * var(--level, 0));
+  pointer-events: none;
+  background-image: repeating-linear-gradient(to right, #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)}, transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)});
+}
+
+// Gradients ignore `direction`, so the guide stack has to be mirrored explicitly.
+.c2-step__row:dir(rtl)::before {
+  background-image: repeating-linear-gradient(to left, #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)}, transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)});
+}
+
+// A list with no group anywhere has no nesting either, so it has nothing to draw.
+:host(:not([grouped])) .c2-step__row::before {
+  display: none;
+}
+
+// A group's row is a `<summary>`: it is the button, so it takes the pointer and the focus ring.
+summary.c2-step__row {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+
+  // Safari still draws the disclosure triangle through this pseudo-element.
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(row--outline);
+    outline-offset: -2px;
+  }
+}
+
+// The last row of the whole list has no hairline under it; a parent's hairline is carried by its last descendant.
+:host([last]) .c2-step__row:not(:has(~ .c2-step__children:not([hidden]))) {
+  border-bottom: none;
+}
+
+:host([last][has-children]:not([collapsed])) > .c2-step__frame > .c2-step__details > summary.c2-step__row {
+  border-bottom: css.cssVar(row--border-bottom);
+}
+
+/**
+ * The disclosure affordance, and there is none by default: a trace is a list of rows, and a column of chevrons
+ * down the side of it is noise. The row is a `<summary>`, so it is clickable and focusable with nothing drawn.
+ * Fill the `toggle` slot to put a marker of your own there, and it takes a column on every row so they line up.
+ */
+.c2-step__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: css.cssVar(toggle--size);
+  height: calc(#{css.cssVar(label--font-size)} * 1.5);
+  margin-inline-end: calc(#{css.cssVar(toggle--gap)} - #{css.cssVar(row--gap)});
+  color: css.cssVar(toggle--color);
+  transition: transform $_duration animation.$standard-easing;
+
+  &[hidden] {
+    display: none;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+:host([has-children]:not([collapsed])) .c2-step__toggle {
+  transform: rotate(90deg);
+}
+
+// The marker column: the marker, then a rail that grows to the bottom of the row.
+.c2-step__gutter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: none;
+  align-self: stretch;
+  gap: css.cssVar(rail--gap);
+}
+
+.c2-step__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  width: css.cssVar(marker--size);
+  height: css.cssVar(marker--size);
+  // Centred on the first line of the label whatever the type size is.
+  margin-top: calc((#{css.cssVar(label--font-size)} * 1.5 - #{css.cssVar(marker--size)}) / 2);
+  font-size: css.cssVar(marker--font-size);
+  font-weight: css.cssVar(marker--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: css.cssVar(marker--color);
+  background: css.cssVar(marker--background);
+  // No ring by default: the finished states *are* their glyph, which is how a run trace reads. The ring is added
+  // back below for the states that have nothing to draw without it.
+  border: 1px solid transparent;
+  border-radius: css.cssVar(marker--border-radius);
+  transition:
+    color $_duration animation.$standard-easing,
+    border-color $_duration animation.$standard-easing,
+    background-color $_duration animation.$standard-easing;
+
+  svg {
+    width: 68%;
+    height: 68%;
+  }
+
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Off by default (`rail--width: 0px`): a trace wants no rail, a stepper gives it a width.
+.c2-step__rail {
+  flex: 1 1 auto;
+  width: css.cssVar(rail--width);
+  min-height: 0;
+  background: css.cssVar(rail--color);
+  border-radius: css.cssVar(rail--width);
+}
+
+:host([last]:not([has-children])) .c2-step__rail,
+:host([last][has-children][collapsed]) .c2-step__rail {
+  visibility: hidden;
+}
+
+// `marker="none"` drops the whole column, rail included.
+:host([marker='none']) .c2-step__gutter {
+  display: none;
+}
+
+.c2-step__text {
+  display: flex;
+  flex-direction: css.cssVar(text--flex-direction);
+  align-items: css.cssVar(text--align-items);
+  flex: 1 1 auto;
+  min-width: 0;
+  // Two values, so the one that applies is the one for the direction in force: side by side the label and the
+  // detail want air between them, stacked they want almost none. Switching `text--flex-direction` is then the
+  // whole of it — nothing else to remember.
+  gap: css.cssVar(detail--row-gap) css.cssVar(detail--gap);
+}
+
+// A step is one row. Text that does not fit is cut with an ellipsis rather than wrapping the row onto a second
+// line, which is what turns a long trace into a wall. `--c2-step__text--flex-direction: column` still stacks the
+// detail under the label — that is two lines on purpose, and each of them is still one line.
+.c2-step__label {
+  transition: color $_duration animation.$standard-easing;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: css.cssVar(label--color);
+  font-family: css.cssVar(label--font-family);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.5;
+}
+
+.c2-step__detail {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: css.cssVar(detail--color);
+  font-family: css.cssVar(label--font-family);
+  font-size: css.cssVar(detail--font-size, label--font-size);
+  font-weight: css.cssVar(detail--font-weight);
+  line-height: 1.5;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-step__trailing {
+  flex: none;
+  white-space: nowrap;
+  color: css.cssVar(trailing--color);
+  font-family: css.cssVar(label--font-family);
+  font-size: css.cssVar(trailing--font-size, label--font-size);
+  font-weight: css.cssVar(trailing--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// Read by assistive technology, never shown: the marker alone would leave the state unspoken.
+.c2-step__status-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.c2-step__children[hidden] {
+  display: none;
+}
+
+// `pending` has no glyph, so the ring is the whole marker.
+.c2-step__row.is-pending .c2-step__marker {
+  border: css.cssVar(marker--border);
+}
+
+// Status colours. Each one tints the marker; the ring states colour their ring with it too.
+@each $status in (success, error, warning, running, current) {
+  .c2-step__row.is-#{$status} .c2-step__marker {
+    color: css.cssVar(#{$status}--color);
+  }
+}
+
+// `current` and `running` are drawn by the ring rather than by a glyph, so they keep one in their own colour.
+.c2-step__row.is-current .c2-step__marker,
+.c2-step__row.is-running .c2-step__marker {
+  border: css.cssVar(marker--border);
+  border-color: currentColor;
+  // A ring with a filled core reads as "here" without needing a glyph.
+  box-shadow: inset 0 0 0 calc(#{css.cssVar(marker--size)} / 5) currentColor;
+}
+
+/**
+ * A number has to sit inside something, whatever the status — but a dotted path is not a glyph, and `2.2.1` in a
+ * round box the size of a checkmark spills out over its own border. In number mode the marker keeps its height and
+ * grows sideways instead: a single digit is still the circle, a path is a pill.
+ */
+:host([marker='number']) .c2-step__marker {
+  width: auto;
+  min-width: css.cssVar(marker--size);
+  padding-inline: css.cssVar(marker--padding-inline);
+  white-space: nowrap;
+  border: css.cssVar(marker--border);
+}
+
+:host([marker='number']) .c2-step__row.is-success .c2-step__marker,
+:host([marker='number']) .c2-step__row.is-error .c2-step__marker,
+:host([marker='number']) .c2-step__row.is-warning .c2-step__marker,
+:host([marker='number']) .c2-step__row.is-current .c2-step__marker,
+:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+  border-color: currentColor;
+}
+
+:host([marker='number']) .c2-step__row.is-current .c2-step__marker,
+:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+  // With a number inside, the filled core would swallow it.
+  box-shadow: none;
+}
+
+// Muted rather than dimmed: an opacity on top of an already-muted grey can never meet the contrast minimum, and a
+// skipped step is still text somebody reads.
+.c2-step__row.is-skipped {
+  .c2-step__marker {
+    color: css.cssVar(skipped--color);
+  }
+  .c2-step__label {
+    color: css.cssVar(skipped--color);
+  }
+}
+
+/**
+ * A status that settles gives the marker one beat. `settling` is written by the step when its status changes after
+ * the first pass and taken off again when the beat ends, so a trace drawn complete sits still and only a step that
+ * actually finishes in front of you moves. A step that is still growing into place has enough going on already.
+ */
+:host([settling]:not([entering])) .c2-step__row.is-success .c2-step__marker,
+:host([settling]:not([entering])) .c2-step__row.is-error .c2-step__marker,
+:host([settling]:not([entering])) .c2-step__row.is-warning .c2-step__marker,
+:host([settling]:not([entering])) .c2-step__row.is-skipped .c2-step__marker {
+  animation: c2-step-settle $_duration animation.$standard-easing;
+}
+
+@keyframes c2-step-settle {
+  from {
+    scale: 0.55;
+  }
+  60% {
+    scale: 1.12;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+// `running` spins its marker border, so a step in flight is obvious without another element.
+.c2-step__row.is-running .c2-step__marker {
+  border-style: solid;
+  border-top-color: transparent;
+  box-shadow: none;
+  animation: c2-step-spin 900ms linear infinite;
+}
+
+:host([marker='number']) .c2-step__row.is-running .c2-step__marker {
+  animation: none;
+  border-top-color: currentColor;
+}
+
+@keyframes c2-step-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-step__row.is-running .c2-step__marker {
+    animation: none;
+    border-top-color: currentColor;
+  }
+  :host([entering]),
+  :host([settling]) .c2-step__row .c2-step__marker {
+    animation: none;
+  }
+  .c2-step__row,
+  .c2-step__marker,
+  .c2-step__label,
+  .c2-step__toggle {
+    transition: none;
+  }
+}

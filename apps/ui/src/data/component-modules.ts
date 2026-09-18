@@ -3,7 +3,11 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/steps'
+import '@c2n/code-editor'
+import '@c2n/theme-select'
 import '@c2n/tree'
+import '@c2n/border-beam'
 import '@c2n/status-panel'
 import '@c2n/qr-code'
 import '@c2n/upload'

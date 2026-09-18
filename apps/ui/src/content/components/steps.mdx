@@ -1,0 +1,345 @@
+---
+title: 'Steps'
+description: 'A vertical trace of a task as it runs: statuses, durations, and stages that open while they work and close when they are done.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import StepsRunDemo from '../../components/StepsRunDemo.astro'
+
+import { Steps } from '@c2n/steps'
+import { Step } from '@c2n/steps/step.js'
+import { Badge } from '@c2n/badge'
+import { FeatherGitBranchIcon as FeatherGitBranch } from '@c2n/feather-icons/icons/git-branch.js'
+import { FeatherPackageIcon as FeatherPackage } from '@c2n/feather-icons/icons/package.js'
+import { FeatherUploadCloudIcon as FeatherUploadCloud } from '@c2n/feather-icons/icons/upload-cloud.js'
+import { FeatherTerminalIcon as FeatherTerminal } from '@c2n/feather-icons/icons/terminal.js'
+
+`c2-steps` is a vertical list of `c2-step` rows. Each row is a marker, a label, an optional dimmed `detail` beside
+it and `trailing` text at the end — a duration, a count, a timestamp.
+
+**A step with sub-steps is a group, and a group is a disclosure**: its own row is the summary and its sub-steps are
+the detail. There is no second element to learn — the same tag is a leaf or a group depending on what is inside it.
+That is what makes a long run readable: the list keeps the shape of the task while the detail of each stage stays
+one click away.
+
+**Every step is a row, and every row is visible.** A group starts expanded and nothing ever folds one away on its
+own: the chevron is there for the reader, and `collapsed` in the markup starts a stage folded. The run only ever
+brings a folded stage _back_ into view — one the reader put away reopens when it starts running (`running`,
+`current`) or when something in it goes wrong (`error`, `warning`).
+
+**A step is one row.** Label, detail and trailing text sit on a single line and truncate with an ellipsis rather
+than wrapping, so a hundred-step trace stays scannable. A sub-step is indented by exactly the marker's width plus
+the row gap, so its marker lands under its parent's label — that alignment is all the nesting needs, and nothing
+else is drawn for it. `--c2-step__guide--width: 1px` adds file-tree rules if you want them, and the `toggle` slot
+adds a chevron; both are off by default.
+
+The detail sits **beside** the label by default, which is what a trace wants — a path or an id read as an aside to
+the name. `--c2-step__text--flex-direction: column` puts it on its own line underneath instead, which is what a
+wizard's descriptions want. That one variable is the whole switch: the gap between them and their alignment follow
+it. Two lines on purpose, and each of them is still one line.
+
+**A parent takes the status of the worst thing inside it** when it authors none of its own, so a stage reports that
+it is running, or that something under it failed, without you setting it.
+
+Author it either way, and mix them freely: slot `c2-step` children, or hand `c2-steps` a `steps` array of
+`{ id, label, detail, trailing, status, children }` and it renders the tree itself. The array wins when both are
+present.
+
+The connector rail is off by default, because a trace does not want one. Give `--c2-step__rail--width` a width and a
+stepper gets its rail. Numbering follows the tree: `marker="number"` draws a dotted path, so the first child of the
+third step reads `3.1` rather than a second `1`.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/steps
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/steps
+<style>
+  .trace {
+    --c2-steps--background: #faf9f5;
+    --c2-steps--border: 1px solid #e8e6dd;
+    --c2-steps--border-radius: 8px;
+    --c2-steps--padding-block: 4px;
+    --c2-step__row--border-bottom: 1px solid #ecebe3;
+    --c2-step__row__hover--background: #f3f1e8;
+    --c2-step__marker--size: 13px;
+    --c2-step__success--color: #3f3f46;
+    --c2-step__label--font-weight: 400;
+  }
+  /* A marker slot holding an icon wants room and no ring around it. */
+  .icons {
+    --c2-step__marker--size: 16px;
+    --c2-step__marker--border: 1px solid transparent;
+    --c2-feather-icon--size: 16px;
+    --c2-feather-icon--stroke-width: 2;
+  }
+  /* Slotted content sets its own type, so the row only has to make space for it. */
+  .rich {
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 13px;
+    --c2-step__row--padding-block: 5px;
+    --c2-step__marker--border: 1px solid #d6d3c4;
+  }
+  /* The chevron rotates on its own; the slot only says what to draw. */
+  .chevrons {
+    --c2-step__toggle--size: 12px;
+    --c2-step__toggle--color: #a8a29a;
+  }
+  /* The detail on its own line under the label. Nothing else to set: the gap follows the direction. */
+  .stacked {
+    --c2-step__text--flex-direction: column;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__detail--font-size: 13px;
+  }
+  /* A wizard: a rail, roomier markers, and the body font instead of the trace's monospace. */
+  .wizard {
+    --c2-step__rail--width: 2px;
+    --c2-step__rail--color: #e4e4e7;
+    --c2-step__rail--gap: 6px;
+    --c2-step__marker--size: 26px;
+    --c2-step__marker--font-size: 12px;
+    --c2-step__marker--background: #ffffff;
+    --c2-step__row--border-bottom: none;
+    --c2-step__row--padding-block: 6px;
+    --c2-step__row--padding-inline: 0px;
+    --c2-step__row--gap: 14px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__detail--font-size: 13px;
+    --c2-step__text--flex-direction: column;
+    --c2-step__current--color: #0265dc;
+    --c2-step__success--color: #16a34a;
+  }
+</style>
+
+<div data-label="A task mid-run — every step is a row, indented under the stage it belongs to">
+  <c2-steps class="trace" aria-label="Pipeline">
+    <c2-step label="build" trailing="24 s">
+      <c2-step status="success" label="install dependencies" trailing="19 s"></c2-step>
+      <c2-step status="success" label="compile" trailing="5 s"></c2-step>
+    </c2-step>
+    <c2-step label="test">
+      <c2-step status="success" label="unit" trailing="8 s"></c2-step>
+      <c2-step status="running" label="e2e"></c2-step>
+      <c2-step status="pending" label="visual"></c2-step>
+    </c2-step>
+    <c2-step label="ship">
+      <c2-step status="pending" label="upload"></c2-step>
+    </c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="A failure, rolled up to the stage that contains it">
+  <c2-steps class="trace" aria-label="Failed run">
+    <c2-step label="build" trailing="24 s">
+      <c2-step status="success" label="install dependencies" trailing="19 s"></c2-step>
+      <c2-step status="success" label="compile" trailing="5 s"></c2-step>
+    </c2-step>
+    <c2-step label="test" trailing="11 s">
+      <c2-step status="success" label="unit" trailing="8 s"></c2-step>
+      <c2-step status="error" label="e2e" detail="2 of 40 failed" trailing="3 s"></c2-step>
+    </c2-step>
+    <c2-step status="skipped" label="ship"></c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="Nested stages, numbered through the tree">
+  <c2-steps class="trace" marker="number" aria-label="Numbered trace">
+    <c2-step status="success" label="goto" detail="[0].goto" trailing="500 ms"></c2-step>
+    <c2-step label="pagination" detail="[2].pagination" trailing="1.53 s">
+      <c2-step status="success" label="collect" trailing="1 ms"></c2-step>
+      <c2-step label="page 2" trailing="620 ms">
+        <c2-step status="success" label="collect" trailing="2 ms"></c2-step>
+        <c2-step status="warning" label="append" detail="1 duplicate" trailing="1 ms"></c2-step>
+      </c2-step>
+    </c2-step>
+    <c2-step status="skipped" label="notify" detail="[5].notify"></c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="An icon of your own in the marker slot">
+  <c2-steps class="trace icons" aria-label="Release">
+    <c2-step status="success" label="checkout" detail="main@8f2c1d" trailing="1.2 s">
+      <c2-feather-git-branch slot="marker"></c2-feather-git-branch>
+    </c2-step>
+    <c2-step status="success" label="build" detail="3 packages" trailing="24 s">
+      <c2-feather-package slot="marker"></c2-feather-package>
+    </c2-step>
+    <c2-step status="running" label="publish" detail="registry.npmjs.org">
+      <c2-feather-upload-cloud slot="marker"></c2-feather-upload-cloud>
+    </c2-step>
+    <c2-step status="pending" label="smoke test">
+      <c2-feather-terminal slot="marker"></c2-feather-terminal>
+    </c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="Anything in the label and trailing slots — a badge, a link, a number of your own">
+  <c2-steps class="trace rich" aria-label="Pull request checks">
+    <c2-step status="success">
+      <span slot="marker">1</span>
+      <span slot="label"><a href="#usage">lint</a></span>
+      <c2-badge slot="trailing" tone="success">passed</c2-badge>
+    </c2-step>
+    <c2-step status="error">
+      <span slot="marker">2</span>
+      <span slot="label"><a href="#usage">type-check</a></span>
+      <span slot="detail">tsconfig.lib.json</span>
+      <c2-badge slot="trailing" tone="danger" count="3"></c2-badge>
+    </c2-step>
+    <c2-step status="pending">
+      <span slot="marker">3</span>
+      <span slot="label"><a href="#usage">test</a></span>
+      <c2-badge slot="trailing" tone="neutral">queued</c2-badge>
+    </c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="A chevron in the toggle slot — the disclosure affordance, which is off by default">
+  <c2-steps class="trace chevrons" aria-label="Pipeline with chevrons">
+    <c2-step label="build" trailing="24 s">
+      <svg slot="toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+      <c2-step status="success" label="compile" trailing="5 s"><span slot="toggle"></span></c2-step>
+      <c2-step status="success" label="bundle" trailing="19 s"><span slot="toggle"></span></c2-step>
+    </c2-step>
+    <c2-step status="running" label="test"><span slot="toggle"></span></c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="Label and detail on two lines — one variable switches it">
+  <c2-steps class="trace stacked" aria-label="Deployment stages">
+    <c2-step status="success" label="Provision" detail="Three nodes in eu-west-1" trailing="1 m 12 s"></c2-step>
+    <c2-step status="running" label="Migrate" detail="Schema, then backfill 2.1 M rows"></c2-step>
+    <c2-step status="pending" label="Cut over" detail="Drain connections and promote the replica"></c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="A wizard — no groups, so no chevron column">
+  <c2-steps class="wizard" marker="number" current="1" aria-label="Checkout">
+    <c2-step label="Account" detail="Signed in as ada@example.com"></c2-step>
+    <c2-step label="Plan" detail="Team, billed yearly"></c2-step>
+    <c2-step label="Payment" detail="Card or invoice"></c2-step>
+    <c2-step label="Confirm" detail="Review and place the order"></c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="Every status">
+  <c2-steps class="wizard" aria-label="Statuses">
+    <c2-step status="success" label="Completed"></c2-step>
+    <c2-step status="warning" label="Completed with warnings"></c2-step>
+    <c2-step status="error" label="Failed"></c2-step>
+    <c2-step status="running" label="Running"></c2-step>
+    <c2-step status="current" label="Current"></c2-step>
+    <c2-step status="pending" label="Pending"></c2-step>
+    <c2-step status="skipped" label="Skipped"></c2-step>
+  </c2-steps>
+</div>
+```
+
+## Driving a run
+
+A trace usually arrives as data. Hand over the shape of the task once, then tick one step at a time — `updateStep`
+finds a step by `id` and redraws without rebuilding the array, which is what a runner wants when it fires hundreds
+of times:
+
+```js tag=CodeBlock
+const trace = document.querySelector('c2-steps')
+
+trace.steps = [
+  { id: 'build', label: 'build', children: [{ id: 'install', label: 'install dependencies' }, { id: 'compile', label: 'compile' }] },
+  { id: 'test', label: 'test', children: [{ id: 'unit', label: 'unit' }, { id: 'e2e', label: 'e2e' }] },
+]
+
+// The parent stage rolls the status up on its own.
+trace.updateStep('install', { status: 'running' })
+trace.updateStep('install', { status: 'success', trailing: '19 s' })
+```
+
+Nothing stops you doing the same to slotted markup — a `c2-step` is an element, and setting `status` on it is
+enough. The parent list watches the attribute, so a stage rolls its status up from that alone:
+
+```js tag=CodeBlock
+document.querySelector('c2-step[data-id="e2e"]').status = 'running'
+```
+
+### Watching a run
+
+A static example can only show one frame of a trace. Press **Run the task** and watch the rows arrive:
+
+<StepsRunDemo />
+
+### What moves while it runs
+
+A trace being written in front of you should look like it. Two things move, and neither needs anything from you:
+
+- **A step that arrives** while the list is already on screen grows into place from a collapsed row and fades in,
+  rather than snapping the rows below it down the page. A step drawn with the list does not — a whole trace fading
+  in at once is a page loading, not an arrival.
+- **A status that settles** gives its marker one beat. Again only a status that actually _changed_: a trace
+  rendered complete sits still.
+
+`--c2-step--enter-duration` (`260ms`) and `--c2-step--enter-translate` (`-4px`) shape the arrival, and `0s` turns
+it off; `--c2-step--transition-duration` (`150ms`) covers the colour transitions and the beat.
+`prefers-reduced-motion: reduce` turns all of it off.
+
+Give every node a stable `id`. That is what lets the list reuse a step's DOM across renders instead of rebuilding
+it — without one a step is identified by its position, so inserting anywhere but the end recreates the rows after
+it, and they all animate in as if they were new.
+
+`collapseAll()` folds every group away, leaving the top-level stages; `expandAll()` brings them all back.
+
+A group announces itself when it is folded away or brought back. The event bubbles, so one listener on the list
+hears them all:
+
+```js tag=CodeBlock
+trace.addEventListener('step-toggle', (event) => {
+  console.log(event.target.label, event.detail.path, event.detail.collapsed)
+})
+```
+
+## Rendering a row yourself
+
+Everything the markup fills with a slot, the data-driven mode fills with a renderer — the two modes have the same
+reach, and a renderer is simply the function form of the slot:
+
+| Part of the row           | In markup                | From `steps`     |
+| ------------------------- | ------------------------ | ---------------- |
+| the icon                  | `<span slot="marker">`   | `renderMarker`   |
+| the primary text          | `<span slot="label">`    | `renderLabel`    |
+| the dimmed text beside it | `<span slot="detail">`   | `renderDetail`   |
+| the text at the end       | `<span slot="trailing">` | `renderTrailing` |
+| the disclosure affordance | `<span slot="toggle">`   | `renderToggle`   |
+| all of the text at once   | —                        | `renderItem`     |
+
+Every renderer is handed the node, its depth, its position, its dotted path and the status actually in effect, and
+returns anything Lit renders — a string, an `<svg>`, an icon element:
+
+```js tag=CodeBlock
+import '@c2n/feather-icons/icons/alert-triangle.js'
+import { html } from 'lit'
+
+// An icon of your own instead of the status glyph, per step.
+trace.renderMarker = ({ node, status }) =>
+  status === 'warning' ? html`<c2-feather-alert-triangle></c2-feather-alert-triangle>` : node.icon
+
+// A duration that ticks while the step is running.
+trace.renderTrailing = ({ node, status }) => (status === 'running' ? elapsedSince(node.startedAt) : node.trailing)
+```
+
+`renderItem` takes over the row's **text** — it overrides `renderLabel`, `renderDetail` and `renderTrailing`. The
+marker and the disclosure are their own columns rather than part of that text, so `renderMarker` and `renderToggle`
+still apply alongside it:
+
+```js tag=CodeBlock
+trace.renderItem = ({ node }) => html`<a href=${node.href}>${node.label}</a> <c2-badge>${node.count}</c2-badge>`
+trace.renderMarker = ({ node }) => node.icon
+```

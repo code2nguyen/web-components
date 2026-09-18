@@ -107,6 +107,57 @@ Every look below is a handful of `--c2-checkbox__container*` custom properties o
 
 </GalleryGrid>
 
+## Toggle button
+
+Match the container and state-layer sizes to turn the checkbox into a compact toggle button. The native checkbox still owns keyboard interaction, form state and its accessible checked state.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Notification toggle
+<style>
+  .notification-toggle {
+    --c2-checkbox__container--width: 40px;
+    --c2-checkbox__container--height: 40px;
+    --c2-checkbox__state-layer--size: 40px;
+    --c2-checkbox__container--border-top-left-radius: 10px;
+    --c2-checkbox__container--border-top-right-radius: 10px;
+    --c2-checkbox__container--border-bottom-left-radius: 10px;
+    --c2-checkbox__container--border-bottom-right-radius: 10px;
+    --c2-checkbox__container--border-top: 1px solid #d4d4d8;
+    --c2-checkbox__container--border-right: 1px solid #d4d4d8;
+    --c2-checkbox__container--border-bottom: 1px solid #d4d4d8;
+    --c2-checkbox__container--border-left: 1px solid #d4d4d8;
+    --c2-checkbox__container--background-color: #ffffff;
+    --c2-checkbox__container__selected--background-color: #18181b;
+    --c2-checkbox__container__selected--border-top: 1px solid #18181b;
+    --c2-checkbox__container__selected--border-right: 1px solid #18181b;
+    --c2-checkbox__container__selected--border-bottom: 1px solid #18181b;
+    --c2-checkbox__container__selected--border-left: 1px solid #18181b;
+    --c2-checkbox__checkmark--size: 18px;
+    --c2-checkbox__checkmark--color: #ffffff;
+    --c2-checkbox__uncheckmark--size: 18px;
+    --c2-checkbox__uncheckmark--color: #3f3f46;
+    --c2-checkbox__state-layer--border-top-left-radius: 10px;
+    --c2-checkbox__state-layer--border-top-right-radius: 10px;
+    --c2-checkbox__state-layer--border-bottom-left-radius: 10px;
+    --c2-checkbox__state-layer--border-bottom-right-radius: 10px;
+    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
+    --c2-checkbox__state-layer__hover__selected--color: #ffffff;
+    --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
+  }
+</style>
+<c2-checkbox class="notification-toggle" aria-label="Toggle notifications">
+  <c2-feather-bell slot="checkmark"></c2-feather-bell>
+  <c2-feather-bell-off slot="uncheckmark"></c2-feather-bell-off>
+</c2-checkbox>
+<c2-checkbox class="notification-toggle" aria-label="Toggle notifications" checked>
+  <c2-feather-bell slot="checkmark"></c2-feather-bell>
+  <c2-feather-bell-off slot="uncheckmark"></c2-feather-bell-off>
+</c2-checkbox>
+```
+
+</GalleryGrid>
+
 ## Hover and size
 
 The touch target is the hover layer. It is transparent by default: give it a colour for a tint, round it for the Material halo, or shrink it to the box for an inline checkbox.

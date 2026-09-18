@@ -1,0 +1,80 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ThemeSelect } from '@c2n/theme-select'
+
+## Presets
+
+Curated looks for `c2-theme-select`. Open any card in the studio to start from it. The trigger is shaped by the four
+`__trigger` variables — size, radius, border and background — and the dropdown by `__menu` and `__menu-item`. Every
+card is `manual` so trying it does not repaint this page.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-theme-select manual></c2-theme-select>
+```
+
+```html tag=MdxCodeBlock,label=Outlined
+<style>
+  .outlined {
+    --c2-theme-select__trigger--border: 1px solid #bcbcc6;
+    --c2-theme-select__trigger--border-radius: 6px;
+  }
+</style>
+<c2-theme-select class="outlined" manual show-label></c2-theme-select>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    --c2-theme-select__trigger--size: 36px;
+    --c2-theme-select__trigger--border-radius: 999px;
+    --c2-theme-select__trigger--background: #f4f4f5;
+    --c2-theme-select__trigger__hover--background: #e4e4e7;
+    --c2-theme-select__icon--size: 18px;
+  }
+</style>
+<c2-theme-select class="pill" manual></c2-theme-select>
+```
+
+```html tag=MdxCodeBlock,label=Solid
+<style>
+  .solid {
+    --c2-theme-select__trigger--background: rgb(2, 101, 220);
+    --c2-theme-select__trigger--color: #ffffff;
+    --c2-theme-select__trigger__hover--background: rgb(1, 84, 184);
+    --c2-theme-select__trigger--padding-inline: 12px;
+    --c2-theme-select__trigger--border-radius: 6px;
+  }
+</style>
+<c2-theme-select class="solid" manual show-label></c2-theme-select>
+```
+
+```html tag=MdxCodeBlock,label=Dark menu
+<style>
+  .dark-menu {
+    --c2-theme-select__menu--background: #18181b;
+    --c2-theme-select__menu--border: 1px solid #27272a;
+    --c2-theme-select__menu--border-radius: 12px;
+    --c2-theme-select__menu-item--color: #fafafa;
+    --c2-theme-select__menu-item__hover--background: #27272a;
+    --c2-theme-select__menu-item__selected--color: #fafafa;
+    --c2-theme-select__menu-item__selected--background: #3f3f46;
+  }
+</style>
+<c2-theme-select class="dark-menu" manual></c2-theme-select>
+```
+
+```html tag=MdxCodeBlock,label=Compact toggle
+<style>
+  .compact {
+    --c2-theme-select__trigger--size: 24px;
+    --c2-theme-select__trigger--border-radius: 4px;
+    --c2-theme-select__icon--size: 14px;
+  }
+</style>
+<c2-theme-select class="compact" manual modes="light,dark"></c2-theme-select>
+```
+
+</GalleryGrid>

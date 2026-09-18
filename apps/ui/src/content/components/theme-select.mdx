@@ -1,0 +1,93 @@
+---
+title: 'Theme Select'
+description: 'Colour-theme switcher: click to step to the next mode, hover for the full menu.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ThemeSelect } from '@c2n/theme-select'
+
+`c2-theme-select` shows the icon of the theme currently in effect. Clicking it steps to the next mode and wraps
+around, so two modes make a plain light/dark toggle. From three modes up the trigger also opens a menu on hover —
+or on focus with <kbd>↓</kbd> — so any mode can be picked directly, and clicking to advance keeps working while the
+menu is open.
+
+By default the element owns the page theme: it writes the resolved scheme to `data-theme` on `<html>`, saves the
+chosen mode in `localStorage` under `storage-key` (`c2n-theme`), restores it on the next load, follows the OS
+preference live while `system` is selected, and stays in sync with other tabs. Point `target` at another element to
+scope the theming to it, or set `manual` to apply nothing and drive the page yourself from `theme-change`.
+
+Modes are `modes="system,light,dark"` in markup. From script they can be objects — `{ value, label, scheme }` —
+which is how a mode gets its own name or a fourth scheme that still resolves to `light` or `dark`. Each mode's icon
+appears in the trigger and beside its label in the menu, and comes from the `<value>-icon` slot: `system-icon`,
+`light-icon` and `dark-icon` override the built-in monitor, sun and moon, and a custom mode brings its own.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/theme-select
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/theme-select
+<style>
+  .boxed {
+    --c2-theme-select__trigger--border: 1px solid #bcbcc6;
+  }
+  .pill {
+    --c2-theme-select__trigger--border-radius: 999px;
+    --c2-theme-select__trigger--background: #f4f4f5;
+  }
+</style>
+
+<div data-label="Three modes — click cycles, hover opens the menu">
+  <c2-theme-select manual></c2-theme-select>
+  <c2-theme-select manual show-label></c2-theme-select>
+  <c2-theme-select manual class="boxed" placement="bottom-end"></c2-theme-select>
+</div>
+
+<div data-label="Two modes — a plain toggle, no menu">
+  <c2-theme-select manual modes="light,dark" class="pill"></c2-theme-select>
+  <c2-theme-select manual modes="light,dark" show-label></c2-theme-select>
+</div>
+
+<div data-label="Menu for two modes, and disabled">
+  <c2-theme-select manual modes="light,dark" menu="always" show-label></c2-theme-select>
+  <c2-theme-select manual disabled></c2-theme-select>
+</div>
+
+<div data-label="Own icons — each one shows in the trigger and in its menu row">
+  <c2-theme-select manual show-label>
+    <svg slot="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M12 3v18"></path>
+    </svg>
+    <svg slot="light-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"></circle>
+    </svg>
+    <svg slot="dark-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <circle cx="12" cy="12" r="9"></circle>
+    </svg>
+  </c2-theme-select>
+</div>
+```
+
+The examples above are `manual` so that trying them does not repaint this page. Drop that attribute and the element
+themes the document on its own:
+
+```html tag=CodeBlock
+<c2-theme-select></c2-theme-select>
+```
+
+Listen for the change when something else has to follow the theme — a canvas, an iframe, a third-party widget. It
+fires on a pick and on an OS flip while `system` is selected, which is the case a `data-theme` observer would miss:
+
+```js tag=CodeBlock
+document.querySelector('c2-theme-select').addEventListener('theme-change', (event) => {
+  // event.detail.value is the mode ('system'), event.detail.theme the scheme it resolves to ('dark')
+  chart.setTheme(event.detail.theme)
+})
+```

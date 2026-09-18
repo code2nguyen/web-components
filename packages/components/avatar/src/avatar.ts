@@ -348,3 +348,5 @@ declare global {
     'c2-avatar': Avatar
   }
 }
+
+export { AvatarGroup, type AvatarGroupCountMode, type AvatarGroupOverflowDetail } from './avatar-group'

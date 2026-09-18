@@ -1,0 +1,199 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Steps } from '@c2n/steps'
+import { Step } from '@c2n/steps/step.js'
+
+## Presets
+
+Curated looks for `c2-steps`. Open any card in the studio to start from it. Two variables do most of the work:
+`--c2-step__rail--width` turns a trace into a stepper, and `--c2-step__row--border-bottom` turns a stepper back into
+a table of rows. Every step is a row and every row is on screen: a sub-step is indented until its marker sits under
+its parent's label, which is all the nesting needs. `--c2-step__guide--width: 1px` adds file-tree rules on top of
+that, and the `toggle` slot adds a chevron — both off by default.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-steps aria-label="Pipeline">
+  <c2-step label="build" trailing="24 s">
+    <c2-step status="success" label="install dependencies" trailing="19 s"></c2-step>
+    <c2-step status="success" label="compile" trailing="5 s"></c2-step>
+  </c2-step>
+  <c2-step label="test">
+    <c2-step status="success" label="unit" trailing="8 s"></c2-step>
+    <c2-step status="running" label="e2e"></c2-step>
+  </c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Run log
+<style>
+  .run-log {
+    --c2-steps--background: #faf9f5;
+    --c2-steps--border: 1px solid #e8e6dd;
+    --c2-steps--border-radius: 8px;
+    --c2-steps--padding-block: 4px;
+    --c2-step__row--border-bottom: 1px solid #ecebe3;
+    --c2-step__row__hover--background: #f3f1e8;
+    --c2-step__marker--size: 13px;
+    --c2-step__success--color: #3f3f46;
+    --c2-step__label--font-weight: 400;
+  }
+</style>
+<c2-steps class="run-log" aria-label="Run trace">
+  <c2-step status="success" label="goto" detail="[0].goto" trailing="500 ms"></c2-step>
+  <c2-step status="success" label="set" detail="[1].set" trailing="0 ms"></c2-step>
+  <c2-step label="pagination" detail="[2].pagination" trailing="1.53 s">
+    <c2-step status="success" label="collect" detail="[2].pagination[1][0].collect" trailing="1 ms"></c2-step>
+    <c2-step status="success" label="append" detail="[2].pagination[1][1].append" trailing="1 ms"></c2-step>
+    <c2-step status="success" label="collect" detail="[2].pagination[2][0].collect" trailing="2 ms"></c2-step>
+    <c2-step status="success" label="append" detail="[2].pagination[2][1].append" trailing="1 ms"></c2-step>
+    <c2-step status="success" label="collect" detail="[2].pagination[3][0].collect" trailing="2 ms"></c2-step>
+    <c2-step status="success" label="append" detail="[2].pagination[3][1].append" trailing="1 ms"></c2-step>
+  </c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Failed run
+<style>
+  .failed {
+    --c2-steps--background: #fffbfb;
+    --c2-steps--border: 1px solid #f3d6d6;
+    --c2-steps--border-radius: 8px;
+    --c2-steps--padding-block: 4px;
+    --c2-step__row--border-bottom: 1px solid #f7e6e6;
+    --c2-step__marker--size: 13px;
+    --c2-step__label--font-weight: 400;
+    --c2-step__toggle--color: #c98b8b;
+  }
+</style>
+<c2-steps class="failed" aria-label="Failed run">
+  <c2-step label="build" trailing="24 s">
+    <c2-step status="success" label="compile" trailing="5 s"></c2-step>
+  </c2-step>
+  <c2-step label="test" trailing="11 s">
+    <c2-step status="success" label="unit" trailing="8 s"></c2-step>
+    <c2-step status="error" label="e2e" detail="2 of 40 failed" trailing="3 s"></c2-step>
+  </c2-step>
+  <c2-step status="skipped" label="ship"></c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Numbered stages
+<style>
+  .numbered {
+    --c2-steps--background: #f8fafc;
+    --c2-steps--border: 1px solid #e2e8f0;
+    --c2-steps--border-radius: 10px;
+    --c2-steps--padding-block: 6px;
+    --c2-step__row--border-bottom: none;
+    --c2-step__row--padding-block: 5px;
+    --c2-step__marker--size: 20px;
+    --c2-step__marker--font-size: 10px;
+    --c2-step__marker--background: #ffffff;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 13px;
+  }
+</style>
+<c2-steps class="numbered" marker="number" aria-label="Numbered trace">
+  <c2-step status="success" label="Prepare" trailing="24 s">
+    <c2-step status="success" label="Install dependencies"></c2-step>
+    <c2-step status="success" label="Configure"></c2-step>
+  </c2-step>
+  <c2-step label="Migrate">
+    <c2-step status="success" label="Schema"></c2-step>
+    <c2-step status="running" label="Backfill"></c2-step>
+    <c2-step status="pending" label="Verify"></c2-step>
+  </c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Vertical wizard
+<style>
+  .wizard {
+    --c2-step__rail--width: 2px;
+    --c2-step__rail--color: #e4e4e7;
+    --c2-step__rail--gap: 6px;
+    --c2-step__marker--size: 26px;
+    --c2-step__marker--font-size: 12px;
+    --c2-step__marker--background: #ffffff;
+    --c2-step__row--border-bottom: none;
+    --c2-step__row--padding-block: 6px;
+    --c2-step__row--padding-inline: 0px;
+    --c2-step__row--gap: 14px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__detail--font-size: 13px;
+    --c2-step__text--flex-direction: column;
+  }
+</style>
+<c2-steps class="wizard" marker="number" current="1" aria-label="Checkout">
+  <c2-step label="Account" detail="Signed in as ada@example.com"></c2-step>
+  <c2-step label="Plan" detail="Team, billed yearly"></c2-step>
+  <c2-step label="Payment" detail="Card or invoice"></c2-step>
+  <c2-step label="Confirm" detail="Review and place the order"></c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Timeline
+<style>
+  .timeline {
+    --c2-step__rail--width: 2px;
+    --c2-step__rail--color: #e4e4e7;
+    --c2-step__rail--gap: 5px;
+    --c2-step__marker--size: 10px;
+    --c2-step__marker--background: #ffffff;
+    --c2-step__row--border-bottom: none;
+    --c2-step__row--padding-block: 5px;
+    --c2-step__row--gap: 12px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 13px;
+    --c2-step__toggle--size: 12px;
+  }
+</style>
+<c2-steps class="timeline" aria-label="Deployment">
+  <c2-step status="success" label="Queued" detail="09:14" trailing="2 s"></c2-step>
+  <c2-step label="Build" detail="09:14" trailing="1 m 20 s">
+    <c2-step status="success" label="Restore cache" trailing="4 s"></c2-step>
+    <c2-step status="success" label="Compile" trailing="1 m 16 s"></c2-step>
+  </c2-step>
+  <c2-step status="running" label="Deploy" detail="09:17"></c2-step>
+  <c2-step status="pending" label="Smoke tests"></c2-step>
+</c2-steps>
+```
+
+```html tag=MdxCodeBlock,label=Dark panel
+<style>
+  .dark-steps {
+    --c2-steps--background: #18181b;
+    --c2-steps--border: 1px solid #27272a;
+    --c2-steps--border-radius: 8px;
+    --c2-steps--padding-block: 4px;
+    --c2-step__row--border-bottom: 1px solid #27272a;
+    --c2-step__row__hover--background: #232326;
+    --c2-step__marker--size: 13px;
+    --c2-step__marker--border: 1px solid #52525b;
+    --c2-step__label--color: #e4e4e7;
+    --c2-step__label--font-weight: 400;
+    --c2-step__detail--color: #a1a1aa;
+    --c2-step__trailing--color: #a1a1aa;
+    --c2-step__guide--color: #3f3f46;
+    --c2-step__guide--width: 1px;
+    --c2-step__success--color: #4ade80;
+    --c2-step__error--color: #f87171;
+    --c2-step__running--color: #60a5fa;
+  }
+</style>
+<c2-steps class="dark-steps" aria-label="Run trace">
+  <c2-step status="success" label="goto" detail="[0].goto" trailing="500 ms"></c2-step>
+  <c2-step label="pagination" detail="[2].pagination" trailing="1.53 s">
+    <c2-step status="success" label="collect" trailing="1 ms"></c2-step>
+    <c2-step status="error" label="append" trailing="1 ms"></c2-step>
+  </c2-step>
+  <c2-step status="skipped" label="notify" detail="[5].notify"></c2-step>
+</c2-steps>
+```
+
+</GalleryGrid>

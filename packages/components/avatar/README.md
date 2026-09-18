@@ -1,6 +1,6 @@
 # @c2n/avatar
 
-Avatar built with Lit: image, initials or any slotted content, with an optional status dot or badge.
+Avatar components built with Lit: `c2-avatar` renders an image, initials or slotted content, while `c2-avatar-group` creates a responsive overlapping stack with an automatic overflow count.
 
 ```bash
 npm install @c2n/avatar
@@ -15,6 +15,13 @@ npm install @c2n/avatar
 <c2-avatar name="Ada Lovelace" src="/ada.jpg" status="online"></c2-avatar>
 <c2-avatar name="Ada Lovelace" auto-color initial-count="2"></c2-avatar>
 <c2-avatar name="Ada Lovelace" src="/ada.jpg" editable></c2-avatar>
+
+<c2-avatar-group aria-label="Contributors" style="--c2-avatar-group--max-width: 160px">
+  <c2-avatar auto-color name="Ada Lovelace"></c2-avatar>
+  <c2-avatar auto-color name="Grace Hopper"></c2-avatar>
+  <c2-avatar auto-color name="Alan Turing"></c2-avatar>
+  <c2-avatar auto-color name="Katherine Johnson"></c2-avatar>
+</c2-avatar-group>
 ```
 
 - **Content resolution**: the `src` image first (a failed load fires `error` and falls back to the initials), then slotted content (an icon, an emoji, an `<img>`), then the initials computed from `name`. `initial-count="2"` uses the first and last word of a longer name; `initials` overrides the computation.
@@ -24,4 +31,4 @@ npm install @c2n/avatar
 - **Accessibility**: the avatar is `role="img"` labelled by `alt` or `name`.
 - **Editing**: `editable` lets the user choose, replace, and remove an image. Listen for `avatar-change` to upload its `detail.file`, and `avatar-remove` to delete the persisted image. The component immediately displays a local preview; use `accept` and `max-size` for client-side validation.
 
-Every visual aspect is a CSS custom property (`--c2-avatar--*`, `--c2-avatar__badge--*`, `--c2-avatar__image--*`). For stacked groups give each avatar `--c2-avatar--box-shadow: 0 0 0 2px <page background>` and a negative margin. The full list is in `custom-elements.json` and on the docs site.
+Every visual aspect is a CSS custom property (`--c2-avatar--*`, `--c2-avatar-group--*`, `--c2-avatar__badge--*`, `--c2-avatar__image--*`). The full list is in `custom-elements.json` and on the docs site.
