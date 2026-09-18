@@ -4,7 +4,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { hasSlottedContent, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './switch.scss?inline'
 
 /** Events fired by {@link Switch}, keyed for `addEventListener`. */
@@ -193,10 +193,12 @@ export class Switch extends LitElement {
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
-  /** `slotchange` does not fire for server-rendered slots, so read the description once after the first render. */
-  override firstUpdated() {
-    const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="description"]')
-    if (slot) this.updateDescription(slot)
+  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
+  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
+  protected override willUpdate(_changed: PropertyValues<this>) {
+    if (!this.hasUpdated) {
+      this.hasDescription = hasSlottedContent(this, 'description')
+    }
   }
 
   protected override update(changed: PropertyValues<this>) {

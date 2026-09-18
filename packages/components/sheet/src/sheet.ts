@@ -4,7 +4,7 @@ import { property, query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { hasSlottedContent, lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './sheet.scss?inline'
 
 export type SheetSide = 'right' | 'left' | 'top' | 'bottom'
@@ -186,10 +186,6 @@ export class Sheet extends LitElement {
     else if (slot.name === 'footer') this.hasFooter = filled
   }
 
-  override firstUpdated() {
-    for (const slot of this.renderRoot.querySelectorAll('slot')) this.updateSlot(slot)
-  }
-
   override updated(changed: PropertyValues<this>) {
     if (changed.has('open') && !isServer && this.dialog) {
       if (this.open && !this.dialog.open) {
@@ -199,6 +195,15 @@ export class Sheet extends LitElement {
       } else if (!this.open && this.dialog.open) {
         this.dialog.close(this.returnValue)
       }
+    }
+  }
+
+  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
+  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
+  override willUpdate(_changed: PropertyValues<this>) {
+    if (!this.hasUpdated) {
+      this.hasTitle = hasSlottedContent(this, 'title')
+      this.hasFooter = hasSlottedContent(this, 'footer')
     }
   }
 

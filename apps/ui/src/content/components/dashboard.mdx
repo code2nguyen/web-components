@@ -6,6 +6,7 @@ category: 'Layout'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import DashboardMotionDemo from '../../components/DashboardMotionDemo.astro'
 
 import { Dashboard } from '@c2n/dashboard'
 
@@ -23,11 +24,26 @@ A pane draws no surface of its own: put a `c2-card`, or any markup, in its defau
 (at the end of the header row) or in `controls` (inside the built-in group, right next to the expand buttons), and
 each built-in icon is a slot of its own — `expand-full-icon`, `collapse-full-icon` and the width and height pairs —
 whose fallback is the default drawing, so a pane can use the application's icon set and keep the behaviour. An
-expanded pane covers its neighbours, so set `--c2-dash-card__expanded--background` on it (or on the card inside).
+expanded pane covers its neighbours on an opaque `--c2-dash-card__expanded--background` (the theme's surface colour
+by default); the pane itself stays transparent at rest. Whatever you slot into the pane fills it — the body is a
+column flex box and each slotted child is a `flex: 1` item — so a chart or a code editor follows the row track
+without a `height: 100%` chain. The whole gutter between two panes drags: each handle is centred on its edge and as
+thick as `--c2-dashboard--gap`.
 
 Set `storage-key` and the track sizes are written to `localStorage` at the end of each gesture and restored on the
 next load; `layout-change` reports them either way, and `reset()` puts the authored tracks back. A handle is a
 window splitter: it is in the tab order and the arrow keys move it, 10px a step and 1px with Shift.
+
+For a grid that changes shape with the viewport, set `layouts` instead of remounting: an ordered list of entries,
+each with a `media` query and the `columns`, `rows` and `layout` (placements by `card-id`) to use while it matches.
+The first match wins, the grid switches in place as the viewport crosses a breakpoint, `layout-change` reports the
+switch, and each entry keeps its own stored sizes under `<storage-key>@<media>`.
+
+```js tag=CodeBlock
+grid.layouts = [
+  { media: '(max-width: 1279px)', columns: 1, rows: 3, layout: { kpis: { row: 1 }, orders: { row: 2 }, activity: { row: 3 } } },
+]
+```
 
 ## Installation
 
@@ -88,3 +104,21 @@ npm install @c2n/dashboard
   </c2-dashboard>
 </div>
 ```
+
+## Adding and removing panes
+
+Panes can come and go at runtime. A `c2-dash-card` appended to a grid that is already on screen fades and scales
+in; to take one out with the same motion, either flip it to `visible: false` in the layout record — it fades, then
+hides — or call `card.dismiss()`, which plays the animation and removes the element once it is done (the promise
+resolves when it is gone, which is where a data-driven app drops the row). Cards present at load do not animate,
+`--c2-dash-card__enter--animation-duration` / `--c2-dash-card__leave--animation-duration` set the timing, and
+`prefers-reduced-motion` turns both off.
+
+**Placement stays yours.** The grid never re-places cards on its own. A pane that is removed or hidden leaves its
+cells empty and its neighbours where they were; a pane added at runtime lands exactly where its `col` / `row` say,
+over whatever already occupies that cell. If the gap should close, or room should be made, the application decides
+how: set the remaining cards' `col` / `row` / `col-span` / `row-span`, or hand the grid a `layout` record keyed by
+`card-id`. Both are applied in place, and the animations run alongside. The demo below does the simple version —
+it looks for the first free cell before adding.
+
+<DashboardMotionDemo />

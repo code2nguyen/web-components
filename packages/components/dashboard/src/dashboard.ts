@@ -29,6 +29,21 @@ export interface Dashboard {
   removeEventListener: TypedRemoveEventListener<Dashboard, DashboardEventMap>
 }
 
+/**
+ * One responsive variant of the grid. The first entry of `layouts` whose media query matches is applied over the
+ * authored `columns`, `rows` and `layout`; with none matching the authored ones stand.
+ */
+export interface DashboardResponsiveLayout {
+  /** Media query, as given to `matchMedia`: `'(max-width: 1279px)'`. */
+  media: string
+  /** Column tracks while this entry is active; the authored `columns` otherwise. */
+  columns?: number | string | string[]
+  /** Row tracks while this entry is active; the authored `rows` otherwise. */
+  rows?: number | string | string[]
+  /** Placement overrides by `card-id`, merged per card over the grid's `layout`. */
+  layout?: Record<string, DashCardPlacement>
+}
+
 interface StoredLayout {
   columns?: string[]
   rows?: string[]
@@ -68,6 +83,15 @@ function toTracks(input: number | string | string[]): string[] {
  * the `fr` tracks around it give up the space in proportion to their weight, down to the minimums. With a
  * `storage-key` the sizes survive a reload.
  *
+ * `layouts` makes the grid responsive without a remount: each entry names a media query and the tracks and card
+ * placements to use while it matches, the first match wins, and every entry keeps its own stored sizes under
+ * `<storage-key>@<media>`.
+ *
+ * Placement is the application's: the grid never re-places cards on its own. A pane removed or hidden at runtime
+ * leaves its cells empty and its neighbours where they were, and a pane added at runtime lands exactly where its
+ * `col`/`row` say, on top of whatever is already there if that cell is taken. To close a gap, or to make room, set
+ * the cards' `col`/`row`/`col-span`/`row-span` or hand the grid a `layout` record — both are applied in place.
+ *
  * The grid is the sizing authority: a card never sets its own width. Give the element a height (or place it in a
  * flex/grid parent that does) whenever the rows use `fr`, since the row tracks divide the host's height.
  *
@@ -75,11 +99,11 @@ function toTracks(input: number | string | string[]): string[] {
  *
  * @slot - The `c2-dash-card` panes. Anything else becomes an ordinary grid item, placed by your own CSS.
  *
- * @event {CustomEvent<DashboardLayoutChangeDetail>} layout-change - The track sizes changed and the gesture ended.
- * Does not bubble: listen on the element.
+ * @event {CustomEvent<DashboardLayoutChangeDetail>} layout-change - The track sizes changed: a gesture ended, `reset()`
+ * was called, or another entry of `layouts` took over. Does not bubble: listen on the element.
  *
- * @cssproperty {pixel} [--c2-dashboard--gap=8px] - Gutter between the cards. The drag handles sit inside the cards,
- * so a gutter under ~6px is hard to grab.
+ * @cssproperty {pixel} [--c2-dashboard--gap=8px] - Gutter between the cards. The whole gutter drags: each card's
+ * handle is centred on its edge and as thick as the gap (never under `--c2-dash-card__handle--size`).
  * @cssproperty {padding} [--c2-dashboard--padding=0px] - Inset around the tracks. With a `background` it is what
  * turns the gutters into a visible frame between the panes.
  * @cssproperty {background} [--c2-dashboard--background=transparent]
@@ -107,14 +131,28 @@ export class Dashboard extends LitElement {
 
   /**
    * Placement overrides keyed by the cards' `card-id`, for a layout that is chosen at runtime rather than authored
-   * in the markup. Each entry wins over the card's own `col`/`row`/`col-span`/`row-span`/visibility.
+   * in the markup. Each entry wins over the card's own `col`/`row`/`col-span`/`row-span`/visibility. This is also
+   * how an app re-flows the remaining panes after one was removed: the grid does not do that by itself.
    */
   @property({ attribute: false }) layout: Record<string, DashCardPlacement> | undefined = undefined
 
+  /**
+   * Responsive variants, in priority order: the first entry whose `media` matches supplies the tracks and the card
+   * placements, and the grid switches as the viewport crosses a breakpoint. Nothing is stored across entries — each
+   * one keeps its own sizes under `<storage-key>@<media>`.
+   */
+  @property({ attribute: false }) layouts: DashboardResponsiveLayout[] | undefined = undefined
+
   @state() private columnTracks: string[] = []
   @state() private rowTracks: string[] = []
+  /** Index into `layouts` of the entry in force, `-1` for the authored grid. */
+  @state() private activeLayout = -1
 
   private cards = new Set<DashboardCard>()
+  private mediaQueries: MediaQueryList[] = []
+  private readonly handleMediaChange = () => {
+    this.activeLayout = this.resolveActiveLayout()
+  }
 
   /** Used track sizes, valid until the next write to the tracks. */
   private pixelCache = new Map<'column' | 'row', number[]>()
@@ -137,8 +175,33 @@ export class Dashboard extends LitElement {
     return this.rowTracks.length
   }
 
+  /** The entry of `layouts` in force, or `undefined` while the authored grid is. */
+  get activeResponsiveLayout(): DashboardResponsiveLayout | undefined {
+    return this.layouts?.[this.activeLayout]
+  }
+
+  override connectedCallback() {
+    super.connectedCallback()
+    if (this.hasUpdated) this.watchMedia()
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    this.unwatchMedia()
+  }
+
   protected override willUpdate(changed: PropertyValues) {
-    if (!this.hasUpdated || changed.has('columns') || changed.has('rows') || changed.has('storageKey')) this.syncTracks()
+    if (!this.hasUpdated || changed.has('layouts')) this.watchMedia()
+    if (
+      !this.hasUpdated ||
+      changed.has('columns') ||
+      changed.has('rows') ||
+      changed.has('storageKey') ||
+      changed.has('layouts') ||
+      changed.has('activeLayout')
+    ) {
+      this.syncTracks()
+    }
   }
 
   protected override updated(changed: PropertyValues) {
@@ -146,22 +209,25 @@ export class Dashboard extends LitElement {
     // The cards are light-DOM children, so the grid lives on the host itself.
     this.style.setProperty('--_columns', this.columnTracks.join(' '))
     this.style.setProperty('--_rows', this.rowTracks.join(' '))
-    if (changed.has('columnTracks') || changed.has('rowTracks') || changed.has('layout')) {
+    if (changed.has('columnTracks') || changed.has('rowTracks') || changed.has('layout') || changed.has('layouts') || changed.has('activeLayout')) {
       for (const card of this.cards) card.hostChanged()
     }
+    // Crossing a breakpoint is a layout change the app did not make itself, so it is reported like a drag.
+    if (changed.has('activeLayout') && changed.get('activeLayout') !== undefined) this.emitLayoutChange()
   }
 
-  /** Back to the authored tracks, and the stored ones are forgotten. */
+  /** Back to the authored tracks of the layout in force, and its stored ones are forgotten. */
   reset() {
-    if (this.storageKey && !isServer) {
+    const key = this.activeStorageKey
+    if (key && !isServer) {
       try {
-        localStorage.removeItem(this.storageKey)
+        localStorage.removeItem(key)
       } catch {
         // A private window or a full quota only costs the stored layout.
       }
     }
-    this.columnTracks = toTracks(this.columns)
-    this.rowTracks = toTracks(this.rows)
+    this.columnTracks = toTracks(this.activeResponsiveLayout?.columns ?? this.columns)
+    this.rowTracks = toTracks(this.activeResponsiveLayout?.rows ?? this.rows)
     this.emitLayoutChange()
   }
 
@@ -175,7 +241,10 @@ export class Dashboard extends LitElement {
   }
 
   placementOf(cardId: string | undefined): DashCardPlacement | undefined {
-    return cardId ? this.layout?.[cardId] : undefined
+    if (!cardId) return undefined
+    const base = this.layout?.[cardId]
+    const active = this.activeResponsiveLayout?.layout?.[cardId]
+    return active && base ? { ...base, ...active } : (active ?? base)
   }
 
   resizeColumn(index: number, delta: number): number {
@@ -300,9 +369,41 @@ export class Dashboard extends LitElement {
     return Math.max(0, min)
   }
 
+  /**
+   * One `MediaQueryList` per entry of `layouts`, listened to for as long as the element is connected. Whichever
+   * entry matches first is the one in force; the listeners re-run the choice whenever any of them flips.
+   */
+  private watchMedia() {
+    this.unwatchMedia()
+    if (isServer || typeof matchMedia !== 'function') return
+    for (const entry of this.layouts ?? []) {
+      const query = matchMedia(entry.media)
+      query.addEventListener('change', this.handleMediaChange)
+      this.mediaQueries.push(query)
+    }
+    this.activeLayout = this.resolveActiveLayout()
+  }
+
+  private unwatchMedia() {
+    for (const query of this.mediaQueries) query.removeEventListener('change', this.handleMediaChange)
+    this.mediaQueries = []
+  }
+
+  private resolveActiveLayout(): number {
+    return this.mediaQueries.findIndex((query) => query.matches)
+  }
+
+  /** Each entry of `layouts` stores its own sizes: `<storage-key>@<media>`; the authored grid uses the bare key. */
+  private get activeStorageKey(): string | undefined {
+    if (!this.storageKey) return undefined
+    const active = this.activeResponsiveLayout
+    return active ? `${this.storageKey}@${active.media}` : this.storageKey
+  }
+
   private syncTracks() {
-    const columns = toTracks(this.columns)
-    const rows = toTracks(this.rows)
+    const active = this.activeResponsiveLayout
+    const columns = toTracks(active?.columns ?? this.columns)
+    const rows = toTracks(active?.rows ?? this.rows)
     const stored = this.readStored()
     // A stored layout only applies while it still describes the same grid; changing `columns` discards it.
     this.columnTracks = stored?.columns?.length === columns.length ? [...stored.columns] : columns
@@ -310,9 +411,10 @@ export class Dashboard extends LitElement {
   }
 
   private readStored(): StoredLayout | null {
-    if (!this.storageKey || isServer) return null
+    const key = this.activeStorageKey
+    if (!key || isServer) return null
     try {
-      const raw = localStorage.getItem(this.storageKey)
+      const raw = localStorage.getItem(key)
       if (!raw) return null
       const parsed = JSON.parse(raw) as StoredLayout | null
       return parsed && typeof parsed === 'object' ? parsed : null
@@ -322,9 +424,10 @@ export class Dashboard extends LitElement {
   }
 
   private persist() {
-    if (!this.storageKey || isServer) return
+    const key = this.activeStorageKey
+    if (!key || isServer) return
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify({ columns: this.columnTracks, rows: this.rowTracks } satisfies StoredLayout))
+      localStorage.setItem(key, JSON.stringify({ columns: this.columnTracks, rows: this.rowTracks } satisfies StoredLayout))
     } catch {
       // A private window or a full quota only costs the stored layout.
     }

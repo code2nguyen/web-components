@@ -31,6 +31,8 @@ export interface DashCardConstraint {
 export interface DashboardHost extends HTMLElement {
   readonly columnCount: number
   readonly rowCount: number
+  /** `true` once the grid has rendered; a card that registers after that arrived at runtime and animates in. */
+  readonly hasUpdated: boolean
   registerCard(card: DashboardCard): void
   unregisterCard(card: DashboardCard): void
   /** Resizes one column by `delta` pixels, clamped by the minimums; returns the change that was actually applied. */

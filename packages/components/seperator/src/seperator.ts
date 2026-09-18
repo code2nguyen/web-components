@@ -1,6 +1,7 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { property, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { hasSlottedContent } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './seperator.scss?inline'
 
@@ -45,11 +46,6 @@ export class Seperator extends LitElement {
   @state() private hasLabel = false
 
   /** `slotchange` does not fire for server-rendered slots, so read the label once after the first render. */
-  override firstUpdated() {
-    const slot = this.renderRoot.querySelector('slot')
-    if (slot) this.updateLabel(slot)
-  }
-
   override updated(changed: PropertyValues<this>) {
     if (changed.has('decorative') || changed.has('orientation')) {
       if (this.decorative) {
@@ -68,6 +64,14 @@ export class Seperator extends LitElement {
 
   private updateLabel(slot: HTMLSlotElement) {
     this.hasLabel = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
+  }
+
+  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
+  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
+  override willUpdate() {
+    if (!this.hasUpdated) {
+      this.hasLabel = hasSlottedContent(this)
+    }
   }
 
   override render() {

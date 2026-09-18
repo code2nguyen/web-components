@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { hasSlottedContent } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './card.scss?inline'
@@ -112,11 +113,6 @@ export class Card extends LitElement {
     this.updateSection(event.target as HTMLSlotElement)
   }
 
-  /** `slotchange` does not fire for slots that were server-rendered (declarative shadow DOM), so read every slot once. */
-  override firstUpdated() {
-    for (const slot of this.renderRoot.querySelectorAll('slot')) this.updateSection(slot)
-  }
-
   private updateSection(slot: HTMLSlotElement) {
     const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
     switch (slot.name) {
@@ -149,6 +145,17 @@ export class Card extends LitElement {
       <div class="c2-card-content" ?hidden=${!this.hasContent}><slot @slotchange=${this.handleSlotChange}></slot></div>
       <div class="c2-card-footer" ?hidden=${!this.hasFooter}><slot name="footer" @slotchange=${this.handleSlotChange}></slot></div>
     `
+  }
+
+  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
+  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
+  override willUpdate() {
+    if (!this.hasUpdated) {
+      this.hasMedia = hasSlottedContent(this, 'media')
+      this.hasHeader = hasSlottedContent(this, 'header')
+      this.hasContent = hasSlottedContent(this)
+      this.hasFooter = hasSlottedContent(this, 'footer')
+    }
   }
 
   override render() {

@@ -19,6 +19,28 @@ export function redispatchEvent(host: HTMLElement, event: Event) {
   return dispatched
 }
 
+/**
+ * Whether the host has light-DOM content for a slot — the default slot when `name` is omitted — read from its
+ * children rather than from `assignedNodes()`, so the answer is available before the first render.
+ *
+ * A component that hides a row when its slot is empty needs the flag for the first paint. Reading the slots in
+ * `firstUpdated` sets state after an update and costs a second render (Lit's `change-in-update` warning), and a
+ * server-rendered slot never fires `slotchange`, so the flag cannot start as `false` and wait for the event. Read
+ * this in `willUpdate` before the first update instead, and let `slotchange` keep the flag current afterwards.
+ * Returns `false` on the server, where the light DOM is not available.
+ */
+export function hasSlottedContent(host: Element, name = ''): boolean {
+  if (isServer) return false
+  for (const node of host.childNodes) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (((node as Element).getAttribute('slot') ?? '') === name) return true
+    } else if (name === '' && node.nodeType === Node.TEXT_NODE && (node.textContent ?? '').trim() !== '') {
+      return true
+    }
+  }
+  return false
+}
+
 let scrollLocks = 0
 let previousOverflow = ''
 

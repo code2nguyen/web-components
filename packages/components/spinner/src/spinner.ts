@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
 import { property, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { hasSlottedContent } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -54,17 +55,20 @@ export class Spinner extends LitElement {
     return Math.min(1, Math.max(0, this.value / max))
   }
 
-  override firstUpdated() {
-    const slot = this.renderRoot.querySelector('slot')
-    if (slot) this.updateText(slot)
-  }
-
   private handleSlotChange(event: Event) {
     this.updateText(event.target as HTMLSlotElement)
   }
 
   private updateText(slot: HTMLSlotElement) {
     this.hasText = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
+  }
+
+  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
+  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
+  override willUpdate() {
+    if (!this.hasUpdated) {
+      this.hasText = hasSlottedContent(this)
+    }
   }
 
   override render() {

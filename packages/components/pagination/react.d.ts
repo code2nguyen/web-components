@@ -6,17 +6,44 @@
 //
 // Register the elements at module scope before React renders, or React writes an object prop as an
 // attribute and it stringifies.
+//
+// On a server-rendered page (Next.js, React Router SSR) write a camelCase property by its kebab-case attribute
+// name ('row-key', not rowKey): the server emits props verbatim, HTML lowercases them, and hydration does not
+// set properties. Those names are listed next to the properties below.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Pagination } from '@c2n/pagination'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
+/** What React writes to a custom element's attribute: true becomes the empty string, false removes it. */
+type Attribute = string | number | boolean
 
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-pagination': C2Props<Pagination>
+      'c2-pagination': C2Props<Pagination> & {
+        'page-size'?: Attribute
+        'total-items'?: Attribute
+        'total-pages'?: Attribute
+        'sibling-count'?: Attribute
+        'boundary-count'?: Attribute
+        'page-size-options'?: Attribute
+        'hide-page-size'?: Attribute
+        'hide-range'?: Attribute
+        'show-first-last'?: Attribute
+        'hide-nav-labels'?: Attribute
+        'previous-label'?: Attribute
+        'next-label'?: Attribute
+        'first-label'?: Attribute
+        'last-label'?: Attribute
+        'page-size-label'?: Attribute
+        'range-template'?: Attribute
+        'page-template'?: Attribute
+        'page-label-template'?: Attribute
+        'jump-label-template'?: Attribute
+        'aria-label'?: Attribute
+      }
     }
   }
 }
