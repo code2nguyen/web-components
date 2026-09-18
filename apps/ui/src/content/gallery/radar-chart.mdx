@@ -1,0 +1,112 @@
+---
+title: 'Radar chart gallery'
+description: 'Profile comparisons across product, channel and operational indicators.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { RadarChart } from '@c2n/chart/radar-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { Card } from '@c2n/card'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-radar-chart label-field="metric" max="100" data='[{"metric":"Quality","current":82,"target":90},{"metric":"Speed","current":74,"target":85},{"metric":"Reliability","current":91,"target":88},{"metric":"Efficiency","current":68,"target":80},{"metric":"Coverage","current":77,"target":84}]'>
+  <c2-chart-series field="current" label="Current"></c2-chart-series>
+  <c2-chart-series field="target" label="Target"></c2-chart-series>
+</c2-radar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Current vs target
+<style>
+  .radar-story { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .radar-story__heading, .radar-story__footer { display: grid; gap: 4px; }
+  .radar-story__heading strong { font-size: 15px; }
+  .radar-story__heading span, .radar-story__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .radar-story__footer { font-size: 12px; }
+  .radar-story c2-radar-chart { width: 100%; --c2-chart--height: 280px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #2563eb; --c2-chart__series-2--color: #f59e0b; --c2-chart__area--opacity: 0.12; }
+</style>
+<c2-card class="radar-story">
+  <div slot="header" class="radar-story__heading">
+    <strong>Product score · Current vs target</strong>
+    <span>Five normalized quality indicators</span>
+  </div>
+  <c2-radar-chart
+    label-field="metric"
+    max="100"
+    data='[{"metric":"Quality","current":82,"target":90},{"metric":"Speed","current":74,"target":85},{"metric":"Reliability","current":91,"target":88},{"metric":"Efficiency","current":68,"target":80},{"metric":"Coverage","current":77,"target":84}]'
+  >
+    <c2-chart-series field="current" label="Current"></c2-chart-series>
+    <c2-chart-series field="target" label="Target"></c2-chart-series>
+  </c2-radar-chart>
+  <div slot="footer" class="radar-story__footer">
+    <strong>Reliability is already above target</strong>
+    <span>Largest opportunity: efficiency</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Circular channel comparison
+<style>
+  .circle-radar-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .circle-radar-card__heading, .circle-radar-card__footer { display: grid; gap: 4px; }
+  .circle-radar-card__heading strong { font-size: 15px; }
+  .circle-radar-card__heading span, .circle-radar-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .circle-radar-card__footer { font-size: 12px; }
+  .circle-radar-card c2-radar-chart { width: 100%; --c2-chart--height: 280px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #8b5cf6; --c2-chart__series-2--color: #14b8a6; --c2-chart__area--opacity: 0.16; }
+</style>
+<c2-card class="circle-radar-card">
+  <div slot="header" class="circle-radar-card__heading">
+    <strong>Channel comparison · Circle</strong>
+    <span>Desktop and mobile experience scores</span>
+  </div>
+  <c2-radar-chart
+    label-field="metric"
+    max="100"
+    shape="circle"
+    points="none"
+    split-number="4"
+    data='[{"metric":"Quality","desktop":88,"mobile":76},{"metric":"Speed","desktop":79,"mobile":91},{"metric":"Reliability","desktop":93,"mobile":86},{"metric":"Efficiency","desktop":72,"mobile":84},{"metric":"Coverage","desktop":81,"mobile":78}]'
+  >
+    <c2-chart-series field="desktop" label="Desktop"></c2-chart-series>
+    <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
+  </c2-radar-chart>
+  <div slot="footer" class="circle-radar-card__footer">
+    <strong>Mobile leads on speed and efficiency</strong>
+    <span>Desktop leads on quality and reliability</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Single profile
+<style>
+  .single-radar-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .single-radar-card__heading, .single-radar-card__footer { display: grid; gap: 4px; }
+  .single-radar-card__heading strong { font-size: 15px; }
+  .single-radar-card__heading span, .single-radar-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .single-radar-card__footer { font-size: 12px; }
+  .single-radar-card c2-radar-chart { width: 100%; --c2-chart--height: 280px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #0d9488; --c2-chart__area--opacity: 0.22; }
+</style>
+<c2-card class="single-radar-card">
+  <div slot="header" class="single-radar-card__heading">
+    <strong>Operational health · Single profile</strong>
+    <span>Auto-ranged indicators</span>
+  </div>
+  <c2-radar-chart
+    label-field="metric"
+    points="none"
+    legend="none"
+    data='[{"metric":"Uptime","score":99.9},{"metric":"Latency","score":82},{"metric":"Throughput","score":91},{"metric":"Recovery","score":76},{"metric":"Observability","score":88},{"metric":"Automation","score":71}]'
+  >
+    <c2-chart-series field="score" label="Platform"></c2-chart-series>
+  </c2-radar-chart>
+  <div slot="footer" class="single-radar-card__footer">
+    <strong>Strongest dimension: uptime</strong>
+    <span>Automation remains the priority</span>
+  </div>
+</c2-card>
+```
+
+</GalleryGrid>

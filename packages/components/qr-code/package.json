@@ -1,6 +1,6 @@
 {
   "name": "@c2n/qr-code",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
   "main": "dist/qr-code.js",
   "exports": {
@@ -62,7 +62,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.8",
+    "@c2n/core": "0.0.9",
     "lit": "3.3.3",
     "uqr": "^0.1.3"
   },

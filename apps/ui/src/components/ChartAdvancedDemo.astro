@@ -66,43 +66,48 @@
   const replay = async (chart: ReplayChart, status: HTMLElement, button: HTMLElement): Promise<void> => {
     button.toggleAttribute('disabled', true)
     const kind = chart.localName
+    seed(chart, status)
 
-    if (kind === 'c2-gauge-chart') {
-      for (let index = 0; index < fiscal.length; index += 1) {
-        const previous = index ? fiscal[index - 1].services / fiscal[index - 1].revenue : 0
-        const next = fiscal[index].services / fiscal[index].revenue
-        await tween((progress) => chart.updateData([{ metric: 'Services mix', value: mix(previous, next, progress) * 100 }]))
-        status.textContent = `FY ${fiscal[index].year} · ${(next * 100).toFixed(1)}% of revenue`
+    try {
+      if (kind === 'c2-gauge-chart') {
+        for (let index = 1; index < fiscal.length; index += 1) {
+          const previous = fiscal[index - 1].services / fiscal[index - 1].revenue
+          const next = fiscal[index].services / fiscal[index].revenue
+          await tween((progress) => chart.updateData([{ metric: 'Services mix', value: mix(previous, next, progress) * 100 }]))
+          status.textContent = `FY ${fiscal[index].year} · ${(next * 100).toFixed(1)}% of revenue`
+        }
+      } else if (kind === 'c2-scatter-chart') {
+        const first = fiscal[0]
+        const shown: Record<string, number>[] = [{ year: first.year, rd: first.rd, revenue: first.revenue }]
+        for (let index = 1; index < fiscal.length; index += 1) {
+          const previous = fiscal[index - 1]
+          const point = fiscal[index]
+          await tween((progress) =>
+            chart.updateData([
+              ...shown,
+              { year: point.year, rd: mix(previous.rd, point.rd, progress), revenue: mix(previous.revenue, point.revenue, progress) },
+            ]),
+          )
+          shown.push({ year: point.year, rd: point.rd, revenue: point.revenue })
+          status.textContent = `FY ${point.year} · R&D $${point.rd.toFixed(1)}B · revenue $${point.revenue.toFixed(1)}B`
+        }
+      } else {
+        const shown: Record<string, string | number>[] = [candles[0]]
+        for (let index = 1; index < candles.length; index += 1) {
+          const candle = candles[index]
+          await tween((progress) => {
+            const close = mix(candle.open, candle.close, progress)
+            const low = mix(candle.open, candle.low, progress)
+            const high = mix(candle.open, candle.high, progress)
+            chart.updateData([...shown, { ...candle, close, low: Math.min(candle.open, close, low), high: Math.max(candle.open, close, high) }])
+          })
+          shown.push(candle)
+          status.textContent = `${candle.date} · $${candle.close.toFixed(2)}`
+        }
       }
-    } else if (kind === 'c2-scatter-chart') {
-      const first = fiscal[0]
-      const shown: Record<string, number>[] = [{ year: first.year, rd: first.rd, revenue: first.revenue }]
-      chart.updateData(shown)
-      status.textContent = `FY ${first.year} · R&D $${first.rd.toFixed(1)}B · revenue $${first.revenue.toFixed(1)}B`
-      for (let index = 1; index < fiscal.length; index += 1) {
-        const previous = fiscal[index - 1]
-        const point = fiscal[index]
-        await tween((progress) =>
-          chart.updateData([...shown, { year: point.year, rd: mix(previous.rd, point.rd, progress), revenue: mix(previous.revenue, point.revenue, progress) }]),
-        )
-        shown.push({ year: point.year, rd: point.rd, revenue: point.revenue })
-        status.textContent = `FY ${point.year} · R&D $${point.rd.toFixed(1)}B · revenue $${point.revenue.toFixed(1)}B`
-      }
-    } else {
-      const shown: Record<string, string | number>[] = []
-      for (const candle of candles) {
-        await tween((progress) => {
-          const close = mix(candle.open, candle.close, progress)
-          const low = mix(candle.open, candle.low, progress)
-          const high = mix(candle.open, candle.high, progress)
-          chart.updateData([...shown, { ...candle, close, low: Math.min(candle.open, close, low), high: Math.max(candle.open, close, high) }])
-        })
-        shown.push(candle)
-        status.textContent = `${candle.date} · $${candle.close.toFixed(2)}`
-      }
+    } finally {
+      button.removeAttribute('disabled')
     }
-
-    button.removeAttribute('disabled')
   }
 
   document.querySelectorAll<HTMLElement>('[data-advanced-realtime]').forEach((demo) => {
@@ -111,13 +116,9 @@
     const status = demo.querySelector<HTMLElement>('[data-advanced-status]')
     if (!chart || !button || !status) return
     void customElements.whenDefined(chart.localName).then(async () => {
-      if (chart.localName === 'c2-gauge-chart') chart.series = [{ field: 'value', label: 'Services mix' }]
-      if (chart.localName === 'c2-scatter-chart') chart.series = [{ field: 'revenue', label: 'Revenue' }]
-      seed(chart, status)
       await chart.updateComplete
       await waitUntilReady(chart)
       button.addEventListener('click', () => void replay(chart, status, button))
-      await replay(chart, status, button)
     })
   })
 </script>
