@@ -23,7 +23,8 @@
   "types": "types/src/index.d.ts",
   "files": [
     "dist",
-    "types"
+    "types",
+    "custom-elements.json"
   ],
   "scripts": {
     "--build": "npm run type-check && vite build",

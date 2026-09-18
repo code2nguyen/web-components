@@ -33,6 +33,7 @@
   "files": [
     "dist",
     "types",
+    "custom-elements.json",
     "react.d.ts",
     "react.js",
     "vue.d.ts",
