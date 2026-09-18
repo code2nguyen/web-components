@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import dashboard from '@c2n/dashboard/custom-elements.json'
 import steps from '@c2n/steps/custom-elements.json'
 import codeEditor from '@c2n/code-editor/custom-elements.json'
 import themeSelect from '@c2n/theme-select/custom-elements.json'
@@ -72,6 +73,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    dashboard,
     steps,
     codeEditor,
     themeSelect,

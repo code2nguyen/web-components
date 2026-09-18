@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        margin: 0;
+      }
+
+      main {
+        width: 640px;
+      }
+
+      c2-dashboard {
+        --c2-dashboard--gap: 10px;
+        height: 300px;
+      }
+
+      c2-dash-card {
+        --c2-dash-card--background: #ffffff;
+        --c2-dash-card--border: 1px solid #e4e4e7;
+        --c2-dash-card__expanded--background: #ffffff;
+      }
+
+      .pane {
+        display: grid;
+        height: 100%;
+        place-items: center;
+        font-size: 13px;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Dashboard scenario"></main>
+    <output aria-label="Changes">0</output>
+  </body>
+</html>

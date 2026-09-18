@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/dashboard:build",
         "../../components/steps:build",
         "../../components/code-editor:build",
         "../../components/theme-select:build",

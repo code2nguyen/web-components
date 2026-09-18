@@ -84,6 +84,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/dashboard:build",
         "./packages/components/steps:build",
         "./packages/components/code-editor:build",
         "./packages/components/theme-select:build",
