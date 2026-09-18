@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number Input</title>
+    <script type="module" src="/src/number-input.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <c2-number-input aria-label="Quantity" value="1" min="0" max="10"></c2-number-input>
+      <c2-number-input aria-label="Price" value="49.99" min="0" step="0.01"><span slot="prefix">$</span><span slot="suffix">USD</span></c2-number-input>
+      <c2-number-input aria-label="Invalid quantity" value="0" min="1" error error-text="Enter at least 1."></c2-number-input>
+      <c2-number-input aria-label="Read-only total" value="24" readonly></c2-number-input>
+      <c2-number-input aria-label="Without steppers" value="24" hide-steppers></c2-number-input>
+    </main>
+  </body>
+</html>

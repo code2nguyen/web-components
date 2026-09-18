@@ -1,0 +1,99 @@
+---
+title: 'Upload gallery'
+description: 'Drop zones for documents, image collections, compact forms, and branded upload flows.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import UploadExamplesRuntime from '../../components/UploadExamplesRuntime.astro'
+
+import { Upload } from '@c2n/upload'
+
+<UploadExamplesRuntime />
+
+Each example has a simulated upload transport. Choose or drop local files to see attachment progress, cancellation, completion, and image previews.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default,description=Balanced drop zone for a single business document,useWhen=A form expects one PDF or office document,accessibility=Give the uploader a name that describes the expected file
+<c2-upload data-upload-demo accept=".pdf,.doc,.docx" max-size="10485760" aria-label="Upload a document"></c2-upload>
+```
+
+```html tag=MdxCodeBlock,label=Project bundle,description=Multiple-file queue with a clear count and size policy,useWhen=People submit a small set of related files
+<c2-upload data-upload-demo multiple max-files="5" max-size="10485760" aria-label="Upload project files">
+  <span slot="prompt">Drop your project bundle or <strong>choose files</strong></span>
+  <span slot="hint">PDF, images, or source files · 5 files maximum</span>
+</c2-upload>
+```
+
+```html tag=MdxCodeBlock,label=Image collection,description=Image-only selection with previews in attachment rows,useWhen=The workflow accepts visual assets
+<style>
+  .image-upload {
+    --c2-upload__dropzone--background: #f5f3ff;
+    --c2-upload__dropzone--border: 1px dashed #8b5cf6;
+    --c2-upload__dropzone__drag--background: #ede9fe;
+    --c2-upload__dropzone__drag--border: 1px dashed #6d28d9;
+    --c2-upload__icon--color: #7c3aed;
+    --c2-upload__action--color: #7c3aed;
+  }
+</style>
+<c2-upload class="image-upload" data-upload-demo multiple accept="image/*" max-files="8" aria-label="Upload gallery images">
+  <span slot="prompt">Build your gallery</span>
+  <span slot="hint">PNG, JPG, WebP, or AVIF</span>
+</c2-upload>
+```
+
+```html tag=MdxCodeBlock,label=Compact button,description=Button-only picker that reports the remaining file capacity,useWhen=Drag-and-drop would take too much space
+<style>
+  .compact-upload {
+    --c2-upload--width: 360px;
+  }
+</style>
+<c2-upload class="compact-upload" data-upload-demo variant="compact" multiple max-files="4" aria-label="Attach supporting evidence"></c2-upload>
+```
+
+```html tag=MdxCodeBlock,label=Custom compact button,description=Branded compact action with a custom icon and label,useWhen=The upload action belongs in a toolbar or import workflow
+<style>
+  .import-upload {
+    --c2-upload--width: 360px;
+    --c2-button__container--height: 40px;
+    --c2-button__container--padding-left: 14px;
+    --c2-button__container--padding-right: 16px;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--background-color: rgb(2, 101, 220);
+    --c2-button__container--color: #ffffff;
+    --c2-button__container__hover--background-color: rgb(1, 84, 184);
+    --c2-button__container__active--background-color: rgb(1, 70, 154);
+    --c2-upload__icon--color: #ffffff;
+  }
+</style>
+<c2-upload class="import-upload" data-upload-demo variant="compact" accept=".csv" aria-label="Import customer CSV">
+  <svg slot="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 3v12M7 10l5 5 5-5"></path><path d="M5 21h14"></path>
+  </svg>
+  <span slot="action">Import CSV</span>
+</c2-upload>
+```
+
+```html tag=MdxCodeBlock,label=Dark workspace,description=Upload surface adapted to a permanently dark canvas,useWhen=The control lives in a dark editor or media workspace
+<style>
+  .dark-upload {
+    --c2-upload__dropzone--background: #18181b;
+    --c2-upload__dropzone--border: 1px dashed #52525b;
+    --c2-upload__dropzone__hover--background: #27272a;
+    --c2-upload__dropzone__hover--border: 1px dashed #71717a;
+    --c2-upload__dropzone__drag--background: #172554;
+    --c2-upload__dropzone__drag--border: 1px dashed #60a5fa;
+    --c2-upload__prompt--color: #fafafa;
+    --c2-upload__hint--color: #a1a1aa;
+    --c2-upload__icon--color: #60a5fa;
+    --c2-upload__action--color: #93c5fd;
+  }
+</style>
+<c2-upload class="dark-upload" data-upload-demo multiple aria-label="Upload workspace assets">
+  <span slot="prompt">Drop workspace assets</span>
+  <span slot="hint">Files upload securely to this workspace</span>
+</c2-upload>
+```
+
+</GalleryGrid>

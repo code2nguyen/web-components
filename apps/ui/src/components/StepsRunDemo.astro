@@ -1,0 +1,111 @@
+---
+// A trace written in front of you: the only way to see what `c2-steps` does when the data changes, since a static
+// example can only ever show one frame of it. Data-driven, because that is how an application drives one.
+import { Steps } from '@c2n/steps'
+import SiteButton from './ui/SiteButton.astro'
+---
+
+<section class="steps-demo" data-steps-demo>
+  <div class="controls">
+    <SiteButton variant="primary" size="sm" data-steps-run>Run the task</SiteButton>
+    <SiteButton variant="ghost" size="sm" data-steps-reset>Reset</SiteButton>
+    <SiteButton variant="ghost" size="sm" data-steps-collapse>Collapse all</SiteButton>
+    <SiteButton variant="ghost" size="sm" data-steps-expand>Expand all</SiteButton>
+  </div>
+  <Steps client:load class="steps-demo__list" aria-label="Deployment" data-steps-list />
+  <p class="steps-demo__note">
+    Each step is appended the moment the runner reaches it, so you are watching rows arrive rather than a list redraw. A stage takes its status from the steps
+    inside it, and gives one beat when it settles.
+  </p>
+</section>
+
+<script>
+  import type { Steps, StepNode } from '@c2n/steps'
+
+  // Astro islands own the runtime import; this script only drives what they defined.
+  await customElements.whenDefined('c2-steps')
+
+  const PLAN: { stage: string; steps: string[] }[] = [
+    { stage: 'build', steps: ['install dependencies', 'compile', 'bundle'] },
+    { stage: 'test', steps: ['unit', 'integration', 'end to end'] },
+    { stage: 'ship', steps: ['upload artefacts', 'announce'] },
+  ]
+  const FAILS = 'end to end'
+
+  document.querySelectorAll<HTMLElement>('[data-steps-demo]').forEach((demo) => {
+    const list = demo.querySelector<Steps>('[data-steps-list]')!
+    let generation = 0
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    const wait = (ms: number) => new Promise((resolve) => (timer = setTimeout(resolve, ms)))
+    const reset = () => {
+      if (timer) clearTimeout(timer)
+      generation += 1
+      list.steps = []
+    }
+
+    demo.querySelector('[data-steps-reset]')?.addEventListener('click', reset)
+    demo.querySelector('[data-steps-collapse]')?.addEventListener('click', () => list.collapseAll())
+    demo.querySelector('[data-steps-expand]')?.addEventListener('click', () => list.expandAll())
+
+    demo.querySelector('[data-steps-run]')?.addEventListener('click', async () => {
+      reset()
+      const mine = generation
+      for (const { stage, steps } of PLAN) {
+        if (generation !== mine) return
+        // A new top-level node: the stage grows into place, and its status rolls up from the steps to come.
+        list.steps = [...list.steps!, { id: stage, label: stage, children: [] }]
+        const parent = list.steps.at(-1)!
+        for (const label of steps) {
+          parent.children = [...parent.children!, { id: label, label, status: 'running' } satisfies StepNode]
+          list.steps = [...list.steps]
+          await wait(620)
+          if (generation !== mine) return
+          const failed = label === FAILS
+          list.updateStep(label, { status: failed ? 'error' : 'success', trailing: `${((Math.random() * 900 + 120) | 0) / 100} s` })
+          await wait(180)
+          if (failed) return
+        }
+      }
+    })
+
+    reset()
+  })
+</script>
+
+<style lang="scss">
+  .steps-demo {
+    padding: 20px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 12px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .steps-demo__list {
+    --c2-steps--background: var(--site-color-surface-container-low);
+    --c2-steps--border: 1px solid var(--site-color-outline-variant);
+    --c2-steps--border-radius: 8px;
+    --c2-steps--padding-block: 4px;
+    --c2-steps--min-height: 0;
+    --c2-step__row--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-step__row__hover--background: var(--site-color-surface-container);
+    --c2-step__marker--size: 14px;
+    --c2-step__label--font-size: 13px;
+    --c2-step__label--font-weight: 400;
+    --c2-step__label--color: var(--site-color-on-surface);
+    --c2-step__detail--color: var(--site-color-on-surface-variant);
+    --c2-step__trailing--color: var(--site-color-on-surface-variant);
+    --c2-step__toggle--color: var(--site-color-on-surface-variant);
+    // An empty list would collapse to nothing between runs, and the buttons would jump.
+    min-height: 148px;
+  }
+  .steps-demo__note {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--site-color-on-surface-variant);
+  }
+</style>

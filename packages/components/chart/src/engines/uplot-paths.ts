@@ -67,8 +67,8 @@ const SCALE_VALUE = 1 as Series.BarsPathBuilderFacet['unit']
  * Grouping is therefore ours to do: `disp` gives uPlot an explicit left edge and width per bar — in data
  * units, which is what it reads when no `unit` is set — placing each series in its own slot of the band.
  */
-export function barPaths(width: number, gap: number, index: number, count: number): Series.PathBuilder | undefined {
-  const key = `${width}:${gap}:${index}:${count}`
+export function barPaths(width: number, gap: number, index: number, count: number, radius = 0): Series.PathBuilder | undefined {
+  const key = `${width}:${gap}:${index}:${count}:${radius}`
   if (barCache.has(key)) return barCache.get(key)
 
   // Synchronous for the same reason as {@link linePaths}: a bar chart whose builder arrives one microtask
@@ -78,17 +78,21 @@ export function barPaths(width: number, gap: number, index: number, count: numbe
 
   // `size[2]` is uPlot's minimum bar width in pixels, not a gap: one pixel, so a dense chart still paints.
   const size: [number, number, number] = [width, Infinity, 1]
+  // uPlot expresses the corner radius as a share of the bar width. A tuple rounds only the value end,
+  // keeping the baseline square so adjacent positive and negative bars still meet the axis cleanly.
+  const roundedEnd: Series.BarsPathBuilderRadii = [radius, 0]
   const builder =
     count > 1
       ? paths.bars?.({
           size,
+          radius: roundedEnd,
           disp: {
             // `unit: 1` is uPlot's "scale value": the numbers below are x values, not pixels or percentages.
             x0: { unit: SCALE_VALUE, values: (self) => layout(self, width, gap, count).left(index) },
             size: { unit: SCALE_VALUE, values: (self) => [layout(self, width, gap, count).barWidth] },
           },
         })
-      : paths.bars?.({ size })
+      : paths.bars?.({ size, radius: roundedEnd })
 
   barCache.set(key, builder)
   return builder

@@ -1,0 +1,167 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { CodeEditor } from '@c2n/code-editor'
+
+## Presets
+
+Curated looks for `c2-code-editor`. Open any card in the studio to start from it. The frame comes from
+`--c2-code-editor--background`, `--border` and `--border-radius`; the syntax palette from the twelve
+`--c2-code-editor__theme--token-*` variables, which are the same names `c2-code-viewer` uses.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-code-editor
+  language="javascript"
+  line-numbers
+  value="// The default palette, on the default surface.
+export function debounce(fn, wait = 200) {
+  let timer
+  return (...args) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), wait)
+  }
+}"
+></c2-code-editor>
+```
+
+```html tag=MdxCodeBlock,label=Midnight
+<style>
+  .midnight {
+    --c2-code-editor--background: #0d1117;
+    --c2-code-editor--color: #c9d1d9;
+    --c2-code-editor--border: 1px solid #30363d;
+    --c2-code-editor__gutter--color: #6e7681;
+    --c2-code-editor__gutter--border-right: 1px solid #21262d;
+    --c2-code-editor__gutter__active--color: #c9d1d9;
+    --c2-code-editor__active-line--background: rgba(110, 118, 129, 0.1);
+    --c2-code-editor__selection--background: rgba(56, 139, 253, 0.3);
+    --c2-code-editor__cursor--color: #c9d1d9;
+    --c2-code-editor__theme--token-keyword: #ff7b72;
+    --c2-code-editor__theme--token-string: #a5d6ff;
+    --c2-code-editor__theme--token-comment: #8b949e;
+    --c2-code-editor__theme--token-constant: #79c0ff;
+    --c2-code-editor__theme--token-function: #d2a8ff;
+    --c2-code-editor__theme--token-variable: #c9d1d9;
+    --c2-code-editor__theme--token-punctuation: #c9d1d9;
+  }
+</style>
+<c2-code-editor
+  class="midnight"
+  language="javascript"
+  line-numbers
+  value="// Dark is a different set of variable values — no JavaScript theme.
+const palette = {
+  keyword: '#ff7b72',
+  string: '#a5d6ff',
+  comment: '#8b949e',
+}
+export default palette"
+></c2-code-editor>
+```
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .terminal {
+    --c2-code-editor--background: #10100e;
+    --c2-code-editor--color: #d8d8c0;
+    --c2-code-editor--border: 1px solid #2c2c26;
+    --c2-code-editor--border-radius: 4px;
+    --c2-code-editor--font-size: 12px;
+    --c2-code-editor__gutter--color: #55554a;
+    --c2-code-editor__gutter--border-right: 1px solid #2c2c26;
+    --c2-code-editor__gutter__active--color: #d8d8c0;
+    --c2-code-editor__cursor--color: #8fc46b;
+    --c2-code-editor__active-line--background: rgba(143, 196, 107, 0.07);
+    --c2-code-editor__theme--token-keyword: #8fc46b;
+    --c2-code-editor__theme--token-string: #e6c384;
+    --c2-code-editor__theme--token-comment: #6a6a5a;
+    --c2-code-editor__theme--token-constant: #7fb4ca;
+    --c2-code-editor__theme--token-function: #e6c384;
+    --c2-code-editor__theme--token-variable: #d8d8c0;
+    --c2-code-editor__theme--token-punctuation: #938f79;
+  }
+</style>
+<c2-code-editor
+  class="terminal"
+  language="javascript"
+  line-numbers
+  value="const log = (msg) => process.stdout.write(`${msg}\n`)
+
+// Green on near-black, the way a terminal reads.
+for (const step of ['build', 'test', 'deploy']) {
+  log(`→ ${step}`)
+}"
+></c2-code-editor>
+```
+
+```html tag=MdxCodeBlock,label=Borderless
+<style>
+  .borderless {
+    --c2-code-editor--border: 1px solid transparent;
+    --c2-code-editor--background: #f8f8f8;
+    --c2-code-editor--border-radius: 10px;
+    --c2-code-editor--min-height: 96px;
+    --c2-code-editor__active-line--background: transparent;
+  }
+</style>
+<c2-code-editor
+  class="borderless"
+  language="css"
+  value=".card {
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgb(24 24 27 / 8%);
+}"
+></c2-code-editor>
+```
+
+```html tag=MdxCodeBlock,label=Dense
+<style>
+  .dense {
+    --c2-code-editor--font-size: 11px;
+    --c2-code-editor--line-height: 1.4;
+    --c2-code-editor--min-height: 84px;
+    --c2-code-editor--padding-block: 6px;
+    --c2-code-editor--padding-inline: 8px;
+    --c2-code-editor--border-radius: 4px;
+    --c2-code-editor__gutter--min-width: 24px;
+  }
+</style>
+<c2-code-editor
+  class="dense"
+  language="json"
+  line-numbers
+  value='{
+  "name": "@c2n/code-editor",
+  "engine": "codemirror",
+  "dense": true,
+  "rows": 24
+}'
+></c2-code-editor>
+```
+
+```html tag=MdxCodeBlock,label=Accented frame
+<style>
+  .accented {
+    --c2-code-editor--border: 1px solid #0265dc;
+    --c2-code-editor--border-radius: 8px;
+    --c2-code-editor--box-shadow: 0 0 0 4px rgba(2, 101, 220, 0.08);
+    --c2-code-editor__gutter--background: rgba(2, 101, 220, 0.04);
+    --c2-code-editor__gutter--border-right: 1px solid rgba(2, 101, 220, 0.16);
+  }
+</style>
+<c2-code-editor
+  class="accented"
+  language="html"
+  line-numbers
+  value="&lt;form&gt;
+  &lt;c2-text-field name=&quot;title&quot; label=&quot;Title&quot;&gt;&lt;/c2-text-field&gt;
+  &lt;c2-button type=&quot;submit&quot;&gt;Save&lt;/c2-button&gt;
+&lt;/form&gt;"
+></c2-code-editor>
+```
+
+</GalleryGrid>

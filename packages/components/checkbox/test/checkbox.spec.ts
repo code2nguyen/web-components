@@ -43,3 +43,21 @@ test('submits only while checked and resets to its authored state', async ({ pag
   await page.locator('form').evaluate((form) => (form as HTMLFormElement).reset())
   await expect(host).toHaveJSProperty('checked', true)
 })
+
+test('a programmatic checked change still lands after the user has clicked the box', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="Accept"></c2-checkbox>')
+  const host = page.locator('c2-checkbox')
+  const input = page.getByRole('checkbox')
+
+  // The click sets the inner input's dirty-checkedness flag, after which the `checked` content attribute no
+  // longer moves it. Staying in sync then rests entirely on the imperative `formElement.checked` write in
+  // `willUpdate`, which every consumer that drives selection from script depends on.
+  await pointerClick(input)
+  await expect(input).toBeChecked()
+
+  await props(host, { checked: false })
+  await expect(input).not.toBeChecked()
+
+  await props(host, { checked: true })
+  await expect(input).toBeChecked()
+})

@@ -1,0 +1,255 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { Dashboard } from '@c2n/dashboard'
+
+<ExampleModules />
+
+## Presets
+
+Curated looks for `c2-dashboard`. Open any card in the studio to start from it. Almost all the work is done by four
+variables: `--c2-dashboard--background` with `--c2-dashboard--padding` turns the gutters into a frame,
+`--c2-dash-card--background` and `--c2-dash-card--border` give a pane its surface, and
+`--c2-dash-card__handle__hover--background` is the only colour the user sees while dragging. Drag any shared edge.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Trading desk
+<style>
+  .desk {
+    height: 460px;
+    --c2-dashboard--gap: 10px;
+    --c2-dashboard--padding: 10px;
+    --c2-dashboard--background: #f1f2f4;
+    --c2-dashboard--border-radius: 14px;
+    --c2-dash-card--background: #ffffff;
+    --c2-dash-card--border: 1px solid #e4e4e7;
+    --c2-dash-card--border-radius: 10px;
+    --c2-dash-card__expanded--background: #ffffff;
+    --c2-dash-card__header--min-height: 40px;
+    --c2-dash-card__header--font-size: 13px;
+    --c2-dash-card__header--border-bottom: 1px solid #e4e4e7;
+    --c2-dash-card__footer--border-top: 1px solid #e4e4e7;
+  }
+
+  /* `body` is a part, so the pane's content area can be made to stretch whatever is inside it. */
+  .desk c2-dash-card::part(body) {
+    display: grid;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .desk c2-line-chart {
+    --c2-chart--height: 100%;
+    --c2-chart--padding: 8px;
+    --c2-chart--background: transparent;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+  }
+
+  .desk c2-table {
+    width: 100%;
+    height: 100%;
+    --c2-table--border-top: none;
+    --c2-table--border-right: none;
+    --c2-table--border-bottom: none;
+    --c2-table--border-left: none;
+    --c2-table--font-size: 12px;
+  }
+
+  .desk c2-list {
+    height: 100%;
+    overflow: auto;
+    --c2-list--border-top: none;
+    --c2-list--border-right: none;
+    --c2-list--border-bottom: none;
+    --c2-list--border-left: none;
+    --c2-list--padding-top: 6px;
+    --c2-list--padding-bottom: 6px;
+  }
+
+  .desk-quote {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .desk-up {
+    color: #16a34a;
+  }
+
+  .desk-down {
+    color: #dc2626;
+  }
+</style>
+<c2-dashboard client:only="lit" class="desk" columns="260px 1fr" rows="1fr 1fr" storage-key="c2n-demo-desk">
+  <c2-dash-card col="1" row="1" row-span="2" min-width="200" card-id="watchlist" expand-full>
+    <span slot="header">Watchlist</span>
+    <c2-badge slot="actions" tone="success">Live</c2-badge>
+    <c2-list value="aapl">
+      <c2-list-item value="aapl"><span class="desk-quote">AAPL <span class="desk-up">+1.24%</span></span></c2-list-item>
+      <c2-list-item value="msft"><span class="desk-quote">MSFT <span class="desk-up">+0.62%</span></span></c2-list-item>
+      <c2-list-item value="nvda"><span class="desk-quote">NVDA <span class="desk-down">−2.08%</span></span></c2-list-item>
+      <c2-list-item value="amzn"><span class="desk-quote">AMZN <span class="desk-up">+0.41%</span></span></c2-list-item>
+      <c2-list-item value="tsla"><span class="desk-quote">TSLA <span class="desk-down">−1.13%</span></span></c2-list-item>
+    </c2-list>
+    <span slot="footer">5 instruments</span>
+  </c2-dash-card>
+
+  <c2-dash-card col="2" row="1" min-height="120" card-id="price" expand-full>
+    <span slot="header">AAPL · quarterly revenue</span>
+    <c2-icon-button slot="actions" aria-label="Refresh">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+    </c2-icon-button>
+    <c2-line-chart
+      x-field="date"
+      x-type="time"
+      curve="smooth"
+      points="none"
+      legend="none"
+      data='[{"date":"2023-12-30","revenue":119.575},{"date":"2024-03-30","revenue":90.753},{"date":"2024-06-29","revenue":85.777},{"date":"2024-09-28","revenue":94.93},{"date":"2024-12-28","revenue":124.3},{"date":"2025-03-29","revenue":95.359},{"date":"2025-06-28","revenue":94.036},{"date":"2025-09-27","revenue":102.466}]'
+    >
+      <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+    </c2-line-chart>
+    <span slot="footer">USD billions · FY2024–25</span>
+  </c2-dash-card>
+
+  <c2-dash-card col="2" row="2" card-id="orders" expand-full>
+    <span slot="header">Working orders</span>
+    <c2-icon-button slot="controls" aria-label="Order settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+    </c2-icon-button>
+    <c2-table row-key="id" rows='[{"id":"1","symbol":"AAPL","side":"Buy","qty":1200,"limit":214.5,"status":"Working"},{"id":"2","symbol":"NVDA","side":"Sell","qty":400,"limit":118.2,"status":"Working"},{"id":"3","symbol":"MSFT","side":"Buy","qty":250,"limit":402.1,"status":"Partial"},{"id":"4","symbol":"TSLA","side":"Sell","qty":900,"limit":241,"status":"Working"},{"id":"5","symbol":"AMZN","side":"Buy","qty":150,"limit":186.75,"status":"Queued"}]'>
+      <c2-table-column field="symbol" header="Symbol" width="100px"></c2-table-column>
+      <c2-table-column field="side" header="Side" width="80px"></c2-table-column>
+      <c2-table-column field="qty" header="Qty" width="1fr" align="end" format="number"></c2-table-column>
+      <c2-table-column field="limit" header="Limit" width="1fr" align="end" format="number"></c2-table-column>
+      <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+    </c2-table>
+    <span slot="footer">5 orders · updated 14:32</span>
+  </c2-dash-card>
+</c2-dashboard>
+```
+
+A real one: a `c2-list`, a `c2-line-chart` and a `c2-table`, one per pane. Each header carries its own controls —
+a `c2-badge` and a `c2-icon-button` in `actions`, another `c2-icon-button` in `controls` so it sits next to the
+built-in fullscreen button — and a `footer` under the content. `storage-key` keeps the sizes you drag.
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .bare {
+    height: 220px;
+    padding: 10px;
+    background: #f4f4f5;
+    border-radius: 12px;
+  }
+
+  .bare-pane {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    font-size: 13px;
+    color: #71717a;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+  }
+</style>
+<c2-dashboard client:only="lit" class="bare" columns="2" rows="1">
+  <c2-dash-card col="1" row="1"><div class="bare-pane">Pane one</div></c2-dash-card>
+  <c2-dash-card col="2" row="1"><div class="bare-pane">Pane two</div></c2-dash-card>
+</c2-dashboard>
+```
+
+A pane is bare on purpose: nothing above sets a single `--c2-*` variable, and every surface you see belongs to the
+markup inside the panes. The cards below move that surface onto the component itself.
+
+```html tag=MdxCodeBlock,label=Seamless
+<style>
+  .seamless {
+    height: 220px;
+    --c2-dashboard--gap: 1px;
+    --c2-dashboard--padding: 1px;
+    --c2-dashboard--background: #d4d4d8;
+    --c2-dashboard--border-radius: 10px;
+    --c2-dash-card--background: #ffffff;
+    --c2-dash-card__expanded--background: #ffffff;
+    --c2-dash-card__header--color: #52525b;
+    --c2-dash-card__header--font-size: 13px;
+    --c2-dash-card__header--min-height: 34px;
+    --c2-dash-card__handle--size: 9px;
+    --c2-dash-card__handle__hover--background: #0265dc;
+  }
+</style>
+<c2-dashboard client:only="lit" class="seamless" columns="1fr 1fr 1fr" rows="1">
+  <c2-dash-card col="1" row="1"><span slot="header">Markets</span></c2-dash-card>
+  <c2-dash-card col="2" row="1"><span slot="header">Positions</span></c2-dash-card>
+  <c2-dash-card col="3" row="1"><span slot="header">Activity</span></c2-dash-card>
+</c2-dashboard>
+```
+
+```html tag=MdxCodeBlock,label=Terminal
+<style>
+  .terminal {
+    height: 220px;
+    --c2-dashboard--gap: 6px;
+    --c2-dashboard--padding: 6px;
+    --c2-dashboard--background: #09090b;
+    --c2-dashboard--border-radius: 6px;
+    --c2-dash-card--background: #18181b;
+    --c2-dash-card--border: 1px solid #27272a;
+    --c2-dash-card--border-radius: 4px;
+    --c2-dash-card__expanded--background: #18181b;
+    --c2-dash-card__header--color: #a1a1aa;
+    --c2-dash-card__header--font-size: 12px;
+    --c2-dash-card__header--min-height: 28px;
+    --c2-dash-card__header--border-bottom: 1px solid #27272a;
+    --c2-dash-card__control--color: #71717a;
+    --c2-dash-card__control__hover--background: #27272a;
+    --c2-dash-card__control__hover--color: #fafafa;
+    --c2-dash-card__handle__hover--background: #22c55e;
+    --c2-dash-card__handle__active--background: #4ade80;
+  }
+</style>
+<c2-dashboard client:only="lit" class="terminal" columns="1fr 2fr" rows="1fr 1fr">
+  <c2-dash-card col="1" row="1" row-span="2" expand-full>
+    <span slot="header">processes</span>
+  </c2-dash-card>
+  <c2-dash-card col="2" row="1" expand-full>
+    <span slot="header">output</span>
+  </c2-dash-card>
+  <c2-dash-card col="2" row="2">
+    <span slot="header">logs</span>
+  </c2-dash-card>
+</c2-dashboard>
+```
+
+```html tag=MdxCodeBlock,label=Soft
+<style>
+  .soft {
+    height: 220px;
+    --c2-dashboard--gap: 14px;
+    --c2-dashboard--padding: 14px;
+    --c2-dashboard--background: #f1f2f4;
+    --c2-dashboard--border-radius: 18px;
+    --c2-dash-card--background: #ffffff;
+    --c2-dash-card--border-radius: 14px;
+    --c2-dash-card--box-shadow: 0 1px 2px rgba(9, 9, 11, 0.06), 0 8px 24px rgba(9, 9, 11, 0.08);
+    --c2-dash-card__expanded--background: #ffffff;
+    --c2-dash-card__header--font-weight: 500;
+    --c2-dash-card__handle__hover--background: rgba(9, 9, 11, 0.18);
+    --c2-dash-card__handle__active--background: rgba(9, 9, 11, 0.38);
+  }
+</style>
+<c2-dashboard client:only="lit" class="soft" columns="1fr 1fr" rows="1">
+  <c2-dash-card col="1" row="1" expand-full><span slot="header">Revenue</span></c2-dash-card>
+  <c2-dash-card col="2" row="1" expand-full><span slot="header">Churn</span></c2-dash-card>
+</c2-dashboard>
+```
+
+</GalleryGrid>

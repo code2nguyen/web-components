@@ -39,6 +39,8 @@ export interface Tabs {
  *
  * @tag c2-tabs
  *
+ * @slotcomponent c2-tab
+ *
  * @slot tab - The `<c2-tab>` elements (assigned automatically).
  * @slot tab-content - The panel of the selected tab (assigned automatically from the child whose `id` matches `selected-tab`).
  *

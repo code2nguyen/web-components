@@ -4,11 +4,48 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  dashboard: `<c2-dashboard columns="1fr 1fr" rows="1fr 1fr" style="width:260px;height:150px;--c2-dashboard--gap:6px;--c2-dashboard--padding:6px;--c2-dashboard--background:var(--c2-theme--color-surface-container);--c2-dashboard--border-radius:10px;--c2-dash-card--background:var(--c2-theme--color-surface);--c2-dash-card--border:var(--c2-theme--border);--c2-dash-card--border-radius:6px;--c2-dash-card__header--font-size:11px;--c2-dash-card__header--min-height:0;--c2-dash-card__header--padding-block:6px;--c2-dash-card__header--padding-inline:8px">
+  <c2-dash-card col="1" row="1" row-span="2"><span slot="header">Watchlist</span></c2-dash-card>
+  <c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card>
+  <c2-dash-card col="2" row="2"><span slot="header">Orders</span></c2-dash-card>
+</c2-dashboard>`,
+  steps: `<c2-steps style="width:300px;--c2-steps--background:#faf9f5;--c2-steps--border:1px solid #e8e6dd;--c2-steps--border-radius:8px;--c2-steps--padding-block:2px;--c2-step__row--border-bottom:1px solid #ecebe3;--c2-step__marker--size:12px;--c2-step__row--padding-block:5px;--c2-step__label--font-size:12px;--c2-step__label--font-weight:400;--c2-step__success--color:#3f3f46" aria-label="Run trace">
+  <c2-step status="success" label="build" trailing="24 s"></c2-step>
+  <c2-step label="test">
+    <c2-step status="success" label="unit" trailing="8 s"></c2-step>
+    <c2-step status="running" label="e2e"></c2-step>
+  </c2-step>
+  <c2-step status="pending" label="ship"></c2-step>
+</c2-steps>`,
+  'code-editor': `<c2-code-editor style="width:300px;--c2-code-editor--min-height:132px;--c2-code-editor--font-size:12px" language="javascript" line-numbers aria-label="Example editor" value="const greet = (name) =>
+  \`hello \${name}\`
+
+// editable, highlighted
+greet('world')"></c2-code-editor>`,
+  'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid #bcbcc6;--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:#f4f4f5"></c2-theme-select></div>`,
+  tree: `<c2-tree style="width:200px" aria-label="Files" expanded-items="src" value="app">
+  <c2-tree-item value="src" label="src">
+    <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+    <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+  </c2-tree-item>
+  <c2-tree-item value="readme" label="README.md"></c2-tree-item>
+</c2-tree>`,
+  'border-beam': `<div style="position:relative;box-sizing:border-box;width:270px;overflow:hidden;padding:20px;border:1px solid #e4e4e7;border-radius:12px;background:#fff"><strong style="display:block;margin-bottom:7px;font-size:14px">Workspace overview</strong><span style="color:#71717a;font-size:12px;line-height:1.45">Review task status and deployment health.</span><c2-border-beam></c2-border-beam></div>`,
+  'status-panel': `<c2-status-panel status="success" heading="Workspace ready" description="Everything is set up and ready to use." style="--c2-status-panel__container--min-height:170px;--c2-status-panel__container--padding:20px;--c2-status-panel__container--gap:14px;--c2-status-panel__media--size:48px;--c2-status-panel__media-icon--size:24px;--c2-status-panel__title--font-size:16px;--c2-status-panel__title--line-height:22px"></c2-status-panel>`,
+  'qr-code': `<c2-qr-code value="https://github.com/code2nguyen/web-components" size="132" aria-label="Project QR code"></c2-qr-code>`,
+  upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,
+  rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
+  cascader: `<c2-cascader aria-label="Choose a location" placeholder="Choose a district" options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing"}]}]'></c2-cascader>`,
+  questionnaire: `<c2-questionnaire questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","options":[{"value":"timeline","label":"Tool call timeline"},{"value":"approvals","label":"Approval checkpoints"},{"value":"handoffs","label":"Sub-agent handoffs"}]},{"id":"updates","title":"What should every progress update include?","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"}]},{"id":"timing","title":"When should work begin?","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"}]}]'></c2-questionnaire>`,
+  'number-input': `<c2-number-input value="4" min="0" max="12" aria-label="Quantity" style="width:190px"><span slot="suffix">items</span></c2-number-input>`,
+  'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
+  'date-selector': `<c2-date-selector months="1" from="2026-09-10" to="2026-09-15" locale="en-US" style="--c2-date-selector__day--size:30px;--c2-date-selector--padding:10px;--c2-date-selector--box-shadow:none"></c2-date-selector>`,
   'line-chart': `<c2-line-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="month" data='[{"month":1,"revenue":128,"cost":74},{"month":2,"revenue":141,"cost":79},{"month":3,"revenue":132,"cost":81},{"month":4,"revenue":167,"cost":88},{"month":5,"revenue":183,"cost":92},{"month":6,"revenue":204,"cost":97}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series><c2-chart-series field="cost" label="Cost"></c2-chart-series></c2-line-chart>`,
   'area-chart': `<c2-area-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="t" curve="smooth" fill-opacity="0.22" legend="none" data='[{"t":1,"sessions":420},{"t":2,"sessions":510},{"t":3,"sessions":486},{"t":4,"sessions":623},{"t":5,"sessions":712},{"t":6,"sessions":690},{"t":7,"sessions":804}]'><c2-chart-series field="sessions" label="Sessions"></c2-chart-series></c2-area-chart>`,
   'bar-chart': `<c2-bar-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="team" x-type="category" legend="none" data='[{"team":"Core","shipped":18},{"team":"Web","shipped":24},{"team":"Infra","shipped":11},{"team":"Data","shipped":16}]'><c2-chart-series field="shipped" label="Shipped"></c2-chart-series></c2-bar-chart>`,
   'pie-chart': `<c2-pie-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="channel" inner-radius="0.58" legend="none" data='[{"channel":"Direct","revenue":4200},{"channel":"Search","revenue":3100},{"channel":"Social","revenue":1800},{"channel":"Email","revenue":900}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-pie-chart>`,
   'gauge-chart': `<c2-gauge-chart style="width:280px;height:132px;--c2-chart--padding:4px" min="0" max="40" precision="1" value-suffix="%" pointer="none" legend="none" label-field="metric" data='[{"metric":"Services mix","value":26.23}]'><c2-chart-series field="value" label="Services mix"></c2-chart-series></c2-gauge-chart>`,
+  'radar-chart': `<c2-radar-chart style="width:280px;height:132px;--c2-chart--padding:4px" label-field="metric" max="100" points="none" data='[{"metric":"Quality","current":82,"target":90},{"metric":"Speed","current":74,"target":85},{"metric":"Reliability","current":91,"target":88},{"metric":"Efficiency","current":68,"target":80},{"metric":"Coverage","current":77,"target":84}]'><c2-chart-series field="current" label="Current"></c2-chart-series><c2-chart-series field="target" label="Target"></c2-chart-series></c2-radar-chart>`,
   'scatter-chart': `<c2-scatter-chart style="width:280px;height:132px;--c2-chart--padding:8px" x-field="rd" legend="none" symbol-size="9" data='[{"rd":21.9,"revenue":365.8},{"rd":26.3,"revenue":394.3},{"rd":29.9,"revenue":383.3},{"rd":31.4,"revenue":391},{"rd":34.6,"revenue":416.2}]'><c2-chart-series field="revenue" label="Revenue"></c2-chart-series></c2-scatter-chart>`,
   'candlestick-chart': `<c2-candlestick-chart style="width:280px;height:132px;--c2-chart--padding:8px" label-field="date" legend="none" data='[{"date":"M","open":248.3,"close":256.1,"low":248.1,"high":256.6},{"date":"T","open":255.9,"close":254.4,"low":253.6,"high":257.3},{"date":"W","open":255.2,"close":252.3,"low":251,"high":255.7},{"date":"T","open":253.2,"close":256.9,"low":252.4,"high":257.2},{"date":"F","open":254.1,"close":255.5,"low":253.1,"high":257.6}]'></c2-candlestick-chart>`,
   sparkline: `<div class="preview-row"><c2-sparkline style="--c2-chart--width:120px" data="[12, 19, 14, 22, 18, 27, 31]" tone="auto"></c2-sparkline><c2-sparkline style="--c2-chart--width:120px" data="[9, 7, 8, 5, 6, 4, 2]" tone="auto" type="area"></c2-sparkline></div>`,
@@ -28,12 +65,14 @@ export const componentPreviews: Record<string, string> = {
   <c2-details label="Shipping" expanded>Delivered in 3–5 business days.</c2-details>
   <c2-details label="Returns">Return within 30 days.</c2-details>
 </c2-accordion>`,
-  avatar: `<div class="preview-row">
+  avatar: `<c2-avatar-group aria-label="Project contributors" style="--c2-avatar-group--max-width:150px">
   <c2-avatar name="Nguyen Thai Vinh" status="online"></c2-avatar>
   <c2-avatar auto-color name="Elisa Jasmin" initial-count="2"></c2-avatar>
   <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
   <c2-avatar name="Grace Hopper" src="/web-components/chat.avif"></c2-avatar>
-</div>`,
+  <c2-avatar auto-color name="Katherine Johnson" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Margaret Hamilton" initial-count="2"></c2-avatar>
+</c2-avatar-group>`,
   badge: `<div class="preview-row">
   <c2-badge tone="success">Active</c2-badge>
   <c2-badge tone="warning">Pending</c2-badge>
@@ -50,7 +89,7 @@ export const componentPreviews: Record<string, string> = {
   <c2-button running>Saving…</c2-button>
 </div>`,
   'button-group': `<div style="display:grid;gap:12px;justify-items:start">
-  <c2-button-group selection="single" value="week" style="--c2-button-group--border: 1px solid #d4d4d8; --c2-button-group__divider--color: #d4d4d8; --c2-button__container--background-color: transparent; --c2-button__container--color: #3f3f46; --c2-button__container__hover--background-color: #f4f4f5; --c2-button__container__selected--background-color: #edf1fe; --c2-button__container__selected--color: #0265dc">
+  <c2-button-group appearance="segmented" value="week">
     <c2-button value="day">Day</c2-button><c2-button value="week">Week</c2-button><c2-button value="month">Month</c2-button>
   </c2-button-group>
   <c2-button-group><c2-button>Save</c2-button><c2-button>Publish</c2-button></c2-button-group>

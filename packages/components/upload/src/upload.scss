@@ -1,0 +1,158 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-upload,
+  $theme: (
+    width: 420px,
+    dropzone--padding: 28px 20px,
+    dropzone--gap: 8px,
+    dropzone--background: #ffffff,
+    dropzone--border: 1px dashed #bcbcc6,
+    dropzone--border-radius: 14px,
+    dropzone__hover--background: #fafafa,
+    dropzone__hover--border: 1px dashed #a1a1aa,
+    dropzone__drag--background: #e8f2ff,
+    dropzone__drag--border: 1px dashed rgb(2, 101, 220),
+    dropzone__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    dropzone__focus--outline-offset: 2px,
+    dropzone__disabled--opacity: variables.$disabled-content-opacity,
+    icon--size: 32px,
+    icon--color: rgb(2, 101, 220),
+    prompt--color: #18181b,
+    prompt--font-size: 14px,
+    prompt--font-weight: 600,
+    action--color: rgb(2, 101, 220),
+    hint--color: #71717a,
+    hint--font-size: 12px,
+    list--gap: 10px,
+    list--margin-top: 12px,
+    error--color: #dc2626,
+    error--font-size: 12px,
+    error--gap: 4px,
+  )
+);
+
+:host {
+  display: block;
+  width: min(100%, css.cssVar(width));
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.dropzone {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  padding: css.cssVar(dropzone--padding);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: css.cssVar(dropzone--gap);
+  border: css.cssVar(dropzone--border);
+  border-radius: css.cssVar(dropzone--border-radius);
+  background: css.cssVar(dropzone--background);
+  text-align: center;
+  cursor: pointer;
+  transition: animation.standard(background), animation.standard(border);
+
+  &:hover:not([aria-disabled='true']) {
+    border: css.cssVar(dropzone__hover--border);
+    background: css.cssVar(dropzone__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(dropzone__focus--outline);
+    outline-offset: css.cssVar(dropzone__focus--outline-offset);
+  }
+
+  &[aria-disabled='true'] {
+    cursor: default;
+    opacity: css.cssVar(dropzone__disabled--opacity);
+  }
+}
+
+.dropzone--dragging,
+.dropzone--dragging:hover {
+  border: css.cssVar(dropzone__drag--border);
+  background: css.cssVar(dropzone__drag--background);
+}
+
+input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.upload-icon,
+::slotted([slot='drop-icon']) {
+  display: block;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-phosphor-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+.compact-button {
+  vertical-align: top;
+}
+
+.compact-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  .upload-icon,
+  ::slotted([slot='drop-icon']) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.prompt {
+  color: css.cssVar(prompt--color);
+  font-size: css.cssVar(prompt--font-size);
+  font-weight: css.cssVar(prompt--font-weight);
+  line-height: 1.4;
+}
+
+.action {
+  color: css.cssVar(action--color);
+}
+
+.hint {
+  color: css.cssVar(hint--color);
+  font-size: css.cssVar(hint--font-size);
+  line-height: 1.4;
+}
+
+.list {
+  display: grid;
+  gap: css.cssVar(list--gap);
+  margin-top: css.cssVar(list--margin-top);
+}
+
+.list--standalone {
+  margin-top: 0;
+}
+
+.errors {
+  display: grid;
+  gap: css.cssVar(error--gap);
+  margin-top: css.cssVar(list--margin-top);
+  color: css.cssVar(error--color);
+  font-size: css.cssVar(error--font-size);
+  line-height: 1.4;
+}

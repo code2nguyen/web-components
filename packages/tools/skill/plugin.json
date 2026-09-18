@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "c2n",
   "description": "Build UI with the c2n web components (c2-* Lit elements from @c2n/*): theme once with @c2n/theme, use the tags directly, turn repeated looks into variant components. Bundles the @c2n/mcp server.",
-  "version": "0.0.7",
+  "version": "0.0.12",
   "author": {
     "name": "code2nguyen"
   },

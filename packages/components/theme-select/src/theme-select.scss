@@ -1,0 +1,251 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-theme-select,
+  $theme: (
+    trigger--size: 32px,
+    trigger--padding-inline: 8px,
+    trigger--gap: 8px,
+    trigger--border-radius: 8px,
+    trigger--border: 1px solid transparent,
+    trigger--background: transparent,
+    trigger--color: #18181b,
+    trigger__hover--background: #f4f4f5,
+    trigger__hover--color: null,
+    trigger__active--background: #e4e4e7,
+    trigger__open--background: null,
+    trigger__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    trigger__focus--outline-offset: 2px,
+    trigger__disabled--opacity: variables.$disabled-content-opacity,
+
+    icon--size: 16px,
+    label--font-size: 14px,
+    label--font-weight: 500,
+
+    menu--background: #ffffff,
+    menu--border: 1px solid #e4e4e7,
+    menu--border-radius: 8px,
+    menu--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    menu--padding: 4px,
+    menu--min-width: 148px,
+    menu--gap: 2px,
+    menu--offset: 6px,
+
+    menu-item--gap: 8px,
+    menu-item--padding-block: 6px,
+    menu-item--padding-inline: 8px,
+    menu-item--border-radius: 6px,
+    menu-item--color: #18181b,
+    menu-item--font-size: 14px,
+    menu-item--font-weight: 500,
+    menu-item__hover--background: #f4f4f5,
+    menu-item__selected--color: rgb(2, 101, 220),
+    menu-item__selected--background: null,
+
+    check--size: 14px,
+    check--color: null,
+
+    transition-duration: 150ms,
+  )
+);
+
+$_duration: css.cssVar(transition-duration);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-theme-select {
+  display: inline-flex;
+}
+
+.c2-theme-select__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  gap: css.cssVar(trigger--gap);
+  min-width: css.cssVar(trigger--size);
+  height: css.cssVar(trigger--size);
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: css.cssVar(trigger--color);
+  background: css.cssVar(trigger--background);
+  border: css.cssVar(trigger--border);
+  border-radius: css.cssVar(trigger--border-radius);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    background-color $_duration animation.$standard-easing,
+    color $_duration animation.$standard-easing;
+
+  &:hover:enabled {
+    background: css.cssVar(trigger__hover--background);
+    color: css.cssVar(trigger__hover--color, trigger--color);
+  }
+
+  &:active:enabled {
+    background: css.cssVar(trigger__active--background, trigger__hover--background);
+  }
+
+  &.is-open:enabled {
+    background: css.cssVar(trigger__open--background, trigger__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(trigger__focus--outline);
+    outline-offset: css.cssVar(trigger__focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(trigger__disabled--opacity);
+  }
+}
+
+// The label turns the square trigger into a pill, so the side padding only applies then.
+:host([show-label]) .c2-theme-select__trigger {
+  padding-inline: css.cssVar(trigger--padding-inline);
+}
+
+.c2-theme-select__label {
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+// Shared by the trigger and every menu row.
+.c2-theme-select__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  line-height: 0;
+  // Icons handed in through the slots size themselves from these, like everywhere else in the library.
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  ::slotted(*) {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+  }
+}
+
+// `c2-overlay` owns position and the open/close animation. Its own box stays untouched — the popover's UA
+// `display: none` lives there, and styling it from here would keep the closed menu on the page.
+.c2-theme-select__overlay {
+  --c2-overlay--offset-y: #{css.cssVar(menu--offset)};
+}
+
+// The surface is ours, one level in.
+.c2-theme-select__menu {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(menu--gap);
+  box-sizing: border-box;
+  min-width: css.cssVar(menu--min-width);
+  padding: css.cssVar(menu--padding);
+  background: css.cssVar(menu--background);
+  border: css.cssVar(menu--border);
+  border-radius: css.cssVar(menu--border-radius);
+  box-shadow: css.cssVar(menu--box-shadow);
+}
+
+.c2-theme-select__item {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  gap: css.cssVar(menu-item--gap);
+  padding: css.cssVar(menu-item--padding-block) css.cssVar(menu-item--padding-inline);
+  margin: 0;
+  font-family: inherit;
+  font-size: css.cssVar(menu-item--font-size);
+  font-weight: css.cssVar(menu-item--font-weight);
+  line-height: 1.4;
+  text-align: start;
+  color: css.cssVar(menu-item--color);
+  background: transparent;
+  border: none;
+  border-radius: css.cssVar(menu-item--border-radius);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background-color $_duration animation.$standard-easing;
+
+  &:hover,
+  &:focus-visible {
+    background: css.cssVar(menu-item__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(trigger__focus--outline);
+    outline-offset: -2px;
+  }
+
+  &.is-selected {
+    color: css.cssVar(menu-item__selected--color);
+    // No default: the declaration drops out and the row keeps the surface behind it.
+    background: css.cssVar(menu-item__selected--background);
+  }
+
+  &.is-selected:hover,
+  &.is-selected:focus-visible {
+    background: css.cssVar(menu-item__selected--background, menu-item__hover--background);
+  }
+}
+
+// Where the per-mode icon slots live. Never shown: the visible icons are clones of what is assigned here.
+.c2-theme-select__icon-source {
+  display: none;
+}
+
+.c2-theme-select__item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+// Always laid out, filled only on the selected row, so the rows do not shift.
+.c2-theme-select__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: css.cssVar(check--size);
+  height: css.cssVar(check--size);
+  line-height: 0;
+  color: css.cssVar(check--color, menu-item__selected--color);
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  ::slotted(*) {
+    width: css.cssVar(check--size);
+    height: css.cssVar(check--size);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-theme-select__trigger,
+  .c2-theme-select__item {
+    transition: none;
+  }
+}

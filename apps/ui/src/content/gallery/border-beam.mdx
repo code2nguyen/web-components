@@ -1,0 +1,174 @@
+---
+description: 'Moving border treatments for focused cards, premium surfaces, live states and subtle callouts.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { BorderBeam } from '@c2n/border-beam'
+
+## Presets
+
+The container supplies the surface and resting border; `c2-border-beam` supplies the moving accent. Keep the element as a direct child so it can inherit the same radius.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .beam-panel-default {
+    position: relative;
+    box-sizing: border-box;
+    width: min(100%, 380px);
+    overflow: hidden;
+    padding: 24px;
+    border: 1px solid #e4e4e7;
+    border-radius: 12px;
+    background: #ffffff;
+  }
+  .beam-panel-default strong {
+    display: block;
+    margin-bottom: 8px;
+  }
+  .beam-panel-default p {
+    margin: 0;
+    color: #71717a;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+</style>
+<div class="beam-panel-default">
+  <strong>Workspace overview</strong>
+  <p>Review tasks, deployment health, and recent automation activity.</p>
+  <c2-border-beam></c2-border-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Electric violet
+<style>
+  .beam-panel-violet {
+    position: relative;
+    box-sizing: border-box;
+    width: min(100%, 380px);
+    overflow: hidden;
+    padding: 24px;
+    border: 1px solid #2e1065;
+    border-radius: 16px;
+    color: #faf5ff;
+    background: linear-gradient(145deg, #1e1235, #0f0b18);
+  }
+  .beam-panel-violet p {
+    margin: 8px 0 0;
+    color: #c4b5fd;
+    font-size: 14px;
+  }
+  .beam-violet {
+    --c2-border-beam__beam--radius: 14px;
+    --c2-border-beam__beam--width: 2px;
+    --c2-border-beam__beam--size: 120px;
+    --c2-border-beam__beam--color-from: #8b5cf6;
+    --c2-border-beam__beam--color-to: #f0abfc;
+    --c2-border-beam__beam--filter: drop-shadow(0 0 7px rgba(192, 132, 252, 0.7));
+    --c2-border-beam__beam--duration: 3.8s;
+  }
+</style>
+<div class="beam-panel-violet">
+  <strong>AI workflow is live</strong>
+  <p>Three agents are coordinating the release.</p>
+  <c2-border-beam class="beam-violet"></c2-border-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Warm signal
+<style>
+  .beam-panel-warm {
+    position: relative;
+    box-sizing: border-box;
+    width: min(100%, 380px);
+    overflow: hidden;
+    padding: 24px;
+    border: 1px solid #fed7aa;
+    border-radius: 14px;
+    background: #fffaf5;
+  }
+  .beam-panel-warm p {
+    margin: 8px 0 0;
+    color: #9a3412;
+    font-size: 14px;
+  }
+  .beam-warm {
+    --c2-border-beam__beam--radius: 12px;
+    --c2-border-beam__beam--size: 88px;
+    --c2-border-beam__beam--color-from: #f97316;
+    --c2-border-beam__beam--color-to: #facc15;
+    --c2-border-beam__beam--filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.45));
+    --c2-border-beam__beam--duration: 6s;
+  }
+</style>
+<div class="beam-panel-warm">
+  <strong>Deployment needs attention</strong>
+  <p>One environment is waiting for approval.</p>
+  <c2-border-beam class="beam-warm" reverse></c2-border-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Dual orbit
+<style>
+  .beam-panel-dual {
+    position: relative;
+    box-sizing: border-box;
+    width: min(100%, 380px);
+    overflow: hidden;
+    padding: 24px;
+    border: 1px solid #dbeafe;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #eff6ff, #ffffff);
+  }
+  .beam-panel-dual p {
+    margin: 8px 0 0;
+    color: #475569;
+    font-size: 14px;
+  }
+  .beam-dual {
+    --c2-border-beam__beam--radius: 16px;
+    --c2-border-beam__beam--size: 70px;
+    --c2-border-beam__beam--filter: drop-shadow(0 0 5px rgba(14, 165, 233, 0.5));
+    --c2-border-beam__beam--duration: 7s;
+  }
+</style>
+<div class="beam-panel-dual">
+  <strong>Realtime sync</strong>
+  <p>Multiple beams can be distributed evenly around the same perimeter.</p>
+  <c2-border-beam class="beam-dual" count="2"></c2-border-beam>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Single border
+<style>
+  .beam-panel-sides {
+    position: relative;
+    box-sizing: border-box;
+    width: min(100%, 380px);
+    overflow: hidden;
+    padding: 24px;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    background: #f8fbff;
+  }
+  .beam-panel-sides p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+  }
+  .beam-single {
+    --c2-border-beam__beam--size: 76px;
+    --c2-border-beam__beam--duration: 5s;
+  }
+</style>
+<div class="beam-panel-sides">
+  <strong>Selective emphasis</strong>
+  <p>This beam moves forward and backward along only the top border.</p>
+  <c2-border-beam class="beam-single" side="top"></c2-border-beam>
+</div>
+```
+
+</GalleryGrid>

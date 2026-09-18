@@ -1,0 +1,44 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-dashboard,
+  $theme: (
+    gap: 8px,
+    padding: 0px,
+    background: transparent,
+    border: none,
+    border-radius: 0px,
+  )
+);
+
+// The cards are light-DOM children, so the grid has to be the host itself; `--_columns` / `--_rows` are written by
+// the element on every update and are private to it. `--_c2-dashboard-gap` hands the gutter width down to the
+// cards, whose drag handles grow to cover it.
+:host {
+  --_c2-dashboard-gap: #{css.cssVar(gap)};
+
+  display: grid;
+  box-sizing: border-box;
+  grid-template-columns: var(--_columns, 1fr);
+  grid-template-rows: var(--_rows, auto);
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  min-width: 0;
+  min-height: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+slot {
+  display: contents;
+}
+
+// A grid item defaults to `min-width: auto`, which refuses to shrink below its content — a table or a chart would
+// push the track wider than the size that was dragged.
+::slotted(*) {
+  min-width: 0;
+  min-height: 0;
+}

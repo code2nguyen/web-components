@@ -1,0 +1,134 @@
+---
+title: 'Status Panel'
+description: 'Communicate empty states, operation outcomes and recoverable errors with clear next steps.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { StatusPanel } from '@c2n/status-panel'
+import { Button } from '@c2n/button'
+
+`c2-status-panel` presents a meaningful application state without assuming that the state is empty or the result of an operation. Choose a `status` for the built-in media treatment, provide concise copy through attributes or slots, and add actions or supporting content only when they help the user move forward.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/status-panel
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/status-panel
+<style>
+  .recovery-state {
+    --c2-status-panel__container--max-width: 560px;
+    --c2-status-panel__container--min-height: 0px;
+    --c2-status-panel__container--padding: 36px;
+    --c2-status-panel__container--gap: 20px;
+    --c2-status-panel__container--border: 1px solid #e4e4e7;
+    --c2-status-panel__container--background-color: #ffffff;
+    --c2-status-panel__media--size: 150px;
+    --c2-status-panel__media-icon--size: 150px;
+    --c2-status-panel__media__error--background-color: transparent;
+    --c2-status-panel__media--border-radius: 0px;
+    --c2-status-panel__title--font-size: 20px;
+    --c2-status-panel__title--line-height: 28px;
+    --c2-status-panel__content--background-color: transparent;
+    --c2-status-panel__content--padding: 0px;
+  }
+  .recovery-state > img[slot='media'] {
+    object-fit: contain;
+  }
+  .release-summary {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #fafafa;
+    text-align: left;
+  }
+  .release-summary__row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 16px;
+    padding: 12px 14px;
+    color: #52525b;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  .release-summary__row + .release-summary__row {
+    border-top: 1px solid #e4e4e7;
+  }
+  .release-summary__label {
+    color: #71717a;
+  }
+  .release-summary strong {
+    color: #18181b;
+    font-weight: 600;
+  }
+  .recovery-secondary {
+    --c2-button__container--border: 1px solid #bcbcc6;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #18181b;
+    --c2-button__container__hover--background-color: #f4f4f5;
+  }
+  .compact-state {
+    --c2-status-panel__container--min-height: 0px;
+    --c2-status-panel__container--padding: 24px;
+    --c2-status-panel__media--size: 48px;
+    --c2-status-panel__media-icon--size: 24px;
+  }
+  .illustrated-state {
+    --c2-status-panel__container--min-height: 0px;
+    --c2-status-panel__container--padding: 28px 24px;
+    --c2-status-panel__media--size: 150px;
+    --c2-status-panel__media-icon--size: 150px;
+    --c2-status-panel__media--background-color: transparent;
+    --c2-status-panel__media--border-radius: 0px;
+  }
+  .illustrated-state > img[slot='media'] {
+    object-fit: contain;
+  }
+  .secondary-action {
+    --c2-button__container--border: 1px solid #bcbcc6;
+    --c2-button__container--background-color: #ffffff;
+    --c2-button__container--color: #18181b;
+    --c2-button__container__hover--background-color: #f4f4f5;
+  }
+</style>
+<div data-label="Empty state">
+  <c2-status-panel client:load heading="No projects yet" description="Create your first project or import one from another workspace.">
+    <c2-button slot="actions">Create project</c2-button>
+    <c2-button slot="actions" class="secondary-action">Import project</c2-button>
+  </c2-status-panel>
+</div>
+<div data-label="Operation outcomes">
+  <c2-status-panel client:only="lit" class="compact-state" status="success" heading="Payment complete" description="A receipt was sent to your email."></c2-status-panel>
+  <c2-status-panel client:only="lit" class="compact-state" status="warning" heading="Storage almost full" description="Remove unused files to avoid interruptions."></c2-status-panel>
+</div>
+<div data-label="Error with details">
+  <c2-status-panel client:load class="recovery-state" status="error">
+    <img slot="media" src="/web-components/status-panel-recovery.svg" alt="" />
+    <span slot="title">This release needs one quick fix</span>
+    <span slot="description">Choose a production owner before publishing. Your release is safely saved as a draft.</span>
+    <div slot="content" class="release-summary">
+      <div class="release-summary__row"><span class="release-summary__label">Release</span><strong>v2.8 · Autumn update</strong></div>
+      <div class="release-summary__row"><span class="release-summary__label">Blocked by</span><strong>Missing production owner</strong></div>
+    </div>
+    <c2-button slot="actions">Choose an owner</c2-button>
+    <c2-button slot="actions" class="recovery-secondary">Keep as draft</c2-button>
+  </c2-status-panel>
+</div>
+<div data-label="Illustration">
+  <c2-status-panel client:load class="illustrated-state" heading="No matching projects" description="Try a broader search or clear the active filters.">
+    <img slot="media" src="/web-components/status-panel-search.svg" alt="" />
+    <c2-button slot="actions">Clear filters</c2-button>
+  </c2-status-panel>
+</div>
+```
+
+The `media`, `title`, `description`, `actions` and `content` slots accept any composition. `heading` and `description` are convenient text fallbacks; slotted content takes precedence. Set `heading-level` to match the surrounding document hierarchy. The component is not a live region by default—add `role="status"` for a dynamically completed operation or `role="alert"` only when an error requires immediate attention.
+
+The default `neutral` status suits empty and unavailable states. `info`, `success`, `warning` and `error` change the built-in icon and its semantic colour treatment. Use `align="start"` for detail-heavy panels and customize the container, media and content surfaces with the documented CSS variables.

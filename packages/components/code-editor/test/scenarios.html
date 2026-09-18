@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code Editor test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        max-width: 640px;
+      }
+      .themed {
+        --c2-code-editor--background: rgb(13, 17, 23);
+        --c2-code-editor--color: rgb(201, 209, 217);
+        --c2-code-editor--border: 2px solid rgb(48, 54, 61);
+        --c2-code-editor--border-radius: 12px;
+        --c2-code-editor--min-height: 160px;
+        --c2-code-editor__gutter--color: rgb(110, 118, 129);
+        --c2-code-editor__theme--token-keyword: rgb(255, 123, 114);
+        --c2-code-editor__theme--token-comment: rgb(139, 148, 158);
+        --c2-code-editor__theme--token-string: rgb(165, 214, 255);
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Code Editor scenario"></main>
+  </body>
+</html>

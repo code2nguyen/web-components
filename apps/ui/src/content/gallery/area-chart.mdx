@@ -1,6 +1,6 @@
 ---
 title: 'Area chart gallery'
-description: 'Revenue and investment trajectories built from Apple fiscal statements filed with the SEC.'
+description: 'Editorial area-chart cards for revenue, investment, services and profit trends.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -12,72 +12,424 @@ import { AreaChart } from '@c2n/chart/area-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
 import { ChartLegend } from '@c2n/chart/chart-legend.js'
 import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Card } from '@c2n/card'
 
 <ExampleModules />
 <ChartFinancialGallery />
 
-Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
+Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm). These examples use overlapping areas rather than stacking: `c2-area-chart` deliberately keeps every series on its own baseline.
 
-<GalleryGrid min="440">
+<GalleryGrid min="340">
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-area-chart
-  x-field="year"
-  curve="smooth"
-  fill-opacity="0.18"
-  data='[{"year":2021,"revenue":365.817},{"year":2022,"revenue":394.328},{"year":2023,"revenue":383.285},{"year":2024,"revenue":391.035},{"year":2025,"revenue":416.161}]'
->
-  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+<c2-area-chart label-field="month" data='[{"month":"Jan","visitors":186},{"month":"Feb","visitors":305},{"month":"Mar","visitors":237},{"month":"Apr","visitors":173},{"month":"May","visitors":209},{"month":"Jun","visitors":214}]'>
+  <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
 </c2-area-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Capital allocation — rich legend and tooltip
+```html tag=MdxCodeBlock,label=Smooth revenue trend
 <style>
-  .investment-area {
-    display: grid;
+  .area-story {
     width: 100%;
-    gap: 12px;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
   }
-  .investment-area c2-area-chart {
-    --c2-chart__area--opacity: 0.13;
-    --c2-chart__series-1--color: #7c3aed;
-    --c2-chart__series-2--color: #db2777;
+  .area-story__heading {
+    display: grid;
+    gap: 4px;
+  }
+  .area-story__heading strong {
+    font-size: 15px;
+  }
+  .area-story__heading span,
+  .area-story__period {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .area-story__footer {
+    display: grid;
+    gap: 2px;
+    font-size: 12px;
+  }
+  .area-story__trend {
+    font-weight: 600;
+  }
+  .area-story c2-area-chart {
+    width: 100%;
+    --c2-chart--height: 220px;
+    --c2-chart--padding: 4px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #3b82f6;
+    --c2-chart__area--opacity: 0.24;
   }
 </style>
-<div class="investment-area" data-finance-demo>
+<c2-card class="area-story">
+  <div slot="header" class="area-story__heading">
+    <strong>Revenue momentum</strong>
+    <span>Annual net sales, FY2021–25</span>
+  </div>
   <c2-area-chart
-    id="financial-area-investment"
     x-field="year"
     curve="smooth"
-    data='[{"year":2021,"revenue":365.817,"rd":21.914,"sga":21.973},{"year":2022,"revenue":394.328,"rd":26.251,"sga":25.094},{"year":2023,"revenue":383.285,"rd":29.915,"sga":24.932},{"year":2024,"revenue":391.035,"rd":31.37,"sga":26.097},{"year":2025,"revenue":416.161,"rd":34.55,"sga":27.601}]'
+    legend="none"
+    data='[{"year":2021,"revenue":365.817},{"year":2022,"revenue":394.328},{"year":2023,"revenue":383.285},{"year":2024,"revenue":391.035},{"year":2025,"revenue":416.161}]'
   >
-    <c2-chart-series field="rd" label="R&amp;D"></c2-chart-series>
-    <c2-chart-series field="sga" label="SG&amp;A"></c2-chart-series>
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
   </c2-area-chart>
-  <c2-chart-legend for="financial-area-investment"></c2-chart-legend>
-  <c2-chart-tooltip for="financial-area-investment"></c2-chart-tooltip>
-</div>
+  <div slot="footer" class="area-story__footer">
+    <span class="area-story__trend">Trending up 6.4% in FY2025 ↗</span>
+    <span class="area-story__period">FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
 ```
 
-```html tag=MdxCodeBlock,label=Profit pool
+```html tag=MdxCodeBlock,label=Linear investment trend
 <style>
-  .profit-area {
-    --c2-chart__area--opacity: 0.1;
-    --c2-chart__series-1--color: #2563eb;
-    --c2-chart__series-2--color: #0f766e;
-    --c2-chart__series-3--color: #ca8a04;
+  .linear-area-card {
+    width: 100%;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
+  }
+  .linear-area-card__heading,
+  .linear-area-card__footer {
+    display: grid;
+    gap: 4px;
+  }
+  .linear-area-card__heading strong {
+    font-size: 15px;
+  }
+  .linear-area-card__heading span,
+  .linear-area-card__footer span:last-child {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .linear-area-card__footer {
+    font-size: 12px;
+  }
+  .linear-area-card__footer strong {
+    font-weight: 600;
+  }
+  .linear-area-card c2-area-chart {
+    width: 100%;
+    --c2-chart--height: 220px;
+    --c2-chart--padding: 4px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #16a34a;
+    --c2-chart__area--opacity: 0.2;
   }
 </style>
-<c2-area-chart
-  class="profit-area"
-  x-field="year"
-  curve="smooth"
-  data='[{"year":2021,"grossProfit":152.836,"operatingIncome":108.949,"netIncome":94.68},{"year":2022,"grossProfit":170.782,"operatingIncome":119.437,"netIncome":99.803},{"year":2023,"grossProfit":169.148,"operatingIncome":114.301,"netIncome":96.995},{"year":2024,"grossProfit":180.683,"operatingIncome":123.216,"netIncome":93.736},{"year":2025,"grossProfit":195.201,"operatingIncome":133.05,"netIncome":112.01}]'
->
-  <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
-  <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
-  <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
-</c2-area-chart>
+<c2-card class="linear-area-card">
+  <div slot="header" class="linear-area-card__heading">
+    <strong>R&amp;D investment · Linear</strong>
+    <span>Research and development expense</span>
+  </div>
+  <c2-area-chart
+    x-field="year"
+    curve="linear"
+    legend="none"
+    data='[{"year":2021,"rd":21.914},{"year":2022,"rd":26.251},{"year":2023,"rd":29.915},{"year":2024,"rd":31.37},{"year":2025,"rd":34.55}]'
+  >
+    <c2-chart-series field="rd" label="R&amp;D"></c2-chart-series>
+  </c2-area-chart>
+  <div slot="footer" class="linear-area-card__footer">
+    <strong>Investment increased 57.7% across the period ↗</strong>
+    <span>FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Stepped services trend
+<style>
+  .step-area-card {
+    width: 100%;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
+  }
+  .step-area-card__heading,
+  .step-area-card__footer {
+    display: grid;
+    gap: 4px;
+  }
+  .step-area-card__heading strong {
+    font-size: 15px;
+  }
+  .step-area-card__heading span,
+  .step-area-card__footer span:last-child {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .step-area-card__footer {
+    font-size: 12px;
+  }
+  .step-area-card__footer strong {
+    font-weight: 600;
+  }
+  .step-area-card c2-area-chart {
+    width: 100%;
+    --c2-chart--height: 220px;
+    --c2-chart--padding: 4px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #8b5cf6;
+    --c2-chart__area--opacity: 0.2;
+  }
+</style>
+<c2-card class="step-area-card">
+  <div slot="header" class="step-area-card__heading">
+    <strong>Services revenue · Step</strong>
+    <span>Discrete fiscal-year reporting periods</span>
+  </div>
+  <c2-area-chart
+    x-field="year"
+    curve="step"
+    legend="none"
+    data='[{"year":2021,"services":68.425},{"year":2022,"services":78.129},{"year":2023,"services":85.2},{"year":2024,"services":96.169},{"year":2025,"services":109.158}]'
+  >
+    <c2-chart-series field="services" label="Services"></c2-chart-series>
+  </c2-area-chart>
+  <div slot="footer" class="step-area-card__footer">
+    <strong>Services crossed $100B in FY2025 ↗</strong>
+    <span>FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Profit structure comparison
+<style>
+  .profit-area-card {
+    width: 100%;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
+  }
+  .profit-area-card__heading,
+  .profit-area-card__footer {
+    display: grid;
+    gap: 4px;
+  }
+  .profit-area-card__heading strong {
+    font-size: 15px;
+  }
+  .profit-area-card__heading span,
+  .profit-area-card__footer span:last-child {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .profit-area-card__footer {
+    font-size: 12px;
+  }
+  .profit-area-card__footer strong {
+    font-weight: 600;
+  }
+  .profit-area-card c2-area-chart {
+    width: 100%;
+    --c2-chart--height: 230px;
+    --c2-chart--padding: 4px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #60a5fa;
+    --c2-chart__series-2--color: #2563eb;
+    --c2-chart__area--opacity: 0.18;
+  }
+</style>
+<c2-card class="profit-area-card">
+  <div slot="header" class="profit-area-card__heading">
+    <strong>Profit structure</strong>
+    <span>Gross profit compared with operating income</span>
+  </div>
+  <c2-area-chart
+    x-field="year"
+    curve="smooth"
+    data='[{"year":2021,"grossProfit":152.836,"operatingIncome":108.949},{"year":2022,"grossProfit":170.782,"operatingIncome":119.437},{"year":2023,"grossProfit":169.148,"operatingIncome":114.301},{"year":2024,"grossProfit":180.683,"operatingIncome":123.216},{"year":2025,"grossProfit":195.201,"operatingIncome":133.05}]'
+  >
+    <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+    <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
+  </c2-area-chart>
+  <div slot="footer" class="profit-area-card__footer">
+    <strong>Both measures reached a five-year high ↗</strong>
+    <span>Areas overlap; they are not cumulatively stacked</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Capital allocation with rich legend
+<style>
+  .investment-area-card {
+    width: 100%;
+    --c2-card--border-top: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-right: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-left: 1px solid var(--site-color-outline-variant);
+    --c2-card--border-top-left-radius: 14px;
+    --c2-card--border-top-right-radius: 14px;
+    --c2-card--border-bottom-left-radius: 14px;
+    --c2-card--border-bottom-right-radius: 14px;
+    --c2-card--background: var(--site-color-surface);
+    --c2-card--padding-top: 4px;
+    --c2-card--padding-right: 20px;
+    --c2-card--padding-bottom: 4px;
+    --c2-card--padding-left: 20px;
+    --c2-card__header--padding-top: 20px;
+    --c2-card__header--padding-right: 20px;
+    --c2-card__header--padding-bottom: 8px;
+    --c2-card__header--padding-left: 20px;
+    --c2-card__footer--padding-top: 10px;
+    --c2-card__footer--padding-right: 20px;
+    --c2-card__footer--padding-bottom: 18px;
+    --c2-card__footer--padding-left: 20px;
+  }
+  .investment-area-card__heading,
+  .investment-area-card__footer,
+  .investment-area-card__body {
+    display: grid;
+    gap: 4px;
+  }
+  .investment-area-card__heading strong {
+    font-size: 15px;
+  }
+  .investment-area-card__heading span,
+  .investment-area-card__footer span:last-child {
+    color: var(--site-color-on-surface-muted);
+    font-size: 12px;
+  }
+  .investment-area-card__footer {
+    font-size: 12px;
+  }
+  .investment-area-card__footer strong {
+    font-weight: 600;
+  }
+  .investment-area-card c2-area-chart {
+    width: 100%;
+    --c2-chart--height: 210px;
+    --c2-chart--padding: 4px;
+    --c2-chart--border-top: none;
+    --c2-chart--border-right: none;
+    --c2-chart--border-bottom: none;
+    --c2-chart--border-left: none;
+    --c2-chart--background: transparent;
+    --c2-chart__grid--color: var(--site-color-outline-variant);
+    --c2-chart__series-1--color: #7c3aed;
+    --c2-chart__series-2--color: #db2777;
+    --c2-chart__area--opacity: 0.13;
+  }
+</style>
+<c2-card class="investment-area-card" data-finance-demo>
+  <div slot="header" class="investment-area-card__heading">
+    <strong>Capital allocation</strong>
+    <span>Operating expense trends with linked presenters</span>
+  </div>
+  <div class="investment-area-card__body">
+    <c2-area-chart
+      id="financial-area-investment"
+      x-field="year"
+      curve="smooth"
+      legend="none"
+      data='[{"year":2021,"revenue":365.817,"rd":21.914,"sga":21.973},{"year":2022,"revenue":394.328,"rd":26.251,"sga":25.094},{"year":2023,"revenue":383.285,"rd":29.915,"sga":24.932},{"year":2024,"revenue":391.035,"rd":31.37,"sga":26.097},{"year":2025,"revenue":416.161,"rd":34.55,"sga":27.601}]'
+    >
+      <c2-chart-series field="rd" label="R&amp;D"></c2-chart-series>
+      <c2-chart-series field="sga" label="SG&amp;A"></c2-chart-series>
+    </c2-area-chart>
+    <c2-chart-legend for="financial-area-investment"></c2-chart-legend>
+    <c2-chart-tooltip for="financial-area-investment"></c2-chart-tooltip>
+  </div>
+  <div slot="footer" class="investment-area-card__footer">
+    <strong>R&amp;D grew faster than SG&amp;A ↗</strong>
+    <span>Hover the plot for fiscal-year detail</span>
+  </div>
+</c2-card>
 ```
 
 </GalleryGrid>

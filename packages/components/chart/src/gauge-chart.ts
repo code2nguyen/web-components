@@ -22,6 +22,8 @@ export interface GaugeChart {
  * ```
  *
  * @tag c2-gauge-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-gauge-chart')
 export class GaugeChart extends EchartsChartBase {
@@ -54,6 +56,9 @@ export class GaugeChart extends EchartsChartBase {
   /** Whether to draw the radial pointer. */
   @property({ type: String }) pointer: 'show' | 'none' = 'show'
 
+  /** Whether to draw the small axis ticks and division lines around the arc. */
+  @property({ type: String }) marks: 'show' | 'none' = 'show'
+
   constructor() {
     super()
     this.tooltip = 'item'
@@ -83,15 +88,17 @@ export class GaugeChart extends EchartsChartBase {
       progress: { show: this.progress === 'show', width: 12, roundCap: true, itemStyle: { color } },
       pointer: { show: this.pointer === 'show', itemStyle: { color } },
       axisLine: { lineStyle: { width: 12, color: [[1, context.theme.gridColor]] } },
-      axisTick: { lineStyle: { color: context.theme.axisColor } },
-      splitLine: { lineStyle: { color: context.theme.axisColor } },
+      axisTick: { show: this.marks === 'show', lineStyle: { color: context.theme.axisColor } },
+      splitLine: { show: this.marks === 'show', lineStyle: { color: context.theme.axisColor } },
       axisLabel: { color: context.theme.axisColor, fontSize: context.theme.fontSize, formatter: formatValue },
-      title: { color: context.theme.mutedColor, fontSize: context.theme.fontSize, offsetCenter: [0, '43%'] },
+      // Keep the value and metric inside the quiet centre of the dial. The previous 43% / 67% offsets
+      // pushed both into the lower arc, where they collided with the scale's min/max labels.
+      title: { color: context.theme.mutedColor, fontSize: context.theme.fontSize, offsetCenter: [0, '25%'] },
       detail: {
         color: context.theme.color,
         fontSize: Math.max(20, context.theme.fontSize * 1.8),
         fontWeight: 650,
-        offsetCenter: [0, '67%'],
+        offsetCenter: [0, '-3%'],
         formatter: formatValue,
       },
     }

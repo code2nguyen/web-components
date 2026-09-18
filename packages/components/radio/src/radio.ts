@@ -5,7 +5,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { consume } from '@lit/context'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { hasSlottedContent, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { radioGroupContext, type RadioGroupContext } from './radio-context'
 import styles from './radio.scss?inline'
 
@@ -213,8 +213,15 @@ export class Radio extends LitElement {
   }
 
   /** `slotchange` does not fire for server-rendered slots, so read them once after the first render. */
-  override firstUpdated() {
-    for (const slot of this.renderRoot.querySelectorAll('slot')) this.updateSlot(slot)
+  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
+  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
+  protected override willUpdate(_changed: PropertyValues<this>) {
+    if (!this.hasUpdated) {
+      this.hasDescription = hasSlottedContent(this, 'description')
+      this.hasDot = hasSlottedContent(this, 'dot')
+      this.hasIcon = hasSlottedContent(this, 'icon')
+      this.hasCheckedIcon = hasSlottedContent(this, 'checked-icon')
+    }
   }
 
   protected override update(changed: PropertyValues<this>) {

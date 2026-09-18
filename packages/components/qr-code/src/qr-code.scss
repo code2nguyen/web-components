@@ -1,0 +1,87 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-qr-code,
+  $theme: (
+    size: 200px,
+    module--color: #18181b,
+    background--color: #ffffff,
+    container--border-radius: 8px,
+    placeholder--color: #71717a,
+    placeholder--font-size: 12px,
+    center--size: 20%,
+    center--background-color: #ffffff,
+    center--padding: 4px,
+    center--border-radius: 6px,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]),
+.center[hidden] {
+  display: none;
+}
+
+.container,
+.placeholder {
+  box-sizing: border-box;
+  width: css.cssVar(size);
+  height: css.cssVar(size);
+  border-radius: css.cssVar(container--border-radius);
+}
+
+.container {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  background: css.cssVar(background--color);
+}
+
+.code {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.background {
+  fill: css.cssVar(background--color);
+}
+
+.modules {
+  fill: css.cssVar(module--color);
+}
+
+.placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #bcbcc6;
+  color: css.cssVar(placeholder--color);
+  font-size: css.cssVar(placeholder--font-size);
+  text-align: center;
+}
+
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  box-sizing: border-box;
+  width: css.cssVar(center--size);
+  height: css.cssVar(center--size);
+  padding: css.cssVar(center--padding);
+  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-content: center;
+  border-radius: css.cssVar(center--border-radius);
+  background: css.cssVar(center--background-color);
+}
+
+::slotted([slot='center']) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

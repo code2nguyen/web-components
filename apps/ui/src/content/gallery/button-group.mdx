@@ -3,10 +3,11 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { ButtonGroup } from '@c2n/button-group'
 import { Button } from '@c2n/button'
+import { IconButton } from '@c2n/icon-button'
 
 ## Presets
 
-Curated looks for `c2-button-group`. Open any card in the studio to start from it. The group frames its items through the `c2-button` variables, so one class on the group themes every button, including the pressed state of a segmented control.
+Curated looks for `c2-button-group`. Open any card in the studio to start from it. Use the built-in segmented appearance for a polished single-selection track, or theme the joined appearance through its button variables.
 
 <GalleryGrid>
 
@@ -38,27 +39,27 @@ Curated looks for `c2-button-group`. Open any card in the studio to start from i
 ```
 
 ```html tag=MdxCodeBlock,label=Segmented
-<style>
-  .segmented {
-    --c2-button-group--border-radius: 8px;
-    --c2-button-group__divider--color: transparent;
-    --c2-button__container--height: 32px;
-    --c2-button__container--padding-left: 14px;
-    --c2-button__container--padding-right: 14px;
-    --c2-button__container--background-color: #f4f4f5;
-    --c2-button__container--color: #52525b;
-    --c2-button__container__hover--background-color: #e4e4e7;
-    --c2-button__container__hover--color: #18181b;
-    --c2-button__container__active--background-color: #d4d4d8;
-    --c2-button__container__selected--background-color: #ffffff;
-    --c2-button__container__selected--color: #18181b;
-    --c2-button__container__selected--border: 1px solid #d4d4d8;
-  }
-</style>
-<c2-button-group client:only="lit" class="segmented" selection="single" value="board">
+<c2-button-group client:only="lit" appearance="segmented" value="board">
   <c2-button value="list">List</c2-button>
   <c2-button value="board">Board</c2-button>
   <c2-button value="calendar">Calendar</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Large and stretched
+<style>
+  .wide-segmented {
+    width: 360px;
+    max-width: 100%;
+    --c2-button-group__indicator--background-color: #edf1fe;
+    --c2-button-group__indicator--border: 1px solid #c7d6ff;
+    --c2-button-group__segmented-item__selected--color: #0265dc;
+  }
+</style>
+<c2-button-group client:only="lit" class="wide-segmented" appearance="segmented" size="l" stretched value="month">
+  <c2-button value="day">Day</c2-button>
+  <c2-button value="week">Week</c2-button>
+  <c2-button value="month">Month</c2-button>
 </c2-button-group>
 ```
 
@@ -152,6 +153,27 @@ Curated looks for `c2-button-group`. Open any card in the studio to start from i
   <c2-button>Zoom in</c2-button>
   <c2-button>Zoom out</c2-button>
   <c2-button>Reset</c2-button>
+</c2-button-group>
+```
+
+```html tag=MdxCodeBlock,label=Vertical segmented
+<style>
+  .vertical-segmented {
+    --c2-button-group__segmented--padding: 4px;
+    --c2-button-group__segmented--gap: 4px;
+    --c2-button-group__segmented--background-color: #e4e4e7;
+    --c2-button-group__indicator--border: 1px solid #d4d4d8;
+    --c2-button-group__indicator--box-shadow: 0 2px 6px rgba(24, 24, 27, 0.18);
+    --c2-button-group__indicator--transition-duration: 320ms;
+  }
+</style>
+<c2-button-group client:only="lit" class="vertical-segmented" appearance="segmented" orientation="vertical" size="m" value="list" aria-label="View layout">
+  <c2-icon-button value="list" aria-label="List view">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>
+  </c2-icon-button>
+  <c2-icon-button value="grid" aria-label="Grid view">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+  </c2-icon-button>
 </c2-button-group>
 ```
 

@@ -23,11 +23,8 @@
         align-items: center;
         gap: 12px;
       }
-      .stack c2-avatar {
-        --c2-avatar--box-shadow: 0 0 0 2px #fff;
-      }
-      .stack c2-avatar + c2-avatar {
-        margin-left: -10px;
+      .responsive-group {
+        --c2-avatar-group--max-width: 150px;
       }
     </style>
   </head>
@@ -87,13 +84,15 @@
       </div>
     </section>
     <section>
-      <h2>Stacked group</h2>
-      <div class="row stack">
+      <h2>Responsive group: resize the window to change the visible count</h2>
+      <c2-avatar-group class="responsive-group" aria-label="Project contributors">
         <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
         <c2-avatar auto-color name="Grace Hopper" initial-count="2"></c2-avatar>
         <c2-avatar auto-color name="Alan Turing" initial-count="2"></c2-avatar>
-        <c2-avatar initials="+4" style="--c2-avatar--background: #e4e4e7; --c2-avatar--color: #52525b"></c2-avatar>
-      </div>
+        <c2-avatar auto-color name="Katherine Johnson" initial-count="2"></c2-avatar>
+        <c2-avatar auto-color name="Margaret Hamilton" initial-count="2"></c2-avatar>
+        <c2-avatar auto-color name="Radia Perlman" initial-count="2"></c2-avatar>
+      </c2-avatar-group>
     </section>
   </body>
 </html>

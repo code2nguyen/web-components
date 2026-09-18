@@ -1,0 +1,303 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-questionnaire,
+  $theme: (
+    width: 100%,
+    max-width: 448px,
+    color: #18181b,
+    progress--font-size: 12px,
+    progress--color: #71717a,
+    title--font-size: 16px,
+    title--font-weight: 600,
+    description--color: #71717a,
+    description--font-size: 14px,
+    options--gap: 8px,
+    option--padding: 10px 12px,
+    option--border: 1px solid #e4e4e7,
+    option--border-radius: 8px,
+    option--background-color: #ffffff,
+    option__hover--border: 1px solid #bcbcc6,
+    option__selected--border: 1px solid #a1a1aa,
+    option__selected--background-color: #fafafa,
+    option__error--border: 1px solid #dc2626,
+    option__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    control--size: 16px,
+    control__selected--background-color: #18181b,
+    option-description--color: #71717a,
+    shortcut--color: #71717a,
+    error--color: #dc2626,
+    action--border-radius: 8px,
+    primary-action--background-color: #18181b,
+    primary-action--color: #ffffff,
+    secondary-action--border: 1px solid #e4e4e7,
+    secondary-action--background-color: #ffffff,
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(width);
+  max-width: css.cssVar(max-width);
+  color: css.cssVar(color);
+  font-family: inherit;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.questionnaire {
+  display: grid;
+}
+
+.progress {
+  margin-bottom: 16px;
+  color: css.cssVar(progress--color);
+  font-size: css.cssVar(progress--font-size);
+}
+
+h2 {
+  margin: 0;
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  line-height: 1.35;
+}
+
+#question-description {
+  display: block;
+  margin: 2px 0 16px;
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: 1.4;
+}
+
+.options {
+  display: grid;
+  gap: css.cssVar(options--gap);
+}
+
+.option {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  box-sizing: border-box;
+  padding: css.cssVar(option--padding);
+  border: css.cssVar(option--border);
+  border-radius: css.cssVar(option--border-radius);
+  background-color: css.cssVar(option--background-color);
+  cursor: pointer;
+  transition: animation.standard(border-color), animation.standard(background-color);
+
+  &:hover:not(.disabled) {
+    border: css.cssVar(option__hover--border);
+  }
+
+  &.selected {
+    border: css.cssVar(option__selected--border);
+    background-color: css.cssVar(option__selected--background-color);
+  }
+
+  &.invalid {
+    border: css.cssVar(option__error--border);
+  }
+
+  &:focus-within {
+    outline: css.cssVar(option__focus--outline);
+    outline-offset: 1px;
+  }
+
+  &.disabled {
+    cursor: default;
+    opacity: 0.38;
+  }
+}
+
+.option input {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.control {
+  position: relative;
+  box-sizing: border-box;
+  width: css.cssVar(control--size);
+  height: css.cssVar(control--size);
+  margin-top: 1px;
+  border: 1px solid #d4d4d8;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.option input[type='checkbox'] + .control {
+  border-radius: 4px;
+}
+
+.option input:checked + .control {
+  border-color: css.cssVar(control__selected--background-color);
+  background: css.cssVar(control__selected--background-color);
+}
+
+.option input[type='radio']:checked + .control::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.option input[type='checkbox']:checked + .control::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.option-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.option-label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.option-description {
+  color: css.cssVar(option-description--color);
+  font-size: 14px;
+  line-height: 18px;
+}
+
+kbd {
+  min-width: 18px;
+  box-sizing: border-box;
+  padding: 1px 5px;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  color: css.cssVar(shortcut--color);
+  background: #ffffff;
+  font: inherit;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.other {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  margin-top: 8px;
+  padding: 0 10px;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  color: inherit;
+  background: #ffffff;
+  font: inherit;
+  font-size: 14px;
+
+  &:focus {
+    outline: css.cssVar(option__focus--outline);
+    outline-offset: 1px;
+  }
+}
+
+.error {
+  margin: 18px 0 0;
+  color: css.cssVar(error--color);
+  font-size: 14px;
+}
+
+.summary h2 {
+  margin-bottom: 16px;
+}
+
+.summary dl {
+  display: grid;
+  gap: css.cssVar(options--gap);
+  margin: 0;
+}
+
+.summary dl > div {
+  padding: css.cssVar(option--padding);
+  border: css.cssVar(option--border);
+  border-radius: css.cssVar(option--border-radius);
+  background: css.cssVar(option--background-color);
+}
+
+.summary dt {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.summary dd {
+  margin: 4px 0 0;
+  color: css.cssVar(option-description--color);
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.forward-actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  box-sizing: border-box;
+  min-height: 32px;
+  padding: 5px 10px;
+  border-radius: css.cssVar(action--border-radius);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: css.cssVar(option__focus--outline);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.38;
+  }
+}
+
+.primary {
+  border: 1px solid css.cssVar(primary-action--background-color);
+  color: css.cssVar(primary-action--color);
+  background: css.cssVar(primary-action--background-color);
+}
+
+.secondary {
+  border: css.cssVar(secondary-action--border);
+  color: inherit;
+  background: css.cssVar(secondary-action--background-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+  }
+}

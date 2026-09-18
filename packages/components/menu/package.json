@@ -1,6 +1,6 @@
 {
   "name": "@c2n/menu",
-  "version": "0.0.7",
+  "version": "0.0.12",
   "type": "module",
   "main": "dist/menu.js",
   "exports": {
@@ -69,8 +69,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.7",
-    "@c2n/overlay": "0.0.7",
+    "@c2n/core": "0.0.12",
+    "@c2n/overlay": "0.0.12",
     "lit": "3.3.3"
   },
   "devDependencies": {

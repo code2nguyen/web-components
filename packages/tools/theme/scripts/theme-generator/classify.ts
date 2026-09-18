@@ -82,6 +82,7 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-menu',
   'c2-navigation-menu',
   'c2-navigation-menu-item',
+  'c2-theme-select',
 ])
 const SHADOW_LG_PREFIXES = new Set(['c2-modal', 'c2-sheet', 'c2-side-nav'])
 

@@ -1,0 +1,150 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-date-input,
+  $theme: (
+    min-height: 36px,
+    gap: 8px,
+    padding: 6px 8px 6px 12px,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    color: #18181b,
+    background: #ffffff,
+    font-size: 14px,
+    font-family: inherit,
+    line-height: 20px,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid #0265dc,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 0px,
+    error--border: 1px solid #dc2626,
+    error__focus--outline: 2px solid rgba(220, 38, 38, 0.25),
+    read-only--background: #fafafa,
+    disabled--opacity: variables.$disabled-content-opacity,
+    calendar-icon--size: 18px,
+    calendar-icon--color: #71717a,
+    calendar-icon__hover--color: #18181b,
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(supporting-text--gap);
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  cursor: text;
+  outline: css.cssVar(focus--outline);
+  outline-color: transparent;
+  outline-offset: css.cssVar(focus--outline-offset);
+  transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &.focused {
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &.error {
+    border: css.cssVar(error--border);
+
+    &.focused {
+      outline: css.cssVar(error__focus--outline);
+    }
+  }
+
+  &.read-only {
+    cursor: default;
+    background: css.cssVar(read-only--background);
+  }
+
+  &.disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+    pointer-events: none;
+  }
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: inherit;
+
+  &::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+}
+
+.calendar-button {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: css.cssVar(calendar-icon--size);
+  height: css.cssVar(calendar-icon--size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: css.cssVar(calendar-icon--color);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    color: css.cssVar(calendar-icon__hover--color);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.calendar-button svg,
+::slotted([slot='calendar-icon']) {
+  width: css.cssVar(calendar-icon--size);
+  height: css.cssVar(calendar-icon--size);
+}
+
+.supporting-text {
+  color: css.cssVar(supporting-text--color);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+
+  &.error {
+    color: css.cssVar(supporting-text__error--color);
+  }
+}

@@ -1,0 +1,34 @@
+---
+title: 'Rate'
+description: 'Accessible star rating input with hover preview, keyboard control and optional half values.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Rate } from '@c2n/rate'
+
+`c2-rate` is a form-associated rating input. Set `value` and `max`, add `allow-half` for half-star precision, and use `readonly` when the score is only for display. Pointer hover previews a score before selection; Arrow keys, Home and End provide the same control from the keyboard.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/rate
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/rate
+<div data-label="Basic">
+  <c2-rate aria-label="Product rating"></c2-rate>
+  <c2-rate aria-label="Current rating" value="3"></c2-rate>
+</div>
+<div data-label="Half stars">
+  <c2-rate aria-label="Precise rating" value="2.5" allow-half></c2-rate>
+</div>
+<div data-label="States">
+  <c2-rate aria-label="Readonly rating" value="4" readonly></c2-rate>
+  <c2-rate aria-label="Disabled rating" value="2" disabled></c2-rate>
+</div>
+```

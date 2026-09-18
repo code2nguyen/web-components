@@ -1,6 +1,6 @@
 ---
 title: 'Line chart gallery'
-description: 'Investor-grade trend views built from Apple fiscal statements filed with the SEC.'
+description: 'Editorial line-chart cards for revenue, investment, services and profitability trends.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -12,80 +12,211 @@ import { LineChart } from '@c2n/chart/line-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
 import { ChartLegend } from '@c2n/chart/chart-legend.js'
 import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
+import { Card } from '@c2n/card'
 
 <ExampleModules />
 <ChartFinancialGallery />
 
 Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
 
-<GalleryGrid min="440">
-
 ```html tag=MdxCodeBlock,label=Default
-<c2-line-chart
-  x-field="year"
-  points="always"
-  data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"netIncome":112.01}]'
->
-  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
-  <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
-  <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+<c2-line-chart label-field="month" data='[{"month":"Jan","visitors":186},{"month":"Feb","visitors":305},{"month":"Mar","visitors":237},{"month":"Apr","visitors":73},{"month":"May","visitors":209},{"month":"Jun","visitors":214}]'>
+  <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
 </c2-line-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Investor lens — rich legend and tooltip
+```html tag=MdxCodeBlock,label=Quarterly revenue history
 <style>
-  .investor-line {
-    display: grid;
-    width: 100%;
-    gap: 12px;
-  }
-  .investor-line c2-line-chart {
-    --c2-chart__line--width: 2.5px;
-    --c2-chart__point--radius: 3px;
-  }
+  .line-history { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 20px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 20px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 8px; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 10px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .line-history__heading, .line-history__footer { display: grid; gap: 4px; }
+  .line-history__heading strong { font-size: 15px; }
+  .line-history__heading span, .line-history__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .line-history__footer { font-size: 12px; }
+  .line-history c2-line-chart { width: 100%; --c2-chart--height: 260px; --c2-chart--padding: 4px; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #60a5fa; --c2-chart__line--width: 2px; }
 </style>
-<div class="investor-line" data-finance-demo>
+<c2-card class="line-history">
+  <div slot="header" class="line-history__heading">
+    <strong>Quarterly revenue history</strong>
+    <span>Twelve reported quarters, FY2023–25</span>
+  </div>
   <c2-line-chart
-    id="financial-line-investor"
-    x-field="year"
+    x-field="date"
+    x-type="time"
     curve="smooth"
-    points="hover"
-    data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"operatingIncome":108.949,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"operatingIncome":119.437,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"operatingIncome":114.301,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"operatingIncome":123.216,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"operatingIncome":133.05,"netIncome":112.01}]'
+    points="none"
+    legend="none"
+    data='[{"date":"2022-12-31","revenue":117.154},{"date":"2023-04-01","revenue":94.836},{"date":"2023-07-01","revenue":81.797},{"date":"2023-09-30","revenue":89.498},{"date":"2023-12-30","revenue":119.575},{"date":"2024-03-30","revenue":90.753},{"date":"2024-06-29","revenue":85.777},{"date":"2024-09-28","revenue":94.93},{"date":"2024-12-28","revenue":124.3},{"date":"2025-03-29","revenue":95.359},{"date":"2025-06-28","revenue":94.036},{"date":"2025-09-27","revenue":102.466}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
-    <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
-    <c2-chart-series field="operatingIncome" label="Operating income"></c2-chart-series>
-    <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
   </c2-line-chart>
-  <c2-chart-legend for="financial-line-investor"></c2-chart-legend>
-  <c2-chart-tooltip for="financial-line-investor"></c2-chart-tooltip>
-</div>
+  <div slot="footer" class="line-history__footer">
+    <strong>FY2025 Q4 revenue increased 8.0% year over year ↗</strong>
+    <span>Dec 2022–Sep 2025 · USD billions</span>
+  </div>
+</c2-card>
 ```
 
-```html tag=MdxCodeBlock,label=Margin expansion
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Smooth revenue trend
 <style>
-  .margin-line {
-    --c2-chart--border-top: none;
-    --c2-chart--border-right: none;
-    --c2-chart--border-bottom: none;
-    --c2-chart--border-left: none;
-    --c2-chart__grid--color: #f4f4f5;
-    --c2-chart__series-1--color: #2563eb;
-    --c2-chart__series-2--color: #7c3aed;
-    --c2-chart__series-3--color: #0f766e;
-  }
+  .smooth-line-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 20px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 20px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 8px; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 10px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .smooth-line-card__heading, .smooth-line-card__footer { display: grid; gap: 4px; }
+  .smooth-line-card__heading strong { font-size: 15px; }
+  .smooth-line-card__heading span, .smooth-line-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .smooth-line-card__footer { font-size: 12px; }
+  .smooth-line-card c2-line-chart { width: 100%; --c2-chart--height: 220px; --c2-chart--padding: 4px; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #60a5fa; --c2-chart__line--width: 2px; }
 </style>
-<c2-line-chart
-  class="margin-line"
-  x-field="year"
-  y-min="20"
-  points="always"
-  data='[{"year":2021,"grossMargin":41.8,"operatingMargin":29.8,"netMargin":25.9},{"year":2022,"grossMargin":43.3,"operatingMargin":30.3,"netMargin":25.3},{"year":2023,"grossMargin":44.1,"operatingMargin":29.8,"netMargin":25.3},{"year":2024,"grossMargin":46.2,"operatingMargin":31.5,"netMargin":24},{"year":2025,"grossMargin":46.9,"operatingMargin":32,"netMargin":26.9}]'
->
-  <c2-chart-series field="grossMargin" label="Gross margin %"></c2-chart-series>
-  <c2-chart-series field="operatingMargin" label="Operating margin %"></c2-chart-series>
-  <c2-chart-series field="netMargin" label="Net margin %"></c2-chart-series>
-</c2-line-chart>
+<c2-card class="smooth-line-card">
+  <div slot="header" class="smooth-line-card__heading">
+    <strong>Revenue momentum · Smooth</strong>
+    <span>Annual net sales, FY2021–25</span>
+  </div>
+  <c2-line-chart
+    x-field="year"
+    curve="smooth"
+    points="none"
+    legend="none"
+    data='[{"year":2021,"revenue":365.817},{"year":2022,"revenue":394.328},{"year":2023,"revenue":383.285},{"year":2024,"revenue":391.035},{"year":2025,"revenue":416.161}]'
+  >
+    <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  </c2-line-chart>
+  <div slot="footer" class="smooth-line-card__footer">
+    <strong>Revenue increased 6.4% in FY2025 ↗</strong>
+    <span>FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Linear investment trend
+<style>
+  .linear-line-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 20px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 20px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 8px; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 10px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .linear-line-card__heading, .linear-line-card__footer { display: grid; gap: 4px; }
+  .linear-line-card__heading strong { font-size: 15px; }
+  .linear-line-card__heading span, .linear-line-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .linear-line-card__footer { font-size: 12px; }
+  .linear-line-card c2-line-chart { width: 100%; --c2-chart--height: 220px; --c2-chart--padding: 4px; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #16a34a; --c2-chart__line--width: 2px; }
+</style>
+<c2-card class="linear-line-card">
+  <div slot="header" class="linear-line-card__heading">
+    <strong>R&amp;D investment · Linear</strong>
+    <span>Research and development expense</span>
+  </div>
+  <c2-line-chart
+    x-field="year"
+    curve="linear"
+    points="always"
+    legend="none"
+    data='[{"year":2021,"rd":21.914},{"year":2022,"rd":26.251},{"year":2023,"rd":29.915},{"year":2024,"rd":31.37},{"year":2025,"rd":34.55}]'
+  >
+    <c2-chart-series field="rd" label="R&amp;D"></c2-chart-series>
+  </c2-line-chart>
+  <div slot="footer" class="linear-line-card__footer">
+    <strong>Investment increased 57.7% across the period ↗</strong>
+    <span>FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Stepped services trend
+<style>
+  .step-line-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 20px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 20px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 8px; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 10px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .step-line-card__heading, .step-line-card__footer { display: grid; gap: 4px; }
+  .step-line-card__heading strong { font-size: 15px; }
+  .step-line-card__heading span, .step-line-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .step-line-card__footer { font-size: 12px; }
+  .step-line-card c2-line-chart { width: 100%; --c2-chart--height: 220px; --c2-chart--padding: 4px; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #f97316; --c2-chart__line--width: 2px; }
+</style>
+<c2-card class="step-line-card">
+  <div slot="header" class="step-line-card__heading">
+    <strong>Services momentum · Step</strong>
+    <span>Annual Services net sales</span>
+  </div>
+  <c2-line-chart
+    x-field="year"
+    curve="step"
+    points="none"
+    legend="none"
+    data='[{"year":2021,"services":68.425},{"year":2022,"services":78.129},{"year":2023,"services":85.2},{"year":2024,"services":96.169},{"year":2025,"services":109.158}]'
+  >
+    <c2-chart-series field="services" label="Services"></c2-chart-series>
+  </c2-line-chart>
+  <div slot="footer" class="step-line-card__footer">
+    <strong>Five consecutive years of growth ↗</strong>
+    <span>FY2021–FY2025 · USD billions</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Margin comparison
+<style>
+  .margin-line-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 20px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 20px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 8px; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 10px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .margin-line-card__heading, .margin-line-card__footer { display: grid; gap: 4px; }
+  .margin-line-card__heading strong { font-size: 15px; }
+  .margin-line-card__heading span, .margin-line-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .margin-line-card__footer { font-size: 12px; }
+  .margin-line-card c2-line-chart { width: 100%; --c2-chart--height: 220px; --c2-chart--padding: 4px; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #3b82f6; --c2-chart__series-2--color: #8b5cf6; --c2-chart__series-3--color: #14b8a6; --c2-chart__line--width: 2px; }
+</style>
+<c2-card class="margin-line-card">
+  <div slot="header" class="margin-line-card__heading">
+    <strong>Margin comparison</strong>
+    <span>Gross, operating and net margin</span>
+  </div>
+  <c2-line-chart
+    x-field="year"
+    y-min="20"
+    curve="smooth"
+    points="always"
+    legend="bottom"
+    data='[{"year":2021,"grossMargin":41.8,"operatingMargin":29.8,"netMargin":25.9},{"year":2022,"grossMargin":43.3,"operatingMargin":30.3,"netMargin":25.3},{"year":2023,"grossMargin":44.1,"operatingMargin":29.8,"netMargin":25.3},{"year":2024,"grossMargin":46.2,"operatingMargin":31.5,"netMargin":24},{"year":2025,"grossMargin":46.9,"operatingMargin":32,"netMargin":26.9}]'
+  >
+    <c2-chart-series field="grossMargin" label="Gross margin %"></c2-chart-series>
+    <c2-chart-series field="operatingMargin" label="Operating margin %"></c2-chart-series>
+    <c2-chart-series field="netMargin" label="Net margin %"></c2-chart-series>
+  </c2-line-chart>
+  <div slot="footer" class="margin-line-card__footer">
+    <strong>Gross margin expanded to 46.9% in FY2025</strong>
+    <span>FY2021–FY2025 · percentage points</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Investor lens with rich legend
+<style>
+  .investor-line-card { width: 100%; --c2-card--border-top: 1px solid var(--site-color-outline-variant); --c2-card--border-right: 1px solid var(--site-color-outline-variant); --c2-card--border-bottom: 1px solid var(--site-color-outline-variant); --c2-card--border-left: 1px solid var(--site-color-outline-variant); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--site-color-surface); --c2-card--padding-top: 4px; --c2-card--padding-right: 20px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 20px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 8px; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 10px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .investor-line-card__heading, .investor-line-card__footer, .investor-line-card__plot { display: grid; gap: 4px; }
+  .investor-line-card__heading strong { font-size: 15px; }
+  .investor-line-card__heading span, .investor-line-card__footer span:last-child { color: var(--site-color-on-surface-muted); font-size: 12px; }
+  .investor-line-card__footer { font-size: 12px; }
+  .investor-line-card__plot { gap: 12px; }
+  .investor-line-card c2-line-chart { width: 100%; --c2-chart--height: 220px; --c2-chart--padding: 4px; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; --c2-chart__grid--color: var(--site-color-outline-variant); --c2-chart__series-1--color: #3b82f6; --c2-chart__series-2--color: #8b5cf6; --c2-chart__series-3--color: #14b8a6; --c2-chart__line--width: 2.5px; }
+</style>
+<c2-card class="investor-line-card" data-finance-demo>
+  <div slot="header" class="investor-line-card__heading">
+    <strong>Investor lens · Rich legend</strong>
+    <span>Revenue and profitability measures</span>
+  </div>
+  <div class="investor-line-card__plot">
+    <c2-line-chart
+      id="financial-line-investor"
+      x-field="year"
+      curve="smooth"
+      points="always"
+      legend="none"
+      data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"netIncome":112.01}]'
+    >
+      <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+      <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+      <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+    </c2-line-chart>
+    <c2-chart-legend for="financial-line-investor"></c2-chart-legend>
+    <c2-chart-tooltip for="financial-line-investor"></c2-chart-tooltip>
+  </div>
+  <div slot="footer" class="investor-line-card__footer">
+    <strong>Compare the measures by selecting the legend</strong>
+    <span>Hover the plot for year-over-year context</span>
+  </div>
+</c2-card>
 ```
 
 </GalleryGrid>

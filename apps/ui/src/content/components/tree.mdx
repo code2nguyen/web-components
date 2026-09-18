@@ -1,0 +1,119 @@
+---
+title: 'Tree'
+description: 'Hierarchical tree view with expansion, selection, checkboxes and lazy loading.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Tree } from '@c2n/tree'
+import { TreeItem } from '@c2n/tree/tree-item.js'
+
+`c2-tree` renders a hierarchy and owns its state: `value` holds the selected rows, `expanded-items` the expanded ones, and every `c2-tree-item` takes its depth, expansion, selection and roving `tabindex` from the tree. Nest the rows in markup, or hand the tree an `items` array of `{ value, label, children }` nodes and it renders the same elements for you — both modes produce identical DOM and the same events. `selection` switches between `none`, `single` and `multiple`; `checkbox-selection` adds a checkbox per row whose ticks travel to descendants and parents, leaving a partly-selected branch indeterminate. A branch marked `has-children` with no children yet calls the tree's `loadChildren` the first time it is opened, showing a spinner meanwhile. `children-outline` draws a vertical rule per level of depth, the way a file explorer marks which branch a row belongs to — off by default, and styled with `--c2-tree-item__guide--color` and `--c2-tree-item__guide--width` once on. `expand-on-click` widens the toggle's job to the whole row — and to Enter and Space — which is what a navigation tree wants, where a branch row is a heading with nothing to select. Only expanded rows render their children slot, so a collapsed subtree is not laid out and stays out of the accessibility tree. It is a `tree` with a roving `tabindex`: Arrow Up and Down walk the visible rows, Arrow Right and Left open and close branches or move to a child or parent, Home and End jump to the ends, Enter and Space select, `*` expands the focused row's siblings, and typing a few letters jumps to a row.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/tree
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/tree
+<style>
+  .files {
+    width: 230px;
+    --c2-tree--border-top: 1px solid #e4e4e7;
+    --c2-tree--border-right: 1px solid #e4e4e7;
+    --c2-tree--border-bottom: 1px solid #e4e4e7;
+    --c2-tree--border-left: 1px solid #e4e4e7;
+  }
+</style>
+<div data-label="Basic">
+  <c2-tree client:only="lit" class="files" aria-label="Files" expanded-items="src" value="app">
+    <c2-tree-item value="src" label="src">
+      <c2-tree-item value="app" label="app.ts"></c2-tree-item>
+      <c2-tree-item value="main" label="main.ts"></c2-tree-item>
+    </c2-tree-item>
+    <c2-tree-item value="readme" label="README.md"></c2-tree-item>
+  </c2-tree>
+</div>
+<div data-label="Multiple selection">
+  <c2-tree client:only="lit" class="files" aria-label="Teams" selection="multiple" expanded-items="eng" value="web;design">
+    <c2-tree-item value="eng" label="Engineering">
+      <c2-tree-item value="web" label="Web"></c2-tree-item>
+      <c2-tree-item value="infra" label="Infrastructure"></c2-tree-item>
+    </c2-tree-item>
+    <c2-tree-item value="design" label="Design"></c2-tree-item>
+  </c2-tree>
+</div>
+<div data-label="Checkbox selection">
+  <c2-tree client:only="lit" class="files" aria-label="Permissions" checkbox-selection expanded-items="content" value="read">
+    <c2-tree-item value="content" label="Content">
+      <c2-tree-item value="read" label="Read"></c2-tree-item>
+      <c2-tree-item value="write" label="Write"></c2-tree-item>
+      <c2-tree-item value="audit" label="Audit log" disabled></c2-tree-item>
+    </c2-tree-item>
+  </c2-tree>
+</div>
+<div data-label="Indent guides">
+  <c2-tree client:only="lit" class="files" children-outline aria-label="Files with guides" expanded-items="src;components" value="button">
+    <c2-tree-item value="src" label="src">
+      <c2-tree-item value="components" label="components">
+        <c2-tree-item value="button" label="button.ts"></c2-tree-item>
+        <c2-tree-item value="card" label="card.ts"></c2-tree-item>
+      </c2-tree-item>
+      <c2-tree-item value="index" label="index.ts"></c2-tree-item>
+    </c2-tree-item>
+  </c2-tree>
+</div>
+<div data-label="Data-driven">
+  <c2-tree
+    client:only="lit"
+    class="files"
+    aria-label="Regions"
+    expanded-items="emea"
+    items='[{"value":"emea","label":"EMEA","children":[{"value":"fr","label":"France"},{"value":"de","label":"Germany"}]},{"value":"apac","label":"APAC"}]'
+  ></c2-tree>
+</div>
+```
+
+Set `items` to render from data instead of markup. The nodes are `{ value, label, children?, disabled?, hasChildren?, data? }`, and four renderers customize how a row draws: `renderItem` takes over the whole content, while `renderIcon`, `renderLabel` and `renderActions` replace one part each. Each is called with `{ node, level, expanded, selected }`, and `renderItem` wins when both are set. The toggle and the selection checkbox are structural and always stay.
+
+```ts tag=CodeBlock
+const tree = document.querySelector('c2-tree')
+
+tree.items = [{ value: 'src', label: 'src', children: [{ value: 'app.ts', label: 'app.ts' }] }]
+
+// One part of the row…
+tree.renderIcon = ({ node }) => (node.children ? folderIcon() : fileIcon())
+
+// …or all of it.
+tree.renderItem = ({ node, selected }) => {
+  const row = document.createElement('span')
+  row.textContent = node.label
+  row.append(badge(node.data.count, { strong: selected }))
+  return row
+}
+
+tree.addEventListener('selection-change', (event) => {
+  console.log(event.detail.value, event.detail.nodes)
+})
+```
+
+The renderers are handed to Lit, so they return a Lit template or a DOM node — not framework markup such as JSX. When the rows are authored in markup, fill the `icon`, `label` and `actions` slots on `c2-tree-item` directly instead.
+
+`selection-change` and `expansion-change` do not bubble — several components fire `selection-change`, so listen on the tree itself rather than on an ancestor.
+
+Mark a branch `has-children` and give the tree a `loadChildren` to fetch a subtree the first time it opens. The row shows a spinner while the promise is pending, and a rejection fires `item-load-error` and leaves the branch open to another attempt:
+
+```ts tag=CodeBlock
+tree.items = [{ value: 'remote', label: 'Remote folder', hasChildren: true }]
+tree.loadChildren = async ({ node }) => {
+  const response = await fetch(`/api/children?id=${node.value}`)
+  return response.json()
+}
+```
+
+When the rows are authored in markup instead, listen for `item-expand` and append the children yourself — the tree notices them and resyncs.

@@ -25,6 +25,8 @@ export interface BarChart {
  * ```
  *
  * @tag c2-bar-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-bar-chart')
 export class BarChart extends UplotChartBase {
@@ -41,7 +43,7 @@ export class BarChart extends UplotChartBase {
       fill: color,
       width: 0,
       // The builder places this series within the group, so it has to know how many there are.
-      paths: barPaths(this.barWidth, this.barGap, index, context.series.length),
+      paths: barPaths(this.barWidth, this.barGap, index, context.series.length, context.theme.barRadius),
       // A bar already marks its value; a dot on top of it is uPlot's line default showing through.
       points: { show: false },
     }

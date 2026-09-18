@@ -1,0 +1,119 @@
+---
+title: 'Code Editor'
+description: 'Editable, syntax-highlighted source field on CodeMirror 6, themed entirely through CSS variables.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { CodeEditor } from '@c2n/code-editor'
+
+`c2-code-editor` is a form control for source code: highlighting, a line-number gutter, bracket matching, undo,
+multi-cursor, search and optional completion. It is form-associated, so `name` and `value` are submitted, `required`
+validates and reset restores the `value` attribute — the same contract a native control has.
+
+The engine is **CodeMirror 6, as an optional peer dependency**. Nothing is imported until an editor mounts, so the
+package itself is under 5 kB gzipped, and an app that never installs CodeMirror still gets a working plain-textarea
+field with the same value, the same `input` / `change` and the same form behaviour. `ready` resolves once the engine
+settles and `engine` reads `codemirror` or `basic`.
+
+Theming is ordinary CSS. CodeMirror renders real DOM inside the shadow root, so there is no JavaScript theme to
+configure: the frame, gutter, selection, cursor and the whole syntax palette are `--c2-code-editor__*` custom
+properties, and the token names match `@c2n/code-viewer`'s `css-variables` theme so one palette drives both. A dark
+editor is different variable values and nothing else.
+
+Grammars for `javascript`, `typescript`, `jsx`, `tsx`, `html`, `css` and `json` are built in and loaded on demand;
+any other language comes from the `languageLoader` property.
+
+The editor sizes itself to its content between `--c2-code-editor--min-height` and `--c2-code-editor--max-height`. A
+height set on the element reaches the editor — the label and the supporting text keep theirs — so in a pane or a
+split view give it `height: 100%` (or let a flex parent stretch it) and set the max height to `none`.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/code-editor
+```
+
+The engine is installed alongside it — only the grammars the app actually uses:
+
+```bash tag=CodeBlock
+npm install @codemirror/state @codemirror/view @codemirror/commands @codemirror/language \
+  @codemirror/autocomplete @codemirror/search @lezer/highlight @codemirror/lang-javascript
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/code-editor
+<style>
+  .midnight {
+    --c2-code-editor--background: #0d1117;
+    --c2-code-editor--color: #c9d1d9;
+    --c2-code-editor--border: 1px solid #30363d;
+    --c2-code-editor__gutter--color: #6e7681;
+    --c2-code-editor__gutter--border-right: 1px solid #21262d;
+    --c2-code-editor__gutter__active--color: #c9d1d9;
+    --c2-code-editor__active-line--background: rgba(110, 118, 129, 0.1);
+    --c2-code-editor__cursor--color: #c9d1d9;
+    --c2-code-editor__theme--token-keyword: #ff7b72;
+    --c2-code-editor__theme--token-string: #a5d6ff;
+    --c2-code-editor__theme--token-comment: #8b949e;
+    --c2-code-editor__theme--token-constant: #79c0ff;
+    --c2-code-editor__theme--token-function: #d2a8ff;
+    --c2-code-editor__theme--token-property: #79c0ff;
+    --c2-code-editor__theme--token-variable: #c9d1d9;
+    --c2-code-editor__theme--token-punctuation: #c9d1d9;
+  }
+  .compact {
+    --c2-code-editor--min-height: 84px;
+    --c2-code-editor--font-size: 12px;
+  }
+</style>
+
+<div data-label="JavaScript with a gutter and completion">
+  <c2-code-editor
+    label="Handler"
+    language="javascript"
+    line-numbers
+    autocomplete
+    help="Tab indents, ⌘F searches."
+    value="const greeting = 'hello'
+
+// Click the button to count.
+export function counter(host) {
+  let count = 0
+  host.addEventListener('click', () => (count += 1))
+  return () => count
+}"
+  ></c2-code-editor>
+</div>
+
+<div data-label="The same component, a dark palette — CSS variables only">
+  <c2-code-editor
+    class="midnight"
+    label="Configuration"
+    language="json"
+    line-numbers
+    wrap
+    value='{ "name": "@c2n/code-editor", "engine": "codemirror", "themed": "with css variables" }'
+  ></c2-code-editor>
+</div>
+
+<div data-label="Read-only, and an error state">
+  <c2-code-editor class="compact" language="css" readonly label="Generated" value=".card { border-radius: 8px }"></c2-code-editor>
+  <c2-code-editor class="compact" language="css" error error-text="Unexpected token at line 1." value=".a { color }"></c2-code-editor>
+</div>
+```
+
+Read the value the way you read any form control, and listen for `input` while typing or `change` on commit:
+
+```js tag=CodeBlock
+const editor = document.querySelector('c2-code-editor')
+
+await editor.ready // 'ready' when CodeMirror mounted, 'basic' for the textarea fallback
+editor.addEventListener('change', () => save(editor.value))
+
+// Anything beyond the built-in grammars: no dependency on this package.
+editor.languageLoader = async (id) => (id === 'python' ? (await import('@codemirror/lang-python')).python() : undefined)
+```

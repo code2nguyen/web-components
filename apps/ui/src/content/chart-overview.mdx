@@ -73,13 +73,16 @@ The components lazy-load optional peer engines only when first rendered. Line, a
   <c2-pie-chart
     label-field="category"
     inner-radius="0.52"
-    animation="auto"
     data='[{"category":"iPhone","sales":209.586},{"category":"Services","sales":109.158},{"category":"Wearables","sales":35.686},{"category":"Mac","sales":33.708},{"category":"iPad","sales":28.023}]'
   >
     <c2-chart-series field="sales" label="FY2025 sales"></c2-chart-series>
   </c2-pie-chart>
 </div>
 ```
+
+Charts animate their first draw by default and keep later data updates immediate. ECharts uses its native
+shape animation, while uPlot charts use a lightweight plot reveal. Use `animation="none"` to disable the
+entrance animation. Both paths respect the user's reduced-motion preference.
 
 Install only the engine your selected elements need:
 

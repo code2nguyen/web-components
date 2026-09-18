@@ -1,0 +1,47 @@
+---
+title: 'Cascader'
+description: 'Select a value from related, multi-level data in one floating panel.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Cascader } from '@c2n/cascader'
+
+`c2-cascader` is a data-driven hierarchical picker for locations, organisation levels, catalogues and other associated data. Pass nested `options`; each chosen branch opens the next column in the same floating layer, and choosing a leaf commits its full value path.
+
+Set `expand-trigger="hover"` to browse branches on hover, or `change-on-select` when intermediate branches are valid choices. The selected `value` is an array in JavaScript and a semicolon-separated path in HTML attributes.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/cascader
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/cascader
+<div data-label="Location">
+  <c2-cascader
+    aria-label="Choose a location"
+    placeholder="Choose a district"
+    options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]},{"value":"ningbo","label":"Ningbo"}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing","children":[{"value":"xuanwu","label":"Xuanwu"},{"value":"qinhuai","label":"Qinhuai"}]}]}]'
+  ></c2-cascader>
+</div>
+<div data-label="Preselected">
+  <c2-cascader
+    aria-label="Current location"
+    value="zhejiang;hangzhou;west-lake"
+    options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]}]}]'
+  ></c2-cascader>
+</div>
+<div data-label="Hover to expand">
+  <c2-cascader
+    aria-label="Choose a team"
+    expand-trigger="hover"
+    placeholder="Choose a team"
+    options='[{"value":"product","label":"Product","children":[{"value":"design","label":"Design","children":[{"value":"research","label":"Research"},{"value":"systems","label":"Design systems"}]},{"value":"engineering","label":"Engineering","children":[{"value":"web","label":"Web platform"},{"value":"mobile","label":"Mobile"}]}]},{"value":"operations","label":"Operations","children":[{"value":"people","label":"People"},{"value":"finance","label":"Finance"}]}]'
+  ></c2-cascader>
+</div>
+```

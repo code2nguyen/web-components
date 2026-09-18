@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-theme-select</title>
+    <script type="module" src="/src/theme-select.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #ffffff;
+        color: #18181b;
+      }
+      html[data-theme='dark'] body {
+        background: #09090b;
+        color: #fafafa;
+      }
+      html[data-theme='dark'] {
+        --c2-theme-select__trigger--color: #fafafa;
+        --c2-theme-select__trigger__hover--background: #27272a;
+        --c2-theme-select__trigger__active--background: #3f3f46;
+        --c2-theme-select__menu--background: #18181b;
+        --c2-theme-select__menu--border: 1px solid #27272a;
+        --c2-theme-select__menu-item--color: #fafafa;
+        --c2-theme-select__menu-item__hover--background: #27272a;
+      }
+      section {
+        margin-bottom: 40px;
+      }
+      h2 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.6;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .boxed {
+        --c2-theme-select__trigger--border: 1px solid #bcbcc6;
+      }
+      .pill {
+        --c2-theme-select__trigger--border-radius: 999px;
+        --c2-theme-select__trigger--background: #f4f4f5;
+        --c2-theme-select__trigger--size: 36px;
+      }
+      #scoped {
+        padding: 16px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+      #scoped[data-theme='dark'] {
+        background: #18181b;
+        color: #fafafa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h2>Three modes — click cycles, hover opens the menu</h2>
+      <div class="row">
+        <c2-theme-select></c2-theme-select>
+        <c2-theme-select show-label></c2-theme-select>
+        <c2-theme-select class="boxed" placement="bottom-end"></c2-theme-select>
+      </div>
+    </section>
+
+    <section>
+      <h2>Two modes — a plain toggle, no menu</h2>
+      <div class="row">
+        <c2-theme-select modes="light,dark" class="pill"></c2-theme-select>
+        <c2-theme-select modes="light,dark" show-label></c2-theme-select>
+      </div>
+    </section>
+
+    <section>
+      <h2>Menu always, custom modes, manual (fires <code>theme-change</code> only)</h2>
+      <div class="row">
+        <c2-theme-select menu="always" modes="light,dark"></c2-theme-select>
+        <c2-theme-select id="custom" manual show-label storage-key=""></c2-theme-select>
+        <output id="log">—</output>
+      </div>
+    </section>
+
+    <section>
+      <h2>Own icons — each one shows in the trigger and in its menu row</h2>
+      <div class="row">
+        <c2-theme-select storage-key="" manual show-label>
+          <svg slot="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 3v18"></path>
+          </svg>
+          <svg slot="light-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="9"></circle>
+          </svg>
+          <svg slot="dark-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <circle cx="12" cy="12" r="9"></circle>
+          </svg>
+        </c2-theme-select>
+      </div>
+    </section>
+
+    <section>
+      <h2>Disabled &amp; scoped to an element instead of &lt;html&gt;</h2>
+      <div class="row">
+        <c2-theme-select disabled></c2-theme-select>
+        <c2-theme-select target="scoped" storage-key="" show-label></c2-theme-select>
+      </div>
+      <div id="scoped">This box is themed on its own <code>data-theme</code>.</div>
+    </section>
+
+    <script type="module">
+      const custom = document.querySelector('#custom')
+      custom.modes = [
+        { value: 'system', label: 'Follow system' },
+        { value: 'light', label: 'Daylight' },
+        { value: 'dark', label: 'Midnight' },
+        { value: 'sepia', label: 'Sepia', scheme: 'light' },
+      ]
+      custom.addEventListener('theme-change', (event) => {
+        document.querySelector('#log').textContent = `${event.detail.value} → ${event.detail.theme}`
+      })
+    </script>
+  </body>
+</html>

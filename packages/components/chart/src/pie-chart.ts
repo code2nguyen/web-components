@@ -27,6 +27,8 @@ export interface PieChart {
  *
  * @tag c2-pie-chart
  *
+ * @slotcomponent c2-chart-series
+ *
  * @cssproperty {border} [--c2-chart__slice--border=2px solid #ffffff] - Border drawn between adjacent slices.
  */
 @customElement('c2-pie-chart')
@@ -44,6 +46,9 @@ export class PieChart extends EchartsChartBase {
 
   /** Where the slice labels are drawn, or `none` to leave them off. */
   @property({ type: String }) labels: 'none' | 'inside' | 'outside' = 'none'
+
+  /** Content shown by visible slice labels. */
+  @property({ type: String, attribute: 'label-content' }) labelContent: 'name' | 'value' | 'percent' | 'name-percent' = 'name'
 
   /** Orders the slices by value rather than keeping the data order. */
   @property({ type: String }) sort: 'none' | 'asc' | 'desc' = 'none'
@@ -116,6 +121,7 @@ export class PieChart extends EchartsChartBase {
         position: this.labels === 'inside' ? 'inside' : 'outside',
         color: this.labels === 'inside' ? theme.surface : theme.color,
         fontSize: theme.fontSize,
+        formatter: this.labelFormatter(),
       },
       labelLine: { show: this.labels === 'outside' },
       // `--c2-chart__slice--border` is a documented variable, so it has to be the thing that draws the gap
@@ -123,6 +129,19 @@ export class PieChart extends EchartsChartBase {
       itemStyle: sliceBorder(this, theme.surface),
       // The slice names ride on each datum from the `named` projection, so no extra wiring is needed.
       sort: this.sort === 'none' ? undefined : this.sort === 'asc' ? 'ascending' : 'descending',
+    }
+  }
+
+  private labelFormatter(): string {
+    switch (this.labelContent) {
+      case 'value':
+        return '{c}'
+      case 'percent':
+        return '{d}%'
+      case 'name-percent':
+        return '{b} · {d}%'
+      default:
+        return '{b}'
     }
   }
 }

@@ -1,0 +1,47 @@
+---
+title: 'Date Selector'
+description: 'Accessible one- or two-month calendar for choosing a date range.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { DateSelector } from '@c2n/date-selector'
+
+`c2-date-selector` chooses a start and end date without a time-zone conversion. The first activation starts a range,
+the second completes it, and the third starts over. Use `min` and `max` for availability, `months="1"` for compact
+layouts, and `locale` or `week-start` to match the audience. Arrow keys move between days; Page Up and Page Down move
+between months. The calendar keeps a usable seven-column minimum width; on mobile, a two-month selector stacks the
+months vertically.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/date-selector
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/date-selector
+<style>
+  .date-selector-compact {
+    --c2-date-selector__day--size: 34px;
+    --c2-date-selector--box-shadow: none;
+  }
+</style>
+
+<div data-label="Date range">
+  <c2-date-selector from="2026-09-10" to="2026-09-15" locale="en-US"></c2-date-selector>
+</div>
+<div data-label="Constrained">
+  <c2-date-selector class="date-selector-compact" months="1" from="2026-10-05" min="2026-10-01" max="2026-10-24" locale="en-US"></c2-date-selector>
+</div>
+<div data-label="Disabled">
+  <c2-date-selector months="1" from="2026-11-08" disabled locale="en-US"></c2-date-selector>
+</div>
+```
+
+Listen for `change` to receive `{ from, to }` in `event.detail`; both are `YYYY-MM-DD` strings. `input` fires at the
+same time for generic form bindings. With `name="trip"`, a complete range submits `trip` and `trip-end`; override the
+second key with `end-name`. `required` treats an unfinished range as missing.

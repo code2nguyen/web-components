@@ -44,17 +44,6 @@
         --c2-button__container__selected--background-color: #edf1fe;
         --c2-button__container__selected--color: #0265dc;
       }
-      .segmented {
-        --c2-button-group--border-radius: 8px;
-        --c2-button-group__divider--color: transparent;
-        --c2-button__container--height: 32px;
-        --c2-button__container--background-color: #f4f4f5;
-        --c2-button__container--color: #52525b;
-        --c2-button__container__hover--background-color: #e4e4e7;
-        --c2-button__container__selected--background-color: #ffffff;
-        --c2-button__container__selected--color: #18181b;
-        --c2-button__container__selected--border: 1px solid #d4d4d8;
-      }
     </style>
   </head>
   <body>
@@ -83,10 +72,14 @@
           <c2-button value="week">Week</c2-button>
           <c2-button value="month">Month</c2-button>
         </c2-button-group>
-        <c2-button-group class="segmented" selection="single" value="board" aria-label="View">
+        <c2-button-group appearance="segmented" value="board" aria-label="View">
           <c2-button value="list">List</c2-button>
           <c2-button value="board">Board</c2-button>
           <c2-button value="calendar">Calendar</c2-button>
+        </c2-button-group>
+        <c2-button-group appearance="segmented" size="s" aria-label="Density">
+          <c2-button value="comfortable">Comfortable</c2-button>
+          <c2-button value="compact">Compact</c2-button>
         </c2-button-group>
         <c2-button-group id="tags" class="outlined" selection="multiple" value="a,c" aria-label="Tags">
           <c2-button value="a">Alpha</c2-button>
@@ -133,7 +126,7 @@
           <c2-button value="m">M</c2-button>
           <c2-button value="l">L</c2-button>
         </c2-button-group>
-        <c2-button-group class="outlined" selection="single" value="no" style="width: 300px; --c2-button-group__item--flex: 1 1 0" aria-label="Answer">
+        <c2-button-group appearance="segmented" stretched value="no" style="max-width: 300px" aria-label="Answer">
           <c2-button value="yes">Yes</c2-button>
           <c2-button value="no">No</c2-button>
           <c2-button value="maybe">Maybe</c2-button>

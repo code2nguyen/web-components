@@ -76,7 +76,7 @@ Read `references/frameworks.md` for details.
 - Plain HTML / Vite: side-effect imports in a `<script type="module">` or the entry module.
 - Lit: import what you render; subclass for tag variants; `redispatchEvent` for child events.
 - Astro: `@astrojs/lit` islands (`<Button client:load>`, kebab-case attributes only; a `client:only` island must not contain islands) or plain tags plus a client `<script>` for repeated markup; variant styles need `is:global`.
-- React 19: props become attributes, custom events via `ref.addEventListener`; older React needs string attributes and refs.
+- React 19: props become attributes, custom events via `ref.addEventListener`; older React needs string attributes and refs. Server-rendered (Next.js): kebab-case attribute names (`min-width`, not `minWidth`) and objects through a ref.
 - Vue: `compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-')`; `.prop` for arrays/objects.
 
 ## 7. Verify

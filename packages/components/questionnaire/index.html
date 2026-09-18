@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-questionnaire</title>
+    <script type="module" src="/src/questionnaire.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px;
+        font-family: system-ui, sans-serif;
+        color: #18181b;
+      }
+      c2-questionnaire {
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-questionnaire complete-label="Save plan"></c2-questionnaire>
+    <script type="module">
+      const questionnaire = document.querySelector('c2-questionnaire')
+      questionnaire.questions = [
+        {
+          id: 'direction',
+          title: 'What should the agent build next?',
+          description: 'Choose a direction or describe another task.',
+          otherPlaceholder: 'Describe another feature…',
+          options: [
+            { value: 'timeline', label: 'Tool call timeline', description: 'Show what the agent ran and what came back.' },
+            { value: 'approvals', label: 'Approval checkpoints', description: 'Ask before sensitive or destructive actions.' },
+            { value: 'handoffs', label: 'Sub-agent handoffs', description: 'Make delegated work and results easier to follow.' },
+          ],
+        },
+        {
+          id: 'updates',
+          title: 'What should every progress update include?',
+          description: 'Select all that apply, or skip this question.',
+          type: 'multiple',
+          skippable: true,
+          options: ['Progress', 'Decisions', 'Risks', 'Next step'].map((label) => ({ value: label.toLowerCase(), label })),
+        },
+        {
+          id: 'timing',
+          title: 'When should work begin?',
+          description: 'Choose when the agent should begin the work.',
+          options: [
+            { value: 'now', label: 'Start now' },
+            { value: 'cycle', label: 'Next development cycle' },
+            { value: 'backlog', label: 'Add it to the backlog' },
+          ],
+        },
+      ]
+      questionnaire.addEventListener('complete', (event) => console.log(event.detail.answers))
+    </script>
+  </body>
+</html>

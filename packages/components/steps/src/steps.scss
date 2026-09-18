@@ -1,0 +1,31 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-steps,
+  $theme: (
+    gap: 0px,
+    background: null,
+    border: null,
+    border-radius: null,
+    padding-block: 0px,
+    padding-inline: 0px,
+    overflow-y: visible,
+    max-height: none,
+  )
+);
+
+// Vertical only: a step that groups sub-steps is a disclosure, and a disclosure is a thing that opens downwards.
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  box-sizing: border-box;
+  max-height: css.cssVar(max-height);
+  overflow-y: css.cssVar(overflow-y);
+  padding: css.cssVar(padding-block) css.cssVar(padding-inline);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+}
+
+:host([hidden]) {
+  display: none;
+}

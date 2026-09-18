@@ -10,6 +10,105 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // Border Beam geometry and timing belong to the decorative effect. Its principal colour and radius follow the
+  // active theme while the second gradient stop remains an intentionally coordinated accent.
+  '--c2-border-beam--outset': { exclude: 'container border alignment geometry' },
+  '--c2-border-beam__beam--width': { exclude: 'decorative stroke geometry' },
+  '--c2-border-beam__beam--size': { exclude: 'decorative highlight length' },
+  '--c2-border-beam__beam--radius': { token: 'radius-lg' },
+  '--c2-border-beam__beam--color-from': { token: 'color-primary' },
+  '--c2-border-beam__beam--color-to': { exclude: 'coordinated decorative gradient stop' },
+  '--c2-border-beam__beam--opacity': { exclude: 'decorative effect opacity' },
+  '--c2-border-beam__beam--filter': { exclude: 'decorative glow effect' },
+  '--c2-border-beam__beam--duration': { exclude: 'decorative animation timing' },
+  '--c2-border-beam__beam--delay': { exclude: 'decorative animation timing' },
+  '--c2-border-beam--z-index': { exclude: 'consumer stacking context' },
+  // Status-panel dimensions follow the surrounding page/card composition. Semantic outcome colours stay stable across
+  // brand themes so success, warning and error do not inherit unrelated accent colours.
+  '--c2-status-panel__container--width': { exclude: 'responsive status-panel width' },
+  '--c2-status-panel__container--max-width': { exclude: 'readable status-panel measure' },
+  '--c2-status-panel__container--min-height': { exclude: 'status-panel composition height' },
+  '--c2-status-panel__container--padding': { exclude: 'status-panel composition spacing' },
+  '--c2-status-panel__container--gap': { exclude: 'status-panel composition rhythm' },
+  '--c2-status-panel__container--border': { exclude: 'transparent opt-in panel frame' },
+  '--c2-status-panel__media--size': { exclude: 'status media geometry' },
+  '--c2-status-panel__media-icon--size': { exclude: 'status icon geometry' },
+  '--c2-status-panel__media__success--background-color': { exclude: 'semantic success colour' },
+  '--c2-status-panel__media__success--color': { exclude: 'semantic success colour' },
+  '--c2-status-panel__media__warning--background-color': { exclude: 'semantic warning colour' },
+  '--c2-status-panel__media__warning--color': { exclude: 'semantic warning colour' },
+  '--c2-status-panel__media__error--background-color': { exclude: 'semantic error colour' },
+  '--c2-status-panel__media__error--color': { exclude: 'semantic error colour' },
+  '--c2-status-panel__header--gap': { exclude: 'status copy rhythm' },
+  '--c2-status-panel__title--font-size': { exclude: 'status heading scale' },
+  '--c2-status-panel__title--line-height': { exclude: 'status heading line height' },
+  '--c2-status-panel__description--line-height': { exclude: 'status description line height' },
+  '--c2-status-panel__description--max-width': { exclude: 'readable status description measure' },
+  '--c2-status-panel__actions--gap': { exclude: 'status action rhythm' },
+  '--c2-status-panel__content--max-width': { exclude: 'readable status detail measure' },
+  '--c2-status-panel__content--padding': { exclude: 'status detail spacing' },
+  // QR dimensions protect scan geometry; the white module field follows the active surface token.
+  '--c2-qr-code--size': { exclude: 'consumer-controlled QR output size' },
+  '--c2-qr-code__background--color': { token: 'color-surface' },
+  '--c2-qr-code__center--size': { exclude: 'center mark constrained by QR scan geometry' },
+  '--c2-qr-code__center--padding': { exclude: 'center mark quiet spacing' },
+  // Upload measurements belong to the drop-zone composition; dashed borders keep their style while following theme colours.
+  '--c2-upload--width': { exclude: 'responsive upload width' },
+  '--c2-upload__dropzone--padding': { exclude: 'drop-zone spacing' },
+  '--c2-upload__dropzone--gap': { exclude: 'drop-zone rhythm' },
+  '--c2-upload__dropzone--border': {
+    token: 'border',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
+  },
+  '--c2-upload__dropzone__hover--border': {
+    token: 'border',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #a1a1aa)',
+  },
+  '--c2-upload__dropzone__drag--background': { token: 'color-primary-container' },
+  '--c2-upload__dropzone__drag--border': {
+    token: 'color-primary',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
+  '--c2-upload__dropzone__focus--outline-offset': { exclude: 'drop-zone focus geometry' },
+  '--c2-upload__icon--size': { exclude: 'drop-zone icon size' },
+  '--c2-upload__list--gap': { exclude: 'attachment queue rhythm' },
+  '--c2-upload__list--margin-top': { exclude: 'attachment queue spacing' },
+  '--c2-upload__error--gap': { exclude: 'validation message rhythm' },
+  // Rate geometry and its familiar gold score colour are intentionally independent of the brand accent.
+  '--c2-rate__icon--size': { exclude: 'rating icon size' },
+  '--c2-rate__container--gap': { exclude: 'rating icon rhythm' },
+  '--c2-rate__icon__filled--color': { exclude: 'semantic rating colour' },
+  '--c2-rate__icon__preview--color': { exclude: 'semantic rating preview colour' },
+  '--c2-rate__icon__hover--scale': { exclude: 'rating hover motion' },
+  '--c2-rate__container__focus--outline-offset': { exclude: 'rating focus geometry' },
+  // Cascader measurements describe its multi-column interaction geometry rather than the global control scale.
+  '--c2-cascader__trigger--min-height': { exclude: 'cascader trigger geometry' },
+  '--c2-cascader__trigger--width': { exclude: 'responsive trigger width' },
+  '--c2-cascader__trigger--padding': { exclude: 'internal trigger spacing' },
+  '--c2-cascader__trigger--gap': { exclude: 'internal trigger spacing' },
+  '--c2-cascader__trigger__focus--outline-offset': { exclude: 'flush focus ring offset' },
+  '--c2-cascader__icon--size': { exclude: 'cascader affordance size' },
+  '--c2-cascader__panel--box-shadow': { token: 'shadow-md' },
+  '--c2-cascader__panel--max-width': { exclude: 'viewport-aware panel width' },
+  '--c2-cascader__column--min-width': { exclude: 'hierarchy column geometry' },
+  '--c2-cascader__column--max-width': { exclude: 'hierarchy column geometry' },
+  '--c2-cascader__column--max-height': { exclude: 'viewport-aware column height' },
+  '--c2-cascader__column--padding': { exclude: 'internal column spacing' },
+  '--c2-cascader__option--min-height': { exclude: 'hierarchy row geometry' },
+  '--c2-cascader__option--padding': { exclude: 'internal option spacing' },
+  '--c2-cascader__option--gap': { exclude: 'internal option spacing' },
+  '--c2-cascader__option__active--background': { token: 'color-primary-container' },
+  '--c2-cascader__empty--padding': { exclude: 'empty-state spacing' },
+  // Questionnaire dimensions follow its content and embedding context rather than global component sizing tokens.
+  '--c2-questionnaire--width': { exclude: 'responsive flow width' },
+  '--c2-questionnaire--max-width': { exclude: 'readable flow measure' },
+  '--c2-questionnaire__title--font-size': { exclude: 'question heading scale' },
+  '--c2-questionnaire__options--gap': { exclude: 'internal option rhythm' },
+  '--c2-questionnaire__option--padding': { exclude: 'internal option spacing' },
+  '--c2-questionnaire__control--size': { exclude: 'native-choice control size' },
+  '--c2-questionnaire__primary-action--color': onPrimary,
+  // A date selector is commonly used as a floating booking panel, so its surface follows the shared popover shadow.
+  '--c2-date-selector--box-shadow': { token: 'shadow-md' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },
@@ -68,6 +167,11 @@ export const overrides: Record<string, Override> = {
     token: 'color-primary-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
   },
+  // Selected + hovered tree row: the same stronger tint of the selected surface as the list item.
+  '--c2-tree-item__selected__hover--background': {
+    token: 'color-primary-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
+  },
   // Typo in the component's variable name (`borde-leftr`); it is the real name the slider reads, so theme it like its siblings.
   '--c2-color-slider--borde-leftr': {
     token: 'border',
@@ -92,6 +196,19 @@ export const overrides: Record<string, Override> = {
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
   '--c2-avatar--color': { exclude: 'identity colour' },
+  '--c2-avatar__editor--color': { token: 'color-on-inverse-surface' },
+  '--c2-avatar__editor__focus--outline-offset': { exclude: 'avatar editor focus geometry' },
+  '--c2-avatar__editor-icon--size': { exclude: 'avatar editor icon size' },
+  '--c2-avatar__remove--size': { exclude: 'avatar remove action geometry' },
+  '--c2-avatar__remove--box-shadow': { token: 'shadow-sm' },
+  // Avatar-group width, overlap and item measurements are responsive composition controls. The overflow badge uses
+  // the inverse surface pair so it remains legible in both light and dark themes.
+  '--c2-avatar-group--max-width': { exclude: 'responsive avatar-group width' },
+  '--c2-avatar-group--overlap': { exclude: 'avatar stacking geometry' },
+  '--c2-avatar-group__avatar--box-shadow': { exclude: 'overlap separation ring' },
+  '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
+  '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
+  '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
   // Code viewer: monospace font and theme-neutral translucent greys / status colours that work on any syntax theme.
   '--c2-code-viewer--font-family': { exclude: 'monospace font, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -105,6 +222,8 @@ export const overrides: Record<string, Override> = {
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
   // Error focus ring stays red on purpose.
   '--c2-text-field__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
+  '--c2-date-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
+  '--c2-number-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
   // 1px radii on the colour picker swatch are a detail, not a shape token.
   '--c2-color-select--border-top-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-top-right-radius': { exclude: 'swatch detail radius' },
@@ -124,4 +243,37 @@ export const overrides: Record<string, Override> = {
     token: 'color-outline-variant',
     value: '-1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
   },
+  // The pressed trigger sits one step darker than the hover surface; the ramp has no token for that step.
+  '--c2-theme-select__trigger__active--background': { exclude: 'pressed tint one step below color-surface-container' },
+  // Code editor: the foreground and the code font size belong to the syntax palette, which is themed as one unit
+  // through `--c2-code-editor__theme--token-*` (the `theme` part is excluded wholesale, as it is for the viewer).
+  // Splitting the foreground off would leave a theme-aware body colour over a fixed token palette.
+  '--c2-code-editor--color': { exclude: 'code foreground; the syntax palette is themed as a unit' },
+  '--c2-code-editor--font-size': { exclude: 'code font size, off the 12/14 text scale' },
+  // The editor's three accent tints are alpha blends the colour ramp has no entries for, but they should still
+  // follow the app's accent — `color-mix` expresses that without a token per opacity step.
+  '--c2-code-editor__active-line--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 4%, transparent)',
+  },
+  '--c2-code-editor__selection--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 18%, transparent)',
+  },
+  '--c2-code-editor__matching-bracket--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 16%, transparent)',
+  },
+  // Steps: success and warning are outcomes, and stay stable across brand themes the way status-panel's do — the
+  // ramp has no token for either. `error`, `running` and `current` do map, to color-error and color-primary.
+  '--c2-step__success--color': { exclude: 'semantic success colour' },
+  '--c2-step__warning--color': { exclude: 'semantic warning colour' },
+  // The secondary runs are deliberately the normal weight, which the scale has no token for.
+  '--c2-step__detail--font-weight': { exclude: 'normal weight, below the font-weight scale' },
+  '--c2-step__trailing--font-weight': { exclude: 'normal weight, below the font-weight scale' },
+  // A dashboard pane is bare by design — the surface it holds owns the radius — while its resize handle floats over
+  // that content, so the bar under the pointer is an accent tint rather than one of the surfaces.
+  '--c2-dashboard--border-radius': { exclude: 'square by default; the grid is a frame only once an app fills it' },
+  '--c2-dash-card--border-radius': { exclude: 'bare pane; the surface inside it owns the radius' },
+  '--c2-dash-card__handle__hover--background': { token: 'color-primary-glow' },
 }

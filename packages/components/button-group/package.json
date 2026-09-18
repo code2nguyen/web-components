@@ -1,6 +1,6 @@
 {
   "name": "@c2n/button-group",
-  "version": "0.0.7",
+  "version": "0.0.12",
   "type": "module",
   "main": "dist/button-group.js",
   "exports": {
@@ -53,7 +53,8 @@
     "type-check": {
       "dependencies": [
         "../../core:build",
-        "../button:build"
+        "../button:build",
+        "../icon-button:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -65,8 +66,9 @@
     }
   },
   "dependencies": {
-    "@c2n/button": "0.0.7",
-    "@c2n/core": "0.0.7",
+    "@c2n/button": "0.0.12",
+    "@c2n/core": "0.0.12",
+    "@c2n/icon-button": "0.0.12",
     "lit": "3.3.3"
   },
   "devDependencies": {

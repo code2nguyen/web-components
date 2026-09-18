@@ -6,6 +6,10 @@
 //
 // Register the elements at module scope before React renders, or React writes an object prop as an
 // attribute and it stringifies.
+//
+// On a server-rendered page (Next.js, React Router SSR) write a camelCase property by its kebab-case attribute
+// name ('row-key', not rowKey): the server emits props verbatim, HTML lowercases them, and hydration does not
+// set properties. Those names are listed next to the properties below.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
@@ -17,26 +21,124 @@ import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
+import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
+/** What React writes to a custom element's attribute: true becomes the empty string, false removes it. */
+type Attribute = string | number | boolean
 
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-area-chart': C2Props<AreaChart>
-      'c2-bar-chart': C2Props<BarChart>
-      'c2-candlestick-chart': C2Props<CandlestickChart>
+      'c2-area-chart': C2Props<AreaChart> & {
+        'fill-opacity'?: Attribute
+        'y-min'?: Attribute
+        'y-max'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
+      'c2-bar-chart': C2Props<BarChart> & {
+        'bar-width'?: Attribute
+        'bar-gap'?: Attribute
+        'y-min'?: Attribute
+        'y-max'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
+      'c2-candlestick-chart': C2Props<CandlestickChart> & {
+        'open-field'?: Attribute
+        'close-field'?: Attribute
+        'low-field'?: Attribute
+        'high-field'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
       'c2-chart-legend': C2Props<ChartLegend>
-      'c2-chart-series': C2Props<ChartSeries>
+      'c2-chart-series': C2Props<ChartSeries> & {
+        'line-width'?: Attribute
+        'span-gaps'?: Attribute
+      }
       'c2-chart-tooltip': C2Props<ChartTooltip>
-      'c2-gauge-chart': C2Props<GaugeChart>
-      'c2-line-chart': C2Props<LineChart>
-      'c2-pie-chart': C2Props<PieChart>
-      'c2-scatter-chart': C2Props<ScatterChart>
-      'c2-sparkline': C2Props<Sparkline>
+      'c2-gauge-chart': C2Props<GaugeChart> & {
+        'start-angle'?: Attribute
+        'end-angle'?: Attribute
+        'split-number'?: Attribute
+        'value-suffix'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
+      'c2-line-chart': C2Props<LineChart> & {
+        'y-min'?: Attribute
+        'y-max'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
+      'c2-pie-chart': C2Props<PieChart> & {
+        'inner-radius'?: Attribute
+        'outer-radius'?: Attribute
+        'start-angle'?: Attribute
+        'label-content'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
+      'c2-radar-chart': C2Props<RadarChart> & {
+        'start-angle'?: Attribute
+        'split-number'?: Attribute
+        'fill-opacity'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
+      'c2-scatter-chart': C2Props<ScatterChart> & {
+        'symbol-size'?: Attribute
+        'large-threshold'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
+      'c2-sparkline': C2Props<Sparkline> & {
+        'y-min'?: Attribute
+        'y-max'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+      }
     }
   }
 }

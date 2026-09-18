@@ -2,14 +2,19 @@
 import { getCollection } from 'astro:content'
 import { COMPONENT_CATEGORIES, EXAMPLE_FRAMEWORKS, EXAMPLE_FRAMEWORK_LABELS } from '../schemas'
 import SiteTextField from './ui/SiteTextField.astro'
+import SiteIconButton from './ui/SiteIconButton.astro'
+import { FeatherXIcon } from './ui/icons'
+import { rawElement, escapeHtml } from '../utils/raw-element'
 
 interface Props {
   /** Which section this sidebar navigates. */
   section?: 'components' | 'icons' | 'guides' | 'examples'
   /** Currently open entry id. */
   currentId?: string
+  /** Places the filter and close control together at the top of the mobile drawer. */
+  drawer?: boolean
 }
-const { section = 'components', currentId } = Astro.props
+const { section = 'components', currentId, drawer = false } = Astro.props
 const base = import.meta.env.BASE_URL
 
 const components = (await getCollection('components')).sort((a, b) => a.data.title.localeCompare(b.data.title))
@@ -76,16 +81,64 @@ const total = section === 'components' ? components.length : groups.reduce((coun
 
 // One group is just a list with a heading: nothing to collapse, nothing worth filtering.
 const collapsible = groups.length > 1
+
+/**
+ * The nav as a `c2-tree`, emitted as a raw string.
+ *
+ * Two things force this shape. It must bypass `@astrojs/lit` (see `utils/raw-element.ts`): server-rendering 138
+ * rows inlines the row stylesheet into a declarative shadow root per row, which took a component page from
+ * 606 KB to 2.1 MB of HTML, and the rows arrived inert behind `defer-hydration`. And each row's link is slotted
+ * into `label` rather than set as the item's `href`, so the anchors stay in the light DOM — they are the
+ * internal link graph a crawler follows, and they keep the nav usable before the tree upgrades.
+ */
+const treeHtml = collapsible
+  ? rawElement(
+      'c2-tree',
+      {
+        class: 'sidebar__tree',
+        'children-outline': true,
+        selection: 'none',
+        // A category row is a heading with nothing to select, and the row already shows a pointer cursor, so
+        // the whole bar has to toggle it — hunting for the 14px chevron is the one thing the old
+        // `c2-details` nav never made anyone do. Leaf rows are left alone (`expandOnClick` only fires on a
+        // branch), so a page link still just navigates.
+        'expand-on-click': true,
+        'expanded-items': groups
+          .filter((group) => group.items.some((item) => item.id === currentId))
+          .map((group) => group.title)
+          .join(';'),
+      },
+      groups
+        .map((group) => {
+          const count = 'count' in group ? group.count : group.items.length
+          const rows = group.items
+            .map((item) =>
+              rawElement(
+                'c2-tree-item',
+                { value: item.id, class: 'sidebar__item', 'data-search': item.search.toLowerCase() },
+                `<a slot="label" href="${escapeHtml(item.href)}"${item.id === currentId ? ' aria-current="page"' : ''}>${escapeHtml(item.title)}</a>`,
+              ),
+            )
+            .join('')
+          return rawElement(
+            'c2-tree-item',
+            { value: group.title, class: 'sidebar__group', 'data-group': group.title },
+            `<span slot="label">${escapeHtml(group.title)}</span>` + `<span slot="actions" class="sidebar__count" data-total="${count}">${count}</span>` + rows,
+          )
+        })
+        .join(''),
+    )
+  : ''
 ---
 
 <nav
-  class="sidebar__nav"
+  class:list={['sidebar__nav', { 'sidebar__nav--drawer': drawer }]}
   data-section={section}
   aria-label={section === 'components' ? 'Components' : section === 'icons' ? 'Icon sets' : section === 'examples' ? 'Example apps' : 'Guides'}
 >
   {
     collapsible && (
-      <div class="sidebar__filter">
+      <div class:list={['sidebar__filter', { 'sidebar__filter--drawer': drawer }]}>
         <SiteTextField
           class="sidebar__filter-field"
           label={`Filter ${overview.noun}`}
@@ -94,6 +147,21 @@ const collapsible = groups.length > 1
           hydrate="defined"
           placeholder={`Filter ${overview.noun}…`}
         />
+        {drawer && (
+          <SiteIconButton label="Close navigation" tooltip={false} size="sm" side-nav-toggle>
+            <FeatherXIcon client:load />
+          </SiteIconButton>
+        )}
+      </div>
+    )
+  }
+
+  {
+    drawer && !collapsible && (
+      <div class="sidebar__drawer-actions">
+        <SiteIconButton label="Close navigation" tooltip={false} size="sm" side-nav-toggle>
+          <FeatherXIcon client:load />
+        </SiteIconButton>
       </div>
     )
   }
@@ -104,10 +172,13 @@ const collapsible = groups.length > 1
   </a>
 
   {
-    groups.map((group) => {
-      const items = (
+    collapsible ? (
+      <Fragment set:html={treeHtml} />
+    ) : (
+      // One group carries no information the "All …" link above it does not already give, so it goes unlabelled.
+      <div class="sidebar__group">
         <ul class="sidebar__items">
-          {group.items.map((item) => (
+          {groups[0].items.map((item) => (
             <li>
               <a href={item.href} data-search={item.search.toLowerCase()} aria-current={currentId === item.id ? 'page' : undefined}>
                 {item.title}
@@ -115,24 +186,8 @@ const collapsible = groups.length > 1
             </li>
           ))}
         </ul>
-      )
-      // `c2-details` is the site's own disclosure: native `<details>` semantics underneath, plus the height/fade
-      // animation and the themed header we would otherwise hand-roll here.
-      return collapsible ? (
-        <c2-details class="sidebar__group" data-group={group.title} expanded={group.items.some((item) => item.id === currentId) || undefined}>
-          <span slot="title" class="sidebar__group-title">
-            {group.title}
-            <span class="sidebar__count" data-total={'count' in group ? group.count : group.items.length}>
-              {'count' in group ? group.count : group.items.length}
-            </span>
-          </span>
-          {items}
-        </c2-details>
-      ) : (
-        // One group carries no information the "All …" link above it does not already give, so it goes unlabelled.
-        <div class="sidebar__group">{items}</div>
-      )
-    })
+      </div>
+    )
   }
 
   {
@@ -163,6 +218,23 @@ const collapsible = groups.length > 1
     padding-top: var(--sidebar-filter-top-space, 0px);
     padding-bottom: 12px;
     background: var(--site-color-surface);
+
+    &--drawer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  .sidebar__filter-field {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sidebar__drawer-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-bottom: 12px;
   }
 
   .sidebar__overview {
@@ -192,61 +264,89 @@ const collapsible = groups.length > 1
     display: none;
   }
 
-  // c2-details ships as a bordered card; a nav group is the opposite of that. Everything here is one of its
-  // documented variables, so the component itself stays untouched.
-  c2-details.sidebar__group {
+  // c2-tree ships as a bordered card; a nav is the opposite of that. Everything here is one of its own
+  // variables — no reaching into the shadow DOM.
+  // These selectors target markup emitted through `set:html`, which never carries Astro's scope class, so
+  // they have to be global. The class names are specific enough to stay contained.
+  :global(.sidebar__tree) {
     display: block;
-    // Per side, not a shorthand: `@c2n/theme`'s base.css sets each of these, so a shorthand the component
-    // falls back to would never be consulted.
-    --c2-details--border-top: none;
-    --c2-details--border-right: none;
-    --c2-details--border-bottom: none;
-    --c2-details--border-left: none;
-    --c2-details--background: transparent;
-    --c2-details--border-top-left-radius: var(--site-radius-sm);
-    --c2-details--border-top-right-radius: var(--site-radius-sm);
-    --c2-details--border-bottom-left-radius: var(--site-radius-sm);
-    --c2-details--border-bottom-right-radius: var(--site-radius-sm);
-    --c2-details--transition-duration: 180ms;
-    --c2-details__header--padding-top: 5px;
-    --c2-details__header--padding-right: 8px;
-    --c2-details__header--padding-bottom: 5px;
-    --c2-details__header--padding-left: 8px;
-    --c2-details__header--gap: 6px;
-    // Chevron first, so the group reads as a disclosure rather than as a label with a stray affordance.
-    --c2-details__header--flex-direction: row-reverse;
-    // Right when closed, down when open — the component's own chevron, at both angles.
-    --c2-details__header__icon--rotate-collapsed: -90deg;
-    --c2-details__header__icon--rotate: 0deg;
-    --c2-details__header--font-size: 13px;
-    --c2-details__header--font-weight: 600;
-    --c2-details__header--color: var(--site-color-on-surface);
-    --c2-details__header__hover--background: var(--site-color-surface-container-2);
-    --c2-details__header__icon--width: 14px;
-    --c2-details__header__icon--height: 14px;
-    --c2-details__header__icon--color: var(--site-color-on-surface-muted);
-    --c2-details__header__focus--outline: 2px solid var(--site-color-primary);
-    --c2-details__content--padding-top: 2px;
-    --c2-details__content--padding-right: 0px;
-    --c2-details__content--padding-bottom: 0px;
-    --c2-details__content--padding-left: 0px;
-  }
-  // Slotted content renders before the element upgrades; without this the whole list flashes open on every load.
-  c2-details:not(:defined) > :not([slot]) {
-    display: none;
+    --c2-tree--background: transparent;
+    --c2-tree--padding-top: 0px;
+    --c2-tree--padding-bottom: 0px;
+    --c2-tree--border-top-left-radius: 0;
+    --c2-tree--border-top-right-radius: 0;
+    --c2-tree--border-bottom-left-radius: 0;
+    --c2-tree--border-bottom-right-radius: 0;
+
+    --c2-tree-item--font-size: 13px;
+    --c2-tree-item--color: var(--site-color-on-surface-variant);
+    --c2-tree-item__row--min-height: 28px;
+    --c2-tree-item__row--indent: 15px;
+    --c2-tree-item__row--padding-inline-start: 8px;
+    --c2-tree-item__row--padding-inline-end: 8px;
+    --c2-tree-item__row--border-radius: var(--site-radius-sm);
+    --c2-tree-item__hover--background: var(--site-color-surface-container-2);
+    --c2-tree-item__hover--color: var(--site-color-on-surface);
+    --c2-tree-item__toggle--size: 14px;
+    --c2-tree-item__toggle--color: var(--site-color-on-surface-muted);
+    --c2-tree-item__focus--outline: 2px solid var(--site-color-primary);
+    --c2-tree-item__guide--color: var(--site-color-outline-variant);
+    // The counts belong to a group row permanently; they are not a hover affordance.
+    --c2-tree-item__actions--opacity: 1;
   }
 
-  .sidebar__group-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    .sidebar__count {
-      margin-left: auto;
+  // A category row is a heading, so it reads louder than the pages under it.
+  :global(.sidebar__tree c2-tree-item.sidebar__group) {
+    --c2-tree-item--color: var(--site-color-on-surface);
+    --c2-tree-item--font-weight: 600;
+  }
+
+  // A group's overrides are custom properties, so they cascade into the rows nested inside it. Put the page
+  // rows back to the quieter treatment they had as list links.
+  :global(.sidebar__tree c2-tree-item.sidebar__item) {
+    --c2-tree-item--color: var(--site-color-on-surface-variant);
+    --c2-tree-item--font-weight: 400;
+  }
+
+  // The slotted anchor fills the row's label cell, so the click target is the whole row bar the toggle.
+  :global(.sidebar__tree c2-tree-item.sidebar__item a) {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    &:hover {
+      text-decoration: none;
+    }
+    &[aria-current='page'] {
+      color: var(--site-color-primary);
+      font-weight: 500;
     }
   }
 
-  .sidebar__count {
+  :global(.sidebar__tree c2-tree-item[hidden]) {
+    display: none;
+  }
+
+  /* Before the tree upgrades the rows are plain unknown elements, so the nav degrades to the indented list of
+     links it is built from — visible and clickable with no JS, rather than a blank panel. */
+  :global(c2-tree:not(:defined)) {
+    display: block;
+    c2-tree-item {
+      display: block;
+    }
+    c2-tree-item .sidebar__count {
+      display: none;
+    }
+    [slot='label'] {
+      display: block;
+      padding: 4px 8px;
+      font-size: 13px;
+    }
+    c2-tree-item c2-tree-item {
+      margin-left: 15px;
+    }
+  }
+
+  :global(.sidebar__count) {
     flex: none;
     font-size: 11px;
     font-weight: 500;
@@ -294,7 +394,7 @@ const collapsible = groups.length > 1
   import '../data/chrome-modules'
 
   type Nav = HTMLElement & { dataset: { section?: string } }
-  type SidebarGroup = HTMLElement & { expanded: boolean; updateComplete: Promise<unknown> }
+  type SidebarTree = HTMLElement & { expandedItems: string[]; updateComplete: Promise<unknown> }
 
   // Private browsing and blocked site data both make storage throw rather than return null.
   function read(key: string): string | null {
@@ -317,41 +417,35 @@ const collapsible = groups.length > 1
    * `c2-side-nav` drawer render the same markup.
    */
   async function enhance(nav: Nav): Promise<void> {
-    const groups = [...nav.querySelectorAll<SidebarGroup>('c2-details.sidebar__group')]
-    if (groups.length === 0) return
-
-    // The nav is server-rendered, then each c2-details creates its native disclosure asynchronously. Let that first
-    // render settle before restoring state so `expanded` and the internal `<details open>` cannot disagree on click.
-    await Promise.all(groups.map((group) => group.updateComplete))
+    const tree = nav.querySelector<SidebarTree>('c2-tree.sidebar__tree')
+    if (!tree) return
+    // The tree ships as a plain tag and upgrades from `data/chrome-modules.ts`, so wait for the definition
+    // before reading `expandedItems` off it.
+    await customElements.whenDefined('c2-tree')
+    await tree.updateComplete
 
     const key = `c2n-sidebar-groups:${nav.dataset.section ?? 'components'}`
-    const current = nav.querySelector<HTMLElement>('a[aria-current="page"]')
-    const currentGroup = current?.closest('c2-details.sidebar__group')
+    const groups = [...tree.querySelectorAll<HTMLElement>('c2-tree-item.sidebar__group')]
+    const currentGroup = nav.querySelector<HTMLElement>('[aria-current="page"]')?.closest<HTMLElement>('c2-tree-item.sidebar__group')
 
-    // Restore what the visitor left open, and always open the group they are actually in.
+    // Restore what the visitor left open, and always open the group they are actually in. The tree keeps one
+    // array for this, so the stored value *is* the state — no per-group reconciliation.
     const stored = read(key)
     if (stored !== null) {
       const open = new Set(stored.split('\n').filter(Boolean))
-      for (const group of groups) group.expanded = open.has(group.dataset.group ?? '') || group === currentGroup
-      await Promise.all(groups.map((group) => group.updateComplete))
+      if (currentGroup?.dataset.group) open.add(currentGroup.dataset.group)
+      tree.expandedItems = groups.map((group) => group.dataset.group ?? '').filter((title) => open.has(title))
+      await tree.updateComplete
     }
 
     // Filtering forces groups open, so remember the real state to put back when the query is cleared.
     let filtering = false
-    let restore: boolean[] = []
+    let restore: string[] = []
 
-    for (const group of groups) {
-      group.addEventListener('toggle', () => {
-        if (filtering) return
-        write(
-          key,
-          groups
-            .filter((item) => item.expanded)
-            .map((item) => item.dataset.group ?? '')
-            .join('\n'),
-        )
-      })
-    }
+    tree.addEventListener('expansion-change', () => {
+      if (filtering) return
+      write(key, tree.expandedItems.join('\n'))
+    })
 
     const field = nav.querySelector<HTMLElement & { value: string }>('.sidebar__filter-field')
     const empty = nav.querySelector<HTMLElement>('.sidebar__empty')
@@ -361,20 +455,22 @@ const collapsible = groups.length > 1
       const query = field.value.trim().toLowerCase()
       if (query && !filtering) {
         filtering = true
-        restore = groups.map((group) => group.expanded)
+        restore = [...tree.expandedItems]
       }
 
       let matches = 0
+      const open: string[] = []
       for (const group of groups) {
         let visible = 0
-        for (const item of group.querySelectorAll<HTMLLIElement>('li')) {
-          const hit = !query || (item.firstElementChild as HTMLElement | null)?.dataset.search?.includes(query) === true
+        for (const item of group.querySelectorAll<HTMLElement>('c2-tree-item.sidebar__item')) {
+          const hit = !query || item.dataset.search?.includes(query) === true
+          // `hidden` also takes the row out of the tree's keyboard order, so Arrow Down skips filtered-out rows.
           item.hidden = !hit
           if (hit) visible += 1
         }
         group.hidden = visible === 0
         // A filtered group has to be open or its hits stay hidden inside it.
-        if (query) group.expanded = visible > 0
+        if (query && visible > 0) open.push(group.dataset.group ?? '')
         // A group that says 11 while showing three rows reads as a bug.
         const count = group.querySelector<HTMLElement>('.sidebar__count')
         if (count) count.textContent = query ? String(visible) : (count.dataset.total ?? count.textContent)
@@ -382,9 +478,11 @@ const collapsible = groups.length > 1
       }
       if (empty) empty.hidden = matches > 0
 
-      if (!query && filtering) {
+      if (query) {
+        tree.expandedItems = open
+      } else if (filtering) {
         filtering = false
-        groups.forEach((group, index) => (group.expanded = restore[index] ?? group.expanded))
+        tree.expandedItems = restore
       }
     }
 

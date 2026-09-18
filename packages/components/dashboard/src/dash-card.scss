@@ -1,0 +1,343 @@
+@use 'sass:string';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-dash-card,
+  $theme: (
+    background: transparent,
+    border: none,
+    border-radius: 0px,
+    box-shadow: none,
+    padding: 0px,
+    overflow: hidden,
+    expanded--background: #ffffff,
+    expanded--z-index: 20,
+    expanded--animation-duration: 200ms,
+    enter--animation-duration: 200ms,
+    leave--animation-duration: 160ms,
+    header--min-height: 44px,
+    header--padding-block: 8px,
+    header--padding-inline: 12px,
+    header--gap: 12px,
+    header--background: transparent,
+    header--border-bottom: none,
+    header--color: #18181b,
+    header--font-size: 14px,
+    header--font-weight: 600,
+    footer--min-height: 36px,
+    footer--padding-block: 6px,
+    footer--padding-inline: 12px,
+    footer--gap: 8px,
+    footer--background: transparent,
+    footer--border-top: none,
+    footer--color: #71717a,
+    footer--font-size: 12px,
+    actions--gap: 8px,
+    controls--gap: 2px,
+    controls--offset: 4px,
+    control--size: 24px,
+    control--icon-size: 16px,
+    control--border-radius: 6px,
+    control--color: #71717a,
+    control--background: transparent,
+    control__hover--background: #f4f4f5,
+    control__hover--color: #18181b,
+    control__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    control__focus--outline-offset: 2px,
+    handle--size: 6px,
+    handle--inset: 2px,
+    handle--background: transparent,
+    handle__hover--background: rgba(2, 101, 220, 0.2),
+    handle__active--background: rgb(2, 101, 220),
+    handle--border-radius: 999px,
+    handle--transition-duration: 150ms,
+    handle__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+// `--_grid-column` / `--_grid-row` are written by the element from the placement the grid resolved; `auto` keeps a
+// card outside a `c2-dashboard` in the normal flow.
+:host {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  grid-column: var(--_grid-column, auto);
+  grid-row: var(--_grid-row, auto);
+  min-width: 0;
+  min-height: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([expanded='width']),
+:host([expanded='height']),
+:host([expanded='full']) {
+  // An expanded card is drawn over its neighbours, not next to them.
+  isolation: isolate;
+  z-index: css.cssVar(expanded--z-index);
+  background: css.cssVar(expanded--background);
+  animation: c2-dash-card-expand css.cssVar(expanded--animation-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes c2-dash-card-expand {
+  from {
+    transform: scale(0.97);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host([expanded='width']),
+  :host([expanded='height']),
+  :host([expanded='full']) {
+    animation: none;
+  }
+
+}
+
+// The enter and leave animations are played by the element with the Web Animations API; the timing lives here so
+// the variables and `prefers-reduced-motion` drive them. Two durations: enter, then leave.
+.c2-dash-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  transition-property: none;
+  transition-duration: css.cssVar(enter--animation-duration), css.cssVar(leave--animation-duration);
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  min-width: 0;
+  min-height: 0;
+  padding: css.cssVar(padding);
+  overflow: css.cssVar(overflow);
+  color: inherit;
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+}
+
+.c2-dash-card__header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  gap: css.cssVar(header--gap);
+  min-width: 0;
+  min-height: css.cssVar(header--min-height);
+  padding: css.cssVar(header--padding-block) css.cssVar(header--padding-inline);
+  font-size: css.cssVar(header--font-size);
+  font-weight: css.cssVar(header--font-weight);
+  color: css.cssVar(header--color);
+  background: css.cssVar(header--background);
+  border-bottom: css.cssVar(header--border-bottom);
+}
+
+// With both the header and the actions slot empty there is no row to draw: the controls float over the corner of
+// the pane instead.
+.c2-dash-card:not(.has-header) .c2-dash-card__header {
+  position: absolute;
+  top: css.cssVar(controls--offset);
+  right: css.cssVar(controls--offset);
+  z-index: 2;
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.c2-dash-card:not(.has-header) .c2-dash-card__title {
+  display: none;
+}
+
+.c2-dash-card__title {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+}
+
+.c2-dash-card__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+  min-width: 0;
+}
+
+.c2-dash-card__controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: css.cssVar(controls--gap);
+}
+
+.c2-dash-card__control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(control--size);
+  height: css.cssVar(control--size);
+  padding: 0;
+  margin: 0;
+  color: css.cssVar(control--color);
+  cursor: pointer;
+  background: css.cssVar(control--background);
+  border: none;
+  border-radius: css.cssVar(control--border-radius);
+}
+
+.c2-dash-card__control:hover {
+  color: css.cssVar(control__hover--color);
+  background: css.cssVar(control__hover--background);
+}
+
+.c2-dash-card__control:focus-visible {
+  outline: css.cssVar(control__focus--outline);
+  outline-offset: css.cssVar(control__focus--outline-offset);
+}
+
+.c2-dash-card__control-icon {
+  width: css.cssVar(control--icon-size);
+  height: css.cssVar(control--icon-size);
+}
+
+// A slotted icon replaces the built-in drawing, so it is sized here rather than by the author.
+.c2-dash-card__control ::slotted(*) {
+  width: css.cssVar(control--icon-size);
+  height: css.cssVar(control--icon-size);
+}
+
+.c2-dash-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+// What is slotted into the pane fills it. `height: 100%` dies partway down a chain of auto-height boxes; a flex
+// item with `min-height: 0` does not. Several children share the height between them.
+.c2-dash-card__body ::slotted(*) {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.c2-dash-card__footer {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  box-sizing: border-box;
+  gap: css.cssVar(footer--gap);
+  min-width: 0;
+  min-height: css.cssVar(footer--min-height);
+  padding: css.cssVar(footer--padding-block) css.cssVar(footer--padding-inline);
+  font-size: css.cssVar(footer--font-size);
+  color: css.cssVar(footer--color);
+  background: css.cssVar(footer--background);
+  border-top: css.cssVar(footer--border-top);
+}
+
+// The rows are toggled with the `hidden` attribute. Their own `display: flex` above outranks the browser's
+// `[hidden]` default, so without this an empty footer still drew a blank row at its minimum height.
+.c2-dash-card__header[hidden],
+.c2-dash-card__controls[hidden],
+.c2-dash-card__footer[hidden] {
+  display: none;
+}
+
+// The grab area is centred on the pane's edge and as thick as the grid gutter (`--_c2-dashboard-gap` is what the
+// grid lays its gutters out with), so it meets the neighbour's handle in the middle and the whole gutter is
+// draggable; it never gets thinner than `handle--size`, which is also what it is outside a grid. The bar inside it
+// is what lights up.
+@function handle-thickness() {
+  @return string.unquote('max(#{css.cssVar(handle--size)}, var(--_c2-dashboard-gap, 0px))');
+}
+
+.c2-dash-card__handle {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: css.cssVar(handle--background);
+  touch-action: none;
+}
+
+.c2-dash-card__handle:focus-visible {
+  outline: css.cssVar(handle__focus--outline);
+}
+
+.c2-dash-card__handle-bar {
+  display: block;
+  background: transparent;
+  border-radius: css.cssVar(handle--border-radius);
+  transition: background css.cssVar(handle--transition-duration) ease;
+}
+
+.c2-dash-card__handle:hover .c2-dash-card__handle-bar,
+.c2-dash-card__handle:focus-visible .c2-dash-card__handle-bar {
+  background: css.cssVar(handle__hover--background);
+}
+
+.c2-dash-card__handle.is-dragging .c2-dash-card__handle-bar {
+  background: css.cssVar(handle__active--background);
+}
+
+.c2-dash-card__handle--left,
+.c2-dash-card__handle--right {
+  top: 0;
+  width: handle-thickness();
+  height: 100%;
+  cursor: col-resize;
+
+  .c2-dash-card__handle-bar {
+    width: 2px;
+    height: calc(100% - 2 * #{css.cssVar(handle--inset)});
+  }
+}
+
+.c2-dash-card__handle--left {
+  left: calc(-0.5 * #{handle-thickness()});
+}
+
+.c2-dash-card__handle--right {
+  right: calc(-0.5 * #{handle-thickness()});
+}
+
+.c2-dash-card__handle--top,
+.c2-dash-card__handle--bottom {
+  left: 0;
+  width: 100%;
+  height: handle-thickness();
+  cursor: row-resize;
+
+  .c2-dash-card__handle-bar {
+    width: calc(100% - 2 * #{css.cssVar(handle--inset)});
+    height: 2px;
+  }
+}
+
+.c2-dash-card__handle--top {
+  top: calc(-0.5 * #{handle-thickness()});
+}
+
+.c2-dash-card__handle--bottom {
+  bottom: calc(-0.5 * #{handle-thickness()});
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-dash-card__handle-bar {
+    transition: none;
+  }
+
+  .c2-dash-card {
+    transition-duration: 0s, 0s;
+  }
+}

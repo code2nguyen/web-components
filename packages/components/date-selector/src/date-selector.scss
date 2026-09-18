@@ -1,0 +1,231 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-date-selector,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 14px,
+    box-shadow: 0 12px 32px rgba(24, 24, 27, 0.08),
+    min-width: 312px,
+    padding: 16px,
+    month-gap: 40px,
+    font-family: inherit,
+    font-size: 14px,
+    day--size: 40px,
+    day--border-radius: 999px,
+    day__hover--background: #f4f4f5,
+    day__today--color: #0265dc,
+    day__today--font-weight: 600,
+    day__selected--background: #0265dc,
+    day__selected--color: #ffffff,
+    range--background: #edf1fe,
+    range--color: #18181b,
+    day__disabled--opacity: 0.38,
+    weekday--color: #71717a,
+    weekday--font-size: 12px,
+    month-title--font-weight: 600,
+    navigation--size: 32px,
+    navigation__hover--background: #f4f4f5,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+    disabled--opacity: 0.38,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-date-selector {
+  display: grid;
+  grid-template-columns: repeat(var(--date-selector-months, 2), minmax(0, 1fr));
+  gap: css.cssVar(month-gap);
+  min-width: css.cssVar(min-width);
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+:host([months='1']) .c2-date-selector {
+  --date-selector-months: 1;
+}
+
+.month {
+  min-width: calc(7 * #{css.cssVar(day--size)});
+}
+
+.month-header {
+  position: relative;
+  display: flex;
+  min-height: css.cssVar(navigation--size);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+h2 {
+  margin: 0;
+  font: inherit;
+  font-weight: css.cssVar(month-title--font-weight);
+}
+
+.navigation {
+  position: absolute;
+  top: 0;
+  display: inline-flex;
+  width: css.cssVar(navigation--size);
+  height: css.cssVar(navigation--size);
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+  transition: animation.standard(background);
+
+  &.previous {
+    left: 0;
+  }
+  &.next {
+    right: 0;
+  }
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(navigation__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+  }
+}
+
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, css.cssVar(day--size));
+}
+
+.week {
+  display: contents;
+}
+
+.weekdays span {
+  display: flex;
+  height: css.cssVar(day--size);
+  align-items: center;
+  justify-content: center;
+  color: css.cssVar(weekday--color);
+  font-size: css.cssVar(weekday--font-size);
+}
+
+.day {
+  position: relative;
+  display: inline-flex;
+  width: css.cssVar(day--size);
+  height: css.cssVar(day--size);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+
+  &::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background: transparent;
+  }
+
+  span {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    border-radius: css.cssVar(day--border-radius);
+    transition: animation.standard(background), animation.standard(color);
+  }
+
+  &:hover:not(:disabled) span {
+    background: css.cssVar(day__hover--background);
+  }
+
+  &[aria-current='date']:not([aria-selected='true']) span {
+    color: css.cssVar(day__today--color);
+    font-weight: css.cssVar(day__today--font-weight);
+  }
+
+  &.in-range::before,
+  &.range-start:not(.range-end)::before,
+  &.range-end:not(.range-start)::before {
+    background: css.cssVar(range--background);
+  }
+  &.range-start::before {
+    border-radius: css.cssVar(day--border-radius) 0 0 css.cssVar(day--border-radius);
+  }
+  &.range-end::before {
+    border-radius: 0 css.cssVar(day--border-radius) css.cssVar(day--border-radius) 0;
+  }
+  &.in-range {
+    color: css.cssVar(range--color);
+  }
+
+  &[aria-selected='true'] span {
+    background: css.cssVar(day__selected--background);
+    color: css.cssVar(day__selected--color);
+  }
+
+  &:focus-visible {
+    z-index: 2;
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+    border-radius: css.cssVar(day--border-radius);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(day__disabled--opacity);
+  }
+}
+
+:host([disabled]) .c2-date-selector {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+@media (max-width: 680px) {
+  .c2-date-selector {
+    grid-template-columns: 1fr;
+  }
+}

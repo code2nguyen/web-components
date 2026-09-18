@@ -3,8 +3,6 @@ import type { MarkdownHeading } from 'astro'
 import SiteSidebar from '../components/SiteSidebar.astro'
 import Toc from '../components/Toc.astro'
 import ViewTabs from '../components/ViewTabs.astro'
-import SiteIconButton from '../components/ui/SiteIconButton.astro'
-import { FeatherXIcon } from '../components/ui/icons'
 import { SideNav } from '@c2n/side-nav'
 
 interface Props {
@@ -30,13 +28,7 @@ const { componentId, currentId = componentId, section = 'components', headings =
 }
 <SideNav client:load class="docs-shell" desktop-mode="over" tablet-mode="over">
   <nav slot="side-nav-content" class="docs-shell__drawer" aria-label="Site navigation">
-    <div class="docs-shell__drawer-head">
-      <span class="docs-shell__drawer-title">Navigation</span>
-      <SiteIconButton label="Close navigation" tooltip={false} side-nav-toggle>
-        <FeatherXIcon client:load />
-      </SiteIconButton>
-    </div>
-    <SiteSidebar section={section} currentId={currentId} />
+    <SiteSidebar section={section} currentId={currentId} drawer />
   </nav>
 
   <div class="docs">
@@ -93,20 +85,6 @@ const { componentId, currentId = componentId, section = 'components', headings =
       flex-direction: column;
       height: 100%;
       padding: 8px 12px 16px;
-    }
-    &__drawer-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: var(--site-header-height);
-      margin-bottom: 8px;
-      padding-left: 10px;
-    }
-    &__drawer-title {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: var(--site-color-on-surface-variant);
     }
   }
 

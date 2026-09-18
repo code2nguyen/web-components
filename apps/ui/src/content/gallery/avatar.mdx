@@ -1,7 +1,7 @@
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
-import { Avatar } from '@c2n/avatar'
+import { Avatar, AvatarGroup } from '@c2n/avatar'
 
 ## Presets
 
@@ -90,6 +90,27 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
 <c2-avatar name="Elisa Jasmin" src="/web-components/chat.avif" class="photo" client:only="lit"></c2-avatar>
 ```
 
+```html tag=MdxCodeBlock,label=Editable photo,description=Avatar that can be replaced or removed in place,useWhen=People manage their own profile image,accessibility=Keep the visible change and remove actions keyboard accessible
+<style>
+  .editable-photo {
+    --c2-avatar--size: 72px;
+    --c2-avatar--box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px #d4d4d8;
+  }
+</style>
+<c2-avatar editable name="Elisa Jasmin" src="/web-components/chat.avif" class="editable-photo" client:only="lit"></c2-avatar>
+```
+
+```html tag=MdxCodeBlock,label=Editable fallback,description=Initials remain useful before a profile photo is chosen,useWhen=Photo upload is optional during onboarding
+<style>
+  .editable-fallback {
+    --c2-avatar--size: 72px;
+    --c2-avatar__auto-color--saturation: 65%;
+    --c2-avatar__auto-color--lightness: 45%;
+  }
+</style>
+<c2-avatar editable auto-color name="Ada Lovelace" initial-count="2" class="editable-fallback" client:only="lit"></c2-avatar>
+```
+
 ```html tag=MdxCodeBlock,label=Online
 <style>
   .online {
@@ -161,25 +182,44 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
 </div>
 ```
 
-```html tag=MdxCodeBlock,label=Stacked group
+```html tag=MdxCodeBlock,label=Responsive group
 <style>
-  .stacked {
+  .responsive-group {
+    --c2-avatar-group--max-width: 152px;
+    --c2-avatar-group--overlap: 12px;
+  }
+  .responsive-group c2-avatar {
     --c2-avatar--size: 36px;
-    --c2-avatar--box-shadow: 0 0 0 2px #ffffff;
-  }
-  .stacked-row {
-    display: flex;
-  }
-  .stacked-row c2-avatar + c2-avatar {
-    margin-left: -12px;
   }
 </style>
-<div class="stacked-row">
-  <c2-avatar auto-color name="Ada Lovelace" initial-count="2" class="stacked" client:only="lit"></c2-avatar>
-  <c2-avatar auto-color name="Grace Hopper" initial-count="2" class="stacked" client:only="lit"></c2-avatar>
-  <c2-avatar auto-color name="Alan Turing" initial-count="2" class="stacked" client:only="lit"></c2-avatar>
-  <c2-avatar initials="+6" class="stacked" style="--c2-avatar--background: #e4e4e7; --c2-avatar--color: #52525b; --c2-avatar--font-size: 12px" client:only="lit"></c2-avatar>
-</div>
+<c2-avatar-group class="responsive-group" aria-label="Project contributors" client:only="lit">
+  <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Grace Hopper" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Alan Turing" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Katherine Johnson" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Margaret Hamilton" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Radia Perlman" initial-count="2"></c2-avatar>
+</c2-avatar-group>
+```
+
+```html tag=MdxCodeBlock,label=Total count
+<style>
+  .total-group {
+    --c2-avatar-group--max-width: 132px;
+    --c2-avatar-group--overlap: 8px;
+    --c2-avatar-group__overflow--background: #18181b;
+  }
+  .total-group c2-avatar {
+    --c2-avatar--size: 32px;
+  }
+</style>
+<c2-avatar-group class="total-group" count-mode="total" max-visible="3" aria-label="Design team" client:only="lit">
+  <c2-avatar auto-color name="Dieter Rams" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Susan Kare" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Paula Scher" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Don Norman" initial-count="2"></c2-avatar>
+  <c2-avatar auto-color name="Irene Au" initial-count="2"></c2-avatar>
+</c2-avatar-group>
 ```
 
 ```html tag=MdxCodeBlock,label=Icon

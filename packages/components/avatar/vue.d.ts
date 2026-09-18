@@ -8,7 +8,7 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Avatar, AvatarEventMap } from '@c2n/avatar'
+import type { Avatar, AvatarEventMap, AvatarGroup, AvatarGroupEventMap } from '@c2n/avatar'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
@@ -19,7 +19,19 @@ declare module 'vue' {
       C2Props<Avatar> & {
         'initial-count'?: unknown
         'auto-color'?: unknown
+        'max-size'?: unknown
+        onAvatarRemove?: (event: AvatarEventMap['avatar-remove']) => void
         onError?: (event: AvatarEventMap['error']) => void
+        onFileReject?: (event: AvatarEventMap['file-reject']) => void
+        onAvatarChange?: (event: AvatarEventMap['avatar-change']) => void
+      }
+    >
+    'c2-avatar-group': DefineComponent<
+      C2Props<AvatarGroup> & {
+        'max-visible'?: unknown
+        'count-mode'?: unknown
+        'aria-label'?: unknown
+        onOverflowChange?: (event: AvatarGroupEventMap['overflow-change']) => void
       }
     >
   }

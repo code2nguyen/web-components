@@ -3,6 +3,21 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/dashboard'
+import '@c2n/steps'
+import '@c2n/code-editor'
+import '@c2n/theme-select'
+import '@c2n/tree'
+import '@c2n/border-beam'
+import '@c2n/status-panel'
+import '@c2n/qr-code'
+import '@c2n/upload'
+import '@c2n/rate'
+import '@c2n/cascader'
+import '@c2n/questionnaire'
+import '@c2n/number-input'
+import '@c2n/date-input'
+import '@c2n/date-selector'
 import '@c2n/chart'
 import '@c2n/autocomplete'
 import '@c2n/header'
@@ -64,4 +79,15 @@ import '@c2n/text-field'
 import '@c2n/textarea'
 import '@c2n/toast'
 import '@c2n/tooltip'
+
+// Icons that gallery examples slot into a `client:only` island. Their children are raw markup, so nothing else
+// loads their modules — an MDX `import` only runs while the page is built, never in the browser.
+import '@c2n/feather-icons/icons/file-text.js'
+import '@c2n/feather-icons/icons/folder.js'
+import '@c2n/feather-icons/icons/hash.js'
+import '@c2n/feather-icons/icons/layers.js'
+import '@c2n/feather-icons/icons/lock.js'
+import '@c2n/feather-icons/icons/square.js'
+import '@c2n/feather-icons/icons/type.js'
+
 import '@fontsource/material-icons'

@@ -6,6 +6,10 @@
 //
 // Register the elements at module scope before React renders, or React writes an object prop as an
 // attribute and it stringifies.
+//
+// On a server-rendered page (Next.js, React Router SSR) write a camelCase property by its kebab-case attribute
+// name ('row-key', not rowKey): the server emits props verbatim, HTML lowercases them, and hydration does not
+// set properties. Those names are listed next to the properties below.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Menu } from '@c2n/menu'
@@ -13,12 +17,22 @@ import type { MenuItem } from '@c2n/menu/menu-item.js'
 
 /** Standard React host-element attributes plus the element's own public properties. */
 type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyof HTMLElement>>
+/** What React writes to a custom element's attribute: true becomes the empty string, false removes it. */
+type Attribute = string | number | boolean
 
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-menu': C2Props<Menu>
-      'c2-menu-item': C2Props<MenuItem>
+      'c2-menu': C2Props<Menu> & {
+        'cross-offset'?: Attribute
+        'fit-anchor'?: Attribute
+        'keep-open'?: Attribute
+        'aria-label'?: Attribute
+      }
+      'c2-menu-item': C2Props<MenuItem> & {
+        'keep-open'?: Attribute
+        'reserve-indicator'?: Attribute
+      }
     }
   }
 }
