@@ -22,6 +22,8 @@ export interface GaugeChart {
  * ```
  *
  * @tag c2-gauge-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-gauge-chart')
 export class GaugeChart extends EchartsChartBase {

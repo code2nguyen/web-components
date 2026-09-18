@@ -29,6 +29,8 @@ export interface LineChart {
  * spare capacity and redraws without a Lit update.
  *
  * @tag c2-line-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-line-chart')
 export class LineChart extends UplotChartBase {

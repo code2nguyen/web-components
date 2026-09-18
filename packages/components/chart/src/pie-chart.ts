@@ -27,6 +27,8 @@ export interface PieChart {
  *
  * @tag c2-pie-chart
  *
+ * @slotcomponent c2-chart-series
+ *
  * @cssproperty {border} [--c2-chart__slice--border=2px solid #ffffff] - Border drawn between adjacent slices.
  */
 @customElement('c2-pie-chart')

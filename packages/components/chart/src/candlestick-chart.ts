@@ -27,6 +27,8 @@ export interface CandlestickChart {
  * ```
  *
  * @tag c2-candlestick-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-candlestick-chart')
 export class CandlestickChart extends EchartsChartBase {

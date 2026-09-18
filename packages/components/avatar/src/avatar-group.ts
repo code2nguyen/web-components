@@ -30,6 +30,8 @@ const HIDDEN_ATTRIBUTE = 'data-c2-avatar-group-hidden'
  *
  * @tag c2-avatar-group
  *
+ * @slotcomponent c2-avatar
+ *
  * @slot - `c2-avatar` elements displayed in source order.
  *
  * @event {CustomEvent<AvatarGroupOverflowDetail>} overflow-change - Fired when resizing changes the visible or hidden counts.

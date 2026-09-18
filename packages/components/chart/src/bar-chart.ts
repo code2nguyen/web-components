@@ -25,6 +25,8 @@ export interface BarChart {
  * ```
  *
  * @tag c2-bar-chart
+ *
+ * @slotcomponent c2-chart-series
  */
 @customElement('c2-bar-chart')
 export class BarChart extends UplotChartBase {
