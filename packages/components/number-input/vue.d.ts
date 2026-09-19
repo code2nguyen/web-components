@@ -17,6 +17,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-number-input': DefineComponent<
       C2Props<NumberInput> & {
+        readonly?: unknown
         'hide-steppers'?: unknown
         'error-text'?: unknown
         'aria-label'?: unknown

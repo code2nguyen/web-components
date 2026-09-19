@@ -1,6 +1,6 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
-import { jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { query, state } from 'lit/decorators.js'
+import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './chart.scss?inline'
 import { ChartFrameBuilder, columnValue, type NormalizeContext } from './chart-data.js'

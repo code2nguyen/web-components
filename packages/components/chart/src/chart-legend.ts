@@ -1,5 +1,6 @@
 import { html, unsafeCSS, type CSSResultGroup, type TemplateResult } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { ChartLinkedElement, type ChartLinkTarget } from './chart-link.js'
 import type { ChartLegendChangeEventDetail, ChartLegendItem } from './chart-base.js'

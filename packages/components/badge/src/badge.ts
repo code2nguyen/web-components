@@ -1,5 +1,6 @@
 import { LitElement, html, isServer, nothing, unsafeCSS } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './badge.scss?inline'

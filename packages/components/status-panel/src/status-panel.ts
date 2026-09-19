@@ -1,5 +1,6 @@
 import { LitElement, html, isServer, unsafeCSS, type TemplateResult } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './status-panel.scss?inline'
 

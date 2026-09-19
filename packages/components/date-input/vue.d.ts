@@ -17,6 +17,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-date-input': DefineComponent<
       C2Props<DateInput> & {
+        readonly?: unknown
         'error-text'?: unknown
         'aria-label'?: unknown
         onInput?: (event: DateInputEventMap['input']) => void

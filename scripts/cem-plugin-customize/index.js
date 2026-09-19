@@ -47,5 +47,21 @@ export function customLitCemPlugin() {
           }
       }
     },
+    // Runs once per module, after every analyze phase.
+    moduleLinkPhase({ moduleDoc }) {
+      for (const declaration of moduleDoc.declarations ?? []) {
+        for (const attribute of declaration.attributes ?? []) {
+          // The analyzer names an attribute after the field when `@property()` carries no explicit `attribute`
+          // option, but Lit derives the observed attribute by *lowercasing* the property name: `readOnly` is
+          // observed as `readonly`, `maxLength` as `maxlength`. Emitting the property spelling makes anything
+          // generating markup from the manifest (framework types, IDE metadata, an agent) write a name the
+          // component never sees; it only ever appeared to work because HTML lowercases attributes too.
+          // `fieldName` keeps the property spelling, so both names stay available.
+          if (attribute.name === attribute.fieldName && attribute.name !== attribute.name.toLowerCase()) {
+            attribute.name = attribute.name.toLowerCase()
+          }
+        }
+      }
+    },
   }
 }

@@ -23,6 +23,8 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-chat-input': C2Props<ChatInput> & {
+        maxlength?: Attribute
+        minlength?: Attribute
         'min-rows'?: Attribute
         'enter-behavior'?: Attribute
         'aria-label'?: Attribute

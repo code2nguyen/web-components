@@ -459,3 +459,28 @@ test('a cell-slot column takes its body from a light-DOM child and falls back to
   // Row 1 has no child, so the column's own formatting still shows.
   await expect(page.getByRole('row', { name: /Ada Lovelace/ })).toContainText('128,000')
 })
+
+test('a column opts out of the table sortable with sortable="false"', async ({ page, renderScenario }) => {
+  await renderScenario(
+    table(
+      'sortable',
+      `<c2-table-column field="name" header="Name" width="200px" sortable="false"></c2-table-column>
+  <c2-table-column field="score" header="Score" width="200px" align="end" format="number"></c2-table-column>`,
+    ),
+  )
+  // Absent inherits the table's `sortable`; the literal string "false" is the only way to express the third state.
+  await expect(page.getByRole('columnheader', { name: 'Name' })).not.toHaveAttribute('aria-sort', /.*/)
+  await expect(page.getByRole('columnheader', { name: 'Score' })).toHaveAttribute('aria-sort', 'none')
+})
+
+test('rows assigned as a JSON string are parsed, so one binding works on the server and the client', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id">
+  <c2-table-column field="name" header="Name" width="260px"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="260px"></c2-table-column>
+</c2-table>`)
+  const host = page.locator('c2-table')
+  await props(host, { rows: JSON.stringify(PEOPLE) })
+  await expect(host).toHaveJSProperty('rows.0.name', 'Ada Lovelace')
+  await expect(page.getByRole('row')).toHaveCount(4)
+  await expect(page.getByRole('gridcell').filter({ hasText: 'Compilers' })).toBeVisible()
+})

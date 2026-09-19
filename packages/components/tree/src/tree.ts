@@ -1,9 +1,9 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { isServer } from 'lit-html/is-server.js'
-import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './tree.scss?inline'
 // Registers `c2-tree-item` so a consumer of the tree alone gets the row element too (as `c2-tabs` does for

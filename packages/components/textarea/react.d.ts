@@ -24,6 +24,9 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-textarea': C2Props<Textarea> & {
         'aria-label'?: Attribute
+        readonly?: Attribute
+        maxlength?: Attribute
+        minlength?: Attribute
         'error-text'?: Attribute
       }
     }

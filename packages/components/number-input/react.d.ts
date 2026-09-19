@@ -23,6 +23,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-number-input': C2Props<NumberInput> & {
+        readonly?: Attribute
         'hide-steppers'?: Attribute
         'error-text'?: Attribute
         'aria-label'?: Attribute
