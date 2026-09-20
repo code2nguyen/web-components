@@ -1,5 +1,6 @@
 ---
 import { groupCssProperties, deepFlatGroupCssProperties } from '../utils/manifest-utils'
+import { renderManifestDescription } from '../utils/manifest-description'
 import { componentManifests } from '../store/component-manifests'
 import SiteIconButton from './ui/SiteIconButton.astro'
 
@@ -51,7 +52,7 @@ const hasCss = flattenGroupedCssProperties.length > 0
                   </td>
                   <td>{attr.default ? <code>{attr.default}</code> : <span class="api__none">—</span>}</td>
                   <td class="api__col-description">
-                    <Fragment set:html={attr.description} />
+                    <Fragment set:html={renderManifestDescription(attr.description)} />
                   </td>
                 </tr>
               ))}
@@ -85,7 +86,7 @@ const hasCss = flattenGroupedCssProperties.length > 0
                     </span>
                   </td>
                   <td class="api__col-description">
-                    <Fragment set:html={slot.description} />
+                    <Fragment set:html={renderManifestDescription(slot.description)} />
                   </td>
                 </tr>
               ))}
@@ -123,7 +124,7 @@ const hasCss = flattenGroupedCssProperties.length > 0
                     <span class="api__type">{event.type}</span>
                   </td>
                   <td class="api__col-description">
-                    <Fragment set:html={event.description} />
+                    <Fragment set:html={renderManifestDescription(event.description)} />
                   </td>
                 </tr>
               ))}
@@ -160,7 +161,7 @@ const hasCss = flattenGroupedCssProperties.length > 0
                     </span>
                   </td>
                   <td class="api__col-description">
-                    <Fragment set:html={part.description} />
+                    <Fragment set:html={renderManifestDescription(part.description)} />
                   </td>
                 </tr>
               ))}
@@ -204,7 +205,7 @@ const hasCss = flattenGroupedCssProperties.length > 0
                     </td>
                     <td>{group.cssProperty.default ? <code>{group.cssProperty.default}</code> : <span class="api__none">—</span>}</td>
                     <td class="api__col-description">
-                      <Fragment set:html={group.cssProperty.description} />
+                      <Fragment set:html={renderManifestDescription(group.cssProperty.description)} />
                     </td>
                   </tr>
                 ) : (
