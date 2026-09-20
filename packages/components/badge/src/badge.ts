@@ -23,6 +23,8 @@ export type BadgeOverlap = 'rectangular' | 'circular'
  * @slot prefix-icon - Icon shown before the text, sized by `--c2-badge__icon--size`.
  * @slot anchor - Element the badge is pinned to. When filled the badge becomes an overlay at the `placement` corner.
  *
+ * @csspart badge - The visible badge pill or dot, including its anchored overlay positioning.
+ *
  * @cssproperty {pixel} [--c2-badge--height=20px]
  * @cssproperty {pixel} [--c2-badge--min-width=20px] - Keeps single digits round.
  * @cssproperty {padding} [--c2-badge--padding-left=6px]

@@ -38,6 +38,13 @@ export interface Radio {
  *
  * @event {Event} change - Re-dispatched from the inner input when the user checks this radio.
  *
+ * @csspart control - The default circular radio indicator.
+ * @csspart dot - The checked mark inside the default control.
+ * @csspart icon - Custom indicator shown from the `icon` slot.
+ * @csspart checked-icon - Custom indicator shown from the `checked-icon` slot while checked.
+ * @csspart label - The option label.
+ * @csspart description - Supporting text below the label.
+ *
  * @cssproperty {pixel} [--c2-radio__container--gap=4px] - Space between the control and the text.
  * @cssproperty {flex-direction-row} [--c2-radio__container--flex-direction=row] - `row-reverse` puts the indicator after the text, e.g. a trailing check mark.
  * @cssproperty {padding} [--c2-radio__container--padding-top=0px]

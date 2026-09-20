@@ -63,6 +63,7 @@ export interface TreeItem {
  * @csspart label - The label box.
  * @csspart actions - The trailing actions box.
  * @csspart group - The container holding the nested children.
+ * @csspart checkbox - The selection checkbox rendered when checkbox selection is enabled.
  *
  * @cssproperty {pixel} [--c2-tree-item__row--min-height=28px] - Height of a row.
  * @cssproperty {pixel} [--c2-tree-item__row--indent=16px] - Extra inset added per level of depth.

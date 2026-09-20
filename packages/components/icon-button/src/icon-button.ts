@@ -14,6 +14,8 @@ import '@c2n/tooltip'
  *
  * @slot - The icon (an inline `<svg>`, a `c2-feather-*` or a `c2-mat-icon` element).
  *
+ * @csspart button - The native button that provides the icon-only interactive surface.
+ *
  * @cssproperty {color} --c2-icon-button--background-color
  * @cssproperty {border-radius} [--c2-icon-button--border-radius=999px]
  * @cssproperty {border} [--c2-icon-button--border=none]

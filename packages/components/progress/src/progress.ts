@@ -19,6 +19,12 @@ import styles from './progress.scss?inline'
  * @slot - Label shown above the track (e.g. "Uploading files"). Also used as the accessible name.
  * @slot value - Replaces the percentage shown next to the label, for counts such as "3 of 5" or "1.2 of 4 MB".
  *
+ * @csspart header - Row containing the label and displayed value.
+ * @csspart label - Container for the default label slot.
+ * @csspart value - Displayed percentage or custom `value` slot.
+ * @csspart track - The full progress track.
+ * @csspart indicator - The filled portion of the progress track.
+ *
  * @cssproperty {pixel} [--c2-progress--height=8px] - Thickness of the track and the indicator.
  * @cssproperty {pixel} [--c2-progress--width=100%] - Width of the bar; the host is a block by default.
  * @cssproperty {border-radius} [--c2-progress--border-radius=999px] - Rounding of both the track and the indicator.

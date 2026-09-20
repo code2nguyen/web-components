@@ -2,8 +2,7 @@ name: Component tests
 
 on:
   pull_request:
-  push:
-    branches: [main, develop]
+    branches: [develop]
   workflow_dispatch:
 
 permissions:

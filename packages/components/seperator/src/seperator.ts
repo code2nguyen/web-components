@@ -17,6 +17,10 @@ export type SeperatorOrientation = 'horizontal' | 'vertical'
  *
  * @slot - Optional label drawn between two line segments.
  *
+ * @csspart seperator - The outer separator layout container.
+ * @csspart line - Each line segment on either side of the optional label.
+ * @csspart label - Container for the optional default slot.
+ *
  * @cssproperty {pixel} [--c2-seperator--thickness=1px]
  * @cssproperty {color} [--c2-seperator--color=#e4e4e7]
  * @cssproperty {border-style} [--c2-seperator--style=solid] - `dashed` or `dotted` for a broken line.

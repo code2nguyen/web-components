@@ -33,6 +33,14 @@ export interface Switch {
  *
  * @event {Event} change - Re-dispatched from the inner input when the state changes.
  *
+ * @csspart control - The switch control, excluding its label and description.
+ * @csspart track - The switch track.
+ * @csspart thumb - The movable switch thumb.
+ * @csspart unchecked-icon - Icon inside the thumb while the switch is off.
+ * @csspart checked-icon - Icon inside the thumb while the switch is on.
+ * @csspart label - The switch label.
+ * @csspart description - Supporting text below the label.
+ *
  * @cssproperty {pixel} [--c2-switch__container--gap=8px] - Space between the track and the text.
  * @cssproperty {flex-direction-row} [--c2-switch__container--flex-direction=row] - `row-reverse` puts the text before the track.
  * @cssproperty {justify-content} [--c2-switch__container--justify-content=flex-start] - `space-between` with a fixed width pushes the track to the far edge.

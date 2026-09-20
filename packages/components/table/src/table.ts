@@ -193,6 +193,23 @@ export interface Table {
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
+ * @csspart toolbar - Row above the grid containing the `toolbar` slot.
+ * @csspart viewport - Scrollable container around the grid.
+ * @csspart grid - The ARIA grid containing the header and body rows.
+ * @csspart footer - Row below the grid containing the `footer` slot.
+ * @csspart state - Cell containing the empty, loading or error state.
+ * @csspart header-row - The grid header row.
+ * @csspart header-cell - Every column header cell.
+ * @csspart selection-header-cell - The header cell containing the select-all checkbox.
+ * @csspart resizer - The pointer target used to resize a column.
+ * @csspart sort-icon - The sort-direction indicator in a sortable header.
+ * @csspart cell - Every body grid cell.
+ * @csspart selection-cell - A body cell containing a row-selection checkbox.
+ * @csspart skeleton - Placeholder displayed while a remote row is loading.
+ * @csspart cell-content - The content wrapper inside a body cell.
+ * @csspart row - Every rendered body row.
+ * @csspart row-selected - A body row while it is selected; exposed in addition to `row`.
+ *
  * @cssproperty {color} [--c2-table--background=#ffffff]
  * @cssproperty {color} [--c2-table--color=#18181b]
  * @cssproperty {font-size} [--c2-table--font-size=14px]

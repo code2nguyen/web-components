@@ -25,6 +25,11 @@ const ITEM_SLOT = 'item-'
  * @slot - The items, in order. Use `c2-link-button` for links; any element works for the current page.
  * @slot separator - Custom separator, cloned between every pair of items (text such as `/`, or an icon).
  *
+ * @csspart separator - A separator inserted between two breadcrumb items.
+ * @csspart item - A list item containing one breadcrumb and its following separator.
+ * @csspart ellipsis - The control that reveals breadcrumb items hidden by overflow or `max-items`.
+ * @csspart list - The ordered list containing the complete breadcrumb trail.
+ *
  * @cssproperty {pixel} [--c2-breadcrumb--gap=4px] - Space between an item and its separator.
  * @cssproperty {pixel} [--c2-breadcrumb__separator--size=14px] - Icon size and font size of the separator.
  * @cssproperty {color} [--c2-breadcrumb__separator--color=#a1a1aa]

@@ -48,6 +48,12 @@ export interface Sheet {
  * @event {CustomEvent<{ returnValue: string }>} close - Fired after the sheet has closed; `detail.returnValue` is what `close()` received (`''` for Escape / backdrop / the × button).
  * @event {Event} cancel - Native, cancelable: fired on Escape before closing.
  *
+ * @csspart panel - The sheet surface positioned over the overlay.
+ * @csspart header - Header containing the title and optional close button.
+ * @csspart close - The native close button.
+ * @csspart body - Scrollable container for the default slot.
+ * @csspart footer - Container for the footer actions.
+ *
  * @cssproperty {pixel} [--c2-sheet--size=380px] - Width of a `left`/`right` sheet, height of a `top`/`bottom` one. The other axis fills the screen.
  * @cssproperty {background} [--c2-sheet--background=#ffffff]
  * @cssproperty {color} [--c2-sheet--color=#18181b]

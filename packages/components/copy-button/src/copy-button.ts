@@ -50,6 +50,9 @@ export interface CopyButton {
  * @event {CustomEvent<{ text: string }>} copied - Fired after the text reached the clipboard. `detail.text` is what was copied.
  * @event {CustomEvent<{ error: unknown }>} copy-error - Fired when the clipboard write failed (denied permission, or no clipboard at all).
  *
+ * @csspart button - The native button that performs the copy action.
+ * @csspart icon - Wrapper that switches between the copy and copied icons.
+ *
  * @cssproperty {color} --c2-copy-button__container--background-color
  * @cssproperty {color} [--c2-copy-button__container--color=rgb(34, 34, 34)]
  * @cssproperty {border} [--c2-copy-button__container--border=none]

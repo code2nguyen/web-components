@@ -18,6 +18,8 @@ export type SkeletonAnimation = 'pulse' | 'wave' | 'none'
  *
  * @tag c2-skeleton
  *
+ * @csspart block - Each animated placeholder block.
+ *
  * @cssproperty {pixel} [--c2-skeleton--width=100%] - Width of the block. Ignored by `circle`, which sizes itself.
  * @cssproperty {pixel} [--c2-skeleton--height=16px] - Height of the block, or of one line of a `text` skeleton.
  * @cssproperty {border-radius} [--c2-skeleton--border-radius=4px] - Rounding; `circle` overrides it with a full round.

@@ -12,6 +12,8 @@ import styles from './kbd.scss?inline'
  *
  * @slot - Key name or shortcut to display.
  *
+ * @csspart kbd - The native `<kbd>` element containing the key or shortcut.
+ *
  * @cssproperty {pixel} [--c2-kbd--min-width=24px]
  * @cssproperty {pixel} [--c2-kbd--height=24px]
  * @cssproperty {padding} [--c2-kbd--padding-left=6px]

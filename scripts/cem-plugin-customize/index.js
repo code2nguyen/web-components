@@ -6,7 +6,7 @@ export function customLitCemPlugin() {
     // Make sure to always give your plugins a name, this helps when debugging
     name: 'custom-lit-cem-plugin',
     // Runs for each module
-    analyzePhase({ ts, node, moduleDoc, context }) {
+    analyzePhase({ ts, node, moduleDoc }) {
       switch (node.kind) {
         case ts.SyntaxKind.ClassDeclaration:
           const className = node.name.getText()
@@ -34,6 +34,11 @@ export function customLitCemPlugin() {
           }
           for (const match of source.matchAll(/\bpart\s*=\s*\$\{([^}]+)\}/g)) {
             for (const quoted of match[1].matchAll(/['"]([^'"]+)['"]/g)) {
+              // A conditional binding can contain quoted comparison values that are not part names, e.g.
+              // `part=${state === 'ready' ? 'editor' : nothing}`. Only collect strings that can contribute to the
+              // binding's result; otherwise `ready` would be documented as a CSS part that never exists.
+              const before = match[1].slice(0, quoted.index)
+              if (/(?:===|!==|==|!=)\s*$/.test(before)) continue
               for (const name of quoted[1].split(/\s+/)) if (/^[a-z][a-z0-9-]*$/.test(name)) names.add(name)
             }
           }

@@ -13,6 +13,9 @@ import styles from './button.scss?inline'
  * @slot suffix-icon - Icon shown after the label.
  * @slot running-icon - Icon shown in place of the prefix icon while `running` is set. Defaults to a spinner; the slot wrapper rotates, so slotted content spins too.
  *
+ * @csspart button - The native button that provides the interactive surface.
+ * @csspart running-icon - Wrapper around the icon shown while `running` is set.
+ *
  * @cssproperty {pixel} [--c2-button__container--height=36px]
  * @cssproperty {width} [--c2-button__container--width=auto] - Width of the host. `100%` makes a full-width button.
  * @cssproperty {justify-content} [--c2-button__container--justify-content=center] - How the label and its icons sit in the button. `flex-start` for a row-shaped button (a list entry, a group header), `space-between` to push a trailing hint to the far edge.

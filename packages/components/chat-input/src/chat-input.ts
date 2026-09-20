@@ -31,6 +31,12 @@ export interface ChatInput {
  * @event {Event} change - Fired when an edit is committed.
  * @event {Event} select - Fired when text is selected.
  * @event {CustomEvent<string>} submit-message - Fired with the current message. Cancel the event to keep the value in the composer.
+ * @csspart container - Outer composer surface containing the textarea and actions.
+ * @csspart textarea - The native auto-growing textarea.
+ * @csspart actions - Row containing the toolbar and send button.
+ * @csspart toolbar - Container for the `toolbar` slot.
+ * @csspart send-button - The native button that submits the current message.
+ *
  * @cssproperty {border} [--c2-chat-input__container--border=1px solid #bcbcc6]
  * @cssproperty {border-radius} [--c2-chat-input__container--border-radius=16px]
  * @cssproperty {color} [--c2-chat-input__container--background=#ffffff]

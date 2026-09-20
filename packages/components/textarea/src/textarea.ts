@@ -27,6 +27,9 @@ export interface Textarea {
  * @event {InputEvent} input - Fired on each edit, after value is updated.
  * @event {Event} change - Fired when an edit is committed.
  * @event {Event} select - Fired when text is selected.
+ * @csspart textarea - The native textarea control.
+ * @csspart supporting-text - Container for help text or the current validation error.
+ *
  * @cssproperty {pixel} [--c2-textarea__container--min-height=80px]
  * @cssproperty {padding} [--c2-textarea__container--padding=10px 12px]
  * @cssproperty {border} [--c2-textarea__container--border=1px solid #bcbcc6]

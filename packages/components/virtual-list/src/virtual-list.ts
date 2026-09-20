@@ -92,6 +92,16 @@ export interface VirtualList {
  * @slot loading - Replaces the built-in spinner shown while the first items load.
  * @slot error - Replaces the built-in message shown when `error` is set.
  *
+ * @csspart search - Header row containing the built-in search field and the `search` and `toolbar` slots.
+ * @csspart viewport - Scroll container that holds the listbox and its empty, loading or error state.
+ * @csspart items - Inner listbox containing the rendered rows and virtual-scroll spacers.
+ * @csspart item - Every rendered `c2-list-item`, including loading placeholders.
+ * @csspart item-selected - A rendered item while it is selected; exposed in addition to `item`.
+ * @csspart skeleton - Placeholder shown inside an item while its remote data block is loading.
+ * @csspart state - Container for the empty, no-results, loading or error message.
+ * @csspart highlight - A `<mark>` around text that matches the active search query.
+ * @csspart footer - Footer row containing the `footer` slot.
+ *
  * @internalcomponent c2-list-item
  * @internalcomponent c2-text-field
  * @internalcomponent c2-spinner

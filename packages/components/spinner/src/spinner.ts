@@ -22,6 +22,11 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS
  *
  * @slot - Optional text shown next to the ring (e.g. "Loading…"). Also used as the accessible name.
  *
+ * @csspart ring - The SVG containing the spinner track and animated arc.
+ * @csspart track - The stationary background circle.
+ * @csspart arc - The animated foreground circle.
+ * @csspart label - Container for the optional loading text.
+ *
  * @cssproperty {pixel} [--c2-spinner--size=24px] - Diameter of the ring.
  * @cssproperty {pixel} [--c2-spinner--stroke-width=4px] - Thickness of the ring, in the ring's 48-unit box; it scales with the size.
  * @cssproperty {stroke-linecap} [--c2-spinner--stroke-linecap=round] - `butt` for square arc ends.

@@ -14,6 +14,9 @@ import styles from './link-button.scss?inline'
  * @slot prefix-icon - Icon shown before the label.
  * @slot suffix-icon - Icon shown after the label, e.g. a `c2-feather-external-link` for links that open a new tab.
  *
+ * @csspart link - The anchor rendered when `href` is set and the control is enabled.
+ * @csspart button - The native button rendered without `href` or while disabled.
+ *
  * @cssproperty {pixel} [--c2-link-button__container--gap=6px]
  * @cssproperty {padding} [--c2-link-button__container--padding-top=4px]
  * @cssproperty {padding} [--c2-link-button__container--padding-right=4px]
