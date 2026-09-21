@@ -1,6 +1,6 @@
 {
   "name": "@c2n/tooltip",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "type": "module",
   "main": "dist/tooltip.js",
   "exports": {
@@ -61,7 +61,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.13",
+    "@c2n/core": "0.0.14",
     "@floating-ui/dom": "1.8.0",
     "lit": "3.3.3"
   },
