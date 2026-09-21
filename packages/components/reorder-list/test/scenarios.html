@@ -22,5 +22,17 @@
   </head>
   <body>
     <main aria-label="Component scenario"></main>
+    <template id="keyed-rows">
+      <div data-reorder-key="alpha" data-reorder-label="Alpha task">Alpha</div>
+      <div data-fixed data-reorder-key="pinned" data-reorder-label="Pinned task">Pinned</div>
+      <div data-reorder-key="bravo" data-reorder-label="Bravo task">Bravo <button type="button">Open</button></div>
+      <div>Unkeyed task</div>
+    </template>
+    <template id="scrolling-rows">
+      <div style="height: 36px">Short row</div>
+      <div style="height: 96px">Tall row</div>
+      <div style="height: 52px">Medium row</div>
+      <div style="height: 120px">Changing row</div>
+    </template>
   </body>
 </html>

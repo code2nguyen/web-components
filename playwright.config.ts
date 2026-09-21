@@ -16,6 +16,11 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    {
+      name: 'reorder-touch',
+      testMatch: ['packages/components/reorder-list/test/*.spec.ts'],
+      use: { ...devices['Pixel 7'] },
+    },
   ],
   webServer: {
     command: 'npm run test:serve',
