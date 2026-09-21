@@ -1,0 +1,40 @@
+---
+title: 'Reorder List'
+description: 'Reorder consumer-owned items with pointer drag and drop.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ReorderList } from '@c2n/reorder-list'
+
+`c2-reorder-list` assigns its ordinary children to dynamic numeric slots and moves those assignments as items are reordered. Optional `placeholder` and `dragging-item` slots replace the built-in drop marker and drag preview.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/reorder-list
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/reorder-list
+<style>
+  .queue::part(item) {
+    padding: 8px;
+  }
+  .queue::part(placeholder) {
+    outline: 2px dashed #0265dc;
+  }
+</style>
+<c2-reorder-list class="queue" editable>
+  <div>Backlog</div>
+  <div>In progress</div>
+  <div>Done</div>
+  <div slot="placeholder">Drop here</div>
+  <div slot="dragging-item">Moving item</div>
+</c2-reorder-list>
+```
+
+Style assigned items directly with local classes. The `item`, `placeholder`, and `dragging-item` parts affect only component-owned placement regions.

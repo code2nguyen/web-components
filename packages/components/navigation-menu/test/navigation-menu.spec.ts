@@ -1,4 +1,25 @@
-import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('panel presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const item = page.locator('c2-navigation-menu-item')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup:
+      '<c2-navigation-menu><c2-navigation-menu-item label="Products" value="products"><div slot="panel" data-slot-presence-probe>Panel</div></c2-navigation-menu-item></c2-navigation-menu>',
+    host: 'c2-navigation-menu-item',
+    slot: 'panel',
+    assertPresent: async (present) => expect.poll(() => item.evaluate((element) => (element as unknown as { hasPanel: boolean }).hasPanel)).toBe(present),
+  })
+})
+
+test('consumer-owned navigation labels and conditional panel remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-navigation-menu><button class="slot-probe" slot="mobile-trigger">Menu</button><c2-navigation-menu-item><span class="slot-probe">Products</span><span class="slot-probe" slot="prefix-icon">P</span><span class="slot-probe" slot="suffix-icon">S</span><section class="slot-probe" slot="panel">Panel</section></c2-navigation-menu-item><c2-navigation-menu-link><span class="slot-probe">Docs</span><span class="slot-probe" slot="description">Guide</span><span class="slot-probe" slot="prefix-icon">P</span><span class="slot-probe" slot="suffix-icon">S</span></c2-navigation-menu-link></c2-navigation-menu>',
+  )
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(9).fill('rgb(1, 2, 3)'))
+})
 
 /** Two panels and two plain links. The delays are zeroed so the assertions are about behaviour, not timing. */
 const bar = (attributes = 'open-delay="0" close-delay="0"') => `<c2-navigation-menu aria-label="Main" ${attributes}>

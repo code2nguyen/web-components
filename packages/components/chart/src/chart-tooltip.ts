@@ -1,5 +1,6 @@
 import { html, isServer, unsafeCSS, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
-import { property, query } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { ChartLinkedElement, type ChartLinkTarget } from './chart-link.js'
 import type { ChartTooltipContext } from './chart-types.js'

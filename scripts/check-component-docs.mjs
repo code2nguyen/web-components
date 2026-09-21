@@ -1,29 +1,21 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
-import { basename, join } from 'node:path'
+import { readFileSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
+
+import {
+  documentedPackageNames,
+  exampleCoverageProblems,
+  publishableComponentPackages,
+  uiExampleDocuments,
+  undocumentedPublishablePackages,
+} from './lib/component-contract-scope.mjs'
+import { manifestElements, validateSlotStylingAudit } from './lib/slot-styling-audit.mjs'
 
 const repoRoot = new URL('..', import.meta.url).pathname.replace(/\/$/, '')
 const contentRoot = join(repoRoot, 'apps/ui/src/content')
 
-function frontmatter(source) {
-  const match = /^---\n([\s\S]*?)\n---/.exec(source)
-  if (!match) return {}
-  return Object.fromEntries(
-    match[1]
-      .split('\n')
-      .map((line) => /^([a-zA-Z_-]+):\s*(['"]?)(.*?)\2$/.exec(line.trim()))
-      .filter(Boolean)
-      .map((match) => [match[1], match[3]]),
-  )
-}
-
-const documentedPackages = new Set()
-for (const directory of ['components', 'oepn-components']) {
-  const root = join(contentRoot, directory)
-  for (const file of existsSync(root) ? readdirSync(root).filter((name) => name.endsWith('.mdx')) : []) {
-    const data = frontmatter(readFileSync(join(root, file), 'utf8'))
-    documentedPackages.add(data.package ?? `@c2n/${basename(file, '.mdx')}`)
-  }
-}
+const documentedPackages = documentedPackageNames(contentRoot)
+const publishable = publishableComponentPackages(repoRoot)
+const exampleProblems = exampleCoverageProblems(publishable.packages, uiExampleDocuments(contentRoot))
 
 const stats = {
   elements: [0, 0],
@@ -33,17 +25,10 @@ const stats = {
   cssParts: [0, 0],
 }
 const missing = []
+const auditedManifests = publishable.packages.map(({ manifest }) => manifest)
 const validEvent = (name) => typeof name === 'string' && name !== 'undefined' && /^[a-z][a-z0-9-]*$/.test(name)
 
-for (const root of ['packages/components', 'open-packages']) {
-  const absolute = join(repoRoot, root)
-  for (const directory of existsSync(absolute) ? readdirSync(absolute) : []) {
-    const packageFile = join(absolute, directory, 'package.json')
-    const manifestFile = join(absolute, directory, 'custom-elements.json')
-    if (!existsSync(packageFile) || !existsSync(manifestFile)) continue
-    const packageName = JSON.parse(readFileSync(packageFile, 'utf8')).name
-    if (!documentedPackages.has(packageName)) continue
-    const manifest = JSON.parse(readFileSync(manifestFile, 'utf8'))
+for (const { manifest } of publishable.packages) {
     for (const module of manifest.modules ?? []) {
       for (const element of module.declarations ?? []) {
         if (!element.tagName) continue
@@ -54,7 +39,6 @@ for (const root of ['packages/components', 'open-packages']) {
         for (const part of element.cssParts ?? []) record('cssParts', part, `${element.tagName} CSS part ${part.name}`)
       }
     }
-  }
 }
 
 function record(kind, item, label) {
@@ -83,11 +67,25 @@ for (const [kind, [described, total]] of Object.entries(stats)) {
   if (coverage < minimumCoverage[kind]) coverageProblems.push(`${kind}: ${Math.round(coverage * 100)}% is below ${minimumCoverage[kind] * 100}%`)
 }
 
+const slotAuditRegistry = JSON.parse(readFileSync(join(repoRoot, 'scripts/data/slot-styling-audit.json'), 'utf8'))
+const slotAudit = validateSlotStylingAudit({ registry: slotAuditRegistry, elements: manifestElements(auditedManifests) })
+console.log(
+  `[docs] slot audit: ${slotAudit.stats.entries}/${slotAudit.stats.slots} decisions ` +
+    `(${Object.entries(slotAudit.stats.decisions)
+      .map(([decision, count]) => `${decision}=${count}`)
+      .join(', ')})`,
+)
+
 if (missing.length) console.warn(`[docs] ${missing.length} descriptions still need enrichment:\n  ${missing.join('\n  ')}`)
-const failures = [...coverageProblems, ...galleryProblems]
+const packageProblems = [
+  ...publishable.errors,
+  ...undocumentedPublishablePackages(publishable.packages, documentedPackages).map((name) => `${name}: publishable component package has no UI documentation page`),
+]
+const failures = [...coverageProblems, ...galleryProblems, ...packageProblems, ...exampleProblems, ...slotAudit.errors]
 if (failures.length) {
   console.error(`[docs] validation failed:\n  ${failures.join('\n  ')}`)
   process.exitCode = 1
 } else {
   console.log(`[docs] gallery baselines: ${readdirSync(galleryRoot).filter((name) => name.endsWith('.mdx')).length} valid`)
+  console.log(`[docs] package examples: ${publishable.packages.length}/${publishable.packages.length} runnable and customized`)
 }

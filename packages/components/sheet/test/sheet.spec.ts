@@ -1,4 +1,14 @@
-import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('footer presence follows assignment, insertion, removal and reassignment', async ({ page, renderScenario }) => {
+  const footer = page.locator('c2-sheet').locator('[part="footer"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-sheet label="Settings" open><button slot="footer" data-slot-presence-probe>Save</button></c2-sheet>',
+    host: 'c2-sheet',
+    slot: 'footer',
+    assertPresent: async (present) => (present ? expect(footer).toBeVisible() : expect(footer).toBeHidden()),
+  })
+})
 
 /** Settled geometry of the panel, after the slide transition has finished. */
 async function panel(page: import('@playwright/test').Page) {

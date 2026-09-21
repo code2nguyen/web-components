@@ -1,6 +1,12 @@
 import { test, expect, props, accessible } from '../../../../tests/component-fixture'
 
 const panels = '<c2-details label="First"><p>First panel</p></c2-details><c2-details label="Second"><p>Second panel</p></c2-details>'
+
+test('consumer-owned disclosure panels remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-accordion><c2-details class="slot-probe" label="Panel">Content</c2-details></c2-accordion>')
+  await page.locator('.slot-probe').evaluate((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)'))
+  await expect(page.locator('.slot-probe')).toHaveCSS('color', 'rgb(1, 2, 3)')
+})
 test('opening one disclosure closes its sibling', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-accordion>${panels}</c2-accordion>`)
   await page.locator('summary').nth(0).click()

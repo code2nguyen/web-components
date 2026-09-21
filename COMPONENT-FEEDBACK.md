@@ -22,6 +22,80 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### Renderer output is unreachable from a page stylesheet
+
+- **Severity:** papercut
+- **Hit while:** migrating a nine-route SvelteKit tool onto 35 packages at 0.0.13, 2026-09-19 (external report).
+- **What happens:** `renderCell` (`c2-table`) and `renderItem` (`c2-virtual-list`, `c2-list`) return nodes that
+  land in the shadow root, where no page stylesheet reaches them. Every element in the app's row template had to
+  carry an inline `style` constant for that reason alone, including the two declarations that turn a filled badge
+  into an outlined one. `::part(cell-content-<field>)` covers a column's text but not the structure inside a
+  renderer.
+- **Where the fix belongs:** `packages/components/table`, `virtual-list`, `list` — give rendered content a `part`,
+  or honour a `part`/class the renderer's returned element already carries.
+
+### No per-row styling hook that CSS can reach
+
+- **Severity:** gap
+- **Hit while:** the same migration, 2026-09-19 (external report).
+- **What happens:** `rowStyle` is a function returning inline styles; there is no `rowClass`, and `::part(row)`
+  cannot be conditioned on row data. Every per-row tint in the app — a revised record, the currently running job —
+  became a badge in a cell instead.
+- **Where the fix belongs:** `packages/components/table` — a `rowClass` callback returning a string, or chosen
+  fields emitted as data attributes on the row so `::part(row)[data-status='failed']` works from a stylesheet.
+
+### Wrapping a table cell takes a three-part override every consumer rewrites
+
+- **Severity:** papercut
+- **Hit while:** the same migration, 2026-09-19 (external report). The identical override was written twice, on
+  two different screens.
+- **What happens:** cells clip by design, which is right for a windowed grid. Opting out means turning
+  virtualization off and then resetting `align-items` and `overflow` through two parts:
+  `--c2-table__row--height: auto`, `::part(cell) { align-items: flex-start; overflow: visible }`,
+  `::part(cell-content) { white-space: normal; overflow: visible }`.
+- **Where the fix belongs:** `packages/components/table` — a `wrap` attribute that does those three things and
+  documents that windowing turns off, or measured variable row heights.
+
+### `cell-slot` defeats virtualization, so rich cells and windowing are mutually exclusive without Lit
+
+- **Severity:** gap
+- **Hit while:** the same migration, 2026-09-19 (external report).
+- **What happens:** a `cell-slot` column needs one light-DOM child per row per field, keyed by row key. On a
+  5,000-row grid that is 5,000 children — exactly the cost windowing exists to avoid. A framework that will not
+  take a Lit dependency therefore cannot have both. (`html` re-exported from `@c2n/core/lit-helper.js` softens
+  this: the Lit renderer no longer means a hand-pinned `lit` in the application.)
+- **Where the fix belongs:** `packages/components/table` — key slot names by **visible index** rather than row key,
+  so a framework renders only the window. Breaking change to the documented `cell:{rowKey}:{field}` contract.
+
+### `c2-status-panel` always renders its media box
+
+- **Severity:** papercut
+- **Hit while:** the same migration, 2026-09-19 (external report).
+- **What happens:** the template always emits the media element, so suppressing it took zeroing the media size and
+  background for all five tones plus collapsing the container gap — six variables to hide one box.
+- **Where the fix belongs:** `packages/components/status-panel` — a `no-media` attribute, or skip the media box
+  when its slot is empty and a flag asks for no default icon.
+
+### `@c2n/seperator` and `c2-seperator` are misspelled
+
+- **Severity:** papercut (public API)
+- **Hit while:** the same migration, 2026-09-19 (external report).
+- **What happens:** the package, the element and the documentation all spell it "seperator". Every consumer has to
+  reproduce the typo.
+- **Where the fix belongs:** ship `@c2n/separator` / `c2-separator` and keep the old spelling as a deprecated alias
+  package and tag. Breaking without the alias, so it needs a deliberate release.
+
+### `reorder-list` exposes two properties whose real attributes are unreadable
+
+- **Severity:** papercut
+- **Hit while:** correcting the manifest's derived attribute names, 2026-09-19.
+- **What happens:** `dragStartThreshold` and `autoScrollDisabled` declare no `attribute`, so Lit observes them as
+  `dragstartthreshold` and `autoscrolldisabled` — now that the manifest reports the real name instead of the
+  property spelling, that is what the API table, the IDE metadata and any generated markup advertise.
+- **Where the fix belongs:** `packages/components/reorder-list` — declare `attribute: 'drag-start-threshold'` and
+  `attribute: 'auto-scroll-disabled'`. Backwards compatible: `element-helper` forwards the lowercase spelling to
+  the kebab-case attribute with a warning.
+
 ### A many-row component cannot be SSR'd chrome: declarative shadow DOM duplicates its stylesheet per instance
 
 - **Severity:** gap (rendering strategy, not a component defect)

@@ -54,7 +54,7 @@ import colorSlider from '@c2n/color-slider/custom-elements.json'
 import listItem from '@c2n/list-item/custom-elements.json'
 import overlay from '@c2n/overlay/custom-elements.json'
 import select from '@c2n/select/custom-elements.json'
-import dropdownList from '@c2n/dropdown-list/custom-elements.json'
+import reorderList from '@c2n/reorder-list/custom-elements.json'
 import list from '@c2n/list/custom-elements.json'
 import tabs from '@c2n/tabs/custom-elements.json'
 import codeViewer from '@c2n/code-viewer/custom-elements.json'
@@ -133,7 +133,7 @@ export const componentManifests = (function () {
     listItem,
     overlay,
     select,
-    dropdownList,
+    reorderList,
     card,
     list,
     tabs,

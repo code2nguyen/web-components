@@ -1,4 +1,14 @@
-import { test, expect, props, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('label presence follows assignment, text, insertion, removal and reassignment', async ({ page, renderScenario }) => {
+  const label = page.locator('c2-spinner').locator('[part="label"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-spinner><span data-slot-presence-probe>Loading</span></c2-spinner>',
+    host: 'c2-spinner',
+    text: true,
+    assertPresent: async (present) => (present ? expect(label).toBeVisible() : expect(label).toBeHidden()),
+  })
+})
 
 test('indeterminate progress has a name without a numeric value', async ({ page, renderScenario }) => {
   await renderScenario('<c2-spinner>Loading files</c2-spinner>')

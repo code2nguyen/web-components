@@ -1,0 +1,4 @@
+{
+  "registry": { "version": 1, "entries": [{ "tag": "c2-demo", "slot": "header", "decision": "part", "parts": ["missing"], "reason": "Missing wrapper." }] },
+  "elements": [{ "tag": "c2-demo", "slots": ["header"], "parts": {}, "variables": [] }]
+}

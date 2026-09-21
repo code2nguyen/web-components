@@ -1,6 +1,7 @@
 import { animate, type Options } from '@lit-labs/motion'
 import { html, LitElement, type PropertyValueMap, type TemplateResult, unsafeCSS } from 'lit'
-import { eventOptions, property, query, queryAll, state } from 'lit/decorators.js'
+import { eventOptions, query, queryAll, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -15,6 +16,18 @@ export interface MutateMouseEvent {
   pageY: number
 }
 
+/**
+ * Reorderable collection that assigns consumer-owned children to numeric slots.
+ *
+ * @tag c2-reorder-list
+ * @slot item-* - Dynamic numeric slot family (`0`, `1`, …) containing consumer-owned reorderable items.
+ * @slot placeholder - Custom placeholder shown at the prospective drop position; falls back to an empty sized marker.
+ * @slot dragging-item - Custom preview shown while an item is being dragged.
+ * @csspart item - Repeated component-owned placement wrapper for every dynamic item slot.
+ * @csspart placeholder - Component-owned drop-position region wrapping the `placeholder` slot and its fallback marker.
+ * @csspart dragging-item - Component-owned drag-preview region wrapping the `dragging-item` slot; active only while dragging.
+ * @fires change - Emitted after a drag completes with the reordered numeric slot indexes in `detail`.
+ */
 @customElement('c2-reorder-list')
 export class ReorderList extends LitElement {
   @query('.dragging-item') protected draggingElement!: HTMLElement
@@ -22,8 +35,13 @@ export class ReorderList extends LitElement {
   @query('.c2-reorder-list-container') protected containerElement!: HTMLElement
   @queryAll('.list-item') protected listItemElements!: NodeListOf<HTMLDivElement>
 
+  /** Enables pointer-driven reordering when true. */
   @property({ type: Boolean, reflect: true }) editable = false
+
+  /** Minimum pointer travel in pixels before a drag starts. */
   @property({ type: Number }) dragStartThreshold = 10
+
+  /** Disables automatic scrolling of the nearest scrollable parent during a drag. */
   @property({ type: Boolean }) autoScrollDisabled = false
 
   @state()
@@ -75,7 +93,7 @@ export class ReorderList extends LitElement {
       if (this.placeholderSlotIndex !== -1 && this.currentDraggingSlotIndex === slotIndex) {
         return html``
       }
-      return html`<div class="list-item ${classMap(itemClasses)}" ${animate(animateOptions)}>
+      return html`<div part="item" class="list-item ${classMap(itemClasses)}" ${animate(animateOptions)}>
         <slot name="${slotIndex}"></slot>
       </div>`
     })
@@ -95,7 +113,7 @@ export class ReorderList extends LitElement {
   }
 
   private createPlaceHolder(itemClasses: { 'list-item--reorderable': boolean }) {
-    return html` <div class="list-item placeholder ${classMap(itemClasses)}">
+    return html` <div part="placeholder" class="list-item placeholder ${classMap(itemClasses)}">
       <slot name="placeholder">
         <div class="dragging-placeholder" style=${styleMap(this.placeholderSize)}></div>
       </slot>
@@ -106,7 +124,7 @@ export class ReorderList extends LitElement {
     const draggingItemClasses = { 'dragging-item--active': this.placeholderSlotIndex > -1 }
     return html`
       <div class="c2-reorder-list-container" @mousedown=${this.handleMouseDown}>${this.renderSlots()}</div>
-      <div class="dragging-item ${classMap(draggingItemClasses)}">
+      <div part="dragging-item" class="dragging-item ${classMap(draggingItemClasses)}">
         <slot name="dragging-item"></slot>
       </div>
     `
@@ -266,10 +284,6 @@ export class ReorderList extends LitElement {
     this.childListObserver.observe(this, { subtree: false, childList: true })
   }
 
-  protected override async firstUpdated() {
-    this.updateSlotMapping()
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected override updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     if (_changedProperties.has('placeholderSlotIndex')) {
@@ -378,7 +392,8 @@ export class ReorderList extends LitElement {
 
   private getChildItems(): Element[] {
     const items: Element[] = []
-    for (const item of this.children) {
+    // Lit's server renderer does not provide HTMLElement.children; an empty collection is the correct SSR shape.
+    for (const item of this.children ?? []) {
       const slotName = item.getAttribute('slot')
       if (slotName === 'dragging-item' || !slotName || !Number.isNaN(parseInt(slotName))) {
         items.push(item)

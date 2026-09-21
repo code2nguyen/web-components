@@ -1,7 +1,7 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { hasSlottedContent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './seperator.scss?inline'
 
@@ -15,6 +15,10 @@ export type SeperatorOrientation = 'horizontal' | 'vertical'
  * @tag c2-seperator
  *
  * @slot - Optional label drawn between two line segments.
+ *
+ * @csspart seperator - The outer separator layout container.
+ * @csspart line - Each line segment on either side of the optional label.
+ * @csspart label - Container for the optional default slot.
  *
  * @cssproperty {pixel} [--c2-seperator--thickness=1px]
  * @cssproperty {color} [--c2-seperator--color=#e4e4e7]
@@ -43,7 +47,7 @@ export class Seperator extends LitElement {
   /** Purely visual: removes the `separator` role so screen readers skip it. */
   @property({ type: Boolean, reflect: true }) decorative = false
 
-  @state() private hasLabel = false
+  private readonly slotPresence = new SlotPresenceController(this, [''])
 
   /** `slotchange` does not fire for server-rendered slots, so read the label once after the first render. */
   override updated(changed: PropertyValues<this>) {
@@ -59,24 +63,12 @@ export class Seperator extends LitElement {
   }
 
   private handleSlotChange(event: Event) {
-    this.updateLabel(event.target as HTMLSlotElement)
-  }
-
-  private updateLabel(slot: HTMLSlotElement) {
-    this.hasLabel = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-  }
-
-  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
-  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-  override willUpdate() {
-    if (!this.hasUpdated) {
-      this.hasLabel = hasSlottedContent(this)
-    }
+    this.slotPresence.handleSlotChange(event)
   }
 
   override render() {
     return html`
-      <div class=${classMap({ 'c2-seperator': true, 'has-label': this.hasLabel })} part="seperator">
+      <div class=${classMap({ 'c2-seperator': true, 'has-label': this.slotPresence.has() })} part="seperator">
         <span class="c2-seperator-line c2-seperator-line--start" part="line"></span>
         <span class="c2-seperator-label" part="label"><slot @slotchange=${this.handleSlotChange}></slot></span>
         <span class="c2-seperator-line c2-seperator-line--end" part="line"></span>

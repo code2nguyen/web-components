@@ -25,3 +25,5 @@ npm install @c2n/details
 - **Animation**: open and close slide the content (height plus a fade) with the Web Animations API, so the motion is the same in every browser; `--c2-details--transition-duration: 0ms` turns it off, and `prefers-reduced-motion` is respected.
 
 Theming is done through CSS custom properties: `--c2-details--*` for the frame, `--c2-details__header--*` (plus `__icon`, `__content`, `__hover`, `__open`, `__focus`, `__disabled`) for the summary, and `--c2-details__content--*` for the body. The full list is in `custom-elements.json` and on the docs site.
+
+Use ordinary classes for assigned slot nodes. The `summary`, `title`, `icon`, `header-content`, and `body` parts expose the disclosure-owned regions and visible title/icon fallbacks.

@@ -76,7 +76,6 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-autocomplete',
   'c2-tooltip',
   'c2-select',
-  'c2-dropdown-list',
   'c2-overlay',
   'c2-color-select',
   'c2-menu',

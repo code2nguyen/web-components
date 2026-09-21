@@ -1,5 +1,6 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -128,6 +129,13 @@ export interface Pagination {
  *
  * @event {CustomEvent<PageChangeEventDetail>} page-change - Fired after the shown page changes, by a control or by a page-size change. `detail.startIndex` / `detail.endIndex` slice the items of the new page.
  * @event {CustomEvent<PageSizeChangeEventDetail>} page-size-change - Fired after the user picks another rows-per-page value.
+ *
+ * @csspart nav - A first, previous, next or last page button.
+ * @csspart item - A numbered page button.
+ * @csspart ellipsis - A control that jumps across a hidden range of pages.
+ * @csspart label - Current-page, item-range or page-size text.
+ * @csspart page-size - The `c2-select` used to change the number of items per page.
+ * @csspart pagination - The outer pagination navigation landmark.
  *
  * @cssproperty {pixel} [--c2-pagination--gap=4px] - Space between the controls.
  * @cssproperty {pixel} [--c2-pagination--section-gap=24px] - Space between the groups of the `compact` variant.

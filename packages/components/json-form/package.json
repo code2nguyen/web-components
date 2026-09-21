@@ -1,6 +1,7 @@
 {
   "name": "@c2n/json-form",
   "version": "0.0.13",
+  "private": true,
   "keywords": [
     "json form",
     "json schema",

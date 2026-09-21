@@ -1,5 +1,5 @@
 import { isServer, LitElement, type PropertyValues } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import type { ChartLegendItem } from './chart-base.js'
 import type { ChartTooltipContext } from './chart-types.js'
 

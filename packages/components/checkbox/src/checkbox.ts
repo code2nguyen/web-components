@@ -1,5 +1,6 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
@@ -28,6 +29,10 @@ export interface Checkbox {
  * @slot uncheckmark - Icon shown when unchecked. Empty by default.
  *
  * @event {Event} change - Re-dispatched from the inner input when the checked state changes.
+ *
+ * @csspart checkmark - Wrapper containing the `checkmark` slot or fallback mark while checked.
+ * @csspart mixedmark - Wrapper containing the `mixedmark` slot or fallback mark while indeterminate.
+ * @csspart uncheckmark - Wrapper containing the optional `uncheckmark` slot while unchecked.
  *
  * @cssproperty {pixel} [--c2-checkbox__container--height=18px]
  * @cssproperty {pixel} [--c2-checkbox__container--width=18px]

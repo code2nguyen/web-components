@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -59,9 +60,10 @@ export interface TreeItem {
  *
  * @csspart row - The clickable row, excluding any nested children.
  * @csspart toggle - The disclosure toggle.
- * @csspart label - The label box.
- * @csspart actions - The trailing actions box.
+ * @csspart label - Text box containing the `label` slot or label-property fallback.
+ * @csspart actions - Trailing box wrapping the assigned `actions` slot.
  * @csspart group - The container holding the nested children.
+ * @csspart checkbox - The selection checkbox rendered when checkbox selection is enabled.
  *
  * @cssproperty {pixel} [--c2-tree-item__row--min-height=28px] - Height of a row.
  * @cssproperty {pixel} [--c2-tree-item__row--indent=16px] - Extra inset added per level of depth.

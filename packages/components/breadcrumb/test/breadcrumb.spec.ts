@@ -2,6 +2,15 @@ import { test, expect, accessible } from '../../../../tests/component-fixture'
 
 const items =
   '<c2-link-button href="#home">Home</c2-link-button><c2-link-button href="#products">Products</c2-link-button><c2-link-button href="#category">Category</c2-link-button><c2-link-button href="#item">Item</c2-link-button>'
+test('initial separator discovery does not schedule a second Lit update', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('c2-breadcrumb scheduled an update')) warnings.push(message.text())
+  })
+  await renderScenario(`<c2-breadcrumb><span slot="separator">/</span>${items}</c2-breadcrumb>`)
+  await expect(page.getByRole('navigation')).toBeVisible()
+  expect(warnings).toEqual([])
+})
 test('navigation labels the current page', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-breadcrumb>${items}</c2-breadcrumb>`)
   await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toBeVisible()

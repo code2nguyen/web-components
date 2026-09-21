@@ -18,6 +18,9 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-text-field': DefineComponent<
       C2Props<TextField> & {
+        readonly?: unknown
+        maxlength?: unknown
+        minlength?: unknown
         'aria-label'?: unknown
         'error-text'?: unknown
         onInput?: (event: TextFieldEventMap['input']) => void
@@ -27,6 +30,9 @@ declare module 'vue' {
     >
     'c2-text-field-clear': DefineComponent<
       C2Props<TextFieldClear> & {
+        readonly?: unknown
+        maxlength?: unknown
+        minlength?: unknown
         'aria-label'?: unknown
         'error-text'?: unknown
         onInput?: (event: TextFieldClearEventMap['input']) => void

@@ -1,4 +1,23 @@
-import { accessible, expect, props, test, watch } from '../../../../tests/component-fixture'
+import { accessible, expect, props, slotPresenceMatrix, test, watch } from '../../../../tests/component-fixture'
+
+test('supporting-text presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const region = page.locator('c2-number-input').locator('.supporting-text')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-number-input><span slot="supporting-text" data-slot-presence-probe>Help</span></c2-number-input>',
+    host: 'c2-number-input',
+    slot: 'supporting-text',
+    assertPresent: async (present) => expect(region).toHaveCount(present ? 1 : 0),
+  })
+})
+
+test('consumer-owned controls and supporting slots remain directly styleable', async ({ page, renderScenario }) => {
+  const slots = ['decrement-icon', 'increment-icon', 'prefix', 'suffix', 'supporting-text']
+  await renderScenario(`<c2-number-input>${slots.map((slot) => `<span class="slot-probe" slot="${slot}">${slot}</span>`).join('')}</c2-number-input>`)
+  await page.addStyleTag({ content: '.slot-probe{color:rgb(1,2,3)}' })
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).color)))
+    .toEqual(Array(5).fill('rgb(1, 2, 3)'))
+})
 
 test('steps with pointer controls and publishes input and change', async ({ page, renderScenario }) => {
   await renderScenario('<c2-number-input value="2" min="0" max="4" step="0.5" aria-label="Quantity"></c2-number-input>')

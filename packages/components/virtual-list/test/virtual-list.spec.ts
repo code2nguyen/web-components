@@ -1,5 +1,15 @@
-import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
 import type {} from './scenario-api'
+
+test('toolbar presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const toolbar = page.locator('c2-virtual-list').locator('[part="search"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-virtual-list items="[]"><span slot="toolbar" data-slot-presence-probe>Tools</span></c2-virtual-list>',
+    host: 'c2-virtual-list',
+    slot: 'toolbar',
+    assertPresent: async (present) => (present ? expect(toolbar).toBeVisible() : expect(toolbar).toBeHidden()),
+  })
+})
 
 const PEOPLE = [
   { id: 'a', name: 'Ada Lovelace', team: 'Analytics' },
@@ -192,6 +202,31 @@ test('empty, loading and error states each replace the list', async ({ page, ren
 
   await props(host, { loading: false, error: 'Could not load' })
   await expect(host).toContainText('Could not load')
+})
+
+test('stable search, footer, and shared state parts coexist with assigned-only slots', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-virtual-list searchable items="[]"><span class="slot-probe" slot="toolbar">Tools</span><span slot="footer">Footer</span><span slot="empty">Empty</span><span slot="loading">Loading</span><span slot="error">Error</span><span class="slot-probe" slot="no-results">None</span></c2-virtual-list>',
+  )
+  await page.addStyleTag({
+    content:
+      'c2-virtual-list::part(search){background:rgb(1,2,3)}c2-virtual-list::part(footer){background:rgb(4,5,6)}c2-virtual-list::part(state){background:rgb(7,8,9)}',
+  })
+  const host = page.locator('c2-virtual-list')
+  await expect(host.locator('[part="search"]')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await expect(host.locator('[part="footer"]')).toHaveCSS('background-color', 'rgb(4, 5, 6)')
+  for (const state of [
+    { loading: false, error: '' },
+    { loading: true, error: '' },
+    { loading: false, error: 'Failed' },
+  ]) {
+    await props(host, state)
+    await expect(host.locator('[part="state"]')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
+  }
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(10, 11, 12)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(2).fill('rgb(10, 11, 12)'))
 })
 
 test('a data source is asked only for the blocks the window needs, and search goes to the server', async ({ page, renderScenario }) => {

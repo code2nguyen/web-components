@@ -102,3 +102,15 @@ test('has no detectable accessibility violations', async ({ page, scenario }) =>
   await page.getByRole('treeitem', { name: 'Zhejiang' }).click()
   await accessible(page)
 })
+
+test('consumer-owned state and icon slots remain directly styleable', async ({ page, scenario }) => {
+  await scenario()
+  const slots = ['empty', 'prefix-icon', 'suffix-icon']
+  await page.locator('c2-cascader').evaluate((host, names) => {
+    for (const name of names) host.insertAdjacentHTML('beforeend', `<span class="slot-probe" slot="${name}">${name}</span>`)
+  }, slots)
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(slots.map(() => 'rgb(1, 2, 3)'))
+})

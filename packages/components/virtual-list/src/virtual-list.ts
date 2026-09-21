@@ -1,11 +1,12 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './virtual-list.scss?inline'
-import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { defaultCompare, getFieldValue, sortEntryConverter, type SortEntry } from '@c2n/core/data-helper.js'
 import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type {
   VirtualListDataSource,
   VirtualListItemContext,
@@ -91,6 +92,16 @@ export interface VirtualList {
  * @slot no-results - Replaces the built-in "no matches" message shown while a search is active.
  * @slot loading - Replaces the built-in spinner shown while the first items load.
  * @slot error - Replaces the built-in message shown when `error` is set.
+ *
+ * @csspart search - Header row containing the built-in search field and the `search` and `toolbar` slots.
+ * @csspart viewport - Scroll container that holds the listbox and its empty, loading or error state.
+ * @csspart items - Inner listbox containing the rendered rows and virtual-scroll spacers.
+ * @csspart item - Every rendered `c2-list-item`, including loading placeholders.
+ * @csspart item-selected - A rendered item while it is selected; exposed in addition to `item`.
+ * @csspart skeleton - Placeholder shown inside an item while its remote data block is loading.
+ * @csspart state - Shared container for the `empty`, `loading`, or `error` slot and its fallback message.
+ * @csspart highlight - A `<mark>` around text that matches the active search query.
+ * @csspart footer - Footer row containing the `footer` slot.
  *
  * @internalcomponent c2-list-item
  * @internalcomponent c2-text-field
@@ -240,8 +251,7 @@ export class VirtualList extends LitElement {
   /** Message shown when a search is active and nothing matches. */
   @property({ type: String, attribute: 'no-results-message' }) noResultsMessage = 'No matches'
 
-  @state() private hasToolbar = false
-  @state() private hasFooter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['toolbar', 'footer'])
   @state() private remoteTotal = -1
   @state() private focusedIndex = 0
 
@@ -416,12 +426,12 @@ export class VirtualList extends LitElement {
   override render() {
     const range = this.#virtualizer.range
     const count = this.itemCount
-    const hasSearchBar = this.searchable || this.hasToolbar
+    const hasSearchBar = this.searchable || this.slotPresence.has('toolbar')
 
     return html`
       <div class="search" part="search" ?hidden=${!hasSearchBar}>
         ${this.searchable ? html`<slot name="search">${this.#renderSearchField()}</slot>` : nothing}
-        <slot name="toolbar" @slotchange=${(event: Event) => (this.hasToolbar = this.#slotHasContent(event))}></slot>
+        <slot name="toolbar" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
       <div class="viewport" part="viewport">
         <div
@@ -440,8 +450,8 @@ export class VirtualList extends LitElement {
         </div>
         ${this.#renderState(count)}
       </div>
-      <div class="footer" part="footer" ?hidden=${!this.hasFooter}>
-        <slot name="footer" @slotchange=${(event: Event) => (this.hasFooter = this.#slotHasContent(event))}></slot>
+      <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
+        <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
     `
   }
@@ -860,12 +870,6 @@ export class VirtualList extends LitElement {
       this.#measuredItemHeight = height
       this.requestUpdate()
     }
-  }
-
-  #slotHasContent(event: Event): boolean {
-    return (event.target as HTMLSlotElement)
-      .assignedNodes({ flatten: true })
-      .some((node) => node.nodeType !== Node.TEXT_NODE || Boolean(node.textContent?.trim()))
   }
 }
 

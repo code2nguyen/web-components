@@ -14,3 +14,5 @@ File and image attachments with metadata, upload progress, failure states, actio
 ```
 
 Importing the package root registers both `c2-attachment` and `c2-attachment-group`.
+
+Assigned media, name, metadata, and action nodes remain directly styleable. Use `::part(media)`, `::part(content)`, `::part(name)`, `::part(metadata)`, or `::part(actions)` for attachment-owned regions, and `c2-attachment-group::part(list)` for the group wrapper.

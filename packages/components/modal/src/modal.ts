@@ -1,10 +1,11 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { property, query, state } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { hasSlottedContent, lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './modal.scss?inline'
 
 /** Events fired by {@link Modal}, keyed for `addEventListener`. */
@@ -32,6 +33,12 @@ export interface Modal {
  * @slot title - Heading shown in the header; the dialog is labelled by it.
  * @slot footer - Actions row (a flex row, see the `footer--*` tokens).
  * @slot close-icon - Replaces the default × icon of the close button.
+ * @csspart panel - Dialog panel containing the header, body, and conditional footer regions.
+ * @csspart header - Header region containing the title slot and close button.
+ * @csspart title - Component-owned title region wrapping the `title` slot.
+ * @csspart close-button - Close button containing the `close-icon` slot or its fallback icon.
+ * @csspart body - Component-owned body region wrapping the default slot.
+ * @csspart footer - Conditional footer region wrapping the `footer` slot.
  *
  * @event {Event} open - Fired after the dialog has been shown.
  * @event {CustomEvent<{ returnValue: string }>} close - Fired after the dialog has closed; `detail.returnValue` is what `close()` received (`''` for Escape / backdrop / the × button).
@@ -113,8 +120,7 @@ export class Modal extends LitElement {
   /** Value passed to the last `close()` call, mirrors `HTMLDialogElement.returnValue`. */
   returnValue = ''
 
-  @state() private hasTitle = false
-  @state() private hasFooter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['title', 'footer'])
 
   @query('dialog') private dialog!: HTMLDialogElement
 
@@ -171,13 +177,7 @@ export class Modal extends LitElement {
   }
 
   private handleSlotChange(event: Event) {
-    this.updateSlot(event.target as HTMLSlotElement)
-  }
-
-  private updateSlot(slot: HTMLSlotElement) {
-    const filled = slot.assignedNodes({ flatten: true }).some((n) => n.nodeType === Node.ELEMENT_NODE || (n.textContent ?? '').trim() !== '')
-    if (slot.name === 'title') this.hasTitle = filled
-    else if (slot.name === 'footer') this.hasFooter = filled
+    this.slotPresence.handleSlotChange(event)
   }
 
   override updated(changed: PropertyValues<this>) {
@@ -192,32 +192,25 @@ export class Modal extends LitElement {
     }
   }
 
-  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
-  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-  override willUpdate(_changed: PropertyValues<this>) {
-    if (!this.hasUpdated) {
-      this.hasTitle = hasSlottedContent(this, 'title')
-      this.hasFooter = hasSlottedContent(this, 'footer')
-    }
-  }
-
   override render() {
+    const hasTitle = this.slotPresence.has('title')
+    const hasFooter = this.slotPresence.has('footer')
     return html`
       <dialog
         class="c2-modal"
-        aria-labelledby=${this.hasTitle ? 'title' : nothing}
-        aria-label=${!this.hasTitle && this.label ? this.label : nothing}
+        aria-labelledby=${hasTitle ? 'title' : nothing}
+        aria-label=${!hasTitle && this.label ? this.label : nothing}
         @close=${this.handleDialogClose}
         @cancel=${this.handleDialogCancel}
         @click=${this.handleDialogClick}
       >
-        <div class=${classMap({ 'c2-modal__panel': true, 'has-title': this.hasTitle, 'has-footer': this.hasFooter })}>
-          <header class="c2-modal__header" ?hidden=${!this.hasTitle && this.hideClose}>
-            <div class="c2-modal__title" id="title"><slot name="title" @slotchange=${this.handleSlotChange}></slot></div>
+        <div part="panel" class=${classMap({ 'c2-modal__panel': true, 'has-title': hasTitle, 'has-footer': hasFooter })}>
+          <header part="header" class="c2-modal__header" ?hidden=${!hasTitle && this.hideClose}>
+            <div part="title" class="c2-modal__title" id="title"><slot name="title" @slotchange=${this.handleSlotChange}></slot></div>
             ${
               this.hideClose
                 ? nothing
-                : html`<button class="c2-modal__close" type="button" aria-label="Close" @click=${() => this.close()}>
+                : html`<button part="close-button" class="c2-modal__close" type="button" aria-label="Close" @click=${() => this.close()}>
                     <slot name="close-icon">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 6 6 18M6 6l12 12"></path>
@@ -226,8 +219,8 @@ export class Modal extends LitElement {
                   </button>`
             }
           </header>
-          <div class="c2-modal__body"><slot></slot></div>
-          <footer class="c2-modal__footer" ?hidden=${!this.hasFooter}><slot name="footer" @slotchange=${this.handleSlotChange}></slot></footer>
+          <div part="body" class="c2-modal__body"><slot></slot></div>
+          <footer part="footer" class="c2-modal__footer" ?hidden=${!hasFooter}><slot name="footer" @slotchange=${this.handleSlotChange}></slot></footer>
         </div>
       </dialog>
     `

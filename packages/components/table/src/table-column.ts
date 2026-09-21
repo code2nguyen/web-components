@@ -1,8 +1,7 @@
 import { LitElement, unsafeCSS, type PropertyValues } from 'lit'
-import { property } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './table-column.scss?inline'
-import { jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { ColumnAlign, ColumnFormat, ColumnPin, TableCellRenderer, TableColumnConfig, TableHeaderRenderer } from './table-types.js'
 
 /** Fired at the parent table whenever a column definition changes. */
@@ -42,11 +41,11 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /** Horizontal alignment of the header and the cells. */
   @property({ type: String }) align: ColumnAlign = 'start'
 
-  /** Lets the user sort by this column. Defaults to the table's `sortable`. */
-  @property({ type: Boolean, converter: { fromAttribute: (value: string | null) => value !== null } }) sortable?: boolean
+  /** Lets the user sort by this column. Absent inherits the table's `sortable`; `sortable="false"` opts out. */
+  @property({ type: Boolean }) sortable?: boolean
 
-  /** Lets the user drag the column's trailing edge. Defaults to the table's `resizable`. */
-  @property({ type: Boolean, converter: { fromAttribute: (value: string | null) => value !== null } }) resizable?: boolean
+  /** Lets the user drag the column's trailing edge. Absent inherits the table's `resizable`; `resizable="false"` opts out. */
+  @property({ type: Boolean }) resizable?: boolean
 
   /** Freezes the column against the leading or trailing edge while scrolling horizontally. */
   @property({ type: String }) pinned?: ColumnPin

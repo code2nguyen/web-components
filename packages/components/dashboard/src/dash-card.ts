@@ -1,9 +1,10 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type TemplateResult } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { isServer } from 'lit-html/is-server.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { hasSlottedContent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { DASHBOARD_TAG, type DashCardConstraint, type DashboardHost } from './dashboard-host'
 import styles from './dash-card.scss?inline'
@@ -115,10 +116,10 @@ function parseDuration(value: string): number {
  * @event {CustomEvent<DashCardExpandChangeDetail>} expand-change - The card was expanded or collapsed through one
  * of its own controls. Does not bubble: listen on the element.
  *
- * @csspart header - The header row, or the floating control group when the header and actions slots are empty.
+ * @csspart header - Conditional row containing the `header` and `actions` slots, or the floating controls when both are empty.
  * @csspart body - The wrapper around the default slot.
- * @csspart footer - The footer row.
- * @csspart controls - The group holding the `controls` slot and the built-in expand buttons.
+ * @csspart footer - Conditional row wrapping the assigned `footer` slot.
+ * @csspart controls - Component-owned group containing the `controls` slot and built-in expand-button fallbacks.
  * @csspart control - One built-in expand button.
  * @csspart handle - Every drag handle. Each also carries the part of its edge.
  * @csspart handle-left - The handle on the left edge.
@@ -229,10 +230,7 @@ export class DashCard extends LitElement {
   /** How far the card is currently expanded. Settable, so an app can expand a card from its own control. */
   @property({ reflect: true }) expanded: DashCardExpanded = 'none'
 
-  @state() private hasHeader = false
-  @state() private hasActions = false
-  @state() private hasSlottedControls = false
-  @state() private hasFooter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['header', 'actions', 'controls', 'footer'])
   @state() private dashboard: DashboardHost | undefined = undefined
   /** `true` while the leave animation plays: the handles are gone, the placement is kept until it ends. */
   @state() private leaving = false
@@ -274,14 +272,6 @@ export class DashCard extends LitElement {
   }
 
   override willUpdate() {
-    // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
-    // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-    if (!this.hasUpdated) {
-      this.hasHeader = hasSlottedContent(this, 'header')
-      this.hasActions = hasSlottedContent(this, 'actions')
-      this.hasSlottedControls = hasSlottedContent(this, 'controls')
-      this.hasFooter = hasSlottedContent(this, 'footer')
-    }
     this.syncVisibility()
   }
 
@@ -467,27 +457,7 @@ export class DashCard extends LitElement {
   }
 
   private handleSlotChange(event: Event) {
-    this.updateSection(event.target as HTMLSlotElement)
-  }
-
-  private updateSection(slot: HTMLSlotElement) {
-    const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-    switch (slot.name) {
-      case 'header':
-        this.hasHeader = filled
-        break
-      case 'actions':
-        this.hasActions = filled
-        break
-      case 'controls':
-        this.hasSlottedControls = filled
-        break
-      case 'footer':
-        this.hasFooter = filled
-        break
-      default:
-        break
-    }
+    this.slotPresence.handleSlotChange(event)
   }
 
   private startDrag(event: PointerEvent, axis: 'column' | 'row', index: number) {
@@ -649,8 +619,8 @@ export class DashCard extends LitElement {
   }
 
   override render() {
-    const hasControls = this.hasSlottedControls || this.expandWidth || this.expandHeight || this.expandFull
-    const hasHeaderRow = this.hasHeader || this.hasActions
+    const hasControls = this.slotPresence.has('controls') || this.expandWidth || this.expandHeight || this.expandFull
+    const hasHeaderRow = this.slotPresence.has('header') || this.slotPresence.has('actions')
     // One header element either way: with the slots empty it is styled as the floating control group instead of a
     // row, so the `controls` slot exists exactly once and keeps its assignment.
     return html`
@@ -663,7 +633,7 @@ export class DashCard extends LitElement {
           </div>
         </div>
         <div class="c2-dash-card__body" part="body"><slot></slot></div>
-        <div class="c2-dash-card__footer" part="footer" ?hidden=${!this.hasFooter}>
+        <div class="c2-dash-card__footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
           <slot name="footer" @slotchange=${this.handleSlotChange}></slot>
         </div>
       </div>

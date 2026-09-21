@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './button.scss?inline'
 
@@ -12,6 +12,9 @@ import styles from './button.scss?inline'
  * @slot prefix-icon - Icon shown before the label. Replaced by `running-icon` while the button is running.
  * @slot suffix-icon - Icon shown after the label.
  * @slot running-icon - Icon shown in place of the prefix icon while `running` is set. Defaults to a spinner; the slot wrapper rotates, so slotted content spins too.
+ *
+ * @csspart button - The native button that provides the interactive surface.
+ * @csspart running-icon - Wrapper containing the `running-icon` slot or spinner fallback while `running` is set.
  *
  * @cssproperty {pixel} [--c2-button__container--height=36px]
  * @cssproperty {width} [--c2-button__container--width=auto] - Width of the host. `100%` makes a full-width button.

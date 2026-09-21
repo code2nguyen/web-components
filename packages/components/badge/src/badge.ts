@@ -1,6 +1,7 @@
-import { LitElement, html, isServer, nothing, unsafeCSS } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import styles from './badge.scss?inline'
 
@@ -21,6 +22,8 @@ export type BadgeOverlap = 'rectangular' | 'circular'
  * @slot - Label text. Ignored while `count` or `dot` is set.
  * @slot prefix-icon - Icon shown before the text, sized by `--c2-badge__icon--size`.
  * @slot anchor - Element the badge is pinned to. When filled the badge becomes an overlay at the `placement` corner.
+ *
+ * @csspart badge - The visible badge pill or dot, including its anchored overlay positioning.
  *
  * @cssproperty {pixel} [--c2-badge--height=20px]
  * @cssproperty {pixel} [--c2-badge--min-width=20px] - Keeps single digits round.
@@ -90,27 +93,7 @@ export class Badge extends LitElement {
   /** Shape of the anchor: `circular` pulls the badge onto the edge of a round anchor instead of its bounding-box corner. */
   @property({ reflect: true }) overlap: BadgeOverlap = 'rectangular'
 
-  @state() private hasAnchor = false
-
-  /** Read the anchor before the first render so a server-rendered badge hydrates in its final position. */
-  override connectedCallback() {
-    super.connectedCallback()
-    if (!isServer) this.hasAnchor = this.querySelector(':scope > [slot="anchor"]') !== null
-  }
-
-  /** `slotchange` does not fire for server-rendered slots, so read the anchor once after the first render. */
-  override firstUpdated() {
-    const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="anchor"]')
-    if (slot) this.updateAnchor(slot)
-  }
-
-  private handleAnchorChange(event: Event) {
-    this.updateAnchor(event.target as HTMLSlotElement)
-  }
-
-  private updateAnchor(slot: HTMLSlotElement) {
-    this.hasAnchor = slot.assignedElements({ flatten: true }).length > 0
-  }
+  private readonly slotPresence = new SlotPresenceController(this, ['anchor'])
 
   /** Text shown for `count`, clamped at `max`. */
   get displayCount(): string {
@@ -129,7 +112,7 @@ export class Badge extends LitElement {
       'c2-badge': true,
       'is-dot': this.dot,
       'is-pulse': this.dot && this.pulse,
-      'is-anchored': this.hasAnchor,
+      'is-anchored': this.slotPresence.has('anchor'),
     })
     if (this.dot) return html`<span class=${classes} part="badge"></span>`
     return html`
@@ -141,7 +124,7 @@ export class Badge extends LitElement {
   }
 
   override render() {
-    return html`<slot name="anchor" @slotchange=${this.handleAnchorChange}></slot>${this.renderBadge()}`
+    return html`<slot name="anchor" @slotchange=${this.slotPresence.handleSlotChange}></slot>${this.renderBadge()}`
   }
 }
 

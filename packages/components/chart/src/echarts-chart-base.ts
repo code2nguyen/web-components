@@ -1,4 +1,4 @@
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { ChartBase } from './chart-base.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
 import { createEchartsAdapter, type EchartsOptions } from './engines/echarts-adapter.js'

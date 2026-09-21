@@ -1,0 +1,10 @@
+{
+  "registry": {
+    "version": 1,
+    "entries": [
+      { "tag": "c2-demo", "slot": "", "decision": "assigned-content", "reason": "Direct content." },
+      { "tag": "c2-demo", "slot": "", "decision": "assigned-content", "reason": "Duplicate." }
+    ]
+  },
+  "elements": [{ "tag": "c2-demo", "slots": [""], "parts": {}, "variables": [] }]
+}

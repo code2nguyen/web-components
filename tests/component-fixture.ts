@@ -17,7 +17,9 @@ export const test = base.extend<{ renderScenario: (html: string) => Promise<void
     await use(async (html) => {
       const directory = relative(testInfo.project.testDir, dirname(testInfo.file)).replaceAll('\\', '/')
       await page.goto(`/${directory}/scenarios.html`)
-      await expect(page.locator('html')).toHaveAttribute('data-modules-ready', 'true')
+      await expect
+        .poll(() => page.evaluate(() => document.documentElement.dataset.modulesReady === 'true' || document.querySelector('main')?.dataset.ready === 'true'))
+        .toBe(true)
       await page.locator('main').evaluate(async (main, markup) => {
         main.innerHTML = markup
         const settle = async (root: Element | ShadowRoot): Promise<void> => {
@@ -74,6 +76,59 @@ export async function pointerClick(locator: Locator) {
   const box = await locator.boundingBox()
   if (!box) throw new Error('Expected a visible pointer target')
   await locator.page().mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+}
+
+export async function slotPresenceMatrix(
+  page: Page,
+  renderScenario: (html: string) => Promise<void>,
+  options: {
+    markup: string
+    host: string
+    slot?: string
+    assertPresent: (present: boolean) => Promise<void>
+    text?: boolean
+  },
+) {
+  const slot = options.slot ?? ''
+  await renderScenario(options.markup)
+  const host = page.locator(options.host)
+  const probe = host.locator(':scope > [data-slot-presence-probe]')
+
+  await options.assertPresent(true)
+  await probe.evaluate((element) => element.remove())
+  await options.assertPresent(false)
+
+  if (options.text) {
+    await host.evaluate((element) => element.append(document.createTextNode('   ')))
+    await options.assertPresent(false)
+    await host.evaluate((element) => {
+      element.lastChild!.remove()
+      element.append(document.createTextNode('Meaningful text'))
+    })
+    await options.assertPresent(true)
+    await host.evaluate((element) => element.lastChild!.remove())
+    await options.assertPresent(false)
+  }
+
+  await host.evaluate((element, name) => {
+    const inserted = document.createElement('span')
+    inserted.dataset.slotPresenceProbe = ''
+    inserted.textContent = 'Inserted content'
+    if (name) inserted.slot = name
+    element.append(inserted)
+  }, slot)
+  await options.assertPresent(true)
+
+  await host.locator(':scope > [data-slot-presence-probe]').evaluate((element) => {
+    element.setAttribute('slot', 'unmatched-presence-slot')
+  })
+  await options.assertPresent(false)
+
+  await host.locator(':scope > [data-slot-presence-probe]').evaluate((element, name) => {
+    if (name) element.setAttribute('slot', name)
+    else element.removeAttribute('slot')
+  }, slot)
+  await options.assertPresent(true)
 }
 
 // Stub the external clipboard boundary, not component behavior. Works in all engines

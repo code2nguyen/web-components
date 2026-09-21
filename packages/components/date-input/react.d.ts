@@ -23,6 +23,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-date-input': C2Props<DateInput> & {
+        readonly?: Attribute
         'error-text'?: Attribute
         'aria-label'?: Attribute
       }

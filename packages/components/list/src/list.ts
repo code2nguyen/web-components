@@ -1,12 +1,12 @@
 import { LitElement, html, unsafeCSS, type PropertyValueMap } from 'lit'
-import { property, query } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './list.scss?inline'
 import { selectedItemValueContext } from '@c2n/list-item/list-item-context.js'
 import { ListItem } from '@c2n/list-item'
 import { provide } from '@lit/context'
-import { arrayPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 
 export interface SelectionChangeEventDetail {
   value: string[]

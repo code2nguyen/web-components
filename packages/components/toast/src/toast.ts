@@ -1,5 +1,5 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -32,6 +32,15 @@ export interface Toast {
  * @slot close-icon - Replaces the dismiss button icon.
  * @event {CustomEvent} toast-close - Dismiss requested by the close button or Escape; detail contains reason.
  * @event {CustomEvent} toast-action - The action-label button was activated.
+ * @csspart container - The notification card surface.
+ * @csspart icon - Container wrapping the assigned leading `icon` slot.
+ * @csspart heading - The optional notification heading.
+ * @csspart message - Container for the notification message.
+ * @csspart action - Button region containing the optional assigned `action` slot.
+ * @csspart close - The dismiss button.
+ * @csspart progress - The countdown track shown while progress is enabled.
+ * @csspart progress-bar - The remaining-time fill inside the countdown track.
+ *
  * @cssproperty {color} [--c2-toast__container--background=#ffffff]
  * @cssproperty {color} [--c2-toast__container--color=#18181b]
  * @cssproperty {border} [--c2-toast__container--border=1px solid #e4e4e7]
@@ -149,6 +158,8 @@ export interface ToastRegion {
  * @internalcomponent c2-toast
  * @event {CustomEvent} toast-dismiss - A toast was removed; detail contains id, toast and reason.
  * @event {CustomEvent} toast-action - Action activated; detail contains id and toast. The toast is then dismissed.
+ * @csspart stack - The live-region container that positions and stacks visible toasts.
+ *
  * @cssproperty {pixel} [--c2-toast-region__container--width=360px]
  * @cssproperty {pixel} [--c2-toast-region__container--gap=12px]
  * @cssproperty {pixel} [--c2-toast-region__container--offset=20px]

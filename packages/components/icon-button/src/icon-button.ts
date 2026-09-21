@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './icon-button.scss?inline'
@@ -13,6 +13,8 @@ import '@c2n/tooltip'
  * @tag c2-icon-button
  *
  * @slot - The icon (an inline `<svg>`, a `c2-feather-*` or a `c2-mat-icon` element).
+ *
+ * @csspart button - The native button that provides the icon-only interactive surface.
  *
  * @cssproperty {color} --c2-icon-button--background-color
  * @cssproperty {border-radius} [--c2-icon-button--border-radius=999px]

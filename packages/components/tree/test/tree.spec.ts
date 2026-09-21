@@ -11,6 +11,20 @@ const files = `
 
 const tree = (attributes = '') => `<c2-tree aria-label="Files" ${attributes}>${files}</c2-tree>`
 
+test('tree item label and actions parts coexist with consumer-owned projected content', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-tree aria-label="Files"><c2-tree-item value="root" expanded><span class="slot-probe" slot="label">Root</span><span class="slot-probe" slot="actions">Action</span><span class="slot-probe" slot="icon">Icon</span><span class="slot-probe" slot="toggle-icon">Toggle</span><c2-tree-item class="slot-probe" value="child" label="Child"></c2-tree-item></c2-tree-item></c2-tree>',
+  )
+  await page.addStyleTag({ content: 'c2-tree-item::part(label){background:rgb(1,2,3)}c2-tree-item::part(actions){background:rgb(4,5,6)}' })
+  const item = page.locator('c2-tree-item').first()
+  await expect(item.locator('[part="label"]').first()).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await expect(item.locator('[part="actions"]').first()).toHaveCSS('background-color', 'rgb(4, 5, 6)')
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(7, 8, 9)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(5).fill('rgb(7, 8, 9)'))
+})
+
 // A row's own box, not its host: the host of an expanded branch also encloses its children, so clicking its
 // centre would land on a descendant. `.first()` picks the row's own shadow content, which precedes its
 // slotted children in document order.

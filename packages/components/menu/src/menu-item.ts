@@ -1,6 +1,8 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './menu-item.scss?inline'
@@ -140,9 +142,15 @@ export class MenuItem extends LitElement {
   /** Private: set by the parent menu on every row while any sibling is checkable, so the labels line up. */
   @property({ type: Boolean, reflect: true, attribute: 'reserve-indicator' }) reserveIndicator = false
 
-  @state() private hasDescription = false
+  private readonly slotPresence = new SlotPresenceController(this, ['description', 'submenu'])
 
-  @state() private submenuPresent = false
+  private get hasDescription(): boolean {
+    return this.slotPresence.has('description')
+  }
+
+  private get submenuPresent(): boolean {
+    return this.slotPresence.has('submenu')
+  }
 
   @query('slot:not([name])') private contentSlot!: HTMLSlotElement
 
@@ -213,15 +221,6 @@ export class MenuItem extends LitElement {
     this.select()
   }
 
-  private handleDescriptionSlotChange(event: Event) {
-    const slot = event.target as HTMLSlotElement
-    this.hasDescription = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-  }
-
-  private handleSubmenuSlotChange(event: Event) {
-    this.submenuPresent = (event.target as HTMLSlotElement).assignedElements({ flatten: true }).length > 0
-  }
-
   protected override updated(changed: PropertyValues<this>): void {
     if (changed.has('checked') && changed.get('checked') !== undefined) {
       this.dispatchEvent(new CustomEvent('checked-change', { bubbles: true, composed: true, detail: { checked: this.checked, value: this.value } }))
@@ -273,7 +272,7 @@ export class MenuItem extends LitElement {
       <div class="content">
         <div class="text"><slot>${this.label ?? this.value}</slot></div>
         <div class="description" ?hidden=${!this.hasDescription}>
-          <slot name="description" @slotchange=${this.handleDescriptionSlotChange}></slot>
+          <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>
       </div>
       <slot name="shortcut"></slot>
@@ -295,7 +294,7 @@ export class MenuItem extends LitElement {
           >`
         : html`<div class="c2-menu-item" @click=${this.handleClick}>${this.renderInner()}</div>`
 
-    return html`${row}<slot name="submenu" @slotchange=${this.handleSubmenuSlotChange}></slot>`
+    return html`${row}<slot name="submenu" @slotchange=${this.slotPresence.handleSlotChange}></slot>`
   }
 }
 

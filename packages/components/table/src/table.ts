@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -7,8 +7,9 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import styles from './table.scss?inline'
-import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { defaultCompare } from '@c2n/core/data-helper.js'
 import { provide } from '@lit/context'
 import { PAGER_CONNECT_EVENT, pagerContext, type PagerConnectEventDetail, type PagerContext } from '@c2n/core/contexts/pager.js'
@@ -193,6 +194,23 @@ export interface Table {
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
+ * @csspart toolbar - Row above the grid containing the `toolbar` slot.
+ * @csspart viewport - Scrollable container around the grid.
+ * @csspart grid - The ARIA grid containing the header and body rows.
+ * @csspart footer - Row below the grid containing the `footer` slot.
+ * @csspart state - Shared cell containing the `empty`, `loading`, or `error` slot and its fallback state.
+ * @csspart header-row - The grid header row.
+ * @csspart header-cell - Every column header cell.
+ * @csspart selection-header-cell - The header cell containing the select-all checkbox.
+ * @csspart resizer - The pointer target used to resize a column.
+ * @csspart sort-icon - The sort-direction indicator in a sortable header.
+ * @csspart cell - Every body grid cell.
+ * @csspart selection-cell - A body cell containing a row-selection checkbox.
+ * @csspart skeleton - Placeholder displayed while a remote row is loading.
+ * @csspart cell-content - The content wrapper inside a body cell.
+ * @csspart row - Every rendered body row.
+ * @csspart row-selected - A body row while it is selected; exposed in addition to `row`.
+ *
  * @cssproperty {color} [--c2-table--background=#ffffff]
  * @cssproperty {color} [--c2-table--color=#18181b]
  * @cssproperty {font-size} [--c2-table--font-size=14px]
@@ -371,8 +389,7 @@ export class Table extends LitElement {
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
-  @state() private hasToolbar = false
-  @state() private hasFooter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['toolbar', 'footer'])
   @state() private remoteTotal = -1
 
   #sortedRows: TableRow[] = []
@@ -620,8 +637,8 @@ export class Table extends LitElement {
     const offset = this.#pageStart
 
     return html`
-      <div class="toolbar" part="toolbar" ?hidden=${!this.hasToolbar}>
-        <slot name="toolbar" @slotchange=${(event: Event) => (this.hasToolbar = this.#slotHasContent(event))}></slot>
+      <div class="toolbar" part="toolbar" ?hidden=${!this.slotPresence.has('toolbar')}>
+        <slot name="toolbar" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
       <div class="viewport" part="viewport">
         <div
@@ -639,8 +656,8 @@ export class Table extends LitElement {
           ${range.paddingBottom > 0 ? html`<div class="spacer" style="height:${range.paddingBottom}px"></div>` : nothing}
         </div>
       </div>
-      <div class="footer" part="footer" ?hidden=${!this.hasFooter}>
-        <slot name="footer" @slotchange=${(event: Event) => (this.hasFooter = this.#slotHasContent(event))}></slot>
+      <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
+        <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
       <slot class="definitions" @slotchange=${this.#handleDefinitionsChange}></slot>
     `
@@ -1191,12 +1208,6 @@ export class Table extends LitElement {
       .assignedElements({ flatten: true })
       .map((element) => (element instanceof TableColumn ? element : element.firstElementChild))
       .filter((element): element is TableColumn => element instanceof TableColumn)
-  }
-
-  #slotHasContent(event: Event): boolean {
-    return (event.target as HTMLSlotElement)
-      .assignedNodes({ flatten: true })
-      .some((node) => node.nodeType !== Node.TEXT_NODE || Boolean(node.textContent?.trim()))
   }
 
   #toggleSort(column: TableColumnConfig, additive: boolean) {

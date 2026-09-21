@@ -1,7 +1,8 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { StepStatus, StepsMarker } from './step-types.js'
 import { STATUS_ICONS, STATUS_LABELS } from './step-icons.js'
@@ -67,12 +68,12 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  *
  * @csspart frame - The box around the whole step, which is what grows when a new step arrives.
  * @csspart row - The row itself: toggle, marker, text and trailing content. A group's row is its `<summary>`.
- * @csspart toggle - The disclosure chevron of a group.
- * @csspart marker - The round marker at the start of the row.
+ * @csspart toggle - Disclosure region containing the assigned `toggle` slot for a group.
+ * @csspart marker - Round marker region containing the `marker` slot or status fallback at the start of the row.
  * @csspart rail - The connector between this marker and the next.
- * @csspart label - The primary text.
- * @csspart detail - The dimmed secondary text.
- * @csspart trailing - The text at the end of the row.
+ * @csspart label - Primary-text region containing the `label` slot or property fallback.
+ * @csspart detail - Secondary-text region containing the `detail` slot or property fallback.
+ * @csspart trailing - End-aligned text region containing the `trailing` slot or property fallback.
  * @csspart children - The box holding the sub-steps.
  *
  * @cssproperty {pixel} [--c2-step__row--gap=10px] - Space between the marker, the text and the trailing content.
@@ -179,9 +180,7 @@ export class Step extends LitElement {
    */
   @property({ attribute: false }) hasChildren = false
 
-  @state() private hasDetailSlot = false
-  @state() private hasTrailingSlot = false
-  @state() private hasToggleSlot = false
+  private readonly slotPresence = new SlotPresenceController(this, ['detail', 'trailing', 'toggle'])
 
   override connectedCallback() {
     super.connectedCallback()
@@ -190,6 +189,7 @@ export class Step extends LitElement {
     // animation event from in there does not cross the boundary, so both ends need a listener.
     this.addEventListener('animationend', this.handleAnimationEnd)
     this.renderRoot.addEventListener('animationend', this.handleAnimationEnd)
+    this.syncHasChildren()
   }
 
   override disconnectedCallback() {
@@ -207,13 +207,6 @@ export class Step extends LitElement {
     const name = (event as AnimationEvent).animationName
     if (name.includes('step-enter') && event.target === this) this.removeAttribute('entering')
     if (name.includes('step-settle')) this.removeAttribute('settling')
-  }
-
-  protected override firstUpdated() {
-    // Server-side rendering hands the element a declarative shadow root whose slots were assigned while the page
-    // was parsed, so that first `slotchange` fired long before hydration attached a listener for it. Asking the
-    // light DOM directly is the only way a hydrated group finds out it has sub-steps.
-    this.syncHasChildren()
   }
 
   protected override willUpdate(changed: PropertyValues) {
@@ -239,12 +232,8 @@ export class Step extends LitElement {
 
   /** These three collapse when empty, so their rows have to know whether the slot was filled. */
   private handleSlotChange(name: 'detail' | 'trailing' | 'toggle', event: Event) {
-    const filled = (event.target as HTMLSlotElement)
-      .assignedNodes({ flatten: true })
-      .some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-    if (name === 'detail') this.hasDetailSlot = filled
-    else if (name === 'trailing') this.hasTrailingSlot = filled
-    else this.hasToggleSlot = filled
+    void name
+    this.slotPresence.handleSlotChange(event)
   }
 
   /** Astro wraps an island in `<astro-island>`, so a sub-step is rarely a literal child — look right through. */
@@ -264,10 +253,10 @@ export class Step extends LitElement {
 
   /** The row's content, identical whether it is a plain row or a group's summary. */
   private renderRowContent(): TemplateResult {
-    const detail = this.detail || this.hasDetailSlot
-    const trailing = this.trailing || this.hasTrailingSlot
+    const detail = this.detail || this.slotPresence.has('detail')
+    const trailing = this.trailing || this.slotPresence.has('trailing')
     return html`
-      <span class="c2-step__toggle" part="toggle" aria-hidden="true" ?hidden=${!this.hasToggleSlot}>
+      <span class="c2-step__toggle" part="toggle" aria-hidden="true" ?hidden=${!this.slotPresence.has('toggle')}>
         <slot name="toggle" @slotchange=${(event: Event) => this.handleSlotChange('toggle', event)}></slot>
       </span>
       <span class="c2-step__gutter">

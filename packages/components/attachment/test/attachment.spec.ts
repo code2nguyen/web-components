@@ -47,6 +47,20 @@ test('custom slots replace all fallback regions', async ({ page, scenario }) => 
   await expect(page.getByRole('button', { name: 'Download' })).toBeVisible()
 })
 
+test('public parts style media, content, name, metadata and actions regions', async ({ page, scenario }) => {
+  await scenario('slots')
+  await page.addStyleTag({
+    content:
+      'c2-attachment::part(media){background:rgb(1,2,3)}c2-attachment::part(content){background:rgb(4,5,6)}c2-attachment::part(name){background:rgb(7,8,9)}c2-attachment::part(metadata){background:rgb(10,11,12)}c2-attachment::part(actions){background:rgb(13,14,15)}',
+  })
+  const host = page.locator('c2-attachment')
+  await expect(host.locator('.media')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await expect(host.locator('.content')).toHaveCSS('background-color', 'rgb(4, 5, 6)')
+  await expect(host.locator('.name')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
+  await expect(host.locator('[part="metadata"]')).toHaveCSS('background-color', 'rgb(10, 11, 12)')
+  await expect(host.locator('.actions')).toHaveCSS('background-color', 'rgb(13, 14, 15)')
+})
+
 test('attachment groups expose collection semantics and grid layout', async ({ page, scenario }) => {
   await scenario('group')
   const group = page.locator('c2-attachment-group')

@@ -1,4 +1,24 @@
-import { accessible, expect, props, test, watch } from '../../../../tests/component-fixture'
+import { accessible, expect, props, slotPresenceMatrix, test, watch } from '../../../../tests/component-fixture'
+
+test('supporting-text presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const region = page.locator('c2-date-input').locator('.supporting-text')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-date-input><span slot="supporting-text" data-slot-presence-probe>Help</span></c2-date-input>',
+    host: 'c2-date-input',
+    slot: 'supporting-text',
+    assertPresent: async (present) => expect(region).toHaveCount(present ? 1 : 0),
+  })
+})
+
+test('consumer-owned calendar and supporting slots remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-date-input><span class="slot-probe" slot="calendar-icon">Calendar</span><span class="slot-probe" slot="supporting-text">Help</span></c2-date-input>',
+  )
+  await page.addStyleTag({ content: '.slot-probe{color:rgb(1,2,3)}' })
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).color)))
+    .toEqual(Array(2).fill('rgb(1, 2, 3)'))
+})
 
 test('publishes an ISO date through events and form data', async ({ page, renderScenario }) => {
   await renderScenario('<form><c2-date-input name="birthday" aria-label="Birthday"></c2-date-input></form>')
