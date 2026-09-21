@@ -1,6 +1,6 @@
 ---
 title: 'Reorder List'
-description: 'Reorder consumer-owned items with pointer drag and drop.'
+description: 'Reorder a vertical queue with pointer or keyboard input while the application owns persistence.'
 category: 'Data display'
 ---
 
@@ -9,7 +9,9 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ReorderList } from '@c2n/reorder-list'
 
-`c2-reorder-list` assigns its ordinary children to dynamic numeric slots and moves those assignments as items are reordered. Optional `placeholder` and `dragging-item` slots replace the built-in drop marker and drag preview.
+Use `c2-reorder-list` for one vertical queue whose ordinary direct children need pointer and keyboard reordering. The component keeps the committed visual order immediately; listen for `reorder` and persist `event.detail.order` in application state. It never physically moves application-owned light DOM.
+
+Choose another pattern for grids, transfer between lists, nesting, copying, deletion, or undo history.
 
 ## Installation
 
@@ -20,21 +22,49 @@ npm install @c2n/reorder-list
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/reorder-list
-<style>
-  .queue::part(item) {
-    padding: 8px;
-  }
-  .queue::part(placeholder) {
-    outline: 2px dashed #0265dc;
-  }
-</style>
-<c2-reorder-list class="queue" editable>
-  <div>Backlog</div>
-  <div>In progress</div>
-  <div>Done</div>
-  <div slot="placeholder">Drop here</div>
-  <div slot="dragging-item">Moving item</div>
-</c2-reorder-list>
+<div data-label="Deployment queue">
+  <style>
+    .release-queue {
+      --c2-reorder-list--container-gap: 6px;
+    }
+    .release-task {
+      padding: 12px;
+      border: 1px solid #d4d4d8;
+      border-radius: 8px;
+      background: white;
+      color: #18181b;
+    }
+  </style>
+  <c2-reorder-list client:only="lit" class="release-queue" editable aria-label="Deployment queue">
+    <div class="release-task" data-reorder-key="scope">Confirm scope</div>
+    <div class="release-task" data-reorder-key="changelog">Update changelog</div>
+    <div class="release-task" data-reorder-key="test">Run tests</div>
+    <div class="release-task" data-reorder-key="build">Build packages</div>
+    <div class="release-task" data-reorder-key="publish">Publish packages</div>
+    <div class="release-task" data-reorder-key="verify">Verify deployment</div>
+  </c2-reorder-list>
+</div>
 ```
 
-Style assigned items directly with local classes. The `item`, `placeholder`, and `dragging-item` parts affect only component-owned placement regions.
+Ordinary children need no `slot`. Optional non-empty `data-reorder-key` values identify application records and must be unique. Use `data-reorder-label` for concise announcements. `data-fixed` pins a row at its absolute position; literal `data-fixed="false"` and `data-fixed="0"` remain movable.
+
+Pointer users press a movable row, cross the pickup threshold, and release at the placeholder. Whole-row touch reordering owns vertical direct manipulation; the nearest eligible scroll container moves automatically unless `autoscrolldisabled` is set. Buttons, links, inputs, and editable descendants keep their native behavior.
+
+Keyboard users focus a movable placement and press Space to pick it up. ArrowUp/ArrowDown move one permitted destination, Home/End jump, Space commits, and Escape cancels. Supply `aria-label` or `aria-labelledby` for an editable list when context does not already name it.
+
+Listen for the canonical event:
+
+```js tag=CodeBlock
+const queue = document.querySelector('c2-reorder-list')
+
+queue.addEventListener('reorder', (event) => {
+  const keys = event.detail.order.map((item) => item.key)
+  saveQueue(keys)
+})
+```
+
+`reorder` fires once only after a real change and includes the moved element/key, absolute `fromIndex`/`toIndex`, complete resulting order, and `mouse`, `touch`, `pen`, or `keyboard` input method. Duplicate keys fire `reorder-error` and block pickup. Initialization, external child reconciliation, cancellation, threshold-only gestures, and no-op drops fire no success event.
+
+The deprecated `change` event still accompanies a successful reorder with its legacy numeric permutation. Migrate persistence code to `reorder` before the next explicitly breaking release.
+
+Style consumer-owned rows directly. Use `container`, `item`, `placeholder`, and `dragging-item` parts for component-owned boundaries; documented CSS variables cover spacing, dividers, feedback, focus, active opacity, shadow, and motion. Reduced-motion mode removes decorative interpolation while preserving the interaction.

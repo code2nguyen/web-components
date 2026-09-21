@@ -1281,10 +1281,10 @@
     },
     {
       "tag": "c2-reorder-list",
-      "slot": "item-*",
+      "slot": "",
       "decision": "part",
       "parts": ["item"],
-      "reason": "The repeated item region owns placement for every dynamic numeric item slot while assigned children remain consumer-owned."
+      "reason": "The repeated item region owns placement for ordinary direct children while private projection slots and assigned content remain consumer-independent."
     },
     {
       "tag": "c2-reorder-list",
