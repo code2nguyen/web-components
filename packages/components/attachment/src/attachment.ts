@@ -58,6 +58,11 @@ export interface Attachment {
  * @slot name - Custom file name. Falls back to the `name` attribute.
  * @slot metadata - Custom metadata. Falls back to the `type` and `size` attributes.
  * @slot actions - Custom controls shown at the end. Replaces the built-in retry and remove buttons.
+ * @csspart media - Media region wrapping the `media` slot and thumbnail or file-icon fallback.
+ * @csspart content - Text and status region containing the name and metadata.
+ * @csspart name - File-name region wrapping the `name` slot and fallback name.
+ * @csspart metadata - Metadata region wrapping the `metadata` slot and type/size fallback.
+ * @csspart actions - Actions region wrapping the `actions` slot and built-in action fallback.
  *
  * @event {CustomEvent<{ name: string }>} attachment-remove - Fired when the remove or cancel action is pressed.
  * @event {CustomEvent<{ name: string }>} attachment-retry - Fired when retry is pressed for a failed upload.
@@ -299,25 +304,25 @@ export class Attachment extends LitElement {
     const tile = this.layout === 'tile' || (this.layout === 'auto' && !!this.src)
     return html`
       <article class=${classMap({ attachment: true, 'has-image': showImage, tile })} aria-label=${this.name || nothing}>
-        <div class="media">
+        <div part="media" class="media">
           <slot name="media">
             ${showImage ? html`<img src=${this.src!} alt=${this.alt ?? this.name} loading="lazy" @error=${this.handleImageError} />` : this.renderMediaFallback()}
           </slot>
         </div>
-        <div class="content">
-          <div class="name"><slot name="name">${this.name || 'Untitled attachment'}</slot></div>
+        <div part="content" class="content">
+          <div part="name" class="name"><slot name="name">${this.name || 'Untitled attachment'}</slot></div>
           ${
             this.status !== 'uploading' && (this.type || this.size)
-              ? html`<div class="metadata">
+              ? html`<div part="metadata" class="metadata">
                   <slot name="metadata"
                     >${this.type ? html`<span>${this.type}</span>` : nothing}${this.type && this.size ? html`<span aria-hidden="true">·</span>` : nothing}${this.size ? html`<span>${this.size}</span>` : nothing}</slot
                   >
                 </div>`
-              : html`<slot name="metadata"></slot>`
+              : html`<slot part="metadata" name="metadata"></slot>`
           }
           ${this.renderStatus()}
         </div>
-        <div class="actions"><slot name="actions">${this.renderActions()}</slot></div>
+        <div part="actions" class="actions"><slot name="actions">${this.renderActions()}</slot></div>
       </article>
     `
   }

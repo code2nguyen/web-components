@@ -6,6 +6,7 @@ import styles from './virtual-list.scss?inline'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { defaultCompare, getFieldValue, sortEntryConverter, type SortEntry } from '@c2n/core/data-helper.js'
 import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type {
   VirtualListDataSource,
   VirtualListItemContext,
@@ -98,7 +99,7 @@ export interface VirtualList {
  * @csspart item - Every rendered `c2-list-item`, including loading placeholders.
  * @csspart item-selected - A rendered item while it is selected; exposed in addition to `item`.
  * @csspart skeleton - Placeholder shown inside an item while its remote data block is loading.
- * @csspart state - Container for the empty, no-results, loading or error message.
+ * @csspart state - Shared container for the `empty`, `loading`, or `error` slot and its fallback message.
  * @csspart highlight - A `<mark>` around text that matches the active search query.
  * @csspart footer - Footer row containing the `footer` slot.
  *
@@ -250,8 +251,7 @@ export class VirtualList extends LitElement {
   /** Message shown when a search is active and nothing matches. */
   @property({ type: String, attribute: 'no-results-message' }) noResultsMessage = 'No matches'
 
-  @state() private hasToolbar = false
-  @state() private hasFooter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['toolbar', 'footer'])
   @state() private remoteTotal = -1
   @state() private focusedIndex = 0
 
@@ -426,12 +426,12 @@ export class VirtualList extends LitElement {
   override render() {
     const range = this.#virtualizer.range
     const count = this.itemCount
-    const hasSearchBar = this.searchable || this.hasToolbar
+    const hasSearchBar = this.searchable || this.slotPresence.has('toolbar')
 
     return html`
       <div class="search" part="search" ?hidden=${!hasSearchBar}>
         ${this.searchable ? html`<slot name="search">${this.#renderSearchField()}</slot>` : nothing}
-        <slot name="toolbar" @slotchange=${(event: Event) => (this.hasToolbar = this.#slotHasContent(event))}></slot>
+        <slot name="toolbar" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
       <div class="viewport" part="viewport">
         <div
@@ -450,8 +450,8 @@ export class VirtualList extends LitElement {
         </div>
         ${this.#renderState(count)}
       </div>
-      <div class="footer" part="footer" ?hidden=${!this.hasFooter}>
-        <slot name="footer" @slotchange=${(event: Event) => (this.hasFooter = this.#slotHasContent(event))}></slot>
+      <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
+        <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
     `
   }
@@ -870,12 +870,6 @@ export class VirtualList extends LitElement {
       this.#measuredItemHeight = height
       this.requestUpdate()
     }
-  }
-
-  #slotHasContent(event: Event): boolean {
-    return (event.target as HTMLSlotElement)
-      .assignedNodes({ flatten: true })
-      .some((node) => node.nodeType !== Node.TEXT_NODE || Boolean(node.textContent?.trim()))
   }
 }
 

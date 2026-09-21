@@ -1,6 +1,12 @@
 import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
 
 const items = '<c2-button value="a">Left</c2-button><c2-button value="b">Right</c2-button><c2-button value="c" disabled>Locked</c2-button>'
+
+test('consumer-owned grouped buttons remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-button-group><c2-button class="slot-probe">Choice</c2-button></c2-button-group>')
+  await page.locator('.slot-probe').evaluate((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)'))
+  await expect(page.locator('.slot-probe')).toHaveCSS('color', 'rgb(1, 2, 3)')
+})
 test('single selection updates pressed state and emits one change', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-button-group selection="single" aria-label="Alignment">${items}</c2-button-group>`)
   const host = page.locator('c2-button-group')

@@ -16,11 +16,11 @@ export type StatTone = 'neutral' | 'positive' | 'negative' | 'warning'
  * @slot trend - Badge or short trend text shown beside the value.
  * @slot description - Supporting context below the label.
  * @csspart container - The outer statistic layout container.
- * @csspart icon - Container for the leading icon.
- * @csspart value - Container for the primary statistic value.
- * @csspart trend - Container for the trend badge or text.
- * @csspart label - Container for the statistic label.
- * @csspart description - Container for supporting context.
+ * @csspart icon - Container wrapping the assigned leading `icon` slot.
+ * @csspart value - Container wrapping the assigned primary `value` slot.
+ * @csspart trend - Container wrapping the assigned `trend` slot badge or text.
+ * @csspart label - Container wrapping the assigned statistic `label` slot.
+ * @csspart description - Container wrapping the assigned supporting `description` slot.
  *
  * @cssproperty {padding} [--c2-stat--padding=16px]
  * @cssproperty {pixel} [--c2-stat--gap=12px]

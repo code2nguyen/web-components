@@ -1,5 +1,74 @@
 import { test, expect } from './fixture'
 
+test('the chart family resolves first-paint theme probes without scheduling a second Lit update', async ({ page, scenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('scheduled an update')) warnings.push(message.text())
+  })
+
+  await scenario('family')
+  const charts = page.locator(
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart, c2-candlestick-chart',
+  )
+  await expect(charts).toHaveCount(9)
+  await expect.poll(() => charts.evaluateAll((elements) => elements.every((element) => element.hasAttribute('data-chart-ready')))).toBe(true)
+  expect(warnings.filter((warning) => warning.includes('c2-') && warning.includes('chart'))).toEqual([])
+
+  const color = await page.locator('c2-line-chart').evaluate((element) => {
+    const chart = element as unknown as { buildContext(): { theme: { color: string } } }
+    return chart.buildContext().theme.color
+  })
+  expect(color).toBe('rgb(1, 2, 3)')
+})
+
+test('a runtime theme signal invalidates once and refreshes engine options', async ({ page, scenario }) => {
+  await scenario('family')
+  const chart = page.locator('c2-line-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const result = await chart.evaluate(async (element) => {
+    const subject = element as unknown as {
+      adapter: { setOptions(options: unknown, mode?: string): void }
+      buildContext(): { theme: { color: string } }
+      updateComplete: Promise<boolean>
+    }
+    const original = subject.adapter.setOptions.bind(subject.adapter)
+    let calls = 0
+    subject.adapter.setOptions = (options, mode) => {
+      calls += 1
+      original(options, mode)
+    }
+    element.style.setProperty('--c2-chart--color', 'rgb(9, 8, 7)')
+    element.style.setProperty('--c2-chart__series-1--color', 'rgb(6, 5, 4)')
+    window.dispatchEvent(new Event('c2n-theme-change'))
+    await subject.updateComplete
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    const marker = element.shadowRoot?.querySelector('.legend-marker')
+    return { calls, color: subject.buildContext().theme.color, legendColor: marker ? getComputedStyle(marker).backgroundColor : '' }
+  })
+  expect(result).toEqual({ calls: 1, color: 'rgb(9, 8, 7)', legendColor: 'rgb(6, 5, 4)' })
+})
+
+test('chart public parts expose actions, shared state, legend, and tooltip regions', async ({ page, scenario }) => {
+  await scenario('slots')
+  await page.addStyleTag({
+    content:
+      'c2-line-chart::part(actions){background:rgb(1,2,3)}c2-line-chart::part(state){background:rgb(4,5,6)}c2-line-chart::part(legend){background:rgb(7,8,9)}c2-line-chart::part(tooltip){background:rgb(10,11,12)}c2-line-chart > *{color:rgb(13,14,15)}',
+  })
+  const chart = page.locator('c2-line-chart')
+  for (const [part, color] of [
+    ['actions', 'rgb(1, 2, 3)'],
+    ['legend', 'rgb(7, 8, 9)'],
+    ['tooltip', 'rgb(10, 11, 12)'],
+  ] as const) {
+    await expect(chart.locator(`[part="${part}"]`)).toHaveCSS('background-color', color)
+  }
+  await expect(chart.locator('[slot="actions"]')).toHaveCSS('color', 'rgb(13, 14, 15)')
+
+  await scenario('empty')
+  await page.addStyleTag({ content: 'c2-line-chart::part(state){background:rgb(4,5,6)}' })
+  await expect(page.locator('c2-line-chart').locator('[part="state"]')).toHaveCSS('background-color', 'rgb(4, 5, 6)')
+})
+
 test('draws a line chart from series children and reports itself ready', async ({ page, scenario }) => {
   await scenario('default')
   const chart = page.locator('c2-line-chart')

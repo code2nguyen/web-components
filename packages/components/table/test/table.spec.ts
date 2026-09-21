@@ -1,5 +1,15 @@
 import type { Page } from '@playwright/test'
-import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('toolbar presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const toolbar = page.locator('c2-table').locator('[part="toolbar"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-table rows="[]"><span slot="toolbar" data-slot-presence-probe>Tools</span></c2-table>',
+    host: 'c2-table',
+    slot: 'toolbar',
+    assertPresent: async (present) => (present ? expect(toolbar).toBeVisible() : expect(toolbar).toBeHidden()),
+  })
+})
 
 const PEOPLE = [
   { id: '1', name: 'Ada Lovelace', team: 'Analytics', score: 128000 },
@@ -458,6 +468,28 @@ test('a cell-slot column takes its body from a light-DOM child and falls back to
   await expect(page.getByTestId('slotted')).toHaveText('record')
   // Row 1 has no child, so the column's own formatting still shows.
   await expect(page.getByRole('row', { name: /Ada Lovelace/ })).toContainText('128,000')
+})
+
+test('stable table parts style shared regions while dynamic cell slots stay consumer-owned', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" rows='${rows}'>
+    <div slot="toolbar">Toolbar</div><div slot="footer">Footer</div>
+    <c2-table-column field="score" header="Score" width="240px" cell-slot></c2-table-column>
+    <b class="slot-probe" slot="cell:2:score">record</b>
+  </c2-table>`)
+  await page.addStyleTag({
+    content: 'c2-table::part(toolbar){background:rgb(1,2,3)}c2-table::part(footer){background:rgb(4,5,6)}c2-table::part(state){background:rgb(7,8,9)}',
+  })
+  const host = page.locator('c2-table')
+  await expect(host.locator('[part="toolbar"]')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await expect(host.locator('[part="footer"]')).toHaveCSS('background-color', 'rgb(4, 5, 6)')
+  await page.locator('.slot-probe').evaluate((node) => ((node as HTMLElement).style.color = 'rgb(10, 11, 12)'))
+  await expect(page.locator('.slot-probe')).toHaveCSS('color', 'rgb(10, 11, 12)')
+  await props(host, { rows: [] })
+  await expect(host.locator('[part="state"]')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
+  await props(host, { loading: true })
+  await expect(host.locator('[part="state"]')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
+  await props(host, { loading: false, error: 'Failed' })
+  await expect(host.locator('[part="state"]')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
 })
 
 test('a column opts out of the table sortable with sortable="false"', async ({ page, renderScenario }) => {

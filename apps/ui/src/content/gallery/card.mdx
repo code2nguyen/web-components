@@ -9,6 +9,8 @@ import { Avatar } from '@c2n/avatar'
 
 Curated looks for `c2-card`. Open any card in the studio to start from it. The surface is `--c2-card--*` (padding, radius, borders, background, color, shadow), the sections are `--c2-card__header--*`, `--c2-card__footer--*` and `--c2-card__media--*`, and `--c2-card__hover--*` / `--c2-card__focus--*` / `--c2-card__disabled--*` cover the states.
 
+Use a class for content you assign to a slot. When a preset needs to alter the card-owned layout around that content, target the documented `media`, `header`, `body`, or `footer` part—for example, `.compact::part(body) { padding: 12px; }`.
+
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default

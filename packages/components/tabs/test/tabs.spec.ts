@@ -2,6 +2,16 @@ import { test, expect, props, watch, accessible } from '../../../../tests/compon
 
 const markup =
   '<c2-tabs><c2-tab for="one">First</c2-tab><c2-tab for="two" disabled>Locked</c2-tab><c2-tab for="three">Third</c2-tab><div id="one">First content</div><div id="two">Locked content</div><div id="three">Third content</div></c2-tabs>'
+
+test('consumer-owned tab labels and panels remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-tabs><c2-tab class="slot-probe" slot="tab" for="panel">Tab</c2-tab><div class="slot-probe" slot="tab-content" id="panel">Panel</div></c2-tabs>',
+  )
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).color)))
+    .toEqual(Array(2).fill('rgb(1, 2, 3)'))
+})
 test('selects the first panel and changes panels by keyboard, skipping disabled tabs', async ({ page, renderScenario }) => {
   await renderScenario(markup)
   const first = page.getByRole('tab', { name: 'First' })

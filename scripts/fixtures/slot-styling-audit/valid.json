@@ -1,0 +1,14 @@
+{
+  "registry": {
+    "version": 1,
+    "entries": [{ "tag": "c2-demo", "slot": "header", "decision": "part", "parts": ["header"], "reason": "The wrapper owns header layout." }]
+  },
+  "elements": [
+    {
+      "tag": "c2-demo",
+      "slots": ["header"],
+      "parts": { "header": "Wrapper around the `header` slot; present when header content is assigned." },
+      "variables": []
+    }
+  ]
+}

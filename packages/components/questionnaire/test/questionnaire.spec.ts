@@ -1,6 +1,28 @@
 import { test, expect } from './fixture'
 import { accessible } from '../../../../tests/component-fixture'
 
+test('questionnaire action parts and assigned replacements use independent styling routes', async ({ page, scenario }) => {
+  await scenario()
+  await page.addStyleTag({
+    content:
+      'c2-questionnaire::part(next-button),c2-questionnaire::part(previous-button),c2-questionnaire::part(skip-button),c2-questionnaire::part(submit-button){background-color:rgb(1,2,3)}',
+  })
+  const host = page.locator('c2-questionnaire')
+  await expect(host.locator('[part="next-button"]')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await page.getByRole('radio', { name: /Tool call timeline/ }).check()
+  await page.getByRole('button', { name: 'Next' }).click()
+  for (const part of ['previous-button', 'skip-button', 'next-button'])
+    await expect(host.locator(`[part="${part}"]`)).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await page.getByRole('button', { name: 'Skip' }).click()
+  await expect(host.locator('[part="submit-button"]')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+
+  await scenario('custom-actions')
+  await page.locator('c2-questionnaire > [slot]').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(4, 5, 6)')))
+  await expect
+    .poll(() => page.locator('c2-questionnaire > [slot]').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(4).fill('rgb(4, 5, 6)'))
+})
+
 test('moves through single and multiple questions while preserving answers', async ({ page, scenario }) => {
   await scenario()
   const host = page.locator('c2-questionnaire')

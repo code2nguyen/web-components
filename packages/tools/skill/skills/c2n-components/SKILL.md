@@ -63,6 +63,7 @@ Naming: the app's prefix (`app-*`, `site-*`, `my-*`), kebab-case with a hyphen, 
 ## 5. Conventions
 
 - Prefer variables set on the host element, a class or an ancestor. Use `::part()` only when `get_component` documents that native CSS part and variables cannot express the change. Do not repeat inline `style="--c2-…"`.
+- Style consumer-owned slotted nodes with their own classes. Use a documented host `::part()` only for the component-owned wrapper, fallback, or state region. Put part selectors in global CSS under Vue scoped styles or Angular Emulated encapsulation, and never assume a part crosses a nested component's shadow root.
 - Grammar `--c2-<component>__<part>[__<state>]--<property>`; states `hover | active | focus | selected | disabled | open | error | read-only`.
 - Boolean attributes are present or absent (`disabled`, `running`, `selected`), and `disabled="false"` reads as false rather than true, so a value bound by a framework behaves; slots by name (`prefix-icon`, `suffix-icon`, `header`, `footer`, `description`…).
 - Array and object properties (`rows`, `columns`, `items`, `options`, `series`, `steps`) take the value itself, or a JSON string in the attribute _and_ on the property — `JSON.stringify(rows)` is one binding that survives server rendering.

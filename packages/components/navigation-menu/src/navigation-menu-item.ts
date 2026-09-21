@@ -1,7 +1,8 @@
 import { LitElement, html, nothing, svg, unsafeCSS } from 'lit'
-import { query, state } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import type { Overlay, Placement } from '@c2n/overlay'
@@ -189,7 +190,11 @@ export class NavigationMenuItem extends LitElement {
   /** Set by the bar's `collapsible`: in `mobile` mode the heading becomes a button that opens and closes the group. */
   @property({ type: Boolean, reflect: true }) collapsible = false
 
-  @state() private panelPresent = false
+  private readonly slotPresence = new SlotPresenceController(this, ['panel'])
+
+  private get panelPresent(): boolean {
+    return this.slotPresence.has('panel')
+  }
 
   @query('.trigger') private trigger?: HTMLElement
 
@@ -251,7 +256,7 @@ export class NavigationMenuItem extends LitElement {
   }
 
   private handlePanelSlotChange(event: Event) {
-    this.panelPresent = (event.target as HTMLSlotElement).assignedElements({ flatten: true }).length > 0
+    this.slotPresence.handleSlotChange(event)
     this.watchPanel()
     this.syncCurrentGroup()
   }

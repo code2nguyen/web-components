@@ -11,6 +11,7 @@ export type AttachmentGroupLayout = 'list' | 'grid' | 'mixed'
  * @tag c2-attachment-group
  * @slot - `c2-attachment` elements.
  * @slotcomponent c2-attachment
+ * @csspart list - List region wrapping the default attachment slot.
  *
  * @cssproperty {pixel} [--c2-attachment-group--gap=8px]
  * @cssproperty {pixel} [--c2-attachment-group--min-column-width=240px]
@@ -60,7 +61,9 @@ export class AttachmentGroup extends LitElement {
   }
 
   override render() {
-    return html`<div class="group" role="list" aria-label=${this.ariaLabel ?? 'Attachments'}><slot @slotchange=${this.handleSlotChange}></slot></div>`
+    return html`<div part="list" class="group" role="list" aria-label=${this.ariaLabel ?? 'Attachments'}>
+      <slot @slotchange=${this.handleSlotChange}></slot>
+    </div>`
   }
 }
 

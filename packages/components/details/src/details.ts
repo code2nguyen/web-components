@@ -6,7 +6,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { hasSlottedContent, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './details.scss?inline'
 
 /** Events fired by {@link Details}, keyed for `addEventListener`. */
@@ -33,6 +33,11 @@ export interface Details {
  * @slot icon - Chevron shown in the header; rotates when open. Defaults to an inline SVG.
  * @slot expanded-icon - Alternative icon shown only while open (replaces the rotation).
  * @slot - Collapsible content.
+ * @csspart summary - Interactive summary containing the title, icon, and optional header content.
+ * @csspart title - Component-owned title region wrapping the `title` slot or label fallback.
+ * @csspart icon - Icon region containing the `icon` and `expanded-icon` slots and fallback chevron.
+ * @csspart header-content - Conditional secondary header region wrapping the `header-content` slot.
+ * @csspart body - Collapsible body region wrapping the default slot.
  *
  * @event {ToggleEvent} toggle - Re-dispatched from the native details after it opens or closes (`newState` is `open` or `closed`).
  *
@@ -114,8 +119,7 @@ export class Details extends LitElement {
   /** Dims the header and blocks toggling (pointer and keyboard). */
   @property({ type: Boolean, reflect: true }) disabled = false
 
-  @state() private hasHeaderContent = false
-  @state() private hasExpandedIcon = false
+  private readonly slotPresence = new SlotPresenceController(this, ['header-content', 'expanded-icon'])
   /** Keeps the native `open` attribute while the close animation plays; the content is hidden by the browser otherwise. */
   @state() private closing = false
 
@@ -132,12 +136,6 @@ export class Details extends LitElement {
   }
 
   override willUpdate(changed: PropertyValues<this>) {
-    // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over
-    // from there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-    if (!this.hasUpdated) {
-      this.hasHeaderContent = hasSlottedContent(this, 'header-content')
-      this.hasExpandedIcon = hasSlottedContent(this, 'expanded-icon')
-    }
     if (changed.has('expanded') && this.hasUpdated) {
       if (this.expanded) this.closing = false
       else if (changed.get('expanded')) this.closing = true
@@ -198,13 +196,7 @@ export class Details extends LitElement {
   }
 
   private handleSlotChange(event: Event) {
-    this.updateSlot(event.target as HTMLSlotElement)
-  }
-
-  private updateSlot(slot: HTMLSlotElement) {
-    const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-    if (slot.name === 'header-content') this.hasHeaderContent = filled
-    else if (slot.name === 'expanded-icon') this.hasExpandedIcon = filled
+    this.slotPresence.handleSlotChange(event)
   }
 
   private handleSummaryClick(event: MouseEvent) {
@@ -248,7 +240,7 @@ export class Details extends LitElement {
 
   protected renderIcon() {
     return html`
-      <span class=${classMap({ 'c2-details-icons': true, 'has-expanded-icon': this.hasExpandedIcon })}>
+      <span part="icon" class=${classMap({ 'c2-details-icons': true, 'has-expanded-icon': this.slotPresence.has('expanded-icon') })}>
         <slot name="expanded-icon" @slotchange=${this.handleSlotChange}></slot>
         <slot name="icon">
           <svg class="default-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -263,22 +255,23 @@ export class Details extends LitElement {
     return html`
       <details class="c2-details" ?open=${this.expanded || this.closing} @toggle=${this.handleDetailsToggle}>
         <summary
-          class=${classMap({ 'has-header-content': this.hasHeaderContent })}
+          part="summary"
+          class=${classMap({ 'has-header-content': this.slotPresence.has('header-content') })}
           tabindex=${this.disabled ? '-1' : nothing}
           aria-disabled=${this.disabled ? 'true' : nothing}
           @click=${this.handleSummaryClick}
           @keydown=${this.handleSummaryKeydown}
         >
           <div class="c2-details-summary-row">
-            <div class="c2-details-summary-content"><slot name="title">${this.label}</slot></div>
+            <div part="title" class="c2-details-summary-content"><slot name="title">${this.label}</slot></div>
             ${this.renderIcon()}
           </div>
-          <div class="c2-details-header-content" ?hidden=${!this.hasHeaderContent}>
+          <div part="header-content" class="c2-details-header-content" ?hidden=${!this.slotPresence.has('header-content')}>
             <slot name="header-content" @slotchange=${this.handleSlotChange}></slot>
           </div>
         </summary>
         <div class="c2-details-content">
-          <div class="c2-details-body">
+          <div part="body" class="c2-details-body">
             <slot></slot>
           </div>
         </div>

@@ -12,6 +12,7 @@
     "prebuild": "npm run sync:examples",
     "build": "astro build",
     "preview": "astro preview",
+    "test:hydration": "playwright test",
     "astro": "astro",
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
@@ -43,7 +44,6 @@
     "@c2n/date-input": "*",
     "@c2n/date-selector": "*",
     "@c2n/details": "*",
-    "@c2n/dropdown-list": "*",
     "@c2n/feather-icons": "*",
     "@c2n/header": "*",
     "@c2n/icon-button": "*",

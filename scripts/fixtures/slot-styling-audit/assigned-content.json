@@ -1,0 +1,7 @@
+{
+  "registry": {
+    "version": 1,
+    "entries": [{ "tag": "c2-demo", "slot": "", "decision": "assigned-content", "reason": "The slot transparently projects consumer-owned light DOM." }]
+  },
+  "elements": [{ "tag": "c2-demo", "slots": [""], "parts": {}, "variables": [] }]
+}

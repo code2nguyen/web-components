@@ -144,7 +144,7 @@ const BUILT_IN_ICONS: Record<string, TemplateResult> = { system: MONITOR_ICON, l
  * @csspart label - The trigger's text, rendered only with `show-label`.
  * @csspart menu - The dropdown surface.
  * @csspart menu-item - One row of the dropdown.
- * @csspart check - The mark beside the selected row.
+ * @csspart check - Marker region containing the `check` slot or fallback beside the selected row.
  *
  * @cssproperty {pixel} [--c2-theme-select__trigger--size=32px] - Height of the trigger, and its width while icon-only.
  * @cssproperty {pixel} [--c2-theme-select__trigger--padding-inline=8px] - Side padding, used only with `show-label`.

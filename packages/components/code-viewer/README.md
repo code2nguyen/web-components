@@ -24,3 +24,5 @@ npm install @c2n/code-viewer
 - **Progressive**: the plain code renders immediately (server-side too) and is upgraded in place once highlighted.
 
 Theming: `--c2-code-viewer--*` for the frame (font, padding, borders, radius, max-height; `background` and `color` override the theme), `__header`, `__copy`, `__line-numbers` and `__line__highlighted` for the parts, and `__theme--*` for the colours of the `css-variables` theme. The full list is in `custom-elements.json` and on the docs site.
+
+The `header`, `title`, `body`, and `copy-button` parts style component-owned regions. Assigned title and icon nodes remain light DOM and can be styled directly; part selectors do not enter a slotted custom element's shadow root.

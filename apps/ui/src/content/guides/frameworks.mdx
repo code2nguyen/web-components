@@ -8,6 +8,21 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 Every `c2-*` component is a standard custom element, so nothing here is a wrapper: the same element runs in every framework. What differs is how each one decides between an attribute and a property, and how it binds an event whose name has a hyphen in it. This guide is the short version of the three example apps — [React](../examples/trading-dashboard-react), [Vue](../examples/support-inbox-vue) and [Angular](../examples/orders-admin-angular) — which are complete applications built the way an outside project would build one.
 
+## Styling slots and public parts
+
+There are two independent styling routes. A node you place in a slot remains consumer-owned light DOM, so give it a class and style it with normal framework-scoped CSS. The layout, fallback, or state region created around that slot belongs to the component's shadow root; style it only through a documented `::part()` name or CSS custom property.
+
+A bare text node is the exception to “give it a class”: text cannot be targeted directly. Use the host's inherited typography or documented custom properties when that is the component contract—as with `c2-mat-icon` ligature text—or wrap the text in an element you own when it needs independent styling.
+
+```css
+.message-copy { font-weight: 500; } /* assigned node */
+c2-chat-message::part(content) { padding: 12px; } /* component-owned region */
+```
+
+Parts do not cross another shadow boundary. A `content` part can style the region containing a slotted `c2-avatar`, but cannot reach the avatar's internals; use the avatar's own public contract. In Vue SFCs, keep `::part()` rules global because the scoped attribute cannot be added inside a component shadow root. Angular Emulated encapsulation has the same constraint: place host `::part()` selectors in a global stylesheet (or opt that owning component out of emulated encapsulation), while ordinary classes on assigned nodes may remain local.
+
+The support-inbox Vue example demonstrates both paths: `thread__message-copy` styles the assigned `<p>`, while the global `.thread__message::part(content)` rule styles its component-owned container without piercing the nested avatar.
+
 Two rules hold everywhere:
 
 - **Register the elements at module scope, before the framework renders.** Frameworks decide "attribute or property" by looking for the property on the element, and an element that has not upgraded yet has none — an object handed to `rows` would be stringified into an attribute.

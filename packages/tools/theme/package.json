@@ -106,7 +106,6 @@
         "../../components/color-select:build",
         "../../components/color-slider:build",
         "../../components/details:build",
-        "../../components/dropdown-list:build",
         "../../components/icon-button:build",
         "../../components/label:build",
         "../../components/link-button:build",

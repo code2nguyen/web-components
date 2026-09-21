@@ -10,6 +10,8 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
+      '**/build/**',
+      '**/coverage/**',
       '**/types/**',
       '**/node_modules/**',
       '**/.astro/**',
@@ -18,6 +20,7 @@ export default tseslint.config(
       'apps/ui/public/demo/**',
       'playwright-report/**',
       'test-results/**',
+      '**/*.min.js',
     ],
   },
   js.configs.recommended,

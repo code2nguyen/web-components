@@ -1,8 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { hasSlottedContent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -52,7 +51,7 @@ export class Spinner extends LitElement {
   /** Accessible name when nothing is slotted. Defaults to "Loading". */
   @property() label = ''
 
-  @state() private hasText = false
+  private readonly slotPresence = new SlotPresenceController(this, [''])
 
   /** Completed fraction, `0` to `1`; `undefined` while indeterminate. */
   get fraction(): number | undefined {
@@ -62,31 +61,20 @@ export class Spinner extends LitElement {
   }
 
   private handleSlotChange(event: Event) {
-    this.updateText(event.target as HTMLSlotElement)
-  }
-
-  private updateText(slot: HTMLSlotElement) {
-    this.hasText = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-  }
-
-  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
-  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-  override willUpdate() {
-    if (!this.hasUpdated) {
-      this.hasText = hasSlottedContent(this)
-    }
+    this.slotPresence.handleSlotChange(event)
   }
 
   override render() {
     const fraction = this.fraction
     const determinate = fraction !== undefined
+    const hasText = this.slotPresence.has()
     const arcStyle = determinate ? styleMap({ strokeDasharray: `${CIRCUMFERENCE}`, strokeDashoffset: `${CIRCUMFERENCE * (1 - fraction)}` }) : nothing
     return html`
       <div
-        class=${classMap({ 'c2-spinner': true, 'is-determinate': determinate, 'has-text': this.hasText })}
+        class=${classMap({ 'c2-spinner': true, 'is-determinate': determinate, 'has-text': hasText })}
         role="progressbar"
-        aria-label=${this.hasText ? nothing : ifDefined(this.label || 'Loading')}
-        aria-labelledby=${this.hasText ? 'label' : nothing}
+        aria-label=${hasText ? nothing : ifDefined(this.label || 'Loading')}
+        aria-labelledby=${hasText ? 'label' : nothing}
         aria-valuemin=${determinate ? '0' : nothing}
         aria-valuemax=${determinate ? String(this.max > 0 ? this.max : 100) : nothing}
         aria-valuenow=${determinate ? String(fraction * (this.max > 0 ? this.max : 100)) : nothing}
@@ -95,7 +83,7 @@ export class Spinner extends LitElement {
           <circle class="c2-spinner-track" part="track" cx="24" cy="24" r=${RADIUS}></circle>
           <circle class="c2-spinner-arc" part="arc" cx="24" cy="24" r=${RADIUS} style=${arcStyle}></circle>
         </svg>
-        <span id="label" class="c2-spinner-label" part="label" ?hidden=${!this.hasText}><slot @slotchange=${this.handleSlotChange}></slot></span>
+        <span id="label" class="c2-spinner-label" part="label" ?hidden=${!hasText}><slot @slotchange=${this.handleSlotChange}></slot></span>
       </div>
     `
   }

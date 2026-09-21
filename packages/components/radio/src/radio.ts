@@ -6,7 +6,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { consume } from '@lit/context'
-import { hasSlottedContent, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 import { radioGroupContext, type RadioGroupContext } from './radio-context'
 import styles from './radio.scss?inline'
 
@@ -39,11 +39,11 @@ export interface Radio {
  * @event {Event} change - Re-dispatched from the inner input when the user checks this radio.
  *
  * @csspart control - The default circular radio indicator.
- * @csspart dot - The checked mark inside the default control.
+ * @csspart dot - Checked-mark region containing the `dot` slot or fallback inside the default control.
  * @csspart icon - Custom indicator shown from the `icon` slot.
  * @csspart checked-icon - Custom indicator shown from the `checked-icon` slot while checked.
  * @csspart label - The option label.
- * @csspart description - Supporting text below the label.
+ * @csspart description - Supporting-text region containing the `description` slot below the label.
  *
  * @cssproperty {pixel} [--c2-radio__container--gap=4px] - Space between the control and the text.
  * @cssproperty {flex-direction-row} [--c2-radio__container--flex-direction=row] - `row-reverse` puts the indicator after the text, e.g. a trailing check mark.
@@ -136,10 +136,7 @@ export class Radio extends LitElement {
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 
-  @state() private hasDescription = false
-  @state() private hasDot = false
-  @state() private hasIcon = false
-  @state() private hasCheckedIcon = false
+  private readonly slotPresence = new SlotPresenceController(this, ['description', 'dot', 'icon', 'checked-icon'])
 
   @consume({ context: radioGroupContext, subscribe: true })
   private group: RadioGroupContext | undefined
@@ -220,18 +217,6 @@ export class Radio extends LitElement {
     this.group = undefined
   }
 
-  /** `slotchange` does not fire for server-rendered slots, so read them once after the first render. */
-  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
-  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-  protected override willUpdate(_changed: PropertyValues<this>) {
-    if (!this.hasUpdated) {
-      this.hasDescription = hasSlottedContent(this, 'description')
-      this.hasDot = hasSlottedContent(this, 'dot')
-      this.hasIcon = hasSlottedContent(this, 'icon')
-      this.hasCheckedIcon = hasSlottedContent(this, 'checked-icon')
-    }
-  }
-
   protected override update(changed: PropertyValues<this>) {
     // Keep the native input in sync before render so `:checked` styles and the change handler agree.
     if (changed.has('checked') && this.formElement) this.formElement.checked = this.checked
@@ -295,15 +280,7 @@ export class Radio extends LitElement {
   }
 
   private handleSlotChange(event: Event) {
-    this.updateSlot(event.target as HTMLSlotElement)
-  }
-
-  private updateSlot(slot: HTMLSlotElement) {
-    const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-    if (slot.name === 'description') this.hasDescription = filled
-    else if (slot.name === 'dot') this.hasDot = filled
-    else if (slot.name === 'icon') this.hasIcon = filled
-    else if (slot.name === 'checked-icon') this.hasCheckedIcon = filled
+    this.slotPresence.handleSlotChange(event)
   }
 
   private handleChange(event: Event) {
@@ -317,10 +294,10 @@ export class Radio extends LitElement {
       <label
         class=${classMap({
           'c2-radio': true,
-          'has-description': this.hasDescription,
-          'has-dot': this.hasDot,
-          'has-icon': this.hasIcon,
-          'has-checked-icon': this.hasCheckedIcon,
+          'has-description': this.slotPresence.has('description'),
+          'has-dot': this.slotPresence.has('dot'),
+          'has-icon': this.slotPresence.has('icon'),
+          'has-checked-icon': this.slotPresence.has('checked-icon'),
         })}
       >
         <span class="c2-radio-control">
@@ -346,7 +323,7 @@ export class Radio extends LitElement {
         </span>
         <span class="c2-radio-text">
           <span class="c2-radio-label" part="label"><slot>${this.label}</slot></span>
-          <span class="c2-radio-description" part="description" ?hidden=${!this.hasDescription}>
+          <span class="c2-radio-description" part="description" ?hidden=${!this.slotPresence.has('description')}>
             <slot name="description" @slotchange=${this.handleSlotChange}></slot>
           </span>
         </span>

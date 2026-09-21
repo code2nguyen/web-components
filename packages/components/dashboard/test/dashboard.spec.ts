@@ -1,6 +1,17 @@
 import type { Locator, Page } from '@playwright/test'
 import { test, expect } from './fixture'
+import { slotPresenceMatrix } from '../../../../tests/component-fixture'
 import type { Dashboard } from '../src/dashboard'
+
+test('footer presence follows assignment, insertion, removal and reassignment', async ({ page, renderScenario }) => {
+  const footer = page.locator('c2-dash-card').locator('[part="footer"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-dash-card><span slot="footer" data-slot-presence-probe>Footer</span></c2-dash-card>',
+    host: 'c2-dash-card',
+    slot: 'footer',
+    assertPresent: async (present) => (present ? expect(footer).toBeVisible() : expect(footer).toBeHidden()),
+  })
+})
 
 /** Real pointer drag: press on the handle, move in steps, release. */
 async function drag(page: Page, handle: Locator, dx: number, dy: number) {
@@ -144,6 +155,25 @@ test('a pane composes its own actions, controls, footer and icons around the bui
   // Own buttons sit before the built-in ones, in the order they were authored.
   const names = await one.getByRole('button').evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label') ?? button.textContent?.trim()))
   expect(names).toEqual(['Refresh', 'Close pane', 'Collapse the card'])
+})
+
+test('dash-card public parts style stable regions while projected actions and icons stay consumer-owned', async ({ page, scenario }) => {
+  await scenario('slots')
+  await page.addStyleTag({
+    content:
+      'c2-dash-card::part(body){background:rgb(1,2,3)}c2-dash-card::part(header){background:rgb(4,5,6)}c2-dash-card::part(footer){background:rgb(7,8,9)}c2-dash-card::part(controls){background:rgb(10,11,12)}c2-dash-card > [slot]{color:rgb(13,14,15)}',
+  })
+  const card = page.locator('#one')
+  for (const [part, color] of [
+    ['body', 'rgb(1, 2, 3)'],
+    ['header', 'rgb(4, 5, 6)'],
+    ['footer', 'rgb(7, 8, 9)'],
+    ['controls', 'rgb(10, 11, 12)'],
+  ] as const) {
+    await expect(card.locator(`[part="${part}"]`)).toHaveCSS('background-color', color)
+  }
+  await expect(card.locator('[slot="actions"]')).toHaveCSS('color', 'rgb(13, 14, 15)')
+  await expect(card.locator('[slot="expand-full-icon"]')).toHaveCSS('color', 'rgb(13, 14, 15)')
 })
 
 // The rows are toggled with `hidden`; the footer's own `display: flex` used to outrank it and a blank 36px row

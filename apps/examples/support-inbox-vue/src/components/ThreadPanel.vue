@@ -56,10 +56,12 @@ function send() {
              and styles the flipped layout with `:host([align='right'])` — so the property alone would be
              silently inert. Forcing the attribute is what the selector actually reads. -->
         <c2-chat-message :align.attr="message.from === 'agent' ? 'right' : 'left'" :class="`thread__message thread__message--${message.from}`">
-          <c2-avatar slot="avatar" auto-color :name="message.author" />
+          <c2-avatar slot="avatar" auto-color :name="message.author" class="thread__nested-avatar" />
           <span slot="title">{{ message.author }}</span>
           <span slot="header-time">{{ message.at }}</span>
-          <p slot="message">{{ message.body }}</p>
+          <!-- This node belongs to Vue's light DOM, so its scoped class works normally. The global
+               `::part(content)` rule styles the component-owned region around it independently. -->
+          <p slot="message" class="thread__message-copy">{{ message.body }}</p>
         </c2-chat-message>
       </li>
     </ol>
@@ -78,3 +80,10 @@ function send() {
     </footer>
   </section>
 </template>
+
+<style scoped>
+/* Assigned content remains in Vue's light DOM, so ordinary scoped selectors apply to it. */
+.thread__message-copy {
+  letter-spacing: 0.005em;
+}
+</style>

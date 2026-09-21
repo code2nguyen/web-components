@@ -3,7 +3,7 @@ import { query, state } from 'lit/decorators.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { getFieldValue } from '@c2n/core/data-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
@@ -231,8 +231,7 @@ export class Autocomplete extends LitElement {
   @state() private focused = false
   @state() private activeIndex = -1
   @state() private disabledByForm = false
-  @state() private hasHeader = false
-  @state() private hasFooter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['header', 'footer'])
 
   @query('.input') private input?: HTMLInputElement
   @query('c2-overlay') private overlay?: Overlay
@@ -582,10 +581,6 @@ export class Autocomplete extends LitElement {
     if (!this.open) this.activeIndex = -1
   }
 
-  private slotHasContent(event: Event): boolean {
-    return (event.target as HTMLSlotElement).assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || !!node.textContent?.trim())
-  }
-
   private renderHighlighted(text: string) {
     const query = this.value.trim()
     if (!query) return text
@@ -694,8 +689,8 @@ export class Autocomplete extends LitElement {
         @toggle=${this.handleOverlayToggle}
       >
         <div class="panel">
-          <header class="panel-header" ?hidden=${!this.hasHeader}>
-            <slot name="header" @slotchange=${(event: Event) => (this.hasHeader = this.slotHasContent(event))}></slot>
+          <header class="panel-header" ?hidden=${!this.slotPresence.has('header')}>
+            <slot name="header" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </header>
           <c2-list
             id=${this.listboxId}
@@ -707,8 +702,8 @@ export class Autocomplete extends LitElement {
             @selection-change=${this.handleListSelection}
             >${this.renderRows()}</c2-list
           >
-          <footer class="panel-footer" ?hidden=${!this.hasFooter}>
-            <slot name="footer" @slotchange=${(event: Event) => (this.hasFooter = this.slotHasContent(event))}></slot>
+          <footer class="panel-footer" ?hidden=${!this.slotPresence.has('footer')}>
+            <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </footer>
         </div>
       </c2-overlay>`

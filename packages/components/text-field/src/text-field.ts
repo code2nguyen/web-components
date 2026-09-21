@@ -8,7 +8,7 @@ import styles from './text-field.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
 import { addClasses } from '@c2n/core/css-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 
 export type TextFieldType = 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' | 'number'
 
@@ -192,7 +192,7 @@ export class TextField extends LitElement {
   // Internal state
   @state() private dirty = false
   @state() private focused = false
-  @state() private hasSupportingSlot = false
+  private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
 
   // Query
   @query('.input') private readonly input?: HTMLInputElement | null
@@ -323,11 +323,6 @@ export class TextField extends LitElement {
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
-  private handleSupportingSlotChange(event: Event) {
-    const slot = event.target as HTMLSlotElement
-    this.hasSupportingSlot = slot.assignedNodes({ flatten: true }).length > 0
-  }
-
   protected renderPrefixSlot() {
     return html`<slot name="prefix-icon"></slot>`
   }
@@ -357,12 +352,12 @@ export class TextField extends LitElement {
     const showError = this.error && !this.disabled && !!this.errorText
     const message = showError ? this.errorText : this.help
     const counter = this.maxLength > 0 ? `${this.value.length} / ${this.maxLength}` : ''
-    if (!message && !counter && !this.hasSupportingSlot) {
-      return html`<slot name="supporting-text" hidden @slotchange=${this.handleSupportingSlotChange}></slot>`
+    if (!message && !counter && !this.slotPresence.has('supporting-text')) {
+      return html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
     }
     return html`<div class="supporting-text ${classMap({ error: this.error && !this.disabled })}">
       <div class="supporting-text__message">
-        <slot name="supporting-text" @slotchange=${this.handleSupportingSlotChange}>${message}</slot>
+        <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
       </div>
       ${counter ? html`<span class="supporting-text__counter">${counter}</span>` : nothing}
     </div>`

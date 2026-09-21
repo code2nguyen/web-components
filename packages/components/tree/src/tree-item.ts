@@ -60,8 +60,8 @@ export interface TreeItem {
  *
  * @csspart row - The clickable row, excluding any nested children.
  * @csspart toggle - The disclosure toggle.
- * @csspart label - The label box.
- * @csspart actions - The trailing actions box.
+ * @csspart label - Text box containing the `label` slot or label-property fallback.
+ * @csspart actions - Trailing box wrapping the assigned `actions` slot.
  * @csspart group - The container holding the nested children.
  * @csspart checkbox - The selection checkbox rendered when checkbox selection is enabled.
  *

@@ -17,7 +17,7 @@ let labelCount = 0
  * @slot required-indicator - Marker shown after the text when `required` is set. Defaults to an asterisk.
  *
  * @csspart label - The label text and optional required marker.
- * @csspart required-indicator - The marker appended while `required` is set.
+ * @csspart required-indicator - Marker containing the `required-indicator` slot or fallback asterisk while `required` is set.
  *
  * @cssproperty {pixel} [--c2-label__container--gap=4px]
  * @cssproperty {color} [--c2-label__container--color=inherit]

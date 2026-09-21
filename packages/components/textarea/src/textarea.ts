@@ -5,7 +5,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import styles from './textarea.scss?inline'
 
 /** Events fired by {@link Textarea}, keyed for `addEventListener`. */
@@ -28,7 +28,7 @@ export interface Textarea {
  * @event {Event} change - Fired when an edit is committed.
  * @event {Event} select - Fired when text is selected.
  * @csspart textarea - The native textarea control.
- * @csspart supporting-text - Container for help text or the current validation error.
+ * @csspart supporting-text - Container wrapping the `supporting-text` slot or generated help and validation fallback.
  *
  * @cssproperty {pixel} [--c2-textarea__container--min-height=80px]
  * @cssproperty {padding} [--c2-textarea__container--padding=10px 12px]
@@ -101,7 +101,7 @@ export class Textarea extends LitElement {
   @property() help = ''
 
   @state() private dirty = false
-  @state() private hasSupportingSlot = false
+  private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
   @query('textarea') private input?: HTMLTextAreaElement
 
   /** The containing form, when this control is associated with one. */
@@ -206,14 +206,10 @@ export class Textarea extends LitElement {
   private handleSelect(event: Event) {
     redispatchEvent(this, event)
   }
-  private handleSlotChange(event: Event) {
-    this.hasSupportingSlot = (event.target as HTMLSlotElement).assignedNodes({ flatten: true }).length > 0
-  }
-
   override render() {
     const invalid = this.error && !this.effectiveDisabled
     const showError = invalid && !!this.errorText
-    const supporting = !!this.help || this.hasSupportingSlot || showError || this.maxLength >= 0
+    const supporting = !!this.help || this.slotPresence.has('supporting-text') || showError || this.maxLength >= 0
     return html` <textarea
         part="textarea"
         name=${ifDefined(this.name || undefined)}
@@ -237,7 +233,7 @@ export class Textarea extends LitElement {
       ></textarea>
       <div id="supporting-text" part="supporting-text" class="supporting-text" ?hidden=${!supporting}>
         <span class="message">
-          <slot name="supporting-text" ?hidden=${showError} @slotchange=${this.handleSlotChange}>${this.help}</slot>
+          <slot name="supporting-text" ?hidden=${showError} @slotchange=${this.slotPresence.handleSlotChange}>${this.help}</slot>
           ${showError ? html`<span role="alert">${this.errorText}</span>` : nothing}
         </span>
         ${this.maxLength >= 0 ? html`<span class="counter">${this.value.length} / ${this.maxLength}</span>` : nothing}

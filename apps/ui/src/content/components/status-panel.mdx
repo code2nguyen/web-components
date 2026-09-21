@@ -12,6 +12,8 @@ import { Button } from '@c2n/button'
 
 `c2-status-panel` presents a meaningful application state without assuming that the state is empty or the result of an operation. Choose a `status` for the built-in media treatment, provide concise copy through attributes or slots, and add actions or supporting content only when they help the user move forward.
 
+Assigned slot nodes are light DOM and take ordinary classes. Use the matching `::part(media)`, `::part(title)`, `::part(description)`, `::part(content)`, or `::part(actions)` selector for the component-owned region around each slot. The first three parts also style their visible fallbacks; content and actions remain stable but hidden when empty.
+
 ## Installation
 
 ```bash tag=CodeBlock

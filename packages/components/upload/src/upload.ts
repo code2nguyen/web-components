@@ -86,6 +86,14 @@ let uploadItemId = 0
  * @slot hint - Replaces the accepted-type and size hint.
  * @slot action - Replaces the dynamic label of the compact upload button.
  * @slot empty - Optional content shown below the drop zone while no files are selected.
+ * @csspart dropzone - Interactive drop-zone region containing the icon, prompt, and hint.
+ * @csspart drop-icon - Icon boundary wrapping the `drop-icon` slot and fallback icon.
+ * @csspart prompt - Instruction region wrapping the `prompt` slot and fallback prompt.
+ * @csspart hint - Supporting-text region wrapping the `hint` slot and generated fallback hint.
+ * @csspart action - Compact picker label boundary wrapping the `action` slot and fallback label.
+ * @csspart empty - Empty-state boundary exposing the `empty` slot.
+ * @csspart errors - Validation-error status region.
+ * @csspart list - Selected-file list region.
  *
  * @event {CustomEvent<UploadFilesEventDetail>} files-selected - Fired after valid files enter the queue through browse, drop or `addFiles()`.
  * @event {CustomEvent<{ rejections: UploadRejection[] }>} file-reject - Fired when type, size, count or single-file rules reject files.
@@ -518,13 +526,14 @@ export class Upload extends LitElement {
     if (this.variant === 'compact') {
       return html`
         <c2-button class="picker compact-button" ?disabled=${this.effectiveDisabled} @click=${this.browse}>
-          <span class="compact-icon" slot="prefix-icon"><slot name="drop-icon">${this.renderIcon()}</slot></span>
-          <slot name="action">${this.defaultActionLabel}</slot>
+          <span part="drop-icon" class="compact-icon" slot="prefix-icon"><slot name="drop-icon">${this.renderIcon()}</slot></span>
+          <slot part="action" name="action">${this.defaultActionLabel}</slot>
         </c2-button>
       `
     }
     return html`
       <div
+        part="dropzone"
         class=${classMap({ picker: true, dropzone: true, 'dropzone--dragging': this.dragging })}
         role="button"
         tabindex=${this.effectiveDisabled ? -1 : 0}
@@ -537,8 +546,8 @@ export class Upload extends LitElement {
         @dragleave=${this.handleDragLeave}
         @drop=${this.handleDrop}
       >
-        <slot name="drop-icon">${this.renderIcon()}</slot>
-        <div class="prompt">
+        <slot part="drop-icon" name="drop-icon">${this.renderIcon()}</slot>
+        <div part="prompt" class="prompt">
           <slot name="prompt">
             ${
               this.multiple && this.uploadItems.length
@@ -547,7 +556,7 @@ export class Upload extends LitElement {
             }
           </slot>
         </div>
-        <div class="hint"><slot name="hint">${this.defaultHint}</slot></div>
+        <div part="hint" class="hint"><slot name="hint">${this.defaultHint}</slot></div>
       </div>
     `
   }
@@ -567,12 +576,12 @@ export class Upload extends LitElement {
       ${this.renderPicker()}
       ${
         this.rejections.length
-          ? html`<div class="errors" role="status">${this.rejections.map((rejection) => html`<div>${rejection.message}</div>`)}</div>`
+          ? html`<div part="errors" class="errors" role="status">${this.rejections.map((rejection) => html`<div>${rejection.message}</div>`)}</div>`
           : nothing
       }
       ${
         this.uploadItems.length
-          ? html`<div class=${classMap({ list: true, 'list--standalone': !this.canAddMore })} role="list" aria-label="Selected files">
+          ? html`<div part="list" class=${classMap({ list: true, 'list--standalone': !this.canAddMore })} role="list" aria-label="Selected files">
               ${this.uploadItems.map(
                 (item) => html`
                   <c2-attachment
@@ -592,7 +601,7 @@ export class Upload extends LitElement {
                 `,
               )}
             </div>`
-          : html`<slot name="empty"></slot>`
+          : html`<slot part="empty" name="empty"></slot>`
       }
     `
   }

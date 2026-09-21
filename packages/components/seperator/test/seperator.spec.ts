@@ -1,4 +1,14 @@
-import { test, expect, props, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('label presence follows assignment, text, insertion, removal and reassignment', async ({ page, renderScenario }) => {
+  const label = page.locator('c2-seperator').locator('[part="label"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-seperator><span data-slot-presence-probe>Section</span></c2-seperator>',
+    host: 'c2-seperator',
+    text: true,
+    assertPresent: async (present) => (present ? expect(label).toBeVisible() : expect(label).toBeHidden()),
+  })
+})
 
 test('semantic separators expose orientation and a slotted label', async ({ page, renderScenario }) => {
   await renderScenario('<c2-seperator>Or continue</c2-seperator>')

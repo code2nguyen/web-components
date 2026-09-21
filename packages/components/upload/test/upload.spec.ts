@@ -42,6 +42,19 @@ test('multiple drop zones switch to upload-more copy and show remaining capacity
   await expect(upload.getByText('2 files remaining')).toBeVisible()
 })
 
+test('public parts style the dropzone, prompt, hint and empty fallback regions', async ({ page, scenario }) => {
+  await scenario()
+  await page.addStyleTag({
+    content:
+      'c2-upload::part(dropzone){background:rgb(1,2,3)}c2-upload::part(prompt){background:rgb(4,5,6)}c2-upload::part(hint){background:rgb(7,8,9)}c2-upload::part(empty){background:rgb(10,11,12)}',
+  })
+  const host = page.locator('c2-upload')
+  await expect(host.locator('.dropzone')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await expect(host.locator('.prompt')).toHaveCSS('background-color', 'rgb(4, 5, 6)')
+  await expect(host.locator('.hint')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
+  await expect(host.locator('slot[name="empty"]')).toHaveCSS('background-color', 'rgb(10, 11, 12)')
+})
+
 test('selects multiple files and renders them as attachments', async ({ page, scenario }) => {
   await scenario('progress')
   const upload = page.locator('c2-upload')

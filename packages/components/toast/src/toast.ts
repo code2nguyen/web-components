@@ -33,10 +33,10 @@ export interface Toast {
  * @event {CustomEvent} toast-close - Dismiss requested by the close button or Escape; detail contains reason.
  * @event {CustomEvent} toast-action - The action-label button was activated.
  * @csspart container - The notification card surface.
- * @csspart icon - Container for the leading status icon.
+ * @csspart icon - Container wrapping the assigned leading `icon` slot.
  * @csspart heading - The optional notification heading.
  * @csspart message - Container for the notification message.
- * @csspart action - The optional action button.
+ * @csspart action - Button region containing the optional assigned `action` slot.
  * @csspart close - The dismiss button.
  * @csspart progress - The countdown track shown while progress is enabled.
  * @csspart progress-bar - The remaining-time fill inside the countdown track.

@@ -32,6 +32,9 @@ jobs:
       # each package's `exports`, which point at the generated `dist/*.d.ts`. Those are git-ignored, so without a
       # build tsc cannot see them and fails on any component that depends on a sibling package.
       - run: npm run build
+      - run: npm run docs:check
+      - name: Verify generated component manifests are committed
+        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)open-packages/*/custom-elements.json'
       - run: npx playwright install --with-deps ${{ matrix.browser }}
       - run: npm run test:type-check
       - name: Test changed component packages

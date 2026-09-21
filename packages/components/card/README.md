@@ -25,3 +25,5 @@ npm install @c2n/card
 - **Disabled**: `disabled` dims the card and blocks interaction; a link card loses its anchor.
 
 Everything visual is a CSS custom property: `--c2-card--*` for the surface (padding, radius, borders, background, color, shadow), `--c2-card__header--*`, `--c2-card__footer--*` and `--c2-card__media--*` for the sections, and `--c2-card__hover--*`, `--c2-card__focus--*`, `--c2-card__disabled--*` for the states. `--c2-card__hover--transform: translateY(-2px)` with a hover shadow gives the classic lift. The full list is in `custom-elements.json` and on the docs site.
+
+Use `::part(media)`, `::part(header)`, `::part(body)` and `::part(footer)` for structural styling of the component-owned section wrappers. Style the elements you place in those slots with their own classes; a card part does not reach inside a slotted custom element's shadow root.

@@ -2,6 +2,10 @@
 
 All components are standard custom elements (Lit 3). Register with a side-effect import; then they are plain HTML.
 
+## Slots and bare text
+
+Style elements assigned to slots with consumer-owned classes and style component-owned placement or fallback regions through documented CSS parts or custom properties. Bare text nodes cannot receive a class or be targeted directly: use inherited host styling or a documented host property, or wrap the text in an element you own. A parent part never reaches inside an assigned custom element's shadow root.
+
 ## Events (every framework)
 
 Each component that fires events exports an event map (`TableEventMap`, `SelectEventMap`, …) from the same module as its class, and declares typed `addEventListener` overloads, so the detail narrows with no cast:
@@ -76,6 +80,10 @@ Types: `import '@c2n/<name>/react'` — one line per package, in any `.d.ts` —
 
 ## Vue 3
 
+### Scoped slot styling
+
+Treat assigned nodes and component-owned regions separately. A slotted node remains in application light DOM, so a Vue scoped class can style it. Use only a documented host `::part(name)` selector for the shadow-owned wrapper or fallback, and place that rule in a global stylesheet because Vue's scoped attribute is not present inside the shadow root. Parts stop at nested custom-element shadow roots; consult the nested component's own manifest instead of chaining private selectors.
+
 Tell the compiler about the tags: `compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-')` (in `@vitejs/plugin-vue`'s `template.compilerOptions`); without it every `c2-*` tag is treated as a Vue component and renders nothing. Register the elements at module scope before `mount()`: Vue chooses between a property and an attribute with `key in el`, so a binding on an element that has not upgraded yet falls back to an attribute.
 
 Types: `import '@c2n/<name>/vue'` registers the tags with Volar, and `"extends": [..., "@c2n/framework-types/tsconfig.vue.json"]` supplies the matching `vueCompilerOptions` (`strictTemplates`, plus the `v-model` prop mapping so `v-model` binds `value`/`checked` rather than `modelValue`). Declare no local `vueCompilerOptions` next to it — a local one replaces the inherited object rather than merging.
@@ -86,6 +94,8 @@ Types: `import '@c2n/<name>/vue'` registers the tags with Volar, and `"extends":
 - A static attribute stays an attribute, so spell it the way the component declares it (`row-key`, not `rowKey`).
 
 ## Angular
+
+With Emulated encapsulation, keep host `::part(name)` rules in a global stylesheet (or use `ViewEncapsulation.None` for the owning stylesheet); Angular's generated scope attribute cannot appear on nodes inside a custom element's shadow root. Classes on consumer-owned assigned nodes can remain component-local. Never use deep/private selectors to cross a nested custom-element boundary.
 
 `CUSTOM_ELEMENTS_SCHEMA` on the component is the only required configuration. `[rows]="…"` writes a property with `setProperty`; `(selection-change)` binds the event by its real name. A **static** attribute stays an attribute, so a camelCase property needs `[rowKey]="'id'"` or the real attribute name (`row-key`) — the lowercase spelling `rowkey` is forwarded to `row-key` with a warning.
 

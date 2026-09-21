@@ -31,8 +31,17 @@ import '@c2n/mat-icon'
 
 ## Examples
 
+The ligature is a bare text node, so it cannot receive a class of its own. Customize it through the host's documented font-size, font-weight, and color properties, or wrap other text-slot content in an element when it needs an independently targetable class.
+
 ```html tag=MdxCodeBlock,compact=true
-<c2-mat-icon>home</c2-mat-icon>
+<style>
+  .featured-icon {
+    --c2-mat-icon--font-size: 36px;
+    --c2-mat-icon--font-weight: 500;
+    --c2-mat-icon--color: #2563eb;
+  }
+</style>
+<c2-mat-icon class="featured-icon">home</c2-mat-icon>
 ```
 
 Use the sliders button on the example, or select any icon in the gallery, to open that icon directly in the configuration studio.

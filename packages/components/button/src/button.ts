@@ -14,7 +14,7 @@ import styles from './button.scss?inline'
  * @slot running-icon - Icon shown in place of the prefix icon while `running` is set. Defaults to a spinner; the slot wrapper rotates, so slotted content spins too.
  *
  * @csspart button - The native button that provides the interactive surface.
- * @csspart running-icon - Wrapper around the icon shown while `running` is set.
+ * @csspart running-icon - Wrapper containing the `running-icon` slot or spinner fallback while `running` is set.
  *
  * @cssproperty {pixel} [--c2-button__container--height=36px]
  * @cssproperty {width} [--c2-button__container--width=auto] - Width of the host. `100%` makes a full-width button.

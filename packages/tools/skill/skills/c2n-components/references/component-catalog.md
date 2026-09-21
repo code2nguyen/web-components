@@ -93,7 +93,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Chatbot** — `c2-chatbot` · `@c2n/chatbot` — Chatbot component for c2n applications.
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/dashboard` — Grid of resizable panes, dragged by the edges they share.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.
-- **dropdown-list** — `c2-dropdown-list` · `@c2n/dropdown-list` — dropdown-list component for c2n applications.
 - **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **reorder-list** — `c2-reorder-list` · `@c2n/reorder-list` — reorder-list component for c2n applications.
 - **Seperator** — `c2-seperator` · `@c2n/seperator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.

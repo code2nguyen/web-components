@@ -1,4 +1,40 @@
 import { test, expect } from './fixture'
+import { slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('detail presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const detail = page.locator('c2-step').locator('[part="detail"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-step label="Build"><span slot="detail" data-slot-presence-probe>Running</span></c2-step>',
+    host: 'c2-step',
+    slot: 'detail',
+    assertPresent: async (present) => (present ? expect(detail).toBeVisible() : expect(detail).toBeHidden()),
+  })
+})
+
+test('initial nested-step and named-slot discovery do not schedule a second Lit update', async ({ page, scenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('c2-step scheduled an update')) warnings.push(message.text())
+  })
+  await scenario('slots')
+  await expect(page.locator('c2-step').first()).toBeVisible()
+  expect(warnings).toEqual([])
+})
+
+test('public step parts style stable regions while assigned step content stays consumer-owned', async ({ page, scenario }) => {
+  await scenario('slots')
+  await page.addStyleTag({
+    content:
+      'c2-step::part(label),c2-step::part(detail),c2-step::part(marker),c2-step::part(toggle),c2-step::part(trailing){background-color:rgb(1,2,3)}c2-step > *{color:rgb(4,5,6)}',
+  })
+  const step = page.locator('c2-step').first()
+  for (const part of ['label', 'detail', 'marker', 'trailing']) await expect(step.locator(`[part="${part}"]`)).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await expect(step.locator('[slot="label"]')).toHaveCSS('color', 'rgb(4, 5, 6)')
+
+  await scenario('toggle-slot')
+  await page.addStyleTag({ content: 'c2-step::part(toggle){background-color:rgb(1,2,3)}' })
+  await expect(page.locator('c2-step').first().locator('[part="toggle"]').first()).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+})
 
 test('renders the trace: label, detail and trailing on every row', async ({ page, scenario }) => {
   await scenario()

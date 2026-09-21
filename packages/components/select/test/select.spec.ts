@@ -86,3 +86,13 @@ test('picking an option fires input and change as well as selection-change', asy
 
   await expect(host).toHaveAttribute('data-seen', '["selection-change","input","change"]')
 })
+
+test('consumer-owned trigger and option slots remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-select><span class="slot-probe" slot="button-content">Choose</span><span class="slot-probe" slot="button-prefix-icon">P</span><span class="slot-probe" slot="button-suffix-icon">S</span><span class="slot-probe" slot="default">Option</span></c2-select>`,
+  )
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(4).fill('rgb(1, 2, 3)'))
+})

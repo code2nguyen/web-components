@@ -1,6 +1,16 @@
-import { accessible } from '../../../../tests/component-fixture'
+import { accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
 import type { QrCode } from '../src/qr-code'
 import { test, expect } from './fixture'
+
+test('center presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const center = page.locator('c2-qr-code').locator('.center')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-qr-code value="https://example.com"><span slot="center" data-slot-presence-probe>Logo</span></c2-qr-code>',
+    host: 'c2-qr-code',
+    slot: 'center',
+    assertPresent: async (present) => (present ? expect(center).toBeVisible() : expect(center).toBeHidden()),
+  })
+})
 
 test('renders an accessible SVG image for its value', async ({ page, scenario }) => {
   await scenario()

@@ -1,7 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { styleMap } from 'lit/directives/style-map.js'
@@ -21,7 +21,7 @@ import styles from './progress.scss?inline'
  *
  * @csspart header - Row containing the label and displayed value.
  * @csspart label - Container for the default label slot.
- * @csspart value - Displayed percentage or custom `value` slot.
+ * @csspart value - Text region containing the custom `value` slot or displayed-percentage fallback.
  * @csspart track - The full progress track.
  * @csspart indicator - The filled portion of the progress track.
  *
@@ -55,9 +55,7 @@ export class Progress extends LitElement {
   /** Show the completed percentage beside the label. Always on when the `value` slot has content. */
   @property({ type: Boolean, attribute: 'show-value', reflect: true }) showValue = false
 
-  @state() private hasLabel = false
-
-  @state() private hasValueText = false
+  private readonly slotPresence = new SlotPresenceController(this, ['', 'value'])
 
   /** Value that fills the track, guarding against a `max` of `0` or less. */
   private get effectiveMax(): number {
@@ -76,36 +74,29 @@ export class Progress extends LitElement {
     return value === undefined ? undefined : value / this.effectiveMax
   }
 
-  // `slotchange` fires on the first assignment too, so there is nothing to read in `firstUpdated`.
-  private handleSlotChange(event: Event) {
-    const slot = event.target as HTMLSlotElement
-    const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-    if (slot.name === 'value') this.hasValueText = filled
-    else this.hasLabel = filled
-  }
-
   override render() {
     const value = this.clampedValue
     const fraction = this.fraction
     const determinate = fraction !== undefined
     const percent = determinate ? Math.round(fraction * 100) : 0
-    const showValue = this.showValue || this.hasValueText
+    const hasLabel = this.slotPresence.has()
+    const showValue = this.showValue || this.slotPresence.has('value')
     return html`
       <div class=${classMap({ 'c2-progress': true, 'is-determinate': determinate })}>
-        <div class="c2-progress-header" part="header" ?hidden=${!this.hasLabel && !showValue}>
-          <span id="label" class="c2-progress-label" part="label" ?hidden=${!this.hasLabel}>
-            <slot @slotchange=${this.handleSlotChange}></slot>
+        <div class="c2-progress-header" part="header" ?hidden=${!hasLabel && !showValue}>
+          <span id="label" class="c2-progress-label" part="label" ?hidden=${!hasLabel}>
+            <slot @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </span>
           <span class="c2-progress-value" part="value" ?hidden=${!showValue}>
-            <slot name="value" @slotchange=${this.handleSlotChange}>${determinate ? `${percent}%` : nothing}</slot>
+            <slot name="value" @slotchange=${this.slotPresence.handleSlotChange}>${determinate ? `${percent}%` : nothing}</slot>
           </span>
         </div>
         <div
           class="c2-progress-track"
           part="track"
           role="progressbar"
-          aria-label=${this.hasLabel ? nothing : ifDefined(this.label || 'Loading')}
-          aria-labelledby=${this.hasLabel ? 'label' : nothing}
+          aria-label=${hasLabel ? nothing : ifDefined(this.label || 'Loading')}
+          aria-labelledby=${hasLabel ? 'label' : nothing}
           aria-valuemin=${determinate ? '0' : nothing}
           aria-valuemax=${determinate ? String(this.effectiveMax) : nothing}
           aria-valuenow=${value !== undefined ? String(value) : nothing}

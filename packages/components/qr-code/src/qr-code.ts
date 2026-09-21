@@ -3,6 +3,7 @@ import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { encode } from 'uqr'
 import styles from './qr-code.scss?inline'
@@ -68,7 +69,7 @@ export class QrCode extends LitElement {
 
   @state() private modules: boolean[][] = []
   @state() private encodingError: Error | null = null
-  @state() private hasCenter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['center'])
 
   protected override willUpdate(changed: PropertyValues<this>): void {
     if (changed.has('size')) this.size = Number.isFinite(this.size) ? Math.max(0, Math.floor(this.size)) : 200
@@ -144,10 +145,6 @@ export class QrCode extends LitElement {
     return this.modules.flatMap((row, y) => row.flatMap((active, x) => (active ? `M${x} ${y}h1v1h-1z` : []))).join('')
   }
 
-  private handleCenterSlot(event: Event): void {
-    this.hasCenter = (event.target as HTMLSlotElement).assignedElements().length > 0
-  }
-
   override render() {
     const label = this.ariaLabel || 'QR code'
     const hostSize = this.size > 0 ? `${this.size}px` : undefined
@@ -163,7 +160,7 @@ export class QrCode extends LitElement {
           <rect class="background" width=${dimension} height=${dimension}></rect>
           <path class="modules" d=${this.modulePath}></path>
         </svg>
-        <div class="center" ?hidden=${!this.hasCenter}><slot name="center" @slotchange=${this.handleCenterSlot}></slot></div>
+        <div class="center" ?hidden=${!this.slotPresence.has('center')}><slot name="center" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
       </div>
     `
   }

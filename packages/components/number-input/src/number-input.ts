@@ -3,7 +3,7 @@ import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
@@ -80,7 +80,7 @@ export class NumberInput extends LitElement {
   private defaultCaptured = false
   @state() private disabledByForm = false
   @state() private focused = false
-  @state() private hasSupportingSlot = false
+  private readonly slotPresence = new SlotPresenceController(this, ['supporting-text'])
   @query('input') private readonly input?: HTMLInputElement
 
   /** Current numeric text, or an empty string. Use `valueAsNumber` for a parsed value. */
@@ -211,9 +211,6 @@ export class NumberInput extends LitElement {
     this.focused = false
     redispatchEvent(this, event)
   }
-  private handleSlotChange(event: Event) {
-    this.hasSupportingSlot = (event.target as HTMLSlotElement).assignedNodes({ flatten: true }).length > 0
-  }
   private keepInputFocus(event: Event) {
     event.preventDefault()
   }
@@ -273,7 +270,7 @@ export class NumberInput extends LitElement {
   override render() {
     const showError = this.error && !this.effectiveDisabled
     const message = showError ? this.errorText : this.help
-    const showSupporting = !!message || this.hasSupportingSlot
+    const showSupporting = !!message || this.slotPresence.has('supporting-text')
     return html`
       <div
         class="field ${classMap({ focused: this.focused, error: showError, 'read-only': this.readOnly, disabled: this.effectiveDisabled })}"
@@ -309,9 +306,9 @@ export class NumberInput extends LitElement {
       ${
         showSupporting
           ? html`<div id="supporting-text" class="supporting-text ${classMap({ error: showError })}">
-              <slot name="supporting-text" @slotchange=${this.handleSlotChange}>${message}</slot>
+              <slot name="supporting-text" @slotchange=${this.slotPresence.handleSlotChange}>${message}</slot>
             </div>`
-          : html`<slot name="supporting-text" hidden @slotchange=${this.handleSlotChange}></slot>`
+          : html`<slot name="supporting-text" hidden @slotchange=${this.slotPresence.handleSlotChange}></slot>`
       }
     `
   }

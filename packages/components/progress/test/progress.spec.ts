@@ -1,4 +1,14 @@
-import { test, expect, props, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('value-slot presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const value = page.locator('c2-progress').locator('[part="value"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-progress><span slot="value" data-slot-presence-probe>One of two</span></c2-progress>',
+    host: 'c2-progress',
+    slot: 'value',
+    assertPresent: async (present) => (present ? expect(value).toBeVisible() : expect(value).toBeHidden()),
+  })
+})
 
 test('indeterminate progress has a name without a numeric value', async ({ page, renderScenario }) => {
   await renderScenario('<c2-progress>Uploading files</c2-progress>')

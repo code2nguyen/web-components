@@ -20,6 +20,12 @@ export type StatusPanelAlign = 'center' | 'start'
  * @slot actions - Primary and secondary actions.
  * @slot content - Additional details, lists or controls below the actions.
  *
+ * @csspart media - Container for the `media` slot and its status-icon fallback; always present.
+ * @csspart title - Heading region for the `title` slot or `heading` fallback; hidden when both are empty.
+ * @csspart description - Supporting-copy region for the `description` slot or attribute fallback; hidden when both are empty.
+ * @csspart content - Additional-details region around the `content` slot; hidden while the slot is empty.
+ * @csspart actions - Action row around the `actions` slot; hidden while the slot is empty.
+ *
  * @cssproperty {length} [--c2-status-panel__container--width=100%] - Panel width.
  * @cssproperty {length} [--c2-status-panel__container--max-width=720px] - Maximum panel width.
  * @cssproperty {length} [--c2-status-panel__container--min-height=240px] - Minimum panel height.
@@ -129,18 +135,18 @@ export class StatusPanel extends LitElement {
     return html`
       <div class="container">
         <div class="message">
-          <div class="media"><slot name="media" @slotchange=${this.handleSlotChange}>${this.renderDefaultMedia()}</slot></div>
+          <div part="media" class="media"><slot name="media" @slotchange=${this.handleSlotChange}>${this.renderDefaultMedia()}</slot></div>
           <div class="header" ?hidden=${!hasTitle && !hasDescription}>
-            <div class="title" role="heading" aria-level=${this.headingLevel} ?hidden=${!hasTitle}>
+            <div part="title" class="title" role="heading" aria-level=${this.headingLevel} ?hidden=${!hasTitle}>
               <slot name="title" @slotchange=${this.handleSlotChange}>${this.heading}</slot>
             </div>
-            <div class="description" ?hidden=${!hasDescription}>
+            <div part="description" class="description" ?hidden=${!hasDescription}>
               <slot name="description" @slotchange=${this.handleSlotChange}>${this.description}</slot>
             </div>
           </div>
         </div>
-        <div class="content" ?hidden=${!this.contentSlotted}><slot name="content" @slotchange=${this.handleSlotChange}></slot></div>
-        <div class="actions" ?hidden=${!this.actionsSlotted}><slot name="actions" @slotchange=${this.handleSlotChange}></slot></div>
+        <div part="content" class="content" ?hidden=${!this.contentSlotted}><slot name="content" @slotchange=${this.handleSlotChange}></slot></div>
+        <div part="actions" class="actions" ?hidden=${!this.actionsSlotted}><slot name="actions" @slotchange=${this.handleSlotChange}></slot></div>
       </div>
     `
   }

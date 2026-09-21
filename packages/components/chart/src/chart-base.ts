@@ -130,10 +130,10 @@ export interface ChartBase {
  * @csspart plot-area - The positioned box the engine draws into.
  * @csspart plot - The engine's container element. Carries no Lit bindings, so the canvas survives every update.
  * @csspart overlay - The non-interactive layer above the canvas that holds the tooltip and the actions.
- * @csspart tooltip - The tooltip bubble.
+ * @csspart tooltip - Component-owned bubble containing the `tooltip` slot and its generated fallback content.
  * @csspart actions - The container for the `actions` slot.
- * @csspart state - The empty, loading or error message layer.
- * @csspart legend - The legend container.
+ * @csspart state - Shared message layer containing the `empty`, `loading`, or `error` slot and its fallback state.
+ * @csspart legend - Component-owned container wrapping the `legend` slot and generated legend fallback.
  * @csspart legend-item - One legend entry, a toggle button.
  * @csspart legend-marker - The colour swatch inside a legend entry.
  *
@@ -282,6 +282,7 @@ export abstract class ChartBase extends LitElement {
   @state() private engineFailed = false
   @state() private hasLinkedLegend = false
   @state() private hasLinkedTooltip = false
+  @state() private themeRevision = 0
 
   protected themeController = new ChartThemeController(this, () => this.handleThemeChange())
   protected frameBuilder = new ChartFrameBuilder()
@@ -361,9 +362,6 @@ export abstract class ChartBase extends LitElement {
    */
   protected override firstUpdated(): void {
     if (this.plotElement) this.#resizeObserver?.observe(this.plotElement)
-    // The controller may have been read before the shadow-root probes existed, in which case it cached
-    // the fallback theme. Resolve it again now so first-paint CSS variables reach the engine.
-    this.themeController.invalidate()
   }
 
   override disconnectedCallback(): void {
@@ -654,8 +652,9 @@ export abstract class ChartBase extends LitElement {
   }
 
   private handleThemeChange(): void {
-    this.#optionsDirty = true
-    this.requestUpdate()
+    // A real reactive key keeps shouldUpdate() out of its data-only fast path. willUpdate() marks options dirty from
+    // the same key and updated() pushes exactly one refresh into the engine.
+    this.themeRevision += 1
   }
 
   #handleSeriesChange = (event: Event): void => {
@@ -853,6 +852,7 @@ export abstract class ChartBase extends LitElement {
         ${legendAfter ? this.renderLegend() : nothing}
       </div>
       <div class="theme-probe" aria-hidden="true">${PROBE_COLORS.map(() => html`<i></i>`)}</div>
+      <!-- slot-presence-policy: series definitions are data inputs, not conditional presentation regions; collection is reconciled by the chart lifecycle. -->
       <slot class="definitions" @slotchange=${this.#collectSeries}></slot>
     `
   }

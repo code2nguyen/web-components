@@ -37,7 +37,7 @@ export default function (plop: NodePlopAPI) {
       {
         type: 'input',
         name: 'name',
-        message: 'wc name(ex: Dropdown List):',
+        message: 'wc name(ex: Status Panel):',
       },
       {
         type: 'list',

@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValueMap } from 'lit'
-import { query, state } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -7,7 +7,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './list-item.scss?inline'
 import { selectedItemValueContext } from './list-item-context'
 import { ContextConsumer } from '@c2n/core/controllers/context-consumer.js'
-import { redispatchEvent } from '@c2n/core/dom-helper.js'
+import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 
 /** Events fired by {@link ListItem}, keyed for `addEventListener`. */
 export interface ListItemEventMap {
@@ -140,7 +140,7 @@ export class ListItem extends LitElement {
    */
   @property({ attribute: false }) applyContext = false
 
-  @state() private hasDescription = false
+  private readonly slotPresence = new SlotPresenceController(this, ['description'])
 
   @query('slot:not([name])')
   private contentSlot!: HTMLSlotElement
@@ -212,14 +212,6 @@ export class ListItem extends LitElement {
     }
   }
 
-  private handleDescriptionSlotChange(event: Event) {
-    this.updateDescription(event.target as HTMLSlotElement)
-  }
-
-  private updateDescription(slot: HTMLSlotElement) {
-    this.hasDescription = slot.assignedNodes({ flatten: true }).some((n) => n.nodeType === Node.ELEMENT_NODE || (n.textContent ?? '').trim() !== '')
-  }
-
   protected override willUpdate(changedProperties: PropertyValueMap<this>): void {
     if (changedProperties.has('applyContext')) {
       if (this.applyContext) {
@@ -270,8 +262,8 @@ export class ListItem extends LitElement {
       <slot name="prefix-icon"></slot>
       <div class="c2-list-item__content">
         <div class="c2-list-item__text"><slot>${this.label ?? this.value}</slot></div>
-        <div class="c2-list-item__description" ?hidden=${!this.hasDescription}>
-          <slot name="description" @slotchange=${this.handleDescriptionSlotChange}></slot>
+        <div class="c2-list-item__description" ?hidden=${!this.slotPresence.has('description')}>
+          <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </div>
       </div>
       <slot name="suffix-icon"></slot>

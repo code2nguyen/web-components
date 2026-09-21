@@ -1,6 +1,36 @@
-import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('item description presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const description = page.locator('c2-menu-item').locator('.description')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-menu-item value="save"><span slot="description" data-slot-presence-probe>Writes changes</span></c2-menu-item>',
+    host: 'c2-menu-item',
+    slot: 'description',
+    assertPresent: async (present) => (present ? expect(description).toBeVisible() : expect(description).toBeHidden()),
+  })
+})
 
 const trigger = '<button class="trigger" slot="trigger">Actions</button>'
+
+test('initial trigger and item discovery do not schedule a second Lit update', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('c2-menu scheduled an update')) warnings.push(message.text())
+  })
+  await renderScenario(`<c2-menu>${trigger}<c2-menu-item>Open</c2-menu-item></c2-menu>`)
+  await expect(page.getByRole('button', { name: 'Actions' })).toBeVisible()
+  expect(warnings).toEqual([])
+})
+
+test('consumer-owned trigger, command, submenu, and adornment slots remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-menu><button class="slot-probe" slot="trigger">Open</button><c2-menu-item><span class="slot-probe">Command</span><span class="slot-probe" slot="description">Description</span><span class="slot-probe" slot="prefix-icon">P</span><span class="slot-probe" slot="shortcut">⌘K</span><span class="slot-probe" slot="suffix-icon">S</span><c2-menu class="slot-probe" slot="submenu"></c2-menu></c2-menu-item></c2-menu>',
+  )
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(7).fill('rgb(1, 2, 3)'))
+})
 
 const commands = `<c2-menu aria-label="File actions">
   ${trigger}

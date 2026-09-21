@@ -30,9 +30,9 @@ export interface Checkbox {
  *
  * @event {Event} change - Re-dispatched from the inner input when the checked state changes.
  *
- * @csspart checkmark - Wrapper for the mark shown while the checkbox is checked.
- * @csspart mixedmark - Wrapper for the mark shown while the checkbox is indeterminate.
- * @csspart uncheckmark - Wrapper for optional content shown while the checkbox is unchecked.
+ * @csspart checkmark - Wrapper containing the `checkmark` slot or fallback mark while checked.
+ * @csspart mixedmark - Wrapper containing the `mixedmark` slot or fallback mark while indeterminate.
+ * @csspart uncheckmark - Wrapper containing the optional `uncheckmark` slot while unchecked.
  *
  * @cssproperty {pixel} [--c2-checkbox__container--height=18px]
  * @cssproperty {pixel} [--c2-checkbox__container--width=18px]

@@ -221,12 +221,23 @@ export class Select extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
+    this.addEventListener('click', this.handleHostActivation)
     // A label may upgrade after this element does, so read it again once the current task has drained.
     queueMicrotask(() => this.isConnected && this.syncLabelText())
     if (!this.defaultValueCaptured) {
       this.defaultValue = arrayPropertyConverter.fromAttribute(this.getAttribute('value') ?? '')
       this.defaultValueCaptured = true
     }
+  }
+
+  override disconnectedCallback() {
+    this.removeEventListener('click', this.handleHostActivation)
+    super.disconnectedCallback()
+  }
+
+  /** WebKit associates form labels but does not focus a form-associated custom element when its label activates it. */
+  private handleHostActivation = (event: MouseEvent): void => {
+    if (event.composedPath()[0] === this && !this.effectiveDisabled) this.button?.focus()
   }
 
   formResetCallback() {

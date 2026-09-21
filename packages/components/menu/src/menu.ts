@@ -176,6 +176,12 @@ export class Menu extends LitElement {
     super.connectedCallback()
     // A submenu opens beside its row, not under it.
     if (!isServer && this.getAttribute('slot') === 'submenu' && !this.hasAttribute('placement')) this.placement = 'right-start'
+    if (!isServer && this.renderRoot.hasChildNodes()) {
+      void this.updateComplete.then(() => {
+        this.syncAnchor()
+        this.syncItems()
+      })
+    }
   }
 
   /** Opens the menu. Pass `'last'` to start on the last row, `'none'` to leave focus where it is. */
@@ -475,15 +481,11 @@ export class Menu extends LitElement {
     this.syncAnchor()
   }
 
-  protected override firstUpdated(): void {
-    this.syncAnchor()
-    this.syncItems()
-  }
-
   protected override willUpdate(changed: PropertyValues<this>): void {
     // The overlay needs its anchor in the same commit that opens it, so resolve it before rendering, not after.
     if (changed.has('anchor') && this.anchor) this.anchorElement = this.resolveAnchor()
     else if (!this.anchorElement) this.anchorElement = this.querySelector<HTMLElement>(':scope > [slot="trigger"]')
+    this.hasTrigger = !!this.anchorElement
   }
 
   protected override updated(changed: PropertyValues<this>): void {

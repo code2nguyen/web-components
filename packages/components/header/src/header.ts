@@ -13,7 +13,7 @@ import styles from './header.scss?inline'
  * @slot actions - Account and application actions aligned to the end.
  * @slot mobile-trigger - Responsive navigation trigger, placed after the actions.
  * @csspart header - The outer page-header landmark.
- * @csspart content - Inner layout container that constrains and aligns the header content.
+ * @csspart content - Inner layout container wrapping and aligning the assigned default slot.
  * @csspart brand - Container for the `brand` slot.
  * @csspart navigation - Primary navigation landmark containing the default slot.
  * @csspart actions - Container for the trailing `actions` slot.
