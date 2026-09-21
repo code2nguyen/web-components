@@ -1,6 +1,6 @@
 {
   "name": "@c2n/spinner",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "type": "module",
   "main": "dist/spinner.js",
   "exports": {
@@ -63,7 +63,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.13",
+    "@c2n/core": "0.0.14",
     "lit": "3.3.3"
   },
   "devDependencies": {
