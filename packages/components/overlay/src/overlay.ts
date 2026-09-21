@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { computePosition, autoUpdate, flip, offset, shift, size, type Placement } from '@floating-ui/dom'

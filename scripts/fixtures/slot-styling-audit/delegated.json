@@ -1,0 +1,12 @@
+{
+  "registry": {
+    "version": 1,
+    "entries": [
+      { "tag": "c2-demo", "slot": "item", "decision": "delegated", "delegateTag": "c2-item", "reason": "The assigned item exposes its own styling contract." }
+    ]
+  },
+  "elements": [
+    { "tag": "c2-demo", "slots": ["item"], "parts": {}, "variables": [] },
+    { "tag": "c2-item", "slots": [], "parts": {}, "variables": [] }
+  ]
+}

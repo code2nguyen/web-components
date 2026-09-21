@@ -1,0 +1,4 @@
+{
+  "registry": { "version": 1, "entries": [{ "tag": "c2-demo", "slot": "", "decision": "part", "parts": ["body"], "reason": "Body wrapper owns layout." }] },
+  "elements": [{ "tag": "c2-demo", "slots": [""], "parts": { "body": "Wrapper around the default slot and its fallback content." }, "variables": [] }]
+}

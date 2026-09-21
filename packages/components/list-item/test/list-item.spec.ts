@@ -1,5 +1,15 @@
 import { test, expect, props, watch, accessible, pointerClick } from '../../../../tests/component-fixture'
 
+test('consumer-owned row content and adornments remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-list-item><span class="slot-probe">Label</span><span class="slot-probe" slot="description">Description</span><span class="slot-probe" slot="prefix-icon">P</span><span class="slot-probe" slot="suffix-icon">S</span></c2-list-item>',
+  )
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(4).fill('rgb(1, 2, 3)'))
+})
+
 test('standalone rows toggle with click and Space and announce their state', async ({ page, renderScenario }) => {
   await renderScenario('<c2-list-item value="a">Favorite</c2-list-item>')
   const item = page.getByRole('button', { name: 'Favorite' })

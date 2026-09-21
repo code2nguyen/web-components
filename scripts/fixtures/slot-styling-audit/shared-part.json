@@ -1,0 +1,17 @@
+{
+  "registry": {
+    "version": 1,
+    "entries": [
+      { "tag": "c2-demo", "slot": "empty", "decision": "part", "parts": ["state"], "reason": "Shared state surface." },
+      { "tag": "c2-demo", "slot": "error", "decision": "part", "parts": ["state"], "reason": "Shared state surface." }
+    ]
+  },
+  "elements": [
+    {
+      "tag": "c2-demo",
+      "slots": ["empty", "error"],
+      "parts": { "state": "Container for the `empty` and `error` slot states; present for the active state." },
+      "variables": []
+    }
+  ]
+}

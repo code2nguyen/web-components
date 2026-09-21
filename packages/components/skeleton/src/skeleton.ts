@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { repeat } from 'lit/directives/repeat.js'
 import styles from './skeleton.scss?inline'
@@ -17,6 +17,8 @@ export type SkeletonAnimation = 'pulse' | 'wave' | 'none'
  * `aria-busy="true"` instead. Give one skeleton in a group a `label` to announce the wait itself.
  *
  * @tag c2-skeleton
+ *
+ * @csspart block - Each animated placeholder block.
  *
  * @cssproperty {pixel} [--c2-skeleton--width=100%] - Width of the block. Ignored by `circle`, which sizes itself.
  * @cssproperty {pixel} [--c2-skeleton--height=16px] - Height of the block, or of one line of a `text` skeleton.

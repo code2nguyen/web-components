@@ -1,6 +1,6 @@
 ---
 title: 'Frameworks'
-description: 'Use the components from React, Vue, Angular, Lit or plain HTML — typed events, generated template types, and the one piece of configuration each framework needs.'
+description: 'Use the components from React, Vue, Angular, Svelte, Lit or plain HTML — typed events, generated template types, and the one piece of configuration each framework needs.'
 order: 15
 ---
 
@@ -8,10 +8,39 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 Every `c2-*` component is a standard custom element, so nothing here is a wrapper: the same element runs in every framework. What differs is how each one decides between an attribute and a property, and how it binds an event whose name has a hyphen in it. This guide is the short version of the three example apps — [React](../examples/trading-dashboard-react), [Vue](../examples/support-inbox-vue) and [Angular](../examples/orders-admin-angular) — which are complete applications built the way an outside project would build one.
 
+## Styling slots and public parts
+
+There are two independent styling routes. A node you place in a slot remains consumer-owned light DOM, so give it a class and style it with normal framework-scoped CSS. The layout, fallback, or state region created around that slot belongs to the component's shadow root; style it only through a documented `::part()` name or CSS custom property.
+
+A bare text node is the exception to “give it a class”: text cannot be targeted directly. Use the host's inherited typography or documented custom properties when that is the component contract—as with `c2-mat-icon` ligature text—or wrap the text in an element you own when it needs independent styling.
+
+```css
+.message-copy { font-weight: 500; } /* assigned node */
+c2-chat-message::part(content) { padding: 12px; } /* component-owned region */
+```
+
+Parts do not cross another shadow boundary. A `content` part can style the region containing a slotted `c2-avatar`, but cannot reach the avatar's internals; use the avatar's own public contract. In Vue SFCs, keep `::part()` rules global because the scoped attribute cannot be added inside a component shadow root. Angular Emulated encapsulation has the same constraint: place host `::part()` selectors in a global stylesheet (or opt that owning component out of emulated encapsulation), while ordinary classes on assigned nodes may remain local.
+
+The support-inbox Vue example demonstrates both paths: `thread__message-copy` styles the assigned `<p>`, while the global `.thread__message::part(content)` rule styles its component-owned container without piercing the nested avatar.
+
 Two rules hold everywhere:
 
 - **Register the elements at module scope, before the framework renders.** Frameworks decide "attribute or property" by looking for the property on the element, and an element that has not upgraded yet has none — an object handed to `rows` would be stringified into an attribute.
 - **Load the theme once.** `import '@c2n/theme/theme.css'` in the entry module.
+
+## Attributes and properties
+
+Two conversions differ from stock Lit, and both exist so that one binding is correct on the server and on the client.
+
+**A boolean attribute written as `"false"` is false.** Lit's default converter is presence-based — any attribute that is there at all is true — so `disabled="false"` would _enable_ the flag. Every c2n boolean reads the literal strings `"false"` and `"0"` as false instead; a bare `disabled`, or `disabled=""`, is still true. This matters wherever a framework renders an attribute by stringifying its value, which Svelte 5 does for every name outside the HTML boolean list and every server renderer does for all of them.
+
+It also gives `c2-table-column` a genuine third state: `sortable` and `resizable` inherit the table's setting when the attribute is absent, and `sortable="false"` is how one column opts out.
+
+**An array or object property accepts a JSON string.** `rows`, `columns`, `items`, `options`, `series` and `steps` parse JSON out of their attribute _and_ out of a string assigned straight to the property, so `JSON.stringify(rows)` is one binding that works in both directions — the server writes it as an attribute, the client sets it as a property, both parse. Pass the array itself wherever the framework can write a property. A string that is not valid JSON is left alone rather than silently becoming `undefined`.
+
+The `;`-separated multi-value properties behave the same way: `value="a;b"` and `element.value = 'a;b'` both yield `['a', 'b']` on `c2-list`, `c2-select`, `c2-tree` and `c2-virtual-list`.
+
+**A camelCase property is not a camelCase attribute.** Lit derives the attribute by lowercasing the property, so `readOnly` is the attribute `readonly` and `maxLength` is `maxlength`; where a component renamed one it is kebab-case, like `row-key`. The API tables and the manifests list the real attribute name, with the property spelling alongside it under `fieldName`. A lookalike such as `rowkey` is forwarded to the real attribute with a console warning rather than dropped.
 
 ## Typed events
 
@@ -94,6 +123,8 @@ useEffect(() => {
 </c2-table>
 ```
 
+If the cell is better built as a Lit template, take `html` from `@c2n/core/lit-helper.js` rather than adding `lit` to the application — it is the same instance the components render with, so there is no version to pin by hand and no second copy of Lit in the bundle.
+
 The children stay in the document's light DOM, so ordinary CSS reaches them — a `renderCell` node lands inside the shadow root, where a stylesheet cannot, and has to be coloured through an inherited custom property. `cell-slot` needs `row-key`, and only the rows the virtualizer has rendered claim a child; the rest simply wait, so it suits paged and modest tables rather than a hundred thousand rows. `renderCell`, or the column's own formatting, stays as the slot's fallback.
 
 ## Vue
@@ -153,6 +184,42 @@ import { C2_FORM_ACCESSORS } from '@c2n/angular'
 ```
 
 Because the schema turns off type checking for these tags, `$event` is a bare `Event` in the template. Take the component's event-map type in the handler and cast once there, rather than `$any` at every call site.
+
+## Svelte 5 and SvelteKit
+
+Register the elements at module scope before anything renders — the root `+layout.svelte` script, or a `src/lib/c2n.ts` it imports. Svelte decides between a property and an attribute with `key in element`, so a binding on a tag that has not upgraded yet quietly falls back to an attribute.
+
+```html tag=CodeBlock
+<script lang="ts">
+  import '@c2n/table'
+  import '@c2n/table/table-column.js'
+  import type { TableEventMap } from '@c2n/table'
+
+  let { orders } = $props()
+  let selected = $state<string[]>([])
+</script>
+
+<c2-table
+  row-key="id"
+  rows={orders}
+  sortable
+  onselection-change={(event: TableEventMap['selection-change']) => (selected = event.detail.rows.map((row) => row.id))}
+>
+  <c2-table-column field="customer" header="Customer"></c2-table-column>
+</c2-table>
+```
+
+Events take the `on` prefix and the event's real name, with no colon: `onclick`, `oninput`, `onselection-change`. Svelte 4's `on:selection-change` still compiles but is deprecated. `selection-change` does not bubble, so the handler belongs on the element itself.
+
+A route that server-renders its data hits both conversions above. Svelte writes `running="false"` rather than omitting the attribute, which now reads as false; and `String(rows)` is `[object Object]`, so pass `rows={JSON.stringify(orders)}` — the server writes it as an attribute and the client sets the same string as a property, and both parse. Spell camelCase properties as the attribute the component declares (`row-key`, not `rowKey`).
+
+`bind:value` applies to form elements and Svelte components, not to a custom element, so bind by hand. Every c2n form control re-emits the inner control's native `input` and `change`, which is what makes that one line enough:
+
+```html tag=CodeBlock
+<c2-text-field value={draft} oninput={(event) => (draft = event.currentTarget.value)}></c2-text-field>
+```
+
+There is no JSX-style declaration file to maintain, because Svelte accepts unknown elements. Point the editor at the generated `html-custom-data.json` below for attribute completion, and take event detail types from each package's event map.
 
 ## Editor support for templates TypeScript never sees
 

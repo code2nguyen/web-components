@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './header.scss?inline'
 
@@ -12,6 +12,13 @@ import styles from './header.scss?inline'
  * @slot - Primary navigation.
  * @slot actions - Account and application actions aligned to the end.
  * @slot mobile-trigger - Responsive navigation trigger, placed after the actions.
+ * @csspart header - The outer page-header landmark.
+ * @csspart content - Inner layout container wrapping and aligning the assigned default slot.
+ * @csspart brand - Container for the `brand` slot.
+ * @csspart navigation - Primary navigation landmark containing the default slot.
+ * @csspart actions - Container for the trailing `actions` slot.
+ * @csspart mobile-trigger - Container for the responsive `mobile-trigger` slot.
+ *
  * @cssproperty {pixel} [--c2-header--min-height=64px]
  * @cssproperty {padding} [--c2-header--padding=8px 24px]
  * @cssproperty {pixel} [--c2-header--gap=24px]

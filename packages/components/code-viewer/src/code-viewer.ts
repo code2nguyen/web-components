@@ -1,7 +1,9 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { unsafeHTML } from 'lit/directives/unsafe-html.js'
 import { Task } from '@lit/task'
@@ -37,6 +39,10 @@ export interface CodeViewer {
  * @slot title - Header label, typically a file name. Shown above the code when present.
  * @slot copy-icon - Replaces the default copy icon.
  * @slot copied-icon - Replaces the default check icon shown after copying.
+ * @csspart header - Header region containing the title, terminal controls, and copy action.
+ * @csspart title - Title boundary exposing the `title` slot.
+ * @csspart body - Code body region containing the default slot or rendered-source fallback and inline copy action.
+ * @csspart copy-button - Copy action containing the `copy-icon` or `copied-icon` fallback.
  *
  * @event {CustomEvent<{ code: string }>} code-copy - Fired after the copy button put the code on the clipboard.
  *
@@ -148,9 +154,9 @@ export class CodeViewer extends LitElement {
   @property({ reflect: true }) variant: 'code' | 'terminal' = 'code'
 
   @state() private slotCode = ''
-  @state() private hasTitle = false
   @state() private highlighted: HighlightResult | undefined = undefined
   @state() private copied = false
+  private readonly slotPresence = new SlotPresenceController(this, ['title'])
 
   private copiedTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -165,6 +171,11 @@ export class CodeViewer extends LitElement {
       return
     }
     super.attributeChangedCallback(name, old, value)
+  }
+
+  override connectedCallback() {
+    super.connectedCallback()
+    this.updateCode(this.defaultLightDomNodes())
   }
 
   /** The code being displayed: `code` or the dedented slot text. */
@@ -206,24 +217,21 @@ export class CodeViewer extends LitElement {
     if (changed.has('code') || changed.has('slotCode') || changed.has('language') || changed.has('inline')) this.highlighted = undefined
   }
 
-  override firstUpdated() {
-    for (const slot of this.renderRoot.querySelectorAll('slot')) this.updateSlot(slot)
-  }
-
   private handleSlotChange(event: Event) {
-    this.updateSlot(event.target as HTMLSlotElement)
+    const slot = event.target as HTMLSlotElement
+    if (slot.name === 'title') this.slotPresence.handleSlotChange(event)
+    else this.updateCode(slot.assignedNodes({ flatten: true }))
   }
 
-  private updateSlot(slot: HTMLSlotElement) {
-    const nodes = slot.assignedNodes({ flatten: true })
-    if (slot.name === 'title') {
-      this.hasTitle = nodes.some((n) => n.nodeType === Node.ELEMENT_NODE || (n.textContent ?? '').trim() !== '')
-    } else if (slot.name === '') {
-      // With <pre> / <template> children, the whitespace text nodes around them are formatting, not code.
-      const elements = nodes.filter((n): n is Element => n.nodeType === Node.ELEMENT_NODE)
-      const parts = (elements.length ? elements : nodes).map((n) => (n instanceof HTMLTemplateElement ? n.innerHTML : (n.textContent ?? '')))
-      this.slotCode = dedent(parts.join(''))
-    }
+  private defaultLightDomNodes(): Node[] {
+    return [...this.childNodes].filter((node) => node.nodeType !== Node.ELEMENT_NODE || ((node as Element).getAttribute('slot') ?? '') === '')
+  }
+
+  private updateCode(nodes: Node[]) {
+    // With <pre> / <template> children, the whitespace text nodes around them are formatting, not code.
+    const elements = nodes.filter((node): node is Element => node.nodeType === Node.ELEMENT_NODE)
+    const parts = (elements.length ? elements : nodes).map((node) => (node instanceof HTMLTemplateElement ? node.innerHTML : (node.textContent ?? '')))
+    this.slotCode = dedent(parts.join(''))
   }
 
   /** Copies the displayed code to the clipboard. */
@@ -239,6 +247,7 @@ export class CodeViewer extends LitElement {
   private renderCopyButton() {
     return html`
       <button
+        part="copy-button"
         class=${classMap({ 'c2-code-viewer-copy': true, 'is-copied': this.copied })}
         type="button"
         aria-label=${this.copied ? 'Copied' : 'Copy code'}
@@ -282,23 +291,24 @@ export class CodeViewer extends LitElement {
     }
     const terminal = this.variant === 'terminal'
     const showCopy = this.copyable || terminal
+    const hasTitle = this.slotPresence.has('title')
     return html`
       ${source}
       <div
-        class=${classMap({ 'c2-code-viewer': true, 'has-title': this.hasTitle || terminal, 'is-terminal': terminal })}
+        class=${classMap({ 'c2-code-viewer': true, 'has-title': hasTitle || terminal, 'is-terminal': terminal })}
         style=${this.highlighted?.style || nothing}
       >
-        <div class="c2-code-viewer-header" ?hidden=${!this.hasTitle && !terminal}>
+        <div part="header" class="c2-code-viewer-header" ?hidden=${!hasTitle && !terminal}>
           ${
             terminal
               ? html`<span class="terminal-dots" aria-hidden="true"><i class="close"></i><i class="minimize"></i><i class="maximize"></i></span>`
               : nothing
           }
-          <slot name="title" @slotchange=${this.handleSlotChange}></slot>
-          ${terminal && !this.hasTitle ? html`<span class="terminal-language">${normalizeLang(this.language)}</span>` : nothing}
+          <slot part="title" name="title" @slotchange=${this.handleSlotChange}></slot>
+          ${terminal && !hasTitle ? html`<span class="terminal-language">${normalizeLang(this.language)}</span>` : nothing}
           ${showCopy ? this.renderCopyButton() : nothing}
         </div>
-        <div class="c2-code-viewer-body">${this.renderCode()} ${showCopy && !this.hasTitle && !terminal ? this.renderCopyButton() : nothing}</div>
+        <div part="body" class="c2-code-viewer-body">${this.renderCode()} ${showCopy && !hasTitle && !terminal ? this.renderCopyButton() : nothing}</div>
       </div>
     `
   }

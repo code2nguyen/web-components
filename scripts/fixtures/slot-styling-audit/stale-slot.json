@@ -1,0 +1,4 @@
+{
+  "registry": { "version": 1, "entries": [{ "tag": "c2-demo", "slot": "old", "decision": "assigned-content", "reason": "Obsolete projection." }] },
+  "elements": [{ "tag": "c2-demo", "slots": [], "parts": {}, "variables": [] }]
+}

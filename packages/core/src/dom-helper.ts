@@ -1,4 +1,5 @@
 import { isServer } from 'lit-html/is-server.js'
+import type { ReactiveController, ReactiveControllerHost } from 'lit'
 
 export const Breakpoints = {
   Phone: '(max-width: 599.98px)',
@@ -39,6 +40,80 @@ export function hasSlottedContent(host: Element, name = ''): boolean {
     }
   }
   return false
+}
+
+export type SlotPresence = 'unknown' | 'present' | 'empty'
+
+type SlotPresenceHost = HTMLElement & ReactiveControllerHost & { readonly updateComplete: Promise<boolean> }
+
+function hasMeaningfulSlotNode(node: Node): boolean {
+  return node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== ''
+}
+
+/**
+ * Tracks whether named light-DOM regions contain meaningful content without hiding authored SSR content.
+ *
+ * The server cannot inspect a custom element's light DOM, so every region starts as `unknown`, which is rendered
+ * conservatively as present. Client-created elements resolve directly from their children before the first update.
+ * An element adopting declarative shadow DOM waits until Lit has completed that initial hydration pass, then requests
+ * one safe reconciliation update. Later slot changes use the same element/non-whitespace-text predicate.
+ */
+export class SlotPresenceController implements ReactiveController {
+  readonly #host: SlotPresenceHost
+  readonly #presence = new Map<string, SlotPresence>()
+  #hydrating = false
+  #reconciled = false
+  #connected = false
+
+  constructor(host: SlotPresenceHost, names: readonly string[]) {
+    this.#host = host
+    for (const name of names) this.#presence.set(name, 'unknown')
+    host.addController(this)
+  }
+
+  state(name = ''): SlotPresence {
+    return this.#presence.get(name) ?? 'unknown'
+  }
+
+  /** Unknown is intentionally visible until the client has authoritative assignment information. */
+  has(name = ''): boolean {
+    return this.state(name) !== 'empty'
+  }
+
+  readonly handleSlotChange = (event: Event): void => {
+    const slot = event.target as HTMLSlotElement
+    this.#set(slot.name, slot.assignedNodes({ flatten: true }).some(hasMeaningfulSlotNode), true)
+  }
+
+  hostConnected(): void {
+    if (isServer) return
+    if (this.#connected) {
+      this.#resolveFromLightDom(true)
+      return
+    }
+
+    this.#connected = true
+    this.#hydrating = Boolean(this.#host.shadowRoot?.hasChildNodes())
+    if (!this.#hydrating) this.#resolveFromLightDom(false)
+  }
+
+  hostUpdated(): void {
+    if (!this.#hydrating || this.#reconciled) return
+    this.#reconciled = true
+    void this.#host.updateComplete.then(() => this.#resolveFromLightDom(true))
+  }
+
+  #resolveFromLightDom(notify: boolean): void {
+    for (const name of this.#presence.keys()) this.#set(name, hasSlottedContent(this.#host, name), notify)
+  }
+
+  #set(name: string, present: boolean, notify: boolean): void {
+    if (!this.#presence.has(name)) return
+    const next: SlotPresence = present ? 'present' : 'empty'
+    if (this.#presence.get(name) === next) return
+    this.#presence.set(name, next)
+    if (notify) this.#host.requestUpdate()
+  }
 }
 
 let scrollLocks = 0

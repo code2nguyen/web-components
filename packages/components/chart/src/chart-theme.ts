@@ -97,6 +97,7 @@ export class ChartThemeController implements ReactiveController {
   #host: ThemeHost
   #onChange: () => void
   #theme?: ChartTheme
+  #resolvedFromFallback = false
   #observer?: MutationObserver
   #media?: MediaQueryList
 
@@ -140,16 +141,35 @@ export class ChartThemeController implements ReactiveController {
     this.#theme = undefined
   }
 
+  /**
+   * The host's first committed render creates the colour probes. If an earlier read had to use fallback values,
+   * discard only that cached value before ChartBase.updated() synchronizes the engine. This is cache maintenance,
+   * not an observable theme change, so it deliberately does not notify the host or schedule another Lit update.
+   */
+  hostUpdated(): void {
+    if (!this.#resolvedFromFallback) return
+    this.#theme = undefined
+    this.#resolvedFromFallback = false
+  }
+
   #handle = () => this.invalidate()
 
   #resolve(): ChartTheme {
-    if (isServer || typeof getComputedStyle !== 'function') return FALLBACK
+    if (isServer || typeof getComputedStyle !== 'function') {
+      this.#resolvedFromFallback = true
+      return FALLBACK
+    }
 
     const style = getComputedStyle(this.#host)
     const probes = this.#host.renderRoot?.querySelectorAll<HTMLElement>('.theme-probe > i')
     // Before the first render there are no probes; the fallback keeps the first paint sane and the
     // controller is invalidated again once the shadow root exists.
-    if (!probes || probes.length < PROBE_COLORS.length) return FALLBACK
+    if (!probes || probes.length < PROBE_COLORS.length) {
+      this.#resolvedFromFallback = true
+      return FALLBACK
+    }
+
+    this.#resolvedFromFallback = false
 
     const at = (name: (typeof PROBE_COLORS)[number], fallback: string): string => {
       const index = PROBE_COLORS.indexOf(name)

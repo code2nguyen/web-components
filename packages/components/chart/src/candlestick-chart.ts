@@ -1,4 +1,4 @@
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { EchartsChartBase } from './echarts-chart-base.js'

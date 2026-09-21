@@ -1,7 +1,28 @@
-import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('description presence follows assignment, insertion, removal and reassignment', async ({ page, renderScenario }) => {
+  const description = page.locator('c2-radio').locator('[part="description"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-radio label="Choice"><span slot="description" data-slot-presence-probe>Details</span></c2-radio>',
+    host: 'c2-radio',
+    slot: 'description',
+    assertPresent: async (present) => (present ? expect(description).toBeVisible() : expect(description).toBeHidden()),
+  })
+})
 
 const choices =
   '<c2-radio-group aria-label="Plan"><c2-radio value="a">Basic</c2-radio><c2-radio value="b" disabled>Unavailable</c2-radio><c2-radio value="c">Pro</c2-radio></c2-radio-group>'
+test('initial group labels and options do not schedule a second Lit update', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('c2-radio-group scheduled an update')) warnings.push(message.text())
+  })
+  await renderScenario(
+    `<c2-radio-group><span slot="label">Plan</span><span slot="description">Choose one</span><c2-radio value="a">A</c2-radio></c2-radio-group>`,
+  )
+  await expect(page.getByRole('radiogroup')).toHaveAttribute('aria-labelledby', 'label')
+  expect(warnings).toEqual([])
+})
 test('group selection is exclusive and changes are emitted once', async ({ page, renderScenario }) => {
   await renderScenario(choices)
   const group = page.locator('c2-radio-group')

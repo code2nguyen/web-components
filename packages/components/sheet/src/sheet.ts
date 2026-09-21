@@ -1,10 +1,11 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { property, query, state } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
-import { hasSlottedContent, lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, lockPageScroll, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './sheet.scss?inline'
 
 export type SheetSide = 'right' | 'left' | 'top' | 'bottom'
@@ -46,6 +47,12 @@ export interface Sheet {
  * @event {Event} open - Fired after the sheet has been shown.
  * @event {CustomEvent<{ returnValue: string }>} close - Fired after the sheet has closed; `detail.returnValue` is what `close()` received (`''` for Escape / backdrop / the × button).
  * @event {Event} cancel - Native, cancelable: fired on Escape before closing.
+ *
+ * @csspart panel - The sheet surface positioned over the overlay.
+ * @csspart header - Header containing the title and optional close button.
+ * @csspart close - The native close button.
+ * @csspart body - Scrollable container for the default slot.
+ * @csspart footer - Container wrapping the assigned `footer` slot actions.
  *
  * @cssproperty {pixel} [--c2-sheet--size=380px] - Width of a `left`/`right` sheet, height of a `top`/`bottom` one. The other axis fills the screen.
  * @cssproperty {background} [--c2-sheet--background=#ffffff]
@@ -119,8 +126,7 @@ export class Sheet extends LitElement {
   /** Value passed to the last `close()` call, mirrors `HTMLDialogElement.returnValue`. */
   returnValue = ''
 
-  @state() private hasTitle = false
-  @state() private hasFooter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['title', 'footer'])
 
   @query('dialog') private dialog!: HTMLDialogElement
 
@@ -177,13 +183,7 @@ export class Sheet extends LitElement {
   }
 
   private handleSlotChange(event: Event) {
-    this.updateSlot(event.target as HTMLSlotElement)
-  }
-
-  private updateSlot(slot: HTMLSlotElement) {
-    const filled = slot.assignedNodes({ flatten: true }).some((n) => n.nodeType === Node.ELEMENT_NODE || (n.textContent ?? '').trim() !== '')
-    if (slot.name === 'title') this.hasTitle = filled
-    else if (slot.name === 'footer') this.hasFooter = filled
+    this.slotPresence.handleSlotChange(event)
   }
 
   override updated(changed: PropertyValues<this>) {
@@ -198,28 +198,21 @@ export class Sheet extends LitElement {
     }
   }
 
-  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
-  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-  override willUpdate(_changed: PropertyValues<this>) {
-    if (!this.hasUpdated) {
-      this.hasTitle = hasSlottedContent(this, 'title')
-      this.hasFooter = hasSlottedContent(this, 'footer')
-    }
-  }
-
   override render() {
+    const hasTitle = this.slotPresence.has('title')
+    const hasFooter = this.slotPresence.has('footer')
     return html`
       <dialog
         class="c2-sheet"
         part="panel"
-        aria-labelledby=${this.hasTitle ? 'title' : nothing}
-        aria-label=${!this.hasTitle && this.label ? this.label : nothing}
+        aria-labelledby=${hasTitle ? 'title' : nothing}
+        aria-label=${!hasTitle && this.label ? this.label : nothing}
         @close=${this.handleDialogClose}
         @cancel=${this.handleDialogCancel}
         @click=${this.handleDialogClick}
       >
-        <div class=${classMap({ 'c2-sheet__panel': true, 'has-title': this.hasTitle, 'has-footer': this.hasFooter })}>
-          <header class="c2-sheet__header" part="header" ?hidden=${!this.hasTitle && this.hideClose}>
+        <div class=${classMap({ 'c2-sheet__panel': true, 'has-title': hasTitle, 'has-footer': hasFooter })}>
+          <header class="c2-sheet__header" part="header" ?hidden=${!hasTitle && this.hideClose}>
             <div class="c2-sheet__title" id="title"><slot name="title" @slotchange=${this.handleSlotChange}></slot></div>
             ${
               this.hideClose
@@ -234,7 +227,7 @@ export class Sheet extends LitElement {
             }
           </header>
           <div class="c2-sheet__body" part="body"><slot></slot></div>
-          <footer class="c2-sheet__footer" part="footer" ?hidden=${!this.hasFooter}>
+          <footer class="c2-sheet__footer" part="footer" ?hidden=${!hasFooter}>
             <slot name="footer" @slotchange=${this.handleSlotChange}></slot>
           </footer>
         </div>

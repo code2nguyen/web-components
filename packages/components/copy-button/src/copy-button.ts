@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -48,6 +49,9 @@ export interface CopyButton {
  *
  * @event {CustomEvent<{ text: string }>} copied - Fired after the text reached the clipboard. `detail.text` is what was copied.
  * @event {CustomEvent<{ error: unknown }>} copy-error - Fired when the clipboard write failed (denied permission, or no clipboard at all).
+ *
+ * @csspart button - The native button that performs the copy action.
+ * @csspart icon - Wrapper that switches between the copy and copied icons.
  *
  * @cssproperty {color} --c2-copy-button__container--background-color
  * @cssproperty {color} [--c2-copy-button__container--color=rgb(34, 34, 34)]

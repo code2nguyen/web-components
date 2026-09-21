@@ -13,6 +13,8 @@ import { Attachment, AttachmentGroup } from '@c2n/attachment'
 <c2-attachment name="project-brief.pdf" type="PDF" size="2.4 MB" removable></c2-attachment>
 ```
 
+Use classes for assigned thumbnail, name, metadata, and action nodes. The matching attachment parts style their component-owned regions; `c2-attachment-group::part(list)` styles the group wrapper.
+
 ```html tag=MdxCodeBlock,label=Image,description=Image attachment using the built-in media preview,useWhen=The file has a safe thumbnail URL
 <c2-attachment name="team-photo.jpg" type="JPG" size="1.8 MB" src="/web-components/chat.avif" removable></c2-attachment>
 ```

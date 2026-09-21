@@ -20,7 +20,17 @@ npm install @c2n/color-area
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/color-area
+<style>
+  .wide-color-area {
+    --c2-color-area--width: 280px;
+    --c2-color-area--height: 180px;
+    --c2-color-area__color-handle--size: 16px;
+  }
+</style>
 <div data-label="Default">
   <c2-color-area></c2-color-area>
+</div>
+<div data-label="Wide landscape">
+  <c2-color-area class="wide-color-area"></c2-color-area>
 </div>
 ```

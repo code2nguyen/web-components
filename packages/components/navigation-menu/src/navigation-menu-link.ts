@@ -1,6 +1,8 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './navigation-menu-link.scss?inline'
 
@@ -76,17 +78,12 @@ export class NavigationMenuLink extends LitElement {
   /** Title used as the default slot's fallback content. */
   @property({ reflect: true }) label?: string
 
-  @state() private hasDescription = false
+  private readonly slotPresence = new SlotPresenceController(this, ['description'])
 
   @query('.link') private link?: HTMLElement
 
   override focus(options?: FocusOptions) {
     this.link?.focus(options)
-  }
-
-  private handleDescriptionSlotChange(event: Event) {
-    const slot = event.target as HTMLSlotElement
-    this.hasDescription = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
   }
 
   override render() {
@@ -101,8 +98,8 @@ export class NavigationMenuLink extends LitElement {
       <slot name="prefix-icon"></slot>
       <span class="content">
         <span class="title"><slot>${this.label ?? nothing}</slot></span>
-        <span class="description" ?hidden=${!this.hasDescription}>
-          <slot name="description" @slotchange=${this.handleDescriptionSlotChange}></slot>
+        <span class="description" ?hidden=${!this.slotPresence.has('description')}>
+          <slot name="description" @slotchange=${this.slotPresence.handleSlotChange}></slot>
         </span>
       </span>
       <slot name="suffix-icon"></slot>

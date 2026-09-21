@@ -27,3 +27,5 @@ npm install @c2n/modal
 - **Looks**: everything is a token: size and margins (`--c2-modal--margin-top: 24px` pins it to the top, `margin-bottom: 0` + full width makes a bottom sheet), radius, shadow, the header/body/footer paddings and dividers, the close button, the backdrop colour and blur, and the enter animation (`--c2-modal--enter-transform`).
 
 The full token list is in `custom-elements.json` and on the docs site.
+
+Style assigned title, body, footer, and close-icon nodes with their own classes. Use the documented `panel`, `header`, `title`, `close-button`, `body`, and `footer` parts for component-owned layout; the conditional footer part is hidden until content is assigned.

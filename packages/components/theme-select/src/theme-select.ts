@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { property, query, queryAll, state } from 'lit/decorators.js'
+import { query, queryAll, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -143,7 +144,7 @@ const BUILT_IN_ICONS: Record<string, TemplateResult> = { system: MONITOR_ICON, l
  * @csspart label - The trigger's text, rendered only with `show-label`.
  * @csspart menu - The dropdown surface.
  * @csspart menu-item - One row of the dropdown.
- * @csspart check - The mark beside the selected row.
+ * @csspart check - Marker region containing the `check` slot or fallback beside the selected row.
  *
  * @cssproperty {pixel} [--c2-theme-select__trigger--size=32px] - Height of the trigger, and its width while icon-only.
  * @cssproperty {pixel} [--c2-theme-select__trigger--padding-inline=8px] - Side padding, used only with `show-label`.

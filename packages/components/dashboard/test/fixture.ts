@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { test as base } from '../../../../tests/fixture'
+import { test as base } from '../../../../tests/component-fixture'
 
 export const test = base.extend<{ scenario: (name?: string) => Promise<void> }>({
   scenario: async ({ page }, use) => {

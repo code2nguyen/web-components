@@ -188,6 +188,18 @@ function build(): void {
     case 'candlestick':
       main.innerHTML = `<c2-candlestick-chart id="chart" label-field="date"></c2-candlestick-chart>`
       break
+    case 'family':
+      main.innerHTML = `
+        <c2-line-chart style="--c2-chart--color:rgb(1,2,3)" x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-line-chart>
+        <c2-area-chart x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-area-chart>
+        <c2-bar-chart x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-bar-chart>
+        <c2-sparkline></c2-sparkline>
+        <c2-pie-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-pie-chart>
+        <c2-gauge-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-gauge-chart>
+        <c2-radar-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-radar-chart>
+        <c2-scatter-chart x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-scatter-chart>
+        <c2-candlestick-chart label-field="t"></c2-candlestick-chart>`
+      break
     case 'inferred':
       // No series children at all: the chart must work out what to plot from the rows themselves.
       main.innerHTML = `<c2-line-chart id="chart" x-field="month"></c2-line-chart>`
@@ -317,6 +329,21 @@ function build(): void {
     ]
   } else if (scenario === 'perf') {
     chart.data = series(1, 100)
+  } else if (scenario === 'family') {
+    for (const element of main.querySelectorAll<ChartBase>(
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart',
+    )) {
+      element.data = series(1, 4)
+    }
+    const sparkline = main.querySelector<ChartBase>('c2-sparkline')
+    if (sparkline) sparkline.data = [4, 7, 5, 9]
+    const candlestick = main.querySelector<ChartBase>('c2-candlestick-chart')
+    if (candlestick) {
+      candlestick.data = [
+        { t: 'A', open: 1, close: 2, low: 0, high: 3 },
+        { t: 'B', open: 2, close: 1, low: 0, high: 3 },
+      ]
+    }
   } else if (!['empty', 'loading', 'error', 'sparkline'].includes(scenario)) {
     chart.data = series(2, 40)
   }

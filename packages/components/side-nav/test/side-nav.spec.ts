@@ -2,6 +2,14 @@ import { test, expect, watch } from '../../../../tests/component-fixture'
 
 const markup =
   '<c2-side-nav desktop-mode="over"><nav slot="side-nav-content" aria-label="Primary"><button>Drawer action</button></nav><button side-nav-toggle>Open navigation</button><p>Page content</p></c2-side-nav>'
+
+test('consumer-owned drawer and page content remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-side-nav><nav class="slot-probe" slot="side-nav-content">Navigation</nav><main class="slot-probe">Page</main></c2-side-nav>')
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(2).fill('rgb(1, 2, 3)'))
+})
 test('toggle opens the overlay, makes content inert, and Escape restores focus', async ({ page, renderScenario, tab }) => {
   await renderScenario(markup)
   const host = page.locator('c2-side-nav')

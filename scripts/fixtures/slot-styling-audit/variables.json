@@ -1,0 +1,15 @@
+{
+  "registry": {
+    "version": 1,
+    "entries": [
+      {
+        "tag": "c2-demo",
+        "slot": "icon",
+        "decision": "variables",
+        "variables": ["--c2-demo__icon--size"],
+        "reason": "The variable controls the complete icon placement."
+      }
+    ]
+  },
+  "elements": [{ "tag": "c2-demo", "slots": ["icon"], "parts": {}, "variables": ["--c2-demo__icon--size"] }]
+}

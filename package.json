@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node scripts/run-changed-component-tests.mjs --project=chromium",
     "test:changed": "node scripts/run-changed-component-tests.mjs",
-    "test:changed:unit": "node --test scripts/run-changed-component-tests.test.mjs",
+    "test:changed:unit": "node --test scripts/*.test.mjs apps/ui/src/utils/*.test.ts",
     "test:button": "playwright test packages/components/button/test --project=chromium",
     "test:all": "playwright test",
     "test:serve": "vite --config tests/vite.config.ts",
@@ -37,11 +37,13 @@
     "mcp:inspect": "npm run inspect -w packages/tools/mcp",
     "mcp:smoke": "npm run smoke -w packages/tools/mcp",
     "docs:check": "node scripts/check-component-docs.mjs",
+    "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
     "@playwright/test": "1.63.0",
+    "ajv": "^8.20.0",
     "husky": "9.1.7",
     "lerna": "10.0.1",
     "lint-staged": "17.4.1",
@@ -141,7 +143,6 @@
         "./packages/components/color-select:build",
         "./packages/components/color-slider:build",
         "./packages/components/details:build",
-        "./packages/components/dropdown-list:build",
         "./packages/components/icon-button:build",
         "./packages/components/label:build",
         "./packages/components/list:build",

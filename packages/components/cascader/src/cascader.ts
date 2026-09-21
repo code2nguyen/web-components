@@ -1,9 +1,9 @@
 import { LitElement, html, nothing, svg, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import { arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
+import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { Overlay } from '@c2n/overlay'
 import styles from './cascader.scss?inline'
 

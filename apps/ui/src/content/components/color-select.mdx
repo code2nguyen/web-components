@@ -20,7 +20,20 @@ npm install @c2n/color-select
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/color-select
+<style>
+  .large-swatch {
+    --c2-color-select--width: 32px;
+    --c2-color-select--height: 32px;
+    --c2-color-select--border-top-left-radius: 8px;
+    --c2-color-select--border-top-right-radius: 8px;
+    --c2-color-select--border-bottom-left-radius: 8px;
+    --c2-color-select--border-bottom-right-radius: 8px;
+  }
+</style>
 <div data-label="Default">
   <c2-color-select color="#ff726b"></c2-color-select>
+</div>
+<div data-label="Large swatch">
+  <c2-color-select class="large-swatch" color="#2563eb"></c2-color-select>
 </div>
 ```

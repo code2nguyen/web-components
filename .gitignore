@@ -2,8 +2,15 @@
 /lib/
 /test/
 **/dist
+**/build/
 **/types
 **/.DS_Store
+*.log
+.env*
+*.tmp
+*.swp
+.vscode/
+.idea/
 scripts/generator/plopfile.js
 scripts/generator/tsconfig.tsbuildinfo
 **/tsconfig.node.tsbuildinfo
@@ -12,4 +19,6 @@ scripts/generator/tsconfig.tsbuildinfo
 apps/ui/public/demo/
 /playwright-report/
 /test-results/
+**/playwright-report/
+**/test-results/
 /packages/tools/mcp/data/registry.json

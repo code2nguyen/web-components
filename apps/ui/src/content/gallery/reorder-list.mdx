@@ -1,0 +1,85 @@
+---
+description: 'Production-shaped queues with fixed rows and public feedback styling.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ReorderList } from '@c2n/reorder-list'
+
+## Presets
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-reorder-list client:only="lit" editable aria-label="Release queue">
+  <div data-reorder-key="verify" data-reorder-label="Verify release">Verify release</div>
+  <div data-fixed data-reorder-key="approval" data-reorder-label="Required approval">Required approval · pinned</div>
+  <div data-reorder-key="publish" data-reorder-label="Publish package">Publish package</div>
+</c2-reorder-list>
+```
+
+```html tag=MdxCodeBlock,label=Operations queue
+<style>
+  .operations-queue {
+    --c2-reorder-list--container-gap: 10px;
+    --c2-reorder-list--container-padding: 12px;
+    --c2-reorder-list__item__focus--outline-color: #7c3aed;
+    --c2-reorder-list__placeholder--border-color: #7c3aed;
+    --c2-reorder-list__dragging-item--box-shadow: 0 18px 40px rgb(76 29 149 / 28%);
+  }
+  .operations-queue::part(container) {
+    border: 1px solid #ddd6fe;
+    border-radius: 14px;
+    background: #faf5ff;
+  }
+  .operations-queue::part(item),
+  .operations-queue::part(dragging-item) {
+    border-radius: 10px;
+  }
+  .operation {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px;
+    border: 1px solid #ddd6fe;
+    border-radius: 10px;
+    background: white;
+    color: #2e1065;
+  }
+  .operation[data-fixed] {
+    background: #f3e8ff;
+  }
+</style>
+<c2-reorder-list client:only="lit" class="operations-queue" editable aria-label="Incident response queue">
+  <article class="operation" data-reorder-key="triage" data-reorder-label="Triage incident"><strong>Triage incident</strong><span>Now</span></article>
+  <article class="operation" data-fixed data-reorder-key="review" data-reorder-label="Security review">
+    <strong>Security review</strong><span>Pinned</span>
+  </article>
+  <article class="operation" data-reorder-key="notify" data-reorder-label="Notify customers"><strong>Notify customers</strong><span>Waiting</span></article>
+  <div class="operation" slot="placeholder">Drop response step here</div>
+  <div class="operation" slot="dragging-item">Moving response step</div>
+</c2-reorder-list>
+```
+
+```html tag=MdxCodeBlock,label=Compact backlog
+<style>
+  .compact-backlog {
+    --c2-reorder-list--container-gap: 4px;
+    --c2-reorder-list--item-padding: 8px 10px;
+    --c2-reorder-list__motion--duration: 100ms;
+  }
+  .compact-backlog::part(item) {
+    border: 1px solid #d4d4d8;
+    border-radius: 7px;
+    background: white;
+  }
+</style>
+<c2-reorder-list client:only="lit" class="compact-backlog" editable aria-label="Compact backlog">
+  <span data-reorder-key="one">Confirm scope</span>
+  <span data-reorder-key="two">Ship implementation</span>
+  <span data-reorder-key="three">Review metrics</span>
+</c2-reorder-list>
+```
+
+</GalleryGrid>

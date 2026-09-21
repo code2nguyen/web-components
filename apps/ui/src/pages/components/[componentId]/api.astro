@@ -5,6 +5,7 @@ import ApiTable from '../../../components/ApiTable.astro'
 import { getCollection, getEntry } from 'astro:content'
 import { componentManifests } from '../../../store/component-manifests'
 import { countGalleryExamples } from '../../../utils/gallery'
+import { renderManifestDescription } from '../../../utils/manifest-description'
 
 /** API reference for a component (attributes, slots, events, CSS parts and custom properties) from its custom-elements manifest. */
 export async function getStaticPaths() {
@@ -63,7 +64,7 @@ const headings = elements.flatMap(({ tag, manifest, idPrefix }) =>
               <code>{tag}</code>
             </h2>
           )}
-          {multiple && <p class="api-element__lead" set:html={manifest.description} />}
+          {multiple && <p class="api-element__lead" set:html={renderManifestDescription(manifest.description)} />}
           <ApiTable componentTag={tag} idPrefix={idPrefix} />
         </section>
       ))

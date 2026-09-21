@@ -1,6 +1,16 @@
-import { accessible } from '../../../../tests/component-fixture'
+import { accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
 import type { Autocomplete } from '../src/autocomplete'
 import { test, expect } from './fixture'
+
+test('header presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const header = page.locator('c2-autocomplete').locator('.panel-header')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-autocomplete><span slot="header" data-slot-presence-probe>Suggestions</span></c2-autocomplete>',
+    host: 'c2-autocomplete',
+    slot: 'header',
+    assertPresent: async (present) => (present ? expect(header).not.toHaveAttribute('hidden', '') : expect(header).toHaveAttribute('hidden', '')),
+  })
+})
 
 test('filters label and description fields, then selects with the keyboard', async ({ page, scenario }) => {
   await scenario('local')
@@ -125,4 +135,17 @@ test('composes list items around renderItem content between header and footer sl
   await page.getByRole('option', { name: /Ada Lovelace Platform/ }).click()
   await expect(host).toHaveJSProperty('value', '7')
   await expect(host).toHaveAttribute('data-selected', /"id":7/)
+})
+
+test('consumer-owned slot content remains directly styleable', async ({ page, scenario }) => {
+  await scenario('local')
+  const slots = ['clear-icon', 'empty', 'error', 'footer', 'header', 'loading', 'prefix-icon', 'suffix-icon']
+  await page.locator('c2-autocomplete').evaluate((host, names) => {
+    for (const name of names) host.insertAdjacentHTML('beforeend', `<span class="slot-probe" slot="${name}">${name}</span>`)
+  }, slots)
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect(page.locator('.slot-probe')).toHaveCount(slots.length)
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(slots.map(() => 'rgb(1, 2, 3)'))
 })

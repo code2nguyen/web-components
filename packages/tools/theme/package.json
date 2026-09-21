@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",
@@ -106,7 +106,6 @@
         "../../components/color-select:build",
         "../../components/color-slider:build",
         "../../components/details:build",
-        "../../components/dropdown-list:build",
         "../../components/icon-button:build",
         "../../components/label:build",
         "../../components/link-button:build",

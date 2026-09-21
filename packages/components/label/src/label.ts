@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './label.scss?inline'
 
@@ -15,6 +15,9 @@ let labelCount = 0
  *
  * @slot default - Label text.
  * @slot required-indicator - Marker shown after the text when `required` is set. Defaults to an asterisk.
+ *
+ * @csspart label - The label text and optional required marker.
+ * @csspart required-indicator - Marker containing the `required-indicator` slot or fallback asterisk while `required` is set.
  *
  * @cssproperty {pixel} [--c2-label__container--gap=4px]
  * @cssproperty {color} [--c2-label__container--color=inherit]

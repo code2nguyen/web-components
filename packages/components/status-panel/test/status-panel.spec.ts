@@ -55,3 +55,28 @@ test('has no detectable accessibility violations', async ({ page, scenario }) =>
   await scenario('custom')
   await accessible(page)
 })
+
+test('public parts style assigned and fallback slot regions independently', async ({ page, scenario }) => {
+  await scenario('custom')
+  await page.addStyleTag({
+    content: `
+      c2-status-panel::part(media) { background: rgb(1, 2, 3); }
+      c2-status-panel::part(title) { background: rgb(4, 5, 6); }
+      c2-status-panel::part(description) { background: rgb(7, 8, 9); }
+      c2-status-panel::part(content) { background: rgb(10, 11, 12); }
+      c2-status-panel::part(actions) { background: rgb(13, 14, 15); }
+    `,
+  })
+  const host = page.locator('c2-status-panel')
+  await expect(host.locator('.media')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+  await expect(host.locator('.title')).toHaveCSS('background-color', 'rgb(4, 5, 6)')
+  await expect(host.locator('.description')).toHaveCSS('background-color', 'rgb(7, 8, 9)')
+  await expect(host.locator('.content')).toHaveCSS('background-color', 'rgb(10, 11, 12)')
+  await expect(host.locator('.actions')).toHaveCSS('background-color', 'rgb(13, 14, 15)')
+  await expect(host.locator('[slot="media"]')).toBeVisible()
+  await expect(host.getByRole('heading', { name: 'Import failed' })).toBeVisible()
+
+  await host.locator('[slot="media"]').evaluate((element) => element.remove())
+  await expect(host.locator('.media svg')).toBeVisible()
+  await expect(host.locator('.media')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
+})

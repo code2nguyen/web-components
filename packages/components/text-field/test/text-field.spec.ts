@@ -1,4 +1,14 @@
-import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('supporting-text presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
+  const region = page.locator('c2-text-field').locator('.supporting-text')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-text-field><span slot="supporting-text" data-slot-presence-probe>Help</span></c2-text-field>',
+    host: 'c2-text-field',
+    slot: 'supporting-text',
+    assertPresent: async (present) => expect(region).toHaveCount(present ? 1 : 0),
+  })
+})
 
 test('editing emits input/change, exposes a name, and reset restores the default', async ({ page, renderScenario }) => {
   await renderScenario('<c2-text-field aria-label="Message" value="Original" help="Describe the issue"></c2-text-field><button>Commit</button>')
@@ -60,6 +70,16 @@ test('an adornment in the icon slots keeps its natural width', async ({ page, re
   expect(adornment.width).toBeGreaterThan(16)
   expect(adornment.clipped).toBe(false)
   await expect(page.locator('#field svg')).toHaveCSS('width', '16px')
+})
+
+test('text field and clear variant slots remain directly styleable', async ({ page, renderScenario }) => {
+  const slots = ['clear-icon', 'help-icon', 'prefix-icon', 'suffix-icon', 'supporting-text']
+  const children = slots.map((slot) => `<span class="slot-probe" slot="${slot}">${slot}</span>`).join('')
+  await renderScenario(`<c2-text-field>${children}</c2-text-field><c2-text-field-clear>${children}</c2-text-field-clear>`)
+  await page.locator('.slot-probe').evaluateAll((nodes) => nodes.forEach((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)')))
+  await expect
+    .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => (node as HTMLElement).style.color)))
+    .toEqual(Array(10).fill('rgb(1, 2, 3)'))
 })
 
 test('participates in FormData, native validation, reset and disabled fieldsets', async ({ page, renderScenario }) => {

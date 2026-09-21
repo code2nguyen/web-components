@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './chatbot.scss?inline'
 import '@c2n/avatar'
@@ -8,7 +8,21 @@ import '@c2n/avatar'
  *
  * @tag c2-chatbot
  *
- * @slot default - Conversation content rendered inside the chatbot shell.
+ * @slot - Conversation content rendered inside the chatbot shell.
+ *
+ * @csspart messages - Always-present conversation container around the default slot; controls assigned-content placement, has no fallback, and does not style inside assigned nodes.
+ *
+ * @cssproperty {border-radius} [--c2-chatbot--border-top-left-radius=8px]
+ * @cssproperty {border-radius} [--c2-chatbot--border-top-right-radius=8px]
+ * @cssproperty {border-radius} [--c2-chatbot--border-bottom-left-radius=8px]
+ * @cssproperty {border-radius} [--c2-chatbot--border-bottom-right-radius=8px]
+ * @cssproperty {border} [--c2-chatbot--border-top=1px solid #e4e4e7]
+ * @cssproperty {border} [--c2-chatbot--border-right=1px solid #e4e4e7]
+ * @cssproperty {border} [--c2-chatbot--border-bottom=1px solid #e4e4e7]
+ * @cssproperty {border} [--c2-chatbot--border-left=1px solid #e4e4e7]
+ * @cssproperty {padding} [--c2-chatbot__header--padding=16px]
+ * @cssproperty {color} [--c2-chatbot__header--background=#ffffff]
+ * @cssproperty {border} [--c2-chatbot__header--border-bottom=1px solid #e4e4e7]
  */
 @customElement('c2-chatbot')
 export class Chatbot extends LitElement {
@@ -24,7 +38,7 @@ export class Chatbot extends LitElement {
           <c2-avatar name="Elisa Jasmin" initial-count="2"></c2-avatar>
           <div>Elisa Jasmin</div>
         </section>
-        <section class="c2-chatbot__message-container"></section>
+        <section class="c2-chatbot__message-container" part="messages"><slot></slot></section>
         <section class="c2-chatbot__input-container"></section>
       </div>
     `

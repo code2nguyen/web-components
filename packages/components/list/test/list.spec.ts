@@ -1,6 +1,12 @@
 import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
 
 const rows = '<c2-list-item value="a">Apple</c2-list-item><c2-list-item value="b" disabled>Banana</c2-list-item><c2-list-item value="c">Cherry</c2-list-item>'
+
+test('consumer-owned list rows remain directly styleable', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-list><c2-list-item class="slot-probe">Row</c2-list-item></c2-list>')
+  await page.locator('.slot-probe').evaluate((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)'))
+  await expect(page.locator('.slot-probe')).toHaveCSS('color', 'rgb(1, 2, 3)')
+})
 test('selection updates options and emits consumer data', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-list aria-label="Fruit">${rows}</c2-list>`)
   const host = page.locator('c2-list')

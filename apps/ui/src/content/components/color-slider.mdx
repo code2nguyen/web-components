@@ -20,7 +20,18 @@ npm install @c2n/color-slider
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/color-slider
+<style>
+  .compact-hue-slider {
+    --c2-color-slider--width: 180px;
+    --c2-color-slider--height: 12px;
+    --c2-color-slider__color-handle--width: 16px;
+    --c2-color-slider__color-handle--height: 16px;
+  }
+</style>
 <div data-label="Default">
   <c2-color-slider></c2-color-slider>
+</div>
+<div data-label="Compact">
+  <c2-color-slider class="compact-hue-slider"></c2-color-slider>
 </div>
 ```

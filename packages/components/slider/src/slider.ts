@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
@@ -32,6 +33,11 @@ export interface Slider {
  *
  * @event {Event} input - Re-dispatched from the inner input while the value changes (every step of a drag).
  * @event {Event} change - Re-dispatched from the inner input when the value is committed (pointer released, key released).
+ *
+ * @csspart track - The complete slider track.
+ * @csspart fill - The track segment before the current value.
+ * @csspart thumb - The draggable value handle.
+ * @csspart value - The value bubble shown above the thumb when `show-value` is set.
  *
  * @cssproperty {pixel} [--c2-slider__container--height=32px] - Height of the horizontal slider (width when vertical); the touch target.
  * @cssproperty {pixel} [--c2-slider__container--length=160px] - Length of a vertical slider. A horizontal one fills its width.

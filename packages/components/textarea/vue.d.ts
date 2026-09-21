@@ -18,6 +18,9 @@ declare module 'vue' {
     'c2-textarea': DefineComponent<
       C2Props<Textarea> & {
         'aria-label'?: unknown
+        readonly?: unknown
+        maxlength?: unknown
+        minlength?: unknown
         'error-text'?: unknown
         onInput?: (event: TextareaEventMap['input']) => void
         onChange?: (event: TextareaEventMap['change']) => void

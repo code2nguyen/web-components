@@ -1,6 +1,6 @@
 {
   "name": "@c2n/attachment",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "type": "module",
   "main": "dist/attachment.js",
   "exports": {
@@ -68,8 +68,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.13",
-    "@c2n/phosphor-icons": "0.0.13",
+    "@c2n/core": "0.0.14",
+    "@c2n/phosphor-icons": "0.0.14",
     "lit": "3.3.3"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './stat.scss?inline'
 
@@ -15,6 +15,13 @@ export type StatTone = 'neutral' | 'positive' | 'negative' | 'warning'
  * @slot icon - Icon shown in the tinted leading container.
  * @slot trend - Badge or short trend text shown beside the value.
  * @slot description - Supporting context below the label.
+ * @csspart container - The outer statistic layout container.
+ * @csspart icon - Container wrapping the assigned leading `icon` slot.
+ * @csspart value - Container wrapping the assigned primary `value` slot.
+ * @csspart trend - Container wrapping the assigned `trend` slot badge or text.
+ * @csspart label - Container wrapping the assigned statistic `label` slot.
+ * @csspart description - Container wrapping the assigned supporting `description` slot.
+ *
  * @cssproperty {padding} [--c2-stat--padding=16px]
  * @cssproperty {pixel} [--c2-stat--gap=12px]
  * @cssproperty {color} [--c2-stat--background=#ffffff]

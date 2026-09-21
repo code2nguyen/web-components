@@ -208,6 +208,14 @@ body {
   --c2-chat-message__message--color: var(--c2-theme--color-on-primary, #ffffff);
 }
 
+/* Public parts live inside the component's shadow root. Keep this host selector global: Vue's scoped
+   attribute is applied to light-DOM nodes and cannot be injected into a shadow tree. This rule reaches
+   only chat-message's documented content region; it cannot pierce the nested c2-avatar shadow root. */
+.thread__message::part(content) {
+  outline: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  outline-offset: 3px;
+}
+
 .thread__messages p {
   margin: 0;
   white-space: pre-wrap;

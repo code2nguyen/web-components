@@ -1,10 +1,12 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { isServer } from 'lit-html/is-server.js'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { live } from 'lit/directives/live.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { createEditor, type EditorHandle, type LanguageLoader } from './engine.js'
 import styles from './code-editor.scss?inline'
@@ -59,9 +61,9 @@ export interface CodeEditor {
  * @event {CustomEvent<{ engine: 'codemirror' | 'basic' }>} ready - The engine settled, so tests and hosts can wait for it. Does not bubble.
  *
  * @csspart container - The box around the label, editor and supporting text.
- * @csspart label - The label above the editor.
+ * @csspart label - Component-owned text region containing the `label` slot above the editor.
  * @csspart editor - The element CodeMirror renders into, or the fallback textarea.
- * @csspart supporting-text - The help / error row under the editor.
+ * @csspart supporting-text - Help and error row containing the `supporting-text` slot or generated fallback.
  *
  * @cssproperty {color} [--c2-code-editor--background=#ffffff]
  * @cssproperty {color} [--c2-code-editor--color=#24292e] - Foreground of text no token class matched.
@@ -117,6 +119,7 @@ export interface CodeEditor {
  */
 @customElement('c2-code-editor')
 export class CodeEditor extends LitElement {
+  private readonly slotPresence = new SlotPresenceController(this, ['label'])
   static formAssociated = true
 
   static override styles = unsafeCSS(styles)
@@ -394,8 +397,8 @@ export class CodeEditor extends LitElement {
         })}
         part="container"
       >
-        <label class="c2-code-editor__label" part="label" ?hidden=${!this.label && !this.hasLabelSlot}>
-          <slot name="label" @slotchange=${this.handleLabelSlotChange}>${this.label}</slot>
+        <label class="c2-code-editor__label" part="label" ?hidden=${!this.label && !this.slotPresence.has('label')}>
+          <slot name="label" @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot>
         </label>
         <!-- Always in the template, so switching engine state never recreates the node CodeMirror owns. -->
         <div
@@ -412,13 +415,6 @@ export class CodeEditor extends LitElement {
         </div>
       </div>
     `
-  }
-
-  @state() private hasLabelSlot = false
-
-  private handleLabelSlotChange(event: Event) {
-    const slot = event.target as HTMLSlotElement
-    this.hasLabelSlot = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
   }
 }
 

@@ -1,0 +1,1926 @@
+{
+  "$schema": "./slot-styling-audit.schema.json",
+  "version": 1,
+  "entries": [
+    {
+      "tag": "c2-accordion",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-area-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-area-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-area-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-area-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-area-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-area-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-area-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-attachment",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-attachment",
+      "slot": "media",
+      "decision": "part",
+      "parts": ["media"],
+      "reason": "The semantic media region owns the media slot's component-side presentation."
+    },
+    {
+      "tag": "c2-attachment",
+      "slot": "metadata",
+      "decision": "part",
+      "parts": ["metadata"],
+      "reason": "The semantic metadata region owns the metadata slot's component-side presentation."
+    },
+    {
+      "tag": "c2-attachment",
+      "slot": "name",
+      "decision": "part",
+      "parts": ["name"],
+      "reason": "The semantic name region owns the name slot's component-side presentation."
+    },
+    {
+      "tag": "c2-attachment-group",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-autocomplete",
+      "slot": "clear-icon",
+      "decision": "assigned-content",
+      "reason": "The clear-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-autocomplete",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-autocomplete",
+      "slot": "error",
+      "decision": "assigned-content",
+      "reason": "The error slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-autocomplete",
+      "slot": "footer",
+      "decision": "assigned-content",
+      "reason": "The footer slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-autocomplete",
+      "slot": "header",
+      "decision": "assigned-content",
+      "reason": "The header slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-autocomplete",
+      "slot": "loading",
+      "decision": "assigned-content",
+      "reason": "The loading slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-autocomplete",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-autocomplete",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-avatar",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-avatar",
+      "slot": "badge",
+      "decision": "assigned-content",
+      "reason": "The badge slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-avatar",
+      "slot": "edit-icon",
+      "decision": "assigned-content",
+      "reason": "The edit-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-avatar",
+      "slot": "remove-icon",
+      "decision": "assigned-content",
+      "reason": "The remove-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-avatar-group",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-badge",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-badge",
+      "slot": "anchor",
+      "decision": "assigned-content",
+      "reason": "The anchor slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-badge",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-bar-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bar-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-bar-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bar-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bar-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bar-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bar-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-breadcrumb",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-breadcrumb",
+      "slot": "separator",
+      "decision": "part",
+      "parts": ["separator"],
+      "reason": "The semantic separator region owns the separator slot's component-side presentation."
+    },
+    {
+      "tag": "c2-button",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-button",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-button",
+      "slot": "running-icon",
+      "decision": "part",
+      "parts": ["running-icon"],
+      "reason": "The semantic running-icon region owns the running-icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-button",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-button-group",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-candlestick-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-candlestick-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-candlestick-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-candlestick-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-candlestick-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-candlestick-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-candlestick-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-card",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The semantic body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-card",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-card",
+      "slot": "header",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The semantic header region owns the header slot's component-side presentation."
+    },
+    {
+      "tag": "c2-card",
+      "slot": "media",
+      "decision": "part",
+      "parts": ["media"],
+      "reason": "The semantic media region owns the media slot's component-side presentation."
+    },
+    {
+      "tag": "c2-cascader",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-cascader",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-cascader",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chart-legend",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chart-tooltip",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chat-input",
+      "slot": "send-icon",
+      "decision": "assigned-content",
+      "reason": "The send-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chat-input",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The semantic toolbar region owns the toolbar slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chat-message",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The semantic body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chat-message",
+      "slot": "avatar",
+      "decision": "part",
+      "parts": ["avatar"],
+      "reason": "The semantic avatar region owns the avatar slot's component-side presentation."
+    },
+    {
+      "tag": "c2-chat-message",
+      "slot": "emotion",
+      "decision": "assigned-content",
+      "reason": "The emotion slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chat-message",
+      "slot": "footer-time",
+      "decision": "assigned-content",
+      "reason": "The footer-time slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chat-message",
+      "slot": "header-time",
+      "decision": "assigned-content",
+      "reason": "The header-time slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chat-message",
+      "slot": "message",
+      "decision": "assigned-content",
+      "reason": "The message slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chat-message",
+      "slot": "title",
+      "decision": "assigned-content",
+      "reason": "The title slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chatbot",
+      "slot": "",
+      "decision": "part",
+      "parts": ["messages"],
+      "reason": "The messages part exposes the always-present component-owned conversation container around the default slot while assigned messages remain consumer-owned."
+    },
+    {
+      "tag": "c2-checkbox",
+      "slot": "checkmark",
+      "decision": "part",
+      "parts": ["checkmark"],
+      "reason": "The semantic checkmark region owns the checkmark slot's component-side presentation."
+    },
+    {
+      "tag": "c2-checkbox",
+      "slot": "mixedmark",
+      "decision": "part",
+      "parts": ["mixedmark"],
+      "reason": "The semantic mixedmark region owns the mixedmark slot's component-side presentation."
+    },
+    {
+      "tag": "c2-checkbox",
+      "slot": "uncheckmark",
+      "decision": "part",
+      "parts": ["uncheckmark"],
+      "reason": "The semantic uncheckmark region owns the uncheckmark slot's component-side presentation."
+    },
+    {
+      "tag": "c2-code-editor",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The semantic label region owns the label slot's component-side presentation."
+    },
+    {
+      "tag": "c2-code-editor",
+      "slot": "supporting-text",
+      "decision": "part",
+      "parts": ["supporting-text"],
+      "reason": "The semantic supporting-text region owns the supporting-text slot's component-side presentation."
+    },
+    {
+      "tag": "c2-code-viewer",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The semantic body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-code-viewer",
+      "slot": "copied-icon",
+      "decision": "assigned-content",
+      "reason": "The copied-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-code-viewer",
+      "slot": "copy-icon",
+      "decision": "assigned-content",
+      "reason": "The copy-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-code-viewer",
+      "slot": "title",
+      "decision": "part",
+      "parts": ["title"],
+      "reason": "The semantic title region owns the title slot's component-side presentation."
+    },
+    {
+      "tag": "c2-copy-button",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-copy-button",
+      "slot": "copied-icon",
+      "decision": "assigned-content",
+      "reason": "The copied-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-copy-button",
+      "slot": "copied-label",
+      "decision": "assigned-content",
+      "reason": "The copied-label slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-copy-button",
+      "slot": "copy-icon",
+      "decision": "assigned-content",
+      "reason": "The copy-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The semantic body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "collapse-full-icon",
+      "decision": "assigned-content",
+      "reason": "The collapse-full-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "collapse-height-icon",
+      "decision": "assigned-content",
+      "reason": "The collapse-height-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "collapse-width-icon",
+      "decision": "assigned-content",
+      "reason": "The collapse-width-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "controls",
+      "decision": "part",
+      "parts": ["controls"],
+      "reason": "The semantic controls region owns the controls slot's component-side presentation."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "expand-full-icon",
+      "decision": "assigned-content",
+      "reason": "The expand-full-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "expand-height-icon",
+      "decision": "assigned-content",
+      "reason": "The expand-height-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "expand-width-icon",
+      "decision": "assigned-content",
+      "reason": "The expand-width-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-dash-card",
+      "slot": "header",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The semantic header region owns the header slot's component-side presentation."
+    },
+    {
+      "tag": "c2-dashboard",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-date-input",
+      "slot": "calendar-icon",
+      "decision": "assigned-content",
+      "reason": "The calendar-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-date-input",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-details",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The semantic body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-details",
+      "slot": "expanded-icon",
+      "decision": "assigned-content",
+      "reason": "The expanded-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-details",
+      "slot": "header-content",
+      "decision": "part",
+      "parts": ["header-content"],
+      "reason": "The semantic header-content region owns the header-content slot's component-side presentation."
+    },
+    {
+      "tag": "c2-details",
+      "slot": "icon",
+      "decision": "part",
+      "parts": ["icon"],
+      "reason": "The semantic icon region owns the icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-details",
+      "slot": "title",
+      "decision": "part",
+      "parts": ["title"],
+      "reason": "The semantic title region owns the title slot's component-side presentation."
+    },
+    {
+      "tag": "c2-gauge-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-gauge-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-gauge-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-gauge-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-gauge-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-gauge-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-gauge-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-header",
+      "slot": "",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The semantic content region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-header",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-header",
+      "slot": "brand",
+      "decision": "part",
+      "parts": ["brand"],
+      "reason": "The semantic brand region owns the brand slot's component-side presentation."
+    },
+    {
+      "tag": "c2-header",
+      "slot": "mobile-trigger",
+      "decision": "part",
+      "parts": ["mobile-trigger"],
+      "reason": "The semantic mobile-trigger region owns the mobile-trigger slot's component-side presentation."
+    },
+    {
+      "tag": "c2-icon-button",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-kbd",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-label",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-label",
+      "slot": "required-indicator",
+      "decision": "part",
+      "parts": ["required-indicator"],
+      "reason": "The semantic required-indicator region owns the required-indicator slot's component-side presentation."
+    },
+    {
+      "tag": "c2-line-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-line-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-line-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-line-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-line-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-line-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-line-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-link-button",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-link-button",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-link-button",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-list",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-list-item",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-list-item",
+      "slot": "description",
+      "decision": "assigned-content",
+      "reason": "The description slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-list-item",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-list-item",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-mat-icon",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects a bare Material Symbols ligature text node, which inherits the host's documented font-size, font-weight, and color custom properties because the text itself cannot receive a class."
+    },
+    {
+      "tag": "c2-menu",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-menu",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-menu-item",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-menu-item",
+      "slot": "description",
+      "decision": "assigned-content",
+      "reason": "The description slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-menu-item",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-menu-item",
+      "slot": "shortcut",
+      "decision": "assigned-content",
+      "reason": "The shortcut slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-menu-item",
+      "slot": "submenu",
+      "decision": "assigned-content",
+      "reason": "The submenu slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-menu-item",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-modal",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The semantic body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-modal",
+      "slot": "close-icon",
+      "decision": "assigned-content",
+      "reason": "The close-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-modal",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-modal",
+      "slot": "title",
+      "decision": "part",
+      "parts": ["title"],
+      "reason": "The semantic title region owns the title slot's component-side presentation."
+    },
+    {
+      "tag": "c2-navigation-menu",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu",
+      "slot": "mobile-trigger",
+      "decision": "assigned-content",
+      "reason": "The mobile-trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu-item",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu-item",
+      "slot": "panel",
+      "decision": "assigned-content",
+      "reason": "The panel slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu-item",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu-item",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu-link",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu-link",
+      "slot": "description",
+      "decision": "assigned-content",
+      "reason": "The description slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu-link",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-navigation-menu-link",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-number-input",
+      "slot": "decrement-icon",
+      "decision": "assigned-content",
+      "reason": "The decrement-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-number-input",
+      "slot": "increment-icon",
+      "decision": "assigned-content",
+      "reason": "The increment-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-number-input",
+      "slot": "prefix",
+      "decision": "assigned-content",
+      "reason": "The prefix slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-number-input",
+      "slot": "suffix",
+      "decision": "assigned-content",
+      "reason": "The suffix slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-number-input",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-overlay",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-pagination",
+      "slot": "first-icon",
+      "decision": "assigned-content",
+      "reason": "The first-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-pagination",
+      "slot": "last-icon",
+      "decision": "assigned-content",
+      "reason": "The last-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-pagination",
+      "slot": "next-icon",
+      "decision": "assigned-content",
+      "reason": "The next-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-pagination",
+      "slot": "previous-icon",
+      "decision": "assigned-content",
+      "reason": "The previous-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-pie-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pie-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-pie-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pie-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pie-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pie-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pie-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-progress",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-progress",
+      "slot": "value",
+      "decision": "part",
+      "parts": ["value"],
+      "reason": "The semantic value region owns the value slot's component-side presentation."
+    },
+    {
+      "tag": "c2-qr-code",
+      "slot": "center",
+      "decision": "assigned-content",
+      "reason": "The center slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-questionnaire",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-questionnaire",
+      "slot": "footer",
+      "decision": "assigned-content",
+      "reason": "The footer slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-questionnaire",
+      "slot": "header",
+      "decision": "assigned-content",
+      "reason": "The header slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-questionnaire",
+      "slot": "next-button",
+      "decision": "part",
+      "parts": ["next-button"],
+      "reason": "The semantic next-button region owns the next-button slot's component-side presentation."
+    },
+    {
+      "tag": "c2-questionnaire",
+      "slot": "previous-button",
+      "decision": "part",
+      "parts": ["previous-button"],
+      "reason": "The semantic previous-button region owns the previous-button slot's component-side presentation."
+    },
+    {
+      "tag": "c2-questionnaire",
+      "slot": "skip-button",
+      "decision": "part",
+      "parts": ["skip-button"],
+      "reason": "The semantic skip-button region owns the skip-button slot's component-side presentation."
+    },
+    {
+      "tag": "c2-questionnaire",
+      "slot": "submit-button",
+      "decision": "part",
+      "parts": ["submit-button"],
+      "reason": "The semantic submit-button region owns the submit-button slot's component-side presentation."
+    },
+    {
+      "tag": "c2-questionnaire",
+      "slot": "summary",
+      "decision": "assigned-content",
+      "reason": "The summary slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-radar-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radar-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-radar-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radar-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radar-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radar-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radar-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radio",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-radio",
+      "slot": "checked-icon",
+      "decision": "part",
+      "parts": ["checked-icon"],
+      "reason": "The semantic checked-icon region owns the checked-icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radio",
+      "slot": "description",
+      "decision": "part",
+      "parts": ["description"],
+      "reason": "The semantic description region owns the description slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radio",
+      "slot": "dot",
+      "decision": "part",
+      "parts": ["dot"],
+      "reason": "The semantic dot region owns the dot slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radio",
+      "slot": "icon",
+      "decision": "part",
+      "parts": ["icon"],
+      "reason": "The semantic icon region owns the icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-radio-group",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-radio-group",
+      "slot": "description",
+      "decision": "assigned-content",
+      "reason": "The description slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-radio-group",
+      "slot": "label",
+      "decision": "assigned-content",
+      "reason": "The label slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-reorder-list",
+      "slot": "dragging-item",
+      "decision": "part",
+      "parts": ["dragging-item"],
+      "reason": "The semantic dragging-item region owns the dragging-item slot's component-side presentation."
+    },
+    {
+      "tag": "c2-reorder-list",
+      "slot": "",
+      "decision": "part",
+      "parts": ["item"],
+      "reason": "The repeated item region owns placement for ordinary direct children while private projection slots and assigned content remain consumer-independent."
+    },
+    {
+      "tag": "c2-reorder-list",
+      "slot": "placeholder",
+      "decision": "part",
+      "parts": ["placeholder"],
+      "reason": "The semantic placeholder region owns the placeholder slot's component-side presentation."
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-select",
+      "slot": "button-content",
+      "decision": "assigned-content",
+      "reason": "The button-content slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-select",
+      "slot": "button-prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The button-prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-select",
+      "slot": "button-suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The button-suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-select",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-seperator",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-sheet",
+      "slot": "",
+      "decision": "part",
+      "parts": ["body"],
+      "reason": "The semantic body region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sheet",
+      "slot": "close-icon",
+      "decision": "assigned-content",
+      "reason": "The close-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-sheet",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sheet",
+      "slot": "title",
+      "decision": "assigned-content",
+      "reason": "The title slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-side-nav",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-side-nav",
+      "slot": "side-nav-content",
+      "decision": "assigned-content",
+      "reason": "The side-nav-content slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-sparkline",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sparkline",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-sparkline",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sparkline",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sparkline",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sparkline",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-sparkline",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
+      "tag": "c2-spinner",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-stat",
+      "slot": "description",
+      "decision": "part",
+      "parts": ["description"],
+      "reason": "The semantic description region owns the description slot's component-side presentation."
+    },
+    {
+      "tag": "c2-stat",
+      "slot": "icon",
+      "decision": "part",
+      "parts": ["icon"],
+      "reason": "The semantic icon region owns the icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-stat",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The semantic label region owns the label slot's component-side presentation."
+    },
+    {
+      "tag": "c2-stat",
+      "slot": "trend",
+      "decision": "part",
+      "parts": ["trend"],
+      "reason": "The semantic trend region owns the trend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-stat",
+      "slot": "value",
+      "decision": "part",
+      "parts": ["value"],
+      "reason": "The semantic value region owns the value slot's component-side presentation."
+    },
+    {
+      "tag": "c2-status-panel",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-status-panel",
+      "slot": "content",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The semantic content region owns the content slot's component-side presentation."
+    },
+    {
+      "tag": "c2-status-panel",
+      "slot": "description",
+      "decision": "part",
+      "parts": ["description"],
+      "reason": "The semantic description region owns the description slot's component-side presentation."
+    },
+    {
+      "tag": "c2-status-panel",
+      "slot": "media",
+      "decision": "part",
+      "parts": ["media"],
+      "reason": "The semantic media region owns the media slot's component-side presentation."
+    },
+    {
+      "tag": "c2-status-panel",
+      "slot": "title",
+      "decision": "part",
+      "parts": ["title"],
+      "reason": "The semantic title region owns the title slot's component-side presentation."
+    },
+    {
+      "tag": "c2-step",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-step",
+      "slot": "detail",
+      "decision": "part",
+      "parts": ["detail"],
+      "reason": "The semantic detail region owns the detail slot's component-side presentation."
+    },
+    {
+      "tag": "c2-step",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The semantic label region owns the label slot's component-side presentation."
+    },
+    {
+      "tag": "c2-step",
+      "slot": "marker",
+      "decision": "part",
+      "parts": ["marker"],
+      "reason": "The semantic marker region owns the marker slot's component-side presentation."
+    },
+    {
+      "tag": "c2-step",
+      "slot": "toggle",
+      "decision": "part",
+      "parts": ["toggle"],
+      "reason": "The semantic toggle region owns the toggle slot's component-side presentation."
+    },
+    {
+      "tag": "c2-step",
+      "slot": "trailing",
+      "decision": "part",
+      "parts": ["trailing"],
+      "reason": "The semantic trailing region owns the trailing slot's component-side presentation."
+    },
+    {
+      "tag": "c2-steps",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-switch",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-switch",
+      "slot": "checked-icon",
+      "decision": "part",
+      "parts": ["checked-icon"],
+      "reason": "The semantic checked-icon region owns the checked-icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-switch",
+      "slot": "description",
+      "decision": "part",
+      "parts": ["description"],
+      "reason": "The semantic description region owns the description slot's component-side presentation."
+    },
+    {
+      "tag": "c2-switch",
+      "slot": "unchecked-icon",
+      "decision": "part",
+      "parts": ["unchecked-icon"],
+      "reason": "The semantic unchecked-icon region owns the unchecked-icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tab",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "cell:{rowKey}:{field}",
+      "decision": "assigned-content",
+      "reason": "The cell:{rowKey}:{field} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "toolbar",
+      "decision": "part",
+      "parts": ["toolbar"],
+      "reason": "The semantic toolbar region owns the toolbar slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tabs",
+      "slot": "tab",
+      "decision": "assigned-content",
+      "reason": "The tab slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tabs",
+      "slot": "tab-content",
+      "decision": "assigned-content",
+      "reason": "The tab-content slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field",
+      "slot": "clear-icon",
+      "decision": "assigned-content",
+      "reason": "The clear-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field",
+      "slot": "help-icon",
+      "decision": "assigned-content",
+      "reason": "The help-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field-clear",
+      "slot": "clear-icon",
+      "decision": "assigned-content",
+      "reason": "The clear-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field-clear",
+      "slot": "help-icon",
+      "decision": "assigned-content",
+      "reason": "The help-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field-clear",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field-clear",
+      "slot": "suffix-icon",
+      "decision": "assigned-content",
+      "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-text-field-clear",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-textarea",
+      "slot": "supporting-text",
+      "decision": "part",
+      "parts": ["supporting-text"],
+      "reason": "The semantic supporting-text region owns the supporting-text slot's component-side presentation."
+    },
+    {
+      "tag": "c2-theme-select",
+      "slot": "check",
+      "decision": "part",
+      "parts": ["check"],
+      "reason": "The semantic check region owns the check slot's component-side presentation."
+    },
+    {
+      "tag": "c2-theme-select",
+      "slot": "dark-icon",
+      "decision": "assigned-content",
+      "reason": "The dark-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-theme-select",
+      "slot": "light-icon",
+      "decision": "assigned-content",
+      "reason": "The light-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-theme-select",
+      "slot": "system-icon",
+      "decision": "assigned-content",
+      "reason": "The system-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-toast",
+      "slot": "action",
+      "decision": "part",
+      "parts": ["action"],
+      "reason": "The semantic action region owns the action slot's component-side presentation."
+    },
+    {
+      "tag": "c2-toast",
+      "slot": "close-icon",
+      "decision": "assigned-content",
+      "reason": "The close-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-toast",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-toast",
+      "slot": "icon",
+      "decision": "part",
+      "parts": ["icon"],
+      "reason": "The semantic icon region owns the icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tooltip",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tree",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tree",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tree-item",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tree-item",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tree-item",
+      "slot": "icon",
+      "decision": "assigned-content",
+      "reason": "The icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tree-item",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The semantic label region owns the label slot's component-side presentation."
+    },
+    {
+      "tag": "c2-tree-item",
+      "slot": "toggle-icon",
+      "decision": "assigned-content",
+      "reason": "The toggle-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-upload",
+      "slot": "action",
+      "decision": "part",
+      "parts": ["action"],
+      "reason": "The semantic action region owns the action slot's component-side presentation."
+    },
+    {
+      "tag": "c2-upload",
+      "slot": "drop-icon",
+      "decision": "part",
+      "parts": ["drop-icon"],
+      "reason": "The semantic drop-icon region owns the drop-icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-upload",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The semantic empty region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-upload",
+      "slot": "hint",
+      "decision": "part",
+      "parts": ["hint"],
+      "reason": "The semantic hint region owns the hint slot's component-side presentation."
+    },
+    {
+      "tag": "c2-upload",
+      "slot": "prompt",
+      "decision": "part",
+      "parts": ["prompt"],
+      "reason": "The semantic prompt region owns the prompt slot's component-side presentation."
+    },
+    {
+      "tag": "c2-virtual-list",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-virtual-list",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-virtual-list",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-virtual-list",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-virtual-list",
+      "slot": "no-results",
+      "decision": "assigned-content",
+      "reason": "The no-results slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-virtual-list",
+      "slot": "search",
+      "decision": "part",
+      "parts": ["search"],
+      "reason": "The semantic search region owns the search slot's component-side presentation."
+    },
+    {
+      "tag": "c2-virtual-list",
+      "slot": "toolbar",
+      "decision": "assigned-content",
+      "reason": "The toolbar slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    }
+  ]
+}

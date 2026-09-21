@@ -1,6 +1,7 @@
 {
   "name": "@c2n/design-board",
   "version": "0.0.13",
+  "private": true,
   "type": "module",
   "main": "dist/design-board.js",
   "exports": {

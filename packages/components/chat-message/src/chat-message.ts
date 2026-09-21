@@ -1,6 +1,7 @@
 import { LitElement, html, unsafeCSS } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import styles from './chat-message.scss?inline'
 
 export type ChatMessageAlign = 'left' | 'right'
@@ -19,8 +20,8 @@ export type ChatMessageAlign = 'left' | 'right'
  * @slot footer-time - Timestamp displayed below the message.
  *
  * @csspart base - The complete message row.
- * @csspart avatar - Avatar region.
- * @csspart body - Header, content and footer column.
+ * @csspart avatar - Component-owned region wrapping the assigned `avatar` slot.
+ * @csspart body - Component-owned column wrapping the default slot between the header and footer.
  * @csspart header - Title and header timestamp row.
  * @csspart content - Main message content.
  * @csspart footer - Reactions and footer timestamp row.
@@ -72,34 +73,23 @@ export class ChatMessage extends LitElement {
   /** Places the avatar and message on the left or right side of the row. */
   @property({ reflect: true }) align: ChatMessageAlign = 'left'
 
-  @state() private hasHeader = true
-  @state() private hasFooter = true
+  private readonly slotPresence = new SlotPresenceController(this, ['title', 'header-time', 'emotion', 'footer-time'])
 
   static override styles = unsafeCSS(styles)
-
-  private syncOptionalRegions() {
-    const assigned = (name: string) => {
-      const slot = this.renderRoot.querySelector<HTMLSlotElement>(`slot[name='${name}']`)
-      return Boolean(slot?.assignedNodes({ flatten: true }).some((node) => node.nodeType !== Node.TEXT_NODE || Boolean(node.textContent?.trim())))
-    }
-
-    this.hasHeader = assigned('title') || assigned('header-time')
-    this.hasFooter = assigned('emotion') || assigned('footer-time')
-  }
 
   override render() {
     return html`
       <article class="c2-chat-message" part="base">
         <div class="c2-chat-message__avatar" part="avatar"><slot name="avatar"></slot></div>
         <div class="c2-chat-message__body" part="body">
-          <header class="c2-chat-message__header" part="header" ?hidden=${!this.hasHeader}>
-            <slot name="title" @slotchange=${this.syncOptionalRegions}></slot>
-            <slot name="header-time" @slotchange=${this.syncOptionalRegions}></slot>
+          <header class="c2-chat-message__header" part="header" ?hidden=${!this.slotPresence.has('title') && !this.slotPresence.has('header-time')}>
+            <slot name="title" @slotchange=${this.slotPresence.handleSlotChange}></slot>
+            <slot name="header-time" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </header>
           <div class="c2-chat-message__content" part="content"><slot name="message"></slot><slot></slot></div>
-          <footer class="c2-chat-message__footer" part="footer" ?hidden=${!this.hasFooter}>
-            <div class="c2-chat-message__emotion" part="actions"><slot name="emotion" @slotchange=${this.syncOptionalRegions}></slot></div>
-            <div class="c2-chat-message__footer-time"><slot name="footer-time" @slotchange=${this.syncOptionalRegions}></slot></div>
+          <footer class="c2-chat-message__footer" part="footer" ?hidden=${!this.slotPresence.has('emotion') && !this.slotPresence.has('footer-time')}>
+            <div class="c2-chat-message__emotion" part="actions"><slot name="emotion" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
+            <div class="c2-chat-message__footer-time"><slot name="footer-time" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
           </footer>
         </div>
       </article>

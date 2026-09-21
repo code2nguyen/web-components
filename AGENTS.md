@@ -72,6 +72,7 @@ This is the least obvious part of the architecture. `vite-plugin-cem` (plus `scr
 Consequences:
 
 - Component JSDoc tags are the API documentation source of truth: `@tag`, `@slot`, `@event`, and `@cssproperty {type} [--name=default]`. Every CSS custom property a consumer may set must have a `@cssproperty` line, or it will not appear in the demo's API table or config panel.
+- The customize plugin also rewrites a derived attribute name to the spelling Lit actually observes. The analyzer names an attribute after the field when `@property()` carries no explicit `attribute`, but Lit lowercases the property, so `readOnly` is observed as `readonly` and `maxLength` as `maxlength`. The manifest's `name` is the real attribute and `fieldName` keeps the property spelling; anything generating markup from a manifest must read `name`.
 - The custom plugin adds two non-standard tags: `@internalcomponent` and `@slotcomponent`, used by the demo to document composed/slotted children.
 - After changing a component's public surface, rebuild that package so its `custom-elements.json` is regenerated; committed manifests are checked in.
 - A new published component must be added by hand (or by plop) to `apps/ui/src/store/component-manifests.ts` in both the import list and the `normalizedManifests` array.
@@ -123,6 +124,7 @@ Follow the shape in `packages/checkbox/src/checkbox.ts`:
 - Re-emit native events from inner form controls with `redispatchEvent` from `@c2n/core/dom-helper.js` rather than constructing new events.
 - Expose customization points as named `<slot>`s with inline SVG defaults (see the checkmark/mixedmark/uncheckmark slots).
 - `@typescript-eslint/no-explicit-any` is an error; `noUnusedLocals`/`noUnusedParameters` are on (prefix intentionally unused args with `_`).
+- Import `property` from **`@c2n/core/lit-helper.js`**, not `lit/decorators.js`. It gives every `type: Boolean` property a converter that reads the literal strings `"false"` and `"0"` as false — Lit's default is presence-based, so a framework that stringifies an attribute (Svelte 5, any server renderer) would turn the flag _on_ by writing `disabled="false"` — and it lets a converter declaring `fromProperty` (`jsonPropertyConverter`, `arrayPropertyConverter`) also parse a string assigned straight to the property, so `JSON.stringify(rows)` is one binding that works as an attribute on the server and as a property on the client. An explicit `converter` always wins. A `type: Boolean` property that is `boolean | undefined` is tri-state for free: absent inherits, `"false"` opts out.
 
 ## Using c2n components in the UI app
 

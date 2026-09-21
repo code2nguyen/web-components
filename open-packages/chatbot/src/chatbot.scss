@@ -51,4 +51,9 @@
     border-top-right-radius: inherit;
     border-bottom: css.cssVar(header--border-bottom);
   }
+
+  .c2-chatbot__message-container {
+    flex: 1;
+    min-height: 10rem;
+  }
 }

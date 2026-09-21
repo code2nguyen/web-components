@@ -1,7 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
-import { hasSlottedContent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './card.scss?inline'
@@ -18,6 +18,11 @@ import styles from './card.scss?inline'
  * @slot media - Full-bleed image, video or any block shown above the body; it is clipped to the card radius.
  * @slot header - Title area above the body.
  * @slot footer - Actions row below the body (a flex row, see the `footer--*` tokens).
+ *
+ * @csspart media - Wrapper around the `media` slot; present when media content is assigned and clipped by the card surface.
+ * @csspart header - Wrapper around the `header` slot; present when header content is assigned.
+ * @csspart body - Wrapper around the default slot; present when body content is assigned.
+ * @csspart footer - Wrapper around the `footer` slot; present when footer content is assigned.
  *
  * @cssproperty {padding} [--c2-card--padding-top=12px]
  * @cssproperty {padding} [--c2-card--padding-right=16px]
@@ -104,30 +109,10 @@ export class Card extends LitElement {
   /** Link relationship forwarded to the anchor when `href` is set. */
   @property() rel: string | undefined = undefined
 
-  @state() private hasMedia = false
-  @state() private hasHeader = false
-  @state() private hasContent = false
-  @state() private hasFooter = false
+  private readonly slotPresence = new SlotPresenceController(this, ['media', 'header', '', 'footer'])
 
   private handleSlotChange(event: Event) {
-    this.updateSection(event.target as HTMLSlotElement)
-  }
-
-  private updateSection(slot: HTMLSlotElement) {
-    const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-    switch (slot.name) {
-      case 'media':
-        this.hasMedia = filled
-        break
-      case 'header':
-        this.hasHeader = filled
-        break
-      case 'footer':
-        this.hasFooter = filled
-        break
-      default:
-        this.hasContent = filled
-    }
+    this.slotPresence.handleSlotChange(event)
   }
 
   private handleKeydown(event: KeyboardEvent) {
@@ -140,22 +125,15 @@ export class Card extends LitElement {
 
   private renderSections() {
     return html`
-      <div class="c2-card-media" ?hidden=${!this.hasMedia}><slot name="media" @slotchange=${this.handleSlotChange}></slot></div>
-      <div class="c2-card-header" ?hidden=${!this.hasHeader}><slot name="header" @slotchange=${this.handleSlotChange}></slot></div>
-      <div class="c2-card-content" ?hidden=${!this.hasContent}><slot @slotchange=${this.handleSlotChange}></slot></div>
-      <div class="c2-card-footer" ?hidden=${!this.hasFooter}><slot name="footer" @slotchange=${this.handleSlotChange}></slot></div>
+      <div part="media" class="c2-card-media" ?hidden=${!this.slotPresence.has('media')}><slot name="media" @slotchange=${this.handleSlotChange}></slot></div>
+      <div part="header" class="c2-card-header" ?hidden=${!this.slotPresence.has('header')}>
+        <slot name="header" @slotchange=${this.handleSlotChange}></slot>
+      </div>
+      <div part="body" class="c2-card-content" ?hidden=${!this.slotPresence.has()}><slot @slotchange=${this.handleSlotChange}></slot></div>
+      <div part="footer" class="c2-card-footer" ?hidden=${!this.slotPresence.has('footer')}>
+        <slot name="footer" @slotchange=${this.handleSlotChange}></slot>
+      </div>
     `
-  }
-
-  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
-  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-  override willUpdate() {
-    if (!this.hasUpdated) {
-      this.hasMedia = hasSlottedContent(this, 'media')
-      this.hasHeader = hasSlottedContent(this, 'header')
-      this.hasContent = hasSlottedContent(this)
-      this.hasFooter = hasSlottedContent(this, 'footer')
-    }
   }
 
   override render() {

@@ -1,5 +1,6 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -83,10 +84,10 @@ let instanceId = 0
  * @slot submit-button - Replaces the final submit control while retaining validation and completion.
  * @slot summary - Replaces the answer summary shown after successful completion. Read the host's `answers` property or the `complete` event to render custom data.
  *
- * @csspart previous-button - Default Previous button, when its slot is not replaced.
- * @csspart skip-button - Default Skip button, when its slot is not replaced.
- * @csspart next-button - Default Next button, when its slot is not replaced.
- * @csspart submit-button - Default final submit button, when its slot is not replaced.
+ * @csspart previous-button - Fallback button inside the `previous-button` slot when no assigned replacement is present.
+ * @csspart skip-button - Fallback button inside the `skip-button` slot when no assigned replacement is present.
+ * @csspart next-button - Fallback button inside the `next-button` slot when no assigned replacement is present.
+ * @csspart submit-button - Fallback button inside the `submit-button` slot when no assigned replacement is present.
  *
  * @event {CustomEvent<{ questionId: string, value: QuestionnaireAnswer, answers: QuestionnaireAnswers }>} answer-change - Fired whenever an answer changes.
  * @event {CustomEvent<{ index: number, question: QuestionnaireQuestion }>} step-change - Fired after navigation changes the visible question.

@@ -1,4 +1,14 @@
-import { test, expect, props, watch, accessible, pointerClick } from '../../../../tests/component-fixture'
+import { test, expect, props, watch, accessible, pointerClick, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+test('description presence follows assignment, insertion, removal and reassignment', async ({ page, renderScenario }) => {
+  const description = page.locator('c2-switch').locator('[part="description"]')
+  await slotPresenceMatrix(page, renderScenario, {
+    markup: '<c2-switch label="Updates"><span slot="description" data-slot-presence-probe>Weekly</span></c2-switch>',
+    host: 'c2-switch',
+    slot: 'description',
+    assertPresent: async (present) => (present ? expect(description).toBeVisible() : expect(description).toBeHidden()),
+  })
+})
 
 test('label activation and Space update checked and emit one change', async ({ page, renderScenario }) => {
   await renderScenario('<c2-switch label="Notifications"><span slot="description">Receive updates</span></c2-switch>')

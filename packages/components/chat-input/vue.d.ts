@@ -17,6 +17,8 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-chat-input': DefineComponent<
       C2Props<ChatInput> & {
+        maxlength?: unknown
+        minlength?: unknown
         'min-rows'?: unknown
         'enter-behavior'?: unknown
         'aria-label'?: unknown

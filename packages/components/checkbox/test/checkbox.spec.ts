@@ -61,3 +61,20 @@ test('a programmatic checked change still lands after the user has clicked the b
   await props(host, { checked: true })
   await expect(input).toBeChecked()
 })
+
+test('a boolean attribute written as "false" turns the flag off', async ({ page, renderScenario }) => {
+  // Frameworks that stringify a non-boolean attribute name (Svelte 5, and any server renderer) emit
+  // `checked="false"`. Lit's presence-based default would read that as true and enable what was disabled.
+  await renderScenario('<c2-checkbox aria-label="Accept terms" checked="false" disabled="false"></c2-checkbox>')
+  const host = page.locator('c2-checkbox')
+  await expect(host).toHaveJSProperty('checked', false)
+  await expect(host).toHaveJSProperty('disabled', false)
+  await page.getByRole('checkbox', { name: 'Accept terms' }).check()
+  await expect(host).toHaveJSProperty('checked', true)
+})
+
+test('a bare boolean attribute and an empty one still read as true', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-checkbox aria-label="One" checked></c2-checkbox><c2-checkbox aria-label="Two" checked=""></c2-checkbox>')
+  await expect(page.locator('c2-checkbox').first()).toHaveJSProperty('checked', true)
+  await expect(page.locator('c2-checkbox').last()).toHaveJSProperty('checked', true)
+})

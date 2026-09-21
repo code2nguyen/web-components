@@ -1,5 +1,5 @@
 import { LitElement, css, type PropertyValues } from 'lit'
-import { property } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { ChartSeriesConfig } from './chart-types.js'
 

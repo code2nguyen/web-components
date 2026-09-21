@@ -1,5 +1,6 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
@@ -23,6 +24,11 @@ const ITEM_SLOT = 'item-'
  *
  * @slot - The items, in order. Use `c2-link-button` for links; any element works for the current page.
  * @slot separator - Custom separator, cloned between every pair of items (text such as `/`, or an icon).
+ *
+ * @csspart separator - Component-owned region containing the `separator` slot or its fallback between breadcrumb items.
+ * @csspart item - A list item containing one breadcrumb and its following separator.
+ * @csspart ellipsis - The control that reveals breadcrumb items hidden by overflow or `max-items`.
+ * @csspart list - The ordered list containing the complete breadcrumb trail.
  *
  * @cssproperty {pixel} [--c2-breadcrumb--gap=4px] - Space between an item and its separator.
  * @cssproperty {pixel} [--c2-breadcrumb__separator--size=14px] - Icon size and font size of the separator.
@@ -72,10 +78,12 @@ export class Breadcrumb extends LitElement {
   private resizeObserver?: ResizeObserver
   private measuredWidth = -1
   private automaticCurrent?: HTMLElement
+  private measureScheduled = false
 
   override connectedCallback() {
     super.connectedCallback()
     if (!isServer) {
+      this.separatorNodes = [...this.children].filter((child) => child.getAttribute('slot') === 'separator')
       this.assignItems()
       this.observer ??= new MutationObserver(() => this.assignItems())
       this.observer.observe(this, { childList: true })
@@ -107,6 +115,7 @@ export class Breadcrumb extends LitElement {
       const name = `${ITEM_SLOT}${index}`
       if (item.getAttribute('slot') !== name) item.setAttribute('slot', name)
     })
+    if (this.itemCount !== items.length) this.expanded = false
     this.itemCount = items.length
     this.markCurrent(items)
   }
@@ -139,21 +148,22 @@ export class Breadcrumb extends LitElement {
       .filter((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
   }
 
-  override firstUpdated() {
-    this.handleSeparatorChange()
-  }
-
   override updated(changed: PropertyValues) {
-    if (changed.has('maxItems') || changed.has('itemCount') || changed.has('separatorNodes')) {
-      if (changed.has('itemCount')) this.expanded = false
-      this.requestMeasure()
-    }
-    if (this.measuring) this.measure()
+    if (changed.has('maxItems') || changed.has('itemCount') || changed.has('separatorNodes') || this.measuring) this.scheduleMeasure()
   }
 
   private requestMeasure() {
     if (isServer || !this.isConnected || this.expanded) return
     this.measuring = true
+  }
+
+  private scheduleMeasure() {
+    if (isServer || this.measureScheduled || this.expanded) return
+    this.measureScheduled = true
+    void this.updateComplete.then(() => {
+      this.measureScheduled = false
+      this.measure()
+    })
   }
 
   /**

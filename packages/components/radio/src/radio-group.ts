@@ -1,7 +1,9 @@
 import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { property, state } from 'lit/decorators.js'
+import { state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { provide } from '@lit/context'
 import { radioGroupContext, type RadioGroupContext } from './radio-context'
@@ -79,8 +81,7 @@ export class RadioGroup extends LitElement {
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
 
-  @state() private hasLabel = false
-  @state() private hasDescription = false
+  private readonly slotPresence = new SlotPresenceController(this, ['label', 'description'])
 
   @provide({ context: radioGroupContext })
   protected context: RadioGroupContext = this.createContext()
@@ -96,6 +97,7 @@ export class RadioGroup extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.defaultValue = this.getAttribute('value') ?? undefined
+    void this.updateComplete.then(() => this.adoptRadios())
   }
 
   /** The containing form, when this control is associated with one. */
@@ -156,11 +158,6 @@ export class RadioGroup extends LitElement {
     return { name: this.name, disabled: this.effectiveDisabled, required: this.required, checkedChanged: (radio) => this.handleCheckedChanged(radio) }
   }
 
-  /** `slotchange` does not fire for server-rendered slots, so read them once after the first render. */
-  override firstUpdated() {
-    for (const slot of this.renderRoot.querySelectorAll('slot')) this.updateSlot(slot)
-  }
-
   override willUpdate(changed: PropertyValues<this>) {
     // Context consumers only re-render when the provided value is a new object.
     if (changed.has('name') || changed.has('disabled') || changed.has('required')) this.context = this.createContext()
@@ -172,16 +169,11 @@ export class RadioGroup extends LitElement {
   }
 
   private handleSlotChange(event: Event) {
-    this.updateSlot(event.target as HTMLSlotElement)
-  }
-
-  private updateSlot(slot: HTMLSlotElement) {
+    const slot = event.target as HTMLSlotElement
     if (slot.name === 'label' || slot.name === 'description') {
-      const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
-      if (slot.name === 'label') this.hasLabel = filled
-      else this.hasDescription = filled
+      this.slotPresence.handleSlotChange(event)
     } else {
-      this.adoptRadios()
+      void this.adoptRadios()
     }
   }
 
@@ -277,19 +269,21 @@ export class RadioGroup extends LitElement {
   }
 
   override render() {
+    const hasLabel = this.slotPresence.has('label')
+    const hasDescription = this.slotPresence.has('description')
     return html`
       <div
         class="c2-radio-group"
         role="radiogroup"
         aria-label=${ifDefined(this.ariaLabel)}
-        aria-labelledby=${this.hasLabel ? 'label' : nothing}
-        aria-describedby=${this.hasDescription ? 'description' : nothing}
+        aria-labelledby=${hasLabel ? 'label' : nothing}
+        aria-describedby=${hasDescription ? 'description' : nothing}
         aria-disabled=${this.effectiveDisabled ? 'true' : nothing}
         aria-orientation=${this.orientation}
       >
-        <div class="c2-radio-group-header" ?hidden=${!this.hasLabel && !this.hasDescription}>
-          <div id="label" class="c2-radio-group-label" ?hidden=${!this.hasLabel}><slot name="label" @slotchange=${this.handleSlotChange}></slot></div>
-          <div id="description" class="c2-radio-group-description" ?hidden=${!this.hasDescription}>
+        <div class="c2-radio-group-header" ?hidden=${!hasLabel && !hasDescription}>
+          <div id="label" class="c2-radio-group-label" ?hidden=${!hasLabel}><slot name="label" @slotchange=${this.handleSlotChange}></slot></div>
+          <div id="description" class="c2-radio-group-description" ?hidden=${!hasDescription}>
             <slot name="description" @slotchange=${this.handleSlotChange}></slot>
           </div>
         </div>

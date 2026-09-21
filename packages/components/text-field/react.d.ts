@@ -24,10 +24,16 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-text-field': C2Props<TextField> & {
+        readonly?: Attribute
+        maxlength?: Attribute
+        minlength?: Attribute
         'aria-label'?: Attribute
         'error-text'?: Attribute
       }
       'c2-text-field-clear': C2Props<TextFieldClear> & {
+        readonly?: Attribute
+        maxlength?: Attribute
+        minlength?: Attribute
         'aria-label'?: Attribute
         'error-text'?: Attribute
       }

@@ -1,10 +1,11 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { property, query, state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
+import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
-import { hasSlottedContent, redispatchEvent } from '@c2n/core/dom-helper.js'
+import { SlotPresenceController, redispatchEvent } from '@c2n/core/dom-helper.js'
 import styles from './switch.scss?inline'
 
 /** Events fired by {@link Switch}, keyed for `addEventListener`. */
@@ -31,6 +32,14 @@ export interface Switch {
  * @slot unchecked-icon - Small icon shown inside the thumb while off.
  *
  * @event {Event} change - Re-dispatched from the inner input when the state changes.
+ *
+ * @csspart control - The switch control, excluding its label and description.
+ * @csspart track - The switch track.
+ * @csspart thumb - The movable switch thumb.
+ * @csspart unchecked-icon - Icon region containing the `unchecked-icon` slot inside the thumb while off.
+ * @csspart checked-icon - Icon region containing the `checked-icon` slot inside the thumb while on.
+ * @csspart label - The switch label.
+ * @csspart description - Supporting-text region containing the `description` slot below the label.
  *
  * @cssproperty {pixel} [--c2-switch__container--gap=8px] - Space between the track and the text.
  * @cssproperty {flex-direction-row} [--c2-switch__container--flex-direction=row] - `row-reverse` puts the text before the track.
@@ -117,7 +126,7 @@ export class Switch extends LitElement {
   @property({ type: String, attribute: 'aria-describedby' })
   ariaDescribedBy!: undefined | string
 
-  @state() private hasDescription = false
+  private readonly slotPresence = new SlotPresenceController(this, ['description'])
   /** True while the thumb follows the pointer; disables the slide transition. */
   @state() private dragging = false
 
@@ -193,14 +202,6 @@ export class Switch extends LitElement {
     this.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   }
 
-  // Before the first render the slots do not exist, so the light DOM answers instead and `slotchange` takes over from
-  // there. Reading the slots in `firstUpdated` would set state after an update and cost a second render.
-  protected override willUpdate(_changed: PropertyValues<this>) {
-    if (!this.hasUpdated) {
-      this.hasDescription = hasSlottedContent(this, 'description')
-    }
-  }
-
   protected override update(changed: PropertyValues<this>) {
     if (changed.has('checked') && this.formElement) this.formElement.checked = this.checked
     super.update(changed)
@@ -219,11 +220,7 @@ export class Switch extends LitElement {
   }
 
   private handleDescriptionChange(event: Event) {
-    this.updateDescription(event.target as HTMLSlotElement)
-  }
-
-  private updateDescription(slot: HTMLSlotElement) {
-    this.hasDescription = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? '').trim() !== '')
+    this.slotPresence.handleSlotChange(event)
   }
 
   private handleChange(event: Event) {
@@ -292,8 +289,9 @@ export class Switch extends LitElement {
   }
 
   override render() {
+    const hasDescription = this.slotPresence.has('description')
     return html`
-      <label class=${classMap({ 'c2-switch': true, 'has-description': this.hasDescription, 'is-dragging': this.dragging })}>
+      <label class=${classMap({ 'c2-switch': true, 'has-description': hasDescription, 'is-dragging': this.dragging })}>
         <span class="c2-switch-control" part="control">
           <input
             class="c2-switch-input"
@@ -323,7 +321,7 @@ export class Switch extends LitElement {
         </span>
         <span class="c2-switch-text">
           <span class="c2-switch-label" part="label"><slot>${this.label}</slot></span>
-          <span class="c2-switch-description" part="description" ?hidden=${!this.hasDescription}>
+          <span class="c2-switch-description" part="description" ?hidden=${!hasDescription}>
             <slot name="description" @slotchange=${this.handleDescriptionChange}></slot>
           </span>
         </span>
