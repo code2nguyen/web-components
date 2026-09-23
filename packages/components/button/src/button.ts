@@ -105,7 +105,9 @@ export class Button extends LitElement {
     this.formDisabled = disabled
     if (this.unavailable) this.internals?.states.add('disabled')
     else this.internals?.states.delete('disabled')
-    this.requestUpdate()
+    // Reflection of `disabled` invokes this callback during Lit's update, after
+    // render has already read `formDisabled`. Schedule a fresh render afterwards.
+    queueMicrotask(() => this.requestUpdate())
   }
 
   private handleClick = () => {
