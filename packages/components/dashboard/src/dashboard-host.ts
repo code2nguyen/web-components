@@ -48,6 +48,8 @@ export interface DashboardHost extends HTMLElement {
 
 /** The part of `c2-dash-card` the grid reads back. */
 export interface DashboardCard extends HTMLElement {
+  /** Stable persistence identity supplied by the card's `card-id`. */
+  readonly cardId?: string
   /** `undefined` while the card is hidden, so a hidden card constrains nothing. */
   readonly constraint: DashCardConstraint | undefined
   /** The grid changed shape: re-render the placement and the handles. */

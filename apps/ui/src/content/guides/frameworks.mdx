@@ -14,7 +14,7 @@ There are two independent styling routes. A node you place in a slot remains con
 
 A bare text node is the exception to “give it a class”: text cannot be targeted directly. Use the host's inherited typography or documented custom properties when that is the component contract—as with `c2-mat-icon` ligature text—or wrap the text in an element you own when it needs independent styling.
 
-```css
+```css tag=CodeBlock
 .message-copy { font-weight: 500; } /* assigned node */
 c2-chat-message::part(content) { padding: 12px; } /* component-owned region */
 ```
@@ -87,11 +87,27 @@ import '@c2n/table'
 import '@c2n/table/table-column.js'
 ```
 
-React 19 assigns a prop as a property when the element has one, so `rows={rows}` lands as an object. That holds on the client only. On a **server-rendered page** — Next.js, React Router in SSR mode — React writes a custom element's props into the HTML verbatim, the parser lowercases them, and hydration does not set properties: `minWidth="240"` reaches the element as `minwidth`, an attribute it does not declare. Write the kebab-case attribute name instead, `min-width`, `expand-full`, `storage-key`; the generated types list it next to the property. The component forwards the lowercase lookalike to the real attribute and warns in the console, so the value survives, but the warning is telling you to fix the spelling. An object or array prop stringifies on the server, so set it in an effect through a ref.
+React 19 assigns a prop as a property when the element has one, so `rows={rows}` lands as an object. That holds on the client only. On a **server-rendered page** — Next.js, React Router in SSR mode — React writes a custom element's props into the HTML verbatim, the parser lowercases them, and hydration does not set properties: `minWidth="240"` reaches the element as `minwidth`, an attribute it does not declare. Write the kebab-case attribute name instead, `min-width`, `expand-full`, `storage-key`; the generated types list it next to the property. The component forwards the lowercase lookalike to the real attribute and warns in the console, so the value survives, but the warning is telling you to fix the spelling. For a converter-backed array or object, pass its JSON string during SSR; the generated React declarations accept both the property value and this serialized attribute form.
 
 ```tsx tag=CodeBlock
-// Server-rendered: attributes by their markup name, objects through a ref
+// Server-rendered: attributes by their markup name, structured values as JSON
 <c2-dash-card col="1" row="1" min-width="240" expand-full>
+<c2-table rows={JSON.stringify(rows)} columns={JSON.stringify(columns)} row-key="id" />
+```
+
+Next.js applies `basePath` to `next/link`, not to an `href` on a custom element. Resolve internal c2n links through the same small helper used for assets and plain anchors; keep absolute, hash, protocol, and already-prefixed URLs unchanged:
+
+```typescript tag=CodeBlock
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH?.replace(/\/$/, '') ?? ''
+
+export function internalHref(href: string) {
+  if (!href.startsWith('/') || href.startsWith('//') || !basePath || href === basePath || href.startsWith(`${basePath}/`)) return href
+  return `${basePath}${href}`
+}
+```
+
+```tsx tag=CodeBlock
+<c2-link-button href={internalHref('/logs/')}>View logs</c2-link-button>
 ```
 
 Events are the exception on the client too: JSX has no spelling for `onSelection-change`, and React's `onChange` is its own synthetic form-control event, so custom events — and `input`/`change` — go through a ref:
@@ -126,6 +142,16 @@ useEffect(() => {
 If the cell is better built as a Lit template, take `html` from `@c2n/core/lit-helper.js` rather than adding `lit` to the application — it is the same instance the components render with, so there is no version to pin by hand and no second copy of Lit in the bundle.
 
 The children stay in the document's light DOM, so ordinary CSS reaches them — a `renderCell` node lands inside the shadow root, where a stylesheet cannot, and has to be coloured through an inherited custom property. `cell-slot` needs `row-key`, and only the rows the virtualizer has rendered claim a child; the rest simply wait, so it suits paged and modest tables rather than a hundred thousand rows. `renderCell`, or the column's own formatting, stays as the slot's fallback.
+
+For a static export, put a semantic server-rendered table in `slot="fallback"`. It is normal light DOM before the custom element upgrades, then the interactive grid takes over while the fallback stays in the DOM but is no longer rendered. This avoids an empty no-JavaScript result without leaving duplicate tables after hydration.
+
+```tsx tag=CodeBlock
+<c2-table ref={tableRef} row-key="id">
+  <table slot="fallback" aria-label="Services">
+    <tbody>{rows.map((row) => <tr key={row.id}><td>{row.name}</td></tr>)}</tbody>
+  </table>
+</c2-table>
+```
 
 ## Vue
 

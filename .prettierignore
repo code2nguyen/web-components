@@ -1,4 +1,8 @@
 node_modules/
+**/.next/
+**/out/
+**/coverage/
+**/next-env.d.ts
 *.tgz
 *.tsbuildinfo
 .DS_Store

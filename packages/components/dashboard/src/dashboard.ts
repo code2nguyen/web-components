@@ -18,6 +18,10 @@ export interface DashboardLayoutChangeDetail {
   columns: string[]
   /** Row tracks. */
   rows: string[]
+  /** Stable card IDs in DOM and reading order. */
+  order: string[]
+  /** Active responsive media query, or `null` for the authored layout. */
+  breakpoint: string | null
 }
 
 /** Events fired by {@link Dashboard}, keyed for `addEventListener`. */
@@ -45,9 +49,12 @@ export interface DashboardResponsiveLayout {
   layout?: Record<string, DashCardPlacement>
 }
 
-interface StoredLayout {
+export interface DashboardStoredLayout {
+  version?: 1
   columns?: string[]
   rows?: string[]
+  order?: string[]
+  breakpoint?: string | null
 }
 
 const FRACTION = /^([\d.]*)fr$/
@@ -86,7 +93,8 @@ function toTracks(input: number | string | string[]): string[] {
  *
  * `layouts` makes the grid responsive without a remount: each entry names a media query and the tracks and card
  * placements to use while it matches, the first match wins, and every entry keeps its own stored sizes under
- * `<storage-key>@<media>`.
+ * `<storage-key>@<media>`. Stored payloads are versioned and include stable card order; `serializeLayout` and
+ * `deserializeLayout` can preserve application metadata such as named sizes without coupling it to the component.
  *
  * Placement is the application's: the grid never re-places cards on its own. A pane removed or hidden at runtime
  * leaves its cells empty and its neighbours where they were, and a pane added at runtime lands exactly where its
@@ -100,8 +108,9 @@ function toTracks(input: number | string | string[]): string[] {
  *
  * @slot - The `c2-dash-card` panes. Anything else becomes an ordinary grid item, placed by your own CSS.
  *
- * @event {CustomEvent<DashboardLayoutChangeDetail>} layout-change - The track sizes changed: a gesture ended, `reset()`
- * was called, or another entry of `layouts` took over. Does not bubble: listen on the element.
+ * @event {CustomEvent<DashboardLayoutChangeDetail>} layout-change - The tracks or stable card order changed: a
+ * gesture ended, `setPanelOrder()`/`reset()` was called, or another entry of `layouts` took over. Includes the active
+ * breakpoint. Does not bubble: listen on the element.
  *
  * @cssproperty {pixel} [--c2-dashboard--gap=8px] - Gutter between the cards. The whole gutter drags: each card's
  * handle is centred on its edge and as thick as the gap (never under `--c2-dash-card__handle--size`).
@@ -127,7 +136,7 @@ export class Dashboard extends LitElement {
   /** Floor for every row, in pixels. A card's own `min-height` raises it for the tracks that card covers. */
   @property({ type: Number, attribute: 'min-row-height' }) minRowHeight = 50
 
-  /** `localStorage` key the track sizes are stored under. Without it the grid starts from the authored tracks. */
+  /** `localStorage` key the track sizes and stable card order are stored under. Without it the grid starts from the authored layout. */
   @property({ attribute: 'storage-key' }) storageKey: string | undefined = undefined
 
   /**
@@ -143,6 +152,12 @@ export class Dashboard extends LitElement {
    * one keeps its own sizes under `<storage-key>@<media>`.
    */
   @property({ attribute: false }) layouts: DashboardResponsiveLayout[] | undefined = undefined
+
+  /** Optional storage encoder. Use it to add application metadata such as named panel sizes. */
+  @property({ attribute: false }) serializeLayout: ((layout: DashboardStoredLayout) => unknown) | undefined = undefined
+
+  /** Optional storage decoder paired with `serializeLayout`. It may also migrate older application payloads. */
+  @property({ attribute: false }) deserializeLayout: ((value: unknown) => DashboardStoredLayout | null) | undefined = undefined
 
   @state() private columnTracks: string[] = []
   @state() private rowTracks: string[] = []
@@ -269,6 +284,13 @@ export class Dashboard extends LitElement {
     this.emitLayoutChange()
   }
 
+  /** Reorders known cards by stable `card-id`, persists the order, and reports one layout change. */
+  setPanelOrder(order: readonly string[]) {
+    this.applyPanelOrder(order)
+    this.persist()
+    this.emitLayoutChange()
+  }
+
   /**
    * Where the splitter after `index` sits, as a percentage of the tracks' total. A focusable `separator` is a
    * window splitter, and a window splitter has to report a value.
@@ -314,7 +336,12 @@ export class Dashboard extends LitElement {
   private emitLayoutChange() {
     this.dispatchEvent(
       new CustomEvent<DashboardLayoutChangeDetail>('layout-change', {
-        detail: { columns: [...this.columnTracks], rows: [...this.rowTracks] },
+        detail: {
+          columns: [...this.columnTracks],
+          rows: [...this.rowTracks],
+          order: this.panelOrder,
+          breakpoint: this.activeResponsiveLayout?.media ?? null,
+        },
         bubbles: false,
         composed: true,
       }),
@@ -409,16 +436,18 @@ export class Dashboard extends LitElement {
     // A stored layout only applies while it still describes the same grid; changing `columns` discards it.
     this.columnTracks = stored?.columns?.length === columns.length ? [...stored.columns] : columns
     this.rowTracks = stored?.rows?.length === rows.length ? [...stored.rows] : rows
+    if (stored?.order?.length) queueMicrotask(() => this.applyPanelOrder(stored.order!))
   }
 
-  private readStored(): StoredLayout | null {
+  private readStored(): DashboardStoredLayout | null {
     const key = this.activeStorageKey
     if (!key || isServer) return null
     try {
       const raw = localStorage.getItem(key)
       if (!raw) return null
-      const parsed = JSON.parse(raw) as StoredLayout | null
-      return parsed && typeof parsed === 'object' ? parsed : null
+      const parsed: unknown = JSON.parse(raw)
+      if (this.deserializeLayout) return this.deserializeLayout(parsed)
+      return parsed && typeof parsed === 'object' ? (parsed as DashboardStoredLayout) : null
     } catch {
       return null
     }
@@ -428,7 +457,14 @@ export class Dashboard extends LitElement {
     const key = this.activeStorageKey
     if (!key || isServer) return
     try {
-      localStorage.setItem(key, JSON.stringify({ columns: this.columnTracks, rows: this.rowTracks } satisfies StoredLayout))
+      const layout: DashboardStoredLayout = {
+        version: 1,
+        columns: [...this.columnTracks],
+        rows: [...this.rowTracks],
+        order: this.panelOrder,
+        breakpoint: this.activeResponsiveLayout?.media ?? null,
+      }
+      localStorage.setItem(key, JSON.stringify(this.serializeLayout ? this.serializeLayout(layout) : layout))
     } catch {
       // A private window or a full quota only costs the stored layout.
     }
@@ -436,6 +472,22 @@ export class Dashboard extends LitElement {
 
   override render() {
     return html`<slot></slot>`
+  }
+
+  private get panelOrder(): string[] {
+    return [...this.children]
+      .filter((child): child is DashboardCard => child instanceof HTMLElement && child.tagName.toLowerCase() === 'c2-dash-card')
+      .map((card) => card.cardId ?? card.getAttribute('card-id') ?? '')
+      .filter(Boolean)
+  }
+
+  private applyPanelOrder(order: readonly string[]) {
+    const cards = [...this.children].filter((child): child is DashboardCard => child instanceof HTMLElement && child.tagName.toLowerCase() === 'c2-dash-card')
+    const byId = new Map(cards.map((card) => [card.cardId ?? card.getAttribute('card-id') ?? '', card]))
+    const ordered = order.map((id) => byId.get(id)).filter((card): card is DashboardCard => Boolean(card))
+    for (const card of cards) if (!ordered.includes(card)) ordered.push(card)
+    if (ordered.every((card, index) => card === cards[index])) return
+    this.append(...ordered)
   }
 }
 

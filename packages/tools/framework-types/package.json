@@ -1,6 +1,6 @@
 {
   "name": "@c2n/framework-types",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Editor metadata for the c2n web components: VS Code / Volar HTML custom data and JetBrains web-types, generated from the custom-elements manifests",
   "type": "module",
   "exports": {

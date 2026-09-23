@@ -129,3 +129,17 @@ test('applies consumer theme variables to size, hover, focus and selected state'
   await page.locator('c2-button').evaluate((element) => element.setAttribute('selected', ''))
   await expect(button).toHaveCSS('background-color', 'rgb(60, 70, 80)')
 })
+
+test('submits and resets its associated form with native button types', async ({ page, scenario }) => {
+  await scenario('form')
+  const input = page.getByRole('textbox')
+  await input.fill('Updated rule')
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByRole('status')).toHaveText('Updated rule:save')
+  await page.getByRole('button', { name: 'Reset' }).click()
+  await expect(input).toHaveValue('Alert rule')
+  await expect(page.getByRole('status')).toHaveText('Alert rule')
+  await expect
+    .poll(() => page.locator('c2-button#subject').evaluate((element) => (element as HTMLElement & { form: HTMLFormElement | null }).form?.id))
+    .toBe('test-form')
+})

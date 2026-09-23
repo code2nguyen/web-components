@@ -56,6 +56,20 @@ test('has no detectable accessibility violations', async ({ page, scenario }) =>
   await accessible(page)
 })
 
+test('exposes loading and empty as distinct semantic states', async ({ page, scenario }) => {
+  await scenario('loading')
+  const loading = page.locator('c2-status-panel')
+  await expect(loading.locator('.container')).toHaveAttribute('role', 'status')
+  await expect(loading.locator('.container')).toHaveAttribute('aria-busy', 'true')
+  await expect(loading.locator('.loading-icon')).toBeVisible()
+
+  await scenario('empty')
+  const empty = page.locator('c2-status-panel')
+  await expect(empty.locator('.container')).not.toHaveAttribute('role')
+  await expect(empty.getByRole('heading', { name: 'No services' })).toBeVisible()
+  await expect(empty.locator('.media svg')).toBeVisible()
+})
+
 test('public parts style assigned and fallback slot regions independently', async ({ page, scenario }) => {
   await scenario('custom')
   await page.addStyleTag({

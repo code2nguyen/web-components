@@ -1,6 +1,6 @@
 {
   "name": "@c2n/select",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "type": "module",
   "main": "dist/select.js",
   "exports": {
@@ -63,10 +63,10 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.14",
-    "@c2n/list": "0.0.14",
-    "@c2n/list-item": "0.0.14",
-    "@c2n/overlay": "0.0.14",
+    "@c2n/core": "0.0.15",
+    "@c2n/list": "0.0.15",
+    "@c2n/list-item": "0.0.15",
+    "@c2n/overlay": "0.0.15",
     "lit": "3.3.3"
   },
   "devDependencies": {

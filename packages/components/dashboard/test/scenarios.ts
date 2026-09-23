@@ -49,8 +49,8 @@ const markup: Record<string, string> = {
     </c2-dashboard>`,
   // Two scenarios over one storage key: the spec resizes in the first and reloads into the second.
   storage: `<c2-dashboard id="subject" columns="2" rows="1" storage-key="${STORAGE_KEY}">
-      <c2-dash-card id="one" col="1" row="1"><div class="pane">One</div></c2-dash-card>
-      <c2-dash-card id="two" col="2" row="1"><div class="pane">Two</div></c2-dash-card>
+      <c2-dash-card id="one" card-id="one" col="1" row="1"><div class="pane">One</div></c2-dash-card>
+      <c2-dash-card id="two" card-id="two" col="2" row="1"><div class="pane">Two</div></c2-dash-card>
     </c2-dashboard>`,
   layout: `<c2-dashboard id="subject" columns="2" rows="1">
       <c2-dash-card id="one" card-id="one" col="1" row="1"><div class="pane">One</div></c2-dash-card>
