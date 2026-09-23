@@ -59,6 +59,10 @@ export interface ButtonGroup {
  * @cssproperty {border-radius} [--c2-button-group__indicator--border-radius=6px] - Sliding selection indicator corner radius.
  * @cssproperty {box-shadow} [--c2-button-group__indicator--box-shadow=0 1px 3px rgba(24, 24, 27, 0.16)] - Sliding selection indicator shadow.
  * @cssproperty {duration} [--c2-button-group__indicator--transition-duration=200ms] - Sliding selection indicator animation duration.
+ *
+ * In the segmented appearance the group owns its children's surface variables with an important cascade layer. Theme
+ * the control through the `segmented-*` and `indicator-*` variables above; app-wide `c2-button` defaults will not leak
+ * into the segmented surface.
  * @slotcomponent c2-button
  * @slotcomponent c2-icon-button
  */

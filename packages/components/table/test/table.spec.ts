@@ -470,6 +470,41 @@ test('a cell-slot column takes its body from a light-DOM child and falls back to
   await expect(page.getByRole('row', { name: /Ada Lovelace/ })).toContainText('128,000')
 })
 
+test('redistributes an interactive cell slot after property-driven rows and columns update', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id">
+    <button slot="cell:2:action">Acknowledge</button>
+  </c2-table>`)
+  const host = page.locator('c2-table')
+  await host.evaluate(async (element, nextRows) => {
+    const table = element as HTMLElement & {
+      rows: typeof nextRows
+      columns: { field: string; header: string; cellSlot?: boolean }[]
+      updateComplete: Promise<boolean>
+    }
+    table.columns = [
+      { field: 'name', header: 'Name' },
+      { field: 'action', header: 'Action', cellSlot: true },
+    ]
+    table.rows = nextRows
+    await table.updateComplete
+  }, PEOPLE)
+  const action = page.getByRole('button', { name: 'Acknowledge' })
+  await expect(action).toBeVisible()
+  await action.click()
+  await expect(action).toBeFocused()
+})
+
+test('retains a semantic static fallback in light DOM but hides it after upgrade', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" rows='${rows}'>
+    <c2-table-column field="name" header="Name"></c2-table-column>
+    <table slot="fallback" aria-label="Server fallback"><tbody><tr><td>Ada Lovelace</td></tr></tbody></table>
+  </c2-table>`)
+  const fallback = page.getByRole('table', { name: 'Server fallback' })
+  await expect(fallback).toBeHidden()
+  await expect(page.locator('c2-table > [slot="fallback"]')).toHaveCount(1)
+  await expect(page.getByRole('grid')).toContainText('Ada Lovelace')
+})
+
 test('stable table parts style shared regions while dynamic cell slots stay consumer-owned', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" rows='${rows}'>
     <div slot="toolbar">Toolbar</div><div slot="footer">Footer</div>

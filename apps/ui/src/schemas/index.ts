@@ -43,7 +43,7 @@ export const guideSchema = z.object({
   order: z.number().default(100),
 })
 
-export const EXAMPLE_FRAMEWORKS = ['html', 'react', 'angular', 'vue'] as const
+export const EXAMPLE_FRAMEWORKS = ['html', 'react', 'nextjs', 'angular', 'vue'] as const
 
 export type ExampleFramework = (typeof EXAMPLE_FRAMEWORKS)[number]
 
@@ -51,6 +51,7 @@ export type ExampleFramework = (typeof EXAMPLE_FRAMEWORKS)[number]
 export const EXAMPLE_FRAMEWORK_LABELS: Record<ExampleFramework, string> = {
   html: 'HTML',
   react: 'React',
+  nextjs: 'Next.js',
   angular: 'Angular',
   vue: 'Vue',
 }
@@ -64,6 +65,18 @@ export const exampleSchema = z.object({
   title: z.string(),
   description: z.string().default(''),
   framework: z.enum(EXAMPLE_FRAMEWORKS),
+  outputDir: z
+    .string()
+    .regex(/^[a-zA-Z0-9_-]+$/)
+    .default('dist'),
+  sourcePath: z
+    .string()
+    .regex(/^[a-zA-Z0-9_./-]+$/)
+    .optional(),
+  evaluationPath: z
+    .string()
+    .regex(/^[a-zA-Z0-9_./-]+$/)
+    .optional(),
   tags: z.array(z.string()).default([]),
   /** Card order, ascending. */
   order: z.number().default(100),

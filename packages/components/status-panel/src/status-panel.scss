@@ -102,6 +102,27 @@
   color: css.cssVar(media__info--color);
 }
 
+:host([status='loading']) .media {
+  background-color: css.cssVar(media__info--background-color);
+  color: css.cssVar(media__info--color);
+}
+
+.loading-icon {
+  animation: c2-status-panel-spin 800ms linear infinite;
+}
+
+@keyframes c2-status-panel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-icon {
+    animation-duration: 1600ms;
+  }
+}
+
 :host([status='success']) .media {
   background-color: css.cssVar(media__success--background-color);
   color: css.cssVar(media__success--color);

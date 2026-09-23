@@ -10,7 +10,7 @@
  *
  * Runs from `pre{build,dev,start}` in this package, after the root `examples:build`.
  */
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -37,9 +37,12 @@ mkdirSync(targetRoot, { recursive: true })
 
 let copied = 0
 for (const id of ids) {
-  const from = join(examplesDir, id, 'dist')
+  const configPath = join(examplesDir, id, 'app.config.json')
+  const config = existsSync(configPath) ? JSON.parse(readFileSync(configPath, 'utf8')) : {}
+  const outputDir = typeof config.outputDir === 'string' && /^[a-zA-Z0-9_-]+$/.test(config.outputDir) ? config.outputDir : 'dist'
+  const from = join(examplesDir, id, outputDir)
   if (!existsSync(from)) {
-    console.warn(`[sync-examples] ${id} has no dist/ — run \`npm run examples:build\` at the root first`)
+    console.warn(`[sync-examples] ${id} has no ${outputDir}/ — run \`npm run examples:build\` at the root first`)
     continue
   }
   const to = join(targetRoot, id)

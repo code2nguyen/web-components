@@ -100,7 +100,8 @@
   border: css.cssVar(container__selected--border, container--border);
 }
 
-:host([disabled]) .c2-button {
+:host([disabled]) .c2-button,
+:host(:state(disabled)) .c2-button {
   cursor: default;
   opacity: css.cssVar(container__disabled--opacity);
 }

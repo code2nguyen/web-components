@@ -182,6 +182,8 @@ export interface Table {
  * @slot empty - Replaces the built-in "no rows" message.
  * @slot loading - Replaces the built-in spinner shown while the first rows load.
  * @slot error - Replaces the built-in message shown when `error` is set.
+ * @slot fallback - Meaningful server-rendered table content. It remains visible before custom-element upgrade and is
+ * retained in the light DOM but hidden after the interactive grid mounts, avoiding duplicate client content.
  * @slot cell:{rowKey}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:AAPL:change"`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback.
  *
  * @slotcomponent c2-table-column
@@ -660,6 +662,7 @@ export class Table extends LitElement {
         <slot name="footer" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
       <slot class="definitions" @slotchange=${this.#handleDefinitionsChange}></slot>
+      <slot name="fallback" class="definitions"></slot>
     `
   }
 

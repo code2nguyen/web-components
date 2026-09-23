@@ -9,7 +9,8 @@
 //
 // On a server-rendered page (Next.js, React Router SSR) write a camelCase property by its kebab-case attribute
 // name ('row-key', not rowKey): the server emits props verbatim, HTML lowercases them, and hydration does not
-// set properties. Those names are listed next to the properties below.
+// set properties. Those names are listed next to the properties below. Structured converter-backed values
+// also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Autocomplete } from '@c2n/autocomplete'
@@ -22,7 +23,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-autocomplete': C2Props<Autocomplete> & {
+      'c2-autocomplete': Omit<C2Props<Autocomplete>, 'suggestions' | 'searchFields'> & {
         'aria-label'?: Attribute
         'item-key'?: Attribute
         'label-field'?: Attribute
@@ -33,6 +34,8 @@ declare module 'react' {
         'min-query-length'?: Attribute
         'max-results'?: Attribute
         'show-empty'?: Attribute
+        suggestions?: Autocomplete['suggestions'] | string
+        searchFields?: Autocomplete['searchFields'] | string
       }
     }
   }

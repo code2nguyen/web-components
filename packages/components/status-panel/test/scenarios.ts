@@ -14,6 +14,10 @@ if (scenario === 'custom') {
     </c2-status-panel>`
 } else if (scenario === 'dynamic') {
   main.innerHTML = `<c2-status-panel id="subject" heading="Waiting"></c2-status-panel>`
+} else if (scenario === 'loading') {
+  main.innerHTML = `<c2-status-panel id="subject" status="loading" heading="Loading services" description="Fetching telemetry."></c2-status-panel>`
+} else if (scenario === 'empty') {
+  main.innerHTML = `<c2-status-panel id="subject" status="empty" heading="No services" description="Try another environment."></c2-status-panel>`
 } else {
   main.innerHTML = `<c2-status-panel id="subject" status="success" heading="Workspace ready" description="You can start inviting teammates."></c2-status-panel>`
 }

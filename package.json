@@ -38,7 +38,8 @@
     "mcp:smoke": "npm run smoke -w packages/tools/mcp",
     "docs:check": "node scripts/check-component-docs.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
-    "check:dogfood": "node scripts/check-dogfooding.mjs"
+    "check:dogfood": "node scripts/check-dogfooding.mjs",
+    "check:css-contracts": "node scripts/check-css-contracts.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
@@ -165,6 +166,7 @@
         "./apps/examples/basic-form-html:build",
         "./apps/examples/data-platform-html:build",
         "./apps/examples/trading-dashboard-react:build",
+        "./apps/examples/observability-nextjs:build",
         "./apps/examples/orders-admin-angular:build",
         "./apps/examples/support-inbox-vue:build"
       ]
