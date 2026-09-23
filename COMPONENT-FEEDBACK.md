@@ -22,6 +22,17 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### Astro SSR consumes navigation-menu item links in site chrome
+
+- **Severity:** docs
+- **Hit while:** restoring top-level navigation in the UI app mobile header, 2026-09-23.
+- **What happens:** rendering `c2-navigation-menu-item` directly inside an Astro `NavigationMenu` island lets
+  `@astrojs/lit` server-render each child as a deferred custom element. Its non-reflected `href` property is then
+  absent from the static HTML, and the non-island children have no independent hydration step. The app must emit
+  plain item tags through `rawElement` to preserve navigable links until the parent registers them.
+- **Where the fix belongs:** Astro framework guidance for `c2-navigation-menu` — document the raw-child pattern
+  (or provide a wrapper that emits plain items) and include a static-output check for item `href` values.
+
 ### Renderer output is unreachable from a page stylesheet
 
 - **Severity:** papercut
