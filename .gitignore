@@ -6,6 +6,7 @@
 **/.next/
 **/out/
 **/types
+!apps/examples/observability-nextjs/types/
 **/.DS_Store
 *.log
 .env*
