@@ -1,6 +1,6 @@
 {
   "name": "@c2n/angular",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Angular bindings for the c2n web components: ControlValueAccessor directives so ngModel and reactive forms work with c2-* form controls",
   "type": "module",
   "main": "dist/index.js",
