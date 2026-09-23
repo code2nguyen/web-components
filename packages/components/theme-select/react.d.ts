@@ -9,7 +9,8 @@
 //
 // On a server-rendered page (Next.js, React Router SSR) write a camelCase property by its kebab-case attribute
 // name ('row-key', not rowKey): the server emits props verbatim, HTML lowercases them, and hydration does not
-// set properties. Those names are listed next to the properties below.
+// set properties. Those names are listed next to the properties below. Structured converter-backed values
+// also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { ThemeSelect } from '@c2n/theme-select'
@@ -22,13 +23,14 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-theme-select': C2Props<ThemeSelect> & {
+      'c2-theme-select': Omit<C2Props<ThemeSelect>, 'modes'> & {
         'show-label'?: Attribute
         'theme-attribute'?: Attribute
         'storage-key'?: Attribute
         'open-delay'?: Attribute
         'close-delay'?: Attribute
         'aria-label'?: Attribute
+        modes?: ThemeSelect['modes'] | string
       }
     }
   }

@@ -1641,6 +1641,12 @@
     },
     {
       "tag": "c2-table",
+      "slot": "fallback",
+      "decision": "assigned-content",
+      "reason": "The fallback remains consumer-owned semantic light DOM before upgrade and is intentionally hidden once the interactive grid mounts."
+    },
+    {
+      "tag": "c2-table",
       "slot": "footer",
       "decision": "part",
       "parts": ["footer"],

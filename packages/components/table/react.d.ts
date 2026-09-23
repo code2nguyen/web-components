@@ -9,7 +9,8 @@
 //
 // On a server-rendered page (Next.js, React Router SSR) write a camelCase property by its kebab-case attribute
 // name ('row-key', not rowKey): the server emits props verbatim, HTML lowercases them, and hydration does not
-// set properties. Those names are listed next to the properties below.
+// set properties. Those names are listed next to the properties below. Structured converter-backed values
+// also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { Table } from '@c2n/table'
@@ -23,7 +24,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-table': C2Props<Table> & {
+      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel'> & {
         'row-key'?: Attribute
         'checkbox-selection'?: Attribute
         sort?: Attribute
@@ -37,12 +38,17 @@ declare module 'react' {
         'block-size'?: Attribute
         'empty-message'?: Attribute
         'page-size'?: Attribute
+        rows?: Table['rows'] | string
+        columns?: Table['columns'] | string
+        value?: Table['value'] | string
+        sortModel?: Table['sortModel'] | string
       }
-      'c2-table-column': C2Props<TableColumn> & {
+      'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions'> & {
         'min-width'?: Attribute
         'format-options'?: Attribute
         'cell-class'?: Attribute
         'cell-slot'?: Attribute
+        formatOptions?: TableColumn['formatOptions'] | string
       }
     }
   }

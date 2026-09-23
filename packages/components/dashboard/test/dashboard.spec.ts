@@ -278,6 +278,22 @@ test('the track sizes survive a reload when a storage key is set', async ({ page
   await expect.poll(() => page.evaluate(() => localStorage.getItem('c2n-dashboard-test'))).toBeNull()
 })
 
+test('stable panel order is persisted and restored with a versioned layout payload', async ({ page, scenario }) => {
+  await scenario('storage')
+  const subject = page.locator('#subject')
+  await subject.evaluate((element) => (element as Dashboard).setPanelOrder(['two', 'one']))
+  await expect(subject.locator('c2-dash-card')).toHaveCount(2)
+  expect(await subject.locator('c2-dash-card').evaluateAll((cards) => cards.map((card) => card.getAttribute('card-id')))).toEqual(['two', 'one'])
+
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('c2n-dashboard-test') ?? '{}'))
+  expect(stored).toMatchObject({ version: 1, order: ['two', 'one'], breakpoint: null })
+
+  await scenario('storage-restored')
+  await expect
+    .poll(() => page.locator('#subject c2-dash-card').evaluateAll((cards) => cards.map((card) => card.getAttribute('card-id'))))
+    .toEqual(['two', 'one'])
+})
+
 test('the layout record overrides the placement and the visibility', async ({ page, scenario }) => {
   await scenario('layout')
   await expect(page.locator('#two')).toBeHidden()

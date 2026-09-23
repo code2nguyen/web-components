@@ -3,6 +3,8 @@
 /test/
 **/dist
 **/build/
+**/.next/
+**/out/
 **/types
 **/.DS_Store
 *.log
@@ -19,6 +21,8 @@ scripts/generator/tsconfig.tsbuildinfo
 apps/ui/public/demo/
 /playwright-report/
 /test-results/
+**/coverage/
+*.tsbuildinfo
 **/playwright-report/
 **/test-results/
 /packages/tools/mcp/data/registry.json

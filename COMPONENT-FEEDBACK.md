@@ -144,6 +144,120 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/tools/theme` — either have the generator emit the shorthand when a
   component declares one, or stop `base.css` writing all four sides when they carry the same token.
 
+### React types omit the `c2-button` value consumed by `c2-button-group`
+
+- **Severity:** papercut
+- **Hit while:** building the Next.js observability example's segmented time-mode control, 2026-09-21.
+- **What happens:** `c2-button-group` uses each child button's `value` attribute as its stable selection ID, but
+  `@c2n/button/react` does not allow `value` on `c2-button`. A typed React consumer must fall back to positional
+  indexes, which couples state to child order.
+- **Where the fix belongs:** `packages/components/button` / framework type generation — expose and document the
+  child value contract, or let the group accept a separate typed item-key mapping.
+- **Resolved 2026-09-23:** `c2-button` now exposes a reflected `value`; generated React types inherit it.
+
+### Serialized select and theme-select values are rejected by generated React types
+
+- **Severity:** papercut
+- **Hit while:** server-rendering global scope and theme controls in the Next.js observability example, 2026-09-21.
+- **What happens:** the components document serialized markup values, but generated React declarations expose
+  only property-shaped `string[]` values. SSR-safe JSX such as a scalar `value="production"` is rejected, so the
+  app needs post-upgrade ref assignment even for an initial selection.
+- **Where the fix belongs:** `@c2n/framework-types` — include the documented attribute representation alongside
+  the property type for properties whose converters accept serialized strings.
+- **Resolved 2026-09-23:** generated React declarations accept the property type or a serialized string for structured values.
+
+### Dashboard persistence cannot represent ordered panels and named sizes
+
+- **Severity:** gap
+- **Hit while:** building versioned desktop/tablet layouts for the Next.js observability example, 2026-09-21.
+- **What happens:** `c2-dashboard`'s `storage-key` persists only track rows and columns. A consumer that needs an
+  ordered panel-ID permutation plus named whole-panel sizes must own a second storage model and packing layer.
+- **Where the fix belongs:** `packages/components/dashboard` — expose a versioned layout value/event contract
+  containing stable card IDs, order, breakpoint, and named sizes, with validation and reset semantics.
+- **Partially addressed 2026-09-23:** stored layouts and events include version, stable order, and breakpoint. Named sizes still require app-owned metadata through serializer hooks; the component does not validate or reset those sizes itself.
+
+### `c2-status-panel` cannot describe loading or empty states semantically
+
+- **Severity:** papercut
+- **Hit while:** implementing explicit Normal/Loading/Empty/Error demonstrations in the Next.js observability example, 2026-09-21.
+- **What happens:** the status vocabulary is limited to `neutral|info|success|warning|error`, so consumers must map
+  empty to neutral and loading to info even though both are first-class component use cases with different
+  default media and announcements.
+- **Where the fix belongs:** `packages/components/status-panel` — add documented `loading` and `empty` statuses,
+  or separate semantic state from visual tone so applications do not encode the distinction ad hoc.
+- **Resolved 2026-09-23:** `loading` and `empty` are first-class statuses with distinct media and loading announcements.
+
+### `c2-button` cannot submit a form through native form semantics
+
+- **Severity:** gap
+- **Hit while:** building the validated alert-rule form in the Next.js observability example, 2026-09-21.
+- **What happens:** the component is not form-associated and exposes no `type="submit"` contract. The app must
+  wire an explicit click handler instead of relying on form submission, Enter behavior, and native validation
+  flow.
+- **Where the fix belongs:** `packages/components/button` — add form association and `type`, `name`, and `value`
+  semantics, forwarding submit/reset behavior through `ElementInternals`.
+- **Resolved 2026-09-23:** the form-associated button supports `button`, `submit`, and `reset` with `name`/`value` semantics.
+
+### Property-driven table cell action slots are not reliably actionable during upgrade
+
+- **Severity:** bug
+- **Hit while:** adding Edit/Open actions to alert rule and incident rows in the Next.js observability example, 2026-09-21.
+- **What happens:** when `rows` and `columns` are assigned after `customElements.whenDefined`, light-DOM controls named
+  for `cell:{rowKey}:{field}` did not consistently attach to the expected rendered cell soon enough to provide a
+  stable keyboard/click target. The dense data stays in `c2-table`, while row actions had to move to an adjacent
+  c2 control region.
+- **Where the fix belongs:** `packages/components/table` — make cell-slot redistribution deterministic after
+  property-driven row/column updates and add a framework/upgrade regression test for interactive slotted cells.
+- **Partially addressed 2026-09-23:** a property-driven update regression verifies pointer/focus use of an interactive light-DOM cell. The original Next.js hydration race has no confirmed runtime fix and remains open.
+
+### Property-driven tables produce no meaningful static-export HTML
+
+- **Severity:** gap
+- **Hit while:** building server-visible trace and log result baselines in the Next.js observability example, 2026-09-21.
+- **What happens:** table rows and columns are property-only data assigned after upgrade, so a static export contains
+  an empty `c2-table`. The application must render a second light-DOM baseline and hide it after the URL-aware client
+  table mounts, duplicating collection markup solely to provide meaningful no-JavaScript/initial HTML.
+- **Where the fix belongs:** `packages/components/table` — document/provide an SSR projection contract (declarative
+  row children, a server renderer, or a hydration-friendly fallback slot) that the upgraded table can adopt.
+- **Resolved 2026-09-23:** `slot="fallback"` is an explicit semantic SSR projection that becomes hidden after upgrade without removing its light DOM.
+
+### `c2-link-button` does not participate in Next.js base-path routing
+
+- **Severity:** papercut
+- **Hit while:** linking trace/log correlations and recovery actions in a statically exported Next.js app with a
+  `/web-components/demo/observability-nextjs` base path, 2026-09-21.
+- **What happens:** unlike Next `Link`, a relative `c2-link-button` href is not rewritten with the configured base
+  path. The consumer must explicitly construct deployment-prefixed URLs or use a different link surface.
+- **Where the fix belongs:** documentation/framework guidance — document base-path URL construction for custom
+  element links, or offer a small adapter that accepts the framework-resolved href while preserving the component.
+- **Resolved 2026-09-23:** the framework guide includes an idempotent Next.js base-path href adapter and component example.
+
+### App-wide button tokens override `c2-button-group` item presentation
+
+- **Severity:** papercut
+- **Hit while:** aligning segmented time controls and dashboard state/size controls in the Next.js observability example, 2026-09-23.
+- **What happens:** a consumer rule that assigns `--c2-button__*` variables directly to every `c2-button` wins over
+  the button group's `::slotted` item variables. Segmented children then retain primary-button fills and app-level
+  heights, so their visual selection and alignment disagree with the group's value and size. The app must exclude
+  grouped children from global button rules and repeat shared tokens on `c2-button-group` for joined controls.
+- **Where the fix belongs:** `packages/components/button-group` and its documentation — expose/document a stable
+  group-item theming layer that app themes can target without competing with child-host declarations, and include a
+  composed example where standalone buttons are globally themed.
+- **Resolved 2026-09-23:** segmented groups own child surface variables through an intentional cascade layer, covered against app-wide button tokens.
+
+### Unknown `--c2-*` custom properties fail silently in consuming applications
+
+- **Severity:** papercut (tooling)
+- **Hit while:** auditing inconsistent card, details, sheet, skeleton, date-input, and list-item surfaces in the
+  Next.js observability example, 2026-09-23.
+- **What happens:** renamed or obsolete component variables remain valid CSS, so type-check, lint, and production
+  builds succeed while components silently use package defaults. The mismatch only becomes apparent during visual
+  inspection; this example contained several stale names despite otherwise complete automated checks.
+- **Where the fix belongs:** manifest/tooling pipeline — add a consumer-facing check that extracts `--c2-*` usages
+  from application styles and validates them against installed custom-elements manifests, reporting the owning
+  component and closest current property name.
+- **Resolved 2026-09-23:** `npm run check:css-contracts` validates app usage against manifests and theme tokens with file/line diagnostics.
+
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                      |
