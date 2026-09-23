@@ -1,6 +1,6 @@
 {
   "name": "@c2n/icon-button",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "type": "module",
   "main": "dist/icon-button.js",
   "exports": {
@@ -62,8 +62,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.14",
-    "@c2n/tooltip": "0.0.14",
+    "@c2n/core": "0.0.15",
+    "@c2n/tooltip": "0.0.15",
     "lit": "3.3.3"
   },
   "devDependencies": {
