@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-21
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "The reorder list still does not work; create a specification for this component."
 
