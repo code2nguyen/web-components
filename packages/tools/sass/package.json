@@ -1,6 +1,6 @@
 {
   "name": "@c2n/sass",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "author": "code2nguyen@gmail.com",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
