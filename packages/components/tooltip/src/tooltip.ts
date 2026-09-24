@@ -108,6 +108,8 @@ export class Tooltip extends LitElement {
   private showTimer: ReturnType<typeof setTimeout> | undefined
   private hideTimer: ReturnType<typeof setTimeout> | undefined
   private cleanupPosition: (() => void) | null = null
+  private positioningStyleObserver: MutationObserver | null = null
+  private positioningStyleValues = ''
 
   /** The element the tooltip describes. Assignable. */
   get target(): HTMLElement | null {
@@ -226,11 +228,26 @@ export class Tooltip extends LitElement {
     const target = this._target
     if (!target) return
     this.cleanupPosition = autoUpdate(target, this, () => this.updatePosition(target))
+    const positioningValues = () => {
+      const style = getComputedStyle(this)
+      return `${style.getPropertyValue('--c2-tooltip--offset')}|${style.getPropertyValue('--c2-tooltip__arrow--size')}`
+    }
+    this.positioningStyleValues = positioningValues()
+    // Floating UI observes layout, but an inspector edit to a positioning variable need not resize either element.
+    this.positioningStyleObserver = new MutationObserver(() => {
+      const next = positioningValues()
+      if (next === this.positioningStyleValues) return
+      this.positioningStyleValues = next
+      void this.updatePosition(target)
+    })
+    this.positioningStyleObserver.observe(this, { attributes: true, attributeFilter: ['style', 'class'] })
   }
 
   private stopPositioning() {
     this.cleanupPosition?.()
     this.cleanupPosition = null
+    this.positioningStyleObserver?.disconnect()
+    this.positioningStyleObserver = null
   }
 
   private async updatePosition(target: HTMLElement) {

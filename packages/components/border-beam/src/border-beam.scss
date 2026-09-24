@@ -108,7 +108,7 @@
 }
 
 .beam--staggered {
-  animation-delay: calc(#{css.cssVar(beam--delay)} - (#{css.cssVar(beam--duration)} * var(--c2-border-beam--phase, 0)));
+  animation-delay: calc(#{css.cssVar(beam--delay)} - (#{css.cssVar(beam--duration)} * var(--_c2-border-beam-phase, 0)));
 }
 
 :host([reverse]) .beam {

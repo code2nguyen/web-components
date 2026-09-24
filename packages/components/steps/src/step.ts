@@ -79,7 +79,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {pixel} [--c2-step__row--gap=10px] - Space between the marker, the text and the trailing content.
  * @cssproperty {padding} [--c2-step__row--padding-block=7px]
  * @cssproperty {padding} [--c2-step__row--padding-inline=12px]
- * @cssproperty {pixel} [--c2-step__row--indent=marker size + row gap] - Extra inset per level of nesting. The default puts a sub-step's marker under its parent's label, which is what makes the nesting read without drawing anything.
+ * @cssproperty {pixel} [--c2-step__row--indent=calc(var(--c2-step__marker--size, 16px) + var(--c2-step__row--gap, 10px))] - Extra inset per level of nesting. The default puts a sub-step's marker under its parent's label, which is what makes the nesting read without drawing anything.
  * @cssproperty {border-radius} --c2-step__row--border-radius
  * @cssproperty {color} --c2-step__row--background
  * @cssproperty {color} --c2-step__row__hover--background - Set it to make the rows respond to the pointer.

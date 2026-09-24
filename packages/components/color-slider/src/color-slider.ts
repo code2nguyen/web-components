@@ -25,17 +25,15 @@ export interface ColorSlider {
  * @event {Event} input - Re-dispatched from the inner range input while its value changes.
  *
  *
- * @cssproperty {border-radius} [--c2-color-slider--border-radius=8px]
- *
  * @cssproperty {border-radius} [--c2-color-slider--border-top-left-radius=8px]
  * @cssproperty {border-radius} [--c2-color-slider--border-top-right-radius=8px]
  * @cssproperty {border-radius} [--c2-color-slider--border-bottom-left-radius=8px]
  * @cssproperty {border-radius} [--c2-color-slider--border-bottom-right-radius=8px]
  *
- * @cssproperty {border} [--c2-color-slider--border-top=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-color-slider--border-right=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-color-slider--border-bottom=1px solid rgb(177, 177, 177)]
- * @cssproperty {border} [--c2-color-slider--borde-leftr=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-color-slider--border-top=1px solid rgb(248, 248, 248)]
+ * @cssproperty {border} [--c2-color-slider--border-right=1px solid rgb(248, 248, 248)]
+ * @cssproperty {border} [--c2-color-slider--border-bottom=1px solid rgb(248, 248, 248)]
+ * @cssproperty {border} [--c2-color-slider--border-left=1px solid rgb(248, 248, 248)]
  *
  * @cssproperty {pixel} [--c2-color-slider--width=160px]
  * @cssproperty {pixel} [--c2-color-slider--height=12px]

@@ -54,6 +54,10 @@ The legend occupies its normal HTML position. The tooltip floats beside the hove
 flips at viewport edges; `position="inline"` makes it occupy its authored position. Assign `renderLegend`,
 `renderLegendItem` or `renderTooltip` for data-driven custom Lit templates.
 
+The chart's built-in tooltip also renders in the browser's top layer. It remains in the chart's shadow tree
+for slots, parts and CSS-variable inheritance, but it is not clipped by the plot or an `overflow: hidden`
+ancestor.
+
 ## Engines
 
 Both libraries are **optional peer dependencies** loaded through a dynamic `import()` on first paint, so

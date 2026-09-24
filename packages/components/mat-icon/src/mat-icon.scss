@@ -15,7 +15,7 @@
   color: css.cssVar(color);
   user-select: none;
   font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Symbols Sharp', 'Material Icons';
-  font-weight: normal;
+  font-weight: css.cssVar(font-weight);
   font-style: normal;
   font-size: css.cssVar(font-size);
   line-height: 1;

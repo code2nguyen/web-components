@@ -47,7 +47,7 @@ import styles from './link-button.scss?inline'
  * @cssproperty {opacity} [--c2-link-button__container__disabled--opacity=0.38]
  *
  * @cssproperty {pixel} [--c2-link-button__icon--size=16px]
- * @cssproperty {color} --c2-link-button__icon--color
+ * @cssproperty {color} [--c2-link-button__icon--color=currentColor]
  */
 @customElement('c2-link-button')
 export class LinkButton extends LitElement {

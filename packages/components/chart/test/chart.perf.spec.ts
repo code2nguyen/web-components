@@ -73,7 +73,7 @@ test('the tooltip is one reused node, not a node per hovered point', async ({ pa
   // reports no datum.
   const startX = box.x + box.width / 2
   await page.mouse.move(startX, box.y + box.height / 2)
-  await expect.poll(() => chart.evaluate((element) => !element.shadowRoot?.querySelector('.tooltip')?.hasAttribute('hidden'))).toBe(true)
+  await expect.poll(() => chart.evaluate((element) => element.shadowRoot?.querySelector('.tooltip')?.matches(':popover-open') ?? false)).toBe(true)
   const showing = await count()
 
   // From there it must be reused: twenty more positions, across many data points, allocate nothing.

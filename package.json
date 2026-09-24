@@ -39,7 +39,9 @@
     "docs:check": "node scripts/check-component-docs.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
-    "check:css-contracts": "node scripts/check-css-contracts.mjs"
+    "check:style-contracts": "node scripts/check-style-contracts.mjs",
+    "test:style-contracts": "playwright test tests/style-contracts",
+    "verify:style-contracts": "node scripts/verify-style-contracts.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

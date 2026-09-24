@@ -2,7 +2,7 @@ name: Component tests
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [develop, main]
   workflow_dispatch:
 
 permissions:
@@ -34,9 +34,34 @@ jobs:
       - run: npm run build
       - run: npm run docs:check
       - name: Verify generated component manifests are committed
-        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)open-packages/*/custom-elements.json'
+        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)open-packages/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
+      # The initial full-library audit still has unresolved failures. Collect the complete result on every PR;
+      # promote this to a required gate only after the inventory and browser/panel evidence reach zero failures.
+      - name: Style-contract static diagnostic
+        if: matrix.browser == 'chromium'
+        continue-on-error: true
+        run: |
+          mkdir -p test-results/style-contracts
+          node scripts/check-style-contracts.mjs --json > test-results/style-contracts/style-contract-static-report.json
+      - name: Summarize style-contract diagnostic
+        if: ${{ !cancelled() && matrix.browser == 'chromium' }}
+        run: node scripts/summarize-style-contract-audit.mjs test-results/style-contracts/style-contract-static-report.json
+      - name: Upload style-contract static report
+        if: ${{ !cancelled() && matrix.browser == 'chromium' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: style-contract-static-report
+          path: test-results/style-contracts/style-contract-static-report.json
+          retention-days: 7
       - run: npx playwright install --with-deps ${{ matrix.browser }}
       - run: npm run test:type-check
+      - name: Style-contract browser diagnostic
+        continue-on-error: true
+        run: npm run test:style-contracts -- --project=${{ matrix.browser }} --output=test-results/style-contracts-${{ matrix.browser }} --reporter=list
+      - name: Configuration-panel diagnostic
+        if: matrix.browser == 'chromium'
+        continue-on-error: true
+        run: npx playwright test --config apps/ui/playwright.config.ts apps/ui/test/style-panel.spec.ts --project=chromium --output=apps/ui/test-results/style-panel --reporter=list
       - name: Test changed component packages
         if: github.event_name != 'workflow_dispatch'
         env:
@@ -52,4 +77,5 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            apps/ui/test-results/
           retention-days: 7

@@ -23,3 +23,19 @@ test('removing the tooltip restores existing descriptions', async ({ page, rende
   await page.locator('c2-tooltip').evaluate((el) => el.remove())
   await expect(page.getByRole('button')).toHaveAttribute('aria-describedby', 'existing')
 })
+
+test('changing the public offset while open repositions the tooltip', async ({ page, renderScenario }) => {
+  await renderScenario('<button id="target" style="margin-top: 200px">Help</button><c2-tooltip for="target">More information</c2-tooltip>')
+  const tooltip = page.locator('c2-tooltip')
+  await tooltip.evaluate((element) => element.setAttribute('open', ''))
+  await expect(tooltip).toBeVisible()
+  await expect(tooltip).toHaveAttribute('current-placement', 'top')
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))))
+  const originalTop = await tooltip.evaluate((element) => Number.parseFloat(getComputedStyle(element).top))
+
+  await tooltip.evaluate((element) => (element as HTMLElement).style.setProperty('--c2-tooltip--offset', '48px'))
+  await expect.poll(() => tooltip.evaluate((element) => Number.parseFloat(getComputedStyle(element).top))).toBeLessThan(originalTop - 30)
+
+  await tooltip.evaluate((element) => (element as HTMLElement).style.removeProperty('--c2-tooltip--offset'))
+  await expect.poll(() => tooltip.evaluate((element) => Number.parseFloat(getComputedStyle(element).top))).toBeGreaterThan(originalTop - 2)
+})

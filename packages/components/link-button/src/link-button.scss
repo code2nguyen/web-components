@@ -33,7 +33,7 @@
     container__disabled--opacity: variables.$disabled-content-opacity,
 
     icon--size: 16px,
-    icon--color: null,
+    icon--color: currentColor,
   )
 );
 
@@ -115,7 +115,7 @@
   flex-shrink: 0;
   width: css.cssVar(icon--size);
   height: css.cssVar(icon--size);
-  color: css.cssVar(icon--color, currentColor);
+  color: css.cssVar(icon--color);
   // Size the icon components of this library to the slot: feather icons and Material icon ligatures.
   --c2-feather-icon--size: #{css.cssVar(icon--size)};
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};

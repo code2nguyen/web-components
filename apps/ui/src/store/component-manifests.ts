@@ -44,6 +44,7 @@ import modal from '@c2n/modal/custom-elements.json'
 import button from '@c2n/button/custom-elements.json'
 import chatInput from '@c2n/chat-input/custom-elements.json'
 import chatMessage from '@c2n/chat-message/custom-elements.json'
+import chatbot from '@c2n/chatbot/custom-elements.json'
 import avatar from '@c2n/avatar/custom-elements.json'
 import sideNav from '@c2n/side-nav/custom-elements.json'
 import card from '@c2n/card/custom-elements.json'
@@ -118,6 +119,7 @@ export const componentManifests = (function () {
     button,
     chatInput,
     chatMessage,
+    chatbot,
     avatar,
     sideNav,
     details,
