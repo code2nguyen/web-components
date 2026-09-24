@@ -1,6 +1,6 @@
 {
   "name": "@c2n/skeleton",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "type": "module",
   "main": "dist/skeleton.js",
   "exports": {
@@ -63,7 +63,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.15",
+    "@c2n/core": "0.0.16",
     "lit": "3.3.3"
   },
   "devDependencies": {

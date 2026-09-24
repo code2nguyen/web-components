@@ -1,6 +1,6 @@
 {
   "name": "@c2n/navigation-menu",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "type": "module",
   "main": "dist/navigation-menu.js",
   "exports": {
@@ -74,8 +74,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.15",
-    "@c2n/overlay": "0.0.15",
+    "@c2n/core": "0.0.16",
+    "@c2n/overlay": "0.0.16",
     "lit": "3.3.3"
   },
   "devDependencies": {
