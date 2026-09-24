@@ -1,10 +1,10 @@
-import { LitElement, html, isServer, unsafeCSS, type TemplateResult } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type TemplateResult } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './status-panel.scss?inline'
 
-export type StatusPanelStatus = 'neutral' | 'info' | 'success' | 'warning' | 'error'
+export type StatusPanelStatus = 'neutral' | 'loading' | 'empty' | 'info' | 'success' | 'warning' | 'error'
 export type StatusPanelAlign = 'center' | 'start'
 
 /**
@@ -108,6 +108,17 @@ export class StatusPanel extends LitElement {
   }
 
   private renderDefaultMedia(): TemplateResult {
+    if (this.status === 'loading') {
+      return html`<svg class="loading-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-6.22-8.56"></path>
+      </svg>`
+    }
+    if (this.status === 'empty') {
+      return html`<svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 8.5 7 4h10l3 4.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"></path>
+        <path d="M4 13h4l1.5 2h5l1.5-2h4"></path>
+      </svg>`
+    }
     if (this.status === 'success') return html`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>`
     if (this.status === 'warning') {
       return html`<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -133,7 +144,12 @@ export class StatusPanel extends LitElement {
     const hasDescription = Boolean(this.description) || this.descriptionSlotted
 
     return html`
-      <div class="container">
+      <div
+        class="container"
+        role=${this.status === 'loading' ? 'status' : nothing}
+        aria-live=${this.status === 'loading' ? 'polite' : nothing}
+        aria-busy=${this.status === 'loading' ? 'true' : nothing}
+      >
         <div class="message">
           <div part="media" class="media"><slot name="media" @slotchange=${this.handleSlotChange}>${this.renderDefaultMedia()}</slot></div>
           <div class="header" ?hidden=${!hasTitle && !hasDescription}>

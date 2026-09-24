@@ -4,12 +4,14 @@ import logoRef from '../assets/logo.svg?raw'
 import '@c2n/theme/base.css'
 import '../assets/global.scss'
 import SiteIconButton from '../components/ui/SiteIconButton.astro'
-import { FeatherGithubIcon, FeatherMenuIcon, FeatherSearchIcon } from '../components/ui/icons'
+import { FeatherGithubIcon, FeatherLayersIcon, FeatherSearchIcon } from '../components/ui/icons'
 import { Header } from '@c2n/header'
 import { LinkButton } from '@c2n/link-button'
+import { NavigationMenu } from '@c2n/navigation-menu'
 import ThemeToggle from '../components/ThemeToggle.astro'
 import SearchPalette from '../components/SearchPalette.astro'
 import { packageVersion } from '../data/package-release'
+import { rawElement } from '../utils/raw-element'
 
 const base = import.meta.env.BASE_URL
 
@@ -23,6 +25,15 @@ interface Props {
 }
 const { title, description = 'A library of small, themable Lit web components published as individual npm packages.', withSidebar, section } = Astro.props
 const repoUrl = 'https://github.com/code2nguyen/web-components'
+const mobileNavItems = [
+  { value: 'components', label: 'Components', href: `${base}/components/`, current: section === 'components' },
+  { value: 'icons', label: 'Icons', href: `${base}/icons/`, current: section === 'icons' },
+  { value: 'guides', label: 'Guides', href: `${base}/guides/`, current: section === 'guides' },
+  { value: 'examples', label: 'Examples', href: `${base}/examples/`, current: section === 'examples' },
+  { value: 'getting-started', label: 'Getting started', href: `${base}/#getting-started`, current: false },
+]
+  .map(({ value, label, href, current }) => rawElement('c2-navigation-menu-item', { value, href, current }, label))
+  .join('')
 ---
 
 <!doctype html>
@@ -86,15 +97,18 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
         </LinkButton>
       </div>
 
-      {
-        withSidebar && (
-          <div slot="mobile-trigger" class="site-header__mobile-trigger">
-            <SiteIconButton label="Open navigation" tooltip={false} class="site-header__menu" data-toggle-sidebar>
-              <FeatherMenuIcon client:load />
+      <div slot="mobile-trigger" class="site-header__mobile-trigger">
+        <NavigationMenu client:load class="site-header__site-menu" mode="mobile" aria-label="Site sections" mobile-label="Open site menu">
+          <Fragment set:html={mobileNavItems} />
+        </NavigationMenu>
+        {
+          withSidebar && (
+            <SiteIconButton label="Browse this section" tooltip={false} class="site-header__menu" data-toggle-sidebar>
+              <FeatherLayersIcon client:load />
             </SiteIconButton>
-          </div>
-        )
-      }
+          )
+        }
+      </div>
     </Header>
 
     <main id="main" class="site-main">
@@ -164,6 +178,25 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
         // Hosts rendered by SiteIconButton / LinkButton carry no scoped attribute, hence :global().
         :global(.site-header__menu) {
           display: inline-flex;
+        }
+        :global(.site-header__site-menu) {
+          --c2-navigation-menu__mobile-trigger--size: 36px;
+          --c2-navigation-menu__mobile-trigger--color: var(--site-color-on-surface-variant);
+          --c2-navigation-menu__mobile-trigger--background: transparent;
+          --c2-navigation-menu__mobile-trigger--border: 1px solid transparent;
+          --c2-navigation-menu__mobile-trigger--border-radius: var(--site-radius-sm);
+          --c2-navigation-menu__mobile-trigger__hover--background: var(--site-color-surface-container-3);
+          --c2-navigation-menu__mobile-trigger__focus--outline: 2px solid var(--site-color-primary);
+          --c2-navigation-menu__mobile-panel--background: var(--site-color-surface);
+          --c2-navigation-menu__mobile-panel--min-width: min(260px, calc(100vw - 32px));
+          --c2-navigation-menu__mobile-panel--border-top: 1px solid var(--site-color-outline-variant);
+          --c2-navigation-menu__mobile-panel--border-right: 1px solid var(--site-color-outline-variant);
+          --c2-navigation-menu__mobile-panel--border-bottom: 1px solid var(--site-color-outline-variant);
+          --c2-navigation-menu__mobile-panel--border-left: 1px solid var(--site-color-outline-variant);
+          --c2-navigation-menu-item--color: var(--site-color-on-surface-variant);
+          --c2-navigation-menu-item__hover--color: var(--site-color-on-surface);
+          --c2-navigation-menu-item__hover--background: var(--site-color-surface-container-2);
+          --c2-navigation-menu-item__current--color: var(--site-color-primary);
         }
         :global(.site-header__github) {
           --c2-link-button__container--padding-top: 9px;
@@ -297,6 +330,10 @@ const repoUrl = 'https://github.com/code2nguyen/web-components'
       }
       @media (max-width: 599.98px) {
         .site-header__wordmark-muted {
+          display: none;
+        }
+        .site-header__version,
+        :global(.site-header__github) {
           display: none;
         }
       }

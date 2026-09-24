@@ -1,6 +1,6 @@
 {
   "name": "@c2n/checkbox",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "type": "module",
   "main": "dist/checkbox.js",
   "exports": {
@@ -61,7 +61,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.14",
+    "@c2n/core": "0.0.15",
     "lit": "3.3.3"
   },
   "devDependencies": {

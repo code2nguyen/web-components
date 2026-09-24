@@ -168,20 +168,22 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
   margin: 0;
   box-shadow: none;
   flex: css.cssVar(item--flex);
-  --c2-button__container--border: 1px solid transparent;
-  --c2-button__container--border-radius: #{css.cssVar(indicator--border-radius)};
-  --c2-button__container--background-color: transparent;
-  --c2-button__container--color: #{css.cssVar(segmented-item--color)};
-  --c2-button__container__hover--background-color: #{css.cssVar(segmented-item__hover--background-color)};
-  --c2-button__container__active--background-color: #{css.cssVar(segmented-item__active--background-color)};
-  --c2-button__container__selected--background-color: transparent;
-  --c2-button__container__selected--color: #{css.cssVar(segmented-item__selected--color)};
-  --c2-button__container__selected--border: 1px solid transparent;
-  --c2-icon-button--border: 1px solid transparent;
-  --c2-icon-button--border-radius: #{css.cssVar(indicator--border-radius)};
-  --c2-icon-button--background-color: transparent;
-  --c2-icon-button__hover--background-color: #{css.cssVar(segmented-item__hover--background-color)};
-  --c2-icon-button__selected--background-color: transparent;
+  // The group is the segmented surface's styling authority. `!important` is intentional for custom-property
+  // declarations here: document-level button defaults otherwise outrank ::slotted() and destroy the track/indicator.
+  --c2-button__container--border: 1px solid transparent !important;
+  --c2-button__container--border-radius: #{css.cssVar(indicator--border-radius)} !important;
+  --c2-button__container--background-color: transparent !important;
+  --c2-button__container--color: #{css.cssVar(segmented-item--color)} !important;
+  --c2-button__container__hover--background-color: #{css.cssVar(segmented-item__hover--background-color)} !important;
+  --c2-button__container__active--background-color: #{css.cssVar(segmented-item__active--background-color)} !important;
+  --c2-button__container__selected--background-color: transparent !important;
+  --c2-button__container__selected--color: #{css.cssVar(segmented-item__selected--color)} !important;
+  --c2-button__container__selected--border: 1px solid transparent !important;
+  --c2-icon-button--border: 1px solid transparent !important;
+  --c2-icon-button--border-radius: #{css.cssVar(indicator--border-radius)} !important;
+  --c2-icon-button--background-color: transparent !important;
+  --c2-icon-button__hover--background-color: #{css.cssVar(segmented-item__hover--background-color)} !important;
+  --c2-icon-button__selected--background-color: transparent !important;
 }
 
 :host([appearance='segmented'][stretched]) ::slotted(*) {

@@ -12,12 +12,13 @@ export async function getStaticPaths() {
 
 const { example } = Astro.props
 const base = import.meta.env.BASE_URL
-const { title, description, framework, tags } = example.data
+const { title, description, framework, tags, sourcePath, evaluationPath } = example.data
 
 // The built app is copied verbatim out of `apps/ui/public/`, so it is a plain static file, not an Astro route —
 // link to `index.html` explicitly: the dev server does not resolve a directory index inside `public/`.
 const appUrl = `${base}/demo/${example.id}/index.html`
-const sourceUrl = `https://github.com/code2nguyen/web-components/tree/main/apps/examples/${example.id}`
+const sourceUrl = `https://github.com/code2nguyen/web-components/tree/develop/${sourcePath ?? `apps/examples/${example.id}`}`
+const evaluationUrl = evaluationPath ? `https://github.com/code2nguyen/web-components/blob/develop/${evaluationPath}` : undefined
 ---
 
 <Main title={`${title} · Examples · c2n web components`} description={description} withSidebar section="examples">
@@ -37,6 +38,13 @@ const sourceUrl = `https://github.com/code2nguyen/web-components/tree/main/apps/
         <span class="example-frame__url">{`/demo/${example.id}/`}</span>
         <SiteButton hydrate="defined" variant="ghost" size="sm" href={appUrl} target="_blank" rel="noreferrer">Open full screen</SiteButton>
         <SiteButton hydrate="defined" variant="ghost" size="sm" href={sourceUrl} target="_blank" rel="noreferrer">Source</SiteButton>
+        {
+          evaluationUrl && (
+            <SiteButton hydrate="defined" variant="ghost" size="sm" href={evaluationUrl} target="_blank" rel="noreferrer">
+              Evaluation
+            </SiteButton>
+          )
+        }
       </div>
       <iframe class="example-frame__view" data-app-url={appUrl} title={`${title} demo`} loading="lazy"></iframe>
     </div>

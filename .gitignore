@@ -3,7 +3,10 @@
 /test/
 **/dist
 **/build/
+**/.next/
+**/out/
 **/types
+!apps/examples/observability-nextjs/types/
 **/.DS_Store
 *.log
 .env*
@@ -19,6 +22,8 @@ scripts/generator/tsconfig.tsbuildinfo
 apps/ui/public/demo/
 /playwright-report/
 /test-results/
+**/coverage/
+*.tsbuildinfo
 **/playwright-report/
 **/test-results/
 /packages/tools/mcp/data/registry.json

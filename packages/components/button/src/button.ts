@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, unsafeCSS } from 'lit'
+import { LitElement, html, isServer, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './button.scss?inline'
@@ -55,9 +55,18 @@ import styles from './button.scss?inline'
  */
 @customElement('c2-button')
 export class Button extends LitElement {
+  static formAssociated = true
+
   static override styles = unsafeCSS(styles)
 
   static override shadowRootOptions: ShadowRootInit = { ...LitElement.shadowRootOptions, delegatesFocus: true }
+
+  private readonly internals = isServer ? undefined : this.attachInternals()
+  private formDisabled = false
+
+  private get unavailable(): boolean {
+    return this.disabled || this.running || this.formDisabled
+  }
 
   /** Disables the button: it no longer receives clicks and is rendered dimmed. */
   @property({ type: Boolean, reflect: true }) disabled = false
@@ -71,14 +80,58 @@ export class Button extends LitElement {
   /** Declares a toggle button: `aria-pressed` is announced as `false` while not selected. Set by `c2-button-group` in selection modes. */
   @property({ type: Boolean, reflect: true }) toggle = false
 
+  /** Native button behavior. `submit` submits the nearest form and `reset` restores it. */
+  @property({ reflect: true }) type: 'button' | 'submit' | 'reset' = 'button'
+
+  /** Stable identity used by `c2-button-group` and included in submitted form data when `name` is set. */
+  @property({ reflect: true }) value = ''
+
+  /** Form field name used with `value` when the button is the control that submits the form. */
+  @property({ reflect: true }) name = ''
+
+  /** The associated form, matching the native button API. */
+  get form(): HTMLFormElement | null {
+    return this.internals?.form ?? null
+  }
+
+  protected override updated(changed: PropertyValues<this>) {
+    if (changed.has('disabled') || changed.has('running')) {
+      if (this.unavailable) this.internals?.states.add('disabled')
+      else this.internals?.states.delete('disabled')
+    }
+  }
+
+  formDisabledCallback(disabled: boolean) {
+    this.formDisabled = disabled
+    if (this.unavailable) this.internals?.states.add('disabled')
+    else this.internals?.states.delete('disabled')
+    // Reflection of `disabled` invokes this callback during Lit's update, after
+    // render has already read `formDisabled`. Schedule a fresh render afterwards.
+    queueMicrotask(() => this.requestUpdate())
+  }
+
+  private handleClick = () => {
+    if (this.unavailable) return
+    if (this.type === 'reset') {
+      if (this.form) HTMLFormElement.prototype.reset.call(this.form)
+      return
+    }
+    if (this.type !== 'submit' || !this.form) return
+    this.internals?.setFormValue(this.name ? this.value : null)
+    HTMLFormElement.prototype.requestSubmit.call(this.form)
+    this.internals?.setFormValue(null)
+  }
+
   override render() {
     return html`
       <button
         class="c2-button"
         part="button"
-        ?disabled=${this.disabled || this.running}
+        ?disabled=${this.unavailable}
         aria-busy=${this.running ? 'true' : nothing}
         aria-pressed=${this.selected ? 'true' : this.toggle ? 'false' : nothing}
+        type="button"
+        @click=${this.handleClick}
       >
         ${
           this.running

@@ -9,7 +9,8 @@
 //
 // On a server-rendered page (Next.js, React Router SSR) write a camelCase property by its kebab-case attribute
 // name ('row-key', not rowKey): the server emits props verbatim, HTML lowercases them, and hydration does not
-// set properties. Those names are listed next to the properties below.
+// set properties. Those names are listed next to the properties below. Structured converter-backed values
+// also accept their serialized string form, so server JSX can emit the same JSON/CSV attribute used by HTML.
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
@@ -33,7 +34,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-area-chart': C2Props<AreaChart> & {
+      'c2-area-chart': Omit<C2Props<AreaChart>, 'series'> & {
         'fill-opacity'?: Attribute
         'y-min'?: Attribute
         'y-max'?: Attribute
@@ -43,8 +44,9 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: AreaChart['series'] | string
       }
-      'c2-bar-chart': C2Props<BarChart> & {
+      'c2-bar-chart': Omit<C2Props<BarChart>, 'series'> & {
         'bar-width'?: Attribute
         'bar-gap'?: Attribute
         'y-min'?: Attribute
@@ -55,8 +57,9 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: BarChart['series'] | string
       }
-      'c2-candlestick-chart': C2Props<CandlestickChart> & {
+      'c2-candlestick-chart': Omit<C2Props<CandlestickChart>, 'series'> & {
         'open-field'?: Attribute
         'close-field'?: Attribute
         'low-field'?: Attribute
@@ -67,6 +70,7 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: CandlestickChart['series'] | string
       }
       'c2-chart-legend': C2Props<ChartLegend>
       'c2-chart-series': C2Props<ChartSeries> & {
@@ -74,7 +78,7 @@ declare module 'react' {
         'span-gaps'?: Attribute
       }
       'c2-chart-tooltip': C2Props<ChartTooltip>
-      'c2-gauge-chart': C2Props<GaugeChart> & {
+      'c2-gauge-chart': Omit<C2Props<GaugeChart>, 'series'> & {
         'start-angle'?: Attribute
         'end-angle'?: Attribute
         'split-number'?: Attribute
@@ -85,8 +89,9 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: GaugeChart['series'] | string
       }
-      'c2-line-chart': C2Props<LineChart> & {
+      'c2-line-chart': Omit<C2Props<LineChart>, 'series'> & {
         'y-min'?: Attribute
         'y-max'?: Attribute
         'x-field'?: Attribute
@@ -95,8 +100,9 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: LineChart['series'] | string
       }
-      'c2-pie-chart': C2Props<PieChart> & {
+      'c2-pie-chart': Omit<C2Props<PieChart>, 'series'> & {
         'inner-radius'?: Attribute
         'outer-radius'?: Attribute
         'start-angle'?: Attribute
@@ -107,8 +113,9 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: PieChart['series'] | string
       }
-      'c2-radar-chart': C2Props<RadarChart> & {
+      'c2-radar-chart': Omit<C2Props<RadarChart>, 'series'> & {
         'start-angle'?: Attribute
         'split-number'?: Attribute
         'fill-opacity'?: Attribute
@@ -118,8 +125,9 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: RadarChart['series'] | string
       }
-      'c2-scatter-chart': C2Props<ScatterChart> & {
+      'c2-scatter-chart': Omit<C2Props<ScatterChart>, 'series'> & {
         'symbol-size'?: Attribute
         'large-threshold'?: Attribute
         'x-field'?: Attribute
@@ -128,8 +136,9 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: ScatterChart['series'] | string
       }
-      'c2-sparkline': C2Props<Sparkline> & {
+      'c2-sparkline': Omit<C2Props<Sparkline>, 'series'> & {
         'y-min'?: Attribute
         'y-max'?: Attribute
         'x-field'?: Attribute
@@ -138,6 +147,7 @@ declare module 'react' {
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
+        series?: Sparkline['series'] | string
       }
     }
   }

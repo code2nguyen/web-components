@@ -17,12 +17,18 @@ const scenario = new URLSearchParams(location.search).get('scenario') ?? 'defaul
 const main = document.querySelector('main')!
 const icon = (slot: string) =>
   `<svg slot="${slot}" data-testid="${slot}" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16" stroke="currentColor" /></svg>`
-main.innerHTML = `
-  <button id="before">Before</button>
-  <c2-button id="subject">Save</c2-button>
-  <button id="after">After</button>
-  <output aria-label="Activations">0</output>
-`
+main.innerHTML =
+  scenario === 'form'
+    ? `<form id="test-form">
+        <input name="title" value="Alert rule">
+        <c2-button id="subject" type="submit" name="intent" value="save">Save</c2-button>
+        <c2-button id="reset" type="reset">Reset</c2-button>
+        <output aria-label="Activations">0</output>
+      </form>`
+    : `<button id="before">Before</button>
+      <c2-button id="subject">Save</c2-button>
+      <button id="after">After</button>
+      <output aria-label="Activations">0</output>`
 const button = document.querySelector('c2-button')!
 const output = document.querySelector('output')!
 let count = 0
@@ -35,10 +41,22 @@ if (['icons', 'custom-running'].includes(scenario)) {
   button.innerHTML = `${icon('prefix-icon')}Save${icon('suffix-icon')}${scenario === 'custom-running' ? icon('running-icon') : ''}`
 }
 button.addEventListener('click', () => {
+  if (scenario === 'form') return
   output.textContent = String(++count)
   if (scenario === 'toggle') button.selected = !button.selected
   if (scenario === 'async' || scenario === 'custom-running') button.running = true
 })
+if (scenario === 'form') {
+  const form = document.querySelector<HTMLFormElement>('#test-form')!
+  form.addEventListener('submit', (event) => {
+    event.preventDefault()
+    const data = new FormData(form)
+    output.textContent = `${data.get('title')}:${button.value}`
+  })
+  form.addEventListener('reset', () => {
+    requestAnimationFrame(() => (output.textContent = String(new FormData(form).get('title'))))
+  })
+}
 if (['async', 'custom-running', 'running', 'disabled'].includes(scenario)) {
   const complete = document.createElement('button')
   complete.textContent = 'Complete operation'

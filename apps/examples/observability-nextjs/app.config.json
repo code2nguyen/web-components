@@ -1,0 +1,10 @@
+{
+  "title": "Signal Forge Observability",
+  "description": "A production-shaped Next.js observability console demonstrating c2n service health, traces, logs, dashboards, alerts, incidents, accessibility, and SSR interoperability.",
+  "framework": "nextjs",
+  "outputDir": "out",
+  "sourcePath": "apps/examples/observability-nextjs",
+  "evaluationPath": "apps/examples/observability-nextjs/COMPONENT-EVALUATION.md",
+  "tags": ["observability", "nextjs", "ssr", "charts", "tables", "forms", "accessibility"],
+  "order": 50
+}

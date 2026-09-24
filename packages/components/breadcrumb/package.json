@@ -1,6 +1,6 @@
 {
   "name": "@c2n/breadcrumb",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "type": "module",
   "main": "dist/breadcrumb.js",
   "exports": {
@@ -65,8 +65,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.14",
-    "@c2n/link-button": "0.0.14",
+    "@c2n/core": "0.0.15",
+    "@c2n/link-button": "0.0.15",
     "lit": "3.3.3"
   },
   "devDependencies": {
