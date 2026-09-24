@@ -172,8 +172,8 @@ export const overrides: Record<string, Override> = {
     token: 'color-primary-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
   },
-  // Typo in the component's variable name (`borde-leftr`); it is the real name the slider reads, so theme it like its siblings.
-  '--c2-color-slider--borde-leftr': {
+  // Keep the left edge of the color slider on the same outline token as its siblings.
+  '--c2-color-slider--border-left': {
     token: 'border',
     value: 'var(--c2-theme--border, var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline, rgb(177, 177, 177)))',
   },

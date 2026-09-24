@@ -139,7 +139,9 @@ function asAttributeName(name) {
 // Tags that stay plain inside an island rather than becoming islands of their own: their parent's module
 // registers them, and nesting an island per row would wrap every one in an element that breaks the parent's
 // walk over its own children.
-const NESTED_CHILD_TAGS = new Set(['c2-tab', 'c2-tree-item'])
+// These are structural/data children whose parent packages register them. Keeping them as plain custom
+// elements avoids a nested Astro hydration boundary that can make a parent initialize before its definitions.
+const NESTED_CHILD_TAGS = new Set(['c2-chart-series', 'c2-tab', 'c2-tree-item'])
 
 function changeComponentName(vnode, uid, componentName, markup) {
   let mainComponent = componentName && vnode.name == componentName ? vnode : null

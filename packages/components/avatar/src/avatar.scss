@@ -117,9 +117,9 @@ input {
   }
 }
 
-// `--c2-avatar--hue` is set on the element's inline style when `auto-color` is on.
+// The private hue is set on this shadow element's inline style when `auto-color` is on.
 :host([auto-color]) .c2-avatar {
-  background: hsl(var(--c2-avatar--hue, 160) css.cssVar(auto-color--saturation) css.cssVar(auto-color--lightness));
+  background: hsl(var(--_c2-avatar-hue, 160) css.cssVar(auto-color--saturation) css.cssVar(auto-color--lightness));
 }
 
 .c2-avatar-image {

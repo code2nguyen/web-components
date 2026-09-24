@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "consumers": [
+    {
+      "tag": "c2-color-slider",
+      "name": "--c2-color-slider__color-handle--background-color",
+      "mode": "inline-style",
+      "source": "packages/components/color-slider/src/color-slider.ts",
+      "target": ".color-handle background-color",
+      "sink": "style.backgroundColor"
+    },
+    {
+      "tag": "c2-tooltip",
+      "name": "--c2-tooltip--offset",
+      "mode": "programmatic",
+      "source": "packages/components/tooltip/src/tooltip.ts",
+      "target": "visible tooltip position relative to target",
+      "sink": "computePosition"
+    }
+  ]
+}

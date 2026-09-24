@@ -588,7 +588,7 @@ test('shows a tooltip listing every series at the hovered position', async ({ pa
   const tooltipVisible = () =>
     chart.evaluate((element) => {
       const tooltip = element.shadowRoot?.querySelector('.tooltip')
-      return tooltip ? !tooltip.hasAttribute('hidden') : false
+      return tooltip?.matches(':popover-open') ?? false
     })
 
   expect(await tooltipVisible()).toBe(false)
@@ -598,6 +598,19 @@ test('shows a tooltip listing every series at the hovered position', async ({ pa
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
 
   await expect.poll(tooltipVisible).toBe(true)
+
+  const placement = await chart.evaluate((element) => {
+    const tooltipElement = element.shadowRoot?.querySelector('.tooltip')
+    const tooltip = tooltipElement?.getBoundingClientRect()
+    return tooltip
+      ? { top: tooltip.top, right: tooltip.right, bottom: tooltip.bottom, left: tooltip.left, popover: tooltipElement?.getAttribute('popover') }
+      : null
+  })
+  expect(placement?.popover).toBe('manual')
+  expect(placement?.top).toBeGreaterThanOrEqual(0)
+  expect(placement?.left).toBeGreaterThanOrEqual(0)
+  expect(placement?.right).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth))
+  expect(placement?.bottom).toBeLessThanOrEqual(await page.evaluate(() => window.innerHeight))
 
   const rows = await chart.evaluate((element) =>
     [...(element.shadowRoot?.querySelectorAll('.tooltip-row') ?? [])].map((row) => ({

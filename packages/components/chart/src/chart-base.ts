@@ -303,6 +303,9 @@ export abstract class ChartBase extends LitElement {
   #tooltipContext: ChartTooltipContext | null = null
   #legendPresenters = new Set<HTMLElement>()
   #tooltipPresenters = new Set<HTMLElement>()
+  #handleViewportChange = (): void => {
+    if (this.hoverContext) this.#positionTooltip(this.hoverContext)
+  }
 
   // ------------------------------------------------ the engine layer's job ---
 
@@ -334,6 +337,9 @@ export abstract class ChartBase extends LitElement {
     super.connectedCallback()
     this.addEventListener(SERIES_CHANGE_EVENT, this.#handleSeriesChange)
     if (isServer) return
+
+    window.addEventListener('resize', this.#handleViewportChange)
+    window.addEventListener('scroll', this.#handleViewportChange, true)
 
     if (typeof ResizeObserver !== 'undefined' && !this.#resizeObserver) {
       this.#resizeObserver = new ResizeObserver((entries) => this.#handleResize(entries))
@@ -369,6 +375,10 @@ export abstract class ChartBase extends LitElement {
     this.removeEventListener(SERIES_CHANGE_EVENT, this.#handleSeriesChange)
     this.#resizeObserver?.disconnect()
     this.#intersectionObserver?.disconnect()
+    if (!isServer) {
+      window.removeEventListener('resize', this.#handleViewportChange)
+      window.removeEventListener('scroll', this.#handleViewportChange, true)
+    }
     this.#unsubscribe?.()
     this.#unsubscribe = undefined
     // uPlot registers its own listeners and ECharts leaks without `dispose`, so the instance goes too.
@@ -417,6 +427,7 @@ export abstract class ChartBase extends LitElement {
       this.#setHover(null)
       this.dispatchEvent(new CustomEvent<ChartTooltipContext | null>('tooltip-change', { detail: null }))
     }
+    this.#syncTooltipPopover()
     if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.notifyLegendChange()
   }
 
@@ -729,16 +740,14 @@ export abstract class ChartBase extends LitElement {
   }
 
   /**
-   * Positions the tooltip imperatively. A pointer move must not schedule a Lit update, so the transform is
-   * written straight to the node; only a change of hovered index re-renders, and only when the body is
+   * Positions the tooltip imperatively. A pointer move must not schedule a Lit update, so fixed coordinates
+   * are written straight to the node; only a change of hovered index re-renders, and only when the body is
    * actually dynamic.
    */
   #setHover(context: ChartTooltipContext | null): void {
     const previous = this.hoverContext
-    if (context && this.tooltipElement) {
-      this.tooltipElement.style.transform = `translate(${context.px}px, ${context.py}px)`
-    }
-    // Same datum, new position: the transform above is the whole update, so the template is left alone and
+    if (context) this.#positionTooltip(context)
+    // Same datum, new position: the direct placement above is the whole update, so the template is left alone and
     // a 60 Hz pointer move costs no Lit work at all. Assigning the state property is what schedules a
     // render, so the early return has to skip the assignment too.
     if (
@@ -749,6 +758,52 @@ export abstract class ChartBase extends LitElement {
     )
       return
     this.hoverContext = context
+  }
+
+  /**
+   * The built-in tooltip remains part of this shadow tree so slots, parts and inherited chart variables keep
+   * working, but a manual popover promotes its box to the top layer. That escapes the plot's paint clipping
+   * and any `overflow: hidden` ancestor without moving consumer-owned nodes into `document.body`.
+   */
+  #syncTooltipPopover(): void {
+    const tooltip = this.tooltipElement
+    if (!tooltip) return
+    const shouldShow = Boolean(this.hoverContext && this.tooltip !== 'none' && !this.hasLinkedTooltip)
+    const shown = tooltip.matches(':popover-open')
+    if (shouldShow && !shown) {
+      try {
+        tooltip.showPopover()
+      } catch {
+        return
+      }
+    } else if (!shouldShow && shown) {
+      try {
+        tooltip.hidePopover()
+      } catch {
+        // It may already have been dismissed while the chart was disconnecting.
+      }
+      return
+    }
+    if (shouldShow && this.hoverContext) this.#positionTooltip(this.hoverContext)
+  }
+
+  /** Places the top-layer bubble above its datum, flipping and shifting it at viewport edges. */
+  #positionTooltip(context: ChartTooltipContext): void {
+    const tooltip = this.tooltipElement
+    if (!tooltip?.matches(':popover-open')) return
+    const plot = this.getPlotBounds()
+    const bounds = tooltip.getBoundingClientRect()
+    const anchorX = plot.left + context.px
+    const anchorY = plot.top + context.py
+    const gap = 10
+    const edge = 8
+    let left = anchorX - bounds.width / 2
+    let top = anchorY - bounds.height - gap
+    if (top < edge) top = anchorY + gap
+    left = Math.max(edge, Math.min(left, window.innerWidth - bounds.width - edge))
+    top = Math.max(edge, Math.min(top, window.innerHeight - bounds.height - edge))
+    tooltip.style.left = `${left}px`
+    tooltip.style.top = `${top}px`
   }
 
   #tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
@@ -842,9 +897,7 @@ export abstract class ChartBase extends LitElement {
           <!-- No bindings inside: Lit never patches this node, so the engine's canvas survives updates. -->
           <div class="plot" part="plot"></div>
           <div class="overlay" part="overlay">
-            <div class="tooltip" part="tooltip" role="tooltip" ?hidden=${!this.hoverContext || this.tooltip === 'none' || this.hasLinkedTooltip}>
-              ${this.renderTooltipBody()}
-            </div>
+            <div class="tooltip" part="tooltip" role="tooltip" popover="manual">${this.renderTooltipBody()}</div>
             <div class="actions" part="actions"><slot name="actions"></slot></div>
           </div>
           ${this.renderState()}

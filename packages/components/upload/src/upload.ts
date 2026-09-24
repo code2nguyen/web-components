@@ -132,7 +132,8 @@ let uploadItemId = 0
  * @cssproperty {font-size} [--c2-upload__error--font-size=12px]
  * @cssproperty {pixel} [--c2-upload__error--gap=4px]
  *
- * @internalcomponent c2-attachment, c2-button
+ * @internalcomponent c2-attachment
+ * @internalcomponent c2-button
  */
 @customElement('c2-upload')
 export class Upload extends LitElement {

@@ -20,6 +20,8 @@ import styles from './chart-tooltip.scss?inline'
  * @cssproperty {border-radius} [--c2-chart__tooltip--border-radius=6px] - Tooltip corner radius.
  * @cssproperty {box-shadow} [--c2-chart__tooltip--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)] - Tooltip shadow.
  * @cssproperty {pixel} [--c2-chart__tooltip--gap=6px] - Gap between tooltip rows.
+ * @cssproperty {pixel} [--c2-chart__legend-marker--size=10px] - Size of the colour swatch in a tooltip row.
+ * @cssproperty {border-radius} [--c2-chart__legend-marker--border-radius=999px] - Corner radius of a tooltip row's colour swatch.
  */
 @customElement('c2-chart-tooltip')
 export class ChartTooltip extends ChartLinkedElement {

@@ -16,13 +16,13 @@ import '@c2n/avatar'
  * @cssproperty {border-radius} [--c2-chatbot--border-top-right-radius=8px]
  * @cssproperty {border-radius} [--c2-chatbot--border-bottom-left-radius=8px]
  * @cssproperty {border-radius} [--c2-chatbot--border-bottom-right-radius=8px]
- * @cssproperty {border} [--c2-chatbot--border-top=1px solid #e4e4e7]
- * @cssproperty {border} [--c2-chatbot--border-right=1px solid #e4e4e7]
- * @cssproperty {border} [--c2-chatbot--border-bottom=1px solid #e4e4e7]
- * @cssproperty {border} [--c2-chatbot--border-left=1px solid #e4e4e7]
+ * @cssproperty {border} [--c2-chatbot--border-top=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-chatbot--border-right=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-chatbot--border-bottom=1px solid rgb(177, 177, 177)]
+ * @cssproperty {border} [--c2-chatbot--border-left=1px solid rgb(177, 177, 177)]
  * @cssproperty {padding} [--c2-chatbot__header--padding=16px]
- * @cssproperty {color} [--c2-chatbot__header--background=#ffffff]
- * @cssproperty {border} [--c2-chatbot__header--border-bottom=1px solid #e4e4e7]
+ * @cssproperty {color} [--c2-chatbot__header--background=rgb(248, 248, 248)]
+ * @cssproperty {border} [--c2-chatbot__header--border-bottom=1px solid rgb(177, 177, 177)]
  */
 @customElement('c2-chatbot')
 export class Chatbot extends LitElement {

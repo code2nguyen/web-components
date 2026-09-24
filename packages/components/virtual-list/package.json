@@ -1,6 +1,6 @@
 {
   "name": "@c2n/virtual-list",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "type": "module",
   "main": "dist/virtual-list.js",
   "exports": {
@@ -73,10 +73,10 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.15",
-    "@c2n/list-item": "0.0.15",
-    "@c2n/spinner": "0.0.15",
-    "@c2n/text-field": "0.0.15",
+    "@c2n/core": "0.0.16",
+    "@c2n/list-item": "0.0.16",
+    "@c2n/spinner": "0.0.16",
+    "@c2n/text-field": "0.0.16",
     "lit": "3.3.3"
   },
   "devDependencies": {

@@ -275,7 +275,7 @@ export class Avatar extends LitElement {
     return html`
       <div
         class=${classMap({ 'c2-avatar': true, 'has-image': showImage })}
-        style=${this.autoColor ? `--c2-avatar--hue: ${this.hue}` : nothing}
+        style=${this.autoColor ? `--_c2-avatar-hue: ${this.hue}` : nothing}
         role=${interactive ? nothing : 'img'}
         aria-label=${interactive ? nothing : label || nothing}
         aria-hidden=${interactive ? 'true' : nothing}
