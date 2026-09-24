@@ -41,7 +41,9 @@ import '@c2n/feather-icons/icons/chevron-right.js'
 
 import type { AttributeDeclarationItem, CSSDeclarationItem, GroupedCssVariables } from '../../store/manifest-declaration-item.ts'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils.ts'
-import { BORDER_RADIUS_ORDER, FONT_PROPERTY, PADDING_ORDER, groupLabel, shortName } from '../../utils/dom.ts'
+import { groupLabel } from '../../utils/dom.ts'
+import { buildInspectorDescriptors, selectInspectorProperties } from '../../utils/inspector-descriptors.ts'
+import { componentManifests } from '../../store/component-manifests.ts'
 import { KEYWORD_OPTIONS, UNITLESS_TYPES } from '../../utils/css-value.ts'
 import type { Select } from '@c2n/select'
 import type { Switch } from '@c2n/switch'
@@ -311,7 +313,8 @@ export class ComponentConfigurationPanel extends LitElement {
     const config = this.componentConfig
     if (!config) return nothing
     const tag = this.configStore.value.currentComponentTag ?? config.tagName
-    const owned = config.allCssProperties.filter((item) => item.cssVariable.startsWith(`--${tag}--`) || item.cssVariable.startsWith(`--${tag}__`))
+    const ownerManifest = componentManifests[tag]
+    const owned = selectInspectorProperties(config.allCssProperties, ownerManifest?.cssProperties ?? [])
     const groups = flatGroupCssProperties(groupCssProperties(owned))
     const initialStyles = this.initialStyles
     this.firstSectionKey = ''
@@ -426,85 +429,37 @@ export class ComponentConfigurationPanel extends LitElement {
    * font) out into single composite rows first so they stay one labelled control instead of four bare fields.
    */
   private buildRows(cssProperties: CSSDeclarationItem[]): Row[] {
-    let remaining = [...cssProperties]
-    const rows: Row[] = []
-
-    const takeBox = (kind: 'padding' | 'radius', order: string[], label: string, match: (item: CSSDeclarationItem) => boolean) => {
-      const picked = remaining.filter(match).sort((a, b) => order.indexOf(a.property) - order.indexOf(b.property))
-      if (picked.length === 0) return
-      remaining = remaining.filter((item) => !picked.includes(item))
-      const single = picked.length === 1
-      const names = picked.map((item) => item.cssVariable)
-      rows.push({
-        key: names.join('|'),
-        label: single ? shortName(picked[0].property) : label,
-        description: picked[0].description,
-        names,
-        stacked: true,
-        render: (changed) =>
-          this.row(
-            names.join('|'),
-            single ? shortName(picked[0].property) : label,
-            picked[0].description,
-            changed,
-            names,
-            true,
-            () =>
-              html`<demo-box-sides-config
-                kind=${kind}
-                .names=${single ? names[0] : names}
-                .values=${single ? this.getCssVariableValue(names[0]) : names.map((name) => this.getCssVariableValue(name))}
-                @change=${this.handleControlChange}
-              ></demo-box-sides-config>`,
-          ),
-      })
-    }
-
-    takeBox('padding', PADDING_ORDER, 'Padding', (item) => item.type === 'padding' || item.property.startsWith('padding'))
-    takeBox('radius', BORDER_RADIUS_ORDER, 'Radius', (item) => item.type === 'border-radius' || BORDER_RADIUS_ORDER.includes(item.property))
-
-    // Font: one composite row for the family/size/weight/style of this part.
-    const fontItems = remaining.filter((item) => FONT_PROPERTY.includes(item.property))
-    if (fontItems.length > 0) {
-      remaining = remaining.filter((item) => !fontItems.includes(item))
-      const names = fontItems.map((item) => item.cssVariable)
-      rows.push({
-        key: names.join('|'),
-        label: 'Font',
-        names,
-        stacked: true,
-        render: (changed) =>
-          this.row(
-            names.join('|'),
-            'Font',
-            undefined,
-            changed,
-            names,
-            true,
-            () =>
-              html`<demo-font-config
-                .names=${names}
-                .values=${names.map((name) => this.getCssVariableValue(name))}
-                @change=${this.handleControlChange}
-              ></demo-font-config>`,
-          ),
-      })
-    }
-
-    for (const item of remaining) {
-      const name = item.cssVariable
-      const label = shortName(item.property) || name
-      const stacked = item.type === 'border' || item.type === 'outline'
-      rows.push({
-        key: name,
+    return buildInspectorDescriptors(cssProperties).map((descriptor) => {
+      const { key, label, description, names, controlFamily, stacked } = descriptor
+      const boxKind = controlFamily.startsWith('padding') ? 'padding' : controlFamily.startsWith('radius') ? 'radius' : null
+      const renderControl = () => {
+        if (boxKind) {
+          const shorthand = names.length === 1
+          return html`<demo-box-sides-config
+            kind=${boxKind}
+            .names=${shorthand ? names[0] : names}
+            .values=${shorthand ? this.getCssVariableValue(names[0]) : names.map((name) => this.getCssVariableValue(name))}
+            @change=${this.handleControlChange}
+          ></demo-box-sides-config>`
+        }
+        if (controlFamily === 'font') {
+          return html`<demo-font-config
+            .names=${names}
+            .values=${names.map((name) => this.getCssVariableValue(name))}
+            @change=${this.handleControlChange}
+          ></demo-font-config>`
+        }
+        return this.control(descriptor.items[0])
+      }
+      return {
+        key,
         label,
-        description: item.description,
-        names: [name],
+        description,
+        names,
         stacked,
-        render: (changed) => this.row(name, label, item.description, changed, [name], stacked, () => this.control(item)),
-      })
-    }
-    return rows
+        render: (changed: boolean) => this.row(key, label, description, changed, names, stacked, renderControl),
+      }
+    })
   }
 
   private row(key: string, label: string, description: string | undefined, changed: boolean, names: string[], stacked: boolean, control: () => TemplateResult) {

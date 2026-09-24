@@ -60,7 +60,7 @@ export class BorderBeam extends LitElement {
               class="beam${count > 1 ? ' beam--staggered' : ''}"
               part="beam"
               style=${styleMap({
-                '--c2-border-beam--phase': index / count,
+                '--_c2-border-beam-phase': index / count,
               })}
             ></span>
           `

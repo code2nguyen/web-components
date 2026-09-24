@@ -50,7 +50,7 @@ export interface Tabs {
  * The name matches `c2-list`, `c2-select` and `c2-table`; it is deliberately not `change`, which every native form
  * control bubbles — a `c2-text-field` inside a panel would otherwise reach a listener meant for the tab strip.
  *
- * @cssproperty {box-shadow} [--c2-tabs--box-shadow=inset 0px -2px 0px 0px rgb(230, 230, 230)]
+ * @cssproperty {box-shadow} [--c2-tabs--box-shadow=inset 0px -2px 0px 0px rgb(213, 213, 213)]
  * @cssproperty {justify-content} [--c2-tabs--justify-content=flex-start]
  * @cssproperty {background-color} --c2-tabs--background-color
  * @cssproperty {pixel} --c2-tabs--height

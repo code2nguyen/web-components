@@ -33,7 +33,11 @@ export async function createEchartsAdapter(features: readonly EchartsFeature[], 
 
     async create(host, options, data, handlers) {
       events = handlers
-      instance = echarts.init(host, undefined, { renderer, useDirtyRect: true })
+      // ECharts documents dirty-rectangle rendering as experimental. During an animated option replacement
+      // (for example when declarative series finish connecting after the host), it can leave cleared rectangles
+      // where later scatter points belong until pointer emphasis happens to repaint those regions. A complete
+      // canvas repaint is the correctness-first default and still keeps data updates coalesced below.
+      instance = echarts.init(host, undefined, { renderer, useDirtyRect: false })
       instance.setOption(withData(options, data), { notMerge: true })
 
       instance.on('click', (params) => {

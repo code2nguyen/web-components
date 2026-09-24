@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://c2n.dev/schemas/style-contract-cases.v1.json",
+  "title": "Reviewed observable style-contract cases",
+  "description": "The loader enforces unique (tag, name, state) identity and rejects stale properties and contexts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "contexts", "cases"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "contexts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "tag", "fixture", "settledWhen"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "tag": { "type": "string", "pattern": "^c2-[a-z0-9-]+$" },
+          "fixture": { "type": "string", "minLength": 1 },
+          "settledWhen": { "type": "string", "minLength": 1 },
+          "modules": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+          "hoverTarget": { "type": "string", "minLength": 1 },
+          "stateSetup": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["target", "attribute", "value"],
+              "properties": {
+                "target": { "type": "string", "minLength": 1 },
+                "attribute": { "type": "string", "minLength": 1 },
+                "value": { "type": "string" }
+              }
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["target"],
+              "properties": {
+                "target": { "type": "string", "minLength": 1 },
+                "width": { "type": "string", "minLength": 1 },
+                "height": { "type": "string", "minLength": 1 }
+              },
+              "anyOf": [{ "required": ["width"] }, { "required": ["height"] }]
+            }
+          }
+        }
+      }
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "tag", "name", "context", "state", "value", "target", "assertion", "browsers", "reset"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "tag": { "type": "string", "pattern": "^c2-[a-z0-9-]+$" },
+          "name": { "type": "string", "pattern": "^--c2-[a-z0-9-]+" },
+          "context": { "type": "string", "minLength": 1 },
+          "state": { "type": "string", "minLength": 1 },
+          "value": { "type": "string", "minLength": 1 },
+          "controlValue": { "type": "string", "minLength": 1 },
+          "target": { "type": "string", "minLength": 1 },
+          "assertion": { "enum": ["computed-style", "geometry", "pseudo-style", "slotted-style", "delegated-style", "programmatic-output"] },
+          "declaration": { "type": "string", "minLength": 1 },
+          "pseudo": { "enum": ["::before", "::after"] },
+          "valueSyntax": { "type": "string", "minLength": 1 },
+          "syntaxRationale": { "type": "string", "minLength": 1 },
+          "outputProbe": { "enum": ["canvas-bitmap", "svg-bitmap", "image-bitmap", "text-content"] },
+          "geometryMetric": { "enum": ["width", "height", "x", "y", "area"] },
+          "stabilityWindowMs": { "type": "integer", "minimum": 0, "maximum": 5000 },
+          "childTag": { "type": "string", "pattern": "^c2-[a-z0-9-]+$" },
+          "browsers": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["chromium", "firefox", "webkit"] } },
+          "reset": { "const": "remove-property" },
+          "sharedStylingPath": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

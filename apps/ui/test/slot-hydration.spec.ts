@@ -20,6 +20,21 @@ test('hard reload keeps the server-rendered pie gallery visible through hydratio
     .toBe(true)
 })
 
+test('scatter chart collects its declarative series before the hydrated chart settles', async ({ page }) => {
+  await page.goto('./components/scatter-chart/')
+  await page.reload()
+
+  const chart = page.locator('#scatter-investment')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect
+    .poll(() => chart.evaluate((element) => (element as HTMLElement & { getLegendItems(): { label: string }[] }).getLegendItems().map((item) => item.label)))
+    .toEqual(['Revenue'])
+
+  const legend = page.locator('c2-chart-legend[for="scatter-investment"]')
+  await expect.poll(() => legend.evaluate((element) => element.shadowRoot?.querySelectorAll('.item').length ?? 0)).toBe(1)
+  await expect(legend.locator('.item')).toContainText('Revenue')
+})
+
 test('card conditional regions survive hydration and reconcile later mutations', async ({ page }) => {
   await page.goto('./components/card/gallery/')
   await page.reload()

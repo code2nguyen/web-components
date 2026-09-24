@@ -178,12 +178,17 @@
 }
 
 .tooltip {
-  position: absolute;
+  position: fixed;
+  inset: auto;
   top: 0;
   left: 0;
   z-index: 2;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  margin: 0;
+  border: 0;
   pointer-events: none;
-  will-change: transform;
   display: flex;
   flex-direction: column;
   gap: css.cssVar(tooltip--gap);
@@ -196,7 +201,7 @@
   white-space: nowrap;
 }
 
-.tooltip[hidden] {
+.tooltip:not(:popover-open) {
   display: none;
 }
 

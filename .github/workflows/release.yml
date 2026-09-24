@@ -136,6 +136,25 @@ jobs:
       - name: Check component documentation coverage
         run: npm run docs:check
 
+      # Diagnostic until the initial audit reaches zero; publishing keeps its existing gates meanwhile.
+      - name: Style-contract static diagnostic
+        continue-on-error: true
+        run: |
+          mkdir -p test-results/style-contracts
+          node scripts/check-style-contracts.mjs --json > test-results/style-contracts/style-contract-static-report.json
+
+      - name: Summarize style-contract diagnostic
+        if: ${{ !cancelled() }}
+        run: node scripts/summarize-style-contract-audit.mjs test-results/style-contracts/style-contract-static-report.json
+
+      - name: Upload style-contract static report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-style-contract-static-report
+          path: test-results/style-contracts/style-contract-static-report.json
+          retention-days: 7
+
       - name: Build tools (MCP registry, skill catalog)
         run: npm run build:tools
 

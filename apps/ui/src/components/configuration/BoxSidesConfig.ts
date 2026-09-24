@@ -116,10 +116,16 @@ export class BoxSidesConfig extends LitElement {
   /** While linked, editing one field writes the same value to all four. */
   @state() private linked = false
 
+  private get validMapping(): boolean {
+    return Array.isArray(this.names)
+      ? this.names.length === 4 && Array.isArray(this.values) && this.values.length === 4
+      : typeof this.names === 'string' && !Array.isArray(this.values)
+  }
+
   private get sides(): [string, string, string, string] | null {
+    if (!this.validMapping) return null
     if (Array.isArray(this.values)) {
-      const filled = [0, 1, 2, 3].map((index) => (this.values as string[])[index] ?? '0') as [string, string, string, string]
-      return filled
+      return [...this.values] as [string, string, string, string]
     }
     return expandBoxShorthand(this.values ?? '')
   }
@@ -140,6 +146,7 @@ export class BoxSidesConfig extends LitElement {
   }
 
   private emit(sides: [string, string, string, string]) {
+    if (!this.validMapping) throw new Error('BoxSidesConfig requires one shorthand name/value or exactly four ordered names/values')
     const detail: Record<string, string> = {}
     if (Array.isArray(this.names)) {
       this.names.forEach((name, index) => (detail[name] = sides[index] ?? '0'))
@@ -167,6 +174,7 @@ export class BoxSidesConfig extends LitElement {
   }
 
   render() {
+    if (!this.validMapping) return html`<span role="alert">Invalid box-property mapping</span>`
     const sides = this.sides
     // `calc(…)`, `var(…)` or a 5-token value: no side fields can represent it, so edit it as text.
     if (!sides) {

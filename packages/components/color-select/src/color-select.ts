@@ -53,7 +53,7 @@ export interface ColorSelect {
  * @cssproperty {border} --c2-color-select--border-bottom
  * @cssproperty {border} --c2-color-select--border-left
  *
- * @cssproperty {color} [--c2-color-select__popover--background-color=rgb(255, 255, 255)]
+ * @cssproperty {color} [--c2-color-select__popover--background-color=rgb(253, 253, 253)]
  * @cssproperty {pixel} [--c2-color-select__popover--gap=16px]
  * @cssproperty {padding} [--c2-color-select__popover--padding-top=0px]
  * @cssproperty {padding} [--c2-color-select__popover--padding-left=8px]

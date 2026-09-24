@@ -43,6 +43,28 @@ jobs:
       - name: Check component documentation coverage
         run: npm run docs:check
 
+      - name: Verify generated component manifests are committed
+        run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)open-packages/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
+
+      # Diagnostic until the initial audit reaches zero; deployment keeps its existing gates meanwhile.
+      - name: Style-contract static diagnostic
+        continue-on-error: true
+        run: |
+          mkdir -p test-results/style-contracts
+          node scripts/check-style-contracts.mjs --json > test-results/style-contracts/style-contract-static-report.json
+
+      - name: Summarize style-contract diagnostic
+        if: ${{ !cancelled() }}
+        run: node scripts/summarize-style-contract-audit.mjs test-results/style-contracts/style-contract-static-report.json
+
+      - name: Upload style-contract static report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-style-contract-static-report
+          path: test-results/style-contracts/style-contract-static-report.json
+          retention-days: 7
+
       - name: Check the docs site dogfoods c2n components
         run: npm run check:dogfood
 

@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://c2n.dev/schemas/style-contract-report.v1.json",
+  "title": "Final style-contract verification report",
+  "description": "Counts, unique property identity, and evidence reconciliation are additionally checked by the report validator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "summary", "properties", "failures", "browserCoverage"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packages", "tags", "properties", "verified", "failed", "approvedExceptions"],
+      "properties": {
+        "packages": { "type": "integer", "minimum": 0 },
+        "tags": { "type": "integer", "minimum": 0 },
+        "properties": { "type": "integer", "minimum": 0 },
+        "verified": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "approvedExceptions": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "properties": { "type": "array", "items": { "$ref": "#/definitions/property" } },
+    "failures": { "type": "array", "items": { "$ref": "#/definitions/failure" } },
+    "browserCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chromium", "firefox", "webkit"],
+      "properties": {
+        "chromium": { "enum": ["complete", "failed"] },
+        "firefox": { "enum": ["representative", "failed"] },
+        "webkit": { "enum": ["representative", "failed"] }
+      }
+    }
+  },
+  "definitions": {
+    "property": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "name", "ownerPackage", "type", "default", "state", "target", "consumptionMode", "controlFamily", "status", "evidence"],
+      "properties": {
+        "tag": { "type": "string", "pattern": "^c2-[a-z0-9-]+$" },
+        "name": { "type": "string", "pattern": "^--c2-[a-z0-9-]+(?:__[a-z0-9-]+)*(?:--[a-z0-9-]+)?$" },
+        "ownerPackage": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "default": { "type": ["string", "null"] },
+        "state": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "consumptionMode": { "enum": ["compiled-css", "inline-style", "programmatic", "delegated", null] },
+        "controlFamily": { "type": ["string", "null"], "minLength": 1 },
+        "status": { "enum": ["verified", "failed", "approved-exception"] },
+        "evidence": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "name", "category", "state", "target", "observed", "source"],
+      "properties": {
+        "tag": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "state": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "observed": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "suggestion": { "type": "string" }
+      }
+    }
+  }
+}

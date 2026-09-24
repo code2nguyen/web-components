@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://c2n.dev/schemas/style-contract-exceptions.v1.json",
+  "title": "Reviewed style-contract exceptions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "exceptions"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "exceptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "tag",
+          "name",
+          "surfaceKind",
+          "limitation",
+          "userImpact",
+          "supportedAlternative",
+          "technicalReason",
+          "reviewedBy",
+          "reviewedOn",
+          "reassessOn"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "tag": { "type": "string", "pattern": "^c2-[a-z0-9-]+$" },
+          "name": { "type": "string", "pattern": "^--c2-[a-z0-9-]+" },
+          "surfaceKind": { "enum": ["browser-owned", "third-party"] },
+          "limitation": { "type": "string", "minLength": 1 },
+          "userImpact": { "type": "string", "minLength": 1 },
+          "supportedAlternative": { "type": "string", "minLength": 1 },
+          "technicalReason": { "type": "string", "minLength": 1 },
+          "reviewedBy": { "type": "string", "minLength": 1 },
+          "reviewedOn": { "type": "string", "format": "date" },
+          "reassessOn": { "type": "string", "format": "date" }
+        }
+      }
+    }
+  }
+}
