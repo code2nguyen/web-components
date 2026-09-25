@@ -10,6 +10,19 @@ test('description presence follows assignment, insertion, removal and reassignme
   })
 })
 
+test('thumb size follows the track height unless explicitly overridden', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-switch label="Notifications" style="--c2-switch__track--height: 32px"></c2-switch><c2-switch label="Compact" style="--c2-switch__track--height: 32px; --c2-switch__thumb--size: 12px"></c2-switch>',
+  )
+  const switches = page.locator('c2-switch')
+
+  await expect(switches.nth(0).locator('[part="track"]')).toHaveCSS('height', '32px')
+  await expect(switches.nth(0).locator('[part="thumb"]')).toHaveCSS('width', '28px')
+  await expect(switches.nth(0).locator('[part="thumb"]')).toHaveCSS('height', '28px')
+  await expect(switches.nth(1).locator('[part="thumb"]')).toHaveCSS('width', '12px')
+  await expect(switches.nth(1).locator('[part="thumb"]')).toHaveCSS('height', '12px')
+})
+
 test('label activation and Space update checked and emit one change', async ({ page, renderScenario }) => {
   await renderScenario('<c2-switch label="Notifications"><span slot="description">Receive updates</span></c2-switch>')
   const host = page.locator('c2-switch')

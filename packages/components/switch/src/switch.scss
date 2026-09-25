@@ -19,7 +19,7 @@
     track__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     track__focus--outline-offset: 2px,
 
-    thumb--size: 16px,
+    thumb--size: calc(var(--c2-switch__track--height, 20px) - 2 * var(--c2-switch__thumb--offset, 2px)),
     thumb--offset: 2px,
     thumb--border-radius: 999px,
     thumb--color: #ffffff,
