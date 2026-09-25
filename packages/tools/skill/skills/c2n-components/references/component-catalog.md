@@ -95,6 +95,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/dashboard` — Grid of resizable panes, dragged by the edges they share.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.
 - **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
+- **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode.
 - **Seperator** — `c2-seperator` · `@c2n/seperator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 
 ## Navigation

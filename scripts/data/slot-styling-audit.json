@@ -853,6 +853,24 @@
       "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-masonry",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot accepts application-owned tile elements; style each tile through its own public contract."
+    },
+    {
+      "tag": "c2-masonry-item",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects application-owned card content; style that content through its own classes or public contract."
+    },
+    {
+      "tag": "c2-masonry-item",
+      "slot": "move-icon",
+      "decision": "assigned-content",
+      "reason": "An assigned move icon belongs to the application and can be styled through its own class or public contract."
+    },
+    {
       "tag": "c2-mat-icon",
       "slot": "",
       "decision": "assigned-content",
