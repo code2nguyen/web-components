@@ -4,6 +4,10 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  masonry: `<c2-masonry style="width:260px;--c2-masonry--gap:6px;--c2-masonry--row-height:9px;--c2-masonry--padding:6px;--c2-masonry--background:#f4f4f5;--c2-masonry--border-radius:8px;--c2-masonry-item--background:#fff;--c2-masonry-item--border:1px solid #e4e4e7;--c2-masonry-item--border-radius:6px;--c2-masonry-item__content--padding:8px">
+  <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>
+  <c2-masonry-item item-id="orders" label="Orders" rows="5" cols="2">Orders · 142</c2-masonry-item>
+</c2-masonry>`,
   dashboard: `<c2-dashboard columns="1fr 1fr" rows="1fr 1fr" style="width:260px;height:150px;--c2-dashboard--gap:6px;--c2-dashboard--padding:6px;--c2-dashboard--background:var(--c2-theme--color-surface-container);--c2-dashboard--border-radius:10px;--c2-dash-card--background:var(--c2-theme--color-surface);--c2-dash-card--border:var(--c2-theme--border);--c2-dash-card--border-radius:6px;--c2-dash-card__header--font-size:11px;--c2-dash-card__header--min-height:0;--c2-dash-card__header--padding-block:6px;--c2-dash-card__header--padding-inline:8px">
   <c2-dash-card col="1" row="1" row-span="2"><span slot="header">Watchlist</span></c2-dash-card>
   <c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card>

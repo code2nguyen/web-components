@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/masonry:build",
         "../../components/dashboard:build",
         "../../components/steps:build",
         "../../components/code-editor:build",

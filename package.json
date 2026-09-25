@@ -89,6 +89,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/masonry:build",
         "./packages/components/dashboard:build",
         "./packages/components/steps:build",
         "./packages/components/code-editor:build",

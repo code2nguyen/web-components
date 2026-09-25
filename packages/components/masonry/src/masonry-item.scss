@@ -1,0 +1,191 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-masonry-item,
+  $theme: (
+    background: transparent,
+    border: none,
+    border-radius: 0px,
+    box-shadow: none,
+    content--padding: 0px,
+    controls--gap: 4px,
+    controls--background: transparent,
+    handle--size: 32px,
+    resize-handle--size: 8px,
+    resize-edge__hover--color: rgb(37 99 235 / 35%),
+    handle--icon-size: 16px,
+    handle--color: #18181b,
+    handle--background: transparent,
+    handle--border-radius: 6px,
+    handle__hover--background: transparent,
+    handle__focus--outline: 2px solid #2563eb,
+    dragging--opacity: 0.92,
+    dragging--box-shadow: 0 12px 28px rgb(15 23 42 / 24%),
+  )
+);
+
+:host {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+}
+
+:host([data-dragging]) {
+  opacity: css.cssVar(dragging--opacity);
+  box-shadow: css.cssVar(dragging--box-shadow);
+}
+
+.controls {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  --resize-hit-size: #{css.cssVar(resize-handle--size)};
+}
+
+.controls::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(#{css.cssVar(handle--size)} + 8px);
+  height: calc(#{css.cssVar(handle--size)} + 8px);
+  background: css.cssVar(controls--background);
+  content: '';
+  pointer-events: none;
+}
+
+.controls::after {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-right: 2px solid css.cssVar(resize-edge__hover--color);
+  border-bottom: 2px solid css.cssVar(resize-edge__hover--color);
+  border-radius: css.cssVar(border-radius);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+}
+
+:host(:hover) .controls::after,
+:host(:focus-within) .controls::after {
+  opacity: 1;
+}
+
+.controls [part='move-handle'] {
+  position: absolute;
+  z-index: 2;
+  top: css.cssVar(controls--gap);
+  right: css.cssVar(controls--gap);
+  opacity: 0;
+  pointer-events: auto;
+  cursor: move;
+}
+
+.controls [part='move-handle'] svg,
+.controls [part='move-handle'] slot,
+.controls [part='move-handle'] slot::slotted(*) {
+  pointer-events: none;
+}
+
+:host([data-dragging]) .controls [part='move-handle'] {
+  cursor: grabbing;
+}
+
+:host(:hover) .controls [part='move-handle'],
+:host(:focus-within) .controls [part='move-handle'],
+:host([data-dragging]) .controls [part='move-handle'] {
+  opacity: 1;
+}
+
+.resize-edge {
+  position: absolute;
+  z-index: 1;
+  background: transparent;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.resize-edge--bottom {
+  right: 0;
+  left: 0;
+  height: var(--resize-hit-size);
+  cursor: ns-resize;
+}
+
+.resize-edge--bottom {
+  bottom: 0;
+}
+
+.resize-edge--right {
+  top: 0;
+  bottom: var(--resize-hit-size);
+  width: var(--resize-hit-size);
+  right: 0;
+  cursor: ew-resize;
+}
+
+.controls [part='resize-handle'] {
+  width: auto;
+  border-radius: 0;
+}
+
+button {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: css.cssVar(handle--size);
+  height: css.cssVar(handle--size);
+  padding: 0;
+  color: css.cssVar(handle--color);
+  background: css.cssVar(handle--background);
+  border: 0;
+  border-radius: css.cssVar(handle--border-radius);
+  cursor: grab;
+  touch-action: none;
+}
+
+.controls [part='move-handle']:hover {
+  background: css.cssVar(handle__hover--background);
+}
+
+button:focus-visible {
+  outline: css.cssVar(handle__focus--outline);
+  outline-offset: 2px;
+}
+
+button svg {
+  display: block;
+  width: css.cssVar(handle--icon-size);
+  height: css.cssVar(handle--icon-size);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+@media (hover: none) {
+  .controls {
+    --resize-hit-size: max(#{css.cssVar(resize-handle--size)}, 16px);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.content {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding: css.cssVar(content--padding);
+}
