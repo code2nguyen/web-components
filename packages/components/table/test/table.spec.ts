@@ -148,6 +148,25 @@ test('a pinned column stays put, header and cells together, while the rest scrol
   expect(after.headerLeft).toBe(after.cellLeft)
 })
 
+test('chains vertical scrolling to the page at the top of the table viewport', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="height: 800px"></div>${table()}<div style="height: 800px"></div>`)
+  const host = page.locator('c2-table')
+  await props(host, {
+    rows: Array.from({ length: 40 }, (_, index) => ({ id: String(index), name: `Person ${index}`, team: 'Platform', score: index })),
+  })
+
+  const viewport = host.locator('[part="viewport"]')
+  await viewport.evaluate((element) => (element.scrollTop = 0))
+  await page.evaluate(() => window.scrollTo(0, 600))
+  const pageTop = await page.evaluate(() => window.scrollY)
+
+  await viewport.hover()
+  await page.mouse.wheel(0, -200)
+
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(pageTop)
+  expect(await viewport.evaluate((element) => element.scrollTop)).toBe(0)
+})
+
 test('sort="field:asc" orders the rows before any click', async ({ page, renderScenario }) => {
   await renderScenario(table('sortable sort="score:asc"'))
   await expect(page.getByRole('row').nth(1)).toContainText('Alan Turing')
