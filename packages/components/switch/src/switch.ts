@@ -58,7 +58,7 @@ export interface Switch {
  * @cssproperty {outline} [--c2-switch__track__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-switch__track__focus--outline-offset=2px]
  *
- * @cssproperty {pixel} [--c2-switch__thumb--size=16px]
+ * @cssproperty {pixel} [--c2-switch__thumb--size=calc(var(--c2-switch__track--height,20px)-2*var(--c2-switch__thumb--offset,2px))] - Defaults to the track height minus the offset on both edges.
  * @cssproperty {pixel} [--c2-switch__thumb--offset=2px] - Gap between the thumb and the track edge.
  * @cssproperty {border-radius} [--c2-switch__thumb--border-radius=999px]
  * @cssproperty {color} [--c2-switch__thumb--color=#ffffff]

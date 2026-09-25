@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
+import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -102,6 +102,9 @@ export interface Tabs {
 @customElement('c2-tabs')
 export class Tabs extends LitElement {
   static override styles = unsafeCSS(styles)
+
+  /** Accessible name for the tab list. */
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   /** `for` value of the selected tab (and `id` of the visible panel). Falls back to the first enabled tab. */
   @provide({ context: selectedTabContext })
@@ -270,7 +273,7 @@ export class Tabs extends LitElement {
   override render() {
     return html`
       <div class="c2-tabs">
-        <div class="c2-tabs-header" role="tablist" @tab-change=${this.handleTabChange} @keydown=${this.handleKeydown}>
+        <div class="c2-tabs-header" role="tablist" aria-label=${this.ariaLabel || nothing} @tab-change=${this.handleTabChange} @keydown=${this.handleKeydown}>
           <slot name="tab" @slotchange=${this.handleTabSlotChange}></slot>
           <div class="selection-indicator ${classMap({ 'first-position': !this.measured })}" style=${this.indicatorStyle}></div>
         </div>

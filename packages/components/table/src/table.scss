@@ -136,7 +136,9 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  overscroll-behavior: contain;
+  // Keep a wide grid from pulling a horizontally scrollable page sideways, but let vertical wheel/touch input
+  // continue into the page once the table reaches its first or last row.
+  overscroll-behavior-x: contain;
   // Virtualization replaces the rows above the viewport and resizes the spacer that stands in for them, which is
   // exactly what the browser's scroll anchoring tries to compensate for. Left on, the two fight during fast scrolling.
   overflow-anchor: none;

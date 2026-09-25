@@ -12,6 +12,17 @@ test('consumer-owned tab labels and panels remain directly styleable', async ({ 
     .poll(() => page.locator('.slot-probe').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).color)))
     .toEqual(Array(2).fill('rgb(1, 2, 3)'))
 })
+test('forwards its accessible name to the internal tab list and keeps it synchronized', async ({ page, renderScenario }) => {
+  await renderScenario(markup.replace('<c2-tabs>', '<c2-tabs aria-label="Account settings">'))
+  const host = page.locator('c2-tabs')
+  await expect(page.getByRole('tablist', { name: 'Account settings' })).toBeVisible()
+
+  await host.evaluate((element) => element.setAttribute('aria-label', 'Billing settings'))
+  await expect(page.getByRole('tablist', { name: 'Billing settings' })).toBeVisible()
+
+  await host.evaluate((element) => element.removeAttribute('aria-label'))
+  await expect(host.locator('[role="tablist"]')).not.toHaveAttribute('aria-label')
+})
 test('selects the first panel and changes panels by keyboard, skipping disabled tabs', async ({ page, renderScenario }) => {
   await renderScenario(markup)
   const first = page.getByRole('tab', { name: 'First' })

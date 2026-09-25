@@ -70,7 +70,7 @@ export class RadarChart extends EchartsChartBase {
         startAngle: this.startAngle,
         splitNumber: Math.max(1, Math.trunc(this.splitNumber)),
         radius: '68%',
-        axisName: { color: theme.axisColor, fontSize: theme.fontSize },
+        axisName: { color: theme.axisColor, fontSize: theme.axisFontSize },
         axisLine: { lineStyle: { color: theme.gridColor } },
         splitLine: { lineStyle: { color: theme.gridColor } },
         splitArea: { show: false },
