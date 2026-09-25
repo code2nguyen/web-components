@@ -904,7 +904,7 @@ export abstract class ChartBase extends LitElement {
         </div>
         ${legendAfter ? this.renderLegend() : nothing}
       </div>
-      <div class="theme-probe" aria-hidden="true">${PROBE_COLORS.map(() => html`<i></i>`)}</div>
+      <div class="theme-probe" aria-hidden="true">${PROBE_COLORS.map(() => html`<i></i>`)}<span class="axis-font-probe"></span></div>
       <!-- slot-presence-policy: series definitions are data inputs, not conditional presentation regions; collection is reconciled by the chart lifecycle. -->
       <slot class="definitions" @slotchange=${this.#collectSeries}></slot>
     `

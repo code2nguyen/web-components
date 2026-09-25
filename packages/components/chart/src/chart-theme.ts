@@ -60,7 +60,10 @@ export interface ChartTheme {
   positive: string
   negative: string
   fontFamily: string
+  /** Base text size resolved to pixels for engines whose APIs accept only numbers. */
   fontSize: number
+  /** Axis-label size resolved independently from `--c2-chart__axis--font-size`. */
+  axisFontSize: number
   lineWidth: number
   pointRadius: number
   /** Roundedness of a bar's value end, expressed as a 0–0.5 share of its width. */
@@ -81,6 +84,7 @@ const FALLBACK: ChartTheme = {
   negative: '#dc2626',
   fontFamily: 'inherit',
   fontSize: 12,
+  axisFontSize: 12,
   lineWidth: 2,
   pointRadius: 2.5,
   barRadius: 0,
@@ -162,6 +166,7 @@ export class ChartThemeController implements ReactiveController {
 
     const style = getComputedStyle(this.#host)
     const probes = this.#host.renderRoot?.querySelectorAll<HTMLElement>('.theme-probe > i')
+    const axisFontProbe = this.#host.renderRoot?.querySelector<HTMLElement>('.axis-font-probe')
     // Before the first render there are no probes; the fallback keeps the first paint sane and the
     // controller is invalidated again once the shadow root exists.
     if (!probes || probes.length < PROBE_COLORS.length) {
@@ -181,6 +186,10 @@ export class ChartThemeController implements ReactiveController {
       const value = parseFloat(style.getPropertyValue(name))
       return Number.isFinite(value) ? value : fallback
     }
+    const pixels = (value: string, fallback: number): number => {
+      const parsed = parseFloat(value)
+      return Number.isFinite(parsed) ? parsed : fallback
+    }
 
     return {
       palette: PROBE_COLORS.slice(0, PALETTE_SIZE).map((name, index) => at(name, FALLBACK.palette[index])),
@@ -195,7 +204,8 @@ export class ChartThemeController implements ReactiveController {
       positive: at('positive', FALLBACK.positive),
       negative: at('negative', FALLBACK.negative),
       fontFamily: style.getPropertyValue('--c2-chart--font-family').trim() || FALLBACK.fontFamily,
-      fontSize: scalar('--c2-chart--font-size', FALLBACK.fontSize),
+      fontSize: pixels(style.fontSize, FALLBACK.fontSize),
+      axisFontSize: pixels(axisFontProbe ? getComputedStyle(axisFontProbe).fontSize : '', FALLBACK.axisFontSize),
       lineWidth: scalar('--c2-chart__line--width', FALLBACK.lineWidth),
       pointRadius: scalar('--c2-chart__point--radius', FALLBACK.pointRadius),
       barRadius: Math.min(0.5, Math.max(0, scalar('--c2-chart__bar--border-radius', FALLBACK.barRadius))),

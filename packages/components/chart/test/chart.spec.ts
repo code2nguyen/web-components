@@ -48,6 +48,42 @@ test('a runtime theme signal invalidates once and refreshes engine options', asy
   expect(result).toEqual({ calls: 1, color: 'rgb(9, 8, 7)', legendColor: 'rgb(6, 5, 4)' })
 })
 
+test('resolves relative font sizes and applies the axis-specific size in both engines', async ({ page, scenario }) => {
+  await scenario('family')
+  const result = await page.evaluate(async () => {
+    document.documentElement.style.fontSize = '10px'
+    const line = document.querySelector('c2-line-chart') as unknown as {
+      style: CSSStyleDeclaration
+      updateComplete: Promise<boolean>
+      buildContext(): { theme: { fontSize: number; axisFontSize: number } }
+      buildOptions(context: unknown): { axes: { font?: string }[] }
+    }
+    const scatter = document.querySelector('c2-scatter-chart') as unknown as {
+      style: CSSStyleDeclaration
+      updateComplete: Promise<boolean>
+      buildContext(): unknown
+      buildOptions(context: unknown): { xAxis: { axisLabel: { fontSize: number } } }
+    }
+    for (const chart of [line, scatter]) {
+      chart.style.setProperty('--c2-chart--font-size', '1rem')
+      chart.style.setProperty('--c2-chart__axis--font-size', '1.5rem')
+    }
+    window.dispatchEvent(new Event('c2n-theme-change'))
+    await Promise.all([line.updateComplete, scatter.updateComplete])
+
+    const lineContext = line.buildContext()
+    const scatterContext = scatter.buildContext()
+    return {
+      fontSize: lineContext.theme.fontSize,
+      axisFontSize: lineContext.theme.axisFontSize,
+      uplotAxisFont: line.buildOptions(lineContext).axes[0].font,
+      echartsAxisFontSize: scatter.buildOptions(scatterContext).xAxis.axisLabel.fontSize,
+    }
+  })
+
+  expect(result).toEqual({ fontSize: 10, axisFontSize: 15, uplotAxisFont: '15px system-ui, sans-serif', echartsAxisFontSize: 15 })
+})
+
 test('chart public parts expose actions, shared state, legend, and tooltip regions', async ({ page, scenario }) => {
   await scenario('slots')
   await page.addStyleTag({
