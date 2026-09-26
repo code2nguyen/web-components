@@ -1,0 +1,239 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-log-viewer,
+  $theme: (
+    height: 480px,
+    background: #0b1220,
+    color: #d3deee,
+    font-family: (
+      ui-monospace,
+      monospace,
+    ),
+    font-size: 13px,
+    line-height: 1.65,
+    border: 1px solid #263449,
+    border-radius: 12px,
+    message--min-width: 240px,
+    cell--padding: 8px 12px,
+    text--inset: 12px,
+    empty--padding: 24px,
+    timestamp--color: #94a3b8,
+    token--color: #93c5fd,
+    attribute--color: #a5b4cc,
+    level--color: #c4b5fd,
+    level__info--color: #6ee7b7,
+    level__warning--color: #fcd34d,
+    level__error--color: #fda4af,
+    entry--box-shadow: inset 0 -1px 0 #1b293d,
+    entry__hover--background: #142238,
+    entry__highlighted--background: #17304c,
+    entry__highlighted--box-shadow: inset 3px 0 0 #60a5fa,
+    empty--color: #94a3b8,
+    copy--size: 28px,
+    copy--icon-size: 55%,
+    copy--stroke-width: 1.8,
+    copy--inset: 8px,
+    copy--padding-top: 4px,
+    copy--background: transparent,
+    copy--color: #dbeafe,
+    copy--border: none,
+    copy--border-radius: 6px,
+    copy__hover--background: #2a4263,
+    copy__focus--outline: 2px solid #60a5fa,
+    viewport__focus--outline: 2px solid #60a5fa,
+  )
+);
+
+:host {
+  display: block;
+  width: 100%;
+  height: css.cssVar(height);
+  min-width: 0;
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+  line-height: css.cssVar(line-height);
+  position: relative;
+  overflow: hidden;
+}
+* {
+  box-sizing: border-box;
+}
+[part='viewport'] {
+  height: 100%;
+  overflow: auto;
+  overflow-anchor: none;
+  position: relative;
+  &:focus-visible {
+    outline: css.cssVar(viewport__focus--outline);
+    outline-offset: -2px;
+  }
+}
+[part='content'] {
+  position: relative;
+}
+[part~='entry'] {
+  position: absolute;
+  display: grid;
+  left: 0;
+  min-width: 100%;
+  box-shadow: css.cssVar(entry--box-shadow);
+  &:hover {
+    background: css.cssVar(entry__hover--background);
+  }
+}
+[part='cell'] {
+  padding: css.cssVar(cell--padding);
+  min-width: 0;
+  color: css.cssVar(attribute--color);
+  &[data-attribute='message'] {
+    color: inherit;
+  }
+  &[data-attribute='timestamp'] {
+    color: css.cssVar(timestamp--color);
+  }
+  &[data-attribute='level'] {
+    color: css.cssVar(level--color);
+  }
+  // The cell stretches to the tallest attribute; its shorter text sticks within that boundary.
+  [part~='text'] {
+    display: block;
+    position: sticky;
+    top: 0;
+  }
+}
+[part~='text'] {
+  white-space: pre;
+  font: inherit;
+  font-variant-ligatures: none;
+}
+.plain {
+  position: absolute;
+  left: css.cssVar(text--inset);
+}
+[part='empty'] {
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+}
+.probe {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  display: flex;
+  .cell-probe {
+    padding: css.cssVar(cell--padding);
+  }
+  .inset-probe {
+    width: css.cssVar(text--inset);
+    flex: none;
+  }
+  .message-probe {
+    width: css.cssVar(message--min-width);
+    flex: none;
+  }
+}
+
+[part~='entry'][data-level='info'] [data-attribute='level'] {
+  color: css.cssVar(level__info--color);
+}
+[part~='entry'][data-level='warn'] [data-attribute='level'],
+[part~='entry'][data-level='warning'] [data-attribute='level'] {
+  color: css.cssVar(level__warning--color);
+}
+[part~='entry'][data-level='error'] [data-attribute='level'],
+[part~='entry'][data-level='fatal'] [data-attribute='level'] {
+  color: css.cssVar(level__error--color);
+}
+
+[part~='highlight'],
+[part~='highlight']:hover {
+  background: css.cssVar(entry__highlighted--background);
+  box-shadow: css.cssVar(entry__highlighted--box-shadow);
+}
+
+.plain-entry {
+  position: absolute;
+}
+.copy-area {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: css.cssVar(copy--size);
+  box-sizing: border-box;
+  padding-top: css.cssVar(copy--padding-top);
+  transform: translateX(calc(-100% - #{css.cssVar(copy--inset)}));
+  pointer-events: none;
+  z-index: 1;
+}
+[part='copy-button'] {
+  position: sticky;
+  top: css.cssVar(copy--inset);
+  display: grid;
+  place-items: center;
+  width: css.cssVar(copy--size);
+  height: min(#{css.cssVar(copy--size)}, 100%);
+  padding: 0;
+  border: css.cssVar(copy--border);
+  border-radius: css.cssVar(copy--border-radius);
+  background: css.cssVar(copy--background);
+  color: css.cssVar(copy--color);
+  cursor: pointer;
+  pointer-events: none;
+  opacity: 0;
+  svg {
+    width: css.cssVar(copy--icon-size);
+    height: css.cssVar(copy--icon-size);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: css.cssVar(copy--stroke-width);
+  }
+  &:hover {
+    background: css.cssVar(copy__hover--background);
+  }
+  &:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    outline: css.cssVar(copy__focus--outline);
+    outline-offset: 2px;
+  }
+}
+[data-copy-hover='true'] [part='copy-button'],
+[part~='entry']:focus-within [part='copy-button'],
+.plain-entry:focus-within [part='copy-button'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: none) {
+  [part='copy-button'] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+.copy-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+[part='token'] {
+  color: css.cssVar(token--color);
+  &[data-token='error'] {
+    color: css.cssVar(level__error--color);
+  }
+  &[data-token='warning'] {
+    color: css.cssVar(level__warning--color);
+  }
+  &[data-token='info'] {
+    color: css.cssVar(level__info--color);
+  }
+  &[data-token='muted'] {
+    color: css.cssVar(timestamp--color);
+  }
+}
