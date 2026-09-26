@@ -158,5 +158,17 @@ const groups = COMPONENT_CATEGORIES.map((category) => ({
 
 <script>
   import '../data/component-modules'
+  import type { LogViewer } from '@c2n/log-viewer'
+  void customElements.whenDefined('c2-log-viewer').then(() => {
+    document.querySelectorAll<LogViewer>('.gallery__canvas c2-log-viewer[data-log-viewer-demo="preview"]').forEach((viewer) => {
+      viewer.columns = ['level', 'message']
+      viewer.appendEntries([
+        { level: 'INFO', message: 'GET /api/products 200 · 18ms' },
+        { level: 'WARN', message: 'Payment delayed · retry queued' },
+        { level: 'ERROR', message: 'POST /api/checkout 502\nUpstream timeout · order preserved' },
+      ])
+      viewer.setFilter(null)
+    })
+  })
   document.querySelectorAll('.gallery__canvas').forEach((canvas) => canvas.classList.add('ready'))
 </script>

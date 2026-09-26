@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import logViewer from '@c2n/log-viewer/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
 import steps from '@c2n/steps/custom-elements.json'
@@ -75,6 +76,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    logViewer,
     masonry,
     dashboard,
     steps,

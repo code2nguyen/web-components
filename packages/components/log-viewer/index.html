@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Log viewer</title>
+  </head>
+  <body>
+    <c2-log-viewer aria-label="Worker logs" wrap></c2-log-viewer>
+    <script type="module">
+      import './src/log-viewer.ts'
+      const viewer = document.querySelector('c2-log-viewer')
+      viewer.appendEntries(
+        Array.from({ length: 10000 }, (_, i) => ({
+          timestamp: '12:04:11',
+          level: i % 2 ? 'info' : 'error',
+          message: `Entry ${i}` + '\nContinuation'.repeat(i % 4),
+        })),
+      )
+    </script>
+  </body>
+</html>
