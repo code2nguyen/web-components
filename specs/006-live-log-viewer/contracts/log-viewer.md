@@ -8,11 +8,11 @@
 - `clear(): void`: remove entries, preserve criteria.
 - `scrollToEnd(): void`: tail and follow future appends.
 - `entryCount: number`: readonly retained count.
-- `filteredCount: number`: readonly displayed count, current after updateComplete.
+- `filteredCount: number`: readonly matching count, current after updateComplete.
 
 No public slots, filter/search controls, custom interaction events or statistics UI. Scroll region inherits accessible name from host aria-label with fallback Log content.
 
-Parts: viewport, content, entry, cell, text, empty, highlight, copy-button. CSS defaults and properties are declared in source JSDoc and generated manifest.
+Parts: viewport, content, entry, cell, text, empty, highlight, token, copy-button, copy-icon. CSS defaults and properties are declared in source JSDoc and generated manifest.
 
 Tests must cover varying heights, tall row sticky boundaries, bounded DOM at 10k entries, visible line slicing within one tall plain entry, first/last reachability, wrap/resize/font reflow, anchor stability, tail-follow, safe text, atomic validation, retained data during filtering, future appends and keyboard/axe accessibility.
 
@@ -22,4 +22,4 @@ Tabular attribute widths are measured from the widest explicit line across all r
 
 Visible entries include a hover/focus copy action (always available on touch), copying their full original message only. Source indexes resolve the correct message after filtering/virtualization. Clipboard success shows a temporary check mark and live status; failure announces a retry message. Button overlays do not change row/column measurements.
 
-Message readability: automatic lightweight token colors in both layouts for standalone severity words, timestamps, quoted values, numbers, URLs and recognizable IDs. Ordinary prose is neutral. Only rendered text is tokenized with safe Lit text spans; no full-code highlighting engine. Colors use the existing severity/timestamp variables and the documented token color variable; they do not affect virtual geometry or clipboard text. Filter highlight backgrounds remain independent.
+Message readability: automatic lightweight token colors in both layouts for standalone severity words, timestamps, quoted values, numbers, URLs and recognizable IDs. Ordinary prose is neutral. Logical lines touched by the rendered window are tokenized lazily and projected onto wrapped/visible fragments with safe Lit text spans; no full-code highlighting engine. Colors use the existing severity/timestamp variables and the documented token color variable; they do not affect virtual geometry or clipboard text. Filter highlight backgrounds remain independent.

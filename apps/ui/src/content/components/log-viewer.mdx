@@ -110,11 +110,11 @@ These examples model a server access stream and a commercial checkout incident. 
 
 Message text is colored automatically in both layouts: ERROR/FATAL in rose, WARN/WARNING in amber, INFO in green, and DEBUG/TRACE and timestamps in muted gray. Quoted values, numbers, URLs and recognizable IDs use soft blue. Ordinary text keeps the neutral foreground. Colors do not change wrapping or row height, and filtering highlights remain a separate background treatment.
 
-Token colors use the existing severity and timestamp CSS variables, plus `--c2-log-viewer__token--color` for values. Only rendered text is tokenized; this is lightweight log recognition rather than programming-language syntax highlighting. Copy always returns the original message without formatting.
+Token colors use the existing severity and timestamp CSS variables, plus `--c2-log-viewer__token--color` for values. Logical lines touched by the virtual window are tokenized lazily, preserving colors across wrapped fragments and visible slices; this is lightweight log recognition rather than programming-language syntax highlighting. Copy always returns the original message without formatting.
 
 ## Copy a message
 
-Move the pointer over an entry to reveal its copy icon. Scrolling hides pointer actions until the pointer moves again, preventing buttons from jumping between messages under a stationary cursor. The icon has a transparent surface; only hovering the icon adds a background. Keyboard users can Tab to the same action; touch devices show it directly. Copy includes the **complete original message**, even when only part of a long trace is currently rendered. Timestamp and other attributes are excluded. A check mark and accessible status confirm success; clipboard failures are announced so you can retry.
+Move the pointer over an entry to reveal its copy icon. Scrolling hides pointer actions until the pointer moves again, preventing buttons from jumping between messages under a stationary cursor. The icon has a transparent surface; only hovering the icon adds a background. Keyboard users can Tab to the same action; touch devices show it directly. Copy includes the **complete original message**, even when only part of a long trace is currently rendered. Timestamp and other attributes are excluded. `--c2-log-viewer__copy--icon-size`, `--c2-log-viewer__copy--stroke-width`, and the `copy-icon` part style both the copy and success icons. A check mark and accessible status confirm success; clipboard failures are announced so you can retry.
 
 ## Virtual scrolling
 

@@ -29,6 +29,8 @@
     entry__highlighted--box-shadow: inset 3px 0 0 #60a5fa,
     empty--color: #94a3b8,
     copy--size: 28px,
+    copy--icon-size: 55%,
+    copy--stroke-width: 1.8,
     copy--inset: 8px,
     copy--padding-top: 4px,
     copy--background: transparent,
@@ -183,11 +185,11 @@
   pointer-events: none;
   opacity: 0;
   svg {
-    width: 55%;
-    height: 55%;
+    width: css.cssVar(copy--icon-size);
+    height: css.cssVar(copy--icon-size);
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.8;
+    stroke-width: css.cssVar(copy--stroke-width);
   }
   &:hover {
     background: css.cssVar(copy__hover--background);

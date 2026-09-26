@@ -9,3 +9,5 @@
 `LineIndex`: cumulative pixel offsets starting at zero. Binary lookup maps scroll offsets to source layout positions.
 
 State: retained entries, filter and display mode, matching count, displayed columns, measured geometry, virtual window, tail-follow flag. Each layout entry records whether it is highlighted. Filter mode indexes matches only; highlight mode indexes all entries and marks matches. No saved-filter entities, slots or statistics state.
+
+`TextLayout`: normalized logical lines plus visual lines and their logical-source index/UTF-16 start offsets. `LogTokenLines` lazily caches token ranges for logical lines touched by the window; binary range lookup clips tokens onto visible visual lines, preserving classes across wrap and slice boundaries. Layouts are weakly keyed so rebuilding/clearing does not retain old token caches.

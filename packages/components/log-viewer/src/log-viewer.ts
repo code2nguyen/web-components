@@ -3,15 +3,15 @@ import { property } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { entryColumns, matchesFilter, validateEntries, validateFilter } from './log-model.js'
 import type { LogEntry, LogFilter, LogFilterMode } from './log-model.js'
-import { LineIndex, textLines } from './log-position.js'
-import { logTokens } from './log-tokens.js'
+import { LineIndex, textLayout, type TextLayout } from './log-position.js'
+import { LogTokenLines } from './log-tokens.js'
 import styles from './log-viewer.scss?inline'
 
 export type { LogEntry, LogFilter, LogFilterMode } from './log-model.js'
 interface LayoutEntry {
   source: number
   highlighted: boolean
-  cells: string[][]
+  cells: TextLayout[]
   height: number
 }
 
@@ -43,6 +43,8 @@ interface LayoutEntry {
  * @cssproperty {color} [--c2-log-viewer__entry__highlighted--background=#17304c] - Matching entry surface in highlight mode
  * @cssproperty {CSS value} [--c2-log-viewer__entry__highlighted--box-shadow=inset 3px 0 0 #60a5fa] - Matching entry accent without changing measured geometry
  * @cssproperty {CSS value} [--c2-log-viewer__copy--size=28px] - Copy button size
+ * @cssproperty {CSS value} [--c2-log-viewer__copy--icon-size=55%] - Copy and success icon width and height
+ * @cssproperty {number} [--c2-log-viewer__copy--stroke-width=1.8] - Copy and success SVG stroke width
  * @cssproperty {CSS value} [--c2-log-viewer__copy--inset=8px] - Copy button offset from viewport edges
  * @cssproperty {CSS value} [--c2-log-viewer__copy--padding-top=4px] - Space above the copy button within an entry
  * @cssproperty {color} [--c2-log-viewer__copy--background=transparent] - Copy button surface
@@ -53,6 +55,7 @@ interface LayoutEntry {
  * @cssproperty {CSS value} [--c2-log-viewer__copy__focus--outline=2px solid #60a5fa] - Copy button keyboard focus
  * @cssproperty {color} [--c2-log-viewer__token--color=#93c5fd] - Quoted values, numbers, URLs and recognizable IDs in log text
  * @csspart token - Colored log token; severity and timestamp tokens use the existing level and timestamp colors
+ * @csspart copy-icon - Copy and success SVG icon
  * @csspart copy-button - Copy the complete message of a visible entry; revealed on hover or keyboard focus
  * @csspart highlight - Matching visible entry or plain text slice in highlight mode
  * @csspart viewport - Keyboard accessible scroll surface
@@ -99,6 +102,7 @@ export class LogViewer extends LitElement {
   private canvas?: CanvasRenderingContext2D | null
   private font = ''
   private measurements = new Map<string, number>()
+  private tokenLines = new WeakMap<TextLayout, LogTokenLines>()
   private copiedSource: number | null = null
   private hoveredSource: number | null = null
   private copyStatus = ''
@@ -287,7 +291,7 @@ export class LogViewer extends LitElement {
       if (!matches && this.filterMode === 'filter') continue
       const cells = this.tabular
         ? this.keys.map((key, column) =>
-            textLines(
+            textLayout(
               Object.prototype.hasOwnProperty.call(entry, key) ? (entry[key] ?? '') : '',
               Math.max(1, this.widths[column] - horizontalPadding),
               this.measure,
@@ -295,7 +299,7 @@ export class LogViewer extends LitElement {
             ),
           )
         : [
-            textLines(
+            textLayout(
               this.keys
                 .map((key) => (Object.prototype.hasOwnProperty.call(entry, key) ? (entry[key] ?? '') : ''))
                 .filter(Boolean)
@@ -305,12 +309,12 @@ export class LogViewer extends LitElement {
               this.wrap,
             ),
           ]
-      const height = Math.max(...cells.map((lines) => lines.length)) * this.lineHeight + (this.tabular ? verticalPadding : 0)
+      const height = Math.max(...cells.map((cell) => cell.lines.length)) * this.lineHeight + (this.tabular ? verticalPadding : 0)
       if (!this.wrap) {
         if (this.tabular) {
           const message = cells[this.keys.indexOf('message')]
-          if (message) for (const line of message) this.extent = Math.max(this.extent, attributesWidth + this.measure(line) + horizontalPadding)
-        } else for (const line of cells[0]) this.extent = Math.max(this.extent, this.measure(line) + this.inset * 2)
+          if (message) for (const line of message.lines) this.extent = Math.max(this.extent, attributesWidth + this.measure(line) + horizontalPadding)
+        } else for (const line of cells[0].lines) this.extent = Math.max(this.extent, this.measure(line) + this.inset * 2)
       }
       this.layout.push({ source, cells, height, highlighted: this.filter !== null && this.filterMode === 'highlight' && matches })
       index.append(height)
@@ -396,8 +400,8 @@ export class LogViewer extends LitElement {
       >
         ${
           copied
-            ? html`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>`
-            : html`<svg viewBox="0 0 24 24" aria-hidden="true">
+            ? html`<svg part="copy-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>`
+            : html`<svg part="copy-icon" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="8" y="8" width="12" height="12" rx="2" />
                 <path d="M16 8V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
               </svg>`
@@ -406,8 +410,13 @@ export class LogViewer extends LitElement {
     </div>`
   }
 
-  private renderLogText(text: string) {
-    return logTokens(text).map((token) => (token.kind ? html`<span part="token" data-token=${token.kind}>${token.text}</span>` : token.text))
+  private renderLogText(layout: TextLayout, first = 0, last = layout.lines.length) {
+    let tokens = this.tokenLines.get(layout)
+    if (!tokens) {
+      tokens = new LogTokenLines(layout)
+      this.tokenLines.set(layout, tokens)
+    }
+    return tokens.slice(first, last).map((token) => (token.kind ? html`<span part="token" data-token=${token.kind}>${token.text}</span>` : token.text))
   }
 
   protected override render() {
@@ -439,9 +448,10 @@ export class LogViewer extends LitElement {
                 style=${`top:${top}px;height:${entry.height}px;grid-template-columns:${template}`}
               >
                 ${this.renderCopy(entry.source, top, entry.height)}
-                ${entry.cells.map((lines, column) => html`<div part="cell" data-attribute=${this.keys[column]}><span part="text">${this.keys[column] === 'message' ? this.renderLogText(lines.join('\n')) : lines.join('\n')}</span></div>`)}
+                ${entry.cells.map((cell, column) => html`<div part="cell" data-attribute=${this.keys[column]}><span part="text">${this.keys[column] === 'message' ? this.renderLogText(cell) : cell.lines.join('\n')}</span></div>`)}
               </div>`
-            const lines = entry.cells[0]
+            const cell = entry.cells[0]
+            const lines = cell.lines
             const first = Math.max(0, Math.floor((this.viewTop - 200 - top) / this.lineHeight))
             const last = Math.min(lines.length, Math.ceil((this.viewTop + this.viewportHeight + 200 - top) / this.lineHeight))
             const sliceTop = top + first * this.lineHeight
@@ -457,7 +467,7 @@ export class LogViewer extends LitElement {
                 part=${entry.highlighted ? 'text highlight' : 'text'}
                 data-index=${entry.source}
                 style=${`top:0;left:0;min-width:${this.textWidth}px;min-height:${sliceHeight}px`}
-                >${this.renderLogText(lines.slice(first, last).join('\n'))}</span
+                >${this.renderLogText(cell, first, last)}</span
               >
               ${this.renderCopy(entry.source, sliceTop, sliceHeight, this.inset)}
             </div>`

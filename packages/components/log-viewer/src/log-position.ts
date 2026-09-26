@@ -19,27 +19,47 @@ export class LineIndex {
   }
 }
 
+/** Visual lines retain their source logical line and UTF-16 offset for token projection. */
+export interface TextLayout {
+  lines: string[]
+  logicalLines: string[]
+  sources: number[]
+  starts: number[]
+}
+
 /** Explicit line breaks, tabs and measured glyph widths; breaks long tokens without assuming equal glyph widths. */
-export function textLines(text: string, width: number, measure: (text: string) => number, wrap: boolean): string[] {
-  const result: string[] = []
-  for (const logical of text.replace(/\r\n?/g, '\n').replace(/\t/g, '    ').split('\n')) {
+export function textLayout(text: string, width: number, measure: (text: string) => number, wrap: boolean): TextLayout {
+  const result: TextLayout = { lines: [], logicalLines: text.replace(/\r\n?/g, '\n').replace(/\t/g, '    ').split('\n'), sources: [], starts: [] }
+  const push = (line: string, source: number, start: number) => {
+    result.lines.push(line)
+    result.sources.push(source)
+    result.starts.push(start)
+  }
+  for (let source = 0; source < result.logicalLines.length; source++) {
+    const logical = result.logicalLines[source]
     if (!wrap || !logical || measure(logical) <= width) {
-      result.push(logical)
+      push(logical, source, 0)
       continue
     }
     let line = ''
     let size = 0
+    let start = 0
     for (const glyph of logical) {
       const advance = measure(glyph)
       if (line && size + advance > width) {
-        result.push(line)
+        push(line, source, start)
+        start += line.length
         line = ''
         size = 0
       }
       line += glyph
       size += advance
     }
-    result.push(line)
+    push(line, source, start)
   }
   return result
+}
+
+export function textLines(text: string, width: number, measure: (text: string) => number, wrap: boolean): string[] {
+  return textLayout(text, width, measure, wrap).lines
 }

@@ -92,3 +92,26 @@ for (const tabular of [true, false]) {
     await expect(button).toHaveCSS('opacity', '0')
   })
 }
+
+test('copy and success icons expose size and stroke styling without changing text geometry', async ({ page, scenario }) => {
+  await scenario('entries')
+  await captureClipboard(page)
+  const viewer = page.locator('c2-log-viewer')
+  const text = viewer.locator('[part="text"]').first()
+  const height = await text.evaluate((element) => element.getBoundingClientRect().height)
+  await viewer.evaluate((element) => {
+    element.style.setProperty('--c2-log-viewer__copy--icon-size', '18px')
+    element.style.setProperty('--c2-log-viewer__copy--stroke-width', '2.5')
+  })
+  const button = viewer.getByRole('button', { name: 'Copy message 1', exact: true })
+  const icon = button.locator('[part="copy-icon"]')
+  await expect(icon).toHaveCSS('width', '18px')
+  await expect(icon).toHaveCSS('height', '18px')
+  await expect(icon).toHaveCSS('stroke-width', '2.5px')
+  await button.focus()
+  await page.keyboard.press('Enter')
+  await expect(button).toHaveAttribute('title', 'Copied')
+  await expect(icon).toHaveCSS('width', '18px')
+  await expect(icon).toHaveCSS('stroke-width', '2.5px')
+  expect(await text.evaluate((element) => element.getBoundingClientRect().height)).toBe(height)
+})
