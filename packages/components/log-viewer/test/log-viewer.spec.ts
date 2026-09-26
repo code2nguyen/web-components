@@ -101,6 +101,14 @@ test('wrapping recalculates variable heights on resize and preserves the reading
     element.shadowRoot!.querySelector('[part="viewport"]')!.scrollTop = 1500
   })
   await expect.poll(() => viewer.locator('[part="entry"]').first().getAttribute('data-index')).not.toBe('0')
+  await expect
+    .poll(() =>
+      viewer
+        .locator('[part="entry"]')
+        .first()
+        .evaluate((row) => (row as HTMLElement).offsetTop),
+    )
+    .toBeLessThan(1500)
   const before = await viewer.evaluate((element) => {
     const viewport = element.shadowRoot!.querySelector('[part="viewport"]')!
     return [...element.shadowRoot!.querySelectorAll<HTMLElement>('[part="entry"]')].find((row) => row.offsetTop + row.offsetHeight > viewport.scrollTop)!

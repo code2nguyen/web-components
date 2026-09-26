@@ -17,6 +17,7 @@ interface LayoutEntry {
 
 /**
  * A text-only, variable-height virtual log viewport. Filters and search are controlled by the application.
+ * With the viewport focused, Home jumps to the first entry and End follows the latest; Ctrl/Command variants also work.
  * @tag c2-log-viewer
  * @cssproperty {CSS value} [--c2-log-viewer--height=480px] - Viewport height
  * @cssproperty {color} [--c2-log-viewer--background=#0b1220] - Terminal surface
@@ -164,12 +165,13 @@ export class LogViewer extends LitElement {
 
   /** Scroll to the newest matching content and resume following subsequent appends. */
   scrollToEnd(): void {
+    if (this.viewport) this.viewTop = this.viewport.scrollTop
     this.follow = true
     this.requestUpdate()
   }
 
   private get viewport(): HTMLElement | null {
-    return this.renderRoot.querySelector<HTMLElement>('[part="viewport"]')
+    return this.renderRoot?.querySelector<HTMLElement>('[part="viewport"]') ?? null
   }
 
   override connectedCallback(): void {
@@ -212,6 +214,12 @@ export class LogViewer extends LitElement {
   }
 
   protected override willUpdate(changes: PropertyValues): void {
+    // Scroll events can arrive after a resize/update. Capture user movement before reflow anchors or tail following.
+    const viewport = this.viewport
+    if (this.hasUpdated && viewport && Math.abs(viewport.scrollTop - this.viewTop) > 0.5) {
+      this.viewTop = viewport.scrollTop
+      this.follow = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= 2
+    }
     if (changes.has('wrap') || changes.has('tabular') || changes.has('columns')) {
       this.needsLayout = true
       this.rebuild = true
@@ -348,6 +356,33 @@ export class LogViewer extends LitElement {
       })
   }
 
+  private onKeyDown(event: KeyboardEvent): void {
+    const viewport = this.viewport
+    if (!viewport || event.target !== viewport || event.altKey || event.shiftKey) return
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault()
+      if (event.key === 'End') this.scrollToEnd()
+      else {
+        this.follow = false
+        this.viewTop = 0
+        viewport.scrollTo({ top: 0, behavior: 'instant' })
+        this.requestUpdate()
+      }
+      return
+    }
+    if (event.ctrlKey || event.metaKey) return
+    const page = Math.max(this.lineHeight, viewport.clientHeight - this.lineHeight)
+    const distances: Record<string, number> = { PageUp: -page, PageDown: page, ArrowUp: -this.lineHeight, ArrowDown: this.lineHeight }
+    const distance = distances[event.key]
+    if (distance === undefined) return
+    event.preventDefault()
+    // Native animated keyboard scrolling can race virtual reflow. Keep each vertical movement immediate.
+    this.viewTop = Math.max(0, Math.min(viewport.scrollTop + distance, viewport.scrollHeight - viewport.clientHeight))
+    this.follow = viewport.scrollHeight - this.viewTop - viewport.clientHeight <= 2
+    viewport.scrollTo({ top: this.viewTop, behavior: 'instant' })
+    this.requestUpdate()
+  }
+
   private onPointerMove(event: PointerEvent): void {
     if (event.pointerType === 'touch') return
     const row = (event.target as Element).closest<HTMLElement>('[data-copy-source]')
@@ -432,6 +467,7 @@ export class LogViewer extends LitElement {
         role="region"
         aria-label=${this.getAttribute('aria-label') ?? 'Log content'}
         @scroll=${this.onScroll}
+        @keydown=${this.onKeyDown}
         @pointermove=${this.onPointerMove}
         @pointerleave=${this.onPointerLeave}
       >

@@ -117,6 +117,6 @@ Avoid changing measured text geometry via parts; use the documented font, cell p
 
 ## Accessibility and limits
 
-The viewport is a keyboard-focusable named region; set `aria-label` to describe your stream. Use normal scrolling keys after focusing it. Copy buttons are keyboard accessible and announce success/failure through a live status region. The copy icon part and variables style both action and success states. No animation is required for state changes.
+The viewport is a keyboard-focusable named region; set `aria-label` to describe your stream. After focusing it, Home jumps to the first entry and End jumps to the latest entry and resumes following appends. Ctrl/Command with Home or End works too. PageUp/PageDown move by a viewport with one line of overlap; Up/Down move by one measured text line. Vertical keyboard movement is immediate, and Left/Right retain native horizontal scrolling. Copy buttons are keyboard accessible and announce success/failure through a live status region. The copy icon part and variables style both action and success states. No animation is required for state changes.
 
 Virtual content supports only selection/find/printing within the rendered window. Application data should power complete export and search.
