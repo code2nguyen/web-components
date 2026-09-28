@@ -26,6 +26,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-tab': C2Props<Tab>
       'c2-tabs': C2Props<Tabs> & {
+        'aria-label'?: Attribute
         'selected-tab'?: Attribute
       }
     }

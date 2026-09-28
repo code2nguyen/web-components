@@ -18,6 +18,8 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-masonry': DefineComponent<
       C2Props<Masonry> & {
+        'save-layout'?: unknown
+        'storage-key'?: unknown
         onLayoutError?: (event: MasonryEventMap['layout-error']) => void
         onLayoutChange?: (event: MasonryEventMap['layout-change']) => void
       }

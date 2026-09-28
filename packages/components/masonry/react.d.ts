@@ -24,7 +24,10 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-masonry': C2Props<Masonry>
+      'c2-masonry': C2Props<Masonry> & {
+        'save-layout'?: Attribute
+        'storage-key'?: Attribute
+      }
       'c2-masonry-item': C2Props<MasonryItem> & {
         'item-id'?: Attribute
         'cols-xs'?: Attribute
