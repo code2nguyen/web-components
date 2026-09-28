@@ -1,0 +1,69 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-masonry,
+  $theme: (
+    gap: 8px,
+    row-height: 8px,
+    padding: 0px,
+    background: transparent,
+    border: none,
+    border-radius: 0px,
+    placeholder--background: rgb(37 99 235 / 8%),
+    placeholder--border: 2px dashed #2563eb,
+    placeholder--border-radius: 6px,
+    motion--duration: 160ms,
+    motion--timing-function: ease,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  background: css.cssVar(background);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--masonry-columns), minmax(0, 1fr));
+  grid-auto-rows: css.cssVar(row-height);
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  background: css.cssVar(background);
+}
+
+.tile {
+  min-width: 0;
+  min-height: 0;
+  transition: transform css.cssVar(motion--duration) css.cssVar(motion--timing-function);
+}
+
+.placeholder {
+  z-index: 1;
+  min-width: 0;
+  min-height: 0;
+  pointer-events: none;
+  background: css.cssVar(placeholder--background);
+  border: css.cssVar(placeholder--border);
+  border-radius: css.cssVar(placeholder--border-radius);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition-duration: 0ms;
+  }
+}
+
+::slotted(c2-masonry-item) {
+  height: 100%;
+}

@@ -90,7 +90,7 @@ export class GaugeChart extends EchartsChartBase {
       axisLine: { lineStyle: { width: 12, color: [[1, context.theme.gridColor]] } },
       axisTick: { show: this.marks === 'show', lineStyle: { color: context.theme.axisColor } },
       splitLine: { show: this.marks === 'show', lineStyle: { color: context.theme.axisColor } },
-      axisLabel: { color: context.theme.axisColor, fontSize: context.theme.fontSize, formatter: formatValue },
+      axisLabel: { color: context.theme.axisColor, fontSize: context.theme.axisFontSize, formatter: formatValue },
       // Keep the value and metric inside the quiet centre of the dial. The previous 43% / 67% offsets
       // pushed both into the lower arc, where they collided with the scale's min/max labels.
       title: { color: context.theme.mutedColor, fontSize: context.theme.fontSize, offsetCenter: [0, '25%'] },

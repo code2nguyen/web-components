@@ -1,0 +1,184 @@
+---
+title: 'Log Viewer'
+description: 'Explore large logs with variable-height virtual scrolling and sticky tabular attributes.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { LogViewer } from '@c2n/log-viewer'
+import { Button } from '@c2n/button'
+
+<ExampleModules />
+
+Read thousands of log entries without rendering thousands of rows. `c2-log-viewer` combines **virtual scrolling for variable-height text** with **sticky attributes** that keep a long entry's context visible. Single-line messages, wrapped output and multiline traces can share the same viewport.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/log-viewer
+```
+
+## Usage
+
+These examples model a server access stream and a commercial checkout incident. The log viewers use their **default CSS values**; the surrounding title bars and navigation buttons belong to the application.
+
+**Try virtual scrolling:** the first example contains **10,000 entries**, including messages with different heights. Scroll through the stream, or jump between the beginning and the latest entry.
+
+**Try sticky attributes:** in the second example, scroll slowly through the long error trace. Its timestamp and `ERROR` label stay at the top while the message moves. They leave with that entry when the next one arrives.
+
+```html tag=UsageBlock,package=@c2n/log-viewer
+<style>
+  .feature-row { padding-left: 0 !important; padding-top: 32px !important; }
+  .feature-row::before { top: 8px !important; transform: none !important; width: auto !important; }
+  .log-demo {
+    width: 100%; min-width: 0; overflow: hidden; border: 1px solid #25334b; border-radius: 14px;
+    background: #0b1220; color: #dbe5f5; box-shadow: 0 16px 36px rgb(2 6 23 / 14%);
+    font-family: system-ui, sans-serif;
+  }
+  .log-demo__bar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 16px 18px; background: #121d30; border-bottom: 1px solid #25334b; }
+  .log-demo__dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 4px rgb(52 211 153 / 10%); }
+  .log-demo__dot--error { background: #fb7185; box-shadow: 0 0 0 4px rgb(251 113 133 / 10%); }
+  .log-demo__title { flex: 1; font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+  .log-demo__badge { border: 1px solid #30425f; border-radius: 20px; padding: 4px 9px; color: #9cb5da; font-size: 11px; white-space: nowrap; }
+  .log-demo__viewer { height: 340px; width: 100%; }
+  .log-demo__footer { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 16px; border-top: 1px solid #25334b; background: #101a2b; }
+  .log-demo__hint { flex: 1; min-width: 150px; font-size: 11px; line-height: 1.6; color: #94a9c7; }
+  .log-demo__action {
+    --c2-button__container--height: 28px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 10px;
+    --c2-button__container--font-size: 11px;
+    --c2-button__container--background-color: #1c2d47;
+    --c2-button__container--color: #dbeafe;
+    --c2-button__container--border: 1px solid #34496a;
+    --c2-button__container__hover--background-color: #2a4060;
+    --c2-button__container__hover--color: #ffffff;
+  }
+</style>
+<div class="feature-row" data-label="Virtual scrolling · 10,000 entries">
+  <div class="log-demo" data-log-demo>
+    <div class="log-demo__bar">
+      <span class="log-demo__dot" aria-hidden="true"></span>
+      <span class="log-demo__title">Server access / eu-west-1</span>
+      <span class="log-demo__badge">10,000 entries</span>
+    </div>
+    <c2-log-viewer class="log-demo__viewer" data-log-viewer-demo="virtual" wrap aria-label="10,000 server access log entries"></c2-log-viewer>
+    <div class="log-demo__footer">
+      <span class="log-demo__hint">Scroll the stream. Only the visible window is rendered.</span>
+      <c2-button class="log-demo__action" data-log-action="start">First entry</c2-button>
+      <c2-button class="log-demo__action" data-log-action="end">Latest entry</c2-button>
+    </div>
+  </div>
+</div>
+<div class="feature-row" data-label="Sticky attributes · one long trace">
+  <div class="log-demo" data-log-demo>
+    <div class="log-demo__bar">
+      <span class="log-demo__dot log-demo__dot--error" aria-hidden="true"></span>
+      <span class="log-demo__title">Commerce checkout / ORD-10428</span>
+      <span class="log-demo__badge">Sticky context</span>
+    </div>
+    <c2-log-viewer class="log-demo__viewer" data-log-viewer-demo="sticky" wrap aria-label="Commerce checkout failure with sticky timestamp and level"></c2-log-viewer>
+    <div class="log-demo__footer">
+      <span class="log-demo__hint">Scroll down: the timestamp and level stay with the trace.</span>
+      <c2-button class="log-demo__action" data-log-action="start">Replay trace</c2-button>
+      <c2-button class="log-demo__action" data-log-action="end">Recovery</c2-button>
+    </div>
+  </div>
+</div>
+<div class="feature-row" data-label="Commerce operations · filter or highlight">
+  <div class="log-demo" data-log-demo>
+    <div class="log-demo__bar">
+      <span class="log-demo__dot log-demo__dot--error" aria-hidden="true"></span>
+      <span class="log-demo__title">Checkout investigation / ORD-10428</span>
+      <span class="log-demo__badge">Warnings + errors</span>
+    </div>
+    <c2-log-viewer class="log-demo__viewer" data-log-viewer-demo="matches" wrap aria-label="Commerce logs with warning and error matching"></c2-log-viewer>
+    <div class="log-demo__footer">
+      <span class="log-demo__hint">Highlight keeps surrounding requests; filter shows only matches.</span>
+      <c2-button class="log-demo__action" data-log-action="highlight">Highlight matches</c2-button>
+      <c2-button class="log-demo__action" data-log-action="filter">Only matches</c2-button>
+      <c2-button class="log-demo__action" data-log-action="start">Clear</c2-button>
+    </div>
+  </div>
+</div>
+```
+
+## Readable log colors
+
+Message text is colored automatically in both layouts: ERROR/FATAL in rose, WARN/WARNING in amber, INFO in green, and DEBUG/TRACE and timestamps in muted gray. Quoted values, numbers, URLs and recognizable IDs use soft blue. Ordinary text keeps the neutral foreground. Colors do not change wrapping or row height, and filtering highlights remain a separate background treatment.
+
+Token colors use the existing severity and timestamp CSS variables, plus `--c2-log-viewer__token--color` for values. Logical lines touched by the virtual window are tokenized lazily, preserving colors across wrapped fragments and visible slices; this is lightweight log recognition rather than programming-language syntax highlighting. Copy always returns the original message without formatting.
+
+## Copy a message
+
+Move the pointer over an entry to reveal its copy icon. Scrolling hides pointer actions until the pointer moves again, preventing buttons from jumping between messages under a stationary cursor. The icon has a transparent surface; only hovering the icon adds a background. Keyboard users can Tab to the same action; touch devices show it directly. Copy includes the **complete original message**, even when only part of a long trace is currently rendered. Timestamp and other attributes are excluded. `--c2-log-viewer__copy--icon-size`, `--c2-log-viewer__copy--stroke-width`, and the `copy-icon` part style both the copy and success icons. A check mark and accessible status confirm success; clipboard failures are announced so you can retry.
+
+## Virtual scrolling
+
+The viewer renders the entries in the visible window plus a small overscan margin. A cumulative height index finds the right window as you scroll. **Rows do not need a fixed height:** line breaks and measured wrapping determine each entry's size.
+
+In continuous text mode (`tabular="false"`), it also renders only the visible lines **inside** a very large entry. A single long trace can be read without mounting all of its text.
+
+Appends follow the end when you are already there. Scroll up to read history and incoming entries preserve your position. Call `scrollToEnd()` to resume following.
+
+## Sticky attributes
+
+Tabular mode is enabled by default. Attributes align vertically in columns, and each entry is as tall as its longest attribute. Shorter attributes stick to the top of the viewport **within that entry**. When the entry ends, its context scrolls away and the next entry takes over.
+
+There is no separate sticky switch: it is part of tabular mode. Use `columns` to choose the attributes and their order; set `tabular = false` for continuous text. `wrap` controls long-line wrapping in either mode.
+
+The title bars and buttons above belong to the example application. The log viewer itself remains a content viewport, controlled through its public API.
+
+### Connect your data
+
+```ts tag=CodeBlock
+import '@c2n/log-viewer'
+
+const viewer = document.querySelector('c2-log-viewer')!
+viewer.columns = ['timestamp', 'level', 'message']
+viewer.appendEntries([
+  { timestamp: '14:08:18', level: 'INFO', orderId: 'ORD-10428', message: 'Checkout started · EUR 129.90' },
+  { timestamp: '14:08:32', level: 'ERROR', orderId: 'ORD-10428', message: 'Payment timeout\nRetry scheduled · cart preserved' },
+])
+
+// Call from an application search field, filter panel, or another component.
+viewer.setFilter({ attributes: { level: ['ERROR', 'WARN'], orderId: 'ORD-10428' }, search: 'retry' })
+viewer.setFilter(null) // Restore every retained entry.
+viewer.wrap = true
+viewer.tabular = false
+viewer.scrollToEnd()
+```
+
+## Filter or highlight
+
+Use the same criteria in two modes:
+
+```ts tag=CodeBlock
+const criteria = { attributes: { level: ['WARN', 'ERROR'] } }
+viewer.setFilter(criteria) // Default: display only matching entries.
+viewer.setFilter(criteria, 'highlight') // Keep all entries, mark the matches.
+viewer.setFilter(null) // Clear criteria and highlights.
+```
+
+Highlight mode preserves the surrounding context and the entry you are reading. It works in tabular and continuous text modes, including with virtual scrolling and future appends. `filteredCount` always reports the number of matches, even when all entries remain visible.
+
+## Data and filtering
+
+Every entry requires a string `message` and accepts arbitrary string attributes. Batches are validated before anything is appended. Entries and filter criteria are copied, so changing the input objects afterwards does not affect the viewer.
+
+`columns` specifies the attribute order and displayed attributes. When empty, attributes are discovered automatically: timestamp, level and source first, additional attributes next, and message last. The same order is used to concatenate attributes with spaces in plain mode; entries are separated by newlines. Explicit line breaks and empty lines are retained. Tabs display as four spaces.
+
+`setFilter(criteria, mode)` replaces the active criteria and display mode (`filter` by default, or `highlight`). Attribute values match exactly and are case sensitive. Arrays mean any of those values; multiple attributes must all match. `search` is a case insensitive substring search across **all** attributes, including hidden columns, combined with the attribute criteria. A missing attribute does not match an exact value. `null` clears the filter. Stored entries remain available, and future appends are evaluated against the active criteria.
+
+`entryCount` includes every retained entry; `filteredCount` reports matching entries after `updateComplete`. `clear()` removes entries while retaining the current filter. The application owns fetching, transport, retention, controls and statistics.
+
+## Layout and accessibility
+
+Rows use a cumulative height index and binary viewport lookup. Wrapped text uses measured glyph widths, so rows do not need a common height. Resize, wrap changes and font changes recalculate layout while preserving the top entry being read. Appends follow the end when the viewport is already there; otherwise they preserve the reading position. `scrollToEnd()` resumes following.
+
+Each attribute column is automatically sized to its widest value, including cell padding. Only the message column takes the remaining viewport width, with `--c2-log-viewer__message--min-width` as its minimum. Widths are measured across all retained entries, so filtering keeps the columns aligned. With wrap disabled, long messages scroll horizontally without changing attribute column widths. In narrow viewports, columns remain aligned and can scroll horizontally. Cell padding, plain text inset and empty state padding are also exposed as CSS variables and included in layout measurement.
+
+Virtual content is available through the keyboard focusable, named scroll region. Home jumps to the first entry; End jumps to the latest and resumes following appends. Ctrl/Command with Home or End also works, while PageUp/PageDown move by a viewport with one line of overlap; Up/Down move by one measured text line. Vertical keyboard movement is immediate, and Left/Right retain native horizontal scrolling. Browser find, selection across unrendered content and printing only see the rendered window; use application data for complete exports or searches.

@@ -67,7 +67,7 @@ export class CandlestickChart extends EchartsChartBase {
 
   protected override coordinateSystem(context: ChartBuildContext): Record<string, unknown> {
     const axisLine = { lineStyle: { color: context.theme.gridColor } }
-    const axisLabel = { color: context.theme.axisColor, fontSize: context.theme.fontSize }
+    const axisLabel = { color: context.theme.axisColor, fontSize: context.theme.axisFontSize }
     return {
       grid: { left: 48, right: 16, top: 16, bottom: 32, containLabel: false },
       xAxis: { type: 'category', data: this.xLabels(), boundaryGap: true, axisLine, axisLabel },

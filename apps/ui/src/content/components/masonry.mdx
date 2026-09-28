@@ -1,0 +1,217 @@
+---
+title: 'Masonry'
+description: 'Automatically pack differently sized dashboard tiles, then move or resize them in edit mode.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Masonry } from '@c2n/masonry'
+
+`c2-masonry` packs direct `c2-masonry-item` children into the earliest available cells. It is useful when cards or charts have explicit row and column spans but the application should not manage coordinates. For fixed, author-positioned tracks, use [`c2-dashboard`](/web-components/components/dashboard) instead. Content stays in the application's markup, so forms and links work normally. If it is taller than a tile's declared height, it scrolls inside the tile.
+
+The container responds to its own width, not the viewport: below 600 px it has 1 column; at 600 px it has 6; at 960 px it has 9; and at 1280 px it has 12. Each tile's `cols` is the base width. `cols-xs`, `cols-sm`, `cols-md`, and `cols-lg` override it in their respective ranges. The component keeps one tile order, clamps over-wide spans for rendering, and repacks that same order at every width.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/masonry
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/masonry
+<style>
+  .masonry-usage-row.masonry-usage-row {
+    padding: 30px 0 12px;
+  }
+
+  .masonry-usage-row.masonry-usage-row::before {
+    top: 4px;
+    transform: none;
+    width: auto;
+  }
+
+  .operations-grid {
+    display: block;
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    --c2-masonry--gap: 8px;
+    --c2-masonry--row-height: 9px;
+    --c2-masonry--padding: 8px;
+    --c2-masonry--background: #f4f4f5;
+    --c2-masonry--border-radius: 12px;
+    --c2-masonry-item--background: #ffffff;
+    --c2-masonry-item--border: 1px solid #e4e4e7;
+    --c2-masonry-item--border-radius: 8px;
+    --c2-masonry-item__content--padding: 14px;
+    --c2-masonry-item__handle--background: transparent;
+    --c2-masonry-item__handle__hover--background: transparent;
+  }
+
+  .operations-grid h3 {
+    margin: 0;
+    color: #52525b;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .operations-grid strong {
+    display: block;
+    margin-top: 9px;
+    font-size: 27px;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .operations-grid p {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #71717a;
+  }
+
+  .operations-grid .card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .operations-grid .card-badge {
+    border-radius: 999px;
+    padding: 3px 7px;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .operations-grid .trend {
+    display: block;
+    width: 100%;
+    height: 62px;
+    margin-top: 13px;
+    overflow: visible;
+  }
+
+  .operations-grid .trend path {
+    fill: none;
+    stroke: #2563eb;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .operations-grid .track {
+    height: 7px;
+    margin-top: 15px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e4e4e7;
+  }
+
+  .operations-grid .track span {
+    display: block;
+    width: 72%;
+    height: 100%;
+    border-radius: inherit;
+    background: #2563eb;
+  }
+
+  .operations-grid .card-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    color: #71717a;
+    font-size: 11px;
+  }
+
+  .operations-grid .activity-list {
+    display: grid;
+    gap: 8px;
+    margin: 13px 0 0;
+    padding: 0;
+    list-style: none;
+    color: #52525b;
+    font-size: 12px;
+  }
+
+  .operations-grid .activity-list li {
+    display: flex;
+    gap: 9px;
+    align-items: baseline;
+  }
+
+  .operations-grid .activity-list time {
+    color: #a1a1aa;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .operations-grid .card-accent {
+    color: #16a34a;
+    font-weight: 600;
+  }
+
+  .operations-grid .custom-handle-icon {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>
+<div data-label="Operations overview" class="masonry-usage-row">
+  <c2-masonry client:only="lit" class="operations-grid">
+    <c2-masonry-item item-id="revenue" label="Revenue" rows="12" cols="3" cols-sm="4" cols-md="4" cols-lg="5">
+      <div class="card-heading"><h3>Quarterly revenue</h3><span class="card-badge">+12.4%</span></div>
+      <strong>$8.4M</strong><p>vs. $7.5M plan</p>
+      <svg class="trend" viewBox="0 0 300 70" preserveAspectRatio="none" aria-hidden="true"><path d="M2 57 32 49 61 53 91 40 120 43 150 30 180 36 210 22 239 27 269 13 298 8" /></svg>
+    </c2-masonry-item>
+    <c2-masonry-item item-id="orders" label="Open orders" rows="10" cols="2" cols-sm="2" cols-md="3" cols-lg="3">
+      <h3>Open orders</h3><strong>142</strong><p>Across 7 regions</p>
+      <div class="track" aria-label="72 percent fulfilled"><span></span></div><div class="card-foot"><span>Fulfilled</span><span>72%</span></div>
+    </c2-masonry-item>
+    <c2-masonry-item item-id="latency" label="Latency" rows="9" cols="2" cols-sm="2" cols-md="2" cols-lg="2">
+      <div class="card-heading"><h3>Median latency</h3><span class="card-badge">Healthy</span></div><strong>84 ms</strong><p>Target under 100 ms</p>
+    </c2-masonry-item>
+    <c2-masonry-item item-id="activity" label="Recent activity" rows="11" cols="3" cols-sm="4" cols-md="4" cols-lg="4">
+      <h3>Recent activity</h3><ul class="activity-list"><li><time>09:42</time><span>Region north deployed</span></li><li><time>09:37</time><span>Orders queue recovered</span></li><li><time>09:21</time><span>Revenue report refreshed</span></li><li><time>09:09</time><span>Fulfillment target met</span></li></ul>
+    </c2-masonry-item>
+  </c2-masonry>
+</div>
+<div data-label="Move or resize with handles" class="masonry-usage-row">
+  <c2-masonry client:only="lit" id="operations-editable" class="operations-grid" editable>
+    <c2-masonry-item item-id="conversion" label="Conversion" rows="9" cols="2" cols-sm="3" cols-md="4" cols-lg="5">
+      <svg slot="move-icon" class="custom-handle-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2v16M2 10h16m-8-8L7 5m3-3 3 3m-3 13-3-3m3 3 3-3M2 10l3-3m-3 3 3 3m13-3-3-3m3 3-3 3" /></svg>
+      <h3>Conversion</h3><strong>4.8%</strong><p><span class="card-accent">↑ 0.6 points</span> this week</p>
+    </c2-masonry-item>
+    <c2-masonry-item item-id="incidents" label="Incidents" rows="9" cols="2" cols-sm="3" cols-md="4" cols-lg="4">
+      <h3>Active incidents</h3><strong>2</strong><p>Both assigned · next review 10:30</p>
+    </c2-masonry-item>
+  </c2-masonry>
+</div>
+```
+
+Every tile needs a unique, nonempty `item-id` for editing. The `editable` attribute exposes a move button and border resize targets; interacting with the tile's interior content never starts a drag. Hover a tile to reveal its move button and highlight its right and bottom resize borders. Keyboard focus reveals the controls too. Focus the move button or bottom resize border, press Enter or Space, use arrow keys (Home/End also move a tile to the extremes), then Enter/Space to commit or Escape to cancel. The live status announces the candidate. Pointer drag supports mouse, touch, and pen; reduced-motion preference removes decorative movement.
+
+The Conversion tile above replaces the built-in move artwork with an SVG in its `move-icon` slot; Incidents uses the default grip. Place the slot on a direct child of `c2-masonry-item`. The item's unnamed slot holds card content, while the container's unnamed slot accepts items. There is no resize icon: drag the highlighted right border to change column span or the bottom border to change row span. The cursor indicates the available direction. Masonry repacks the tiles after a resize; it does not pin the opposite edge or scale the card content. Keyboard users can Tab to the bottom border's focus outline and use arrow keys in edit mode. The available slots are listed under each element on the API tab.
+
+Committed edits save to `localStorage` and restore automatically by default. Give the container a stable `id` to keep its default storage key stable, or set `storage-key="operations-layout"` to choose the exact key. Use `save-layout="false"` to disable storage; the repository's Boolean converter recognizes the literal `"false"`. A completed user edit still sends one nonbubbling `layout-change` from the container. Its `detail.layout` has `version: 1` and an ordered `items` array of `{ id, rows, columns: { xs, sm, md, lg } }`; it stores no coordinates. Applications can also assign a snapshot through the property-only `layout` input, which takes precedence over stored data:
+
+```js tag=CodeBlock
+import '@c2n/masonry'
+
+const masonry = document.querySelector('c2-masonry')
+masonry.addEventListener('layout-change', (event) => {
+  console.log('Committed masonry arrangement', event.detail.layout)
+})
+```
+
+Resizing changes the column span only for the current range; row span is shared. A canceled or no-op action, a container-width change, or assigning `layout` emits no user-change event. Invalid IDs and spans leave content visible, and `layout-error` explains why editing or a supplied snapshot was rejected. The API tab lists both elements, their slots and parts, and every CSS theme variable.

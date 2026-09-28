@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masonry component</title>
+    <script type="module" src="/src/masonry.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 32px;
+        background: #f4f4f5;
+        color: #18181b;
+        font-family: system-ui, sans-serif;
+      }
+      h1 {
+        margin-top: 0;
+      }
+      c2-masonry {
+        --c2-masonry--gap: 10px;
+        --c2-masonry--row-height: 12px;
+        --c2-masonry--padding: 10px;
+        --c2-masonry--background: #e4e4e7;
+        --c2-masonry--border-radius: 12px;
+        --c2-masonry-item--background: #ffffff;
+        --c2-masonry-item--border: 1px solid #d4d4d8;
+        --c2-masonry-item--border-radius: 8px;
+        --c2-masonry-item__content--padding: 12px;
+      }
+      c2-masonry-item h2 {
+        margin: 0 0 10px;
+        font-size: 14px;
+      }
+      c2-masonry-item strong {
+        font-size: 28px;
+      }
+      output {
+        display: block;
+        margin-top: 14px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Operations dashboard</h1>
+    <p>Drag a handle or use Enter, arrows, and Escape. Resize this window to see the same tile order repack.</p>
+    <c2-masonry id="dashboard" editable>
+      <c2-masonry-item item-id="revenue" label="Revenue" rows="10" cols="3" cols-sm="3" cols-md="4" cols-lg="5">
+        <h2>Quarterly revenue</h2>
+        <strong>$8.4M</strong>
+        <p>12% above plan</p>
+      </c2-masonry-item>
+      <c2-masonry-item item-id="orders" label="Orders" rows="8" cols="2" cols-sm="3" cols-md="3" cols-lg="3">
+        <h2>Open orders</h2>
+        <strong>142</strong>
+        <p>Across 7 regions</p>
+      </c2-masonry-item>
+      <c2-masonry-item item-id="latency" label="Latency" rows="8" cols="2" cols-sm="3" cols-md="2" cols-lg="2">
+        <h2>Median latency</h2>
+        <strong>84 ms</strong>
+        <p>Within target</p>
+      </c2-masonry-item>
+      <c2-masonry-item item-id="activity" label="Activity" rows="10" cols="3" cols-sm="6" cols-md="4" cols-lg="4">
+        <h2>Recent activity</h2>
+        <p>09:42 · Region north deployed</p>
+        <p>09:37 · Orders queue recovered</p>
+        <p>09:21 · Revenue report refreshed</p>
+        <p>09:09 · Fulfillment target met</p>
+        <p>08:58 · West cluster checked</p>
+        <p>08:34 · Backlog below alert line</p>
+        <p>08:20 · North region warmed</p>
+        <p>08:11 · Daily snapshot complete</p>
+        <p>07:49 · Retry queue cleared</p>
+        <p>07:32 · Service health verified</p>
+      </c2-masonry-item>
+    </c2-masonry>
+    <output id="saved" aria-label="Last saved layout">No user edit committed yet.</output>
+    <script type="module">
+      const dashboard = document.querySelector('#dashboard')
+      const output = document.querySelector('#saved')
+      const previous = localStorage.getItem('masonry-harness-layout')
+      if (previous) {
+        try {
+          dashboard.layout = JSON.parse(previous)
+        } catch {
+          localStorage.removeItem('masonry-harness-layout')
+        }
+      }
+      dashboard.addEventListener('layout-change', (event) => {
+        localStorage.setItem('masonry-harness-layout', JSON.stringify(event.detail.layout))
+        output.textContent = JSON.stringify(event.detail.layout, null, 2)
+      })
+      dashboard.addEventListener('layout-error', (event) => {
+        output.textContent = `Layout input error: ${event.detail.reason}`
+      })
+    </script>
+  </body>
+</html>

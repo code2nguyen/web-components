@@ -79,7 +79,7 @@ export abstract class UplotChartBase extends ChartBase {
       ...(scale ? { scale, side: 1 as const } : {}),
       show,
       stroke: theme.axisColor,
-      font: `${theme.fontSize}px ${theme.fontFamily === 'inherit' ? 'system-ui, sans-serif' : theme.fontFamily}`,
+      font: `${theme.axisFontSize}px ${theme.fontFamily === 'inherit' ? 'system-ui, sans-serif' : theme.fontFamily}`,
       ticks: { show, stroke: theme.gridColor, width: 1 },
       // Only the left axis contributes grid lines; a second set from the right one would not line up with it.
       grid:

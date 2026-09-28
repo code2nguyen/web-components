@@ -23,6 +23,7 @@ declare module 'vue' {
     >
     'c2-tabs': DefineComponent<
       C2Props<Tabs> & {
+        'aria-label'?: unknown
         'selected-tab'?: unknown
         onSelectionChange?: (event: TabsEventMap['selection-change']) => void
       }

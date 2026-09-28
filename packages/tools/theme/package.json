@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",
@@ -54,6 +54,8 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/log-viewer:build",
+        "../../components/masonry:build",
         "../../components/dashboard:build",
         "../../components/steps:build",
         "../../components/code-editor:build",

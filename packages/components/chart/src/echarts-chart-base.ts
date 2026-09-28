@@ -28,7 +28,7 @@ export abstract class EchartsChartBase extends ChartBase {
   protected coordinateSystem(context: ChartBuildContext): Record<string, unknown> {
     const { theme } = context
     const axisLine = { lineStyle: { color: theme.gridColor } }
-    const axisLabel = { color: theme.axisColor, fontSize: theme.fontSize }
+    const axisLabel = { color: theme.axisColor, fontSize: theme.axisFontSize }
     return {
       grid: { left: 48, right: 16, top: 16, bottom: 32, containLabel: false },
       xAxis: { type: this.xType === 'time' ? 'time' : this.xType === 'category' ? 'category' : 'value', axisLine, axisLabel, data: context.labels },

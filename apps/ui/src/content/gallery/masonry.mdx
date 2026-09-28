@@ -1,0 +1,218 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Masonry } from '@c2n/masonry'
+
+## Gallery
+
+Two dashboard-sized examples show the packing, not just isolated tiles. The first keeps the masonry elements at their defaults and styles only application-owned card content. The second themes the grid, tile surfaces, edit controls, and destination preview through public CSS variables. Narrow either example to see the same cards stack in order.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .masonry-default {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .masonry-default-tile {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 16px;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #18181b;
+    font-size: 12px;
+  }
+
+  .masonry-default-tile h3 {
+    margin: 0;
+    color: #71717a;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .masonry-default-tile strong {
+    display: block;
+    margin-top: 8px;
+    font-size: 25px;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .masonry-default-tile p {
+    margin: 6px 0 0;
+    color: #71717a;
+  }
+
+  .masonry-default-tile .positive {
+    color: #15803d;
+    font-weight: 600;
+  }
+
+  .masonry-default-tile .sparkline {
+    display: block;
+    width: 100%;
+    height: 48px;
+    margin-top: 14px;
+  }
+
+  .masonry-default-tile .sparkline path {
+    fill: none;
+    stroke: #2563eb;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .masonry-default-tile .progress-track {
+    height: 7px;
+    margin-top: 15px;
+    border-radius: 999px;
+    background: #e4e4e7;
+  }
+
+  .masonry-default-tile .progress-track span {
+    display: block;
+    width: 99.9%;
+    height: 100%;
+    border-radius: inherit;
+    background: #22c55e;
+  }
+
+  .masonry-default-tile .mini-list {
+    display: grid;
+    gap: 7px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    color: #52525b;
+  }
+
+  .masonry-default-tile .mini-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .masonry-default-tile .mini-list li span {
+    color: #52525b;
+  }
+</style>
+<c2-masonry client:only="lit" class="masonry-default">
+  <c2-masonry-item item-id="throughput" label="Throughput" rows="12" cols="3" cols-sm="4" cols-md="5" cols-lg="6">
+    <div class="masonry-default-tile"><h3>Orders processed</h3><strong>18,642</strong><p><span class="positive">↑ 8.2%</span> from last week</p><svg class="sparkline" viewBox="0 0 240 50" preserveAspectRatio="none" aria-hidden="true"><path d="M2 42 27 35 53 39 79 27 104 31 130 18 156 23 183 12 208 16 238 5" /></svg></div>
+  </c2-masonry-item>
+  <c2-masonry-item item-id="queue" label="Queue" rows="12" cols="2" cols-sm="2" cols-md="2" cols-lg="3">
+    <div class="masonry-default-tile"><h3>Open queue</h3><strong>142</strong><p>Across 7 regions</p><ul class="mini-list"><li><span>Priority</span><b>18</b></li><li><span>On track</span><b>124</b></li></ul></div>
+  </c2-masonry-item>
+  <c2-masonry-item item-id="health" label="Health" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3">
+    <div class="masonry-default-tile"><h3>Service availability</h3><strong>99.9%</strong><p>30-day rolling window</p><div class="progress-track" aria-label="Availability is 99.9 percent"><span></span></div></div>
+  </c2-masonry-item>
+  <c2-masonry-item item-id="deploys" label="Deploys" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3">
+    <div class="masonry-default-tile"><h3>Deployments today</h3><strong>3</strong><p>All checks passing</p><ul class="mini-list"><li><span>North region</span><span>09:42</span></li><li><span>West region</span><span>08:18</span></li></ul></div>
+  </c2-masonry-item>
+</c2-masonry>
+```
+
+```html tag=MdxCodeBlock,label=Night watch
+<style>
+  .night-watch {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    --c2-masonry--gap: 8px;
+    --c2-masonry--row-height: 9px;
+    --c2-masonry--padding: 12px;
+    --c2-masonry--background: #101827;
+    --c2-masonry--border-radius: 14px;
+    --c2-masonry__placeholder--background: rgb(56 189 248 / 20%);
+    --c2-masonry__placeholder--border: 2px dashed #38bdf8;
+    --c2-masonry-item--background: #1e293b;
+    --c2-masonry-item--border: 1px solid #334155;
+    --c2-masonry-item--border-radius: 10px;
+    --c2-masonry-item__content--padding: 14px;
+    --c2-masonry-item__handle--background: #334155;
+    --c2-masonry-item__handle--color: #f8fafc;
+    --c2-masonry-item__handle__hover--background: #475569;
+  }
+
+  .night-watch h3 {
+    margin: 0 80px 6px 0;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .night-watch strong {
+    display: block;
+    color: #f8fafc;
+    font-size: 27px;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .night-watch p {
+    margin: 7px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+  }
+
+  .night-watch .night-positive {
+    color: #5eead4;
+    font-weight: 600;
+  }
+
+  .night-watch .night-trend {
+    display: block;
+    width: 100%;
+    height: 58px;
+    margin-top: 15px;
+  }
+
+  .night-watch .night-trend path {
+    fill: none;
+    stroke: #38bdf8;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .night-watch .night-list {
+    display: grid;
+    gap: 9px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    color: #cbd5e1;
+    font-size: 12px;
+  }
+
+  .night-watch .night-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .night-watch .night-list li span {
+    color: #cbd5e1;
+  }
+
+  .night-watch .night-list b {
+    color: #f8fafc;
+  }
+</style>
+<c2-masonry client:only="lit" class="night-watch" editable>
+  <c2-masonry-item item-id="requests" label="Requests" rows="13" cols="3" cols-sm="4" cols-md="5" cols-lg="6"><h3>Requests / min</h3><strong>12,804</strong><p><span class="night-positive">↑ 6.8%</span> from yesterday</p><svg class="night-trend" viewBox="0 0 240 58" preserveAspectRatio="none" aria-hidden="true"><path d="M2 47 29 42 54 45 80 31 107 35 133 22 159 27 184 15 211 20 238 7" /></svg></c2-masonry-item>
+  <c2-masonry-item item-id="errors" label="Errors" rows="10" cols="2" cols-sm="2" cols-md="2" cols-lg="3"><h3>Error rate</h3><strong>0.03%</strong><p>Below 0.1% threshold</p></c2-masonry-item>
+  <c2-masonry-item item-id="latency" label="Latency" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3"><h3>P95 latency</h3><strong>218 ms</strong><p>Target under 250 ms</p></c2-masonry-item>
+  <c2-masonry-item item-id="regions" label="Regions" rows="10" cols="2" cols-sm="3" cols-md="3" cols-lg="3"><h3>Regional health</h3><ul class="night-list"><li><span>North</span><b>Healthy</b></li><li><span>West</span><b>Healthy</b></li><li><span>East</span><b>Degraded</b></li></ul></c2-masonry-item>
+</c2-masonry>
+```
+
+</GalleryGrid>

@@ -10,6 +10,43 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // Terminal typography and colors form one readable palette; a generic sans/light theme must not split it.
+  '--c2-log-viewer--background': { exclude: 'default terminal palette' },
+  '--c2-log-viewer--color': { exclude: 'default terminal palette' },
+  '--c2-log-viewer--font-family': { exclude: 'monospace text layout' },
+  '--c2-log-viewer--border': { exclude: 'default terminal frame' },
+  '--c2-log-viewer--border-radius': { exclude: 'default terminal frame' },
+  '--c2-log-viewer__viewport__focus--outline': { exclude: 'terminal focus contrast' },
+  '--c2-log-viewer__empty--color': { exclude: 'terminal metadata contrast' },
+  '--c2-log-viewer__token--color': { exclude: 'terminal log token contrast' },
+  '--c2-log-viewer__timestamp--color': { exclude: 'terminal metadata contrast' },
+  '--c2-log-viewer__attribute--color': { exclude: 'terminal metadata contrast' },
+  '--c2-log-viewer__level--color': { exclude: 'terminal level contrast' },
+  '--c2-log-viewer__level__info--color': { exclude: 'terminal severity contrast' },
+  '--c2-log-viewer__level__warning--color': { exclude: 'terminal severity contrast' },
+  '--c2-log-viewer__level__error--color': { exclude: 'terminal severity contrast' },
+  '--c2-log-viewer__entry--box-shadow': { exclude: 'terminal row divider contrast' },
+  '--c2-log-viewer__entry__highlighted--background': { exclude: 'terminal match contrast' },
+  '--c2-log-viewer__entry__highlighted--box-shadow': { exclude: 'terminal match accent' },
+  '--c2-log-viewer__entry__hover--background': { exclude: 'terminal hover surface contrast' },
+  '--c2-log-viewer__copy--background': { exclude: 'terminal copy control contrast' },
+  '--c2-log-viewer__copy--color': { exclude: 'terminal copy control contrast' },
+  '--c2-log-viewer__copy--border': { exclude: 'terminal copy control contrast' },
+  '--c2-log-viewer__copy--border-radius': { exclude: 'terminal copy control shape' },
+  '--c2-log-viewer__copy__hover--background': { exclude: 'terminal copy control contrast' },
+  '--c2-log-viewer__copy__focus--outline': { exclude: 'terminal copy focus contrast' },
+  // Masonry defaults have no outer rounding; the edit preview and elevation follow the active brand theme.
+  '--c2-masonry--border-radius': { exclude: 'square outer layout by default' },
+  '--c2-masonry-item--border-radius': { exclude: 'square tile by default' },
+  '--c2-masonry__placeholder--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #2563eb) 8%, transparent)',
+  },
+  '--c2-masonry__placeholder--border': {
+    token: 'color-primary',
+    value: '2px dashed var(--c2-theme--color-primary, #2563eb)',
+  },
+  '--c2-masonry-item__dragging--box-shadow': { token: 'shadow-md' },
   // Border Beam geometry and timing belong to the decorative effect. Its principal colour and radius follow the
   // active theme while the second gradient stop remains an intentionally coordinated accent.
   '--c2-border-beam--outset': { exclude: 'container border alignment geometry' },

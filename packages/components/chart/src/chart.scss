@@ -301,12 +301,16 @@
 }
 
 /*
- * Colour probes. `getComputedStyle().getPropertyValue()` hands back the author's text for a `var()` or
- * `color-mix()` chain, which no canvas engine can parse; the computed `color` of an element always
- * resolves to `rgb(…)`. `display: none` keeps them free.
+ * Theme probes. `getComputedStyle().getPropertyValue()` hands back the author's text for a `var()` or
+ * `color-mix()` chain, which no canvas engine can parse; computed element properties resolve colours and
+ * relative lengths into values the engines accept. `display: none` keeps the probes free.
  */
 .theme-probe {
   display: none;
+
+  .axis-font-probe {
+    font-size: css.cssVar(axis--font-size);
+  }
 
   i:nth-child(1) {
     color: css.cssVar(series-1--color);
