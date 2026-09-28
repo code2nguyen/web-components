@@ -207,12 +207,6 @@
   opacity: 1;
   pointer-events: auto;
 }
-@media (hover: none) {
-  [part='copy-button'] {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
 .copy-status {
   position: absolute;
   width: 1px;
