@@ -1,0 +1,9 @@
+{
+  "title": "Log Lens",
+  "description": "An OpenTelemetry log analyzer in Next.js that reads a log file as a story: message patterns, a written timeline of incidents, where failing requests diverge from healthy ones, and which attributes set the errors apart.",
+  "framework": "nextjs",
+  "outputDir": "out",
+  "sourcePath": "apps/examples/log-lens-nextjs",
+  "tags": ["opentelemetry", "logs", "nextjs", "log-viewer", "charts", "upload"],
+  "order": 60
+}

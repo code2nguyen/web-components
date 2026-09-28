@@ -269,6 +269,41 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   component and closest current property name.
 - **Resolved 2026-09-23:** `npm run check:css-contracts` validates app usage against manifests and theme tokens with file/line diagnostics.
 
+### `c2-log-viewer` can follow the end but cannot be sent to the start, or tell the app which entry was chosen
+
+- **Severity:** gap
+- **Hit while:** building the raw-log view of the Log Lens Next.js example (`apps/examples/log-lens-nextjs`), 2026-09-28.
+- **What happens:** replacing the buffer (`clear()` + `appendEntries()`) leaves the viewer following the newest
+  entry, because an empty viewport counts as "at the bottom". An analysis view wants to open at the first record;
+  the only public way there is calling `setFilter(null, 'filter')` afterwards for its anchor-reset side effect. The
+  viewer also fires no event for an entry, so a record cannot open a detail panel or be added to a filter from the
+  viewport — the app has to offer those actions somewhere else.
+- **Where the fix belongs:** `packages/components/log-viewer` — `scrollToStart()` (or `scrollToEntry(index)`) next
+  to `scrollToEnd()`, and an `entry-click` event carrying the entry and its index.
+
+### Charts have no time markers or annotated ranges
+
+- **Severity:** gap
+- **Hit while:** marking the detected story chapters (error surge, recovery, silent service) on the Log Lens rhythm
+  chart, 2026-09-28.
+- **What happens:** `c2-area-chart`/`c2-line-chart` cannot draw a vertical marker at an x value or shade an x range.
+  The example renders a separate strip of positioned `c2-icon-button` markers under the chart, which only
+  approximates the plot's x scale (axes and padding shift it) and does not follow zoom.
+- **Where the fix belongs:** `packages/components/chart` — an `annotations` property (`{ x, x2?, label, tone }[]`)
+  drawn by both engines, with the markers reachable from the keyboard and announced in the chart's description.
+
+### Bridging `@c2n/theme` tokens on `:root` loses to the theme's own dark fallback when the OS is dark
+
+- **Severity:** papercut
+- **Hit while:** bridging the Log Lens palette onto `--c2-theme--*`, 2026-09-28.
+- **What happens:** `tokens.css` sets the dark values under `@media (prefers-color-scheme: dark)
+:root:not([data-theme='light']):not(.c2-light)` — specificity 0,3,0. An app that follows the documented advice
+  (override tokens on `:root` and under its dark selector, e.g. `:root[data-theme='dark']`, 0,2,0) keeps its tokens
+  on a light OS but silently gets the stock dark palette whenever the OS is dark and the page is in dark mode. The
+  example raises its selector with two dummy `:not()`s to match.
+- **Where the fix belongs:** `packages/tools/theme` — wrap the generated token blocks in a cascade layer (or
+  `:where()`) so any unlayered app override wins regardless of specificity, and say so in the theming guide.
+
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                      |
