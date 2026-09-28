@@ -194,6 +194,35 @@ test('checkbox selection starts from value and adds to it', async ({ page, rende
   await expect(host).toHaveJSProperty('value', ['1'])
 })
 
+test('a selected row keeps its background under the pointer, and a plain row shows a hover', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="single" stripe'))
+  const background = (index: number) =>
+    page
+      .getByRole('row')
+      .nth(index)
+      .evaluate((row) => getComputedStyle(row).backgroundColor)
+
+  // Hover wins over the stripe, on an odd row as much as an even one.
+  await page.getByRole('row').nth(2).hover()
+  expect(await background(2)).toBe('rgb(244, 244, 245)')
+
+  // Clicking leaves the pointer on the row: it must read as selected, not as hovered.
+  await page.getByRole('row').nth(1).click()
+  expect(await background(1)).toBe('rgb(226, 233, 253)')
+  await page.getByRole('row').nth(2).hover()
+  expect(await background(1)).toBe('rgb(237, 241, 254)')
+  expect(await background(2)).toBe('rgb(244, 244, 245)')
+})
+
+test('columns are resizable by default, and resizable="false" turns it off', async ({ page, renderScenario }) => {
+  await renderScenario(table())
+  const resizers = () => page.locator('c2-table').evaluate((element) => element.shadowRoot!.querySelectorAll('.resizer').length)
+  expect(await resizers()).toBe(3)
+
+  await page.locator('c2-table').evaluate((element) => element.setAttribute('resizable', 'false'))
+  await expect.poll(resizers).toBe(0)
+})
+
 test('a table-level sortable makes every column sortable', async ({ page, renderScenario }) => {
   await renderScenario(table('sortable'))
   // Nothing is sorted until a header is clicked, and no column carries `sortable` of its own.

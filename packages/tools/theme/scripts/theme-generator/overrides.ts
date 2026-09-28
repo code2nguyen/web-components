@@ -209,6 +209,11 @@ export const overrides: Record<string, Override> = {
     token: 'color-primary-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
   },
+  // Selected + hovered table row: the same stronger tint of the selected surface as the list item.
+  '--c2-table__row__selected__hover--background': {
+    token: 'color-primary-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
+  },
   // Keep the left edge of the color slider on the same outline token as its siblings.
   '--c2-color-slider--border-left': {
     token: 'border',
