@@ -38,16 +38,19 @@ Restart the agent after adding its MCP configuration, then ask it to use the c2n
 
 ## Tools
 
-| Tool                 | Purpose                                                                                 |
-| -------------------- | --------------------------------------------------------------------------------------- |
-| `list_components`    | Every component with tag, package, category, description, installed version             |
-| `search_components`  | Free-text search across names, descriptions, attributes, slots, events, examples, icons |
-| `get_component`      | Full API of one component, CSS variables grouped by part/state with their theme token   |
-| `get_examples`       | Searchable usage/gallery markup, CSS, intent and accessibility notes, paginated         |
-| `get_presets`        | Curated presets as CSS variable values                                                  |
-| `get_theme`          | The `--c2-theme--*` tokens, install/mapping snippets; per-component mapping with `tag`  |
-| `generate_variant`   | CSS class / HTML + style / Lit subclass / JSON from variable + attribute overrides      |
-| `get_workflow_guide` | `workflow`, `theming`, `variant-components`, `frameworks`                               |
+| Tool                 | Purpose                                                                                   |
+| -------------------- | ----------------------------------------------------------------------------------------- |
+| `list_components`    | Every component with tag, package, category, description, installed version               |
+| `search_components`  | Free-text search across names, descriptions, attributes, slots, events, examples, icons   |
+| `get_component`      | Full API of one component, CSS variables grouped by part/state with their theme token     |
+| `get_examples`       | Usage rows and gallery cards; `view: "index"` lists every look (summary, screenshot)      |
+| `search_examples`    | Find a look across every component's gallery ("glass", "pill", "underline")               |
+| `get_presets`        | Curated presets as CSS variable values                                                    |
+| `get_theme`          | The `--c2-theme--*` tokens, install/mapping snippets; per-component mapping with `tag`    |
+| `generate_variant`   | CSS class / HTML + style / Lit subclass / JSON from overrides, a preset or a gallery card |
+| `get_workflow_guide` | `workflow`, `theming`, `variant-components`, `frameworks`                                 |
+
+Gallery cards are served with a generated summary of what they change and CSS whose colours follow the `--c2-theme--*` tokens wherever a literal equals a token's value (`var(--c2-theme--color-outline, #d4d4d8)`), so a copied card follows the application's theme and dark mode. Each card also links light and dark PNG captures hosted with the docs site (`gallery-shots/<component>/<slug>.<theme>.png`, written by `apps/ui/scripts/gallery-shots.mjs` in the Pages deploy).
 
 Resources: `c2n://components`, `c2n://components/{tag}`, `c2n://theme`, `c2n://guide/{topic}`.
 

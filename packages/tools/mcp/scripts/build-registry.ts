@@ -18,6 +18,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { parseCssVarName } from '../src/lib/css-var-name.ts'
+import { exampleSlug, summarizeExample, themeExampleCss } from './gallery.ts'
 import type { ComponentEntry, CssProperty, ElementEntry, Example, GuideTopic, Preset, Registry, ThemeEntry, ThemeToken } from '../src/registry-types.ts'
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -145,7 +146,16 @@ function readFences(body: string): Fence[] {
   return fences
 }
 
-function splitStyle(html: string): { css?: string; html: string } {
+/**
+ * Astro hydration directives (`client:only="lit"`, `client:load`) are how the docs site renders a fence; they mean
+ * nothing in the application an agent copies the example into, so the registry never carries them.
+ */
+function stripAstroDirectives(html: string): string {
+  return html.replace(/\s+client:[a-z]+(?:="[^"]*")?/g, '')
+}
+
+function splitStyle(fence: string): { css?: string; html: string } {
+  const html = stripAstroDirectives(fence)
   const style = /<style>([\s\S]*?)<\/style>/.exec(html)
   if (!style) return { html: html.trim() }
   return { css: dedent(style[1]), html: html.replace(style[0], '').trim() }
@@ -248,6 +258,7 @@ const guides = Object.fromEntries(
 // ---------------------------------------------------------------------------------------------------------------------
 
 const components: Record<string, ComponentEntry> = {}
+const galleryColors = { themed: 0, literal: 0 }
 const tagIndex: Record<string, string> = {}
 const packageIndex: Record<string, string> = {}
 const problems: string[] = []
@@ -378,25 +389,36 @@ for (const dir of packageDirs.sort()) {
     }
     const gallery = galleryPages.get(id)
     if (gallery) {
+      const slugs = new Set<string>()
       for (const fence of readFences(gallery.body)) {
         if (fence.meta.tag !== 'MdxCodeBlock') continue
-        const { css, html } = splitStyle(fence.body)
+        const { css: authoredCss, html } = splitStyle(fence.body)
         const label = fence.meta.label ?? 'Example'
+        const slug = exampleSlug(fence.section, label, slugs)
+        const themed = authoredCss ? themeExampleCss(authoredCss, themeData.tokens) : undefined
+        if (themed) galleryColors.themed += themed.themed
+        if (themed) galleryColors.literal += themed.literal
+        const summary = summarizeExample(html, authoredCss)
         examples.push({
           kind: 'gallery',
           label,
+          slug,
           section: fence.section,
-          description: fence.meta.description ?? `${label}${fence.section ? ` ${fence.section}` : ''} example for ${docElements[0].tag}.`,
+          description: fence.meta.description ?? summary,
+          summary,
           useWhen: fence.meta.useWhen,
           accessibility: fence.meta.accessibility,
-          isDefault: label.toLowerCase() === 'default' && !css?.includes('--c2-'),
+          isDefault: label.toLowerCase() === 'default' && !authoredCss?.includes('--c2-'),
           tags: [...new Set([...html.matchAll(/<(c2-[a-z0-9-]+)/g)].map((match) => match[1]))],
+          // Written by `apps/ui/scripts/gallery-shots.mjs` during the Pages deploy, at exactly these paths.
+          screenshots: { light: `${DOCS_BASE}/gallery-shots/${id}/${slug}.light.png`, dark: `${DOCS_BASE}/gallery-shots/${id}/${slug}.dark.png` },
+          galleryUrl: `${DOCS_BASE}/components/${id}/gallery`,
           html,
-          css,
+          css: themed?.css,
         })
       }
     }
-    if (componentPreviews[id]) examples.push({ kind: 'preview', label: 'Preview', html: componentPreviews[id] })
+    if (componentPreviews[id]) examples.push({ kind: 'preview', label: 'Preview', html: stripAstroDirectives(componentPreviews[id]) })
 
     const presetGroup = componentPresets[docElements[0].tag]
     const category = doc?.section === 'icons' ? 'Icons' : (doc?.frontmatter.category ?? 'Layout')
@@ -490,6 +512,6 @@ if (problems.length) {
   const total = Object.keys(components).length
   const examplesCount = Object.values(components).reduce((n, c) => n + c.examples.length, 0)
   console.log(
-    `[build-registry] ${total} components, ${Object.keys(tagIndex).length} tags, ${examplesCount} examples, ${theme.tokens.length} tokens → ${outFile}`,
+    `[build-registry] ${total} components, ${Object.keys(tagIndex).length} tags, ${examplesCount} examples, ${theme.tokens.length} tokens, gallery colours ${galleryColors.themed} themed / ${galleryColors.literal} literal → ${outFile}`,
   )
 }

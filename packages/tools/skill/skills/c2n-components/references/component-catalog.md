@@ -6,45 +6,45 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Buttons
 
 - **Button** — `c2-button` · `@c2n/button` — Themeable button with slots for text, prefix, suffix and running icons.
-- **Button Group** — `c2-button-group` · `@c2n/button-group` — Joined actions and polished segmented controls with single or multiple selection.
+- **Button Group** — `c2-button-group` · `@c2n/button-group` — Joined actions and polished segmented controls with single or multiple selection. Children: `c2-button`, `c2-icon-button`.
 - **Copy Button** — `c2-copy-button` · `@c2n/copy-button` — Button that copies text to the clipboard — the element it sits in, another element by id, or a literal string.
 - **Icon Button** — `c2-icon-button` · `@c2n/icon-button` — Round, hoverable button wrapping a slotted SVG icon.
 
 ## Chart
 
-- **Area chart** — `c2-area-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity.
-- **Bar chart** — `c2-bar-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — Bars over categories or time buckets, with several series drawn side by side within each band.
-- **Candlestick chart** — `c2-candlestick-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts OHLC chart for market sessions and other open-close ranges, with semantic positive and negative colours.
-- **Gauge chart** — `c2-gauge-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A focused radial KPI gauge drawn by ECharts, with a configurable scale, progress arc and pointer.
-- **Line chart** — `c2-line-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children.
-- **Pie chart** — `c2-pie-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it.
-- **Radar chart** — `c2-radar-chart, c2-chart-series, c2-chart-legend` · `@c2n/chart` — Compare several profiles across the same set of normalized indicators.
-- **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures.
-- **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat.
+- **Area chart** — `c2-area-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity. Children: `c2-chart-series`.
+- **Bar chart** — `c2-bar-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — Bars over categories or time buckets, with several series drawn side by side within each band. Children: `c2-chart-series`.
+- **Candlestick chart** — `c2-candlestick-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts OHLC chart for market sessions and other open-close ranges, with semantic positive and negative colours. Children: `c2-chart-series`.
+- **Gauge chart** — `c2-gauge-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A focused radial KPI gauge drawn by ECharts, with a configurable scale, progress arc and pointer. Children: `c2-chart-series`.
+- **Line chart** — `c2-line-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children. Children: `c2-chart-series`.
+- **Pie chart** — `c2-pie-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it. Children: `c2-chart-series`.
+- **Radar chart** — `c2-radar-chart, c2-chart-series, c2-chart-legend` · `@c2n/chart` — Compare several profiles across the same set of normalized indicators. Children: `c2-chart-series`.
+- **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures. Children: `c2-chart-series`.
+- **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat. Children: `c2-chart-series`.
 
 ## Chat
 
 - **Chat Input** — `c2-chat-input` · `@c2n/chat-input` — Auto-growing message composer with keyboard submission, toolbar actions and native form support.
-- **Chat Message** — `c2-chat-message` · `@c2n/chat-message` — Flexible message row for conversations, assistant answers and activity updates.
-- **Chat Message List** — `c2-chat-message-list` · `@c2n/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history.
+- **Chat Message** — `c2-chat-message` · `@c2n/chat-message` — Flexible message row for conversations, assistant answers and activity updates. Children: `c2-avatar`.
+- **Chat Message List** — `c2-chat-message-list` · `@c2n/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history. Children: `c2-chat-message`.
 
 ## Data display
 
-- **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/attachment` — File and image attachments with metadata, upload progress, failure states, and actions.
-- **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/avatar` — Image, initials or icon for a person, with status dot and badge.
+- **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
+- **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
 - **Badge** — `c2-badge` · `@c2n/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
 - **Code Viewer** — `c2-code-viewer` · `@c2n/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Kbd** — `c2-kbd` · `@c2n/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
-- **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection.
+- **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
 - **List Item** — `c2-list-item` · `@c2n/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
 - **Log Viewer** — `c2-log-viewer` · `@c2n/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
 - **QR Code** — `c2-qr-code` · `@c2n/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Reorder List** — `c2-reorder-list` · `@c2n/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
 - **Stat** — `c2-stat` · `@c2n/stat` — Displays a KPI with an optional icon, trend and supporting description.
-- **Steps** — `c2-steps, c2-step` · `@c2n/steps` — A vertical trace of a task as it runs: statuses, durations, and stages that open while they work and close when they are done.
-- **Table** — `c2-table, c2-table-column` · `@c2n/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.
-- **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs.
-- **Tree** — `c2-tree, c2-tree-item` · `@c2n/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading.
+- **Steps** — `c2-steps, c2-step` · `@c2n/steps` — A vertical trace of a task as it runs: statuses, durations, and stages that open while they work and close when they are done. Children: `c2-step`.
+- **Table** — `c2-table, c2-table-column` · `@c2n/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`.
+- **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
+- **Tree** — `c2-tree, c2-tree-item` · `@c2n/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
 
 ## Feedback
@@ -81,9 +81,9 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Label** — `c2-label` · `@c2n/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Number Input** — `c2-number-input` · `@c2n/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
-- **Radio** — `c2-radio, c2-radio-group` · `@c2n/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation.
+- **Radio** — `c2-radio, c2-radio-group` · `@c2n/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
 - **Rate** — `c2-rate` · `@c2n/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
-- **Select** — `c2-select` · `@c2n/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options.
+- **Select** — `c2-select` · `@c2n/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options. Children: `c2-list-item`.
 - **Shortcut** — `c2-shortcut` · `@c2n/shortcut` — Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.
 - **Slider** — `c2-slider` · `@c2n/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
 - **Switch** — `c2-switch` · `@c2n/switch` — On/off toggle on a native switch input, with label, description and thumb icons.
@@ -96,24 +96,24 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Layout
 
-- **Accordion** — `c2-accordion` · `@c2n/accordion` — Connected, animated panels with shared borders and single or multiple expansion.
+- **Accordion** — `c2-accordion` · `@c2n/accordion` — Connected, animated panels with shared borders and single or multiple expansion. Children: `c2-details`.
 - **Border Beam** — `c2-border-beam` · `@c2n/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/card` — Groups related content and actions on a single bordered surface.
 - **Carousel** — `c2-carousel` · `@c2n/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.
 - **Chatbot** — `c2-chatbot` · `@c2n/chatbot` — Chatbot component for c2n applications.
-- **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/dashboard` — Grid of resizable panes, dragged by the edges they share.
+- **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.
 - **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
-- **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode.
+- **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Seperator** — `c2-seperator` · `@c2n/seperator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 
 ## Navigation
 
-- **Breadcrumb** — `c2-breadcrumb` · `@c2n/breadcrumb` — Navigation trail of link buttons with separators, a current page and optional collapsing.
+- **Breadcrumb** — `c2-breadcrumb` · `@c2n/breadcrumb` — Navigation trail of link buttons with separators, a current page and optional collapsing. Children: `c2-link-button`.
 - **Link Button** — `c2-link-button` · `@c2n/link-button` — Text-styled control for link and navigation actions, rendered as a real anchor or a button.
-- **Menu** — `c2-menu, c2-menu-item` · `@c2n/menu` — Commands, links, checkboxes and submenus in a popover anchored to a trigger.
-- **Navigation Menu** — `c2-navigation-menu, c2-navigation-menu-item, c2-navigation-menu-link` · `@c2n/navigation-menu` — Site navigation bar whose triggers open panels of links below the header.
+- **Menu** — `c2-menu, c2-menu-item` · `@c2n/menu` — Commands, links, checkboxes and submenus in a popover anchored to a trigger. Children: `c2-menu-item`.
+- **Navigation Menu** — `c2-navigation-menu, c2-navigation-menu-item, c2-navigation-menu-link` · `@c2n/navigation-menu` — Site navigation bar whose triggers open panels of links below the header. Children: `c2-navigation-menu-item`, `c2-navigation-menu-link`.
 - **Pagination** — `c2-pagination` · `@c2n/pagination` — Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page.
 - **Side Nav** — `c2-side-nav` · `@c2n/side-nav` — Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones.
-- **Tabs** — `c2-tabs, c2-tab` · `@c2n/tabs` — Tab strip that shows one content panel at a time.
+- **Tabs** — `c2-tabs, c2-tab` · `@c2n/tabs` — Tab strip that shows one content panel at a time. Children: `c2-tab`.

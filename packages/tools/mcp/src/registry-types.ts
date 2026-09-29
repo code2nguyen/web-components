@@ -70,9 +70,17 @@ export interface CssProperty {
 export interface Example {
   kind: 'usage' | 'gallery' | 'preview'
   label: string
+  /** Gallery cards: `<section>--<label>`, unique within the component; `get_examples` also accepts it as `label`. */
+  slug?: string
   section?: string
-  /** What the example demonstrates. */
+  /** What the example demonstrates: the curated description, else `summary`. */
   description?: string
+  /** Gallery cards: generated from the CSS and markup (which parts, states and attributes the card changes). */
+  summary?: string
+  /** Gallery cards: PNG captures of the rendered card on the docs site, in the light and the dark theme. */
+  screenshots?: { light: string; dark: string }
+  /** Gallery cards: the docs page showing the card live. */
+  galleryUrl?: string
   /** Situation in which this pattern is appropriate. */
   useWhen?: string
   /** Accessibility behavior or responsibility worth preserving. */
@@ -82,6 +90,10 @@ export interface Example {
   /** c2 custom-element tags present in the example markup. */
   tags?: string[]
   html: string
+  /**
+   * Gallery cards: colour literals equal to a theme token's value are served as `var(--c2-theme--…, literal)`, so a
+   * copied card follows the application's theme and dark mode; the remaining literals are the card's own accents.
+   */
   css?: string
 }
 

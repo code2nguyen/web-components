@@ -16,8 +16,9 @@ test('installs and updates every project-scoped agent configuration', () => {
     const first = installProject({ projectRoot })
     const second = installProject({ projectRoot })
 
-    assert.equal(first.skills.length, 2)
-    assert.deepEqual(second.agents, ['claude', 'codex', 'antigravity'])
+    assert.equal(first.skills.length, 3)
+    assert.deepEqual(second.agents, ['claude', 'codex', 'antigravity', 'copilot'])
+    assert.equal(second.mcp, 'npx')
     assert.match(readFileSync(join(projectRoot, '.claude/skills/c2n-components/SKILL.md'), 'utf8'), /^name: c2n-components$/m)
     assert.match(readFileSync(join(projectRoot, '.agents/skills/c2n-components/SKILL.md'), 'utf8'), /^name: c2n-components$/m)
     assert.equal(existsSync(join(projectRoot, '.agents/skills/c2n-components/references/component-catalog.md')), true)
@@ -35,6 +36,11 @@ test('installs and updates every project-scoped agent configuration', () => {
     assert.equal(codex.match(/\[mcp_servers\.c2n\]/g)?.length, 1)
     assert.match(codex, new RegExp(`@c2n/mcp@${version.replaceAll('.', '\\.')}`))
     assert.match(codex, /\[\[skills\.config\]\]\npath = "keep"/)
+
+    assert.match(readFileSync(join(projectRoot, '.github/skills/c2n-components/SKILL.md'), 'utf8'), /^name: c2n-components$/m)
+    const vscode = JSON.parse(readFileSync(join(projectRoot, '.vscode/mcp.json'), 'utf8'))
+    assert.deepEqual(vscode.servers.c2n, { type: 'stdio', command: 'npx', args: ['-y', `@c2n/mcp@${version}`] })
+    assert.equal(vscode.mcpServers, undefined)
   } finally {
     rmSync(projectRoot, { recursive: true, force: true })
   }
@@ -46,6 +52,49 @@ test('can install the skill without MCP configuration', () => {
     const result = installProject({ projectRoot, agents: ['codex'], includeMcp: false })
     assert.equal(result.skills.length, 1)
     assert.deepEqual(result.configs, [])
+  } finally {
+    rmSync(projectRoot, { recursive: true, force: true })
+  }
+})
+
+test('merges the Copilot rules block without touching the rest of the file', () => {
+  const projectRoot = mkdtempSync(join(tmpdir(), 'c2n-skill-'))
+  try {
+    mkdirSync(join(projectRoot, '.github'), { recursive: true })
+    mkdirSync(join(projectRoot, '.vscode'), { recursive: true })
+    writeFileSync(join(projectRoot, '.github/copilot-instructions.md'), '# Team rules\n\nUse tabs.\n')
+    writeFileSync(join(projectRoot, '.vscode/mcp.json'), '{"servers":{"other":{"command":"other"}},"inputs":[]}\n')
+    installProject({ projectRoot, agents: ['copilot'] })
+    installProject({ projectRoot, agents: ['copilot'] })
+
+    const rules = readFileSync(join(projectRoot, '.github/copilot-instructions.md'), 'utf8')
+    assert.match(rules, /^# Team rules\n\nUse tabs\.\n\n<!-- c2n:start/)
+    assert.equal(rules.match(/<!-- c2n:start/g)?.length, 1)
+    assert.match(rules, /get_component/)
+    const vscode = JSON.parse(readFileSync(join(projectRoot, '.vscode/mcp.json'), 'utf8'))
+    assert.equal(vscode.servers.other.command, 'other')
+    assert.deepEqual(vscode.inputs, [])
+  } finally {
+    rmSync(projectRoot, { recursive: true, force: true })
+  }
+})
+
+test('runs the project-installed MCP server when there is one, so starting it needs no network', () => {
+  const projectRoot = mkdtempSync(join(tmpdir(), 'c2n-skill-'))
+  try {
+    assert.throws(() => installProject({ projectRoot, agents: ['copilot'], mcp: 'local' }), /npm i -D @c2n\/mcp/)
+    mkdirSync(join(projectRoot, 'node_modules/@c2n/mcp/dist'), { recursive: true })
+    writeFileSync(join(projectRoot, 'node_modules/@c2n/mcp/dist/cli.js'), '')
+    const result = installProject({ projectRoot, agents: ['copilot', 'claude', 'codex'] })
+
+    assert.equal(result.mcp, 'local')
+    const vscode = JSON.parse(readFileSync(join(projectRoot, '.vscode/mcp.json'), 'utf8'))
+    assert.deepEqual(vscode.servers.c2n, { type: 'stdio', command: 'node', args: ['${workspaceFolder}/node_modules/@c2n/mcp/dist/cli.js'] })
+    const claude = JSON.parse(readFileSync(join(projectRoot, '.mcp.json'), 'utf8'))
+    assert.deepEqual(claude.mcpServers.c2n.args, ['node_modules/@c2n/mcp/dist/cli.js'])
+    assert.match(readFileSync(join(projectRoot, '.codex/config.toml'), 'utf8'), /command = "node"\nargs = \["node_modules\/@c2n\/mcp\/dist\/cli\.js"\]/)
+
+    assert.equal(installProject({ projectRoot, agents: ['claude'], mcp: 'npx' }).mcp, 'npx')
   } finally {
     rmSync(projectRoot, { recursive: true, force: true })
   }
