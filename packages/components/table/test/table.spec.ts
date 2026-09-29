@@ -833,3 +833,30 @@ test('without a key, keyOf is the row position, and a selectable table warns onc
   await props(page.locator('c2-table'), { value: ['1'] })
   expect(warnings).toEqual([])
 })
+
+test('clicking the selected row again clears it, in single and multiple selection', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="single"'))
+  const host = page.locator('c2-table')
+  await watch(host, 'selection-change')
+  await page.getByRole('row').nth(1).click()
+  await expect(host).toHaveJSProperty('value', ['1'])
+  await page.getByRole('row').nth(1).click()
+  await expect(host).toHaveJSProperty('value', [])
+  const events = JSON.parse((await host.getAttribute('data-events')) ?? '[]') as { value: string[] }[]
+  expect(events.map((event) => event.value)).toEqual([['1'], []])
+
+  await renderScenario(table('selection="multiple" value="1;2"'))
+  const multiple = page.locator('c2-table')
+  // Several selected: a plain click narrows to that row, and a second click on it clears it.
+  await page.getByRole('row').nth(1).click()
+  await expect(multiple).toHaveJSProperty('value', ['1'])
+  await page.getByRole('row').nth(1).click()
+  await expect(multiple).toHaveJSProperty('value', [])
+  // Enter follows the click, Space toggles.
+  await page.getByRole('row').nth(2).getByRole('gridcell').first().click()
+  await expect(multiple).toHaveJSProperty('value', ['2'])
+  await page.keyboard.press('Enter')
+  await expect(multiple).toHaveJSProperty('value', [])
+  await page.keyboard.press(' ')
+  await expect(multiple).toHaveJSProperty('value', ['2'])
+})

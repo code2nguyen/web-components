@@ -148,6 +148,9 @@ table.isSelected(order) // → false
 table.keyOf(order) // → 'eu:A-100'
 ```
 
+A click selects a row on its own, and clicking the row that is already the whole selection clears it again;
+⌘/Ctrl-click and Space toggle one row in and out of a `multiple` selection, and shift-click selects a range.
+
 **Always set a key on a selectable table.** Without one a row's key is its position in the sorted rows — `"0"`, `"1"`,
 … — so a sort, a filter or a new `rows` array hands the selection to whichever rows now sit there. The table warns
 about it once in the console. `selectRows()` and `deselectRows()` fire `selection-change`, like `selectAll()`.

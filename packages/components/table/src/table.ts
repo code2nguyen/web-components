@@ -418,7 +418,10 @@ export class Table extends LitElement {
    */
   @property({ attribute: false }) getRowKey?: (row: TableRow) => unknown
 
-  /** `single` selects one row at a time, `multiple` supports ⌘/ctrl-click and shift-click ranges. */
+  /**
+   * `single` selects one row at a time, `multiple` supports ⌘/ctrl-click and shift-click ranges. A click selects the
+   * row alone; clicking the row that is already the whole selection clears it, and ⌘/ctrl-click or Space toggles one row.
+   */
   @property({ type: String }) selection: TableSelectionMode = 'none'
 
   /** Adds a leading checkbox column, pinned to the start. */
@@ -1577,9 +1580,11 @@ export class Table extends LitElement {
     if (!row) return
     const key = this.#keyAt(index, row)
 
+    // Clicking the row that is the selection again clears it — with a modifier or without — so a selection can be
+    // undone by the same gesture that made it.
     if (this.selection === 'single') {
       this.#selectionAnchor = index
-      this.#commitSelection(modifiers.toggle && this.value.includes(key) ? [] : [key])
+      this.#commitSelection(this.value.includes(key) ? [] : [key])
       return
     }
 
@@ -1600,7 +1605,8 @@ export class Table extends LitElement {
       this.#commitSelection(this.value.includes(key) ? this.value.filter((entry) => entry !== key) : [...this.value, key])
       return
     }
-    this.#commitSelection([key])
+    // A plain click narrows the selection to one row; on the row that already is the whole selection, it clears it.
+    this.#commitSelection(this.value.length === 1 && this.value[0] === key ? [] : [key])
   }
 
   #commitSelection(keys: string[]) {
