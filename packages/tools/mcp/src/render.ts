@@ -46,6 +46,8 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   out.push(`- Package: \`${component.package}\` ${installed ? `(installed ${installed.version})` : `— not installed. \`${component.install.npm}\``}`)
   out.push(`- Status: ${component.status} · Category: ${component.category} · Docs: ${component.docsUrl}`)
   out.push(`- Register: \`import '${primary.modulePath}'\` · Class: \`import { ${primary.className} } from '${primary.modulePath}'\``)
+  if (component.composition.slotted.length)
+    out.push(`- Children: put ${component.composition.slotted.map((t) => `\`${t}\``).join(', ')} inside it (see the Composition section and get_examples).`)
   if (component.tagPattern)
     out.push(`- Icon set: tags follow \`${component.tagPattern}\`, ${component.icons?.length} icons (use \`search_components\` with the icon name).`)
   for (const element of component.elements) {

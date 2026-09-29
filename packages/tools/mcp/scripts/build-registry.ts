@@ -145,7 +145,16 @@ function readFences(body: string): Fence[] {
   return fences
 }
 
-function splitStyle(html: string): { css?: string; html: string } {
+/**
+ * Astro hydration directives (`client:only="lit"`, `client:load`) are how the docs site renders a fence; they mean
+ * nothing in the application an agent copies the example into, so the registry never carries them.
+ */
+function stripAstroDirectives(html: string): string {
+  return html.replace(/\s+client:[a-z]+(?:="[^"]*")?/g, '')
+}
+
+function splitStyle(fence: string): { css?: string; html: string } {
+  const html = stripAstroDirectives(fence)
   const style = /<style>([\s\S]*?)<\/style>/.exec(html)
   if (!style) return { html: html.trim() }
   return { css: dedent(style[1]), html: html.replace(style[0], '').trim() }
@@ -396,7 +405,7 @@ for (const dir of packageDirs.sort()) {
         })
       }
     }
-    if (componentPreviews[id]) examples.push({ kind: 'preview', label: 'Preview', html: componentPreviews[id] })
+    if (componentPreviews[id]) examples.push({ kind: 'preview', label: 'Preview', html: stripAstroDirectives(componentPreviews[id]) })
 
     const presetGroup = componentPresets[docElements[0].tag]
     const category = doc?.section === 'icons' ? 'Icons' : (doc?.frontmatter.category ?? 'Layout')

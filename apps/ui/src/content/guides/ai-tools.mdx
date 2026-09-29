@@ -1,6 +1,6 @@
 ---
 title: 'AI tools'
-description: 'Give Claude Code, Codex or Google Antigravity the c2n skill, live component APIs, examples and application conventions.'
+description: 'Give Claude Code, Codex, Google Antigravity or GitHub Copilot the c2n skill, live component APIs, examples and application conventions.'
 order: 30
 ---
 
@@ -29,6 +29,9 @@ The installer defaults to all supported agents. It copies project-scoped skills 
 | Claude Code        | `.claude/skills/c2n-components/` | `.mcp.json`               |
 | Codex              | `.agents/skills/c2n-components/` | `.codex/config.toml`      |
 | Google Antigravity | `.agents/skills/c2n-components/` | `.agents/mcp_config.json` |
+| GitHub Copilot     | `.github/skills/c2n-components/` | `.vscode/mcp.json`        |
+
+For GitHub Copilot in VS Code the installer also adds a short c2n block to `.github/copilot-instructions.md`, which Copilot loads into every chat: check each component with `get_component` before using it, build the child elements a container expects, and restyle only through documented CSS variables. Re-running the installer replaces that block in place and leaves the rest of the file alone. Use Copilot's agent mode, where it can call MCP tools.
 
 Install for only one agent when the project does not need every configuration:
 
@@ -36,6 +39,7 @@ Install for only one agent when the project does not need every configuration:
 npx c2n-skill install --agent claude
 npx c2n-skill install --agent codex
 npx c2n-skill install --agent antigravity
+npx c2n-skill install --agent copilot
 ```
 
 Comma-separated agents and a different project directory are supported. Use `--no-mcp` when only the offline skill is wanted.
@@ -44,6 +48,17 @@ Comma-separated agents and a different project directory are supported. Use `--n
 npx c2n-skill install --agent codex,antigravity --project ./my-app
 npx c2n-skill install --agent codex --no-mcp
 ```
+
+### Behind a proxy or VPN
+
+By default every configuration starts the server with `npx -y @c2n/mcp@<version>`, which downloads it from npm each time the agent launches it. When the agent's environment cannot reach the registry (a corporate proxy, TLS inspection), the download fails, the agent quietly runs without the c2n tools and falls back to guessing component APIs. Install the server into the project instead; the installer then points every configuration at that copy, so starting it needs no network and it always matches the installed components:
+
+```bash tag=CodeBlock
+npm install --save-dev @c2n/skill @c2n/mcp
+npx c2n-skill install --agent copilot --mcp local
+```
+
+`--mcp auto` (the default) picks the local copy whenever `node_modules/@c2n/mcp` exists; `--mcp npx` forces the download.
 
 Re-run the installer after upgrading `@c2n/skill`; c2n-owned files are refreshed while unrelated MCP entries are preserved. Restart the agent after installation so it reloads project skills and MCP configuration.
 
@@ -62,6 +77,8 @@ If the MCP server does not appear, verify that it can start in the same project:
 ```bash tag=CodeBlock
 npx -y @c2n/mcp --version
 ```
+
+In VS Code, run **MCP: List Servers**, select `c2n` and choose **Show Output** to see why a server failed to start.
 
 If that succeeds, restart the agent and check that its project root is the directory containing the generated configuration. Run `npx c2n-skill install` again if configuration was deleted or the package was upgraded.
 
@@ -112,6 +129,20 @@ Codex project `.codex/config.toml`:
 [mcp_servers.c2n]
 command = "npx"
 args = ["-y", "@c2n/mcp"]
+```
+
+GitHub Copilot in VS Code, `.vscode/mcp.json` (note the `servers` key):
+
+```json tag=CodeBlock
+{
+  "servers": {
+    "c2n": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@c2n/mcp"]
+    }
+  }
+}
 ```
 
 Google Antigravity project `.agents/mcp_config.json` uses the same `mcpServers.c2n` command and arguments as the Claude JSON example, without requiring the `type` field.

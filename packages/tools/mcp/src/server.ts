@@ -36,8 +36,12 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       instructions: [
         'c2n web components (Lit custom elements, tag prefix c2-, npm scope @c2n).',
+        'Their APIs change between releases, so never write a c2-* tag, attribute, slot, event or --c2-* variable from memory:',
+        'call get_component for every component before using it, and use only the names it returns.',
         'Start with list_components or search_components, then get_component for the API and get_examples for markup.',
-        'Call get_theme before writing CSS: apps set ~35 --c2-theme--* tokens once; prefer per-component variables on a class or element, and use only documented ::part() hooks when variables cannot express the change.',
+        'get_component also names the child elements a container expects (c2-dashboard holds c2-dash-card, c2-tabs holds c2-tab): build them in.',
+        'Call get_theme before writing CSS: apps set ~35 --c2-theme--* tokens once; restyle a component only through the --c2-<component>__<part>--<property> variables get_component lists, set on a class or the element,',
+        'never with border, padding, background, color or size rules on the c2-* host, and use only documented ::part() hooks when variables cannot express the change.',
         'When a look repeats, call generate_variant (css | html | lit) instead of repeating inline styles.',
         'get_workflow_guide explains the application workflow, theming, variant components and framework notes.',
       ].join(' '),
