@@ -123,13 +123,13 @@ function escapeForCharacterClass(characters: string) {
  * @cssproperty {border} [--c2-tag-input__focus--border-right=1px solid #476ef9]
  * @cssproperty {border} [--c2-tag-input__focus--border-bottom=1px solid #476ef9]
  * @cssproperty {border} [--c2-tag-input__focus--border-left=1px solid #476ef9]
- * @cssproperty {outline} [--c2-tag-input__focus--outline=3px solid rgba(71, 110, 249, 0.2)]
+ * @cssproperty {outline} [--c2-tag-input__focus--outline=none]
  *
  * @cssproperty {border} [--c2-tag-input__error--border-top=1px solid #dc2626]
  * @cssproperty {border} [--c2-tag-input__error--border-right=1px solid #dc2626]
  * @cssproperty {border} [--c2-tag-input__error--border-bottom=1px solid #dc2626]
  * @cssproperty {border} [--c2-tag-input__error--border-left=1px solid #dc2626]
- * @cssproperty {outline} [--c2-tag-input__error__focus--outline=3px solid rgba(220, 38, 38, 0.2)]
+ * @cssproperty {outline} [--c2-tag-input__error__focus--outline=none]
  *
  * @cssproperty {border} [--c2-tag-input__read-only--border-top=1px solid #e4e4e7]
  * @cssproperty {border} [--c2-tag-input__read-only--border-right=1px solid #e4e4e7]
@@ -153,7 +153,7 @@ function escapeForCharacterClass(characters: string) {
  * @cssproperty {font-size} [--c2-tag-input__tag--font-size=12px]
  * @cssproperty {font-weight} [--c2-tag-input__tag--font-weight=500]
  * @cssproperty {pixel} [--c2-tag-input__tag--max-width=240px] - Longer tags are truncated with an ellipsis.
- * @cssproperty {outline} [--c2-tag-input__tag__focus--outline=2px solid rgba(71, 110, 249, 0.4)]
+ * @cssproperty {color} [--c2-tag-input__tag__focus--background=#e4e4e7] - Fill of the selected (focused) tag.
  * @cssproperty {border} [--c2-tag-input__tag__invalid--border=1px solid #dc2626]
  * @cssproperty {color} [--c2-tag-input__tag__invalid--background=#ffffff]
  * @cssproperty {color} [--c2-tag-input__tag__invalid--color=#dc2626]

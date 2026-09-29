@@ -260,14 +260,22 @@ export const overrides: Record<string, Override> = {
   '--c2-code-viewer__line__highlighted--background': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-code-viewer__line__highlighted--border-left': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
-  // Autocomplete uses its accent border as the focus indicator; adding the global ring creates a doubled border.
+  // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
-  // Error focus ring stays red on purpose.
-  '--c2-text-field__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
-  '--c2-date-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
-  '--c2-time-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
-  '--c2-number-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
-  '--c2-tag-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
+  '--c2-text-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-textarea__container__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-tag-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-date-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-time-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-number-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  // A selected tag is marked by a darker fill, not a ring.
+  '--c2-tag-input__tag__focus--background': { token: 'color-outline-variant' },
+  // The error state is carried by the red border, so no error ring either.
+  '--c2-text-field__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-date-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-time-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-number-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-tag-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
   // 1px radii on the colour picker swatch are a detail, not a shape token.
   '--c2-color-select--border-top-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-top-right-radius': { exclude: 'swatch detail radius' },

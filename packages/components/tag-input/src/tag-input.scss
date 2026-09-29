@@ -39,12 +39,12 @@
     focus--border-right: 1px solid #476ef9,
     focus--border-bottom: 1px solid #476ef9,
     focus--border-left: 1px solid #476ef9,
-    focus--outline: 3px solid rgba(71, 110, 249, 0.2),
+    focus--outline: none,
     error--border-top: 1px solid #dc2626,
     error--border-right: 1px solid #dc2626,
     error--border-bottom: 1px solid #dc2626,
     error--border-left: 1px solid #dc2626,
-    error__focus--outline: 3px solid rgba(220, 38, 38, 0.2),
+    error__focus--outline: none,
     read-only--border-top: 1px solid #e4e4e7,
     read-only--border-right: 1px solid #e4e4e7,
     read-only--border-bottom: 1px solid #e4e4e7,
@@ -67,7 +67,7 @@
     tag--font-size: 12px,
     tag--font-weight: 500,
     tag--max-width: 240px,
-    tag__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
+    tag__focus--background: #e4e4e7,
     tag__invalid--border: 1px solid #dc2626,
     tag__invalid--background: #ffffff,
     tag__invalid--color: #dc2626,
@@ -193,17 +193,21 @@
   line-height: 1;
   cursor: default;
   outline: none;
+  transition: animation.standard(background);
 
   &:focus-visible,
   &:focus {
-    outline: css.cssVar(tag__focus--outline);
-    outline-offset: 1px;
+    background: css.cssVar(tag__focus--background);
   }
 
   &.invalid {
     border: css.cssVar(tag__invalid--border);
     background: css.cssVar(tag__invalid--background);
     color: css.cssVar(tag__invalid--color);
+
+    &:focus {
+      background: css.cssVar(tag__focus--background);
+    }
   }
 }
 
