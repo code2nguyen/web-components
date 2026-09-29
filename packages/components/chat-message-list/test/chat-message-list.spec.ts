@@ -16,6 +16,30 @@ const scrollUp = async (list: Locator, pixels = 300) => {
   await list.page().mouse.wheel(0, -pixels)
 }
 
+/** Keeps wheeling up until `reached` passes; Firefox moves a few hundred pixels per wheel event whatever the delta. */
+const scrollUpUntil = (list: Locator, reached: () => Promise<void>) =>
+  expect(async () => {
+    await scrollUp(list, 1000)
+    await reached()
+  }).toPass({ timeout: 5000 })
+
+/** Resolves once a smooth scroll has stopped: WebKit retargets a keyboard scroll pressed mid-animation short of its end. */
+const scrollSettled = (list: Locator) =>
+  scroller(list).evaluate(
+    (element) =>
+      new Promise<void>((resolve) => {
+        let last = -1
+        let still = 0
+        const tick = () => {
+          still = element.scrollTop === last ? still + 1 : 0
+          last = element.scrollTop
+          if (still >= 5) resolve()
+          else requestAnimationFrame(tick)
+        }
+        tick()
+      }),
+  )
+
 test('starts at the latest message and follows appended messages', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-chat-message-list>${rows(20)}</c2-chat-message-list>`)
   const list = page.locator('c2-chat-message-list')
@@ -73,6 +97,7 @@ test('the log is keyboard scrollable and resumes following at the bottom', async
   await expect(scroller(list)).toBeFocused()
   await page.keyboard.press('PageUp')
   await expect(page.getByRole('button', { name: /Jump to latest message/ })).toBeVisible()
+  await scrollSettled(list)
   await page.keyboard.press('End')
   await expect(page.getByRole('button', { name: /Jump to latest message/ })).toBeHidden()
   await expect.poll(() => list.evaluate((element) => (element as HTMLElement & { atBottom: boolean }).atBottom)).toBe(true)
@@ -96,15 +121,13 @@ test('requests older messages once at the top and keeps the reading position whe
   })
   await expect.poll(() => distanceFromBottom(list)).toBe(0)
 
-  await scrollUp(list, 1000)
-  await expect(list).toHaveAttribute('data-events', '[null]')
+  await scrollUpUntil(list, () => expect(list).toHaveAttribute('data-events', '[null]', { timeout: 500 }))
   await expect(page.getByText('Message 1', { exact: true })).toBeAttached()
   // Message 11 was at the top of the viewport before the prepend and stays there instead of being pushed down.
   await expect(page.getByText('Message 11')).toBeInViewport()
   await expect(page.getByText('Message 10', { exact: true })).not.toBeInViewport()
 
-  await scrollUp(list, 1000)
-  await expect(page.getByText('Message 1', { exact: true })).toBeInViewport()
+  await scrollUpUntil(list, () => expect(page.getByText('Message 1', { exact: true })).toBeInViewport({ timeout: 500 }))
   await expect(list).toHaveAttribute('data-events', '[null]')
 })
 
