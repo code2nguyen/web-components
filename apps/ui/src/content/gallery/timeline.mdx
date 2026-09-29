@@ -1,0 +1,95 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Timeline, TimelineItem } from '@c2n/timeline'
+
+## Presets
+
+Timelines for order histories, changelogs and activity feeds. The marker (`__marker--size`, `--border`,
+`--background`) and the connector (`__connector--width`, `--background`) set most of the character; the spacing
+comes from `--c2-timeline-item--padding-bottom`.
+
+<GalleryGrid min={300}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-timeline aria-label="Order history">
+  <c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success">Paid with a card ending 4242.</c2-timeline-item>
+  <c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary">Handed to the carrier.</c2-timeline-item>
+  <c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item>
+</c2-timeline>
+```
+
+```html tag=MdxCodeBlock,label=Changelog
+<style>
+  .changelog-timeline {
+    width: 320px;
+    --c2-timeline-item--gap: 20px;
+    --c2-timeline-item--padding-bottom: 28px;
+    --c2-timeline-item__timestamp__split--width: 72px;
+    --c2-timeline-item__marker--size: 10px;
+    --c2-timeline-item__marker--background: #18181b;
+    --c2-timeline-item__marker--border: 2px solid #18181b;
+    --c2-timeline-item__connector--width: 1px;
+    --c2-timeline-item__label--font-weight: 600;
+    --c2-timeline-item__timestamp--font-size: 12px;
+  }
+</style>
+<c2-timeline class="changelog-timeline" layout="split" aria-label="Changelog">
+  <c2-timeline-item label="v2.4.0" timestamp="Sep 24">Adds the timeline component and split layout.</c2-timeline-item>
+  <c2-timeline-item label="v2.3.1" timestamp="Sep 02">Fixes focus rings in Safari.</c2-timeline-item>
+  <c2-timeline-item label="v2.3.0" timestamp="Aug 18">New date selector ranges.</c2-timeline-item>
+</c2-timeline>
+```
+
+```html tag=MdxCodeBlock,label=Activity feed
+<style>
+  .activity-timeline {
+    width: 320px;
+    --c2-timeline-item--padding-bottom: 16px;
+    --c2-timeline-item__marker--size: 28px;
+    --c2-timeline-item__marker--background: #f4f4f5;
+    --c2-timeline-item__marker--border: 1px solid #e4e4e7;
+    --c2-timeline-item__label--line-height: 28px;
+    --c2-timeline-item__timestamp--line-height: 16px;
+    --c2-timeline-item__content--margin-top: 8px;
+  }
+  .activity-timeline blockquote {
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    color: #3f3f46;
+  }
+</style>
+<c2-timeline class="activity-timeline" aria-label="Activity">
+  <c2-timeline-item tone="primary" timestamp="10 min ago">
+    <svg slot="marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    <span slot="label"><strong>Ana</strong> commented</span>
+    <blockquote>Looks good, ship it once CI is green.</blockquote>
+  </c2-timeline-item>
+  <c2-timeline-item tone="success" label="Merged into develop" timestamp="1 hour ago">
+    <svg slot="marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+  </c2-timeline-item>
+</c2-timeline>
+```
+
+```html tag=MdxCodeBlock,label=Dashed roadmap
+<style>
+  .roadmap-timeline {
+    width: 320px;
+    --c2-timeline-item__marker--size: 14px;
+    --c2-timeline-item__marker--border: 3px solid #bcbcc6;
+    --c2-timeline-item__marker__primary--border-color: #7c3aed;
+    --c2-timeline-item__marker__success--border-color: #7c3aed;
+    --c2-timeline-item__connector--background: repeating-linear-gradient(to bottom, #d4d4d8 0 4px, transparent 4px 8px);
+    --c2-timeline-item__timestamp--color: #7c3aed;
+  }
+</style>
+<c2-timeline class="roadmap-timeline" aria-label="Roadmap">
+  <c2-timeline-item label="Research" timestamp="Q1 · done" tone="success"></c2-timeline-item>
+  <c2-timeline-item label="Design system" timestamp="Q2 · in progress" tone="primary"></c2-timeline-item>
+  <c2-timeline-item label="Launch" timestamp="Q4 · planned"></c2-timeline-item>
+</c2-timeline>
+```
+
+</GalleryGrid>

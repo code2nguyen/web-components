@@ -1,0 +1,148 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-timeline-item,
+  $theme: (
+    gap: 12px,
+    padding-bottom: 24px,
+    marker--size: 12px,
+    marker--background: #ffffff,
+    marker--border: 2px solid #bcbcc6,
+    marker--border-radius: 999px,
+    marker--color: #71717a,
+    marker__primary--border-color: rgb(2, 101, 220),
+    marker__primary--color: rgb(2, 101, 220),
+    marker__success--border-color: #15803d,
+    marker__success--color: #15803d,
+    marker__warning--border-color: #a16207,
+    marker__warning--color: #a16207,
+    marker__danger--border-color: #dc2626,
+    marker__danger--color: #dc2626,
+    connector--width: 2px,
+    connector--background: #e4e4e7,
+    connector--gap: 4px,
+    label--font-size: 14px,
+    label--font-weight: 500,
+    label--line-height: 20px,
+    label--color: #18181b,
+    timestamp--font-size: 12px,
+    timestamp--line-height: 20px,
+    timestamp--color: #71717a,
+    timestamp__split--width: 96px,
+    content--font-size: 14px,
+    content--color: #71717a,
+    content--margin-top: 4px,
+  )
+);
+
+// One grid per entry. The rail spans every row, including the trailing spacer row, so the connector runs through
+// the space between two entries rather than stopping short of it.
+:host {
+  display: grid;
+  grid-template-columns: css.cssVar(marker--size) minmax(0, 1fr);
+  grid-template-rows: auto auto auto css.cssVar(padding-bottom);
+  grid-template-areas:
+    'rail label'
+    'rail timestamp'
+    'rail content'
+    'rail .';
+  column-gap: css.cssVar(gap);
+  box-sizing: border-box;
+}
+
+:host([split]) {
+  grid-template-columns: css.cssVar(timestamp__split--width) css.cssVar(marker--size) minmax(0, 1fr);
+  grid-template-rows: auto auto css.cssVar(padding-bottom);
+  grid-template-areas:
+    'timestamp rail label'
+    '. rail content'
+    '. rail .';
+}
+
+:host([last]) {
+  grid-template-rows: auto auto auto 0;
+}
+
+:host([split][last]) {
+  grid-template-rows: auto auto 0;
+}
+
+:host([hidden]),
+[hidden] {
+  display: none !important;
+}
+
+.rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+}
+
+.marker {
+  display: grid;
+  place-items: center;
+  flex: none;
+  box-sizing: border-box;
+  width: css.cssVar(marker--size);
+  height: css.cssVar(marker--size);
+  // Centre the marker on the label's first line; a marker taller than that line sits at the top instead.
+  margin-top: max(0px, calc((#{css.cssVar(label--line-height)} - #{css.cssVar(marker--size)}) / 2));
+  color: css.cssVar(marker--color);
+  background: css.cssVar(marker--background);
+  border: css.cssVar(marker--border);
+  border-radius: css.cssVar(marker--border-radius);
+
+  ::slotted(*) {
+    width: 60%;
+    height: 60%;
+  }
+}
+
+@each $tone in primary, success, warning, danger {
+  :host([tone='#{$tone}']) .marker {
+    color: css.cssVar(marker__#{$tone}--color);
+    border-color: css.cssVar(marker__#{$tone}--border-color);
+  }
+}
+
+.connector {
+  flex: 1 1 auto;
+  width: css.cssVar(connector--width);
+  margin-top: css.cssVar(connector--gap);
+  background: css.cssVar(connector--background);
+}
+
+:host([last]) .connector {
+  visibility: hidden;
+}
+
+.label {
+  grid-area: label;
+  min-width: 0;
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: css.cssVar(label--line-height);
+  color: css.cssVar(label--color);
+}
+
+.timestamp {
+  grid-area: timestamp;
+  min-width: 0;
+  font-size: css.cssVar(timestamp--font-size);
+  line-height: css.cssVar(timestamp--line-height);
+  color: css.cssVar(timestamp--color);
+}
+
+:host([split]) .timestamp {
+  text-align: end;
+  // Sit on the same line box as the label beside it.
+  line-height: css.cssVar(label--line-height);
+}
+
+.content {
+  grid-area: content;
+  min-width: 0;
+  margin-top: css.cssVar(content--margin-top);
+  font-size: css.cssVar(content--font-size);
+  color: css.cssVar(content--color);
+}

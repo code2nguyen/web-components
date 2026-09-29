@@ -1359,6 +1359,43 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-timeline': {
+    html: `<c2-timeline aria-label="Order history" style="width:300px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success">Paid with a card ending 4242.</c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary">Handed to the carrier.</c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
+    presets: [
+      {
+        name: 'Filled dots',
+        description: 'Solid ink markers on a hairline connector, with a bolder label.',
+        css: {
+          '--c2-timeline-item__marker--size': '10px',
+          '--c2-timeline-item__marker--background': '#18181b',
+          '--c2-timeline-item__marker--border': '2px solid #18181b',
+          '--c2-timeline-item__connector--width': '1px',
+          '--c2-timeline-item__label--font-weight': '600',
+        },
+      },
+      {
+        name: 'Split dates',
+        description: 'Timestamps in their own column before the rail, for scanning by date.',
+        attributes: { layout: 'split' },
+        css: {
+          '--c2-timeline-item--gap': '16px',
+          '--c2-timeline-item__timestamp__split--width': '88px',
+        },
+      },
+      {
+        name: 'Dashed roadmap',
+        description: 'Heavier violet rings joined by a dashed connector.',
+        css: {
+          '--c2-timeline-item__marker--size': '14px',
+          '--c2-timeline-item__marker--border': '3px solid #bcbcc6',
+          '--c2-timeline-item__marker__primary--border-color': '#7c3aed',
+          '--c2-timeline-item__marker__success--border-color': '#7c3aed',
+          '--c2-timeline-item__connector--background': 'repeating-linear-gradient(to bottom, #d4d4d8 0 4px, transparent 4px 8px)',
+          '--c2-timeline-item__timestamp--color': '#7c3aed',
+        },
+      },
+    ],
+  },
   'c2-steps': {
     html: `<c2-steps aria-label="Pipeline"><c2-step label="build" trailing="24 s"><c2-step status="success" label="install dependencies" trailing="19 s"></c2-step><c2-step status="success" label="compile" trailing="5 s"></c2-step></c2-step><c2-step label="test"><c2-step status="success" label="unit" trailing="8 s"></c2-step><c2-step status="running" label="e2e"></c2-step></c2-step><c2-step status="pending" label="ship"></c2-step></c2-steps>`,
     presets: [
