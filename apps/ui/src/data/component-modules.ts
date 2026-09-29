@@ -3,6 +3,8 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/chat-message-list'
+import './chat-message-list-examples'
 import '@c2n/shortcut'
 import '@c2n/carousel'
 import '@c2n/tag-input'

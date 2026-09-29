@@ -26,6 +26,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 - **Chat Input** — `c2-chat-input` · `@c2n/chat-input` — Auto-growing message composer with keyboard submission, toolbar actions and native form support.
 - **Chat Message** — `c2-chat-message` · `@c2n/chat-message` — Flexible message row for conversations, assistant answers and activity updates.
+- **Chat Message List** — `c2-chat-message-list` · `@c2n/chat-message-list` — Scrolling conversation log that follows new messages, counts unread ones and loads older history.
 
 ## Data display
 

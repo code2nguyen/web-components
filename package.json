@@ -89,6 +89,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/chat-message-list:build",
         "./packages/components/shortcut:build",
         "./packages/components/carousel:build",
         "./packages/components/tag-input:build",

@@ -17,6 +17,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/chat-message-list": "*",
     "@c2n/shortcut": "*",
     "@c2n/carousel": "*",
     "@c2n/tag-input": "*",

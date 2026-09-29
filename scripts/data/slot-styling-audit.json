@@ -498,6 +498,40 @@
       "reason": "The title slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-chat-message-list",
+      "slot": "",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The content column owns the spacing between messages; assigned messages stay consumer-owned."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty region owns the empty slot's placement and muted text."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "jump-icon",
+      "decision": "variables",
+      "variables": ["--c2-chat-message-list__jump-icon--size"],
+      "reason": "The jump button sizes the slotted icon and its SVG fallback through the icon size variable."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["loading"],
+      "reason": "The loading region owns the loading slot's placement and muted text."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "start",
+      "decision": "assigned-content",
+      "reason": "The start slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-chatbot",
       "slot": "",
       "decision": "part",
