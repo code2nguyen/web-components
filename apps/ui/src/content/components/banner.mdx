@@ -1,0 +1,58 @@
+---
+title: 'Banner'
+description: 'A persistent, full-width message in the page flow for system notices, outages and account status.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Banner } from '@c2n/banner'
+import { Button } from '@c2n/button'
+
+`c2-banner` shows a message that stays on the page until the user acts on it or the condition goes away, unlike a
+toast, which floats and expires. `variant` picks the colours and the default icon, and also the announcement:
+`warning` and `error` are exposed as alerts, the others as status messages. Put the text in `message` or the default
+slot, add buttons or links to the `actions` slot, and set `dismissible` for a close button.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/banner
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/banner
+<style>
+  .banner-row { width: 100%; max-width: 640px; }
+</style>
+<div data-label="Neutral">
+  <c2-banner class="banner-row" message="Scheduled maintenance on Sunday, 02:00–04:00 UTC."></c2-banner>
+</div>
+<div data-label="Information">
+  <c2-banner class="banner-row" variant="info" heading="New" message="Dashboards can now be shared with your whole team." dismissible></c2-banner>
+</div>
+<div data-label="Success">
+  <c2-banner class="banner-row" variant="success" message="Your payment method was updated."></c2-banner>
+</div>
+<div data-label="Warning with action">
+  <c2-banner class="banner-row" variant="warning" heading="Trial ending" message="Your trial ends in 3 days.">
+    <c2-button slot="actions">Upgrade</c2-button>
+  </c2-banner>
+</div>
+<div data-label="Error">
+  <c2-banner class="banner-row" variant="error" heading="Outage" message="Deployments are failing in eu-west-1."></c2-banner>
+</div>
+```
+
+## Dismissing
+
+The close button fires a cancelable `banner-close` event and then hides the banner (`hidden`). Call
+`event.preventDefault()` to keep it, for example until a request that records the dismissal succeeds, and
+`show()` to bring a dismissed banner back.
+
+```ts tag=CodeBlock
+const banner = document.querySelector('c2-banner')!
+banner.addEventListener('banner-close', () => localStorage.setItem('maintenance-banner', 'dismissed'))
+```

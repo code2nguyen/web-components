@@ -187,6 +187,32 @@
       "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-banner",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-banner",
+      "slot": "close-icon",
+      "decision": "assigned-content",
+      "reason": "The close-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-banner",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-banner",
+      "slot": "icon",
+      "decision": "part",
+      "parts": ["icon"],
+      "reason": "The semantic icon region owns the icon slot's component-side presentation."
+    },
+    {
       "tag": "c2-bar-chart",
       "slot": "actions",
       "decision": "part",

@@ -1,0 +1,80 @@
+---
+title: 'Banner gallery'
+description: 'Announcement bars, cookie notices and status strips built from the banner variables.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Banner } from '@c2n/banner'
+import { Button } from '@c2n/button'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-banner {
+    width: 360px;
+  }
+</style>
+<c2-banner class="default-banner" message="Scheduled maintenance on Sunday."></c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Announcement bar
+<style>
+  .announcement {
+    width: 360px;
+    --c2-banner__container--background: #18181b;
+    --c2-banner__container--color: #fafafa;
+    --c2-banner__container--border: none;
+    --c2-banner__container--border-radius: 0;
+    --c2-banner__container--padding: 10px 16px;
+    --c2-banner__close--color: #d4d4d8;
+    --c2-banner__close__hover--background: rgba(255, 255, 255, 0.12);
+  }
+</style>
+<c2-banner class="announcement" no-icon dismissible heading="v2.0" message="is out — see what's new."></c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Accent strip
+<style>
+  .accent {
+    width: 360px;
+    --c2-banner__container--border: none;
+    --c2-banner__container--border-radius: 0;
+    --c2-banner__container__variant--background-mix: 6%;
+    --c2-banner__container--box-shadow: inset 4px 0 0 #f59e0b;
+  }
+</style>
+<c2-banner class="accent" variant="warning" heading="Billing" message="Your card expires this month."></c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Cookie notice
+<style>
+  .cookie {
+    width: 360px;
+    --c2-banner__container--background: #ffffff;
+    --c2-banner__container--border-radius: 14px;
+    --c2-banner__container--padding: 16px;
+    --c2-banner__container--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+</style>
+<c2-banner class="cookie" no-icon message="We use cookies to improve your experience.">
+  <c2-button slot="actions">Accept</c2-button>
+</c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Soft error
+<style>
+  .soft-error {
+    width: 360px;
+    --c2-banner__container--border-radius: 999px;
+    --c2-banner__container--padding: 8px 16px;
+    --c2-banner__container__variant--border-mix: 0%;
+    --c2-banner__container--color: #991b1b;
+  }
+</style>
+<c2-banner class="soft-error" variant="error" message="Sync failed. Retrying in 30s."></c2-banner>
+```
+
+</GalleryGrid>
