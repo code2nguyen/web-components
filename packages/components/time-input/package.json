@@ -51,7 +51,8 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../overlay:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -64,6 +65,7 @@
   },
   "dependencies": {
     "@c2n/core": "0.0.17",
+    "@c2n/overlay": "0.0.17",
     "lit": "3.3.3"
   },
   "devDependencies": {
