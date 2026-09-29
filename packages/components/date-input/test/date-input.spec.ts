@@ -78,3 +78,26 @@ test('supports read-only state and a custom calendar icon', async ({ page, rende
   await expect(page.getByTestId('calendar')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Open calendar' })).toBeDisabled()
 })
+
+test('clicking the calendar icon focuses the input and opens the picker', async ({ page, renderScenario, browserName }) => {
+  await renderScenario('<c2-date-input aria-label="Start date"></c2-date-input>')
+  const input = page.locator('c2-date-input input')
+  await page.getByRole('button', { name: 'Open calendar' }).click()
+  await expect(input).toBeFocused()
+  // `:open` reports an open date picker in Chromium; other engines lack it or show the picker out of process.
+  if (browserName === 'chromium') await expect.poll(() => input.evaluate((element) => element.matches(':open'))).toBe(true)
+})
+
+test('clicking the calendar icon survives showPicker() throwing', async ({ page, renderScenario }) => {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  await renderScenario('<c2-date-input aria-label="Start date"></c2-date-input>')
+  await page.evaluate(() => {
+    HTMLInputElement.prototype.showPicker = () => {
+      throw new DOMException('showPicker() called from cross-origin iframe.', 'SecurityError')
+    }
+  })
+  await page.getByRole('button', { name: 'Open calendar' }).click()
+  await expect(page.locator('c2-date-input input')).toBeFocused()
+  expect(errors).toEqual([])
+})
