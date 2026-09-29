@@ -81,6 +81,7 @@ function sharedIconStylingPath(record) {
   const parent = record.declaration.superclass
   if (record.packageName === '@c2n/feather-icons' && parent?.name === 'FeatherIcon' && parent.module === '/src/feather-icon') return 'feather-icon-base'
   if (record.packageName === '@c2n/phosphor-icons' && parent?.name === 'PhosphorIcon' && parent.module === '/src/phosphor-icon') return 'phosphor-icon-base'
+  if (record.packageName === '@c2n/symbols' && parent?.name === 'SymbolElement' && parent.module === '/src/symbol') return 'symbol-base'
   return null
 }
 

@@ -143,6 +143,7 @@
         "./packages/components/button:build",
         "./packages/icons/feather-icons:build",
         "./packages/icons/phosphor-icons:build",
+        "./packages/icons/symbols:build",
         "./open-packages/chatbot:build",
         "./packages/components/chat-input:build",
         "./packages/components/chat-message:build",

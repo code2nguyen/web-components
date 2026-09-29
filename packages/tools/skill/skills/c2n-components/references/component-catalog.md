@@ -64,6 +64,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Feather Icons** — `c2-feather-{name}` · `@c2n/feather-icons` — 287 open-source Feather icons, one web component each.
 - **Mat Icon** — `c2-mat-icon` · `@c2n/mat-icon` — 2,234 Material Icons ligatures rendered through a single element.
 - **Phosphor Icons** — `c2-phosphor-{name}` · `@c2n/phosphor-icons` — 1,512 flexible icons in six weights, one web component each.
+- **Symbols** — `c2-symbol-{name}` · `@c2n/symbols` — 157 themeable spot illustrations for empty states, status panels, onboarding and error pages.
 
 ## Inputs
 

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <path class="success" d="M46 38c6-4 13-2 15 4l6 15c2 5 0 9-4 12l-6 4c4 13 14 23 27 27l4-6c3-4 7-6 12-4l15 6c6 2 8 9 4 15l-6 8c-4 6-12 8-20 6-31-8-53-30-61-61-2-8 0-16 6-20Z"/>
+  <path class="line-success" d="M94 42a26 26 0 0 1 24 24M96 28a40 40 0 0 1 36 36"/>
+  <path class="primary" d="M36 118Q37.7 122.3 42 124Q37.7 125.7 36 130Q34.3 125.7 30 124Q34.3 122.3 36 118Z"/>
+  <circle class="accent" cx="128" cy="116" r="4"/>
+</svg>

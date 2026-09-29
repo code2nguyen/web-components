@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <path class="surface line" d="M22 80c14-24 34-36 58-36s44 12 58 36c-14 24-34 36-58 36S36 104 22 80Z"/>
+  <circle class="primary" cx="80" cy="80" r="20"/>
+  <circle class="ink" cx="80" cy="80" r="8"/>
+  <circle class="surface" cx="87" cy="73" r="3.5"/>
+  <rect class="backdrop" x="75" y="22" width="10" height="116" rx="5" transform="rotate(-45 80 80)"/>
+  <rect class="error" x="77.5" y="26" width="5" height="108" rx="2.5" transform="rotate(-45 80 80)"/>
+  <path class="primary" d="M130 118Q131.7 122.3 136 124Q131.7 125.7 130 130Q128.3 125.7 124 124Q128.3 122.3 130 118Z"/>
+  <circle class="accent" cx="128" cy="38" r="4"/>
+</svg>

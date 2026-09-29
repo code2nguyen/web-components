@@ -131,6 +131,7 @@
         "../../components/tooltip:build",
         "../../icons/feather-icons:build",
         "../../icons/phosphor-icons:build",
+        "../../icons/symbols:build",
         "../../../open-packages/chatbot:build"
       ],
       "command": "tsc -p tsconfig.lib.json && node scripts/theme-generator/index.ts"

@@ -104,6 +104,36 @@
       "fixture": "<button id=\"tooltip-offset-target\" style=\"margin-top: 200px\">Help</button><c2-tooltip for=\"tooltip-offset-target\">More information</c2-tooltip>",
       "settledWhen": "c2-tooltip .c2-tooltip",
       "stateSetup": [{ "target": "c2-tooltip", "attribute": "open", "value": "" }]
+    },
+    {
+      "id": "symbol-success-shared",
+      "tag": "c2-symbol-success",
+      "fixture": "<c2-symbol-success></c2-symbol-success>",
+      "settledWhen": "c2-symbol-success svg"
+    },
+    {
+      "id": "symbol-server-error-shared",
+      "tag": "c2-symbol-server-error",
+      "fixture": "<c2-symbol-server-error></c2-symbol-server-error>",
+      "settledWhen": "c2-symbol-server-error svg"
+    },
+    {
+      "id": "symbol-expired-shared",
+      "tag": "c2-symbol-expired",
+      "fixture": "<c2-symbol-expired></c2-symbol-expired>",
+      "settledWhen": "c2-symbol-expired svg"
+    },
+    {
+      "id": "symbol-empty-inbox-shared",
+      "tag": "c2-symbol-empty-inbox",
+      "fixture": "<c2-symbol-empty-inbox></c2-symbol-empty-inbox>",
+      "settledWhen": "c2-symbol-empty-inbox svg"
+    },
+    {
+      "id": "symbol-achievement-shared",
+      "tag": "c2-symbol-achievement",
+      "fixture": "<c2-symbol-achievement></c2-symbol-achievement>",
+      "settledWhen": "c2-symbol-achievement svg"
     }
   ],
   "cases": [
@@ -1176,6 +1206,189 @@
       "valueSyntax": "width",
       "browsers": ["chromium"],
       "reset": "remove-property"
+    },
+    {
+      "id": "symbol-size-shared",
+      "tag": "c2-symbol-success",
+      "name": "--c2-symbol--size",
+      "context": "symbol-success-shared",
+      "state": "base",
+      "value": "77px",
+      "target": "c2-symbol-success",
+      "assertion": "geometry",
+      "valueSyntax": "width",
+      "geometryMetric": "width",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-stroke-width-shared",
+      "tag": "c2-symbol-success",
+      "name": "--c2-symbol--stroke-width",
+      "context": "symbol-success-shared",
+      "state": "base",
+      "value": "5",
+      "target": "c2-symbol-success path.line-surface",
+      "assertion": "computed-style",
+      "declaration": "stroke-width",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-backdrop-shared",
+      "tag": "c2-symbol-success",
+      "name": "--c2-symbol__backdrop--color",
+      "context": "symbol-success-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-success circle.backdrop",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-success-shared",
+      "tag": "c2-symbol-success",
+      "name": "--c2-symbol__success--color",
+      "context": "symbol-success-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-success circle.success",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-primary-shared",
+      "tag": "c2-symbol-success",
+      "name": "--c2-symbol__primary--color",
+      "context": "symbol-success-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-success path.line-primary",
+      "assertion": "computed-style",
+      "declaration": "stroke",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-primary-soft-shared",
+      "tag": "c2-symbol-success",
+      "name": "--c2-symbol__primary-soft--color",
+      "context": "symbol-success-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-success circle.primary-soft",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-surface-shared",
+      "tag": "c2-symbol-server-error",
+      "name": "--c2-symbol__surface--color",
+      "context": "symbol-server-error-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-server-error rect.surface",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-line-shared",
+      "tag": "c2-symbol-server-error",
+      "name": "--c2-symbol__line--color",
+      "context": "symbol-server-error-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-server-error rect.line",
+      "assertion": "computed-style",
+      "declaration": "stroke",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-error-shared",
+      "tag": "c2-symbol-server-error",
+      "name": "--c2-symbol__error--color",
+      "context": "symbol-server-error-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-server-error circle.error",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-ink-shared",
+      "tag": "c2-symbol-expired",
+      "name": "--c2-symbol__ink--color",
+      "context": "symbol-expired-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-expired circle.ink",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-warning-shared",
+      "tag": "c2-symbol-expired",
+      "name": "--c2-symbol__warning--color",
+      "context": "symbol-expired-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-expired circle.warning",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-muted-shared",
+      "tag": "c2-symbol-empty-inbox",
+      "name": "--c2-symbol__muted--color",
+      "context": "symbol-empty-inbox-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-empty-inbox ellipse.muted",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-accent-shared",
+      "tag": "c2-symbol-achievement",
+      "name": "--c2-symbol__accent--color",
+      "context": "symbol-achievement-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-achievement path.accent",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
     }
   ]
 }

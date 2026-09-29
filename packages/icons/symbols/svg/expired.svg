@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <circle class="surface line" cx="78" cy="78" r="42"/>
+  <path class="line" d="M78 42v6M78 108v6M42 78h6M108 78h6"/>
+  <path class="line-ink" d="M78 78V58M78 78l14 9"/>
+  <circle class="ink" cx="78" cy="78" r="4"/>
+  <circle class="warning line-surface" cx="114" cy="112" r="15"/>
+  <path class="line-surface" d="M114 105v8M114 119v.01"/>
+</svg>

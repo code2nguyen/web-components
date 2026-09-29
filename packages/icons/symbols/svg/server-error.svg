@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="surface line" x="38" y="36" width="84" height="32" rx="6"/>
+  <rect class="surface line" x="38" y="76" width="84" height="32" rx="6"/>
+  <circle class="success" cx="53" cy="52" r="4"/>
+  <circle class="error" cx="53" cy="92" r="4"/>
+  <path class="line" d="M68 52h38M68 92h24M80 108v12M60 124h40"/>
+  <circle class="error line-surface" cx="118" cy="108" r="15"/>
+  <path class="line-surface" d="M118 101v8M118 115v.01"/>
+</svg>

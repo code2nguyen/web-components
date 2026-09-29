@@ -86,6 +86,7 @@
     "@c2n/status-panel": "*",
     "@c2n/steps": "*",
     "@c2n/switch": "*",
+    "@c2n/symbols": "*",
     "@c2n/tabs": "*",
     "@c2n/text-field": "*",
     "@c2n/textarea": "*",
