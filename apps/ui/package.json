@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@c2n/tag-input": "*",
+    "@c2n/split-panel": "*",
     "@c2n/banner": "*",
     "@c2n/time-input": "*",
     "@c2n/log-viewer": "*",
