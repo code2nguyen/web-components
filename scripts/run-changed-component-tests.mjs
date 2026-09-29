@@ -7,7 +7,11 @@ const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const repositoryRoot = resolve(scriptDirectory, '..')
 const packageRoots = ['packages/components', 'open-packages']
 const componentPackagePattern = /^(packages\/components|open-packages)\/([^/]+)(?:\/|$)/
-const explicitTestPattern = /^(packages\/components|open-packages)\/[^/]+\/test(?:\/|$)/
+const explicitTestPattern = /^(?:(packages\/components|open-packages)\/[^/]+|packages\/umbrella)\/test(?:\/|$)/
+// `@c2n/components` loads every component at once, so a change to any of them (a tag defined twice, a module that
+// throws while it is evaluated) can break its barrel without breaking the component's own suite.
+const umbrellaTestDirectory = 'packages/umbrella/test'
+const umbrellaImpactPattern = /^(?:packages\/components|open-packages|packages\/umbrella)\//
 
 const globalImpactPatterns = [
   /^tests\//,
@@ -35,6 +39,7 @@ export function findComponentTestDirectories(root = repositoryRoot) {
         .filter((entry) => entry.isDirectory() && existsSync(resolve(absoluteRoot, entry.name, 'test')))
         .map((entry) => `${packageRoot}/${entry.name}/test`)
     })
+    .concat(existsSync(resolve(root, umbrellaTestDirectory)) ? [umbrellaTestDirectory] : [])
     .sort()
 }
 
@@ -48,6 +53,7 @@ export function selectComponentTestDirectories(changedFiles, availableDirectorie
   const available = new Set(availableDirectories)
   const selected = new Set()
   for (const changedFile of changedFiles) {
+    if (umbrellaImpactPattern.test(normalizePath(changedFile)) && available.has(umbrellaTestDirectory)) selected.add(umbrellaTestDirectory)
     const match = normalizePath(changedFile).match(componentPackagePattern)
     if (!match) continue
     const directory = `${match[1]}/${match[2]}/test`

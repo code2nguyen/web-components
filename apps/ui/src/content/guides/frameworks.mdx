@@ -28,6 +28,22 @@ Two rules hold everywhere:
 - **Register the elements at module scope, before the framework renders.** Frameworks decide "attribute or property" by looking for the property on the element, and an element that has not upgraded yet has none — an object handed to `rows` would be stringified into an attribute.
 - **Load the theme once.** `import '@c2n/theme/theme.css'` in the entry module.
 
+## One package or one per component
+
+Every component is its own package, and `@c2n/components` depends on all of them (and on `@c2n/theme`), so one install brings in the whole library. It holds no code of its own: each entry re-exports the real package, so `@c2n/components/table` and `@c2n/table` load the same module and register the tag once.
+
+```bash tag=CodeBlock
+npm install @c2n/components
+```
+
+```typescript tag=CodeBlock
+import '@c2n/components/theme.css'
+import '@c2n/components/table' // one entry per package: registers c2-table and c2-table-column
+import '@c2n/components/select'
+```
+
+`import '@c2n/components'` registers every component at once. That suits a prototype or an internal tool, but no bundler can tree-shake a registration away, so an application you ship should import the entries it uses. The icon sets are not included (Phosphor alone has 1,512 elements); install `@c2n/feather-icons`, `@c2n/phosphor-icons` or `@c2n/symbols` next to it. Optional engines such as `uplot`, `echarts` and CodeMirror are still yours to install, as they are with the component packages.
+
 ## Attributes and properties
 
 Two conversions differ from stock Lit, and both exist so that one binding is correct on the server and on the client.
@@ -79,6 +95,8 @@ Two packages, no wrapper. `@c2n/<name>/react` declares the tags in JSX; the prop
 import '@c2n/table/react'
 import '@c2n/select/react'
 ```
+
+With `@c2n/components` installed, `import '@c2n/components/react'` declares every tag in one line.
 
 ```tsx tag=CodeBlock
 // src/main.tsx — registration must happen before the first render
@@ -162,7 +180,7 @@ One required piece of configuration, or every `c2-*` tag is resolved as a Vue co
 vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('c2-') } } })
 ```
 
-`@c2n/<name>/vue` registers the tags with Volar so templates can be checked strictly, and `@c2n/framework-types/tsconfig.vue.json` carries the compiler options that go with them:
+`@c2n/<name>/vue` (or `@c2n/components/vue` for every tag at once) registers the tags with Volar so templates can be checked strictly, and `@c2n/framework-types/tsconfig.vue.json` carries the compiler options that go with them:
 
 ```json tag=CodeBlock
 {

@@ -62,7 +62,7 @@ interface PackageJson {
 const EXCLUDED = new Set(['@c2n/design-board', '@c2n/json-form'])
 
 /** Nearest `node_modules/@c2n` above this package: the workspace symlinks, one per `@c2n` package. */
-function scopeDir(): string {
+export function scopeDir(): string {
   let dir = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
   for (;;) {
     const candidate = join(dir, 'node_modules', '@c2n')
