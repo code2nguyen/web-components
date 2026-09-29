@@ -67,6 +67,18 @@ function columnKey(column: TableColumnConfig): string {
   return (column instanceof TableColumn ? column.columnId : column.id) || column.field
 }
 
+/**
+ * `value` holds row keys, and a row key is always a string. `arrayPropertyConverter` only splits strings, so an array
+ * of numeric ids assigned from script (`table.value = [1, 2]`) used to be stored as numbers and match no row.
+ */
+const rowKeysConverter = {
+  ...arrayPropertyConverter,
+  fromProperty: (value: unknown) => {
+    const parsed = arrayPropertyConverter.fromProperty(value)
+    return Array.isArray(parsed) ? parsed.filter((key) => key !== null && key !== undefined).map(String) : parsed
+  },
+}
+
 function toNumber(value: unknown): number {
   if (typeof value === 'number') return value
   if (typeof value === 'string' && value.trim() !== '') return Number(value)
@@ -224,6 +236,11 @@ export interface Table {
  * `renderCell` such as a sparkline receives the same transient row as the formatted cells around it. Add
  * `highlight-updates` to pulse row backgrounds, and optionally choose its numeric direction with
  * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected.
+ *
+ * **Row keys.** Selection, `value`, events and cell slots name a row by its key: the `row-key` field of the row (or
+ * `getRowKey(row)`) as a string, so `{ id: 7 }` is `"7"`. Without a `row-key` the key is the row's position, which
+ * points at another row after a sort, so set one on any selectable table. `keyOf(row)`, `isSelected(row)`,
+ * `selectRows(rows)` and `deselectRows(rows)` work from the rows themselves when the key rule is beside the point.
  *
  * **Summary row.** Give a column `summary="sum"` (or `avg`, `min`, `max`, `count`, or a function of the rows) and the
  * table adds a totals row below the body. It is a row of the same grid, so every value sits under its own column
@@ -387,8 +404,19 @@ export class Table extends LitElement {
   /** Column definitions, as an alternative to `c2-table-column` children. Children win when both are present. */
   @property({ converter: jsonPropertyConverter }) columns?: TableColumnConfig[]
 
-  /** Field used as the identity of a row, for selection and DOM reuse. Falls back to the row index. */
+  /**
+   * Field holding the identity of a row — its key — used for selection, DOM reuse, animated updates and cell slots;
+   * may be a dotted path. A key is always a string: `{ id: 7 }` has the key `"7"`. Without one (or where the field is
+   * empty) a row's key is its position in the sorted dataset, which moves when the rows are sorted or replaced — so
+   * a selection would move with it. Set it whenever rows can be selected.
+   */
   @property({ type: String, attribute: 'row-key' }) rowKey = ''
+
+  /**
+   * Computes a row's key when no single field holds it, such as a composite `` row => `${row.region}:${row.sku}` ``.
+   * Wins over `row-key`; the result is turned into a string. Property only.
+   */
+  @property({ attribute: false }) getRowKey?: (row: TableRow) => unknown
 
   /** `single` selects one row at a time, `multiple` supports ⌘/ctrl-click and shift-click ranges. */
   @property({ type: String }) selection: TableSelectionMode = 'none'
@@ -396,8 +424,12 @@ export class Table extends LitElement {
   /** Adds a leading checkbox column, pinned to the start. */
   @property({ type: Boolean, attribute: 'checkbox-selection' }) checkboxSelection = false
 
-  /** Keys of the selected rows: an array in the property, `;`-separated in the attribute. */
-  @property({ converter: arrayPropertyConverter, reflect: true }) value: string[] = []
+  /**
+   * Keys of the selected rows (see `row-key`): an array in the property, `;`-separated in the attribute. Entries are
+   * stored as strings, so `[1, 2]` selects the rows whose key field holds `1` and `2`. To select by row rather than
+   * by key, use `selectRows()`.
+   */
+  @property({ converter: rowKeysConverter, reflect: true }) value: string[] = []
 
   /** The sort, in priority order: `SortModel[]` in the property, `field:asc;other:desc` in the `sort` attribute. */
   @property({ converter: sortModelConverter, attribute: 'sort', reflect: true }) sortModel: SortModel[] = []
@@ -497,6 +529,7 @@ export class Table extends LitElement {
   #animationFrame?: number
   #transitionRows?: TableRow[]
   #rowUpdateStates = new Map<string, RowUpdateState>()
+  #warnedPositionalKeys = false
   #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
 
   /**
@@ -582,6 +615,51 @@ export class Table extends LitElement {
       ...visible.filter((column) => !column.pinned),
       ...visible.filter((column) => column.pinned === 'end'),
     ]
+  }
+
+  /**
+   * The key of `row`: `getRowKey(row)`, else its `row-key` field, as a string. Without either it is the row's current
+   * position, found by identity among the rows the table holds, and `undefined` when the row is not one of them.
+   */
+  keyOf(row: TableRow): string | undefined {
+    const identity = this.#identityOf(row)
+    if (identity !== undefined) return identity
+    if (this.dataSource) {
+      const size = this.#effectiveBlockSize
+      for (const [block, rows] of this.#blocks) {
+        const index = rows.indexOf(row)
+        if (index >= 0) return String(block * size + index)
+      }
+      return undefined
+    }
+    const index = this.#sortedRows.indexOf(row)
+    return index >= 0 ? String(index) : undefined
+  }
+
+  /** Whether `row` is selected. */
+  isSelected(row: TableRow): boolean {
+    const key = this.keyOf(row)
+    return key !== undefined && this.value.includes(key)
+  }
+
+  /**
+   * Selects `rows` by their keys, replacing the selection unless `add` is set; `selection="single"` keeps the last
+   * one. Fires `selection-change`, like `selectAll()`. No-op while `selection="none"`.
+   */
+  selectRows(rows: TableRow[], { add = false }: { add?: boolean } = {}) {
+    if (this.selection === 'none') return
+    const keys = rows.map((row) => this.keyOf(row)).filter((key): key is string => key !== undefined)
+    if (this.selection === 'single') {
+      this.#commitSelection(keys.length ? [keys[keys.length - 1]] : add ? this.value : [])
+      return
+    }
+    this.#commitSelection([...new Set([...(add ? this.value : []), ...keys])])
+  }
+
+  /** Removes `rows` from the selection. Fires `selection-change`. */
+  deselectRows(rows: TableRow[]) {
+    const keys = new Set(rows.map((row) => this.keyOf(row)))
+    this.#commitSelection(this.value.filter((key) => !keys.has(key)))
   }
 
   /** The rows currently selected. Only the loaded ones when a `dataSource` is used. */
@@ -711,6 +789,7 @@ export class Table extends LitElement {
       this.#pendingScrollTop = false
       if (this.viewport) this.viewport.scrollTop = 0
     }
+    this.#warnPositionalKeys()
     this.#measureRowHeight()
     this.#measureColumnWidths()
     this.#syncFocusToWindow()
@@ -1210,9 +1289,26 @@ export class Table extends LitElement {
   }
 
   #keyAt(index: number, row: TableRow): string {
-    if (!this.rowKey) return String(index)
-    const value = getFieldValue(row, this.rowKey)
-    return value === null || value === undefined ? String(index) : String(value)
+    return this.#identityOf(row) ?? String(index)
+  }
+
+  /** The key a row carries itself, from `getRowKey` or `row-key`; `undefined` when it has none and only its position identifies it. */
+  #identityOf(row: TableRow): string | undefined {
+    const value = this.getRowKey ? this.getRowKey(row) : this.rowKey ? getFieldValue(row, this.rowKey) : undefined
+    return value === null || value === undefined || value === '' ? undefined : String(value)
+  }
+
+  get #hasRowIdentity(): boolean {
+    return Boolean(this.getRowKey || this.rowKey)
+  }
+
+  /** A selectable table without a key selects positions, which re-point at other rows after a sort. Say so, once. */
+  #warnPositionalKeys() {
+    if (this.#warnedPositionalKeys || this.#hasRowIdentity || this.selection === 'none' || this.rowCount === 0) return
+    this.#warnedPositionalKeys = true
+    console.warn(
+      `[c2-table] selection="${this.selection}" without row-key: a row's key is its position, so the selection moves to other rows when they are sorted or replaced. Set row-key (or getRowKey) to the field that identifies a row.`,
+    )
   }
 
   #applySort() {
@@ -1284,7 +1380,7 @@ export class Table extends LitElement {
 
     // A stable key lets a removed row remain in its former visual position long enough to collapse. Without one,
     // identity is positional, so structural updates stay immediate while numeric modification can still interpolate.
-    if (this.rowKey && !this.paginated) {
+    if (this.#hasRowIdentity && !this.paginated) {
       const previousRows = this.#sortRows(displayedPrevious.filter(isRecord))
       const transitionRows = [...this.#sortRows(this.rows)]
       previousRows.forEach((row, index) => {

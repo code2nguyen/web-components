@@ -753,3 +753,83 @@ test('a data source is not totalled from the rows it happens to hold; summaryVal
   await props(page.locator('c2-table'), { summaryValues: { qty: 500500 } })
   await expect.poll(async () => (await summaryCells(page)).map((cell) => cell.text)).toEqual(['Total', '500,500', ''])
 })
+
+const NUMERIC = [
+  { id: 1, region: 'eu', sku: 'A', name: 'Anvil' },
+  { id: 2, region: 'eu', sku: 'B', name: 'Bolt' },
+  { id: 3, region: 'us', sku: 'A', name: 'Anvil US' },
+]
+
+const selectable = (attributes = '') => `<c2-table style="height:240px;width:520px" selection="multiple" rows='${JSON.stringify(NUMERIC)}' ${attributes}>
+  <c2-table-column field="name" header="Name" width="200px" sortable></c2-table-column>
+  <c2-table-column field="sku" header="SKU" width="200px"></c2-table-column>
+</c2-table>`
+
+const selectedNames = (page: Page) =>
+  page
+    .locator('c2-table')
+    .evaluate((element) =>
+      [...element.shadowRoot!.querySelectorAll('[role="row"][aria-selected="true"]')].map((row) => row.querySelector('[role="gridcell"]')!.textContent!.trim()),
+    )
+
+test('numeric keys assigned from script select their rows, stored as strings', async ({ page, renderScenario }) => {
+  await renderScenario(selectable('row-key="id"'))
+  const host = page.locator('c2-table')
+  await props(host, { value: [1, 3] })
+  await expect(host).toHaveJSProperty('value', ['1', '3'])
+  await expect(host).toHaveAttribute('value', '1;3')
+  expect(await selectedNames(page)).toEqual(['Anvil', 'Anvil US'])
+})
+
+test('row helpers select by row, and getRowKey builds a composite key', async ({ page, renderScenario }) => {
+  await renderScenario(selectable())
+  const host = page.locator('c2-table')
+  await watch(host, 'selection-change')
+  const result = await host.evaluate((element) => {
+    type Row = { region: string; sku: string }
+    const table = element as HTMLElement & {
+      rows: Row[]
+      getRowKey: (row: Row) => string
+      keyOf: (row: Row) => string | undefined
+      isSelected: (row: Row) => boolean
+      selectRows: (rows: Row[], options?: { add?: boolean }) => void
+      deselectRows: (rows: Row[]) => void
+      value: string[]
+    }
+    table.getRowKey = (row) => `${row.region}:${row.sku}`
+    const [first, second, third] = table.rows
+    table.selectRows([first])
+    table.selectRows([third], { add: true })
+    const afterSelect = [...table.value]
+    const selected = [table.isSelected(first), table.isSelected(second), table.isSelected(third)]
+    table.deselectRows([first])
+    return { key: table.keyOf(third), afterSelect, selected, afterDeselect: [...table.value], foreign: table.keyOf({ region: '', sku: '' }) }
+  })
+  expect(result).toEqual({ key: 'us:A', afterSelect: ['eu:A', 'us:A'], selected: [true, false, true], afterDeselect: ['us:A'], foreign: ':' })
+  const events = JSON.parse((await host.getAttribute('data-events')) ?? '[]') as { value: string[] }[]
+  expect(events.map((event) => event.value)).toEqual([['eu:A'], ['eu:A', 'us:A'], ['us:A']])
+  expect(await selectedNames(page)).toEqual(['Anvil US'])
+})
+
+test('without a key, keyOf is the row position, and a selectable table warns once', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('[c2-table]')) warnings.push(message.text())
+  })
+  await renderScenario(selectable())
+  const host = page.locator('c2-table')
+  expect(
+    await host.evaluate((element) =>
+      (element as HTMLElement & { keyOf: (row: unknown) => string | undefined; rows: unknown[] }).keyOf((element as HTMLElement & { rows: unknown[] }).rows[2]),
+    ),
+  ).toBe('2')
+  await props(host, { value: ['0'] })
+  await props(host, { value: ['1'] })
+  await expect.poll(() => warnings.length).toBe(1)
+  expect(warnings[0]).toContain('row-key')
+
+  warnings.length = 0
+  await renderScenario(selectable('row-key="id"'))
+  await props(page.locator('c2-table'), { value: ['1'] })
+  expect(warnings).toEqual([])
+})

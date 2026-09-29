@@ -90,7 +90,7 @@ export interface TableColumnConfig {
    * body with its own template language. The table puts a `<slot name="cell:<row key>:<field>">` in the cell;
    * `renderCell` (or the formatted value) stays as the fallback while nothing is slotted into it.
    *
-   * Requires `rowKey`. Only the rows the virtualizer has rendered have a slot, so children for the rest simply
+   * Requires a row key (`rowKey` or `getRowKey`). Only the rows the virtualizer has rendered have a slot, so children for the rest simply
    * wait — write one child per row and let the table pick.
    */
   cellSlot?: boolean
@@ -134,7 +134,7 @@ export interface TableDataSource {
 }
 
 export interface TableSelectionChangeEventDetail {
-  /** Keys of the selected rows (`row-key` field, or the row index when no `row-key` is set). */
+  /** Keys of the selected rows, as strings: the `row-key` field (or `getRowKey`), or the row's position when there is neither. */
   value: string[]
   /** The selected rows themselves; only the loaded ones when a `dataSource` is used. */
   rows: TableRow[]

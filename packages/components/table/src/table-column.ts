@@ -88,7 +88,7 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /**
    * Renders each cell from a light-DOM child of the table rather than from `renderCell`: the cell holds a
    * `<slot name="cell:<row key>:<field>">`, so a framework can build the body with its own template language.
-   * Requires the table's `row-key`.
+   * Requires the table's `row-key` (or `getRowKey`).
    */
   @property({ type: Boolean, attribute: 'cell-slot' }) cellSlot = false
 
