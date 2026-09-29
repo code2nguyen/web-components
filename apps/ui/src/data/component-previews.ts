@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  timeline: `<c2-timeline aria-label="Order history" style="width:240px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success"></c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary"></c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
   'split-panel': `<c2-split-panel position="35" style="width:260px;height:130px;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;font-size:12px">
   <div slot="start" style="padding:8px">Inbox</div>
   <div slot="end" style="padding:8px;color:#71717a">Message</div>

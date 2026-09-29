@@ -3,6 +3,7 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/timeline'
 import '@c2n/split-panel'
 import '@c2n/banner'
 import '@c2n/time-input'

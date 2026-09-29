@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/timeline:build",
         "../../components/split-panel:build",
         "../../components/banner:build",
         "../../components/time-input:build",
