@@ -57,7 +57,7 @@ interface LayoutEntry {
  * @cssproperty {color} [--c2-log-viewer__token--color=#93c5fd] - Quoted values, numbers, URLs and recognizable IDs in log text
  * @csspart token - Colored log token; severity and timestamp tokens use the existing level and timestamp colors
  * @csspart copy-icon - Copy and success SVG icon
- * @csspart copy-button - Copy the complete message of a visible entry; revealed on hover or keyboard focus
+ * @csspart copy-button - Copy the complete message of a visible entry; revealed on hover, tap or keyboard focus
  * @csspart highlight - Matching visible entry or plain text slice in highlight mode
  * @csspart viewport - Keyboard accessible scroll surface
  * @csspart content - Virtual content and its total scroll extent
@@ -383,8 +383,7 @@ export class LogViewer extends LitElement {
     this.requestUpdate()
   }
 
-  private onPointerMove(event: PointerEvent): void {
-    if (event.pointerType === 'touch') return
+  private revealCopy(event: PointerEvent): void {
     const row = (event.target as Element).closest<HTMLElement>('[data-copy-source]')
     const source = row ? Number(row.dataset.copySource) : null
     if (source === this.hoveredSource) return
@@ -392,7 +391,18 @@ export class LogViewer extends LitElement {
     this.requestUpdate()
   }
 
-  private onPointerLeave(): void {
+  private onPointerMove(event: PointerEvent): void {
+    if (event.pointerType !== 'touch') this.revealCopy(event)
+  }
+
+  // Touch has no hover: a tap reveals that entry's copy button only, instead of showing one on every row.
+  private onPointerDown(event: PointerEvent): void {
+    if (event.pointerType === 'touch') this.revealCopy(event)
+  }
+
+  private onPointerLeave(event: PointerEvent): void {
+    // Touch fires pointerleave right after every tap; keep the tapped entry revealed until another tap or a scroll.
+    if (event.pointerType === 'touch') return
     this.hoveredSource = null
     this.requestUpdate()
   }
@@ -468,6 +478,7 @@ export class LogViewer extends LitElement {
         aria-label=${this.getAttribute('aria-label') ?? 'Log content'}
         @scroll=${this.onScroll}
         @keydown=${this.onKeyDown}
+        @pointerdown=${this.onPointerDown}
         @pointermove=${this.onPointerMove}
         @pointerleave=${this.onPointerLeave}
       >

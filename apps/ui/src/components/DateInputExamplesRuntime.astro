@@ -1,0 +1,45 @@
+---
+/**
+ * Resolves relative date bounds for date-input documentation examples. `data-min-days` / `data-max-days` are day
+ * offsets from today (`-2` is two days ago, `0` is today); the runtime writes them to `min` / `max` as local ISO dates
+ * and flags a typed date outside the range as an error on `change`.
+ */
+---
+
+<script>
+  import type { DateInput } from '@c2n/date-input'
+  import '@c2n/date-input'
+
+  const initialized = new WeakSet<DateInput>()
+
+  function isoDaysFromToday(offset: number) {
+    const date = new Date()
+    date.setDate(date.getDate() + offset)
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${date.getFullYear()}-${month}-${day}`
+  }
+
+  function setup(input: DateInput) {
+    if (initialized.has(input)) return
+    initialized.add(input)
+    const { minDays, maxDays } = input.dataset
+    if (minDays !== undefined) input.min = isoDaysFromToday(Number(minDays))
+    if (maxDays !== undefined) input.max = isoDaysFromToday(Number(maxDays))
+    input.addEventListener('change', async () => {
+      // Validity is synced in the element's update, after the redispatched event.
+      await input.updateComplete
+      input.error = !input.checkValidity()
+      input.errorText = input.validationMessage
+    })
+  }
+
+  function setupAll() {
+    document.querySelectorAll<DateInput>('c2-date-input[data-min-days], c2-date-input[data-max-days]').forEach(setup)
+  }
+
+  setupAll()
+  const observer = new MutationObserver(setupAll)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setupAll)
+</script>

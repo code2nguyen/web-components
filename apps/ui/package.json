@@ -123,6 +123,7 @@
     "mdast-util-mdx-jsx": "3.2.0",
     "micromark": "^4.0.2",
     "nanostores": "^1.5.3",
+    "parse5": "^7.3.0",
     "sass": "1.104.0",
     "unist-util-visit": "^5.1.0",
     "uplot": "^1.6.32"
