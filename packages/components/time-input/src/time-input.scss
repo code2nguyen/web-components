@@ -1,0 +1,358 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-time-input,
+  $theme: (
+    min-height: 36px,
+    gap: 8px,
+    padding: 6px 8px 6px 12px,
+    border: 1px solid #bcbcc6,
+    border-radius: 6px,
+    color: #18181b,
+    background: #ffffff,
+    font-size: 14px,
+    font-family: inherit,
+    line-height: 20px,
+    hover--border: 1px solid #a1a1aa,
+    focus--border: 1px solid #0265dc,
+    focus--outline: none,
+    focus--outline-offset: 0px,
+    error--border: 1px solid #dc2626,
+    error__focus--outline: none,
+    read-only--background: #fafafa,
+    disabled--opacity: variables.$disabled-content-opacity,
+    clock-icon--size: 18px,
+    clock-icon--color: #71717a,
+    clock-icon__hover--color: #18181b,
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
+    picker--background: #ffffff,
+    picker--border: 1px solid #e4e4e7,
+    picker--border-radius: 8px,
+    picker--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    picker--padding: 10px 6px 6px,
+    picker--color: #18181b,
+    picker-readout--font-size: 20px,
+    picker-readout--font-weight: 600,
+    picker-readout--color: #18181b,
+    picker-readout__empty--color: #a1a1aa,
+    picker-readout-period--color: #71717a,
+    picker-column--width: 38px,
+    picker-column--visible-rows: 5,
+    picker-option--height: 28px,
+    picker-option--font-size: 13px,
+    picker-option--color: #71717a,
+    picker-option__hover--color: #18181b,
+    picker-option__selected--color: #0265dc,
+    picker-option__selected--font-weight: 600,
+    picker-option__selected--scale: 1.15,
+    picker-option__disabled--opacity: variables.$disabled-content-opacity,
+    picker-separator--color: #d4d4d8,
+    picker-divider--border: 1px solid #e4e4e7,
+    picker-action--font-size: 12px,
+    picker-action--font-weight: 600,
+    picker-action--color: #71717a,
+    picker-action__hover--color: #18181b,
+    picker-action-primary--color: #0265dc,
+    picker-action-primary__hover--color: #0154b8,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(supporting-text--gap);
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  cursor: text;
+  outline: css.cssVar(focus--outline);
+  outline-color: transparent;
+  outline-offset: css.cssVar(focus--outline-offset);
+  transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
+
+  &:hover {
+    border: css.cssVar(hover--border);
+  }
+
+  &.focused {
+    border: css.cssVar(focus--border);
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &.error {
+    border: css.cssVar(error--border);
+
+    &.focused {
+      outline: css.cssVar(error__focus--outline);
+    }
+  }
+
+  &.read-only {
+    cursor: default;
+    background: css.cssVar(read-only--background);
+  }
+
+  &.disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+    pointer-events: none;
+  }
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: inherit;
+
+  &::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+}
+
+.clock-button {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: css.cssVar(clock-icon--size);
+  height: css.cssVar(clock-icon--size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: css.cssVar(clock-icon--color);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    color: css.cssVar(clock-icon__hover--color);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.clock-button svg,
+::slotted([slot='clock-icon']) {
+  width: css.cssVar(clock-icon--size);
+  height: css.cssVar(clock-icon--size);
+}
+
+.supporting-text {
+  color: css.cssVar(supporting-text--color);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+
+  &.error {
+    color: css.cssVar(supporting-text__error--color);
+  }
+}
+
+// ---- picker ---------------------------------------------------------------------------------------------------------
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: css.cssVar(picker--padding);
+  border: css.cssVar(picker--border);
+  border-radius: css.cssVar(picker--border-radius);
+  color: css.cssVar(picker--color);
+  background: css.cssVar(picker--background);
+  box-shadow: css.cssVar(picker--box-shadow);
+  font-family: css.cssVar(font-family);
+  font-variant-numeric: tabular-nums;
+}
+
+.readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  padding: 0 6px 8px;
+  border-bottom: css.cssVar(picker-divider--border);
+  color: css.cssVar(picker-readout--color);
+  font-size: css.cssVar(picker-readout--font-size);
+  font-weight: css.cssVar(picker-readout--font-weight);
+  line-height: 1;
+  letter-spacing: -0.02em;
+
+  &.empty {
+    color: css.cssVar(picker-readout__empty--color);
+  }
+
+  .colon {
+    margin: 0 0.06em;
+    color: css.cssVar(picker-separator--color);
+    animation: colon-pulse 2s ease-in-out infinite;
+  }
+
+  .period {
+    margin-left: 5px;
+    color: css.cssVar(picker-readout-period--color);
+    font-size: 0.55em;
+    letter-spacing: 0.06em;
+  }
+}
+
+@keyframes colon-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.columns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 4px 2px;
+}
+
+.column {
+  box-sizing: border-box;
+  width: css.cssVar(picker-column--width);
+  height: calc(css.cssVar(picker-option--height) * css.cssVar(picker-column--visible-rows));
+  // Half a column of padding on each end lets the first and last value reach the centre line.
+  padding-block: calc(css.cssVar(picker-option--height) * (css.cssVar(picker-column--visible-rows) - 1) / 2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  outline: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 38%, #000 62%, transparent);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &.period {
+    width: auto;
+    min-width: 36px;
+    margin-left: 2px;
+  }
+}
+
+.option {
+  display: grid;
+  place-items: center;
+  height: css.cssVar(picker-option--height);
+  padding-inline: 4px;
+  color: css.cssVar(picker-option--color);
+  font-size: css.cssVar(picker-option--font-size);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  scroll-snap-align: center;
+  transition: animation.standard(color), animation.standard(transform);
+
+  &:hover {
+    color: css.cssVar(picker-option__hover--color);
+  }
+
+  &[aria-selected='true'] {
+    color: css.cssVar(picker-option__selected--color);
+    font-weight: css.cssVar(picker-option__selected--font-weight);
+    transform: scale(css.cssVar(picker-option__selected--scale));
+  }
+
+  &[aria-disabled='true'] {
+    color: css.cssVar(picker-option--color);
+    opacity: css.cssVar(picker-option__disabled--opacity);
+    cursor: default;
+  }
+}
+
+// Keyboard focus is marked on the value itself, not with a ring around the column.
+.column:focus-visible .option[aria-selected='true'] {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.separator {
+  color: css.cssVar(picker-separator--color);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 6px 0;
+  border-top: css.cssVar(picker-divider--border);
+}
+
+.action {
+  margin: 0;
+  padding: 4px 2px;
+  border: 0;
+  outline: none;
+  color: css.cssVar(picker-action--color);
+  background: none;
+  font-family: inherit;
+  font-size: css.cssVar(picker-action--font-size);
+  font-weight: css.cssVar(picker-action--font-weight);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: animation.standard(color);
+
+  &:hover {
+    color: css.cssVar(picker-action__hover--color);
+  }
+
+  &:focus-visible {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
+  &.primary {
+    color: css.cssVar(picker-action-primary--color);
+
+    &:hover {
+      color: css.cssVar(picker-action-primary__hover--color);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .readout .colon {
+    animation: none;
+  }
+
+  .option {
+    transition: none;
+  }
+}

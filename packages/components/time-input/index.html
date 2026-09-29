@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Time Input</title>
+    <script type="module" src="/src/time-input.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <c2-time-input aria-label="Start time"></c2-time-input>
+      <c2-time-input aria-label="Meeting time" value="09:30" min="09:00" max="17:00" step="900" help="Office hours, 15-minute slots."></c2-time-input>
+      <c2-time-input aria-label="Precise time" value="14:05:30" step="1"></c2-time-input>
+      <c2-time-input aria-label="Invalid time" value="23:15" error error-text="The venue closes at 22:00."></c2-time-input>
+      <c2-time-input aria-label="Read-only time" value="08:00" readonly></c2-time-input>
+      <c2-time-input aria-label="Disabled time" value="08:00" disabled></c2-time-input>
+    </main>
+  </body>
+</html>

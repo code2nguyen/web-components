@@ -20,6 +20,15 @@ export interface OpenedChangeEventDetail {
 const BREAKPOINT_QUERIES = [Breakpoints.Phone, Breakpoints.Tablet, Breakpoints.Desktop]
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
+// Whether the last user input was a key press rather than a pointer. WebKit shows `:focus-visible` on any scripted
+// focus, so moving focus to the first drawer link after a tap drew a keyboard ring on it; a pointer opening focuses the
+// drawer panel instead, which still traps focus and puts Tab on the first link.
+let keyboardModality = false
+if (!isServer) {
+  document.addEventListener('keydown', (event) => (keyboardModality = !event.metaKey && !event.altKey && !event.ctrlKey), true)
+  document.addEventListener('pointerdown', () => (keyboardModality = false), true)
+}
+
 /** Events fired by {@link SideNav}, keyed for `addEventListener`. */
 export interface SideNavEventMap {
   'opened-change': CustomEvent<OpenedChangeEventDetail>
@@ -247,6 +256,10 @@ export class SideNav extends LitElement {
   }
 
   private focusDrawer() {
+    if (!keyboardModality) {
+      this.drawer.focus({ preventScroll: true })
+      return
+    }
     const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="side-nav-content"]')
     for (const element of slot?.assignedElements({ flatten: true }) ?? []) {
       const target = element.matches(FOCUSABLE) ? element : element.querySelector(FOCUSABLE)

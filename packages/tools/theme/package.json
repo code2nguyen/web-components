@@ -55,6 +55,12 @@
       "dependencies": [
         "type-check",
         "../../components/shortcut:build",
+        "../../components/carousel:build",
+        "../../components/tag-input:build",
+        "../../components/timeline:build",
+        "../../components/split-panel:build",
+        "../../components/banner:build",
+        "../../components/time-input:build",
         "../../components/log-viewer:build",
         "../../components/masonry:build",
         "../../components/dashboard:build",

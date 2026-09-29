@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-carousel</title>
+    <script type="module" src="/src/carousel.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 40px;
+        max-width: 720px;
+      }
+      .slide {
+        display: grid;
+        place-items: center;
+        height: 220px;
+        border-radius: 8px;
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 600;
+      }
+      .slide:nth-child(5n + 1) {
+        background: #0265dc;
+      }
+      .slide:nth-child(5n + 2) {
+        background: #7c3aed;
+      }
+      .slide:nth-child(5n + 3) {
+        background: #db2777;
+      }
+      .slide:nth-child(5n + 4) {
+        background: #ea580c;
+      }
+      .slide:nth-child(5n + 5) {
+        background: #16a34a;
+      }
+      .multi {
+        --c2-carousel__slide--width: calc((100% - 32px) / 3);
+      }
+      .peek {
+        --c2-carousel__slide--width: 85%;
+        --c2-carousel--gap: 12px;
+      }
+      .minimal {
+        --c2-carousel__indicators--display: none;
+        --c2-carousel__control--background-color: rgba(24, 24, 27, 0.6);
+        --c2-carousel__control--color: #ffffff;
+        --c2-carousel__control--border: 1px solid transparent;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Default</h2>
+    <c2-carousel label="Featured">
+      <div class="slide">1</div>
+      <div class="slide">2</div>
+      <div class="slide">3</div>
+      <div class="slide">4</div>
+      <div class="slide">5</div>
+    </c2-carousel>
+
+    <h2>Loop + autoplay</h2>
+    <c2-carousel label="Highlights" loop autoplay interval="3000">
+      <div class="slide">1</div>
+      <div class="slide">2</div>
+      <div class="slide">3</div>
+    </c2-carousel>
+
+    <h2>Three per view</h2>
+    <c2-carousel class="multi" label="Products">
+      <div class="slide">1</div>
+      <div class="slide">2</div>
+      <div class="slide">3</div>
+      <div class="slide">4</div>
+      <div class="slide">5</div>
+      <div class="slide">6</div>
+      <div class="slide">7</div>
+    </c2-carousel>
+
+    <h2>Peek</h2>
+    <c2-carousel class="peek" label="Stories">
+      <div class="slide">1</div>
+      <div class="slide">2</div>
+      <div class="slide">3</div>
+      <div class="slide">4</div>
+    </c2-carousel>
+
+    <h2>Minimal, no indicators</h2>
+    <c2-carousel class="minimal" label="Gallery" loop>
+      <div class="slide">1</div>
+      <div class="slide">2</div>
+      <div class="slide">3</div>
+    </c2-carousel>
+
+    <h2>RTL</h2>
+    <c2-carousel dir="rtl" label="معرض">
+      <div class="slide">1</div>
+      <div class="slide">2</div>
+      <div class="slide">3</div>
+    </c2-carousel>
+  </body>
+</html>

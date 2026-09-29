@@ -6,10 +6,13 @@ category: 'Inputs'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import DateInputExamplesRuntime from '../../components/DateInputExamplesRuntime.astro'
 
 import { DateInput } from '@c2n/date-input'
 
 `c2-date-input` wraps the browser's native date control in a consistent, themeable field. Its `value`, `min` and `max` are local-calendar ISO dates (`YYYY-MM-DD`), while form submission, reset, required validation, keyboard editing and the platform date picker remain native.
+
+<DateInputExamplesRuntime />
 
 ## Installation
 
@@ -43,3 +46,51 @@ npm install @c2n/date-input
 ```
 
 Listen for `input` while the value changes and `change` when it is committed. Call `showPicker()` from a user gesture to open the platform picker programmatically; `valueAsDate` exposes the selected value as a `Date`.
+
+## Limiting the date range
+
+`min` and `max` are inclusive bounds. The platform picker greys out every date outside them, and a date typed outside the range makes the field invalid (`validity.rangeUnderflow` / `rangeOverflow`), which blocks form submission. For a range relative to today, compute the bounds when the page loads — the examples below do so from `data-min-days` / `data-max-days` offsets:
+
+```html tag=UsageBlock,package=@c2n/date-input
+<style>
+  .date-width {
+    width: 220px;
+  }
+</style>
+<div data-label="From two days ago (d-2 onwards)">
+  <c2-date-input class="date-width" aria-label="Service date" data-min-days="-2" help="Two days ago or later."></c2-date-input>
+</div>
+<div data-label="Past dates only (up to d-1)">
+  <c2-date-input class="date-width" aria-label="Date of birth" data-max-days="-1" help="Yesterday or earlier."></c2-date-input>
+</div>
+<div data-label="Rolling window (d-7 to today)">
+  <c2-date-input class="date-width" aria-label="Report date" data-min-days="-7" data-max-days="0" help="Within the last 7 days."></c2-date-input>
+</div>
+```
+
+The bounds are local-calendar `YYYY-MM-DD` strings, so build them from the local date parts rather than `toISOString()`, which is UTC and can land on the wrong day:
+
+```ts tag=CodeBlock
+import type { DateInput } from '@c2n/date-input'
+
+function isoDaysFromToday(offset: number) {
+  const date = new Date()
+  date.setDate(date.getDate() + offset)
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+
+const serviceDate = document.querySelector<DateInput>('#service-date')!
+serviceDate.min = isoDaysFromToday(-2) // d-2 and later
+
+const birthDate = document.querySelector<DateInput>('#birth-date')!
+birthDate.max = isoDaysFromToday(-1) // d-1 and earlier: past dates only
+
+// Surface a typed out-of-range date as an error message.
+serviceDate.addEventListener('change', async () => {
+  await serviceDate.updateComplete
+  serviceDate.error = !serviceDate.checkValidity()
+  serviceDate.errorText = serviceDate.validationMessage
+})
+```

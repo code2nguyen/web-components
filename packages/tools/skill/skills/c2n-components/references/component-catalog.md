@@ -42,11 +42,13 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Stat** — `c2-stat` · `@c2n/stat` — Displays a KPI with an optional icon, trend and supporting description.
 - **Steps** — `c2-steps, c2-step` · `@c2n/steps` — A vertical trace of a task as it runs: statuses, durations, and stages that open while they work and close when they are done.
 - **Table** — `c2-table, c2-table-column` · `@c2n/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing.
+- **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
 
 ## Feedback
 
+- **Banner** — `c2-banner` · `@c2n/banner` — A persistent, full-width message in the page flow for system notices, outages and account status.
 - **Modal** — `c2-modal` · `@c2n/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
 - **Overlay** — `c2-overlay` · `@c2n/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
 - **Progress** — `c2-progress` · `@c2n/progress` — Linear progress bar, indeterminate or filling to a value, with an optional label and count.
@@ -83,9 +85,11 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Shortcut** — `c2-shortcut` · `@c2n/shortcut` — Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.
 - **Slider** — `c2-slider` · `@c2n/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
 - **Switch** — `c2-switch` · `@c2n/switch` — On/off toggle on a native switch input, with label, description and thumb icons.
+- **Tag Input** — `c2-tag-input` · `@c2n/tag-input` — Turns typed or pasted text into removable tags — recipients, keywords, labels — with configurable delimiters, parsing and validation.
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
 - **Textarea** — `c2-textarea` · `@c2n/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
 - **Theme Select** — `c2-theme-select` · `@c2n/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
+- **Time Input** — `c2-time-input` · `@c2n/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
 - **Upload** — `c2-upload` · `@c2n/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 
 ## Layout
@@ -93,12 +97,14 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Accordion** — `c2-accordion` · `@c2n/accordion` — Connected, animated panels with shared borders and single or multiple expansion.
 - **Border Beam** — `c2-border-beam` · `@c2n/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/card` — Groups related content and actions on a single bordered surface.
+- **Carousel** — `c2-carousel` · `@c2n/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.
 - **Chatbot** — `c2-chatbot` · `@c2n/chatbot` — Chatbot component for c2n applications.
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/dashboard` — Grid of resizable panes, dragged by the edges they share.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.
 - **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode.
 - **Seperator** — `c2-seperator` · `@c2n/seperator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
+- **Split Panel** — `c2-split-panel` · `@c2n/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 
 ## Navigation
 

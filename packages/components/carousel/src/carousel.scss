@@ -1,0 +1,308 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-carousel,
+  $theme: (
+    gap: 16px,
+    slide--width: 100%,
+    track--border-radius: 8px,
+    track__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    track__focus--outline-offset: 2px,
+
+    control--display: inline-flex,
+    control--opacity: 1,
+    control__opposite--opacity: 1,
+    control__zone--width: 20%,
+    control--transition-duration: 240ms,
+    control__hidden--translate: 8px,
+    control--size: 36px,
+    control--inset: 12px,
+    control--color: #18181b,
+    control--background-color: #ffffff,
+    control--border: 1px solid #e4e4e7,
+    control--border-radius: 999px,
+    control--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    control__hover--background-color: #f4f4f5,
+    control__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    control__focus--outline-offset: 2px,
+    control__disabled--opacity: 0.38,
+    icon--size: 16px,
+    rotation--color: #71717a,
+    rotation__hover--color: #18181b,
+
+    indicators--display: flex,
+    indicators--gap: 4px,
+    indicators--margin-top: 8px,
+    indicators--justify-content: center,
+    indicator--width: 8px,
+    indicator--height: 8px,
+    indicator--border-radius: 999px,
+    indicator--background-color: #a1a1aa,
+    indicator__hover--background-color: #71717a,
+    indicator__selected--width: 24px,
+    indicator__selected--background-color: rgb(2, 101, 220),
+    indicator__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    indicator--transition-duration: 200ms,
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host([mouse-drag]:not([mouse-drag='false'])) .c2-carousel-track {
+  cursor: grab;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-carousel {
+  position: relative;
+  min-width: 0;
+}
+
+.c2-carousel-viewport {
+  position: relative;
+}
+
+// The track is a native scroll container: touch, trackpad and keyboard scrolling all work, and snapping keeps a
+// slide aligned to its start edge. The scrollbar is hidden because the controls and indicators replace it.
+.c2-carousel-track {
+  display: flex;
+  gap: css.cssVar(gap);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: css.cssVar(track--border-radius);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // While a mouse drags the track, and until the scroll that follows it lands, snapping would fight the pointer.
+  &.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+    user-select: none;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(track__focus--outline);
+    outline-offset: css.cssVar(track__focus--outline-offset);
+  }
+}
+
+::slotted(*) {
+  flex: 0 0 css.cssVar(slide--width);
+  box-sizing: border-box;
+  min-width: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.c2-carousel-control,
+.c2-carousel-rotation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(control--size);
+  height: css.cssVar(control--size);
+  margin: 0;
+  padding: 0;
+  color: css.cssVar(control--color);
+  background-color: css.cssVar(control--background-color);
+  border: css.cssVar(control--border);
+  border-radius: css.cssVar(control--border-radius);
+  cursor: pointer;
+  transition: background-color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background-color: css.cssVar(control__hover--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(control__focus--outline);
+    outline-offset: css.cssVar(control__focus--outline-offset);
+  }
+
+  &:disabled {
+    opacity: css.cssVar(control__disabled--opacity);
+    cursor: default;
+  }
+}
+
+.c2-carousel-control {
+  // How shown a control is, 0 to 1. The state rules below set it; opacity follows it, and so does a short slide in from
+  // the control's own edge, so the reveal reads as the button arriving rather than blinking on.
+  --_shown: 1;
+  --_edge: -1;
+
+  display: css.cssVar(control--display);
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  box-shadow: css.cssVar(control--box-shadow);
+  opacity: var(--_shown);
+  transform: translateY(-50%);
+  translate: calc(#{css.cssVar(control__hidden--translate)} * (1 - var(--_shown)) * var(--_edge)) 0;
+  transition:
+    background-color 150ms ease,
+    opacity css.cssVar(control--transition-duration) cubic-bezier(0.2, 0, 0, 1),
+    translate css.cssVar(control--transition-duration) cubic-bezier(0.2, 0, 0, 1);
+
+  &:disabled {
+    opacity: calc(var(--_shown) * #{css.cssVar(control__disabled--opacity)});
+  }
+}
+
+.c2-carousel-next {
+  --_edge: 1;
+}
+
+:host(:dir(rtl)) .c2-carousel-previous {
+  --_edge: 1;
+}
+
+:host(:dir(rtl)) .c2-carousel-next {
+  --_edge: -1;
+}
+
+// At rest the controls take the configured opacity; hover or focus anywhere in the carousel brings them back. A device
+// that cannot hover always shows them, since nothing would ever reveal them there.
+@media (hover: hover) {
+  :host(:not(:hover):not(:focus-within)) .c2-carousel-control {
+    --_shown: #{css.cssVar(control--opacity)};
+  }
+
+  // While hovering, a control whose edge zone the pointer is not in takes its own opacity; a focused one stays shown.
+  :host(:hover) .pointer-start .c2-carousel-next:not(:focus-visible),
+  :host(:hover) .pointer-end .c2-carousel-previous:not(:focus-visible),
+  :host(:hover) .pointer-middle .c2-carousel-control:not(:focus-visible) {
+    --_shown: #{css.cssVar(control__opposite--opacity)};
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-carousel-control {
+    translate: none;
+    transition: none;
+  }
+}
+
+// Never painted: its width is the edge zone that reveals a control, resolved by the browser and read on pointer moves.
+// It is at least as wide as the control and its inset, or a narrow carousel would hide the button under the pointer.
+.c2-carousel-zone {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: max(#{css.cssVar(control__zone--width)}, calc(#{css.cssVar(control--inset)} + #{css.cssVar(control--size)}));
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.c2-carousel-previous {
+  inset-inline-start: css.cssVar(control--inset);
+}
+
+.c2-carousel-next {
+  inset-inline-end: css.cssVar(control--inset);
+}
+
+// The rotation control sits in the indicator row: a bare 24px icon target rather than a floating button.
+.c2-carousel-rotation {
+  width: 24px;
+  height: 24px;
+  color: css.cssVar(rotation--color);
+  background-color: transparent;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    color: css.cssVar(rotation__hover--color);
+    background-color: transparent;
+  }
+}
+
+.c2-carousel-icon {
+  display: inline-flex;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.c2-carousel-rotation .c2-carousel-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.c2-carousel-indicators {
+  display: css.cssVar(indicators--display);
+  align-items: center;
+  justify-content: css.cssVar(indicators--justify-content);
+  gap: css.cssVar(indicators--gap);
+  margin-top: css.cssVar(indicators--margin-top);
+}
+
+.c2-carousel-indicator-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: inherit;
+  gap: css.cssVar(indicators--gap);
+}
+
+// The button is a 24px target (WCAG 2.5.8); the visible dot is its ::before.
+.c2-carousel-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0 4px;
+  background: none;
+  border: 0;
+  border-radius: css.cssVar(indicator--border-radius);
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    display: block;
+    width: css.cssVar(indicator--width);
+    height: css.cssVar(indicator--height);
+    background-color: css.cssVar(indicator--background-color);
+    border-radius: css.cssVar(indicator--border-radius);
+    transition-property: width, background-color;
+    transition-duration: css.cssVar(indicator--transition-duration);
+    transition-timing-function: ease;
+  }
+
+  &:hover::before {
+    background-color: css.cssVar(indicator__hover--background-color);
+  }
+
+  &[aria-current='true']::before {
+    width: css.cssVar(indicator__selected--width);
+    background-color: css.cssVar(indicator__selected--background-color);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(indicator__focus--outline);
+    outline-offset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-carousel-indicator::before {
+    transition: none;
+  }
+}

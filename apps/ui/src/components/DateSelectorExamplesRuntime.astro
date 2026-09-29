@@ -1,0 +1,38 @@
+---
+/**
+ * Resolves relative date bounds for date-selector documentation examples. `data-min-days` / `data-max-days` are day
+ * offsets from today (`-2` is two days ago, `0` is today); the runtime writes them to `min` / `max` as local ISO dates.
+ */
+---
+
+<script>
+  import type { DateSelector } from '@c2n/date-selector'
+  import '@c2n/date-selector'
+
+  const initialized = new WeakSet<DateSelector>()
+
+  function isoDaysFromToday(offset: number) {
+    const date = new Date()
+    date.setDate(date.getDate() + offset)
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${date.getFullYear()}-${month}-${day}`
+  }
+
+  function setup(selector: DateSelector) {
+    if (initialized.has(selector)) return
+    initialized.add(selector)
+    const { minDays, maxDays } = selector.dataset
+    if (minDays !== undefined) selector.min = isoDaysFromToday(Number(minDays))
+    if (maxDays !== undefined) selector.max = isoDaysFromToday(Number(maxDays))
+  }
+
+  function setupAll() {
+    document.querySelectorAll<DateSelector>('c2-date-selector[data-min-days], c2-date-selector[data-max-days]').forEach(setup)
+  }
+
+  setupAll()
+  const observer = new MutationObserver(setupAll)
+  observer.observe(document.documentElement, { childList: true, subtree: true })
+  document.addEventListener('astro:page-load', setupAll)
+</script>
