@@ -8,11 +8,14 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Radio, RadioEventMap } from '@c2n/radio/radio.js'
-import type { RadioGroup, RadioGroupEventMap } from '@c2n/radio/radio-group.js'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Radio } from '@c2n/radio/radio.js'
+import type { RadioGroup } from '@c2n/radio/radio-group.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -20,13 +23,13 @@ declare module 'vue' {
       C2Props<Radio> & {
         'aria-label'?: unknown
         'aria-describedby'?: unknown
-        onChange?: (event: RadioEventMap['change']) => void
+        onChange?: (event: EventOf<Radio, 'change'>) => void
       }
     >
     'c2-radio-group': DefineComponent<
       C2Props<RadioGroup> & {
         'aria-label'?: unknown
-        onChange?: (event: RadioGroupEventMap['change']) => void
+        onChange?: (event: EventOf<RadioGroup, 'change'>) => void
       }
     >
   }

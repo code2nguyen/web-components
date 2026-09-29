@@ -574,7 +574,9 @@ test('mobile-breakpoint switches the layout with the viewport', async ({ page, r
   await renderScenario(modes('mobile-breakpoint="800"'))
   const host = page.locator('c2-navigation-menu')
 
-  await expect(host).toHaveAttribute('mode', 'bar')
+  // The default `bar` is not reflected until the mode has changed once, so the first check reads the property.
+  await expect(host).toHaveJSProperty('mode', 'bar')
+  await expect(host).not.toHaveAttribute('mode')
   await expect(page.getByRole('button', { name: 'Fixed Income Products' })).toBeVisible()
 
   await page.setViewportSize({ width: 600, height: 720 })

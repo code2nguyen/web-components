@@ -25,6 +25,13 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = resolve(packageRoot, '../../..')
 const uiRoot = join(repoRoot, 'apps/ui/src')
 const outFile = join(packageRoot, 'data/registry.json')
+/** `@c2n/components`: every component package behind one install, one entry per package (`@c2n/components/table`). */
+const UMBRELLA = '@c2n/components'
+const umbrellaPackages = new Set(
+  Object.keys(
+    (JSON.parse(readFileSync(join(repoRoot, 'packages/umbrella/package.json'), 'utf8')) as { dependencies?: Record<string, string> }).dependencies ?? {},
+  ),
+)
 const DOCS_BASE = 'https://code2nguyen.github.io/web-components'
 const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Feedback', 'Chat', 'Icons']
 const GUIDES: GuideTopic[] = ['workflow', 'theming', 'variant-components', 'frameworks']
@@ -446,6 +453,7 @@ for (const dir of packageDirs.sort()) {
         // A package whose elements are documented one page at a time is also imported one element at a time.
         import: tagPattern || docs.length > 1 ? `import '${docElements[0].modulePath}'` : `import '${pkg.name}'`,
         importClass: `import { ${docElements[0].className} } from '${docElements[0].modulePath}'`,
+        umbrella: umbrellaPackages.has(pkg.name) ? `${UMBRELLA}/${pkg.name.slice('@c2n/'.length)}` : undefined,
       },
       presets: presetGroup
         ? { html: presetGroup.html, items: presetGroup.presets.map((preset) => ({ ...preset, description: describeComponentPreset(preset) })) }

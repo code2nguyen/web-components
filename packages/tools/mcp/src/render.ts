@@ -1,6 +1,6 @@
 /** Compact markdown renderers for tool results. */
 import { groupCssProperties } from './lib/group-css.ts'
-import type { InstalledInfo } from './installed.ts'
+import { importPath, UMBRELLA, type InstalledInfo } from './installed.ts'
 import type { ComponentEntry, CssProperty, ElementEntry, Example, Registry, ThemeEntry } from './registry-types.ts'
 
 export const MAX_CHARS = 12_000
@@ -43,9 +43,15 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   out.push(`# ${component.title} (${primary.tag})`)
   out.push(component.description || component.intro || '')
   out.push('')
-  out.push(`- Package: \`${component.package}\` ${installed ? `(installed ${installed.version})` : `— not installed. \`${component.install.npm}\``}`)
+  const status = installed?.via
+    ? `(installed ${installed.version} through \`${UMBRELLA}\` ${installed.via.version}: import it from \`${component.install.umbrella ?? UMBRELLA}\`, not \`${component.package}\`)`
+    : installed
+      ? `(installed ${installed.version})`
+      : `— not installed. \`${component.install.npm}\`${component.install.umbrella ? `, or \`npm install ${UMBRELLA}\` for every component (then \`import '${component.install.umbrella}'\`)` : ''}`
+  out.push(`- Package: \`${component.package}\` ${status}`)
   out.push(`- Status: ${component.status} · Category: ${component.category} · Docs: ${component.docsUrl}`)
-  out.push(`- Register: \`import '${primary.modulePath}'\` · Class: \`import { ${primary.className} } from '${primary.modulePath}'\``)
+  const modulePath = importPath(primary.modulePath, component.package, installed)
+  out.push(`- Register: \`import '${modulePath}'\` · Class: \`import { ${primary.className} } from '${modulePath}'\``)
   if (component.composition.slotted.length)
     out.push(`- Children: put ${component.composition.slotted.map((t) => `\`${t}\``).join(', ')} inside it (see the Composition section and get_examples).`)
   if (component.tagPattern)
@@ -225,7 +231,7 @@ export function renderPresets(component: ComponentEntry, names?: string): string
   return out.join('\n')
 }
 
-export function renderTheme(theme: ThemeEntry, registry: Registry, component?: ComponentEntry): string {
+export function renderTheme(theme: ThemeEntry, registry: Registry, component?: ComponentEntry, umbrella?: InstalledInfo | null): string {
   const out: string[] = []
   if (component) {
     out.push(`# Theme mapping for ${component.title}`, '')
@@ -241,6 +247,11 @@ export function renderTheme(theme: ThemeEntry, registry: Registry, component?: C
   out.push(
     `\`${theme.install.npm}\` then \`${theme.install.imports[0]}\` once at the app root (or \`${theme.install.imports[2]}\` alone and bridge your own tokens).`,
   )
+  if (umbrella)
+    out.push(
+      '',
+      `This project has \`${UMBRELLA}\` ${umbrella.version}, which includes the theme: \`import '${UMBRELLA}/theme.css'\` (or \`${UMBRELLA}/base.css\`, \`${UMBRELLA}/tokens.css\`) is the same stylesheet.`,
+    )
   out.push('', `Dark mode: ${theme.darkMode}`, '')
   out.push('## Tokens', '')
   out.push(

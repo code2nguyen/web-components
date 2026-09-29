@@ -8,11 +8,14 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { TextField, TextFieldEventMap } from '@c2n/text-field'
-import type { TextFieldClear, TextFieldClearEventMap } from '@c2n/text-field/text-field-clear.js'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { TextField } from '@c2n/text-field'
+import type { TextFieldClear } from '@c2n/text-field/text-field-clear.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -23,9 +26,9 @@ declare module 'vue' {
         minlength?: unknown
         'aria-label'?: unknown
         'error-text'?: unknown
-        onInput?: (event: TextFieldEventMap['input']) => void
-        onChange?: (event: TextFieldEventMap['change']) => void
-        onClear?: (event: TextFieldEventMap['clear']) => void
+        onInput?: (event: EventOf<TextField, 'input'>) => void
+        onChange?: (event: EventOf<TextField, 'change'>) => void
+        onClear?: (event: EventOf<TextField, 'clear'>) => void
       }
     >
     'c2-text-field-clear': DefineComponent<
@@ -35,9 +38,9 @@ declare module 'vue' {
         minlength?: unknown
         'aria-label'?: unknown
         'error-text'?: unknown
-        onInput?: (event: TextFieldClearEventMap['input']) => void
-        onChange?: (event: TextFieldClearEventMap['change']) => void
-        onClear?: (event: TextFieldClearEventMap['clear']) => void
+        onInput?: (event: EventOf<TextFieldClear, 'input'>) => void
+        onChange?: (event: EventOf<TextFieldClear, 'change'>) => void
+        onClear?: (event: EventOf<TextFieldClear, 'clear'>) => void
       }
     >
   }

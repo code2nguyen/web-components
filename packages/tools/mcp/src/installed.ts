@@ -3,13 +3,17 @@
  * which is the project directory when an MCP client spawns the server) and reads their manifests so the API served
  * for an installed component matches the installed version.
  */
-import { readFileSync } from 'node:fs'
-import { createRequire } from 'node:module'
-import { join } from 'node:path'
+import { existsSync, readFileSync, realpathSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import type { ElementEntry } from './registry-types.ts'
+
+/** The one-install package: depends on every component package and re-exports each one as `@c2n/components/<name>`. */
+export const UMBRELLA = '@c2n/components'
 
 export interface InstalledInfo {
   version: string
+  /** Set when the project reaches the package through `@c2n/components`: import it from the umbrella's entry. */
+  via?: { package: typeof UMBRELLA; version: string }
   /** Elements from the installed `custom-elements.json`, keyed by tag, when the package ships one. */
   elements?: Map<string, Pick<ElementEntry, 'attributes' | 'slots' | 'events' | 'cssParts' | 'cssProperties'>>
 }
@@ -27,10 +31,16 @@ export function installedPackage(name: string): InstalledInfo | null {
   if (cache.packages.has(name)) return cache.packages.get(name) ?? null
   let info: InstalledInfo | null
   try {
-    const req = createRequire(join(root, 'noop.js'))
-    const pkgJsonPath = req.resolve(`${name}/package.json`)
+    // Only a project that declares the umbrella and not the package itself imports through the umbrella: this repo's
+    // workspaces resolve `@c2n/components` too, and their packages depend on `@c2n/<name>` directly.
+    const declared = declaredDependencies(root)
+    const umbrella = name !== UMBRELLA && declared.has(UMBRELLA) && !declared.has(name) ? umbrellaOf(root, name) : undefined
+    // Under a strict layout (pnpm) the umbrella's dependencies are not hoisted: resolve them from the umbrella itself.
+    const pkgJsonPath = findPackageJson(root, name) ?? (umbrella && findPackageJson(dirname(umbrella.path), name))
+    if (!pkgJsonPath) throw new Error(`${name} is not installed`)
     const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { version: string; customElements?: string }
     info = { version: pkg.version }
+    if (umbrella) info.via = { package: UMBRELLA, version: umbrella.version }
     if (pkg.customElements) {
       try {
         const manifest = JSON.parse(readFileSync(join(pkgJsonPath, '..', pkg.customElements), 'utf8')) as {
@@ -68,4 +78,52 @@ export function installedPackage(name: string): InstalledInfo | null {
   }
   cache.packages.set(name, info)
   return info
+}
+
+/** Every dependency the project's own `package.json` names. */
+function declaredDependencies(root: string): Set<string> {
+  try {
+    const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as Record<string, Record<string, string> | undefined>
+    return new Set(['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'].flatMap((key) => Object.keys(pkg[key] ?? {})))
+  } catch {
+    return new Set()
+  }
+}
+
+/**
+ * `node_modules/<name>/package.json` as Node's lookup finds it from `from`. Not `require.resolve`: the component
+ * packages do not export `./package.json`, so resolving it throws for every one of them.
+ */
+function findPackageJson(from: string, name: string): string | undefined {
+  for (let dir = from; ; dir = dirname(dir)) {
+    const candidate = join(dir, 'node_modules', name, 'package.json')
+    if (existsSync(candidate)) return candidate
+    if (dirname(dir) === dir) return undefined
+  }
+}
+
+/** The installed `@c2n/components`, when it lists `name` among its dependencies. */
+function umbrellaOf(root: string, name: string): { path: string; version: string } | undefined {
+  const path = findPackageJson(root, UMBRELLA)
+  if (!path) return undefined
+  try {
+    const pkg = JSON.parse(readFileSync(path, 'utf8')) as { version: string; dependencies?: Record<string, string> }
+    return pkg.dependencies?.[name] ? { path: realpathSync(path), version: pkg.version } : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * The module an agent should import `modulePath` (a module of `pkg`) from. A project that installed `@c2n/components`
+ * imports the umbrella's entry, which re-exports every module of the package, so a subpath such as
+ * `@c2n/table/table-column.js` maps to `@c2n/components/table` too.
+ */
+export function importPath(modulePath: string, pkg: string, installed: InstalledInfo | null): string {
+  return installed?.via && (modulePath === pkg || modulePath.startsWith(`${pkg}/`)) ? `${UMBRELLA}/${pkg.slice('@c2n/'.length)}` : modulePath
+}
+
+/** The project's `@c2n/components`, when its `package.json` declares it. */
+export function umbrellaInstalled(): InstalledInfo | null {
+  return declaredDependencies(projectRoot()).has(UMBRELLA) ? installedPackage(UMBRELLA) : null
 }
