@@ -100,6 +100,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode.
 - **Seperator** — `c2-seperator` · `@c2n/seperator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
+- **Split Panel** — `c2-split-panel` · `@c2n/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 
 ## Navigation
 

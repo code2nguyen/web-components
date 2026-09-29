@@ -4,6 +4,10 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'split-panel': `<c2-split-panel position="35" style="width:260px;height:130px;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;font-size:12px">
+  <div slot="start" style="padding:8px">Inbox</div>
+  <div slot="end" style="padding:8px;color:#71717a">Message</div>
+</c2-split-panel>`,
   banner: `<c2-banner variant="info" heading="New" message="Dashboards can be shared." dismissible style="width:300px"></c2-banner>`,
   'time-input': `<c2-time-input value="09:30" aria-label="Meeting time" style="width:160px"></c2-time-input>`,
   'log-viewer': `<c2-log-viewer data-log-viewer-demo="preview" wrap aria-label="Store server log" style="height:180px;width:300px"></c2-log-viewer>`,

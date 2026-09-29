@@ -1,0 +1,167 @@
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-split-panel,
+  $theme: (
+    divider--size: 1px,
+    divider--hit-area: 12px,
+    divider--opacity: 0,
+    divider__hover--opacity: 1,
+    divider--background: #e4e4e7,
+    divider__hover--background: #a1a1aa,
+    divider__active--background: rgb(2, 101, 220),
+    divider__focus--background: rgb(2, 101, 220),
+    divider__disabled--opacity: variables.$disabled-content-opacity,
+
+    handle--display: flex,
+    handle--width: 12px,
+    handle--height: 24px,
+    handle--background: #ffffff,
+    handle--border: 1px solid #e4e4e7,
+    handle--border-radius: 4px,
+    handle--color: #71717a,
+
+    panel--overflow: auto,
+    start--background: transparent,
+    end--background: transparent,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([orientation='vertical']) {
+  height: 100%;
+}
+
+.container {
+  --_divider: #{css.cssVar(divider--size)};
+  display: grid;
+  width: 100%;
+  height: 100%;
+}
+
+:host([orientation='vertical']) .container {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: css.cssVar(panel--overflow);
+}
+
+[part~='start'] {
+  background: css.cssVar(start--background);
+}
+
+[part~='end'] {
+  background: css.cssVar(end--background);
+}
+
+[part~='divider'] {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: css.cssVar(divider--background);
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+  opacity: css.cssVar(divider--opacity);
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease;
+}
+
+:host([orientation='vertical']) [part~='divider'] {
+  cursor: row-resize;
+}
+
+// Invisible grab area wider than the line itself.
+[part~='divider']::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline: calc((#{css.cssVar(divider--hit-area)} - 100%) / -2);
+}
+
+:host([orientation='vertical']) [part~='divider']::before {
+  inset-inline: 0;
+  inset-block: calc((#{css.cssVar(divider--hit-area)} - 100%) / -2);
+}
+
+:host(:not([disabled])) [part~='divider']:hover {
+  background: css.cssVar(divider__hover--background);
+}
+
+// The line and the grip stay hidden until the pointer finds the divider, and while it is dragged or keyboard-focused.
+:host(:not([disabled])) [part~='divider']:hover,
+:host([dragging]) [part~='divider'],
+[part~='divider']:focus-visible {
+  opacity: css.cssVar(divider__hover--opacity);
+}
+
+// Without a hovering pointer (touch) a hidden divider could not be found at all.
+@media (hover: none) {
+  [part~='divider'] {
+    opacity: css.cssVar(divider__hover--opacity);
+  }
+}
+
+:host([dragging]) [part~='divider'] {
+  background: css.cssVar(divider__active--background);
+}
+
+// Keyboard focus recolours the line instead of drawing a ring around it.
+[part~='divider']:focus-visible {
+  background: css.cssVar(divider__focus--background);
+}
+
+:host([disabled]) [part~='divider'] {
+  cursor: default;
+  opacity: calc(#{css.cssVar(divider__disabled--opacity)} * #{css.cssVar(divider--opacity)});
+}
+
+[part~='handle'] {
+  position: relative;
+  flex: none;
+  display: css.cssVar(handle--display);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: css.cssVar(handle--width);
+  height: css.cssVar(handle--height);
+  background: css.cssVar(handle--background);
+  border: css.cssVar(handle--border);
+  border-radius: css.cssVar(handle--border-radius);
+  color: css.cssVar(handle--color);
+  pointer-events: none;
+}
+
+:host([orientation='vertical']) [part~='handle'] {
+  width: css.cssVar(handle--height);
+  height: css.cssVar(handle--width);
+}
+
+[part~='handle'] svg {
+  width: 6px;
+  height: 14px;
+  fill: currentColor;
+}
+
+:host([orientation='vertical']) [part~='handle'] svg {
+  transform: rotate(90deg);
+}
+
+:host([dragging]) {
+  user-select: none;
+}

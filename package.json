@@ -89,6 +89,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/split-panel:build",
         "./packages/components/banner:build",
         "./packages/components/time-input:build",
         "./packages/components/log-viewer:build",
