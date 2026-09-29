@@ -860,3 +860,18 @@ test('clicking the selected row again clears it, in single and multiple selectio
   await page.keyboard.press(' ')
   await expect(multiple).toHaveJSProperty('value', ['2'])
 })
+
+test('a selected row paints its text with the selected colour, over a custom cell colour', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="single" value="2"'))
+  await page.locator('c2-table').evaluate((element) => {
+    const style = (element as HTMLElement).style
+    style.setProperty('--c2-table__cell--color', 'rgb(200, 200, 200)')
+    style.setProperty('--c2-table__row__selected--background', 'rgb(24, 24, 27)')
+    style.setProperty('--c2-table__row__selected--color', 'rgb(255, 255, 255)')
+  })
+  const colors = () =>
+    page
+      .locator('c2-table')
+      .evaluate((element) => [...element.shadowRoot!.querySelectorAll('.row--body')].map((row) => getComputedStyle(row.querySelector('.cell-content')!).color))
+  expect(await colors()).toEqual(['rgb(200, 200, 200)', 'rgb(255, 255, 255)', 'rgb(200, 200, 200)'])
+})

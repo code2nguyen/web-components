@@ -200,6 +200,12 @@
   color: css.cssVar(row__selected--color);
 }
 
+// Every cell sets its own colour from `cell--color`, so the row's colour alone never reached the text: a selected
+// row with a dark background kept dark text. The selected colour has to be applied on the cells themselves.
+:host .row--body.row--selected .cell {
+  color: css.cssVar(row__selected--color);
+}
+
 :host .row--selected.row--body:hover {
   background: css.cssVar(row__selected__hover--background);
 }
