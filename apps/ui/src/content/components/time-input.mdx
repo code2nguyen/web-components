@@ -1,0 +1,46 @@
+---
+title: 'Time Input'
+description: 'Form-associated time-of-day input with native picker, step and range constraints, helper text and error states.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TimeInput } from '@c2n/time-input'
+
+`c2-time-input` wraps the browser's native time control in a consistent, themeable field. Its `value`, `min` and `max` are 24-hour strings (`HH:mm`, or `HH:mm:ss` when `step` is below 60 seconds) whatever the display locale, while form submission, reset, required validation, keyboard editing and the platform time picker remain native. It shares its field styling with `c2-date-input`, so the two sit side by side.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/time-input
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/time-input
+<style>
+  .time-width {
+    width: 160px;
+  }
+</style>
+<div data-label="Default">
+  <c2-time-input class="time-width" aria-label="Start time"></c2-time-input>
+  <c2-time-input class="time-width" aria-label="Meeting time" value="09:30"></c2-time-input>
+</div>
+<div data-label="Constraints">
+  <c2-time-input class="time-width" aria-label="Office hours slot" value="10:15" min="09:00" max="17:00" step="900" required></c2-time-input>
+  <c2-time-input class="time-width" aria-label="Precise time" value="14:05:30" step="1"></c2-time-input>
+</div>
+<div data-label="Supporting text">
+  <c2-time-input class="time-width" aria-label="Pickup time" help="Between 09:00 and 18:00."></c2-time-input>
+  <c2-time-input class="time-width" aria-label="Pickup time with error" value="23:15" error error-text="The shop closes at 22:00."></c2-time-input>
+</div>
+<div data-label="States">
+  <c2-time-input class="time-width" aria-label="Read-only time" value="08:00" readonly></c2-time-input>
+  <c2-time-input class="time-width" aria-label="Disabled time" value="08:00" disabled></c2-time-input>
+</div>
+```
+
+Listen for `input` while the value changes and `change` when it is committed. `step` is in seconds (default `60`): `900` accepts quarter hours only, and anything below `60` adds a seconds segment. `min` and `max` are inclusive; when `min` is later than `max` the valid range wraps past midnight (`min="22:00" max="06:00"` for a night shift). `valueAsNumber` exposes the time as milliseconds since midnight, and `showPicker()` opens the platform picker from a user gesture where the engine has one.

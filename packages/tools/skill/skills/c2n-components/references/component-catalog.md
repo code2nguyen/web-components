@@ -85,6 +85,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
 - **Textarea** — `c2-textarea` · `@c2n/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
 - **Theme Select** — `c2-theme-select` · `@c2n/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
+- **Time Input** — `c2-time-input` · `@c2n/time-input` — Form-associated time-of-day input with native picker, step and range constraints, helper text and error states.
 - **Upload** — `c2-upload` · `@c2n/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 
 ## Layout
