@@ -92,6 +92,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Accordion** — `c2-accordion` · `@c2n/accordion` — Connected, animated panels with shared borders and single or multiple expansion.
 - **Border Beam** — `c2-border-beam` · `@c2n/border-beam` — A decorative beam that travels around the border of any positioned container.
 - **Card** — `c2-card` · `@c2n/card` — Groups related content and actions on a single bordered surface.
+- **Carousel** — `c2-carousel` · `@c2n/carousel` — A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.
 - **Chatbot** — `c2-chatbot` · `@c2n/chatbot` — Chatbot component for c2n applications.
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/dashboard` — Grid of resizable panes, dragged by the edges they share.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.

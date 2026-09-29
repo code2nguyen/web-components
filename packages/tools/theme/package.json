@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/carousel:build",
         "../../components/log-viewer:build",
         "../../components/masonry:build",
         "../../components/dashboard:build",

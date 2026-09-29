@@ -355,6 +355,36 @@
       "reason": "The semantic media region owns the media slot's component-side presentation."
     },
     {
+      "tag": "c2-carousel",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-carousel",
+      "slot": "next-icon",
+      "decision": "assigned-content",
+      "reason": "The next-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-carousel",
+      "slot": "pause-icon",
+      "decision": "assigned-content",
+      "reason": "The pause-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-carousel",
+      "slot": "play-icon",
+      "decision": "assigned-content",
+      "reason": "The play-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-carousel",
+      "slot": "previous-icon",
+      "decision": "assigned-content",
+      "reason": "The previous-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-cascader",
       "slot": "empty",
       "decision": "assigned-content",

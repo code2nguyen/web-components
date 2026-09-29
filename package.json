@@ -89,6 +89,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/carousel:build",
         "./packages/components/log-viewer:build",
         "./packages/components/masonry:build",
         "./packages/components/dashboard:build",

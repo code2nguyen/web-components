@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Carousel test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+      }
+      main {
+        display: grid;
+        gap: 16px;
+        width: 600px;
+      }
+      .slide {
+        display: grid;
+        place-items: center;
+        height: 160px;
+        background: #f4f4f5;
+        color: #18181b;
+      }
+      .multi {
+        --c2-carousel__slide--width: calc((100% - 32px) / 3);
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Carousel scenario"></main>
+  </body>
+</html>
