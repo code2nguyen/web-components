@@ -1697,6 +1697,18 @@
       "reason": "The tab-content slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-tag-input",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tag-input",
+      "slot": "remove-icon",
+      "decision": "assigned-content",
+      "reason": "The remove-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-text-field",
       "slot": "clear-icon",
       "decision": "assigned-content",

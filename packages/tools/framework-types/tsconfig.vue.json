@@ -22,6 +22,7 @@
         "c2-rate": true,
         "c2-select": true,
         "c2-slider": true,
+        "c2-tag-input": true,
         "c2-text-field": true,
         "c2-text-field-clear": true,
         "c2-textarea": true

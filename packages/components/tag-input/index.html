@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-tag-input</title>
+    <script type="module" src="/src/tag-input.ts"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        display: grid;
+        gap: 24px;
+        max-width: 480px;
+      }
+      h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      c2-tag-input {
+        width: 100%;
+      }
+      .pills {
+        --c2-tag-input__tag--border-radius: 999px;
+        --c2-tag-input__tag--border: 1px solid transparent;
+        --c2-tag-input__tag--background: #edf1fe;
+        --c2-tag-input__tag--color: #2f56e6;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Emails (comma, semicolon or space; invalid tags marked)</h2>
+      <c2-tag-input
+        aria-label="Recipients"
+        placeholder="Add recipients"
+        delimiters=",; "
+        pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+        add-on-blur
+        value="ann@example.com;bob@example.com"
+      ></c2-tag-input>
+    </section>
+    <section>
+      <h2>split-pattern, pills</h2>
+      <c2-tag-input class="pills" aria-label="Keywords" placeholder="red | green | blue" split-pattern="\s*\|\s*"></c2-tag-input>
+    </section>
+    <section>
+      <h2>parseTag: "Name &lt;address&gt;" → address, reject-invalid, max 4</h2>
+      <c2-tag-input id="parsed" aria-label="Guests" placeholder="Paste from your mail client" reject-invalid max="4"></c2-tag-input>
+    </section>
+    <section>
+      <h2>Read-only / disabled</h2>
+      <c2-tag-input aria-label="Read-only" readonly value="ann@example.com;bob@example.com"></c2-tag-input>
+      <br /><br />
+      <c2-tag-input aria-label="Disabled" disabled value="ann@example.com"></c2-tag-input>
+    </section>
+    <script type="module">
+      const parsed = document.querySelector('#parsed')
+      parsed.parseTag = (token) => (/<([^>]+)>/.exec(token)?.[1] ?? token).toLowerCase()
+      parsed.validator = (tag) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tag)
+    </script>
+  </body>
+</html>
