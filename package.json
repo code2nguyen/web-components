@@ -90,6 +90,11 @@
     "build": {
       "dependencies": [
         "./packages/components/carousel:build",
+        "./packages/components/tag-input:build",
+        "./packages/components/timeline:build",
+        "./packages/components/split-panel:build",
+        "./packages/components/banner:build",
+        "./packages/components/time-input:build",
         "./packages/components/log-viewer:build",
         "./packages/components/masonry:build",
         "./packages/components/dashboard:build",

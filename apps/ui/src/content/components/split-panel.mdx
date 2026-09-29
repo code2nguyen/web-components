@@ -1,0 +1,82 @@
+---
+title: 'Split Panel'
+description: 'Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { SplitPanel } from '@c2n/split-panel'
+
+`c2-split-panel` puts two panels side by side — an editor beside its preview, a list beside the record it opens, a sidebar the reader can widen — with a divider between them. The divider and its grip stay hidden until the pointer reaches them — or while dragged or keyboard-focused, when the line takes the accent colour instead of drawing a focus ring — and are always shown on touch screens; `--c2-split-panel__divider--opacity: 1` keeps them visible. Drag the divider with a mouse, touch or pen, or focus it and use the Arrow keys (1%, Shift for 10%), Home/End and Enter, which collapses the start panel and restores it. `position` is the start panel's share in percent, bounded by `min` and `max`; `orientation="vertical"` stacks the panels; `snap` lists positions a drag sticks to; and `primary` names the panel that keeps its pixel size when the host is resized. Content goes in the `start` and `end` slots, the `reposition` event reports every move, and a second split panel in a slot makes a three-way layout.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/split-panel
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/split-panel
+<style>
+  .sp {
+    width: 100%;
+    max-width: 520px;
+    height: 180px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .sp-pane {
+    padding: 12px;
+    font-size: 14px;
+  }
+  .sp-visible {
+    --c2-split-panel__divider--opacity: 1;
+  }
+  .sp-nested {
+    height: 100%;
+  }
+</style>
+<div data-label="Default">
+  <c2-split-panel class="sp">
+    <div slot="start" class="sp-pane">Start</div>
+    <div slot="end" class="sp-pane">End</div>
+  </c2-split-panel>
+</div>
+<div data-label="Always visible">
+  <c2-split-panel class="sp sp-visible">
+    <div slot="start" class="sp-pane">Start</div>
+    <div slot="end" class="sp-pane">End</div>
+  </c2-split-panel>
+</div>
+<div data-label="Vertical">
+  <c2-split-panel class="sp" orientation="vertical" position="40">
+    <div slot="start" class="sp-pane">Top</div>
+    <div slot="end" class="sp-pane">Bottom</div>
+  </c2-split-panel>
+</div>
+<div data-label="Sidebar">
+  <c2-split-panel class="sp" position="30" min="15" max="60" primary="start" snap="30">
+    <div slot="start" class="sp-pane">Keeps its width when the page resizes; snaps back to 30%</div>
+    <div slot="end" class="sp-pane">Content</div>
+  </c2-split-panel>
+</div>
+<div data-label="Nested">
+  <c2-split-panel class="sp" position="30">
+    <div slot="start" class="sp-pane">Files</div>
+    <c2-split-panel slot="end" class="sp-nested" orientation="vertical" position="65">
+      <div slot="start" class="sp-pane">Editor</div>
+      <div slot="end" class="sp-pane">Terminal</div>
+    </c2-split-panel>
+  </c2-split-panel>
+</div>
+<div data-label="Disabled">
+  <c2-split-panel class="sp" disabled>
+    <div slot="start" class="sp-pane">Locked</div>
+    <div slot="end" class="sp-pane">Layout</div>
+  </c2-split-panel>
+</div>
+```

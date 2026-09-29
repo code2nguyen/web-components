@@ -46,7 +46,7 @@
     focus--border-left: 1px solid #476ef9,
     focus--color: null,
     focus--background: null,
-    focus--outline: 3px solid rgba(71, 110, 249, 0.2),
+    focus--outline: none,
     focus--outline-offset: 0px,
 
     error--border-top: 1px solid #dc2626,
@@ -55,7 +55,7 @@
     error--border-left: 1px solid #dc2626,
     error--color: null,
     error--background: null,
-    error__focus--outline: 3px solid rgba(220, 38, 38, 0.2),
+    error__focus--outline: none,
     read-only--border-top: 1px solid #e4e4e7,
     read-only--border-bottom: 1px solid #e4e4e7,
     read-only--border-right: 1px solid #e4e4e7,
@@ -71,6 +71,7 @@
     clear-icon--size: 16px,
     clear-icon--color: #a1a1aa,
     clear-icon__hover--color: #18181b,
+    clear-icon__focus--outline: 2px solid rgba(71, 110, 249, 0.4),
 
     help-icon--size: 16px,
     help-icon--color: #71717a,
@@ -187,7 +188,7 @@
     border-left: css.cssVar(hover--border-left, border-left);
   }
 
-  // Focus: brand border plus a soft ring.
+  // Focus: accent border only (no ring, which would double the border).
   &.focus-within {
     border-top: css.cssVar(focus--border-top, border-top);
     border-bottom: css.cssVar(focus--border-bottom, border-bottom);
@@ -267,7 +268,7 @@
   }
 
   &:focus-visible {
-    outline: css.cssVar(focus--outline);
+    outline: css.cssVar(clear-icon__focus--outline);
     outline-offset: 2px;
     border-radius: 4px;
   }
