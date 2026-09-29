@@ -8,11 +8,14 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Table, TableEventMap } from '@c2n/table'
-import type { TableColumn, TableColumnEventMap } from '@c2n/table/table-column.js'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Table } from '@c2n/table'
+import type { TableColumn } from '@c2n/table/table-column.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -31,12 +34,12 @@ declare module 'vue' {
         'block-size'?: unknown
         'empty-message'?: unknown
         'page-size'?: unknown
-        onPageChange?: (event: TableEventMap['page-change']) => void
-        onSortChange?: (event: TableEventMap['sort-change']) => void
-        onRowClick?: (event: TableEventMap['row-click']) => void
-        onCellClick?: (event: TableEventMap['cell-click']) => void
-        onSelectionChange?: (event: TableEventMap['selection-change']) => void
-        onColumnResize?: (event: TableEventMap['column-resize']) => void
+        onPageChange?: (event: EventOf<Table, 'page-change'>) => void
+        onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
+        onRowClick?: (event: EventOf<Table, 'row-click'>) => void
+        onCellClick?: (event: EventOf<Table, 'cell-click'>) => void
+        onSelectionChange?: (event: EventOf<Table, 'selection-change'>) => void
+        onColumnResize?: (event: EventOf<Table, 'column-resize'>) => void
       }
     >
     'c2-table-column': DefineComponent<
@@ -45,7 +48,6 @@ declare module 'vue' {
         'format-options'?: unknown
         'cell-class'?: unknown
         'cell-slot'?: unknown
-        onCOLUMN_CHANGE_EVENT?: (event: TableColumnEventMap['COLUMN_CHANGE_EVENT']) => void
       }
     >
   }

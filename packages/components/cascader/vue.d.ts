@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Cascader, CascaderEventMap } from '@c2n/cascader'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Cascader } from '@c2n/cascader'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -20,10 +23,10 @@ declare module 'vue' {
         'aria-label'?: unknown
         'change-on-select'?: unknown
         'expand-trigger'?: unknown
-        onOpenChange?: (event: CascaderEventMap['open-change']) => void
-        onCascaderChange?: (event: CascaderEventMap['cascader-change']) => void
-        onInput?: (event: CascaderEventMap['input']) => void
-        onChange?: (event: CascaderEventMap['change']) => void
+        onOpenChange?: (event: EventOf<Cascader, 'open-change'>) => void
+        onCascaderChange?: (event: EventOf<Cascader, 'cascader-change'>) => void
+        onInput?: (event: EventOf<Cascader, 'input'>) => void
+        onChange?: (event: EventOf<Cascader, 'change'>) => void
       }
     >
   }

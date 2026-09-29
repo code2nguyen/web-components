@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Upload, UploadEventMap } from '@c2n/upload'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Upload } from '@c2n/upload'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -21,15 +24,15 @@ declare module 'vue' {
         'max-size'?: unknown
         'auto-upload'?: unknown
         'aria-label'?: unknown
-        onInput?: (event: UploadEventMap['input']) => void
-        onChange?: (event: UploadEventMap['change']) => void
-        onFilesSelected?: (event: UploadEventMap['files-selected']) => void
-        onFileReject?: (event: UploadEventMap['file-reject']) => void
-        onUploadStart?: (event: UploadEventMap['upload-start']) => void
-        onUploadProgress?: (event: UploadEventMap['upload-progress']) => void
-        onUploadSuccess?: (event: UploadEventMap['upload-success']) => void
-        onUploadError?: (event: UploadEventMap['upload-error']) => void
-        onUploadRemove?: (event: UploadEventMap['upload-remove']) => void
+        onInput?: (event: EventOf<Upload, 'input'>) => void
+        onChange?: (event: EventOf<Upload, 'change'>) => void
+        onFilesSelected?: (event: EventOf<Upload, 'files-selected'>) => void
+        onFileReject?: (event: EventOf<Upload, 'file-reject'>) => void
+        onUploadStart?: (event: EventOf<Upload, 'upload-start'>) => void
+        onUploadProgress?: (event: EventOf<Upload, 'upload-progress'>) => void
+        onUploadSuccess?: (event: EventOf<Upload, 'upload-success'>) => void
+        onUploadError?: (event: EventOf<Upload, 'upload-error'>) => void
+        onUploadRemove?: (event: EventOf<Upload, 'upload-remove'>) => void
       }
     >
   }

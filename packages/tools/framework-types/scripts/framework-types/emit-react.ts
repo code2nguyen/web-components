@@ -96,17 +96,15 @@ export function emitVue(pkg: DiscoveredPackage): string {
   const imports = new Map<string, Set<string>>()
   for (const element of pkg.elements) {
     if (!imports.has(element.module)) imports.set(element.module, new Set())
-    const names = imports.get(element.module)!
-    names.add(element.className)
-    // The event map, not each detail interface: it lives in the same module as the class, so it always imports.
-    if (element.events.length > 0) names.add(`${element.className}EventMap`)
+    imports.get(element.module)!.add(element.className)
   }
+  const needsEvents = pkg.elements.some((element) => element.events.length > 0)
 
   const entry = (element: CustomElement) => {
     // A kebab attribute whose property is camelCase has to be listed by hand: `Omit<T, keyof HTMLElement>` only
     // carries the property spelling, and a template may legitimately use either.
     const attributes = element.attributes.filter((attribute) => attribute.name !== attribute.fieldName).map((attribute) => `'${attribute.name}'?: unknown`)
-    const events = element.events.map((event) => `'on${handlerName(event.name)}'?: (event: ${element.className}EventMap['${event.name}']) => void`)
+    const events = element.events.map((event) => `'on${handlerName(event.name)}'?: (event: EventOf<${element.className}, '${event.name}'>) => void`)
     const extras = [...new Set([...attributes, ...events])]
     const props =
       extras.length === 0 ? `C2Props<${element.className}>` : `C2Props<${element.className}> & {\n${extras.map((line) => `      ${line}`).join('\n')}\n    }`
@@ -124,10 +122,17 @@ export function emitVue(pkg: DiscoveredPackage): string {
     `// nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.`,
     ``,
     `import type { DefineComponent, HTMLAttributes } from 'vue'`,
+    ...(needsEvents ? [`import type { EventMapOf } from '@c2n/core/event-helper.js'`] : []),
     ...[...imports].map(([module, names]) => `import type { ${[...names].sort().join(', ')} } from '${module}'`),
     ``,
     `/** The element's own public properties, plus every attribute Vue understands on a host element. */`,
     `type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes`,
+    ...(needsEvents
+      ? [
+          `/** The event an element fires under \`name\`, read from the map its \`addEventListener\` carries (its own or inherited). */`,
+          `type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent`,
+        ]
+      : []),
     ``,
     `declare module 'vue' {`,
     `  interface GlobalComponents {`,

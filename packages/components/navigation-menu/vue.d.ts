@@ -8,12 +8,15 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { NavigationMenu, NavigationMenuEventMap } from '@c2n/navigation-menu'
-import type { NavigationMenuItem, NavigationMenuItemEventMap } from '@c2n/navigation-menu/navigation-menu-item.js'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { NavigationMenu } from '@c2n/navigation-menu'
+import type { NavigationMenuItem } from '@c2n/navigation-menu/navigation-menu-item.js'
 import type { NavigationMenuLink } from '@c2n/navigation-menu/navigation-menu-link.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -29,13 +32,13 @@ declare module 'vue' {
         'mobile-open'?: unknown
         'auto-current'?: unknown
         'current-url'?: unknown
-        onValueChange?: (event: NavigationMenuEventMap['value-change']) => void
+        onValueChange?: (event: EventOf<NavigationMenu, 'value-change'>) => void
       }
     >
     'c2-navigation-menu-item': DefineComponent<
       C2Props<NavigationMenuItem> & {
         'current-group'?: unknown
-        onPanelToggle?: (event: NavigationMenuItemEventMap['panel-toggle']) => void
+        onPanelToggle?: (event: EventOf<NavigationMenuItem, 'panel-toggle'>) => void
       }
     >
     'c2-navigation-menu-link': DefineComponent<C2Props<NavigationMenuLink>>
