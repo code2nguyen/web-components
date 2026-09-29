@@ -332,7 +332,12 @@ const mobileNavItems = [
         .site-header__wordmark-muted {
           display: none;
         }
-        .site-header__version,
+        // Keep the release badge on phones (the wordmark suffix and GitHub link make room for it), just tighter.
+        .site-header__version {
+          margin-right: 4px;
+          padding: 1px 6px;
+          font-size: 10px;
+        }
         :global(.site-header__github) {
           display: none;
         }
