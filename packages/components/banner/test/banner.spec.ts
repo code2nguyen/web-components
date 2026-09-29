@@ -67,3 +67,35 @@ test('renders slotted actions after the message', async ({ page, scenario }) => 
   await scenario()
   await expect(page.locator('c2-banner [part="actions"]')).toBeHidden()
 })
+
+test('position="top" sticks to the top edge while scrolling', async ({ page, scenario }) => {
+  await scenario('positions')
+  const top = page.locator('#top')
+  await expect(top).toHaveCSS('position', 'sticky')
+  await page.mouse.wheel(0, 800)
+  await expect.poll(() => top.evaluate((el) => Math.round(el.getBoundingClientRect().top))).toBe(0)
+  const container = top.locator('[part="container"]')
+  await expect(container).toHaveCSS('border-top-width', '0px')
+  await expect(container).toHaveCSS('border-bottom-width', '1px')
+  await expect(container).toHaveCSS('border-top-left-radius', '0px')
+})
+
+test('position="bottom" is fixed to the bottom of the viewport across its full width', async ({ page, scenario }) => {
+  await scenario('positions')
+  const bottom = page.locator('#bottom')
+  await expect(bottom).toHaveCSS('position', 'fixed')
+  const viewport = page.viewportSize()!
+  const box = await bottom.boundingBox()
+  expect(Math.round(box!.y + box!.height)).toBe(viewport.height)
+  expect(Math.round(box!.width)).toBe(viewport.width)
+  await expect(bottom.locator('[part="container"]')).toHaveCSS('border-bottom-width', '0px')
+  await expect(bottom.locator('[part="container"]')).toHaveCSS('border-top-width', '1px')
+})
+
+test('--c2-banner--offset moves a pinned banner off its edge', async ({ page, scenario }) => {
+  await scenario('positions')
+  const bottom = page.locator('#bottom')
+  await bottom.evaluate((el) => (el as HTMLElement).style.setProperty('--c2-banner--offset', '16px'))
+  const box = await bottom.boundingBox()
+  expect(Math.round(box!.y + box!.height)).toBe(page.viewportSize()!.height - 16)
+})

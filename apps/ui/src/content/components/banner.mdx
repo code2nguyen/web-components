@@ -6,9 +6,11 @@ category: 'Feedback'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 
 import { Banner } from '@c2n/banner'
 import { Button } from '@c2n/button'
+import { LinkButton } from '@c2n/link-button'
 
 `c2-banner` shows a message that stays on the page until the user acts on it or the condition goes away, unlike a
 toast, which floats and expires. `variant` picks the colours and the default icon, and also the announcement:
@@ -25,25 +27,122 @@ npm install @c2n/banner
 
 ```html tag=UsageBlock,package=@c2n/banner
 <style>
-  .banner-row { width: 100%; max-width: 640px; }
+  .banner-row {
+    width: 100%;
+    max-width: 720px;
+  }
+  .banner-action {
+    --c2-button__container--height: 30px;
+    --c2-button__container--padding-left: 12px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--font-size: 13px;
+  }
+  .banner-action--quiet {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: inherit;
+    --c2-button__container--border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    --c2-button__container__hover--background-color: color-mix(in srgb, currentColor 8%, transparent);
+    --c2-button__container__active--background-color: color-mix(in srgb, currentColor 14%, transparent);
+  }
+  .banner-link {
+    --c2-link-button__container--font-size: 13px;
+    --c2-link-button__container--font-weight: 600;
+  }
 </style>
-<div data-label="Neutral">
-  <c2-banner class="banner-row" message="Scheduled maintenance on Sunday, 02:00–04:00 UTC."></c2-banner>
-</div>
 <div data-label="Information">
-  <c2-banner class="banner-row" variant="info" heading="New" message="Dashboards can now be shared with your whole team." dismissible></c2-banner>
+  <c2-banner class="banner-row" variant="info" heading="New" message="Dashboards can now be shared with your whole team." dismissible>
+    <c2-link-button class="banner-link" slot="actions" href="#">See what's new</c2-link-button>
+  </c2-banner>
 </div>
 <div data-label="Success">
-  <c2-banner class="banner-row" variant="success" message="Your payment method was updated."></c2-banner>
+  <c2-banner class="banner-row" variant="success" heading="Payment updated" message="Your next invoice will be charged to Visa •••• 4242." dismissible></c2-banner>
 </div>
-<div data-label="Warning with action">
-  <c2-banner class="banner-row" variant="warning" heading="Trial ending" message="Your trial ends in 3 days.">
-    <c2-button slot="actions">Upgrade</c2-button>
+<div data-label="Warning with actions">
+  <c2-banner class="banner-row" variant="warning" heading="Trial ending" message="Your trial ends in 3 days. Upgrade to keep your projects.">
+    <c2-button class="banner-action banner-action--quiet" slot="actions">Remind me</c2-button>
+    <c2-button class="banner-action" slot="actions">Upgrade</c2-button>
   </c2-banner>
 </div>
 <div data-label="Error">
-  <c2-banner class="banner-row" variant="error" heading="Outage" message="Deployments are failing in eu-west-1."></c2-banner>
+  <c2-banner class="banner-row" variant="error" heading="Outage" message="Deployments are failing in eu-west-1. We're on it.">
+    <c2-link-button class="banner-link" slot="actions" href="#">Status page</c2-link-button>
+  </c2-banner>
 </div>
+<div data-label="Neutral">
+  <c2-banner class="banner-row" message="Scheduled maintenance on Sunday, 02:00–04:00 UTC."></c2-banner>
+</div>
+```
+
+## Position
+
+By default a banner sits in the page flow where you place it. Set `position` to pin it to an edge of the viewport:
+
+- `top` is **sticky**: the banner keeps its place in the flow and sticks to the top of its scroll container as the page
+  scrolls, so it never covers content. Use it for app-wide notices placed first in the page.
+- `bottom` is **fixed**: the banner floats over the content at the bottom of the viewport, as a cookie-consent bar does.
+  Give the page bottom padding at least as tall as the banner so the last content stays reachable.
+
+A pinned banner spans the full width with square corners and keeps a border on its inner edge only.
+`--c2-banner--offset` moves it away from the edge (below a fixed header, for example) and `--c2-banner--z-index`
+sets its stacking order. Scroll the page below: the banner stays on top of it.
+
+```html tag=MdxCodeBlock,label=Sticky top
+<style>
+  .mock-page {
+    width: 100%;
+    max-width: 560px;
+    height: 240px;
+    overflow: auto;
+    border: 1px solid var(--site-color-outline-variant, #e4e4e7);
+    border-radius: 10px;
+    background: var(--site-color-surface, #ffffff);
+  }
+  .mock-page__body {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+  }
+  .mock-page__line {
+    height: 12px;
+    border-radius: 6px;
+    background: var(--site-color-outline-variant, #e4e4e7);
+    opacity: 0.6;
+  }
+  .mock-page__line:nth-child(3n) {
+    width: 60%;
+  }
+  .mock-page__line:nth-child(4n + 1) {
+    height: 64px;
+  }
+</style>
+<div class="mock-page">
+  <c2-banner position="top" variant="info" heading="Maintenance" message="Read-only mode from 02:00 UTC." dismissible></c2-banner>
+  <div class="mock-page__body">
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+    <div class="mock-page__line"></div>
+  </div>
+</div>
+```
+
+```html tag=CodeBlock
+<c2-banner position="top" variant="error" heading="Outage" message="Deployments are failing in eu-west-1."></c2-banner>
+
+<c2-banner position="bottom" message="We use cookies to keep you signed in." dismissible>
+  <c2-button slot="actions">Accept</c2-button>
+</c2-banner>
+
+<style>
+  /* Stick below a 56px header instead of the very top. */
+  c2-banner[position='top'] { --c2-banner--offset: 56px; }
+</style>
 ```
 
 ## Dismissing

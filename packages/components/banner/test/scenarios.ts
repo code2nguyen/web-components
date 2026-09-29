@@ -12,6 +12,9 @@ const markup: Record<string, string> = {
   prevented: `<c2-banner dismissible close-label="Dismiss notice" message="Accept the terms to continue."></c2-banner><output>0</output>`,
   actions: `<c2-banner variant="warning" heading="Trial ending">Your trial ends in 3 days.<button slot="actions" type="button">Upgrade</button></c2-banner>`,
   'no-icon': `<c2-banner no-icon message="No icon here."></c2-banner>`,
+  positions: `<c2-banner id="top" position="top" variant="info" message="Pinned to the top."></c2-banner>
+    <div style="height:2000px"></div>
+    <c2-banner id="bottom" position="bottom" variant="warning" message="Pinned to the bottom."></c2-banner>`,
 }
 main.innerHTML = markup[scenario] ?? markup.default
 

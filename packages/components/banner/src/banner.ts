@@ -6,6 +6,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import styles from './banner.scss?inline'
 
 export type BannerVariant = 'neutral' | 'info' | 'success' | 'warning' | 'error'
+export type BannerPosition = 'inline' | 'top' | 'bottom'
 
 /** Events fired by {@link Banner}, keyed for `addEventListener`. */
 export interface BannerEventMap {
@@ -19,6 +20,9 @@ export interface Banner {
 
 /**
  * A persistent, full-width message placed in the page flow: system notices, outages, trial expiry, cookie consent.
+ * `position` pins it to an edge of the viewport: `top` sticks to the top of its scroll container while keeping its
+ * place in the flow, `bottom` floats fixed over the content (give the page bottom padding so nothing is covered).
+ * A pinned banner spans the full width with square corners and a border on its inner edge only.
  * @tag c2-banner
  * @slot default - Message content, replacing message.
  * @slot icon - Leading icon, with a variant-specific SVG default.
@@ -33,13 +37,15 @@ export interface Banner {
  * @csspart actions - Container for the assigned actions slot.
  * @csspart close - The dismiss button.
  *
+ * @cssproperty {pixel} [--c2-banner--offset=0px] - Distance from the pinned edge when `position` is `top` or `bottom`.
+ * @cssproperty {number} [--c2-banner--z-index=10] - Stacking order when `position` is `top` or `bottom`.
  * @cssproperty {color} [--c2-banner__container--background=#fafafa]
  * @cssproperty {color} [--c2-banner__container--color=#18181b]
  * @cssproperty {border} [--c2-banner__container--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-banner__container--border-radius=8px]
  * @cssproperty {padding} [--c2-banner__container--padding=12px 16px]
  * @cssproperty {pixel} [--c2-banner__container--gap=12px]
- * @cssproperty {box-shadow} [--c2-banner__container--box-shadow=none]
+ * @cssproperty {box-shadow} [--c2-banner__container--box-shadow=0 1px 2px rgba(24, 24, 27, 0.05)]
  * @cssproperty {font-family} [--c2-banner__container--font-family=inherit]
  * @cssproperty {font-size} [--c2-banner__container--font-size=14px]
  * @cssproperty {line-height} [--c2-banner__container--line-height=1.5]
@@ -48,6 +54,9 @@ export interface Banner {
  * @cssproperty {font-weight} [--c2-banner__heading--font-weight=600]
  * @cssproperty {pixel} [--c2-banner__icon--size=20px]
  * @cssproperty {color} [--c2-banner__icon--color=#71717a]
+ * @cssproperty {padding} [--c2-banner__icon--padding=6px] - Space between the glyph and the edge of its tinted disc; `0` removes the disc's padding.
+ * @cssproperty {border-radius} [--c2-banner__icon--border-radius=999px]
+ * @cssproperty {percentage} [--c2-banner__icon--background-mix=14%] - Share of the icon colour in the disc behind it; `0%` removes the disc.
  * @cssproperty {color} [--c2-banner__icon__info--color=#2563eb]
  * @cssproperty {color} [--c2-banner__icon__success--color=#15803d]
  * @cssproperty {color} [--c2-banner__icon__warning--color=#a16207]
@@ -67,6 +76,8 @@ export class Banner extends LitElement {
   @property() heading = ''
   /** Semantic variant: tints the banner with the matching icon colour. `warning` and `error` are announced as alerts, the others as status messages. */
   @property({ reflect: true }) variant: BannerVariant = 'neutral'
+  /** `inline` stays in the page flow; `top` sticks to the top edge while scrolling; `bottom` is fixed to the bottom of the viewport. */
+  @property({ reflect: true }) position: BannerPosition = 'inline'
   /** Hides the leading icon and removes its space from the layout. */
   @property({ type: Boolean, attribute: 'no-icon' }) noIcon = false
   /** Shows a keyboard-accessible dismiss button. */

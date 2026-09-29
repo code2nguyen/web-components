@@ -1,13 +1,15 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-banner,
   $theme: (
+    offset: 0px,
+    z-index: 10,
     container--background: #fafafa,
     container--color: #18181b,
     container--border: 1px solid #e4e4e7,
     container--border-radius: 8px,
     container--padding: 12px 16px,
     container--gap: 12px,
-    container--box-shadow: none,
+    container--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.05),
     container--font-family: inherit,
     container--font-size: 14px,
     container--line-height: 1.5,
@@ -16,6 +18,9 @@
     heading--font-weight: 600,
     icon--size: 20px,
     icon--color: #71717a,
+    icon--padding: 6px,
+    icon--border-radius: 999px,
+    icon--background-mix: 14%,
     icon__info--color: #2563eb,
     icon__success--color: #15803d,
     icon__warning--color: #a16207,
@@ -35,6 +40,17 @@
 :host([hidden]) {
   display: none;
 }
+:host([position='top']) {
+  position: sticky;
+  top: css.cssVar(offset);
+  z-index: css.cssVar(z-index);
+}
+:host([position='bottom']) {
+  position: fixed;
+  inset-inline: 0;
+  bottom: css.cssVar(offset);
+  z-index: css.cssVar(z-index);
+}
 .banner {
   display: flex;
   flex-wrap: wrap;
@@ -52,10 +68,26 @@
   font-size: css.cssVar(container--font-size);
   line-height: css.cssVar(container--line-height);
 }
+// Pinned: a full-width bar with square corners and a border on its inner edge only.
+:host([position='top']) .banner,
+:host([position='bottom']) .banner {
+  border-width: 0;
+  border-radius: 0;
+}
+:host([position='top']) .banner {
+  border-bottom: css.cssVar(container--border);
+}
+:host([position='bottom']) .banner {
+  border-top: css.cssVar(container--border);
+}
 @each $variant in info, success, warning, error {
   :host([variant='#{$variant}']) {
     .banner {
-      background: color-mix(in srgb, #{css.cssVar(icon__#{$variant}--color)} #{css.cssVar(container__variant--background-mix)}, #{css.cssVar(container--background)});
+      background: color-mix(
+        in srgb,
+        #{css.cssVar(icon__#{$variant}--color)} #{css.cssVar(container__variant--background-mix)},
+        #{css.cssVar(container--background)}
+      );
       border-color: color-mix(in srgb, #{css.cssVar(icon__#{$variant}--color)} #{css.cssVar(container__variant--border-mix)}, transparent);
     }
     .icon {
@@ -68,9 +100,14 @@
   --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
   display: inline-flex;
   flex: none;
+  // The size is the glyph's; the padding draws a soft disc in the icon's own colour around it.
+  box-sizing: content-box;
   width: css.cssVar(icon--size);
   height: css.cssVar(icon--size);
+  padding: css.cssVar(icon--padding);
+  border-radius: css.cssVar(icon--border-radius);
   color: css.cssVar(icon--color);
+  background: color-mix(in srgb, currentColor #{css.cssVar(icon--background-mix)}, transparent);
 }
 .icon svg,
 ::slotted([slot='icon']) {
@@ -127,5 +164,8 @@
 @media (forced-colors: active) {
   .banner {
     border-color: CanvasText;
+  }
+  .icon {
+    background: none;
   }
 }
