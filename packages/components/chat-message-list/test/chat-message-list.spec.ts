@@ -93,6 +93,8 @@ test('stops following when the reader scrolls up, counts new messages and jumps 
 test('the log is keyboard scrollable and resumes following at the bottom', async ({ page, renderScenario, tab }) => {
   await renderScenario(`<c2-chat-message-list>${rows(20)}</c2-chat-message-list>`)
   const list = page.locator('c2-chat-message-list')
+  await expect.poll(() => distanceFromBottom(list)).toBe(0)
+  await scrollSettled(list)
   await tab()
   await expect(scroller(list)).toBeFocused()
   await page.keyboard.press('PageUp')
@@ -146,4 +148,17 @@ test('shows the loading and empty slots only when they apply', async ({ page, re
   await expect(page.getByText('No messages yet')).toBeHidden()
   await expect(page.getByText('Loading earlier messages…')).toBeHidden()
   await expect(page.getByText('Message 1')).toBeVisible()
+})
+
+test('the scrollbar takes its colours from the scrollbar variables', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-chat-message-list style="--c2-chat-message-list__scrollbar__thumb--color: rgb(255, 0, 0); --c2-chat-message-list__scrollbar__track--color: rgb(0, 0, 255)">${rows(20)}</c2-chat-message-list>`,
+  )
+  const scroll = scroller(page.locator('c2-chat-message-list'))
+  const style = await scroll.evaluate((element) => {
+    const computed = getComputedStyle(element)
+    return { supported: CSS.supports('scrollbar-color', 'auto'), color: computed.scrollbarColor }
+  })
+  test.skip(!style.supported, 'scrollbar-color is not supported; the ::-webkit-scrollbar fallback applies')
+  expect(style.color).toBe('rgb(255, 0, 0) rgb(0, 0, 255)')
 })

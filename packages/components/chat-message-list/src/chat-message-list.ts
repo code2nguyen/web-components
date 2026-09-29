@@ -49,6 +49,11 @@ export interface ChatMessageList {
  *
  * @cssproperty {color} [--c2-chat-message-list--background=transparent]
  * @cssproperty {outline} [--c2-chat-message-list__scroller__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {scrollbar-width} [--c2-chat-message-list__scrollbar--width=thin] - `scrollbar-width` of the log: `thin`, `auto` or `none`.
+ * @cssproperty {pixel} [--c2-chat-message-list__scrollbar--size=8px] - Scrollbar thickness in browsers without `scrollbar-color` (Safari before 26).
+ * @cssproperty {color} [--c2-chat-message-list__scrollbar__track--color=transparent]
+ * @cssproperty {color} [--c2-chat-message-list__scrollbar__thumb--color=color-mix(in srgb, currentColor 22%, transparent)]
+ * @cssproperty {color} [--c2-chat-message-list__scrollbar__thumb__hover--color=color-mix(in srgb, currentColor 40%, transparent)]
  * @cssproperty {padding} [--c2-chat-message-list__content--padding=16px]
  * @cssproperty {pixel} [--c2-chat-message-list__content--gap=16px]
  * @cssproperty {margin} [--c2-chat-message-list__content--margin-top=auto]

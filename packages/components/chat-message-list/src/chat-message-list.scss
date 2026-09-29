@@ -3,7 +3,12 @@
   $theme: (
     background: transparent,
     scroller__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
-
+    // Derived from the text colour so the thumb reads on a light or a dark surface without a theme.
+    scrollbar--width: thin,
+    scrollbar--size: 8px,
+    scrollbar__track--color: transparent,
+    scrollbar__thumb--color: color-mix(in srgb, currentColor 22%, transparent),
+    scrollbar__thumb__hover--color: color-mix(in srgb, currentColor 40%, transparent),
     content--padding: 16px,
     content--gap: 16px,
     content--margin-top: auto,
@@ -55,10 +60,39 @@
   overflow-anchor: none;
   overscroll-behavior: contain;
   outline: none;
+  scrollbar-width: css.cssVar(scrollbar--width);
+  scrollbar-color: css.cssVar(scrollbar__thumb--color) css.cssVar(scrollbar__track--color);
+
+  &:hover {
+    scrollbar-color: css.cssVar(scrollbar__thumb__hover--color) css.cssVar(scrollbar__track--color);
+  }
 
   &:focus-visible {
     outline: css.cssVar(scroller__focus--outline);
     outline-offset: -2px;
+  }
+}
+
+// Safari before 26 has no `scrollbar-color`; Chromium ignores these pseudo-elements once it is set.
+@supports not (scrollbar-color: auto) {
+  .c2-chat-message-list__scroller {
+    &::-webkit-scrollbar {
+      width: css.cssVar(scrollbar--size);
+      height: css.cssVar(scrollbar--size);
+    }
+
+    &::-webkit-scrollbar-track {
+      background: css.cssVar(scrollbar__track--color);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: css.cssVar(scrollbar__thumb--color);
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+      background: css.cssVar(scrollbar__thumb__hover--color);
+    }
   }
 }
 
