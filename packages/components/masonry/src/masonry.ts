@@ -135,7 +135,6 @@ export class Masonry extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    if (!this.hasAttribute('tabindex')) this.tabIndex = -1
     this.addEventListener('pointerdown', this.onPointerDown)
     this.addEventListener('pointermove', this.onPointerMove)
     this.addEventListener('pointerup', this.onPointerUp)
@@ -564,7 +563,11 @@ export class Masonry extends LitElement {
     this.finishSession()
     this.draw()
     this.statusMessage = `${label} edit canceled.`
-    if (!item?.isConnected) this.focus()
+    if (!item?.isConnected) {
+      // Made focusable only here: a tabindex written on connect is an attribute the server never rendered, which fails React hydration.
+      if (!this.hasAttribute('tabindex')) this.tabIndex = -1
+      this.focus()
+    }
   }
 
   private finishSession(): void {

@@ -439,6 +439,12 @@ for (const { edge, dx, dy, dimension } of [
   })
 }
 
+test('adds no host attribute on connect, so server-rendered markup hydrates unchanged', async ({ page, scenario }) => {
+  await scenario('editing')
+  await expect(page.locator('c2-masonry-item')).not.toHaveCount(0)
+  await expect(page.locator('c2-masonry')).not.toHaveAttribute('tabindex')
+})
+
 test('cancels a held gesture when the active tile disappears', async ({ page, scenario }) => {
   await scenario('editing')
   const handle = page.locator('c2-masonry-item').first().locator('[part="move-handle"]')
