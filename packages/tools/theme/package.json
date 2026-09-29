@@ -55,6 +55,7 @@
       "dependencies": [
         "type-check",
         "../../components/tag-input:build",
+        "../../components/time-input:build",
         "../../components/log-viewer:build",
         "../../components/masonry:build",
         "../../components/dashboard:build",

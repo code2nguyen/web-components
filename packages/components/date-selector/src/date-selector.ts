@@ -54,7 +54,8 @@ function addDays(date: Date, amount: number): Date {
  * Home/End move within the week, and Page Up/Page Down change month.
  *
  * When `name` is present, the start date is submitted under that name and the end date under `end-name` (or
- * `${name}-end`). `required` requires a complete range. Use `min` and `max` to constrain availability.
+ * `${name}-end`). `required` requires a complete range. Use `min` and `max` to constrain availability:
+ * days outside them are disabled, and the month navigation stops at the months that contain them.
  *
  * @tag c2-date-selector
  * @event {Event} input - Fired after either endpoint changes, with `from` and `to` already updated.
@@ -229,12 +230,17 @@ export class DateSelector extends LitElement {
     this.dispatchEvent(new CustomEvent<DateRangeChangeDetail>('change', { detail: { from: this.from, to: this.to }, bubbles: true, composed: true }))
   }
 
-  private navigate(amount: number) {
-    if (this.effectiveDisabled) return
+  /** Whether moving the view by `amount` months would still show a selectable day within `min`/`max`. */
+  private canNavigate(amount: number) {
+    if (this.effectiveDisabled) return false
     const target = addMonths(this.visibleMonth, amount)
-    if (amount < 0 && this.min && toIso(new Date(target.getFullYear(), target.getMonth() + 1, 0, 12)) < this.min) return
-    if (amount > 0 && this.max && toIso(target) > this.max) return
-    this.visibleMonth = target
+    if (amount < 0 && this.min && toIso(new Date(target.getFullYear(), target.getMonth() + 1, 0, 12)) < this.min) return false
+    if (amount > 0 && this.max && toIso(target) > this.max) return false
+    return true
+  }
+
+  private navigate(amount: number) {
+    if (this.canNavigate(amount)) this.visibleMonth = addMonths(this.visibleMonth, amount)
   }
 
   private async moveFocus(current: string, offset: number, byMonth = false) {
@@ -323,9 +329,9 @@ export class DateSelector extends LitElement {
     })
     return html`<section class="month" aria-label=${monthLabel}>
       <header class="month-header">
-        ${index === 0 ? html`<button class="navigation previous" type="button" aria-label="Previous month" ?disabled=${this.effectiveDisabled} @click=${() => this.navigate(-1)}><span aria-hidden="true">‹</span></button>` : nothing}
+        ${index === 0 ? html`<button class="navigation previous" type="button" aria-label="Previous month" ?disabled=${!this.canNavigate(-1)} @click=${() => this.navigate(-1)}><span aria-hidden="true">‹</span></button>` : nothing}
         <h2>${monthLabel}</h2>
-        ${index === this.displayedMonths - 1 ? html`<button class="navigation next" type="button" aria-label="Next month" ?disabled=${this.effectiveDisabled} @click=${() => this.navigate(1)}><span aria-hidden="true">›</span></button>` : nothing}
+        ${index === this.displayedMonths - 1 ? html`<button class="navigation next" type="button" aria-label="Next month" ?disabled=${!this.canNavigate(1)} @click=${() => this.navigate(1)}><span aria-hidden="true">›</span></button>` : nothing}
       </header>
       <div class="weekdays" aria-hidden="true">${this.weekdayLabels().map((label) => html`<span>${label}</span>`)}</div>
       <div class="days" role="grid" aria-label=${monthLabel}>
