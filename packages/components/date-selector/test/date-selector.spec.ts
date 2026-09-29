@@ -41,6 +41,15 @@ test('enforces min and max dates', async ({ page, scenario }) => {
   await expect(page.getByRole('gridcell', { name: /September 7, 2026/ })).toBeDisabled()
   await expect(page.getByRole('gridcell', { name: /September 20, 2026/ })).toBeEnabled()
   await expect(page.getByRole('gridcell', { name: /September 21, 2026/ })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Previous month' })).toBeDisabled()
+  await expect(page.getByRole('button', { name: 'Next month' })).toBeDisabled()
+})
+
+test('navigates freely without bounds', async ({ page, scenario }) => {
+  await scenario('default')
+  await expect(page.getByRole('button', { name: 'Previous month' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Next month' }).click()
+  await expect(page.getByRole('grid', { name: 'October 2026' })).toBeVisible()
 })
 
 test('submits both endpoints and resets to authored values', async ({ page, scenario }) => {
