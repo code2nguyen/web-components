@@ -181,9 +181,21 @@ export class DateInput extends LitElement {
     this.focused = false
     redispatchEvent(this, event)
   }
+  private keepInputFocus(event: Event) {
+    // The icon button would otherwise take focus from the input on press, dropping the focus ring under the picker.
+    event.preventDefault()
+  }
   private openPicker(event: Event) {
     event.stopPropagation()
-    if (!this.effectiveDisabled && !this.readOnly) this.showPicker()
+    const input = this.input
+    if (!input || this.effectiveDisabled || this.readOnly) return
+    input.focus()
+    try {
+      input.showPicker()
+    } catch {
+      // showPicker() throws in a cross-origin iframe and where the engine has no date picker for it; the focused
+      // input still takes keyboard editing, and the browser's own affordances still open its picker.
+    }
   }
   private forwardFocus(event: Event) {
     if (event.target !== this.input) this.input?.focus()
@@ -243,6 +255,7 @@ export class DateInput extends LitElement {
           tabindex="-1"
           aria-label="Open calendar"
           ?disabled=${this.effectiveDisabled || this.readOnly}
+          @mousedown=${this.keepInputFocus}
           @click=${this.openPicker}
         >
           <slot name="calendar-icon">
