@@ -1815,6 +1815,18 @@
       "reason": "The system-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-time-input",
+      "slot": "clock-icon",
+      "decision": "assigned-content",
+      "reason": "The clock-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-time-input",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-toast",
       "slot": "action",
       "decision": "part",

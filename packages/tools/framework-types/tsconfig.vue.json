@@ -24,7 +24,8 @@
         "c2-slider": true,
         "c2-text-field": true,
         "c2-text-field-clear": true,
-        "c2-textarea": true
+        "c2-textarea": true,
+        "c2-time-input": true
       },
       "checked": {
         "c2-checkbox": true,
