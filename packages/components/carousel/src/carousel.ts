@@ -176,6 +176,12 @@ export class Carousel extends LitElement {
 
   /** The index the track rests at or is scrolling towards; `-1` when it must be re-aligned. */
   private scrolledIndex = -1
+  /**
+   * Offset a programmatic scroll is heading to. Until the track gets there, a `scrollend` elsewhere is the late end of
+   * the scroll it interrupted (Chromium fires one when a second `scrollTo` cuts the first short) and must not move the
+   * index back. A user gesture on the track clears it, so a swipe that interrupts still settles where it stops.
+   */
+  private scrollTarget: number | null = null
   private settleTimer?: ReturnType<typeof setTimeout>
   private rotationTimer?: ReturnType<typeof setTimeout>
   private resizeObserver?: ResizeObserver
@@ -329,6 +335,7 @@ export class Carousel extends LitElement {
     if (!track || offset === undefined) return
     this.scrolledIndex = index
     if (Math.abs(track.scrollLeft - offset) < 1) return
+    this.scrollTarget = offset
     const behavior: ScrollBehavior = smooth && !this.reducedMotion?.matches ? 'smooth' : 'instant'
     track.scrollTo({ left: offset, behavior })
   }
@@ -343,6 +350,10 @@ export class Carousel extends LitElement {
   private settle() {
     const track = this.track
     if (!track) return
+    if (this.scrollTarget !== null) {
+      if (Math.abs(track.scrollLeft - this.scrollTarget) >= 2) return
+      this.scrollTarget = null
+    }
     const offsets = this.offsets().slice(0, this.count)
     if (offsets.length === 0) return
     let nearest = 0
@@ -354,6 +365,14 @@ export class Carousel extends LitElement {
     if (nearest === previousIndex) return
     this.index = nearest
     this.emitChange(nearest, previousIndex)
+  }
+
+  /** Passive, so a wheel or touch scroll never waits on it. */
+  private readonly handleUserScroll = {
+    handleEvent: () => {
+      this.scrollTarget = null
+    },
+    passive: true,
   }
 
   private handleTrackKeydown(event: KeyboardEvent) {
@@ -503,6 +522,9 @@ export class Carousel extends LitElement {
           aria-live=${this.playing ? 'off' : 'polite'}
           @scroll=${this.handleScroll}
           @scrollend=${this.settle}
+          @wheel=${this.handleUserScroll}
+          @pointerdown=${this.handleUserScroll}
+          @touchstart=${this.handleUserScroll}
           @keydown=${this.handleTrackKeydown}
         >
           <slot @slotchange=${this.handleSlotChange}></slot>

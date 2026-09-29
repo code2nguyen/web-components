@@ -110,11 +110,13 @@ test('the focused track moves with arrow keys, Home and End', async ({ page, sce
 
 test('scrolling the track updates the current slide', async ({ page, scenario }) => {
   await scenario()
-  const track = page.locator('c2-carousel').locator('.c2-carousel-track')
-  const box = await track.boundingBox()
-  if (!box) throw new Error('Track has no bounds')
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await page.mouse.wheel(box.width * 2, 0)
+  // Scroll the track to an absolute offset: `scroll-snap-stop: always` stops a relative scroll (a wheel, `scrollBy`)
+  // at the next slide in Firefox and WebKit, so a two-slide wheel is not a portable way to land on slide 3.
+  await page.locator('c2-carousel').evaluate((carousel) => {
+    const track = carousel.shadowRoot!.querySelector('.c2-carousel-track')!
+    const slide = carousel.children[2]
+    track.scrollTo({ left: track.scrollLeft + slide.getBoundingClientRect().left - track.getBoundingClientRect().left })
+  })
   await expect(indicator(page, 3)).toHaveAttribute('aria-current', 'true')
   await expect(page.getByRole('status', { name: 'Changes' })).toHaveText(/->2\/5$/)
 })
