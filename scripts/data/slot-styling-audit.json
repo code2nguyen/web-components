@@ -187,6 +187,32 @@
       "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-banner",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-banner",
+      "slot": "close-icon",
+      "decision": "assigned-content",
+      "reason": "The close-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-banner",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-banner",
+      "slot": "icon",
+      "decision": "part",
+      "parts": ["icon"],
+      "reason": "The semantic icon region owns the icon slot's component-side presentation."
+    },
+    {
       "tag": "c2-bar-chart",
       "slot": "actions",
       "decision": "part",
@@ -355,6 +381,36 @@
       "reason": "The semantic media region owns the media slot's component-side presentation."
     },
     {
+      "tag": "c2-carousel",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-carousel",
+      "slot": "next-icon",
+      "decision": "assigned-content",
+      "reason": "The next-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-carousel",
+      "slot": "pause-icon",
+      "decision": "assigned-content",
+      "reason": "The pause-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-carousel",
+      "slot": "play-icon",
+      "decision": "assigned-content",
+      "reason": "The play-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-carousel",
+      "slot": "previous-icon",
+      "decision": "assigned-content",
+      "reason": "The previous-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-cascader",
       "slot": "empty",
       "decision": "assigned-content",
@@ -440,6 +496,40 @@
       "slot": "title",
       "decision": "assigned-content",
       "reason": "The title slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The content column owns the spacing between messages; assigned messages stay consumer-owned."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty region owns the empty slot's placement and muted text."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "jump-icon",
+      "decision": "variables",
+      "variables": ["--c2-chat-message-list__jump-icon--size"],
+      "reason": "The jump button sizes the slotted icon and its SVG fallback through the icon size variable."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["loading"],
+      "reason": "The loading region owns the loading slot's placement and muted text."
+    },
+    {
+      "tag": "c2-chat-message-list",
+      "slot": "start",
+      "decision": "assigned-content",
+      "reason": "The start slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-chatbot",
@@ -1482,6 +1572,27 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-split-panel",
+      "slot": "end",
+      "decision": "part",
+      "parts": ["end"],
+      "reason": "The end panel region owns the end slot's component-side presentation."
+    },
+    {
+      "tag": "c2-split-panel",
+      "slot": "handle",
+      "decision": "part",
+      "parts": ["handle"],
+      "reason": "The divider grip owns the handle slot's component-side presentation."
+    },
+    {
+      "tag": "c2-split-panel",
+      "slot": "start",
+      "decision": "part",
+      "parts": ["start"],
+      "reason": "The start panel region owns the start slot's component-side presentation."
+    },
+    {
       "tag": "c2-stat",
       "slot": "description",
       "decision": "part",
@@ -1697,6 +1808,18 @@
       "reason": "The tab-content slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-tag-input",
+      "slot": "prefix-icon",
+      "decision": "assigned-content",
+      "reason": "The prefix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-tag-input",
+      "slot": "remove-icon",
+      "decision": "assigned-content",
+      "reason": "The remove-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-text-field",
       "slot": "clear-icon",
       "decision": "assigned-content",
@@ -1787,6 +1910,52 @@
       "slot": "system-icon",
       "decision": "assigned-content",
       "reason": "The system-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-time-input",
+      "slot": "clock-icon",
+      "decision": "assigned-content",
+      "reason": "The clock-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-time-input",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-timeline",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-timeline-item",
+      "slot": "",
+      "decision": "part",
+      "parts": ["content"],
+      "reason": "The semantic content region owns the default slot's component-side presentation."
+    },
+    {
+      "tag": "c2-timeline-item",
+      "slot": "label",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The semantic label region owns the label slot's component-side presentation."
+    },
+    {
+      "tag": "c2-timeline-item",
+      "slot": "marker",
+      "decision": "part",
+      "parts": ["marker"],
+      "reason": "The marker part owns the marker slot's size, colour and frame."
+    },
+    {
+      "tag": "c2-timeline-item",
+      "slot": "timestamp",
+      "decision": "part",
+      "parts": ["timestamp"],
+      "reason": "The semantic timestamp region owns the timestamp slot's component-side presentation."
     },
     {
       "tag": "c2-toast",

@@ -1,0 +1,154 @@
+---
+description: 'Ready-made looks for c2-split-panel: bare line, thick bar, accent grip, card panels, dark and a stacked layout.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { SplitPanel } from '@c2n/split-panel'
+
+## Presets
+
+Curated looks for `c2-split-panel`. The divider is hidden until the pointer finds it (or it is dragged or keyboard-focused); `--c2-split-panel__divider--opacity: 1` keeps it on screen, as the thick bar, accent grip and dark looks do. The `__divider` group does most of the work — `--c2-split-panel__divider--size` is the room the line takes, `--hit-area` the grab area around it, and `--background` with its `__hover` and `__active` states the colour — while `--c2-split-panel__handle--display: none` removes the grip and `__start` / `__end` colour the panels.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .spg-default {
+    height: 160px;
+  }
+  .spg-default [slot] {
+    padding: 12px;
+  }
+</style>
+<c2-split-panel class="spg-default">
+  <div slot="start">Start</div>
+  <div slot="end">End</div>
+</c2-split-panel>
+```
+
+```html tag=MdxCodeBlock,label=Bare line
+<style>
+  .spg-bare {
+    height: 160px;
+    --c2-split-panel__handle--display: none;
+    --c2-split-panel__divider__hover--background: rgb(2, 101, 220);
+  }
+  .spg-bare [slot] {
+    padding: 12px;
+  }
+</style>
+<c2-split-panel class="spg-bare">
+  <div slot="start">Start</div>
+  <div slot="end">End</div>
+</c2-split-panel>
+```
+
+```html tag=MdxCodeBlock,label=Thick bar
+<style>
+  .spg-thick {
+    height: 160px;
+    --c2-split-panel__divider--opacity: 1;
+    --c2-split-panel__divider--size: 8px;
+    --c2-split-panel__divider--background: #f4f4f5;
+    --c2-split-panel__divider__hover--background: #e4e4e7;
+    --c2-split-panel__handle--background: transparent;
+    --c2-split-panel__handle--border: none;
+  }
+  .spg-thick [slot] {
+    padding: 12px;
+  }
+</style>
+<c2-split-panel class="spg-thick">
+  <div slot="start">Start</div>
+  <div slot="end">End</div>
+</c2-split-panel>
+```
+
+```html tag=MdxCodeBlock,label=Accent grip
+<style>
+  .spg-accent {
+    height: 160px;
+    --c2-split-panel__divider--opacity: 1;
+    --c2-split-panel__handle--width: 8px;
+    --c2-split-panel__handle--height: 40px;
+    --c2-split-panel__handle--background: rgb(2, 101, 220);
+    --c2-split-panel__handle--border: none;
+    --c2-split-panel__handle--border-radius: 999px;
+    --c2-split-panel__handle--color: #ffffff;
+  }
+  .spg-accent [slot] {
+    padding: 12px;
+  }
+</style>
+<c2-split-panel class="spg-accent">
+  <div slot="start">Start</div>
+  <div slot="end">End</div>
+</c2-split-panel>
+```
+
+```html tag=MdxCodeBlock,label=Card panels
+<style>
+  .spg-cards {
+    height: 160px;
+    --c2-split-panel__divider--size: 12px;
+    --c2-split-panel__divider--background: transparent;
+    --c2-split-panel__divider__hover--background: transparent;
+    --c2-split-panel__divider__active--background: transparent;
+    --c2-split-panel__start--background: #f4f4f5;
+    --c2-split-panel__end--background: #f4f4f5;
+  }
+  .spg-cards [slot] {
+    height: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+  }
+</style>
+<c2-split-panel class="spg-cards">
+  <div slot="start">Start</div>
+  <div slot="end">End</div>
+</c2-split-panel>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .spg-dark {
+    height: 160px;
+    --c2-split-panel__divider--opacity: 1;
+    color: #e4e4e7;
+    --c2-split-panel__divider--background: #3f3f46;
+    --c2-split-panel__divider__hover--background: #71717a;
+    --c2-split-panel__handle--background: #27272a;
+    --c2-split-panel__handle--border: 1px solid #3f3f46;
+    --c2-split-panel__handle--color: #a1a1aa;
+    --c2-split-panel__start--background: #18181b;
+    --c2-split-panel__end--background: #09090b;
+  }
+  .spg-dark [slot] {
+    padding: 12px;
+  }
+</style>
+<c2-split-panel class="spg-dark">
+  <div slot="start">Start</div>
+  <div slot="end">End</div>
+</c2-split-panel>
+```
+
+```html tag=MdxCodeBlock,label=Stacked
+<style>
+  .spg-stacked {
+    height: 200px;
+    --c2-split-panel__end--background: #fafafa;
+  }
+  .spg-stacked [slot] {
+    padding: 12px;
+  }
+</style>
+<c2-split-panel class="spg-stacked" orientation="vertical" position="60">
+  <div slot="start">Editor</div>
+  <div slot="end">Terminal</div>
+</c2-split-panel>
+```
+
+</GalleryGrid>

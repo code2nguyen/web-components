@@ -1,0 +1,400 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Timeline, TimelineItem } from '@c2n/timeline'
+import { Badge } from '@c2n/badge'
+import { Accordion } from '@c2n/accordion'
+import { Avatar, AvatarGroup } from '@c2n/avatar'
+import { CopyButton } from '@c2n/copy-button'
+import { Kbd } from '@c2n/kbd'
+
+## Presets
+
+Timelines for order histories, changelogs and activity feeds. The marker (`__marker--size`, `--border`,
+`--background`) and the connector (`__connector--width`, `--background`) set most of the character; the spacing
+comes from `--c2-timeline-item--padding-bottom`. An entry's content is ordinary light DOM, so a release note can carry
+headings, lists and code, styled by the page's own CSS.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-timeline aria-label="Order history">
+  <c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success">Paid with a card ending 4242.</c2-timeline-item>
+  <c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary">Handed to the carrier.</c2-timeline-item>
+  <c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item>
+</c2-timeline>
+```
+
+```html tag=MdxCodeBlock,label=Changelog
+<style>
+  .changelog-timeline {
+    width: 320px;
+    --c2-timeline-item--gap: 20px;
+    --c2-timeline-item--padding-bottom: 28px;
+    --c2-timeline-item__timestamp__split--width: 72px;
+    --c2-timeline-item__marker--size: 10px;
+    --c2-timeline-item__marker--background: #18181b;
+    --c2-timeline-item__marker--border: 2px solid #18181b;
+    --c2-timeline-item__connector--width: 1px;
+    --c2-timeline-item__label--font-weight: 600;
+    --c2-timeline-item__timestamp--font-size: 12px;
+  }
+</style>
+<c2-timeline class="changelog-timeline" layout="split" aria-label="Changelog">
+  <c2-timeline-item label="v2.4.0" timestamp="Sep 24">Adds the timeline component and split layout.</c2-timeline-item>
+  <c2-timeline-item label="v2.3.1" timestamp="Sep 02">Fixes focus rings in Safari.</c2-timeline-item>
+  <c2-timeline-item label="v2.3.0" timestamp="Aug 18">New date selector ranges.</c2-timeline-item>
+</c2-timeline>
+```
+
+```html tag=MdxCodeBlock,label=Release notes
+<style>
+  .release-timeline {
+    width: 100%;
+    max-width: 760px;
+    --c2-timeline-item--gap: 28px;
+    --c2-timeline-item--padding-bottom: 48px;
+    --c2-timeline-item__timestamp__split--width: 112px;
+    --c2-timeline-item__marker--size: 12px;
+    --c2-timeline-item__marker--border: 2px solid #d4d4d8;
+    --c2-timeline-item__marker__primary--border-color: #0265dc;
+    --c2-timeline-item__marker__primary--background: #0265dc;
+    --c2-timeline-item__marker__danger--border-color: #dc2626;
+    --c2-timeline-item__connector--width: 1px;
+    --c2-timeline-item__label--line-height: 28px;
+    --c2-timeline-item__timestamp--font-size: 13px;
+    --c2-timeline-item__content--margin-top: 6px;
+    --c2-timeline-item__content--color: #3f3f46;
+    --c2-accordion--border-color: #e4e4e7;
+    --c2-details__header--padding-top: 10px;
+    --c2-details__header--padding-bottom: 10px;
+    --c2-details__header--padding-left: 14px;
+    --c2-details__header--padding-right: 14px;
+    --c2-details__header--color: #18181b;
+    --c2-details__header--font-size: 13px;
+    --c2-details__header__hover--background: #fafafa;
+    --c2-details__header__icon--width: 16px;
+    --c2-details__header__icon--height: 16px;
+    --c2-details__content--padding-left: 14px;
+    --c2-details__content--padding-right: 14px;
+    --c2-details__content--padding-bottom: 12px;
+    --c2-badge--height: 18px;
+    --c2-badge--font-size: 11px;
+  }
+  .release-timeline .release-version {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #52525b;
+  }
+  .release-timeline h3 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 28px;
+    color: #18181b;
+  }
+  .release-timeline p {
+    margin: 0 0 16px;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .release-timeline .section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .release-timeline .section-title svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+  }
+  .release-timeline .is-new svg { color: #0265dc; }
+  .release-timeline .is-improved svg { color: #7c3aed; }
+  .release-timeline .is-fixed svg { color: #15803d; }
+  .release-timeline .is-breaking svg { color: #dc2626; }
+  .release-timeline ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .release-timeline li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .release-timeline li + li {
+    border-top: 1px dashed #f0f0f2;
+  }
+  .release-timeline li > span {
+    flex: 1;
+  }
+  .release-timeline .pr {
+    flex: none;
+    font-size: 12px;
+    color: #71717a;
+    text-decoration: none;
+  }
+  .release-timeline .pr:hover {
+    color: #0265dc;
+    text-decoration: underline;
+  }
+  .release-timeline code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: #f4f4f5;
+    font-size: 12px;
+    color: #18181b;
+  }
+  .release-timeline .highlight {
+    display: grid;
+    gap: 4px;
+    margin: 0 0 16px;
+    padding: 16px 18px;
+    border: 1px solid #dbe4ff;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f5f8ff, #faf5ff);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .release-timeline .highlight strong {
+    font-size: 14px;
+    color: #18181b;
+  }
+  .release-timeline .migration {
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fef2f2;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .release-timeline .migration pre {
+    position: relative;
+    margin: 10px 0 0;
+    padding: 10px 44px 10px 12px;
+    border-radius: 6px;
+    background: #18181b;
+    color: #e4e4e7;
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    --c2-copy-button__container--color: #e4e4e7;
+    --c2-copy-button__container__hover--background-color: #3f3f46;
+  }
+  .release-timeline .migration .del { color: #fca5a5; }
+  .release-timeline .migration .add { color: #86efac; }
+  .release-timeline .release-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .release-timeline .install {
+    position: relative;
+    margin: 0;
+    padding: 7px 40px 7px 12px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    background: #fafafa;
+    font-size: 12px;
+    color: #18181b;
+    --c2-copy-button__container--height: 24px;
+    --c2-copy-button__container--min-width: 24px;
+    --c2-copy-button__pin--offset-y: 4px;
+    --c2-copy-button__pin--offset-x: 4px;
+  }
+  .release-timeline .contributors {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #71717a;
+    --c2-avatar--size: 24px;
+    --c2-avatar-group--overlap: 6px;
+    --c2-avatar-group--max-width: 140px;
+    --c2-avatar-group__overflow--size: 24px;
+    --c2-avatar-group__overflow--font-size: 10px;
+  }
+  .release-timeline .read-more {
+    font-size: 13px;
+    color: #0265dc;
+  }
+</style>
+<c2-timeline class="release-timeline" layout="split" aria-label="Release notes">
+  <c2-timeline-item timestamp="Sep 24, 2026" datetime="2026-09-24" tone="primary">
+    <span slot="label" class="release-version">v2.4.0 <c2-badge tone="primary">Latest</c2-badge> <c2-badge>Minor</c2-badge></span>
+    <h3>Timelines, relative dates and a command palette</h3>
+    <p>This release adds a timeline for order histories and changelogs, lets the date input accept ranges relative to today, and ships a command palette for the docs. It also closes a long tail of focus-ring issues in Safari.</p>
+    <div class="highlight">
+      <strong>New: search everything from the keyboard</strong>
+      <span>Press <c2-kbd>⌘ K</c2-kbd> on any docs page to jump to a component, a guide or an API entry.</span>
+    </div>
+    <c2-accordion multiple client:only="lit">
+      <c2-details expanded>
+        <span slot="title" class="section-title is-new">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          New features <c2-badge tone="primary" count="3"></c2-badge>
+        </span>
+        <ul>
+          <li><c2-badge>Timeline</c2-badge><span><code>c2-timeline</code> and <code>c2-timeline-item</code>, with stacked and <code>split</code> layouts, tones and icon markers.</span><a class="pr" href="#">#91</a></li>
+          <li><c2-badge>Date input</c2-badge><span>Relative ranges such as <code>d-2</code> onwards, limited to past dates when <code>max</code> is today.</span><a class="pr" href="#">#86</a></li>
+          <li><c2-badge>Docs</c2-badge><span>A command palette built from <code>c2-modal</code>, <code>c2-text-field</code> and <code>c2-list</code>.</span><a class="pr" href="#">#84</a></li>
+        </ul>
+      </c2-details>
+      <c2-details>
+        <span slot="title" class="section-title is-improved">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"></path><path d="M16 7h6v6"></path></svg>
+          Improvements <c2-badge count="2"></c2-badge>
+        </span>
+        <ul>
+          <li><c2-badge>Date selector</c2-badge><span>Month navigation stops at <code>min</code> and <code>max</code> instead of showing empty months.</span><a class="pr" href="#">#85</a></li>
+          <li><c2-badge>Theme</c2-badge><span>Timeline connectors and split-panel dividers follow the outline tokens.</span><a class="pr" href="#">#90</a></li>
+        </ul>
+      </c2-details>
+      <c2-details>
+        <span slot="title" class="section-title is-fixed">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          Bug fixes <c2-badge tone="success" count="4"></c2-badge>
+        </span>
+        <ul>
+          <li><c2-badge>List</c2-badge><span>The focus ring no longer clips inside a scrolling list in Safari.</span><a class="pr" href="#">#88</a></li>
+          <li><c2-badge>Select</c2-badge><span>Keeps its value when its options are replaced.</span><a class="pr" href="#">#87</a></li>
+          <li><c2-badge>Tabs</c2-badge><span>The active indicator no longer jumps on the first render.</span><a class="pr" href="#">#83</a></li>
+          <li><c2-badge>Astro</c2-badge><span>A <code>client:only</code> island no longer breaks hydration for the rest of the page.</span><a class="pr" href="#">#82</a></li>
+        </ul>
+      </c2-details>
+    </c2-accordion>
+    <div class="release-footer">
+      <pre class="install">npm install @c2n/timeline@2.4.0<c2-copy-button pin reveal="always"></c2-copy-button></pre>
+      <span class="contributors">
+        <c2-avatar-group aria-label="Contributors" client:only="lit">
+          <c2-avatar name="Ana Lima" auto-color></c2-avatar>
+          <c2-avatar name="Minh Tran" auto-color></c2-avatar>
+          <c2-avatar name="Sofia Rossi" auto-color></c2-avatar>
+          <c2-avatar name="Kenji Sato" auto-color></c2-avatar>
+          <c2-avatar name="Leo Martin" auto-color></c2-avatar>
+          <c2-avatar name="Nora Weiss" auto-color></c2-avatar>
+        </c2-avatar-group>
+        6 contributors
+      </span>
+    </div>
+  </c2-timeline-item>
+  <c2-timeline-item timestamp="Sep 02, 2026" datetime="2026-09-02" tone="danger">
+    <span slot="label" class="release-version">v2.3.0 <c2-badge tone="danger">Breaking</c2-badge></span>
+    <h3>Typed events</h3>
+    <p>Every component now declares its events, so <code>addEventListener</code> is typed per element in TypeScript, React, Vue and Angular. To make that possible, <code>selection-change</code> no longer bubbles.</p>
+    <div class="migration">
+      <strong>Migration.</strong> Move <code>selection-change</code> listeners from a parent onto the component itself, and rename <code>change</code> on <code>c2-tabs</code>.
+      <pre><span class="del">- panel.addEventListener('selection-change', onPick)</span>
+<span class="del">- tabs.addEventListener('change', onTab)</span>
+<span class="add">+ select.addEventListener('selection-change', onPick)</span>
+<span class="add">+ tabs.addEventListener('selection-change', onTab)</span><c2-copy-button pin reveal="always" value="select.addEventListener('selection-change', onPick)
+tabs.addEventListener('selection-change', onTab)"></c2-copy-button></pre>
+    </div>
+    <c2-accordion multiple client:only="lit">
+      <c2-details>
+        <span slot="title" class="section-title is-breaking">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+          Breaking changes <c2-badge tone="danger" count="2"></c2-badge>
+        </span>
+        <ul>
+          <li><c2-badge>Events</c2-badge><span><code>selection-change</code> does not bubble on list, select, table, tabs and virtual list.</span><a class="pr" href="#">#79</a></li>
+          <li><c2-badge>Tabs</c2-badge><span>Fires <code>selection-change</code> instead of <code>change</code>.</span><a class="pr" href="#">#79</a></li>
+        </ul>
+      </c2-details>
+      <c2-details>
+        <span slot="title" class="section-title is-improved">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-5-5L2 17"></path><path d="M16 7h6v6"></path></svg>
+          Improvements <c2-badge count="2"></c2-badge>
+        </span>
+        <ul>
+          <li><c2-badge>Core</c2-badge><span>Boolean attributes read <code>"false"</code> and <code>"0"</code> as false, so server-rendered markup behaves.</span><a class="pr" href="#">#77</a></li>
+          <li><c2-badge>Angular</c2-badge><span><code>C2_FORM_ACCESSORS</code> makes <code>ngModel</code> work on every form control.</span><a class="pr" href="#">#76</a></li>
+        </ul>
+      </c2-details>
+    </c2-accordion>
+    <div class="release-footer">
+      <a class="read-more" href="#">Read the upgrade guide →</a>
+    </div>
+  </c2-timeline-item>
+  <c2-timeline-item timestamp="Aug 18, 2026" datetime="2026-08-18">
+    <span slot="label" class="release-version">v2.2.1 <c2-badge>Patch</c2-badge></span>
+    <p>A patch release with one fix for Safari users.</p>
+    <c2-accordion multiple client:only="lit">
+      <c2-details>
+        <span slot="title" class="section-title is-fixed">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          Bug fixes <c2-badge tone="success" count="1"></c2-badge>
+        </span>
+        <ul>
+          <li><c2-badge>Modal</c2-badge><span>The scroll lock restores the page position after closing in Safari 18.</span><a class="pr" href="#">#74</a></li>
+        </ul>
+      </c2-details>
+    </c2-accordion>
+  </c2-timeline-item>
+</c2-timeline>
+```
+
+```html tag=MdxCodeBlock,label=Activity feed
+<style>
+  .activity-timeline {
+    width: 320px;
+    --c2-timeline-item--padding-bottom: 16px;
+    --c2-timeline-item__marker--size: 28px;
+    --c2-timeline-item__marker--background: #f4f4f5;
+    --c2-timeline-item__marker--border: 1px solid #e4e4e7;
+    --c2-timeline-item__label--line-height: 28px;
+    --c2-timeline-item__timestamp--line-height: 16px;
+    --c2-timeline-item__content--margin-top: 8px;
+  }
+  .activity-timeline blockquote {
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    color: #3f3f46;
+  }
+</style>
+<c2-timeline class="activity-timeline" aria-label="Activity">
+  <c2-timeline-item tone="primary" timestamp="10 min ago">
+    <svg slot="marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    <span slot="label"><strong>Ana</strong> commented</span>
+    <blockquote>Looks good, ship it once CI is green.</blockquote>
+  </c2-timeline-item>
+  <c2-timeline-item tone="success" label="Merged into develop" timestamp="1 hour ago">
+    <svg slot="marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+  </c2-timeline-item>
+</c2-timeline>
+```
+
+```html tag=MdxCodeBlock,label=Dashed roadmap
+<style>
+  .roadmap-timeline {
+    width: 320px;
+    --c2-timeline-item__marker--size: 14px;
+    --c2-timeline-item__marker--border: 3px solid #bcbcc6;
+    --c2-timeline-item__marker__primary--border-color: #7c3aed;
+    --c2-timeline-item__marker__success--border-color: #7c3aed;
+    --c2-timeline-item__connector--background: repeating-linear-gradient(to bottom, #d4d4d8 0 4px, transparent 4px 8px);
+    --c2-timeline-item__timestamp--color: #7c3aed;
+  }
+</style>
+<c2-timeline class="roadmap-timeline" aria-label="Roadmap">
+  <c2-timeline-item label="Research" timestamp="Q1 · done" tone="success"></c2-timeline-item>
+  <c2-timeline-item label="Design system" timestamp="Q2 · in progress" tone="primary"></c2-timeline-item>
+  <c2-timeline-item label="Launch" timestamp="Q4 · planned"></c2-timeline-item>
+</c2-timeline>
+```
+
+</GalleryGrid>

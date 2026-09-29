@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <circle class="muted line" cx="104" cy="60" r="13"/>
+  <path class="muted line" d="M82 108a22 22 0 0 1 44 0Z"/>
+  <circle class="surface line" cx="68" cy="66" r="17"/>
+  <path class="surface line" d="M38 122a30 30 0 0 1 60 0Z"/>
+  <circle class="primary line-surface" cx="116" cy="108" r="14"/>
+  <path class="line-surface" d="M116 102v12M110 108h12"/>
+</svg>

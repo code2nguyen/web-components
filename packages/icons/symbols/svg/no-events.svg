@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <path class="line-ink" d="M58 32v16M102 32v16"/>
+  <rect class="surface line" x="34" y="40" width="92" height="86" rx="8"/>
+  <path class="primary line" d="M34 48a8 8 0 0 1 8-8h76a8 8 0 0 1 8 8v14H34Z"/>
+  <circle class="muted" cx="50" cy="80" r="4"/>
+  <circle class="muted" cx="65" cy="80" r="4"/>
+  <circle class="muted" cx="80" cy="80" r="4"/>
+  <circle class="muted" cx="95" cy="80" r="4"/>
+  <circle class="muted" cx="110" cy="80" r="4"/>
+  <circle class="muted" cx="50" cy="96" r="4"/>
+  <circle class="muted" cx="65" cy="96" r="4"/>
+  <circle class="muted" cx="80" cy="96" r="4"/>
+  <circle class="muted" cx="95" cy="96" r="4"/>
+  <circle class="muted" cx="110" cy="96" r="4"/>
+  <circle class="muted" cx="50" cy="112" r="4"/>
+  <circle class="muted" cx="65" cy="112" r="4"/>
+  <circle class="muted" cx="80" cy="112" r="4"/>
+</svg>

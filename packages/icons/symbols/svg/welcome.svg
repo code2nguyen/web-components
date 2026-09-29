@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <g transform="rotate(-14 80 84)">
+  <rect class="accent" x="50" y="44" width="12" height="40" rx="6"/><rect class="accent" x="63" y="36" width="12" height="46" rx="6"/><rect class="accent" x="76" y="38" width="12" height="44" rx="6"/><rect class="accent" x="89" y="46" width="12" height="36" rx="6"/>
+  <rect class="accent" x="36" y="80" width="14" height="36" rx="7" transform="rotate(-40 43 98)"/>
+  <rect class="accent" x="50" y="68" width="51" height="56" rx="20"/>
+  <path class="line-surface" opacity="0.6" d="M60 96a14 14 0 0 0 14 12"/>
+  </g>
+  <path class="line-primary" d="M112 36a20 20 0 0 1 10 14M118 26a32 32 0 0 1 16 22M36 118a20 20 0 0 1-8-14"/>
+  <path class="primary" d="M32 33Q34 38 39 40Q34 42 32 47Q30 42 25 40Q30 38 32 33Z"/>
+  <circle class="primary-soft" cx="126" cy="112" r="4"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="ink" x="26" y="38" width="108" height="84" rx="8"/>
+  <path class="line-surface" opacity="0.2" d="M27.5 54h105"/>
+  <circle class="error" cx="37" cy="46" r="2.5"/>
+  <circle class="accent" cx="46" cy="46" r="2.5"/>
+  <circle class="success" cx="55" cy="46" r="2.5"/>
+  <path class="line-surface" d="m40 68 9 7-9 7"/>
+  <path class="line-primary" d="M56 82h14"/>
+  <path class="line-surface" opacity="0.3" d="M40 98h52M40 110h32"/>
+  <path class="line-primary" d="M128 21v10M123 26h10"/>
+  <path class="accent" d="M30 120Q31.7 124.3 36 126Q31.7 127.7 30 132Q28.3 127.7 24 126Q28.3 124.3 30 120Z"/>
+</svg>

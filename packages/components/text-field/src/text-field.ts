@@ -86,7 +86,7 @@ export interface TextField {
  * @cssproperty {border} [--c2-text-field__focus--border-left=1px solid #476ef9]
  * @cssproperty {color} --c2-text-field__focus--color
  * @cssproperty {color} --c2-text-field__focus--background
- * @cssproperty {outline} [--c2-text-field__focus--outline=3px solid rgba(71, 110, 249, 0.2)]
+ * @cssproperty {outline} [--c2-text-field__focus--outline=none]
  * @cssproperty {pixel} [--c2-text-field__focus--outline-offset=0px]
  *
  * @cssproperty {border} [--c2-text-field__error--border-top=1px solid #dc2626]
@@ -95,7 +95,7 @@ export interface TextField {
  * @cssproperty {border} [--c2-text-field__error--border-left=1px solid #dc2626]
  * @cssproperty {color} --c2-text-field__error--color
  * @cssproperty {color} --c2-text-field__error--background
- * @cssproperty {outline} [--c2-text-field__error__focus--outline=3px solid rgba(220, 38, 38, 0.2)]
+ * @cssproperty {outline} [--c2-text-field__error__focus--outline=none]
  *
  * @cssproperty {border} [--c2-text-field__read-only--border-top=1px solid #e4e4e7]
  * @cssproperty {border} [--c2-text-field__read-only--border-right=1px solid #e4e4e7]
@@ -112,6 +112,7 @@ export interface TextField {
  * @cssproperty {pixel} [--c2-text-field__clear-icon--size=16px]
  * @cssproperty {color} [--c2-text-field__clear-icon--color=#a1a1aa]
  * @cssproperty {color} [--c2-text-field__clear-icon__hover--color=#18181b]
+ * @cssproperty {outline} [--c2-text-field__clear-icon__focus--outline=2px solid rgba(71, 110, 249, 0.4)]
  *
  * @cssproperty {pixel} [--c2-text-field__help-icon--size=16px]
  * @cssproperty {color} [--c2-text-field__help-icon--color=#71717a]

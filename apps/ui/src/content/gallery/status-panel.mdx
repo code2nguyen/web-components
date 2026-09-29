@@ -3,6 +3,7 @@ import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { StatusPanel } from '@c2n/status-panel'
 import { Button } from '@c2n/button'
+import { OfflineSymbol as SymbolOffline } from '@c2n/symbols'
 
 ## Presets
 
@@ -195,6 +196,22 @@ Classes style assigned media, text, and buttons directly. The same-named public 
 <c2-status-panel client:load class="illustrated-success" status="success" heading="Your launch is live" description="The new experience is now available to everyone.">
   <img slot="media" src="/web-components/status-panel-launch.svg" alt="" />
   <c2-button slot="actions">View release</c2-button>
+</c2-status-panel>
+```
+
+```html tag=MdxCodeBlock,label=Symbol media
+<style>
+  .symbol-media {
+    --c2-status-panel__container--min-height: 0px;
+    --c2-status-panel__container--padding: 28px 24px;
+    --c2-status-panel__media--size: 128px;
+    --c2-status-panel__media-icon--size: 128px;
+    --c2-status-panel__media__error--background-color: transparent;
+  }
+</style>
+<c2-status-panel client:load class="symbol-media" status="error" heading="You are offline" description="Check your connection. Changes are saved and will sync when you are back online.">
+  <c2-symbol-offline slot="media"></c2-symbol-offline>
+  <c2-button slot="actions">Try again</c2-button>
 </c2-status-panel>
 ```
 

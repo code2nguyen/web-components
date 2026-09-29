@@ -1,6 +1,7 @@
 ---
 // ⌘K search, composed from c2 components: c2-modal (focus trap, Escape, backdrop, scroll lock, focus restore),
-// c2-text-field (the query) and c2-list / c2-list-item (results; the list drives the highlighted row through `value`).
+// c2-text-field (the query), c2-list / c2-list-item (results; the list drives the highlighted row through `value`) and
+// c2-shortcut (⌘K / Ctrl+K, which also works while the user types in a field).
 // Rendered as plain tags (registered by data/chrome-modules.ts): the palette is hidden until opened and has many rows,
 // so SSR'ing every row as an island would only add weight. What stays ours: filtering, arrow-key highlight, Enter.
 import { getCollection } from 'astro:content'
@@ -53,6 +54,10 @@ const field = rawElement(
   { class: 'search-palette__field', type: 'search', placeholder: 'Search components…', autocomplete: 'off' },
   '<c2-feather-search slot="prefix-icon"></c2-feather-search><kbd slot="suffix-icon" class="kbd">esc</kbd>',
 )
+const shortcut = rawElement('c2-shortcut', {
+  class: 'search-palette__shortcut',
+  bindings: JSON.stringify([{ keys: 'mod+k', action: 'open-search', description: 'Search the documentation' }]),
+})
 const palette = rawElement(
   'c2-modal',
   { class: 'search-palette', label: 'Search components', 'hide-close': true },
@@ -60,7 +65,7 @@ const palette = rawElement(
 )
 ---
 
-<Fragment set:html={palette} />
+<Fragment set:html={shortcut + palette} />
 
 <style lang="scss" is:global>
   .search-palette {
@@ -155,6 +160,7 @@ const palette = rawElement(
   import type { TextField } from '@c2n/text-field'
   import type { List } from '@c2n/list'
   import type { ListItem } from '@c2n/list-item'
+  import type { Shortcut } from '@c2n/shortcut'
 
   const modal = document.querySelector<Modal>('.search-palette')
   const field = modal?.querySelector<TextField>('.search-palette__field')
@@ -196,16 +202,8 @@ const palette = rawElement(
 
   document.querySelectorAll('[data-open-search]').forEach((button) => button.addEventListener('click', open))
 
-  document.addEventListener('keydown', (event) => {
-    const target = event.target as HTMLElement | null
-    const typing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'C2-TEXT-FIELD' || target.isContentEditable)
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-      event.preventDefault()
-      open()
-    } else if (event.key === '/' && !typing && !modal?.open) {
-      event.preventDefault()
-      open()
-    }
+  document.querySelector<Shortcut>('.search-palette__shortcut')?.addEventListener('shortcut', (event) => {
+    if (event.detail.action === 'open-search') open()
   })
 
   field?.addEventListener('input', filter)

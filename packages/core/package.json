@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -31,6 +31,10 @@
     "./lit-helper.js": {
       "types": "./dist/lit-helper.d.ts",
       "default": "./dist/lit-helper.js"
+    },
+    "./shortcut-helper.js": {
+      "types": "./dist/shortcut-helper.d.ts",
+      "default": "./dist/shortcut-helper.js"
     },
     "./contexts/pager.js": {
       "types": "./dist/contexts/pager.d.ts",

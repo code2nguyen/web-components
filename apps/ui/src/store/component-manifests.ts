@@ -1,4 +1,12 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
+import shortcut from '@c2n/shortcut/custom-elements.json'
+import carousel from '@c2n/carousel/custom-elements.json'
+import tagInput from '@c2n/tag-input/custom-elements.json'
+import timeline from '@c2n/timeline/custom-elements.json'
+import splitPanel from '@c2n/split-panel/custom-elements.json'
+import banner from '@c2n/banner/custom-elements.json'
+import timeInput from '@c2n/time-input/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
@@ -70,12 +78,21 @@ import textField from '@c2n/text-field/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
+import symbols from '@c2n/symbols/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    chatMessageList,
+    shortcut,
+    carousel,
+    tagInput,
+    timeline,
+    splitPanel,
+    banner,
+    timeInput,
     logViewer,
     masonry,
     dashboard,
@@ -147,6 +164,7 @@ export const componentManifests = (function () {
     label,
     featherIcons,
     phosphorIcons,
+    symbols,
   ].reduce((result, item) => {
     const pkg = item as Package
     const tags: string[] = []

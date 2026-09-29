@@ -94,3 +94,21 @@ test('public parts style assigned and fallback slot regions independently', asyn
   await expect(host.locator('.media svg')).toBeVisible()
   await expect(host.locator('.media')).toHaveCSS('background-color', 'rgb(1, 2, 3)')
 })
+
+test('hosts a c2-symbol illustration as media, decorative unless labelled', async ({ page, scenario }) => {
+  await scenario('symbol')
+  const host = page.locator('c2-status-panel')
+  const symbol = host.locator('c2-symbol-offline')
+
+  await expect(host.locator('.media slot > svg')).toBeHidden()
+  await expect(symbol.locator('svg')).toHaveAttribute('aria-hidden', 'true')
+  await expect(symbol).toHaveCSS('width', '96px')
+  await expect(symbol).toHaveCSS('height', '96px')
+
+  await symbol.evaluate(async (element) => {
+    element.setAttribute('label', 'No connection')
+    await (element as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete
+  })
+  await expect(host.getByRole('img', { name: 'No connection' })).toBeVisible()
+  await accessible(page)
+})

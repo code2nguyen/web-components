@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>chat-message-list scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        max-width: 600px;
+      }
+      c2-chat-message-list {
+        height: 240px;
+        border: 1px solid #e4e4e7;
+      }
+      .row {
+        height: 40px;
+      }
+    </style>
+    <script type="module">
+      import '../src/chat-message-list.ts'
+      import '@c2n/chat-message'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

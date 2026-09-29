@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <path class="muted line" d="M86 124 110 84l26 40Z"/>
+  <path class="primary-soft line" d="M22 124 64 58l44 66Z"/>
+  <path class="surface" d="m64 60-10 15.5 6-3 4 4 5-4 5 3Z"/>
+  <path class="line-ink" d="M64 58V26"/>
+  <path class="error" d="M64 26h24l-6 8 6 8H64Z"/>
+  <path class="accent" d="M122 33Q124 38 129 40Q124 42 122 47Q120 42 115 40Q120 38 122 33Z"/>
+  <path class="line-accent" d="M34 36v8M30 40h8"/>
+  <circle class="primary" cx="116" cy="66" r="3"/>
+</svg>

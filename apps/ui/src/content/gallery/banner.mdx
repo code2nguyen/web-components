@@ -1,0 +1,204 @@
+---
+title: 'Banner gallery'
+description: 'Announcement bars, cookie notices and status strips built from the banner variables.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Banner } from '@c2n/banner'
+import { Button } from '@c2n/button'
+import { LinkButton } from '@c2n/link-button'
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default-banner {
+    width: 100%;
+    max-width: 720px;
+  }
+</style>
+<c2-banner class="default-banner" variant="info" heading="Heads up" message="Scheduled maintenance on Sunday, 02:00–04:00 UTC." dismissible></c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Gradient announcement
+<style>
+  .gradient-banner {
+    width: 100%;
+    max-width: 720px;
+    --c2-banner__container--background: linear-gradient(100deg, #4f46e5, #9333ea 55%, #db2777);
+    --c2-banner__container--color: #ffffff;
+    --c2-banner__container--border: none;
+    --c2-banner__container--border-radius: 12px;
+    --c2-banner__container--padding: 12px 12px 12px 20px;
+    --c2-banner__container--box-shadow: 0 10px 30px -12px rgba(147, 51, 234, 0.6);
+    --c2-banner__close--color: rgba(255, 255, 255, 0.8);
+    --c2-banner__close__hover--background: rgba(255, 255, 255, 0.16);
+  }
+  .gradient-banner c2-link-button {
+    --c2-link-button__container--color: #ffffff;
+    --c2-link-button__container__hover--color: #ffffff;
+    --c2-link-button__container--text-decoration: underline;
+    --c2-link-button__container--text-decoration-color: rgba(255, 255, 255, 0.5);
+    --c2-link-button__container--font-weight: 600;
+  }
+</style>
+<c2-banner class="gradient-banner" no-icon dismissible heading="✨ v2.0 is here" message="Realtime collaboration, a new editor and 40% faster builds.">
+  <c2-link-button slot="actions" href="#">Read the changelog →</c2-link-button>
+</c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Accent strip
+<style>
+  .accent-banner {
+    width: 100%;
+    max-width: 720px;
+    --c2-banner__container--border: none;
+    --c2-banner__container--border-radius: 4px 10px 10px 4px;
+    --c2-banner__container--padding: 14px 16px;
+    --c2-banner__container__variant--background-mix: 10%;
+    --c2-banner__container--box-shadow: inset 4px 0 0 #f59e0b;
+    --c2-banner__icon--background-mix: 0%;
+    --c2-banner__icon--padding: 0;
+  }
+  .accent-banner c2-button {
+    --c2-button__container--height: 30px;
+    --c2-button__container--font-size: 13px;
+    --c2-button__container--background-color: #b45309;
+    --c2-button__container__hover--background-color: #92400e;
+    --c2-button__container__active--background-color: #78350f;
+  }
+</style>
+<c2-banner class="accent-banner" variant="warning" heading="Billing" message="Your card ending in 4242 expires this month.">
+  <c2-button slot="actions">Update card</c2-button>
+</c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Cookie consent
+<style>
+  .cookie-banner {
+    width: 100%;
+    max-width: 720px;
+    --c2-banner__container--background: #ffffff;
+    --c2-banner__container--border: 1px solid #e4e4e7;
+    --c2-banner__container--border-radius: 16px;
+    --c2-banner__container--padding: 16px 16px 16px 20px;
+    --c2-banner__container--gap: 16px;
+    --c2-banner__container--box-shadow: 0 12px 32px -8px rgba(24, 24, 27, 0.16);
+    --c2-banner__icon--size: 22px;
+    --c2-banner__icon--padding: 9px;
+    --c2-banner__icon--color: #a16207;
+  }
+  .cookie-banner c2-button {
+    --c2-button__container--height: 34px;
+    --c2-button__container--border-radius: 999px;
+    --c2-button__container--background-color: #18181b;
+    --c2-button__container__hover--background-color: #3f3f46;
+    --c2-button__container__active--background-color: #52525b;
+  }
+  .cookie-banner c2-button.quiet {
+    --c2-button__container--background-color: transparent;
+    --c2-button__container--color: #18181b;
+    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container__active--background-color: #e4e4e7;
+  }
+</style>
+<c2-banner class="cookie-banner" heading="We use cookies" message="to keep you signed in and to understand how the product is used.">
+  <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3a9 9 0 1 0 9 9 3 3 0 0 1-3-3 3 3 0 0 1-3-3 3 3 0 0 1-3-3Z"></path>
+    <path d="M8.5 12.5h.01M12 16h.01M15.5 14.5h.01M9 8h.01"></path>
+  </svg>
+  <c2-button class="quiet" slot="actions">Preferences</c2-button>
+  <c2-button slot="actions">Accept all</c2-button>
+</c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Midnight status
+<style>
+  .midnight-banner {
+    width: 100%;
+    max-width: 720px;
+    --c2-banner__container--background: #0b1120;
+    --c2-banner__container--color: #e2e8f0;
+    --c2-banner__container--border: 1px solid #1e293b;
+    --c2-banner__container--border-radius: 12px;
+    --c2-banner__container--padding: 12px 16px;
+    --c2-banner__container__variant--background-mix: 6%;
+    --c2-banner__container__variant--border-mix: 40%;
+    --c2-banner__container--box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.08);
+    --c2-banner__icon__success--color: #4ade80;
+    --c2-banner__icon--background-mix: 18%;
+    --c2-banner__close--color: #94a3b8;
+    --c2-banner__close__hover--background: rgba(148, 163, 184, 0.14);
+  }
+  .midnight-banner c2-link-button {
+    --c2-link-button__container--color: #4ade80;
+    --c2-link-button__container__hover--color: #86efac;
+    --c2-link-button__container--font-weight: 600;
+  }
+</style>
+<c2-banner class="midnight-banner" variant="success" heading="All systems operational" message="Last incident resolved 12 days ago." dismissible>
+  <c2-link-button slot="actions" href="#">Status page</c2-link-button>
+</c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Soft pill
+<style>
+  .pill-banner {
+    width: 100%;
+    max-width: 720px;
+    --c2-banner__container--border-radius: 999px;
+    --c2-banner__container--padding: 6px 8px 6px 6px;
+    --c2-banner__container--gap: 10px;
+    --c2-banner__container__variant--background-mix: 10%;
+    --c2-banner__container__variant--border-mix: 0%;
+    --c2-banner__container--box-shadow: none;
+    --c2-banner__container--color: #991b1b;
+    --c2-banner__icon--size: 16px;
+    --c2-banner__icon--padding: 6px;
+    --c2-banner__icon--background-mix: 100%;
+    --c2-banner__icon__error--color: #dc2626;
+  }
+  .pill-banner::part(icon) {
+    color: #ffffff;
+    background: #dc2626;
+  }
+  .pill-banner c2-link-button {
+    --c2-link-button__container--color: #991b1b;
+    --c2-link-button__container__hover--color: #7f1d1d;
+    --c2-link-button__container--font-weight: 600;
+    --c2-link-button__container--padding-right: 12px;
+  }
+</style>
+<c2-banner class="pill-banner" variant="error" message="Sync failed — retrying in 30s.">
+  <c2-link-button slot="actions" href="#">Retry now</c2-link-button>
+</c2-banner>
+```
+
+```html tag=MdxCodeBlock,label=Top bar
+<style>
+  .topbar-banner {
+    width: 100%;
+    max-width: 720px;
+    --c2-banner__container--background: #eff6ff;
+    --c2-banner__container--color: #1e3a8a;
+    --c2-banner__container--padding: 8px 16px;
+    --c2-banner__container--font-size: 13px;
+    --c2-banner__icon--size: 16px;
+    --c2-banner__icon--padding: 0;
+    --c2-banner__icon--background-mix: 0%;
+  }
+  .topbar-banner c2-link-button {
+    --c2-link-button__container--font-size: 13px;
+    --c2-link-button__container--font-weight: 600;
+    --c2-link-button__container--color: #1d4ed8;
+  }
+</style>
+<c2-banner class="topbar-banner" position="top" variant="info" message="You're viewing a shared workspace as a guest." dismissible>
+  <c2-link-button slot="actions" href="#">Request access</c2-link-button>
+</c2-banner>
+```
+
+</GalleryGrid>
