@@ -209,6 +209,11 @@ export const overrides: Record<string, Override> = {
     token: 'color-primary-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
   },
+  // Selected + hovered table row: the same stronger tint of the selected surface as the list item.
+  '--c2-table__row__selected__hover--background': {
+    token: 'color-primary-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
+  },
   // Keep the left edge of the color slider on the same outline token as its siblings.
   '--c2-color-slider--border-left': {
     token: 'border',
@@ -255,12 +260,22 @@ export const overrides: Record<string, Override> = {
   '--c2-code-viewer__line__highlighted--background': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-code-viewer__line__highlighted--border-left': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
-  // Autocomplete uses its accent border as the focus indicator; adding the global ring creates a doubled border.
+  // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
-  // Error focus ring stays red on purpose.
-  '--c2-text-field__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
-  '--c2-date-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
-  '--c2-number-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
+  '--c2-text-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-textarea__container__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-tag-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-date-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-time-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-number-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  // A selected tag is marked by a darker fill, not a ring.
+  '--c2-tag-input__tag__focus--background': { token: 'color-outline-variant' },
+  // The error state is carried by the red border, so no error ring either.
+  '--c2-text-field__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-date-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-time-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-number-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-tag-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
   // 1px radii on the colour picker swatch are a detail, not a shape token.
   '--c2-color-select--border-top-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-top-right-radius': { exclude: 'swatch detail radius' },
@@ -323,4 +338,16 @@ export const overrides: Record<string, Override> = {
   '--c2-symbol__accent--color': { exclude: 'decorative golden highlight' },
   '--c2-symbol__success--color': { exclude: 'semantic success colour' },
   '--c2-symbol__warning--color': { exclude: 'semantic warning colour' },
+  // Carousel indicator dots are small fills, not surfaces: they take the strong outline and the muted text colour.
+  '--c2-carousel__indicator--background-color': { token: 'color-outline-strong' },
+  '--c2-carousel__indicator__hover--background-color': { token: 'color-on-surface-variant' },
+  // Timeline: the connector is the standard hairline grey; success and warning markers are semantic status colours.
+  '--c2-timeline-item__connector--background': { token: 'color-outline-variant' },
+  '--c2-timeline-item__marker__success--border-color': { exclude: 'success status colour' },
+  '--c2-timeline-item__marker__success--color': { exclude: 'success status colour' },
+  '--c2-timeline-item__marker__warning--border-color': { exclude: 'warning status colour' },
+  '--c2-timeline-item__marker__warning--color': { exclude: 'warning status colour' },
+  // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
+  '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
+  '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },
 }

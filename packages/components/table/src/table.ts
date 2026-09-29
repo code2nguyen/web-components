@@ -258,10 +258,11 @@ export interface Table {
  *
  * @cssproperty {pixel} [--c2-table__row--height=36px] - Row height; virtualization measures it, so keep it uniform.
  * @cssproperty {border} [--c2-table__row--border-bottom=1px solid #e4e4e7]
- * @cssproperty {color} [--c2-table__row__hover--background=#fafafa]
+ * @cssproperty {color} [--c2-table__row__hover--background=#f4f4f5]
  * @cssproperty {color} [--c2-table__row__odd--background=#fafafa] - Applies with the `stripe` attribute.
  * @cssproperty {color} [--c2-table__row__selected--background=#edf1fe]
  * @cssproperty {color} [--c2-table__row__selected--color=#18181b]
+ * @cssproperty {color} [--c2-table__row__selected__hover--background=#e2e9fd] - A selected row under the pointer.
  * @cssproperty {color} [--c2-table__row__added--background=rgba(22,163,74,0.16)] - Highlight used while a realtime row expands into the table.
  * @cssproperty {color} [--c2-table__row__removed--background=rgba(220,38,38,0.14)] - Highlight used while a realtime row collapses out of the table.
  * @cssproperty {color} [--c2-table__row__increased--background=rgba(22,163,74,0.14)] - Pulse used when the watched numeric value increases.
@@ -330,8 +331,8 @@ export class Table extends LitElement {
   /** Makes every column sortable; a column's own `sortable` still wins. */
   @property({ type: Boolean }) sortable = false
 
-  /** Makes every column resizable; a column's own `resizable` still wins. */
-  @property({ type: Boolean }) resizable = false
+  /** Columns are resizable by default; `resizable="false"` turns it off. A column's own `resizable` still wins. */
+  @property({ type: Boolean }) resizable = true
 
   /** Tints odd rows with `--c2-table__row__odd--background`. */
   @property({ type: Boolean, reflect: true }) stripe = false
@@ -792,6 +793,7 @@ export class Table extends LitElement {
       <div
         class=${classMap({
           row: true,
+          'row--body': true,
           'row--odd': index % 2 === 1,
           'row--selected': selected,
           'row--clickable': selectable,

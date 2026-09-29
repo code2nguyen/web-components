@@ -26,6 +26,18 @@
       <c2-date-input aria-label="Invalid date" value="2026-09-20" error error-text="Choose a weekday."></c2-date-input>
       <c2-date-input aria-label="Read-only date" value="2026-09-15" readonly></c2-date-input>
       <c2-date-input aria-label="Disabled date" value="2026-09-15" disabled></c2-date-input>
+      <c2-date-input id="from-two-days-ago" aria-label="From two days ago" help="Two days ago or later (d-2)."></c2-date-input>
+      <c2-date-input id="past-only" aria-label="Past dates only" help="Yesterday or earlier (d-1)."></c2-date-input>
     </main>
+    <script type="module">
+      // Local-calendar YYYY-MM-DD for today + offset days (toISOString() is UTC and can be off by one).
+      const isoDaysFromToday = (offset) => {
+        const date = new Date()
+        date.setDate(date.getDate() + offset)
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      }
+      document.querySelector('#from-two-days-ago').min = isoDaysFromToday(-2)
+      document.querySelector('#past-only').max = isoDaysFromToday(-1)
+    </script>
   </body>
 </html>

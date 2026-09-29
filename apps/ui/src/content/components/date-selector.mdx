@@ -6,6 +6,7 @@ category: 'Inputs'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import DateSelectorExamplesRuntime from '../../components/DateSelectorExamplesRuntime.astro'
 
 import { DateSelector } from '@c2n/date-selector'
 
@@ -14,6 +15,8 @@ the second completes it, and the third starts over. Use `min` and `max` for avai
 layouts, and `locale` or `week-start` to match the audience. Arrow keys move between days; Page Up and Page Down move
 between months. The calendar keeps a usable seven-column minimum width; on mobile, a two-month selector stacks the
 months vertically.
+
+<DateSelectorExamplesRuntime />
 
 ## Installation
 
@@ -45,3 +48,36 @@ npm install @c2n/date-selector
 Listen for `change` to receive `{ from, to }` in `event.detail`; both are `YYYY-MM-DD` strings. `input` fires at the
 same time for generic form bindings. With `name="trip"`, a complete range submits `trip` and `trip-end`; override the
 second key with `end-name`. `required` treats an unfinished range as missing.
+
+## Limiting the date range
+
+`min` and `max` are inclusive `YYYY-MM-DD` bounds. Days outside them are greyed out (`--c2-date-selector__day__disabled--opacity`) and cannot be clicked or reached with the keyboard, and the previous/next month buttons are disabled once the next month would hold no selectable day. For a range relative to today, compute the bounds when the page loads — the examples below do so from `data-min-days` / `data-max-days` offsets:
+
+```html tag=UsageBlock,package=@c2n/date-selector
+<div data-label="From two days ago (d-2 onwards)">
+  <c2-date-selector months="1" data-min-days="-2" locale="en-US" aria-label="Choose service dates"></c2-date-selector>
+</div>
+<div data-label="Past dates only (up to d-1)">
+  <c2-date-selector months="1" data-max-days="-1" locale="en-US" aria-label="Choose a past period"></c2-date-selector>
+</div>
+```
+
+Build the bounds from the local date parts rather than `toISOString()`, which is UTC and can land on the wrong day:
+
+```ts tag=CodeBlock
+import type { DateSelector } from '@c2n/date-selector'
+
+function isoDaysFromToday(offset: number) {
+  const date = new Date()
+  date.setDate(date.getDate() + offset)
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
+
+const booking = document.querySelector<DateSelector>('#booking')!
+booking.min = isoDaysFromToday(-2) // d-2 and later
+
+const history = document.querySelector<DateSelector>('#history')!
+history.max = isoDaysFromToday(-1) // d-1 and earlier: past dates only
+```

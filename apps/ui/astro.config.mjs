@@ -6,6 +6,19 @@ import { MDXCodeBlockRemark } from './plugin/mdx-codeblock-remark.mjs'
 import { MDXTableExtends } from './plugin/mdx-table-extends.mjs'
 import { HTMLElement } from '@lit-labs/ssr-dom-shim'
 
+// `@astrojs/lit` with its server renderer wrapped by plugin/lit-server.mjs, which keeps Astro's island bootstrap out of
+// named slots. Swapping the entrypoint keeps a single Lit renderer, so `client:only` still needs no hint.
+function litIntegration() {
+  const integration = lit()
+  const setup = integration.hooks['astro:config:setup']
+  integration.hooks['astro:config:setup'] = (options) =>
+    setup({
+      ...options,
+      addRenderer: (renderer) => options.addRenderer({ ...renderer, serverEntrypoint: new URL('./plugin/lit-server.mjs', import.meta.url) }),
+    })
+  return integration
+}
+
 export default defineConfig({
   site: 'https://code2nguyen.github.io',
   base: '/web-components',
@@ -22,7 +35,7 @@ export default defineConfig({
       },
     },
     mdx(),
-    lit(),
+    litIntegration(),
   ],
   scopedStyleStrategy: 'class',
 })

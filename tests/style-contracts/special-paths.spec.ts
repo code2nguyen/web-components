@@ -335,7 +335,9 @@ test('a stable motion declaration remains a valid observable effect', async ({ p
   expect(result.kind).toBe('changed')
 })
 
-test('unrelated pseudo, slotted, delegated, and geometry changes cannot pass', async ({ page }) => {
+test('unrelated pseudo, slotted, delegated, and geometry changes cannot pass', async ({ page, browserName }) => {
+  // Dozens of before/after/restore cycles; CI's WebKit runner needs more than the default 30 s for them.
+  test.slow(browserName === 'webkit')
   await page.setContent('<c2-changing-probe><span class="slotted">Slot</span></c2-changing-probe>')
   await page.evaluate(() => {
     customElements.define(
@@ -579,7 +581,7 @@ test('hidden computed and text changes are not observable presentation', async (
   }
 })
 
-test('SVG bitmap observes externally styled filter, clipping, and transform effects', async ({ page }) => {
+test('SVG bitmap observes externally styled filter, clipping, and transform effects', async ({ page, browserName }) => {
   await page.setContent(`<c2-svg-effect-probe>
     <svg width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" fill="blue"></rect></svg>
   </c2-svg-effect-probe>
@@ -595,6 +597,8 @@ test('SVG bitmap observes externally styled filter, clipping, and transform effe
     ['--c2-svg-effect-probe--clip-path', 'inset(50% 0 0 0)', 'clip-path'],
     ['--c2-svg-effect-probe--transform', 'translateX(10px)', 'transform'],
   ] as const) {
+    // WebKit renders only `url(#…)` filters on SVG child elements, not CSS filter functions, so there is no effect to observe.
+    if (browserName === 'webkit' && valueSyntax === 'filter') continue
     const result = await checkObservableEffect(page, {
       host: 'c2-svg-effect-probe',
       name,

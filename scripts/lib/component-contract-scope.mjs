@@ -70,6 +70,8 @@ export function exampleCoverageProblems(packages, documents) {
       problems.push(`${name}: no runnable UI example uses a published component tag`)
       continue
     }
+    // A component with no styling surface (a behaviour-only element that renders nothing) has nothing to customize.
+    if (!properties.length && !parts.length) continue
     if (!runnable.some((source) => properties.some((property) => source.includes(property)) || parts.some((part) => source.includes(`::part(${part})`)))) {
       problems.push(`${name}: no substantial customization example uses a documented CSS custom property or CSS part`)
     }
