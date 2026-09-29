@@ -3024,4 +3024,37 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-tag-input': {
+    html: `<c2-tag-input aria-label="Recipients" placeholder="Add recipients" value="ann@example.com;bob@example.com" style="width: 320px"></c2-tag-input>`,
+    presets: [
+      {
+        name: 'Pills',
+        description: 'Fully rounded brand-tinted tags without a border.',
+        css: {
+          '--c2-tag-input__tag--border-radius': '999px',
+          '--c2-tag-input__tag--padding-left': '10px',
+          '--c2-tag-input__tag--border': '1px solid transparent',
+          '--c2-tag-input__tag--background': '#edf1fe',
+          '--c2-tag-input__tag--color': '#2f56e6',
+          '--c2-tag-input__remove-icon--color': '#2f56e6',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'A 28px field with 20px tags for toolbars and filters.',
+        css: {
+          '--c2-tag-input--min-height': '28px',
+          '--c2-tag-input--font-size': '12px',
+          '--c2-tag-input--line-height': '16px',
+          '--c2-tag-input--padding-top': '3px',
+          '--c2-tag-input--padding-bottom': '3px',
+          '--c2-tag-input--padding-left': '4px',
+          '--c2-tag-input--gap': '4px',
+          '--c2-tag-input__tag--height': '20px',
+          '--c2-tag-input__tag--padding-left': '6px',
+          '--c2-tag-input__remove-icon--size': '12px',
+        },
+      },
+    ],
+  },
 }

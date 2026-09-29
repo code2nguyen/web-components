@@ -84,6 +84,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Select** — `c2-select` · `@c2n/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options.
 - **Slider** — `c2-slider` · `@c2n/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
 - **Switch** — `c2-switch` · `@c2n/switch` — On/off toggle on a native switch input, with label, description and thumb icons.
+- **Tag Input** — `c2-tag-input` · `@c2n/tag-input` — Turns typed or pasted text into removable tags — recipients, keywords, labels — with configurable delimiters, parsing and validation.
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
 - **Textarea** — `c2-textarea` · `@c2n/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
 - **Theme Select** — `c2-theme-select` · `@c2n/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
