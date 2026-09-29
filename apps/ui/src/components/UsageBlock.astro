@@ -163,13 +163,15 @@ const { code, lang, uid, style, package: pkg } = Astro.props
   }
 
   @media (max-width: 599.98px) {
+    // The label goes in flow above its row, so a long one wraps instead of running into the components.
     .usage__canvas > [data-label] {
       padding-left: 0;
-      padding-top: 28px;
       &::before {
-        top: 6px;
-        transform: none;
+        position: static;
+        flex: 0 0 100%;
         width: auto;
+        margin-bottom: -4px;
+        transform: none;
       }
     }
   }
