@@ -34,7 +34,7 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     --c2-code-viewer--box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     --c2-code-viewer__header--background: rgba(255, 255, 255, 0.06);
     --c2-code-viewer__header--border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    --c2-code-viewer__header--color: #a1a1aa;
+    --c2-code-viewer__header--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-code-viewer style="width: 240px" class="terminal" variant="terminal" language="bash" theme="vitesse-dark" code="npm install\nnpm run ui">
@@ -135,7 +135,7 @@ Curated looks for `c2-code-viewer`. Open any card in the studio to start from it
     --c2-code-viewer--border-top-right-radius: 6px;
     --c2-code-viewer--border-bottom-left-radius: 6px;
     --c2-code-viewer--border-bottom-right-radius: 6px;
-    --c2-code-viewer--background: #fafafa;
+    --c2-code-viewer--background: var(--c2-theme--color-surface-container-low, #fafafa);
   }
 </style>
 <c2-code-viewer style="width: 240px" class="compact" language="ts" theme="github-light" code="const hello = (name) =>\n  `Hi, ${name}!`"></c2-code-viewer>

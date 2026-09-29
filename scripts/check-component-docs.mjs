@@ -56,7 +56,7 @@ for (const file of readdirSync(galleryRoot)
   const fences = [...source.matchAll(/```html\s+([^\n]*\btag=MdxCodeBlock[^\n]*)\n([\s\S]*?)```/g)]
   const baseline = fences.find((match) => /(?:^|[,;\s])label=Default(?:[,;]|$)/.test(match[1]))
   if (!baseline) galleryProblems.push(`${file}: missing a Default gallery sample`)
-  else if (/--c2-[a-z0-9-]+/.test(baseline[2])) galleryProblems.push(`${file}: Default sample changes a c2n CSS variable`)
+  else if (/--c2-[a-z0-9_-]+\s*:/.test(baseline[2])) galleryProblems.push(`${file}: Default sample changes a c2n CSS variable`)
 }
 
 const minimumCoverage = { elements: 1, attributes: 1, slots: 1, events: 1, cssParts: 1 }

@@ -18,7 +18,7 @@ card is `manual` so trying it does not repaint this page.
 ```html tag=MdxCodeBlock,label=Outlined
 <style>
   .outlined {
-    --c2-theme-select__trigger--border: 1px solid #bcbcc6;
+    --c2-theme-select__trigger--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
     --c2-theme-select__trigger--border-radius: 6px;
   }
 </style>
@@ -30,8 +30,8 @@ card is `manual` so trying it does not repaint this page.
   .pill {
     --c2-theme-select__trigger--size: 36px;
     --c2-theme-select__trigger--border-radius: 999px;
-    --c2-theme-select__trigger--background: #f4f4f5;
-    --c2-theme-select__trigger__hover--background: #e4e4e7;
+    --c2-theme-select__trigger--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-theme-select__trigger__hover--background: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-theme-select__icon--size: 18px;
   }
 </style>
@@ -54,13 +54,13 @@ card is `manual` so trying it does not repaint this page.
 ```html tag=MdxCodeBlock,label=Dark menu
 <style>
   .dark-menu {
-    --c2-theme-select__menu--background: #18181b;
-    --c2-theme-select__menu--border: 1px solid #27272a;
+    --c2-theme-select__menu--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-theme-select__menu--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-theme-select__menu--border-radius: 12px;
-    --c2-theme-select__menu-item--color: #fafafa;
-    --c2-theme-select__menu-item__hover--background: #27272a;
-    --c2-theme-select__menu-item__selected--color: #fafafa;
-    --c2-theme-select__menu-item__selected--background: #3f3f46;
+    --c2-theme-select__menu-item--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-theme-select__menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-theme-select__menu-item__selected--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-theme-select__menu-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-theme-select class="dark-menu" manual></c2-theme-select>

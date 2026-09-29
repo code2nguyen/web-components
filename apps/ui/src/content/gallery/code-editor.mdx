@@ -29,22 +29,22 @@ export function debounce(fn, wait = 200) {
 ```html tag=MdxCodeBlock,label=Midnight
 <style>
   .midnight {
-    --c2-code-editor--background: #0d1117;
-    --c2-code-editor--color: #c9d1d9;
-    --c2-code-editor--border: 1px solid #30363d;
+    --c2-code-editor--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-code-editor--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
+    --c2-code-editor--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 87%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor__gutter--color: #6e7681;
-    --c2-code-editor__gutter--border-right: 1px solid #21262d;
-    --c2-code-editor__gutter__active--color: #c9d1d9;
+    --c2-code-editor__gutter--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 94%, var(--c2-theme--color-surface, #ffffff));
+    --c2-code-editor__gutter__active--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor__active-line--background: rgba(110, 118, 129, 0.1);
     --c2-code-editor__selection--background: rgba(56, 139, 253, 0.3);
-    --c2-code-editor__cursor--color: #c9d1d9;
+    --c2-code-editor__cursor--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor__theme--token-keyword: #ff7b72;
     --c2-code-editor__theme--token-string: #a5d6ff;
     --c2-code-editor__theme--token-comment: #8b949e;
     --c2-code-editor__theme--token-constant: #79c0ff;
     --c2-code-editor__theme--token-function: #d2a8ff;
-    --c2-code-editor__theme--token-variable: #c9d1d9;
-    --c2-code-editor__theme--token-punctuation: #c9d1d9;
+    --c2-code-editor__theme--token-variable: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
+    --c2-code-editor__theme--token-punctuation: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-code-editor
@@ -64,19 +64,19 @@ export default palette"
 ```html tag=MdxCodeBlock,label=Terminal
 <style>
   .terminal {
-    --c2-code-editor--background: #10100e;
+    --c2-code-editor--background: var(--c2-theme--color-on-surface, #18181b);
     --c2-code-editor--color: #d8d8c0;
-    --c2-code-editor--border: 1px solid #2c2c26;
+    --c2-code-editor--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 92%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor--border-radius: 4px;
     --c2-code-editor--font-size: 12px;
-    --c2-code-editor__gutter--color: #55554a;
-    --c2-code-editor__gutter--border-right: 1px solid #2c2c26;
+    --c2-code-editor__gutter--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 75%, var(--c2-theme--color-surface, #ffffff));
+    --c2-code-editor__gutter--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 92%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor__gutter__active--color: #d8d8c0;
     --c2-code-editor__cursor--color: #8fc46b;
     --c2-code-editor__active-line--background: rgba(143, 196, 107, 0.07);
     --c2-code-editor__theme--token-keyword: #8fc46b;
     --c2-code-editor__theme--token-string: #e6c384;
-    --c2-code-editor__theme--token-comment: #6a6a5a;
+    --c2-code-editor__theme--token-comment: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 67%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor__theme--token-constant: #7fb4ca;
     --c2-code-editor__theme--token-function: #e6c384;
     --c2-code-editor__theme--token-variable: #d8d8c0;
@@ -100,7 +100,7 @@ for (const step of ['build', 'test', 'deploy']) {
 <style>
   .borderless {
     --c2-code-editor--border: 1px solid transparent;
-    --c2-code-editor--background: #f8f8f8;
+    --c2-code-editor--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor--border-radius: 10px;
     --c2-code-editor--min-height: 96px;
     --c2-code-editor__active-line--background: transparent;
@@ -146,7 +146,7 @@ for (const step of ['build', 'test', 'deploy']) {
 ```html tag=MdxCodeBlock,label=Accented frame
 <style>
   .accented {
-    --c2-code-editor--border: 1px solid #0265dc;
+    --c2-code-editor--border: 1px solid var(--c2-theme--color-primary, #0265dc);
     --c2-code-editor--border-radius: 8px;
     --c2-code-editor--box-shadow: 0 0 0 4px rgba(2, 101, 220, 0.08);
     --c2-code-editor__gutter--background: rgba(2, 101, 220, 0.04);

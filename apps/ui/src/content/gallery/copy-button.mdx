@@ -16,9 +16,9 @@ Curated looks for `c2-copy-button`. Open any card in the studio to start from it
 ```html tag=MdxCodeBlock,label=Outlined
 <style>
   .outlined {
-    --c2-copy-button__container--border: 1px solid #bcbcc6;
-    --c2-copy-button__container__hover--border: 1px solid #a1a1aa;
-    --c2-copy-button__container__hover--background-color: #f4f4f5;
+    --c2-copy-button__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
+    --c2-copy-button__container__hover--border: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-copy-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <c2-copy-button class="outlined" reveal="always" value="14 Rue de Rivoli, 75001 Paris">Copy</c2-copy-button>
@@ -47,8 +47,8 @@ Curated looks for `c2-copy-button`. Open any card in the studio to start from it
     --c2-copy-button__container--height: 32px;
     --c2-copy-button__container--padding-left: 14px;
     --c2-copy-button__container--padding-right: 14px;
-    --c2-copy-button__container--background-color: #f4f4f5;
-    --c2-copy-button__container__hover--background-color: #e4e4e7;
+    --c2-copy-button__container--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-copy-button__container__hover--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <c2-copy-button class="pill" reveal="always" value="c2n_live_8f4c19ab7e2d">Copy token</c2-copy-button>
@@ -68,13 +68,13 @@ The shape it was built for: a block with the button pinned in its corner, copyin
     position: relative;
     margin: 0;
     padding: 12px 44px 12px 14px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
-    background: #fafafa;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12.5px;
     white-space: pre;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <pre class="snippet">npm install @c2n/copy-button<c2-copy-button pin reveal="always"></c2-copy-button></pre>
@@ -87,16 +87,16 @@ The shape it was built for: a block with the button pinned in its corner, copyin
     margin: 0;
     padding: 14px 46px 14px 16px;
     border-radius: 8px;
-    background: #18181b;
-    color: #e4e4e7;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    color: var(--c2-theme--color-outline-variant, #e4e4e7);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12.5px;
     white-space: pre;
   }
   .dark-block c2-copy-button {
-    --c2-copy-button__container--color: #a1a1aa;
+    --c2-copy-button__container--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-copy-button__container__hover--background-color: rgba(255, 255, 255, 0.1);
-    --c2-copy-button__container__hover--color: #fafafa;
+    --c2-copy-button__container__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
     --c2-copy-button__container__copied--color: #4ade80;
   }
 </style>
@@ -109,15 +109,15 @@ The shape it was built for: a block with the button pinned in its corner, copyin
     position: relative;
     max-width: 340px;
     padding: 14px 52px 14px 16px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
     font-size: 13px;
     line-height: 1.55;
-    color: #3f3f46;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
   .detail c2-copy-button {
-    --c2-copy-button__container--border: 1px solid #e4e4e7;
-    --c2-copy-button__container__hover--background-color: #f4f4f5;
+    --c2-copy-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-copy-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <div class="detail">
@@ -134,13 +134,13 @@ The shape it was built for: a block with the button pinned in its corner, copyin
     max-height: 92px;
     overflow: auto;
     padding: 12px 44px 12px 14px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
-    background: #fafafa;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12.5px;
     line-height: 1.7;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <div class="scrolls">git remote add origin git@github.com:code2nguyen/web-components.git && git fetch --all --tags --prune && git checkout -b feature/copy-button origin/develop && npm install && npm run build && npm run ui:build — scroll this box: the pinned button holds its corner in both directions<c2-copy-button pin reveal="always"></c2-copy-button></div>
@@ -152,13 +152,13 @@ The shape it was built for: a block with the button pinned in its corner, copyin
     position: relative;
     margin: 0;
     padding: 12px 44px 12px 14px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
-    background: #fafafa;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 12.5px;
     white-space: pre;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <pre class="on-hover">hover me — the default<c2-copy-button pin></c2-copy-button></pre>

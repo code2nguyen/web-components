@@ -64,6 +64,7 @@ The components lazy-load optional peer engines only when first rendered. Line, a
 <div class="engine-pair">
   <c2-line-chart
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"revenue":365.817,"netIncome":94.68},{"year":2022,"revenue":394.328,"netIncome":99.803},{"year":2023,"revenue":383.285,"netIncome":96.995},{"year":2024,"revenue":391.035,"netIncome":93.736},{"year":2025,"revenue":416.161,"netIncome":112.01}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
@@ -113,6 +114,7 @@ numeric fields are inferred from the first row.
 <c2-area-chart
   class="shared-data-chart"
   x-field="year"
+  label-field="year"
   fill-opacity="0.12"
   data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"operatingIncome":108.949},{"year":2022,"revenue":394.328,"grossProfit":170.782,"operatingIncome":119.437},{"year":2023,"revenue":383.285,"grossProfit":169.148,"operatingIncome":114.301},{"year":2024,"revenue":391.035,"grossProfit":180.683,"operatingIncome":123.216},{"year":2025,"revenue":416.161,"grossProfit":195.201,"operatingIncome":133.05}]'
 >
@@ -148,6 +150,7 @@ context rather than repeating the chart labels.
   <c2-bar-chart
     id="overview-finance-chart"
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"netIncome":112.01}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
@@ -208,7 +211,7 @@ append real samples directly and leave animation off so transitions never overla
 </style>
 
 <div class="overview-live" data-chart-overview-realtime>
-  <c2-line-chart x-field="year" max-points="5">
+  <c2-line-chart x-field="year" label-field="year" max-points="5">
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
     <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
     <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
@@ -265,6 +268,7 @@ Hover a point or toggle a legend item below to see the same semantic event model
   <c2-line-chart
     zoom
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"revenue":365.817,"netIncome":94.68},{"year":2022,"revenue":394.328,"netIncome":99.803},{"year":2023,"revenue":383.285,"netIncome":96.995},{"year":2024,"revenue":391.035,"netIncome":93.736},{"year":2025,"revenue":416.161,"netIncome":112.01}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
@@ -306,6 +310,7 @@ default, 32px for a sparkline). A `ResizeObserver` keeps the engine canvas synch
   <c2-bar-chart
     lazy-render
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"revenue":365.817},{"year":2022,"revenue":394.328},{"year":2023,"revenue":383.285},{"year":2024,"revenue":391.035},{"year":2025,"revenue":416.161}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
@@ -342,6 +347,7 @@ the engine. Theme changes redraw without replacing data.
 <div class="executive-theme">
   <c2-area-chart
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"grossProfit":152.836,"operatingIncome":108.949},{"year":2022,"grossProfit":170.782,"operatingIncome":119.437},{"year":2023,"grossProfit":169.148,"operatingIncome":114.301},{"year":2024,"grossProfit":180.683,"operatingIncome":123.216},{"year":2025,"grossProfit":195.201,"operatingIncome":133.05}]'
   >
     <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>

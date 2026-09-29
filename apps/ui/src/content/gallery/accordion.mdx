@@ -32,11 +32,11 @@ One connected surface by default, with shared dividers and animated panels. The 
     width: 280px;
     max-width: 100%;
     --c2-accordion--gap: 0px;
-    --c2-accordion--border-color: #d4d4d8;
+    --c2-accordion--border-color: var(--c2-theme--color-outline, #d4d4d8);
     --c2-accordion--border-radius: 12px;
-    --c2-details__header--color: #18181b;
-    --c2-details__header__open--background: #f4f4f5;
-    --c2-details__content--color: #52525b;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-details__header__open--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .connected p {
     margin: 0;
@@ -58,8 +58,8 @@ One connected surface by default, with shared dividers and animated panels. The 
     max-width: 100%;
     --c2-accordion--gap: 12px;
     --c2-details--box-shadow: 0 2px 6px rgb(0 0 0 / 5%);
-    --c2-details__header--color: #18181b;
-    --c2-details__content--color: #52525b;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .cards p {
     margin: 0;
@@ -108,11 +108,11 @@ One connected surface by default, with shared dividers and animated panels. The 
     max-width: 100%;
     --c2-accordion--gap: 0px;
     --c2-accordion--border-color: #bbf7d0;
-    --c2-details__header--color: #18181b;
-    --c2-details__header__open--background: #f0fdf4;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-details__header__open--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__header__open--color: #166534;
     --c2-details__header__icon--color: #16a34a;
-    --c2-details__content--color: #52525b;
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__content--border-top: 1px solid #dcfce7;
     --c2-details__content--padding-top: 12px;
   }
@@ -136,13 +136,13 @@ One connected surface by default, with shared dividers and animated panels. The 
     max-width: 100%;
     --c2-accordion--gap: 0px;
     --c2-accordion--border-radius: 0px;
-    --c2-accordion--border-color: #e4e4e7;
+    --c2-accordion--border-color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-details__header--padding-left: 0px;
     --c2-details__header--padding-right: 0px;
-    --c2-details__header--color: #18181b;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-details__header__hover--background: transparent;
     --c2-details__header__hover--color: #2563eb;
-    --c2-details__content--color: #52525b;
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .flush c2-details {
     --c2-details--border-left: none;
@@ -172,11 +172,11 @@ One connected surface by default, with shared dividers and animated panels. The 
     --c2-details--background: transparent;
     --c2-details__header--padding-top: 10px;
     --c2-details__header--padding-bottom: 10px;
-    --c2-details__header--color: #3f3f46;
-    --c2-details__header__hover--background: #f4f4f5;
-    --c2-details__header__open--background: #f4f4f5;
-    --c2-details__header__open--color: #18181b;
-    --c2-details__content--color: #52525b;
+    --c2-details__header--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details__header__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-details__header__open--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-details__header__open--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__content--padding-top: 8px;
   }
   .ghost c2-details {
@@ -205,16 +205,16 @@ One connected surface by default, with shared dividers and animated panels. The 
     max-width: 100%;
     --c2-accordion--gap: 0px;
     --c2-accordion--border-radius: 0px;
-    --c2-accordion--border-color: #e4e4e7;
+    --c2-accordion--border-color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-details__header--flex-direction: row-reverse;
     --c2-details__header--gap: 8px;
     --c2-details__header--padding-left: 8px;
-    --c2-details__header--color: #18181b;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-details__header__icon--width: 16px;
     --c2-details__header__icon--height: 16px;
     --c2-details__header__icon--rotate: 90deg;
-    --c2-details__header__icon--color: #71717a;
-    --c2-details__content--color: #52525b;
+    --c2-details__header__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__content--padding-left: 32px;
   }
   .chevron-first c2-details {
@@ -250,18 +250,18 @@ One connected surface by default, with shared dividers and animated panels. The 
     max-width: 100%;
     --c2-accordion--gap: 0px;
     --c2-accordion--border-radius: 0px;
-    --c2-accordion--border-color: #d4d4d8;
+    --c2-accordion--border-color: var(--c2-theme--color-outline, #d4d4d8);
     --c2-details__header--padding-top: 16px;
     --c2-details__header--padding-bottom: 16px;
     --c2-details__header--padding-left: 0px;
     --c2-details__header--padding-right: 0px;
-    --c2-details__header--color: #18181b;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-details__header--font-size: 15px;
     --c2-details__header__hover--background: transparent;
     --c2-details__header__icon--width: 18px;
     --c2-details__header__icon--height: 18px;
-    --c2-details__header__icon--color: #18181b;
-    --c2-details__content--color: #52525b;
+    --c2-details__header__icon--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__content--padding-top: 0px;
     --c2-details__content--padding-bottom: 16px;
   }
@@ -303,15 +303,15 @@ One connected surface by default, with shared dividers and animated panels. The 
     width: 280px;
     max-width: 100%;
     --c2-accordion--gap: 0px;
-    --c2-accordion--border-color: #3f3f46;
+    --c2-accordion--border-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-accordion--border-radius: 10px;
-    --c2-details--background: #18181b;
-    --c2-details__header--color: #fafafa;
-    --c2-details__header__hover--background: #27272a;
-    --c2-details__header__open--background: #27272a;
-    --c2-details__header__icon--color: #a1a1aa;
+    --c2-details--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-details__header--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-details__header__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details__header__open--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details__header__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-details__header__focus--outline: 2px solid rgba(96, 165, 250, 0.6);
-    --c2-details__content--color: #a1a1aa;
+    --c2-details__content--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-details__content--padding-top: 12px;
   }
   .dark p {
@@ -333,16 +333,16 @@ One connected surface by default, with shared dividers and animated panels. The 
     width: 300px;
     max-width: 100%;
     --c2-accordion--gap: 0px;
-    --c2-accordion--border-color: #e4e4e7;
+    --c2-accordion--border-color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-accordion--border-radius: 12px;
     --c2-details__header--padding-top: 14px;
     --c2-details__header--padding-bottom: 14px;
-    --c2-details__header--color: #18181b;
-    --c2-details__header__content--color: #71717a;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-details__header__content--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-details__header__content--font-size: 12px;
     --c2-details__header__content--margin-top: 2px;
-    --c2-details__content--color: #52525b;
-    --c2-details__content--border-top: 1px solid #f4f4f5;
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details__content--border-top: 1px solid var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-details__content--padding-top: 12px;
   }
   .descriptions p {

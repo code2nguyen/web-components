@@ -82,8 +82,8 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .pinned {
     height: 296px;
     width: 100%;
-    --c2-table__pinned-start--box-shadow: 2px 0 0 0 #e4e4e7;
-    --c2-table__pinned-end--box-shadow: -2px 0 0 0 #e4e4e7;
+    --c2-table__pinned-start--box-shadow: 2px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table__pinned-end--box-shadow: -2px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <c2-table client:only="lit" class="pinned" row-key="id" rows='[{"id":"1","order":"#10841","customer":"Northwind Trading","channel":"Online","items":12,"total":8420.5,"margin":0.182,"status":"Paid","placed":"2026-02-11T09:24:00Z"},{"id":"2","order":"#10840","customer":"Contoso Ltd","channel":"Partner","items":4,"total":1290,"margin":0.241,"status":"Pending","placed":"2026-02-11T08:02:00Z"},{"id":"3","order":"#10839","customer":"Fabrikam","channel":"Online","items":31,"total":18640.75,"margin":0.129,"status":"Paid","placed":"2026-02-10T17:41:00Z"},{"id":"4","order":"#10838","customer":"Tailspin Toys","channel":"Retail","items":7,"total":3150.2,"margin":0.204,"status":"Refunded","placed":"2026-02-10T14:15:00Z"},{"id":"5","order":"#10837","customer":"Adventure Works","channel":"Partner","items":19,"total":9875,"margin":0.163,"status":"Paid","placed":"2026-02-09T11:58:00Z"},{"id":"6","order":"#10836","customer":"Wide World Importers","channel":"Online","items":2,"total":480.9,"margin":0.315,"status":"Pending","placed":"2026-02-09T10:07:00Z"}]'>
@@ -103,7 +103,7 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .resizable {
     height: 296px;
     width: 100%;
-    --c2-table__resizer--color: #e4e4e7;
+    --c2-table__resizer--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table__resizer__hover--color: rgb(2, 101, 220);
   }
 </style>
@@ -128,8 +128,8 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
     border-radius: 999px;
     font-size: 12px;
     font-weight: 500;
-    color: #3f3f46;
-    background: #f4f4f5;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .pills::part(cell-content-team) {
     padding: 2px 10px;
@@ -179,7 +179,7 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .sortable-card {
     height: 296px;
     width: 100%;
-    --c2-table__header-cell__hover--background: #f4f4f5;
+    --c2-table__header-cell__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <c2-table client:only="lit" class="sortable-card" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -216,7 +216,7 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .multi {
     height: 296px;
     width: 100%;
-    --c2-table__header-cell__sorted--color: #18181b;
+    --c2-table__header-cell__sorted--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-table client:only="lit" class="multi" sortable multi-sort sort="team:asc;score:desc" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -271,8 +271,8 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .single-card {
     height: 296px;
     width: 100%;
-    --c2-table__row__selected--background: #18181b;
-    --c2-table__row__selected--color: #ffffff;
+    --c2-table__row__selected--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-table__row__selected--color: var(--c2-theme--color-on-primary, #ffffff);
   }
 </style>
 <c2-table client:only="lit" class="single-card" selection="single" value="3" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -319,13 +319,13 @@ flickering between colors. Every third replay tick performs an add or delete so 
     height: 326px;
     --c2-table__header--height: 42px;
     --c2-table__row--height: 56px;
-    --c2-table__row--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-outline-variant);
   }
   .market-controls {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: var(--site-color-on-surface-muted);
+    color: var(--c2-theme--color-on-surface-variant);
     font-size: 12px;
   }
 </style>
@@ -373,7 +373,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     height: 320px;
     width: 100%;
     --c2-table__toolbar--padding: 10px 12px;
-    --c2-table__toolbar--background: #fafafa;
+    --c2-table__toolbar--background: var(--c2-theme--color-surface-container-low, #fafafa);
   }
   .toolbar-title .bar {
     display: flex;
@@ -387,10 +387,10 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     margin-right: auto;
   }
   .toolbar-title .ghost {
-    --c2-button__container--background-color: #ffffff;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #e4e4e7;
-    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <c2-table client:only="lit" class="toolbar-title" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -451,7 +451,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     height: 320px;
     width: 100%;
     --c2-table__toolbar--padding: 10px 12px;
-    --c2-table__toolbar--border-bottom: 1px solid #e4e4e7;
+    --c2-table__toolbar--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .toolbar-filters .bar {
     display: flex;
@@ -500,8 +500,8 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     height: 330px;
     width: 100%;
     --c2-table__footer--padding: 10px 12px;
-    --c2-table__footer--background: #fafafa;
-    --c2-table__footer--border-top: 1px solid #e4e4e7;
+    --c2-table__footer--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-table__footer--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .footer-total .bar {
     display: flex;
@@ -511,7 +511,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
   }
   .footer-total .label {
     font-size: 12px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .footer-total .total {
     margin-left: auto;
@@ -587,8 +587,8 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   .ledger {
     height: 296px;
     width: 100%;
-    --c2-table__summary--background: #18181b;
-    --c2-table__summary--color: #fafafa;
+    --c2-table__summary--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-table__summary--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
     --c2-table__summary--box-shadow: none;
     --c2-table__summary--height: 40px;
   }
@@ -620,7 +620,7 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   .loading-card {
     height: 296px;
     width: 100%;
-    --c2-table__skeleton--background: #f4f4f5;
+    --c2-table__skeleton--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-table__skeleton--border-radius: 4px;
   }
 </style>
@@ -650,7 +650,7 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   .skeleton-card .line {
     height: 10px;
     border-radius: 4px;
-    background: linear-gradient(90deg, #f4f4f5 0%, #e4e4e7 50%, #f4f4f5 100%);
+    background: linear-gradient(90deg, var(--c2-theme--color-surface-container, #f4f4f5) 0%, var(--c2-theme--color-outline-variant, #e4e4e7) 50%, var(--c2-theme--color-surface-container, #f4f4f5) 100%);
   }
   .skeleton-card .line:nth-child(2) {
     width: 82%;
@@ -683,7 +683,7 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   .empty-card {
     height: 296px;
     width: 100%;
-    --c2-table__state--color: #71717a;
+    --c2-table__state--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-table__state--padding: 40px 16px;
   }
   .empty-card .empty {
@@ -693,7 +693,7 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   }
   .empty-card .empty strong {
     font-size: 14px;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-table client:only="lit" class="empty-card" row-key="id" rows='[]'>
@@ -716,7 +716,7 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   .error-card {
     height: 296px;
     width: 100%;
-    --c2-table__state__error--color: #dc2626;
+    --c2-table__state__error--color: var(--c2-theme--color-error, #dc2626);
     --c2-table__state--padding: 32px 16px;
   }
   .error-card .failed {
@@ -782,12 +782,12 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     --c2-table--border-bottom-left-radius: 0;
     --c2-table--border-bottom-right-radius: 0;
     --c2-table__header--background: transparent;
-    --c2-table__header--border-bottom: 1px solid #18181b;
-    --c2-table__header--color: #18181b;
+    --c2-table__header--border-bottom: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-table__header--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-table__header--letter-spacing: 0.08em;
     --c2-table__header-cell--padding: 0 8px;
-    --c2-table__row--border-bottom: 1px solid #f4f4f5;
-    --c2-table__row__hover--background: #fafafa;
+    --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-table__row__hover--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-table__cell--padding: 0 8px;
   }
 </style>
@@ -810,13 +810,13 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     --c2-table--border-top-right-radius: 0;
     --c2-table--border-bottom-left-radius: 0;
     --c2-table--border-bottom-right-radius: 0;
-    --c2-table__header--background: #f4f4f5;
+    --c2-table__header--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-table__header--height: 32px;
     --c2-table__header--font-size: 12px;
-    --c2-table__header--border-bottom: 1px solid #d4d4d8;
+    --c2-table__header--border-bottom: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-table__row--height: 30px;
-    --c2-table__row--border-bottom: 1px solid #e4e4e7;
-    --c2-table__cell--border-right: 1px solid #e4e4e7;
+    --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table__cell--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table__cell--padding: 0 8px;
     --c2-table__cell--font-size: 12px;
     --c2-table__header-cell--padding: 0 8px;
@@ -838,20 +838,20 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
   .console {
     height: 296px;
     width: 100%;
-    --c2-table--background: #18181b;
-    --c2-table--color: #fafafa;
-    --c2-table--border-top: 1px solid #3f3f46;
-    --c2-table--border-right: 1px solid #3f3f46;
-    --c2-table--border-bottom: 1px solid #3f3f46;
-    --c2-table--border-left: 1px solid #3f3f46;
-    --c2-table__header--background: #27272a;
-    --c2-table__header--color: #a1a1aa;
-    --c2-table__header--border-bottom: 1px solid #3f3f46;
-    --c2-table__row--border-bottom: 1px solid #27272a;
-    --c2-table__row__hover--background: #27272a;
-    --c2-table__cell--color: #fafafa;
-    --c2-table__sort-icon--color: #52525b;
-    --c2-table__sort-icon__active--color: #a1a1aa;
+    --c2-table--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-table--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-table--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__header--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__header--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-table__header--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__cell--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-table__sort-icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__sort-icon__active--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-table client:only="lit" class="console" sortable row-key="id" rows='[{"id":"1","service":"api-gateway","region":"eu-west-1","tier":"Edge","uptime":0.9998,"p95":124,"requests":1284000,"state":"Healthy"},{"id":"2","service":"auth","region":"eu-west-1","tier":"Core","uptime":0.9991,"p95":86,"requests":642000,"state":"Healthy"},{"id":"3","service":"billing","region":"us-east-1","tier":"Core","uptime":0.9912,"p95":412,"requests":98400,"state":"Degraded"},{"id":"4","service":"search","region":"us-east-1","tier":"Edge","uptime":0.9975,"p95":238,"requests":874000,"state":"Healthy"},{"id":"5","service":"notifications","region":"ap-south-1","tier":"Async","uptime":0.9834,"p95":1840,"requests":41200,"state":"Down"},{"id":"6","service":"reports","region":"eu-west-1","tier":"Async","uptime":0.9989,"p95":690,"requests":18600,"state":"Healthy"}]'>
@@ -870,7 +870,7 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
   .soft {
     height: 310px;
     width: 100%;
-    --c2-table--background: #fafafa;
+    --c2-table--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-table--border-top: none;
     --c2-table--border-right: none;
     --c2-table--border-bottom: none;
@@ -880,13 +880,13 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     --c2-table--border-bottom-left-radius: 14px;
     --c2-table--border-bottom-right-radius: 14px;
     --c2-table--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.08);
-    --c2-table__header--background: #fafafa;
+    --c2-table__header--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-table__header--border-bottom: none;
     --c2-table__header--height: 40px;
     --c2-table__row--height: 44px;
     --c2-table__row--border-bottom: none;
-    --c2-table__row__odd--background: #ffffff;
-    --c2-table__row__hover--background: #f4f4f5;
+    --c2-table__row__odd--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__row__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-table__cell--padding: 0 16px;
     --c2-table__header-cell--padding: 0 16px;
   }
@@ -907,10 +907,10 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     height: 296px;
     width: 100%;
     --c2-table__row--border-bottom: none;
-    --c2-table__row__odd--background: #f4f4f5;
-    --c2-table__row__hover--background: #e4e4e7;
-    --c2-table__header--background: #ffffff;
-    --c2-table__header--border-bottom: 2px solid #18181b;
+    --c2-table__row__odd--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-table__row__hover--background: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table__header--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__header--border-bottom: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
   }
 </style>
 <c2-table client:only="lit" class="zebra" stripe sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -987,30 +987,30 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
   .terminal {
     height: 296px;
     width: 100%;
-    --c2-table--background: #09090b;
-    --c2-table--color: #e4e4e7;
+    --c2-table--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table--font-size: 12px;
-    --c2-table--border-top: 1px solid #27272a;
-    --c2-table--border-right: 1px solid #27272a;
-    --c2-table--border-bottom: 1px solid #27272a;
-    --c2-table--border-left: 1px solid #27272a;
-    --c2-table__header--background: #09090b;
-    --c2-table__header--color: #71717a;
+    --c2-table--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__header--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table__header--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-table__header--height: 30px;
     --c2-table__header--letter-spacing: 0.08em;
-    --c2-table__header--border-bottom: 1px solid #27272a;
+    --c2-table__header--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-table__row--height: 30px;
     --c2-table__row--border-bottom: none;
-    --c2-table__row__odd--background: #111113;
-    --c2-table__row__hover--background: #1c1c1f;
-    --c2-table__cell--color: #e4e4e7;
+    --c2-table__row__odd--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 98%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__cell--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table__cell--font-size: 12px;
-    --c2-table__sort-icon--color: #3f3f46;
+    --c2-table__sort-icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-table__sort-icon__active--color: #22c55e;
   }
   .terminal::part(cell-symbol) {
     font-weight: 600;
-    color: #fafafa;
+    color: var(--c2-theme--color-on-inverse-surface, #fafafa);
   }
   .terminal::part(cell-last), .terminal::part(cell-change), .terminal::part(cell-pct), .terminal::part(cell-volume) {
     font-variant-numeric: tabular-nums;

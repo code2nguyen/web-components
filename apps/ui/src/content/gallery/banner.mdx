@@ -37,8 +37,8 @@ import { LinkButton } from '@c2n/link-button'
     --c2-banner__close__hover--background: rgba(255, 255, 255, 0.16);
   }
   .gradient-banner c2-link-button {
-    --c2-link-button__container--color: #ffffff;
-    --c2-link-button__container__hover--color: #ffffff;
+    --c2-link-button__container--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-link-button__container--text-decoration: underline;
     --c2-link-button__container--text-decoration-color: rgba(255, 255, 255, 0.5);
     --c2-link-button__container--font-weight: 600;
@@ -80,8 +80,8 @@ import { LinkButton } from '@c2n/link-button'
   .cookie-banner {
     width: 100%;
     max-width: 720px;
-    --c2-banner__container--background: #ffffff;
-    --c2-banner__container--border: 1px solid #e4e4e7;
+    --c2-banner__container--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-banner__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-banner__container--border-radius: 16px;
     --c2-banner__container--padding: 16px 16px 16px 20px;
     --c2-banner__container--gap: 16px;
@@ -93,16 +93,16 @@ import { LinkButton } from '@c2n/link-button'
   .cookie-banner c2-button {
     --c2-button__container--height: 34px;
     --c2-button__container--border-radius: 999px;
-    --c2-button__container--background-color: #18181b;
-    --c2-button__container__hover--background-color: #3f3f46;
-    --c2-button__container__active--background-color: #52525b;
+    --c2-button__container--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__active--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .cookie-banner c2-button.quiet {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <c2-banner class="cookie-banner" heading="We use cookies" message="to keep you signed in and to understand how the product is used.">
@@ -159,7 +159,7 @@ import { LinkButton } from '@c2n/link-button'
     --c2-banner__icon--size: 16px;
     --c2-banner__icon--padding: 6px;
     --c2-banner__icon--background-mix: 100%;
-    --c2-banner__icon__error--color: #dc2626;
+    --c2-banner__icon__error--color: var(--c2-theme--color-error, #dc2626);
   }
   .pill-banner::part(icon) {
     color: #ffffff;
@@ -182,7 +182,7 @@ import { LinkButton } from '@c2n/link-button'
   .topbar-banner {
     width: 100%;
     max-width: 720px;
-    --c2-banner__container--background: #eff6ff;
+    --c2-banner__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-banner__container--color: #1e3a8a;
     --c2-banner__container--padding: 8px 16px;
     --c2-banner__container--font-size: 13px;

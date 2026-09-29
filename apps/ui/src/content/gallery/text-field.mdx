@@ -35,7 +35,7 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
 <style>
   .soft-filled {
     width: 220px;
-    --c2-text-field--background: #f4f4f5;
+    --c2-text-field--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-text-field--border-top: 1px solid transparent;
     --c2-text-field--border-right: 1px solid transparent;
     --c2-text-field--border-bottom: 1px solid transparent;
@@ -48,11 +48,11 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
     --c2-text-field--border-top-right-radius: 10px;
     --c2-text-field--border-bottom-left-radius: 10px;
     --c2-text-field--border-bottom-right-radius: 10px;
-    --c2-text-field__focus--background: #ffffff;
-    --c2-text-field__focus--border-top: 1px solid #18181b;
-    --c2-text-field__focus--border-right: 1px solid #18181b;
-    --c2-text-field__focus--border-bottom: 1px solid #18181b;
-    --c2-text-field__focus--border-left: 1px solid #18181b;
+    --c2-text-field__focus--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-text-field__focus--border-top: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__focus--border-right: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__focus--border-bottom: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__focus--border-left: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
     --c2-text-field__focus--outline: 3px solid rgba(24, 24, 27, 0.1);
   }
 </style>
@@ -67,11 +67,11 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
     --c2-text-field--border-top: 0px solid transparent;
     --c2-text-field--border-right: 0px solid transparent;
     --c2-text-field--border-left: 0px solid transparent;
-    --c2-text-field--border-bottom: 1px solid #d4d4d8;
+    --c2-text-field--border-bottom: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-text-field__hover--border-top: 0px solid transparent;
     --c2-text-field__hover--border-right: 0px solid transparent;
     --c2-text-field__hover--border-left: 0px solid transparent;
-    --c2-text-field__hover--border-bottom: 1px solid #71717a;
+    --c2-text-field__hover--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
     --c2-text-field__focus--border-top: 0px solid transparent;
     --c2-text-field__focus--border-right: 0px solid transparent;
     --c2-text-field__focus--border-left: 0px solid transparent;
@@ -107,22 +107,22 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
 <style>
   .dark {
     width: 220px;
-    --c2-text-field--background: #18181b;
-    --c2-text-field--color: #f4f4f5;
-    --c2-text-field__placeholder--color: #a1a1aa;
-    --c2-text-field__icon--color: #a1a1aa;
-    --c2-text-field--border-top: 1px solid #3f3f46;
-    --c2-text-field--border-right: 1px solid #3f3f46;
-    --c2-text-field--border-bottom: 1px solid #3f3f46;
-    --c2-text-field--border-left: 1px solid #3f3f46;
-    --c2-text-field__hover--border-top: 1px solid #52525b;
-    --c2-text-field__hover--border-right: 1px solid #52525b;
-    --c2-text-field__hover--border-bottom: 1px solid #52525b;
-    --c2-text-field__hover--border-left: 1px solid #52525b;
-    --c2-text-field__focus--border-top: 1px solid #a1a1aa;
-    --c2-text-field__focus--border-right: 1px solid #a1a1aa;
-    --c2-text-field__focus--border-bottom: 1px solid #a1a1aa;
-    --c2-text-field__focus--border-left: 1px solid #a1a1aa;
+    --c2-text-field--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field__placeholder--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-text-field__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-text-field--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field__hover--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field__hover--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field__hover--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field__hover--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-text-field__focus--border-top: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-text-field__focus--border-right: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-text-field__focus--border-bottom: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-text-field__focus--border-left: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-text-field__focus--outline: 3px solid rgba(244, 244, 245, 0.15);
   }
 </style>
@@ -160,18 +160,18 @@ Border per side, radius per corner, padding and colours are all `--c2-text-field
     --c2-text-field--border-top-right-radius: 0px;
     --c2-text-field--border-bottom-left-radius: 0px;
     --c2-text-field--border-bottom-right-radius: 0px;
-    --c2-text-field--border-top: 1px solid #18181b;
-    --c2-text-field--border-right: 1px solid #18181b;
-    --c2-text-field--border-bottom: 1px solid #18181b;
-    --c2-text-field--border-left: 1px solid #18181b;
-    --c2-text-field__hover--border-top: 1px solid #18181b;
-    --c2-text-field__hover--border-right: 1px solid #18181b;
-    --c2-text-field__hover--border-bottom: 1px solid #18181b;
-    --c2-text-field__hover--border-left: 1px solid #18181b;
-    --c2-text-field__focus--border-top: 2px solid #18181b;
-    --c2-text-field__focus--border-right: 2px solid #18181b;
-    --c2-text-field__focus--border-bottom: 2px solid #18181b;
-    --c2-text-field__focus--border-left: 2px solid #18181b;
+    --c2-text-field--border-top: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field--border-right: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field--border-bottom: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field--border-left: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__hover--border-top: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__hover--border-right: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__hover--border-bottom: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__hover--border-left: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__focus--border-top: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__focus--border-right: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__focus--border-bottom: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-text-field__focus--border-left: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
     --c2-text-field__focus--outline: 0px solid transparent;
     --c2-text-field--font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     --c2-text-field--font-size: 13px;
@@ -392,7 +392,7 @@ Icons, adornment text, the clear button, helper text, the counter and a `c2-labe
     --c2-text-field--border-bottom-right-radius: 999px;
     --c2-text-field--padding-left: 14px;
     --c2-text-field--padding-right: 12px;
-    --c2-text-field--background: #f4f4f5;
+    --c2-text-field--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-text-field--border-top: 1px solid transparent;
     --c2-text-field--border-right: 1px solid transparent;
     --c2-text-field--border-bottom: 1px solid transparent;
@@ -401,7 +401,7 @@ Icons, adornment text, the clear button, helper text, the counter and a `c2-labe
     --c2-text-field__hover--border-right: 1px solid transparent;
     --c2-text-field__hover--border-bottom: 1px solid transparent;
     --c2-text-field__hover--border-left: 1px solid transparent;
-    --c2-text-field__focus--background: #ffffff;
+    --c2-text-field__focus--background: var(--c2-theme--color-surface, #ffffff);
   }
 </style>
 <c2-text-field type="search" clearable placeholder="Search…" class="search"><c2-feather-search slot="prefix-icon"></c2-feather-search></c2-text-field>
@@ -423,7 +423,7 @@ Icons, adornment text, the clear button, helper text, the counter and a `c2-labe
   }
   .currency .adornment {
     font-size: 13px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 </style>
 <c2-text-field type="number" placeholder="0.00" class="currency"><span slot="prefix-icon" class="adornment">$</span><span slot="suffix-icon" class="adornment">USD</span></c2-text-field>
@@ -437,7 +437,7 @@ Icons, adornment text, the clear button, helper text, the counter and a `c2-labe
   }
   .url .adornment {
     font-size: 13px;
-    color: #a1a1aa;
+    color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-text-field placeholder="your-site" class="url"><span slot="prefix-icon" class="adornment">https://</span><span slot="suffix-icon" class="adornment">.com</span></c2-text-field>
@@ -447,8 +447,8 @@ Icons, adornment text, the clear button, helper text, the counter and a `c2-labe
 <style>
   .clearable {
     width: 220px;
-    --c2-text-field__clear-icon--color: #71717a;
-    --c2-text-field__clear-icon__hover--color: #dc2626;
+    --c2-text-field__clear-icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-text-field__clear-icon__hover--color: var(--c2-theme--color-error, #dc2626);
   }
 </style>
 <c2-text-field clearable value="Click × to clear" class="clearable"></c2-text-field>

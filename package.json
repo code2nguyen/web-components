@@ -36,6 +36,7 @@
     "build:tools": "wireit",
     "mcp:inspect": "npm run inspect -w packages/tools/mcp",
     "gallery:shots": "node apps/ui/scripts/gallery-shots.mjs",
+    "gallery:audit": "node apps/ui/scripts/gallery-shots.mjs --audit",
     "mcp:smoke": "npm run smoke -w packages/tools/mcp",
     "docs:check": "node scripts/check-component-docs.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",

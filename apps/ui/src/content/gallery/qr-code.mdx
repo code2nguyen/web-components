@@ -29,8 +29,8 @@ import { QrCode } from '@c2n/qr-code'
 <style>
   .ticket-code {
     --c2-qr-code__module--color: #4c1d95;
-    --c2-qr-code__background--color: #faf5ff;
-    --c2-qr-code__center--background-color: #ffffff;
+    --c2-qr-code__background--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
+    --c2-qr-code__center--background-color: var(--c2-theme--color-surface, #ffffff);
     --c2-qr-code__center--border-radius: 999px;
   }
 

@@ -43,11 +43,11 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
 <style>
   .outline {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__hover--border: 1px solid #a1a1aa;
-    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__hover--border: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <c2-button class="outline">Outline</c2-button>
@@ -84,9 +84,9 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
 ```html tag=MdxCodeBlock,label=Dark
 <style>
   .dark {
-    --c2-button__container--background-color: #18181b;
-    --c2-button__container__hover--background-color: #3f3f46;
-    --c2-button__container__active--background-color: #52525b;
+    --c2-button__container--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__active--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-button__container__focus--outline: 2px solid rgba(24, 24, 27, 0.35);
   }
 </style>
@@ -96,10 +96,10 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
 ```html tag=MdxCodeBlock,label=Neutral
 <style>
   .neutral {
-    --c2-button__container--background-color: #e4e4e7;
-    --c2-button__container--color: #18181b;
-    --c2-button__container__hover--background-color: #d4d4d8;
-    --c2-button__container__active--background-color: #a1a1aa;
+    --c2-button__container--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-button__container__focus--outline: 2px solid rgba(24, 24, 27, 0.25);
   }
 </style>
@@ -263,10 +263,10 @@ Every look below is a handful of `--c2-button__*` custom properties on top of th
     --c2-button__container--padding-right: 12px;
     --c2-button__container--border-radius: 999px;
     --c2-button__container--font-size: 12px;
-    --c2-button__container--background-color: #f4f4f5;
-    --c2-button__container--color: #18181b;
-    --c2-button__container__hover--background-color: #e4e4e7;
-    --c2-button__container__active--background-color: #d4d4d8;
+    --c2-button__container--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline, #d4d4d8);
     --c2-button__container__focus--outline: 2px solid rgba(24, 24, 27, 0.25);
   }
 </style>
@@ -303,10 +303,10 @@ Icons go in the `prefix-icon` and `suffix-icon` slots; they inherit the label co
 <style>
   .both {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <c2-button class="both">
@@ -323,9 +323,9 @@ Icons go in the `prefix-icon` and `suffix-icon` slots; they inherit the label co
 ```html tag=MdxCodeBlock,label=Tinted icon
 <style>
   .tinted-icon {
-    --c2-button__container--background-color: #18181b;
-    --c2-button__container__hover--background-color: #3f3f46;
-    --c2-button__container__active--background-color: #52525b;
+    --c2-button__container--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__active--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-button__icon--color: #fbbf24;
   }
 </style>
@@ -352,9 +352,9 @@ Place icon-only buttons in a positioned wrapper to create a floating action butt
     width: min(100%, 360px);
     height: 220px;
     overflow: hidden;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 18px;
-    background: #ffffff;
+    background: var(--c2-theme--color-surface, #ffffff);
   }
   .floating-actions {
     position: absolute;
@@ -379,11 +379,11 @@ Place icon-only buttons in a positioned wrapper to create a floating action butt
     --c2-button__container--padding-right: 0;
     --c2-button__container--gap: 0;
     --c2-button__container--border-radius: 999px;
-    --c2-button__container--border: 1px solid #e4e4e7;
-    --c2-button__container--background-color: #ffffff;
-    --c2-button__container--color: #18181b;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-button__icon--size: 20px;
   }
   .floating-button:hover,
@@ -458,10 +458,10 @@ Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon 
 <style>
   .feather-outline {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-button__icon--color: #2563eb;
   }
 </style>
@@ -526,9 +526,9 @@ Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon 
 ```html tag=MdxCodeBlock,label=Material dark pill
 <style>
   .material-dark-pill {
-    --c2-button__container--background-color: #18181b;
-    --c2-button__container__hover--background-color: #3f3f46;
-    --c2-button__container__active--background-color: #52525b;
+    --c2-button__container--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__active--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-button__container--border-radius: 999px;
     --c2-button__container--padding-left: 14px;
     --c2-button__container--padding-right: 20px;
@@ -586,8 +586,8 @@ Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon 
 <style>
   .disabled-outline {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-button__container__disabled--opacity: 0.5;
   }
 </style>
@@ -634,10 +634,10 @@ Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon 
   }
   .actions-cancel {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <div class="actions">
@@ -653,7 +653,7 @@ Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon 
     gap: 6px;
     padding: 4px;
     border-radius: 999px;
-    background: #f4f4f5;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .toolbar-item {
     --c2-button__container--height: 30px;
@@ -662,14 +662,14 @@ Icons from `@c2n/feather-icons` and `@c2n/mat-icon` drop straight into the icon 
     --c2-button__container--border-radius: 999px;
     --c2-button__container--font-size: 13px;
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #52525b;
-    --c2-button__container__hover--background-color: #e4e4e7;
-    --c2-button__container__active--background-color: #d4d4d8;
+    --c2-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container__hover--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline, #d4d4d8);
   }
   .toolbar-item-selected {
-    --c2-button__container--background-color: #ffffff;
-    --c2-button__container--color: #18181b;
-    --c2-button__container__hover--background-color: #ffffff;
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface, #ffffff);
   }
 </style>
 <div class="toolbar">

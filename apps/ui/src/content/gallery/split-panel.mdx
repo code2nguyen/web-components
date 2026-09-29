@@ -51,8 +51,8 @@ Curated looks for `c2-split-panel`. The divider is hidden until the pointer find
     height: 160px;
     --c2-split-panel__divider--opacity: 1;
     --c2-split-panel__divider--size: 8px;
-    --c2-split-panel__divider--background: #f4f4f5;
-    --c2-split-panel__divider__hover--background: #e4e4e7;
+    --c2-split-panel__divider--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-split-panel__divider__hover--background: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-split-panel__handle--background: transparent;
     --c2-split-panel__handle--border: none;
   }
@@ -96,8 +96,8 @@ Curated looks for `c2-split-panel`. The divider is hidden until the pointer find
     --c2-split-panel__divider--background: transparent;
     --c2-split-panel__divider__hover--background: transparent;
     --c2-split-panel__divider__active--background: transparent;
-    --c2-split-panel__start--background: #f4f4f5;
-    --c2-split-panel__end--background: #f4f4f5;
+    --c2-split-panel__start--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-split-panel__end--background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .spg-cards [slot] {
     height: 100%;
@@ -116,14 +116,14 @@ Curated looks for `c2-split-panel`. The divider is hidden until the pointer find
   .spg-dark {
     height: 160px;
     --c2-split-panel__divider--opacity: 1;
-    color: #e4e4e7;
-    --c2-split-panel__divider--background: #3f3f46;
-    --c2-split-panel__divider__hover--background: #71717a;
-    --c2-split-panel__handle--background: #27272a;
-    --c2-split-panel__handle--border: 1px solid #3f3f46;
-    --c2-split-panel__handle--color: #a1a1aa;
-    --c2-split-panel__start--background: #18181b;
-    --c2-split-panel__end--background: #09090b;
+    color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-split-panel__divider--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-split-panel__divider__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-split-panel__handle--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-split-panel__handle--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-split-panel__handle--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-split-panel__start--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-split-panel__end--background: var(--c2-theme--color-on-surface, #18181b);
   }
   .spg-dark [slot] {
     padding: 12px;
@@ -139,7 +139,7 @@ Curated looks for `c2-split-panel`. The divider is hidden until the pointer find
 <style>
   .spg-stacked {
     height: 200px;
-    --c2-split-panel__end--background: #fafafa;
+    --c2-split-panel__end--background: var(--c2-theme--color-surface-container-low, #fafafa);
   }
   .spg-stacked [slot] {
     padding: 12px;

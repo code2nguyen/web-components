@@ -31,7 +31,7 @@ import { ReorderList } from '@c2n/reorder-list'
   .operations-queue::part(container) {
     border: 1px solid #ddd6fe;
     border-radius: 14px;
-    background: #faf5ff;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
   }
   .operations-queue::part(item),
   .operations-queue::part(dragging-item) {
@@ -70,7 +70,7 @@ import { ReorderList } from '@c2n/reorder-list'
     --c2-reorder-list__motion--duration: 100ms;
   }
   .compact-backlog::part(item) {
-    border: 1px solid #d4d4d8;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     border-radius: 7px;
     background: white;
   }

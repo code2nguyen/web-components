@@ -27,8 +27,8 @@ The trigger is the `--c2-select__button--*` family: a border per side, radius pe
 <style>
   .soft-filled {
     width: 190px;
-    --c2-select__button--background: #f4f4f5;
-    --c2-select__button__hover--background: #e4e4e7;
+    --c2-select__button--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-select__button__hover--background: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-select__button--border-top: 1px solid transparent;
     --c2-select__button--border-right: 1px solid transparent;
     --c2-select__button--border-bottom: 1px solid transparent;
@@ -88,11 +88,11 @@ The trigger is the `--c2-select__button--*` family: a border per side, radius pe
     --c2-select__button--border-top: 0px solid transparent;
     --c2-select__button--border-right: 0px solid transparent;
     --c2-select__button--border-left: 0px solid transparent;
-    --c2-select__button--border-bottom: 1px solid #d4d4d8;
+    --c2-select__button--border-bottom: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-select__button__hover--border-top: 0px solid transparent;
     --c2-select__button__hover--border-right: 0px solid transparent;
     --c2-select__button__hover--border-left: 0px solid transparent;
-    --c2-select__button__hover--border-bottom: 1px solid #71717a;
+    --c2-select__button__hover--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
     --c2-select__button__open--border-top: 0px solid transparent;
     --c2-select__button__open--border-right: 0px solid transparent;
     --c2-select__button__open--border-left: 0px solid transparent;
@@ -140,36 +140,36 @@ The trigger is the `--c2-select__button--*` family: a border per side, radius pe
 <style>
   .dark {
     width: 190px;
-    --c2-select__button--background: #18181b;
-    --c2-select__button__hover--background: #27272a;
-    --c2-select__button--color: #f4f4f5;
-    --c2-select__button__hover--color: #ffffff;
-    --c2-select__button__suffix-icon--color: #a1a1aa;
-    --c2-select__placeholder--color: #a1a1aa;
-    --c2-select__button--border-top: 1px solid #3f3f46;
-    --c2-select__button--border-right: 1px solid #3f3f46;
-    --c2-select__button--border-bottom: 1px solid #3f3f46;
-    --c2-select__button--border-left: 1px solid #3f3f46;
-    --c2-select__button__hover--border-top: 1px solid #52525b;
-    --c2-select__button__hover--border-right: 1px solid #52525b;
-    --c2-select__button__hover--border-bottom: 1px solid #52525b;
-    --c2-select__button__hover--border-left: 1px solid #52525b;
-    --c2-select__button__open--border-top: 1px solid #71717a;
-    --c2-select__button__open--border-right: 1px solid #71717a;
-    --c2-select__button__open--border-bottom: 1px solid #71717a;
-    --c2-select__button__open--border-left: 1px solid #71717a;
+    --c2-select__button--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-select__button__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__hover--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-select__button__suffix-icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-select__placeholder--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-select__button--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__hover--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__hover--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__hover--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__hover--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__open--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__open--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__open--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__button__open--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
     --c2-select__button__focus--outline: 2px solid rgba(244, 244, 245, 0.25);
-    --c2-select__list--background: #18181b;
-    --c2-select__list--border-top: 1px solid #3f3f46;
-    --c2-select__list--border-right: 1px solid #3f3f46;
-    --c2-select__list--border-bottom: 1px solid #3f3f46;
-    --c2-select__list--border-left: 1px solid #3f3f46;
+    --c2-select__list--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-select__list--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__list--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__list--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-select__list--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-select__list--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    --c2-list-item--color: #e4e4e7;
-    --c2-list-item__hover--background: #27272a;
-    --c2-list-item__selected--background: #3f3f46;
-    --c2-list-item__selected--color: #ffffff;
-    --c2-list-item__selected__hover--background: #52525b;
+    --c2-list-item--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-list-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-list-item__selected--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-list-item__selected__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-select value="FR" placeholder="Country" class="dark" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>
@@ -250,7 +250,7 @@ The trigger is the `--c2-select__button--*` family: a border per side, radius pe
 <style>
   .prefix-icon {
     width: 190px;
-    --c2-select__button__prefix-icon--color: #71717a;
+    --c2-select__button__prefix-icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 </style>
 <c2-select placeholder="Language" class="prefix-icon" client:only="lit">
@@ -362,8 +362,8 @@ The rows are your own `c2-list-item` children: style them with `--c2-list-item--
   .check {
     width: 190px;
     --c2-list-item__selected--background: transparent;
-    --c2-list-item__selected--color: #18181b;
-    --c2-list-item__selected__hover--background: #f4f4f5;
+    --c2-list-item__selected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-list-item__selected__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-list-item__icon--color: #476ef9;
   }
   .check c2-list-item:not([selected]) .tick {
@@ -381,7 +381,7 @@ The rows are your own `c2-list-item` children: style them with `--c2-list-item--
 <style>
   .icon-options {
     width: 190px;
-    --c2-list-item__icon--color: #71717a;
+    --c2-list-item__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-list-item--gap: 10px;
   }
 </style>
@@ -412,7 +412,7 @@ The rows are your own `c2-list-item` children: style them with `--c2-list-item--
   .two-line small {
     display: block;
     font-size: 12px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .two-line c2-list-item[selected] small {
     color: inherit;
@@ -441,8 +441,8 @@ The rows are your own `c2-list-item` children: style them with `--c2-list-item--
     width: 220px;
     --c2-list-item--gap: 10px;
     --c2-list-item__selected--background: transparent;
-    --c2-list-item__selected--color: #18181b;
-    --c2-list-item__selected__hover--background: #f4f4f5;
+    --c2-list-item__selected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-list-item__selected__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .checkbox-multiple .box {
     display: inline-flex;
@@ -451,9 +451,9 @@ The rows are your own `c2-list-item` children: style them with `--c2-list-item--
     box-sizing: border-box;
     width: 16px;
     height: 16px;
-    border: 1px solid #bcbcc6;
+    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
     border-radius: 4px;
-    color: #ffffff;
+    color: var(--c2-theme--color-on-primary, #ffffff);
     transition:
       background 120ms ease,
       border-color 120ms ease;
@@ -498,8 +498,8 @@ The rows are your own `c2-list-item` children: style them with `--c2-list-item--
     --c2-list-item--padding-left: 12px;
     --c2-list-item--border-left: 3px solid transparent;
     --c2-list-item__selected--border-left: 3px solid #476ef9;
-    --c2-list-item__selected--background: #fafafa;
-    --c2-list-item__selected--color: #18181b;
+    --c2-list-item__selected--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-list-item__selected--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-select value="FR" placeholder="Country" class="flat" client:only="lit"><c2-list-item value="US">United States</c2-list-item><c2-list-item value="FR">France</c2-list-item><c2-list-item value="VN">Vietnam</c2-list-item></c2-select>

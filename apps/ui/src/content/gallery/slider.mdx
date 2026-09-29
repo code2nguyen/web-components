@@ -19,7 +19,7 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
     width: 220px;
     --c2-slider__track--height: 8px;
     --c2-slider__thumb--size: 22px;
-    --c2-slider__thumb--border: 3px solid #0265dc;
+    --c2-slider__thumb--border: 3px solid var(--c2-theme--color-primary, #0265dc);
   }
 </style>
 <c2-slider class="thick" value="55" aria-label="Thick"></c2-slider>
@@ -29,7 +29,7 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
 <style>
   .flat {
     width: 220px;
-    --c2-slider__thumb--color: #0265dc;
+    --c2-slider__thumb--color: var(--c2-theme--color-primary, #0265dc);
     --c2-slider__thumb--border: none;
     --c2-slider__thumb--box-shadow: none;
     --c2-slider__thumb--size: 14px;
@@ -44,11 +44,11 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
     width: 220px;
     --c2-slider__track--height: 24px;
     --c2-slider__track--border-radius: 6px;
-    --c2-slider__track--color: #f4f4f5;
-    --c2-slider__fill--color: #0265dc;
+    --c2-slider__track--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-slider__fill--color: var(--c2-theme--color-primary, #0265dc);
     --c2-slider__thumb--size: 8px;
     --c2-slider__thumb--border-radius: 2px;
-    --c2-slider__thumb--color: #ffffff;
+    --c2-slider__thumb--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-slider__thumb--border: none;
     --c2-slider__thumb--box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
     --c2-slider__thumb__hover--box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
@@ -96,8 +96,8 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
     width: 220px;
     --c2-slider__track--height: 6px;
     --c2-slider__track--color: #fee2e2;
-    --c2-slider__fill--color: linear-gradient(90deg, #f59e0b, #dc2626);
-    --c2-slider__thumb--border: 2px solid #dc2626;
+    --c2-slider__fill--color: linear-gradient(90deg, #f59e0b, var(--c2-theme--color-error, #dc2626));
+    --c2-slider__thumb--border: 2px solid var(--c2-theme--color-error, #dc2626);
     --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12);
     --c2-slider__thumb__active--box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.18);
     --c2-slider__thumb__focus--outline: 2px solid rgba(220, 38, 38, 0.4);
@@ -126,16 +126,16 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
     width: 240px;
     padding: 20px;
     border-radius: 12px;
-    background: #18181b;
-    --c2-slider__track--color: #3f3f46;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-slider__track--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-slider__fill--color: #5aa3ff;
-    --c2-slider__thumb--color: #18181b;
+    --c2-slider__thumb--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-slider__thumb--border: 2px solid #5aa3ff;
     --c2-slider__thumb__hover--box-shadow: 0 0 0 6px rgba(90, 163, 255, 0.2);
     --c2-slider__thumb__active--box-shadow: 0 0 0 8px rgba(90, 163, 255, 0.28);
     --c2-slider__thumb__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
-    --c2-slider__value--background: #fafafa;
-    --c2-slider__value--color: #18181b;
+    --c2-slider__value--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-slider__value--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <div class="dark">

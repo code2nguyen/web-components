@@ -26,9 +26,9 @@ Each treatment keeps the native date picker and changes only the public CSS vari
 <style>
   .soft {
     width: 220px;
-    --c2-date-input--background: #f4f4f5;
+    --c2-date-input--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-date-input--border: 1px solid transparent;
-    --c2-date-input__hover--border: 1px solid #d4d4d8;
+    --c2-date-input__hover--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-date-input--border-radius: 10px;
   }
 </style>
@@ -39,13 +39,13 @@ Each treatment keeps the native date picker and changes only the public CSS vari
 <style>
   .dark {
     width: 220px;
-    --c2-date-input--background: #18181b;
-    --c2-date-input--color: #f4f4f5;
-    --c2-date-input--border: 1px solid #3f3f46;
-    --c2-date-input__hover--border: 1px solid #71717a;
-    --c2-date-input__focus--border: 1px solid #a1a1aa;
+    --c2-date-input--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-date-input--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-date-input--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-date-input__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-date-input__focus--border: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-date-input__focus--outline: 2px solid rgba(244, 244, 245, 0.25);
-    --c2-date-input__calendar-icon--color: #a1a1aa;
+    --c2-date-input__calendar-icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-date-input class="dark" aria-label="Due date" value="2026-09-15"></c2-date-input>

@@ -415,7 +415,8 @@ for (const dir of packageDirs.sort()) {
           summary,
           useWhen: fence.meta.useWhen,
           accessibility: fence.meta.accessibility,
-          isDefault: label.toLowerCase() === 'default' && !authoredCss?.includes('--c2-'),
+          // Setting a component variable makes a card a variant; reading a theme token (`var(--c2-theme--…)`) does not.
+          isDefault: label.toLowerCase() === 'default' && !/--c2-[a-z0-9_-]+\s*:/.test(authoredCss ?? ''),
           tags: [...new Set([...html.matchAll(/<(c2-[a-z0-9-]+)/g)].map((match) => match[1]))],
           // Written by `apps/ui/scripts/gallery-shots.mjs` during the Pages deploy, at exactly these paths.
           screenshots: { light: `${DOCS_BASE}/gallery-shots/${id}/${slug}.light.png`, dark: `${DOCS_BASE}/gallery-shots/${id}/${slug}.dark.png` },
