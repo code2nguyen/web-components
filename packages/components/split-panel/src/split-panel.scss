@@ -4,10 +4,12 @@
   $theme: (
     divider--size: 1px,
     divider--hit-area: 12px,
+    divider--opacity: 0,
+    divider__hover--opacity: 1,
     divider--background: #e4e4e7,
     divider__hover--background: #a1a1aa,
     divider__active--background: rgb(2, 101, 220),
-    divider__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    divider__focus--background: rgb(2, 101, 220),
     divider__disabled--opacity: variables.$disabled-content-opacity,
 
     handle--display: flex,
@@ -74,7 +76,10 @@
   touch-action: none;
   user-select: none;
   outline: none;
-  transition: background-color 120ms ease;
+  opacity: css.cssVar(divider--opacity);
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease;
 }
 
 :host([orientation='vertical']) [part~='divider'] {
@@ -98,18 +103,32 @@
   background: css.cssVar(divider__hover--background);
 }
 
+// The line and the grip stay hidden until the pointer finds the divider, and while it is dragged or keyboard-focused.
+:host(:not([disabled])) [part~='divider']:hover,
+:host([dragging]) [part~='divider'],
+[part~='divider']:focus-visible {
+  opacity: css.cssVar(divider__hover--opacity);
+}
+
+// Without a hovering pointer (touch) a hidden divider could not be found at all.
+@media (hover: none) {
+  [part~='divider'] {
+    opacity: css.cssVar(divider__hover--opacity);
+  }
+}
+
 :host([dragging]) [part~='divider'] {
   background: css.cssVar(divider__active--background);
 }
 
+// Keyboard focus recolours the line instead of drawing a ring around it.
 [part~='divider']:focus-visible {
-  outline: css.cssVar(divider__focus--outline);
-  outline-offset: 2px;
+  background: css.cssVar(divider__focus--background);
 }
 
 :host([disabled]) [part~='divider'] {
   cursor: default;
-  opacity: css.cssVar(divider__disabled--opacity);
+  opacity: calc(#{css.cssVar(divider__disabled--opacity)} * #{css.cssVar(divider--opacity)});
 }
 
 [part~='handle'] {

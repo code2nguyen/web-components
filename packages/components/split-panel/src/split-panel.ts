@@ -48,11 +48,13 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
  *
  * @cssproperty {pixel} [--c2-split-panel__divider--size=1px] - Thickness of the visible divider line; it takes that much room between the panels.
  * @cssproperty {pixel} [--c2-split-panel__divider--hit-area=12px] - Thickness of the invisible grab area centred on the divider.
+ * @cssproperty {opacity} [--c2-split-panel__divider--opacity=0] - Resting opacity of the divider line and its grip; hidden until hovered, dragged or keyboard-focused (always shown on devices without hover). Set `1` to keep it visible.
+ * @cssproperty {opacity} [--c2-split-panel__divider__hover--opacity=1] - Opacity while hovered, dragged or keyboard-focused.
  * @cssproperty {color} [--c2-split-panel__divider--background=#e4e4e7]
  * @cssproperty {color} [--c2-split-panel__divider__hover--background=#a1a1aa]
  * @cssproperty {color} [--c2-split-panel__divider__active--background=rgb(2, 101, 220)] - While dragging.
- * @cssproperty {outline} [--c2-split-panel__divider__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
- * @cssproperty {opacity} [--c2-split-panel__divider__disabled--opacity=0.38]
+ * @cssproperty {color} [--c2-split-panel__divider__focus--background=rgb(2, 101, 220)] - While keyboard-focused; the divider draws no outline.
+ * @cssproperty {opacity} [--c2-split-panel__divider__disabled--opacity=0.38] - Multiplied by `--c2-split-panel__divider--opacity`, so a hidden divider stays hidden when disabled.
  *
  * @cssproperty {display} [--c2-split-panel__handle--display=flex] - `none` hides the grip, leaving a bare line.
  * @cssproperty {pixel} [--c2-split-panel__handle--width=12px] - Across the divider.
@@ -189,9 +191,9 @@ export class SplitPanel extends LitElement {
 
   private handlePointerDown(event: PointerEvent) {
     if (this.disabled || (event.pointerType === 'mouse' && event.button !== 0)) return
+    // preventDefault also keeps the divider from taking focus: a drag leaves focus where it was.
     event.preventDefault()
     this.divider.setPointerCapture(event.pointerId)
-    this.divider.focus()
     this.dragging = true
     this.toggleAttribute('dragging', true)
   }

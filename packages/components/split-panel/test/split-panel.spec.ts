@@ -27,6 +27,15 @@ test('splits the space evenly by default', async ({ page, scenario }) => {
   expect(await startSize(page)).toBeCloseTo(298.5, 0)
 })
 
+test('hides the divider and its grip until hovered', async ({ page, scenario }) => {
+  await scenario()
+  await expect(divider(page)).toHaveCSS('opacity', '0')
+  await divider(page).hover()
+  await expect(divider(page)).toHaveCSS('opacity', '1')
+  await page.mouse.move(0, 0)
+  await expect(divider(page)).toHaveCSS('opacity', '0')
+})
+
 test('dragging the divider resizes the panels and reports the position', async ({ page, scenario }) => {
   await scenario()
   await drag(page, 150)
@@ -35,7 +44,7 @@ test('dragging the divider resizes the panels and reports the position', async (
   expect(value).toBeLessThan(27)
   expect(await startSize(page)).toBeLessThan(160)
   await expect(page.getByRole('status')).toHaveText(new RegExp(`:${value}$`))
-  await expect(divider(page)).toBeFocused()
+  await expect(divider(page)).not.toBeFocused()
 })
 
 test('moves with the keyboard', async ({ page, scenario, tab }) => {
@@ -43,7 +52,9 @@ test('moves with the keyboard', async ({ page, scenario, tab }) => {
   await page.getByRole('button', { name: 'Before' }).focus()
   await tab()
   await expect(divider(page)).toBeFocused()
-  await expect(divider(page)).toHaveCSS('outline-style', 'solid')
+  await expect(divider(page)).toHaveCSS('outline-style', 'none')
+  await expect(divider(page)).toHaveCSS('background-color', 'rgb(2, 101, 220)')
+  await expect(divider(page)).toHaveCSS('opacity', '1')
   await page.keyboard.press('ArrowRight')
   await expect(divider(page)).toHaveAttribute('aria-valuenow', '51')
   await page.keyboard.press('Shift+ArrowLeft')

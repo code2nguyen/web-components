@@ -9,7 +9,7 @@ import { SplitPanel } from '@c2n/split-panel'
 
 ## Presets
 
-Curated looks for `c2-split-panel`. The `__divider` group does most of the work — `--c2-split-panel__divider--size` is the room the line takes, `--hit-area` the grab area around it, and `--background` with its `__hover` and `__active` states the colour — while `--c2-split-panel__handle--display: none` removes the grip and `__start` / `__end` colour the panels.
+Curated looks for `c2-split-panel`. The divider is hidden until the pointer finds it (or it is dragged or keyboard-focused); `--c2-split-panel__divider--opacity: 1` keeps it on screen, as the thick bar, accent grip and dark looks do. The `__divider` group does most of the work — `--c2-split-panel__divider--size` is the room the line takes, `--hit-area` the grab area around it, and `--background` with its `__hover` and `__active` states the colour — while `--c2-split-panel__handle--display: none` removes the grip and `__start` / `__end` colour the panels.
 
 <GalleryGrid>
 
@@ -49,6 +49,7 @@ Curated looks for `c2-split-panel`. The `__divider` group does most of the work 
 <style>
   .spg-thick {
     height: 160px;
+    --c2-split-panel__divider--opacity: 1;
     --c2-split-panel__divider--size: 8px;
     --c2-split-panel__divider--background: #f4f4f5;
     --c2-split-panel__divider__hover--background: #e4e4e7;
@@ -69,6 +70,7 @@ Curated looks for `c2-split-panel`. The `__divider` group does most of the work 
 <style>
   .spg-accent {
     height: 160px;
+    --c2-split-panel__divider--opacity: 1;
     --c2-split-panel__handle--width: 8px;
     --c2-split-panel__handle--height: 40px;
     --c2-split-panel__handle--background: rgb(2, 101, 220);
@@ -113,6 +115,7 @@ Curated looks for `c2-split-panel`. The `__divider` group does most of the work 
 <style>
   .spg-dark {
     height: 160px;
+    --c2-split-panel__divider--opacity: 1;
     color: #e4e4e7;
     --c2-split-panel__divider--background: #3f3f46;
     --c2-split-panel__divider__hover--background: #71717a;

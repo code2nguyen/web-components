@@ -547,6 +547,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         name: 'Thick bar',
         description: 'An 8px grey bar with a borderless grip.',
         css: {
+          '--c2-split-panel__divider--opacity': '1',
           '--c2-split-panel__divider--size': '8px',
           '--c2-split-panel__divider--background': '#f4f4f5',
           '--c2-split-panel__divider__hover--background': '#e4e4e7',
@@ -558,6 +559,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         name: 'Accent grip',
         description: 'A tall accent pill in the middle of the divider.',
         css: {
+          '--c2-split-panel__divider--opacity': '1',
           '--c2-split-panel__handle--width': '8px',
           '--c2-split-panel__handle--height': '40px',
           '--c2-split-panel__handle--background': 'rgb(2, 101, 220)',
