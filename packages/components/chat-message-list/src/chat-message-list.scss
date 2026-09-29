@@ -1,0 +1,150 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chat-message-list,
+  $theme: (
+    background: transparent,
+    scroller__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+
+    content--padding: 16px,
+    content--gap: 16px,
+    content--margin-top: auto,
+
+    loading--color: #71717a,
+    loading--font-size: 12px,
+    empty--color: #71717a,
+    empty--font-size: 14px,
+
+    jump-button--size: 32px,
+    jump-button--bottom: 16px,
+    jump-button--border: 1px solid #e4e4e7,
+    jump-button--border-radius: 999px,
+    jump-button--background: #ffffff,
+    jump-button--color: #18181b,
+    jump-button--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    jump-button__hover--background: #f4f4f5,
+    jump-button__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    jump-icon--size: 18px,
+
+    badge--background: rgb(2, 101, 220),
+    badge--color: #ffffff,
+    badge--font-size: 12px,
+    badge--font-weight: 600,
+  )
+);
+
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 0;
+  background: css.cssVar(background);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.c2-chat-message-list__scroller {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  // The component restores the reading position itself when older messages are prepended.
+  overflow-anchor: none;
+  overscroll-behavior: contain;
+  outline: none;
+
+  &:focus-visible {
+    outline: css.cssVar(scroller__focus--outline);
+    outline-offset: -2px;
+  }
+}
+
+.c2-chat-message-list__content {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(content--gap);
+  margin-top: css.cssVar(content--margin-top);
+  padding: css.cssVar(content--padding);
+}
+
+.c2-chat-message-list__loading {
+  align-self: center;
+  color: css.cssVar(loading--color);
+  font-size: css.cssVar(loading--font-size);
+}
+
+.c2-chat-message-list__empty {
+  align-self: center;
+  color: css.cssVar(empty--color);
+  font-size: css.cssVar(empty--font-size);
+  text-align: center;
+}
+
+.c2-chat-message-list__jump-button {
+  position: absolute;
+  bottom: css.cssVar(jump-button--bottom);
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: css.cssVar(jump-button--size);
+  height: css.cssVar(jump-button--size);
+  padding: 0 7px;
+  border: css.cssVar(jump-button--border);
+  border-radius: css.cssVar(jump-button--border-radius);
+  background: css.cssVar(jump-button--background);
+  color: css.cssVar(jump-button--color);
+  box-shadow: css.cssVar(jump-button--box-shadow);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: css.cssVar(jump-button__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(jump-button__focus--outline);
+    outline-offset: 2px;
+  }
+}
+
+.c2-chat-message-list__jump-icon {
+  display: inline-flex;
+  width: css.cssVar(jump-icon--size);
+  height: css.cssVar(jump-icon--size);
+
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.c2-chat-message-list__badge {
+  min-width: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: css.cssVar(badge--background);
+  color: css.cssVar(badge--color);
+  font-size: css.cssVar(badge--font-size);
+  font-weight: css.cssVar(badge--font-weight);
+  line-height: 18px;
+  text-align: center;
+}
+
+.c2-chat-message-list__visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

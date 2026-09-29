@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-chat-message-list</title>
+    <script type="module" src="/src/chat-message-list.ts"></script>
+    <script type="module">
+      import '@c2n/chat-message'
+      import '@c2n/chat-input'
+
+      const list = document.querySelector('#room c2-chat-message-list')
+      let page = 0
+      const row = (text, outgoing) =>
+        `<c2-chat-message ${outgoing ? 'align="right"' : ''}><span slot="title">${outgoing ? 'You' : 'Nova'}</span><div>${text}</div></c2-chat-message>`
+
+      document.querySelector('#room').addEventListener('submit-message', (event) => {
+        list.insertAdjacentHTML('beforeend', row(event.detail, true))
+        list.scrollToBottom('smooth')
+        setTimeout(() => {
+          list.insertAdjacentHTML('beforeend', row('', false))
+          const body = list.lastElementChild.querySelector('div')
+          const words = 'This reply streams in word by word, and the list keeps it in view while you are at the bottom.'.split(' ')
+          let index = 0
+          const timer = setInterval(() => {
+            body.textContent = words.slice(0, ++index).join(' ')
+            if (index === words.length) clearInterval(timer)
+          }, 80)
+        }, 300)
+      })
+      list.addEventListener('load-older', () => {
+        list.loading = true
+        setTimeout(() => {
+          page += 1
+          list.insertAdjacentHTML('afterbegin', Array.from({ length: 6 }, (_, i) => row(`History page ${page}, message ${i + 1}`, i % 2)).join(''))
+          list.loading = false
+          list.hasMore = page < 3
+        }, 600)
+      })
+      list.insertAdjacentHTML('beforeend', Array.from({ length: 12 }, (_, i) => row(`Message ${i + 1}`, i % 2)).join(''))
+    </script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      }
+      #room {
+        display: flex;
+        flex-direction: column;
+        height: 480px;
+        border: 1px solid #e4e4e7;
+        border-radius: 14px;
+      }
+      #room c2-chat-message-list {
+        flex: 1;
+      }
+      #room c2-chat-input {
+        margin: 12px;
+      }
+      .empty {
+        height: 200px;
+        border: 1px dashed #bcbcc6;
+        border-radius: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section id="room">
+      <c2-chat-message-list has-more></c2-chat-message-list>
+      <c2-chat-input aria-label="Message" placeholder="Send a message…"></c2-chat-input>
+    </section>
+    <c2-chat-message-list class="empty">
+      <span slot="empty">No messages yet</span>
+    </c2-chat-message-list>
+  </body>
+</html>

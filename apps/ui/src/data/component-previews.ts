@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'chat-message-list': `<c2-chat-message-list style="width:260px;height:170px;border:1px solid #e4e4e7;border-radius:8px;--c2-chat-message-list__content--padding:10px;--c2-chat-message-list__content--gap:10px">
+  <c2-chat-message style="--c2-chat-message--font-size:13px"><c2-avatar name="Nova AI" initials="AI" slot="avatar" style="--c2-avatar--size:24px"></c2-avatar><div>How can I help today?</div></c2-chat-message>
+  <c2-chat-message align="right" style="--c2-chat-message--font-size:13px"><div>Summarize my inbox.</div></c2-chat-message>
+  <c2-chat-message style="--c2-chat-message--font-size:13px"><c2-avatar name="Nova AI" initials="AI" slot="avatar" style="--c2-avatar--size:24px"></c2-avatar><div>You have three threads waiting.</div></c2-chat-message>
+</c2-chat-message-list>`,
   'log-viewer': `<c2-log-viewer data-log-viewer-demo="preview" wrap aria-label="Store server log" style="height:180px;width:300px"></c2-log-viewer>`,
   masonry: `<c2-masonry style="width:260px;--c2-masonry--gap:6px;--c2-masonry--row-height:9px;--c2-masonry--padding:6px;--c2-masonry--background:#f4f4f5;--c2-masonry--border-radius:8px;--c2-masonry-item--background:#fff;--c2-masonry-item--border:1px solid #e4e4e7;--c2-masonry-item--border-radius:6px;--c2-masonry-item__content--padding:8px">
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>

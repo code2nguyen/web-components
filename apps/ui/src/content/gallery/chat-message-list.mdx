@@ -1,0 +1,166 @@
+---
+description: 'Chat rooms built from c2-chat-message-list, c2-chat-message and c2-chat-input.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ChatMessageList } from '@c2n/chat-message-list'
+import { ChatMessage } from '@c2n/chat-message'
+import { ChatInput } from '@c2n/chat-input'
+import { Avatar } from '@c2n/avatar'
+
+Each card is a whole chat room: the list scrolls the conversation and the composer sits below it. The list's own variables set the spacing and the jump-to-latest button; the rows are styled through `c2-chat-message`.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .list-default {
+    height: 280px;
+    width: min(100%, 420px);
+    border: 1px solid #e4e4e7;
+    border-radius: 14px;
+  }
+</style>
+
+<c2-chat-message-list class="list-default">
+  <c2-chat-message>
+    <c2-avatar slot="avatar" name="Maya Chen" initial-count="2" auto-color></c2-avatar>
+    <span slot="title">Maya</span>
+    <time slot="header-time">09:12</time>
+    <div>Morning! Did the release go out?</div>
+  </c2-chat-message>
+  <c2-chat-message align="right">
+    <span slot="title">You</span>
+    <time slot="header-time">09:14</time>
+    <div>Yes, v0.0.18 is live. No incidents so far.</div>
+  </c2-chat-message>
+  <c2-chat-message>
+    <c2-avatar slot="avatar" name="Maya Chen" initial-count="2" auto-color></c2-avatar>
+    <span slot="title">Maya</span>
+    <time slot="header-time">09:15</time>
+    <div>Great, I'll let the support team know.</div>
+  </c2-chat-message>
+</c2-chat-message-list>
+```
+
+```html tag=MdxCodeBlock,label=Night assistant
+<style>
+  .night-room {
+    display: flex;
+    flex-direction: column;
+    height: 320px;
+    width: min(100%, 420px);
+    border-radius: 18px;
+    background: #111114;
+    color: #e4e4e7;
+    overflow: hidden;
+  }
+  .night-list {
+    flex: 1;
+    --c2-chat-message-list__content--padding: 20px;
+    --c2-chat-message-list__content--gap: 20px;
+    --c2-chat-message-list__jump-button--background: #27272a;
+    --c2-chat-message-list__jump-button--color: #f4f4f5;
+    --c2-chat-message-list__jump-button--border: 1px solid #3f3f46;
+    --c2-chat-message-list__jump-button__hover--background: #3f3f46;
+    --c2-chat-message-list__badge--background: #a78bfa;
+    --c2-chat-message-list__badge--color: #18181b;
+  }
+  .night-list c2-chat-message {
+    --c2-chat-message__message--color: #e4e4e7;
+    --c2-chat-message__header__title--color: #fafafa;
+  }
+  .night-list .night-outgoing {
+    --c2-chat-message__message--background: #312e81;
+    --c2-chat-message__message--padding-top: 8px;
+    --c2-chat-message__message--padding-right: 12px;
+    --c2-chat-message__message--padding-bottom: 8px;
+    --c2-chat-message__message--padding-left: 12px;
+    --c2-chat-message__message--border-top-left-radius: 14px;
+    --c2-chat-message__message--border-top-right-radius: 14px;
+    --c2-chat-message__message--border-bottom-left-radius: 14px;
+    --c2-chat-message__message--border-bottom-right-radius: 14px;
+  }
+  .night-input {
+    margin: 0 14px 14px;
+    --c2-chat-input__container--background: #1c1c21;
+    --c2-chat-input__container--color: #f4f4f5;
+    --c2-chat-input__container--border: 1px solid #3f3f46;
+    --c2-chat-input__send-button--background: #7c3aed;
+  }
+</style>
+
+<section class="night-room">
+  <c2-chat-message-list class="night-list" label="Conversation with Nova">
+    <c2-chat-message>
+      <c2-avatar slot="avatar" name="Nova AI" initials="AI"></c2-avatar>
+      <span slot="title">Nova</span>
+      <div>I summarised the three customer interviews. Want the themes or the quotes first?</div>
+    </c2-chat-message>
+    <c2-chat-message class="night-outgoing" align="right">
+      <div>Themes first, please.</div>
+    </c2-chat-message>
+    <c2-chat-message>
+      <c2-avatar slot="avatar" name="Nova AI" initials="AI"></c2-avatar>
+      <span slot="title">Nova</span>
+      <div>Onboarding friction, unclear pricing and a strong demand for exports.</div>
+    </c2-chat-message>
+  </c2-chat-message-list>
+  <c2-chat-input class="night-input" aria-label="Message" placeholder="Reply to Nova…"></c2-chat-input>
+</section>
+```
+
+```html tag=MdxCodeBlock,label=Support desk
+<style>
+  .desk-list {
+    height: 300px;
+    width: min(100%, 420px);
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    background: #fafafa;
+    --c2-chat-message-list__content--padding: 12px;
+    --c2-chat-message-list__content--gap: 8px;
+    --c2-chat-message-list__content--margin-top: 0;
+    --c2-chat-message-list__jump-button--border-radius: 6px;
+  }
+  .desk-list c2-chat-message {
+    --c2-chat-message--font-size: 13px;
+    --c2-chat-message__message--background: #ffffff;
+    --c2-chat-message__message--border-top: 1px solid #e4e4e7;
+    --c2-chat-message__message--border-right: 1px solid #e4e4e7;
+    --c2-chat-message__message--border-bottom: 1px solid #e4e4e7;
+    --c2-chat-message__message--border-left: 1px solid #e4e4e7;
+    --c2-chat-message__message--border-top-left-radius: 6px;
+    --c2-chat-message__message--border-top-right-radius: 6px;
+    --c2-chat-message__message--border-bottom-left-radius: 6px;
+    --c2-chat-message__message--border-bottom-right-radius: 6px;
+    --c2-chat-message__message--padding-top: 8px;
+    --c2-chat-message__message--padding-right: 10px;
+    --c2-chat-message__message--padding-bottom: 8px;
+    --c2-chat-message__message--padding-left: 10px;
+  }
+  .desk-intro {
+    align-self: center;
+    color: #71717a;
+    font-size: 12px;
+  }
+</style>
+
+<c2-chat-message-list class="desk-list" label="Ticket #4821">
+  <span class="desk-intro" slot="start">Ticket #4821 opened · Tue 14:02</span>
+  <c2-chat-message>
+    <span slot="title">Customer</span>
+    <time slot="header-time">14:02</time>
+    <div>My invoice shows the wrong billing address.</div>
+  </c2-chat-message>
+  <c2-chat-message>
+    <span slot="title">Alex · Support</span>
+    <time slot="header-time">14:05</time>
+    <div>Thanks! I've corrected it and sent a new invoice to your inbox.</div>
+  </c2-chat-message>
+</c2-chat-message-list>
+```
+
+</GalleryGrid>
