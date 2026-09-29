@@ -5,5 +5,5 @@
   <circle class="primary-soft" cx="72" cy="72" r="23"/>
   <path class="line-primary" d="M59 66a15 15 0 0 1 9-10"/>
   <path class="line-primary" d="M126 34v10M121 39h10"/>
-  <circle class="warning" cx="36" cy="118" r="3.5"/>
+  <circle class="accent" cx="36" cy="118" r="3.5"/>
 </svg>

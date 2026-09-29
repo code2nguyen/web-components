@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
   <circle class="backdrop" cx="80" cy="80" r="64"/>
-  <path class="line-warning" d="M80 18v8M42 34l6 6M118 34l-6 6M28 72h8M124 72h8"/>
-  <path class="warning" d="M80 40a30 30 0 0 0-18 54c4 3 6 8 6 12v4h24v-4c0-4 2-9 6-12a30 30 0 0 0-18-54Z"/>
+  <path class="line-accent" d="M80 18v8M42 34l6 6M118 34l-6 6M28 72h8M124 72h8"/>
+  <path class="accent" d="M80 40a30 30 0 0 0-18 54c4 3 6 8 6 12v4h24v-4c0-4 2-9 6-12a30 30 0 0 0-18-54Z"/>
   <path class="line-surface" d="M66 66a15 15 0 0 1 10-12"/>
   <rect class="muted line" x="68" y="110" width="24" height="12" rx="4"/>
   <path class="line" d="M73 130h14"/>

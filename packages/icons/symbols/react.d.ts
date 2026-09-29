@@ -14,33 +14,163 @@
 
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type {
+  AccountLockedSymbol,
+  AchievementSymbol,
+  AgreementSymbol,
+  AiAssistantSymbol,
   AllDoneSymbol,
+  AnalyticsSymbol,
+  AnnouncementSymbol,
+  ApiSymbol,
+  AppearanceSymbol,
+  ArchiveSymbol,
+  AttachmentSymbol,
+  AutomationSymbol,
+  BackupSymbol,
+  BiometricSymbol,
+  BlockedSymbol,
+  BrokenLinkSymbol,
+  BugSymbol,
+  CallSymbol,
+  CameraDeniedSymbol,
+  CelebrationSymbol,
+  ClipboardSymbol,
+  CloudErrorSymbol,
+  CoffeeBreakSymbol,
+  ConnectedSymbol,
+  ContactsSymbol,
+  ConversationSymbol,
+  CookieConsentSymbol,
+  CreateNewSymbol,
+  CreditCardSymbol,
+  CustomizeSymbol,
+  DatabaseSymbol,
+  DeliverySymbol,
+  DesktopSymbol,
+  DisconnectedSymbol,
+  DiscountSymbol,
+  DocumentSymbol,
+  EarningsSymbol,
+  EmailVerificationSymbol,
   EmptyBoxSymbol,
   EmptyCartSymbol,
   EmptyFolderSymbol,
   EmptyInboxSymbol,
+  EmptyTrashSymbol,
+  EmptyWishlistSymbol,
   ErrorSymbol,
   ExpiredSymbol,
+  ExploreSymbol,
+  ExportSymbol,
+  FaqSymbol,
+  FeedbackSymbol,
+  FolderSharedSymbol,
   ForbiddenSymbol,
+  GiftSymbol,
+  GoalsSymbol,
+  GrowthSymbol,
+  GuideSymbol,
+  HealthSymbol,
+  HelpSymbol,
+  HiddenSymbol,
   IdeaSymbol,
+  ImportSymbol,
   InfoSymbol,
+  InviteSymbol,
+  InvoiceSymbol,
+  LanguageSymbol,
   LaunchSymbol,
+  LearnSymbol,
+  LinkSymbol,
+  LocationDeniedSymbol,
+  LocationSymbol,
+  LowBatterySymbol,
+  MagicSymbol,
   MailSentSymbol,
   MaintenanceSymbol,
+  MicrophoneDeniedSymbol,
+  MilestoneSymbol,
+  MobileAppSymbol,
+  NewMessageSymbol,
+  NoBookmarksSymbol,
+  NoCodeSymbol,
   NoDataSymbol,
+  NoDownloadsSymbol,
   NoEventsSymbol,
+  NoFavoritesSymbol,
+  NoFilesSymbol,
+  NoHistorySymbol,
+  NoImagesSymbol,
+  NoIntegrationsSymbol,
+  NoLocationSymbol,
+  NoLogsSymbol,
+  NoMediaSymbol,
   NoMessagesSymbol,
+  NoMusicSymbol,
   NoNotificationsSymbol,
+  NoOrdersSymbol,
   NoResultsSymbol,
+  NoReviewsSymbol,
+  NoTagsSymbol,
+  NoTasksSymbol,
   NoUsersSymbol,
   NotFoundSymbol,
+  NotificationSymbol,
   OfflineSymbol,
+  OnboardingSymbol,
+  OutOfOfficeSymbol,
+  PackageDeliveredSymbol,
+  PageErrorSymbol,
+  PasswordResetSymbol,
+  PasswordSymbol,
+  PaymentFailedSymbol,
+  PaymentSuccessSymbol,
+  PendingSymbol,
+  PreferencesSymbol,
+  PremiumSymbol,
+  PrintSymbol,
+  ProfileSymbol,
+  QrScanSymbol,
+  QuietHoursSymbol,
+  RateLimitedSymbol,
+  ReminderSymbol,
+  ReportSymbol,
+  ReturnsSymbol,
+  SavingsSymbol,
+  ScheduledSymbol,
   SearchSymbol,
   SecureSymbol,
+  SecurityAlertSymbol,
   ServerErrorSymbol,
+  ServerSymbol,
+  SetupSymbol,
+  ShareSymbol,
+  ShoppingBagSymbol,
+  SignInSymbol,
+  SignOutSymbol,
+  SpreadsheetSymbol,
+  StorageFullSymbol,
+  StoreSymbol,
   SuccessSymbol,
+  SupportSymbol,
+  SyncingSymbol,
+  TeamSymbol,
+  TemplatesSymbol,
+  ThankYouSymbol,
+  TimeoutSymbol,
+  TwoFactorSymbol,
+  UnlockedSymbol,
+  UnsupportedDeviceSymbol,
+  UpdateAvailableSymbol,
+  UploadFailedSymbol,
   UploadSymbol,
+  VaultSymbol,
+  VerifiedSymbol,
+  VersionControlSymbol,
+  VideoCallSymbol,
+  WalletSymbol,
   WarningSymbol,
+  WelcomeSymbol,
 } from '@c2n/symbols'
 
 /** Standard React host-element attributes plus the element's own public properties. */
@@ -49,33 +179,163 @@ type C2Props<T> = DetailedHTMLProps<HTMLAttributes<T>, T> & Partial<Omit<T, keyo
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
+      'c2-symbol-account-locked': C2Props<AccountLockedSymbol>
+      'c2-symbol-achievement': C2Props<AchievementSymbol>
+      'c2-symbol-agreement': C2Props<AgreementSymbol>
+      'c2-symbol-ai-assistant': C2Props<AiAssistantSymbol>
       'c2-symbol-all-done': C2Props<AllDoneSymbol>
+      'c2-symbol-analytics': C2Props<AnalyticsSymbol>
+      'c2-symbol-announcement': C2Props<AnnouncementSymbol>
+      'c2-symbol-api': C2Props<ApiSymbol>
+      'c2-symbol-appearance': C2Props<AppearanceSymbol>
+      'c2-symbol-archive': C2Props<ArchiveSymbol>
+      'c2-symbol-attachment': C2Props<AttachmentSymbol>
+      'c2-symbol-automation': C2Props<AutomationSymbol>
+      'c2-symbol-backup': C2Props<BackupSymbol>
+      'c2-symbol-biometric': C2Props<BiometricSymbol>
+      'c2-symbol-blocked': C2Props<BlockedSymbol>
+      'c2-symbol-broken-link': C2Props<BrokenLinkSymbol>
+      'c2-symbol-bug': C2Props<BugSymbol>
+      'c2-symbol-call': C2Props<CallSymbol>
+      'c2-symbol-camera-denied': C2Props<CameraDeniedSymbol>
+      'c2-symbol-celebration': C2Props<CelebrationSymbol>
+      'c2-symbol-clipboard': C2Props<ClipboardSymbol>
+      'c2-symbol-cloud-error': C2Props<CloudErrorSymbol>
+      'c2-symbol-coffee-break': C2Props<CoffeeBreakSymbol>
+      'c2-symbol-connected': C2Props<ConnectedSymbol>
+      'c2-symbol-contacts': C2Props<ContactsSymbol>
+      'c2-symbol-conversation': C2Props<ConversationSymbol>
+      'c2-symbol-cookie-consent': C2Props<CookieConsentSymbol>
+      'c2-symbol-create-new': C2Props<CreateNewSymbol>
+      'c2-symbol-credit-card': C2Props<CreditCardSymbol>
+      'c2-symbol-customize': C2Props<CustomizeSymbol>
+      'c2-symbol-database': C2Props<DatabaseSymbol>
+      'c2-symbol-delivery': C2Props<DeliverySymbol>
+      'c2-symbol-desktop': C2Props<DesktopSymbol>
+      'c2-symbol-disconnected': C2Props<DisconnectedSymbol>
+      'c2-symbol-discount': C2Props<DiscountSymbol>
+      'c2-symbol-document': C2Props<DocumentSymbol>
+      'c2-symbol-earnings': C2Props<EarningsSymbol>
+      'c2-symbol-email-verification': C2Props<EmailVerificationSymbol>
       'c2-symbol-empty-box': C2Props<EmptyBoxSymbol>
       'c2-symbol-empty-cart': C2Props<EmptyCartSymbol>
       'c2-symbol-empty-folder': C2Props<EmptyFolderSymbol>
       'c2-symbol-empty-inbox': C2Props<EmptyInboxSymbol>
+      'c2-symbol-empty-trash': C2Props<EmptyTrashSymbol>
+      'c2-symbol-empty-wishlist': C2Props<EmptyWishlistSymbol>
       'c2-symbol-error': C2Props<ErrorSymbol>
       'c2-symbol-expired': C2Props<ExpiredSymbol>
+      'c2-symbol-explore': C2Props<ExploreSymbol>
+      'c2-symbol-export': C2Props<ExportSymbol>
+      'c2-symbol-faq': C2Props<FaqSymbol>
+      'c2-symbol-feedback': C2Props<FeedbackSymbol>
+      'c2-symbol-folder-shared': C2Props<FolderSharedSymbol>
       'c2-symbol-forbidden': C2Props<ForbiddenSymbol>
+      'c2-symbol-gift': C2Props<GiftSymbol>
+      'c2-symbol-goals': C2Props<GoalsSymbol>
+      'c2-symbol-growth': C2Props<GrowthSymbol>
+      'c2-symbol-guide': C2Props<GuideSymbol>
+      'c2-symbol-health': C2Props<HealthSymbol>
+      'c2-symbol-help': C2Props<HelpSymbol>
+      'c2-symbol-hidden': C2Props<HiddenSymbol>
       'c2-symbol-idea': C2Props<IdeaSymbol>
+      'c2-symbol-import': C2Props<ImportSymbol>
       'c2-symbol-info': C2Props<InfoSymbol>
+      'c2-symbol-invite': C2Props<InviteSymbol>
+      'c2-symbol-invoice': C2Props<InvoiceSymbol>
+      'c2-symbol-language': C2Props<LanguageSymbol>
       'c2-symbol-launch': C2Props<LaunchSymbol>
+      'c2-symbol-learn': C2Props<LearnSymbol>
+      'c2-symbol-link': C2Props<LinkSymbol>
+      'c2-symbol-location': C2Props<LocationSymbol>
+      'c2-symbol-location-denied': C2Props<LocationDeniedSymbol>
+      'c2-symbol-low-battery': C2Props<LowBatterySymbol>
+      'c2-symbol-magic': C2Props<MagicSymbol>
       'c2-symbol-mail-sent': C2Props<MailSentSymbol>
       'c2-symbol-maintenance': C2Props<MaintenanceSymbol>
+      'c2-symbol-microphone-denied': C2Props<MicrophoneDeniedSymbol>
+      'c2-symbol-milestone': C2Props<MilestoneSymbol>
+      'c2-symbol-mobile-app': C2Props<MobileAppSymbol>
+      'c2-symbol-new-message': C2Props<NewMessageSymbol>
+      'c2-symbol-no-bookmarks': C2Props<NoBookmarksSymbol>
+      'c2-symbol-no-code': C2Props<NoCodeSymbol>
       'c2-symbol-no-data': C2Props<NoDataSymbol>
+      'c2-symbol-no-downloads': C2Props<NoDownloadsSymbol>
       'c2-symbol-no-events': C2Props<NoEventsSymbol>
+      'c2-symbol-no-favorites': C2Props<NoFavoritesSymbol>
+      'c2-symbol-no-files': C2Props<NoFilesSymbol>
+      'c2-symbol-no-history': C2Props<NoHistorySymbol>
+      'c2-symbol-no-images': C2Props<NoImagesSymbol>
+      'c2-symbol-no-integrations': C2Props<NoIntegrationsSymbol>
+      'c2-symbol-no-location': C2Props<NoLocationSymbol>
+      'c2-symbol-no-logs': C2Props<NoLogsSymbol>
+      'c2-symbol-no-media': C2Props<NoMediaSymbol>
       'c2-symbol-no-messages': C2Props<NoMessagesSymbol>
+      'c2-symbol-no-music': C2Props<NoMusicSymbol>
       'c2-symbol-no-notifications': C2Props<NoNotificationsSymbol>
+      'c2-symbol-no-orders': C2Props<NoOrdersSymbol>
       'c2-symbol-no-results': C2Props<NoResultsSymbol>
+      'c2-symbol-no-reviews': C2Props<NoReviewsSymbol>
+      'c2-symbol-no-tags': C2Props<NoTagsSymbol>
+      'c2-symbol-no-tasks': C2Props<NoTasksSymbol>
       'c2-symbol-no-users': C2Props<NoUsersSymbol>
       'c2-symbol-not-found': C2Props<NotFoundSymbol>
+      'c2-symbol-notification': C2Props<NotificationSymbol>
       'c2-symbol-offline': C2Props<OfflineSymbol>
+      'c2-symbol-onboarding': C2Props<OnboardingSymbol>
+      'c2-symbol-out-of-office': C2Props<OutOfOfficeSymbol>
+      'c2-symbol-package-delivered': C2Props<PackageDeliveredSymbol>
+      'c2-symbol-page-error': C2Props<PageErrorSymbol>
+      'c2-symbol-password': C2Props<PasswordSymbol>
+      'c2-symbol-password-reset': C2Props<PasswordResetSymbol>
+      'c2-symbol-payment-failed': C2Props<PaymentFailedSymbol>
+      'c2-symbol-payment-success': C2Props<PaymentSuccessSymbol>
+      'c2-symbol-pending': C2Props<PendingSymbol>
+      'c2-symbol-preferences': C2Props<PreferencesSymbol>
+      'c2-symbol-premium': C2Props<PremiumSymbol>
+      'c2-symbol-print': C2Props<PrintSymbol>
+      'c2-symbol-profile': C2Props<ProfileSymbol>
+      'c2-symbol-qr-scan': C2Props<QrScanSymbol>
+      'c2-symbol-quiet-hours': C2Props<QuietHoursSymbol>
+      'c2-symbol-rate-limited': C2Props<RateLimitedSymbol>
+      'c2-symbol-reminder': C2Props<ReminderSymbol>
+      'c2-symbol-report': C2Props<ReportSymbol>
+      'c2-symbol-returns': C2Props<ReturnsSymbol>
+      'c2-symbol-savings': C2Props<SavingsSymbol>
+      'c2-symbol-scheduled': C2Props<ScheduledSymbol>
       'c2-symbol-search': C2Props<SearchSymbol>
       'c2-symbol-secure': C2Props<SecureSymbol>
+      'c2-symbol-security-alert': C2Props<SecurityAlertSymbol>
+      'c2-symbol-server': C2Props<ServerSymbol>
       'c2-symbol-server-error': C2Props<ServerErrorSymbol>
+      'c2-symbol-setup': C2Props<SetupSymbol>
+      'c2-symbol-share': C2Props<ShareSymbol>
+      'c2-symbol-shopping-bag': C2Props<ShoppingBagSymbol>
+      'c2-symbol-sign-in': C2Props<SignInSymbol>
+      'c2-symbol-sign-out': C2Props<SignOutSymbol>
+      'c2-symbol-spreadsheet': C2Props<SpreadsheetSymbol>
+      'c2-symbol-storage-full': C2Props<StorageFullSymbol>
+      'c2-symbol-store': C2Props<StoreSymbol>
       'c2-symbol-success': C2Props<SuccessSymbol>
+      'c2-symbol-support': C2Props<SupportSymbol>
+      'c2-symbol-syncing': C2Props<SyncingSymbol>
+      'c2-symbol-team': C2Props<TeamSymbol>
+      'c2-symbol-templates': C2Props<TemplatesSymbol>
+      'c2-symbol-thank-you': C2Props<ThankYouSymbol>
+      'c2-symbol-timeout': C2Props<TimeoutSymbol>
+      'c2-symbol-two-factor': C2Props<TwoFactorSymbol>
+      'c2-symbol-unlocked': C2Props<UnlockedSymbol>
+      'c2-symbol-unsupported-device': C2Props<UnsupportedDeviceSymbol>
+      'c2-symbol-update-available': C2Props<UpdateAvailableSymbol>
       'c2-symbol-upload': C2Props<UploadSymbol>
+      'c2-symbol-upload-failed': C2Props<UploadFailedSymbol>
+      'c2-symbol-vault': C2Props<VaultSymbol>
+      'c2-symbol-verified': C2Props<VerifiedSymbol>
+      'c2-symbol-version-control': C2Props<VersionControlSymbol>
+      'c2-symbol-video-call': C2Props<VideoCallSymbol>
+      'c2-symbol-wallet': C2Props<WalletSymbol>
       'c2-symbol-warning': C2Props<WarningSymbol>
+      'c2-symbol-welcome': C2Props<WelcomeSymbol>
     }
   }
 }

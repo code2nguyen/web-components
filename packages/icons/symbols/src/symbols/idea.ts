@@ -17,14 +17,15 @@ import { SymbolElement } from '../symbol'
  * @cssproperty {color} [--c2-symbol__ink--color=#71717a] - Small solid details: handles, dots, clock hands.
  * @cssproperty {color} [--c2-symbol__primary--color=#0265dc] - Accent fills and strokes.
  * @cssproperty {color} [--c2-symbol__primary-soft--color=#edf1fe] - Soft accent fills: a lens, a folder back, a chat bubble.
+ * @cssproperty {color} [--c2-symbol__accent--color=#fbbf24] - Decorative warm highlight: stars, coins, light bulbs, flames, confetti.
  * @cssproperty {color} [--c2-symbol__success--color=#16a34a] - Success badges and check marks.
- * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges, the light bulb, the rocket flame.
+ * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges and hazard signs.
  * @cssproperty {color} [--c2-symbol__error--color=#dc2626] - Error badges and strike-throughs.
  */
 @customElement('c2-symbol-idea')
 export class IdeaSymbol extends SymbolElement {
   protected override renderSymbol() {
-    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><path class="line-warning" d="M80 18v8M42 34l6 6M118 34l-6 6M28 72h8M124 72h8"/><path class="warning" d="M80 40a30 30 0 0 0-18 54c4 3 6 8 6 12v4h24v-4c0-4 2-9 6-12a30 30 0 0 0-18-54Z"/><path class="line-surface" d="M66 66a15 15 0 0 1 10-12"/><rect class="muted line" x="68" y="110" width="24" height="12" rx="4"/><path class="line" d="M73 130h14"/>`
+    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><path class="line-accent" d="M80 18v8M42 34l6 6M118 34l-6 6M28 72h8M124 72h8"/><path class="accent" d="M80 40a30 30 0 0 0-18 54c4 3 6 8 6 12v4h24v-4c0-4 2-9 6-12a30 30 0 0 0-18-54Z"/><path class="line-surface" d="M66 66a15 15 0 0 1 10-12"/><rect class="muted line" x="68" y="110" width="24" height="12" rx="4"/><path class="line" d="M73 130h14"/>`
   }
 }
 

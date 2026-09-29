@@ -12,7 +12,7 @@ test('every generated icon keeps its individual source/manifest styling contract
       names: [
         '--c2-symbol--size',
         '--c2-symbol--stroke-width',
-        ...['backdrop', 'surface', 'muted', 'line', 'ink', 'primary', 'primary-soft', 'success', 'warning', 'error'].map(
+        ...['backdrop', 'surface', 'muted', 'line', 'ink', 'primary', 'primary-soft', 'accent', 'success', 'warning', 'error'].map(
           (role) => `--c2-symbol__${role}--color`,
         ),
       ],

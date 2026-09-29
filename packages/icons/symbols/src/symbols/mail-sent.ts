@@ -4,7 +4,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { SymbolElement } from '../symbol'
 
 /**
- * Mail sent symbol. An envelope and a paper plane: a message, invitation or confirmation email was sent.
+ * Mail sent symbol. A paper plane: a message, invitation or confirmation email was sent.
  *
  * @tag c2-symbol-mail-sent
  *
@@ -17,14 +17,15 @@ import { SymbolElement } from '../symbol'
  * @cssproperty {color} [--c2-symbol__ink--color=#71717a] - Small solid details: handles, dots, clock hands.
  * @cssproperty {color} [--c2-symbol__primary--color=#0265dc] - Accent fills and strokes.
  * @cssproperty {color} [--c2-symbol__primary-soft--color=#edf1fe] - Soft accent fills: a lens, a folder back, a chat bubble.
+ * @cssproperty {color} [--c2-symbol__accent--color=#fbbf24] - Decorative warm highlight: stars, coins, light bulbs, flames, confetti.
  * @cssproperty {color} [--c2-symbol__success--color=#16a34a] - Success badges and check marks.
- * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges, the light bulb, the rocket flame.
+ * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges and hazard signs.
  * @cssproperty {color} [--c2-symbol__error--color=#dc2626] - Error badges and strike-throughs.
  */
 @customElement('c2-symbol-mail-sent')
 export class MailSentSymbol extends SymbolElement {
   protected override renderSymbol() {
-    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><path class="line" stroke-dasharray="2 7" d="M40 50c10-18 30-24 50-16"/><rect class="surface line" x="30" y="62" width="84" height="60" rx="6"/><path class="line" d="m32 66 40 30 40-30"/><path class="primary" d="M92 50 136 28l-16 44Z"/><path class="line-surface" d="m134 30-30 30"/>`
+    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><path class="line" stroke-dasharray="3 7" d="M22 116c14 6 30 4 42-8"/><path class="primary" d="M26 76 134 30 82 96Z"/><path class="primary" opacity="0.6" d="M82 96 134 30l-26 88Z"/><path class="primary" d="m82 96 4 28 14-17Z"/><path class="line-surface" opacity="0.6" d="M82 96 134 30"/><path class="accent" d="M38 33Q40 38 45 40Q40 42 38 47Q36 42 31 40Q36 38 38 33Z"/><path class="line-accent" d="M130 106v8M126 110h8"/><circle class="primary" cx="116" cy="130" r="3"/>`
   }
 }
 

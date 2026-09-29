@@ -17,8 +17,9 @@ import { SymbolElement } from '../symbol'
  * @cssproperty {color} [--c2-symbol__ink--color=#71717a] - Small solid details: handles, dots, clock hands.
  * @cssproperty {color} [--c2-symbol__primary--color=#0265dc] - Accent fills and strokes.
  * @cssproperty {color} [--c2-symbol__primary-soft--color=#edf1fe] - Soft accent fills: a lens, a folder back, a chat bubble.
+ * @cssproperty {color} [--c2-symbol__accent--color=#fbbf24] - Decorative warm highlight: stars, coins, light bulbs, flames, confetti.
  * @cssproperty {color} [--c2-symbol__success--color=#16a34a] - Success badges and check marks.
- * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges, the light bulb, the rocket flame.
+ * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges and hazard signs.
  * @cssproperty {color} [--c2-symbol__error--color=#dc2626] - Error badges and strike-throughs.
  */
 @customElement('c2-symbol-no-events')

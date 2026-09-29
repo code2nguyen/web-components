@@ -1,57 +1,787 @@
 {
+  "account-locked": {
+    "category": "security",
+    "title": "Account locked",
+    "description": "A person and a padlock: the account is locked, suspended or awaiting verification."
+  },
+  "achievement": {
+    "category": "status",
+    "title": "Achievement",
+    "description": "A golden trophy: a goal reached, a badge earned, a leaderboard or a completed challenge."
+  },
+  "agreement": {
+    "category": "files",
+    "title": "Agreement",
+    "description": "A signed document and a pen: a contract, terms of service, e-signature or approval."
+  },
+  "ai-assistant": {
+    "category": "onboarding",
+    "title": "AI assistant",
+    "description": "A friendly robot: an AI assistant, a chatbot, a copilot or an automated agent."
+  },
   "all-done": {
     "category": "status",
     "title": "All done",
     "description": "A clipboard with every item checked off: a finished checklist, an inbox at zero, nothing left to review."
   },
-  "empty-box": { "category": "empty", "title": "Empty box", "description": "An open, empty box: no items, no orders, nothing added to a collection yet." },
-  "empty-cart": { "category": "empty", "title": "Empty cart", "description": "An empty shopping cart: a cart or basket with no products in it." },
+  "analytics": {
+    "category": "files",
+    "title": "Analytics",
+    "description": "A bar chart with a trend line: analytics, insights, metrics, a dashboard or statistics."
+  },
+  "announcement": {
+    "category": "communication",
+    "title": "Announcement",
+    "description": "A megaphone: news, a feature announcement, a broadcast or a changelog."
+  },
+  "api": {
+    "category": "onboarding",
+    "title": "API",
+    "description": "A code window with braces: API access, developer settings, webhooks or JSON data."
+  },
+  "appearance": {
+    "category": "onboarding",
+    "title": "Appearance",
+    "description": "A sun and a moon: appearance, light and dark mode, theme or display settings."
+  },
+  "archive": {
+    "category": "files",
+    "title": "Archive",
+    "description": "An archive box: archived items, old records, cold storage or closed projects."
+  },
+  "attachment": {
+    "category": "files",
+    "title": "Attachment",
+    "description": "A paper clip on a page: attachments, attached files or add a file."
+  },
+  "automation": {
+    "category": "onboarding",
+    "title": "Automation",
+    "description": "A lightning bolt: automations, workflows, triggers, instant actions or performance."
+  },
+  "backup": {
+    "category": "files",
+    "title": "Backup",
+    "description": "A cloud with sync arrows and a check: backups, cloud sync, autosave or restore points."
+  },
+  "biometric": {
+    "category": "security",
+    "title": "Biometric",
+    "description": "A fingerprint: biometric sign-in, Touch ID, passkeys or identity verification."
+  },
+  "blocked": {
+    "category": "security",
+    "title": "Blocked",
+    "description": "A person with a no-entry badge: a blocked user, a suspended or banned account."
+  },
+  "broken-link": {
+    "category": "error",
+    "title": "Broken link",
+    "description": "A broken chain: a dead link, an expired invitation or a reference that no longer resolves."
+  },
+  "bug": {
+    "category": "error",
+    "title": "Bug",
+    "description": "A bug: something went wrong, an unexpected error, a crash report or a known issue."
+  },
+  "call": {
+    "category": "communication",
+    "title": "Call",
+    "description": "A phone handset ringing: a call, contact by phone, a voice line or a callback."
+  },
+  "camera-denied": {
+    "category": "security",
+    "title": "Camera denied",
+    "description": "A camera with an error badge: camera permission denied, no camera found or video off."
+  },
+  "celebration": {
+    "category": "status",
+    "title": "Celebration",
+    "description": "A party popper and confetti: a milestone, a launch, a completed onboarding or good news."
+  },
+  "clipboard": {
+    "category": "files",
+    "title": "Clipboard",
+    "description": "A clipboard with a check badge: copied to clipboard, a form submitted or a checklist."
+  },
+  "cloud-error": {
+    "category": "error",
+    "title": "Cloud error",
+    "description": "A cloud with an error badge: sync failed, the service is unavailable or a backup did not finish."
+  },
+  "coffee-break": {
+    "category": "status",
+    "title": "Coffee break",
+    "description": "A steaming cup: all caught up, take a break, idle or away."
+  },
+  "connected": {
+    "category": "onboarding",
+    "title": "Connected",
+    "description": "Two apps linked with a check: integration connected, accounts linked, sync enabled."
+  },
+  "contacts": {
+    "category": "communication",
+    "title": "Contacts",
+    "description": "An address book: contacts, a directory, customers, people or leads."
+  },
+  "conversation": {
+    "category": "communication",
+    "title": "Conversation",
+    "description": "Two chat bubbles: messages, a conversation, comments, replies or a chat thread."
+  },
+  "cookie-consent": {
+    "category": "security",
+    "title": "Cookie consent",
+    "description": "A bitten cookie: cookie consent, tracking preferences and privacy settings."
+  },
+  "create-new": {
+    "category": "onboarding",
+    "title": "Create new",
+    "description": "A dashed card with a plus: create the first item, start from scratch, add something new."
+  },
+  "credit-card": {
+    "category": "commerce",
+    "title": "Credit card",
+    "description": "Two payment cards: add a payment method, billing details or a saved card."
+  },
+  "customize": {
+    "category": "onboarding",
+    "title": "Customize",
+    "description": "A paint palette and a brush: customize, themes, branding, appearance or design."
+  },
+  "database": {
+    "category": "files",
+    "title": "Database",
+    "description": "A database cylinder: data sources, tables, records, storage or a data warehouse."
+  },
+  "delivery": {
+    "category": "commerce",
+    "title": "Delivery",
+    "description": "A delivery truck: shipping, an order on its way, logistics or tracking."
+  },
+  "desktop": {
+    "category": "onboarding",
+    "title": "Desktop",
+    "description": "A desktop monitor: the desktop app, a large screen, a workstation or a web dashboard."
+  },
+  "disconnected": {
+    "category": "error",
+    "title": "Disconnected",
+    "description": "A plug pulled from its socket: the connection was lost, a device or service is disconnected."
+  },
+  "discount": {
+    "category": "commerce",
+    "title": "Discount",
+    "description": "A price tag with a percent sign: a discount, promotion, coupon code or sale."
+  },
+  "document": {
+    "category": "files",
+    "title": "Document",
+    "description": "A page of text: a document, an article, notes, a draft or a policy."
+  },
+  "earnings": {
+    "category": "commerce",
+    "title": "Earnings",
+    "description": "A stack of coins and a rising arrow: revenue, earnings, payouts or growth."
+  },
+  "email-verification": {
+    "category": "security",
+    "title": "Email verification",
+    "description": "An envelope with a check badge: verify your email, confirmation link sent, email verified."
+  },
+  "empty-box": {
+    "category": "empty",
+    "title": "Empty box",
+    "description": "An open, empty box: no items, no orders, nothing added to a collection yet."
+  },
+  "empty-cart": {
+    "category": "empty",
+    "title": "Empty cart",
+    "description": "An empty shopping cart: a cart or basket with no products in it."
+  },
   "empty-folder": {
     "category": "empty",
     "title": "Empty folder",
     "description": "An open folder with nothing inside: no files, no documents, an empty directory."
   },
-  "empty-inbox": { "category": "empty", "title": "Empty inbox", "description": "An empty tray: an inbox, queue or feed with no entries." },
-  "error": { "category": "status", "title": "Error", "description": "A cross in a red badge: an operation failed or could not be completed." },
-  "expired": { "category": "status", "title": "Expired", "description": "A clock with a warning badge: an expired session, link, trial or token." },
-  "forbidden": { "category": "error", "title": "Forbidden", "description": "A locked padlock: access denied, sign-in required, a permission is missing." },
-  "idea": { "category": "action", "title": "Idea", "description": "A glowing light bulb: a tip, a suggestion, onboarding hints or a feature announcement." },
-  "info": { "category": "status", "title": "Info", "description": "An i in an accent badge: neutral information or a notice." },
-  "launch": { "category": "action", "title": "Launch", "description": "A rocket taking off: getting started, a first run, a release or an upgrade." },
+  "empty-inbox": {
+    "category": "empty",
+    "title": "Empty inbox",
+    "description": "An empty tray: an inbox, queue or feed with no entries."
+  },
+  "empty-trash": {
+    "category": "empty",
+    "title": "Empty trash",
+    "description": "A clean trash can: the trash, recycle bin or deleted items are empty."
+  },
+  "empty-wishlist": {
+    "category": "commerce",
+    "title": "Empty wishlist",
+    "description": "A heart with a plus badge: an empty wishlist, no saved or liked items."
+  },
+  "error": {
+    "category": "status",
+    "title": "Error",
+    "description": "A cross in a red badge: an operation failed or could not be completed."
+  },
+  "expired": {
+    "category": "status",
+    "title": "Expired",
+    "description": "A clock with a warning badge: an expired session, link, trial or token."
+  },
+  "explore": {
+    "category": "onboarding",
+    "title": "Explore",
+    "description": "A compass: explore, discover, browse the catalogue or find your way."
+  },
+  "export": {
+    "category": "files",
+    "title": "Export",
+    "description": "An arrow leaving a document: export, download a report, send data elsewhere."
+  },
+  "faq": {
+    "category": "communication",
+    "title": "FAQ",
+    "description": "A question and an answer bubble: frequently asked questions, a knowledge base or Q&A."
+  },
+  "feedback": {
+    "category": "communication",
+    "title": "Feedback",
+    "description": "Three faces from sad to happy: rate your experience, send feedback, a satisfaction survey."
+  },
+  "folder-shared": {
+    "category": "files",
+    "title": "Shared folder",
+    "description": "A folder with two people: shared files, team drive, collaborators or permissions."
+  },
+  "forbidden": {
+    "category": "security",
+    "title": "Forbidden",
+    "description": "A locked padlock: access denied, sign-in required, a permission is missing."
+  },
+  "gift": {
+    "category": "commerce",
+    "title": "Gift",
+    "description": "A wrapped present: a reward, a referral bonus, a free trial, a voucher or a surprise."
+  },
+  "goals": {
+    "category": "onboarding",
+    "title": "Goals",
+    "description": "An arrow in a target: goals, objectives, OKRs, targets or focus."
+  },
+  "growth": {
+    "category": "onboarding",
+    "title": "Growth",
+    "description": "A sprouting plant: growth, progress, a new beginning, sustainability or nurturing."
+  },
+  "guide": {
+    "category": "onboarding",
+    "title": "Guide",
+    "description": "An open book: documentation, a guide, a handbook, a tutorial or a knowledge base."
+  },
+  "health": {
+    "category": "status",
+    "title": "Health",
+    "description": "A heart with a pulse line: health, wellbeing, monitoring, vital signs or system health."
+  },
+  "help": {
+    "category": "communication",
+    "title": "Help",
+    "description": "A lifebuoy: help centre, get help, rescue, troubleshooting or onboarding assistance."
+  },
+  "hidden": {
+    "category": "security",
+    "title": "Hidden",
+    "description": "A crossed-out eye: private, hidden or sensitive content; visibility turned off."
+  },
+  "idea": {
+    "category": "onboarding",
+    "title": "Idea",
+    "description": "A glowing light bulb: a tip, a suggestion, onboarding hints or a feature announcement."
+  },
+  "import": {
+    "category": "files",
+    "title": "Import",
+    "description": "An arrow entering a document: import data, upload a CSV or bring content in."
+  },
+  "info": {
+    "category": "status",
+    "title": "Info",
+    "description": "An i in an accent badge: neutral information or a notice."
+  },
+  "invite": {
+    "category": "communication",
+    "title": "Invite",
+    "description": "An invitation card with a person and a plus badge: invite teammates, share access, add members."
+  },
+  "invoice": {
+    "category": "commerce",
+    "title": "Invoice",
+    "description": "A paid invoice with a stamp: billing, receipts, invoices or statements."
+  },
+  "language": {
+    "category": "communication",
+    "title": "Language",
+    "description": "A globe and a letter bubble: language, translation, localisation or region settings."
+  },
+  "launch": {
+    "category": "onboarding",
+    "title": "Launch",
+    "description": "A rocket taking off: getting started, a first run, a release or an upgrade."
+  },
+  "learn": {
+    "category": "onboarding",
+    "title": "Learn",
+    "description": "A graduation cap: learn, courses, a tutorial, certification or an academy."
+  },
+  "link": {
+    "category": "files",
+    "title": "Link",
+    "description": "Two linked chain rings: a link, a URL, connected records or a shared reference."
+  },
+  "location": {
+    "category": "onboarding",
+    "title": "Location",
+    "description": "A pin on a folded map: an address, a store locator, delivery area or places."
+  },
+  "location-denied": {
+    "category": "security",
+    "title": "Location denied",
+    "description": "A map pin with an error badge: location access denied or unavailable."
+  },
+  "low-battery": {
+    "category": "error",
+    "title": "Low battery",
+    "description": "An almost empty battery: low battery, low credit or a resource running out."
+  },
+  "magic": {
+    "category": "onboarding",
+    "title": "Magic",
+    "description": "A magic wand with sparkles: generate with AI, auto-fill, smart suggestions or one-click setup."
+  },
   "mail-sent": {
-    "category": "action",
+    "category": "communication",
     "title": "Mail sent",
-    "description": "An envelope and a paper plane: a message, invitation or confirmation email was sent."
+    "description": "A paper plane: a message, invitation or confirmation email was sent."
   },
   "maintenance": {
     "category": "error",
     "title": "Maintenance",
     "description": "A traffic cone: scheduled maintenance, work in progress, a feature under construction."
   },
-  "no-data": { "category": "empty", "title": "No data", "description": "A chart without data: an empty report, dashboard or time range." },
-  "no-events": { "category": "empty", "title": "No events", "description": "A blank calendar: no events, meetings or bookings scheduled." },
-  "no-messages": { "category": "empty", "title": "No messages", "description": "Two speech bubbles: no conversations, comments or replies yet." },
-  "no-notifications": { "category": "empty", "title": "No notifications", "description": "A sleeping bell: no notifications, alerts or activity." },
-  "no-results": { "category": "empty", "title": "No results", "description": "A magnifier crossing out a page: a search or filter matched nothing." },
+  "microphone-denied": {
+    "category": "security",
+    "title": "Microphone denied",
+    "description": "A microphone with an error badge: microphone permission denied or muted."
+  },
+  "milestone": {
+    "category": "status",
+    "title": "Milestone",
+    "description": "A flag on a summit: a milestone, a goal, the end of a journey or a completed plan."
+  },
+  "mobile-app": {
+    "category": "onboarding",
+    "title": "Mobile app",
+    "description": "A phone with app tiles: get the mobile app, install on a device or a responsive view."
+  },
+  "new-message": {
+    "category": "communication",
+    "title": "New message",
+    "description": "An open envelope with a letter and a dot: a new message, an unread email or an invitation received."
+  },
+  "no-bookmarks": {
+    "category": "empty",
+    "title": "No bookmarks",
+    "description": "Two empty bookmark ribbons: no saved items, bookmarks or read-later entries."
+  },
+  "no-code": {
+    "category": "empty",
+    "title": "No code",
+    "description": "An editor window with brackets: no snippets, scripts, API keys or code yet."
+  },
+  "no-data": {
+    "category": "empty",
+    "title": "No data",
+    "description": "A chart without data: an empty report, dashboard or time range."
+  },
+  "no-downloads": {
+    "category": "empty",
+    "title": "No downloads",
+    "description": "An arrow into an empty tray: no downloads, exports or received files."
+  },
+  "no-events": {
+    "category": "empty",
+    "title": "No events",
+    "description": "A blank calendar: no events, meetings or bookings scheduled."
+  },
+  "no-favorites": {
+    "category": "empty",
+    "title": "No favorites",
+    "description": "An empty star with small golden stars: no favourites, starred or pinned items."
+  },
+  "no-files": {
+    "category": "empty",
+    "title": "No files",
+    "description": "A stack of blank documents: no files, attachments or documents yet."
+  },
+  "no-history": {
+    "category": "empty",
+    "title": "No history",
+    "description": "A clock circled by an arrow: no activity, history, versions or recent items."
+  },
+  "no-images": {
+    "category": "empty",
+    "title": "No images",
+    "description": "A picture frame with a landscape: no photos, images or media uploaded yet."
+  },
+  "no-integrations": {
+    "category": "empty",
+    "title": "No integrations",
+    "description": "A puzzle piece and an empty slot: no integrations, apps, plugins or connections."
+  },
+  "no-location": {
+    "category": "empty",
+    "title": "No location",
+    "description": "A folded map with a pin: no places, addresses or locations; a map with no results."
+  },
+  "no-logs": {
+    "category": "empty",
+    "title": "No logs",
+    "description": "An empty terminal with a prompt: no logs, output, events or console messages."
+  },
+  "no-media": {
+    "category": "empty",
+    "title": "No media",
+    "description": "A video player: no videos, recordings or media to play."
+  },
+  "no-messages": {
+    "category": "empty",
+    "title": "No messages",
+    "description": "Two speech bubbles: no conversations, comments or replies yet."
+  },
+  "no-music": {
+    "category": "empty",
+    "title": "No music",
+    "description": "Two musical notes: no songs, playlists, sounds or audio."
+  },
+  "no-notifications": {
+    "category": "empty",
+    "title": "No notifications",
+    "description": "A sleeping bell: no notifications, alerts or activity."
+  },
+  "no-orders": {
+    "category": "commerce",
+    "title": "No orders",
+    "description": "A blank receipt: no orders, purchases or invoices yet."
+  },
+  "no-results": {
+    "category": "empty",
+    "title": "No results",
+    "description": "A magnifier crossing out a page: a search or filter matched nothing."
+  },
+  "no-reviews": {
+    "category": "empty",
+    "title": "No reviews",
+    "description": "A review card with empty stars: no ratings, reviews or testimonials yet."
+  },
+  "no-tags": {
+    "category": "empty",
+    "title": "No tags",
+    "description": "Two blank tags: no labels, tags or categories created yet."
+  },
+  "no-tasks": {
+    "category": "empty",
+    "title": "No tasks",
+    "description": "An empty board with three columns: no tasks, issues or cards on a kanban board."
+  },
   "no-users": {
     "category": "empty",
     "title": "No users",
     "description": "Two people and a plus badge: no members, contacts or collaborators yet; invite someone."
   },
-  "not-found": { "category": "error", "title": "Not found", "description": "A page with a question mark: a 404, a missing page or a deleted record." },
-  "offline": { "category": "error", "title": "Offline", "description": "A crossed-out cloud: no network connection, a service that cannot be reached." },
-  "search": { "category": "action", "title": "Search", "description": "A magnifying glass: start searching, nothing searched yet." },
-  "secure": { "category": "status", "title": "Secure", "description": "A shield with a check mark: protected, verified, two-factor enabled." },
+  "not-found": {
+    "category": "error",
+    "title": "Not found",
+    "description": "A page with a question mark: a 404, a missing page or a deleted record."
+  },
+  "notification": {
+    "category": "communication",
+    "title": "Notification",
+    "description": "A ringing bell with a dot: new notifications, alerts, mentions or activity."
+  },
+  "offline": {
+    "category": "error",
+    "title": "Offline",
+    "description": "A crossed-out Wi-Fi signal: no network connection, offline mode or a service that cannot be reached."
+  },
+  "onboarding": {
+    "category": "onboarding",
+    "title": "Onboarding",
+    "description": "A path with checkpoints and a flag: onboarding steps, a checklist, progress or a guided tour."
+  },
+  "out-of-office": {
+    "category": "status",
+    "title": "Out of office",
+    "description": "A palm tree on an island: out of office, on vacation, away or on holiday."
+  },
+  "package-delivered": {
+    "category": "commerce",
+    "title": "Package delivered",
+    "description": "A closed parcel with a check badge: order delivered, shipment received."
+  },
+  "page-error": {
+    "category": "error",
+    "title": "Page error",
+    "description": "A browser window with a dazed face: the page crashed, failed to load or an unexpected error."
+  },
+  "password": {
+    "category": "security",
+    "title": "Password",
+    "description": "A key over a masked password field: set a password, sign in, credentials or secrets."
+  },
+  "password-reset": {
+    "category": "security",
+    "title": "Password reset",
+    "description": "A key inside a circular arrow: reset or change your password, recover an account."
+  },
+  "payment-failed": {
+    "category": "commerce",
+    "title": "Payment failed",
+    "description": "A card with an error badge: the payment was declined, the card expired or billing failed."
+  },
+  "payment-success": {
+    "category": "commerce",
+    "title": "Payment success",
+    "description": "A card with a check badge: payment received, order paid, subscription activated."
+  },
+  "pending": {
+    "category": "status",
+    "title": "Pending",
+    "description": "An hourglass running: waiting for approval, processing, queued or in review."
+  },
+  "preferences": {
+    "category": "onboarding",
+    "title": "Preferences",
+    "description": "A panel of sliders: preferences, filters, adjustments or fine-tuning."
+  },
+  "premium": {
+    "category": "commerce",
+    "title": "Premium",
+    "description": "A diamond: premium, upgrade to Pro, a paid plan or exclusive features."
+  },
+  "print": {
+    "category": "files",
+    "title": "Print",
+    "description": "A printer with a page: print, a printable view, a PDF or a hard copy."
+  },
+  "profile": {
+    "category": "onboarding",
+    "title": "Profile",
+    "description": "An ID card: your profile, account details, identity or a member card."
+  },
+  "qr-scan": {
+    "category": "onboarding",
+    "title": "QR scan",
+    "description": "A QR code in a viewfinder: scan to connect, pair a device, check in or pay."
+  },
+  "quiet-hours": {
+    "category": "status",
+    "title": "Quiet hours",
+    "description": "A sleeping moon: do not disturb, notifications paused, night mode or quiet hours."
+  },
+  "rate-limited": {
+    "category": "error",
+    "title": "Rate limited",
+    "description": "A speedometer in the red: too many requests, a usage limit reached, slow down."
+  },
+  "reminder": {
+    "category": "status",
+    "title": "Reminder",
+    "description": "A ringing alarm clock: a reminder, a due date, a deadline or a snoozed item."
+  },
+  "report": {
+    "category": "files",
+    "title": "Report",
+    "description": "A report with a pie chart: a summary, a monthly report, an export or a breakdown."
+  },
+  "returns": {
+    "category": "commerce",
+    "title": "Returns",
+    "description": "A parcel inside a circular arrow: returns, refunds, exchanges or a sent-back order."
+  },
+  "savings": {
+    "category": "commerce",
+    "title": "Savings",
+    "description": "A piggy bank and a coin: savings, a budget, a goal or money put aside."
+  },
+  "scheduled": {
+    "category": "status",
+    "title": "Scheduled",
+    "description": "A calendar with a checked day: scheduled, booked, confirmed appointment or event."
+  },
+  "search": {
+    "category": "onboarding",
+    "title": "Search",
+    "description": "A magnifying glass: start searching, nothing searched yet."
+  },
+  "secure": {
+    "category": "security",
+    "title": "Secure",
+    "description": "A shield with a check mark: protected, verified, two-factor enabled."
+  },
+  "security-alert": {
+    "category": "security",
+    "title": "Security alert",
+    "description": "A shield with an exclamation mark: a security warning, suspicious sign-in or vulnerability."
+  },
+  "server": {
+    "category": "onboarding",
+    "title": "Server",
+    "description": "A healthy server rack: infrastructure, hosting, uptime, a deployment target or all systems operational."
+  },
   "server-error": {
     "category": "error",
     "title": "Server error",
     "description": "A server stack with an error badge: a 500, an outage or a failed backend request."
   },
-  "success": { "category": "status", "title": "Success", "description": "A check mark in a green badge: an operation completed successfully." },
-  "upload": { "category": "action", "title": "Upload", "description": "A cloud with an upward arrow: drop files here, import or sync data." },
+  "setup": {
+    "category": "onboarding",
+    "title": "Setup",
+    "description": "Two gears: setup, settings, configuration, preferences or an installation step."
+  },
+  "share": {
+    "category": "communication",
+    "title": "Share",
+    "description": "Three connected nodes: share, send to others, publish, a network or connections."
+  },
+  "shopping-bag": {
+    "category": "commerce",
+    "title": "Shopping bag",
+    "description": "A shopping bag: shopping, a store, purchases, checkout or a marketplace."
+  },
+  "sign-in": {
+    "category": "security",
+    "title": "Sign in",
+    "description": "An arrow going through a door: sign in, log in, join or enter a workspace."
+  },
+  "sign-out": {
+    "category": "security",
+    "title": "Sign out",
+    "description": "An arrow leaving through a door: signed out, logged out, you have left the workspace."
+  },
+  "spreadsheet": {
+    "category": "files",
+    "title": "Spreadsheet",
+    "description": "A spreadsheet: a table, CSV or Excel import, a data set or rows and columns."
+  },
+  "storage-full": {
+    "category": "error",
+    "title": "Storage full",
+    "description": "A full database: storage or quota exceeded, disk space low, the plan limit reached."
+  },
+  "store": {
+    "category": "commerce",
+    "title": "Store",
+    "description": "A storefront with an awning: a shop, a marketplace, sellers or a merchant account."
+  },
+  "success": {
+    "category": "status",
+    "title": "Success",
+    "description": "A check mark in a green badge: an operation completed successfully."
+  },
+  "support": {
+    "category": "communication",
+    "title": "Support",
+    "description": "A headset and a chat bubble: customer support, live chat, a help desk or contact us."
+  },
+  "syncing": {
+    "category": "status",
+    "title": "Syncing",
+    "description": "Two circling arrows: syncing, refreshing, reconnecting or updating data."
+  },
+  "team": {
+    "category": "onboarding",
+    "title": "Team",
+    "description": "Three people: a team, a workspace, members, an organisation or collaboration."
+  },
+  "templates": {
+    "category": "onboarding",
+    "title": "Templates",
+    "description": "A page layout: templates, layouts, blueprints or a starter kit."
+  },
+  "thank-you": {
+    "category": "communication",
+    "title": "Thank you",
+    "description": "A letter with a heart: thank you, appreciation, a donation received or a kind message."
+  },
+  "timeout": {
+    "category": "error",
+    "title": "Timeout",
+    "description": "A stopwatch with an error badge: the request timed out or took too long."
+  },
+  "two-factor": {
+    "category": "security",
+    "title": "Two-factor",
+    "description": "A phone showing a code and a shield: two-factor authentication, one-time passcode, device confirmation."
+  },
+  "unlocked": {
+    "category": "security",
+    "title": "Unlocked",
+    "description": "An open padlock: access granted, unlocked, permissions given or a feature enabled."
+  },
+  "unsupported-device": {
+    "category": "error",
+    "title": "Unsupported device",
+    "description": "A desktop and a phone with an error badge: this browser, device or screen size is not supported."
+  },
+  "update-available": {
+    "category": "status",
+    "title": "Update available",
+    "description": "An app window with a progress bar: an update is available or installing, a new version."
+  },
+  "upload": {
+    "category": "files",
+    "title": "Upload",
+    "description": "A cloud with an upward arrow: drop files here, import or sync data."
+  },
+  "upload-failed": {
+    "category": "error",
+    "title": "Upload failed",
+    "description": "A file with an upward arrow and an error badge: the upload failed, the file is too large or invalid."
+  },
+  "vault": {
+    "category": "security",
+    "title": "Vault",
+    "description": "A safe: encrypted storage, secrets, a password manager or protected data."
+  },
+  "verified": {
+    "category": "status",
+    "title": "Verified",
+    "description": "A rosette with a check mark: verified account, certified, approved or quality badge."
+  },
+  "version-control": {
+    "category": "files",
+    "title": "Version control",
+    "description": "A branching graph: version control, branches, pull requests, merges or change history."
+  },
+  "video-call": {
+    "category": "communication",
+    "title": "Video call",
+    "description": "A video call window: a meeting, a webinar, screen sharing or a live session."
+  },
+  "wallet": {
+    "category": "commerce",
+    "title": "Wallet",
+    "description": "A wallet with a banknote: balance, funds, payouts, credits or an e-wallet."
+  },
   "warning": {
     "category": "status",
     "title": "Warning",
     "description": "An exclamation mark in an amber triangle: something needs attention before continuing."
+  },
+  "welcome": {
+    "category": "onboarding",
+    "title": "Welcome",
+    "description": "A waving hand: welcome, hello, a first visit, a greeting or a new member."
   }
 }

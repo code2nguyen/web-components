@@ -145,9 +145,9 @@ greet('world')"></c2-code-editor>`,
   <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
 </div>`,
   symbols: `<div class="preview-row" style="gap:10px;--c2-symbol--size:84px">
-  <c2-symbol-empty-inbox></c2-symbol-empty-inbox>
+  <c2-symbol-celebration></c2-symbol-celebration>
   <c2-symbol-no-results></c2-symbol-no-results>
-  <c2-symbol-success></c2-symbol-success>
+  <c2-symbol-payment-success></c2-symbol-payment-success>
 </div>`,
   'icon-button': `<div class="preview-row">
   <c2-icon-button tooltip="Camera">

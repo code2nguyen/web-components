@@ -128,6 +128,12 @@
       "tag": "c2-symbol-empty-inbox",
       "fixture": "<c2-symbol-empty-inbox></c2-symbol-empty-inbox>",
       "settledWhen": "c2-symbol-empty-inbox svg"
+    },
+    {
+      "id": "symbol-achievement-shared",
+      "tag": "c2-symbol-achievement",
+      "fixture": "<c2-symbol-achievement></c2-symbol-achievement>",
+      "settledWhen": "c2-symbol-achievement svg"
     }
   ],
   "cases": [
@@ -1364,6 +1370,20 @@
       "state": "base",
       "value": "rgb(231, 17, 73)",
       "target": "c2-symbol-empty-inbox ellipse.muted",
+      "assertion": "computed-style",
+      "declaration": "fill",
+      "browsers": ["chromium"],
+      "reset": "remove-property",
+      "sharedStylingPath": "symbol-base"
+    },
+    {
+      "id": "symbol-accent-shared",
+      "tag": "c2-symbol-achievement",
+      "name": "--c2-symbol__accent--color",
+      "context": "symbol-achievement-shared",
+      "state": "base",
+      "value": "rgb(231, 17, 73)",
+      "target": "c2-symbol-achievement path.accent",
       "assertion": "computed-style",
       "declaration": "fill",
       "browsers": ["chromium"],

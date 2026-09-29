@@ -4,7 +4,7 @@ import { customElement } from '@c2n/core/element-helper.js'
 import { SymbolElement } from '../symbol'
 
 /**
- * Offline symbol. A crossed-out cloud: no network connection, a service that cannot be reached.
+ * Offline symbol. A crossed-out Wi-Fi signal: no network connection, offline mode or a service that cannot be reached.
  *
  * @tag c2-symbol-offline
  *
@@ -17,14 +17,15 @@ import { SymbolElement } from '../symbol'
  * @cssproperty {color} [--c2-symbol__ink--color=#71717a] - Small solid details: handles, dots, clock hands.
  * @cssproperty {color} [--c2-symbol__primary--color=#0265dc] - Accent fills and strokes.
  * @cssproperty {color} [--c2-symbol__primary-soft--color=#edf1fe] - Soft accent fills: a lens, a folder back, a chat bubble.
+ * @cssproperty {color} [--c2-symbol__accent--color=#fbbf24] - Decorative warm highlight: stars, coins, light bulbs, flames, confetti.
  * @cssproperty {color} [--c2-symbol__success--color=#16a34a] - Success badges and check marks.
- * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges, the light bulb, the rocket flame.
+ * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges and hazard signs.
  * @cssproperty {color} [--c2-symbol__error--color=#dc2626] - Error badges and strike-throughs.
  */
 @customElement('c2-symbol-offline')
 export class OfflineSymbol extends SymbolElement {
   protected override renderSymbol() {
-    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><path class="surface line" d="M52 110a22 22 0 0 1-2-43.9A30 30 0 0 1 108 60a25 25 0 0 1 2 50Z"/><path class="line" d="M66 96a20 20 0 0 1 28 0M73 103a10 10 0 0 1 14 0"/><path class="line-error" d="m42 42 76 76"/>`
+    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><path class="line-ink" d="M44.6 68.6A50 50 0 0 1 115.4 68.6"/><path class="line-ink" d="M56 80A34 34 0 0 1 104 80"/><path class="line-ink" d="M67.3 91.3A18 18 0 0 1 92.7 91.3"/><circle class="ink" cx="80" cy="104" r="6"/><rect class="backdrop" x="75" y="26" width="10" height="108" rx="5" transform="rotate(-45 80 80)"/><rect class="error" x="77.5" y="30" width="5" height="100" rx="2.5" transform="rotate(-45 80 80)"/><path class="primary" d="M128 112Q129.7 116.3 134 118Q129.7 119.7 128 124Q126.3 119.7 122 118Q126.3 116.3 128 112Z"/><circle class="accent" cx="34" cy="40" r="4"/>`
   }
 }
 

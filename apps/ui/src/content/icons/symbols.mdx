@@ -1,6 +1,6 @@
 ---
 title: 'Symbols'
-description: '27 themeable spot illustrations for empty states, status panels and error pages.'
+description: '157 themeable spot illustrations for empty states, status panels, onboarding and error pages.'
 package: '@c2n/symbols'
 ---
 
@@ -14,8 +14,11 @@ import {
   NoResultsSymbol as SymbolNoResults,
   OfflineSymbol as SymbolOffline,
   ServerErrorSymbol as SymbolServerError,
-  SuccessSymbol as SymbolSuccess,
   UploadSymbol as SymbolUpload,
+  CelebrationSymbol as SymbolCelebration,
+  PaymentSuccessSymbol as SymbolPaymentSuccess,
+  AiAssistantSymbol as SymbolAiAssistant,
+  CookieConsentSymbol as SymbolCookieConsent,
 } from '@c2n/symbols'
 import { StatusPanel } from '@c2n/status-panel'
 import { Button } from '@c2n/button'
@@ -23,10 +26,12 @@ import { Button } from '@c2n/button'
 # Symbols
 
 `@c2n/symbols` is a set of spot illustrations, one web component each: `c2-symbol-<name>`. Use them wherever a view needs a
-picture rather than an icon: the media of a `c2-status-panel`, an empty table or list, a 404 page, an onboarding step.
+picture rather than an icon: the media of a `c2-status-panel`, an empty table or list, a 404 page, an onboarding step,
+a payment confirmation, a permission prompt. The set covers empty states, status and celebration, errors and limits,
+security and privacy, commerce, communication, files and data, and onboarding.
 
 The artwork is drawn for this library on one 160×160 grid. Every colour in it comes from a small set of **colour roles**
-(backdrop, surface, outline, accent, success, warning, error), so the whole set follows `@c2n/theme` — brand colour and
+(backdrop, surface, outline, accent, a golden highlight, success, warning, error), so the whole set follows `@c2n/theme` — brand colour and
 dark mode included — and one CSS variable recolours a role everywhere.
 
 ## Installation
@@ -55,7 +60,10 @@ import '@c2n/symbols'
 ```html tag=MdxCodeBlock,compact=true
 <c2-symbol-empty-inbox></c2-symbol-empty-inbox>
 <c2-symbol-no-results></c2-symbol-no-results>
-<c2-symbol-success></c2-symbol-success>
+<c2-symbol-payment-success></c2-symbol-payment-success>
+<c2-symbol-celebration></c2-symbol-celebration>
+<c2-symbol-ai-assistant></c2-symbol-ai-assistant>
+<c2-symbol-cookie-consent></c2-symbol-cookie-consent>
 <c2-symbol-offline></c2-symbol-offline>
 ```
 
@@ -98,6 +106,22 @@ disc — the symbol brings its own backdrop.
 </c2-status-panel>
 ```
 
+A success state reads the same way:
+
+```html tag=MdxCodeBlock
+<style>
+  .illustrated-success {
+    --c2-status-panel__media--size: 128px;
+    --c2-status-panel__media-icon--size: 128px;
+    --c2-status-panel__media__success--background-color: transparent;
+  }
+</style>
+<c2-status-panel class="illustrated-success" status="success" heading="Payment received" description="Your Pro plan is active. A receipt is on its way to your inbox.">
+  <c2-symbol-payment-success slot="media"></c2-symbol-payment-success>
+  <c2-button slot="actions">Go to dashboard</c2-button>
+</c2-status-panel>
+```
+
 ## Accessibility
 
 A symbol is decorative by default: its SVG is hidden from assistive technology, which is right when a heading next to it
@@ -121,6 +145,7 @@ with that name.
 | Ink         | `--c2-symbol__ink--color`          | `--c2-theme--color-on-surface-variant` |
 | Accent      | `--c2-symbol__primary--color`      | `--c2-theme--color-primary`            |
 | Soft accent | `--c2-symbol__primary-soft--color` | `--c2-theme--color-primary-container`  |
+| Highlight   | `--c2-symbol__accent--color`       | — (golden: stars, coins, confetti)     |
 | Success     | `--c2-symbol__success--color`      | — (stays green)                        |
 | Warning     | `--c2-symbol__warning--color`      | — (stays amber)                        |
 | Error       | `--c2-symbol__error--color`        | `--c2-theme--color-error`              |

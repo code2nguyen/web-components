@@ -1,6 +1,6 @@
 # Symbols
 
-Spot illustrations as Lit web components, for empty states, status panels, onboarding and error pages: `<c2-symbol-empty-inbox>`, `<c2-symbol-no-results>`, `<c2-symbol-success>`, and more.
+157 spot illustrations as Lit web components, for empty states, status panels, onboarding, commerce, security and error pages: `<c2-symbol-empty-inbox>`, `<c2-symbol-no-results>`, `<c2-symbol-success>`, and more.
 
 The artwork is drawn for this package (MIT, like the rest of the repository) on one 160×160 grid, and every colour in it comes from a small set of themeable roles, so a theme recolours the whole set at once and dark mode works through `@c2n/theme`.
 
@@ -61,15 +61,16 @@ The symbol names, catalog (title, category, description), tag helper and `Symbol
 | `--c2-symbol__ink--color`          | `#71717a` | Small solid details                              |
 | `--c2-symbol__primary--color`      | `#0265dc` | Accent                                           |
 | `--c2-symbol__primary-soft--color` | `#edf1fe` | Soft accent fills                                |
+| `--c2-symbol__accent--color`       | `#fbbf24` | Golden highlight: stars, coins, bulbs, confetti  |
 | `--c2-symbol__success--color`      | `#16a34a` | Success badges                                   |
-| `--c2-symbol__warning--color`      | `#f59e0b` | Warning badges, the light bulb, the rocket flame |
+| `--c2-symbol__warning--color`      | `#f59e0b` | Warning badges and hazard signs                  |
 | `--c2-symbol__error--color`        | `#dc2626` | Error badges and strike-throughs                 |
 
 Set `--c2-symbol__backdrop--color: transparent` to drop the disc.
 
 ## Adding or editing a symbol
 
-The components under `src/symbols/` are generated and committed. The sources are `svg/<name>.svg` plus an entry in `svg/catalog.json`. A source must use the exact wrapper `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">` and take every colour from a class: a fill role (`backdrop`, `surface`, `muted`, `ink`, `primary`, `primary-soft`, `success`, `warning`, `error`), the default outline `line`, or a coloured stroke `line-<role>`. The generator rejects `fill`, `stroke`, `style` and any other class. Then run:
+The components under `src/symbols/` are generated and committed. The sources are `svg/<name>.svg` plus an entry in `svg/catalog.json` (title, category — `empty`, `status`, `error`, `security`, `commerce`, `communication`, `files` or `onboarding` — and description). A source must use the exact wrapper `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">` and take every colour from a class: a fill role (`backdrop`, `surface`, `muted`, `ink`, `primary`, `primary-soft`, `accent`, `success`, `warning`, `error`), the default outline `line`, or a coloured stroke `line-<role>`. The generator rejects `fill`, `stroke`, `style` and any other class. Then run:
 
 ```bash
 npm run generate -w packages/icons/symbols

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="primary" x="26" y="92" width="56" height="28" rx="14" transform="rotate(-45 54 106)"/><rect class="backdrop" x="36" y="100" width="36" height="12" rx="6" transform="rotate(-45 54 106)"/>
+  <rect class="primary" x="78" y="40" width="56" height="28" rx="14" transform="rotate(-45 106 54)"/><rect class="backdrop" x="88" y="48" width="36" height="12" rx="6" transform="rotate(-45 106 54)"/>
+  <path class="line-accent" d="M70 70l-6-9M62 78l-10-2M90 90l6 9M98 82l10 2"/>
+  <path class="primary" d="M36 34Q37.7 38.3 42 40Q37.7 41.7 36 46Q34.3 41.7 30 40Q34.3 38.3 36 34Z"/>
+  <circle class="accent" cx="128" cy="120" r="4"/>
+</svg>

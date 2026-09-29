@@ -20,7 +20,7 @@ import { format, resolveConfig } from 'prettier'
 
 const TAG_PREFIX = 'c2-symbol-'
 const CLASS_SUFFIX = 'Symbol'
-const CATEGORIES = ['empty', 'status', 'error', 'action'] as const
+const CATEGORIES = ['empty', 'status', 'error', 'security', 'commerce', 'communication', 'files', 'onboarding'] as const
 
 // Every public variable of the set, in documentation order. The generator checks this list against the `$theme`
 // map of `src/symbol.scss` so the JSDoc defaults cannot drift from the stylesheet.
@@ -34,12 +34,13 @@ const CSS_PROPERTIES: { name: string; type: string; description: string }[] = [
   { name: 'ink--color', type: 'color', description: 'Small solid details: handles, dots, clock hands.' },
   { name: 'primary--color', type: 'color', description: 'Accent fills and strokes.' },
   { name: 'primary-soft--color', type: 'color', description: 'Soft accent fills: a lens, a folder back, a chat bubble.' },
+  { name: 'accent--color', type: 'color', description: 'Decorative warm highlight: stars, coins, light bulbs, flames, confetti.' },
   { name: 'success--color', type: 'color', description: 'Success badges and check marks.' },
-  { name: 'warning--color', type: 'color', description: 'Warning badges, the light bulb, the rocket flame.' },
+  { name: 'warning--color', type: 'color', description: 'Warning badges and hazard signs.' },
   { name: 'error--color', type: 'color', description: 'Error badges and strike-throughs.' },
 ]
 
-const FILL_ROLES = ['backdrop', 'surface', 'muted', 'ink', 'primary', 'primary-soft', 'success', 'warning', 'error']
+const FILL_ROLES = ['backdrop', 'surface', 'muted', 'ink', 'primary', 'primary-soft', 'accent', 'success', 'warning', 'error']
 const ALLOWED_CLASSES = new Set(['line', ...FILL_ROLES, ...FILL_ROLES.map((role) => `line-${role}`)])
 const ALLOWED_ELEMENTS = new Set(['g', 'path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon'])
 const FORBIDDEN_ATTRIBUTES = /\s(fill|stroke|stroke-width|style|color|href|xlink:href|on[a-z]+)=/

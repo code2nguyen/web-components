@@ -17,14 +17,15 @@ import { SymbolElement } from '../symbol'
  * @cssproperty {color} [--c2-symbol__ink--color=#71717a] - Small solid details: handles, dots, clock hands.
  * @cssproperty {color} [--c2-symbol__primary--color=#0265dc] - Accent fills and strokes.
  * @cssproperty {color} [--c2-symbol__primary-soft--color=#edf1fe] - Soft accent fills: a lens, a folder back, a chat bubble.
+ * @cssproperty {color} [--c2-symbol__accent--color=#fbbf24] - Decorative warm highlight: stars, coins, light bulbs, flames, confetti.
  * @cssproperty {color} [--c2-symbol__success--color=#16a34a] - Success badges and check marks.
- * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges, the light bulb, the rocket flame.
+ * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges and hazard signs.
  * @cssproperty {color} [--c2-symbol__error--color=#dc2626] - Error badges and strike-throughs.
  */
 @customElement('c2-symbol-search')
 export class SearchSymbol extends SymbolElement {
   protected override renderSymbol() {
-    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><rect class="ink" x="102" y="91" width="13" height="34" rx="6.5" transform="rotate(-45 108.5 108)"/><circle class="surface line" cx="72" cy="72" r="32"/><circle class="primary-soft" cx="72" cy="72" r="23"/><path class="line-primary" d="M59 66a15 15 0 0 1 9-10"/><path class="line-primary" d="M126 34v10M121 39h10"/><circle class="warning" cx="36" cy="118" r="3.5"/>`
+    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><rect class="ink" x="102" y="91" width="13" height="34" rx="6.5" transform="rotate(-45 108.5 108)"/><circle class="surface line" cx="72" cy="72" r="32"/><circle class="primary-soft" cx="72" cy="72" r="23"/><path class="line-primary" d="M59 66a15 15 0 0 1 9-10"/><path class="line-primary" d="M126 34v10M121 39h10"/><circle class="accent" cx="36" cy="118" r="3.5"/>`
   }
 }
 

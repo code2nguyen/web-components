@@ -17,14 +17,15 @@ import { SymbolElement } from '../symbol'
  * @cssproperty {color} [--c2-symbol__ink--color=#71717a] - Small solid details: handles, dots, clock hands.
  * @cssproperty {color} [--c2-symbol__primary--color=#0265dc] - Accent fills and strokes.
  * @cssproperty {color} [--c2-symbol__primary-soft--color=#edf1fe] - Soft accent fills: a lens, a folder back, a chat bubble.
+ * @cssproperty {color} [--c2-symbol__accent--color=#fbbf24] - Decorative warm highlight: stars, coins, light bulbs, flames, confetti.
  * @cssproperty {color} [--c2-symbol__success--color=#16a34a] - Success badges and check marks.
- * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges, the light bulb, the rocket flame.
+ * @cssproperty {color} [--c2-symbol__warning--color=#f59e0b] - Warning badges and hazard signs.
  * @cssproperty {color} [--c2-symbol__error--color=#dc2626] - Error badges and strike-throughs.
  */
 @customElement('c2-symbol-launch')
 export class LaunchSymbol extends SymbolElement {
   protected override renderSymbol() {
-    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><circle class="warning" cx="34" cy="46" r="3"/><circle class="primary-soft" cx="124" cy="118" r="5"/><path class="line-primary" d="M120 30v10M115 35h10"/><g transform="rotate(45 80 80)"><path class="warning" d="M68 102h24c0 10-6 18-12 24-6-6-12-14-12-24Z"/><path class="primary line" d="M60 82 46 96v12l14-8ZM100 82l14 14v12l-14-8Z"/><path class="surface line" d="M80 28c14 10 20 26 20 44v30H60V72c0-18 6-34 20-44Z"/><circle class="primary-soft line-primary" cx="80" cy="64" r="8"/></g>`
+    return svg`<circle class="backdrop" cx="80" cy="80" r="64"/><circle class="accent" cx="34" cy="46" r="3"/><circle class="primary-soft" cx="124" cy="118" r="5"/><path class="line-primary" d="M120 30v10M115 35h10"/><g transform="rotate(45 80 80)"><path class="accent" d="M68 102h24c0 10-6 18-12 24-6-6-12-14-12-24Z"/><path class="primary line" d="M60 82 46 96v12l14-8ZM100 82l14 14v12l-14-8Z"/><path class="surface line" d="M80 28c14 10 20 26 20 44v30H60V72c0-18 6-34 20-44Z"/><circle class="primary-soft line-primary" cx="80" cy="64" r="8"/></g>`
   }
 }
 

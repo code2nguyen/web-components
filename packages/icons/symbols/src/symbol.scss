@@ -10,6 +10,7 @@
     ink--color: #71717a,
     primary--color: #0265dc,
     primary-soft--color: #edf1fe,
+    accent--color: #fbbf24,
     success--color: #16a34a,
     warning--color: #f59e0b,
     error--color: #dc2626,
@@ -19,7 +20,7 @@
 // Colour roles every source SVG in `svg/` is drawn with. A class names a fill (`primary`) or a stroke
 // (`line-primary`, or plain `line` for the default outline); the generator rejects any other class and any
 // hard-coded colour, so these variables are the whole palette of the set.
-$fills: backdrop, surface, muted, ink, primary, primary-soft, success, warning, error;
+$fills: backdrop, surface, muted, ink, primary, primary-soft, accent, success, warning, error;
 
 :host {
   display: inline-flex;
