@@ -14,9 +14,11 @@ npm install @c2n/slider
 <c2-slider value="40" aria-label="Volume"></c2-slider>
 <c2-slider min="0" max="10" step="1" value="6" ticks show-value aria-label="Rating"></c2-slider>
 <c2-slider orientation="vertical" value="70" aria-label="Level"></c2-slider>
+<c2-slider mode="range" name="price" value-start="20" value-end="80" show-value aria-label="Price"></c2-slider>
 ```
 
 - **Value**: `value`, `min`, `max` and `step` mirror the native input; `value` reflects and is snapped by the browser. `input` fires on every step of a drag, `change` when the value is committed.
+- **Range**: `mode="range"` draws two thumbs that select an interval, read and written through `valueStart`/`valueEnd` (`value-start`/`value-end`). The thumbs cannot pass each other, a press on the track moves the nearer one, and the form submits two entries under `name`. Each thumb is its own `slider`, named `aria-label` plus `start-label`/`end-label` ("Price, Minimum").
 - **Bubble**: `show-value` shows the value above the thumb while hovering, dragging or focused; `--c2-slider__value--opacity: 1` keeps it always on. Set the `formatValue` property (`(v) => \`${v}%\``) to format both the bubble and `aria-valuetext`.
 - **Ticks**: `ticks` draws a mark for every `step` (up to 200), coloured differently on the filled part.
 - **Orientation**: `orientation="vertical"` turns the track upright; its length is `--c2-slider__container--length`. Horizontal sliders fill their width.
