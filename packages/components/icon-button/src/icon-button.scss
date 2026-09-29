@@ -24,7 +24,11 @@
 );
 
 :host {
+  // Keep the button in the middle of whatever box the host gets: sized directly, or stretched by a flex row or grid cell.
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }
 
 :host([hidden]) {

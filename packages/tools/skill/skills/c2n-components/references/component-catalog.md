@@ -48,6 +48,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Feedback
 
+- **Banner** — `c2-banner` · `@c2n/banner` — A persistent, full-width message in the page flow for system notices, outages and account status.
 - **Modal** — `c2-modal` · `@c2n/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
 - **Overlay** — `c2-overlay` · `@c2n/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
 - **Progress** — `c2-progress` · `@c2n/progress` — Linear progress bar, indeterminate or filling to a value, with an optional label and count.
@@ -86,6 +87,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.
 - **Textarea** — `c2-textarea` · `@c2n/textarea` — Multiline text input with resizing, helper and error text, and a character counter.
 - **Theme Select** — `c2-theme-select` · `@c2n/theme-select` — Colour-theme switcher: click to step to the next mode, hover for the full menu.
+- **Time Input** — `c2-time-input` · `@c2n/time-input` — Form-associated time-of-day input with a scroll-wheel picker, step and range constraints, helper text and error states.
 - **Upload** — `c2-upload` · `@c2n/upload` — Drag-and-drop file selection with validation, upload progress, retry, cancellation, and attachment results.
 
 ## Layout
@@ -99,6 +101,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode.
 - **Seperator** — `c2-seperator` · `@c2n/seperator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
+- **Split Panel** — `c2-split-panel` · `@c2n/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.
 
 ## Navigation
 

@@ -4,6 +4,9 @@
  * hydrating each element as an Astro island.
  */
 import '@c2n/timeline'
+import '@c2n/split-panel'
+import '@c2n/banner'
+import '@c2n/time-input'
 import '@c2n/log-viewer'
 import './log-viewer-examples'
 import '@c2n/masonry'

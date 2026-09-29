@@ -265,6 +265,7 @@ export const overrides: Record<string, Override> = {
   // Error focus ring stays red on purpose.
   '--c2-text-field__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
   '--c2-date-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
+  '--c2-time-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
   '--c2-number-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
   // 1px radii on the colour picker swatch are a detail, not a shape token.
   '--c2-color-select--border-top-left-radius': { exclude: 'swatch detail radius' },
@@ -324,4 +325,7 @@ export const overrides: Record<string, Override> = {
   '--c2-timeline-item__marker__success--color': { exclude: 'success status colour' },
   '--c2-timeline-item__marker__warning--border-color': { exclude: 'warning status colour' },
   '--c2-timeline-item__marker__warning--color': { exclude: 'warning status colour' },
+  // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
+  '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
+  '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },
 }

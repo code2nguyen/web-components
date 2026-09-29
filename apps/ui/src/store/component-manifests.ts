@@ -1,5 +1,8 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import timeline from '@c2n/timeline/custom-elements.json'
+import splitPanel from '@c2n/split-panel/custom-elements.json'
+import banner from '@c2n/banner/custom-elements.json'
+import timeInput from '@c2n/time-input/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
@@ -78,6 +81,9 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     timeline,
+    splitPanel,
+    banner,
+    timeInput,
     logViewer,
     masonry,
     dashboard,
