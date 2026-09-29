@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="primary" x="38" y="83" width="52" height="26" rx="13" transform="rotate(-45 64 96)"/><rect class="backdrop" x="47" y="90.5" width="34" height="11" rx="5.5" transform="rotate(-45 64 96)"/>
+  <rect class="accent" x="70" y="51" width="52" height="26" rx="13" transform="rotate(-45 96 64)"/><rect class="backdrop" x="79" y="58.5" width="34" height="11" rx="5.5" transform="rotate(-45 96 64)"/>
+  <path class="primary" d="M126 114Q127.7 118.3 132 120Q127.7 121.7 126 126Q124.3 121.7 120 120Q124.3 118.3 126 114Z"/>
+  <circle class="accent" cx="34" cy="40" r="4"/>
+</svg>

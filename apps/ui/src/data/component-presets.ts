@@ -32,6 +32,48 @@ export function describeComponentPreset(preset: ComponentPreset): string {
 }
 
 export const componentPresets: Record<string, ComponentPresetGroup> = {
+  'c2-carousel': {
+    html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
+    presets: [
+      {
+        name: 'Glass controls',
+        description: 'Translucent dark buttons over the slides and a rounder viewport.',
+        css: {
+          '--c2-carousel__track--border-radius': '14px',
+          '--c2-carousel__control--background-color': 'rgba(24, 24, 27, 0.55)',
+          '--c2-carousel__control--color': '#ffffff',
+          '--c2-carousel__control--border': '1px solid rgba(255, 255, 255, 0.2)',
+          '--c2-carousel__control__hover--background-color': 'rgba(24, 24, 27, 0.75)',
+          '--c2-carousel__indicator__selected--background-color': '#18181b',
+        },
+      },
+      {
+        name: 'Peek cards',
+        description: 'The next slide peeks in; swipe or use the indicators, no floating buttons.',
+        css: {
+          '--c2-carousel__slide--width': '80%',
+          '--c2-carousel--gap': '12px',
+          '--c2-carousel__control--display': 'none',
+        },
+      },
+      {
+        name: 'Square and flat',
+        description: 'No rounding or shadow, bar indicators aligned to the start.',
+        css: {
+          '--c2-carousel__track--border-radius': '0',
+          '--c2-carousel__control--border-radius': '0',
+          '--c2-carousel__control--box-shadow': 'none',
+          '--c2-carousel__control--border': '1px solid #18181b',
+          '--c2-carousel__indicator--width': '16px',
+          '--c2-carousel__indicator--height': '2px',
+          '--c2-carousel__indicator--border-radius': '0',
+          '--c2-carousel__indicator__selected--width': '32px',
+          '--c2-carousel__indicator__selected--background-color': '#18181b',
+          '--c2-carousel__indicators--justify-content': 'flex-start',
+        },
+      },
+    ],
+  },
   'c2-tree': {
     html: `<c2-tree style="width:220px" aria-label="Files" expanded-items="src" value="app"><c2-tree-item value="src" label="src"><c2-tree-item value="app" label="app.ts"></c2-tree-item><c2-tree-item value="main" label="main.ts"></c2-tree-item></c2-tree-item><c2-tree-item value="readme" label="README.md"></c2-tree-item></c2-tree>`,
     presets: [
@@ -533,6 +575,42 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-label__required-indicator--color': '#a1a1aa',
         },
       },
+    ],
+  },
+  'c2-split-panel': {
+    html: `<c2-split-panel style="width: 260px; height: 120px; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden"><div slot="start" style="padding: 10px; font-size: 12px">Start</div><div slot="end" style="padding: 10px; font-size: 12px">End</div></c2-split-panel>`,
+    presets: [
+      {
+        name: 'Bare line',
+        description: 'No grip; the line turns accent on hover.',
+        css: { '--c2-split-panel__handle--display': 'none', '--c2-split-panel__divider__hover--background': 'rgb(2, 101, 220)' },
+      },
+      {
+        name: 'Thick bar',
+        description: 'An 8px grey bar with a borderless grip.',
+        css: {
+          '--c2-split-panel__divider--opacity': '1',
+          '--c2-split-panel__divider--size': '8px',
+          '--c2-split-panel__divider--background': '#f4f4f5',
+          '--c2-split-panel__divider__hover--background': '#e4e4e7',
+          '--c2-split-panel__handle--background': 'transparent',
+          '--c2-split-panel__handle--border': 'none',
+        },
+      },
+      {
+        name: 'Accent grip',
+        description: 'A tall accent pill in the middle of the divider.',
+        css: {
+          '--c2-split-panel__divider--opacity': '1',
+          '--c2-split-panel__handle--width': '8px',
+          '--c2-split-panel__handle--height': '40px',
+          '--c2-split-panel__handle--background': 'rgb(2, 101, 220)',
+          '--c2-split-panel__handle--border': 'none',
+          '--c2-split-panel__handle--border-radius': '999px',
+          '--c2-split-panel__handle--color': '#ffffff',
+        },
+      },
+      { name: 'Stacked', description: 'Panels on top of each other.', attributes: { orientation: 'vertical' } },
     ],
   },
   'c2-sheet': {
@@ -1355,6 +1433,43 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-code-editor--box-shadow': '0 0 0 4px rgba(2, 101, 220, 0.08)',
           '--c2-code-editor__gutter--background': 'rgba(2, 101, 220, 0.04)',
           '--c2-code-editor__gutter--border-right': '1px solid rgba(2, 101, 220, 0.16)',
+        },
+      },
+    ],
+  },
+  'c2-timeline': {
+    html: `<c2-timeline aria-label="Order history" style="width:300px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success">Paid with a card ending 4242.</c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary">Handed to the carrier.</c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
+    presets: [
+      {
+        name: 'Filled dots',
+        description: 'Solid ink markers on a hairline connector, with a bolder label.',
+        css: {
+          '--c2-timeline-item__marker--size': '10px',
+          '--c2-timeline-item__marker--background': '#18181b',
+          '--c2-timeline-item__marker--border': '2px solid #18181b',
+          '--c2-timeline-item__connector--width': '1px',
+          '--c2-timeline-item__label--font-weight': '600',
+        },
+      },
+      {
+        name: 'Split dates',
+        description: 'Timestamps in their own column before the rail, for scanning by date.',
+        attributes: { layout: 'split' },
+        css: {
+          '--c2-timeline-item--gap': '16px',
+          '--c2-timeline-item__timestamp__split--width': '88px',
+        },
+      },
+      {
+        name: 'Dashed roadmap',
+        description: 'Heavier violet rings joined by a dashed connector.',
+        css: {
+          '--c2-timeline-item__marker--size': '14px',
+          '--c2-timeline-item__marker--border': '3px solid #bcbcc6',
+          '--c2-timeline-item__marker__primary--border-color': '#7c3aed',
+          '--c2-timeline-item__marker__success--border-color': '#7c3aed',
+          '--c2-timeline-item__connector--background': 'repeating-linear-gradient(to bottom, #d4d4d8 0 4px, transparent 4px 8px)',
+          '--c2-timeline-item__timestamp--color': '#7c3aed',
         },
       },
     ],
@@ -2947,6 +3062,39 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-dash-card__header--font-weight': '500',
           '--c2-dash-card__handle__hover--background': 'rgba(9, 9, 11, 0.18)',
           '--c2-dash-card__handle__active--background': 'rgba(9, 9, 11, 0.38)',
+        },
+      },
+    ],
+  },
+  'c2-tag-input': {
+    html: `<c2-tag-input aria-label="Recipients" placeholder="Add recipients" value="ann@example.com;bob@example.com" style="width: 320px"></c2-tag-input>`,
+    presets: [
+      {
+        name: 'Pills',
+        description: 'Fully rounded brand-tinted tags without a border.',
+        css: {
+          '--c2-tag-input__tag--border-radius': '999px',
+          '--c2-tag-input__tag--padding-left': '10px',
+          '--c2-tag-input__tag--border': '1px solid transparent',
+          '--c2-tag-input__tag--background': '#edf1fe',
+          '--c2-tag-input__tag--color': '#2f56e6',
+          '--c2-tag-input__remove-icon--color': '#2f56e6',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'A 28px field with 20px tags for toolbars and filters.',
+        css: {
+          '--c2-tag-input--min-height': '28px',
+          '--c2-tag-input--font-size': '12px',
+          '--c2-tag-input--line-height': '16px',
+          '--c2-tag-input--padding-top': '3px',
+          '--c2-tag-input--padding-bottom': '3px',
+          '--c2-tag-input--padding-left': '4px',
+          '--c2-tag-input--gap': '4px',
+          '--c2-tag-input__tag--height': '20px',
+          '--c2-tag-input__tag--padding-left': '6px',
+          '--c2-tag-input__remove-icon--size': '12px',
         },
       },
     ],

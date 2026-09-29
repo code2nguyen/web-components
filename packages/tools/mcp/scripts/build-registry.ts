@@ -327,9 +327,15 @@ for (const dir of packageDirs.sort()) {
   let tagPattern: string | undefined
   let icons: string[] | undefined
   if (elements.length > 20) {
-    const prefix = elements[0].tag.replace(/[a-z0-9]+$/, '')
-    const common = elements.every((e) => e.tag.startsWith(prefix))
-    if (common) {
+    // The longest prefix every tag shares, cut back to a `-`: `c2-feather-`, `c2-symbol-` (whose names can be
+    // several words, so trimming the first tag's last word is not enough).
+    const shared = elements.reduce((acc, e) => {
+      let i = 0
+      while (i < acc.length && acc[i] === e.tag[i]) i++
+      return acc.slice(0, i)
+    }, elements[0].tag)
+    const prefix = shared.slice(0, shared.lastIndexOf('-') + 1)
+    if (prefix.length > 'c2-'.length) {
       icons = elements.map((e) => e.tag.slice(prefix.length)).sort()
       tagPattern = `${prefix}{name}`
       const sample = elements.find((e) => e.tag === `${prefix}${icons[0]}`) ?? elements[0]

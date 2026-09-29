@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-banner</title>
+    <script type="module" src="/src/banner.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 16px;
+      }
+      .brand {
+        --c2-banner__container--background: #18181b;
+        --c2-banner__container--color: #fafafa;
+        --c2-banner__container--border: none;
+        --c2-banner__container--border-radius: 0;
+        --c2-banner__icon--color: #fafafa;
+        --c2-banner__close--color: #fafafa;
+        --c2-banner__close__hover--background: rgba(255, 255, 255, 0.12);
+      }
+    </style>
+  </head>
+  <body>
+    <c2-banner message="Scheduled maintenance on Sunday, 02:00–04:00 UTC."></c2-banner>
+    <c2-banner variant="info" heading="New" message="Dashboards can now be shared with your whole team." dismissible></c2-banner>
+    <c2-banner variant="success" message="Your payment method was updated."></c2-banner>
+    <c2-banner variant="warning" heading="Trial ending" dismissible>
+      Your trial ends in 3 days.
+      <button slot="actions">Upgrade</button>
+    </c2-banner>
+    <c2-banner variant="error" heading="Outage" message="Deployments are failing in eu-west-1. We are investigating."></c2-banner>
+    <c2-banner class="brand" no-icon dismissible message="We use cookies to improve your experience.">
+      <a slot="actions" href="#" style="color: inherit">Learn more</a>
+    </c2-banner>
+    <script type="module">
+      document.addEventListener('banner-close', (e) => console.log('banner-close', e.target))
+    </script>
+  </body>
+</html>

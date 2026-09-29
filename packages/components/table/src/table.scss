@@ -44,9 +44,10 @@
     resizer__hover--color: rgb(2, 101, 220),
     row--height: 36px,
     row--border-bottom: 1px solid #e4e4e7,
-    row__hover--background: #fafafa,
+    row__hover--background: #f4f4f5,
     row__odd--background: #fafafa,
     row__selected--background: #edf1fe,
+    row__selected__hover--background: #e2e9fd,
     row__selected--color: #18181b,
     row__added--background: rgba(22, 163, 74, 0.16),
     row__removed--background: rgba(220, 38, 38, 0.14),
@@ -172,6 +173,10 @@
   border-bottom: css.cssVar(header--border-bottom);
 }
 
+// Stripe, hover and selection all paint the same body row, so they share one specificity (`:host` + two
+// classes/pseudo-classes) and are ordered weakest first: hover beats the stripe, selection beats both. Anything
+// heavier on the hover rule — it used to be `.row:not(…):not(…):hover` — hides the selected background for as long as
+// the pointer rests on the row, which is right after it was clicked.
 :host([stripe]) .row--odd {
   background: css.cssVar(row__odd--background);
 }
@@ -180,14 +185,17 @@
   cursor: pointer;
 }
 
-.row:not(.row--header):not(.row--state):hover {
+:host .row--body:hover {
   background: css.cssVar(row__hover--background);
 }
 
-.row--selected,
-.row--selected:hover {
+:host .row--body.row--selected {
   background: css.cssVar(row__selected--background);
   color: css.cssVar(row__selected--color);
+}
+
+:host .row--selected.row--body:hover {
+  background: css.cssVar(row__selected__hover--background);
 }
 
 .row--added {

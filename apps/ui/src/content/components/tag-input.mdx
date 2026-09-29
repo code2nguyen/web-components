@@ -1,0 +1,70 @@
+---
+title: 'Tag Input'
+description: 'Turns typed or pasted text into removable tags — recipients, keywords, labels — with configurable delimiters, parsing and validation.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { TagInput } from '@c2n/tag-input'
+
+`c2-tag-input` collects a list of short values in one field: type an address, press comma or Enter, and it becomes a tag; paste a column of addresses and each line becomes a tag. The value is a `string[]` (in markup, separate tags with semicolons), and the element is form-associated: every tag is submitted as its own entry under `name`, `required` asks for at least one tag, and form reset restores the initial tags.
+
+How text is split is up to you. `delimiters` lists every character that commits the pending text (default `,`; `delimiters=",; "` also accepts semicolons and spaces, `delimiters=""` leaves only Enter), and `split-pattern` replaces it with a regular expression such as `\s*\|\s*`. Pasted text is split on the same delimiters plus line breaks and tabs. `add-on-blur` commits whatever is left when focus leaves.
+
+`pattern` (or the `validator` property) decides whether a tag is valid. Invalid tags stay in the field, marked red, and keep the form invalid until removed; `reject-invalid` refuses them instead and leaves their text in the input. Duplicates are ignored unless `allow-duplicates` is set, and `max` caps the count.
+
+Keyboard: Backspace in the empty input (or ArrowLeft at its start) moves to the last tag, ArrowLeft / ArrowRight walk the tags, Backspace / Delete remove the focused tag, and Enter or a double-click puts a tag back into the input to edit it.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/tag-input
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/tag-input
+<style>
+  .w {
+    width: 360px;
+  }
+</style>
+<div data-label="Emails">
+  <c2-tag-input
+    class="w"
+    aria-label="Recipients"
+    placeholder="Add recipients"
+    delimiters=",; "
+    pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+    value="ann@example.com;bob@example.com;not-an-email"
+  ></c2-tag-input>
+</div>
+<div data-label="Custom split">
+  <c2-tag-input class="w" aria-label="Keywords" placeholder="red | green | blue" split-pattern="\s*\|\s*" value="design;tokens"></c2-tag-input>
+</div>
+<div data-label="Reject invalid, max 3">
+  <c2-tag-input class="w" aria-label="Codes" placeholder="Three-letter codes" pattern="[A-Z]{3}" reject-invalid max="3" value="EUR;USD"></c2-tag-input>
+</div>
+<div data-label="States">
+  <c2-tag-input class="w" aria-label="Read-only" readonly value="ann@example.com;bob@example.com"></c2-tag-input>
+  <c2-tag-input class="w" aria-label="Disabled" disabled value="ann@example.com"></c2-tag-input>
+</div>
+```
+
+## Parsing and validating in script
+
+`parseTag` normalizes every token before it becomes a tag (return `null` to drop it), `validator` adds any check a regular expression cannot express, and the cancelable `tag-add` / `tag-remove` events can veto a change.
+
+```ts tag=CodeBlock
+const field = document.querySelector('c2-tag-input')!
+
+// "Ann <Ann@Example.com>" → "ann@example.com"
+field.parseTag = (token) => (/<([^>]+)>/.exec(token)?.[1] ?? token).toLowerCase()
+
+// Only company addresses; the message becomes the form's validation message.
+field.validator = (tag) => tag.endsWith('@example.com') || `${tag} is outside the company`
+
+field.addEventListener('change', () => console.log(field.value))
+```

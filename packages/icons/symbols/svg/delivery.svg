@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <ellipse class="muted" cx="80" cy="122" rx="52" ry="5"/>
+  <path class="line-primary" opacity="0.6" d="M14 70h10M10 84h12"/>
+  <rect class="primary-soft line" x="28" y="46" width="66" height="58" rx="4"/>
+  <rect class="accent" x="40" y="58" width="20" height="18" rx="2"/>
+  <path class="line-ink" opacity="0.4" d="M50 58v7"/>
+  <path class="primary" d="M94 62h22l18 20v20a4 4 0 0 1-4 4H94Z"/>
+  <path class="surface" d="M100 68h13l11 13h-24Z"/>
+  <circle class="ink line-surface" cx="52" cy="106" r="10"/>
+  <circle class="ink line-surface" cx="114" cy="106" r="10"/>
+  <circle class="surface" cx="52" cy="106" r="3.5"/>
+  <circle class="surface" cx="114" cy="106" r="3.5"/>
+  <path class="accent" d="M128 32Q129.7 36.3 134 38Q129.7 39.7 128 44Q126.3 39.7 122 38Q126.3 36.3 128 32Z"/>
+</svg>

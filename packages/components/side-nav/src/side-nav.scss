@@ -89,6 +89,11 @@ $_duration: css.cssVar(transition-duration);
     visibility 0s linear $_duration;
 }
 
+// Focused only programmatically (tabindex -1) when a pointer opens the overlay; it is a container, not a control.
+.drawer:focus {
+  outline: none;
+}
+
 :host([opened]) .drawer {
   width: css.cssVar(open--width);
 }

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <path class="line-ink" d="M44.6 68.6A50 50 0 0 1 115.4 68.6"/>
+  <path class="line-ink" d="M56 80A34 34 0 0 1 104 80"/>
+  <path class="line-ink" d="M67.3 91.3A18 18 0 0 1 92.7 91.3"/>
+  <circle class="ink" cx="80" cy="104" r="6"/>
+  <rect class="backdrop" x="75" y="26" width="10" height="108" rx="5" transform="rotate(-45 80 80)"/>
+  <rect class="error" x="77.5" y="30" width="5" height="100" rx="2.5" transform="rotate(-45 80 80)"/>
+  <path class="primary" d="M128 112Q129.7 116.3 134 118Q129.7 119.7 128 124Q126.3 119.7 122 118Q126.3 116.3 128 112Z"/>
+  <circle class="accent" cx="34" cy="40" r="4"/>
+</svg>

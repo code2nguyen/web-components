@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="surface line" x="28" y="38" width="104" height="74" rx="10"/>
+  <path class="surface line" d="M52 112l-4 16 18-16"/>
+  <path class="muted" d="M46 54L48.2 58.9L53.6 59.5L49.6 63.2L50.7 68.5L46 65.8L41.3 68.5L42.4 63.2L38.4 59.5L43.8 58.9Z"/>
+  <path class="muted" d="M63 54L65.2 58.9L70.6 59.5L66.6 63.2L67.7 68.5L63 65.8L58.3 68.5L59.4 63.2L55.4 59.5L60.8 58.9Z"/>
+  <path class="muted" d="M80 54L82.2 58.9L87.6 59.5L83.6 63.2L84.7 68.5L80 65.8L75.3 68.5L76.4 63.2L72.4 59.5L77.8 58.9Z"/>
+  <path class="muted" d="M97 54L99.2 58.9L104.6 59.5L100.6 63.2L101.7 68.5L97 65.8L92.3 68.5L93.4 63.2L89.4 59.5L94.8 58.9Z"/>
+  <path class="muted" d="M114 54L116.2 58.9L121.6 59.5L117.6 63.2L118.7 68.5L114 65.8L109.3 68.5L110.4 63.2L106.4 59.5L111.8 58.9Z"/>
+  <path class="line" d="M42 84h64M42 96h40"/>
+  <path class="accent" d="M128 21Q130 26 135 28Q130 30 128 35Q126 30 121 28Q126 26 128 21Z"/>
+  <circle class="primary-soft" cx="32" cy="128" r="4"/>
+</svg>

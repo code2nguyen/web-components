@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="surface line" x="42" y="36" width="76" height="94" rx="8"/>
+  <rect class="muted line" x="62" y="28" width="36" height="16" rx="5"/>
+  <circle class="success" cx="59" cy="66" r="7"/>
+  <circle class="success" cx="59" cy="88" r="7"/>
+  <circle class="success" cx="59" cy="110" r="7"/>
+  <path class="line-surface" d="m55.5 66 2.5 2.5 5-5M55.5 88l2.5 2.5 5-5M55.5 110l2.5 2.5 5-5"/>
+  <path class="line" d="M74 66h30M74 88h24M74 110h28"/>
+  <path class="line-primary" d="M130 30v10M125 35h10"/>
+</svg>
