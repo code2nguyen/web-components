@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  shortcut: `<div class="preview-row">
+  <c2-kbd>mod + K</c2-kbd>
+  <c2-kbd>G</c2-kbd><c2-kbd>D</c2-kbd>
+  <c2-kbd>?</c2-kbd>
+</div>`,
   'log-viewer': `<c2-log-viewer data-log-viewer-demo="preview" wrap aria-label="Store server log" style="height:180px;width:300px"></c2-log-viewer>`,
   masonry: `<c2-masonry style="width:260px;--c2-masonry--gap:6px;--c2-masonry--row-height:9px;--c2-masonry--padding:6px;--c2-masonry--background:#f4f4f5;--c2-masonry--border-radius:8px;--c2-masonry-item--background:#fff;--c2-masonry-item--border:1px solid #e4e4e7;--c2-masonry-item--border-radius:6px;--c2-masonry-item__content--padding:8px">
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>

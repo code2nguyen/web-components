@@ -80,6 +80,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation.
 - **Rate** — `c2-rate` · `@c2n/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
 - **Select** — `c2-select` · `@c2n/select` — Dropdown that pairs a themeable trigger with an anchored list of c2-list-item options.
+- **Shortcut** — `c2-shortcut` · `@c2n/shortcut` — Keyboard shortcuts for a whole application from one element: each binding fires an action event, runs a handler or activates a target.
 - **Slider** — `c2-slider` · `@c2n/slider` — Range input with a themeable track, thumb, step ticks and value bubble.
 - **Switch** — `c2-switch` · `@c2n/switch` — On/off toggle on a native switch input, with label, description and thumb icons.
 - **Text Field** — `c2-text-field, c2-text-field-clear` · `@c2n/text-field` — Single-line input with icon slots, clear button, helper and error text, and a character counter.

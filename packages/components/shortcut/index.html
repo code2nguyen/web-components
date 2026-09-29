@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shortcut</title>
+    <script type="module" src="/src/shortcut.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 16px;
+        margin: 0;
+        padding: 32px;
+        font: 14px system-ui;
+        color: #18181b;
+      }
+      .panel {
+        padding: 12px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+      }
+      kbd {
+        padding: 1px 6px;
+        border: 1px solid #d4d4d8;
+        border-radius: 4px;
+        background: #f4f4f5;
+      }
+      #log {
+        min-height: 20px;
+        color: #71717a;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-shortcut id="shortcuts"></c2-shortcut>
+    <ul id="cheatsheet"></ul>
+    <label>Type here (bare keys are ignored, chords still fire) <input /></label>
+    <button id="new-item" type="button">New item</button>
+    <div class="panel" tabindex="0">Focus this panel and press Escape: the scoped binding wins over the global one.</div>
+    <output id="log"></output>
+
+    <script type="module">
+      const shortcuts = document.querySelector('#shortcuts')
+      const log = document.querySelector('#log')
+      shortcuts.bindings = [
+        { keys: 'mod+k, /', action: 'search', description: 'Open search' },
+        { keys: 'mod+s', action: 'save', description: 'Save' },
+        { keys: 'g d', action: 'go-dashboard', description: 'Go to dashboard' },
+        { keys: 'escape', action: 'close-global', description: 'Close (global)' },
+        { keys: 'escape', action: 'close-panel', scope: '.panel', description: 'Close panel (scoped)' },
+        { keys: 'alt+n', for: 'new-item', description: 'Click “New item”' },
+        { keys: 'shift+?', handler: () => (log.textContent = 'handler: help'), description: 'Help (handler)' },
+      ]
+      shortcuts.addEventListener('shortcut', (event) => (log.textContent = `shortcut: ${event.detail.action ?? event.detail.keys}`))
+      document.querySelector('#new-item').addEventListener('click', () => (log.textContent = 'clicked: New item'))
+      document.querySelector('#cheatsheet').innerHTML = shortcuts.entries.map((entry) => `<li><kbd>${entry.label}</kbd> ${entry.description}</li>`).join('')
+    </script>
+  </body>
+</html>

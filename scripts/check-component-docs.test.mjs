@@ -128,6 +128,12 @@ test('rejects publishable packages without runnable or substantially customized 
   )
 })
 
+test('does not require a customization example from a package without a styling surface', () => {
+  const packages = [{ name: '@c2n/behaviour', manifest: { modules: [{ declarations: [{ tagName: 'c2-behaviour' }] }] } }]
+  const documents = [{ path: 'behaviour.mdx', source: "import '@c2n/behaviour'\n```html tag=UsageBlock\n<c2-behaviour></c2-behaviour>\n```" }]
+  assert.deepEqual(exampleCoverageProblems(packages, documents), [])
+})
+
 test('applies the registry schema to reject additional fields', async () => {
   const input = await fixture('valid.json')
   input.registry.entries[0].unexpected = true
