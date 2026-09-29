@@ -1,5 +1,5 @@
 import { LitElement, html, unsafeCSS, type PropertyValues } from 'lit'
-import { state } from 'lit/decorators.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property } from '@c2n/core/lit-helper.js'
 import styles from './timeline-item.scss?inline'
@@ -85,7 +85,12 @@ export class TimelineItem extends LitElement {
   /** The layout of the timeline this entry belongs to. Written by `c2-timeline`. */
   @property({ attribute: false }) layout: TimelineLayout = 'stacked'
 
-  @state() private slotted = { label: false, timestamp: false, content: false }
+  /**
+   * Whether the label, timestamp and content slots are filled. Read from the light DOM rather than from `slotchange`
+   * alone: a server-rendered slot fires `slotchange` before the element hydrates, so an entry would keep its content
+   * hidden.
+   */
+  private readonly slotPresence = new SlotPresenceController(this, ['label', 'timestamp', ''])
 
   override connectedCallback() {
     super.connectedCallback()
@@ -98,29 +103,23 @@ export class TimelineItem extends LitElement {
     if (changed.has('layout')) this.toggleAttribute('split', this.layout === 'split')
   }
 
-  private onSlotChange(key: keyof TimelineItem['slotted'], event: Event) {
-    const slot = event.target as HTMLSlotElement
-    const filled = slot.assignedNodes({ flatten: true }).some((node) => node.nodeType === Node.ELEMENT_NODE || !!node.textContent?.trim())
-    if (this.slotted[key] !== filled) this.slotted = { ...this.slotted, [key]: filled }
-  }
-
   override render() {
-    const hasLabel = !!this.label || this.slotted.label
-    const hasTimestamp = !!this.timestamp || this.slotted.timestamp
-    const timestamp = html`<slot name="timestamp" @slotchange=${(event: Event) => this.onSlotChange('timestamp', event)}>${this.timestamp}</slot>`
+    const hasLabel = !!this.label || this.slotPresence.has('label')
+    const hasTimestamp = !!this.timestamp || this.slotPresence.has('timestamp')
+    const timestamp = html`<slot name="timestamp" @slotchange=${this.slotPresence.handleSlotChange}>${this.timestamp}</slot>`
     return html`
       <div class="rail" aria-hidden="true">
         <span class="marker" part="marker"><slot name="marker"></slot></span>
         <span class="connector" part="connector"></span>
       </div>
       <div class="label" part="label" ?hidden=${!hasLabel}>
-        <slot name="label" @slotchange=${(event: Event) => this.onSlotChange('label', event)}>${this.label}</slot>
+        <slot name="label" @slotchange=${this.slotPresence.handleSlotChange}>${this.label}</slot>
       </div>
       <div class="timestamp" part="timestamp" ?hidden=${!hasTimestamp}>
         ${this.datetime ? html`<time datetime=${this.datetime}>${timestamp}</time>` : timestamp}
       </div>
-      <div class="content" part="content" ?hidden=${!this.slotted.content}>
-        <slot @slotchange=${(event: Event) => this.onSlotChange('content', event)}></slot>
+      <div class="content" part="content" ?hidden=${!this.slotPresence.has('')}>
+        <slot @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
     `
   }
