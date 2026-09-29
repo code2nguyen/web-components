@@ -222,6 +222,7 @@ export class Tabs extends LitElement {
     for (const tab of tabs) {
       tab.selected = tab === selected
       tab.tabIndex = tab === focusable ? 0 : -1
+      tab.requestUpdate()
     }
 
     for (const child of this.children) {

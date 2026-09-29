@@ -1,6 +1,10 @@
-import { accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+import type { Page } from '@playwright/test'
+import { accessible, expect, slotPresenceMatrix } from '../../../../tests/component-fixture'
 import type { Autocomplete } from '../src/autocomplete'
-import { test, expect } from './fixture'
+import { test } from './fixture'
+
+// Suggestion rows state their role through ElementInternals, which getByRole cannot see: find them by tag.
+const options = (page: Page) => page.locator('c2-autocomplete c2-list-item')
 
 test('header presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
   const header = page.locator('c2-autocomplete').locator('.panel-header')
@@ -19,7 +23,8 @@ test('filters label and description fields, then selects with the keyboard', asy
 
   await input.fill('par')
   await expect(input).toHaveAttribute('aria-expanded', 'true')
-  await expect(page.getByRole('option')).toHaveCount(4)
+  await expect(options(page)).toHaveCount(4)
+  await expect(options(page).first()).toHaveHostAria('role', 'option')
 
   await input.press('ArrowDown')
   await input.press('Enter')
@@ -37,7 +42,7 @@ test('keeps suggestions open when the input is clicked with an existing query', 
   await expect(input).toHaveAttribute('aria-expanded', 'true')
   await input.click()
   await expect(input).toHaveAttribute('aria-expanded', 'true')
-  await expect(page.getByRole('option')).toHaveCount(4)
+  await expect(options(page)).toHaveCount(4)
 
   await page.mouse.click(5, 5)
   await expect(input).toHaveAttribute('aria-expanded', 'false')
@@ -53,14 +58,16 @@ test('preserves the query and reuses its results when selection behavior is pres
   const input = page.getByRole('combobox', { name: 'Search destinations' })
 
   await input.fill('airport')
-  await page.getByRole('option', { name: /Charles de Gaulle Airport/ }).click()
+  await options(page)
+    .filter({ hasText: /Charles de Gaulle Airport/ })
+    .click()
   await expect(host).toHaveJSProperty('value', 'airport')
   await expect(host).toHaveAttribute('data-selected', /"value":"cdg"/)
   await expect(input).toHaveAttribute('aria-expanded', 'false')
 
   await input.click()
   await expect(input).toHaveAttribute('aria-expanded', 'true')
-  await expect(page.getByRole('option', { name: /Charles de Gaulle Airport/ })).toBeVisible()
+  await expect(options(page).filter({ hasText: /Charles de Gaulle Airport/ })).toBeVisible()
 })
 
 test('loads remote suggestions and aborts a stale request', async ({ page, scenario }) => {
@@ -72,7 +79,7 @@ test('loads remote suggestions and aborts a stale request', async ({ page, scena
   await expect(page.getByRole('status')).toHaveText('Loading suggestions…')
   await input.fill('par')
   await expect(host).toHaveAttribute('data-aborted', 'p')
-  await expect(page.getByRole('option')).toHaveCount(3)
+  await expect(options(page)).toHaveCount(3)
   await expect(host).toHaveAttribute('data-request', 'par')
 })
 
@@ -82,7 +89,7 @@ test('reuses the last successful remote results when reopening an unchanged quer
   const input = page.getByRole('combobox')
 
   await input.fill('par')
-  await expect(page.getByRole('option')).toHaveCount(3)
+  await expect(options(page)).toHaveCount(3)
   await expect(host).toHaveAttribute('data-request-count', '1')
 
   await page.mouse.click(5, 5)
@@ -90,7 +97,7 @@ test('reuses the last successful remote results when reopening an unchanged quer
   await input.click()
 
   await expect(host).toHaveAttribute('data-request-count', '1')
-  await expect(page.getByRole('option')).toHaveCount(3)
+  await expect(options(page)).toHaveCount(3)
   await expect(page.getByRole('status')).toHaveCount(0)
 
   await host.evaluate((element) => (element as Autocomplete).load())
@@ -103,7 +110,9 @@ test('supports pointer selection, clear, query events and form submission', asyn
   const input = page.getByRole('combobox')
 
   await input.fill('airport')
-  await page.getByRole('option', { name: /Charles de Gaulle Airport/ }).click()
+  await options(page)
+    .filter({ hasText: /Charles de Gaulle Airport/ })
+    .click()
   await expect.poll(() => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('destination'))).toBe('cdg')
 
   await page.getByRole('button', { name: 'Clear' }).click()
@@ -130,9 +139,11 @@ test('composes list items around renderItem content between header and footer sl
   await expect(host.locator('c2-list-item')).toHaveCount(1)
   await expect(page.getByText('People directory')).toBeVisible()
   await expect(page.getByText('View all people')).toBeVisible()
-  await expect(page.getByRole('option', { name: /Ada Lovelace Platform/ })).toBeVisible()
+  await expect(options(page).filter({ hasText: /Ada Lovelace\s*Platform/ })).toBeVisible()
 
-  await page.getByRole('option', { name: /Ada Lovelace Platform/ }).click()
+  await options(page)
+    .filter({ hasText: /Ada Lovelace\s*Platform/ })
+    .click()
   await expect(host).toHaveJSProperty('value', '7')
   await expect(host).toHaveAttribute('data-selected', /"id":7/)
 })

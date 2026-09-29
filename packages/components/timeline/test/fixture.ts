@@ -9,4 +9,5 @@ export const test = base.extend<{ scenario: (name?: string) => Promise<void> }>(
     })
   },
 })
-export { expect } from '@playwright/test'
+// Re-exported from the component fixture for its `toHaveHostAria` matcher.
+export { expect } from '../../../../tests/component-fixture'
