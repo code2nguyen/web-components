@@ -45,14 +45,12 @@ export const test = base.extend<{ renderScenario: (html: string) => Promise<void
 export async function hostAria(locator: Locator, attribute: string): Promise<string | null> {
   return locator.evaluate((element, name) => {
     if (element.hasAttribute(name)) return element.getAttribute(name)
-    const property =
-      name === 'role'
-        ? 'role'
-        : name
-            .replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase())
-            .replace(/^aria([a-z])/, (_match, letter: string) => `aria${letter.toUpperCase()}`)
+    // An ARIA attribute name is one lowercase word while the property is camel-cased by word (`aria-posinset` is
+    // `ariaPosInSet`), so match it case-insensitively against the properties ElementInternals actually has.
+    const flat = name.replace(/-/g, '')
+    const property = Object.keys(ElementInternals.prototype).find((key) => key.toLowerCase() === flat)
     const internals = (element as Element & { internals?: Record<string, unknown> }).internals
-    const value = internals?.[property]
+    const value = property ? internals?.[property] : undefined
     return typeof value === 'string' ? value : null
   }, attribute)
 }
