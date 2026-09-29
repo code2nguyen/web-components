@@ -80,6 +80,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Date Selector** — `c2-date-selector` · `@c2n/date-selector` — Accessible one- or two-month calendar for choosing a date range.
 - **Label** — `c2-label` · `@c2n/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Number Input** — `c2-number-input` · `@c2n/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
+- **OTP Input** — `c2-otp-input` · `@c2n/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
 - **Rate** — `c2-rate` · `@c2n/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
