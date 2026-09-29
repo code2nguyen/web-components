@@ -535,6 +535,40 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-split-panel': {
+    html: `<c2-split-panel style="width: 260px; height: 120px; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden"><div slot="start" style="padding: 10px; font-size: 12px">Start</div><div slot="end" style="padding: 10px; font-size: 12px">End</div></c2-split-panel>`,
+    presets: [
+      {
+        name: 'Bare line',
+        description: 'No grip; the line turns accent on hover.',
+        css: { '--c2-split-panel__handle--display': 'none', '--c2-split-panel__divider__hover--background': 'rgb(2, 101, 220)' },
+      },
+      {
+        name: 'Thick bar',
+        description: 'An 8px grey bar with a borderless grip.',
+        css: {
+          '--c2-split-panel__divider--size': '8px',
+          '--c2-split-panel__divider--background': '#f4f4f5',
+          '--c2-split-panel__divider__hover--background': '#e4e4e7',
+          '--c2-split-panel__handle--background': 'transparent',
+          '--c2-split-panel__handle--border': 'none',
+        },
+      },
+      {
+        name: 'Accent grip',
+        description: 'A tall accent pill in the middle of the divider.',
+        css: {
+          '--c2-split-panel__handle--width': '8px',
+          '--c2-split-panel__handle--height': '40px',
+          '--c2-split-panel__handle--background': 'rgb(2, 101, 220)',
+          '--c2-split-panel__handle--border': 'none',
+          '--c2-split-panel__handle--border-radius': '999px',
+          '--c2-split-panel__handle--color': '#ffffff',
+        },
+      },
+      { name: 'Stacked', description: 'Panels on top of each other.', attributes: { orientation: 'vertical' } },
+    ],
+  },
   'c2-sheet': {
     html: `<c2-sheet open><span slot="title">Filters</span><div>Panel content</div></c2-sheet>`,
     presets: [

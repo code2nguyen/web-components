@@ -318,4 +318,7 @@ export const overrides: Record<string, Override> = {
   '--c2-dashboard--border-radius': { exclude: 'square by default; the grid is a frame only once an app fills it' },
   '--c2-dash-card--border-radius': { exclude: 'bare pane; the surface inside it owns the radius' },
   '--c2-dash-card__handle__hover--background': { token: 'color-primary-glow' },
+  // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
+  '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
+  '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },
 }

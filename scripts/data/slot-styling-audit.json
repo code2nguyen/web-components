@@ -1482,6 +1482,27 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-split-panel",
+      "slot": "end",
+      "decision": "part",
+      "parts": ["end"],
+      "reason": "The end panel region owns the end slot's component-side presentation."
+    },
+    {
+      "tag": "c2-split-panel",
+      "slot": "handle",
+      "decision": "part",
+      "parts": ["handle"],
+      "reason": "The divider grip owns the handle slot's component-side presentation."
+    },
+    {
+      "tag": "c2-split-panel",
+      "slot": "start",
+      "decision": "part",
+      "parts": ["start"],
+      "reason": "The start panel region owns the start slot's component-side presentation."
+    },
+    {
       "tag": "c2-stat",
       "slot": "description",
       "decision": "part",
