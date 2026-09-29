@@ -12,6 +12,9 @@
  *   the audit: a finding not on that list fails the run, and so does an entry that no longer occurs (delete it). Like
  *   the dogfood list, it only shrinks.
  *
+ * The audit is opt-in (slow: the whole site is built first): `.github/workflows/gallery-audit.yml` runs it from the
+ * Actions tab or on a PR labelled `gallery-audit`, and `.claude/skills/gallery-audit` tells an agent how to run it.
+ *
  * Runs after `npm run ui:build` (it serves `apps/ui/dist/`) and `npm run build:tools` (the registry lists each
  * component's cards, in page order, with their slugs).
  *

@@ -1,0 +1,52 @@
+name: Gallery audit
+
+# Checks every gallery card in the light and the dark theme: text contrast (axe-core), tags that never registered,
+# cards that render nothing, content wider than its frame, console errors. It builds the whole docs site and takes a
+# few minutes, so it runs only when asked:
+#   - from the Actions tab (Run workflow), optionally limited to some components, on any branch;
+#   - on a pull request carrying the `gallery-audit` label, on every push while the label stays on.
+# A finding missing from apps/ui/gallery-audit.known.json fails the run, and so does an entry that no longer occurs.
+# The artifact holds report.md / report.json and a screenshot of every card audited.
+on:
+  workflow_dispatch:
+    inputs:
+      components:
+        description: 'Component ids to audit, space-separated (e.g. "button tabs"); empty audits every gallery'
+        type: string
+        default: ''
+  pull_request:
+    types: [labeled, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gallery-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'gallery-audit')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: google/wireit@setup-github-actions-caching/v2
+      - run: npm ci
+      - run: npm run ui:build
+      - run: npm run build:tools
+      - run: npx playwright install --with-deps chromium
+      - name: Audit the gallery
+        env:
+          COMPONENTS: ${{ inputs.components }}
+        # Unquoted on purpose: the input is a space-separated list of ids.
+        run: npm run gallery:audit -- --shots-dir test-results/gallery-audit/shots $COMPONENTS
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: gallery-audit
+          path: test-results/gallery-audit/
+          retention-days: 7
