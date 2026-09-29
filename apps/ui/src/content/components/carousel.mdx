@@ -10,14 +10,18 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { Carousel } from '@c2n/carousel'
 
 `c2-carousel` turns its children into slides of a horizontal slideshow. The track is a native scroll container with
-CSS scroll snapping, so touch swipes, trackpads and the keyboard all move it, and the previous/next controls and the
-indicators below follow along. `index` names the slide at the start of the viewport and fires `slide-change` when the
+CSS scroll snapping, so touch swipes, trackpads and the keyboard all move it, and a mouse can drag it from slide to
+slide (`mouse-drag="false"` turns that off). The previous/next controls and the indicators below follow along. `index` names the slide at the start of the viewport and fires `slide-change` when the
 user moves it. `loop` wraps around the ends, and `autoplay` rotates every `interval` milliseconds with a play/pause
 control, pausing while the pointer or focus is inside the carousel.
 
 How wide a slide is is a CSS variable: `--c2-carousel__slide--width: 50%` shows two at once, `85%` lets the next one
-peek in, and the indicators shrink to the positions that can actually be reached. `--c2-carousel__control--display`
-and `--c2-carousel__indicators--display` hide the controls or the indicators.
+peek in, and the indicators shrink to the positions that can actually be reached. Clicking a slide that peeks into
+view moves to it, so a peek layout can hide the controls. `--c2-carousel__control--display`
+and `--c2-carousel__indicators--display` hide the controls or the indicators, and `--c2-carousel__control--opacity: 0`
+shows the controls only while the pointer is over the carousel or focus is inside it. Add
+`--c2-carousel__control__opposite--opacity: 0` and a control shows only while the pointer is near its edge: previous
+in the left 20%, next in the right 20% (`--c2-carousel__control__zone--width`), neither over the middle. Devices that cannot hover always show both.
 
 ## Installation
 
@@ -58,6 +62,11 @@ npm install @c2n/carousel
   .peek {
     --c2-carousel__slide--width: 85%;
     --c2-carousel--gap: 12px;
+    --c2-carousel__control--display: none;
+  }
+  .hover-controls {
+    --c2-carousel__control--opacity: 0;
+    --c2-carousel__control__opposite--opacity: 0;
   }
 </style>
 <div data-label="Default">
@@ -66,6 +75,13 @@ npm install @c2n/carousel
     <div class="slide">Slide 2</div>
     <div class="slide">Slide 3</div>
     <div class="slide">Slide 4</div>
+  </c2-carousel>
+</div>
+<div data-label="Controls on hover">
+  <c2-carousel client:only="lit" class="demo hover-controls" label="Gallery" loop>
+    <div class="slide">Slide 1</div>
+    <div class="slide">Slide 2</div>
+    <div class="slide">Slide 3</div>
   </c2-carousel>
 </div>
 <div data-label="Loop and autoplay">

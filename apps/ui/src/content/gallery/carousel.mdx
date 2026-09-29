@@ -56,6 +56,29 @@ previous/next buttons and `--c2-carousel__indicator--*` / `--c2-carousel__indica
 </c2-carousel>
 ```
 
+```html tag=MdxCodeBlock,label=Controls on hover
+<style>
+  .hover-controls {
+    --c2-carousel__control--opacity: 0;
+    --c2-carousel__control__opposite--opacity: 0;
+    --c2-carousel__track--border-radius: 12px;
+  }
+  .hover-controls .slide {
+    display: grid;
+    place-items: center;
+    height: 180px;
+    background: linear-gradient(135deg, #0f766e, #16a34a);
+    color: #ffffff;
+    font-weight: 600;
+  }
+</style>
+<c2-carousel client:only="lit" class="hover-controls" label="Carousel with controls on hover" loop>
+  <div class="slide">Slide 1</div>
+  <div class="slide">Slide 2</div>
+  <div class="slide">Slide 3</div>
+</c2-carousel>
+```
+
 ```html tag=MdxCodeBlock,label=Peek cards
 <style>
   .peek-cards {

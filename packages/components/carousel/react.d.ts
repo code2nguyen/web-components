@@ -24,6 +24,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-carousel': C2Props<Carousel> & {
+        'mouse-drag'?: Attribute
         'previous-label'?: Attribute
         'next-label'?: Attribute
         'indicators-label'?: Attribute

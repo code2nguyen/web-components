@@ -17,6 +17,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-carousel': DefineComponent<
       C2Props<Carousel> & {
+        'mouse-drag'?: unknown
         'previous-label'?: unknown
         'next-label'?: unknown
         'indicators-label'?: unknown

@@ -121,6 +121,159 @@ test('scrolling the track updates the current slide', async ({ page, scenario })
   await expect(page.getByRole('status', { name: 'Changes' })).toHaveText(/->2\/5$/)
 })
 
+/** Press the mouse at the centre of the track, move it `dx` pixels in steps, and release it. */
+async function dragTrack(page: Page, dx: number, from?: { x: number; y: number }) {
+  const box = await page.locator('c2-carousel').locator('.c2-carousel-track').boundingBox()
+  if (!box) throw new Error('Track has no bounds')
+  const start = from ?? { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+  await page.mouse.move(start.x, start.y)
+  await page.mouse.down()
+  await page.mouse.move(start.x + dx, start.y, { steps: 8 })
+  await page.mouse.up()
+}
+
+test('dragging the track with the mouse turns the page either way', async ({ page, scenario }) => {
+  await scenario()
+  await dragTrack(page, -200)
+  await expect(indicator(page, 2)).toHaveAttribute('aria-current', 'true')
+  await expect.poll(() => slideAtStart(page)).toBe(1)
+  // A short drag still turns the page instead of snapping back.
+  await dragTrack(page, -40)
+  await expect(indicator(page, 3)).toHaveAttribute('aria-current', 'true')
+  await expect.poll(() => slideAtStart(page)).toBe(2)
+  await dragTrack(page, 40)
+  await expect.poll(() => slideAtStart(page)).toBe(1)
+  await expect(page.getByRole('status', { name: 'Changes' })).toHaveText('0->1/5,1->2/5,2->1/5')
+})
+
+test('dragging stops at the ends without loop', async ({ page, scenario }) => {
+  await scenario()
+  await dragTrack(page, 200)
+  await expect.poll(() => slideAtStart(page)).toBe(0)
+  await expect(page.getByRole('status', { name: 'Changes' })).toHaveText('')
+})
+
+test('right-to-left dragging follows the reading direction', async ({ page, scenario }) => {
+  await scenario('rtl')
+  await dragTrack(page, 200)
+  await expect(indicator(page, 2)).toHaveAttribute('aria-current', 'true')
+  await expect.poll(() => slideAtStart(page)).toBe(1)
+})
+
+test('the click that ends a drag does not follow a link, a plain click does', async ({ page, scenario }) => {
+  await scenario()
+  const link = page.getByRole('link', { name: 'Link 1' })
+  const box = await link.boundingBox()
+  if (!box) throw new Error('Link has no bounds')
+  await dragTrack(page, -200, { x: box.x + box.width / 2, y: box.y + box.height / 2 })
+  await expect(indicator(page, 2)).toHaveAttribute('aria-current', 'true')
+  expect(new URL(page.url()).hash).toBe('')
+  await page.getByRole('link', { name: 'Link 2' }).click()
+  await expect.poll(() => new URL(page.url()).hash).toBe('#link-2')
+})
+
+test('mouse-drag="false" leaves the track to native scrolling', async ({ page, scenario }) => {
+  await scenario('no-drag')
+  await dragTrack(page, -200)
+  await expect.poll(() => slideAtStart(page)).toBe(0)
+  await expect(indicator(page, 1)).toHaveAttribute('aria-current', 'true')
+})
+
+test('by default the controls stay shown and in place with the pointer away', async ({ page, scenario }) => {
+  await scenario()
+  await page.mouse.move(0, 0)
+  const next = page.getByRole('button', { name: 'Next slide' })
+  expect(await next.evaluate((button) => [getComputedStyle(button).opacity, getComputedStyle(button).translate])).toEqual(['1', '0px'])
+})
+
+test('controls can show only while the pointer is over the carousel', async ({ page, scenario }) => {
+  await scenario('hover-controls')
+  const next = page.getByRole('button', { name: 'Next slide' })
+  const opacity = () => next.evaluate((button) => Number(getComputedStyle(button).opacity))
+  // How far the button sits from its resting place along the row; hidden, it waits a little towards its own edge.
+  const shift = () => next.evaluate((button) => Math.round(new DOMMatrix(getComputedStyle(button).translate.replace(/^(\S+)(\s.*)?$/, 'translate($1)')).e))
+  await page.mouse.move(0, 0)
+  await expect.poll(opacity).toBe(0)
+  await expect.poll(shift).toBe(8)
+  const box = await page.locator('c2-carousel').boundingBox()
+  if (!box) throw new Error('Carousel has no bounds')
+  await page.mouse.move(box.x + box.width / 2, box.y + 40)
+  await expect.poll(opacity).toBe(1)
+  await expect.poll(shift).toBe(0)
+  await page.mouse.move(0, 0)
+  await expect.poll(opacity).toBe(0)
+  // Keyboard focus inside the carousel reveals them too.
+  await page.getByRole('link', { name: 'Link 1' }).focus()
+  await expect.poll(opacity).toBe(1)
+})
+
+for (const [scenarioName, leftControl, rightControl] of [
+  ['side-controls', 'Previous slide', 'Next slide'],
+  ['side-controls-rtl', 'Next slide', 'Previous slide'],
+] as const) {
+  test(`${scenarioName}: each edge zone shows only its own control, the middle neither`, async ({ page, scenario }) => {
+    await scenario(scenarioName)
+    const opacityOf = (name: string) => () => page.getByRole('button', { name, exact: true }).evaluate((button) => Number(getComputedStyle(button).opacity))
+    const box = await page.locator('c2-carousel').boundingBox()
+    if (!box) throw new Error('Carousel has no bounds')
+    // Within the default 20% zone along an edge only that edge's control shows; the middle shows neither.
+    await page.mouse.move(box.x + box.width * 0.15, box.y + 40)
+    await expect.poll(opacityOf(leftControl)).toBe(1)
+    await expect.poll(opacityOf(rightControl)).toBe(0)
+    await page.mouse.move(box.x + box.width * 0.5, box.y + 40)
+    await expect.poll(opacityOf(leftControl)).toBe(0)
+    await expect.poll(opacityOf(rightControl)).toBe(0)
+    await page.mouse.move(box.x + box.width * 0.3, box.y + 40)
+    await expect.poll(opacityOf(leftControl)).toBe(0)
+    await page.mouse.move(box.x + box.width * 0.85, box.y + 40)
+    await expect.poll(opacityOf(rightControl)).toBe(1)
+    await expect.poll(opacityOf(leftControl)).toBe(0)
+    await page.mouse.move(0, 0)
+    await expect.poll(opacityOf(rightControl)).toBe(0)
+    await expect.poll(opacityOf(leftControl)).toBe(0)
+  })
+}
+
+test('clicking a peeking slide moves to it', async ({ page, scenario }) => {
+  await scenario('peek')
+  const box = await page.locator('c2-carousel').locator('.c2-carousel-track').boundingBox()
+  if (!box) throw new Error('Track has no bounds')
+  // The sliver of slide 2 at the end edge; a locator click would scroll the slide into view first.
+  await page.mouse.click(box.x + box.width - 10, box.y + box.height / 2)
+  await expect(indicator(page, 2)).toHaveAttribute('aria-current', 'true')
+  await expect.poll(() => slideAtStart(page)).toBe(1)
+  // Slide 2 is now fully in view: clicking it again does nothing, clicking the next sliver moves on.
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.click(box.x + box.width - 10, box.y + box.height / 2)
+  // The last of the three slides cannot reach the start edge; the track scrolls to its end instead.
+  await expect(indicator(page, 3)).toHaveAttribute('aria-current', 'true')
+  await expect(page.getByRole('status', { name: 'Changes' })).toHaveText('0->1/3,1->2/3')
+})
+
+test('clicking a fully visible slide does not move the carousel', async ({ page, scenario }) => {
+  await scenario('multi')
+  await page.getByText('Slide 2').click()
+  await expect(indicator(page, 1)).toHaveAttribute('aria-current', 'true')
+  await expect(page.getByRole('status', { name: 'Changes' })).toHaveText('')
+})
+
+test('the edge zone width is a CSS variable and never narrower than the control', async ({ page, scenario }) => {
+  await scenario('side-controls')
+  const carousel = page.locator('c2-carousel')
+  const box = await carousel.boundingBox()
+  if (!box) throw new Error('Carousel has no bounds')
+  const opacity = () => page.getByRole('button', { name: 'Next slide' }).evaluate((button) => Number(getComputedStyle(button).opacity))
+  await carousel.evaluate((element) => (element as HTMLElement).style.setProperty('--c2-carousel__control__zone--width', '40%'))
+  await page.mouse.move(box.x + box.width * 0.65, box.y + 40)
+  await expect.poll(opacity).toBe(1)
+  // A zone set below the control's own extent (12px inset + 36px) still covers the control.
+  await carousel.evaluate((element) => (element as HTMLElement).style.setProperty('--c2-carousel__control__zone--width', '10px'))
+  await page.mouse.move(box.x + box.width / 2, box.y + 40)
+  await expect.poll(opacity).toBe(0)
+  await page.mouse.move(box.x + box.width - 40, box.y + 40)
+  await expect.poll(opacity).toBe(1)
+})
+
 test('tabbing to a link in a later slide makes it current', async ({ page, scenario }) => {
   await scenario()
   await page.getByRole('link', { name: 'Link 3' }).focus()

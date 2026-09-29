@@ -31,6 +31,8 @@ function format(template: string, values: Record<string, number>): string {
 
 /** How long scrolling must pause before the carousel treats the position as settled, where `scrollend` is missing. */
 const SETTLE_DELAY = 120
+/** How far, in pixels, a mouse must move with the button down before the press becomes a drag instead of a click. */
+const DRAG_THRESHOLD = 5
 
 const chevronLeft = html`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <polyline points="15 18 9 12 15 6"></polyline>
@@ -52,12 +54,20 @@ const pauseIcon = html`<svg viewBox="0 0 24 24" fill="currentColor" stroke="none
  * swipes, trackpads and a focused track's arrow keys all move it, and CSS scroll snapping keeps a slide aligned to
  * the start of the viewport.
  *
+ * With a mouse, dragging the track moves it too (`mouse-drag`, on by default): releasing it past a few pixels goes to the
+ * next or previous slide, and the click that ends a drag does not reach a link in the slide. Clicking a slide that
+ * only peeks into view (a `--c2-carousel__slide--width` below 100%) moves to it, so a peek layout can do without the
+ * controls.
+ *
  * Previous/next controls sit over the track and a row of indicators below it, one per position the carousel can rest
  * at. How wide a slide is and how far apart slides sit are CSS variables (`--c2-carousel__slide--width`,
  * `--c2-carousel--gap`), so showing two or three slides at once, or letting the next one peek in, needs no attribute;
  * `index` then names the first slide in view and the indicators shrink to the positions that can actually be reached.
  * Hiding the controls or the indicators is also CSS (`--c2-carousel__control--display`,
- * `--c2-carousel__indicators--display`).
+ * `--c2-carousel__indicators--display`), and so is showing the controls only while the pointer is over the carousel
+ * (`--c2-carousel__control--opacity: 0`), or only the one whose edge the pointer is near, with nothing shown while it
+ * is over the middle (`--c2-carousel__control__opposite--opacity: 0` as well; `--c2-carousel__control__zone--width`
+ * sets how near).
  *
  * `loop` wraps previous/next around the ends. `autoplay` advances every `interval` milliseconds, always wrapping to the
  * first slide, and adds a play/pause control; rotation pauses while the pointer is over the carousel or focus is inside
@@ -76,7 +86,7 @@ const pauseIcon = html`<svg viewBox="0 0 24 24" fill="currentColor" stroke="none
  * @slot play-icon - Icon of the play control shown with `autoplay` while rotation is stopped.
  * @slot pause-icon - Icon of the pause control shown with `autoplay` while slides rotate.
  *
- * @event {CustomEvent<SlideChangeEventDetail>} slide-change - Fired after the slide at the start of the viewport changes by a control, an indicator, the keyboard, a swipe, autoplay or a `next()`/`previous()`/`goTo()` call. Setting `index` does not fire it. Does not bubble.
+ * @event {CustomEvent<SlideChangeEventDetail>} slide-change - Fired after the slide at the start of the viewport changes by a control, an indicator, the keyboard, a swipe, a drag, a click on a peeking slide, autoplay or a `next()`/`previous()`/`goTo()` call. Setting `index` does not fire it. Does not bubble.
  *
  * @csspart carousel - The region that wraps the whole carousel.
  * @csspart track - The scrolling row of slides.
@@ -94,6 +104,11 @@ const pauseIcon = html`<svg viewBox="0 0 24 24" fill="currentColor" stroke="none
  * @cssproperty {pixel} [--c2-carousel__track__focus--outline-offset=2px]
  *
  * @cssproperty {display} [--c2-carousel__control--display=inline-flex] - `none` hides the previous/next buttons.
+ * @cssproperty {opacity} [--c2-carousel__control--opacity=1] - Opacity of the previous/next buttons while the pointer is off the carousel and focus is outside it; `0` shows them only on hover. Ignored on devices that cannot hover.
+ * @cssproperty {opacity} [--c2-carousel__control__opposite--opacity=1] - Opacity of a control the pointer is not near while it hovers the carousel: with `0` only the edge zone under the pointer shows its button (previous on the left, next on the right) and the middle shows neither. A focused control always shows.
+ * @cssproperty {length} [--c2-carousel__control__zone--width=20%] - Width of the zone along each edge of the track that reveals that edge's control; a percentage is of the track width. Never narrower than the control and its inset.
+ * @cssproperty {time} [--c2-carousel__control--transition-duration=240ms] - How long the previous/next buttons take to fade and slide in and out.
+ * @cssproperty {pixel} [--c2-carousel__control__hidden--translate=8px] - How far towards its edge a hidden previous/next button sits; it slides in from there as it fades in. `0px` only fades.
  * @cssproperty {pixel} [--c2-carousel__control--size=36px]
  * @cssproperty {pixel} [--c2-carousel__control--inset=12px] - Distance from a control to the edge of the track.
  * @cssproperty {color} [--c2-carousel__control--color=#18181b]
@@ -135,6 +150,9 @@ export class Carousel extends LitElement {
 
   /** Advance to the next slide every `interval` milliseconds and show a play/pause control. */
   @property({ type: Boolean, reflect: true }) autoplay = false
+
+  /** Let a mouse drag the track from slide to slide. Touch and trackpads scroll it natively either way; `"false"` turns it off. */
+  @property({ type: Boolean, reflect: true, attribute: 'mouse-drag' }) mouseDrag = true
 
   /** Milliseconds each slide stays on show while `autoplay` rotates. */
   @property({ type: Number }) interval = 5000
@@ -182,6 +200,10 @@ export class Carousel extends LitElement {
    * index back. A user gesture on the track clears it, so a swipe that interrupts still settles where it stops.
    */
   private scrollTarget: number | null = null
+  /** The mouse drag in progress: where it started, and whether it has moved far enough to be a drag rather than a click. */
+  private drag: { pointerId: number; x: number; scrollLeft: number; index: number; moved: boolean } | null = null
+  /** Set when a drag ends, so the click the browser fires on release does not follow a link in the slide. */
+  private suppressClick = false
   private settleTimer?: ReturnType<typeof setTimeout>
   private rotationTimer?: ReturnType<typeof setTimeout>
   private resizeObserver?: ResizeObserver
@@ -235,6 +257,7 @@ export class Carousel extends LitElement {
     this.rotating = !this.reducedMotion?.matches
     this.addEventListener('pointerenter', this.handlePointerEnter)
     this.addEventListener('pointerleave', this.handlePointerLeave)
+    this.addEventListener('pointermove', this.handlePointerMove)
     this.addEventListener('focusin', this.handleFocusIn)
     this.addEventListener('focusout', this.handleFocusOut)
     document.addEventListener('visibilitychange', this.handleVisibility)
@@ -248,6 +271,7 @@ export class Carousel extends LitElement {
     super.disconnectedCallback()
     this.removeEventListener('pointerenter', this.handlePointerEnter)
     this.removeEventListener('pointerleave', this.handlePointerLeave)
+    this.removeEventListener('pointermove', this.handlePointerMove)
     this.removeEventListener('focusin', this.handleFocusIn)
     this.removeEventListener('focusout', this.handleFocusOut)
     document.removeEventListener('visibilitychange', this.handleVisibility)
@@ -349,11 +373,12 @@ export class Carousel extends LitElement {
   /** The track stopped: whichever slide it rests closest to is now the current one. */
   private settle() {
     const track = this.track
-    if (!track) return
+    if (!track || this.drag) return
     if (this.scrollTarget !== null) {
       if (Math.abs(track.scrollLeft - this.scrollTarget) >= 2) return
       this.scrollTarget = null
     }
+    this.releaseSnap(false)
     const offsets = this.offsets().slice(0, this.count)
     if (offsets.length === 0) return
     let nearest = 0
@@ -370,9 +395,108 @@ export class Carousel extends LitElement {
   /** Passive, so a wheel or touch scroll never waits on it. */
   private readonly handleUserScroll = {
     handleEvent: () => {
+      if (this.drag) return
       this.scrollTarget = null
+      this.releaseSnap(false)
     },
     passive: true,
+  }
+
+  /**
+   * Snapping is switched off while a drag moves the track and until the scroll that follows it lands, or the browser
+   * would snap to the nearest slide under the pointer and again the moment the drag lets go.
+   */
+  private releaseSnap(released: boolean) {
+    this.track?.classList.toggle('is-dragging', released)
+  }
+
+  private handleDragStart(event: PointerEvent) {
+    this.handleUserScroll.handleEvent()
+    if (!this.mouseDrag || event.pointerType !== 'mouse' || event.button !== 0 || this.count < 2) return
+    // A field in a slide keeps its own text selection and caret placement.
+    const field = event.composedPath().find((node) => node instanceof HTMLElement && node.matches('input, textarea, select, [contenteditable]'))
+    if (field || !this.track) return
+    this.drag = { pointerId: event.pointerId, x: event.clientX, scrollLeft: this.track.scrollLeft, index: this.currentIndex, moved: false }
+  }
+
+  private handleDragMove(event: PointerEvent) {
+    const drag = this.drag
+    const track = this.track
+    if (!drag || !track || event.pointerId !== drag.pointerId) return
+    const dx = event.clientX - drag.x
+    if (!drag.moved) {
+      if (Math.abs(dx) < DRAG_THRESHOLD) return
+      // Capture only once it is a drag: capturing on press would retarget a plain click on a link to the track.
+      drag.moved = true
+      this.scrollTarget = null
+      track.setPointerCapture(event.pointerId)
+      this.releaseSnap(true)
+    }
+    event.preventDefault()
+    track.scrollLeft = drag.scrollLeft - dx
+  }
+
+  private handleDragEnd(event: PointerEvent) {
+    const drag = this.drag
+    const track = this.track
+    if (!drag || event.pointerId !== drag.pointerId) return
+    this.drag = null
+    if (!drag.moved || !track) return
+    this.suppressClick = true
+    // A click that does not follow (the pointer left the page) must not swallow the next real one.
+    setTimeout(() => (this.suppressClick = false))
+    const offsets = this.offsets().slice(0, this.count)
+    let target = 0
+    offsets.forEach((offset, index) => {
+      if (Math.abs(offset - track.scrollLeft) < Math.abs(offsets[target] - track.scrollLeft)) target = index
+    })
+    // Past the threshold the drag always turns the page, however little of the next slide it revealed.
+    const dx = event.clientX - drag.x
+    const forward = this.isRtl ? dx > 0 : dx < 0
+    if (target === drag.index && event.type === 'pointerup') target = Math.min(Math.max(0, drag.index + (forward ? 1 : -1)), this.count - 1)
+    const previousIndex = this.currentIndex
+    this.scrollToIndex(target, true)
+    if (this.scrollTarget === null) this.releaseSnap(false)
+    if (target === previousIndex) return
+    this.index = target
+    this.emitChange(target, previousIndex)
+  }
+
+  /** Capturing, so it runs before a link or a listener in the slide sees the click. */
+  private readonly handleTrackClick = {
+    handleEvent: (event: MouseEvent) => {
+      if (this.suppressClick) {
+        this.suppressClick = false
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+      // A click on a slide that only peeks into view brings it in, and does not also reach a link inside it.
+      const slide = this.peekingSlideIndex(event)
+      if (slide === -1) return
+      event.preventDefault()
+      event.stopPropagation()
+      this.goTo(slide)
+    },
+    capture: true,
+  }
+
+  /** Index of the partly visible slide a click landed on, if showing it would move the carousel; `-1` otherwise. */
+  private peekingSlideIndex(event: MouseEvent): number {
+    const track = this.track
+    if (!track) return -1
+    const index = this.slides.findIndex((slide) => event.composedPath().includes(slide))
+    if (index === -1) return -1
+    const box = track.getBoundingClientRect()
+    const rect = this.slides[index].getBoundingClientRect()
+    if (rect.left >= box.left - 1 && rect.right <= box.right + 1) return -1
+    const target = Math.min(index, this.count - 1)
+    return target === this.currentIndex ? -1 : target
+  }
+
+  private handleNativeDrag(event: DragEvent) {
+    // Links and images in a slide are draggable by default, which would hijack the pointer before the track moves.
+    if (this.mouseDrag) event.preventDefault()
   }
 
   private handleTrackKeydown(event: KeyboardEvent) {
@@ -470,7 +594,28 @@ export class Carousel extends LitElement {
     this.syncHold()
   }
 
+  /**
+   * Mark which half of the carousel the pointer is over, in reading order, so CSS can fade the control on the other
+   * half. A class on the inner region rather than state: it changes on every crossing of the middle, never re-renders.
+   */
+  private handlePointerMove = (event: PointerEvent) => {
+    if (event.pointerType === 'touch') return
+    const root = this.shadowRoot
+    const region = root?.querySelector('.c2-carousel')
+    const viewport = root?.querySelector('.c2-carousel-viewport')
+    if (!region || !viewport) return
+    const box = viewport.getBoundingClientRect()
+    // The zone probe is sized by `--c2-carousel__control__zone--width`, so a percentage, a length or a calc() all resolve.
+    const zone = root?.querySelector('.c2-carousel-zone')?.getBoundingClientRect().width ?? box.width / 2
+    const fromStart = this.isRtl ? box.right - event.clientX : event.clientX - box.left
+    const side = fromStart < zone ? 'pointer-start' : box.width - fromStart < zone ? 'pointer-end' : 'pointer-middle'
+    if (region.classList.contains(side)) return
+    region.classList.remove('pointer-start', 'pointer-end', 'pointer-middle')
+    region.classList.add(side)
+  }
+
   private handlePointerLeave = () => {
+    this.shadowRoot?.querySelector('.c2-carousel')?.classList.remove('pointer-start', 'pointer-end', 'pointer-middle')
     this.resumedUnderPointer = false
     this.hovered = false
     this.syncHold()
@@ -515,6 +660,7 @@ export class Carousel extends LitElement {
     const atEnd = !this.loop && index >= count - 1
     return html`<section class="c2-carousel" part="carousel" aria-roledescription="carousel" aria-label=${this.label}>
       <div class="c2-carousel-viewport">
+        <div class="c2-carousel-zone" aria-hidden="true"></div>
         <div
           class="c2-carousel-track"
           part="track"
@@ -523,8 +669,13 @@ export class Carousel extends LitElement {
           @scroll=${this.handleScroll}
           @scrollend=${this.settle}
           @wheel=${this.handleUserScroll}
-          @pointerdown=${this.handleUserScroll}
           @touchstart=${this.handleUserScroll}
+          @pointerdown=${this.handleDragStart}
+          @pointermove=${this.handleDragMove}
+          @pointerup=${this.handleDragEnd}
+          @pointercancel=${this.handleDragEnd}
+          @click=${this.handleTrackClick}
+          @dragstart=${this.handleNativeDrag}
           @keydown=${this.handleTrackKeydown}
         >
           <slot @slotchange=${this.handleSlotChange}></slot>

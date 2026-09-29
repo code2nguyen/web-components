@@ -15,6 +15,11 @@ const attributes = {
   autoplay: 'autoplay interval="400"',
   rtl: 'dir="rtl"',
   start: 'index="2"',
+  'no-drag': 'mouse-drag="false"',
+  'hover-controls': 'style="--c2-carousel__control--opacity: 0"',
+  peek: 'style="--c2-carousel__slide--width: 80%; --c2-carousel__control--display: none"',
+  'side-controls': 'loop style="--c2-carousel__control--opacity: 0; --c2-carousel__control__opposite--opacity: 0"',
+  'side-controls-rtl': 'loop dir="rtl" style="--c2-carousel__control--opacity: 0; --c2-carousel__control__opposite--opacity: 0"',
 }[scenario]
 
 main.innerHTML = `<button id="before">Before</button>

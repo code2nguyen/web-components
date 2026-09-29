@@ -8,6 +8,11 @@
     track__focus--outline-offset: 2px,
 
     control--display: inline-flex,
+    control--opacity: 1,
+    control__opposite--opacity: 1,
+    control__zone--width: 20%,
+    control--transition-duration: 240ms,
+    control__hidden--translate: 8px,
     control--size: 36px,
     control--inset: 12px,
     control--color: #18181b,
@@ -44,6 +49,10 @@
   min-width: 0;
 }
 
+:host([mouse-drag]:not([mouse-drag='false'])) .c2-carousel-track {
+  cursor: grab;
+}
+
 :host([hidden]) {
   display: none;
 }
@@ -71,6 +80,13 @@
 
   &::-webkit-scrollbar {
     display: none;
+  }
+
+  // While a mouse drags the track, and until the scroll that follows it lands, snapping would fight the pointer.
+  &.is-dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+    user-select: none;
   }
 
   &:focus-visible {
@@ -120,12 +136,73 @@
 }
 
 .c2-carousel-control {
+  // How shown a control is, 0 to 1. The state rules below set it; opacity follows it, and so does a short slide in from
+  // the control's own edge, so the reveal reads as the button arriving rather than blinking on.
+  --_shown: 1;
+  --_edge: -1;
+
   display: css.cssVar(control--display);
   position: absolute;
   top: 50%;
   z-index: 1;
   box-shadow: css.cssVar(control--box-shadow);
+  opacity: var(--_shown);
   transform: translateY(-50%);
+  translate: calc(#{css.cssVar(control__hidden--translate)} * (1 - var(--_shown)) * var(--_edge)) 0;
+  transition:
+    background-color 150ms ease,
+    opacity css.cssVar(control--transition-duration) cubic-bezier(0.2, 0, 0, 1),
+    translate css.cssVar(control--transition-duration) cubic-bezier(0.2, 0, 0, 1);
+
+  &:disabled {
+    opacity: calc(var(--_shown) * #{css.cssVar(control__disabled--opacity)});
+  }
+}
+
+.c2-carousel-next {
+  --_edge: 1;
+}
+
+:host(:dir(rtl)) .c2-carousel-previous {
+  --_edge: 1;
+}
+
+:host(:dir(rtl)) .c2-carousel-next {
+  --_edge: -1;
+}
+
+// At rest the controls take the configured opacity; hover or focus anywhere in the carousel brings them back. A device
+// that cannot hover always shows them, since nothing would ever reveal them there.
+@media (hover: hover) {
+  :host(:not(:hover):not(:focus-within)) .c2-carousel-control {
+    --_shown: #{css.cssVar(control--opacity)};
+  }
+
+  // While hovering, a control whose edge zone the pointer is not in takes its own opacity; a focused one stays shown.
+  :host(:hover) .pointer-start .c2-carousel-next:not(:focus-visible),
+  :host(:hover) .pointer-end .c2-carousel-previous:not(:focus-visible),
+  :host(:hover) .pointer-middle .c2-carousel-control:not(:focus-visible) {
+    --_shown: #{css.cssVar(control__opposite--opacity)};
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-carousel-control {
+    translate: none;
+    transition: none;
+  }
+}
+
+// Never painted: its width is the edge zone that reveals a control, resolved by the browser and read on pointer moves.
+// It is at least as wide as the control and its inset, or a narrow carousel would hide the button under the pointer.
+.c2-carousel-zone {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: max(#{css.cssVar(control__zone--width)}, calc(#{css.cssVar(control--inset)} + #{css.cssVar(control--size)}));
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .c2-carousel-previous {
