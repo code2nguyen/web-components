@@ -55,6 +55,8 @@
       "dependencies": [
         "type-check",
         "../../components/split-panel:build",
+        "../../components/banner:build",
+        "../../components/time-input:build",
         "../../components/log-viewer:build",
         "../../components/masonry:build",
         "../../components/dashboard:build",
