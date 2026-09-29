@@ -14,7 +14,7 @@ const markup: Record<string, string> = {
   pattern: field('split-pattern="\\s*\\|\\s*"'),
   parser: field(''),
   max: field('max="2"'),
-  blur: field('add-on-blur'),
+  blur: `${field('add-on-blur')}<button type="button">After</button>`,
   veto: field(''),
   disabled: field('disabled value="ann@example.com"'),
   readonly: field('readonly value="ann@example.com"'),

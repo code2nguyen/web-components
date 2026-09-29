@@ -10,7 +10,10 @@ async function paste(page: Page, text: string) {
   await input(page).evaluate((element, text) => {
     const data = new DataTransfer()
     data.setData('text/plain', text)
-    element.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true, composed: true }))
+    // Firefox ignores `clipboardData` in the ClipboardEvent constructor, so attach it to the event instead.
+    const event = new ClipboardEvent('paste', { bubbles: true, cancelable: true, composed: true })
+    Object.defineProperty(event, 'clipboardData', { value: data })
+    element.dispatchEvent(event)
   }, text)
 }
 
@@ -94,10 +97,11 @@ test('stops adding at max and hides the input', async ({ page, scenario }) => {
   await expect(input(page)).toHaveValue('c')
 })
 
-test('add-on-blur commits the pending text when focus leaves', async ({ page, scenario }) => {
+test('add-on-blur commits the pending text when focus leaves', async ({ page, scenario, tab }) => {
   await scenario('blur')
   await input(page).pressSequentially('draft')
-  await page.keyboard.press('Tab')
+  await tab()
+  await expect(page.getByRole('button', { name: 'After' })).toBeFocused()
   await expect(tags(page)).toHaveText(['draft'])
 })
 
