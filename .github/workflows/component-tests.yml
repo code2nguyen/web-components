@@ -79,3 +79,28 @@ jobs:
             test-results/
             apps/ui/test-results/
           retention-days: 7
+
+  # Every gallery card in the light and the dark theme: text contrast, tags that never registered, cards that render
+  # nothing, content wider than its frame, console errors. A finding missing from apps/ui/gallery-audit.known.json
+  # fails the job, and so does an entry there that no longer occurs. Screenshots of every card ride in the artifact.
+  gallery-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: google/wireit@setup-github-actions-caching/v2
+      - run: npm ci
+      - run: npm run ui:build
+      - run: npm run build:tools
+      - run: npx playwright install --with-deps chromium
+      - name: Audit the gallery
+        run: npm run gallery:audit -- --shots-dir test-results/gallery-audit/shots
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: gallery-audit
+          path: test-results/gallery-audit/
+          retention-days: 7
