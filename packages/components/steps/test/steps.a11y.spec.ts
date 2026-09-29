@@ -11,8 +11,13 @@ for (const state of ['default', 'number', 'wizard', 'flat', 'statuses', 'data'])
 
 test('the list is a list, and every status is spoken as well as drawn', async ({ page, scenario }) => {
   await scenario('statuses')
-  await expect(page.getByRole('list', { name: 'Statuses' })).toBeVisible()
-  await expect(page.getByRole('listitem')).toHaveCount(7)
+  const list = page.locator('c2-steps#subject')
+  await expect(list).toBeVisible()
+  await expect(list).toHaveHostAria('role', 'list')
+  await expect(list).toHaveAccessibleName('Statuses')
+  const items = page.locator('c2-step')
+  await expect(items).toHaveCount(7)
+  for (const item of await items.all()) await expect(item).toHaveHostAria('role', 'listitem')
   for (const [label, spoken] of [
     ['Success', 'Completed'],
     ['Error', 'Failed'],
@@ -29,7 +34,7 @@ test('the list is a list, and every status is spoken as well as drawn', async ({
 test('sub-steps are a list inside their parent listitem', async ({ page, scenario }) => {
   await scenario()
   const parent = page.locator('c2-step[label="pagination"]')
-  await expect(parent).toHaveRole('listitem')
+  await expect(parent).toHaveHostAria('role', 'listitem')
   await expect(parent.locator('[part="children"]').first()).toHaveRole('list')
 })
 
@@ -46,4 +51,35 @@ test('a group is reachable and operable from the keyboard', async ({ page, scena
   await page.keyboard.press('Enter')
   await expect(page.locator('c2-step#build')).toHaveAttribute('collapsed', '')
   await expect(page.locator('c2-step#build details')).toHaveJSProperty('open', false)
+})
+
+// React hydrates server markup against what the element looks like after it upgrades, and reports every attribute
+// the element wrote on itself as a mismatch. The list and listitem roles therefore live on ElementInternals.
+test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, scenario }) => {
+  await scenario('statuses')
+  const hosts = page.locator('c2-steps, c2-step')
+  const hostSemantics = () =>
+    hosts.evaluateAll((elements) =>
+      elements.flatMap((element) =>
+        element
+          .getAttributeNames()
+          .filter((name) => name === 'role' || name.startsWith('aria-'))
+          .map((name) => `${element.localName}${element.id ? `#${element.id}` : ''}[${name}]`),
+      ),
+    )
+  const list = page.locator('c2-steps#subject')
+  const first = page.locator('c2-step').first()
+
+  await expect(list).toHaveHostAria('role', 'list')
+  await expect(first).toHaveHostAria('role', 'listitem')
+  // The one host attribute left is the author's own label.
+  expect(await hostSemantics()).toEqual(['c2-steps#subject[aria-label]'])
+
+  await first.evaluate(async (step) => {
+    step.setAttribute('status', 'error')
+    await (step as Element & { updateComplete?: Promise<boolean> }).updateComplete
+  })
+  await expect(first).toContainText('Failed')
+  await expect(first).toHaveHostAria('role', 'listitem')
+  expect(await hostSemantics()).toEqual(['c2-steps#subject[aria-label]'])
 })

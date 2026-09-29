@@ -1,4 +1,4 @@
-import { test, expect, props, watch, accessible } from '../../../../tests/component-fixture'
+import { test, expect, props, watch, accessible, hostAria } from '../../../../tests/component-fixture'
 
 const markup =
   '<c2-tabs><c2-tab for="one">First</c2-tab><c2-tab for="two" disabled>Locked</c2-tab><c2-tab for="three">Third</c2-tab><div id="one">First content</div><div id="two">Locked content</div><div id="three">Third content</div></c2-tabs>'
@@ -25,27 +25,27 @@ test('forwards its accessible name to the internal tab list and keeps it synchro
 })
 test('selects the first panel and changes panels by keyboard, skipping disabled tabs', async ({ page, renderScenario }) => {
   await renderScenario(markup)
-  const first = page.getByRole('tab', { name: 'First' })
-  await expect(first).toHaveAttribute('aria-selected', 'true')
+  const first = page.locator('c2-tab', { hasText: 'First' })
+  await expect(first).toHaveHostAria('aria-selected', 'true')
   await first.press('ArrowRight')
-  await expect(page.getByRole('tab', { name: 'Third' })).toBeFocused()
+  await expect(page.locator('c2-tab', { hasText: 'Third' })).toBeFocused()
   await expect(page.getByRole('tabpanel')).toHaveText('Third content')
   await expect(page.getByText('First content', { exact: true })).not.toBeVisible()
   await page.keyboard.press('Home')
-  await expect(first).toHaveAttribute('aria-selected', 'true')
+  await expect(first).toHaveHostAria('aria-selected', 'true')
   await accessible(page)
 })
 test('consumer cancellation prevents a tab switch', async ({ page, renderScenario }) => {
   await renderScenario(markup)
   await page.locator('c2-tabs').evaluate((el) => el.addEventListener('tab-change', (event) => event.preventDefault()))
-  await page.getByRole('tab', { name: 'Third' }).click()
+  await page.locator('c2-tab', { hasText: 'Third' }).click()
   await expect(page.getByRole('tabpanel')).toHaveText('First content')
 })
 test('click emits one change and clearing selection restores the first panel', async ({ page, renderScenario }) => {
   await renderScenario(markup)
   const host = page.locator('c2-tabs')
   await watch(host, 'selection-change')
-  await page.getByRole('tab', { name: 'Third' }).click()
+  await page.locator('c2-tab', { hasText: 'Third' }).click()
   await expect(host).toHaveAttribute('data-events', '[{"value":"three"}]')
   await props(host, { selectedTab: '' })
   await expect(page.getByRole('tabpanel')).toHaveText('First content')
@@ -79,9 +79,9 @@ test('tabs built with createElement, the way a framework renderer builds them, b
   await expect(page.locator('c2-tab[for="one"]')).toHaveAttribute('slot', 'tab')
   await expect(page.locator('c2-tab[for="two"]')).toHaveAttribute('slot', 'tab')
 
-  const first = page.getByRole('tab', { name: 'First' })
-  await expect(first).toHaveAttribute('aria-selected', 'true')
-  await page.getByRole('tab', { name: 'Second' }).click()
+  const first = page.locator('c2-tab', { hasText: 'First' })
+  await expect(first).toHaveHostAria('aria-selected', 'true')
+  await page.locator('c2-tab', { hasText: 'Second' }).click()
   await expect(page.getByRole('tabpanel')).toHaveText('Second content')
 })
 
@@ -95,8 +95,39 @@ test('selection-change does not reach an ancestor', async ({ page, renderScenari
   const host = page.locator('c2-tabs')
   await watch(host, 'selection-change')
 
-  await page.getByRole('tab', { name: 'Third' }).click()
+  await page.locator('c2-tab', { hasText: 'Third' }).click()
 
   await expect(host).toHaveAttribute('data-events', '[{"value":"three"}]')
   await expect(wrapper).toHaveAttribute('data-events', '[]')
+})
+
+// React hydrates server markup against what the element looks like after it upgrades: every attribute the element
+// writes on itself is one the server never rendered, and React reports it as a mismatch. So the tabs state their
+// role, selection, disabled state and panel through ElementInternals, and the hosts carry only what the author wrote.
+test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, renderScenario }) => {
+  await renderScenario(markup)
+  const hosts = page.locator('c2-tabs, c2-tab')
+  const hostSemantics = () =>
+    hosts.evaluateAll((elements) =>
+      elements.flatMap((element) => element.getAttributeNames().filter((name) => name === 'role' || name.startsWith('aria-')).map((name) => `${element.localName}[${name}]`)),
+    )
+  const first = page.locator('c2-tab[for="one"]')
+  const locked = page.locator('c2-tab[for="two"]')
+  const third = page.locator('c2-tab[for="three"]')
+
+  await expect(first).toHaveHostAria('aria-selected', 'true')
+  expect(await hostSemantics()).toEqual([])
+  for (const tab of [first, locked, third]) await expect(tab).toHaveHostAria('role', 'tab')
+  await expect(locked).toHaveHostAria('aria-disabled', 'true')
+  await expect(first).toHaveHostAria('aria-disabled', null)
+  await expect(third).toHaveHostAria('aria-selected', 'false')
+  expect(await first.evaluate((tab) => (tab as unknown as { internals: ElementInternals }).internals.ariaControlsElements?.map((panel) => panel.id))).toEqual([
+    'one',
+  ])
+
+  await third.click()
+  await expect(third).toHaveHostAria('aria-selected', 'true')
+  await expect(first).toHaveHostAria('aria-selected', 'false')
+  expect(await hostSemantics()).toEqual([])
+  expect(await hostAria(third, 'role')).toBe('tab')
 })
