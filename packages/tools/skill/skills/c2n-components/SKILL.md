@@ -41,6 +41,7 @@ Without the server, use `references/component-catalog.md` only to identify a lik
 Read `references/theming.md`.
 
 - Install the theme with the components: `npm install @c2n/theme @c2n/<component>…`.
+- A project that has `@c2n/components` installed already has every component package and the theme: it depends on all of them. Import `@c2n/components/<name>` (the package name without its scope) per component rather than the `@c2n/components` barrel, which registers everything; `@c2n/components/react` and `/vue` type every tag. Icon sets are not included.
 - Import `@c2n/theme/theme.css` once at the application root (`main.ts`, root layout, global stylesheet). If the app already has design tokens, import `@c2n/theme/base.css` alone and bridge the app's tokens onto the `--c2-theme--*` names on `:root`.
 - Override tokens on `:root` (light) and under the app's dark selector. Component variables are never set globally when a token covers the job.
 - Register elements with side-effect imports (`import '@c2n/button'`) at the entry or in the module that renders them; icons individually (`import '@c2n/feather-icons/icons/search.js'`).

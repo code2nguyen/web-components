@@ -61,6 +61,7 @@
     "packages/components/*",
     "packages/icons/*",
     "packages/core",
+    "packages/umbrella",
     "packages/tools/*",
     "apps/ui",
     "apps/examples/*",
@@ -194,6 +195,7 @@
     "build:tools": {
       "dependencies": [
         "./packages/tools/framework-types:build",
+        "./packages/umbrella:type-check",
         "./packages/tools/mcp:build",
         "./packages/tools/skill:build"
       ]
