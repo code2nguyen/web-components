@@ -10,7 +10,7 @@ export { formatShortcut, ariaKeyShortcuts, parseShortcut, isApplePlatform } from
 
 /** One keyboard shortcut held by a `c2-shortcut` element. Only `keys` is required. */
 export interface ShortcutBinding extends ShortcutBindingOptions {
-  /** `mod+k`, `ctrl+shift+p`, `mod+k, /` (alternatives), `g d` (a sequence). `mod` is ⌘ on Apple platforms, Ctrl elsewhere. */
+  /** `mod+k`, `ctrl+shift+p`, `mod+k, alt+/` (alternatives), `mod+k mod+s` (a sequence). `mod` is ⌘ on Apple platforms, Ctrl elsewhere. Every key needs Ctrl, ⌘ or Alt; only `escape` and `f1`–`f24` may stand alone. */
   keys: string
   /** Name to switch on in the `shortcut` event (`detail.action`). */
   action?: string
@@ -24,7 +24,7 @@ export interface ShortcutBinding extends ShortcutBindingOptions {
 
 /** A binding with its platform-aware labels, as returned by {@link Shortcut.entries}. */
 export interface ShortcutEntry extends ShortcutBinding {
-  /** Display label of every alternative joined with `, ` (`⌘K, /` on macOS, `Ctrl+K, /` elsewhere). */
+  /** Display label of every alternative joined with `, ` (`⌘K, ⌥/` on macOS, `Ctrl+K, Alt+/` elsewhere). */
   label: string
   /** Display label of each alternative. */
   labels: string[]
@@ -51,14 +51,16 @@ export interface Shortcut {
 const EDITABLE_TARGET =
   'input:not([type=button],[type=checkbox],[type=radio],[type=submit],[type=reset],[type=file],[type=range],[type=color],[type=image]),textarea,select,[contenteditable]:not([contenteditable=false])'
 
+const INNER_CONTROL = 'button, input, a[href], summary, [role=button], [role=switch], [role=checkbox], [role=tab], [role=menuitem]'
+
 /**
  * Turns keyboard shortcuts into events. One element holds every shortcut of an application (or of a region) in
  * its `bindings` list and renders nothing. When a binding's keys are pressed the element calls `preventDefault()`
  * on the key event, fires `shortcut` with the binding's `action`, then runs the binding's `handler` and activates
  * its `for` target, unless the event was cancelled.
  *
- * Bare keys (`/`, `?`, `g d`) are ignored while the user types in a field; strokes with Ctrl, ⌘ or Alt fire there
- * too. A binding's `scope` limits it to focus inside the element's parent (`parent`) or inside any element matching
+ * Every key must be composed with Ctrl, ⌘ or Alt (`mod+k`, `alt+1`, `mod+k mod+s`); only Escape and F1–F24 may be
+ * bound on their own, and those are ignored while the user types in a field unless `allowInInputs` is set. A binding's `scope` limits it to focus inside the element's parent (`parent`) or inside any element matching
  * a CSS selector; when several bindings match, the most narrowly scoped wins, across every `c2-shortcut` on the page.
  * A key a component has already handled (`preventDefault()` on it) is left alone.
  *
@@ -139,7 +141,9 @@ export class Shortcut extends LitElement {
     // A field (native, or a custom element wrapping one, such as `c2-text-field`) is focused; clicking it would not.
     const field = target.matches(EDITABLE_TARGET) || !!target.shadowRoot?.querySelector(EDITABLE_TARGET)
     if (field) target.focus()
-    else target.click()
+    // A click dispatched on a custom element's host never reaches the control inside it (a `c2-switch` would not
+    // toggle), so the inner control is clicked; its click is composed and still reaches listeners on the host.
+    else (target.shadowRoot?.querySelector<HTMLElement>(INNER_CONTROL) ?? target).click()
   }
 
   /** Announce each `for` target's shortcut, leaving any `aria-keyshortcuts` the author wrote untouched. */

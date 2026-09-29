@@ -34,7 +34,7 @@
   <body>
     <c2-shortcut id="shortcuts"></c2-shortcut>
     <ul id="cheatsheet"></ul>
-    <label>Type here (bare keys are ignored, chords still fire) <input /></label>
+    <label>Type here (Escape is ignored here, chords still fire) <input /></label>
     <button id="new-item" type="button">New item</button>
     <div class="panel" tabindex="0">Focus this panel and press Escape: the scoped binding wins over the global one.</div>
     <output id="log"></output>
@@ -43,13 +43,13 @@
       const shortcuts = document.querySelector('#shortcuts')
       const log = document.querySelector('#log')
       shortcuts.bindings = [
-        { keys: 'mod+k, /', action: 'search', description: 'Open search' },
+        { keys: 'mod+k, mod+/', action: 'search', description: 'Open search' },
         { keys: 'mod+s', action: 'save', description: 'Save' },
-        { keys: 'g d', action: 'go-dashboard', description: 'Go to dashboard' },
+        { keys: 'alt+g alt+d', action: 'go-dashboard', description: 'Go to dashboard' },
         { keys: 'escape', action: 'close-global', description: 'Close (global)' },
         { keys: 'escape', action: 'close-panel', scope: '.panel', description: 'Close panel (scoped)' },
         { keys: 'alt+n', for: 'new-item', description: 'Click “New item”' },
-        { keys: 'shift+?', handler: () => (log.textContent = 'handler: help'), description: 'Help (handler)' },
+        { keys: 'mod+shift+?', handler: () => (log.textContent = 'handler: help'), description: 'Help (handler)' },
       ]
       shortcuts.addEventListener('shortcut', (event) => (log.textContent = `shortcut: ${event.detail.action ?? event.detail.keys}`))
       document.querySelector('#new-item').addEventListener('click', () => (log.textContent = 'clicked: New item'))

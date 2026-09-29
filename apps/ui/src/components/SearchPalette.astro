@@ -1,7 +1,7 @@
 ---
 // ⌘K search, composed from c2 components: c2-modal (focus trap, Escape, backdrop, scroll lock, focus restore),
 // c2-text-field (the query), c2-list / c2-list-item (results; the list drives the highlighted row through `value`) and
-// c2-shortcut (⌘K / Ctrl+K and `/`, which it already ignores while the user types in a field).
+// c2-shortcut (⌘K / Ctrl+K, which also works while the user types in a field).
 // Rendered as plain tags (registered by data/chrome-modules.ts): the palette is hidden until opened and has many rows,
 // so SSR'ing every row as an island would only add weight. What stays ours: filtering, arrow-key highlight, Enter.
 import { getCollection } from 'astro:content'
@@ -56,7 +56,7 @@ const field = rawElement(
 )
 const shortcut = rawElement('c2-shortcut', {
   class: 'search-palette__shortcut',
-  bindings: JSON.stringify([{ keys: 'mod+k, /', action: 'open-search', description: 'Search the documentation' }]),
+  bindings: JSON.stringify([{ keys: 'mod+k', action: 'open-search', description: 'Search the documentation' }]),
 })
 const palette = rawElement(
   'c2-modal',

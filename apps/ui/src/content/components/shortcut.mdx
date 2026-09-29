@@ -23,8 +23,9 @@ npm install @c2n/shortcut
 
 ## Usage
 
-Focus any switch in the demo, then press <c2-kbd>1</c2-kbd>, <c2-kbd>2</c2-kbd> or <c2-kbd>3</c2-kbd>. The bindings are
-scoped to the demo, so these keys do nothing anywhere else on this page.
+Press <c2-kbd>alt + 1</c2-kbd>, <c2-kbd>alt + 2</c2-kbd> or <c2-kbd>alt + 3</c2-kbd> (<c2-kbd>⌥</c2-kbd> on macOS)
+anywhere on this page to flip the switches. Every shortcut holds Ctrl, ⌘ or Alt, so none of them gets in the way of
+typing.
 
 ```html tag=UsageBlock,package=@c2n/shortcut
 <style>
@@ -43,14 +44,14 @@ scoped to the demo, so these keys do nothing anywhere else on this page.
     gap: 16px;
   }
 </style>
-<div data-label="Scoped to a region">
+<div data-label="Activating targets">
   <div class="shortcut-demo">
     <c2-shortcut
-      bindings='[{"keys":"1","for":"shortcut-demo-wifi","scope":".shortcut-demo"},{"keys":"2","for":"shortcut-demo-bluetooth","scope":".shortcut-demo"},{"keys":"3","for":"shortcut-demo-airplane","scope":".shortcut-demo"}]'
+      bindings='[{"keys":"alt+1","for":"shortcut-demo-wifi"},{"keys":"alt+2","for":"shortcut-demo-bluetooth"},{"keys":"alt+3","for":"shortcut-demo-airplane"}]'
     ></c2-shortcut>
-    <div class="shortcut-demo__row"><c2-switch id="shortcut-demo-wifi" checked>Wi-Fi</c2-switch><c2-kbd>1</c2-kbd></div>
-    <div class="shortcut-demo__row"><c2-switch id="shortcut-demo-bluetooth">Bluetooth</c2-switch><c2-kbd>2</c2-kbd></div>
-    <div class="shortcut-demo__row"><c2-switch id="shortcut-demo-airplane">Airplane mode</c2-switch><c2-kbd>3</c2-kbd></div>
+    <div class="shortcut-demo__row"><c2-switch id="shortcut-demo-wifi" checked>Wi-Fi</c2-switch><c2-kbd>alt + 1</c2-kbd></div>
+    <div class="shortcut-demo__row"><c2-switch id="shortcut-demo-bluetooth">Bluetooth</c2-switch><c2-kbd>alt + 2</c2-kbd></div>
+    <div class="shortcut-demo__row"><c2-switch id="shortcut-demo-airplane">Airplane mode</c2-switch><c2-kbd>alt + 3</c2-kbd></div>
   </div>
 </div>
 ```
@@ -64,9 +65,9 @@ how an app swaps its shortcuts per route.
 <c2-shortcut
   id="shortcuts"
   bindings='[
-    { "keys": "mod+k, /", "action": "search", "description": "Open search" },
+    { "keys": "mod+k, mod+/", "action": "search", "description": "Open search" },
     { "keys": "mod+s", "action": "save", "description": "Save" },
-    { "keys": "g d", "action": "go-dashboard", "description": "Go to dashboard" },
+    { "keys": "alt+g alt+d", "action": "go-dashboard", "description": "Go to dashboard" },
     { "keys": "escape", "action": "close-panel", "scope": ".side-panel", "allowInInputs": true },
     { "keys": "alt+n", "for": "new-item", "description": "New item" }
   ]'
@@ -93,39 +94,45 @@ how an app swaps its shortcuts per route.
 ```
 
 From script, a binding can carry a `handler` instead of an action, and `entries` returns each binding with its
-platform-aware `label` (`⌘K, /` on macOS, `Ctrl+K, /` elsewhere) for a cheatsheet:
+platform-aware `label` (`⌘K, ⌘/` on macOS, `Ctrl+K, Ctrl+/` elsewhere) for a cheatsheet:
 
 ```ts tag=CodeBlock
-shortcuts.bindings = [...shortcuts.bindings, { keys: 'shift+?', handler: () => cheatsheet.show(), description: 'Show shortcuts' }]
+shortcuts.bindings = [...shortcuts.bindings, { keys: 'mod+shift+?', handler: () => cheatsheet.show(), description: 'Show shortcuts' }]
 
 for (const { label, description } of shortcuts.entries) console.log(label, description)
 ```
 
 ## Key syntax
 
-| `keys`         | Meaning                                                                       |
-| -------------- | ----------------------------------------------------------------------------- |
-| `mod+k`        | ⌘K on macOS and iOS, Ctrl+K elsewhere                                         |
-| `ctrl+shift+p` | Every modifier listed must be held, and no other                              |
-| `mod+k, /`     | Alternatives, separated by commas                                             |
-| `g d`          | A sequence: <c2-kbd>g</c2-kbd>, then <c2-kbd>d</c2-kbd> within one second     |
-| `?`, `escape`  | Key names are `KeyboardEvent.key` values, case-insensitive                    |
-| `plus`, `comma`, `space`, `esc`, `up` | Aliases for keys the syntax itself uses, and short names |
+| `keys`                                | Meaning                                                                               |
+| ------------------------------------- | ------------------------------------------------------------------------------------- |
+| `mod+k`                               | ⌘K on macOS and iOS, Ctrl+K elsewhere                                                 |
+| `ctrl+shift+p`                        | Every modifier listed must be held, and no other                                      |
+| `mod+k, mod+/`                        | Alternatives, separated by commas                                                     |
+| `alt+g alt+d`                         | A sequence: <c2-kbd>alt + g</c2-kbd>, then <c2-kbd>alt + d</c2-kbd> within one second |
+| `escape`, `f1`                        | The only keys that may be bound without a modifier                                    |
+| `plus`, `comma`, `space`, `esc`, `up` | Aliases for keys the syntax itself uses, and short names                              |
+
+Every stroke must hold Ctrl, ⌘ or Alt (`mod` counts; Shift alone does not, since `shift+a` is typing). Escape and
+F1–F24 are the only exceptions. An alternative with a bare key (`/`, `g d`, `shift+?`) is ignored with a console
+warning. Key names are `KeyboardEvent.key` values, case-insensitive.
 
 Letters and digits also match by physical key when the typed character is not plain ASCII, so `alt+k` works with
 Option on macOS and on non-Latin layouts.
 
 ## Behaviour
 
-- **Typing.** Bare keys (`/`, `?`, `g d`, `escape`) are ignored while focus is in an input, textarea, select or
-  contenteditable, so typing a slash in a field does not open search. Strokes with Ctrl, ⌘ or Alt fire there too.
-  `allowInInputs` lifts the guard for one binding.
+- **Typing.** Shortcuts with Ctrl, ⌘ or Alt fire in fields too. Escape and the function keys, which need no
+  modifier, are ignored while focus is in an input, textarea, select or contenteditable; `allowInInputs` lifts that
+  guard for one binding.
 - **Scope.** `scope: "parent"` limits a binding to focus inside the element's parent; any other value is a CSS
   selector matched against the focused element and its ancestors. When several bindings match, the most narrowly
   scoped one wins, across every `c2-shortcut` on the page, then the first one listed.
 - **Firing.** The key event's default is prevented (`allowDefault` opts out), then `shortcut` fires on the element.
   Unless it is cancelled, the binding's `handler` runs and its `for` target is activated: a text field — native or a
-  component wrapping one, such as `c2-text-field` — is focused, anything else is clicked.
+  component wrapping one, such as `c2-text-field` — is focused, anything else is clicked. For a component such as
+  `c2-switch` or `c2-button`, the control inside its shadow root is clicked, so it toggles or activates as a real
+  click would.
 - **Keys already handled.** A key another component has handled (it called `preventDefault()`, as a list does for its
   arrow keys) is left alone.
 - **Held keys.** Auto-repeat is ignored unless the binding sets `repeat`.

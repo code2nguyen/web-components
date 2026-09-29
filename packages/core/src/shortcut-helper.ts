@@ -1,5 +1,5 @@
 /**
- * Keyboard shortcuts: parse the `mod+k, g d` syntax, match it against `keydown` events, format it for display
+ * Keyboard shortcuts: parse the `mod+k, mod+k mod+s` syntax, match it against `keydown` events, format it for display
  * and for `aria-keyshortcuts`, and route every registered binding through one shared document listener.
  *
  * Syntax. A binding's `keys` is a comma-separated list of alternatives; an alternative is a space-separated
@@ -7,10 +7,15 @@
  * Ctrl elsewhere. Key names are `KeyboardEvent.key` values, case-insensitive, plus the aliases in {@link KEY_ALIASES}
  * (`esc`, `space`, `up`, `plus`, `comma`, …) for keys the syntax itself uses.
  *
+ * Every stroke must be composed: it holds Ctrl, ⌘ or Alt (Shift alone does not count, `shift+a` is typing). Escape
+ * and the function keys F1–F24 are the only keys accepted on their own. An alternative with a bare stroke (`/`,
+ * `g d`) is dropped with a console warning.
+ *
  *     mod+k            ⌘K / Ctrl+K
- *     mod+k, /         either of two shortcuts
- *     g d              g, then d within a second
+ *     mod+k, alt+/     either of two shortcuts
+ *     mod+k mod+s      ⌘K, then ⌘S within a second
  *     ctrl+shift+p     all three modifiers must match, and no other
+ *     escape, f1       keys that need no modifier
  */
 
 export interface ShortcutStroke {
@@ -46,7 +51,7 @@ export interface ShortcutBindingOptions {
 
 export interface ShortcutMatch<B extends ShortcutBindingOptions = ShortcutBindingOptions> {
   binding: B
-  /** The alternative that matched, as written (`/` of `mod+k, /`). */
+  /** The alternative that matched, as written (`alt+/` of `mod+k, alt+/`). */
   keys: string
   event: KeyboardEvent
 }
@@ -95,11 +100,27 @@ function parseStroke(raw: string): ShortcutStroke {
   return stroke
 }
 
+/** Whether the stroke holds Ctrl, ⌘ or Alt, the modifiers that make a key press a command rather than typing. */
+function isChord(stroke: ShortcutStroke): boolean {
+  return stroke.ctrl || stroke.meta || stroke.alt || stroke.mod
+}
+
+/** Keys that are commands on their own and need no modifier. */
+function isStandaloneKey(key: string): boolean {
+  return key === 'escape' || /^f([1-9]|1[0-9]|2[0-4])$/.test(key)
+}
+
+/** Whether a stroke is accepted: a chord, or Escape / a function key. */
+export function isComposedStroke(stroke: ShortcutStroke): boolean {
+  return !!stroke.key && (isChord(stroke) || isStandaloneKey(stroke.key))
+}
+
 const cache = new Map<string, ShortcutSequence[]>()
 
 /**
- * Parses a `keys` string into its alternatives. Malformed alternatives (no key) are dropped. The comma key has to be
- * written `comma`, since a bare `,` separates alternatives.
+ * Parses a `keys` string into its alternatives. Malformed alternatives (no key) and alternatives with a stroke that is
+ * not composed (see {@link isComposedStroke}) are dropped, the latter with a warning. The comma key has to be written
+ * `comma`, since a bare `,` separates alternatives.
  */
 export function parseShortcut(keys: string): ShortcutSequence[] {
   const cached = cache.get(keys)
@@ -110,6 +131,11 @@ export function parseShortcut(keys: string): ShortcutSequence[] {
     .filter(Boolean)
     .map((source) => ({ source, strokes: source.split(/\s+/).map(parseStroke) }))
     .filter((sequence) => sequence.strokes.every((stroke) => stroke.key))
+    .filter((sequence) => {
+      if (sequence.strokes.every(isComposedStroke)) return true
+      console.warn(`[c2-shortcut] "${sequence.source}" ignored: every key needs Ctrl, ⌘ or Alt (only Escape and F1–F24 may stand alone).`)
+      return false
+    })
   cache.set(keys, sequences)
   return sequences
 }
@@ -137,11 +163,6 @@ export function matchesStroke(stroke: ShortcutStroke, event: KeyboardEvent, appl
   // fall back to the physical key.
   const ascii = key.length === 1 && key.charCodeAt(0) < 128
   return !ascii && event.code === codeFor(stroke.key)
-}
-
-/** Whether the stroke carries a modifier that makes it safe to fire while the user is typing. */
-function isChord(stroke: ShortcutStroke): boolean {
-  return stroke.ctrl || stroke.meta || stroke.alt || stroke.mod
 }
 
 const APPLE_KEY_LABELS: Record<string, string> = {
@@ -309,7 +330,7 @@ function handleKeydown(event: KeyboardEvent) {
   const completed: Candidate[] = []
   const advanced: { candidate: Candidate; progress: number }[] = []
 
-  // Sequences already under way come first: after `g`, `d` completes `g d` rather than a lone `d` binding.
+  // Sequences already under way come first: after ⌘K, ⌘S completes `mod+k mod+s` rather than a lone `mod+s` binding.
   for (const { candidate, progress } of pending) {
     const still = candidates.find((c) => c.binding === candidate.binding && c.sequence === candidate.sequence)
     if (!still || !matchesStroke(candidate.sequence.strokes[progress], event, apple)) continue
