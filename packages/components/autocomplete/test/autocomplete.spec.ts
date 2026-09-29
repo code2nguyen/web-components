@@ -58,7 +58,9 @@ test('preserves the query and reuses its results when selection behavior is pres
   const input = page.getByRole('combobox', { name: 'Search destinations' })
 
   await input.fill('airport')
-  await options(page).filter({ hasText: /Charles de Gaulle Airport/ }).click()
+  await options(page)
+    .filter({ hasText: /Charles de Gaulle Airport/ })
+    .click()
   await expect(host).toHaveJSProperty('value', 'airport')
   await expect(host).toHaveAttribute('data-selected', /"value":"cdg"/)
   await expect(input).toHaveAttribute('aria-expanded', 'false')
@@ -108,7 +110,9 @@ test('supports pointer selection, clear, query events and form submission', asyn
   const input = page.getByRole('combobox')
 
   await input.fill('airport')
-  await options(page).filter({ hasText: /Charles de Gaulle Airport/ }).click()
+  await options(page)
+    .filter({ hasText: /Charles de Gaulle Airport/ })
+    .click()
   await expect.poll(() => page.locator('form').evaluate((form) => new FormData(form as HTMLFormElement).get('destination'))).toBe('cdg')
 
   await page.getByRole('button', { name: 'Clear' }).click()
@@ -137,7 +141,9 @@ test('composes list items around renderItem content between header and footer sl
   await expect(page.getByText('View all people')).toBeVisible()
   await expect(options(page).filter({ hasText: /Ada Lovelace\s*Platform/ })).toBeVisible()
 
-  await options(page).filter({ hasText: /Ada Lovelace\s*Platform/ }).click()
+  await options(page)
+    .filter({ hasText: /Ada Lovelace\s*Platform/ })
+    .click()
   await expect(host).toHaveJSProperty('value', '7')
   await expect(host).toHaveAttribute('data-selected', /"id":7/)
 })

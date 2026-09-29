@@ -1,5 +1,10 @@
 import { test, expect, props, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+import type { Page } from '@playwright/test'
 import type {} from './scenario-api'
+
+// Rows are `c2-list-item`s that state their role through ElementInternals, which getByRole cannot see: find them by
+// tag. The listbox itself is a native element in the shadow root, so getByRole still reaches it.
+const options = (page: Page) => page.locator('c2-virtual-list c2-list-item')
 
 test('toolbar presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
   const toolbar = page.locator('c2-virtual-list').locator('[part="search"]')
@@ -26,22 +31,23 @@ const list = (attributes = '') =>
 test('renders one option per item, with its label and description', async ({ page, renderScenario }) => {
   await renderScenario(list())
   await expect(page.getByRole('listbox')).toBeVisible()
-  await expect(page.getByRole('option')).toHaveCount(4)
-  await expect(page.getByRole('option').first()).toContainText('Ada Lovelace')
-  await expect(page.getByRole('option').first()).toContainText('Analytics')
+  await expect(options(page)).toHaveCount(4)
+  await expect(options(page).first()).toHaveHostAria('role', 'option')
+  await expect(options(page).first()).toContainText('Ada Lovelace')
+  await expect(options(page).first()).toContainText('Analytics')
   await accessible(page)
 })
 
 test('falls back to a conventional label field, so a list of plain objects needs no configuration', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-virtual-list aria-label="Fruit" items='[{"name":"Apple"},{"name":"Pear"}]'></c2-virtual-list>`)
-  await expect(page.getByRole('option').first()).toContainText('Apple')
-  await expect(page.getByRole('option').last()).toContainText('Pear')
+  await expect(options(page).first()).toContainText('Apple')
+  await expect(options(page).last()).toContainText('Pear')
 })
 
 test('renders a list of bare strings', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-virtual-list aria-label="Fruit" items='["Apple","Pear"]'></c2-virtual-list>`)
-  await expect(page.getByRole('option').first()).toContainText('Apple')
-  await expect(page.getByRole('option').last()).toContainText('Pear')
+  await expect(options(page).first()).toContainText('Apple')
+  await expect(options(page).last()).toContainText('Pear')
 })
 
 test('windows a long list: the DOM stays small and the scrollbar spans everything', async ({ page, renderScenario }) => {
@@ -66,10 +72,16 @@ test('single selection replaces, multiple selection toggles and extends with shi
   const host = page.locator('c2-virtual-list')
   await watch(host, 'selection-change')
 
-  await page.getByRole('option', { name: /Grace Hopper/ }).click()
+  await options(page)
+    .filter({ hasText: /Grace Hopper/ })
+    .click()
   await expect(host).toHaveJSProperty('value', ['g'])
-  await page.getByRole('option', { name: /Alan Turing/ }).click()
+  await options(page)
+    .filter({ hasText: /Alan Turing/ })
+    .click()
   await expect(host).toHaveJSProperty('value', ['t'])
+  await expect(options(page).filter({ hasText: /Alan Turing/ })).toHaveHostAria('aria-selected', 'true')
+  await expect(options(page).filter({ hasText: /Grace Hopper/ })).toHaveHostAria('aria-selected', 'false')
   await expect(host).toHaveAttribute(
     'data-events',
     JSON.stringify([
@@ -79,11 +91,17 @@ test('single selection replaces, multiple selection toggles and extends with shi
   )
 
   await props(host, { selection: 'multiple', value: [] })
-  await page.getByRole('option', { name: /Ada Lovelace/ }).click()
-  await page.getByRole('option', { name: /Katherine Johnson/ }).click({ modifiers: ['Shift'] })
+  await options(page)
+    .filter({ hasText: /Ada Lovelace/ })
+    .click()
+  await options(page)
+    .filter({ hasText: /Katherine Johnson/ })
+    .click({ modifiers: ['Shift'] })
   await expect(host).toHaveJSProperty('value', ['a', 'g', 't', 'k'])
 
-  await page.getByRole('option', { name: /Grace Hopper/ }).click({ modifiers: [process.platform === 'darwin' ? 'Meta' : 'Control'] })
+  await options(page)
+    .filter({ hasText: /Grace Hopper/ })
+    .click({ modifiers: [process.platform === 'darwin' ? 'Meta' : 'Control'] })
   await expect(host).toHaveJSProperty('value', ['a', 't', 'k'])
 })
 
@@ -93,8 +111,9 @@ test('a disabled item cannot be selected', async ({ page, renderScenario }) => {
        items='[{"id":"a","name":"Ada"},{"id":"b","name":"Blocked","blocked":true}]'></c2-virtual-list>`,
   )
   const host = page.locator('c2-virtual-list')
+  await expect(options(page).filter({ hasText: 'Blocked' })).toHaveHostAria('aria-disabled', 'true')
   // `force`, because Playwright refuses to click an element the list has already marked `aria-disabled`.
-  await page.getByRole('option', { name: 'Blocked' }).click({ force: true })
+  await options(page).filter({ hasText: 'Blocked' }).click({ force: true })
   await expect(host).toHaveJSProperty('value', [])
 })
 
@@ -102,7 +121,7 @@ test('the keyboard walks the list and Enter selects', async ({ page, renderScena
   await renderScenario(list('selection="single"'))
   const host = page.locator('c2-virtual-list')
 
-  await page.getByRole('option').first().focus()
+  await options(page).first().focus()
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('Enter')
@@ -120,7 +139,7 @@ test('the keyboard walks the list and Enter selects', async ({ page, renderScena
 test('the keyboard reaches an item far outside the rendered window', async ({ page, renderScenario }) => {
   await renderScenario(list())
   await page.evaluate(() => window.virtualListScenario.fill(50_000))
-  await page.getByRole('option').first().focus()
+  await options(page).first().focus()
   await page.keyboard.press('End')
   await page.evaluate(() => window.virtualListScenario.settle())
 
@@ -136,10 +155,10 @@ test('the search property narrows the list and reports how many matched', async 
 
   // `an` is in both Analytics teams and in Alan, but in no other name or team.
   await props(host, { search: 'an' })
-  await expect(page.getByRole('option')).toHaveCount(2)
+  await expect(options(page)).toHaveCount(2)
 
   await props(host, { search: 'grace' })
-  await expect(page.getByRole('option')).toHaveText([/Grace Hopper/])
+  await expect(options(page)).toHaveText([/Grace Hopper/])
   await expect(host).toHaveAttribute(
     'data-events',
     JSON.stringify([
@@ -149,17 +168,17 @@ test('the search property narrows the list and reports how many matched', async 
   )
 
   await props(host, { search: '' })
-  await expect(page.getByRole('option')).toHaveCount(4)
+  await expect(options(page)).toHaveCount(4)
 })
 
 test('typing in the built-in search field filters, highlights, and shows a no-results message', async ({ page, renderScenario }) => {
   await renderScenario(list('searchable highlight search-debounce="0"'))
   await page.getByRole('searchbox').fill('lovelace')
-  await expect(page.getByRole('option')).toHaveCount(1)
+  await expect(options(page)).toHaveCount(1)
   await expect(page.locator('c2-virtual-list').locator('mark')).toHaveText('Lovelace')
 
   await page.getByRole('searchbox').fill('nobody')
-  await expect(page.getByRole('option')).toHaveCount(0)
+  await expect(options(page)).toHaveCount(0)
   await expect(page.locator('c2-virtual-list')).toContainText('No matches')
   await accessible(page)
 })
@@ -167,10 +186,10 @@ test('typing in the built-in search field filters, highlights, and shows a no-re
 test('search-fields limits what a query is matched against', async ({ page, renderScenario }) => {
   await renderScenario(list('search-fields="team"'))
   await props(page.locator('c2-virtual-list'), { search: 'analytics' })
-  await expect(page.getByRole('option')).toHaveCount(2)
+  await expect(options(page)).toHaveCount(2)
 
   await props(page.locator('c2-virtual-list'), { search: 'ada' })
-  await expect(page.getByRole('option')).toHaveCount(0)
+  await expect(options(page)).toHaveCount(0)
 })
 
 test('a matcher replaces the built-in field matching', async ({ page, renderScenario }) => {
@@ -181,15 +200,15 @@ test('a matcher replaces the built-in field matching', async ({ page, renderScen
     list.search = 'k'
     await list.updateComplete
   })
-  await expect(page.getByRole('option')).toHaveText([/Katherine Johnson/])
+  await expect(options(page)).toHaveText([/Katherine Johnson/])
 })
 
 test('sort orders the list, and the attribute form parses field:direction', async ({ page, renderScenario }) => {
   await renderScenario(list('sort="name:desc"'))
-  await expect(page.getByRole('option').first()).toContainText('Katherine Johnson')
+  await expect(options(page).first()).toContainText('Katherine Johnson')
 
   await props(page.locator('c2-virtual-list'), { sort: { field: 'name', direction: 'asc' } })
-  await expect(page.getByRole('option').first()).toContainText('Ada Lovelace')
+  await expect(options(page).first()).toContainText('Ada Lovelace')
 })
 
 test('empty, loading and error states each replace the list', async ({ page, renderScenario }) => {
@@ -235,13 +254,13 @@ test('a data source is asked only for the blocks the window needs, and search go
 
   await expect(page.locator('c2-virtual-list')).toHaveJSProperty('itemCount', 10_000)
   expect(await page.evaluate(() => window.virtualListScenario.requestCount())).toBeLessThan(4)
-  await expect(page.getByRole('option').first()).toContainText('Ada Lovelace 1')
+  await expect(options(page).first()).toContainText('Ada Lovelace 1')
 
   await props(page.locator('c2-virtual-list'), { search: 'Ada Lovelace 1' })
   await page.evaluate(() => window.virtualListScenario.settle())
   // 1, 15, 22, … every name containing the string — far fewer than the 10 000 it started with.
   await expect(page.locator('c2-virtual-list')).not.toHaveJSProperty('itemCount', 10_000)
-  await expect(page.getByRole('option').first()).toContainText('Ada Lovelace 1')
+  await expect(options(page).first()).toContainText('Ada Lovelace 1')
 })
 
 test('rows a data source has not delivered yet render as skeletons, not as gaps', async ({ page, renderScenario }) => {
@@ -269,12 +288,12 @@ test('scrollToIndex brings a far item into view', async ({ page, renderScenario 
 test('virtual="never" renders every row', async ({ page, renderScenario }) => {
   await renderScenario(list('virtual="never"'))
   await page.evaluate(() => window.virtualListScenario.fill(300))
-  await expect(page.getByRole('option')).toHaveCount(300)
+  await expect(options(page)).toHaveCount(300)
 })
 
 test('refresh picks up an items array that was mutated in place', async ({ page, renderScenario }) => {
   await renderScenario(list())
-  await expect(page.getByRole('option')).toHaveCount(4)
+  await expect(options(page)).toHaveCount(4)
 
   await page.locator('c2-virtual-list').evaluate(async (element) => {
     const host = element as HTMLElement & { items: unknown[]; refresh(): void; updateComplete: Promise<boolean> }
@@ -282,7 +301,7 @@ test('refresh picks up an items array that was mutated in place', async ({ page,
     host.refresh()
     await host.updateComplete
   })
-  await expect(page.getByRole('option')).toHaveCount(5)
+  await expect(options(page)).toHaveCount(5)
 })
 
 test('a run of adjacent selected rows squares the corners between them', async ({ page, renderScenario }) => {
