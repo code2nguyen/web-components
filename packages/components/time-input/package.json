@@ -1,6 +1,6 @@
 {
   "name": "@c2n/time-input",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "type": "module",
   "main": "dist/time-input.js",
   "exports": {
@@ -64,8 +64,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.17",
-    "@c2n/overlay": "0.0.17",
+    "@c2n/core": "0.0.18",
+    "@c2n/overlay": "0.0.18",
     "lit": "3.3.3"
   },
   "devDependencies": {

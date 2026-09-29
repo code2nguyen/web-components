@@ -1,6 +1,6 @@
 {
   "name": "@c2n/tree",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "type": "module",
   "main": "dist/tree.js",
   "exports": {
@@ -73,9 +73,9 @@
     }
   },
   "dependencies": {
-    "@c2n/checkbox": "0.0.17",
-    "@c2n/core": "0.0.17",
-    "@c2n/spinner": "0.0.17",
+    "@c2n/checkbox": "0.0.18",
+    "@c2n/core": "0.0.18",
+    "@c2n/spinner": "0.0.18",
     "lit": "3.3.3"
   },
   "devDependencies": {
