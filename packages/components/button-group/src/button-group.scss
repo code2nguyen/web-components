@@ -200,7 +200,8 @@ $_overlap: max(0px, calc(#{css.cssVar(divider--width)} - #{css.cssVar(gap)} * 10
   --c2-icon-button__icon--height: 16px;
 }
 
-:host([appearance='segmented'][size='m']) ::slotted(*) {
+:host([appearance='segmented'][size='m']) ::slotted(*),
+:host([appearance='segmented']:not([size])) ::slotted(*) {
   --c2-button__container--height: 32px;
   --c2-button__container--padding-left: 14px;
   --c2-button__container--padding-right: 14px;
