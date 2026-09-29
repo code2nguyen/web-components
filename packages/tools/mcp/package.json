@@ -53,7 +53,8 @@
   "wireit": {
     "build:registry": {
       "dependencies": [
-        "../../..:build"
+        "../../..:build",
+        "../framework-types:build"
       ],
       "command": "node scripts/build-registry.ts",
       "files": [
@@ -68,6 +69,7 @@
         "../../../apps/ui/src/data/component-presets.ts",
         "../../../apps/ui/src/data/component-previews.ts",
         "../theme/dist/tokens.json",
+        "../../umbrella/package.json",
         "../skill/skills/c2n-components/references/*.md",
         "!../skill/skills/c2n-components/references/component-catalog.md",
         "../../../lerna.json",

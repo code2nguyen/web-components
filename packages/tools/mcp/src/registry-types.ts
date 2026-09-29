@@ -35,7 +35,8 @@ export interface ComponentEntry {
   tagPattern?: string
   icons?: string[]
   composition: { internal: string[]; slotted: string[]; usedBy: string[] }
-  install: { npm: string; import: string; importClass: string }
+  /** `umbrella`: the `@c2n/components` entry that registers this package, when the umbrella includes it. */
+  install: { npm: string; import: string; importClass: string; umbrella?: string }
   presets?: { html: string; items: Preset[] }
   examples: Example[]
   hasGallery: boolean

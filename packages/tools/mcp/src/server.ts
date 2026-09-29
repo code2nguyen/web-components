@@ -1,7 +1,7 @@
 /** The c2n MCP server: tools and resources over the bundled registry. */
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { installedPackage } from './installed.ts'
+import { importPath, installedPackage, umbrellaInstalled } from './installed.ts'
 import { generateCode, type CodeFormat } from './lib/generate-code.ts'
 import { loadRegistry, resolveElement, suggest } from './registry.ts'
 import type { GuideTopic, Registry } from './registry-types.ts'
@@ -49,6 +49,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         'Their APIs change between releases, so never write a c2-* tag, attribute, slot, event or --c2-* variable from memory:',
         'call get_component for every component before using it, and use only the names it returns.',
         'Start with list_components or search_components, then get_component for the API and get_examples for markup.',
+        'Use the import lines get_component gives: a project that installed @c2n/components imports @c2n/components/<name>, not @c2n/<name>.',
         'get_component also names the child elements a container expects (c2-dashboard holds c2-dash-card, c2-tabs holds c2-tab): build them in.',
         'Call get_theme before writing CSS: apps set ~35 --c2-theme--* tokens once; restyle a component only through the --c2-<component>__<part>--<property> variables get_component lists, set on a class or the element,',
         'never with border, padding, background, color or size rules on the c2-* host, and use only documented ::part() hooks when variables cannot express the change.',
@@ -131,7 +132,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           ...resolved.component,
           examples: undefined,
           installed: installed?.version ?? null,
-          resolved: { tag: resolved.tag, modulePath: resolved.modulePath, className: resolved.className },
+          installedVia: installed?.via?.package ?? null,
+          resolved: { tag: resolved.tag, modulePath: importPath(resolved.modulePath, resolved.component.package, installed), className: resolved.className },
         })
       return text(
         renderComponent(resolved.component, {
@@ -286,7 +288,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
               }
             : registry.theme,
         )
-      return text(renderTheme(registry.theme, registry, resolved?.component))
+      return text(renderTheme(registry.theme, registry, resolved?.component, umbrellaInstalled()))
     },
   )
 
@@ -359,7 +361,14 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       // The card's class carried its look; the variant brings its own, so drop it from this element only.
       const cardHtml = card?.html.replace(new RegExp(`(<${resolved.tag}\\b[^>]*?)\\sclass="[^"]*"`), '$1')
       const baseHtml = html ?? cardHtml ?? resolved.component.presets?.html ?? `<${resolved.tag}>Label</${resolved.tag}>`
-      const input = { tag: resolved.tag, html: baseHtml, changes, name, className: resolved.className, modulePath: resolved.modulePath }
+      const input = {
+        tag: resolved.tag,
+        html: baseHtml,
+        changes,
+        name,
+        className: resolved.className,
+        modulePath: importPath(resolved.modulePath, resolved.component.package, installedPackage(resolved.component.package)),
+      }
       const formats: CodeFormat[] = format === 'all' ? ['css', 'html', 'lit'] : [format]
       const out: string[] = []
       if (warnings.length) out.push(`> ${warnings.join('\n> ')}\n`)
