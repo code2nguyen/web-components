@@ -24,6 +24,14 @@ test('toggle opens the overlay, makes content inert, and Escape restores focus',
   await expect(page.getByRole('button', { name: 'Open navigation' })).toBeFocused()
   await expect(host).toHaveAttribute('data-events', '[{"opened":true},{"opened":false}]')
 })
+test('opening with a pointer focuses the drawer itself, not its first control', async ({ page, renderScenario }) => {
+  await renderScenario(markup)
+  const host = page.locator('c2-side-nav')
+  await page.getByRole('button', { name: 'Open navigation' }).click()
+  await expect(host).toHaveJSProperty('opened', true)
+  await expect(page.locator('[part="drawer"]')).toBeFocused()
+  await expect(page.getByRole('button', { name: 'Drawer action' })).not.toBeFocused()
+})
 test('responsive mode collapses on phone and restores desktop preference', async ({ page, renderScenario }) => {
   await page.setViewportSize({ width: 1400, height: 900 })
   await renderScenario('<c2-side-nav opened><nav slot="side-nav-content">Navigation</nav><p>Content</p></c2-side-nav>')

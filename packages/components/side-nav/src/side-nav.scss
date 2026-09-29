@@ -89,6 +89,11 @@ $_duration: css.cssVar(transition-duration);
     visibility 0s linear $_duration;
 }
 
+// The drawer only takes focus from script (tabindex="-1") as the start of the dialog's focus trap; it is not a control.
+.drawer:focus {
+  outline: none;
+}
+
 :host([opened]) .drawer {
   width: css.cssVar(open--width);
 }

@@ -20,6 +20,15 @@ export interface OpenedChangeEventDetail {
 const BREAKPOINT_QUERIES = [Breakpoints.Phone, Breakpoints.Tablet, Breakpoints.Desktop]
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
+// Whether the latest interaction in the document was a pointer (mouse, touch, pen) rather than a key. A drawer opened
+// by a tap takes focus on its own container, so the first link does not light up with a focus ring (iOS Safari draws
+// one on any programmatically focused link); a drawer opened from the keyboard still focuses its first control.
+let pointerModality = false
+if (!isServer) {
+  document.addEventListener('pointerdown', () => (pointerModality = true), true)
+  document.addEventListener('keydown', () => (pointerModality = false), true)
+}
+
 /** Events fired by {@link SideNav}, keyed for `addEventListener`. */
 export interface SideNavEventMap {
   'opened-change': CustomEvent<OpenedChangeEventDetail>
@@ -247,6 +256,10 @@ export class SideNav extends LitElement {
   }
 
   private focusDrawer() {
+    if (pointerModality) {
+      this.drawer.focus()
+      return
+    }
     const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="side-nav-content"]')
     for (const element of slot?.assignedElements({ flatten: true }) ?? []) {
       const target = element.matches(FOCUSABLE) ? element : element.querySelector(FOCUSABLE)
