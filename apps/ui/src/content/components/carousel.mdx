@@ -1,0 +1,116 @@
+---
+title: 'Carousel'
+description: 'A swipeable slideshow with previous/next controls, indicators, looping and optional autoplay.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Carousel } from '@c2n/carousel'
+
+`c2-carousel` turns its children into slides of a horizontal slideshow. The track is a native scroll container with
+CSS scroll snapping, so touch swipes, trackpads and the keyboard all move it, and a mouse can drag it from slide to
+slide (`mouse-drag="false"` turns that off). The previous/next controls and the indicators below follow along. `index` names the slide at the start of the viewport and fires `slide-change` when the
+user moves it. `loop` wraps around the ends, and `autoplay` rotates every `interval` milliseconds with a play/pause
+control, pausing while the pointer or focus is inside the carousel.
+
+How wide a slide is is a CSS variable: `--c2-carousel__slide--width: 50%` shows two at once, `85%` lets the next one
+peek in, and the indicators shrink to the positions that can actually be reached. Clicking a slide that peeks into
+view moves to it, so a peek layout can hide the controls. `--c2-carousel__control--display`
+and `--c2-carousel__indicators--display` hide the controls or the indicators, and `--c2-carousel__control--opacity: 0`
+shows the controls only while the pointer is over the carousel or focus is inside it. Add
+`--c2-carousel__control__opposite--opacity: 0` and a control shows only while the pointer is near its edge: previous
+in the left 20%, next in the right 20% (`--c2-carousel__control__zone--width`), neither over the middle. Devices that cannot hover always show both.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/carousel
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/carousel
+<style>
+  .demo {
+    width: 480px;
+    max-width: 100%;
+  }
+  .slide {
+    display: grid;
+    place-items: center;
+    height: 180px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #0265dc, #7c3aed);
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .slide:nth-child(3n + 2) {
+    background: linear-gradient(135deg, #db2777, #ea580c);
+  }
+  .slide:nth-child(3n + 3) {
+    background: linear-gradient(135deg, #0f766e, #16a34a);
+  }
+  .three-up {
+    --c2-carousel__slide--width: calc((100% - 32px) / 3);
+  }
+  .three-up .slide {
+    height: 120px;
+  }
+  .peek {
+    --c2-carousel__slide--width: 85%;
+    --c2-carousel--gap: 12px;
+    --c2-carousel__control--display: none;
+  }
+  .hover-controls {
+    --c2-carousel__control--opacity: 0;
+    --c2-carousel__control__opposite--opacity: 0;
+  }
+</style>
+<div data-label="Default">
+  <c2-carousel client:only="lit" class="demo" label="Featured">
+    <div class="slide">Slide 1</div>
+    <div class="slide">Slide 2</div>
+    <div class="slide">Slide 3</div>
+    <div class="slide">Slide 4</div>
+  </c2-carousel>
+</div>
+<div data-label="Controls on hover">
+  <c2-carousel client:only="lit" class="demo hover-controls" label="Gallery" loop>
+    <div class="slide">Slide 1</div>
+    <div class="slide">Slide 2</div>
+    <div class="slide">Slide 3</div>
+  </c2-carousel>
+</div>
+<div data-label="Loop and autoplay">
+  <c2-carousel client:only="lit" class="demo" label="Highlights" loop autoplay interval="4000">
+    <div class="slide">Slide 1</div>
+    <div class="slide">Slide 2</div>
+    <div class="slide">Slide 3</div>
+  </c2-carousel>
+</div>
+<div data-label="Three per view">
+  <c2-carousel client:only="lit" class="demo three-up" label="Products">
+    <div class="slide">1</div>
+    <div class="slide">2</div>
+    <div class="slide">3</div>
+    <div class="slide">4</div>
+    <div class="slide">5</div>
+    <div class="slide">6</div>
+  </c2-carousel>
+</div>
+<div data-label="Peek">
+  <c2-carousel client:only="lit" class="demo peek" label="Stories">
+    <div class="slide">Slide 1</div>
+    <div class="slide">Slide 2</div>
+    <div class="slide">Slide 3</div>
+    <div class="slide">Slide 4</div>
+  </c2-carousel>
+</div>
+```
+
+Every child element is one slide and is announced as "2 of 4" unless it has its own `aria-label`; name the carousel
+itself with `label`. All the other labels (`previous-label`, `indicator-label-template`, `pause-label`, …) are
+attributes too, so the element can be translated without a slot.

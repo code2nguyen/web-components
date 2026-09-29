@@ -89,6 +89,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/carousel:build",
         "./packages/components/tag-input:build",
         "./packages/components/timeline:build",
         "./packages/components/split-panel:build",

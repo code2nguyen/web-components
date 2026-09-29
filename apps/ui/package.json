@@ -17,6 +17,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/carousel": "*",
     "@c2n/tag-input": "*",
     "@c2n/timeline": "*",
     "@c2n/split-panel": "*",

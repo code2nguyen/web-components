@@ -32,6 +32,48 @@ export function describeComponentPreset(preset: ComponentPreset): string {
 }
 
 export const componentPresets: Record<string, ComponentPresetGroup> = {
+  'c2-carousel': {
+    html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
+    presets: [
+      {
+        name: 'Glass controls',
+        description: 'Translucent dark buttons over the slides and a rounder viewport.',
+        css: {
+          '--c2-carousel__track--border-radius': '14px',
+          '--c2-carousel__control--background-color': 'rgba(24, 24, 27, 0.55)',
+          '--c2-carousel__control--color': '#ffffff',
+          '--c2-carousel__control--border': '1px solid rgba(255, 255, 255, 0.2)',
+          '--c2-carousel__control__hover--background-color': 'rgba(24, 24, 27, 0.75)',
+          '--c2-carousel__indicator__selected--background-color': '#18181b',
+        },
+      },
+      {
+        name: 'Peek cards',
+        description: 'The next slide peeks in; swipe or use the indicators, no floating buttons.',
+        css: {
+          '--c2-carousel__slide--width': '80%',
+          '--c2-carousel--gap': '12px',
+          '--c2-carousel__control--display': 'none',
+        },
+      },
+      {
+        name: 'Square and flat',
+        description: 'No rounding or shadow, bar indicators aligned to the start.',
+        css: {
+          '--c2-carousel__track--border-radius': '0',
+          '--c2-carousel__control--border-radius': '0',
+          '--c2-carousel__control--box-shadow': 'none',
+          '--c2-carousel__control--border': '1px solid #18181b',
+          '--c2-carousel__indicator--width': '16px',
+          '--c2-carousel__indicator--height': '2px',
+          '--c2-carousel__indicator--border-radius': '0',
+          '--c2-carousel__indicator__selected--width': '32px',
+          '--c2-carousel__indicator__selected--background-color': '#18181b',
+          '--c2-carousel__indicators--justify-content': 'flex-start',
+        },
+      },
+    ],
+  },
   'c2-tree': {
     html: `<c2-tree style="width:220px" aria-label="Files" expanded-items="src" value="app"><c2-tree-item value="src" label="src"><c2-tree-item value="app" label="app.ts"></c2-tree-item><c2-tree-item value="main" label="main.ts"></c2-tree-item></c2-tree-item><c2-tree-item value="readme" label="README.md"></c2-tree-item></c2-tree>`,
     presets: [

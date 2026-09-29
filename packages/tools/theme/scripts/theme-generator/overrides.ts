@@ -328,6 +328,9 @@ export const overrides: Record<string, Override> = {
   '--c2-dashboard--border-radius': { exclude: 'square by default; the grid is a frame only once an app fills it' },
   '--c2-dash-card--border-radius': { exclude: 'bare pane; the surface inside it owns the radius' },
   '--c2-dash-card__handle__hover--background': { token: 'color-primary-glow' },
+  // Carousel indicator dots are small fills, not surfaces: they take the strong outline and the muted text colour.
+  '--c2-carousel__indicator--background-color': { token: 'color-outline-strong' },
+  '--c2-carousel__indicator__hover--background-color': { token: 'color-on-surface-variant' },
   // Timeline: the connector is the standard hairline grey; success and warning markers are semantic status colours.
   '--c2-timeline-item__connector--background': { token: 'color-outline-variant' },
   '--c2-timeline-item__marker__success--border-color': { exclude: 'success status colour' },

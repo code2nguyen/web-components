@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  carousel: `<c2-carousel label="Preview" loop style="width:260px;--c2-carousel__control--size:28px;--c2-carousel__control--inset:8px">
+  <div style="display:grid;place-items:center;height:120px;border-radius:8px;background:linear-gradient(135deg,#0265dc,#7c3aed);color:#fff;font-weight:600">1</div>
+  <div style="display:grid;place-items:center;height:120px;border-radius:8px;background:linear-gradient(135deg,#db2777,#ea580c);color:#fff;font-weight:600">2</div>
+  <div style="display:grid;place-items:center;height:120px;border-radius:8px;background:linear-gradient(135deg,#0f766e,#16a34a);color:#fff;font-weight:600">3</div>
+</c2-carousel>`,
   'tag-input': `<c2-tag-input aria-label="Recipients" placeholder="Add recipients" value="ann@example.com;bob@example.com" style="width:260px"></c2-tag-input>`,
   timeline: `<c2-timeline aria-label="Order history" style="width:240px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success"></c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary"></c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
   'split-panel': `<c2-split-panel position="35" style="width:260px;height:130px;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;font-size:12px">
