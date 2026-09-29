@@ -8,17 +8,20 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { ListItem, ListItemEventMap } from '@c2n/list-item'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { ListItem } from '@c2n/list-item'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
     'c2-list-item': DefineComponent<
       C2Props<ListItem> & {
-        onClick?: (event: ListItemEventMap['click']) => void
-        onSelectedChange?: (event: ListItemEventMap['selected-change']) => void
+        onClick?: (event: EventOf<ListItem, 'click'>) => void
+        onSelectedChange?: (event: EventOf<ListItem, 'selected-change'>) => void
       }
     >
   }

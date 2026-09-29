@@ -8,17 +8,20 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { SplitPanel, SplitPanelEventMap } from '@c2n/split-panel'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { SplitPanel } from '@c2n/split-panel'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
     'c2-split-panel': DefineComponent<
       C2Props<SplitPanel> & {
         'snap-threshold'?: unknown
-        onReposition?: (event: SplitPanelEventMap['reposition']) => void
+        onReposition?: (event: EventOf<SplitPanel, 'reposition'>) => void
       }
     >
   }

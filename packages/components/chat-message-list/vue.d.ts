@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { ChatMessageList, ChatMessageListEventMap } from '@c2n/chat-message-list'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { ChatMessageList } from '@c2n/chat-message-list'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -19,8 +22,8 @@ declare module 'vue' {
       C2Props<ChatMessageList> & {
         'has-more'?: unknown
         'jump-label'?: unknown
-        onLoadOlder?: (event: ChatMessageListEventMap['load-older']) => void
-        onAtBottomChange?: (event: ChatMessageListEventMap['at-bottom-change']) => void
+        onLoadOlder?: (event: EventOf<ChatMessageList, 'load-older'>) => void
+        onAtBottomChange?: (event: EventOf<ChatMessageList, 'at-bottom-change'>) => void
       }
     >
   }

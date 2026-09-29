@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Avatar, AvatarEventMap, AvatarGroup, AvatarGroupEventMap } from '@c2n/avatar'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Avatar, AvatarGroup } from '@c2n/avatar'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -20,10 +23,10 @@ declare module 'vue' {
         'initial-count'?: unknown
         'auto-color'?: unknown
         'max-size'?: unknown
-        onAvatarRemove?: (event: AvatarEventMap['avatar-remove']) => void
-        onError?: (event: AvatarEventMap['error']) => void
-        onFileReject?: (event: AvatarEventMap['file-reject']) => void
-        onAvatarChange?: (event: AvatarEventMap['avatar-change']) => void
+        onAvatarRemove?: (event: EventOf<Avatar, 'avatar-remove'>) => void
+        onError?: (event: EventOf<Avatar, 'error'>) => void
+        onFileReject?: (event: EventOf<Avatar, 'file-reject'>) => void
+        onAvatarChange?: (event: EventOf<Avatar, 'avatar-change'>) => void
       }
     >
     'c2-avatar-group': DefineComponent<
@@ -31,7 +34,7 @@ declare module 'vue' {
         'max-visible'?: unknown
         'count-mode'?: unknown
         'aria-label'?: unknown
-        onOverflowChange?: (event: AvatarGroupEventMap['overflow-change']) => void
+        onOverflowChange?: (event: EventOf<AvatarGroup, 'overflow-change'>) => void
       }
     >
   }

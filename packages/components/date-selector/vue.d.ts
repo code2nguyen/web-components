@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { DateSelector, DateSelectorEventMap } from '@c2n/date-selector'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { DateSelector } from '@c2n/date-selector'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -20,8 +23,8 @@ declare module 'vue' {
         'week-start'?: unknown
         'end-name'?: unknown
         'aria-label'?: unknown
-        onInput?: (event: DateSelectorEventMap['input']) => void
-        onChange?: (event: DateSelectorEventMap['change']) => void
+        onInput?: (event: EventOf<DateSelector, 'input'>) => void
+        onChange?: (event: EventOf<DateSelector, 'change'>) => void
       }
     >
   }

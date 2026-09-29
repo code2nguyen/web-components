@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { ChatInput, ChatInputEventMap } from '@c2n/chat-input'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { ChatInput } from '@c2n/chat-input'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -23,10 +26,10 @@ declare module 'vue' {
         'enter-behavior'?: unknown
         'aria-label'?: unknown
         'send-label'?: unknown
-        onSubmitMessage?: (event: ChatInputEventMap['submit-message']) => void
-        onInput?: (event: ChatInputEventMap['input']) => void
-        onChange?: (event: ChatInputEventMap['change']) => void
-        onSelect?: (event: ChatInputEventMap['select']) => void
+        onSubmitMessage?: (event: EventOf<ChatInput, 'submit-message'>) => void
+        onInput?: (event: EventOf<ChatInput, 'input'>) => void
+        onChange?: (event: EventOf<ChatInput, 'change'>) => void
+        onSelect?: (event: EventOf<ChatInput, 'select'>) => void
       }
     >
   }

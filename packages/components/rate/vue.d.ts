@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Rate, RateEventMap } from '@c2n/rate'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Rate } from '@c2n/rate'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -19,9 +22,9 @@ declare module 'vue' {
       C2Props<Rate> & {
         'allow-half'?: unknown
         'aria-label'?: unknown
-        onRateChange?: (event: RateEventMap['rate-change']) => void
-        onInput?: (event: RateEventMap['input']) => void
-        onChange?: (event: RateEventMap['change']) => void
+        onRateChange?: (event: EventOf<Rate, 'rate-change'>) => void
+        onInput?: (event: EventOf<Rate, 'input'>) => void
+        onChange?: (event: EventOf<Rate, 'change'>) => void
       }
     >
   }

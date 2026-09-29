@@ -8,16 +8,19 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { ColorArea, ColorAreaEventMap } from '@c2n/color-area'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { ColorArea } from '@c2n/color-area'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
     'c2-color-area': DefineComponent<
       C2Props<ColorArea> & {
-        onChange?: (event: ColorAreaEventMap['change']) => void
+        onChange?: (event: EventOf<ColorArea, 'change'>) => void
       }
     >
   }
