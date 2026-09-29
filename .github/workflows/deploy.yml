@@ -78,7 +78,7 @@ jobs:
         run: npm test -w packages/tools/skill
 
       - name: Generated files are up to date
-        run: git diff --exit-code -- packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json packages/tools/framework-types/tsconfig.vue.json 'packages/*/*/react.d.ts' 'packages/*/*/vue.d.ts' 'open-packages/*/react.d.ts' 'open-packages/*/vue.d.ts'
+        run: git diff --exit-code -- packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json packages/tools/framework-types/tsconfig.vue.json 'packages/*/*/react.d.ts' 'packages/*/*/vue.d.ts' 'open-packages/*/react.d.ts' 'open-packages/*/vue.d.ts' packages/umbrella
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
