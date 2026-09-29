@@ -111,6 +111,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Navigation
 
 - **Breadcrumb** — `c2-breadcrumb` · `@c2n/breadcrumb` — Navigation trail of link buttons with separators, a current page and optional collapsing. Children: `c2-link-button`.
+- **Context Menu** — `c2-context-menu` · `@c2n/context-menu` — A menu opened by right-clicking or long-pressing an area, built from a slotted c2-menu or a render function per clicked spot. Children: `c2-menu`.
 - **Link Button** — `c2-link-button` · `@c2n/link-button` — Text-styled control for link and navigation actions, rendered as a real anchor or a button.
 - **Menu** — `c2-menu, c2-menu-item` · `@c2n/menu` — Commands, links, checkboxes and submenus in a popover anchored to a trigger. Children: `c2-menu-item`.
 - **Navigation Menu** — `c2-navigation-menu, c2-navigation-menu-item, c2-navigation-menu-link` · `@c2n/navigation-menu` — Site navigation bar whose triggers open panels of links below the header. Children: `c2-navigation-menu-item`, `c2-navigation-menu-link`.

@@ -137,6 +137,10 @@
       "types": "./lib/color-slider.d.ts",
       "default": "./lib/color-slider.js"
     },
+    "./context-menu": {
+      "types": "./lib/context-menu.d.ts",
+      "default": "./lib/context-menu.js"
+    },
     "./copy-button": {
       "types": "./lib/copy-button.d.ts",
       "default": "./lib/copy-button.js"
@@ -399,6 +403,7 @@
     "@c2n/color-area": "0.0.18",
     "@c2n/color-select": "0.0.18",
     "@c2n/color-slider": "0.0.18",
+    "@c2n/context-menu": "0.0.18",
     "@c2n/copy-button": "0.0.18",
     "@c2n/dashboard": "0.0.18",
     "@c2n/date-input": "0.0.18",

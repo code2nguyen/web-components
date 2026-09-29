@@ -600,6 +600,18 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-context-menu",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer-owned area that opens the menu; style it through its own class. The host draws no box (display: contents)."
+    },
+    {
+      "tag": "c2-context-menu",
+      "slot": "menu",
+      "decision": "assigned-content",
+      "reason": "The menu slot takes a consumer-owned c2-menu; style its surface through the --c2-menu--* contract, set on the menu or inherited from the context menu."
+    },
+    {
       "tag": "c2-copy-button",
       "slot": "",
       "decision": "assigned-content",
