@@ -2,9 +2,13 @@ import { test, expect } from './fixture'
 
 test('renders a list of entries with their label, timestamp and content', async ({ page, scenario }) => {
   await scenario()
-  const list = page.getByRole('list', { name: 'Order history' })
+  const list = page.locator('c2-timeline')
   await expect(list).toBeVisible()
-  await expect(list.getByRole('listitem')).toHaveCount(3)
+  await expect(list).toHaveHostAria('role', 'list')
+  await expect(list).toHaveAccessibleName('Order history')
+  const items = list.locator('c2-timeline-item')
+  await expect(items).toHaveCount(3)
+  for (const item of await items.all()) await expect(item).toHaveHostAria('role', 'listitem')
   const first = page.locator('c2-timeline-item').first()
   await expect(first.locator('[part="label"]')).toHaveText('Order placed')
   await expect(first.locator('time')).toHaveAttribute('datetime', '2026-09-12T09:14')
@@ -93,4 +97,27 @@ test('slots replace the label, the timestamp and the marker', async ({ page, sce
   const second = page.locator('c2-timeline-item').nth(1)
   await expect(second.locator('[part="timestamp"]')).toBeHidden()
   await expect(second.locator('[part="content"]')).toBeHidden()
+})
+
+// React hydrates server markup against what the element looks like after it upgrades, and reports every attribute
+// the element wrote on itself as a mismatch. The list and listitem roles therefore live on ElementInternals.
+test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, scenario }) => {
+  await scenario()
+  const hostSemantics = () =>
+    page.locator('c2-timeline, c2-timeline-item').evaluateAll((elements) =>
+      elements.flatMap((element) =>
+        element
+          .getAttributeNames()
+          .filter((name) => name === 'role' || name.startsWith('aria-'))
+          .map((name) => `${element.localName}[${name}]`),
+      ),
+    )
+  // The one host attribute left is the author's own label.
+  await expect(page.locator('c2-timeline')).toHaveHostAria('role', 'list')
+  expect(await hostSemantics()).toEqual(['c2-timeline[aria-label]'])
+
+  await page.getByRole('button', { name: 'Add entry' }).click()
+  const added = page.locator('c2-timeline-item').nth(3)
+  await expect(added).toHaveHostAria('role', 'listitem')
+  expect(await hostSemantics()).toEqual(['c2-timeline[aria-label]'])
 })

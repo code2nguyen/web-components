@@ -67,6 +67,10 @@ export type TimelineLayout = 'stacked' | 'split'
 export class TimelineItem extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** Plain-text label. Use the `label` slot for markup. */
   @property() label = ''
 
@@ -94,7 +98,7 @@ export class TimelineItem extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    this.setAttribute('role', 'listitem')
+    this.internals.role = 'listitem'
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {

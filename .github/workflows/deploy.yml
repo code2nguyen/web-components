@@ -80,6 +80,16 @@ jobs:
       - name: Generated files are up to date
         run: git diff --exit-code -- packages/tools/skill/skills packages/tools/skill/.claude-plugin packages/tools/skill/.mcp.json packages/tools/skill/plugin.json packages/tools/skill/mcp.json packages/tools/framework-types/tsconfig.vue.json 'packages/*/*/react.d.ts' 'packages/*/*/vue.d.ts' 'open-packages/*/react.d.ts' 'open-packages/*/vue.d.ts' packages/umbrella
 
+      # PNGs of every gallery card, light and dark, at the URLs the @c2n/mcp registry lists, so agents that read
+      # images can see a look before choosing it. Served by Pages only; a failure here must not block the docs.
+      - name: Install Chromium for the gallery screenshots
+        continue-on-error: true
+        run: npx playwright install --with-deps chromium
+
+      - name: Capture gallery screenshots
+        continue-on-error: true
+        run: npm run gallery:shots
+
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v5
         with:

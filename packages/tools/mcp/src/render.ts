@@ -46,6 +46,8 @@ export function renderComponent(component: ComponentEntry, options: ComponentRen
   out.push(`- Package: \`${component.package}\` ${installed ? `(installed ${installed.version})` : `— not installed. \`${component.install.npm}\``}`)
   out.push(`- Status: ${component.status} · Category: ${component.category} · Docs: ${component.docsUrl}`)
   out.push(`- Register: \`import '${primary.modulePath}'\` · Class: \`import { ${primary.className} } from '${primary.modulePath}'\``)
+  if (component.composition.slotted.length)
+    out.push(`- Children: put ${component.composition.slotted.map((t) => `\`${t}\``).join(', ')} inside it (see the Composition section and get_examples).`)
   if (component.tagPattern)
     out.push(`- Icon set: tags follow \`${component.tagPattern}\`, ${component.icons?.length} icons (use \`search_components\` with the icon name).`)
   for (const element of component.elements) {
@@ -160,6 +162,7 @@ export function renderExamples(component: ComponentEntry, examples: Example[], t
     if (ex.description) out.push(`Demonstrates: ${ex.description}`)
     if (ex.useWhen) out.push(`Use when: ${ex.useWhen}`)
     if (ex.accessibility) out.push(`Accessibility: ${ex.accessibility}`)
+    if (ex.screenshots) out.push(`Look: [light](${ex.screenshots.light}) · [dark](${ex.screenshots.dark}) · [live](${ex.galleryUrl})`)
     out.push('```html')
     out.push(ex.html.length > 4000 ? `${ex.html.slice(0, 4000)}\n<!-- … truncated -->` : ex.html)
     out.push('```')
@@ -171,6 +174,30 @@ export function renderExamples(component: ComponentEntry, examples: Example[], t
     out.push('')
   }
   if (offset + examples.length < total) out.push(`More: call again with \`offset: ${offset + examples.length}\`.`)
+  return out.join('\n')
+}
+
+/**
+ * One line per example, no code: what an agent reads to choose a look before fetching the one it wants. Gallery cards
+ * are grouped by section, the order the docs site shows them in.
+ */
+export function renderExampleIndex(component: ComponentEntry, examples: Example[]): string {
+  const tag = component.elements[0].tag
+  const out = [
+    `# ${component.title} looks (${examples.length})`,
+    '',
+    `Pick by intent, then fetch one with \`get_examples\` \`{ tag: "${tag}", label: "<slug>" }\`, or start a variant from it with \`generate_variant\` \`{ tag: "${tag}", example: "<slug>" }\`. Gallery CSS follows the \`--c2-theme--*\` tokens where a colour matches one; any literal left is the card's own accent, so swap it for the application's tokens.`,
+  ]
+  let group = ''
+  for (const ex of examples) {
+    const heading = ex.kind === 'gallery' ? (ex.section ?? 'Gallery') : ex.kind === 'usage' ? 'Usage (docs page)' : 'Preview'
+    if (heading !== group) {
+      out.push('', `## ${heading}`)
+      group = heading
+    }
+    const details = [ex.description, ex.useWhen ? `Use when: ${ex.useWhen}` : '', ex.screenshots ? `[look](${ex.screenshots.light})` : '']
+    out.push(`- **${ex.label}**${ex.slug ? ` \`${ex.slug}\`` : ''}${details.some(Boolean) ? ` — ${details.filter(Boolean).join(' ')}` : ''}`)
+  }
   return out.join('\n')
 }
 

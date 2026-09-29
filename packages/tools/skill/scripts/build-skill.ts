@@ -27,6 +27,7 @@ interface Registry {
       elements: {
         tag: string
       }[]
+      composition: { slotted: string[] }
     }
   >
 }
@@ -51,7 +52,11 @@ function renderCatalog(): string {
     for (const c of components.sort((a, b) => a.title.localeCompare(b.title))) {
       const tags = c.tagPattern ?? c.elements.map((element) => element.tag).join(', ')
       const description = c.description || `${c.title} component for c2n applications.`
-      out.push(`- **${c.title}** — \`${tags}\` · \`${c.package}\` — ${description}`)
+      // A container whose children must be c2 elements says so here, since an agent reading only this index would
+      // otherwise fill it with plain markup.
+      const children = c.composition.slotted
+      const holds = children.length ? ` Children: ${children.map((tag) => `\`${tag}\``).join(', ')}.` : ''
+      out.push(`- **${c.title}** — \`${tags}\` · \`${c.package}\` — ${description}${holds}`)
     }
     out.push(``)
   }

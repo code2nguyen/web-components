@@ -5,7 +5,35 @@ import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const supportedAgents = new Set(['claude', 'codex', 'antigravity'])
+const allAgents = ['claude', 'codex', 'antigravity', 'copilot']
+const supportedAgents = new Set(allAgents)
+
+// Copilot loads `.github/copilot-instructions.md` into every chat, which makes it the one place guaranteed to reach
+// the model; the skill and the MCP server only help once the model decides to use them. The block is replaced in
+// place on every install, and nothing outside the markers is touched.
+const instructionsStart = '<!-- c2n:start (managed by `npx c2n-skill install`, edits inside are replaced) -->'
+const instructionsEnd = '<!-- c2n:end -->'
+const copilotInstructions = `${instructionsStart}
+## c2n web components (\`c2-*\` elements from \`@c2n/*\`)
+
+- Never write a \`c2-*\` tag, attribute, slot, event or \`--c2-*\` variable from memory. Before using a component, call the c2n MCP tool \`get_component\` for its API and \`get_examples\` for markup; call \`get_theme\` before writing CSS. Without the MCP tools, read \`node_modules/@c2n/<name>/custom-elements.json\`.
+- Build the child elements a container expects: \`get_component\` lists them under "Children" (\`c2-dashboard\` holds \`c2-dash-card\`, \`c2-tabs\` holds \`c2-tab\`).
+- Restyle a component only through its documented CSS variables, \`--c2-<component>__<part>[__<state>]--<property>\`, set on a class or the element. Do not put \`border\`, \`padding\`, \`background\`, \`color\` or size rules on a \`c2-*\` host, do not reach into its shadow DOM, and use \`::part()\` only for parts \`get_component\` lists.
+- Theme once: import \`@c2n/theme/theme.css\` at the app root and set \`--c2-theme--*\` tokens on \`:root\`.
+- The \`c2n-components\` skill (\`.github/skills/c2n-components/SKILL.md\`) has the full workflow.
+${instructionsEnd}`
+
+function mergeInstructions(file) {
+  mkdirSync(dirname(file), { recursive: true })
+  const current = existsSync(file) ? readFileSync(file, 'utf8') : ''
+  const start = current.indexOf(instructionsStart)
+  const end = current.indexOf(instructionsEnd)
+  const next =
+    start >= 0 && end > start
+      ? current.slice(0, start) + copilotInstructions + current.slice(end + instructionsEnd.length)
+      : `${current.trimEnd()}${current.trim() ? '\n\n' : ''}${copilotInstructions}\n`
+  writeFileSync(file, next)
+}
 
 function copyDirectory(source, destination) {
   mkdirSync(destination, { recursive: true })
@@ -27,14 +55,14 @@ function installSkill(projectRoot, relativeDirectory) {
   return destination
 }
 
-function mergeJsonServer(file, server) {
+function mergeJsonServer(file, server, key = 'mcpServers') {
   mkdirSync(dirname(file), { recursive: true })
   const value = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {}
-  value.mcpServers = { ...(value.mcpServers ?? {}), c2n: server }
+  value[key] = { ...(value[key] ?? {}), c2n: server }
   writeFileSync(file, JSON.stringify(value, null, 2) + '\n')
 }
 
-function mergeCodexServer(file, version) {
+function mergeCodexServer(file, command) {
   mkdirSync(dirname(file), { recursive: true })
   const lines = existsSync(file) ? readFileSync(file, 'utf8').split(/\r?\n/) : []
   const start = lines.findIndex((line) => line.trim() === '[mcp_servers.c2n]')
@@ -44,24 +72,37 @@ function mergeCodexServer(file, version) {
     lines.splice(start, end - start)
   }
   const current = lines.join('\n').trimEnd()
-  const section = `[mcp_servers.c2n]\ncommand = "npx"\nargs = ["-y", "@c2n/mcp@${version}"]`
+  const section = `[mcp_servers.c2n]\ncommand = ${JSON.stringify(command.command)}\nargs = [${command.args.map((arg) => JSON.stringify(arg)).join(', ')}]`
   writeFileSync(file, `${current}${current ? '\n\n' : ''}${section}\n`)
 }
 
-export function installProject({ projectRoot = process.cwd(), agents = ['claude', 'codex', 'antigravity'], includeMcp = true } = {}) {
+/**
+ * `npx -y @c2n/mcp@<version>` downloads the server every time the agent starts it, which fails silently behind a
+ * proxy the agent's environment does not know about. A project that installed `@c2n/mcp` itself runs that copy
+ * instead: no network at startup, and the registry matches the installed components.
+ */
+const localServer = 'node_modules/@c2n/mcp/dist/cli.js'
+
+export function installProject({ projectRoot = process.cwd(), agents = allAgents, includeMcp = true, mcp = 'auto' } = {}) {
   const selected = [...new Set(agents)]
   for (const agent of selected) {
-    if (!supportedAgents.has(agent)) throw new Error(`Unknown agent "${agent}". Use claude, codex, antigravity, or all.`)
+    if (!supportedAgents.has(agent)) throw new Error(`Unknown agent "${agent}". Use ${allAgents.join(', ')}, or all.`)
   }
+  if (!['auto', 'local', 'npx'].includes(mcp)) throw new Error(`Unknown --mcp "${mcp}". Use auto, local or npx.`)
 
   const root = resolve(projectRoot)
   const packageJson = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'))
-  const command = { command: 'npx', args: ['-y', `@c2n/mcp@${packageJson.version}`] }
+  const local = mcp === 'local' || (mcp === 'auto' && existsSync(join(root, localServer)))
+  if (local && includeMcp && !existsSync(join(root, localServer))) {
+    throw new Error(`--mcp local needs @c2n/mcp in the project: npm i -D @c2n/mcp@${packageJson.version}`)
+  }
+  const command = local ? { command: 'node', args: [localServer] } : { command: 'npx', args: ['-y', `@c2n/mcp@${packageJson.version}`] }
   const server = { type: 'stdio', ...command }
   const installedSkills = new Set()
 
   if (selected.includes('claude')) installedSkills.add(installSkill(root, '.claude/skills'))
   if (selected.includes('codex') || selected.includes('antigravity')) installedSkills.add(installSkill(root, '.agents/skills'))
+  if (selected.includes('copilot')) installedSkills.add(installSkill(root, '.github/skills'))
 
   const configs = []
   if (includeMcp && selected.includes('claude')) {
@@ -71,7 +112,7 @@ export function installProject({ projectRoot = process.cwd(), agents = ['claude'
   }
   if (includeMcp && selected.includes('codex')) {
     const file = join(root, '.codex/config.toml')
-    mergeCodexServer(file, packageJson.version)
+    mergeCodexServer(file, command)
     configs.push(file)
   }
   if (includeMcp && selected.includes('antigravity')) {
@@ -79,12 +120,25 @@ export function installProject({ projectRoot = process.cwd(), agents = ['claude'
     mergeJsonServer(file, command)
     configs.push(file)
   }
+  if (includeMcp && selected.includes('copilot')) {
+    const file = join(root, '.vscode/mcp.json')
+    // VS Code does not promise the workspace as the server's working directory; its variable pins the local path.
+    const args = local ? [`\${workspaceFolder}/${localServer}`] : server.args
+    mergeJsonServer(file, { ...server, args }, 'servers')
+    configs.push(file)
+  }
+  const instructions = []
+  if (selected.includes('copilot')) {
+    const file = join(root, '.github/copilot-instructions.md')
+    mergeInstructions(file)
+    instructions.push(file)
+  }
 
-  return { agents: selected, skills: [...installedSkills], configs }
+  return { agents: selected, skills: [...installedSkills], configs, instructions, mcp: local ? 'local' : 'npx' }
 }
 
 function usage() {
-  return `Install the c2n skill and MCP server into a project.\n\nUsage:\n  c2n-skill install [--agent all|claude|codex|antigravity] [--project <path>] [--no-mcp]\n\nThe default is --agent all --project .`
+  return `Install the c2n skill and MCP server into a project.\n\nUsage:\n  c2n-skill install [--agent all|claude|codex|antigravity|copilot] [--project <path>] [--mcp auto|local|npx] [--no-mcp]\n\nThe default is --agent all --project . --mcp auto.\n--mcp local runs the project's own node_modules/@c2n/mcp (no download when the agent starts it, which is what works\nbehind a proxy); npx fetches @c2n/mcp on start; auto picks local when @c2n/mcp is installed in the project.`
 }
 
 export function run(argv = process.argv.slice(2)) {
@@ -96,24 +150,28 @@ export function run(argv = process.argv.slice(2)) {
   }
 
   let projectRoot = process.cwd()
-  let agents = ['claude', 'codex', 'antigravity']
+  let agents = allAgents
   let includeMcp = true
+  let mcp = 'auto'
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index]
     if (argument === '--no-mcp') includeMcp = false
     else if (argument === '--project') projectRoot = args[++index]
     else if (argument.startsWith('--project=')) projectRoot = argument.slice('--project='.length)
+    else if (argument === '--mcp') mcp = args[++index] ?? ''
+    else if (argument.startsWith('--mcp=')) mcp = argument.slice('--mcp='.length)
     else if (argument === '--agent') agents = (args[++index] ?? '').split(',')
     else if (argument.startsWith('--agent=')) agents = argument.slice('--agent='.length).split(',')
     else throw new Error(`Unknown argument "${argument}".\n\n${usage()}`)
   }
   if (!projectRoot) throw new Error('--project requires a path')
-  if (agents.includes('all')) agents = ['claude', 'codex', 'antigravity']
+  if (agents.includes('all')) agents = allAgents
 
-  const result = installProject({ projectRoot, agents, includeMcp })
+  const result = installProject({ projectRoot, agents, includeMcp, mcp })
   console.log(`Installed c2n for ${result.agents.join(', ')} in ${resolve(projectRoot)}`)
   for (const skill of result.skills) console.log(`  skill: ${skill}`)
-  for (const config of result.configs) console.log(`  MCP:   ${config}`)
+  for (const config of result.configs) console.log(`  MCP:   ${config} (${result.mcp === 'local' ? 'runs node_modules/@c2n/mcp' : 'npx -y @c2n/mcp'})`)
+  for (const file of result.instructions) console.log(`  rules: ${file}`)
   console.log('Restart the selected agent so it discovers the skill and MCP server.')
 }
 

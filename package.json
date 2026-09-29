@@ -35,6 +35,7 @@
     "clean": "npx del-cli **/node_modules **/dist **/types **/custom-elements.json package-lock.json -f",
     "build:tools": "wireit",
     "mcp:inspect": "npm run inspect -w packages/tools/mcp",
+    "gallery:shots": "node apps/ui/scripts/gallery-shots.mjs",
     "mcp:smoke": "npm run smoke -w packages/tools/mcp",
     "docs:check": "node scripts/check-component-docs.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",

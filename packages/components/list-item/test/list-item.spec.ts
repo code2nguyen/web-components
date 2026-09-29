@@ -12,12 +12,13 @@ test('consumer-owned row content and adornments remain directly styleable', asyn
 
 test('standalone rows toggle with click and Space and announce their state', async ({ page, renderScenario }) => {
   await renderScenario('<c2-list-item value="a">Favorite</c2-list-item>')
-  const item = page.getByRole('button', { name: 'Favorite' })
+  const item = page.locator('c2-list-item', { hasText: 'Favorite' })
+  await expect(item).toHaveHostAria('role', 'button')
   await watch(item, 'selected-change')
   await item.click()
-  await expect(item).toHaveAttribute('aria-pressed', 'true')
+  await expect(item).toHaveHostAria('aria-pressed', 'true')
   await item.press('Space')
-  await expect(item).toHaveAttribute('aria-pressed', 'false')
+  await expect(item).toHaveHostAria('aria-pressed', 'false')
   await expect(item).toHaveAttribute('data-events', '[{"selected":true,"value":"a"},{"selected":false,"value":"a"}]')
   await accessible(page)
 })
@@ -94,4 +95,44 @@ test('renders without tripping Lit’s change-in-update warning', async ({ page,
   await expect(page.getByText('12 unread')).toBeVisible()
 
   expect(warnings).toEqual([])
+})
+
+// React hydrates server markup against what the element looks like after it upgrades, and reports every attribute
+// the element wrote on itself as a mismatch. The row's role and state therefore live on ElementInternals.
+test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-list-item value="a">Favorite</c2-list-item>
+    <c2-list-item href="#docs">Docs</c2-list-item>
+    <c2-list-item disabled>Unavailable</c2-list-item>
+  `)
+  const hostSemantics = () =>
+    page
+      .locator('c2-list-item')
+      .evaluateAll((elements) => elements.flatMap((element) => element.getAttributeNames().filter((name) => name === 'role' || name.startsWith('aria-'))))
+  const toggle = page.locator('c2-list-item[value="a"]')
+  const link = page.locator('c2-list-item[href="#docs"]')
+  const disabled = page.locator('c2-list-item', { hasText: 'Unavailable' })
+
+  await expect(toggle).toHaveHostAria('role', 'button')
+  await expect(toggle).toHaveHostAria('aria-pressed', 'false')
+  await expect(toggle).toHaveHostAria('aria-selected', null)
+  await expect(link).toHaveHostAria('role', 'link')
+  await expect(link).toHaveHostAria('aria-pressed', null)
+  await expect(disabled).toHaveHostAria('aria-disabled', 'true')
+  await expect(toggle).toHaveHostAria('aria-disabled', null)
+  expect(await hostSemantics()).toEqual([])
+
+  await toggle.click()
+  await expect(toggle).toHaveHostAria('aria-pressed', 'true')
+  await props(disabled, { disabled: false })
+  await expect(disabled).toHaveHostAria('aria-disabled', null)
+  expect(await hostSemantics()).toEqual([])
+})
+
+test('an author-written role on the host wins and decides the state it implies', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-list-item role="option" value="a">Favorite</c2-list-item>')
+  const item = page.locator('c2-list-item')
+  await expect(item).toHaveAttribute('role', 'option')
+  await expect(item).toHaveHostAria('aria-selected', 'false')
+  await expect(item).toHaveHostAria('aria-pressed', null)
 })

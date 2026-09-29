@@ -1,6 +1,6 @@
 # @c2n/skill
 
-Portable Agent Skill and MCP configuration for building applications with the `c2-*` elements from `@c2n/*`. The same package supports Claude Code, Codex and Google Antigravity.
+Portable Agent Skill and MCP configuration for building applications with the `c2-*` elements from `@c2n/*`. The same package supports Claude Code, Codex, Google Antigravity and GitHub Copilot (VS Code).
 
 ## Install in a project
 
@@ -17,6 +17,7 @@ The default installs all supported agents. Select one or disable MCP configurati
 npx c2n-skill install --agent claude
 npx c2n-skill install --agent codex
 npx c2n-skill install --agent antigravity
+npx c2n-skill install --agent copilot
 npx c2n-skill install --agent codex,antigravity --no-mcp
 ```
 
@@ -27,6 +28,11 @@ Generated project files:
 | Claude      | `.claude/skills/c2n-components/` | `.mcp.json`               |
 | Codex       | `.agents/skills/c2n-components/` | `.codex/config.toml`      |
 | Antigravity | `.agents/skills/c2n-components/` | `.agents/mcp_config.json` |
+| Copilot     | `.github/skills/c2n-components/` | `.vscode/mcp.json`        |
+
+For Copilot the installer also merges a short c2n rules block into `.github/copilot-instructions.md`, which Copilot reads in every chat.
+
+The MCP configurations start the server with `npx -y @c2n/mcp@<version>`. Behind a proxy that download can fail silently when the agent starts it; install `@c2n/mcp` as a dev dependency and the installer points every configuration at `node_modules/@c2n/mcp` instead (`--mcp auto`, the default, or force it with `--mcp local`).
 
 Codex and Antigravity intentionally share the portable `.agents/skills/` copy. Re-running the installer updates c2n-owned files and preserves other MCP server entries.
 

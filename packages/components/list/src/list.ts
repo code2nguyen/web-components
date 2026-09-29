@@ -82,6 +82,10 @@ export interface List {
 export class List extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** Selected values. Written as `value="a;b"` in markup, read as `['a', 'b']` from the property. */
   @provide({ context: selectedItemValueContext })
   @property({
@@ -260,10 +264,9 @@ export class List extends LitElement {
     if (changedProperties.has('value') || changedProperties.has('disabled')) {
       this.syncRows()
     }
-    this.setAttribute('role', 'listbox')
-    this.setAttribute('aria-multiselectable', String(this.multiple))
-    if (this.disabled) this.setAttribute('aria-disabled', 'true')
-    else this.removeAttribute('aria-disabled')
+    this.internals.role = 'listbox'
+    this.internals.ariaMultiSelectable = String(this.multiple)
+    this.internals.ariaDisabled = this.disabled ? 'true' : null
     this.syncPaddingClasses()
   }
 

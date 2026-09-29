@@ -11,7 +11,8 @@ for (const state of ['default', 'split', 'slots']) {
 
 test('markers are decoration, not content', async ({ page, scenario }) => {
   await scenario('slots')
-  const item = page.getByRole('listitem').first()
+  const item = page.locator('c2-timeline-item').first()
+  await expect(item).toHaveHostAria('role', 'listitem')
   await expect(item).toHaveAccessibleName('')
   await expect(item.locator('.rail')).toHaveAttribute('aria-hidden', 'true')
 })

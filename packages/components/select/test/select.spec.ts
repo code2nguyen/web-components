@@ -1,5 +1,9 @@
+import type { Page } from '@playwright/test'
 import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
 
+// The menu and its rows state their roles through ElementInternals, which getByRole cannot see: find them by tag.
+const listbox = (page: Page) => page.locator('c2-select c2-list')
+const option = (page: Page, name: string) => page.locator('c2-list-item', { hasText: name })
 const rows = '<c2-list-item value="a">Apple</c2-list-item><c2-list-item value="b">Berry</c2-list-item>'
 
 test('is labelable: a `for` label names it and clicking the label focuses it', async ({ page, renderScenario }) => {
@@ -27,8 +31,10 @@ test('selecting a value closes the menu and updates the trigger', async ({ page,
   const host = page.locator('c2-select')
   await watch(host, 'selection-change')
   await page.getByRole('button', { name: 'Choose fruit' }).click()
-  await expect(page.getByRole('listbox')).toBeVisible()
-  await page.getByRole('option', { name: 'Berry' }).click()
+  await expect(listbox(page)).toBeVisible()
+  await expect(listbox(page)).toHaveHostAria('role', 'listbox')
+  await expect(option(page, 'Berry')).toHaveHostAria('role', 'option')
+  await option(page, 'Berry').click()
   await expect(page.getByRole('button', { name: 'Berry' })).toHaveAttribute('aria-expanded', 'false')
   await expect(host).toHaveJSProperty('value', ['b'])
   await expect(host).toHaveAttribute('data-events', '[{"value":["b"],"data":[null]}]')
@@ -37,19 +43,21 @@ test('selecting a value closes the menu and updates the trigger', async ({ page,
 test('ArrowDown opens, Escape dismisses and multiple selections keep the menu open', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-select placeholder="Choose fruit" multiple>${rows}</c2-select>`)
   await page.getByRole('button', { name: 'Choose fruit' }).press('ArrowDown')
-  await expect(page.getByRole('listbox')).toBeVisible()
-  await page.getByRole('option', { name: 'Apple' }).click()
-  await page.getByRole('option', { name: 'Berry' }).click()
+  await expect(listbox(page)).toBeVisible()
+  await option(page, 'Apple').click()
+  await option(page, 'Berry').click()
   await expect(page.locator('c2-select')).toHaveJSProperty('value', ['a', 'b'])
-  await expect(page.getByRole('listbox')).toBeVisible()
+  await expect(option(page, 'Apple')).toHaveHostAria('aria-selected', 'true')
+  await expect(listbox(page)).toHaveHostAria('aria-multiselectable', 'true')
+  await expect(listbox(page)).toBeVisible()
   await page.keyboard.press('Escape')
-  await expect(page.getByRole('listbox')).not.toBeVisible()
+  await expect(listbox(page)).not.toBeVisible()
 })
 test('readonly prevents native popover activation', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-select placeholder="Read only" readonly>${rows}</c2-select>`)
   await page.getByRole('button', { name: 'Read only' }).click()
   await expect(page.locator('c2-select')).toHaveJSProperty('open', false)
-  await expect(page.getByRole('listbox')).not.toBeVisible()
+  await expect(listbox(page)).not.toBeVisible()
 })
 
 test('offers a scalar single-select API and submits single and multiple values', async ({ page, renderScenario }) => {
@@ -82,7 +90,7 @@ test('picking an option fires input and change as well as selection-change', asy
   })
 
   await page.getByRole('button', { name: 'Choose fruit' }).click()
-  await page.getByRole('option', { name: 'Berry' }).click()
+  await option(page, 'Berry').click()
 
   await expect(host).toHaveAttribute('data-seen', '["selection-change","input","change"]')
 })
