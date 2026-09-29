@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  shortcut: `<div class="preview-row">
+  <c2-kbd>mod + K</c2-kbd>
+  <c2-kbd>G</c2-kbd><c2-kbd>D</c2-kbd>
+  <c2-kbd>?</c2-kbd>
+</div>`,
   carousel: `<c2-carousel label="Preview" loop style="width:260px;--c2-carousel__control--size:28px;--c2-carousel__control--inset:8px">
   <div style="display:grid;place-items:center;height:120px;border-radius:8px;background:linear-gradient(135deg,#0265dc,#7c3aed);color:#fff;font-weight:600">1</div>
   <div style="display:grid;place-items:center;height:120px;border-radius:8px;background:linear-gradient(135deg,#db2777,#ea580c);color:#fff;font-weight:600">2</div>

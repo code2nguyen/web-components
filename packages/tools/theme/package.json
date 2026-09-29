@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/shortcut:build",
         "../../components/carousel:build",
         "../../components/tag-input:build",
         "../../components/timeline:build",
