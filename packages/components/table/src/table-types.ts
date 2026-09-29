@@ -30,6 +30,24 @@ export interface TableRowContext {
   key: string
 }
 
+/** Built-in aggregates of the summary row. `count` counts the rows whose value is neither empty nor null. */
+export type TableSummaryAggregate = 'sum' | 'avg' | 'min' | 'max' | 'count'
+
+export interface TableSummaryContext {
+  column: TableColumnConfig
+  /** The rows the summary covers: every row, or the current page with `summary-scope="page"`. */
+  rows: TableRow[]
+}
+
+export interface TableSummaryRenderContext extends TableSummaryContext {
+  /** The value for the column: the table's `summaryValues` entry when it has one, otherwise the column's aggregate. */
+  value: unknown
+}
+
+/** Computes a column's summary value from its rows; the result is formatted like a cell of the column. */
+export type TableSummaryFunction = (context: TableSummaryContext) => unknown
+export type TableSummaryRenderer = (context: TableSummaryRenderContext) => unknown
+
 export type TableRowStyle = Record<string, string | number | null | undefined>
 export type TableRowStyler = (context: TableRowContext) => TableRowStyle | undefined
 
@@ -38,7 +56,12 @@ export type TableCellRenderer = (context: TableCellContext) => unknown
 export type TableHeaderRenderer = (context: TableHeaderContext) => unknown
 
 export interface TableColumnConfig {
-  /** Key of the value in the row object; may be a dotted path. */
+  /**
+   * Stable identity of the column. Defaults to `field`; set it when two columns show the same field, or when a
+   * computed column has no field. Widths, pinning, the `cell-<id>` parts and the summary row are keyed by it.
+   */
+  id?: string
+  /** Key of the value in the row object; may be a dotted path. May be empty for a computed column that has an `id`. */
   field: string
   /** Header label. Defaults to the field. */
   header?: string
@@ -67,12 +90,22 @@ export interface TableColumnConfig {
    * body with its own template language. The table puts a `<slot name="cell:<row key>:<field>">` in the cell;
    * `renderCell` (or the formatted value) stays as the fallback while nothing is slotted into it.
    *
-   * Requires `rowKey`. Only the rows the virtualizer has rendered have a slot, so children for the rest simply
+   * Requires a row key (`rowKey` or `getRowKey`). Only the rows the virtualizer has rendered have a slot, so children for the rest simply
    * wait — write one child per row and let the table pick.
    */
   cellSlot?: boolean
   renderCell?: TableCellRenderer
   renderHeader?: TableHeaderRenderer
+  /** Value of the column in the summary row: a built-in aggregate, or a function of the rows. */
+  summary?: TableSummaryAggregate | TableSummaryFunction
+  /** Text shown in the column's summary cell when it has no value, such as `Total`. */
+  summaryLabel?: string
+  /** Alignment of the summary cell. Defaults to the column's `align`. */
+  summaryAlign?: ColumnAlign
+  /** Number of columns the summary cell spans, starting at this one. The spanned columns' summaries are not shown. */
+  summarySpan?: number
+  /** Renders the summary cell body instead of the formatted value. */
+  renderSummary?: TableSummaryRenderer
   /** Client-side sort comparator for the column's values. */
   comparator?: (a: unknown, b: unknown) => number
 }
@@ -101,7 +134,7 @@ export interface TableDataSource {
 }
 
 export interface TableSelectionChangeEventDetail {
-  /** Keys of the selected rows (`row-key` field, or the row index when no `row-key` is set). */
+  /** Keys of the selected rows, as strings: the `row-key` field (or `getRowKey`), or the row's position when there is neither. */
   value: string[]
   /** The selected rows themselves; only the loaded ones when a `dataSource` is used. */
   rows: TableRow[]
@@ -123,6 +156,8 @@ export interface TableCellEventDetail extends TableRowEventDetail {
 }
 
 export interface TableColumnResizeEventDetail {
+  /** The column's `id`, which is its `field` unless one was set. */
+  id: string
   field: string
   width: number
 }
