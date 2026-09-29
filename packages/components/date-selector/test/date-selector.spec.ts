@@ -12,6 +12,10 @@ test('completes a range, then starts a new one', async ({ page, scenario }) => {
   await page.getByRole('gridcell', { name: /September 18, 2026/ }).click()
   await expect(selector).toHaveAttribute('from', '2026-09-18')
   await expect(selector).toHaveAttribute('to', '')
+  // A lone start date draws no range strip behind its circle.
+  const start = page.getByRole('gridcell', { name: /September 18, 2026/ })
+  await expect(start).toHaveAttribute('aria-selected', 'true')
+  await expect(start).not.toHaveClass(/range-start/)
 })
 
 test('an earlier second date restarts the range', async ({ page, scenario }) => {

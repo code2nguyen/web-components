@@ -285,10 +285,12 @@ export class DateSelector extends LitElement {
     const disabled = this.isUnavailable(value)
     const selected = value === this.from || value === this.to
     const inRange = !!this.to && value > this.from && value < this.to
+    // The range strip only exists once both ends are picked; a lone start date is just a selected circle.
+    const rangeStart = !!this.to && value === this.from
     const focusable =
       !disabled && (this.focusDate ? value === this.focusDate : this.from ? value === this.from : value === today || !this.min || value >= this.min)
     return html`<button
-      class="day ${value === this.from ? 'range-start' : ''} ${value === this.to ? 'range-end' : ''} ${inRange ? 'in-range' : ''}"
+      class="day ${rangeStart ? 'range-start' : ''} ${value === this.to ? 'range-end' : ''} ${inRange ? 'in-range' : ''}"
       type="button"
       role="gridcell"
       data-date=${value}
