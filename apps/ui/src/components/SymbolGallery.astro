@@ -1,0 +1,181 @@
+---
+import { symbolCatalog, symbolCategories, symbolTag } from '@c2n/symbols/symbol-names.js'
+import MdxCodeBlock from './MdxCodeBlock.astro'
+import SiteCard from './ui/SiteCard.astro'
+import SiteTextField from './ui/SiteTextField.astro'
+
+// Symbols are emitted as plain markup (not SSR'd through the Lit renderer); the client script registers them.
+const categoryTitles: Record<(typeof symbolCategories)[number], string> = {
+  empty: 'Empty states',
+  status: 'Status',
+  error: 'Errors and access',
+  action: 'Actions and onboarding',
+}
+const groups = symbolCategories.map((category) => ({
+  category,
+  title: categoryTitles[category],
+  items: symbolCatalog
+    .filter((symbol) => symbol.category === category)
+    .map((symbol) => ({ ...symbol, tag: symbolTag(symbol.name), markup: `<${symbolTag(symbol.name)}></${symbolTag(symbol.name)}>` })),
+}))
+const studioUid = 'symbol-gallery-studio'
+const studioTag = 'c2-symbol-empty-inbox'
+const studioCode = `<${studioTag}></${studioTag}>`
+---
+
+<div class="symbol-gallery__toolbar">
+  <SiteTextField class="symbol-gallery__filter" label="Filter symbols" search size="sm" placeholder={`Filter ${symbolCatalog.length} symbols…`} />
+  <span class="symbol-gallery__count">{symbolCatalog.length} symbols · select one to customize</span>
+</div>
+{
+  groups.map(({ category, title, items }) => (
+    <section class="symbol-gallery__group" data-category={category}>
+      <h3 class="symbol-gallery__group-title">{title}</h3>
+      <div class="symbol-gallery">
+        {items.map(({ name, title: symbolTitle, description, tag, markup }) => (
+          <div class="symbol-gallery__item" data-name={name} data-search={`${name} ${symbolTitle} ${description}`.toLowerCase()}>
+            <SiteCard hydrate="defined" interactive class="symbol-gallery__card" title={description}>
+              <div slot="media" class="symbol-gallery__media">
+                <Fragment set:html={markup} />
+              </div>
+              <span class="symbol-gallery__title">{symbolTitle}</span>
+              <code class="symbol-gallery__tag">{tag}</code>
+            </SiteCard>
+            <c2-copy-button class="symbol-gallery__copy" pin value={markup} label={`Copy ${name} HTML`} />
+          </div>
+        ))}
+      </div>
+    </section>
+  ))
+}
+<p class="symbol-gallery__empty" hidden>No symbol matches.</p>
+
+<MdxCodeBlock code={studioCode} lang="html" uid={studioUid} style="" label="Selected symbol" offscreen>
+  <Fragment set:html={`<${studioTag} data-target-uid="${studioUid}"></${studioTag}>`} />
+</MdxCodeBlock>
+
+<script>
+  import '@c2n/copy-button'
+  import '@c2n/symbols'
+</script>
+
+<style lang="scss">
+  .symbol-gallery__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 16px 0 12px;
+  }
+  .symbol-gallery__filter {
+    flex: 1;
+    min-width: 200px;
+    max-width: 360px;
+  }
+  .symbol-gallery__count {
+    font-size: 12.5px;
+    color: var(--site-color-on-surface-muted);
+  }
+  .symbol-gallery__group {
+    margin: 0 0 20px;
+    &[hidden] {
+      display: none;
+    }
+  }
+  .symbol-gallery__group-title {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--site-color-on-surface-variant);
+  }
+  .symbol-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
+    gap: 12px;
+    // The site bridges the symbol roles onto its own tokens through @c2n/theme; only the size is local.
+    --c2-symbol--size: 104px;
+  }
+  .symbol-gallery__item {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    &[hidden] {
+      display: none;
+    }
+  }
+  .symbol-gallery__card {
+    flex: 1;
+    min-width: 0;
+    --c2-card__hover--background: var(--site-color-surface-container-1);
+  }
+  .symbol-gallery__media {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0 4px;
+  }
+  .symbol-gallery__title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--site-color-on-surface);
+  }
+  .symbol-gallery__tag {
+    display: block;
+    overflow: hidden;
+    font-size: 11px;
+    color: var(--site-color-on-surface-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .symbol-gallery__copy {
+    z-index: 1;
+    --c2-copy-button__pin--offset-x: 6px;
+    --c2-copy-button__pin--offset-y: 6px;
+    --c2-copy-button__container--height: 26px;
+    --c2-copy-button__container--min-width: 26px;
+    --c2-copy-button__container--padding-left: 5px;
+    --c2-copy-button__container--padding-right: 5px;
+    --c2-copy-button__container--background-color: var(--site-color-surface);
+    --c2-copy-button__container--border: 1px solid var(--site-color-outline-variant);
+    --c2-copy-button__container__hover--background-color: var(--site-color-surface-container-2);
+    --c2-copy-button__icon--size: 14px;
+  }
+  .symbol-gallery__empty {
+    text-align: center;
+    color: var(--site-color-on-surface-muted);
+    &[hidden] {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import type { TextField } from '@c2n/text-field'
+  import { openIconInStudio } from '../utils/playground.ts'
+
+  const filter = document.querySelector<TextField>('.symbol-gallery__filter')
+  const groups = Array.from(document.querySelectorAll<HTMLElement>('.symbol-gallery__group'))
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.symbol-gallery__item'))
+  const empty = document.querySelector<HTMLElement>('.symbol-gallery__empty')
+
+  filter?.addEventListener('input', () => {
+    const query = filter.value.trim().toLowerCase()
+    items.forEach((item) => {
+      item.hidden = !!query && !(item.dataset.search ?? '').includes(query)
+    })
+    groups.forEach((group) => {
+      group.hidden = !group.querySelector('.symbol-gallery__item:not([hidden])')
+    })
+    if (empty) empty.hidden = groups.some((group) => !group.hidden)
+  })
+
+  items.forEach((item) => {
+    // An interactive c2-card fires `click` for pointer, Enter and Space alike.
+    item.querySelector('.symbol-gallery__card')?.addEventListener('click', () => {
+      openIconInStudio({ uid: 'symbol-gallery-studio', tagName: `c2-symbol-${item.dataset.name ?? ''}` })
+    })
+  })
+</script>

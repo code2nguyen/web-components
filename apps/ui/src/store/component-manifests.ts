@@ -70,6 +70,7 @@ import textField from '@c2n/text-field/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
+import symbols from '@c2n/symbols/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
@@ -147,6 +148,7 @@ export const componentManifests = (function () {
     label,
     featherIcons,
     phosphorIcons,
+    symbols,
   ].reduce((result, item) => {
     const pkg = item as Package
     const tags: string[] = []

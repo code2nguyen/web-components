@@ -22,6 +22,20 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### Status panel needs three variables to host an illustration
+
+- **Severity:** papercut
+- **Hit while:** documenting `@c2n/symbols` in `c2-status-panel`'s `media` slot (symbols page and the status-panel
+  gallery's "Symbol media" card), 2026-09-29.
+- **Expected:** slotting a 128px illustration into `media` shows it at its own size.
+- **What happens:** the media region is a fixed 64px tinted disc with `overflow: hidden`, and `::slotted([slot=media])`
+  forces the slotted element to `--c2-status-panel__media-icon--size` (32px). An illustration needs
+  `--c2-status-panel__media--size`, `--c2-status-panel__media-icon--size` and the (per-status)
+  `--c2-status-panel__media…--background-color: transparent` all set together, or it renders clipped or tiny on a
+  coloured disc.
+- **Smallest fix:** a behaviour attribute such as `media="illustration"` (or detecting a slotted `c2-symbol-*`) that
+  drops the disc and sizes the region to its content, with one `--c2-status-panel__illustration--size` variable.
+
 ### Astro SSR consumes navigation-menu item links in site chrome
 
 - **Severity:** docs

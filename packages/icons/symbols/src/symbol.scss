@@ -1,0 +1,60 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-symbol,
+  $theme: (
+    size: 120px,
+    stroke-width: 3,
+    backdrop--color: #f4f4f5,
+    surface--color: #ffffff,
+    muted--color: #e4e4e7,
+    line--color: #a1a1aa,
+    ink--color: #71717a,
+    primary--color: #0265dc,
+    primary-soft--color: #edf1fe,
+    success--color: #16a34a,
+    warning--color: #f59e0b,
+    error--color: #dc2626,
+  )
+);
+
+// Colour roles every source SVG in `svg/` is drawn with. A class names a fill (`primary`) or a stroke
+// (`line-primary`, or plain `line` for the default outline); the generator rejects any other class and any
+// hard-coded colour, so these variables are the whole palette of the set.
+$fills: backdrop, surface, muted, ink, primary, primary-soft, success, warning, error;
+
+:host {
+  display: inline-flex;
+  width: css.cssVar(size);
+  height: css.cssVar(size);
+  line-height: 0;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.line {
+  stroke: css.cssVar(line--color);
+  stroke-width: css.cssVar(stroke-width);
+}
+
+@each $role in $fills {
+  .#{$role} {
+    fill: css.cssVar(#{$role}--color);
+  }
+
+  .line-#{$role} {
+    stroke: css.cssVar(#{$role}--color);
+    stroke-width: css.cssVar(stroke-width);
+  }
+}

@@ -15,8 +15,9 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
   <DocComponentLayout section="icons">
     <h1>Icons</h1>
     <p>
-      Icon sets are packaged separately from UI components. Each set wraps an upstream icon library as web components that inherit
-      <code>currentColor</code> and are sized through CSS custom properties, so they drop into any component slot.
+      Icon sets are packaged separately from UI components. Each icon set wraps an upstream icon library as web components that inherit
+      <code>currentColor</code> and are sized through CSS custom properties, so they drop into any component slot. <a href={`${base}/icons/symbols`}>Symbols</a> are
+      larger spot illustrations for empty states and status panels, themed through colour roles.
     </p>
     <AllIconSearch />
     <ul class="icon-sets">
@@ -103,6 +104,9 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
   import '@c2n/phosphor-icons/icons/camera.js'
   import '@c2n/phosphor-icons/icons/gear.js'
   import '@c2n/phosphor-icons/icons/arrow-right.js'
+  import '@c2n/symbols/symbols/empty-inbox.js'
+  import '@c2n/symbols/symbols/no-results.js'
+  import '@c2n/symbols/symbols/success.js'
   import '@c2n/mat-icon'
   import '@fontsource/material-icons'
 </script>

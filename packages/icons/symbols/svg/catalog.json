@@ -1,0 +1,57 @@
+{
+  "all-done": {
+    "category": "status",
+    "title": "All done",
+    "description": "A clipboard with every item checked off: a finished checklist, an inbox at zero, nothing left to review."
+  },
+  "empty-box": { "category": "empty", "title": "Empty box", "description": "An open, empty box: no items, no orders, nothing added to a collection yet." },
+  "empty-cart": { "category": "empty", "title": "Empty cart", "description": "An empty shopping cart: a cart or basket with no products in it." },
+  "empty-folder": {
+    "category": "empty",
+    "title": "Empty folder",
+    "description": "An open folder with nothing inside: no files, no documents, an empty directory."
+  },
+  "empty-inbox": { "category": "empty", "title": "Empty inbox", "description": "An empty tray: an inbox, queue or feed with no entries." },
+  "error": { "category": "status", "title": "Error", "description": "A cross in a red badge: an operation failed or could not be completed." },
+  "expired": { "category": "status", "title": "Expired", "description": "A clock with a warning badge: an expired session, link, trial or token." },
+  "forbidden": { "category": "error", "title": "Forbidden", "description": "A locked padlock: access denied, sign-in required, a permission is missing." },
+  "idea": { "category": "action", "title": "Idea", "description": "A glowing light bulb: a tip, a suggestion, onboarding hints or a feature announcement." },
+  "info": { "category": "status", "title": "Info", "description": "An i in an accent badge: neutral information or a notice." },
+  "launch": { "category": "action", "title": "Launch", "description": "A rocket taking off: getting started, a first run, a release or an upgrade." },
+  "mail-sent": {
+    "category": "action",
+    "title": "Mail sent",
+    "description": "An envelope and a paper plane: a message, invitation or confirmation email was sent."
+  },
+  "maintenance": {
+    "category": "error",
+    "title": "Maintenance",
+    "description": "A traffic cone: scheduled maintenance, work in progress, a feature under construction."
+  },
+  "no-data": { "category": "empty", "title": "No data", "description": "A chart without data: an empty report, dashboard or time range." },
+  "no-events": { "category": "empty", "title": "No events", "description": "A blank calendar: no events, meetings or bookings scheduled." },
+  "no-messages": { "category": "empty", "title": "No messages", "description": "Two speech bubbles: no conversations, comments or replies yet." },
+  "no-notifications": { "category": "empty", "title": "No notifications", "description": "A sleeping bell: no notifications, alerts or activity." },
+  "no-results": { "category": "empty", "title": "No results", "description": "A magnifier crossing out a page: a search or filter matched nothing." },
+  "no-users": {
+    "category": "empty",
+    "title": "No users",
+    "description": "Two people and a plus badge: no members, contacts or collaborators yet; invite someone."
+  },
+  "not-found": { "category": "error", "title": "Not found", "description": "A page with a question mark: a 404, a missing page or a deleted record." },
+  "offline": { "category": "error", "title": "Offline", "description": "A crossed-out cloud: no network connection, a service that cannot be reached." },
+  "search": { "category": "action", "title": "Search", "description": "A magnifying glass: start searching, nothing searched yet." },
+  "secure": { "category": "status", "title": "Secure", "description": "A shield with a check mark: protected, verified, two-factor enabled." },
+  "server-error": {
+    "category": "error",
+    "title": "Server error",
+    "description": "A server stack with an error badge: a 500, an outage or a failed backend request."
+  },
+  "success": { "category": "status", "title": "Success", "description": "A check mark in a green badge: an operation completed successfully." },
+  "upload": { "category": "action", "title": "Upload", "description": "A cloud with an upward arrow: drop files here, import or sync data." },
+  "warning": {
+    "category": "status",
+    "title": "Warning",
+    "description": "An exclamation mark in an amber triangle: something needs attention before continuing."
+  }
+}

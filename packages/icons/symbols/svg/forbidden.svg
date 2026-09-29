@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <ellipse class="muted" cx="80" cy="132" rx="42" ry="5"/>
+  <path class="muted line" d="M56 72V56a24 24 0 0 1 48 0v16H92V56a12 12 0 0 0-24 0v16Z"/>
+  <rect class="primary" x="44" y="70" width="72" height="56" rx="10"/>
+  <path class="surface" d="M80 88a6 6 0 0 0-3 11.2V110h6V99.2A6 6 0 0 0 80 88Z"/>
+</svg>

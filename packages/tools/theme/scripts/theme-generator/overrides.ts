@@ -313,4 +313,13 @@ export const overrides: Record<string, Override> = {
   '--c2-dashboard--border-radius': { exclude: 'square by default; the grid is a frame only once an app fills it' },
   '--c2-dash-card--border-radius': { exclude: 'bare pane; the surface inside it owns the radius' },
   '--c2-dash-card__handle__hover--background': { token: 'color-primary-glow' },
+  // Symbols are drawn with colour roles, not parts: each role follows the surface or accent token it stands in for,
+  // so a brand theme and dark mode recolour every illustration. The outline is the stronger border grey (the text
+  // rule would read #a1a1aa as secondary text); success and warning stay stable, as status-panel's and steps' do.
+  '--c2-symbol__backdrop--color': { token: 'color-surface-container' },
+  '--c2-symbol__surface--color': { token: 'color-surface' },
+  '--c2-symbol__line--color': { token: 'color-outline-strong' },
+  '--c2-symbol__primary-soft--color': { token: 'color-primary-container' },
+  '--c2-symbol__success--color': { exclude: 'semantic success colour' },
+  '--c2-symbol__warning--color': { exclude: 'semantic warning colour' },
 }
