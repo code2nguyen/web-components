@@ -70,6 +70,10 @@ export interface ButtonGroup {
 export class ButtonGroup extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** `none` (default) for plain attached buttons, `single` for one pressed item, `multiple` for independent toggles. */
   @property({ reflect: true }) selection: ButtonGroupSelection = 'none'
 
@@ -111,7 +115,7 @@ export class ButtonGroup extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    if (!this.hasAttribute('role')) this.setAttribute('role', 'group')
+    this.internals.role = 'group'
     if (!isServer) {
       this.observer ??= new MutationObserver(() => this.syncItems())
       this.observer.observe(this, { childList: true })

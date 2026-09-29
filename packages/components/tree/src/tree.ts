@@ -122,6 +122,10 @@ export interface Tree {
 export class Tree extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** Nodes to render. Leave empty and nest `c2-tree-item` elements instead to author the tree in markup. */
   @property({ converter: jsonPropertyConverter }) items: TreeNode[] = []
 
@@ -306,11 +310,6 @@ export class Tree extends LitElement {
     return result
   }
 
-  override connectedCallback() {
-    super.connectedCallback()
-    this.setAttribute('role', 'tree')
-  }
-
   override willUpdate(changed: PropertyValues<this>) {
     // A framework that writes the attribute value straight onto the property hands us a string.
     for (const key of ['value', 'expandedItems'] as const) {
@@ -324,9 +323,9 @@ export class Tree extends LitElement {
   }
 
   override updated(changed: PropertyValues<this>) {
-    this.setAttribute('aria-multiselectable', String(this.#multiple))
-    if (this.disabled) this.setAttribute('aria-disabled', 'true')
-    else this.removeAttribute('aria-disabled')
+    this.internals.role = 'tree'
+    this.internals.ariaMultiSelectable = String(this.#multiple)
+    this.internals.ariaDisabled = this.disabled ? 'true' : null
     if (changed.has('items')) this.#loaded.clear()
     this.#syncItems()
   }

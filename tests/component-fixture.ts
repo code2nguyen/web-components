@@ -1,5 +1,5 @@
 import { relative, dirname } from 'node:path'
-import { expect, type Locator, type Page } from '@playwright/test'
+import { expect as baseExpect, type Locator, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { test as base } from './fixture'
 
@@ -37,7 +37,46 @@ export const test = base.extend<{ renderScenario: (html: string) => Promise<void
   },
 })
 
-export { expect } from '@playwright/test'
+/**
+ * Reads an ARIA value the way the accessibility tree resolves it: a host attribute (an author override) wins, then the
+ * component's `ElementInternals`. Components state their own semantics through internals so they never write an
+ * attribute a server did not render — which also means Playwright's `getByRole` and `toHaveAttribute` cannot see them.
+ */
+export async function hostAria(locator: Locator, attribute: string): Promise<string | null> {
+  return locator.evaluate((element, name) => {
+    if (element.hasAttribute(name)) return element.getAttribute(name)
+    const property =
+      name === 'role'
+        ? 'role'
+        : name
+            .replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase())
+            .replace(/^aria([a-z])/, (_match, letter: string) => `aria${letter.toUpperCase()}`)
+    const internals = (element as Element & { internals?: Record<string, unknown> }).internals
+    const value = internals?.[property]
+    return typeof value === 'string' ? value : null
+  }, attribute)
+}
+
+export const expect = baseExpect.extend({
+  /** Retrying assertion on {@link hostAria}; `null` asserts the value is absent. */
+  async toHaveHostAria(locator: Locator, attribute: string, expected: string | null, options?: { timeout?: number }) {
+    let actual: string | null = null
+    const poll = baseExpect.poll(async () => (actual = await hostAria(locator, attribute)), { timeout: options?.timeout ?? this.timeout })
+    // `.not` polls for the value to go away rather than waiting out the timeout for it to appear.
+    const matched = await (this.isNot ? poll.not : poll).toBe(expected).then(
+      () => true,
+      () => false,
+    )
+    return {
+      pass: this.isNot ? !matched : matched,
+      name: 'toHaveHostAria',
+      expected,
+      actual,
+      message: () =>
+        `${this.utils.matcherHint('toHaveHostAria', locator.toString(), attribute, { isNot: this.isNot })}\n\nExpected: ${this.isNot ? 'not ' : ''}${this.utils.printExpected(expected)}\nReceived: ${this.utils.printReceived(actual)}`,
+    }
+  },
+})
 
 export async function props(locator: Locator, values: Record<string, unknown>) {
   await locator.evaluate(async (element, data) => {

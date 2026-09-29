@@ -135,6 +135,10 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
 export class Step extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** State of the step. Drives the marker glyph and the accent colour, and reopens a folded group. */
   @property({ reflect: true }) status: StepStatus = 'pending'
 
@@ -184,7 +188,7 @@ export class Step extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    this.setAttribute('role', 'listitem')
+    this.internals.role = 'listitem'
     // The arrival animation runs on the host, the settling one on the marker inside the shadow root — and an
     // animation event from in there does not cross the boundary, so both ends need a listener.
     this.addEventListener('animationend', this.handleAnimationEnd)
