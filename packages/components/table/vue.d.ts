@@ -31,6 +31,8 @@ declare module 'vue' {
         'block-size'?: unknown
         'empty-message'?: unknown
         'page-size'?: unknown
+        'summary-values'?: unknown
+        'summary-scope'?: unknown
         onPageChange?: (event: TableEventMap['page-change']) => void
         onSortChange?: (event: TableEventMap['sort-change']) => void
         onRowClick?: (event: TableEventMap['row-click']) => void
@@ -41,10 +43,14 @@ declare module 'vue' {
     >
     'c2-table-column': DefineComponent<
       C2Props<TableColumn> & {
+        'column-id'?: unknown
         'min-width'?: unknown
         'format-options'?: unknown
         'cell-class'?: unknown
         'cell-slot'?: unknown
+        'summary-label'?: unknown
+        'summary-align'?: unknown
+        'summary-span'?: unknown
         onCOLUMN_CHANGE_EVENT?: (event: TableColumnEventMap['COLUMN_CHANGE_EVENT']) => void
       }
     >

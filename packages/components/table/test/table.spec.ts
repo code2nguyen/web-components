@@ -599,3 +599,157 @@ test('rows assigned as a JSON string are parsed, so one binding works on the ser
   await expect(page.getByRole('row')).toHaveCount(4)
   await expect(page.getByRole('gridcell').filter({ hasText: 'Compilers' })).toBeVisible()
 })
+
+const LEDGER = Array.from({ length: 40 }, (_, index) => ({ id: String(index + 1), name: `Item ${index + 1}`, qty: index + 1, amount: 10.5 }))
+const ledgerRows = JSON.stringify(LEDGER)
+
+const ledger = (attributes = '', columns = '') => `<c2-table style="height:240px;width:520px" row-key="id" rows='${ledgerRows}' ${attributes}>
+  ${
+    columns ||
+    `<c2-table-column field="name" header="Name" width="200px" summary-label="Total"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="120px" align="end" format="number" summary="sum"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="200px" align="end" format="currency" summary="sum"></c2-table-column>`
+  }
+</c2-table>`
+
+const summaryCells = (page: Page) =>
+  page.locator('c2-table').evaluate((element) =>
+    [...element.shadowRoot!.querySelectorAll<HTMLElement>('[part~="summary-cell"]')].map((cell) => {
+      const rect = cell.getBoundingClientRect()
+      return { text: cell.textContent!.trim(), left: Math.round(rect.left), right: Math.round(rect.right), justify: getComputedStyle(cell).justifyContent }
+    }),
+  )
+
+const headerCells = (page: Page) =>
+  page.locator('c2-table').evaluate((element) =>
+    [...element.shadowRoot!.querySelectorAll<HTMLElement>('[role="columnheader"]')].map((cell) => {
+      const rect = cell.getBoundingClientRect()
+      return { left: Math.round(rect.left), right: Math.round(rect.right) }
+    }),
+  )
+
+test('a summary row totals each column in its own track, formatted like the column', async ({ page, renderScenario }) => {
+  await renderScenario(ledger())
+  const cells = await summaryCells(page)
+  expect(cells.map((cell) => cell.text)).toEqual(['Total', '820', '$420.00'])
+  // Same tracks as the header, and the column's alignment.
+  expect(cells.map(({ left, right }) => ({ left, right }))).toEqual(await headerCells(page))
+  expect(cells[2].justify).toBe('flex-end')
+  await expect(page.locator('c2-table').locator('[role="grid"]')).toHaveAttribute('aria-rowcount', '42')
+  await expect(page.locator('c2-table').locator('[part="summary-row"]')).toHaveAttribute('aria-rowindex', '42')
+  await accessible(page)
+})
+
+test('the summary row stays at the bottom of the viewport while the body scrolls', async ({ page, renderScenario }) => {
+  await renderScenario(ledger())
+  const bottoms = () =>
+    page.locator('c2-table').evaluate((element) => {
+      const root = element.shadowRoot!
+      return {
+        viewport: Math.round(root.querySelector('[part="viewport"]')!.getBoundingClientRect().bottom),
+        summary: Math.round(root.querySelector('[part="summary-row"]')!.getBoundingClientRect().bottom),
+      }
+    })
+  const before = await bottoms()
+  expect(before.summary).toBeLessThanOrEqual(before.viewport)
+  expect(before.viewport - before.summary).toBeLessThan(20)
+  await page.locator('c2-table').evaluate((element) => (element.shadowRoot!.querySelector('[part="viewport"]')!.scrollTop = 300))
+  expect(await bottoms()).toEqual(before)
+})
+
+test('a pinned column keeps its summary cell when the rest scrolls sideways', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ledger(
+      '',
+      `<c2-table-column field="name" header="Name" width="220px" pinned="start" summary-label="Total"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="320px" summary="sum"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="320px" summary="sum"></c2-table-column>`,
+    ),
+  )
+  const before = await summaryCells(page)
+  await page.locator('c2-table').evaluate((element) => (element.shadowRoot!.querySelector('[part="viewport"]')!.scrollLeft = 200))
+  const after = await summaryCells(page)
+  expect(after[0].left).toBe(before[0].left)
+  expect(after[1].left).toBe(before[1].left - 200)
+})
+
+test('summary values are keyed by column id, so two columns of one field keep their own', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ledger(
+      `summary-values='{"name": "All items", "amount-share": 1}'`,
+      `<c2-table-column field="name" header="Name" width="200px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="160px" format="currency" summary="avg"></c2-table-column>
+  <c2-table-column column-id="amount-share" field="amount" header="Share" width="160px" format="percent" summary="sum"></c2-table-column>`,
+    ),
+  )
+  // `summaryValues` wins over the aggregate of the column it names, and only that one.
+  expect((await summaryCells(page)).map((cell) => cell.text)).toEqual(['All items', '$10.50', '100%'])
+  await expect(page.locator('c2-table').locator('[part~="cell-amount-share"]').first()).toBeVisible()
+})
+
+test('a count is formatted as a number, and a function summary is formatted by the column', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ledger(
+      '',
+      `<c2-table-column field="name" header="Name" width="200px" summary="count"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="200px" format="currency" summary="count"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="120px" format="number"></c2-table-column>`,
+    ),
+  )
+  await page
+    .locator('c2-table-column[field="qty"]')
+    .evaluate((column) => ((column as HTMLElement & { summary: unknown }).summary = ({ rows }: { rows: { qty: number }[] }) => rows.length * 1000))
+  await expect.poll(async () => (await summaryCells(page)).map((cell) => cell.text)).toEqual(['40', '40', '40,000'])
+})
+
+test('summary-span stretches a label across columns, and the keyboard moves between summary cells', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ledger(
+      '',
+      `<c2-table-column field="id" header="ID" width="80px" summary-label="Total" summary-span="2"></c2-table-column>
+  <c2-table-column field="name" header="Name" width="200px" summary="count"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="120px" summary="sum"></c2-table-column>`,
+    ),
+  )
+  const cells = await summaryCells(page)
+  const headers = await headerCells(page)
+  expect(cells.map((cell) => cell.text)).toEqual(['Total', '820'])
+  expect(cells[0]).toMatchObject({ left: headers[0].left, right: headers[1].right })
+  await expect(page.locator('c2-table').locator('[part~="summary-cell"]').first()).toHaveAttribute('aria-colspan', '2')
+
+  const active = () => page.locator('c2-table').evaluate((element) => element.shadowRoot!.activeElement?.textContent?.trim())
+  await page.locator('c2-table').locator('[role="columnheader"]').first().focus()
+  await page.keyboard.press('Control+End')
+  expect(await active()).toBe('820')
+  await page.keyboard.press('ArrowLeft')
+  expect(await active()).toBe('Total')
+  await page.keyboard.press('ArrowRight')
+  expect(await active()).toBe('820')
+  await page.keyboard.press('ArrowUp')
+  expect(await active()).toBe('40')
+  await page.keyboard.press('ArrowDown')
+  expect(await active()).toBe('820')
+})
+
+test('summary-scope="page" totals the page on show, and an empty table has no summary row', async ({ page, renderScenario }) => {
+  await renderScenario(ledger('page-size="10" summary-scope="page"'))
+  expect((await summaryCells(page))[1].text).toBe('55')
+  await props(page.locator('c2-table'), { page: 2 })
+  await expect.poll(async () => (await summaryCells(page))[1].text).toBe('155')
+  await props(page.locator('c2-table'), { summaryScope: 'all' })
+  await expect.poll(async () => (await summaryCells(page))[1].text).toBe('820')
+  await props(page.locator('c2-table'), { rows: [] })
+  await expect(page.locator('c2-table').locator('[part="summary-row"]')).toHaveCount(0)
+})
+
+test('a data source is not totalled from the rows it happens to hold; summaryValues carries its totals', async ({ page, renderScenario }) => {
+  await renderScenario(ledger('', ''))
+  await page.locator('c2-table').evaluate((element, source) => {
+    const table = element as HTMLElement & { rows: unknown[]; dataSource: unknown; summaryValues: unknown }
+    table.rows = []
+    table.dataSource = { getRows: async ({ start, count }: { start: number; count: number }) => ({ rows: source.slice(start, start + count), total: 1000 }) }
+  }, LEDGER)
+  await expect.poll(async () => (await summaryCells(page)).map((cell) => cell.text)).toEqual(['Total', '', ''])
+  await props(page.locator('c2-table'), { summaryValues: { qty: 500500 } })
+  await expect.poll(async () => (await summaryCells(page)).map((cell) => cell.text)).toEqual(['Total', '500,500', ''])
+})

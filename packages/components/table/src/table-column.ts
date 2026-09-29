@@ -2,7 +2,17 @@ import { LitElement, unsafeCSS, type PropertyValues } from 'lit'
 import { customElement } from '@c2n/core/element-helper.js'
 import styles from './table-column.scss?inline'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
-import type { ColumnAlign, ColumnFormat, ColumnPin, TableCellRenderer, TableColumnConfig, TableHeaderRenderer } from './table-types.js'
+import type {
+  ColumnAlign,
+  ColumnFormat,
+  ColumnPin,
+  TableCellRenderer,
+  TableColumnConfig,
+  TableHeaderRenderer,
+  TableSummaryAggregate,
+  TableSummaryFunction,
+  TableSummaryRenderer,
+} from './table-types.js'
 
 /** Fired at the parent table whenever a column definition changes. */
 export const COLUMN_CHANGE_EVENT = 'c2-table-column-change'
@@ -25,6 +35,13 @@ export const COLUMN_CHANGE_EVENT = 'c2-table-column-change'
 @customElement('c2-table-column')
 export class TableColumn extends LitElement implements TableColumnConfig {
   static override styles = unsafeCSS(styles)
+
+  /**
+   * Stable identity of the column; defaults to `field`. Set it when two columns show the same field, or for a
+   * computed column with no field. Widths, pinning, the `cell-<id>` parts and the summary row are keyed by it. Not the
+   * HTML `id`, which has to be unique in the whole document rather than in one table.
+   */
+  @property({ type: String, attribute: 'column-id' }) columnId = ''
 
   /** Key of the value in the row object; may be a dotted path such as `user.name`. */
   @property({ type: String }) field = ''
@@ -80,6 +97,21 @@ export class TableColumn extends LitElement implements TableColumnConfig {
 
   /** Renders the header body. Property only. */
   @property({ attribute: false }) renderHeader?: TableHeaderRenderer
+
+  /** Value of the column in the table's summary row: `sum`, `avg`, `min`, `max` or `count`, or a function of the rows (property only). */
+  @property({ type: String }) summary?: TableSummaryAggregate | TableSummaryFunction
+
+  /** Text shown in the column's summary cell when it has no value, such as `Total`. */
+  @property({ type: String, attribute: 'summary-label' }) summaryLabel?: string
+
+  /** Alignment of the summary cell. Defaults to `align`. */
+  @property({ type: String, attribute: 'summary-align' }) summaryAlign?: ColumnAlign
+
+  /** Number of columns the summary cell spans, starting at this one; the spanned columns' summaries are not shown. */
+  @property({ type: Number, attribute: 'summary-span' }) summarySpan?: number
+
+  /** Renders the summary cell body instead of the formatted value. Property only. */
+  @property({ attribute: false }) renderSummary?: TableSummaryRenderer
 
   /** Client-side sort comparator for this column's values. Property only. */
   @property({ attribute: false }) comparator?: (a: unknown, b: unknown) => number

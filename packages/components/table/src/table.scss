@@ -54,6 +54,12 @@
     row__increased--background: rgba(22, 163, 74, 0.14),
     row__decreased--background: rgba(220, 38, 38, 0.12),
     row__modified--background: rgba(2, 101, 220, 0.1),
+    summary--height: 36px,
+    summary--background: #fafafa,
+    summary--color: #18181b,
+    summary--font-size: 14px,
+    summary--font-weight: 600,
+    summary--box-shadow: 0 -1px 0 0 #e4e4e7,
     cell--padding: 0 12px,
     cell--gap: 8px,
     cell--font-size: 14px,
@@ -355,6 +361,29 @@
   font-weight: css.cssVar(header--font-weight);
   letter-spacing: css.cssVar(header--letter-spacing);
   user-select: none;
+}
+
+// The summary row mirrors the header at the other end: a row of the same grid, so its cells sit in their columns'
+// tracks, kept at the bottom of the viewport while the body scrolls under it.
+.row--summary {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  height: css.cssVar(summary--height);
+  background: css.cssVar(summary--background);
+  border-bottom: none;
+  box-shadow: css.cssVar(summary--box-shadow);
+}
+
+.cell--summary {
+  color: css.cssVar(summary--color);
+  font-size: css.cssVar(summary--font-size);
+  font-weight: css.cssVar(summary--font-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.row--summary .cell--pinned {
+  z-index: 4;
 }
 
 .row--header .cell--pinned {
