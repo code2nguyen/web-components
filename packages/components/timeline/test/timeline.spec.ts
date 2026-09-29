@@ -104,16 +104,14 @@ test('slots replace the label, the timestamp and the marker', async ({ page, sce
 test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, scenario }) => {
   await scenario()
   const hostSemantics = () =>
-    page
-      .locator('c2-timeline, c2-timeline-item')
-      .evaluateAll((elements) =>
-        elements.flatMap((element) =>
-          element
-            .getAttributeNames()
-            .filter((name) => name === 'role' || name.startsWith('aria-'))
-            .map((name) => `${element.localName}[${name}]`),
-        ),
-      )
+    page.locator('c2-timeline, c2-timeline-item').evaluateAll((elements) =>
+      elements.flatMap((element) =>
+        element
+          .getAttributeNames()
+          .filter((name) => name === 'role' || name.startsWith('aria-'))
+          .map((name) => `${element.localName}[${name}]`),
+      ),
+    )
   // The one host attribute left is the author's own label.
   await expect(page.locator('c2-timeline')).toHaveHostAria('role', 'list')
   expect(await hostSemantics()).toEqual(['c2-timeline[aria-label]'])

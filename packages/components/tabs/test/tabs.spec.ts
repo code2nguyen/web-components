@@ -109,7 +109,12 @@ test('states its semantics without writing host attributes, so server-rendered m
   const hosts = page.locator('c2-tabs, c2-tab')
   const hostSemantics = () =>
     hosts.evaluateAll((elements) =>
-      elements.flatMap((element) => element.getAttributeNames().filter((name) => name === 'role' || name.startsWith('aria-')).map((name) => `${element.localName}[${name}]`)),
+      elements.flatMap((element) =>
+        element
+          .getAttributeNames()
+          .filter((name) => name === 'role' || name.startsWith('aria-'))
+          .map((name) => `${element.localName}[${name}]`),
+      ),
     )
   const first = page.locator('c2-tab[for="one"]')
   const locked = page.locator('c2-tab[for="two"]')
