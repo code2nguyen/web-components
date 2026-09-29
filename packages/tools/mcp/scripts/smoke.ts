@@ -1,6 +1,8 @@
 /** Spawns the server over stdio and exercises every tool and resource. `npm run smoke -w packages/tools/mcp`. */
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -89,4 +91,32 @@ const componentResource = await client.readResource({ uri: 'c2n://components/c2-
 assert((componentResource.contents[0] as { text: string }).text.includes('"id": "checkbox"'), 'component resource wrong')
 
 await client.close()
+
+// A project that installed only `@c2n/components`, laid out as pnpm would: the component packages are reachable from
+// the umbrella, not from the project. The server must read their API and hand out umbrella import lines.
+const project = mkdtempSync(join(tmpdir(), 'c2n-smoke-'))
+try {
+  writeFileSync(join(project, 'package.json'), JSON.stringify({ name: 'app', dependencies: { '@c2n/components': '*' } }))
+  mkdirSync(join(project, 'node_modules/@c2n'), { recursive: true })
+  symlinkSync(resolve(packageRoot, '../../umbrella'), join(project, 'node_modules/@c2n/components'), 'dir')
+  const umbrellaClient = new Client({ name: 'c2n-smoke-umbrella', version: '0.0.0' })
+  await umbrellaClient.connect(
+    new StdioClientTransport({
+      command: process.execPath,
+      args: [entry],
+      cwd: packageRoot,
+      env: { ...process.env, C2N_PROJECT_ROOT: project } as Record<string, string>,
+    }),
+  )
+  const column = textOf(await umbrellaClient.callTool({ name: 'get_component', arguments: { tag: 'c2-table-column', include: ['attributes'] } }))
+  assert(column.includes("import '@c2n/components/table'") && column.includes('through `@c2n/components`'), 'get_component ignores @c2n/components')
+  const installedOnly = textOf(await umbrellaClient.callTool({ name: 'list_components', arguments: { installedOnly: true } }))
+  assert(installedOnly.includes('c2-button') && !installedOnly.includes('c2-feather-'), 'list_components installedOnly misreads @c2n/components')
+  const umbrellaTheme = textOf(await umbrellaClient.callTool({ name: 'get_theme', arguments: {} }))
+  assert(umbrellaTheme.includes('@c2n/components/theme.css'), 'get_theme ignores @c2n/components')
+  await umbrellaClient.close()
+} finally {
+  rmSync(project, { recursive: true, force: true })
+}
+
 console.log(`[smoke] ok: ${tools.length} tools, ${resources.length} resources, entry ${entry}`)
