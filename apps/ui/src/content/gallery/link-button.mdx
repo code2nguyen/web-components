@@ -40,9 +40,9 @@ Every look below is a handful of `--c2-link-button__container*` custom propertie
   .always-underlined {
     --c2-link-button__container--text-decoration: underline;
     --c2-link-button__container--text-underline-offset: 6px;
-    --c2-link-button__container--color: #18181b;
-    --c2-link-button__container--text-decoration-color: #a1a1aa;
-    --c2-link-button__container__hover--text-decoration-color: #18181b;
+    --c2-link-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-link-button__container--text-decoration-color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-link-button__container__hover--text-decoration-color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-link-button class="always-underlined" href="#">Terms of service</c2-link-button>
@@ -51,7 +51,7 @@ Every look below is a handful of `--c2-link-button__container*` custom propertie
 ```html tag=MdxCodeBlock,label=Danger
 <style>
   .danger {
-    --c2-link-button__container--color: #dc2626;
+    --c2-link-button__container--color: var(--c2-theme--color-error, #dc2626);
     --c2-link-button__container__hover--color: #b91c1c;
     --c2-link-button__container--text-decoration-color: #b91c1c;
   }
@@ -62,9 +62,9 @@ Every look below is a handful of `--c2-link-button__container*` custom propertie
 ```html tag=MdxCodeBlock,label=Muted
 <style>
   .muted {
-    --c2-link-button__container--color: #a1a1aa;
+    --c2-link-button__container--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-link-button__container--font-weight: 400;
-    --c2-link-button__container__hover--color: #52525b;
+    --c2-link-button__container__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-link-button__container__hover--text-decoration: none;
   }
 </style>
@@ -97,9 +97,9 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     display: inline-flex;
     gap: 4px;
     padding: 4px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
-    background: #ffffff;
+    background: var(--c2-theme--color-surface, #ffffff);
   }
   .segmented-item {
     --c2-link-button__container--padding-left: 12px;
@@ -107,12 +107,12 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     --c2-link-button__container--padding-top: 6px;
     --c2-link-button__container--padding-bottom: 6px;
     --c2-link-button__container--border-radius: 6px;
-    --c2-link-button__container--color: #52525b;
-    --c2-link-button__container__hover--color: #18181b;
-    --c2-link-button__container__hover--background-color: #f4f4f5;
+    --c2-link-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-link-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-link-button__container__hover--text-decoration: none;
-    --c2-link-button__container__selected--color: #18181b;
-    --c2-link-button__container__selected--background-color: #e4e4e7;
+    --c2-link-button__container__selected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-link-button__container__selected--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <nav class="segmented">
@@ -127,7 +127,7 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
   .tab-nav {
     display: inline-flex;
     gap: 16px;
-    border-bottom: 1px solid #e4e4e7;
+    border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .tab-item {
     --c2-link-button__container--padding-left: 2px;
@@ -135,8 +135,8 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     --c2-link-button__container--padding-top: 8px;
     --c2-link-button__container--padding-bottom: 10px;
     --c2-link-button__container--border-radius: 0;
-    --c2-link-button__container--color: #71717a;
-    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-link-button__container__hover--text-decoration: none;
     --c2-link-button__container__selected--color: #2563eb;
     --c2-link-button__container__selected--font-weight: 500;
@@ -162,9 +162,9 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     gap: 2px;
     width: 200px;
     padding: 6px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
-    background: #ffffff;
+    background: var(--c2-theme--color-surface, #ffffff);
   }
   .sidebar-item {
     --c2-link-button__container--padding-left: 10px;
@@ -202,7 +202,7 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     width: 200px;
     padding: 6px;
     border-radius: 10px;
-    background: #18181b;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
   }
   .dark-sidebar-item {
     --c2-link-button__container--padding-left: 10px;
@@ -211,12 +211,12 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     --c2-link-button__container--padding-bottom: 7px;
     --c2-link-button__container--gap: 10px;
     --c2-link-button__container--border-radius: 6px;
-    --c2-link-button__container--color: #a1a1aa;
-    --c2-link-button__container__hover--color: #fafafa;
-    --c2-link-button__container__hover--background-color: #27272a;
+    --c2-link-button__container--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-link-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-link-button__container__hover--text-decoration: none;
-    --c2-link-button__container__selected--color: #fafafa;
-    --c2-link-button__container__selected--background-color: #3f3f46;
+    --c2-link-button__container__selected--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-link-button__container__selected--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-link-button__container__selected--font-weight: 500;
   }
   .dark-sidebar-item::part(link) {
@@ -242,17 +242,17 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     display: inline-flex;
     align-items: center;
     gap: 2px;
-    color: #a1a1aa;
+    color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
   .crumb {
     --c2-link-button__container--padding-left: 2px;
     --c2-link-button__container--padding-right: 2px;
     --c2-link-button__container--font-size: 13px;
-    --c2-link-button__container--color: #71717a;
+    --c2-link-button__container--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-link-button__container--font-weight: 400;
-    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-link-button__container__hover--text-decoration: none;
-    --c2-link-button__container__selected--color: #18181b;
+    --c2-link-button__container__selected--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-link-button__container__selected--font-weight: 500;
   }
   .breadcrumb c2-feather-chevron-right {
@@ -277,12 +277,12 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
   .footer-link {
     --c2-link-button__container--padding-left: 0;
     --c2-link-button__container--padding-right: 0;
-    --c2-link-button__container--color: #71717a;
+    --c2-link-button__container--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-link-button__container--font-size: 12px;
     --c2-link-button__container--font-weight: 400;
-    --c2-link-button__container__hover--color: #18181b;
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-link-button__container__hover--text-decoration: underline;
-    --c2-link-button__container--text-decoration-color: #d4d4d8;
+    --c2-link-button__container--text-decoration-color: var(--c2-theme--color-outline, #d4d4d8);
   }
 </style>
 <div class="footer">

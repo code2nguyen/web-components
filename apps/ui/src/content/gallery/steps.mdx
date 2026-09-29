@@ -30,14 +30,14 @@ that, and the `toggle` slot adds a chevron — both off by default.
 ```html tag=MdxCodeBlock,label=Run log
 <style>
   .run-log {
-    --c2-steps--background: #faf9f5;
-    --c2-steps--border: 1px solid #e8e6dd;
+    --c2-steps--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
+    --c2-steps--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
     --c2-steps--border-radius: 8px;
     --c2-steps--padding-block: 4px;
-    --c2-step__row--border-bottom: 1px solid #ecebe3;
-    --c2-step__row__hover--background: #f3f1e8;
+    --c2-step__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 7%, var(--c2-theme--color-surface, #ffffff));
     --c2-step__marker--size: 13px;
-    --c2-step__success--color: #3f3f46;
+    --c2-step__success--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-step__label--font-weight: 400;
   }
 </style>
@@ -58,7 +58,7 @@ that, and the `toggle` slot adds a chevron — both off by default.
 ```html tag=MdxCodeBlock,label=Failed run
 <style>
   .failed {
-    --c2-steps--background: #fffbfb;
+    --c2-steps--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 1%, var(--c2-theme--color-surface, #ffffff));
     --c2-steps--border: 1px solid #f3d6d6;
     --c2-steps--border-radius: 8px;
     --c2-steps--padding-block: 4px;
@@ -83,15 +83,15 @@ that, and the `toggle` slot adds a chevron — both off by default.
 ```html tag=MdxCodeBlock,label=Numbered stages
 <style>
   .numbered {
-    --c2-steps--background: #f8fafc;
-    --c2-steps--border: 1px solid #e2e8f0;
+    --c2-steps--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
+    --c2-steps--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
     --c2-steps--border-radius: 10px;
     --c2-steps--padding-block: 6px;
     --c2-step__row--border-bottom: none;
     --c2-step__row--padding-block: 5px;
     --c2-step__marker--size: 20px;
     --c2-step__marker--font-size: 10px;
-    --c2-step__marker--background: #ffffff;
+    --c2-step__marker--background: var(--c2-theme--color-surface, #ffffff);
     --c2-step__label--font-family: inherit;
     --c2-step__label--font-size: 13px;
   }
@@ -113,11 +113,11 @@ that, and the `toggle` slot adds a chevron — both off by default.
 <style>
   .wizard {
     --c2-step__rail--width: 2px;
-    --c2-step__rail--color: #e4e4e7;
+    --c2-step__rail--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-step__rail--gap: 6px;
     --c2-step__marker--size: 26px;
     --c2-step__marker--font-size: 12px;
-    --c2-step__marker--background: #ffffff;
+    --c2-step__marker--background: var(--c2-theme--color-surface, #ffffff);
     --c2-step__row--border-bottom: none;
     --c2-step__row--padding-block: 6px;
     --c2-step__row--padding-inline: 0px;
@@ -141,10 +141,10 @@ that, and the `toggle` slot adds a chevron — both off by default.
 <style>
   .timeline {
     --c2-step__rail--width: 2px;
-    --c2-step__rail--color: #e4e4e7;
+    --c2-step__rail--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-step__rail--gap: 5px;
     --c2-step__marker--size: 10px;
-    --c2-step__marker--background: #ffffff;
+    --c2-step__marker--background: var(--c2-theme--color-surface, #ffffff);
     --c2-step__row--border-bottom: none;
     --c2-step__row--padding-block: 5px;
     --c2-step__row--gap: 12px;
@@ -167,19 +167,19 @@ that, and the `toggle` slot adds a chevron — both off by default.
 ```html tag=MdxCodeBlock,label=Dark panel
 <style>
   .dark-steps {
-    --c2-steps--background: #18181b;
-    --c2-steps--border: 1px solid #27272a;
+    --c2-steps--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-steps--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-steps--border-radius: 8px;
     --c2-steps--padding-block: 4px;
-    --c2-step__row--border-bottom: 1px solid #27272a;
-    --c2-step__row__hover--background: #232326;
+    --c2-step__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 95%, var(--c2-theme--color-surface, #ffffff));
     --c2-step__marker--size: 13px;
-    --c2-step__marker--border: 1px solid #52525b;
-    --c2-step__label--color: #e4e4e7;
+    --c2-step__marker--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__label--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-step__label--font-weight: 400;
-    --c2-step__detail--color: #a1a1aa;
-    --c2-step__trailing--color: #a1a1aa;
-    --c2-step__guide--color: #3f3f46;
+    --c2-step__detail--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-step__trailing--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-step__guide--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-step__guide--width: 1px;
     --c2-step__success--color: #4ade80;
     --c2-step__error--color: #f87171;

@@ -33,13 +33,13 @@ previous/next controls on their own, and `--c2-pagination--justify-content` plac
 <style>
   .outlined {
     --c2-pagination--gap: 6px;
-    --c2-pagination__item--border: 1px solid #e4e4e7;
+    --c2-pagination__item--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-pagination__item--border-radius: 6px;
-    --c2-pagination__nav--border: 1px solid #e4e4e7;
+    --c2-pagination__nav--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-pagination__nav--border-radius: 6px;
-    --c2-pagination__item__selected--background-color: #18181b;
-    --c2-pagination__item__selected--color: #ffffff;
-    --c2-pagination__item__selected--border: 1px solid #18181b;
+    --c2-pagination__item__selected--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-pagination__item__selected--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-pagination__item__selected--border: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
   }
 </style>
 <c2-pagination client:only="lit" class="outlined" total-pages="9" page="3" hide-nav-labels></c2-pagination>
@@ -49,15 +49,15 @@ previous/next controls on their own, and `--c2-pagination--justify-content` plac
 <style>
   .quiet {
     --c2-pagination--gap: 2px;
-    --c2-pagination__item--color: #71717a;
+    --c2-pagination__item--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-pagination__item--font-weight: 400;
     --c2-pagination__item--min-width: 30px;
     --c2-pagination__item--height: 30px;
-    --c2-pagination__nav--color: #71717a;
+    --c2-pagination__nav--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-pagination__nav--font-weight: 400;
     --c2-pagination__item__selected--background-color: transparent;
     --c2-pagination__item__selected--border: 1px solid transparent;
-    --c2-pagination__item__selected--color: #18181b;
+    --c2-pagination__item__selected--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-pagination__item__selected--font-weight: 600;
   }
 </style>
@@ -70,10 +70,10 @@ previous/next controls on their own, and `--c2-pagination--justify-content` plac
     --c2-pagination--gap: 0px;
     --c2-pagination__item--border-radius: 0px;
     --c2-pagination__nav--border-radius: 0px;
-    --c2-pagination__item--border: 1px solid #e4e4e7;
-    --c2-pagination__nav--border: 1px solid #e4e4e7;
-    --c2-pagination__item__selected--background-color: #f4f4f5;
-    --c2-pagination__item__selected--border: 1px solid #e4e4e7;
+    --c2-pagination__item--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-pagination__nav--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-pagination__item__selected--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-pagination__item__selected--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-pagination__item__selected--font-weight: 600;
   }
 </style>
@@ -90,7 +90,7 @@ previous/next controls on their own, and `--c2-pagination--justify-content` plac
     --c2-pagination--justify-content: flex-end;
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
   }
 </style>
@@ -100,16 +100,16 @@ previous/next controls on their own, and `--c2-pagination--justify-content` plac
 ```html tag=MdxCodeBlock,label=Dark
 <style>
   .dark {
-    --c2-pagination__item--color: #e4e4e7;
-    --c2-pagination__nav--color: #e4e4e7;
-    --c2-pagination__item__hover--background-color: #3f3f46;
-    --c2-pagination__nav__hover--background-color: #3f3f46;
-    --c2-pagination__item__selected--background-color: #52525b;
-    --c2-pagination__item__selected--color: #ffffff;
-    --c2-pagination__item__selected--border: 1px solid #52525b;
-    --c2-pagination__ellipsis--color: #a1a1aa;
+    --c2-pagination__item--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-pagination__nav--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-pagination__item__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-pagination__nav__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-pagination__item__selected--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-pagination__item__selected--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-pagination__item__selected--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-pagination__ellipsis--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     padding: 8px 12px;
-    background: #18181b;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
     border-radius: 10px;
   }
 </style>

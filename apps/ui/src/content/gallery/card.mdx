@@ -46,7 +46,7 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .elevated {
     --c2-card--border-top: none;
@@ -79,10 +79,10 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .tinted {
-    --c2-card--background: #eff6ff;
+    --c2-card--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-card--border-top: 1px solid #bfdbfe;
     --c2-card--border-right: 1px solid #bfdbfe;
     --c2-card--border-bottom: 1px solid #bfdbfe;
@@ -110,15 +110,15 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .dark {
-    --c2-card--background: #18181b;
-    --c2-card--color: #fafafa;
-    --c2-card--border-top: 1px solid #27272a;
-    --c2-card--border-right: 1px solid #27272a;
-    --c2-card--border-bottom: 1px solid #27272a;
-    --c2-card--border-left: 1px solid #27272a;
+    --c2-card--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-card--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-card--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-card--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-card--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-card--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-card--border-top-left-radius: 12px;
     --c2-card--border-top-right-radius: 12px;
     --c2-card--border-bottom-left-radius: 12px;
@@ -142,7 +142,7 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .sunset {
     --c2-card--background: linear-gradient(135deg, #f97316 0%, #ec4899 55%, #8b5cf6 100%);
@@ -179,19 +179,19 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .dropzone {
-    --c2-card--background: #fafafa;
-    --c2-card--border-top: 2px dashed #d4d4d8;
-    --c2-card--border-right: 2px dashed #d4d4d8;
-    --c2-card--border-bottom: 2px dashed #d4d4d8;
-    --c2-card--border-left: 2px dashed #d4d4d8;
-    --c2-card__hover--background: #f4f4f5;
-    --c2-card__hover--border-top: 2px dashed #a1a1aa;
-    --c2-card__hover--border-right: 2px dashed #a1a1aa;
-    --c2-card__hover--border-bottom: 2px dashed #a1a1aa;
-    --c2-card__hover--border-left: 2px dashed #a1a1aa;
+    --c2-card--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-card--border-top: 2px dashed var(--c2-theme--color-outline, #d4d4d8);
+    --c2-card--border-right: 2px dashed var(--c2-theme--color-outline, #d4d4d8);
+    --c2-card--border-bottom: 2px dashed var(--c2-theme--color-outline, #d4d4d8);
+    --c2-card--border-left: 2px dashed var(--c2-theme--color-outline, #d4d4d8);
+    --c2-card__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-card__hover--border-top: 2px dashed var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-card__hover--border-right: 2px dashed var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-card__hover--border-bottom: 2px dashed var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-card__hover--border-left: 2px dashed var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-card--padding-top: 24px;
     --c2-card--padding-bottom: 24px;
     --c2-card--border-top-left-radius: 12px;
@@ -216,13 +216,13 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .g .ghost {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .g .danger {
     --c2-button__container--background-color: #dc2626;
@@ -230,9 +230,9 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
   }
   .divided {
     --c2-card__header--padding-bottom: 12px;
-    --c2-card__header--border-bottom: 1px solid #e4e4e7;
+    --c2-card__header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-card__footer--padding-top: 12px;
-    --c2-card__footer--border-top: 1px solid #e4e4e7;
+    --c2-card__footer--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-card__footer--justify-content: flex-end;
     --c2-card--border-top-left-radius: 10px;
     --c2-card--border-top-right-radius: 10px;
@@ -259,7 +259,7 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .product {
     --c2-card--padding-top: 12px;
@@ -295,13 +295,13 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .g .ghost {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .profile {
     --c2-card--padding-top: 20px;
@@ -337,7 +337,7 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .stat {
     --c2-card--padding-top: 16px;
@@ -369,17 +369,17 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     margin: 0;
     font-size: 12px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .link {
     --c2-card--box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --c2-card__hover--border-top: 1px solid #a1a1aa;
-    --c2-card__hover--border-right: 1px solid #a1a1aa;
-    --c2-card__hover--border-bottom: 1px solid #a1a1aa;
-    --c2-card__hover--border-left: 1px solid #a1a1aa;
+    --c2-card__hover--border-top: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-card__hover--border-right: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-card__hover--border-bottom: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-card__hover--border-left: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-card__hover--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     --c2-card__hover--transform: translateY(-2px);
-    --c2-card__focus--outline: 2px solid #18181b;
+    --c2-card__focus--outline: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
     --c2-card--border-top-left-radius: 12px;
     --c2-card--border-top-right-radius: 12px;
     --c2-card--border-bottom-left-radius: 12px;

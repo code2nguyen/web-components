@@ -65,6 +65,7 @@ npm install @c2n/chart uplot
   <c2-line-chart
     class="plot"
     x-field="year"
+    label-field="year"
     data='[{"year":2015,"nuclear":437.43,"wind":21.42,"solar":7.75},{"year":2016,"nuclear":403.2,"wind":21.38,"solar":8.66},{"year":2017,"nuclear":398.36,"wind":24.61,"solar":8.87},{"year":2018,"nuclear":412.94,"wind":28.6,"solar":11.15},{"year":2019,"nuclear":399.01,"wind":34.72,"solar":12.02},{"year":2020,"nuclear":353.83,"wind":40.05,"solar":13.09},{"year":2021,"nuclear":379.36,"wind":37.12,"solar":15.28},{"year":2022,"nuclear":294.73,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"wind":45.43,"solar":24.87}]'
   >
     <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
@@ -79,6 +80,7 @@ npm install @c2n/chart uplot
       id="line-energy-custom"
       class="plot"
       x-field="year"
+      label-field="year"
       data='[{"year":2019,"nuclear":399.01,"hydro":56.91,"wind":34.72,"solar":12.02},{"year":2020,"nuclear":353.83,"hydro":62.52,"wind":40.05,"solar":13.09},{"year":2021,"nuclear":379.36,"hydro":59.54,"wind":37.12,"solar":15.28},{"year":2022,"nuclear":294.73,"hydro":45.56,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"hydro":55.9,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"hydro":71.12,"wind":45.43,"solar":24.87}]'
     >
       <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
@@ -93,7 +95,7 @@ npm install @c2n/chart uplot
 
 <div data-label="Realtime replay" data-energy-realtime>
   <div class="energy-live">
-    <c2-line-chart class="plot" x-field="year" max-points="180" data-energy-fields="nuclear,wind,solar">
+    <c2-line-chart class="plot" x-field="year" label-field="year" max-points="180" data-energy-fields="nuclear,wind,solar">
       <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
       <c2-chart-series field="wind" label="Wind"></c2-chart-series>
       <c2-chart-series field="solar" label="Solar"></c2-chart-series>

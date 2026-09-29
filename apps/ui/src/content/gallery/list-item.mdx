@@ -36,9 +36,9 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
 <style>
   .neutral {
     width: 200px;
-    --c2-list-item__selected--background: #e4e4e7;
-    --c2-list-item__selected--color: #18181b;
-    --c2-list-item__selected__hover--background: #d4d4d8;
+    --c2-list-item__selected--background: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list-item__selected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-list-item__selected__hover--background: var(--c2-theme--color-outline, #d4d4d8);
   }
 </style>
 <div class="neutral"><c2-list-item selected>Selected item</c2-list-item><c2-list-item>Default item</c2-list-item></div>
@@ -74,9 +74,9 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     --c2-list-item--border-bottom-right-radius: 999px;
     --c2-list-item--padding-left: 16px;
     --c2-list-item--padding-right: 16px;
-    --c2-list-item__selected--background: #18181b;
-    --c2-list-item__selected--color: #ffffff;
-    --c2-list-item__selected__hover--background: #27272a;
+    --c2-list-item__selected--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-list-item__selected--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-list-item__selected__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <div class="pill"><c2-list-item selected>Selected item</c2-list-item><c2-list-item>Default item</c2-list-item></div>
@@ -95,7 +95,7 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     --c2-list-item__selected--border-left: 3px solid #2563eb;
     --c2-list-item__selected--background: transparent;
     --c2-list-item__selected--color: #2563eb;
-    --c2-list-item__selected__hover--background: #f4f4f5;
+    --c2-list-item__selected__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <div class="accent-bar"><c2-list-item selected>Selected item</c2-list-item><c2-list-item>Default item</c2-list-item></div>
@@ -144,13 +144,13 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     width: 200px;
     padding: 6px;
     border-radius: 10px;
-    background: #18181b;
-    --c2-list-item--color: #d4d4d8;
-    --c2-list-item__hover--background: #27272a;
-    --c2-list-item__hover--color: #ffffff;
-    --c2-list-item__selected--background: #3f3f46;
-    --c2-list-item__selected--color: #ffffff;
-    --c2-list-item__selected__hover--background: #52525b;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-list-item--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-list-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-list-item__hover--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-list-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-list-item__selected--color: var(--c2-theme--color-on-primary, #ffffff);
+    --c2-list-item__selected__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <div class="dark"><c2-list-item selected>Selected item</c2-list-item><c2-list-item>Default item</c2-list-item><c2-list-item disabled>Disabled item</c2-list-item></div>
@@ -168,8 +168,8 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     --c2-list-item__selected--border-right: 1px solid #476ef9;
     --c2-list-item__selected--border-bottom: 1px solid #476ef9;
     --c2-list-item__selected--border-left: 1px solid #476ef9;
-    --c2-list-item__selected--background: #ffffff;
-    --c2-list-item__selected__hover--background: #f5f7ff;
+    --c2-list-item__selected--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-list-item__selected__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <div class="outlined"><c2-list-item selected>Selected item</c2-list-item><c2-list-item>Default item</c2-list-item></div>
@@ -189,7 +189,7 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     display: flex;
     flex-direction: column;
     width: 200px;
-    --c2-list-item__icon--color: #71717a;
+    --c2-list-item__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-list-item--gap: 10px;
   }
 </style>
@@ -207,8 +207,8 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     flex-direction: column;
     width: 200px;
     --c2-list-item__selected--background: transparent;
-    --c2-list-item__selected--color: #18181b;
-    --c2-list-item__selected__hover--background: #f4f4f5;
+    --c2-list-item__selected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-list-item__selected__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-list-item__icon--color: #476ef9;
   }
   .check c2-list-item:not([selected]) c2-feather-check {
@@ -228,12 +228,12 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     display: flex;
     flex-direction: column;
     width: 220px;
-    --c2-list-item__icon--color: #71717a;
+    --c2-list-item__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .shortcuts kbd {
     font-family: inherit;
     font-size: 11px;
-    color: #a1a1aa;
+    color: var(--c2-theme--color-outline-strong, #a1a1aa);
     white-space: nowrap;
   }
 </style>
@@ -257,7 +257,7 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
   .two-line small {
     display: block;
     font-size: 12px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .two-line c2-list-item[selected] small {
     color: inherit;
@@ -286,7 +286,7 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
     border-radius: 999px;
     font-size: 10px;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--c2-theme--color-on-primary, #ffffff);
   }
   .avatars .avatar--violet {
     background: #7c3aed;
@@ -297,7 +297,7 @@ Padding, radius and the hover / selected colours are all `--c2-list-item--*` var
   .avatars small {
     display: block;
     font-size: 12px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 </style>
 <div class="avatars">
@@ -318,10 +318,10 @@ A `c2-list` gives the rows a shared surface and owns the selection: set `value` 
 <style>
   .menu-card {
     width: 200px;
-    --c2-list--border-top: 1px solid #e4e4e7;
-    --c2-list--border-right: 1px solid #e4e4e7;
-    --c2-list--border-bottom: 1px solid #e4e4e7;
-    --c2-list--border-left: 1px solid #e4e4e7;
+    --c2-list--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-list--border-top-left-radius: 10px;
     --c2-list--border-top-right-radius: 10px;
     --c2-list--border-bottom-left-radius: 10px;
@@ -340,7 +340,7 @@ A `c2-list` gives the rows a shared surface and owns the selection: set `value` 
 <style>
   .sidebar {
     width: 200px;
-    --c2-list--background: #fafafa;
+    --c2-list--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-list--padding-top: 8px;
     --c2-list--padding-right: 8px;
     --c2-list--padding-bottom: 8px;
@@ -351,15 +351,15 @@ A `c2-list` gives the rows a shared surface and owns the selection: set `value` 
     --c2-list--border-bottom-left-radius: 12px;
     --c2-list--border-bottom-right-radius: 12px;
     --c2-list-item--font-weight: 500;
-    --c2-list-item--color: #52525b;
-    --c2-list-item__hover--background: #f4f4f5;
-    --c2-list-item__hover--color: #18181b;
-    --c2-list-item__selected--background: #ffffff;
-    --c2-list-item__selected--color: #18181b;
-    --c2-list-item__selected--border-top: 1px solid #e4e4e7;
-    --c2-list-item__selected--border-right: 1px solid #e4e4e7;
-    --c2-list-item__selected--border-bottom: 1px solid #e4e4e7;
-    --c2-list-item__selected--border-left: 1px solid #e4e4e7;
+    --c2-list-item--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-list-item__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-list-item__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-list-item__selected--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-list-item__selected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-list-item__selected--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list-item__selected--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list-item__selected--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list-item__selected--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-list-item--border-top: 1px solid transparent;
     --c2-list-item--border-right: 1px solid transparent;
     --c2-list-item--border-bottom: 1px solid transparent;
@@ -382,10 +382,10 @@ A `c2-list` gives the rows a shared surface and owns the selection: set `value` 
     --c2-list--padding-right: 0px;
     --c2-list--padding-bottom: 0px;
     --c2-list--padding-left: 0px;
-    --c2-list--border-top: 1px solid #e4e4e7;
-    --c2-list--border-right: 1px solid #e4e4e7;
-    --c2-list--border-bottom: 1px solid #e4e4e7;
-    --c2-list--border-left: 1px solid #e4e4e7;
+    --c2-list--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-list--border-top-left-radius: 8px;
     --c2-list--border-top-right-radius: 8px;
     --c2-list--border-bottom-left-radius: 8px;
@@ -395,7 +395,7 @@ A `c2-list` gives the rows a shared surface and owns the selection: set `value` 
     --c2-list-item--border-bottom-left-radius: 0px;
     --c2-list-item--border-bottom-right-radius: 0px;
     --c2-list-item--padding-left: 12px;
-    --c2-list-item--border-bottom: 1px solid #f4f4f5;
+    --c2-list-item--border-bottom: 1px solid var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <c2-list value="2" class="flush" client:only="lit">

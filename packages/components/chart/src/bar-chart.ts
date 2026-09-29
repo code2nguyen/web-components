@@ -58,19 +58,6 @@ export class BarChart extends UplotChartBase {
       cursor: { ...options.cursor, x: true, y: false },
     }
   }
-
-  /**
-   * Bars sit on category labels when there are any, so the tick shows the label rather than the index.
-   *
-   * uPlot picks its own split values, and on a handful of bands those land on halves — which would round
-   * to the same label twice and then off the end of the list. A band has no label between its slots, so
-   * those ticks are blank.
-   */
-  protected override formatAxisX(value: number): string {
-    const labels = this.frame?.labels
-    if (!labels) return super.formatAxisX(value)
-    return Number.isInteger(value) ? (labels[value] ?? '') : ''
-  }
 }
 
 declare global {

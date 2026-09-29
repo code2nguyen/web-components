@@ -133,10 +133,26 @@ export abstract class UplotChartBase extends ChartBase {
    * every tick "Jan 1".
    */
   protected formatAxisX(value: number): string {
+    // Rows with a `label-field` name their own ticks, as the ECharts charts' category axes do: a year, a quarter or
+    // a region is a name, not a quantity to print as "2,021". uPlot picks its own splits, and on a handful of rows
+    // (a bar chart's bands) those land on halves; a tick between two rows has no name, so it stays blank.
+    const labels = this.frame?.labels
+    if (labels) {
+      const index = this.#indexOfX(value)
+      return index < 0 ? '' : (labels[index] ?? '')
+    }
     if (this.xType !== 'time') return this.formatValue(value)
     const span = this.xSpan()
     const options: Intl.DateTimeFormatOptions =
       span > 0 && span < DAY ? { hour: 'numeric', minute: '2-digit' } : span < YEAR ? { month: 'short', day: 'numeric' } : { month: 'short', year: 'numeric' }
     return new Intl.DateTimeFormat(this.locale, options).format(new Date(value))
+  }
+
+  /** The row whose x value is `value`, or `-1`. Label axes are short, so a scan is cheaper than an index. */
+  #indexOfX(value: number): number {
+    const frame = this.frame
+    if (!frame) return -1
+    for (let index = 0; index < frame.length; index += 1) if (frame.x[index] === value) return index
+    return -1
   }
 }

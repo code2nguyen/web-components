@@ -54,12 +54,12 @@ Curated looks for `c2-switch`. Open any card in the studio to start from it. Siz
 <style>
   .outlined {
     --c2-switch__track--color: transparent;
-    --c2-switch__track--border: 1px solid #a1a1aa;
-    --c2-switch__track__hover--color: #f4f4f5;
-    --c2-switch__thumb--color: #71717a;
+    --c2-switch__track--border: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-switch__track__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-switch__thumb--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-switch__thumb--box-shadow: none;
-    --c2-switch__track__checked--border: 1px solid #0265dc;
-    --c2-switch__thumb__checked--color: #ffffff;
+    --c2-switch__track__checked--border: 1px solid var(--c2-theme--color-primary, #0265dc);
+    --c2-switch__thumb__checked--color: var(--c2-theme--color-on-primary, #ffffff);
   }
 </style>
 <c2-switch class="outlined" checked>Outlined</c2-switch>
@@ -82,9 +82,9 @@ Curated looks for `c2-switch`. Open any card in the studio to start from it. Siz
   .square {
     --c2-switch__track--border-radius: 4px;
     --c2-switch__thumb--border-radius: 2px;
-    --c2-switch__track--color: #d4d4d8;
-    --c2-switch__track__checked--color: #18181b;
-    --c2-switch__track__checked__hover--color: #27272a;
+    --c2-switch__track--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-switch__track__checked--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-switch__track__checked__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-switch__thumb--box-shadow: none;
   }
 </style>
@@ -110,16 +110,16 @@ Curated looks for `c2-switch`. Open any card in the studio to start from it. Siz
     display: inline-flex;
     padding: 14px 18px;
     border-radius: 12px;
-    background: #18181b;
-    color: #fafafa;
-    --c2-switch__track--color: #3f3f46;
-    --c2-switch__track__hover--color: #52525b;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-switch__track--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-switch__track__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-switch__track__checked--color: #5aa3ff;
     --c2-switch__track__checked__hover--color: #7bb6ff;
-    --c2-switch__thumb--color: #fafafa;
+    --c2-switch__thumb--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
     --c2-switch__thumb__checked--color: #032a5c;
     --c2-switch__track__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
-    --c2-switch__description--color: #a1a1aa;
+    --c2-switch__description--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <div class="dark"><c2-switch checked>Dark mode<span slot="description">Follows the system at sunset.</span></c2-switch></div>

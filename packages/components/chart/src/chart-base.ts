@@ -227,7 +227,10 @@ export abstract class ChartBase extends LitElement {
   /** Row field holding the x value; may be a dotted path. Defaults to the row index. */
   @property({ type: String, attribute: 'x-field' }) xField = ''
 
-  /** Row field holding the category label, for charts that name their slices. */
+  /**
+   * Row field holding each row's label: the slice names of a pie, the category axis of a bar chart, and the x tick
+   * labels of a line, area or sparkline chart (`label-field="month"`, or `"year"` to print 2021 rather than 2,021).
+   */
   @property({ type: String, attribute: 'label-field' }) labelField = ''
 
   /** How x values are interpreted, which decides the axis and the tooltip format. */
@@ -401,7 +404,9 @@ export abstract class ChartBase extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues): void {
-    if (changed.has('data') || changed.has('revision')) {
+    // The fields that shape the frame count as data: a chart switched to another x or label field at runtime must
+    // re-read its rows, which the builder's signature cache would otherwise hand back unchanged.
+    if (changed.has('data') || changed.has('revision') || changed.has('xField') || changed.has('labelField') || changed.has('xType')) {
       this.frame = this.frameBuilder.build(this.data, this.normalizeContext())
       this.#dataDirty = true
     }

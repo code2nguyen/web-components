@@ -54,7 +54,7 @@ Curated looks for `c2-spinner`. Open any card in the studio to start from it. Th
   .steps {
     --c2-spinner--size: 28px;
     --c2-spinner--stroke-width: 6px;
-    --c2-spinner__label--color: #18181b;
+    --c2-spinner__label--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-spinner__label--font-weight: 500;
   }
 </style>
@@ -100,10 +100,10 @@ Curated looks for `c2-spinner`. Open any card in the studio to start from it. Th
     display: inline-flex;
     padding: 16px 20px;
     border-radius: 12px;
-    background: #18181b;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
     --c2-spinner--color: #5aa3ff;
-    --c2-spinner__track--color: #3f3f46;
-    --c2-spinner__label--color: #d4d4d8;
+    --c2-spinner__track--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-spinner__label--color: var(--c2-theme--color-outline, #d4d4d8);
   }
 </style>
 <div class="dark"><c2-spinner>Syncing workspace</c2-spinner></div>

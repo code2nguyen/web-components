@@ -25,9 +25,9 @@ An icon button is a 48px state layer around a 24px icon; every look below only c
 ```html tag=MdxCodeBlock,label=Filled
 <style>
   .filled {
-    --c2-icon-button--background-color: #18181b;
-    --c2-icon-button__hover--background-color: #3f3f46;
-    --c2-icon-button__icon--color: #ffffff;
+    --c2-icon-button--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-icon-button__state-layer--size: 40px;
     --c2-icon-button__icon--width: 20px;
     --c2-icon-button__icon--height: 20px;
@@ -79,7 +79,7 @@ An icon button is a 48px state layer around a 24px icon; every look below only c
 ```html tag=MdxCodeBlock,label=Muted with hover tint
 <style>
   .muted {
-    --c2-icon-button__icon--color: #71717a;
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-icon-button__hover--background-color: rgba(37, 99, 235, 0.1);
     --c2-icon-button__icon__hover--color: #2563eb;
   }
@@ -90,9 +90,9 @@ An icon button is a 48px state layer around a 24px icon; every look below only c
 ```html tag=MdxCodeBlock,label=Neutral filled
 <style>
   .neutral {
-    --c2-icon-button--background-color: #f4f4f5;
-    --c2-icon-button__hover--background-color: #e4e4e7;
-    --c2-icon-button__icon--color: #18181b;
+    --c2-icon-button--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-icon-button__state-layer--size: 36px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
@@ -160,8 +160,8 @@ An icon button is a 48px state layer around a 24px icon; every look below only c
 <style>
   .rounded-square {
     --c2-icon-button--border-radius: 10px;
-    --c2-icon-button--background-color: #f4f4f5;
-    --c2-icon-button__hover--background-color: #e4e4e7;
+    --c2-icon-button--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <c2-icon-button class="rounded-square"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
@@ -171,9 +171,9 @@ An icon button is a 48px state layer around a 24px icon; every look below only c
 <style>
   .square {
     --c2-icon-button--border-radius: 0;
-    --c2-icon-button--background-color: #18181b;
-    --c2-icon-button__hover--background-color: #3f3f46;
-    --c2-icon-button__icon--color: #ffffff;
+    --c2-icon-button--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-primary, #ffffff);
   }
 </style>
 <c2-icon-button class="square"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></c2-icon-button>
@@ -238,21 +238,21 @@ Inline SVG, `@c2n/feather-icons` and `@c2n/mat-icon` all work in the default slo
     display: inline-flex;
     gap: 2px;
     padding: 4px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
-    background: #ffffff;
+    background: var(--c2-theme--color-surface, #ffffff);
   }
   .toolbar-item {
     --c2-icon-button__state-layer--size: 32px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
     --c2-icon-button--border-radius: 6px;
-    --c2-icon-button__icon--color: #52525b;
-    --c2-icon-button__hover--background-color: #f4f4f5;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .toolbar-item-active {
-    --c2-icon-button--background-color: #e4e4e7;
-    --c2-icon-button__icon--color: #18181b;
+    --c2-icon-button--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <div class="toolbar">
@@ -269,15 +269,15 @@ Inline SVG, `@c2n/feather-icons` and `@c2n/mat-icon` all work in the default slo
     gap: 4px;
     padding: 6px;
     border-radius: 999px;
-    background: #18181b;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
   }
   .dark-toolbar-item {
     --c2-icon-button__state-layer--size: 36px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
-    --c2-icon-button__icon--color: #a1a1aa;
-    --c2-icon-button__hover--background-color: #3f3f46;
-    --c2-icon-button__icon__hover--color: #ffffff;
+    --c2-icon-button__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-primary, #ffffff);
   }
 </style>
 <div class="dark-toolbar">

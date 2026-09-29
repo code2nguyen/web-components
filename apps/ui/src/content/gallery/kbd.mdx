@@ -17,7 +17,7 @@ Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keyc
 <style>
   .flat {
     --c2-kbd--background-color: transparent;
-    --c2-kbd--border: 1px solid #d4d4d8;
+    --c2-kbd--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-kbd--box-shadow: none;
   }
 </style>
@@ -27,10 +27,10 @@ Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keyc
 ```html tag=MdxCodeBlock,label=Dark
 <style>
   .dark {
-    --c2-kbd--background-color: #27272a;
-    --c2-kbd--color: #e4e4e7;
-    --c2-kbd--border: 1px solid #3f3f46;
-    --c2-kbd--box-shadow: 0 1px 0 #18181b;
+    --c2-kbd--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kbd--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-kbd--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kbd--box-shadow: 0 1px 0 var(--c2-theme--color-inverse-surface, #18181b);
   }
 </style>
 <c2-kbd class="dark">⌘ + K</c2-kbd>
@@ -41,10 +41,10 @@ Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keyc
   .mechanical {
     --c2-kbd--min-width: 34px;
     --c2-kbd--height: 34px;
-    --c2-kbd--background-color: #fafafa;
-    --c2-kbd--border: 1px solid #d4d4d8;
+    --c2-kbd--background-color: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-kbd--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-kbd--border-radius: 8px;
-    --c2-kbd--box-shadow: 0 3px 0 #d4d4d8;
+    --c2-kbd--box-shadow: 0 3px 0 var(--c2-theme--color-outline, #d4d4d8);
     --c2-kbd--font-size: 13px;
     --c2-kbd--font-weight: 600;
   }
@@ -88,7 +88,7 @@ Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keyc
     --c2-kbd--background-color: transparent;
     --c2-kbd--border: none;
     --c2-kbd--box-shadow: none;
-    --c2-kbd--color: #71717a;
+    --c2-kbd--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-kbd--font-size: 11px;
     --c2-kbd--letter-spacing: 0.06em;
     --c2-kbd--text-transform: uppercase;
@@ -104,7 +104,7 @@ Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keyc
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .row c2-kbd {
     --c2-kbd--min-width: 26px;

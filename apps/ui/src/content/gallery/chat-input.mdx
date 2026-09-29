@@ -27,10 +27,10 @@ Each composition below is a complete assistant prompt experience. The cards stay
     gap: 22px;
     width: min(100%, 720px);
     padding: 34px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 24px;
-    background: linear-gradient(145deg, #fafafa, #f4f4f5);
-    color: #18181b;
+    background: linear-gradient(145deg, var(--c2-theme--color-surface-container-low, #fafafa), var(--c2-theme--color-surface-container, #f4f4f5));
+    color: var(--c2-theme--color-on-surface, #18181b);
     font-family: Inter, system-ui, sans-serif;
   }
   .default-heading {
@@ -43,7 +43,7 @@ Each composition below is a complete assistant prompt experience. The cards stay
     letter-spacing: -0.03em;
   }
   .default-heading span {
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     font-size: 13px;
   }
 </style>
@@ -65,8 +65,8 @@ Each composition below is a complete assistant prompt experience. The cards stay
     border-radius: 24px;
     background:
       radial-gradient(circle at 50% 0%, rgba(109, 94, 252, 0.18), transparent 42%),
-      #111113;
-    color: #fafafa;
+      var(--c2-theme--color-on-surface, #18181b);
+    color: var(--c2-theme--color-on-inverse-surface, #fafafa);
     font-family: Inter, system-ui, sans-serif;
   }
   .midnight-heading {
@@ -79,31 +79,31 @@ Each composition below is a complete assistant prompt experience. The cards stay
     letter-spacing: -0.03em;
   }
   .midnight-heading span {
-    color: #a1a1aa;
+    color: var(--c2-theme--color-outline-strong, #a1a1aa);
     font-size: 13px;
   }
   .midnight-composer {
-    --c2-chat-input__container--border: 1px solid #3f3f46;
+    --c2-chat-input__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-chat-input__container--border-radius: 22px;
-    --c2-chat-input__container--background: #212124;
-    --c2-chat-input__container--color: #fafafa;
+    --c2-chat-input__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 96%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chat-input__container--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
     --c2-chat-input__container--padding: 12px;
-    --c2-chat-input__container__hover--border: 1px solid #52525b;
-    --c2-chat-input__container__focus--border: 1px solid #71717a;
+    --c2-chat-input__container__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chat-input__container__focus--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
     --c2-chat-input__container__focus--box-shadow: 0 0 0 3px rgba(161, 161, 170, 0.14);
-    --c2-chat-input__placeholder--color: #8b8b94;
-    --c2-chat-input__send-button--background: #fafafa;
-    --c2-chat-input__send-button--color: #18181b;
-    --c2-chat-input__send-button__hover--background: #e4e4e7;
-    --c2-chat-input__send-button__active--background: #d4d4d8;
+    --c2-chat-input__placeholder--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 49%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chat-input__send-button--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-chat-input__send-button--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-chat-input__send-button__hover--background: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-chat-input__send-button__active--background: var(--c2-theme--color-outline, #d4d4d8);
   }
   .midnight-tool {
     --c2-icon-button__state-layer--size: 32px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
-    --c2-icon-button__icon--color: #a1a1aa;
-    --c2-icon-button__icon__hover--color: #fafafa;
-    --c2-icon-button__hover--background-color: #3f3f46;
+    --c2-icon-button__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 
@@ -134,8 +134,8 @@ Each composition below is a complete assistant prompt experience. The cards stay
     padding: 30px;
     border: 1px solid #e8e1d5;
     border-radius: 24px;
-    background: #f6f3ed;
-    color: #2f2b26;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 92%, var(--c2-theme--color-surface, #ffffff));
     font-family: Georgia, serif;
   }
   .research-attachment {
@@ -273,25 +273,25 @@ Each composition below is a complete assistant prompt experience. The cards stay
     gap: 14px;
     width: min(100%, 720px);
     padding: 28px;
-    border: 1px solid #27272a;
+    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     border-radius: 20px;
-    background: #09090b;
-    color: #e4e4e7;
+    background: var(--c2-theme--color-on-surface, #18181b);
+    color: var(--c2-theme--color-outline-variant, #e4e4e7);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   .developer-context {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #a1a1aa;
+    color: var(--c2-theme--color-outline-strong, #a1a1aa);
     font-size: 12px;
   }
   .developer-branch {
     padding: 5px 9px;
-    border: 1px solid #3f3f46;
+    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     border-radius: 999px;
-    background: #18181b;
-    color: #d4d4d8;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    color: var(--c2-theme--color-outline, #d4d4d8);
   }
   .developer-composer {
     --c2-chat-input__container--border: 1px solid #3f3f46;
@@ -315,9 +315,9 @@ Each composition below is a complete assistant prompt experience. The cards stay
     --c2-icon-button__state-layer--size: 30px;
     --c2-icon-button__icon--width: 16px;
     --c2-icon-button__icon--height: 16px;
-    --c2-icon-button__icon--color: #a1a1aa;
-    --c2-icon-button__icon__hover--color: #f4f4f5;
-    --c2-icon-button__hover--background-color: #27272a;
+    --c2-icon-button__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-icon-button__icon__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-icon-button--border-radius: 7px;
   }
 </style>

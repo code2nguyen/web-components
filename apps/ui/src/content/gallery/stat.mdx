@@ -18,7 +18,7 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
   .executive-stat {
     width: 290px;
     --c2-stat--padding: 20px;
-    --c2-stat--border: 1px solid #e2e8f0;
+    --c2-stat--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
     --c2-stat--border-radius: 16px;
     --c2-stat--box-shadow: 0 18px 45px rgba(15, 23, 42, 0.09);
     --c2-stat__icon--size: 46px;
@@ -70,7 +70,7 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
   .drawdown-stat {
     width: 290px;
     --c2-stat--padding: 20px;
-    --c2-stat--background: #fff7f7;
+    --c2-stat--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
     --c2-stat--border: 1px solid #fecaca;
     --c2-stat--border-radius: 16px;
     --c2-stat--box-shadow: 0 18px 40px rgba(185, 28, 28, 0.08);
@@ -99,12 +99,12 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
     width: 260px;
     --c2-stat--padding: 20px;
     --c2-stat--background: rgba(255, 255, 255, 0.1);
-    --c2-stat--color: #ffffff;
+    --c2-stat--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-stat--border: 1px solid rgba(255, 255, 255, 0.2);
     --c2-stat--border-radius: 16px;
     --c2-stat--box-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
     --c2-stat__icon--background: rgba(255, 255, 255, 0.14);
-    --c2-stat__icon--color: #ffffff;
+    --c2-stat__icon--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-stat__icon--border-radius: 12px;
     --c2-stat__value--font-size: 30px;
     --c2-stat__label--color: rgba(255, 255, 255, 0.72);
@@ -112,7 +112,7 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
   }
   .aurora-stat c2-badge {
     --c2-badge--background: rgba(255, 255, 255, 0.16);
-    --c2-badge--color: #ffffff;
+    --c2-badge--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-badge--border: 1px solid rgba(255, 255, 255, 0.16);
   }
 </style>
@@ -156,13 +156,13 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
     --c2-stat--border: none;
     --c2-stat--border-radius: 0;
     --c2-stat__icon--size: 34px;
-    --c2-stat__icon--background: #18181b;
-    --c2-stat__icon--color: #ffffff;
+    --c2-stat__icon--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-stat__icon--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-stat__icon--border-radius: 999px;
     --c2-stat__value--font-size: 36px;
     --c2-stat__value--font-weight: 500;
     --c2-stat__value--line-height: 40px;
-    --c2-stat__label--color: #3f3f46;
+    --c2-stat__label--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-stat class="editorial-stat" value="48 ms" label="Median API latency">

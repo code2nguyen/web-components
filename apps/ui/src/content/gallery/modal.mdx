@@ -32,10 +32,10 @@ Curated looks for `c2-modal`. Each card shows a trigger; open the dialog to see 
 <style>
   .divided {
     --c2-modal__header--padding-bottom: 14px;
-    --c2-modal__header--border-bottom: 1px solid #e4e4e7;
+    --c2-modal__header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-modal__body--padding-top: 16px;
     --c2-modal__footer--padding-top: 14px;
-    --c2-modal__footer--border-top: 1px solid #e4e4e7;
+    --c2-modal__footer--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .divided p {
     margin: 0;
@@ -139,13 +139,13 @@ Curated looks for `c2-modal`. Each card shows a trigger; open the dialog to see 
 ```html tag=MdxCodeBlock,label=Dark
 <style>
   .dark {
-    --c2-modal--background: #18181b;
-    --c2-modal--color: #fafafa;
-    --c2-modal--border: 1px solid #27272a;
-    --c2-modal__body--color: #a1a1aa;
-    --c2-modal__close--color: #a1a1aa;
-    --c2-modal__close__hover--background: #27272a;
-    --c2-modal__close__hover--color: #fafafa;
+    --c2-modal--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-modal--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-modal--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-modal__body--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-modal__close--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-modal__close__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-modal__close__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
     --c2-modal__backdrop--background: rgba(0, 0, 0, 0.7);
   }
   .dark p {
@@ -172,7 +172,7 @@ Curated looks for `c2-modal`. Each card shows a trigger; open the dialog to see 
     --c2-modal--border-bottom-left-radius: 0px;
     --c2-modal--border-bottom-right-radius: 0px;
     --c2-modal--enter-transform: scale(1.02);
-    --c2-modal__header--border-bottom: 1px solid #e4e4e7;
+    --c2-modal__header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-modal__header--padding-bottom: 16px;
     --c2-modal__body--padding-top: 24px;
   }

@@ -42,7 +42,7 @@ Curated looks for `c2-progress`. Open any card in the studio to start from it. T
   .square {
     --c2-progress--height: 10px;
     --c2-progress--border-radius: 0;
-    --c2-progress__track--background-color: #f4f4f5;
+    --c2-progress__track--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <c2-progress class="square" value="60"></c2-progress>
@@ -56,9 +56,9 @@ Curated looks for `c2-progress`. Open any card in the studio to start from it. T
 <style>
   .steps {
     --c2-progress--height: 6px;
-    --c2-progress__label--color: #18181b;
+    --c2-progress__label--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-progress__label--font-weight: 500;
-    --c2-progress__value--color: #71717a;
+    --c2-progress__value--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-progress__value--font-size: 12px;
     --c2-progress__value--font-weight: 400;
   }

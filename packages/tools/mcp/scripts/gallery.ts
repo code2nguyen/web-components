@@ -85,30 +85,99 @@ function pickToken(property: string, candidates: string[]): string | undefined {
 
 const normalizeColor = (value: string) => value.toLowerCase().replace(/\s+/g, '')
 
+/** `#3f3f46` → `[63, 63, 70, 1]`; `rgba(24, 24, 27, 0.55)` → `[24, 24, 27, 0.55]`. */
+function parseColor(color: string): [number, number, number, number] | undefined {
+  const hex = /^#([0-9a-f]{3,8})$/i.exec(color)
+  if (hex) {
+    let digits = hex[1]
+    if (digits.length <= 4) digits = [...digits].map((digit) => digit + digit).join('')
+    const channel = (at: number) => parseInt(digits.slice(at, at + 2), 16)
+    return [channel(0), channel(2), channel(4), digits.length === 8 ? channel(6) / 255 : 1]
+  }
+  const rgb = /^rgba?\(([^)]*)\)$/i.exec(color)
+  if (!rgb) return undefined
+  const [r, g, b, a = 1] = rgb[1]
+    .split(/[\s,/]+/)
+    .filter(Boolean)
+    .map(Number)
+  return [r, g, b, a]
+}
+
+/** Greys (and near-greys such as zinc) are ink and paper; anything with a hue is an accent. */
+const isNeutral = ([r, g, b]: [number, number, number, number]) => Math.max(r, g, b) - Math.min(r, g, b) <= 16
+
+const INK = 'var(--c2-theme--color-on-surface, #18181b)'
+const PAPER = 'var(--c2-theme--color-surface, #ffffff)'
+
 /**
- * Rewrites every colour literal equal to a token's light value as `var(--c2-theme--<token>, <literal>)`, choosing the
- * token by the property the variable sets. Under the default light theme the card renders exactly as authored; with
- * an application's tokens, or in dark mode, it follows them. Colours no token owns (accents such as a Tailwind blue)
- * stay literal: they are the card's deliberate choice.
+ * An opaque grey no role owns, as a share of ink over paper: `#3f3f46` is 83% ink. Under the light theme that is the
+ * authored grey to within a few levels; in dark mode ink and paper swap, so a hover two steps darker than its base
+ * stays two steps apart instead of collapsing onto one role.
+ */
+function mixNeutral([r, g, b]: [number, number, number, number]): string {
+  const ink = 24
+  const paper = 255
+  const share = Math.round(((paper - (r + g + b) / 3) / (paper - ink)) * 100)
+  const clamped = Math.min(100, Math.max(0, share))
+  return clamped === 0 ? PAPER : clamped === 100 ? INK : `color-mix(in srgb, ${INK} ${clamped}%, ${PAPER})`
+}
+
+const COLOR = /#[0-9a-f]{3,8}\b|rgba?\([^)]*\)/gi
+
+/**
+ * Makes a card's neutral colours follow the theme. A literal equal to a colour role's light value becomes
+ * `var(--c2-theme--<role>, <literal>)`, the role chosen by the property it is assigned to; any other opaque grey becomes
+ * a mix of ink and paper (`mixNeutral`). Under the default light theme the card renders as authored; with an
+ * application's tokens, or in dark mode, its greys, text and borders flip with everything else.
+ *
+ * Hues stay literal: they are the card's accents. So does a whole rule block that paints a coloured background, since
+ * its text was chosen against that colour and must not flip on its own. Only the `color-*` roles take part; the chart
+ * palette tokens are series colours, not surfaces or text.
  */
 export function themeExampleCss(css: string, tokens: ThemeColor[]): { css: string; themed: number; literal: number } {
   const byValue = new Map<string, string[]>()
-  for (const token of tokens) if (token.light) byValue.set(normalizeColor(token.light), [...(byValue.get(normalizeColor(token.light)) ?? []), token.name])
+  for (const token of tokens) {
+    if (!token.light || !token.name.startsWith('--c2-theme--color-')) continue
+    const key = normalizeColor(token.light)
+    byValue.set(key, [...(byValue.get(key) ?? []), token.name])
+  }
   let themed = 0
   let literal = 0
-  const out = css.replace(/(--c2-[a-z0-9_-]+)(\s*:\s*)([^;}]+)/g, (declaration, name: string, colon: string, value: string) => {
-    if (value.includes('var(')) return declaration
-    const property = parseCssVarName(name)?.property ?? ''
-    const next = value.replace(/#[0-9a-f]{3,8}\b|rgba?\([^)]*\)/gi, (color) => {
-      const token = pickToken(property, byValue.get(normalizeColor(color)) ?? [])
-      if (!token) {
-        literal++
-        return color
-      }
-      themed++
-      return `var(${token}, ${color})`
+  // Plain declarations count too: `color: #3f3f46` on a card's own wrapper goes dark in dark mode just the same.
+  const DECLARATION = /(--c2-[a-z0-9_-]+|\b[a-z][a-z-]*)(\s*:\s*)([^;]+)/g
+  const propertyOf = (name: string) => (name.startsWith('--') ? (parseCssVarName(name)?.property ?? '') : name)
+  // Innermost blocks only, so an `@media` wrapper is walked into rather than rewritten as one body.
+  const out = css.replace(/\{([^{}]*)\}/g, (block, body: string) => {
+    const accentSurface = [...body.matchAll(DECLARATION)].some(([, name, , value]) => {
+      if (!/background/.test(propertyOf(name))) return false
+      return [...value.matchAll(COLOR)].some((match) => {
+        const color = parseColor(match[0])
+        return !!color && color[3] >= 0.5 && !isNeutral(color)
+      })
     })
-    return `${name}${colon}${next}`
+    if (accentSurface) {
+      literal += (body.match(COLOR) ?? []).length
+      return block
+    }
+    const next = body.replace(DECLARATION, (declaration, name: string, colon: string, value: string) => {
+      if (value.includes('var(') || value.includes('color-mix(')) return declaration
+      const property = propertyOf(name)
+      return `${name}${colon}${value.replace(COLOR, (match) => {
+        const token = pickToken(property, byValue.get(normalizeColor(match)) ?? [])
+        if (token) {
+          themed++
+          return `var(${token}, ${match})`
+        }
+        const color = parseColor(match)
+        if (color && color[3] === 1 && isNeutral(color)) {
+          themed++
+          return mixNeutral(color)
+        }
+        literal++
+        return match
+      })}`
+    })
+    return `{${next}}`
   })
   return { css: out, themed, literal }
 }

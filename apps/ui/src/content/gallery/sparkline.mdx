@@ -75,7 +75,7 @@ Figures are USD billions from Apple's fiscal 2021–2025 statements in the publi
     font-size: 15px;
   }
   .finance-kpis small {
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .finance-kpis c2-sparkline {
     --c2-chart--width: 128px;
@@ -122,13 +122,13 @@ The starting watchlist is a fixed illustrative snapshot for a repeatable demo. S
     height: 326px;
     --c2-table__header--height: 42px;
     --c2-table__row--height: 56px;
-    --c2-table__row--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-outline-variant);
   }
   .market-controls {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: var(--site-color-on-surface-muted);
+    color: var(--c2-theme--color-on-surface-variant);
     font-size: 12px;
   }
 </style>
