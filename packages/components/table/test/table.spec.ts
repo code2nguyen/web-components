@@ -599,3 +599,279 @@ test('rows assigned as a JSON string are parsed, so one binding works on the ser
   await expect(page.getByRole('row')).toHaveCount(4)
   await expect(page.getByRole('gridcell').filter({ hasText: 'Compilers' })).toBeVisible()
 })
+
+const LEDGER = Array.from({ length: 40 }, (_, index) => ({ id: String(index + 1), name: `Item ${index + 1}`, qty: index + 1, amount: 10.5 }))
+const ledgerRows = JSON.stringify(LEDGER)
+
+const ledger = (attributes = '', columns = '') => `<c2-table style="height:240px;width:520px" row-key="id" rows='${ledgerRows}' ${attributes}>
+  ${
+    columns ||
+    `<c2-table-column field="name" header="Name" width="200px" summary-label="Total"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="120px" align="end" format="number" summary="sum"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="200px" align="end" format="currency" summary="sum"></c2-table-column>`
+  }
+</c2-table>`
+
+const summaryCells = (page: Page) =>
+  page.locator('c2-table').evaluate((element) =>
+    [...element.shadowRoot!.querySelectorAll<HTMLElement>('[part~="summary-cell"]')].map((cell) => {
+      const rect = cell.getBoundingClientRect()
+      return { text: cell.textContent!.trim(), left: Math.round(rect.left), right: Math.round(rect.right), justify: getComputedStyle(cell).justifyContent }
+    }),
+  )
+
+const headerCells = (page: Page) =>
+  page.locator('c2-table').evaluate((element) =>
+    [...element.shadowRoot!.querySelectorAll<HTMLElement>('[role="columnheader"]')].map((cell) => {
+      const rect = cell.getBoundingClientRect()
+      return { left: Math.round(rect.left), right: Math.round(rect.right) }
+    }),
+  )
+
+test('a summary row totals each column in its own track, formatted like the column', async ({ page, renderScenario }) => {
+  await renderScenario(ledger())
+  const cells = await summaryCells(page)
+  expect(cells.map((cell) => cell.text)).toEqual(['Total', '820', '$420.00'])
+  // Same tracks as the header, and the column's alignment.
+  expect(cells.map(({ left, right }) => ({ left, right }))).toEqual(await headerCells(page))
+  expect(cells[2].justify).toBe('flex-end')
+  await expect(page.locator('c2-table').locator('[role="grid"]')).toHaveAttribute('aria-rowcount', '42')
+  await expect(page.locator('c2-table').locator('[part="summary-row"]')).toHaveAttribute('aria-rowindex', '42')
+  await accessible(page)
+})
+
+test('the summary row stays at the bottom of the viewport while the body scrolls', async ({ page, renderScenario }) => {
+  await renderScenario(ledger())
+  const bottoms = () =>
+    page.locator('c2-table').evaluate((element) => {
+      const root = element.shadowRoot!
+      return {
+        viewport: Math.round(root.querySelector('[part="viewport"]')!.getBoundingClientRect().bottom),
+        summary: Math.round(root.querySelector('[part="summary-row"]')!.getBoundingClientRect().bottom),
+      }
+    })
+  const before = await bottoms()
+  expect(before.summary).toBeLessThanOrEqual(before.viewport)
+  expect(before.viewport - before.summary).toBeLessThan(20)
+  await page.locator('c2-table').evaluate((element) => (element.shadowRoot!.querySelector('[part="viewport"]')!.scrollTop = 300))
+  expect(await bottoms()).toEqual(before)
+})
+
+test('a pinned column keeps its summary cell when the rest scrolls sideways', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ledger(
+      '',
+      `<c2-table-column field="name" header="Name" width="220px" pinned="start" summary-label="Total"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="320px" summary="sum"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="320px" summary="sum"></c2-table-column>`,
+    ),
+  )
+  const before = await summaryCells(page)
+  await page.locator('c2-table').evaluate((element) => (element.shadowRoot!.querySelector('[part="viewport"]')!.scrollLeft = 200))
+  const after = await summaryCells(page)
+  expect(after[0].left).toBe(before[0].left)
+  expect(after[1].left).toBe(before[1].left - 200)
+})
+
+test('summary values are keyed by column id, so two columns of one field keep their own', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ledger(
+      `summary-values='{"name": "All items", "amount-share": 1}'`,
+      `<c2-table-column field="name" header="Name" width="200px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="160px" format="currency" summary="avg"></c2-table-column>
+  <c2-table-column column-id="amount-share" field="amount" header="Share" width="160px" format="percent" summary="sum"></c2-table-column>`,
+    ),
+  )
+  // `summaryValues` wins over the aggregate of the column it names, and only that one.
+  expect((await summaryCells(page)).map((cell) => cell.text)).toEqual(['All items', '$10.50', '100%'])
+  await expect(page.locator('c2-table').locator('[part~="cell-amount-share"]').first()).toBeVisible()
+})
+
+test('a count is formatted as a number, and a function summary is formatted by the column', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ledger(
+      '',
+      `<c2-table-column field="name" header="Name" width="200px" summary="count"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="200px" format="currency" summary="count"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="120px" format="number"></c2-table-column>`,
+    ),
+  )
+  await page
+    .locator('c2-table-column[field="qty"]')
+    .evaluate((column) => ((column as HTMLElement & { summary: unknown }).summary = ({ rows }: { rows: { qty: number }[] }) => rows.length * 1000))
+  await expect.poll(async () => (await summaryCells(page)).map((cell) => cell.text)).toEqual(['40', '40', '40,000'])
+})
+
+test('summary-span stretches a label across columns, and the keyboard moves between summary cells', async ({ page, renderScenario }) => {
+  await renderScenario(
+    ledger(
+      '',
+      `<c2-table-column field="id" header="ID" width="80px" summary-label="Total" summary-span="2"></c2-table-column>
+  <c2-table-column field="name" header="Name" width="200px" summary="count"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="120px" summary="sum"></c2-table-column>`,
+    ),
+  )
+  const cells = await summaryCells(page)
+  const headers = await headerCells(page)
+  expect(cells.map((cell) => cell.text)).toEqual(['Total', '820'])
+  expect(cells[0]).toMatchObject({ left: headers[0].left, right: headers[1].right })
+  await expect(page.locator('c2-table').locator('[part~="summary-cell"]').first()).toHaveAttribute('aria-colspan', '2')
+
+  const active = () => page.locator('c2-table').evaluate((element) => element.shadowRoot!.activeElement?.textContent?.trim())
+  await page.locator('c2-table').locator('[role="columnheader"]').first().focus()
+  await page.keyboard.press('Control+End')
+  expect(await active()).toBe('820')
+  await page.keyboard.press('ArrowLeft')
+  expect(await active()).toBe('Total')
+  await page.keyboard.press('ArrowRight')
+  expect(await active()).toBe('820')
+  await page.keyboard.press('ArrowUp')
+  expect(await active()).toBe('40')
+  await page.keyboard.press('ArrowDown')
+  expect(await active()).toBe('820')
+})
+
+test('summary-scope="page" totals the page on show, and an empty table has no summary row', async ({ page, renderScenario }) => {
+  await renderScenario(ledger('page-size="10" summary-scope="page"'))
+  expect((await summaryCells(page))[1].text).toBe('55')
+  await props(page.locator('c2-table'), { page: 2 })
+  await expect.poll(async () => (await summaryCells(page))[1].text).toBe('155')
+  await props(page.locator('c2-table'), { summaryScope: 'all' })
+  await expect.poll(async () => (await summaryCells(page))[1].text).toBe('820')
+  await props(page.locator('c2-table'), { rows: [] })
+  await expect(page.locator('c2-table').locator('[part="summary-row"]')).toHaveCount(0)
+})
+
+test('a data source is not totalled from the rows it happens to hold; summaryValues carries its totals', async ({ page, renderScenario }) => {
+  await renderScenario(ledger('', ''))
+  await page.locator('c2-table').evaluate((element, source) => {
+    const table = element as HTMLElement & { rows: unknown[]; dataSource: unknown; summaryValues: unknown }
+    table.rows = []
+    table.dataSource = { getRows: async ({ start, count }: { start: number; count: number }) => ({ rows: source.slice(start, start + count), total: 1000 }) }
+  }, LEDGER)
+  await expect.poll(async () => (await summaryCells(page)).map((cell) => cell.text)).toEqual(['Total', '', ''])
+  await props(page.locator('c2-table'), { summaryValues: { qty: 500500 } })
+  await expect.poll(async () => (await summaryCells(page)).map((cell) => cell.text)).toEqual(['Total', '500,500', ''])
+})
+
+const NUMERIC = [
+  { id: 1, region: 'eu', sku: 'A', name: 'Anvil' },
+  { id: 2, region: 'eu', sku: 'B', name: 'Bolt' },
+  { id: 3, region: 'us', sku: 'A', name: 'Anvil US' },
+]
+
+const selectable = (attributes = '') => `<c2-table style="height:240px;width:520px" selection="multiple" rows='${JSON.stringify(NUMERIC)}' ${attributes}>
+  <c2-table-column field="name" header="Name" width="200px" sortable></c2-table-column>
+  <c2-table-column field="sku" header="SKU" width="200px"></c2-table-column>
+</c2-table>`
+
+const selectedNames = (page: Page) =>
+  page
+    .locator('c2-table')
+    .evaluate((element) =>
+      [...element.shadowRoot!.querySelectorAll('[role="row"][aria-selected="true"]')].map((row) => row.querySelector('[role="gridcell"]')!.textContent!.trim()),
+    )
+
+test('numeric keys assigned from script select their rows, stored as strings', async ({ page, renderScenario }) => {
+  await renderScenario(selectable('row-key="id"'))
+  const host = page.locator('c2-table')
+  await props(host, { value: [1, 3] })
+  await expect(host).toHaveJSProperty('value', ['1', '3'])
+  await expect(host).toHaveAttribute('value', '1;3')
+  expect(await selectedNames(page)).toEqual(['Anvil', 'Anvil US'])
+})
+
+test('row helpers select by row, and getRowKey builds a composite key', async ({ page, renderScenario }) => {
+  await renderScenario(selectable())
+  const host = page.locator('c2-table')
+  await watch(host, 'selection-change')
+  const result = await host.evaluate((element) => {
+    type Row = { region: string; sku: string }
+    const table = element as HTMLElement & {
+      rows: Row[]
+      getRowKey: (row: Row) => string
+      keyOf: (row: Row) => string | undefined
+      isSelected: (row: Row) => boolean
+      selectRows: (rows: Row[], options?: { add?: boolean }) => void
+      deselectRows: (rows: Row[]) => void
+      value: string[]
+    }
+    table.getRowKey = (row) => `${row.region}:${row.sku}`
+    const [first, second, third] = table.rows
+    table.selectRows([first])
+    table.selectRows([third], { add: true })
+    const afterSelect = [...table.value]
+    const selected = [table.isSelected(first), table.isSelected(second), table.isSelected(third)]
+    table.deselectRows([first])
+    return { key: table.keyOf(third), afterSelect, selected, afterDeselect: [...table.value], foreign: table.keyOf({ region: '', sku: '' }) }
+  })
+  expect(result).toEqual({ key: 'us:A', afterSelect: ['eu:A', 'us:A'], selected: [true, false, true], afterDeselect: ['us:A'], foreign: ':' })
+  const events = JSON.parse((await host.getAttribute('data-events')) ?? '[]') as { value: string[] }[]
+  expect(events.map((event) => event.value)).toEqual([['eu:A'], ['eu:A', 'us:A'], ['us:A']])
+  expect(await selectedNames(page)).toEqual(['Anvil US'])
+})
+
+test('without a key, keyOf is the row position, and a selectable table warns once', async ({ page, renderScenario }) => {
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('[c2-table]')) warnings.push(message.text())
+  })
+  await renderScenario(selectable())
+  const host = page.locator('c2-table')
+  expect(
+    await host.evaluate((element) =>
+      (element as HTMLElement & { keyOf: (row: unknown) => string | undefined; rows: unknown[] }).keyOf((element as HTMLElement & { rows: unknown[] }).rows[2]),
+    ),
+  ).toBe('2')
+  await props(host, { value: ['0'] })
+  await props(host, { value: ['1'] })
+  await expect.poll(() => warnings.length).toBe(1)
+  expect(warnings[0]).toContain('row-key')
+
+  warnings.length = 0
+  await renderScenario(selectable('row-key="id"'))
+  await props(page.locator('c2-table'), { value: ['1'] })
+  expect(warnings).toEqual([])
+})
+
+test('clicking the selected row again clears it, in single and multiple selection', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="single"'))
+  const host = page.locator('c2-table')
+  await watch(host, 'selection-change')
+  await page.getByRole('row').nth(1).click()
+  await expect(host).toHaveJSProperty('value', ['1'])
+  await page.getByRole('row').nth(1).click()
+  await expect(host).toHaveJSProperty('value', [])
+  const events = JSON.parse((await host.getAttribute('data-events')) ?? '[]') as { value: string[] }[]
+  expect(events.map((event) => event.value)).toEqual([['1'], []])
+
+  await renderScenario(table('selection="multiple" value="1;2"'))
+  const multiple = page.locator('c2-table')
+  // Several selected: a plain click narrows to that row, and a second click on it clears it.
+  await page.getByRole('row').nth(1).click()
+  await expect(multiple).toHaveJSProperty('value', ['1'])
+  await page.getByRole('row').nth(1).click()
+  await expect(multiple).toHaveJSProperty('value', [])
+  // Enter follows the click, Space toggles.
+  await page.getByRole('row').nth(2).getByRole('gridcell').first().click()
+  await expect(multiple).toHaveJSProperty('value', ['2'])
+  await page.keyboard.press('Enter')
+  await expect(multiple).toHaveJSProperty('value', [])
+  await page.keyboard.press(' ')
+  await expect(multiple).toHaveJSProperty('value', ['2'])
+})
+
+test('a selected row paints its text with the selected colour, over a custom cell colour', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="single" value="2"'))
+  await page.locator('c2-table').evaluate((element) => {
+    const style = (element as HTMLElement).style
+    style.setProperty('--c2-table__cell--color', 'rgb(200, 200, 200)')
+    style.setProperty('--c2-table__row__selected--background', 'rgb(24, 24, 27)')
+    style.setProperty('--c2-table__row__selected--color', 'rgb(255, 255, 255)')
+  })
+  const colors = () =>
+    page
+      .locator('c2-table')
+      .evaluate((element) => [...element.shadowRoot!.querySelectorAll('.row--body')].map((row) => getComputedStyle(row.querySelector('.cell-content')!).color))
+  expect(await colors()).toEqual(['rgb(200, 200, 200)', 'rgb(255, 255, 255)', 'rgb(200, 200, 200)'])
+})

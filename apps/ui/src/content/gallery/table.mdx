@@ -560,6 +560,55 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
 
 </GalleryGrid>
 
+## Totals
+
+A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals row. It is a row of the same grid, so each figure sits in its own column's track — through resizing, pinning and horizontal scroll — takes the column's `format` and alignment, and stays at the bottom of the viewport while the rows scroll under it. `summary-label` writes text into a column with no figure, and `summary-span` stretches it over the columns after it. Style it with the `--c2-table__summary--*` variables, or one column's figure with `::part(summary-content-<id>)`.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Invoice totals
+<style>
+  .invoice {
+    height: 296px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="invoice" row-key="id" rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"rate":95,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"rate":110,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"rate":120,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"rate":80,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"rate":95,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"rate":80,"amount":240},{"id":"7","task":"Performance budget","team":"Engineering","hours":11,"rate":120,"amount":1320},{"id":"8","task":"Onboarding flow","team":"Design","hours":16,"rate":95,"amount":1520},{"id":"9","task":"Docs migration","team":"Content","hours":10,"rate":80,"amount":800},{"id":"10","task":"QA sweep","team":"Engineering","hours":8,"rate":110,"amount":880}]'>
+  <c2-table-column field="task" header="Task" width="minmax(160px, 2fr)" summary-label="Total" summary-span="2"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" summary="sum"></c2-table-column>
+  <c2-table-column field="rate" header="Rate" width="100px" align="end" format="currency" summary="avg"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Ledger footer
+<style>
+  .ledger {
+    height: 296px;
+    width: 100%;
+    --c2-table__summary--background: #18181b;
+    --c2-table__summary--color: #fafafa;
+    --c2-table__summary--box-shadow: none;
+    --c2-table__summary--height: 40px;
+  }
+  .ledger::part(summary-content-amount) {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgb(22, 163, 74);
+  }
+</style>
+<c2-table client:only="lit" class="ledger" row-key="id" rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"rate":95,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"rate":110,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"rate":120,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"rate":80,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"rate":95,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"rate":80,"amount":240},{"id":"7","task":"Performance budget","team":"Engineering","hours":11,"rate":120,"amount":1320},{"id":"8","task":"Onboarding flow","team":"Design","hours":16,"rate":95,"amount":1520},{"id":"9","task":"Docs migration","team":"Content","hours":10,"rate":80,"amount":800},{"id":"10","task":"QA sweep","team":"Engineering","hours":8,"rate":110,"amount":880}]'>
+  <c2-table-column field="task" header="Task" width="200px" pinned="start" summary="count"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="160px"></c2-table-column>
+  <c2-table-column field="hours" header="Hours" width="120px" align="end" format="number" summary="sum"></c2-table-column>
+  <c2-table-column field="rate" header="Rate" width="120px" align="end" format="currency" summary="max"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="160px" align="end" format="currency" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
 ## States
 
 `loading` shows a spinner until the data lands — or whatever you slot into `loading` — `error` replaces the body with a message and a way out, and an empty `rows` array shows `empty-message` or the `empty` slot. Give the host a height and the body scrolls inside it; past `virtual-threshold` rows it virtualizes on its own.
