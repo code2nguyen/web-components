@@ -28,11 +28,20 @@ When c2n MCP tools are available:
 
 1. `list_components` or `search_components` to pick the component for the need.
 2. `get_component` for attributes, slots, events, documented CSS parts and CSS variables (grouped by semantic target and state, with the theme token each follows).
-3. `get_examples` for real markup. Start with the default example, then retrieve gallery examples matching the requested state, layout or use case. Preserve any accessibility note returned with an example.
+3. `get_examples` for real markup. Start with the default example, then pick a look from the docs gallery (§2a). Preserve any accessibility note returned with an example.
 4. `get_presets` when a curated visual treatment is useful. A preset is structured CSS-variable and attribute data suitable for generation; a gallery example is broader usage and composition context.
 5. `get_theme` **before writing any CSS**, so overrides go on tokens when a token exists.
 6. `generate_variant` when a selected preset or gallery look repeats: it validates names and emits the class / HTML / Lit code.
 7. `get_workflow_guide` for the workflow, theming, variant or framework guide text.
+
+### 2a. Find the look in the gallery
+
+Each component has a gallery of designed looks on the docs site. Start from one instead of inventing CSS:
+
+- `get_examples` with `view: "index"` lists every card of a component on one page: label, slug, a summary of what it changes and a screenshot link (light; swap `.light.png` for `.dark.png`). Open the screenshots when you can read images.
+- `search_examples` finds a look across all components by style or situation ("compact", "glass", "pill", "underline", "KPI").
+- Fetch the chosen card with `get_examples` `label: "<slug>"`. Its CSS already uses `var(--c2-theme--…, literal)` wherever a colour belongs to the theme; a literal left over is the card's own accent, so replace it with the application's token (usually `--c2-theme--color-primary…`) rather than pasting it.
+- When the look repeats, `generate_variant` with `example: "<slug>"` turns the card into a class or Lit subclass under the app's prefix.
 
 Without the server, use `references/component-catalog.md` only to identify a likely package. Then read `node_modules/@c2n/<name>/custom-elements.json` for the installed version's attributes, slots, events, CSS parts and CSS properties. If the package is not installed, use https://code2nguyen.github.io/web-components/. Never infer an API from the catalog or invent a variable, attribute, slot or event name.
 

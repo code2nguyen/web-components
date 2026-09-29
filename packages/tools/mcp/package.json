@@ -58,6 +58,7 @@
       "command": "node scripts/build-registry.ts",
       "files": [
         "scripts/build-registry.ts",
+        "scripts/gallery.ts",
         "src/registry-types.ts",
         "src/lib/css-var-name.ts",
         "../../components/*/custom-elements.json",

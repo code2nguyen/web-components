@@ -13,7 +13,7 @@ Build screens from `@c2n/*` web components with as little code as possible. Thre
 
 - Register an element with a side-effect import (`import '@c2n/button'`) at the application entry, or in the module that renders it.
 - Write plain markup: `<c2-button>Save</c2-button>`. Attributes, slots and events come from the component API (MCP `get_component`, or `node_modules/@c2n/<name>/custom-elements.json`).
-- Retrieve `get_examples` next: begin from the unmodified Default sample, then select gallery examples by use case. Use `get_presets` when structured values are more useful than a complete pattern.
+- Retrieve `get_examples` next: begin from the unmodified Default sample, then choose a look from the docs gallery: `view: "index"` lists every card with a summary and screenshot, `search_examples` finds a look across components, and `label: "<slug>"` fetches one. Copy its theme-following CSS, swap any remaining colour literal for your tokens, and start a variant from it with `generate_variant` `example`. Use `get_presets` when structured values are more useful than a complete pattern.
 - Icons are components: `c2-feather-<name>` from `@c2n/feather-icons/icons/<name>.js`, sized and coloured through `--c2-feather-icon--size|color|stroke-width`.
 - A component that appears once with the themed default look needs nothing else.
 

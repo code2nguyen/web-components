@@ -20,7 +20,7 @@ const client = new Client({ name: 'c2n-smoke', version: '0.0.0' })
 await client.connect(new StdioClientTransport({ command: process.execPath, args: [entry], cwd: packageRoot }))
 
 const { tools } = await client.listTools()
-assert(tools.length === 8, `expected 8 tools, got ${tools.length}: ${tools.map((t) => t.name).join(', ')}`)
+assert(tools.length === 9, `expected 9 tools, got ${tools.length}: ${tools.map((t) => t.name).join(', ')}`)
 
 const list = textOf(await client.callTool({ name: 'list_components', arguments: {} }))
 assert(list.includes('c2-button') && list.includes('@c2n/button'), 'list_components lacks c2-button')
@@ -36,6 +36,17 @@ assert(search.includes('c2-select'), 'search_components should find c2-select')
 
 const examples = textOf(await client.callTool({ name: 'get_examples', arguments: { tag: 'button', kind: 'gallery', limit: 2 } }))
 assert(examples.includes('```html'), 'get_examples should return fenced html')
+
+const index = textOf(await client.callTool({ name: 'get_examples', arguments: { tag: 'c2-button', view: 'index' } }))
+assert(index.includes('`variants--soft`') && !index.includes('```html'), 'get_examples index should list slugs without code')
+const card = textOf(await client.callTool({ name: 'get_examples', arguments: { tag: 'c2-button', label: 'variants--outline' } }))
+assert(card.includes('var(--c2-theme--color-outline') && card.includes('gallery-shots/button/variants--outline.light.png'), 'gallery card should be themed')
+const looks = textOf(await client.callTool({ name: 'search_examples', arguments: { query: 'underline' } }))
+assert(looks.includes('Text Field'), 'search_examples should find the underline text field')
+const fromCard = textOf(
+  await client.callTool({ name: 'generate_variant', arguments: { tag: 'c2-button', name: 'app-outline-button', example: 'variants--outline', format: 'css' } }),
+)
+assert(fromCard.includes('.app-outline-button') && fromCard.includes('--c2-theme--color-outline'), 'generate_variant should start from a gallery card')
 
 const presets = textOf(await client.callTool({ name: 'get_presets', arguments: { tag: 'c2-button' } }))
 assert(presets.includes('```css'), 'get_presets should return css blocks')
