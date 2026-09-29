@@ -4,7 +4,8 @@ import { test, expect } from './fixture'
 test('shows aligned attributes, multiline content and safe text without chrome or slots', async ({ page, scenario }) => {
   await scenario('entries')
   const viewer = page.locator('c2-log-viewer')
-  await expect(viewer).toHaveAttribute('tabular', '')
+  // A reflected default is not written onto the host (it would fail SSR hydration), so it is read as a property.
+  await expect(viewer).toHaveJSProperty('tabular', true)
   await expect(viewer.locator('[part="entry"]')).toHaveCount(4)
   await expect(viewer.locator('[data-index="2"] [data-attribute="message"]')).toHaveText('<failed>')
   expect(await viewer.locator('failed, slot, nav').count()).toBe(0)

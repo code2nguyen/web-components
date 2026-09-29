@@ -112,7 +112,8 @@ test('draws a line chart from series children and reports itself ready', async (
   // The engine arrives through a dynamic import, so readiness is an explicit signal rather than a paint.
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
   await expect(chart).toHaveAttribute('data-chart-engine', 'uplot')
-  await expect(chart).toHaveAttribute('animation', 'auto')
+  // A reflected default is not written onto the host (it would fail SSR hydration), so it is read as a property.
+  await expect(chart).toHaveJSProperty('animation', 'auto')
   // One canvas, created by the engine inside the plot container.
   expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBe(1)
 })

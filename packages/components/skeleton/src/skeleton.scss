@@ -54,8 +54,9 @@
   border-radius: 999px;
 }
 
-// Pulse: the whole block fades in and out.
-:host([animation='pulse']) .c2-skeleton-block {
+// Pulse: the whole block fades in and out. The default, so an absent `animation` (not reflected) matches it too.
+:host([animation='pulse']) .c2-skeleton-block,
+:host(:not([animation])) .c2-skeleton-block {
   animation: c2-skeleton-pulse css.cssVar(animation-duration) ease-in-out infinite;
 }
 
@@ -90,7 +91,8 @@
 
 // Reduced motion: a still block still reads as "not loaded yet", so drop the movement rather than slowing it.
 @media (prefers-reduced-motion: reduce) {
-  :host([animation='pulse']) .c2-skeleton-block {
+  :host([animation='pulse']) .c2-skeleton-block,
+  :host(:not([animation])) .c2-skeleton-block {
     animation: none;
   }
   :host([animation='wave']) .c2-skeleton-block::after {

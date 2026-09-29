@@ -166,7 +166,8 @@ test('a folded stage comes back when it starts running or something in it fails'
 test('`collapsed` in the markup starts a stage folded and nothing unfolds it unasked', async ({ page, scenario }) => {
   await scenario('authored-collapsed')
   const build = page.locator('c2-step[label="build"]')
-  await expect(build).toHaveAttribute('status', 'pending')
+  // A reflected default is not written onto the host (it would fail SSR hydration), so it is read as a property.
+  await expect(build).toHaveJSProperty('status', 'pending')
   await expect(build).toHaveAttribute('collapsed', '')
   await expect(page.locator('c2-step[label="install"]')).toBeHidden()
 })
@@ -227,7 +228,8 @@ test('current derives the statuses of a wizard and an authored one still wins', 
   const status = (label: string) => page.locator(`c2-step[label="${label}"]`)
   await expect(status('Account')).toHaveAttribute('status', 'success')
   await expect(status('Plan')).toHaveAttribute('status', 'current')
-  await expect(status('Payment')).toHaveAttribute('status', 'pending')
+  // `pending` is the default, so deriving it writes no attribute (see `reflected defaults` in CLAUDE.md).
+  await expect(status('Payment')).toHaveJSProperty('status', 'pending')
 })
 
 test('slots replace the label, the detail, the trailing content and the marker', async ({ page, scenario }) => {

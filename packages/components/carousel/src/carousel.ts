@@ -662,7 +662,7 @@ export class Carousel extends LitElement {
       <div class="c2-carousel-viewport">
         <div class="c2-carousel-zone" aria-hidden="true"></div>
         <div
-          class="c2-carousel-track"
+          class="c2-carousel-track ${this.mouseDrag ? 'is-draggable' : ''}"
           part="track"
           tabindex="0"
           aria-live=${this.playing ? 'off' : 'polite'}

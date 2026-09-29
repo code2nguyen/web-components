@@ -22,7 +22,8 @@ test('an earlier second date restarts the range', async ({ page, scenario }) => 
   await scenario()
   await page.getByRole('gridcell', { name: /September 7, 2026/ }).click()
   await expect(page.locator('c2-date-selector')).toHaveAttribute('from', '2026-09-07')
-  await expect(page.locator('c2-date-selector')).toHaveAttribute('to', '')
+  // A reflected default is not written onto the host (it would fail SSR hydration), so it is read as a property.
+  await expect(page.locator('c2-date-selector')).toHaveJSProperty('to', '')
 })
 
 test('moves through the calendar with arrow and page keys', async ({ page, scenario }) => {
