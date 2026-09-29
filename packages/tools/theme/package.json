@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/banner:build",
         "../../components/time-input:build",
         "../../components/log-viewer:build",
         "../../components/masonry:build",

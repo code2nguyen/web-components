@@ -47,6 +47,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 ## Feedback
 
+- **Banner** — `c2-banner` · `@c2n/banner` — A persistent, full-width message in the page flow for system notices, outages and account status.
 - **Modal** — `c2-modal` · `@c2n/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
 - **Overlay** — `c2-overlay` · `@c2n/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
 - **Progress** — `c2-progress` · `@c2n/progress` — Linear progress bar, indeterminate or filling to a value, with an optional label and count.

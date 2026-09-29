@@ -17,6 +17,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/banner": "*",
     "@c2n/time-input": "*",
     "@c2n/log-viewer": "*",
     "@c2n/masonry": "*",
