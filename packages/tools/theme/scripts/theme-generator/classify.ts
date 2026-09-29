@@ -78,6 +78,7 @@ const SHADOW_MD_PREFIXES = new Set([
   'c2-select',
   'c2-overlay',
   'c2-color-select',
+  'c2-time-input',
   'c2-menu',
   'c2-navigation-menu',
   'c2-navigation-menu-item',
