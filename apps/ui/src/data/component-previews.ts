@@ -109,7 +109,7 @@ greet('world')"></c2-code-editor>`,
   header: `<c2-header style="width:280px;--c2-header--padding:8px 12px;--c2-header--min-height:48px;--c2-header--gap:16px">
   <strong slot="brand">Northstar</strong>
   <span style="font-size:12px">Markets</span>
-  <c2-button slot="actions" style="--c2-button__container--height:30px;--c2-button__container--padding-left:12px;--c2-button__container--padding-right:12px;--c2-button__container--font-size:13px">Sign in</c2-button>
+  <c2-button slot="actions" style="--c2-button__container--height:30px;--c2-button__container--padding-left:12px;--c2-button__container--padding-right:12px;--c2-button__container--font-size:13px;--c2-button__container--background-color:var(--c2-theme--color-surface-container, #f4f4f5);--c2-button__container--color:var(--c2-theme--color-on-surface, #18181b);--c2-button__container--border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);--c2-button__container__hover--background-color:var(--c2-theme--color-surface-container-low, #fafafa);--c2-button__container__active--background-color:var(--c2-theme--color-surface-container, #f4f4f5)">Sign in</c2-button>
 </c2-header>`,
   stat: `<c2-stat style="width:240px" value="$18.4M" label="Assets under management" tone="positive">
   <span slot="trend" style="color:#15803d;font-size:12px;font-weight:600">+12%</span>
