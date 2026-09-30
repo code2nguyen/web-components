@@ -16,7 +16,10 @@ import '../src/pie-chart'
 import '../src/gauge-chart'
 import '../src/radar-chart'
 import '../src/scatter-chart'
+import '../src/bubble-chart'
 import '../src/candlestick-chart'
+import '../src/overlap-chart'
+import * as overlapLayout from '../src/overlap-layout'
 import '../src/chart-series'
 import '../src/chart-legend'
 import '../src/chart-tooltip'
@@ -188,6 +191,26 @@ function build(): void {
     case 'candlestick':
       main.innerHTML = `<c2-candlestick-chart id="chart" label-field="date"></c2-candlestick-chart>`
       break
+    case 'overlap':
+    case 'overlap-uniform':
+    case 'overlap-selectable':
+    case 'overlap-select-set':
+      main.innerHTML = `
+        <c2-overlap-chart id="chart" set-labels="around" ${scenario === 'overlap-uniform' ? 'layout="uniform" labels="percent"' : ''} ${scenario === 'overlap-selectable' ? 'selectable' : ''} ${scenario === 'overlap-select-set' ? 'selectable selection="set"' : ''}>
+          <c2-chart-series field="web" label="Web app"></c2-chart-series>
+          <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
+          <c2-chart-series field="api" label="Public API"></c2-chart-series>
+        </c2-overlap-chart>`
+      break
+    case 'overlap-too-many':
+      main.innerHTML = `
+        <c2-overlap-chart id="chart">
+          <c2-chart-series field="a"></c2-chart-series>
+          <c2-chart-series field="b"></c2-chart-series>
+          <c2-chart-series field="c"></c2-chart-series>
+          <c2-chart-series field="d"></c2-chart-series>
+        </c2-overlap-chart>`
+      break
     case 'family':
       main.innerHTML = `
         <c2-line-chart style="--c2-chart--color:rgb(1,2,3)" x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-line-chart>
@@ -259,7 +282,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart, c2-candlestick-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -275,6 +298,16 @@ function build(): void {
       { channel: 'Direct', revenue: 4200 },
       { channel: 'Search', revenue: 3100 },
       { channel: 'Social', revenue: 1800 },
+    ]
+  } else if (scenario.startsWith('overlap')) {
+    chart.data = [
+      { sets: ['web'], size: 18420 },
+      { sets: ['mobile'], size: 12960 },
+      { sets: ['api'], size: 4310 },
+      { sets: ['web', 'mobile'], size: 6880 },
+      { sets: ['web', 'api'], size: 2150 },
+      { sets: ['mobile', 'api'], size: 1020 },
+      { sets: ['web', 'mobile', 'api'], size: 740 },
     ]
   } else if (scenario === 'gauge') {
     chart.data = [{ metric: 'Target', value: 78 }]
@@ -367,6 +400,7 @@ function build(): void {
     },
     hover: (detail) => adapterEvents?.hover(detail),
     element: () => chart,
+    overlapLayout,
   }
 }
 
@@ -374,7 +408,9 @@ build()
 
 void whenDrawn(
   Array.from(
-    main.querySelectorAll('c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart'),
+    main.querySelectorAll(
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
+    ),
   ),
 ).then(() => {
   main.dataset.ready = 'true'

@@ -33,7 +33,7 @@
   cursor: pointer;
 }
 
-.item[aria-pressed='false'] {
+.item--dimmed {
   opacity: css.cssVar(legend__disabled--opacity);
 }
 

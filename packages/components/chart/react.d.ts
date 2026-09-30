@@ -22,6 +22,7 @@ import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
+import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
@@ -42,6 +43,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -55,6 +57,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -88,6 +91,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -107,6 +111,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -118,10 +123,26 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: LineChart['series'] | string
+      }
+      'c2-overlap-chart': Omit<C2Props<OverlapChart>, 'selected' | 'series'> & {
+        'sets-field'?: Attribute
+        'size-field'?: Attribute
+        'set-labels'?: Attribute
+        'selected-set'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        selected?: OverlapChart['selected'] | string
+        series?: OverlapChart['series'] | string
       }
       'c2-pie-chart': Omit<C2Props<PieChart>, 'series'> & {
         'inner-radius'?: Attribute
@@ -131,6 +152,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -143,6 +165,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -154,6 +177,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -165,6 +189,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute

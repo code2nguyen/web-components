@@ -35,6 +35,20 @@ test('scatter chart collects its declarative series before the hydrated chart se
   await expect(legend.locator('.item')).toContainText('Revenue')
 })
 
+test('server-rendered charts keep their declared series', async ({ page }) => {
+  await page.goto('./components/overlap-chart/gallery/')
+  await page.reload()
+
+  const chart = page.locator('c2-overlap-chart').first()
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  // The server cannot see the chart's children, so the definitions have to be read on the client. Inferred from the data
+  // alone, the sets would be named by their keys (`web`); the declared labels prove the children were read.
+  await expect
+    .poll(() => chart.evaluate((element) => (element as HTMLElement & { getLegendItems(): { label: string }[] }).getLegendItems().map((item) => item.label)))
+    .toEqual(['Web', 'Mobile', 'API'])
+  await expect(chart.locator('table.overlap-a11y tbody tr').first()).toContainText('Web only')
+})
+
 test('card conditional regions survive hydration and reconcile later mutations', async ({ page }) => {
   await page.goto('./components/card/gallery/')
   await page.reload()

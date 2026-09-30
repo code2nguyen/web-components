@@ -68,6 +68,8 @@ export interface ChartTheme {
   pointRadius: number
   /** Roundedness of a bar's value end, expressed as a 0–0.5 share of its width. */
   barRadius: number
+  /** Opacity the other series keep while one is highlighted from the legend. */
+  dimmedOpacity: number
 }
 
 const FALLBACK: ChartTheme = {
@@ -88,6 +90,7 @@ const FALLBACK: ChartTheme = {
   lineWidth: 2,
   pointRadius: 2.5,
   barRadius: 0,
+  dimmedOpacity: 0.25,
 }
 
 /**
@@ -209,6 +212,7 @@ export class ChartThemeController implements ReactiveController {
       lineWidth: scalar('--c2-chart__line--width', FALLBACK.lineWidth),
       pointRadius: scalar('--c2-chart__point--radius', FALLBACK.pointRadius),
       barRadius: Math.min(0.5, Math.max(0, scalar('--c2-chart__bar--border-radius', FALLBACK.barRadius))),
+      dimmedOpacity: Math.min(1, Math.max(0, scalar('--c2-chart__series__dimmed--opacity', FALLBACK.dimmedOpacity))),
     }
   }
 }
