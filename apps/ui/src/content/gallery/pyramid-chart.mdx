@@ -39,7 +39,7 @@ import { ChartSeries } from '@c2n/chart/chart-series.js'
 <style>
   .hiring-pyramid { width: 100%; --c2-chart--height: 280px; --c2-chart__series-1--color: #7c3aed; --c2-chart__series-2--color: #8b5cf6; --c2-chart__series-3--color: #a78bfa; --c2-chart__series-4--color: #c4b5fd; --c2-chart__series-5--color: #ddd6fe; }
 </style>
-<c2-pyramid-chart class="hiring-pyramid" label-field="stage" apex="bottom" sort="descending" legend="none" data='[{"stage":"Applied","candidates":1840},{"stage":"Screened","candidates":612},{"stage":"Interviewed","candidates":148},{"stage":"Offer","candidates":31},{"stage":"Hired","candidates":24}]'>
+<c2-pyramid-chart class="hiring-pyramid" label-field="stage" apex="bottom" legend="none" data='[{"stage":"Applied","candidates":1840},{"stage":"Screened","candidates":612},{"stage":"Interviewed","candidates":148},{"stage":"Offer","candidates":31},{"stage":"Hired","candidates":24}]'>
   <c2-chart-series field="candidates" label="Candidates"></c2-chart-series>
 </c2-pyramid-chart>
 ```
@@ -48,7 +48,7 @@ import { ChartSeries } from '@c2n/chart/chart-series.js'
 <style>
   .side-pyramid { width: 100%; --c2-chart--height: 220px; --c2-chart__level--min-width: 18%; }
 </style>
-<c2-pyramid-chart class="side-pyramid" label-field="tier" apex="end" sizing="height" label-content="name" legend="none" data='[{"tier":"Free","users":8200},{"tier":"Pro","users":2100},{"tier":"Team","users":640},{"tier":"Enterprise","users":90}]'>
+<c2-pyramid-chart class="side-pyramid" label-field="tier" apex="end" label-content="name" legend="none" data='[{"tier":"Free","users":8200},{"tier":"Pro","users":2100},{"tier":"Team","users":640},{"tier":"Enterprise","users":90}]'>
   <c2-chart-series field="users" label="Users"></c2-chart-series>
 </c2-pyramid-chart>
 ```

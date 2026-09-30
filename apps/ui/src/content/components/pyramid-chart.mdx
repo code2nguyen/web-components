@@ -101,11 +101,11 @@ npm install @c2n/chart echarts
 
 `sort="ascending"` (the default) puts the smallest value at the apex, `descending` the largest, and `none`
 keeps the order of the rows, read from the apex. `apex` says where the point is: `top`, `bottom` for an
-inverted pyramid that reads as a narrowing process, or `start` and `end` to lay it on its side (they follow the
+inverted pyramid that reads top to bottom as a narrowing process (the smallest stage still sits at the point), or `start` and `end` to lay it on its side (they follow the
 writing direction).
 
 ```html tag=CodeBlock
-<c2-pyramid-chart label-field="stage" apex="bottom" sort="descending" legend="none" data='[…]'>
+<c2-pyramid-chart label-field="stage" apex="bottom" legend="none" data='[…]'>
   <c2-chart-series field="candidates" label="Candidates"></c2-chart-series>
 </c2-pyramid-chart>
 ```

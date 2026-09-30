@@ -8,7 +8,7 @@ import type { ChartEventMap, ChartLegendItem } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import type { ChartFrame } from './chart-types.js'
-import { layoutPyramid, type PyramidLevel, type PyramidSizing, type PyramidSort } from './pyramid-layout.js'
+import { layoutPyramid, readableTextOn, spreadLabels, type PyramidLevel, type PyramidSizing, type PyramidSort } from './pyramid-layout.js'
 import './chart-series.js'
 
 export interface PyramidChart {
@@ -29,6 +29,19 @@ interface PyramidDatum {
   real: number
   share: number
   itemStyle: { color: string; height?: string; width?: string; opacity?: number }
+  /** An inside label's colour, picked against the level's own fill. */
+  label?: { color: string }
+}
+
+/** One outside label as the label series draws it, in plot pixels. */
+interface OutsideLabel {
+  text: string
+  /** Where the leader line leaves the level's edge, where it bends, and where it meets the text. */
+  points: [number, number][]
+  x: number
+  y: number
+  align: 'left' | 'center' | 'right'
+  opacity: number
 }
 
 /**
@@ -57,7 +70,8 @@ interface PyramidDatum {
  */
 @customElement('c2-pyramid-chart')
 export class PyramidChart extends EchartsChartBase {
-  protected override readonly features: readonly EchartsFeature[] = ['funnel']
+  // `custom` draws the outside labels: ECharts gives a funnel's own labels no way to avoid each other.
+  protected override readonly features: readonly EchartsFeature[] = ['funnel', 'custom']
 
   /**
    * What a level's size encodes. `area` and `height` keep a triangular outline and size each level's area or
@@ -97,8 +111,11 @@ export class PyramidChart extends EchartsChartBase {
   /** Data row of each level ECharts draws, by the index ECharts reports it under. */
   #drawnRows: number[] = []
 
+  /** The outside labels, drawn by their own series in the order the levels are. */
+  #outsideLabels: OutsideLabel[] = []
+
   #resizeObserver?: ResizeObserver
-  #observedHeight = 0
+  #observedSize = ''
 
   protected override get legendDependsOnData(): boolean {
     return true
@@ -109,10 +126,13 @@ export class PyramidChart extends EchartsChartBase {
     const plot = this.plotElement
     if (!plot || typeof ResizeObserver === 'undefined') return
     this.#resizeObserver = new ResizeObserver((entries) => {
-      const height = Math.round(entries[entries.length - 1]?.contentRect.height ?? 0)
-      if (height === this.#observedHeight) return
-      this.#observedHeight = height
-      if (this.#readLayout().gap > 0) this.layoutRevision += 1
+      const rect = entries[entries.length - 1]?.contentRect
+      const size = rect ? `${Math.round(rect.width)}x${Math.round(rect.height)}` : ''
+      if (size === this.#observedSize) return
+      const first = this.#observedSize === ''
+      this.#observedSize = size
+      // Outside labels and gaps are laid out in pixels, so they have to follow the funnel ECharts rescales itself.
+      if (!first && (this.labels === 'outside' || this.#readLayout().gap > 0)) this.layoutRevision += 1
     })
     this.#resizeObserver.observe(plot)
   }
@@ -121,7 +141,7 @@ export class PyramidChart extends EchartsChartBase {
     super.disconnectedCallback()
     this.#resizeObserver?.disconnect()
     this.#resizeObserver = undefined
-    this.#observedHeight = 0
+    this.#observedSize = ''
   }
 
   /** A pyramid has no grid and no axes. */
@@ -219,9 +239,137 @@ export class PyramidChart extends EchartsChartBase {
         real: level.value,
         share: total > 0 ? level.value / total : 0,
         itemStyle,
+        ...(this.labels === 'inside' ? { label: { color: readableTextOn(itemStyle.color) } } : {}),
       }
     })
-    return [data]
+    this.#outsideLabels = this.labels === 'outside' ? this.#placeOutsideLabels(levels, data, context, available) : []
+    return [data, this.#outsideLabels.map((_, index) => ({ value: [index] }))]
+  }
+
+  /**
+   * ECharts' funnel labels sit at the middle of their level and cannot be moved (`labelLayout` never sees them and
+   * FunnelView writes their position straight into the text style), so the thin levels near the apex would stack
+   * their labels on top of each other. The levels' geometry is known here, so the labels are spread along the axis
+   * and drawn by a series of their own, each with a leader line from its level's edge.
+   */
+  #placeOutsideLabels(levels: PyramidLevel[], data: PyramidDatum[], context: ChartBuildContext, available: number): OutsideLabel[] {
+    const layout = this.#readLayout()
+    const box = this.#box(context)
+    const horizontal = this.#horizontal
+    const align = this.#align(layout.align)
+    const length = horizontal ? box.width : box.height
+    const cross = horizontal ? box.height : box.width
+    const start = horizontal ? box.left : box.top
+    const crossStart = horizontal ? box.top : box.left
+    const apexAtStart = horizontal ? this.#engineSort() === 'ascending' : this.apex === 'top'
+    const minSize = toPixels(layout.minWidth, cross)
+    const maxSize = toPixels(layout.maxWidth, cross)
+    const { fontSize, dimmedOpacity } = context.theme
+    const highlighted = this.highlighted
+
+    let offset = 0
+    let previousDepth = 0
+    const levelsAt = levels.map((level) => {
+      const size = (level.height ?? 1 / levels.length) * available * length
+      const centre = offset + size / 2
+      offset += size + layout.gap
+      // Both of a level's edges are linear in depth, so its width halfway along is the width at the mean depth.
+      const width = minSize + (maxSize - minSize) * ((previousDepth + level.depth) / 2)
+      previousDepth = level.depth
+      return { centre: apexAtStart ? start + centre : start + length - centre, width }
+    })
+    const texts = data.map((datum) => this.#labelText(datum))
+    const sizes = texts.map((text) => (horizontal ? text.length * fontSize * 0.58 + 10 : fontSize * 1.35))
+    const placed = spreadLabels(
+      levelsAt.map((level) => level.centre),
+      sizes,
+      start,
+      start + length,
+    )
+
+    // Which side of the funnel the labels go on: away from the edge it is aligned to.
+    const nearSide = horizontal ? align === 'bottom' : align === 'right'
+    return levelsAt.map((level, index) => {
+      const lead = nearSide ? crossStart + edgeOffset(align, cross, level.width, true) : crossStart + edgeOffset(align, cross, level.width, false)
+      const direction = nearSide ? -1 : 1
+      const opacity = highlighted !== null && data[index].name !== highlighted ? dimmedOpacity : 1
+      if (horizontal) {
+        const textY = nearSide ? box.top - LABEL_LINE - fontSize * 0.7 : box.top + box.height + LABEL_LINE + fontSize * 0.7
+        const endY = textY - direction * fontSize * 0.7
+        return {
+          text: texts[index],
+          points: [
+            [level.centre, lead],
+            [level.centre, lead + direction * 6],
+            [placed[index], endY],
+          ],
+          x: placed[index],
+          y: textY,
+          align: 'center',
+          opacity,
+        }
+      }
+      const textX = lead + direction * LABEL_LINE
+      return {
+        text: texts[index],
+        points: [
+          [lead + direction * 2, level.centre],
+          [lead + direction * 8, level.centre],
+          [textX - direction * 3, placed[index]],
+        ],
+        x: textX,
+        y: placed[index],
+        align: nearSide ? 'right' : 'left',
+        opacity,
+      }
+    })
+  }
+
+  /** The funnel, plus the series that draws its outside labels. */
+  protected override buildOptions(context: ChartBuildContext): unknown {
+    const options = super.buildOptions(context) as { series?: Record<string, unknown>[] }
+    if (this.labels !== 'outside') return options
+    return {
+      ...options,
+      series: [
+        ...(options.series ?? []),
+        { type: 'custom', name: 'labels', coordinateSystem: 'none', silent: true, z: 5, animationDurationUpdate: 0, renderItem: this.#renderLabelItem },
+      ],
+    }
+  }
+
+  // The same function on every build, so ECharts updates the label elements instead of replacing them.
+  #renderLabelItem = (params: { dataIndex: number }): unknown => {
+    const label = this.#outsideLabels[params.dataIndex]
+    if (!label) return null
+    const theme = this.themeController.theme
+    return {
+      type: 'group',
+      silent: true,
+      children: [
+        {
+          type: 'polyline',
+          silent: true,
+          shape: { points: label.points },
+          style: { fill: 'none', stroke: theme.mutedColor, lineWidth: 1, opacity: 0.6 * label.opacity },
+        },
+        {
+          type: 'text',
+          silent: true,
+          style: {
+            text: label.text,
+            x: label.x,
+            y: label.y,
+            align: label.align,
+            verticalAlign: 'middle',
+            fill: theme.color,
+            fontSize: theme.fontSize,
+            fontFamily: theme.fontFamily === 'inherit' ? undefined : theme.fontFamily,
+            opacity: label.opacity,
+          },
+        },
+      ],
+    }
   }
 
   protected override seriesOption(_index: number, context: ChartBuildContext): Record<string, unknown> {
@@ -231,11 +379,13 @@ export class PyramidChart extends EchartsChartBase {
     const horizontal = this.#horizontal
     const align = this.#align(layout.align)
     const outsideSide = horizontal ? (align === 'bottom' ? 'top' : 'bottom') : align === 'right' ? 'left' : 'right'
-    const showLabels = this.labels !== 'none'
+    // Outside labels are drawn by their own series (see #placeOutsideLabels); the funnel only draws inside ones.
+    const showLabels = this.labels === 'inside'
     const label = {
       show: showLabels,
       position: this.labels === 'inside' ? 'inside' : outsideSide,
-      color: this.labels === 'inside' ? theme.surface : theme.color,
+      // Inside labels carry their own colour, picked against each level's fill.
+      color: theme.color,
       fontSize: theme.fontSize,
       formatter: (params: { data?: PyramidDatum }) => this.#labelText(params.data),
     }
@@ -255,9 +405,8 @@ export class PyramidChart extends EchartsChartBase {
       minSize: layout.minWidth,
       maxSize: layout.maxWidth,
       label,
-      labelLine: { show: this.labels === 'outside', length: LABEL_LINE, lineStyle: { color: theme.gridColor, width: 1 } },
-      // Thin levels near the apex would otherwise stack their outside labels on top of each other.
-      labelLayout: { moveOverlap: horizontal ? 'shiftX' : 'shiftY' },
+      labelLine: { show: false },
+      // Outside labels sit where #placeOutsideLabels spread them, clear of each other.
       itemStyle: levelBorder(this, theme.surface),
       emphasis: { label: { show: showLabels } },
     }
@@ -365,6 +514,12 @@ function toEngineSize(value: string, fallback: string): string {
   if (value.endsWith('%')) return Number.isFinite(parseFloat(value)) ? value : fallback
   const pixels = parseFloat(value)
   return Number.isFinite(pixels) ? String(pixels) : fallback
+}
+
+/** Where a level's edge sits across the axis, from the start of the box: its far edge, or with `near` its near one. */
+function edgeOffset(align: string, cross: number, width: number, near: boolean): number {
+  const from = align === 'left' || align === 'top' ? 0 : align === 'right' || align === 'bottom' ? cross - width : (cross - width) / 2
+  return near ? from : from + width
 }
 
 /** Resolves an engine size against the extent a percentage refers to. */

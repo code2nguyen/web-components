@@ -1,5 +1,5 @@
 import { test, expect } from './fixture'
-import { layoutPyramid } from '../src/pyramid-layout'
+import { layoutPyramid, readableTextOn, spreadLabels } from '../src/pyramid-layout'
 
 test('the chart family resolves first-paint theme probes without scheduling a second Lit update', async ({ page, scenario }) => {
   const warnings: string[] = []
@@ -648,6 +648,22 @@ test('lays pyramid levels out by area, height, width or rank', () => {
   expect(layoutPyramid([], { sizing: 'area', sort: 'ascending' })).toEqual([])
 })
 
+test('spreads pyramid labels apart and keeps them inside the plot', () => {
+  // Three labels wanted almost on top of each other near the start, one far down: the first three are pushed apart.
+  expect(spreadLabels([10, 12, 14, 200], [16, 16, 16, 16], 0, 240)).toEqual([10, 26, 42, 200])
+  // Input order is kept, whatever order the centres come in.
+  expect(spreadLabels([200, 12, 10], [16, 16, 16], 0, 240)).toEqual([200, 26, 10])
+  // A crowd at the end is pulled back inside, dragging its neighbours along.
+  expect(spreadLabels([230, 235, 238], [16, 16, 16], 0, 240)).toEqual([200, 216, 232])
+})
+
+test('picks a readable inside label colour against each level', () => {
+  expect(readableTextOn('rgb(94, 234, 212)')).toBe('#18181b')
+  expect(readableTextOn('rgb(15, 118, 110)')).toBe('#ffffff')
+  expect(readableTextOn('#0265dc')).toBe('#ffffff')
+  expect(readableTextOn('not a colour')).toBe('#ffffff')
+})
+
 test('hands ECharts a funnel whose synthetic depths follow the pyramid layout', async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
@@ -681,6 +697,42 @@ test('hands ECharts a funnel whose synthetic depths follow the pyramid layout', 
   expect(result.increasing).toBe(true)
   expect(result.heights).toBeCloseTo(100, 6)
   expect(result).toMatchObject({ type: 'funnel', sort: 'ascending', orient: 'vertical', extent: [0, 1], position: 'right', label: 'Starter · 4,870' })
+})
+
+test('draws outside pyramid labels with their own series, spread clear of each other', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const result = await chart.evaluate((element) => {
+    type Label = { type: string; children: { type: string; style: { text?: string; y?: number } }[] }
+    const pyramid = element as unknown as {
+      frame: unknown
+      labels: string
+      buildContext(): unknown
+      buildOptions(context: unknown): { series: { type: string; label?: { show: boolean }; renderItem?(params: { dataIndex: number }): Label | null }[] }
+      projectData(frame: unknown, context: unknown): unknown[][]
+    }
+    const read = () => {
+      const context = pyramid.buildContext()
+      const projected = pyramid.projectData(pyramid.frame, context)
+      const series = pyramid.buildOptions(context).series
+      const labels = series[1]?.renderItem ? projected[1].map((_, index) => series[1].renderItem?.({ dataIndex: index })?.children[1].style) : []
+      return { types: series.map((item) => item.type), engineLabels: series[0].label?.show, labels }
+    }
+    const outside = read()
+    pyramid.labels = 'inside'
+    const inside = read()
+    return { outside, inside }
+  })
+
+  // The funnel's own labels cannot be moved, so outside ones come from a second, silent series.
+  expect(result.outside.types).toEqual(['funnel', 'custom'])
+  expect(result.outside.engineLabels).toBe(false)
+  expect(result.outside.labels.map((label) => label?.text)).toEqual(['Enterprise · 42', 'Business · 318', 'Team · 1,260', 'Starter · 4,870'])
+  const ys = result.outside.labels.map((label) => label?.y ?? 0)
+  for (let index = 1; index < ys.length; index += 1) expect(ys[index] - ys[index - 1]).toBeGreaterThanOrEqual(12 * 1.35 - 0.001)
+  expect(result.inside).toEqual({ types: ['funnel'], engineLabels: true, labels: [] })
 })
 
 test('maps the apex and the level variables onto the funnel', async ({ page, scenario }) => {

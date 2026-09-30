@@ -89,3 +89,56 @@ function depthForArea(share: number, apex: number): number {
   const k = (1 - apex) / 2
   return (-apex + Math.sqrt(apex * apex + 4 * k * share * ((1 + apex) / 2))) / (2 * k)
 }
+
+/**
+ * Places labels along one axis as close to their levels as they can get without overlapping. `centres` are the
+ * wanted positions (in any order), `sizes` each label's extent along the axis, and every label is kept whole
+ * inside `min…max`. Returns the positions in the input order.
+ */
+export function spreadLabels(centres: readonly number[], sizes: readonly number[], min: number, max: number): number[] {
+  const order = centres.map((_, index) => index).sort((a, b) => centres[a] - centres[b])
+  const placed = centres.slice()
+  // Down the axis, each label is pushed clear of the one before it and of the start.
+  let edge = min
+  for (const index of order) {
+    const half = sizes[index] / 2
+    placed[index] = Math.max(centres[index], edge + half)
+    edge = placed[index] + half
+  }
+  // Back up it, anything pushed past the end is pulled in, dragging its neighbours along. The start wins when the
+  // labels cannot all fit.
+  edge = max
+  for (let position = order.length - 1; position >= 0; position -= 1) {
+    const index = order[position]
+    const half = sizes[index] / 2
+    placed[index] = Math.max(min + half, Math.min(placed[index], edge - half))
+    edge = placed[index] - half
+  }
+  return placed
+}
+
+/** Near-black or white, whichever reads better on `background` (an `rgb(…)` or `#rrggbb` colour). */
+export function readableTextOn(background: string, dark = '#18181b', light = '#ffffff'): string {
+  const channels = parseColor(background)
+  if (!channels) return light
+  const luminance = relativeLuminance(channels)
+  const contrast = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+  const darkLuminance = relativeLuminance(parseColor(dark) ?? [0, 0, 0])
+  return contrast(luminance, darkLuminance) >= contrast(luminance, 1) ? dark : light
+}
+
+function parseColor(value: string): [number, number, number] | undefined {
+  const rgb = /rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i.exec(value)
+  if (rgb) return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])]
+  const hex = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(value.trim())
+  if (hex) return [parseInt(hex[1], 16), parseInt(hex[2], 16), parseInt(hex[3], 16)]
+  return undefined
+}
+
+function relativeLuminance([r, g, b]: [number, number, number]): number {
+  const linear = (channel: number) => {
+    const c = channel / 255
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  }
+  return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+}
