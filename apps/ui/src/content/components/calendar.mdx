@@ -12,7 +12,8 @@ import { Calendar } from '@c2n/calendar'
 `c2-calendar` shows a plan on a month grid. Each entry in `events` is drawn as a bar from its `start` to its `end`
 day, so a vacation reads as one strip with a clear beginning and end, continued on the next row when it crosses a
 week. Overlapping entries stack in separate lanes. The header steps between months (and back to today); `month`
-picks the one shown, `week-start` and `locale` match the audience. The calendar's text follows `locale` (`fr`,
+picks the one shown. The week starts on the locale's usual day (Sunday in `en-US`, Monday in `fr` or `en-GB`,
+Saturday in `ar-EG`); `week-start` (`monday`, `sunday` or `saturday`) overrides it. The calendar's text follows `locale` (`fr`,
 `en-GB`, …) and, when it is not set, the browser's language: month and day names, Today and "this month" come from the
 browser's `Intl` data, and the navigation labels are built in for English, French, German, Spanish, Italian, Portuguese,
 Dutch and Vietnamese, falling back to English otherwise.

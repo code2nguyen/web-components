@@ -3,7 +3,7 @@ import '../src/week-planner'
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
 main.innerHTML = `
-  <c2-week-planner id="subject" locale="en-US" style="width: 760px"></c2-week-planner>
+  <c2-week-planner id="subject" locale="en-US" week-start="monday" style="width: 760px"></c2-week-planner>
   <output aria-label="Last event"></output>
 `
 
@@ -20,6 +20,13 @@ subject.events = [
 if (scenario === 'alternate' || scenario === 'odd') subject.alternateWeeks = true
 if (scenario === 'odd') subject.parity = 'odd'
 if (scenario === 'french') subject.locale = 'fr'
+// The scenarios pin Monday; these ones let the locale decide.
+const localeWeek = /^week-(.+)$/.exec(scenario)
+if (localeWeek) {
+  subject.removeAttribute('week-start')
+  subject.locale = localeWeek[1]
+}
+if (scenario === 'french' || scenario === 'browser-locale') subject.removeAttribute('week-start')
 if (scenario === 'french' || scenario === 'browser-locale') subject.alternateWeeks = true
 if (scenario === 'browser-locale') subject.removeAttribute('locale')
 if (scenario === 'every-week') subject.events = subject.events.filter((event) => !event.weeks)

@@ -172,3 +172,23 @@ test.describe('without a locale attribute', () => {
     await expect(page.getByRole('button', { name: 'Aujourd’hui' })).toBeVisible()
   })
 })
+
+test.describe('first day of the week', () => {
+  for (const [locale, first] of [
+    ['en-US', 'Sun'],
+    ['en-GB', 'Mon'],
+    ['fr', 'lun.'],
+    ['ar-EG-u-nu-latn', 'السبت'],
+  ]) {
+    test(`follows the convention of ${locale}`, async ({ page, scenario }) => {
+      await scenario(`week-${locale}`)
+      await expect(page.locator('c2-calendar').locator('.weekdays span').first()).toHaveText(first)
+    })
+  }
+
+  test('lets week-start override the locale', async ({ page, scenario }) => {
+    await scenario('week-en-US')
+    await page.locator('c2-calendar').evaluate((element) => element.setAttribute('week-start', 'monday'))
+    await expect(page.locator('c2-calendar').locator('.weekdays span').first()).toHaveText('Mon')
+  })
+})

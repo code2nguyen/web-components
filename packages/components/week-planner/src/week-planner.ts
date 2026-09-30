@@ -3,6 +3,7 @@ import { state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { firstDayOfWeek, resolveLocale, type Weekday } from '@c2n/core/locale-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 // Registers `c2-button-group` and `c2-button`, the odd/even week switch, and `c2-badge`, the current week's number.
 import '@c2n/button-group'
@@ -11,7 +12,7 @@ import styles from './week-planner.scss?inline'
 
 export type WeekPlannerDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
 export type WeekPlannerParity = 'odd' | 'even'
-export type WeekPlannerWeekStart = 'monday' | 'sunday'
+export type WeekPlannerWeekStart = 'monday' | 'sunday' | 'saturday'
 
 /** One slot of the typical week: a day, a time range, and optionally the kind of week it happens in. */
 export interface WeekPlannerEvent {
@@ -199,8 +200,8 @@ export class WeekPlanner extends LitElement {
   @property({ type: Number, attribute: 'start-hour' }) startHour = 8
   /** Last hour on the scale; later events extend it. */
   @property({ type: Number, attribute: 'end-hour' }) endHour = 18
-  /** First day of the week. */
-  @property({ attribute: 'week-start', reflect: true }) weekStart: WeekPlannerWeekStart = 'monday'
+  /** First day of the week. Defaults to the convention of `locale` (Sunday in `en-US`, Monday in `fr` or `en-GB`). */
+  @property({ attribute: 'week-start', reflect: true }) weekStart: WeekPlannerWeekStart | '' = ''
   /** Language of the planner's text and day names, e.g. `fr` or `en-GB`. Defaults to the browser's language. */
   @property({ type: String }) locale = ''
   /** Accessible name for the planner. Defaults to "Week plan" in the planner's language. */
@@ -218,7 +219,15 @@ export class WeekPlanner extends LitElement {
   }
 
   private get effectiveLocale() {
-    return this.locale || (typeof navigator !== 'undefined' && navigator.language) || 'en-US'
+    return resolveLocale(this.locale)
+  }
+
+  /** First day of the week as `Date#getDay` numbers it: `week-start` when set, else the locale's convention. */
+  private get firstWeekday(): Weekday {
+    if (this.weekStart === 'sunday') return 0
+    if (this.weekStart === 'monday') return 1
+    if (this.weekStart === 'saturday') return 6
+    return firstDayOfWeek(this.effectiveLocale)
   }
 
   private get labels(): Labels {
@@ -299,7 +308,8 @@ export class WeekPlanner extends LitElement {
     const lastHour = Math.min(24, Math.max(Number.isFinite(this.endHour) ? Math.ceil(this.endHour) : 18, ...all.map((item) => Math.ceil(item.to / 60))))
     const hours = Math.max(1, lastHour - firstHour)
 
-    const order = this.weekStart === 'sunday' ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6, 0]
+    const first = this.firstWeekday
+    const order = Array.from({ length: 7 }, (_, index) => (first + index) % 7)
     const shortName = new Intl.DateTimeFormat(this.effectiveLocale, { weekday: 'short' })
     const longName = new Intl.DateTimeFormat(this.effectiveLocale, { weekday: 'long' })
     // 2024-01-07 is a Sunday: index 0 of DAYS.

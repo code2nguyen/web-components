@@ -65,7 +65,9 @@ Blocks are buttons: clicking one, or pressing Enter on it, fires `event-click` w
 
 ## Language
 
-The planner's text follows `locale` (`fr`, `en-GB`, …) and, when it is not set, the browser's language. Day names,
+The planner's text follows `locale` (`fr`, `en-GB`, …) and, when it is not set, the browser's language. The day
+columns start on that language's usual first day (Sunday in `en-US`, Monday in `fr` or `en-GB`, Saturday in
+`ar-EG`); `week-start` (`monday`, `sunday` or `saturday`) overrides it. Day names,
 "today" and "this week" come from the browser's `Intl` data, so they exist in every language; the switch labels
 (Odd week, Even week) and the accessible names are built in for English, French, German, Spanish, Italian, Portuguese,
 Dutch and Vietnamese, and fall back to English otherwise.

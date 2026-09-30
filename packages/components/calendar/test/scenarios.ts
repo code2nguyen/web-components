@@ -3,7 +3,7 @@ import '../src/calendar'
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
 main.innerHTML = `
-  <c2-calendar id="subject" locale="en-US" month="2026-09" style="width: 720px"></c2-calendar>
+  <c2-calendar id="subject" locale="en-US" week-start="monday" month="2026-09" style="width: 720px"></c2-calendar>
   <output aria-label="Last event"></output>
 `
 
@@ -25,6 +25,13 @@ if (scenario === 'attribute') {
   subject.setAttribute('events', JSON.stringify([{ title: 'Ski trip', start: '2026-11-20', end: '2026-11-22' }]))
 }
 if (scenario === 'french') subject.locale = 'fr'
+// The scenarios pin Monday; these ones let the locale decide.
+const localeWeek = /^week-(.+)$/.exec(scenario)
+if (localeWeek) {
+  subject.removeAttribute('week-start')
+  subject.locale = localeWeek[1]
+}
+if (scenario === 'french' || scenario === 'browser-locale') subject.removeAttribute('week-start')
 if (scenario === 'browser-locale') subject.removeAttribute('locale')
 if (scenario === 'sunday') subject.weekStart = 'sunday'
 if (scenario === 'no-picker') subject.setAttribute('month-picker', 'false')

@@ -3,10 +3,11 @@ import { queryAll, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
+import { firstDayOfWeek, resolveLocale, type Weekday } from '@c2n/core/locale-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import styles from './calendar.scss?inline'
 
-export type CalendarWeekStart = 'monday' | 'sunday'
+export type CalendarWeekStart = 'monday' | 'sunday' | 'saturday'
 
 /** One entry in the plan: a single day, or a span from `start` to `end` (both inclusive, `YYYY-MM-DD`). */
 export interface CalendarEvent {
@@ -259,8 +260,8 @@ export class Calendar extends LitElement {
   @property({ type: String }) month = ''
   /** Language of the calendar's text, month and day names, e.g. `fr` or `en-GB`. Defaults to the browser's language. */
   @property({ type: String }) locale = ''
-  /** First day of each week. */
-  @property({ attribute: 'week-start', reflect: true }) weekStart: CalendarWeekStart = 'monday'
+  /** First day of the week. Defaults to the convention of `locale` (Sunday in `en-US`, Monday in `fr` or `en-GB`). */
+  @property({ attribute: 'week-start', reflect: true }) weekStart: CalendarWeekStart | '' = ''
   /** Makes the month title open a year and month picker. Set `month-picker="false"` for a plain title. */
   @property({ type: Boolean, attribute: 'month-picker' }) monthPicker = true
   /** Accessible name for the calendar; defaults to the month title. */
@@ -279,7 +280,15 @@ export class Calendar extends LitElement {
   }
 
   private get effectiveLocale() {
-    return this.locale || (typeof navigator !== 'undefined' && navigator.language) || 'en-US'
+    return resolveLocale(this.locale)
+  }
+
+  /** First day of the week as `Date#getDay` numbers it: `week-start` when set, else the locale's convention. */
+  private get firstWeekday(): Weekday {
+    if (this.weekStart === 'sunday') return 0
+    if (this.weekStart === 'monday') return 1
+    if (this.weekStart === 'saturday') return 6
+    return firstDayOfWeek(this.effectiveLocale)
   }
 
   private get labels(): Labels {
@@ -428,7 +437,7 @@ export class Calendar extends LitElement {
 
   private get firstGridDay() {
     const first = this.visibleMonth
-    const offset = this.weekStart === 'sunday' ? first.getDay() : (first.getDay() + 6) % 7
+    const offset = (first.getDay() - this.firstWeekday + 7) % 7
     return addDays(first, -offset)
   }
 
