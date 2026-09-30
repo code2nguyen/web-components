@@ -103,6 +103,11 @@ export class CandlestickChart extends EchartsChartBase {
     }
   }
 
+  /** Open, close, low and high are one series drawn as candles, so a click has nothing to set apart. */
+  protected override highlightKeyAt(): string | undefined {
+    return undefined
+  }
+
   protected override legendItems(): ChartLegendItem[] {
     const visible = !this.hiddenSeries.has(0)
     return [
@@ -110,7 +115,7 @@ export class CandlestickChart extends EchartsChartBase {
         label: this.name,
         color: this.themeController.theme.positive,
         visible,
-        toggle: () => this.setSeriesVisible(0, !visible),
+        ...this.legendEntryState(this.openField, visible, (next) => this.setSeriesVisible(0, next)),
         series: { field: this.openField, label: this.name },
         index: 0,
       },

@@ -150,6 +150,12 @@ function changeComponentName(vnode, uid, componentName, markup) {
     const classAttribute = vnode.attributes[classAttributeIndex]
     classAttribute.value = classAttribute.value + ` ${uid}`
   }
+  // A nested child is still rendered by Astro's Lit renderer on the server, which assigns any attribute whose name is a
+  // property as that property; a non-reflected one (`c2-chart-series`'s `field`) then never reaches the HTML. So its
+  // attributes are handed over capitalized as well, even though it does not become an island.
+  if (NESTED_CHILD_TAGS.has(vnode.name)) {
+    for (const attribute of vnode.attributes ?? []) attribute.name = asAttributeName(attribute.name)
+  }
   if (vnode.name?.startsWith('c2-') && !NESTED_CHILD_TAGS.has(vnode.name)) {
     vnode.name = changeCase.pascalCase(vnode.name.replace('c2-', ''))
     vnode.attributes = vnode.attributes || []

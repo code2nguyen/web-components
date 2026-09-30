@@ -13,11 +13,12 @@ import './gauge-chart.js'
 import './radar-chart.js'
 import './scatter-chart.js'
 import './candlestick-chart.js'
+import './overlap-chart.js'
 import './chart-series.js'
 import './chart-legend.js'
 import './chart-tooltip.js'
 
-export { ChartBase, type ChartEventMap, type ChartLegendChangeEventDetail, type ChartLegendItem } from './chart-base.js'
+export { ChartBase, type ChartEventMap, type ChartLegendChangeEventDetail, type ChartLegendItem, type ChartSeriesHighlightEventDetail } from './chart-base.js'
 export { UplotChartBase, type UplotSeriesStyle } from './uplot-chart-base.js'
 export { EchartsChartBase } from './echarts-chart-base.js'
 export { LineChart } from './line-chart.js'
@@ -29,6 +30,18 @@ export { GaugeChart } from './gauge-chart.js'
 export { RadarChart } from './radar-chart.js'
 export { ScatterChart } from './scatter-chart.js'
 export { CandlestickChart } from './candlestick-chart.js'
+export { OverlapChart, type OverlapChartEventMap, type OverlapSelectionChangeEventDetail } from './overlap-chart.js'
+export {
+  OVERLAP_MAX_SETS,
+  fitOverlap,
+  overlapRegions,
+  regionPath,
+  solveOverlap,
+  type OverlapCircle,
+  type OverlapLayoutMode,
+  type OverlapRegion,
+  type OverlapRow,
+} from './overlap-layout.js'
 export { ChartSeries, SERIES_CHANGE_EVENT } from './chart-series.js'
 export { ChartLegend } from './chart-legend.js'
 export { ChartTooltip } from './chart-tooltip.js'

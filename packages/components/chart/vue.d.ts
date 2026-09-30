@@ -17,6 +17,7 @@ import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
+import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
@@ -37,11 +38,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<AreaChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<AreaChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<AreaChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<AreaChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<AreaChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<AreaChart, 'chart-ready'>) => void
@@ -59,11 +62,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<BarChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<BarChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<BarChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<BarChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<BarChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<BarChart, 'chart-ready'>) => void
@@ -81,11 +86,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<CandlestickChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<CandlestickChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<CandlestickChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<CandlestickChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<CandlestickChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<CandlestickChart, 'chart-ready'>) => void
@@ -111,11 +118,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<GaugeChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<GaugeChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<GaugeChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<GaugeChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<GaugeChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<GaugeChart, 'chart-ready'>) => void
@@ -131,17 +140,48 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<LineChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<LineChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<LineChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<LineChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<LineChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<LineChart, 'chart-ready'>) => void
         onChartError?: (event: EventOf<LineChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<LineChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<LineChart, 'point-click'>) => void
+      }
+    >
+    'c2-overlap-chart': DefineComponent<
+      C2Props<OverlapChart> & {
+        'sets-field'?: unknown
+        'size-field'?: unknown
+        'set-labels'?: unknown
+        'selected-set'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onSetHover?: (event: EventOf<OverlapChart, 'set-hover'>) => void
+        onRegionHover?: (event: EventOf<OverlapChart, 'region-hover'>) => void
+        onRegionClick?: (event: EventOf<OverlapChart, 'region-click'>) => void
+        onSelectionChange?: (event: EventOf<OverlapChart, 'selection-change'>) => void
+        onSetClick?: (event: EventOf<OverlapChart, 'set-click'>) => void
+        onTooltipChange?: (event: EventOf<OverlapChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<OverlapChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<OverlapChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<OverlapChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<OverlapChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<OverlapChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<OverlapChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<OverlapChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<OverlapChart, 'point-click'>) => void
       }
     >
     'c2-pie-chart': DefineComponent<
@@ -153,11 +193,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<PieChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<PieChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<PieChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<PieChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<PieChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<PieChart, 'chart-ready'>) => void
@@ -174,11 +216,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<RadarChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<RadarChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<RadarChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<RadarChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<RadarChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<RadarChart, 'chart-ready'>) => void
@@ -194,11 +238,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<ScatterChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<ScatterChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<ScatterChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<ScatterChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<ScatterChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<ScatterChart, 'chart-ready'>) => void
@@ -214,11 +260,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<Sparkline, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<Sparkline, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<Sparkline, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<Sparkline, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<Sparkline, 'range-change'>) => void
         onChartReady?: (event: EventOf<Sparkline, 'chart-ready'>) => void

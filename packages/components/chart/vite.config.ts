@@ -17,6 +17,8 @@ export default defineConfig({
         'src/radar-chart.ts',
         'src/scatter-chart.ts',
         'src/candlestick-chart.ts',
+        'src/overlap-chart.ts',
+        'src/overlap-layout.ts',
         'src/chart-series.ts',
         'src/chart-legend.ts',
         'src/chart-tooltip.ts',
@@ -34,7 +36,8 @@ export default defineConfig({
     rollupOptions: {
       // `uplot` and `echarts` are peer dependencies reached through a dynamic import; the `^echarts`
       // branch also covers the `echarts/core`, `/charts`, `/components` and `/renderers` subpaths.
-      external: /^(lit|@lit\/context|@c2n|uplot|echarts)/,
+      // `@upsetjs/venn.js` is a regular dependency of the overlap chart, resolved by the consumer's bundler.
+      external: /^(lit|@lit\/context|@c2n|@upsetjs|uplot|echarts)/,
     },
   },
   plugins: [
@@ -54,6 +57,7 @@ export default defineConfig({
         'src/radar-chart.ts',
         'src/scatter-chart.ts',
         'src/candlestick-chart.ts',
+        'src/overlap-chart.ts',
         'src/chart-series.ts',
         'src/chart-legend.ts',
         'src/chart-tooltip.ts',
