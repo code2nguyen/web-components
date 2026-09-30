@@ -32,6 +32,7 @@ import type {
 import styles from './flow.scss?inline'
 
 import '@c2n/context-menu'
+import '@c2n/kbd'
 
 export type * from './flow-types.js'
 export { buildGraph, layoutGraph, mergeLayout } from './flow-layout.js'
@@ -125,6 +126,7 @@ const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in 
  * @event {CustomEvent<FlowMenuSelectDetail>} flow-menu-select - A context-menu row added by `renderContextMenu` was activated, with the node it was opened on. Does not bubble.
  *
  * @internalcomponent c2-context-menu
+ * @internalcomponent c2-kbd
  *
  * @cssproperty {pixel} [--c2-flow--height=480px] - Height of the canvas.
  * @cssproperty {color} [--c2-flow--background-color=#fafafa] - Canvas background.
@@ -848,9 +850,9 @@ export class Flow extends LitElement {
               <hr />`
           : nothing
       }
-      <c2-menu-item value="flow:zoom-in" keep-open>${this.menuIcon(MENU_ICONS.zoomIn)}Zoom in<span slot="shortcut">+</span></c2-menu-item>
-      <c2-menu-item value="flow:zoom-out" keep-open>${this.menuIcon(MENU_ICONS.zoomOut)}Zoom out<span slot="shortcut">−</span></c2-menu-item>
-      <c2-menu-item value="flow:fit">${this.menuIcon(MENU_ICONS.fit)}Fit view<span slot="shortcut">0</span></c2-menu-item>
+      <c2-menu-item value="flow:zoom-in" keep-open>${this.menuIcon(MENU_ICONS.zoomIn)}Zoom in<c2-kbd slot="shortcut">+</c2-kbd></c2-menu-item>
+      <c2-menu-item value="flow:zoom-out" keep-open>${this.menuIcon(MENU_ICONS.zoomOut)}Zoom out<c2-kbd slot="shortcut">−</c2-kbd></c2-menu-item>
+      <c2-menu-item value="flow:fit">${this.menuIcon(MENU_ICONS.fit)}Fit view<c2-kbd slot="shortcut">0</c2-kbd></c2-menu-item>
       <hr />
       <h6>Layout</h6>
       <c2-menu-item type="radio" name="flow-direction" value="flow:direction-lr" .checked=${lr}>Left to right</c2-menu-item>

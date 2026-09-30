@@ -140,6 +140,8 @@ test('the canvas context menu groups the view controls and switches the layout d
     await expect(item(page, value)).toBeVisible()
   }
   await expect(item(page, 'flow:details')).toHaveCount(0)
+  await expect(item(page, 'flow:zoom-in').locator('c2-kbd[slot="shortcut"]')).toHaveText('+')
+  await expect(item(page, 'flow:fit').locator('c2-kbd[slot="shortcut"]')).toHaveText('0')
   await expect(item(page, 'flow:direction-lr')).toHaveJSProperty('checked', true)
   // Nothing has been moved yet, so there is no custom layout to discard.
   await expect(item(page, 'flow:auto-layout')).toHaveJSProperty('disabled', true)

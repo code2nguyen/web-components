@@ -57,7 +57,8 @@
     "type-check": {
       "dependencies": [
         "../../core:build",
-        "../context-menu:build"
+        "../context-menu:build",
+        "../kbd:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -71,6 +72,7 @@
   "dependencies": {
     "@c2n/context-menu": "0.0.19",
     "@c2n/core": "0.0.19",
+    "@c2n/kbd": "0.0.19",
     "@floating-ui/dom": "1.8.0",
     "lit": "3.3.3"
   },
