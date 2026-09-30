@@ -7,52 +7,57 @@
     <script type="module" src="/src/calendar.ts"></script>
     <style>
       body {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
+        display: grid;
         gap: 32px;
+        max-width: 880px;
         padding: 24px;
         font-family: system-ui, sans-serif;
       }
-      section {
-        display: grid;
-        gap: 8px;
-      }
       h3 {
-        margin: 0;
+        margin: 0 0 8px;
         color: #71717a;
         font-size: 12px;
         font-weight: 500;
       }
-      .brand {
-        --c2-calendar__day__selected--background: #7c3aed;
-        --c2-calendar__day__today--color: #7c3aed;
-        --c2-calendar__day--border-radius: 999px;
-        --c2-calendar--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.08);
+      .soft {
+        --c2-calendar--border: 0px solid transparent;
+        --c2-calendar__day--min-height: 64px;
+        --c2-calendar__event--border-radius: 999px;
+        --c2-calendar__event--background: #7c3aed;
       }
     </style>
   </head>
 
   <body>
     <section>
-      <h3>Default</h3>
-      <c2-calendar></c2-calendar>
+      <h3>Vacation plan</h3>
+      <c2-calendar
+        id="plan"
+        month="2026-09"
+        events='[
+          {"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},
+          {"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},
+          {"id":"conf","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},
+          {"id":"review","title":"Quarterly review","start":"2026-09-24"},
+          {"id":"move","title":"Moving week","start":"2026-09-28","end":"2026-10-04","color":"#be185d"}
+        ]'
+      ></c2-calendar>
+      <p id="log" style="color: #71717a; font-size: 13px">Click an event.</p>
     </section>
     <section>
-      <h3>Selected value, week starts Sunday</h3>
-      <c2-calendar value="2026-09-18" week-start="sunday"></c2-calendar>
+      <h3>Sunday first, themed</h3>
+      <c2-calendar
+        class="soft"
+        month="2026-10"
+        week-start="sunday"
+        events='[{"title":"Team offsite","start":"2026-10-12","end":"2026-10-14"},{"title":"Half term","start":"2026-10-19","end":"2026-10-23","color":"#0369a1"}]'
+      ></c2-calendar>
     </section>
-    <section>
-      <h3>min / max</h3>
-      <c2-calendar value="2026-09-10" min="2026-09-05" max="2026-09-25"></c2-calendar>
-    </section>
-    <section>
-      <h3>Themed</h3>
-      <c2-calendar class="brand" value="2026-09-22"></c2-calendar>
-    </section>
-    <section>
-      <h3>Disabled</h3>
-      <c2-calendar value="2026-09-10" disabled></c2-calendar>
-    </section>
+    <script type="module">
+      const log = document.querySelector('#log')
+      const plan = document.querySelector('#plan')
+      plan.addEventListener('event-click', (event) => (log.textContent = `Clicked: ${event.detail.event.title}`))
+      plan.addEventListener('month-change', (event) => (log.textContent = `Showing ${event.detail.month}`))
+    </script>
   </body>
 </html>

@@ -22,8 +22,8 @@ declare module 'vue' {
       C2Props<Calendar> & {
         'week-start'?: unknown
         'aria-label'?: unknown
-        onInput?: (event: EventOf<Calendar, 'input'>) => void
-        onChange?: (event: EventOf<Calendar, 'change'>) => void
+        onMonthChange?: (event: EventOf<Calendar, 'month-change'>) => void
+        onEventClick?: (event: EventOf<Calendar, 'event-click'>) => void
       }
     >
   }

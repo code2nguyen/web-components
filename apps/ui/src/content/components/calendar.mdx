@@ -1,7 +1,7 @@
 ---
 title: 'Calendar'
-description: 'Inline month calendar for picking a single date.'
-category: 'Inputs'
+description: 'Month planner that draws events and trips as bars across the days they cover.'
+category: 'Data display'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -9,11 +9,10 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Calendar } from '@c2n/calendar'
 
-`c2-calendar` shows one month and lets the user pick one day. Its `value` is a local `YYYY-MM-DD` string, so it never
-shifts across time zones. `min` and `max` disable the days outside them, `week-start` and `locale` match the audience,
-and with a `name` it submits its value in a form like a native control. Arrow keys move by day or week, Home and End
-move within the week, Page Up and Page Down change month (with Shift, year), and Enter or Space selects. For a start
-and end date, use [`c2-date-selector`](/web-components/components/date-selector) instead.
+`c2-calendar` shows a plan on a month grid. Each entry in `events` is drawn as a bar from its `start` to its `end`
+day, so a vacation reads as one strip with a clear beginning and end, continued on the next row when it crosses a
+week. Overlapping entries stack in separate lanes. The header moves between months (and back to today); `month`
+picks the one shown, `week-start` and `locale` match the audience.
 
 ## Installation
 
@@ -24,16 +23,30 @@ npm install @c2n/calendar
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/calendar
-<div data-label="Selected date">
-  <c2-calendar value="2026-09-18" locale="en-US"></c2-calendar>
-</div>
-<div data-label="Limited to a range, Sunday first">
-  <c2-calendar value="2026-09-10" min="2026-09-05" max="2026-09-25" week-start="sunday" locale="en-US"></c2-calendar>
-</div>
-<div data-label="Disabled">
-  <c2-calendar value="2026-09-10" disabled locale="en-US"></c2-calendar>
+<div data-label="Vacation plan">
+  <c2-calendar
+    month="2026-09"
+    locale="en-US"
+    events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"summit","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
+  ></c2-calendar>
 </div>
 ```
 
-Listen for `change` (or `input`) and read `event.target.value`. With `name="day"` the form submits `day=2026-09-18`;
-`required` makes an empty calendar invalid, and a form reset restores the authored `value`.
+## Events
+
+Each entry is `{ id?, title, start, end?, color? }`. Dates are local `YYYY-MM-DD` strings and `end` is inclusive;
+leave it out for a one-day entry. `color` is any CSS colour for that bar (pick one that keeps white text readable),
+otherwise `--c2-calendar__event--background` applies. Entries without a valid `start` are skipped.
+
+Set `events` as a property from code, or as a JSON attribute in markup. Bars are buttons: clicking one (or pressing
+Enter on it) fires `event-click` with the entry in `event.detail.event`. The header fires `month-change` with the
+month now shown (`YYYY-MM`), which is where to load the next month's plan.
+
+```ts tag=CodeBlock
+import '@c2n/calendar'
+
+const calendar = document.querySelector('c2-calendar')!
+calendar.events = [{ id: 'trip', title: 'Vacation', start: '2026-09-10', end: '2026-09-18' }]
+calendar.addEventListener('event-click', (event) => console.log(event.detail.event.id))
+calendar.addEventListener('month-change', (event) => console.log(event.detail.month))
+```

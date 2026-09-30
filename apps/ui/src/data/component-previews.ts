@@ -4,7 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
-  calendar: `<c2-calendar value="2026-09-18" locale="en-US" style="--c2-calendar__day--size:28px;--c2-calendar--padding:8px;--c2-calendar--font-size:12px"></c2-calendar>`,
+  calendar: `<c2-calendar month="2026-09" locale="en-US" style="width:300px;--c2-calendar--padding:8px;--c2-calendar--font-size:12px;--c2-calendar__day--min-height:36px;--c2-calendar__day--font-size:10px;--c2-calendar__event--height:14px;--c2-calendar__event--font-size:10px;--c2-calendar__navigation--size:24px" events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"title":"Review","start":"2026-09-24"}]'></c2-calendar>`,
   'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:#71717a">Wrote the first published algorithm.</div></c2-hover-card>`,
   command: `<c2-command style="width:260px;--c2-command__field--min-height:40px;--c2-command__list--max-height:150px">
   <c2-command-group heading="Suggestions">

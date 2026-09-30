@@ -23,9 +23,10 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-calendar': C2Props<Calendar> & {
+      'c2-calendar': Omit<C2Props<Calendar>, 'events'> & {
         'week-start'?: Attribute
         'aria-label'?: Attribute
+        events?: Calendar['events'] | string
       }
     }
   }

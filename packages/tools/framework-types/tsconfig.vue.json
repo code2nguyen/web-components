@@ -13,7 +13,6 @@
         "textarea": true,
         "select": true,
         "c2-autocomplete": true,
-        "c2-calendar": true,
         "c2-cascader": true,
         "c2-chat-input": true,
         "c2-code-editor": true,

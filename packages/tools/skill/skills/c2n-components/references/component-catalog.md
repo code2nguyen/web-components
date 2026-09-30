@@ -33,6 +33,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Attachment** — `c2-attachment, c2-attachment-group` · `@c2n/attachment` — File and image attachments with metadata, upload progress, failure states, and actions. Children: `c2-attachment`.
 - **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
 - **Badge** — `c2-badge` · `@c2n/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
+- **Calendar** — `c2-calendar` · `@c2n/calendar` — Month planner that draws events and trips as bars across the days they cover.
 - **Code Viewer** — `c2-code-viewer` · `@c2n/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
 - **Kbd** — `c2-kbd` · `@c2n/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
@@ -72,7 +73,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Inputs
 
 - **Autocomplete** — `c2-autocomplete` · `@c2n/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
-- **Calendar** — `c2-calendar` · `@c2n/calendar` — Inline month calendar for picking a single date.
 - **Cascader** — `c2-cascader` · `@c2n/cascader` — Select a value from related, multi-level data in one floating panel.
 - **Checkbox** — `c2-checkbox` · `@c2n/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
 - **Code Editor** — `c2-code-editor` · `@c2n/code-editor` — Editable, syntax-highlighted source field on CodeMirror 6, themed entirely through CSS variables.
