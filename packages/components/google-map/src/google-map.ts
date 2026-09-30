@@ -83,6 +83,7 @@ export interface GoogleMap {
  * @event {CustomEvent<GoogleMapClickEventDetail>} map-click - Fired when the user clicks the map. `detail` holds the `lat`/`lng`, and the `placeId` of a clicked point of interest.
  * @event {CustomEvent<GoogleMapViewChangeEventDetail>} view-change - Fired when the map settles after a pan or zoom, with its `center`, `zoom` and `bounds`.
  *
+ * @cssproperty {length} [--c2-google-map__container--width=100%] - Width of the map.
  * @cssproperty {length} [--c2-google-map__container--height=400px] - Height of the map.
  * @cssproperty {border} [--c2-google-map__container--border=1px solid #e4e4e7] - Border around the map.
  * @cssproperty {length} [--c2-google-map__container--border-radius=8px] - Corner radius of the map.

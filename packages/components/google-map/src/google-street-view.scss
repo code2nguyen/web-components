@@ -1,6 +1,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-google-street-view,
   $theme: (
+    container--width: 100%,
     container--height: 400px,
     container--border: 1px solid #e4e4e7,
     container--border-radius: 8px,
@@ -15,6 +16,7 @@
   position: relative;
   display: block;
   box-sizing: border-box;
+  width: css.cssVar(container--width);
   height: css.cssVar(container--height);
   overflow: hidden;
   border: css.cssVar(container--border);

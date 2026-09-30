@@ -121,7 +121,8 @@ export class GoogleMapMarker extends LitElement {
     marker.title = this.label
     marker.gmpDraggable = this.draggable
     marker.zIndex = this.zIndex ?? null
-    if (redraw) marker.content = this.content ?? this.#pin().element
+    // The pin is itself the element to show; its `element` property is deprecated.
+    if (redraw) marker.content = this.content ?? this.#pin()
   }
 
   #pin(): google.maps.marker.PinElement {

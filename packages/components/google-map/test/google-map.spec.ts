@@ -289,6 +289,18 @@ test.describe('c2-google-street-view', () => {
     await expect(view.getByRole('status')).toHaveCount(0)
   })
 
+  test('keeps its zoom when Google reports an unsettled one', async ({ page, renderScenario }) => {
+    await renderScenario(`<c2-google-street-view position="48.85,2.29" zoom="2"></c2-google-street-view>`)
+    await expect.poll(() => events(page, 'map-ready')).toHaveLength(1)
+    await page.evaluate(() => {
+      const panorama = (window as unknown as Scope).fakeGoogle.panoramas[0]
+      panorama.zoomUnsettled = true
+      panorama.setPov({ heading: 45, pitch: 0 })
+    })
+    await expect.poll(async () => (await events(page, 'view-change')).at(-1)?.detail).toMatchObject({ heading: 45, zoom: 2 })
+    expect(await page.locator('c2-google-street-view').evaluate((view) => (view as HTMLElement & { zoom: number }).zoom)).toBe(2)
+  })
+
   test('says so when there is no imagery at its position', async ({ page, renderScenario }) => {
     await renderScenario(`<c2-google-street-view position="0,0"></c2-google-street-view>`)
     await expect(page.locator('c2-google-street-view').getByRole('alert')).toHaveText('Street View has no imagery near this place.')

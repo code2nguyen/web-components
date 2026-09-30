@@ -122,13 +122,12 @@ class FakeMap extends MVCObject {
   }
 }
 
-class FakePin {
-  element: HTMLElement
-  constructor(readonly options: Record<string, unknown>) {
-    this.element = document.createElement('span')
-    this.element.textContent = (options.glyphText as string) ?? ''
-    this.element.style.background = options.background as string
-  }
+/** Like the real `PinElement`, the pin is an element itself. */
+function FakePin(options: Record<string, unknown>): HTMLElement {
+  const pin = document.createElement('span')
+  pin.textContent = (options.glyphText as string) ?? ''
+  pin.style.background = options.background as string
+  return pin
 }
 
 class FakeMarker extends EventTarget {
@@ -247,8 +246,10 @@ class FakePanorama extends MVCObject {
     return this.position ? latLng(this.position) : null
   }
   getZoom() {
-    return this.zoom
+    // The real panorama reports NaN before its zoom settles; `zoomUnsettled` reproduces that.
+    return this.zoomUnsettled ? NaN : this.zoom
   }
+  zoomUnsettled = false
   getPano() {
     return this.pano
   }
@@ -265,6 +266,7 @@ class FakePanorama extends MVCObject {
     this.trigger('pov_changed')
   }
   setZoom(zoom: number) {
+    if (!Number.isFinite(zoom)) throw new Error(`setPov: in property zoom: ${zoom} is not an accepted value`)
     this.zoom = zoom
   }
   setPano(pano: string) {

@@ -49,6 +49,7 @@ const NO_IMAGERY = 'Street View has no imagery near this place.'
  * @event {CustomEvent<GoogleStreetViewReadyEventDetail>} map-ready - Fired once the panorama exists. `detail.panorama` is the `google.maps.StreetViewPanorama`.
  * @event {CustomEvent<GoogleStreetViewChangeEventDetail>} view-change - Fired when the user moves or looks around, with the `position`, `heading`, `pitch`, `zoom` and `pano`.
  *
+ * @cssproperty {length} [--c2-google-street-view__container--width=100%] - Width of the panorama.
  * @cssproperty {length} [--c2-google-street-view__container--height=400px] - Height of the panorama.
  * @cssproperty {border} [--c2-google-street-view__container--border=1px solid #e4e4e7] - Border around the panorama.
  * @cssproperty {length} [--c2-google-street-view__container--border-radius=8px] - Corner radius of the panorama.
@@ -137,10 +138,12 @@ export class GoogleStreetView extends GoogleMapsElement {
       panorama.setPosition(this.position)
       panorama.setVisible(true)
     }
-    if ((changed.has('heading') || changed.has('pitch')) && (this.heading !== reported?.heading || this.pitch !== reported?.pitch)) {
-      panorama.setPov({ heading: this.heading, pitch: this.pitch })
+    const heading = Number.isFinite(this.heading) ? this.heading : 0
+    const pitch = Number.isFinite(this.pitch) ? this.pitch : 0
+    if ((changed.has('heading') || changed.has('pitch')) && (heading !== reported?.heading || pitch !== reported?.pitch)) {
+      panorama.setPov({ heading, pitch })
     }
-    if (changed.has('zoom') && this.zoom !== reported?.zoom) panorama.setZoom(this.zoom)
+    if (changed.has('zoom') && Number.isFinite(this.zoom) && this.zoom !== reported?.zoom) panorama.setZoom(this.zoom)
     if (changed.has('disableDefaultUi') || changed.has('options')) panorama.setOptions({ disableDefaultUI: this.disableDefaultUi, ...this.options })
     if (changed.has('for')) void this.#link()
   }
@@ -171,11 +174,13 @@ export class GoogleStreetView extends GoogleMapsElement {
   #report(): void {
     const panorama = this.#panorama!
     const pov = panorama.getPov()
+    // Google reports NaN for a value it has not settled yet; keep the last good one rather than hand NaN back to it.
+    const settled = (value: number | undefined, fallback: number) => (Number.isFinite(value) ? value! : fallback)
     const detail: GoogleStreetViewChangeEventDetail = {
       position: parseLatLng(panorama.getPosition()),
-      heading: pov.heading,
-      pitch: pov.pitch,
-      zoom: panorama.getZoom(),
+      heading: settled(pov.heading, this.heading),
+      pitch: settled(pov.pitch, this.pitch),
+      zoom: settled(panorama.getZoom(), this.zoom),
       pano: panorama.getPano(),
     }
     this.#reported = detail
