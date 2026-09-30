@@ -84,8 +84,6 @@ test.describe('month picker', () => {
     await expect(picker.getByRole('button', { name: 'September 2026, has events' })).toBeFocused()
     await expect(picker.getByRole('button', { name: 'October 2026, has events' })).toBeVisible()
     await expect(picker.getByRole('button', { name: 'November 2026', exact: true })).toBeVisible()
-    await expect(picker.getByRole('button', { name: 'Previous year, has events' })).toBeVisible()
-    await expect(picker.getByRole('button', { name: 'Next year, has events' })).toBeVisible()
   })
 
   test('jumps to a month of another year in a few clicks', async ({ page, scenario }) => {
@@ -93,7 +91,6 @@ test.describe('month picker', () => {
     await page.getByRole('button', { name: 'September 2026' }).click()
     await page.getByRole('button', { name: /^Next year/ }).click()
     await expect(page.getByRole('dialog').getByText('2027')).toBeVisible()
-    await expect(page.getByRole('button', { name: /^Next year/ })).toHaveAccessibleName('Next year')
     await page.getByRole('button', { name: 'June 2027, has events' }).click()
     await expect(page.getByRole('dialog')).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'June 2027' })).toBeVisible()

@@ -95,8 +95,7 @@ function dayDiff(from: Date, to: Date): number {
  * across time zones. The header moves between months; `month` picks the one shown.
  *
  * The month title opens a month picker (turn it off with `month-picker="false"`): a year stepper over the twelve
- * months, where a dot marks every month that has events and the year arrows carry a dot while earlier or later years
- * do. Arrow keys move between months, Page Up/Page Down change the year, Enter picks and Escape closes.
+ * months, where a dot and a soft tint mark every month that has events. Arrow keys move between months, Page Up/Page Down change the year, Enter picks and Escape closes.
  *
  * @tag c2-calendar
  *
@@ -153,7 +152,7 @@ function dayDiff(from: Date, to: Date): number {
  * @cssproperty {color} [--c2-calendar__month__marked--color=#18181b]
  * @cssproperty {color} [--c2-calendar__month__marked--background=rgba(2, 101, 220, 0.1)] - Soft tint behind a month that has events.
  * @cssproperty {color} [--c2-calendar__month__marked__hover--background=rgba(2, 101, 220, 0.18)]
- * @cssproperty {color} [--c2-calendar__marker--color=rgb(2, 101, 220)] - Dot on a month (or year arrow) that has events.
+ * @cssproperty {color} [--c2-calendar__marker--color=rgb(2, 101, 220)] - Dot on a month that has events.
  * @cssproperty {pixel} [--c2-calendar__marker--size=6px]
  */
 @customElement('c2-calendar')
@@ -282,29 +281,14 @@ export class Calendar extends LitElement {
     const long = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' })
     const now = new Date()
     const shown = this.visibleMonth
-    const keys = [...marked]
-    const earlier = keys.some((key) => key < `${year}-01`)
-    const later = keys.some((key) => key > `${year}-12`)
     return html`<div class="picker" role="dialog" aria-label="Choose a month" @keydown=${this.handlePickerKeydown} @focusout=${this.handlePickerFocusout}>
       <div class="picker-year">
-        <button
-          class="nav"
-          type="button"
-          aria-label=${earlier ? 'Previous year, has events' : 'Previous year'}
-          @click=${() => this.movePickerFocus(this.pickerFocus - 12)}
-        >
+        <button class="nav" type="button" aria-label="Previous year" @click=${() => this.movePickerFocus(this.pickerFocus - 12)}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
-          ${earlier ? html`<span class="marker" aria-hidden="true"></span>` : nothing}
         </button>
         <span class="picker-year-label" aria-live="polite">${year}</span>
-        <button
-          class="nav"
-          type="button"
-          aria-label=${later ? 'Next year, has events' : 'Next year'}
-          @click=${() => this.movePickerFocus(this.pickerFocus + 12)}
-        >
+        <button class="nav" type="button" aria-label="Next year" @click=${() => this.movePickerFocus(this.pickerFocus + 12)}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-          ${later ? html`<span class="marker" aria-hidden="true"></span>` : nothing}
         </button>
       </div>
       <div class="picker-months">
