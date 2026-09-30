@@ -12,7 +12,13 @@ import type { AlignedData, Options } from 'uplot'
 import { loadUplot } from './uplot-loader.js'
 import type { ChartAdapter, ChartAdapterEvents } from '../chart-adapter.js'
 
-export async function createUplotAdapter(): Promise<ChartAdapter<Options, AlignedData>> {
+/**
+ * How the cursor picks a series. `nearest` takes the line closest to the pointer; `band` (area charts) takes the fill
+ * the pointer is inside, which is the line just above it, and falls back to the nearest when it is above every line.
+ */
+export type UplotHitMode = 'nearest' | 'band'
+
+export async function createUplotAdapter(hitMode: UplotHitMode = 'nearest'): Promise<ChartAdapter<Options, AlignedData>> {
   const UPlot = await loadUplot()
 
   let instance: uPlot | undefined
@@ -41,18 +47,28 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
           }
           let nearestSeriesIndex = 0
           let nearestDistance = Number.POSITIVE_INFINITY
+          let bandSeriesIndex = -1
+          let bandDistance = Number.POSITIVE_INFINITY
+          // `cursor.top` is in CSS pixels from the top of the plot, so the points must be too: `valToPos(…, true)`
+          // would give canvas pixels, scaled by the device pixel ratio, and pick the wrong series on any HiDPI screen.
           const cursorY = self.cursor.top ?? 0
           for (let engineIndex = 1; engineIndex < self.series.length; engineIndex += 1) {
             const series = self.series[engineIndex]
             const value = data[engineIndex]?.[index]
             if (!series?.show || value === null || value === undefined || !Number.isFinite(value)) continue
-            const pointY = self.valToPos(value, series.scale ?? 'y', true)
+            const pointY = self.valToPos(value, series.scale ?? 'y', false)
             const distance = Math.abs(pointY - cursorY)
             if (distance < nearestDistance) {
               nearestDistance = distance
               nearestSeriesIndex = engineIndex - 1
             }
+            // Inside a fill means below its line (screen y grows downwards); the closest such line is the band.
+            if (pointY <= cursorY && cursorY - pointY < bandDistance) {
+              bandDistance = cursorY - pointY
+              bandSeriesIndex = engineIndex - 1
+            }
           }
+          if (hitMode === 'band' && bandSeriesIndex >= 0) nearestSeriesIndex = bandSeriesIndex
           const pointer = self.cursor.event
           const bounds = container?.getBoundingClientRect()
           hovered = { index, seriesIndex: nearestSeriesIndex }

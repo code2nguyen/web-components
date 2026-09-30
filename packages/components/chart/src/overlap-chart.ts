@@ -16,6 +16,7 @@ import {
   boxesOverlap,
   differencePath,
   leaderEnd,
+  lensPath,
   regionLabelPoint,
   regionPath,
   solveOverlap,
@@ -125,6 +126,7 @@ interface OverlapStyle {
   selectedOpacity: number
   highlightFillOpacity: number
   dimmedOpacity: number
+  overlapFillOpacity: number
   /** Resolved `--c2-chart__set__dimmed--color`, or `undefined` to keep each set's own colour. */
   dimmedColor?: string
   dimmedFillStyle: OverlapFillStyle
@@ -194,8 +196,9 @@ const SET_SERIES = 2
  * @cssproperty {opacity} [--c2-chart__set--fill-opacity=0.16] - Opacity of each circle's fill. Overlaps read darker because the fills stack.
  * @cssproperty {pixel} [--c2-chart__set--stroke-width=2px] - Width of each circle's outline, drawn in the set's colour.
  * @cssproperty {opacity} [--c2-chart__region__hover--opacity=0.12] - Opacity of the text-coloured wash over the hovered or focused region.
- * @cssproperty {opacity} [--c2-chart__region__selected--opacity=0.24] - Opacity of the text-coloured wash over the selected region, or over the whole circle of the selected set.
- * @cssproperty {opacity} [--c2-chart__set__highlight--fill-opacity=0.32] - Fill opacity of the highlighted or selected set's circle.
+ * @cssproperty {opacity} [--c2-chart__region__selected--opacity=0.24] - Opacity of the text-coloured wash over the selected region.
+ * @cssproperty {opacity} [--c2-chart__set__highlight--fill-opacity=0.4] - Fill opacity of the highlighted or selected set's circle.
+ * @cssproperty {opacity} [--c2-chart__set-overlap__highlight--fill-opacity=0.22] - Extra shading, in the highlighted set's colour, over each part of its circle it shares with another set, so the overlaps stand out.
  * @cssproperty {opacity} [--c2-chart__set__dimmed--opacity=0.4] - How much of their usual fill and outline the other circles keep while one set is highlighted.
  * @cssproperty {color} [--c2-chart__set__dimmed--color=transparent] - Colour the other circles take while one set is highlighted, a neutral grey for instance. `transparent` keeps each set's own colour.
  * @cssproperty {string} [--c2-chart__set__dimmed--fill-style=solid] - How the other circles are filled while one set is highlighted: `solid`, `hatch` (diagonal lines), `dots`, or `none` (outline only).
@@ -685,8 +688,9 @@ export class OverlapChart extends EchartsChartBase {
       setStrokeWidth: read('--c2-chart__set--stroke-width', 2),
       hoverOpacity: read('--c2-chart__region__hover--opacity', 0.12),
       selectedOpacity: read('--c2-chart__region__selected--opacity', 0.24),
-      highlightFillOpacity: read('--c2-chart__set__highlight--fill-opacity', 0.32),
+      highlightFillOpacity: read('--c2-chart__set__highlight--fill-opacity', 0.4),
       dimmedOpacity: read('--c2-chart__set__dimmed--opacity', 0.4),
+      overlapFillOpacity: read('--c2-chart__set-overlap__highlight--fill-opacity', 0.22),
       dimmedColor: this.#probeColor('.overlap-dimmed-probe'),
       dimmedFillStyle: readFillStyle(style.getPropertyValue('--c2-chart__set__dimmed--fill-style')),
       regionFontSize: read('--c2-chart__region-label--font-size', 14),
@@ -846,7 +850,7 @@ export class OverlapChart extends EchartsChartBase {
     return this.#pixels
   }
 
-  #renderSetFill(params: RenderParams, api: RenderApi, theme: ChartTheme): unknown {
+  #renderSetFill(params: RenderParams, api: RenderApi, _theme: ChartTheme): unknown {
     const pixels = this.#layoutPixels(api.getWidth(), api.getHeight())
     const circle = pixels?.circles[params.dataIndex]
     const set = this.#model?.sets[params.dataIndex]
@@ -855,8 +859,17 @@ export class OverlapChart extends EchartsChartBase {
     const active = this.#activeSet()
     const shape = { cx: circle.x, cy: circle.y, r: circle.radius }
     const children: unknown[] = []
-    if (!active || active === set.key) {
-      children.push({ type: 'circle', shape, style: { fill: set.color, fillOpacity: active ? style.highlightFillOpacity : style.setFillOpacity } })
+    if (!active) {
+      children.push({ type: 'circle', shape, style: { fill: set.color, fillOpacity: style.setFillOpacity } })
+    } else if (active === set.key) {
+      children.push({ type: 'circle', shape, style: { fill: set.color, fillOpacity: style.highlightFillOpacity } })
+      // Inside the highlighted circle, every part it shares with another set is shaded deeper in its own colour, so
+      // the reader sees which of its sections overlap (a part shared with two sets gets two layers).
+      pixels?.circles.forEach((other, index) => {
+        if (index === params.dataIndex) return
+        const pathData = lensPath(circle, other)
+        if (pathData) children.push({ type: 'path', shape: { pathData }, style: { fill: set.color, fillOpacity: style.overlapFillOpacity } })
+      })
     } else {
       // Another set is highlighted: this one takes the dimmed colour and fill style, but only outside the highlighted
       // circle, so the areas it shares with that set read as part of the highlight rather than being painted over.
@@ -869,14 +882,6 @@ export class OverlapChart extends EchartsChartBase {
       if (outline && pattern) children.push({ ...outline, style: { fill: pattern, opacity: style.dimmedOpacity } })
       else if (outline && style.dimmedFillStyle !== 'none')
         children.push({ ...outline, style: { fill: color, fillOpacity: style.setFillOpacity * style.dimmedOpacity } })
-    }
-    // The selected set gets the same text-coloured wash a selected region gets, over its whole circle.
-    if (this.selectedSet === set.key) {
-      children.push({
-        type: 'circle',
-        shape: { cx: circle.x, cy: circle.y, r: circle.radius },
-        style: { fill: theme.color, fillOpacity: style.selectedOpacity },
-      })
     }
     return { type: 'group', children }
   }
@@ -966,11 +971,14 @@ export class OverlapChart extends EchartsChartBase {
           type: 'circle',
           silent: true,
           shape: { cx: circle.x, cy: circle.y, r: circle.radius },
+          // The highlighted circle is drawn above the others with a soft glow, so it comes forward.
+          z2: emphasised ? 10 : 0,
           style: {
             fill: 'none',
             stroke: active && !emphasised ? (style.dimmedColor ?? set.color) : set.color,
             lineWidth: emphasised ? style.setStrokeWidth + 1.5 : style.setStrokeWidth,
             strokeOpacity: active && !emphasised ? style.dimmedOpacity : 1,
+            ...(emphasised ? { shadowBlur: 14, shadowColor: set.color } : {}),
           },
         },
         ...(label ? [this.#setNameElement(label, set, theme, style, fontFamily)] : []),

@@ -190,6 +190,11 @@ function intersectionPath(members: readonly OverlapCircle[], clockwise: boolean)
   return parts.join(' ')
 }
 
+/** The lens circles `a` and `b` share, as SVG path data, or `''` when they do not meet. */
+export function lensPath(a: OverlapCircle, b: OverlapCircle): string {
+  return intersectionPath([a, b], true)
+}
+
 /**
  * The part of circle `a` outside circle `b`, as SVG path data under the non-zero rule: `a` wound one way and the
  * lens they share the other way, so the lens cancels out. `a` itself when they do not meet, `''` when `b` covers `a`.

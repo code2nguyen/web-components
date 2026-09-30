@@ -123,7 +123,13 @@ export class PieChart extends EchartsChartBase {
     const highlighted = this.highlighted
     if (highlighted === null || !(frame.labels ?? []).includes(highlighted)) return projected
     const opacity = context.theme.dimmedOpacity
-    return projected.map((series) => series.map((datum) => (datum.name === highlighted ? datum : { ...datum, itemStyle: { ...datum.itemStyle, opacity } })))
+    // The highlighted slice lifts off the page with a soft shadow in its own colour's direction; the rest fade back.
+    const lift = { shadowBlur: 12, shadowColor: 'rgba(0, 0, 0, 0.35)' }
+    return projected.map((series) =>
+      series.map((datum) =>
+        datum.name === highlighted ? { ...datum, itemStyle: { ...datum.itemStyle, ...lift } } : { ...datum, itemStyle: { ...datum.itemStyle, opacity } },
+      ),
+    )
   }
 
   protected override seriesOption(_index: number, context: ChartBuildContext): Record<string, unknown> {

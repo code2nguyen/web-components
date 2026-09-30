@@ -2,7 +2,7 @@ import { property } from '@c2n/core/lit-helper.js'
 import type { AlignedData, Axis, Options, Series } from 'uplot'
 import { ChartBase } from './chart-base.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
-import { createUplotAdapter } from './engines/uplot-adapter.js'
+import { createUplotAdapter, type UplotHitMode } from './engines/uplot-adapter.js'
 import type { ChartFrame, ChartSeriesConfig } from './chart-types.js'
 
 const DAY = 86_400_000
@@ -56,8 +56,11 @@ export abstract class UplotChartBase extends ChartBase {
     return options
   }
 
+  /** How the cursor picks a series: the nearest line, or (area charts) the fill it is inside. */
+  protected readonly hitMode: UplotHitMode = 'nearest'
+
   protected override createAdapter(): Promise<ChartAdapter> {
-    return createUplotAdapter() as unknown as Promise<ChartAdapter>
+    return createUplotAdapter(this.hitMode) as unknown as Promise<ChartAdapter>
   }
 
   protected override projectData(frame: ChartFrame): unknown {
@@ -109,18 +112,31 @@ export abstract class UplotChartBase extends ChartBase {
       axes: [axis(showX, true), axis(showY, false), ...(hasRight ? [axis(showY, false, RIGHT_SCALE)] : [])],
       series: [
         {},
-        ...series.map((item, index) => ({
-          label: item.label ?? item.field,
-          show: !context.hidden.has(index),
-          scale: item.axis === 'right' ? RIGHT_SCALE : undefined,
-          ...this.seriesStyle(item, index, context),
-          // Another series is highlighted from the legend: this one fades back.
-          ...(context.highlighted >= 0 && index !== context.highlighted ? { alpha: theme.dimmedOpacity } : {}),
-        })),
+        ...series.map((item, index) => {
+          const style = this.seriesStyle(item, index, context)
+          return {
+            label: item.label ?? item.field,
+            show: !context.hidden.has(index),
+            // Spread in only for the right-hand axis, as for the axes above: an explicit `undefined` is copied over uPlot's
+            // default, and a series left without the `y` scale key cannot be mapped to a pixel, so the cursor could
+            // never tell which series it is nearest (it always reported the first).
+            ...(item.axis === 'right' ? { scale: RIGHT_SCALE } : {}),
+            ...style,
+            // A highlighted series comes forward with a heavier line, and the others fade back.
+            ...this.highlightStyle(style, index, context),
+          }
+        }),
       ],
     }
 
     return this.decorateOptions(options, context)
+  }
+
+  /** The highlight on top of a series' own style: a heavier stroke for the highlighted one, fading for the rest. */
+  protected highlightStyle(style: UplotSeriesStyle, index: number, context: ChartBuildContext): UplotSeriesStyle {
+    if (context.highlighted < 0) return {}
+    if (index !== context.highlighted) return { alpha: context.theme.dimmedOpacity }
+    return style.stroke ? { width: (style.width ?? context.theme.lineWidth) + 1 } : {}
   }
 
   /** A fixed y range when either bound is set, otherwise uPlot's own auto-ranging. */

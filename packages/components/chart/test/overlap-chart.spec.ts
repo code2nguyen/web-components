@@ -321,7 +321,7 @@ test('while one set is highlighted, the others take the dimmed colour and fill s
     }, fillStyle)
 
   const solid = await render('solid')
-  expect(solid.highlighted).toEqual({ fill: 'rgb(2, 101, 220)', opacity: 0.32 })
+  expect(solid.highlighted).toEqual({ fill: 'rgb(2, 101, 220)', opacity: 0.4 })
   expect(solid.dimmed?.fill).toBe('rgb(1, 2, 3)')
   expect(solid.dimmed?.opacity).toBeCloseTo(0.16 * 0.4)
   expect(solid.dimmedStroke).toBe('rgb(1, 2, 3)')
@@ -460,4 +460,25 @@ test("the other circles' dimmed fill stays outside the highlighted circle", asyn
     }
   })
   expect(result).toEqual({ type: 'path', inShared: false, inMobileOnly: true })
+})
+
+test('the highlighted circle shades each part it shares with another set, so its overlaps stand out', async ({ page, scenario }) => {
+  await scenario('overlap')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const shading = await chart.evaluate(async (element) => {
+    element.setAttribute('highlighted', 'web')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+    type Item = { children: { type: string; style: { fillOpacity?: number } }[] }
+    const subject = element as unknown as { buildOptions(c: unknown): { series: { renderItem(p: object, api: object): Item }[] }; buildContext(): unknown }
+    const series = subject.buildOptions(subject.buildContext()).series[0]
+    const api = { getWidth: () => 640, getHeight: () => 320 }
+    return series.renderItem({ dataIndex: 0 }, api).children.map((child) => [child.type, child.style.fillOpacity])
+  })
+  // The circle itself, then one lens for mobile and one for the API.
+  expect(shading).toEqual([
+    ['circle', 0.4],
+    ['path', 0.22],
+    ['path', 0.22],
+  ])
 })

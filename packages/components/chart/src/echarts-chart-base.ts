@@ -87,9 +87,12 @@ export abstract class EchartsChartBase extends ChartBase {
       legend: { show: false },
       ...this.coordinateSystem(context),
       series: series.map((item, index) => {
-        const option = { name: item.label ?? item.field, ...this.seriesOption(index, context) }
-        // Another series is highlighted from the legend: this one fades back.
-        return context.highlighted >= 0 && index !== context.highlighted ? dimSeries(option, theme.dimmedOpacity) : option
+        const option: Record<string, unknown> = { name: item.label ?? item.field, ...this.seriesOption(index, context) }
+        // A highlighted series comes forward (drawn on top, a heavier line) and the others fade back.
+        if (context.highlighted < 0) return option
+        if (index !== context.highlighted) return dimSeries(option, theme.dimmedOpacity)
+        const lineStyle = option.lineStyle as { width?: number } | undefined
+        return { ...option, z: 3, lineStyle: { ...lineStyle, width: (lineStyle?.width ?? theme.lineWidth) + 1 } }
       }),
     }
     return options

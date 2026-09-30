@@ -330,3 +330,66 @@ test('the default legend-action is highlight, and toggle still hides the clicked
   await expect(chart.locator('.legend-item').first()).toHaveClass(/legend-item--dimmed/)
   expect(await chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBeNull()
 })
+
+test('on an area chart a click inside a fill picks that area, whichever band it is', async ({ page, scenario }) => {
+  await scenario('empty')
+  const rows = [
+    { t: 1, s0: 10, s1: 20, s2: 30 },
+    { t: 2, s0: 12, s1: 22, s2: 32 },
+    { t: 3, s0: 11, s1: 21, s2: 31 },
+  ]
+  await page.evaluate((rows) => {
+    const main = document.querySelector('main') as HTMLElement
+    main.innerHTML =
+      '<c2-area-chart id="subject" x-field="t" y-min="0" y-max="40"><c2-chart-series field="s0"></c2-chart-series><c2-chart-series field="s1"></c2-chart-series><c2-chart-series field="s2"></c2-chart-series></c2-area-chart>'
+    ;(main.firstElementChild as HTMLElement & { data: unknown }).data = rows
+  }, rows)
+  const chart = page.locator('#subject')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const over = await chart.locator('.u-over').boundingBox()
+  if (!over) throw new Error('no plot overlay')
+  const picked: (string | null)[] = []
+  // At the middle x the lines sit at 11, 21 and 31 on a 0–40 scale; click halfway into each band.
+  for (const value of [5, 16, 26]) {
+    const x = over.x + over.width / 2
+    const y = over.y + over.height * (1 - value / 40)
+    await page.mouse.move(x, y, { steps: 2 })
+    await page.mouse.click(x, y)
+    picked.push(await chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted))
+    await chart.evaluate((element) => (element as unknown as { highlight(key: null): void }).highlight(null))
+  }
+  expect(picked).toEqual(['s0', 's1', 's2'])
+})
+
+test('the cursor finds the right series on an auto-ranged chart too', async ({ page, scenario }) => {
+  await scenario('empty')
+  await page.evaluate(() => {
+    const main = document.querySelector('main') as HTMLElement
+    main.innerHTML =
+      '<c2-area-chart id="subject" x-field="t" curve="smooth"><c2-chart-series field="s0"></c2-chart-series><c2-chart-series field="s1"></c2-chart-series><c2-chart-series field="s2"></c2-chart-series></c2-area-chart>'
+    ;(main.firstElementChild as HTMLElement & { data: unknown }).data = [
+      { t: 1, s0: 10, s1: 40, s2: 70 },
+      { t: 2, s0: 12, s1: 42, s2: 72 },
+      { t: 3, s0: 11, s1: 41, s2: 71 },
+    ]
+  })
+  const chart = page.locator('#subject')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await chart.evaluate((element) => {
+    const seen: string[] = []
+    element.addEventListener('point-hover', (event) => {
+      const detail = (event as CustomEvent<{ series: { field: string } } | null>).detail
+      if (detail) seen.push(detail.series.field)
+    })
+    ;(window as unknown as { seen: string[] }).seen = seen
+  })
+  const over = await chart.locator('.u-over').boundingBox()
+  if (!over) throw new Error('no plot overlay')
+  const at = async (fraction: number) => {
+    await page.mouse.move(over.x + over.width / 2, over.y + over.height * fraction, { steps: 2 })
+    return page.evaluate(() => (window as unknown as { seen: string[] }).seen.at(-1))
+  }
+  // Near the bottom is inside only the lowest fill; near the top, above every line, the nearest is the highest.
+  expect(await at(0.97)).toBe('s0')
+  expect(await at(0.03)).toBe('s2')
+})
