@@ -37,7 +37,7 @@ import { Card } from '@c2n/card'
     <strong>Which surfaces do active users touch?</strong>
     <span>Unique active users, last 30 days</span>
   </div>
-  <c2-overlap-chart legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
+  <c2-overlap-chart set-labels="around" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
     <c2-chart-series field="web" label="Web"></c2-chart-series>
     <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
     <c2-chart-series field="api" label="API"></c2-chart-series>
@@ -50,7 +50,7 @@ import { Card } from '@c2n/card'
 ```
 
 ```html tag=MdxCodeBlock,label=Skills coverage
-<c2-overlap-chart layout="uniform" labels="percent" legend="none" data='[{"sets":["design"],"size":42},{"sets":["frontend"],"size":58},{"sets":["backend"],"size":51},{"sets":["design","frontend"],"size":19},{"sets":["design","backend"],"size":2},{"sets":["frontend","backend"],"size":24},{"sets":["design","frontend","backend"],"size":2}]'>
+<c2-overlap-chart layout="uniform" labels="percent" set-labels="around" legend="none" data='[{"sets":["design"],"size":42},{"sets":["frontend"],"size":58},{"sets":["backend"],"size":51},{"sets":["design","frontend"],"size":19},{"sets":["design","backend"],"size":2},{"sets":["frontend","backend"],"size":24},{"sets":["design","frontend","backend"],"size":2}]'>
   <c2-chart-series field="design" label="Design"></c2-chart-series>
   <c2-chart-series field="frontend" label="Frontend"></c2-chart-series>
   <c2-chart-series field="backend" label="Backend"></c2-chart-series>
@@ -58,7 +58,7 @@ import { Card } from '@c2n/card'
 ```
 
 ```html tag=MdxCodeBlock,label=Subset and disjoint set
-<c2-overlap-chart legend="none" data='[{"sets":["active"],"size":9400},{"sets":["churned"],"size":2100},{"sets":["reactivated"],"size":600},{"sets":["active","reactivated"],"size":600}]'>
+<c2-overlap-chart set-labels="around" legend="none" data='[{"sets":["active"],"size":9400},{"sets":["churned"],"size":2100},{"sets":["reactivated"],"size":600},{"sets":["active","reactivated"],"size":600}]'>
   <c2-chart-series field="active" label="Active"></c2-chart-series>
   <c2-chart-series field="churned" label="Churned"></c2-chart-series>
   <c2-chart-series field="reactivated" label="Reactivated"></c2-chart-series>
@@ -69,7 +69,7 @@ import { Card } from '@c2n/card'
 <style>
   .overlap-focus { --c2-chart__set__dimmed--color: var(--c2-theme--color-on-surface-variant, #a1a1aa); --c2-chart__set__dimmed--fill-style: hatch; }
 </style>
-<c2-overlap-chart class="overlap-focus" highlighted="api" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
+<c2-overlap-chart class="overlap-focus" highlighted="api" set-labels="around" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
   <c2-chart-series field="web" label="Web"></c2-chart-series>
   <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
   <c2-chart-series field="api" label="API"></c2-chart-series>

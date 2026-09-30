@@ -169,9 +169,11 @@ const SET_SERIES = 2
  * The legend switches a set off and lays the diagram out again without it. With more than three sets the chart
  * shows its error state, because circles cannot draw every region of four sets.
  *
- * Hovering a set's name, or its legend entry, highlights its whole circle; `highlighted` does the same from the
- * application (a row of a table next to the chart, say), and so does a legend click with `legend-action="highlight"`. On a `selectable` chart, clicking a region selects
- * that region and clicking a set's name selects the whole set.
+ * The sets are named in the chart's legend, all in one place (`legend` positions it). `set-labels="around"` writes
+ * each set's name and total beside its circle instead. Hovering a legend entry, or a name, highlights the whole
+ * circle, and clicking highlights it; `highlighted` does the same from the application (a row of a table next to the
+ * chart, say). On a `selectable` chart, clicking a region selects that region and clicking a set's name selects the
+ * whole set.
  *
  * The plot is one tab stop: the arrow keys move through the sets and then the regions from the largest to the
  * smallest, Enter selects the focused one when `selectable` is set, and Escape clears the focus and the selection.
@@ -224,6 +226,13 @@ export class OverlapChart extends EchartsChartBase {
    */
   @property({ type: String }) layout: OverlapLayoutMode = 'proportional'
 
+  /**
+   * Where the sets are named. `none` (the default) names them in the legend alone, grouped in one place that
+   * `legend` positions; `around` also writes each set's name and total beside its circle, where hovering or clicking
+   * the name highlights the set. With `around` the legend is usually redundant, so pair it with `legend="none"`.
+   */
+  @property({ type: String, attribute: 'set-labels' }) setLabelPlacement: 'around' | 'none' = 'none'
+
   /** What each region shows: its member count, its share of all members, both (`6,140 · 23.3%`), or nothing. */
   @property({ type: String }) labels: 'count' | 'percent' | 'count-percent' | 'none' = 'count'
 
@@ -273,8 +282,6 @@ export class OverlapChart extends EchartsChartBase {
     super()
     // A region has no x position to follow, so the tooltip describes the hovered region only.
     this.tooltip = 'item'
-    // Every circle is named beside it, so a legend would say the same thing a second time. `legend` still adds one.
-    this.legend = 'none'
   }
 
   // ----------------------------------------------------------- public API ---
@@ -407,9 +414,15 @@ export class OverlapChart extends EchartsChartBase {
               color: set.color,
             },
           ],
-          px: label?.x ?? detail.px,
+          px: label?.x ?? this.#pixels?.circles[detail.index]?.x ?? detail.px,
           // The top edge of the name, so the tooltip opens above it rather than over it.
-          py: label ? label.y - (label.verticalAlign === 'bottom' ? Math.ceil((this.#style?.setFontSize ?? 14) * 1.25) : 0) : detail.py,
+          // Without names, the top of the circle itself.
+          py: label
+            ? label.y - (label.verticalAlign === 'bottom' ? Math.ceil((this.#style?.setFontSize ?? 14) * 1.25) : 0)
+            : (() => {
+                const circle = this.#pixels?.circles[detail.index]
+                return circle ? circle.y - circle.radius : detail.py
+              })(),
           set: info,
         }
       }
@@ -687,12 +700,14 @@ export class OverlapChart extends EchartsChartBase {
     const model = this.#computeModel()
     const style = this.#style ?? this.#readStyle()
     if (!model) return undefined
-    const key = `${width}x${height}|${model.signature}|${this.labels}|${JSON.stringify(style)}|${this.locale ?? ''}`
+    const key = `${width}x${height}|${model.signature}|${this.labels}|${this.setLabelPlacement}|${JSON.stringify(style)}|${this.locale ?? ''}`
     if (this.#pixels?.key === key) return this.#pixels
 
     const fontFamily = this.#fontFamily(this.themeController.theme) ?? 'sans-serif'
     const measure = (text: string, size: number, weight: number) => measureText(text, `${weight} ${size}px ${fontFamily}`, size)
-    const circles = fitOverlap(model.circles, width, height, { x: 8, y: style.setFontSize + 16 })
+    const around = this.setLabelPlacement === 'around'
+    // Names beside the circles need a band above and below; without them the circles can use the whole box.
+    const circles = fitOverlap(model.circles, width, height, { x: 8, y: around ? style.setFontSize + 16 : 8 })
     const paths = new Map<number, string>()
     const labels = new Map<number, OverlapLabel>()
     const anchors = new Map<number, OverlapPoint>()
@@ -700,7 +715,7 @@ export class OverlapChart extends EchartsChartBase {
 
     // Set names first: they sit outside their circles and everything placed later keeps clear of them.
     const cy = circles.reduce((sum, c) => sum + c.y, 0) / circles.length
-    const setLabels = circles.map((circle, index) => {
+    const setLabels = (around ? circles : []).map((circle, index) => {
       const set = model.sets[index]
       const region = model.regions.find((item) => item.mask === 1 << index)
       const total = this.#formatCount(region?.total ?? 0)
@@ -938,7 +953,7 @@ export class OverlapChart extends EchartsChartBase {
     const circle = pixels?.circles[params.dataIndex]
     const label = pixels?.setLabels[params.dataIndex]
     const set = this.#model?.sets[params.dataIndex]
-    if (!circle || !label || !set) return null
+    if (!circle || !set) return null
     const style = this.#style as OverlapStyle
     const fontFamily = this.#fontFamily(theme)
     const active = this.#activeSet()
@@ -958,36 +973,48 @@ export class OverlapChart extends EchartsChartBase {
             strokeOpacity: active && !emphasised ? style.dimmedOpacity : 1,
           },
         },
-        {
-          type: 'text',
-          cursor: 'pointer',
-          style: {
-            text: `{dot|●} {name|${escapeRich(label.name)}} {total|${escapeRich(label.total)}}`,
-            x: label.x,
-            y: label.y,
-            align: label.align,
-            verticalAlign: label.verticalAlign,
-            fontSize: style.setFontSize,
-            fontFamily,
-            rich: {
-              dot: { fill: set.color, fontSize: style.setFontSize, fontFamily },
-              name: { fill: theme.color, fontWeight: style.setFontWeight, fontSize: style.setFontSize, fontFamily },
-              total: { fill: theme.mutedColor, fontSize: style.setFontSize, fontFamily },
-            },
-          },
-        },
-        // The keyboard focus on a set is drawn around its name, the thing a pointer would be on.
+        ...(label ? [this.#setNameElement(label, set, theme, style, fontFamily)] : []),
+        // The keyboard focus on a set is drawn around its name, the thing a pointer would be on, or, without names,
+        // as a dashed ring just outside its circle.
         ...(focused
           ? [
-              {
-                type: 'rect',
-                silent: true,
-                shape: this.#setLabelRect(label, style.setFontSize),
-                style: { fill: 'none', stroke: theme.color, lineWidth: 1.5, lineDash: [4, 3] },
-              },
+              label
+                ? {
+                    type: 'rect',
+                    silent: true,
+                    shape: this.#setLabelRect(label, style.setFontSize),
+                    style: { fill: 'none', stroke: theme.color, lineWidth: 1.5, lineDash: [4, 3] },
+                  }
+                : {
+                    type: 'circle',
+                    silent: true,
+                    shape: { cx: circle.x, cy: circle.y, r: circle.radius + 4 },
+                    style: { fill: 'none', stroke: theme.color, lineWidth: 1.5, lineDash: [4, 3] },
+                  },
             ]
           : []),
       ],
+    }
+  }
+
+  #setNameElement(label: OverlapPixels['setLabels'][number], set: OverlapSet, theme: ChartTheme, style: OverlapStyle, fontFamily: string | undefined): unknown {
+    return {
+      type: 'text',
+      cursor: 'pointer',
+      style: {
+        text: `{dot|●} {name|${escapeRich(label.name)}} {total|${escapeRich(label.total)}}`,
+        x: label.x,
+        y: label.y,
+        align: label.align,
+        verticalAlign: label.verticalAlign,
+        fontSize: style.setFontSize,
+        fontFamily,
+        rich: {
+          dot: { fill: set.color, fontSize: style.setFontSize, fontFamily },
+          name: { fill: theme.color, fontWeight: style.setFontWeight, fontSize: style.setFontSize, fontFamily },
+          total: { fill: theme.mutedColor, fontSize: style.setFontSize, fontFamily },
+        },
+      },
     }
   }
 

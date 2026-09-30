@@ -111,6 +111,7 @@ declare module 'react' {
       'c2-overlap-chart': Omit<C2Props<OverlapChart>, 'selected' | 'series'> & {
         'sets-field'?: Attribute
         'size-field'?: Attribute
+        'set-labels'?: Attribute
         'selected-set'?: Attribute
         'x-field'?: Attribute
         'label-field'?: Attribute

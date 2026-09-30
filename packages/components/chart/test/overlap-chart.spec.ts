@@ -374,7 +374,7 @@ test('selection="set" selects the whole circle under the pointer, the smallest f
   expect(errors).toEqual([])
 })
 
-test('the overlap chart has no legend by default, since every circle is named beside it', async ({ page, scenario }) => {
+test('by default the sets are named in one legend, and set-labels="around" names them beside their circles', async ({ page, scenario }) => {
   await scenario('empty')
   await page.evaluate(() => {
     const main = document.querySelector('main') as HTMLElement
@@ -388,7 +388,22 @@ test('the overlap chart has no legend by default, since every circle is named be
   })
   const chart = page.locator('#subject')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
-  await expect(chart.locator('.legend')).toHaveCount(0)
+  // All the names together, in the one legend below the plot.
+  await expect(chart.locator('.legend.legend--bottom .legend-item')).toHaveCount(2)
+  const names = () =>
+    chart.evaluate((element) => {
+      type Item = { children: { type: string }[] } | null
+      const subject = element as unknown as { buildOptions(c: unknown): { series: { renderItem(p: object, api: object): Item }[] }; buildContext(): unknown }
+      const series = subject.buildOptions(subject.buildContext()).series[2]
+      const api = { getWidth: () => 640, getHeight: () => 320 }
+      return [0, 1].map((index) => series.renderItem({ dataIndex: index }, api)?.children.some((child) => child.type === 'text'))
+    })
+  expect(await names()).toEqual([false, false])
+  await chart.evaluate(async (element) => {
+    element.setAttribute('set-labels', 'around')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
+  expect(await names()).toEqual([true, true])
 })
 
 test('labels="count-percent" shows the count with the share on a second line', async ({ page, scenario }) => {

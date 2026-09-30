@@ -159,6 +159,7 @@ declare module 'vue' {
       C2Props<OverlapChart> & {
         'sets-field'?: unknown
         'size-field'?: unknown
+        'set-labels'?: unknown
         'selected-set'?: unknown
         'x-field'?: unknown
         'label-field'?: unknown

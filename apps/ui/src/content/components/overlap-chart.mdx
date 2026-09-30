@@ -146,13 +146,14 @@ and `none`.
 Hovering a region shows its name, its count, its share and the total for the combination, and fires `region-hover`.
 Clicking fires `region-click`.
 
-Hovering a set's name, or its entry in the legend, highlights its whole circle; the tooltip then describes the set: its
+Hovering a set's entry in the legend (or its name, with `set-labels="around"`) highlights its whole circle; the tooltip then describes the set: its
 members, its share of the whole, and how many belong to no other set. `set-hover` and `set-click` report the set. Clicking a set's name also highlights it, as a click on a series does on every
 chart; clicking it again clears the highlight, and `preventDefault()` on `set-click` keeps it as it is.
 `highlighted` does the same from your application, for instance while the pointer is on a row of a table next to
 the chart.
 
-With `selectable`, clicking a region selects that region and clicking a set's name selects the whole set. Add
+With `selectable`, clicking a region selects that region and clicking a set's name (with `set-labels="around"`) selects the
+whole set. Add
 `selection="set"` to make a click anywhere inside a circle select that whole circle, as the "Click a circle" example
 above does: in an overlap the smallest circle under the pointer comes first, and each further click on the same spot
 moves to the next circle there, then clears. While the pointer is over the circles, the one a click would select is
@@ -170,9 +171,12 @@ clears the selection. None of these events bubble, so listen on the element itse
 </script>
 ```
 
-Every circle is named beside it, so the chart shows no separate legend by default; `legend="bottom"` (or `top`,
-`start`, `end`) adds one. A legend click highlights the set, as `highlighted` does; with `legend-action="toggle"` it
-switches the set off and lays the diagram out again without it. The plot is one tab stop: the arrow keys move
+The sets are named in the chart's legend, all together in one place: below the plot by default, or wherever
+`legend="top|start|end"` puts it. `set-labels="around"` writes each set's name and total beside its circle instead
+(pair it with `legend="none"`, as several gallery cards do), and hovering or clicking a name then works like its legend
+entry. The legend can be replaced like any chart's, through the `legend` slot, `renderLegendItem` or a linked
+`c2-chart-legend`. A legend click highlights the set, as `highlighted` does; with `legend-action="toggle"` it switches
+the set off and lays the diagram out again without it. The plot is one tab stop: the arrow keys move
 through the sets and then the regions from the largest to the smallest, Enter selects, and Escape clears. A table of
 every region is rendered for assistive technology.
 
