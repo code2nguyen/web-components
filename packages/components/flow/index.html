@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-flow</title>
+    <script type="module" src="/src/flow.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 24px;
+      }
+      .night {
+        --c2-flow--background-color: #0b1020;
+        --c2-flow__dot--color: #1e293b;
+        --c2-flow__node--background-color: #111827;
+        --c2-flow__node--color: #e5e7eb;
+        --c2-flow__node--border: 1px solid #334155;
+        --c2-flow__description--color: #94a3b8;
+        --c2-flow__edge__done--color: #64748b;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>CI pipeline (drag, hover, right-click; layout saved under "flow-dev:ci")</h2>
+    <c2-flow
+      storage-key="flow-dev:ci"
+      nodes='[{"id":"checkout","label":"Checkout","status":"success","meta":"4s","description":"actions/checkout"},{"id":"install","label":"Install deps","status":"success","meta":"48s","description":"npm ci","details":{"Runner":"ubuntu-24.04","Cache":"hit (412 MB)"}},{"id":"lint","label":"Lint","status":"success","meta":"21s","description":"eslint"},{"id":"types","label":"Type-check","status":"success","meta":"34s","description":"tsc"},{"id":"unit","label":"Unit tests","status":"warning","meta":"1m 52s","description":"playwright","details":{"Tests":"1318 passed, 2 flaky"}},{"id":"build","label":"Build packages","status":"success","meta":"2m 10s","description":"wireit"},{"id":"e2e-chromium","label":"E2E Chromium","status":"success","meta":"3m 02s"},{"id":"e2e-firefox","label":"E2E Firefox","status":"running","meta":"2m 41s","details":{"Progress":"812 of 1320 tests"}},{"id":"e2e-webkit","label":"E2E WebKit","status":"error","meta":"1m 18s","details":{"Failed":"select.spec.ts, closes on outside click"}},{"id":"staging","label":"Deploy staging","status":"pending"},{"id":"approval","label":"Approval","status":"pending","description":"manual gate"},{"id":"prod","label":"Deploy production","status":"pending"}]'
+      edges='[{"source":"checkout","target":"install"},{"source":"install","target":"lint"},{"source":"install","target":"types"},{"source":"install","target":"unit"},{"source":"lint","target":"build"},{"source":"types","target":"build"},{"source":"unit","target":"build"},{"source":"build","target":"e2e-chromium"},{"source":"build","target":"e2e-firefox"},{"source":"build","target":"e2e-webkit"},{"source":"e2e-chromium","target":"staging"},{"source":"e2e-firefox","target":"staging"},{"source":"e2e-webkit","target":"staging"},{"source":"staging","target":"approval"},{"source":"approval","target":"prod"}]'
+    ></c2-flow>
+
+    <h2>Top to bottom, step edges</h2>
+    <c2-flow
+      direction="TB"
+      edge-type="step"
+      nodes='[{"id":"orders","label":"Extract orders","status":"success","description":"postgres"},{"id":"customers","label":"Extract customers","status":"success","description":"crm api"},{"id":"validate","label":"Validate","status":"warning","description":"14 rows quarantined"},{"id":"transform","label":"Transform","status":"success","description":"dbt"},{"id":"load","label":"Load warehouse","status":"error","description":"No active warehouse"},{"id":"report","label":"Quality report","status":"skipped"},{"id":"dash","label":"Refresh dashboards","status":"skipped"}]'
+      edges='[{"source":"orders","target":"validate"},{"source":"customers","target":"validate"},{"source":"validate","target":"transform"},{"source":"transform","target":"load"},{"source":"load","target":"report"},{"source":"load","target":"dash"}]'
+    ></c2-flow>
+
+    <h2>Cycle, themed</h2>
+    <c2-flow
+      class="night"
+      style="--c2-flow--height: 260px"
+      nodes='[{"id":"fetch","label":"Fetch","status":"success"},{"id":"process","label":"Process batch","status":"running","description":"attempt 3"},{"id":"check","label":"Check result","status":"pending"},{"id":"publish","label":"Publish","status":"pending"}]'
+      edges='[{"source":"fetch","target":"process"},{"source":"process","target":"check"},{"source":"check","target":"process"},{"source":"check","target":"publish"}]'
+    ></c2-flow>
+  </body>
+</html>

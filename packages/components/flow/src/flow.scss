@@ -1,0 +1,469 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-flow,
+  $theme: (
+    height: 480px,
+    background-color: #fafafa,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    font-family: null,
+
+    dot--color: #d4d4d8,
+    dot--size: 1px,
+    dot--gap: 16px,
+
+    rank--gap: 72px,
+    node--gap: 20px,
+
+    node--width: 200px,
+    node--padding-top: 10px,
+    node--padding-right: 12px,
+    node--padding-bottom: 10px,
+    node--padding-left: 12px,
+    node--background-color: #ffffff,
+    node--color: #18181b,
+    node--border: 1px solid #bcbcc6,
+    node--border-radius: 8px,
+    node--box-shadow: '0 1px 2px rgba(24, 24, 27, 0.06)',
+    node__hover--border-color: #a1a1aa,
+    node__selected--border-color: rgb(2, 101, 220),
+    node__selected--box-shadow: '0 0 0 3px rgba(2, 101, 220, 0.2)',
+    node__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    node__dragging--box-shadow: '0 10px 28px rgba(24, 24, 27, 0.14)',
+    node__skipped--opacity: 0.6,
+
+    label--font-size: 14px,
+    label--font-weight: 500,
+    description--font-size: 12px,
+    description--color: #71717a,
+
+    handle--size: 7px,
+    handle--background-color: #ffffff,
+    handle--border-color: #a1a1aa,
+
+    edge--color: #d4d4d8,
+    edge--width: 1.5px,
+    edge__done--color: #a1a1aa,
+    edge__active--color: rgb(2, 101, 220),
+    edge__failed--color: #dc2626,
+    edge__highlighted--width: 2.5px,
+    edge--animation-duration: 600ms,
+
+    success--color: #16a34a,
+    error--color: #dc2626,
+    warning--color: #d97706,
+    running--color: rgb(2, 101, 220),
+    current--color: rgb(2, 101, 220),
+    pending--color: #a1a1aa,
+    skipped--color: #a1a1aa,
+
+    card--width: 300px,
+    card--padding: 14px,
+    card--background-color: #ffffff,
+    card--color: #18181b,
+    card--border: 1px solid #e4e4e7,
+    card--border-radius: 8px,
+    card--box-shadow: '0 8px 24px rgba(24, 24, 27, 0.08)',
+    card--font-size: 14px,
+    card--offset: 8px,
+    card__term--color: #71717a,
+    card--transition-duration: 150ms,
+  )
+);
+
+:host {
+  display: block;
+  position: relative;
+  height: css.cssVar(height);
+  font-family: css.cssVar(font-family);
+  // Read by the layout, which runs in script.
+  --_rank-gap: #{css.cssVar(rank--gap)};
+  --_node-gap: #{css.cssVar(node--gap)};
+  --_card-offset: #{css.cssVar(card--offset)};
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.stage {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background-color: css.cssVar(background-color);
+  background-image: radial-gradient(circle, css.cssVar(dot--color) css.cssVar(dot--size), transparent calc(#{css.cssVar(dot--size)} + 0.2px));
+  background-size: calc(#{css.cssVar(dot--gap)} * var(--_zoom, 1)) calc(#{css.cssVar(dot--gap)} * var(--_zoom, 1));
+  cursor: grab;
+  // Vertical swipes keep scrolling the page; horizontal ones pan the canvas.
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.stage.is-panning {
+  cursor: grabbing;
+}
+
+.viewport {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.edges {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.edge {
+  fill: none;
+  stroke: css.cssVar(edge--color);
+  stroke-width: css.cssVar(edge--width);
+  transition:
+    stroke 200ms,
+    opacity 200ms;
+}
+
+.edge--done {
+  stroke: css.cssVar(edge__done--color);
+}
+
+.edge--active {
+  stroke: css.cssVar(edge__active--color);
+  stroke-dasharray: 6 5;
+  animation: c2-flow-dash css.cssVar(edge--animation-duration) linear infinite;
+}
+
+.edge--failed {
+  stroke: css.cssVar(edge__failed--color);
+}
+
+.edge--blocked {
+  stroke-dasharray: 2 4;
+}
+
+.edge--back:not(.edge--active) {
+  stroke-dasharray: 5 4;
+}
+
+.edge.is-highlighted {
+  stroke-width: css.cssVar(edge__highlighted--width);
+}
+
+.edges.has-highlight .edge:not(.is-highlighted) {
+  opacity: 0.35;
+}
+
+@keyframes c2-flow-dash {
+  to {
+    stroke-dashoffset: -11;
+  }
+}
+
+.node {
+  --_cutout: #{css.cssVar(node--background-color)};
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: css.cssVar(node--width);
+  padding-top: css.cssVar(node--padding-top);
+  padding-right: css.cssVar(node--padding-right);
+  padding-bottom: css.cssVar(node--padding-bottom);
+  padding-left: css.cssVar(node--padding-left);
+  background-color: css.cssVar(node--background-color);
+  color: css.cssVar(node--color);
+  border: css.cssVar(node--border);
+  border-radius: css.cssVar(node--border-radius);
+  box-shadow: css.cssVar(node--box-shadow);
+  cursor: pointer;
+  touch-action: none;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.stage:not(.is-locked) .node {
+  cursor: grab;
+}
+
+.node:hover {
+  border-color: css.cssVar(node__hover--border-color);
+}
+
+.node:focus-visible {
+  outline: css.cssVar(node__focus--outline);
+  outline-offset: 2px;
+}
+
+.node.is-selected {
+  border-color: css.cssVar(node__selected--border-color);
+  box-shadow: css.cssVar(node__selected--box-shadow);
+}
+
+.node.is-dragging {
+  cursor: grabbing;
+  box-shadow: css.cssVar(node__dragging--box-shadow);
+  z-index: 1;
+}
+
+.node.status--skipped .body {
+  opacity: css.cssVar(node__skipped--opacity);
+}
+
+.node.status--running {
+  border-color: color-mix(in srgb, #{css.cssVar(running--color)} 55%, transparent);
+}
+
+.node.status--error {
+  border-color: color-mix(in srgb, #{css.cssVar(error--color)} 60%, transparent);
+}
+
+.node.is-selected.status--running,
+.node.is-selected.status--error {
+  border-color: css.cssVar(node__selected--border-color);
+}
+
+.handle {
+  position: absolute;
+  box-sizing: border-box;
+  width: css.cssVar(handle--size);
+  height: css.cssVar(handle--size);
+  border-radius: 50%;
+  background-color: css.cssVar(handle--background-color);
+  border: 1.5px solid css.cssVar(handle--border-color);
+  pointer-events: none;
+}
+
+.direction--lr .handle {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.direction--lr .handle--in {
+  left: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+.direction--lr .handle--out {
+  right: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+.direction--tb .handle {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.direction--tb .handle--in {
+  top: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+.direction--tb .handle--out {
+  bottom: calc(#{css.cssVar(handle--size)} / -2 - 0.5px);
+}
+
+.body {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.label,
+.description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.label {
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.3;
+}
+
+.description,
+.meta {
+  font-size: css.cssVar(description--font-size);
+  color: css.cssVar(description--color);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.meta {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  flex: none;
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+
+.status svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.cutout {
+  stroke: var(--_cutout);
+}
+.cutout-fill {
+  fill: var(--_cutout);
+}
+
+.status--success {
+  --_status: #{css.cssVar(success--color)};
+}
+.status--error {
+  --_status: #{css.cssVar(error--color)};
+}
+.status--warning {
+  --_status: #{css.cssVar(warning--color)};
+}
+.status--running {
+  --_status: #{css.cssVar(running--color)};
+}
+.status--current {
+  --_status: #{css.cssVar(current--color)};
+}
+.status--pending {
+  --_status: #{css.cssVar(pending--color)};
+}
+.status--skipped {
+  --_status: #{css.cssVar(skipped--color)};
+}
+
+.status {
+  color: var(--_status);
+}
+
+.spin {
+  animation: c2-flow-spin 900ms linear infinite;
+  transform-origin: 8px 8px;
+}
+
+@keyframes c2-flow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Hover card: a manual popover in the top layer, placed next to the node by floating-ui.
+.card {
+  --_cutout: #{css.cssVar(card--background-color)};
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  margin: 0;
+  box-sizing: border-box;
+  width: css.cssVar(card--width);
+  max-width: calc(100vw - 16px);
+  padding: css.cssVar(card--padding);
+  background-color: css.cssVar(card--background-color);
+  color: css.cssVar(card--color);
+  border: css.cssVar(card--border);
+  border-radius: css.cssVar(card--border-radius);
+  box-shadow: css.cssVar(card--box-shadow);
+  font-size: css.cssVar(card--font-size);
+  font-family: inherit;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity css.cssVar(card--transition-duration) animation.$standard-easing,
+    transform css.cssVar(card--transition-duration) animation.$standard-easing,
+    display css.cssVar(card--transition-duration) allow-discrete,
+    overlay css.cssVar(card--transition-duration) allow-discrete;
+}
+
+.card:popover-open {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .card:popover-open {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.card-content {
+  display: grid;
+  gap: 10px;
+}
+
+.card-head {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.card-title {
+  font-weight: 600;
+}
+
+.card-head .text {
+  gap: 1px;
+}
+
+.card-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--_status);
+}
+
+.card-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.card-details dt {
+  color: css.cssVar(card__term--color);
+}
+
+.card-details dd {
+  margin: 0;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin,
+  .edge--active {
+    animation: none;
+  }
+  .card {
+    transition: none;
+  }
+}

@@ -1,0 +1,108 @@
+---
+title: 'Flow'
+description: 'A pipeline or dependency graph on a pannable canvas: steps with a status, smooth edges, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { Flow } from '@c2n/flow'
+
+<ExampleModules />
+
+`c2-flow` draws a directed graph such as a CI pipeline, a data job or a training run. Give it `nodes` and `edges` (as properties, or as JSON attributes); every node carries a status, and each edge takes its look from the statuses at both ends: an edge into a running step animates, one out of a failed step turns red and one touching a skipped step is dotted.
+
+The flow lays itself out: one column per dependency depth (`direction="LR"`) or one row (`"TB"`), with siblings ordered to avoid crossings. Cycles are allowed and their closing edge loops round the outside. Drag a node to arrange the graph yourself; with a `storage-key` the arrangement and the chosen direction are saved in `localStorage` and restored on the next visit, and when the graph has changed in between, the saved layout is merged: kept steps stay put, new ones are placed next to their neighbours.
+
+Right-click the canvas or a node (or long-press it, or press Shift+F10) for the view controls: zoom in, zoom out, fit view, layout direction, auto layout and lock layout. Hover or focus a node for a card with its status and details.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/flow
+```
+
+`@c2n/context-menu` and `@c2n/menu` are dependencies of the package and are registered for you.
+
+## Usage
+
+Drag the steps, hover them, and right-click the canvas. The last row draws its nodes with `renderNode`.
+
+```html tag=UsageBlock,package=@c2n/flow
+<style>
+  .demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .demo c2-flow {
+    --c2-flow--height: 380px;
+  }
+  .demo .short {
+    --c2-flow--height: 300px;
+  }
+  .result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<div data-label="CI pipeline">
+  <div class="demo">
+    <c2-flow client:only="lit" data-flow-demo="events" aria-label="CI pipeline" storage-key="c2n-docs:flow:ci" nodes='[{"id":"checkout","label":"Checkout","status":"success","meta":"4s","description":"actions/checkout"},{"id":"install","label":"Install deps","status":"success","meta":"48s","description":"npm ci","details":{"Runner":"ubuntu-24.04","Cache":"hit (412 MB)"}},{"id":"lint","label":"Lint","status":"success","meta":"21s","description":"eslint"},{"id":"types","label":"Type-check","status":"success","meta":"34s","description":"tsc"},{"id":"unit","label":"Unit tests","status":"warning","meta":"1m 52s","description":"playwright","details":{"Tests":"1318 passed, 2 flaky"}},{"id":"build","label":"Build packages","status":"success","meta":"2m 10s","description":"wireit"},{"id":"e2e-chromium","label":"E2E Chromium","status":"success","meta":"3m 02s"},{"id":"e2e-firefox","label":"E2E Firefox","status":"running","meta":"2m 41s","details":{"Progress":"812 of 1320 tests"}},{"id":"e2e-webkit","label":"E2E WebKit","status":"error","meta":"1m 18s","details":{"Failed":"select.spec.ts, closes on outside click"}},{"id":"staging","label":"Deploy staging","status":"pending"},{"id":"approval","label":"Approval","status":"pending","description":"manual gate"},{"id":"prod","label":"Deploy production","status":"pending"}]' edges='[{"source":"checkout","target":"install"},{"source":"install","target":"lint"},{"source":"install","target":"types"},{"source":"install","target":"unit"},{"source":"lint","target":"build"},{"source":"types","target":"build"},{"source":"unit","target":"build"},{"source":"build","target":"e2e-chromium"},{"source":"build","target":"e2e-firefox"},{"source":"build","target":"e2e-webkit"},{"source":"e2e-chromium","target":"staging"},{"source":"e2e-firefox","target":"staging"},{"source":"e2e-webkit","target":"staging"},{"source":"staging","target":"approval"},{"source":"approval","target":"prod"}]'></c2-flow>
+    <output class="result"></output>
+  </div>
+</div>
+<div data-label="Top to bottom, step edges">
+  <div class="demo">
+    <c2-flow client:only="lit" aria-label="Warehouse load" direction="TB" edge-type="step" storage-key="c2n-docs:flow:etl" nodes='[{"id":"orders","label":"Extract orders","status":"success","description":"postgres"},{"id":"customers","label":"Extract customers","status":"success","description":"crm api"},{"id":"validate","label":"Validate","status":"warning","description":"14 rows quarantined"},{"id":"transform","label":"Transform","status":"success","description":"dbt"},{"id":"load","label":"Load warehouse","status":"error","description":"No active warehouse"},{"id":"report","label":"Quality report","status":"skipped"},{"id":"dash","label":"Refresh dashboards","status":"skipped"}]' edges='[{"source":"orders","target":"validate"},{"source":"customers","target":"validate"},{"source":"validate","target":"transform"},{"source":"transform","target":"load"},{"source":"load","target":"report"},{"source":"load","target":"dash"}]'></c2-flow>
+  </div>
+</div>
+<div data-label="A cycle">
+  <div class="demo">
+    <c2-flow client:only="lit" class="short" aria-label="Batch with retries" nodes='[{"id":"fetch","label":"Fetch","status":"success"},{"id":"process","label":"Process batch","status":"running","description":"attempt 3"},{"id":"check","label":"Check result","status":"pending"},{"id":"publish","label":"Publish","status":"pending"}]' edges='[{"source":"fetch","target":"process"},{"source":"process","target":"check"},{"source":"check","target":"process"},{"source":"check","target":"publish"}]'></c2-flow>
+  </div>
+</div>
+<div data-label="Custom nodes">
+  <div class="demo">
+    <c2-flow client:only="lit" data-flow-demo="custom" class="short" aria-label="Model training" nodes='[{"id":"data","label":"Load features","status":"success","data":{"kind":"dataset","progress":100,"metric":"1.2M rows"}},{"id":"split","label":"Train / test split","status":"success","data":{"kind":"transform","progress":100,"metric":"80 / 20"}},{"id":"xgb","label":"XGBoost","status":"running","data":{"kind":"train","progress":64,"metric":"AUC 0.871"}},{"id":"lgbm","label":"LightGBM","status":"success","data":{"kind":"train","progress":100,"metric":"AUC 0.864"}},{"id":"eval","label":"Evaluate","status":"pending","data":{"kind":"evaluate","progress":0,"metric":"best of 2"}}]' edges='[{"source":"data","target":"split"},{"source":"split","target":"xgb"},{"source":"split","target":"lgbm"},{"source":"xgb","target":"eval"},{"source":"lgbm","target":"eval"}]'></c2-flow>
+  </div>
+</div>
+```
+
+## Custom nodes and cards
+
+`renderNode` returns the body of every node and `renderCard` the content of its hover card, as a Lit template, a DOM node or a string. Handles, dragging, edges and positioning stay with the flow. A framework that renders its own markup can use the `node:<id>` and `card:<id>` slots instead.
+
+```ts tag=CodeBlock
+import { html } from 'lit'
+import '@c2n/flow'
+
+const flow = document.querySelector('c2-flow')!
+flow.renderNode = ({ node, status }) => html`
+  <strong>${node.label}</strong>
+  <progress max="100" value=${node.data.progress}></progress>
+  <small>${status} · ${node.data.metric}</small>
+`
+flow.addEventListener('node-click', ({ detail }) => openDetails(detail.node))
+```
+
+## Context menu
+
+`renderContextMenu` receives the node that was right-clicked (or `null` for the canvas) and the built-in rows. Return your own rows next to `defaultItems` to extend the menu; they fire `flow-menu-select` with the node. Return `undefined` to keep the built-in rows, or `null` to let the browser show its own menu.
+
+```ts tag=CodeBlock
+flow.renderContextMenu = ({ node, defaultItems }) =>
+  node?.status === 'error' ? html`<c2-menu-item value="retry">Retry ${node.label}</c2-menu-item><hr />${defaultItems}` : undefined
+
+flow.addEventListener('flow-menu-select', ({ detail }) => {
+  if (detail.value === 'retry') retry(detail.node!.id)
+})
+```
+
+## Layout
+
+The saved layout is a plain object of positions keyed by node id. `getLayout()` returns the current one and `setLayout()` applies one (merged like a restored layout), so it can live on a server instead of in `localStorage`; `layout-change` fires whenever the user changes it. `resetLayout()` goes back to the auto layout, and `fitView()`, `zoomIn()` and `zoomOut()` drive the view from your own controls.

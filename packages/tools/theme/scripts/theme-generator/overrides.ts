@@ -356,4 +356,10 @@ export const overrides: Record<string, Override> = {
   // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
   '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
   '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },
+  // Flow: the dot grid and the edges of steps that have not run are drawn lines, the resting outline grey; the success
+  // and warning colours are semantic status colours, as on c2-steps.
+  '--c2-flow__dot--color': { token: 'color-outline' },
+  '--c2-flow__edge--color': { token: 'color-outline' },
+  '--c2-flow__success--color': { exclude: 'success status colour' },
+  '--c2-flow__warning--color': { exclude: 'warning status colour' },
 }
