@@ -55,7 +55,7 @@ import { ChartSeries } from '@c2n/chart/chart-series.js'
 
 ```html tag=MdxCodeBlock,label=Flat top
 <style>
-  .flat-pyramid { width: 100%; --c2-chart--height: 260px; --c2-chart__level--min-width: 24%; --c2-chart__level--gap: 2px; --c2-chart__slice--border: none; }
+  .flat-pyramid { width: 100%; --c2-chart--height: 260px; --c2-chart__level--min-width: 24%; --c2-chart__level--gap: 4px; --c2-chart__level--border-radius: 10px; --c2-chart__slice--border: none; }
 </style>
 <c2-pyramid-chart class="flat-pyramid" label-field="need" sort="none" labels="inside" label-content="name" legend="none" data='[{"need":"Growth","score":12},{"need":"Esteem","score":18},{"need":"Belonging","score":22},{"need":"Safety","score":24},{"need":"Basics","score":24}]'>
   <c2-chart-series field="score" label="Score"></c2-chart-series>

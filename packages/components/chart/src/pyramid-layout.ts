@@ -2,12 +2,11 @@
  * The geometry behind `c2-pyramid-chart`, kept free of the DOM and of ECharts so it can be tested as plain
  * arithmetic.
  *
- * ECharts' funnel series draws each level as a trapezoid whose base-side edge is as wide as the level's value
- * and whose apex-side edge is as wide as the next smaller level's. That is the `width` sizing. The other
- * sizings keep the outline a triangle (or a trapezoid, with a flat apex) and decide how far down it each level
- * reaches instead. They are handed to ECharts as a synthetic value — the depth of the level's base-side edge,
- * from 0 at the apex to 1 at the base, which the series maps linearly onto `minSize…maxSize` — plus the
- * level's own height, so the funnel layout reproduces them exactly.
+ * `layoutPyramid` orders the levels and decides how far down the outline each one reaches: its `depth`, from 0
+ * at the apex to 1 at the base, and its share of the height. The `width` sizing is a classic funnel, where every
+ * level is the same height and its base is as wide as its value; the other sizings keep the outline a triangle
+ * (or a trapezoid, with a flat apex) and size each level's area or height instead. `pyramidShapes` turns that
+ * into pixel outlines and `roundedPolygonPath` into the path the chart draws.
  */
 
 /** How a level's value is turned into its size. */
@@ -21,12 +20,12 @@ export interface PyramidLevel {
   index: number
   /** The row's value. */
   value: number
-  /** The synthetic value ECharts sizes the level's base-side edge by, from 0 to 1. */
-  depth: number
   /**
-   * Share of the pyramid's height the level takes, from 0 to 1. `undefined` under `width` sizing, where every
-   * level is the same height and ECharts divides the height itself.
+   * How far the level's base-side edge is from the apex, from 0 to 1; the edge's width grows linearly with it. Under
+   * `width` sizing it is the value's share of the largest value.
    */
+  depth: number
+  /** Share of the pyramid's height the level takes, from 0 to 1. `undefined` under `width` sizing: every level is equally high. */
   height?: number
 }
 
@@ -50,8 +49,8 @@ export function layoutPyramid(values: readonly (number | null | undefined)[], op
   })
   if (drawn.length === 0) return []
 
-  // Under `width` sizing ECharts orders the levels by their width, which is their value: the sort cannot be
-  // honoured, so the levels always read from the smallest at the apex.
+  // Under `width` sizing each level's apex-side edge is as wide as the level before it, so only an order by value
+  // keeps the outline from zigzagging: the levels always read from the smallest at the apex.
   const sort = options.sizing === 'width' ? 'ascending' : options.sort
   if (sort !== 'none') drawn.sort((a, b) => (sort === 'ascending' ? a.value - b.value : b.value - a.value) || a.index - b.index)
 
@@ -141,4 +140,108 @@ function relativeLuminance([r, g, b]: [number, number, number]): number {
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
   }
   return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+}
+
+/** The box the pyramid is drawn in, in plot pixels. */
+export interface PyramidBox {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export interface PyramidShapeOptions {
+  /** The side the point is on. */
+  apex: 'top' | 'bottom' | 'left' | 'right'
+  /** Where the pyramid sits across its axis: `start` is the left (or top) edge of the box. */
+  align: 'start' | 'center' | 'end'
+  /** Space between adjacent levels, in pixels. */
+  gap: number
+  /** Width of the apex and of the base, in pixels. */
+  minSize: number
+  maxSize: number
+}
+
+/** One level's outline and the anchors its labels use, in plot pixels. */
+export interface PyramidShape {
+  /** The outline: the apex-side edge, then the base-side edge, going round. */
+  points: [number, number][]
+  /** The middle of the level. */
+  centre: [number, number]
+  /** The level's thickness along the axis, and its width across it halfway along. */
+  thickness: number
+  width: number
+  /** Across the axis, where the level's two sides are halfway along it: towards the start, and towards the end. */
+  sides: [number, number]
+}
+
+/**
+ * Turns laid-out levels into outlines inside `box`. Both of a level's edges are linear in depth, so the edge at
+ * depth `d` is `minSize + (maxSize - minSize) d` wide; the apex-side edge of a level is the base-side edge of the
+ * one before it.
+ */
+export function pyramidShapes(levels: readonly PyramidLevel[], box: PyramidBox, options: PyramidShapeOptions): PyramidShape[] {
+  const vertical = options.apex === 'top' || options.apex === 'bottom'
+  const length = vertical ? box.height : box.width
+  const cross = vertical ? box.width : box.height
+  const alongStart = vertical ? box.y : box.x
+  const crossStart = vertical ? box.x : box.y
+  const apexAtStart = options.apex === 'top' || options.apex === 'left'
+  const available = Math.max(0, length - options.gap * Math.max(0, levels.length - 1))
+  const widthAt = (depth: number) => options.minSize + (options.maxSize - options.minSize) * depth
+  const from = (width: number) => crossStart + (options.align === 'start' ? 0 : options.align === 'end' ? cross - width : (cross - width) / 2)
+  const along = (distance: number) => (apexAtStart ? alongStart + distance : alongStart + length - distance)
+  const point = (a: number, c: number): [number, number] => (vertical ? [c, a] : [a, c])
+
+  let offset = 0
+  let previous = 0
+  return levels.map((level) => {
+    const thickness = (level.height ?? 1 / levels.length) * available
+    const near = along(offset)
+    const far = along(offset + thickness)
+    const nearWidth = widthAt(previous)
+    const farWidth = widthAt(level.depth)
+    const width = (nearWidth + farWidth) / 2
+    const middle = along(offset + thickness / 2)
+    offset += thickness + options.gap
+    previous = level.depth
+    return {
+      points: [point(near, from(nearWidth)), point(near, from(nearWidth) + nearWidth), point(far, from(farWidth) + farWidth), point(far, from(farWidth))],
+      centre: point(middle, from(width) + width / 2),
+      thickness,
+      width,
+      sides: [from(width), from(width) + width],
+    }
+  })
+}
+
+/**
+ * An SVG path through `points` with every corner rounded: each corner is cut `radius` pixels back along both of
+ * its sides (less on a short side) and joined with a curve through the corner's own control point. Points closer
+ * than half a pixel are merged, so a level that comes to a point is a rounded triangle.
+ */
+export function roundedPolygonPath(points: readonly [number, number][], radius: number): string {
+  const corners: [number, number][] = []
+  for (const point of points) {
+    const last = corners[corners.length - 1]
+    if (!last || Math.hypot(point[0] - last[0], point[1] - last[1]) >= 0.5) corners.push(point)
+  }
+  if (corners.length > 2 && Math.hypot(corners[0][0] - corners[corners.length - 1][0], corners[0][1] - corners[corners.length - 1][1]) < 0.5) corners.pop()
+  if (corners.length < 3) return ''
+  const round = (value: number) => Math.round(value * 100) / 100
+  if (radius <= 0) return `M${corners.map(([x, y]) => `${round(x)} ${round(y)}`).join('L')}Z`
+
+  const count = corners.length
+  let path = ''
+  corners.forEach((corner, index) => {
+    const before = corners[(index - 1 + count) % count]
+    const after = corners[(index + 1) % count]
+    const toBefore = Math.hypot(before[0] - corner[0], before[1] - corner[1])
+    const toAfter = Math.hypot(after[0] - corner[0], after[1] - corner[1])
+    const cut = Math.min(radius, toBefore / 2, toAfter / 2)
+    const start = [corner[0] + ((before[0] - corner[0]) / toBefore) * cut, corner[1] + ((before[1] - corner[1]) / toBefore) * cut]
+    const end = [corner[0] + ((after[0] - corner[0]) / toAfter) * cut, corner[1] + ((after[1] - corner[1]) / toAfter) * cut]
+    path += `${index === 0 ? 'M' : 'L'}${round(start[0])} ${round(start[1])}Q${round(corner[0])} ${round(corner[1])} ${round(end[0])} ${round(end[1])}`
+  })
+  return `${path}Z`
 }

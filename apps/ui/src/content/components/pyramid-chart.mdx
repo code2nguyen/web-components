@@ -16,8 +16,8 @@ import { ChartLegend } from '@c2n/chart/chart-legend.js'
 
 A pyramid shows the parts of a whole in order: customer tiers, a test suite, headcount by level. `label-field`
 names each level, a single `c2-chart-series` supplies its value, and one row is one level. It is drawn by
-ECharts' funnel series, so like the [pie chart](../pie-chart) it has no axes, a per-level tooltip and a legend
-that switches levels off.
+ECharts and, like the [pie chart](../pie-chart), has no axes, a per-level tooltip and a legend whose entries
+highlight a level (or, with `legend-action="toggle"`, switch it off). Clicking a level highlights it too.
 
 ## Installation
 
@@ -92,7 +92,7 @@ npm install @c2n/chart echarts
   of the total. It is the reading a pyramid invites, and small levels near the apex still get a visible band.
 - `height` keeps the triangle and makes each level's height proportional to its value. It reads like a stacked
   bar; very small levels shrink to a sliver.
-- `width` is ECharts' own funnel: every level is the same height and its base is as wide as its value. The
+- `width` is the classic funnel: every level is the same height and its base is as wide as its value. The
   outline stops being a triangle, and the levels are always ordered by value.
 - `equal` gives every level the same height inside a perfect triangle, so only the order is encoded and the
   values have to be read from the labels.
@@ -114,9 +114,11 @@ writing direction).
 
 `labels` is `outside` by default, because the apex level is rarely wide enough to hold text; `inside` and
 `none` are the alternatives. `label-content` picks `name`, `value`, `percent`, `name-value` (the default) or
-`name-percent`. Outside labels that would collide near the apex are pushed apart.
+`name-percent`. Outside labels that would collide near the apex are pushed apart, and an inside label that does
+not fit its level is left to the tooltip.
 
-The shape is styled through CSS variables on the host: `--c2-chart__level--gap` spaces the levels apart,
+The shape is styled through CSS variables on the host: `--c2-chart__level--border-radius` rounds every level's
+corners, the apex included (`4px` by default, `0` for sharp corners), `--c2-chart__level--gap` spaces the levels apart,
 `--c2-chart__level--min-width` gives the pyramid a flat top, `--c2-chart__level--max-width` narrows its base,
 and `--c2-chart__level--align` (`start`, `center`, `end`) moves it across its axis. `--c2-chart__slice--border`
 draws the edge between levels, as it does between pie slices. Level colours come from

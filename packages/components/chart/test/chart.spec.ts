@@ -1,5 +1,5 @@
 import { test, expect } from './fixture'
-import { layoutPyramid, readableTextOn, spreadLabels } from '../src/pyramid-layout'
+import { layoutPyramid, pyramidShapes, readableTextOn, roundedPolygonPath, spreadLabels } from '../src/pyramid-layout'
 
 test('the chart family resolves first-paint theme probes without scheduling a second Lit update', async ({ page, scenario }) => {
   const warnings: string[] = []
@@ -633,7 +633,7 @@ test('lays pyramid levels out by area, height, width or rank', () => {
     [3, 1],
   ])
 
-  // ECharts orders a width-sized funnel by value, so the sort is not honoured and every level is one height.
+  // A width-sized pyramid is always ordered by value, so the sort is not honoured, and every level is one height.
   const width = layoutPyramid(values, { sizing: 'width', sort: 'descending' })
   expect(width.map((level) => level.index)).toEqual([1, 3, 2, 0])
   expect(width.every((level) => level.height === undefined)).toBe(true)
@@ -664,39 +664,107 @@ test('picks a readable inside label colour against each level', () => {
   expect(readableTextOn('not a colour')).toBe('#ffffff')
 })
 
-test('hands ECharts a funnel whose synthetic depths follow the pyramid layout', async ({ page, scenario }) => {
+test('outlines pyramid levels in pixels, for every apex, alignment and width', () => {
+  const levels = layoutPyramid([1, 3], { sizing: 'area', sort: 'none' })
+  const box = { x: 0, y: 0, width: 200, height: 100 }
+  const top = pyramidShapes(levels, box, { apex: 'top', align: 'center', gap: 0, minSize: 0, maxSize: 200 })
+  // The first level is a triangle at the top (its apex-side edge has no width), the second the trapezoid below it.
+  expect(top[0].points).toEqual([
+    [100, 0],
+    [100, 0],
+    [150, 50],
+    [50, 50],
+  ])
+  expect(top[1].points).toEqual([
+    [50, 50],
+    [150, 50],
+    [200, 100],
+    [0, 100],
+  ])
+  expect(top[1]).toMatchObject({ centre: [100, 75], thickness: 50, width: 150, sides: [25, 175] })
+
+  // Upside down, aligned to the end, with a gap: the point is at the bottom right and the levels are 10px apart.
+  const bottom = pyramidShapes(levels, box, { apex: 'bottom', align: 'end', gap: 10, minSize: 0, maxSize: 200 })
+  expect(bottom[0].points[0]).toEqual([200, 100])
+  expect(bottom[1].points[0][1] - bottom[0].points[2][1]).toBe(-10)
+
+  // On its side, pointing left, with a flat 40px apex.
+  const left = pyramidShapes(levels, { x: 0, y: 0, width: 100, height: 200 }, { apex: 'left', align: 'center', gap: 0, minSize: 40, maxSize: 200 })
+  expect(left[0].points.slice(0, 2)).toEqual([
+    [0, 80],
+    [0, 120],
+  ])
+  expect(left[1].points[2]).toEqual([100, 200])
+})
+
+test('rounds every corner of a level, and merges the corners of a point', () => {
+  const square: [number, number][] = [
+    [0, 0],
+    [10, 0],
+    [10, 10],
+    [0, 10],
+  ]
+  expect(roundedPolygonPath(square, 0)).toBe('M0 0L10 0L10 10L0 10Z')
+  expect(roundedPolygonPath(square, 2)).toBe('M0 2Q0 0 2 0L8 0Q10 0 10 2L10 8Q10 10 8 10L2 10Q0 10 0 8Z')
+  // A radius longer than half a side is cut back to half of it.
+  expect(roundedPolygonPath(square, 50)).toBe('M0 5Q0 0 5 0L5 0Q10 0 10 5L10 5Q10 10 5 10L5 10Q0 10 0 5Z')
+  // An apex level's two top corners coincide: it is drawn as a rounded triangle, with three curves.
+  const triangle = roundedPolygonPath(
+    [
+      [5, 0],
+      [5, 0],
+      [10, 10],
+      [0, 10],
+    ],
+    2,
+  )
+  expect(triangle.match(/Q/g)).toHaveLength(3)
+  expect(roundedPolygonPath([[0, 0]], 2)).toBe('')
+})
+
+test('draws pyramid levels as rounded paths in the layout order', async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
   await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
 
-  const result = await chart.evaluate((element) => {
-    const pyramid = element as unknown as {
-      frame: unknown
-      buildContext(): unknown
-      projectData(frame: unknown, context: unknown): { name: string; value: number; real: number; itemStyle: { height?: string } }[][]
-      seriesOption(index: number, context: unknown): Record<string, unknown> & { label: { position: string; formatter(params: unknown): string } }
-    }
-    const context = pyramid.buildContext()
-    const [data] = pyramid.projectData(pyramid.frame, context)
-    const option = pyramid.seriesOption(0, context)
-    return {
-      names: data.map((datum) => datum.name),
-      increasing: data.every((datum, index) => index === 0 || datum.value > data[index - 1].value),
-      heights: data.reduce((sum, datum) => sum + parseFloat(datum.itemStyle.height ?? '0'), 0),
-      type: option.type,
-      sort: option.sort,
-      orient: option.orient,
-      extent: [option.min, option.max],
-      position: option.label.position,
-      label: option.label.formatter({ data: data[3] }),
-    }
-  })
+  const read = (style: string) =>
+    chart.evaluate((element, nextStyle) => {
+      type Item = { children: { type: string; shape?: { pathData?: string }; style: { fill?: string } }[] } | null
+      const pyramid = element as unknown as {
+        frame: unknown
+        buildContext(): { width: number; height: number }
+        buildOptions(context: unknown): { series: { type: string; renderItem(params: { dataIndex: number }, api: object): Item }[] }
+        projectData(frame: unknown, context: unknown): { name: string }[][]
+        levelGeometry(width: number, height: number): { radius: number; shapes: { points: [number, number][] }[] }
+      }
+      element.setAttribute('style', nextStyle)
+      const context = pyramid.buildContext()
+      const [data] = pyramid.projectData(pyramid.frame, context)
+      const series = pyramid.buildOptions(context).series
+      const api = { getWidth: () => context.width, getHeight: () => context.height }
+      const item = series[0].renderItem({ dataIndex: 3 }, api)
+      const geometry = pyramid.levelGeometry(context.width, context.height)
+      return {
+        names: data.map((datum) => datum.name),
+        types: series.map((entry) => entry.type),
+        path: item?.children[0].shape?.pathData ?? '',
+        radius: geometry.radius,
+        // Each level's apex-side edge is the base-side edge of the level before it.
+        stacked: geometry.shapes.every((shape, index) => index === 0 || shape.points[0][1] === geometry.shapes[index - 1].points[3][1]),
+      }
+    }, style)
 
-  expect(result.names).toEqual(['Enterprise', 'Business', 'Team', 'Starter'])
-  expect(result.increasing).toBe(true)
-  expect(result.heights).toBeCloseTo(100, 6)
-  expect(result).toMatchObject({ type: 'funnel', sort: 'ascending', orient: 'vertical', extent: [0, 1], position: 'right', label: 'Starter · 4,870' })
+  const rounded = await read('')
+  expect(rounded.names).toEqual(['Enterprise', 'Business', 'Team', 'Starter'])
+  expect(rounded.types).toEqual(['custom', 'custom'])
+  expect(rounded.radius).toBe(4)
+  expect(rounded.path).toMatch(/^M[\d. ]+Q/)
+  expect(rounded.stacked).toBe(true)
+
+  const sharp = await read('--c2-chart__level--border-radius: 0')
+  expect(sharp.radius).toBe(0)
+  expect(sharp.path).not.toContain('Q')
 })
 
 test('draws outside pyramid labels with their own series, spread clear of each other', async ({ page, scenario }) => {
@@ -705,20 +773,22 @@ test('draws outside pyramid labels with their own series, spread clear of each o
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
 
   const result = await chart.evaluate((element) => {
-    type Label = { type: string; children: { type: string; style: { text?: string; y?: number } }[] }
+    type Item = { children: { type: string; style: { text?: string; y?: number } }[] } | null
     const pyramid = element as unknown as {
       frame: unknown
       labels: string
-      buildContext(): unknown
-      buildOptions(context: unknown): { series: { type: string; label?: { show: boolean }; renderItem?(params: { dataIndex: number }): Label | null }[] }
+      buildContext(): { width: number; height: number }
+      buildOptions(context: unknown): { series: { type: string; renderItem(params: { dataIndex: number }, api: object): Item }[] }
       projectData(frame: unknown, context: unknown): unknown[][]
     }
     const read = () => {
       const context = pyramid.buildContext()
+      const api = { getWidth: () => context.width, getHeight: () => context.height }
       const projected = pyramid.projectData(pyramid.frame, context)
       const series = pyramid.buildOptions(context).series
-      const labels = series[1]?.renderItem ? projected[1].map((_, index) => series[1].renderItem?.({ dataIndex: index })?.children[1].style) : []
-      return { types: series.map((item) => item.type), engineLabels: series[0].label?.show, labels }
+      const outside = series[1] ? projected[1].map((_, index) => series[1].renderItem({ dataIndex: index }, api)?.children[1].style) : []
+      const inside = projected[0].map((_, index) => series[0].renderItem({ dataIndex: index }, api)?.children[1]?.style.text)
+      return { series: series.length, outside, inside }
     }
     const outside = read()
     pyramid.labels = 'inside'
@@ -726,50 +796,53 @@ test('draws outside pyramid labels with their own series, spread clear of each o
     return { outside, inside }
   })
 
-  // The funnel's own labels cannot be moved, so outside ones come from a second, silent series.
-  expect(result.outside.types).toEqual(['funnel', 'custom'])
-  expect(result.outside.engineLabels).toBe(false)
-  expect(result.outside.labels.map((label) => label?.text)).toEqual(['Enterprise · 42', 'Business · 318', 'Team · 1,260', 'Starter · 4,870'])
-  const ys = result.outside.labels.map((label) => label?.y ?? 0)
+  expect(result.outside.series).toBe(2)
+  expect(result.outside.outside.map((label) => label?.text)).toEqual(['Enterprise · 42', 'Business · 318', 'Team · 1,260', 'Starter · 4,870'])
+  const ys = result.outside.outside.map((label) => label?.y ?? 0)
   for (let index = 1; index < ys.length; index += 1) expect(ys[index] - ys[index - 1]).toBeGreaterThanOrEqual(12 * 1.35 - 0.001)
-  expect(result.inside).toEqual({ types: ['funnel'], engineLabels: true, labels: [] })
+  expect(result.outside.inside).toEqual([undefined, undefined, undefined, undefined])
+  // Inside, the apex level is too small to hold its text, so it is left to the tooltip.
+  expect(result.inside.series).toBe(1)
+  expect(result.inside.inside[0]).toBeUndefined()
+  expect(result.inside.inside[3]).toBe('Starter · 4,870')
 })
 
-test('maps the apex and the level variables onto the funnel', async ({ page, scenario }) => {
+test('lays a pyramid on its side or upside down, and moves it across its axis', async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
 
-  const read = (apex: string, style: string) =>
+  const apexAt = (apex: string, style: string) =>
     chart.evaluate(
       (element, [nextApex, nextStyle]) => {
         const pyramid = element as unknown as {
           apex: string
-          buildContext(): unknown
-          seriesOption(index: number, context: unknown): Record<string, unknown> & { label: { position: string } }
+          frame: unknown
+          buildContext(): { width: number; height: number }
+          projectData(frame: unknown, context: unknown): unknown
+          levelGeometry(width: number, height: number): { shapes: { points: [number, number][] }[] }
         }
         pyramid.apex = nextApex
         element.setAttribute('style', nextStyle)
-        const option = pyramid.seriesOption(0, pyramid.buildContext())
-        return {
-          sort: option.sort,
-          orient: option.orient,
-          align: option.funnelAlign,
-          gap: option.gap,
-          min: option.minSize,
-          max: option.maxSize,
-          position: option.label.position,
-        }
+        const context = pyramid.buildContext()
+        pyramid.projectData(pyramid.frame, context)
+        const [x, y] = pyramid.levelGeometry(context.width, context.height).shapes[0].points[0]
+        return { x: x / context.width, y: y / context.height }
       },
       [apex, style],
     )
 
-  expect(await read('bottom', '')).toEqual({ sort: 'descending', orient: 'vertical', align: 'center', gap: 0, min: '0%', max: '100%', position: 'right' })
-  expect(await read('start', '')).toMatchObject({ sort: 'ascending', orient: 'horizontal', position: 'bottom' })
-  expect(await read('end', 'direction: rtl')).toMatchObject({ sort: 'ascending', orient: 'horizontal' })
-  expect(
-    await read('top', '--c2-chart__level--gap: 4px; --c2-chart__level--align: end; --c2-chart__level--min-width: 10%; --c2-chart__level--max-width: 240px'),
-  ).toEqual({ sort: 'ascending', orient: 'vertical', align: 'right', gap: 4, min: '10%', max: '240', position: 'left' })
+  const round = (point: { x: number; y: number }) => ({ x: Math.round(point.x * 10) / 10, y: Math.round(point.y * 10) / 10 })
+  // Labels sit to the right, so a centred upright pyramid's point is left of the middle, at the top.
+  const top = round(await apexAt('top', ''))
+  expect(top.y).toBe(0)
+  expect(top.x).toBeLessThan(0.5)
+  expect(round(await apexAt('bottom', '')).y).toBe(1)
+  expect(round(await apexAt('start', '')).x).toBe(0)
+  expect(round(await apexAt('end', '')).x).toBe(1)
+  expect(round(await apexAt('start', 'direction: rtl')).x).toBe(1)
+  // Aligned to the end, the labels move to the start side and the pyramid's right edge meets the plot's.
+  expect((await apexAt('top', '--c2-chart__level--align: end')).x).toBeGreaterThan(0.9)
 })
 
 test('reports the clicked pyramid level by its data row', async ({ page, scenario }) => {
@@ -777,16 +850,18 @@ test('reports the clicked pyramid level by its data row', async ({ page, scenari
   const chart = page.locator('c2-pyramid-chart')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
 
-  // The base level is the widest and the easiest to hit: just above the bottom edge, in the middle of the funnel.
+  // The base level is the widest and the easiest to hit: aim for its middle.
   const target = await chart.evaluate((element) => {
     const pyramid = element as unknown as {
       getPlotBounds(): DOMRect
-      buildContext(): unknown
-      seriesOption(index: number, context: unknown): { left: number; right: number; bottom: number }
+      buildContext(): { width: number; height: number }
+      levelGeometry(width: number, height: number): { shapes: { centre: [number, number] }[] }
     }
     const bounds = pyramid.getPlotBounds()
-    const option = pyramid.seriesOption(0, pyramid.buildContext())
-    return { x: bounds.left + option.left + (bounds.width - option.left - option.right) / 2, y: bounds.bottom - option.bottom - 6 }
+    const context = pyramid.buildContext()
+    const shapes = pyramid.levelGeometry(context.width, context.height).shapes
+    const [x, y] = shapes[shapes.length - 1].centre
+    return { x: bounds.left + x, y: bounds.top + y }
   })
   await chart.evaluate((element) => {
     const events: unknown[] = []
@@ -802,7 +877,7 @@ test('reports the clicked pyramid level by its data row', async ({ page, scenari
     })
     .toBe(true)
   await page.mouse.click(target.x, target.y)
-  // ECharts drew Starter last, at index 3; the events name its row, which is the first.
+  // Starter is drawn last, at index 3; the events name its row, which is the first.
   await expect.poll(async () => (await events()).find(([type]) => type === 'point-click')?.[1]).toMatchObject({ index: 0, label: 'Starter', y: 4870 })
   expect((await events()).find(([type]) => type === 'point-hover')?.[1]).toMatchObject({ index: 0, label: 'Starter' })
   // A click on a level highlights it, as a click on a pie slice does.
@@ -845,15 +920,19 @@ test('with legend-action="toggle", hiding a pyramid level lays the rest out agai
   const drawn = await chart.evaluate((element) => {
     const pyramid = element as unknown as {
       frame: unknown
-      buildContext(): unknown
-      projectData(frame: unknown, context: unknown): { name: string; value: number }[][]
+      buildContext(): { width: number; height: number }
+      projectData(frame: unknown, context: unknown): { name: string }[][]
+      levelGeometry(width: number, height: number): { shapes: { points: [number, number][] }[] }
     }
-    const [data] = pyramid.projectData(pyramid.frame, pyramid.buildContext())
-    return data.map((datum) => [datum.name, datum.value])
+    const context = pyramid.buildContext()
+    const [data] = pyramid.projectData(pyramid.frame, context)
+    const shapes = pyramid.levelGeometry(context.width, context.height).shapes
+    const base = shapes[shapes.length - 1].points
+    return { names: data.map((datum) => datum.name), baseWidth: base[2][0] - base[3][0], plotWidth: context.width }
   })
-  expect(drawn.map(([name]) => name)).toEqual(['Enterprise', 'Business', 'Team'])
-  // The base is the new widest level, so the three remaining levels still fill the triangle.
-  expect(drawn[2][1]).toBe(1)
+  expect(drawn.names).toEqual(['Enterprise', 'Business', 'Team'])
+  // Team is the new base, as wide as the pyramid can be, so the three remaining levels still fill the triangle.
+  expect(drawn.baseWidth).toBeGreaterThan(drawn.plotWidth * 0.3)
 })
 
 test('drives the grid from markup in both directions', async ({ page, scenario }) => {
