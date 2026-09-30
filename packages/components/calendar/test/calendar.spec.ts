@@ -143,3 +143,11 @@ test.describe('month picker', () => {
     expect(results.violations).toEqual([])
   })
 })
+
+test('keeps white text on an event with its own colour when the theme darkens the default text', async ({ page, scenario }) => {
+  await scenario()
+  // The dark theme sets the default event text to a dark colour for its lighter default bar.
+  await page.locator('c2-calendar').evaluate((element) => (element as HTMLElement).style.setProperty('--c2-calendar__event--color', 'rgb(24, 24, 27)'))
+  await expect(page.getByRole('button', { name: /^Vacation/ }).first()).toHaveCSS('color', 'rgb(255, 255, 255)')
+  await expect(page.getByRole('button', { name: /^Flight/ })).toHaveCSS('color', 'rgb(24, 24, 27)')
+})

@@ -109,3 +109,10 @@ test('has no axe violations', async ({ page, scenario }) => {
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('keeps white text on an event with its own colour when the theme darkens the default text', async ({ page, scenario }) => {
+  await scenario()
+  await page.locator('c2-week-planner').evaluate((element) => (element as HTMLElement).style.setProperty('--c2-week-planner__event--color', 'rgb(24, 24, 27)'))
+  await expect(page.getByRole('button', { name: /^Review/ })).toHaveCSS('color', 'rgb(255, 255, 255)')
+  await expect(page.getByRole('button', { name: /^Workshop/ })).toHaveCSS('color', 'rgb(24, 24, 27)')
+})

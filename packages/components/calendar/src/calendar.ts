@@ -18,6 +18,11 @@ export interface CalendarEvent {
   end?: string
   /** Bar colour, any CSS colour. Defaults to `--c2-calendar__event--background`. */
   color?: string
+  /**
+   * Text colour on a bar with its own `color`. Defaults to white, which suits a mid-to-dark colour in both themes;
+   * set a dark one for a light `color`.
+   */
+  textColor?: string
 }
 
 export interface CalendarEventClickDetail {
@@ -374,6 +379,8 @@ export class Calendar extends LitElement {
               gridColumn: `${segment.column + 1} / span ${segment.span}`,
               gridRow: String(segment.lane + 2),
               '--event-color': segment.event.color || null,
+              // A colour of the author's own keeps its text colour in every theme; only the default follows it.
+              '--event-text-color': segment.event.color ? segment.event.textColor || '#ffffff' : null,
             })}
             @click=${() => this.openEvent(segment.event)}
           >

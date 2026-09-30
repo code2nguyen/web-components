@@ -26,6 +26,11 @@ export interface WeekPlannerEvent {
   weeks?: 'all' | WeekPlannerParity
   /** Block colour, any CSS colour. Defaults to `--c2-week-planner__event--background`. */
   color?: string
+  /**
+   * Text colour on a bar with its own `color`. Defaults to white, which suits a mid-to-dark colour in both themes;
+   * set a dark one for a light `color`.
+   */
+  textColor?: string
 }
 
 export interface WeekPlannerEventClickDetail {
@@ -289,6 +294,8 @@ export class WeekPlanner extends LitElement {
                     '--column': String(item.column),
                     '--columns': String(item.columns),
                     '--event-color': item.event.color || null,
+                    // A colour of the author's own keeps its text colour in every theme; only the default follows it.
+                    '--event-text-color': item.event.color ? item.event.textColor || '#ffffff' : null,
                   })}
                   @click=${() => this.openEvent(item.event)}
                 >

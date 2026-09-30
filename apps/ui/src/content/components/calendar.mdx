@@ -38,8 +38,8 @@ npm install @c2n/calendar
 
 ## Events
 
-Each entry is `{ id?, title, start, end?, color? }`. Dates are local `YYYY-MM-DD` strings and `end` is inclusive;
-leave it out for a one-day entry. `color` is any CSS colour for that bar (pick one that keeps white text readable),
+Each entry is `{ id?, title, start, end?, color?, textColor? }`. Dates are local `YYYY-MM-DD` strings and `end` is inclusive;
+leave it out for a one-day entry. `color` is any CSS colour for that bar (its text stays white in both themes; add `textColor` for a light `color`),
 otherwise `--c2-calendar__event--background` applies. Entries without a valid `start` are skipped.
 
 Set `events` as a property from code, or as a JSON attribute in markup. Bars are buttons: clicking one (or pressing
