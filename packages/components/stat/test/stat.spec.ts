@@ -16,3 +16,13 @@ test('shows slotted supporting context', async ({ page, scenario }) => {
   await scenario('description')
   await expect(page.getByText('Updated today')).toBeVisible()
 })
+
+test('shows a placeholder while the value is missing', async ({ page, scenario }) => {
+  await scenario('no-value')
+  const value = page.locator('c2-stat [part="value"]')
+  await expect(value).toHaveText('--')
+  await page.locator('c2-stat').evaluate((el: HTMLElementTagNameMap['c2-stat']) => (el.value = '42'))
+  await expect(value).toHaveText('42')
+  await page.locator('c2-stat').evaluate((el: HTMLElementTagNameMap['c2-stat']) => (el.value = undefined))
+  await expect(value).toHaveText('--')
+})

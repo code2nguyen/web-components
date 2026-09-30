@@ -51,8 +51,8 @@ export type StatTone = 'neutral' | 'positive' | 'negative' | 'warning'
 export class Stat extends LitElement {
   static override styles = unsafeCSS(styles)
 
-  /** Plain-text metric. Use the `value` slot for formatted markup. */
-  @property() value = ''
+  /** Plain-text metric. Use the `value` slot for formatted markup. Shows `--` while `null` or `undefined`. */
+  @property() value?: string | null
 
   /** Plain-text label. Use the `label` slot for formatted markup. */
   @property() label = ''
@@ -66,7 +66,7 @@ export class Stat extends LitElement {
         <span class="icon" part="icon" aria-hidden="true"><slot name="icon"></slot></span>
         <div class="content">
           <div class="value-row">
-            <div class="value" part="value"><slot name="value">${this.value}</slot></div>
+            <div class="value" part="value"><slot name="value">${this.value ?? '--'}</slot></div>
             <div class="trend" part="trend"><slot name="trend"></slot></div>
           </div>
           <div class="label" part="label"><slot name="label">${this.label}</slot></div>
