@@ -4,6 +4,15 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  command: `<c2-command style="width:260px;--c2-command__field--min-height:40px;--c2-command__list--max-height:150px">
+  <c2-command-group heading="Suggestions">
+    <c2-command-item value="calendar">Calendar</c2-command-item>
+    <c2-command-item value="emoji">Search emoji</c2-command-item>
+  </c2-command-group>
+  <c2-command-group heading="Settings">
+    <c2-command-item value="profile">Profile</c2-command-item>
+  </c2-command-group>
+</c2-command>`,
   marker: `<p style="max-width:240px;margin:0;font-size:15px;line-height:1.8;text-align:center">Deploys are <c2-marker>fully automated</c2-marker>, <c2-marker variant="underline">reviewed</c2-marker> and <c2-marker variant="circle">reversible</c2-marker>.</p>`,
   'context-menu': `<c2-context-menu>
   <div style="display:grid;place-items:center;width:200px;height:96px;border:1px dashed #a1a1aa;border-radius:8px;color:#71717a;font-size:13px">Right-click me</div>

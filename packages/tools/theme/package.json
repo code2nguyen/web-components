@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/command:build",
         "../../components/marker:build",
         "../../components/context-menu:build",
         "../../components/otp-input:build",

@@ -92,6 +92,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/command:build",
         "./packages/components/marker:build",
         "./packages/components/context-menu:build",
         "./packages/components/otp-input:build",

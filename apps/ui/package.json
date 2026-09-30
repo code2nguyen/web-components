@@ -17,6 +17,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/command": "*",
     "@c2n/marker": "*",
     "@c2n/context-menu": "*",
     "@c2n/otp-input": "*",
