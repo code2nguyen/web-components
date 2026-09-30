@@ -146,7 +146,7 @@ test('lets a declared series relabel, recolour and limit the groups', async ({ p
   await expect(chart.locator('.legend-item')).toHaveCount(1)
 })
 
-test('ends the legend with a size key that follows the data', async ({ page }) => {
+test('size-legend ends the legend with a size key that follows the data', async ({ page }) => {
   await open(page)
   const chart = page.locator('c2-bubble-chart')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
@@ -163,7 +163,15 @@ test('ends the legend with a size key that follows the data', async ({ page }) =
   })
   await expect(key).toHaveAttribute('aria-label', 'Population: 8K, 2K, 500')
 
-  await chart.evaluate((element) => element.setAttribute('size-legend', 'none'))
+  await chart.evaluate((element) => element.removeAttribute('size-legend'))
+  await expect(chart.locator('[part="size-legend"]')).toHaveCount(0)
+})
+
+test('hides the size key by default', async ({ page }) => {
+  await open(page, 'wide')
+  const chart = page.locator('c2-bubble-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart.locator('.legend-item')).toHaveCount(2)
   await expect(chart.locator('[part="size-legend"]')).toHaveCount(0)
 })
 

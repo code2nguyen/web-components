@@ -66,7 +66,7 @@ switch (scenario) {
   default:
     main.innerHTML = `
       <c2-bubble-chart id="chart" x-field="gdp" y-field="life" size-field="pop" size-label="Population"
-        label-field="country" series-field="region" x-scale="log" bubble-labels="all"></c2-bubble-chart>`
+        label-field="country" series-field="region" x-scale="log" bubble-labels="all" size-legend></c2-bubble-chart>`
 }
 
 const chart = main.querySelector('c2-bubble-chart') as BubbleChart

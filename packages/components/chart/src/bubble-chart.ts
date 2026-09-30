@@ -86,7 +86,8 @@ function roundNicely(value: number): number {
  *
  * Size maps to area — the diameter grows with the square root of the value — between `--c2-chart__bubble--min-size`
  * and `--c2-chart__bubble--max-size`, so a value twice as large looks twice as large. Larger bubbles are drawn first
- * within each series so the small ones stay on top and hoverable. The built-in legend ends with a key to the sizes.
+ * within each series so the small ones stay on top and hoverable. `size-legend` ends the built-in legend with a key
+ * to the sizes.
  *
  * @tag c2-bubble-chart
  *
@@ -130,8 +131,8 @@ export class BubbleChart extends EchartsChartBase {
   /** Which bubbles carry their label: `auto` labels the ones whose text fits inside. Needs `label-field`. */
   @property({ type: String, attribute: 'bubble-labels' }) bubbleLabels: 'none' | 'auto' | 'all' = 'auto'
 
-  /** Whether the built-in legend ends with a key to the bubble sizes. */
-  @property({ type: String, attribute: 'size-legend' }) sizeLegend: 'auto' | 'none' = 'auto'
+  /** Ends the built-in legend with a key to the bubble sizes, titled by `size-label`. Off by default. */
+  @property({ type: Boolean, attribute: 'size-legend' }) sizeLegend = false
 
   /** Names the size measure in the tooltip and the size key. Defaults to the humanized `size-field`. */
   @property({ type: String, attribute: 'size-label' }) sizeLabel = ''
@@ -386,7 +387,7 @@ export class BubbleChart extends EchartsChartBase {
   /** Three nested circles at a full, a quarter and a sixteenth of the size domain: diameters of 1, ½ and ¼. */
   protected override renderLegendExtras(): unknown {
     const domain = this.sizeMax ?? this.sizeDomain
-    if (this.sizeLegend === 'none' || !this.sizeField || !(domain > 0)) return nothing
+    if (!this.sizeLegend || !this.sizeField || !(domain > 0)) return nothing
     const style = this.bubbleStyle()
     const values = [domain, domain / 4, domain / 16].map(roundNicely).filter((value, index, all) => value > 0 && all.indexOf(value) === index)
     const circles = values

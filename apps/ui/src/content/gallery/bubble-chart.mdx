@@ -28,14 +28,14 @@ The default example plots approximate, rounded 2023 figures after the World Bank
     --c2-chart__bubble-label--font-size: 11px;
   }
 </style>
-<c2-bubble-chart class="bubble-labelled" x-field="vol" size-field="aum" size-label="AUM ($B)" label-field="asset" x-label="Volatility (%)" y-label="Expected return (%)" data='[{"asset":"Global equity","vol":16,"equity":8.2,"aum":900},{"asset":"EM equity","vol":23,"equity":9.6,"aum":260},{"asset":"Real estate","vol":14,"alternatives":6.4,"aum":180},{"asset":"Private credit","vol":9,"alternatives":7.4,"aum":150},{"asset":"Gold","vol":15,"alternatives":4.2,"aum":60},{"asset":"Core bonds","vol":5,"bonds":3.6,"aum":640},{"asset":"Cash","vol":1,"bonds":2.4,"aum":120}]'>
+<c2-bubble-chart class="bubble-labelled" x-field="vol" size-field="aum" size-legend size-label="AUM ($B)" label-field="asset" x-label="Volatility (%)" y-label="Expected return (%)" data='[{"asset":"Global equity","vol":16,"equity":8.2,"aum":900},{"asset":"EM equity","vol":23,"equity":9.6,"aum":260},{"asset":"Real estate","vol":14,"alternatives":6.4,"aum":180},{"asset":"Private credit","vol":9,"alternatives":7.4,"aum":150},{"asset":"Gold","vol":15,"alternatives":4.2,"aum":60},{"asset":"Core bonds","vol":5,"bonds":3.6,"aum":640},{"asset":"Cash","vol":1,"bonds":2.4,"aum":120}]'>
   <c2-chart-series field="equity" label="Equity"></c2-chart-series>
   <c2-chart-series field="bonds" label="Bonds"></c2-chart-series>
   <c2-chart-series field="alternatives" label="Alternatives"></c2-chart-series>
 </c2-bubble-chart>
 ```
 
-```html tag=MdxCodeBlock,label=Compact · no size key
+```html tag=MdxCodeBlock,label=Compact
 <style>
   .bubble-compact {
     --c2-chart--height: 260px;
@@ -45,7 +45,7 @@ The default example plots approximate, rounded 2023 figures after the World Bank
     --c2-chart__bubble--max-size: 40px;
   }
 </style>
-<c2-bubble-chart class="bubble-compact" x-field="gdp" y-field="life" size-field="pop" label-field="country" series-field="region" x-scale="log" bubble-labels="none" size-legend="none" legend="top" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240}]'></c2-bubble-chart>
+<c2-bubble-chart class="bubble-compact" x-field="gdp" y-field="life" size-field="pop" label-field="country" series-field="region" x-scale="log" bubble-labels="none" legend="top" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240}]'></c2-bubble-chart>
 ```
 
 </GalleryGrid>
