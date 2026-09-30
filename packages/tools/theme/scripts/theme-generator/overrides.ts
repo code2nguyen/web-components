@@ -10,6 +10,8 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // Message body text is a slightly softer ink than the title; it is still body text on the surface.
+  '--c2-chat-message__message--color': { token: 'color-on-surface' },
   // Terminal typography and colors form one readable palette; a generic sans/light theme must not split it.
   '--c2-log-viewer--background': { exclude: 'default terminal palette' },
   '--c2-log-viewer--color': { exclude: 'default terminal palette' },
