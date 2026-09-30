@@ -16,11 +16,13 @@ const slugify = (text: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
 
-/** `Variants` + `Soft` → `variants--soft`, suffixed `-2`, `-3` when a gallery repeats a label within a section. */
+/**
+ * `Variants` + `Soft` → `variants--soft`. The slug is also the screenshot file name on the docs site, so it must not
+ * depend on card order: a label repeated within a section fails the build instead of being numbered.
+ */
 export function exampleSlug(section: string | undefined, label: string, used: Set<string>): string {
-  const base = [section, label].filter(Boolean).map(slugify).filter(Boolean).join('--') || 'example'
-  let slug = base
-  for (let n = 2; used.has(slug); n++) slug = `${base}-${n}`
+  const slug = [section, label].filter(Boolean).map(slugify).filter(Boolean).join('--') || 'example'
+  if (used.has(slug)) throw new Error(`Two gallery cards share the slug "${slug}": give one its own label (a comma ends the label in fence meta)`)
   used.add(slug)
   return slug
 }
