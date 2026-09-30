@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import hoverCard from '@c2n/hover-card/custom-elements.json'
 import command from '@c2n/command/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
 import contextMenu from '@c2n/context-menu/custom-elements.json'
@@ -89,6 +90,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    hoverCard,
     command,
     marker,
     contextMenu,

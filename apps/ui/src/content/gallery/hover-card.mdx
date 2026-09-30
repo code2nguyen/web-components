@@ -1,0 +1,124 @@
+---
+description: 'Ready-made looks for c2-hover-card: profile, link preview, dark and compact cards. Hover a trigger to see it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { HoverCard } from '@c2n/hover-card'
+
+## Presets
+
+Curated looks for `c2-hover-card`. Hover the trigger in a card to see it. The card is styled through `--c2-hover-card--*`: `background-color`, `color`, `border`, `border-radius` and `box-shadow` set the surface, `width` and the four `padding-*` variables its size, and `offset`, `transition-duration` and `enter-transform` how it arrives.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .trigger {
+    color: rgb(2, 101, 220);
+    font-weight: 500;
+  }
+</style>
+<c2-hover-card open-delay="200" client:only="lit"><a class="trigger" slot="trigger" href="#">@ada</a>Ada Lovelace wrote the first published algorithm.</c2-hover-card>
+```
+
+```html tag=MdxCodeBlock,label=Profile
+<style>
+  .profile-card {
+    --c2-hover-card--width: 280px;
+    --c2-hover-card--border-radius: 14px;
+  }
+  .trigger {
+    color: rgb(2, 101, 220);
+    font-weight: 500;
+  }
+  .profile-card .cover {
+    height: 48px;
+    margin: -16px -16px 0;
+    border-radius: 13px 13px 0 0;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+  }
+  .profile-card .avatar {
+    width: 48px;
+    height: 48px;
+    margin-top: -24px;
+    border-radius: 999px;
+    border: 3px solid var(--c2-theme--color-surface, #ffffff);
+    background: #f59e0b;
+  }
+  .profile-card .meta {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<c2-hover-card class="profile-card" open-delay="200" client:only="lit"><a class="trigger" slot="trigger" href="#">@grace</a><div class="cover"></div><div class="avatar"></div><strong>Grace Hopper</strong><p class="meta">Rear admiral, compiler pioneer · 1.2k followers</p></c2-hover-card>
+```
+
+```html tag=MdxCodeBlock,label=Link preview
+<style>
+  .link-preview {
+    --c2-hover-card--width: 300px;
+    --c2-hover-card--padding-top: 12px;
+    --c2-hover-card--padding-right: 12px;
+    --c2-hover-card--padding-bottom: 12px;
+    --c2-hover-card--padding-left: 12px;
+  }
+  .trigger {
+    color: rgb(2, 101, 220);
+    text-decoration: underline;
+  }
+  .link-preview .thumb {
+    height: 96px;
+    border-radius: 6px;
+    background: linear-gradient(160deg, #0ea5e9, #22c55e);
+    margin-bottom: 8px;
+  }
+  .link-preview .host {
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+  }
+</style>
+<c2-hover-card class="link-preview" open-delay="200" client:only="lit"><a class="trigger" slot="trigger" href="#">the release notes</a><div class="thumb"></div><div class="host">github.com</div><strong>v0.0.20 — hover cards and range sliders</strong></c2-hover-card>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark-card {
+    --c2-hover-card--background-color: #18181b;
+    --c2-hover-card--color: #fafafa;
+    --c2-hover-card--border: 1px solid #3f3f46;
+    --c2-hover-card--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    --c2-hover-card--width: 240px;
+  }
+  .trigger {
+    color: rgb(2, 101, 220);
+    font-weight: 500;
+  }
+</style>
+<c2-hover-card class="dark-card" open-delay="200" client:only="lit"><a class="trigger" slot="trigger" href="#">#design-system</a>Channel for tokens, components and the docs site. 48 members.</c2-hover-card>
+```
+
+```html tag=MdxCodeBlock,label=Compact and quick
+<style>
+  .compact-card {
+    --c2-hover-card--width: 200px;
+    --c2-hover-card--font-size: 12px;
+    --c2-hover-card--padding-top: 8px;
+    --c2-hover-card--padding-right: 10px;
+    --c2-hover-card--padding-bottom: 8px;
+    --c2-hover-card--padding-left: 10px;
+    --c2-hover-card--border-radius: 6px;
+    --c2-hover-card--offset: 4px;
+    --c2-hover-card--transition-duration: 80ms;
+  }
+  .trigger {
+    color: rgb(2, 101, 220);
+    font-weight: 500;
+  }
+</style>
+<c2-hover-card class="compact-card" open-delay="0" close-delay="100" client:only="lit"><a class="trigger" slot="trigger" href="#">PR #119</a>feat(slider): add range mode with two thumbs · merged</c2-hover-card>
+```
+
+</GalleryGrid>

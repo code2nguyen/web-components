@@ -2200,6 +2200,42 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-hover-card': {
+    html: `<c2-hover-card open-delay="200"><a slot="trigger" href="#">@ada</a>Ada Lovelace wrote the first published algorithm.</c2-hover-card>`,
+    presets: [
+      {
+        name: 'Dark',
+        description: 'Dark surface with a subtle outline and deeper shadow.',
+        css: {
+          '--c2-hover-card--background-color': '#18181b',
+          '--c2-hover-card--color': '#fafafa',
+          '--c2-hover-card--border': '1px solid #3f3f46',
+          '--c2-hover-card--box-shadow': '0 12px 32px rgba(0, 0, 0, 0.35)',
+        },
+      },
+      {
+        name: 'Compact',
+        css: {
+          '--c2-hover-card--width': '200px',
+          '--c2-hover-card--font-size': '12px',
+          '--c2-hover-card--padding-top': '8px',
+          '--c2-hover-card--padding-right': '10px',
+          '--c2-hover-card--padding-bottom': '8px',
+          '--c2-hover-card--padding-left': '10px',
+          '--c2-hover-card--border-radius': '6px',
+        },
+        attributes: { 'open-delay': '0' },
+      },
+      {
+        name: 'Rounded',
+        css: {
+          '--c2-hover-card--border-radius': '14px',
+          '--c2-hover-card--width': '280px',
+          '--c2-hover-card--box-shadow': '0 24px 60px rgba(0, 0, 0, 0.18)',
+        },
+      },
+    ],
+  },
   'c2-tooltip': {
     html: `<button>Hover me<c2-tooltip>Save changes</c2-tooltip></button>`,
     presets: [

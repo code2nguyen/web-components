@@ -77,11 +77,12 @@ test('draws an animated mark once it scrolls into view', async ({ page, scenario
   await expect(below).not.toHaveClass(/is-drawn/)
   await expect(below.locator('path')).toHaveCSS('stroke-dashoffset', '1px')
 
-  await page.mouse.wheel(0, 4000)
+  // Firefox caps a wheel delta at about one page, which leaves the mark off screen, so scroll explicitly.
+  await below.scrollIntoViewIfNeeded()
   await expect(below).toHaveClass(/is-drawn/)
 
   // Drawn once: scrolling back out of view leaves the mark in place.
-  await page.mouse.wheel(0, -4000)
+  await page.evaluate(() => window.scrollTo(0, 0))
   await expect(below).toHaveClass(/is-drawn/)
 })
 
