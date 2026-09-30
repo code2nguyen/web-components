@@ -11,6 +11,7 @@ import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/co
 import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { defaultCompare } from '@c2n/core/data-helper.js'
+import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
 import { provide } from '@lit/context'
 import { PAGER_CONNECT_EVENT, pagerContext, type PagerConnectEventDetail, type PagerContext } from '@c2n/core/contexts/pager.js'
 import { COLUMN_CHANGE_EVENT, TableColumn } from './table-column.js'
@@ -345,6 +346,11 @@ export interface Table {
  *   <c2-table-column field="amount" format="currency" align="end" summary="sum"></c2-table-column>
  * </c2-table>
  * ```
+ *
+ * Wrapped in a `c2-context-menu`, a right-clicked or long-pressed body cell answers the menu's request with the same
+ * detail as `cell-click` (`row`, `rowIndex`, `key`, `column`, `value`), which the menu passes on as `context.data`
+ * with this table as `context.source`, so `renderContextMenu` can build the rows for that cell. The cell also takes
+ * the keyboard focus.
  *
  * @tag c2-table
  *
@@ -1460,6 +1466,7 @@ export class Table extends LitElement {
         tabindex=${shared.tabindex}
         style=${shared.style}
         @click=${() => this.#handleCellClick(line, columnIndex, column, value)}
+        @c2-context-menu-request=${(event: Event) => this.#handleContextMenuRequest(event, line, columnIndex, column, value)}
       >
         <span
           class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0 })}
@@ -2246,6 +2253,15 @@ export class Table extends LitElement {
         composed: true,
       }),
     )
+  }
+
+  /** An enclosing `c2-context-menu` asks what was right-clicked: the cell, with the same detail as `cell-click`. */
+  #handleContextMenuRequest(event: Event, line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
+    const rowIndex = this.#rowIndexAt(line)
+    const row = this.#rowAt(rowIndex)
+    if (!row) return
+    this.focusedCell = { row: line, column: columnIndex }
+    provideContextMenuData(event, this, { row, rowIndex, key: this.#keyAt(rowIndex, row), column, value } satisfies TableCellEventDetail)
   }
 
   #handleCheckboxToggle(index: number) {
