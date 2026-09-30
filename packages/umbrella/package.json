@@ -81,6 +81,10 @@
       "types": "./lib/button-group.d.ts",
       "default": "./lib/button-group.js"
     },
+    "./calendar": {
+      "types": "./lib/calendar.d.ts",
+      "default": "./lib/calendar.js"
+    },
     "./card": {
       "types": "./lib/card.d.ts",
       "default": "./lib/card.js"
@@ -405,6 +409,7 @@
     "@c2n/breadcrumb": "0.0.19",
     "@c2n/button": "0.0.19",
     "@c2n/button-group": "0.0.19",
+    "@c2n/calendar": "0.0.19",
     "@c2n/card": "0.0.19",
     "@c2n/carousel": "0.0.19",
     "@c2n/cascader": "0.0.19",

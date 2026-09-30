@@ -1,0 +1,39 @@
+---
+title: 'Calendar'
+description: 'Inline month calendar for picking a single date.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Calendar } from '@c2n/calendar'
+
+`c2-calendar` shows one month and lets the user pick one day. Its `value` is a local `YYYY-MM-DD` string, so it never
+shifts across time zones. `min` and `max` disable the days outside them, `week-start` and `locale` match the audience,
+and with a `name` it submits its value in a form like a native control. Arrow keys move by day or week, Home and End
+move within the week, Page Up and Page Down change month (with Shift, year), and Enter or Space selects. For a start
+and end date, use [`c2-date-selector`](/web-components/components/date-selector) instead.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/calendar
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/calendar
+<div data-label="Selected date">
+  <c2-calendar value="2026-09-18" locale="en-US"></c2-calendar>
+</div>
+<div data-label="Limited to a range, Sunday first">
+  <c2-calendar value="2026-09-10" min="2026-09-05" max="2026-09-25" week-start="sunday" locale="en-US"></c2-calendar>
+</div>
+<div data-label="Disabled">
+  <c2-calendar value="2026-09-10" disabled locale="en-US"></c2-calendar>
+</div>
+```
+
+Listen for `change` (or `input`) and read `event.target.value`. With `name="day"` the form submits `day=2026-09-18`;
+`required` makes an empty calendar invalid, and a form reset restores the authored `value`.

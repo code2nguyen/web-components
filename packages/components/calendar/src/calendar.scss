@@ -1,0 +1,182 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-calendar,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 14px,
+    box-shadow: none,
+    padding: 12px,
+    font-family: inherit,
+    font-size: 14px,
+    title--font-weight: 600,
+    navigation--size: 32px,
+    navigation--border-radius: 6px,
+    navigation__hover--background: #f4f4f5,
+    weekday--color: #71717a,
+    weekday--font-size: 12px,
+    day--size: 36px,
+    day--border-radius: 6px,
+    day__hover--background: #f4f4f5,
+    day__today--color: rgb(2, 101, 220),
+    day__today--font-weight: 600,
+    day__selected--background: rgb(2, 101, 220),
+    day__selected--color: #ffffff,
+    day__disabled--opacity: 0.38,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+    disabled--opacity: 0.38,
+  )
+);
+
+:host {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-calendar {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  box-shadow: css.cssVar(box-shadow);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font: inherit;
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.navigation {
+  display: inline-flex;
+  width: css.cssVar(navigation--size);
+  height: css.cssVar(navigation--size);
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(navigation--border-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: animation.standard(background);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(navigation__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, css.cssVar(day--size));
+  gap: 2px 0;
+}
+
+.row {
+  display: contents;
+}
+
+.weekday,
+.empty,
+.day {
+  display: inline-flex;
+  width: css.cssVar(day--size);
+  height: css.cssVar(day--size);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.weekday {
+  color: css.cssVar(weekday--color);
+  font-size: css.cssVar(weekday--font-size);
+}
+
+.day {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(day--border-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  transition: animation.standard(background), animation.standard(color);
+
+  &:hover:not(:disabled):not([aria-selected='true']) {
+    background: css.cssVar(day__hover--background);
+  }
+
+  &[aria-current='date']:not([aria-selected='true']) {
+    color: css.cssVar(day__today--color);
+    font-weight: css.cssVar(day__today--font-weight);
+  }
+
+  &[aria-selected='true'] {
+    background: css.cssVar(day__selected--background);
+    color: css.cssVar(day__selected--color);
+  }
+
+  &:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(day__disabled--opacity);
+  }
+}
+
+.c2-calendar[aria-disabled='true'] {
+  opacity: css.cssVar(disabled--opacity);
+}
+
+// The whole calendar is already dimmed; don't dim its days and buttons a second time.
+.c2-calendar[aria-disabled='true'] :is(.day, .navigation):disabled {
+  opacity: 1;
+}

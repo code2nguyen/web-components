@@ -72,6 +72,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Inputs
 
 - **Autocomplete** — `c2-autocomplete` · `@c2n/autocomplete` — Searchable combobox for local or remote items with customizable list rows.
+- **Calendar** — `c2-calendar` · `@c2n/calendar` — Inline month calendar for picking a single date.
 - **Cascader** — `c2-cascader` · `@c2n/cascader` — Select a value from related, multi-level data in one floating panel.
 - **Checkbox** — `c2-checkbox` · `@c2n/checkbox` — Native checkbox behaviour in a quiet, themeable box with an opt-in hover layer.
 - **Code Editor** — `c2-code-editor` · `@c2n/code-editor` — Editable, syntax-highlighted source field on CodeMirror 6, themed entirely through CSS variables.

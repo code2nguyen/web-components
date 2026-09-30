@@ -1,0 +1,43 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Calendar } from '@c2n/calendar'
+
+## Presets
+
+The selected-day and today colours carry the accent; the day size and radius set the calendar's density and shape.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-calendar value="2026-09-18" locale="en-US"></c2-calendar>
+```
+
+```html tag=MdxCodeBlock,label=Round violet
+<style>
+  .round-violet {
+    --c2-calendar__day--border-radius: 999px;
+    --c2-calendar__navigation--border-radius: 999px;
+    --c2-calendar__day__selected--background: #7c3aed;
+    --c2-calendar__day__today--color: #7c3aed;
+    --c2-calendar--box-shadow: 0 12px 32px rgba(24, 24, 27, 0.08);
+  }
+</style>
+<c2-calendar class="round-violet" value="2026-09-22" locale="en-US"></c2-calendar>
+```
+
+```html tag=MdxCodeBlock,label=Compact borderless
+<style>
+  .compact-borderless {
+    --c2-calendar--border: 0px solid transparent;
+    --c2-calendar--padding: 4px;
+    --c2-calendar__day--size: 30px;
+    --c2-calendar--font-size: 12px;
+    --c2-calendar__day__selected--background: #047857;
+    --c2-calendar__day__today--color: #047857;
+  }
+</style>
+<c2-calendar class="compact-borderless" value="2026-09-08" locale="en-US"></c2-calendar>
+```
+
+</GalleryGrid>
