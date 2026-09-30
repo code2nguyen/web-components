@@ -84,6 +84,10 @@ type ManagedStep = HTMLElement & {
 export class Steps extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** How each marker is drawn: a status glyph, the step's number, or nothing. */
   @property({ reflect: true }) marker: StepsMarker = 'icon'
 
@@ -151,7 +155,7 @@ export class Steps extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    this.setAttribute('role', 'list')
+    this.internals.role = 'list'
     this.observer ??= new MutationObserver(() => this.syncSteps())
     this.observer.observe(this, { subtree: true, childList: true, attributes: true, attributeFilter: ['status'] })
   }

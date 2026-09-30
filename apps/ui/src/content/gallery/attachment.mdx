@@ -42,14 +42,14 @@ Use classes for assigned thumbnail, name, metadata, and action nodes. The matchi
 ```html tag=MdxCodeBlock,label=Dark,description=Dark surface using component-level variables,useWhen=The attachment sits on a permanently dark region
 <style>
   .dark {
-    --c2-attachment--background: #18181b;
-    --c2-attachment--border: 1px solid #3f3f46;
-    --c2-attachment--color: #fafafa;
-    --c2-attachment__media--background: #27272a;
-    --c2-attachment__media--color: #d4d4d8;
-    --c2-attachment__metadata--color: #a1a1aa;
-    --c2-attachment__action--color: #d4d4d8;
-    --c2-attachment__action__hover--background: #3f3f46;
+    --c2-attachment--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-attachment--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-attachment__media--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment__media--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-attachment__metadata--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-attachment__action--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-attachment__action__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-attachment class="dark" name="archive.tar.gz" type="Archive" size="32 MB" removable></c2-attachment>
@@ -95,15 +95,15 @@ The mixed layout follows the reference composition: visual files form a tile row
     width: min(100%, 760px);
     --c2-attachment-group--gap: 14px;
     --c2-attachment-group--min-column-width: 180px;
-    --c2-attachment--background: #181818;
-    --c2-attachment--border: 1px solid #333333;
-    --c2-attachment--color: #f4f4f5;
-    --c2-attachment__media--background: #282828;
-    --c2-attachment__media--color: #f4f4f5;
-    --c2-attachment__metadata--color: #a1a1aa;
-    --c2-attachment__status--color: #a1a1aa;
-    --c2-attachment__action--color: #e4e4e7;
-    --c2-attachment__action__hover--background: #333333;
+    --c2-attachment--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-attachment--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 88%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment__media--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment__media--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
+    --c2-attachment__metadata--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-attachment__status--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-attachment__action--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-attachment__action__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 88%, var(--c2-theme--color-surface, #ffffff));
     --c2-attachment__tile--width: 100%;
   }
   .reference-media {
@@ -112,17 +112,17 @@ The mixed layout follows the reference composition: visual files form a tile row
     height: 100%;
     background:
       linear-gradient(135deg, transparent 38%, rgba(255, 255, 255, 0.16) 39% 42%, transparent 43%),
-      linear-gradient(30deg, #52525b, #18181b 55%, #71717a);
+      linear-gradient(30deg, color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff)), var(--c2-theme--color-inverse-surface, #18181b) 55%, color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff)));
   }
   .reference-media.desk {
     background:
       linear-gradient(80deg, transparent 47%, rgba(255, 255, 255, 0.18) 48% 52%, transparent 53%),
-      linear-gradient(160deg, #d4d4d8, #71717a 48%, #27272a 49%);
+      linear-gradient(160deg, var(--c2-theme--color-outline, #d4d4d8), color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff)) 48%, color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff)) 49%);
   }
   .reference-media.office {
     background:
-      linear-gradient(0deg, #3f3f46 0 22%, transparent 23%),
-      linear-gradient(145deg, #71717a, #27272a 55%, #18181b);
+      linear-gradient(0deg, color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff)) 0 22%, transparent 23%),
+      linear-gradient(145deg, color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff)) 55%, var(--c2-theme--color-inverse-surface, #18181b));
   }
 </style>
 <c2-attachment-group class="reference-attachments" layout="mixed" aria-label="Reference files">

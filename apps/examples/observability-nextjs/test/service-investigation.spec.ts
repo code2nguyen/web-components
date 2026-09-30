@@ -45,7 +45,8 @@ test('service inventory demo states are page-scoped and recover without changing
     ['Error', 'Service inventory unavailable'],
   ] as const) {
     await demoState.click()
-    await page.getByRole('option', { name: state }).click()
+    // c2-list-item states role=option through ElementInternals, which getByRole does not read.
+    await page.locator('c2-list-item', { hasText: state }).click()
     await expect(page.getByText(expected, { exact: true })).toBeVisible()
     await expect(page).toHaveURL(originalUrl)
   }

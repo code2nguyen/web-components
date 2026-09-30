@@ -7,6 +7,7 @@
  * - `packages/adapters/angular/src/value-accessors.ts` — the `ControlValueAccessor` directives of `@c2n/angular`
  * - `dist/html-custom-data.json` — VS Code / Volar completion for plain HTML, Vue and Angular templates
  * - `dist/web-types.json`        — the JetBrains equivalent
+ * - `packages/umbrella/`         — `@c2n/components`, every component package behind one install
  *
  * The two `.d.ts` files live in the package they describe: a single aggregate file would have to import from
  * every `@c2n` package, and a consumer who installed three of them would not be able to compile it.
@@ -22,8 +23,9 @@ import { format, resolveConfig } from 'prettier'
 import { emitHtmlCustomData, emitWebTypes } from './emit-editor.ts'
 import { emitReact, emitVue } from './emit-react.ts'
 import { emitAngular } from './emit-angular.ts'
+import { emitUmbrella } from './emit-umbrella.ts'
 import { emitVueTsconfig } from './emit-vue-config.ts'
-import { readPackages, repoRelative } from './manifests.ts'
+import { readPackages, repoRelative, scopeDir } from './manifests.ts'
 
 const packageDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const distDir = join(packageDir, 'dist')
@@ -31,7 +33,8 @@ const version = (JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8
 
 const prettierConfig = await resolveConfig(join(packageDir, 'package.json'))
 
-async function write(file: string, contents: string, parser: 'typescript' | 'json'): Promise<void> {
+async function write(file: string, contents: string, parser: 'typescript' | 'json' | 'json-stringify' | 'css'): Promise<void> {
+  mkdirSync(dirname(file), { recursive: true })
   writeFileSync(file, await format(contents, { ...prettierConfig, parser }))
   console.log(`  ${repoRelative(file)}`)
 }
@@ -56,3 +59,6 @@ await write(resolve(packageDir, '../../adapters/angular/src/value-accessors.ts')
 await write(join(packageDir, 'tsconfig.vue.json'), emitVueTsconfig(packages, version), 'json')
 await write(join(distDir, 'html-custom-data.json'), emitHtmlCustomData(packages, version), 'json')
 await write(join(distDir, 'web-types.json'), emitWebTypes(packages, version), 'json')
+
+const umbrellaDir = resolve(packageDir, '../../umbrella')
+for (const file of emitUmbrella(packages, umbrellaDir, scopeDir())) await write(join(umbrellaDir, file.path), file.contents, file.parser)

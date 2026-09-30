@@ -55,6 +55,14 @@ export function customLitCemPlugin() {
     // Runs once per module, after every analyze phase.
     moduleLinkPhase({ moduleDoc }) {
       for (const declaration of moduleDoc.declarations ?? []) {
+        // `dispatchEvent(new CustomEvent(COLUMN_CHANGE_EVENT))` is recorded under the constant's *name*, since the
+        // analyzer does not resolve identifiers. Every such event is an undocumented protocol between a component
+        // and its parent (`c2-table-column` → `c2-table`, a pager → its host), not public API — a documented one has
+        // an `@event` line with its real name — so the manifest drops it rather than publish a name nobody fires.
+        if (declaration.events) {
+          declaration.events = declaration.events.filter((event) => !/^[A-Z_$][A-Z0-9_$]*$/.test(event.name ?? ''))
+          if (declaration.events.length === 0) delete declaration.events
+        }
         for (const attribute of declaration.attributes ?? []) {
           // The analyzer names an attribute after the field when `@property()` carries no explicit `attribute`
           // option, but Lit derives the observed attribute by *lowercasing* the property name: `readOnly` is

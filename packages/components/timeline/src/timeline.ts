@@ -34,6 +34,10 @@ export { TimelineItem } from './timeline-item.js'
 export class Timeline extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** Where each entry's timestamp goes: under its label, or in a column of its own before the rail. */
   @property({ reflect: true }) layout: TimelineLayout = 'stacked'
 
@@ -45,7 +49,7 @@ export class Timeline extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    this.setAttribute('role', 'list')
+    this.internals.role = 'list'
     this.observer ??= new MutationObserver(() => this.syncItems())
     this.observer.observe(this, { subtree: true, childList: true })
   }

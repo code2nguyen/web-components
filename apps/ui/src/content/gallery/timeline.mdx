@@ -33,8 +33,8 @@ headings, lists and code, styled by the page's own CSS.
     --c2-timeline-item--padding-bottom: 28px;
     --c2-timeline-item__timestamp__split--width: 72px;
     --c2-timeline-item__marker--size: 10px;
-    --c2-timeline-item__marker--background: #18181b;
-    --c2-timeline-item__marker--border: 2px solid #18181b;
+    --c2-timeline-item__marker--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-timeline-item__marker--border: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
     --c2-timeline-item__connector--width: 1px;
     --c2-timeline-item__label--font-weight: 600;
     --c2-timeline-item__timestamp--font-size: 12px;
@@ -89,14 +89,14 @@ headings, lists and code, styled by the page's own CSS.
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 13px;
     font-weight: 600;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .release-timeline h3 {
     margin: 0 0 6px;
     font-size: 20px;
     font-weight: 600;
     line-height: 28px;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
   .release-timeline p {
     margin: 0 0 16px;
@@ -113,10 +113,10 @@ headings, lists and code, styled by the page's own CSS.
     height: 16px;
     flex: none;
   }
-  .release-timeline .is-new svg { color: #0265dc; }
+  .release-timeline .is-new svg { color: var(--c2-theme--color-primary, #0265dc); }
   .release-timeline .is-improved svg { color: #7c3aed; }
   .release-timeline .is-fixed svg { color: #15803d; }
-  .release-timeline .is-breaking svg { color: #dc2626; }
+  .release-timeline .is-breaking svg { color: var(--c2-theme--color-error, #dc2626); }
   .release-timeline ul {
     margin: 0;
     padding: 0;
@@ -131,7 +131,7 @@ headings, lists and code, styled by the page's own CSS.
     line-height: 1.55;
   }
   .release-timeline li + li {
-    border-top: 1px dashed #f0f0f2;
+    border-top: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, var(--c2-theme--color-surface, #ffffff));
   }
   .release-timeline li > span {
     flex: 1;
@@ -139,19 +139,19 @@ headings, lists and code, styled by the page's own CSS.
   .release-timeline .pr {
     flex: none;
     font-size: 12px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     text-decoration: none;
   }
   .release-timeline .pr:hover {
-    color: #0265dc;
+    color: var(--c2-theme--color-primary, #0265dc);
     text-decoration: underline;
   }
   .release-timeline code {
     padding: 1px 5px;
     border-radius: 4px;
-    background: #f4f4f5;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
     font-size: 12px;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
   .release-timeline .highlight {
     display: grid;
@@ -160,20 +160,20 @@ headings, lists and code, styled by the page's own CSS.
     padding: 16px 18px;
     border: 1px solid #dbe4ff;
     border-radius: 10px;
-    background: linear-gradient(135deg, #f5f8ff, #faf5ff);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff)), color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff)));
     font-size: 13px;
     line-height: 1.6;
   }
   .release-timeline .highlight strong {
     font-size: 14px;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
   .release-timeline .migration {
     margin: 0 0 16px;
     padding: 14px 16px;
     border: 1px solid #fecaca;
     border-radius: 10px;
-    background: #fef2f2;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     font-size: 13px;
     line-height: 1.6;
   }
@@ -182,13 +182,13 @@ headings, lists and code, styled by the page's own CSS.
     margin: 10px 0 0;
     padding: 10px 44px 10px 12px;
     border-radius: 6px;
-    background: #18181b;
-    color: #e4e4e7;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    color: var(--c2-theme--color-outline-variant, #e4e4e7);
     font-size: 12px;
     line-height: 1.7;
     overflow-x: auto;
-    --c2-copy-button__container--color: #e4e4e7;
-    --c2-copy-button__container__hover--background-color: #3f3f46;
+    --c2-copy-button__container--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-copy-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
   .release-timeline .migration .del { color: #fca5a5; }
   .release-timeline .migration .add { color: #86efac; }
@@ -204,11 +204,11 @@ headings, lists and code, styled by the page's own CSS.
     position: relative;
     margin: 0;
     padding: 7px 40px 7px 12px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
-    background: #fafafa;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
     font-size: 12px;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
     --c2-copy-button__container--height: 24px;
     --c2-copy-button__container--min-width: 24px;
     --c2-copy-button__pin--offset-y: 4px;
@@ -219,7 +219,7 @@ headings, lists and code, styled by the page's own CSS.
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-avatar--size: 24px;
     --c2-avatar-group--overlap: 6px;
     --c2-avatar-group--max-width: 140px;
@@ -228,7 +228,7 @@ headings, lists and code, styled by the page's own CSS.
   }
   .release-timeline .read-more {
     font-size: 13px;
-    color: #0265dc;
+    color: var(--c2-theme--color-primary, #0265dc);
   }
 </style>
 <c2-timeline class="release-timeline" layout="split" aria-label="Release notes">
@@ -352,8 +352,8 @@ tabs.addEventListener('selection-change', onTab)"></c2-copy-button></pre>
     width: 320px;
     --c2-timeline-item--padding-bottom: 16px;
     --c2-timeline-item__marker--size: 28px;
-    --c2-timeline-item__marker--background: #f4f4f5;
-    --c2-timeline-item__marker--border: 1px solid #e4e4e7;
+    --c2-timeline-item__marker--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-timeline-item__marker--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-timeline-item__label--line-height: 28px;
     --c2-timeline-item__timestamp--line-height: 16px;
     --c2-timeline-item__content--margin-top: 8px;
@@ -361,9 +361,9 @@ tabs.addEventListener('selection-change', onTab)"></c2-copy-button></pre>
   .activity-timeline blockquote {
     margin: 0;
     padding: 8px 12px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
-    color: #3f3f46;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-timeline class="activity-timeline" aria-label="Activity">
@@ -383,10 +383,10 @@ tabs.addEventListener('selection-change', onTab)"></c2-copy-button></pre>
   .roadmap-timeline {
     width: 320px;
     --c2-timeline-item__marker--size: 14px;
-    --c2-timeline-item__marker--border: 3px solid #bcbcc6;
+    --c2-timeline-item__marker--border: 3px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
     --c2-timeline-item__marker__primary--border-color: #7c3aed;
     --c2-timeline-item__marker__success--border-color: #7c3aed;
-    --c2-timeline-item__connector--background: repeating-linear-gradient(to bottom, #d4d4d8 0 4px, transparent 4px 8px);
+    --c2-timeline-item__connector--background: repeating-linear-gradient(to bottom, var(--c2-theme--color-outline, #d4d4d8) 0 4px, transparent 4px 8px);
     --c2-timeline-item__timestamp--color: #7c3aed;
   }
 </style>

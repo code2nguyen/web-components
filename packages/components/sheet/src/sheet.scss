@@ -94,7 +94,9 @@
 
 // One edge per side: the panel spans the perpendicular axis and is `size` deep, and it slides in from off-screen.
 // `inset` wins over the UA's centring margins, so no `margin: auto` reset is needed.
-:host([side='right']) .c2-sheet {
+// `right` is the default, which is not reflected onto the host, so an absent `side` matches it too.
+:host([side='right']) .c2-sheet,
+:host(:not([side])) .c2-sheet {
   inset: 0 0 0 auto;
   width: css.cssVar(size);
   height: 100dvh;

@@ -68,6 +68,10 @@ export interface Tooltip {
 export class Tooltip extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** Preferred side; flips when there is no room. */
   @property({ reflect: true }) placement: Placement = 'top'
 
@@ -148,7 +152,7 @@ export class Tooltip extends LitElement {
     super.connectedCallback()
     if (isServer) return
     if (!this.hasAttribute('popover')) this.setAttribute('popover', 'manual')
-    this.setAttribute('role', 'tooltip')
+    this.internals.role = 'tooltip'
     this.resolveTarget()
   }
 

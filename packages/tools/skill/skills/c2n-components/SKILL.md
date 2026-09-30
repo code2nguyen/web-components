@@ -28,19 +28,29 @@ When c2n MCP tools are available:
 
 1. `list_components` or `search_components` to pick the component for the need.
 2. `get_component` for attributes, slots, events, documented CSS parts and CSS variables (grouped by semantic target and state, with the theme token each follows).
-3. `get_examples` for real markup. Start with the default example, then retrieve gallery examples matching the requested state, layout or use case. Preserve any accessibility note returned with an example.
+3. `get_examples` for real markup. Start with the default example, then pick a look from the docs gallery (§2a). Preserve any accessibility note returned with an example.
 4. `get_presets` when a curated visual treatment is useful. A preset is structured CSS-variable and attribute data suitable for generation; a gallery example is broader usage and composition context.
 5. `get_theme` **before writing any CSS**, so overrides go on tokens when a token exists.
 6. `generate_variant` when a selected preset or gallery look repeats: it validates names and emits the class / HTML / Lit code.
 7. `get_workflow_guide` for the workflow, theming, variant or framework guide text.
 
-Without the server, use `references/component-catalog.md` only to identify a likely package. Then read `node_modules/@c2n/<name>/custom-elements.json` for the installed version's attributes, slots, events, CSS parts and CSS properties. If the package is not installed, use https://code2nguyen.github.io/web-components/. Never infer an API from the catalog or invent a variable, attribute, slot or event name.
+### 2a. Find the look in the gallery
+
+Each component has a gallery of designed looks on the docs site. Start from one instead of inventing CSS:
+
+- `get_examples` with `view: "index"` lists every card of a component on one page: label, slug, a summary of what it changes and a screenshot link (light; swap `.light.png` for `.dark.png`). Open the screenshots when you can read images.
+- `search_examples` finds a look across all components by style or situation ("compact", "glass", "pill", "underline", "KPI").
+- Fetch the chosen card with `get_examples` `label: "<slug>"`. Its CSS already uses `var(--c2-theme--…, literal)` wherever a colour belongs to the theme; a literal left over is the card's own accent, so replace it with the application's token (usually `--c2-theme--color-primary…`) rather than pasting it.
+- When the look repeats, `generate_variant` with `example: "<slug>"` turns the card into a class or Lit subclass under the app's prefix.
+
+Without the server, use `references/component-catalog.md` only to identify a likely package. Then read `node_modules/@c2n/<name>/custom-elements.json` (resolved from `@c2n/components` when the project installed only the umbrella) for the installed version's attributes, slots, events, CSS parts and CSS properties. If the package is not installed, use https://code2nguyen.github.io/web-components/. Never infer an API from the catalog or invent a variable, attribute, slot or event name.
 
 ## 3. Theme once
 
 Read `references/theming.md`.
 
 - Install the theme with the components: `npm install @c2n/theme @c2n/<component>…`.
+- Or install everything at once: `npm install @c2n/components` depends on every component package and the theme. In a project that declares it (and not the individual packages), import through it — `@c2n/components/<name>` (the package name without its scope) per component, `@c2n/components/theme.css` for the theme — because a strict installer (pnpm) does not expose `@c2n/<name>` to the app. Prefer the per-component entries to the `@c2n/components` barrel, which registers everything; `@c2n/components/react` and `/vue` type every tag. Not included: icon sets and the optional chart/code-editor engines (`uplot`, `echarts`, CodeMirror) — install those separately. The MCP server detects this and prints the matching import lines.
 - Import `@c2n/theme/theme.css` once at the application root (`main.ts`, root layout, global stylesheet). If the app already has design tokens, import `@c2n/theme/base.css` alone and bridge the app's tokens onto the `--c2-theme--*` names on `:root`.
 - Override tokens on `:root` (light) and under the app's dark selector. Component variables are never set globally when a token covers the job.
 - Register elements with side-effect imports (`import '@c2n/button'`) at the entry or in the module that renders them; icons individually (`import '@c2n/feather-icons/icons/search.js'`).

@@ -8,17 +8,20 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { ColorSlider, ColorSliderEventMap } from '@c2n/color-slider'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { ColorSlider } from '@c2n/color-slider'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
     'c2-color-slider': DefineComponent<
       C2Props<ColorSlider> & {
         'aria-label'?: unknown
-        onInput?: (event: ColorSliderEventMap['input']) => void
+        onInput?: (event: EventOf<ColorSlider, 'input'>) => void
       }
     >
   }

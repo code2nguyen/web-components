@@ -30,3 +30,14 @@ test('runs all suites for shared runtime and test infrastructure changes', () =>
 test('ignores packages without a component suite', () => {
   assert.deepEqual(selectComponentTestDirectories(['packages/components/table/src/table.ts'], suites), [])
 })
+
+test('runs the @c2n/components suite for any component change and for its own', () => {
+  const withUmbrella = [...suites, 'packages/umbrella/test']
+  assert.deepEqual(selectComponentTestDirectories(['packages/components/table/src/table.ts'], withUmbrella), ['packages/umbrella/test'])
+  assert.deepEqual(selectComponentTestDirectories(['packages/components/button/src/button.ts'], withUmbrella), [
+    'packages/components/button/test',
+    'packages/umbrella/test',
+  ])
+  assert.deepEqual(selectComponentTestDirectories(['packages/umbrella/index.js'], withUmbrella), ['packages/umbrella/test'])
+  assert.deepEqual(selectComponentTestDirectories(['apps/ui/src/pages/index.astro'], withUmbrella), [])
+})

@@ -8,11 +8,14 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Tree, TreeEventMap } from '@c2n/tree'
-import type { TreeItem, TreeItemEventMap } from '@c2n/tree/tree-item.js'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Tree } from '@c2n/tree'
+import type { TreeItem } from '@c2n/tree/tree-item.js'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -23,20 +26,17 @@ declare module 'vue' {
         'selection-propagation'?: unknown
         'children-outline'?: unknown
         'expand-on-click'?: unknown
-        onExpansionChange?: (event: TreeEventMap['expansion-change']) => void
-        onItemLoadError?: (event: TreeEventMap['item-load-error']) => void
-        onSelectionChange?: (event: TreeEventMap['selection-change']) => void
-        onItemClick?: (event: TreeEventMap['item-click']) => void
-        onItemExpand?: (event: TreeEventMap['item-expand']) => void
+        onExpansionChange?: (event: EventOf<Tree, 'expansion-change'>) => void
+        onItemLoadError?: (event: EventOf<Tree, 'item-load-error'>) => void
+        onSelectionChange?: (event: EventOf<Tree, 'selection-change'>) => void
+        onItemClick?: (event: EventOf<Tree, 'item-click'>) => void
+        onItemExpand?: (event: EventOf<Tree, 'item-expand'>) => void
       }
     >
     'c2-tree-item': DefineComponent<
       C2Props<TreeItem> & {
         'has-children'?: unknown
         'children-outline'?: unknown
-        onTREE_ITEM_CHANGE_EVENT?: (event: TreeItemEventMap['TREE_ITEM_CHANGE_EVENT']) => void
-        onTREE_ITEM_TOGGLE_EVENT?: (event: TreeItemEventMap['TREE_ITEM_TOGGLE_EVENT']) => void
-        onTREE_ITEM_CHECK_EVENT?: (event: TreeItemEventMap['TREE_ITEM_CHECK_EVENT']) => void
       }
     >
   }

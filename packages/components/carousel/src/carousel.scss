@@ -49,7 +49,8 @@
   min-width: 0;
 }
 
-:host([mouse-drag]:not([mouse-drag='false'])) .c2-carousel-track {
+// A class, not `:host([mouse-drag])`: the default (on) is not reflected onto the host.
+.c2-carousel-track.is-draggable {
   cursor: grab;
 }
 

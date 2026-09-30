@@ -18,8 +18,8 @@ previous/next buttons and `--c2-carousel__indicator--*` / `--c2-carousel__indica
     place-items: center;
     height: 160px;
     border-radius: 8px;
-    background: #f4f4f5;
-    color: #18181b;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+    color: var(--c2-theme--color-on-surface, #18181b);
     font-weight: 600;
   }
 </style>
@@ -35,10 +35,10 @@ previous/next buttons and `--c2-carousel__indicator--*` / `--c2-carousel__indica
   .glass {
     --c2-carousel__track--border-radius: 14px;
     --c2-carousel__control--background-color: rgba(24, 24, 27, 0.55);
-    --c2-carousel__control--color: #ffffff;
+    --c2-carousel__control--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-carousel__control--border: 1px solid rgba(255, 255, 255, 0.2);
     --c2-carousel__control__hover--background-color: rgba(24, 24, 27, 0.75);
-    --c2-carousel__indicator__selected--background-color: #18181b;
+    --c2-carousel__indicator__selected--background-color: var(--c2-theme--color-inverse-surface, #18181b);
   }
   .glass .slide {
     display: grid;
@@ -90,10 +90,10 @@ previous/next buttons and `--c2-carousel__indicator--*` / `--c2-carousel__indica
   .peek-cards .card {
     height: 140px;
     padding: 16px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 14px;
-    background: #ffffff;
-    color: #18181b;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-carousel client:only="lit" class="peek-cards" label="Peek carousel">
@@ -110,20 +110,20 @@ previous/next buttons and `--c2-carousel__indicator--*` / `--c2-carousel__indica
     --c2-carousel__track--border-radius: 0;
     --c2-carousel__control--border-radius: 0;
     --c2-carousel__control--box-shadow: none;
-    --c2-carousel__control--border: 1px solid #18181b;
+    --c2-carousel__control--border: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
     --c2-carousel__indicator--width: 16px;
     --c2-carousel__indicator--height: 2px;
     --c2-carousel__indicator--border-radius: 0;
     --c2-carousel__indicator__selected--width: 32px;
-    --c2-carousel__indicator__selected--background-color: #18181b;
+    --c2-carousel__indicator__selected--background-color: var(--c2-theme--color-inverse-surface, #18181b);
     --c2-carousel__indicators--justify-content: flex-start;
   }
   .flat .slide {
     display: grid;
     place-items: center;
     height: 160px;
-    background: #fafafa;
-    color: #18181b;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
+    color: var(--c2-theme--color-on-surface, #18181b);
     font-weight: 600;
   }
 </style>

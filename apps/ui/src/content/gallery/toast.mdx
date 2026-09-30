@@ -27,7 +27,7 @@ import { FeatherXIcon as FeatherX } from '@c2n/feather-icons/icons/x.js'
 <style>
   .success {
     width: 320px;
-    --c2-toast__container--background: #f0fdf4;
+    --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--color: #14532d;
     --c2-toast__container--border: 1px solid #bbf7d0;
   }
@@ -39,12 +39,12 @@ import { FeatherXIcon as FeatherX } from '@c2n/feather-icons/icons/x.js'
 <style>
   .dark {
     width: 320px;
-    --c2-toast__container--background: #18181b;
-    --c2-toast__container--color: #fafafa;
-    --c2-toast__container--border: 1px solid #3f3f46;
+    --c2-toast__container--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-toast__container--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-toast__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__icon__info--color: #93c5fd;
-    --c2-toast__close--color: #d4d4d8;
-    --c2-toast__close__hover--background: #3f3f46;
+    --c2-toast__close--color: var(--c2-theme--color-outline, #d4d4d8);
+    --c2-toast__close__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-toast class="dark" variant="info" dismissible heading="New notification" message="Your teammate shared a file."></c2-toast>
@@ -74,7 +74,7 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
 <style>
   .celebration {
     width: 340px;
-    --c2-toast__container--background: #faf5ff;
+    --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--border: 1px solid #e9d5ff;
     --c2-toast__container--color: #581c87;
     --c2-toast__icon--color: #9333ea;
@@ -105,7 +105,7 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
 <style>
   .download {
     width: 340px;
-    --c2-toast__container--background: #eff6ff;
+    --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--border: 1px solid #bfdbfe;
     --c2-toast__container--color: #1e3a8a;
     --c2-toast__icon--color: #2563eb;
@@ -176,9 +176,9 @@ Set `no-icon` to remove the leading icon and its spacing. Managed notifications 
 <style>
   .snackbar {
     width: 320px;
-    --c2-toast__container--background: #18181b;
-    --c2-toast__container--color: #fafafa;
-    --c2-toast__container--border: 1px solid #27272a;
+    --c2-toast__container--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-toast__container--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-toast__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--border-radius: 6px;
     --c2-toast__action--color: #93c5fd;
   }
@@ -235,12 +235,12 @@ These cards show static remaining-time previews. The manager animates the bar fr
 <style>
   .dark-countdown {
     width: 340px;
-    --c2-toast__container--background: #18181b;
-    --c2-toast__container--color: #fafafa;
-    --c2-toast__container--border: 1px solid #3f3f46;
+    --c2-toast__container--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-toast__container--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-toast__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__progress--height: 4px;
     --c2-toast__progress--color: #a78bfa;
-    --c2-toast__progress--background: #3f3f46;
+    --c2-toast__progress--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-toast class="dark-countdown" no-icon heading="Export complete" message="Your download is ready." show-progress progress="0.35"></c2-toast>

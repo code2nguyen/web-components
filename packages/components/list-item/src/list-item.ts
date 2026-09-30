@@ -145,8 +145,9 @@ export class ListItem extends LitElement {
   @query('slot:not([name])')
   private contentSlot!: HTMLSlotElement
 
-  /** `role` written by the author, kept over the automatic one. */
-  private authorRole: string | null = null
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
 
   /** The text a `c2-select` shows for this row: `label` when set, otherwise the text content of the default slot. */
   get displayText(): string {
@@ -165,7 +166,6 @@ export class ListItem extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    if (this.authorRole === null) this.authorRole = this.getAttribute('role')
     this.addEventListener('keydown', this.handleKeydown)
     this.addEventListener('click', this.blockDisabledClick, true)
   }
@@ -238,20 +238,12 @@ export class ListItem extends LitElement {
 
   private syncAria() {
     const inList = this.applyContext
-    const role = this.authorRole ?? (this.href ? 'link' : inList ? 'option' : 'button')
-    this.setAttribute('role', role)
-    if (role === 'option') {
-      this.setAttribute('aria-selected', String(this.selected))
-      this.removeAttribute('aria-pressed')
-    } else if (role === 'button') {
-      this.setAttribute('aria-pressed', String(this.selected))
-      this.removeAttribute('aria-selected')
-    } else {
-      this.removeAttribute('aria-selected')
-      this.removeAttribute('aria-pressed')
-    }
-    if (this.disabled) this.setAttribute('aria-disabled', 'true')
-    else this.removeAttribute('aria-disabled')
+    // A `role` the author writes on the host wins in the accessibility tree; follow it for the state it implies.
+    const role = this.getAttribute('role') ?? (this.href ? 'link' : inList ? 'option' : 'button')
+    this.internals.role = role
+    this.internals.ariaSelected = role === 'option' ? String(this.selected) : null
+    this.internals.ariaPressed = role === 'button' ? String(this.selected) : null
+    this.internals.ariaDisabled = this.disabled ? 'true' : null
     // Standalone rows are tab stops themselves; in a list the list assigns the roving tabindex.
     if (!inList) this.tabIndex = this.disabled ? -1 : 0
     else if (this.disabled) this.tabIndex = -1

@@ -29,6 +29,7 @@ import {
   type TableRowStyler,
   type TableSelectionChangeEventDetail,
   type TableSortChangeEventDetail,
+  type TableSummaryAggregate,
 } from './table-types.js'
 
 import '@c2n/checkbox'
@@ -50,6 +51,68 @@ interface PinPlacement {
 type RowUpdateState = 'added' | 'removed' | 'increased' | 'decreased' | 'modified'
 
 const HEADER_ROW = -1
+/** Row index of the summary row in `focusedCell`; body rows are numbered from 0 and the header is `HEADER_ROW`. */
+const SUMMARY_ROW = -2
+
+export type TableSummaryScope = 'all' | 'page'
+
+interface SummaryCell {
+  column: TableColumnConfig
+  index: number
+  span: number
+}
+
+/** A column's identity: its `id` (the `column-id` attribute on an element, never the HTML `id`), otherwise its field. */
+function columnKey(column: TableColumnConfig): string {
+  return (column instanceof TableColumn ? column.columnId : column.id) || column.field
+}
+
+/**
+ * `value` holds row keys, and a row key is always a string. `arrayPropertyConverter` only splits strings, so an array
+ * of numeric ids assigned from script (`table.value = [1, 2]`) used to be stored as numbers and match no row.
+ */
+const rowKeysConverter = {
+  ...arrayPropertyConverter,
+  fromProperty: (value: unknown) => {
+    const parsed = arrayPropertyConverter.fromProperty(value)
+    return Array.isArray(parsed) ? parsed.filter((key) => key !== null && key !== undefined).map(String) : parsed
+  },
+}
+
+function toNumber(value: unknown): number {
+  if (typeof value === 'number') return value
+  if (typeof value === 'string' && value.trim() !== '') return Number(value)
+  return Number.NaN
+}
+
+/** Reduces a column's values to one of the built-in aggregates; non-numeric values are skipped by all but `count`. */
+function aggregate(kind: TableSummaryAggregate, values: unknown[]): unknown {
+  if (kind === 'count') return values.filter((value) => value !== null && value !== undefined && value !== '').length
+  let sum = 0
+  let count = 0
+  let min = Number.POSITIVE_INFINITY
+  let max = Number.NEGATIVE_INFINITY
+  for (const value of values) {
+    const number = toNumber(value)
+    if (!Number.isFinite(number)) continue
+    sum += number
+    count++
+    if (number < min) min = number
+    if (number > max) max = number
+  }
+  switch (kind) {
+    case 'sum':
+      return sum
+    case 'avg':
+      return count ? sum / count : undefined
+    case 'min':
+      return count ? min : undefined
+    case 'max':
+      return count ? max : undefined
+    default:
+      return undefined
+  }
+}
 
 export interface TablePageChangeEventDetail {
   /** The page now shown, 1-based. */
@@ -174,6 +237,27 @@ export interface Table {
  * `highlight-updates` to pulse row backgrounds, and optionally choose its numeric direction with
  * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected.
  *
+ * **Row keys.** Selection, `value`, events and cell slots name a row by its key: the `row-key` field of the row (or
+ * `getRowKey(row)`) as a string, so `{ id: 7 }` is `"7"`. Without a `row-key` the key is the row's position, which
+ * points at another row after a sort, so set one on any selectable table. `keyOf(row)`, `isSelected(row)`,
+ * `selectRows(rows)` and `deselectRows(rows)` work from the rows themselves when the key rule is beside the point.
+ *
+ * **Summary row.** Give a column `summary="sum"` (or `avg`, `min`, `max`, `count`, or a function of the rows) and the
+ * table adds a totals row below the body. It is a row of the same grid, so every value sits under its own column
+ * whatever the order, width or pinning, is formatted with the column's `format`, and stays in view while the body
+ * scrolls. Values are keyed by the column's `id`, which defaults to its `field`; `summary-label` puts text such as
+ * `Total` in a column with no value and `summary-span` stretches it across the columns after it. Aggregates cover
+ * every row (`summary-scope="page"` limits them to the page on show). A `dataSource` only holds the rows it has
+ * fetched, so give it the server's totals through `summaryValues` instead, which also overrides any computed value:
+ *
+ * ```html
+ * <c2-table summary-values='{"amount": 128450.5}'>
+ *   <c2-table-column field="name" summary-label="Total"></c2-table-column>
+ *   <c2-table-column field="amount" format="currency" align="end"></c2-table-column>
+ *   <c2-table-column field="qty" align="end" summary="sum"></c2-table-column>
+ * </c2-table>
+ * ```
+ *
  * @tag c2-table
  *
  * @slot default - The column definitions: `c2-table-column` elements. They render nothing themselves.
@@ -212,6 +296,9 @@ export interface Table {
  * @csspart cell-content - The content wrapper inside a body cell.
  * @csspart row - Every rendered body row.
  * @csspart row-selected - A body row while it is selected; exposed in addition to `row`.
+ * @csspart summary-row - The totals row kept at the bottom of the grid.
+ * @csspart summary-cell - Every cell of the summary row. Each also carries `summary-cell-<id>`, named after its column.
+ * @csspart summary-content - The content wrapper inside a summary cell; also `summary-content-<id>`.
  *
  * @cssproperty {color} [--c2-table--background=#ffffff]
  * @cssproperty {color} [--c2-table--color=#18181b]
@@ -280,6 +367,13 @@ export interface Table {
  * @cssproperty {box-shadow} [--c2-table__pinned-start--box-shadow=1px 0 0 0 #e4e4e7] - Separator on the last column pinned to the start.
  * @cssproperty {box-shadow} [--c2-table__pinned-end--box-shadow=-1px 0 0 0 #e4e4e7] - Separator on the first column pinned to the end.
  *
+ * @cssproperty {pixel} [--c2-table__summary--height=36px]
+ * @cssproperty {color} [--c2-table__summary--background=#fafafa]
+ * @cssproperty {color} [--c2-table__summary--color=#18181b]
+ * @cssproperty {font-size} [--c2-table__summary--font-size=14px]
+ * @cssproperty {font-weight} [--c2-table__summary--font-weight=600]
+ * @cssproperty {box-shadow} [--c2-table__summary--box-shadow=0 -1px 0 0 #e4e4e7] - Separator above the summary row; a shadow rather than a border so it lands on the last row's own border instead of doubling it.
+ *
  * @cssproperty {pixel} [--c2-table__selection-cell--width=44px] - Width of the `checkbox-selection` column.
  *
  * @cssproperty {color} [--c2-table__skeleton--background=#f4f4f5] - Placeholder shown in cells whose `dataSource` block is still loading.
@@ -310,17 +404,35 @@ export class Table extends LitElement {
   /** Column definitions, as an alternative to `c2-table-column` children. Children win when both are present. */
   @property({ converter: jsonPropertyConverter }) columns?: TableColumnConfig[]
 
-  /** Field used as the identity of a row, for selection and DOM reuse. Falls back to the row index. */
+  /**
+   * Field holding the identity of a row — its key — used for selection, DOM reuse, animated updates and cell slots;
+   * may be a dotted path. A key is always a string: `{ id: 7 }` has the key `"7"`. Without one (or where the field is
+   * empty) a row's key is its position in the sorted dataset, which moves when the rows are sorted or replaced — so
+   * a selection would move with it. Set it whenever rows can be selected.
+   */
   @property({ type: String, attribute: 'row-key' }) rowKey = ''
 
-  /** `single` selects one row at a time, `multiple` supports ⌘/ctrl-click and shift-click ranges. */
+  /**
+   * Computes a row's key when no single field holds it, such as a composite `` row => `${row.region}:${row.sku}` ``.
+   * Wins over `row-key`; the result is turned into a string. Property only.
+   */
+  @property({ attribute: false }) getRowKey?: (row: TableRow) => unknown
+
+  /**
+   * `single` selects one row at a time, `multiple` supports ⌘/ctrl-click and shift-click ranges. A click selects the
+   * row alone; clicking the row that is already the whole selection clears it, and ⌘/ctrl-click or Space toggles one row.
+   */
   @property({ type: String }) selection: TableSelectionMode = 'none'
 
   /** Adds a leading checkbox column, pinned to the start. */
   @property({ type: Boolean, attribute: 'checkbox-selection' }) checkboxSelection = false
 
-  /** Keys of the selected rows: an array in the property, `;`-separated in the attribute. */
-  @property({ converter: arrayPropertyConverter, reflect: true }) value: string[] = []
+  /**
+   * Keys of the selected rows (see `row-key`): an array in the property, `;`-separated in the attribute. Entries are
+   * stored as strings, so `[1, 2]` selects the rows whose key field holds `1` and `2`. To select by row rather than
+   * by key, use `selectRows()`.
+   */
+  @property({ converter: rowKeysConverter, reflect: true }) value: string[] = []
 
   /** The sort, in priority order: `SortModel[]` in the property, `field:asc;other:desc` in the `sort` attribute. */
   @property({ converter: sortModelConverter, attribute: 'sort', reflect: true }) sortModel: SortModel[] = []
@@ -389,6 +501,15 @@ export class Table extends LitElement {
    */
   @property({ type: Number, attribute: 'page-size' }) pageSize = 0
 
+  /**
+   * Values of the summary row keyed by column `id` (its `field` unless set), such as totals computed by a server.
+   * An entry wins over the column's `summary` aggregate. An object in the property, JSON in the attribute.
+   */
+  @property({ converter: jsonPropertyConverter, attribute: 'summary-values' }) summaryValues?: Record<string, unknown>
+
+  /** Rows the summary aggregates cover: `all` rows, or only the `page` on show. A `dataSource` is only aggregated per page. */
+  @property({ type: String, attribute: 'summary-scope' }) summaryScope: TableSummaryScope = 'all'
+
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
@@ -411,6 +532,8 @@ export class Table extends LitElement {
   #animationFrame?: number
   #transitionRows?: TableRow[]
   #rowUpdateStates = new Map<string, RowUpdateState>()
+  #warnedPositionalKeys = false
+  #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
 
   /**
    * Shared with a `c2-pagination` slotted into the `footer`. Rebuilt rather than mutated whenever the paging state
@@ -489,12 +612,57 @@ export class Table extends LitElement {
   /** The resolved, ordered, visible columns — children first, then the `columns` property, then one per key of the first row. */
   get resolvedColumns(): TableColumnConfig[] {
     const source: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? this.#autoColumns())
-    const visible = source.filter((column) => column.field && !column.hidden)
+    const visible = source.filter((column) => columnKey(column) && !column.hidden)
     return [
       ...visible.filter((column) => column.pinned === 'start'),
       ...visible.filter((column) => !column.pinned),
       ...visible.filter((column) => column.pinned === 'end'),
     ]
+  }
+
+  /**
+   * The key of `row`: `getRowKey(row)`, else its `row-key` field, as a string. Without either it is the row's current
+   * position, found by identity among the rows the table holds, and `undefined` when the row is not one of them.
+   */
+  keyOf(row: TableRow): string | undefined {
+    const identity = this.#identityOf(row)
+    if (identity !== undefined) return identity
+    if (this.dataSource) {
+      const size = this.#effectiveBlockSize
+      for (const [block, rows] of this.#blocks) {
+        const index = rows.indexOf(row)
+        if (index >= 0) return String(block * size + index)
+      }
+      return undefined
+    }
+    const index = this.#sortedRows.indexOf(row)
+    return index >= 0 ? String(index) : undefined
+  }
+
+  /** Whether `row` is selected. */
+  isSelected(row: TableRow): boolean {
+    const key = this.keyOf(row)
+    return key !== undefined && this.value.includes(key)
+  }
+
+  /**
+   * Selects `rows` by their keys, replacing the selection unless `add` is set; `selection="single"` keeps the last
+   * one. Fires `selection-change`, like `selectAll()`. No-op while `selection="none"`.
+   */
+  selectRows(rows: TableRow[], { add = false }: { add?: boolean } = {}) {
+    if (this.selection === 'none') return
+    const keys = rows.map((row) => this.keyOf(row)).filter((key): key is string => key !== undefined)
+    if (this.selection === 'single') {
+      this.#commitSelection(keys.length ? [keys[keys.length - 1]] : add ? this.value : [])
+      return
+    }
+    this.#commitSelection([...new Set([...(add ? this.value : []), ...keys])])
+  }
+
+  /** Removes `rows` from the selection. Fires `selection-change`. */
+  deselectRows(rows: TableRow[]) {
+    const keys = new Set(rows.map((row) => this.keyOf(row)))
+    this.#commitSelection(this.value.filter((key) => !keys.has(key)))
   }
 
   /** The rows currently selected. Only the loaded ones when a `dataSource` is used. */
@@ -560,7 +728,9 @@ export class Table extends LitElement {
       }
     }
     this.#syncPagerContext()
-    if (this.rowCount === 0 && this.focusedCell.row !== HEADER_ROW) this.focusedCell = { row: HEADER_ROW, column: this.focusedCell.column }
+    if (this.focusedCell.row !== HEADER_ROW && (this.rowCount === 0 || (this.focusedCell.row === SUMMARY_ROW && !this.#hasSummary(this.#renderColumns())))) {
+      this.focusedCell = { row: HEADER_ROW, column: this.focusedCell.column }
+    }
   }
 
   #syncPagerContext() {
@@ -622,6 +792,7 @@ export class Table extends LitElement {
       this.#pendingScrollTop = false
       if (this.viewport) this.viewport.scrollTop = 0
     }
+    this.#warnPositionalKeys()
     this.#measureRowHeight()
     this.#measureColumnWidths()
     this.#syncFocusToWindow()
@@ -638,6 +809,7 @@ export class Table extends LitElement {
     const range = this.#virtualizer.range
     // The virtualizer windows the page; the body renders dataset indices, so shift its range by the page offset.
     const offset = this.#pageStart
+    const summary = this.#hasSummary(columns)
 
     return html`
       <div class="toolbar" part="toolbar" ?hidden=${!this.slotPresence.has('toolbar')}>
@@ -648,7 +820,7 @@ export class Table extends LitElement {
           class="grid"
           role="grid"
           part="grid"
-          aria-rowcount=${this.totalRows + 1}
+          aria-rowcount=${this.totalRows + (summary ? 2 : 1)}
           aria-colcount=${columns.length}
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
           style=${styleMap({ '--_grid-template': this.#gridTemplate(columns) })}
@@ -657,6 +829,7 @@ export class Table extends LitElement {
           ${this.#renderHeaderRow(columns, pins)} ${range.paddingTop > 0 ? html`<div class="spacer" style="height:${range.paddingTop}px"></div>` : nothing}
           ${this.#renderBody(columns, pins, offset + range.start, offset + range.end)}
           ${range.paddingBottom > 0 ? html`<div class="spacer" style="height:${range.paddingBottom}px"></div>` : nothing}
+          ${summary ? this.#renderSummaryRow(columns, pins) : nothing}
         </div>
       </div>
       <div class="footer" part="footer" ?hidden=${!this.slotPresence.has('footer')}>
@@ -712,6 +885,7 @@ export class Table extends LitElement {
           role="columnheader"
           part="header-cell selection-header-cell"
           data-field=${column.field}
+          data-column-id=${columnKey(column)}
           aria-colindex=${columnIndex + 1}
           tabindex=${this.#tabIndexFor(HEADER_ROW, columnIndex)}
           style=${styleMap(this.#pinStyle(column, pins))}
@@ -731,6 +905,7 @@ export class Table extends LitElement {
     const sortIndex = this.sortModel.findIndex((entry) => entry.field === column.field)
     const sort = sortIndex >= 0 ? this.sortModel[sortIndex] : undefined
     const resizable = column.resizable ?? this.resizable
+    const label = column.renderHeader ? column.renderHeader({ column }) : (column.header ?? humanize(column.field || columnKey(column)))
 
     return html`
       <div
@@ -745,6 +920,7 @@ export class Table extends LitElement {
         role="columnheader"
         part="header-cell"
         data-field=${column.field}
+        data-column-id=${columnKey(column)}
         aria-colindex=${columnIndex + 1}
         aria-sort=${ifDefined(sortable ? (sort ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none') : undefined)}
         tabindex=${this.#tabIndexFor(HEADER_ROW, columnIndex)}
@@ -754,7 +930,7 @@ export class Table extends LitElement {
           this.#toggleSort(column, event.shiftKey)
         }}
       >
-        <span class="cell-content">${column.renderHeader ? column.renderHeader({ column }) : (column.header ?? humanize(column.field))}</span>
+        <span class="cell-content">${label}</span>
         ${sortable ? this.#renderSortIcon(sort?.direction) : nothing}
         ${sort && this.sortModel.length > 1 ? html`<span class="sort-order">${sortIndex + 1}</span>` : nothing}
         ${resizable ? html`<span class="resizer" part="resizer" @pointerdown=${(event: PointerEvent) => this.#startResize(event, column)}></span>` : nothing}
@@ -861,13 +1037,13 @@ export class Table extends LitElement {
     // formatter produced stays as the slot's fallback, so a row with no child still shows its value.
     const content = row
       ? column.cellSlot
-        ? html`<slot name=${`cell:${this.#keyAt(rowIndex, row)}:${column.field}`}>${rendered}</slot>`
+        ? html`<slot name=${`cell:${this.#keyAt(rowIndex, row)}:${columnKey(column)}`}>${rendered}</slot>`
         : rendered
       : html`<span class="skeleton" part="skeleton"></span>`
 
     // A cell and its content each carry a part named after the column, so one column can be styled from outside —
     // the cell for its box, the content for the text itself, which is what a pill or a chip needs.
-    const fieldPart = column.field.replace(/[^\w-]/g, '-')
+    const fieldPart = columnKey(column).replace(/[^\w-]/g, '-')
     return html`
       <div
         class=${shared.class}
@@ -879,6 +1055,125 @@ export class Table extends LitElement {
         @click=${() => this.#handleCellClick(rowIndex, columnIndex, column, value)}
       >
         <span class="cell-content" part="cell-content cell-content-${fieldPart}">${content}</span>
+      </div>
+    `
+  }
+
+  #hasSummary(columns: TableColumnConfig[]): boolean {
+    if (this.error || this.rowCount === 0) return false
+    if (this.summaryValues) return true
+    return columns.some((column) => column.summary !== undefined || column.summaryLabel !== undefined || column.renderSummary !== undefined)
+  }
+
+  /** The summary row's cells: one per column, except that a `summary-span` cell stands in for the columns it covers. */
+  #summaryCells(columns: TableColumnConfig[]): SummaryCell[] {
+    const cells: SummaryCell[] = []
+    for (let index = 0; index < columns.length;) {
+      const column = columns[index]
+      const span = Math.min(Math.max(1, Math.floor(column.summarySpan ?? 1) || 1), columns.length - index)
+      cells.push({ column, index, span })
+      index += span
+    }
+    return cells
+  }
+
+  /**
+   * The rows the summary covers and the value of every column, keyed by column id. Cached on its inputs: the table
+   * re-renders on every scroll frame while virtualizing, and aggregating a large dataset each time would be wasted.
+   */
+  #summaryData(columns: TableColumnConfig[]): { rows: TableRow[]; values: Map<string, unknown> } {
+    const pageScope = this.summaryScope === 'page'
+    // A `dataSource` only holds the blocks it has fetched, so an aggregate over "all" of it would be a partial sum
+    // presented as a total. Its page, once loaded, is complete; otherwise the server's figures come in `summaryValues`.
+    const aggregatable = !this.dataSource || (pageScope && this.paginated)
+    const start = pageScope ? this.#pageStart : 0
+    const count = !aggregatable ? 0 : pageScope ? this.rowCount : (this.#transitionRows ?? this.#sortedRows).length
+    const inputs = [
+      columns.length,
+      ...columns.map((column) => column.summary),
+      this.columnElements,
+      this.columns,
+      this.summaryValues,
+      this.#sortedRows,
+      this.#transitionRows,
+      this.#animationProgress,
+      this.dataSource ? this.#blocks.get(this.page - 1) : undefined,
+      start,
+      count,
+    ]
+    const cached = this.#summaryCache
+    if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached
+
+    const rows: TableRow[] = []
+    for (let index = start; index < start + count; index++) {
+      const row = this.#rowAt(index)
+      // A row collapsing out during an animated update is already gone from the data, so it no longer counts.
+      if (row && this.#rowUpdateStates.get(this.#keyAt(index, row)) !== 'removed') rows.push(row)
+    }
+    const values = new Map<string, unknown>()
+    for (const column of columns) {
+      const key = columnKey(column)
+      if (this.summaryValues && Object.prototype.hasOwnProperty.call(this.summaryValues, key)) values.set(key, this.summaryValues[key])
+      // Without rows to aggregate a sum would still read 0 — a figure, and a wrong one. Leave the cell to its label.
+      else if (!aggregatable) continue
+      else if (typeof column.summary === 'function') values.set(key, column.summary({ column, rows }))
+      else if (column.summary && column.field)
+        values.set(
+          key,
+          aggregate(
+            column.summary,
+            rows.map((row) => getFieldValue(row, column.field)),
+          ),
+        )
+    }
+    this.#summaryCache = { inputs, rows, values }
+    return this.#summaryCache
+  }
+
+  #renderSummaryRow(columns: TableColumnConfig[], pins: Map<string, PinPlacement>) {
+    const { rows, values } = this.#summaryData(columns)
+    return html`
+      <div class="row row--summary" role="row" part="summary-row" aria-rowindex=${this.totalRows + 2}>
+        ${this.#summaryCells(columns).map((cell) => this.#renderSummaryCell(cell, rows, values, pins))}
+      </div>
+    `
+  }
+
+  #renderSummaryCell({ column, index, span }: SummaryCell, rows: TableRow[], values: Map<string, unknown>, pins: Map<string, PinPlacement>) {
+    const key = columnKey(column)
+    const value = values.get(key)
+    const explicit = Boolean(this.summaryValues && Object.prototype.hasOwnProperty.call(this.summaryValues, key))
+    let content: unknown
+    if (column.renderSummary) content = column.renderSummary({ column, rows, value })
+    else if (value !== undefined && value !== null && value !== '') {
+      // A count is a number of rows, not an amount: a currency or date column must not format it as one.
+      content =
+        column.summary === 'count' && !explicit
+          ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
+          : this.#formatValue(column, value)
+    } else content = column.summaryLabel ?? ''
+
+    const focused = this.focusedCell.row === SUMMARY_ROW && this.focusedCell.column >= index && this.focusedCell.column < index + span
+    const part = key.replace(/[^\w-]/g, '-')
+    return html`
+      <div
+        class=${classMap({
+          cell: true,
+          'cell--summary': true,
+          [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true,
+          'cell--selection': column.field === SELECTION_FIELD,
+          ...this.#pinClasses(column, pins),
+          ...(column.cellClass ? { [column.cellClass]: true } : {}),
+        })}
+        role="gridcell"
+        part="summary-cell summary-cell-${part}"
+        aria-colindex=${index + 1}
+        aria-colspan=${ifDefined(span > 1 ? span : undefined)}
+        tabindex=${focused ? 0 : -1}
+        style=${styleMap({ ...this.#pinStyle(column, pins), ...(span > 1 ? { 'grid-column': `span ${span}` } : {}) })}
+        @click=${() => (this.focusedCell = { row: SUMMARY_ROW, column: index })}
+      >
+        ${column.field === SELECTION_FIELD ? nothing : html`<span class="cell-content" part="summary-content summary-content-${part}">${content}</span>`}
       </div>
     `
   }
@@ -904,7 +1199,12 @@ export class Table extends LitElement {
   }
 
   #gridTemplate(columns: TableColumnConfig[]): string {
-    return columns.map((column) => (this.widthOverrides[column.field] ? `${this.widthOverrides[column.field]}px` : column.width || '1fr')).join(' ')
+    return columns
+      .map((column) => {
+        const override = this.widthOverrides[columnKey(column)]
+        return override ? `${override}px` : column.width || '1fr'
+      })
+      .join(' ')
   }
 
   #pinPlacements(columns: TableColumnConfig[]): Map<string, PinPlacement> {
@@ -914,14 +1214,14 @@ export class Table extends LitElement {
 
     let offset = 0
     startColumns.forEach((column, index) => {
-      placements.set(column.field, { side: 'start', offset, edge: index === startColumns.length - 1 })
+      placements.set(columnKey(column), { side: 'start', offset, edge: index === startColumns.length - 1 })
       offset += this.#columnWidth(column)
     })
 
     offset = 0
     for (let index = endColumns.length - 1; index >= 0; index--) {
       const column = endColumns[index]
-      placements.set(column.field, { side: 'end', offset, edge: index === 0 })
+      placements.set(columnKey(column), { side: 'end', offset, edge: index === 0 })
       offset += this.#columnWidth(column)
     }
 
@@ -929,11 +1229,12 @@ export class Table extends LitElement {
   }
 
   #columnWidth(column: TableColumnConfig): number {
-    return this.widthOverrides[column.field] ?? this.#measuredWidths.get(column.field) ?? 0
+    const key = columnKey(column)
+    return this.widthOverrides[key] ?? this.#measuredWidths.get(key) ?? 0
   }
 
   #pinClasses(column: TableColumnConfig, pins: Map<string, PinPlacement>): Record<string, boolean> {
-    const pin = pins.get(column.field)
+    const pin = pins.get(columnKey(column))
     if (!pin) return {}
     return {
       'cell--pinned': true,
@@ -943,7 +1244,7 @@ export class Table extends LitElement {
   }
 
   #pinStyle(column: TableColumnConfig, pins: Map<string, PinPlacement>): Record<string, string> {
-    const pin = pins.get(column.field)
+    const pin = pins.get(columnKey(column))
     if (!pin) return {}
     return pin.side === 'start' ? { left: `${pin.offset}px` } : { right: `${pin.offset}px` }
   }
@@ -991,9 +1292,26 @@ export class Table extends LitElement {
   }
 
   #keyAt(index: number, row: TableRow): string {
-    if (!this.rowKey) return String(index)
-    const value = getFieldValue(row, this.rowKey)
-    return value === null || value === undefined ? String(index) : String(value)
+    return this.#identityOf(row) ?? String(index)
+  }
+
+  /** The key a row carries itself, from `getRowKey` or `row-key`; `undefined` when it has none and only its position identifies it. */
+  #identityOf(row: TableRow): string | undefined {
+    const value = this.getRowKey ? this.getRowKey(row) : this.rowKey ? getFieldValue(row, this.rowKey) : undefined
+    return value === null || value === undefined || value === '' ? undefined : String(value)
+  }
+
+  get #hasRowIdentity(): boolean {
+    return Boolean(this.getRowKey || this.rowKey)
+  }
+
+  /** A selectable table without a key selects positions, which re-point at other rows after a sort. Say so, once. */
+  #warnPositionalKeys() {
+    if (this.#warnedPositionalKeys || this.#hasRowIdentity || this.selection === 'none' || this.rowCount === 0) return
+    this.#warnedPositionalKeys = true
+    console.warn(
+      `[c2-table] selection="${this.selection}" without row-key: a row's key is its position, so the selection moves to other rows when they are sorted or replaced. Set row-key (or getRowKey) to the field that identifies a row.`,
+    )
   }
 
   #applySort() {
@@ -1065,7 +1383,7 @@ export class Table extends LitElement {
 
     // A stable key lets a removed row remain in its former visual position long enough to collapse. Without one,
     // identity is positional, so structural updates stay immediate while numeric modification can still interpolate.
-    if (this.rowKey && !this.paginated) {
+    if (this.#hasRowIdentity && !this.paginated) {
       const previousRows = this.#sortRows(displayedPrevious.filter(isRecord))
       const transitionRows = [...this.#sortRows(this.rows)]
       previousRows.forEach((row, index) => {
@@ -1216,7 +1534,7 @@ export class Table extends LitElement {
   }
 
   #toggleSort(column: TableColumnConfig, additive: boolean) {
-    if (column.field === SELECTION_FIELD) return
+    if (column.field === SELECTION_FIELD || !column.field) return
     if (!(column.sortable ?? this.sortable)) return
     const existing = this.sortModel.find((entry) => entry.field === column.field)
     const direction: SortDirection | undefined = !existing ? 'asc' : existing.direction === 'asc' ? 'desc' : undefined
@@ -1262,9 +1580,11 @@ export class Table extends LitElement {
     if (!row) return
     const key = this.#keyAt(index, row)
 
+    // Clicking the row that is the selection again clears it — with a modifier or without — so a selection can be
+    // undone by the same gesture that made it.
     if (this.selection === 'single') {
       this.#selectionAnchor = index
-      this.#commitSelection(modifiers.toggle && this.value.includes(key) ? [] : [key])
+      this.#commitSelection(this.value.includes(key) ? [] : [key])
       return
     }
 
@@ -1285,7 +1605,8 @@ export class Table extends LitElement {
       this.#commitSelection(this.value.includes(key) ? this.value.filter((entry) => entry !== key) : [...this.value, key])
       return
     }
-    this.#commitSelection([key])
+    // A plain click narrows the selection to one row; on the row that already is the whole selection, it clears it.
+    this.#commitSelection(this.value.length === 1 && this.value[0] === key ? [] : [key])
   }
 
   #commitSelection(keys: string[]) {
@@ -1312,7 +1633,7 @@ export class Table extends LitElement {
 
     const move = (moveEvent: PointerEvent) => {
       width = Math.max(minWidth, Math.round(startWidth + moveEvent.clientX - startX))
-      this.widthOverrides = { ...this.widthOverrides, [column.field]: width }
+      this.widthOverrides = { ...this.widthOverrides, [columnKey(column)]: width }
     }
     const finish = (upEvent: PointerEvent) => {
       handle.releasePointerCapture(upEvent.pointerId)
@@ -1321,7 +1642,11 @@ export class Table extends LitElement {
       handle.removeEventListener('pointercancel', finish)
       handle.classList.remove('resizer--active')
       this.dispatchEvent(
-        new CustomEvent<TableColumnResizeEventDetail>('column-resize', { detail: { field: column.field, width }, bubbles: true, composed: true }),
+        new CustomEvent<TableColumnResizeEventDetail>('column-resize', {
+          detail: { id: columnKey(column), field: column.field, width },
+          bubbles: true,
+          composed: true,
+        }),
       )
     }
 
@@ -1342,37 +1667,46 @@ export class Table extends LitElement {
     const last = first + this.rowCount - 1
     // Rows per viewport, for PageUp/PageDown — unrelated to the `pageSize` property, which is rows per data page.
     const viewportRows = Math.max(1, Math.floor((this.viewport?.clientHeight ?? 0) / this.#rowHeightPx) - 1)
+    const summary = this.#hasSummary(columns)
+    // A spanning summary cell covers several column indices; on that row, left/right move from cell to cell.
+    const summaryCells = summary ? this.#summaryCells(columns) : []
+    const summaryCellAt = (index: number) => [...summaryCells].reverse().find((cell) => cell.index <= index) ?? summaryCells[0]
 
     switch (event.key) {
       case 'ArrowDown':
-        row = Math.min(last, row + 1)
+        if (row === SUMMARY_ROW) break
+        row = summary && row >= last ? SUMMARY_ROW : Math.min(last, row + 1)
         break
       case 'ArrowUp':
-        row = row <= first ? HEADER_ROW : row - 1
+        if (row === SUMMARY_ROW) row = last
+        else row = row <= first ? HEADER_ROW : row - 1
         break
       case 'ArrowRight':
-        column = Math.min(columns.length - 1, column + 1)
+        if (row === SUMMARY_ROW) column = summaryCells.find((cell) => cell.index > column)?.index ?? summaryCellAt(column).index
+        else column = Math.min(columns.length - 1, column + 1)
         break
       case 'ArrowLeft':
-        column = Math.max(0, column - 1)
+        if (row === SUMMARY_ROW) column = summaryCells[summaryCells.indexOf(summaryCellAt(column)) - 1]?.index ?? 0
+        else column = Math.max(0, column - 1)
         break
       case 'Home':
         if (event.ctrlKey || event.metaKey) row = HEADER_ROW
         column = 0
         break
       case 'End':
-        if (event.ctrlKey || event.metaKey) row = last
-        column = columns.length - 1
+        if (event.ctrlKey || event.metaKey) row = summary ? SUMMARY_ROW : last
+        column = row === SUMMARY_ROW ? summaryCellAt(columns.length - 1).index : columns.length - 1
         break
       case 'PageDown':
-        row = Math.min(last, Math.max(first, row) + viewportRows)
+        if (row !== SUMMARY_ROW) row = Math.min(last, Math.max(first, row) + viewportRows)
         break
       case 'PageUp':
-        row = Math.max(first, row - viewportRows)
+        row = Math.max(first, (row === SUMMARY_ROW ? last + 1 : row) - viewportRows)
         break
       case 'Enter':
       case ' ': {
         event.preventDefault()
+        if (row === SUMMARY_ROW) return
         if (row === HEADER_ROW) this.#toggleSort(columns[column], event.shiftKey)
         else if (this.selection !== 'none') this.#applySelection(row, { toggle: event.key === ' ' || event.ctrlKey || event.metaKey, range: event.shiftKey })
         return
@@ -1392,7 +1726,7 @@ export class Table extends LitElement {
   }
 
   #measureRowHeight() {
-    const first = this.renderRoot.querySelector('.row:not(.row--header):not(.row--state)')
+    const first = this.renderRoot.querySelector('.row--body')
     if (!first) return
     // Not rounded: the spacers model the whole list as `count * height`, so a fraction of a pixel per row turns into
     // thousands of pixels of drift between the scrollbar and the rendered window over a long list.
@@ -1404,14 +1738,14 @@ export class Table extends LitElement {
   }
 
   #measureColumnWidths() {
-    const cells = this.renderRoot.querySelectorAll<HTMLElement>('.cell--header[data-field]')
+    const cells = this.renderRoot.querySelectorAll<HTMLElement>('.cell--header[data-column-id]')
     let pinnedChanged = false
     for (const cell of cells) {
-      const field = cell.dataset.field
-      if (!field) continue
+      const key = cell.dataset.columnId
+      if (!key) continue
       const width = Math.round(cell.getBoundingClientRect().width)
-      if (width > 0 && this.#measuredWidths.get(field) !== width) {
-        this.#measuredWidths.set(field, width)
+      if (width > 0 && this.#measuredWidths.get(key) !== width) {
+        this.#measuredWidths.set(key, width)
         if (cell.classList.contains('cell--pinned')) pinnedChanged = true
       }
     }

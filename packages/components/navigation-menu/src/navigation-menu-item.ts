@@ -202,8 +202,9 @@ export class NavigationMenuItem extends LitElement {
 
   @query('slot[name="panel"]') private panelSlot?: HTMLSlotElement
 
-  /** `role` written by the author, kept over the automatic one. */
-  private authorRole: string | null = null
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
 
   /** Watches the panel content so `current-group` follows a row that becomes current later, as a route change does. */
   private panelObserver?: MutationObserver
@@ -215,7 +216,7 @@ export class NavigationMenuItem extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    if (this.authorRole === null) this.authorRole = this.getAttribute('role')
+    this.internals.role = 'listitem'
   }
 
   override disconnectedCallback() {
@@ -283,10 +284,6 @@ export class NavigationMenuItem extends LitElement {
     const open = (event as ToggleEvent).newState === 'open'
     if (open !== this.expanded) this.expanded = open
     this.dispatchEvent(new CustomEvent<PanelToggleEventDetail>('panel-toggle', { bubbles: true, composed: true, detail: { open, value: this.value } }))
-  }
-
-  protected override updated(): void {
-    this.setAttribute('role', this.authorRole ?? 'listitem')
   }
 
   private renderChevron() {

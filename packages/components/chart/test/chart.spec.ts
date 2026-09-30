@@ -112,10 +112,36 @@ test('draws a line chart from series children and reports itself ready', async (
   // The engine arrives through a dynamic import, so readiness is an explicit signal rather than a paint.
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
   await expect(chart).toHaveAttribute('data-chart-engine', 'uplot')
-  await expect(chart).toHaveAttribute('animation', 'auto')
+  // A reflected default is not written onto the host (it would fail SSR hydration), so it is read as a property.
+  await expect(chart).toHaveJSProperty('animation', 'auto')
   // One canvas, created by the engine inside the plot container.
   expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBe(1)
 })
+
+for (const tag of ['c2-line-chart', 'c2-bar-chart'])
+  test(`${tag} names its x ticks after the label field instead of printing the x value`, async ({ page, scenario }) => {
+    await scenario('family')
+    const chart = page.locator(tag)
+    await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+    type Subject = HTMLElement & { data: unknown; xField: string; labelField: string; formatAxisX(value: number): string }
+    // The frame is rebuilt after the update that changes the data or its fields, so read the ticks until it lands.
+    const ticks = () => chart.evaluate((element) => [2021, 2021.5, 2022].map((value) => (element as Subject).formatAxisX(value)))
+
+    await chart.evaluate((element) => {
+      const subject = element as Subject
+      subject.xField = 'year'
+      subject.data = [
+        { year: 2021, revenue: 1 },
+        { year: 2022, revenue: 2 },
+      ]
+    })
+    await expect.poll(ticks).toEqual(['2,021', '2,021.5', '2,022'])
+
+    await chart.evaluate((element) => {
+      ;(element as Subject).labelField = 'year'
+    })
+    await expect.poll(ticks).toEqual(['2021', '', '2022'])
+  })
 
 test('reads a bare number array and infers the x axis', async ({ page, scenario }) => {
   await scenario('sparkline')

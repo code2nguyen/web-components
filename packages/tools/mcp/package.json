@@ -1,6 +1,6 @@
 {
   "name": "@c2n/mcp",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "MCP server exposing the c2n web components (API, examples, presets, theme tokens, variant generation) to AI agents",
   "type": "module",
   "bin": {
@@ -53,11 +53,13 @@
   "wireit": {
     "build:registry": {
       "dependencies": [
-        "../../..:build"
+        "../../..:build",
+        "../framework-types:build"
       ],
       "command": "node scripts/build-registry.ts",
       "files": [
         "scripts/build-registry.ts",
+        "scripts/gallery.ts",
         "src/registry-types.ts",
         "src/lib/css-var-name.ts",
         "../../components/*/custom-elements.json",
@@ -67,6 +69,7 @@
         "../../../apps/ui/src/data/component-presets.ts",
         "../../../apps/ui/src/data/component-previews.ts",
         "../theme/dist/tokens.json",
+        "../../umbrella/package.json",
         "../skill/skills/c2n-components/references/*.md",
         "!../skill/skills/c2n-components/references/component-catalog.md",
         "../../../lerna.json",

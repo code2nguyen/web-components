@@ -1,5 +1,10 @@
+import type { Page } from '@playwright/test'
 import { test, expect, watch, accessible } from '../../../../tests/component-fixture'
 
+// The rows-per-page menu is a `c2-select`, whose `c2-list` and `c2-list-item` hosts state their roles through
+// ElementInternals, which getByRole cannot see: find them by tag.
+const pageSizeList = (page: Page) => page.locator('c2-pagination c2-list')
+const pageSizeOption = (page: Page, name: string) => page.locator('c2-pagination c2-list-item', { hasText: name })
 const numbered = '<c2-pagination total-items="240" page-size="10" page="4"></c2-pagination>'
 
 test('numbered pagination names the current page and moves it on click', async ({ page, renderScenario }) => {
@@ -143,7 +148,8 @@ test('changing the rows per page keeps the first row of the page visible', async
   const host = page.locator('c2-pagination')
   await watch(host, 'page-size-change')
   await page.getByRole('button', { name: 'Rows per page' }).click()
-  await page.getByRole('option', { name: '25' }).click()
+  await expect(pageSizeOption(page, '25')).toHaveHostAria('role', 'option')
+  await pageSizeOption(page, '25').click()
   await expect(host).toHaveJSProperty('pageSize', 25)
   // Row 21 was the first row on show, so 25 rows a page puts it on page 1.
   await expect(host).toHaveJSProperty('page', 1)
@@ -214,7 +220,7 @@ test('the rows-per-page dropdown has a floor, so one-digit options do not open a
   await renderScenario('<c2-pagination variant="compact" total-items="9" page-size="4" page-size-options="4,8"></c2-pagination>')
   const trigger = page.getByRole('button', { name: 'Rows per page' })
   await trigger.click()
-  const list = await page.getByRole('listbox').boundingBox()
+  const list = await pageSizeList(page).boundingBox()
   const button = await trigger.boundingBox()
   // Wide enough for a three-digit option, and wider than a one-digit trigger — but no wider than it needs to be.
   expect(list!.width).toBeGreaterThan(48)

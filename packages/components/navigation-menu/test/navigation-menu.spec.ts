@@ -45,7 +45,9 @@ test('renders a navigation landmark of links and triggers', async ({ page, rende
   await renderScenario(bar())
   await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible()
   await expect(page.getByRole('list')).toBeVisible()
-  await expect(page.getByRole('listitem')).toHaveCount(4)
+  const items = page.locator('c2-navigation-menu-item')
+  await expect(items).toHaveCount(4)
+  for (const item of await items.all()) await expect(item).toHaveHostAria('role', 'listitem')
   await expect(page.getByRole('button', { name: 'Products' })).toHaveAttribute('aria-expanded', 'false')
   await expect(page.getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '#docs')
   await expect(page.getByRole('link', { name: 'Pricing' })).toHaveAttribute('aria-current', 'page')
@@ -572,7 +574,9 @@ test('mobile-breakpoint switches the layout with the viewport', async ({ page, r
   await renderScenario(modes('mobile-breakpoint="800"'))
   const host = page.locator('c2-navigation-menu')
 
-  await expect(host).toHaveAttribute('mode', 'bar')
+  // The default `bar` is not reflected until the mode has changed once, so the first check reads the property.
+  await expect(host).toHaveJSProperty('mode', 'bar')
+  await expect(host).not.toHaveAttribute('mode')
   await expect(page.getByRole('button', { name: 'Fixed Income Products' })).toBeVisible()
 
   await page.setViewportSize({ width: 600, height: 720 })
@@ -651,4 +655,29 @@ test('a panel item without a value is still addressable', async ({ page, renderS
   await page.getByRole('button', { name: 'Products' }).click()
   await expect(page.getByRole('group', { name: 'Products' })).toBeVisible()
   await expect(page.locator('c2-navigation-menu')).toHaveJSProperty('value', 'item-1')
+})
+
+// React hydrates server markup against what the element looks like after it upgrades, and reports every attribute
+// the element wrote on itself as a mismatch. Each item's listitem role therefore lives on ElementInternals.
+test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, renderScenario }) => {
+  await renderScenario(bar())
+  const hostSemantics = () =>
+    page.locator('c2-navigation-menu, c2-navigation-menu-item, c2-navigation-menu-link').evaluateAll((elements) =>
+      elements.flatMap((element) =>
+        element
+          .getAttributeNames()
+          .filter((name) => name === 'role' || name.startsWith('aria-'))
+          .map((name) => `${element.localName}[${name}]`),
+      ),
+    )
+  const products = page.locator('c2-navigation-menu-item[value="products"]')
+
+  await expect(products).toHaveHostAria('role', 'listitem')
+  // The one host attribute left is the author's own label.
+  expect(await hostSemantics()).toEqual(['c2-navigation-menu[aria-label]'])
+
+  await page.getByRole('button', { name: 'Products' }).click()
+  await expect(page.getByRole('group', { name: 'Products' })).toBeVisible()
+  await expect(products).toHaveHostAria('role', 'listitem')
+  expect(await hostSemantics()).toEqual(['c2-navigation-menu[aria-label]'])
 })

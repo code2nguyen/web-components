@@ -81,14 +81,14 @@ Curated looks for `c2-tree`. Open any card in the studio to start from it. The c
 <style>
   .explorer {
     width: 100%;
-    --c2-tree--background: #fafafa;
-    --c2-tree--border-top: 1px solid #e4e4e7;
-    --c2-tree--border-right: 1px solid #e4e4e7;
-    --c2-tree--border-bottom: 1px solid #e4e4e7;
-    --c2-tree--border-left: 1px solid #e4e4e7;
+    --c2-tree--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-tree--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-tree-item__row--border-radius: 0px;
     --c2-tree-item__row--min-height: 26px;
-    --c2-tree-item__guide--color: #d4d4d8;
+    --c2-tree-item__guide--color: var(--c2-theme--color-outline, #d4d4d8);
   }
 </style>
 <c2-tree client:only="lit" class="explorer" children-outline aria-label="Explorer" expanded-items="src;components" value="button">
@@ -109,10 +109,10 @@ Curated looks for `c2-tree`. Open any card in the studio to start from it. The c
 <style>
   .permissions {
     width: 100%;
-    --c2-tree--border-top: 1px solid #e4e4e7;
-    --c2-tree--border-right: 1px solid #e4e4e7;
-    --c2-tree--border-bottom: 1px solid #e4e4e7;
-    --c2-tree--border-left: 1px solid #e4e4e7;
+    --c2-tree--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-tree--padding-top: 8px;
     --c2-tree--padding-bottom: 8px;
     --c2-tree-item__row--min-height: 32px;

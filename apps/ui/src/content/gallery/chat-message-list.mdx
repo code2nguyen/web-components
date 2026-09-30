@@ -19,7 +19,7 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
   .list-default {
     height: 280px;
     width: min(100%, 420px);
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 14px;
   }
 </style>
@@ -53,8 +53,8 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
     height: 320px;
     width: min(100%, 420px);
     border-radius: 18px;
-    background: #111114;
-    color: #e4e4e7;
+    background: var(--c2-theme--color-on-surface, #18181b);
+    color: var(--c2-theme--color-outline-variant, #e4e4e7);
     overflow: hidden;
   }
   .night-list {
@@ -71,8 +71,8 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
     --c2-chat-message-list__scrollbar__thumb__hover--color: rgba(167, 139, 250, 0.6);
   }
   .night-list c2-chat-message {
-    --c2-chat-message__message--color: #e4e4e7;
-    --c2-chat-message__header__title--color: #fafafa;
+    --c2-chat-message__message--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-chat-message__header__title--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
   }
   .night-list .night-outgoing {
     --c2-chat-message__message--background: #312e81;
@@ -119,9 +119,9 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
   .desk-list {
     height: 300px;
     width: min(100%, 420px);
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
-    background: #fafafa;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-chat-message-list__content--padding: 12px;
     --c2-chat-message-list__content--gap: 8px;
     --c2-chat-message-list__content--margin-top: 0;
@@ -129,11 +129,11 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
   }
   .desk-list c2-chat-message {
     --c2-chat-message--font-size: 13px;
-    --c2-chat-message__message--background: #ffffff;
-    --c2-chat-message__message--border-top: 1px solid #e4e4e7;
-    --c2-chat-message__message--border-right: 1px solid #e4e4e7;
-    --c2-chat-message__message--border-bottom: 1px solid #e4e4e7;
-    --c2-chat-message__message--border-left: 1px solid #e4e4e7;
+    --c2-chat-message__message--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-chat-message__message--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-chat-message__message--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-chat-message__message--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-chat-message__message--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-chat-message__message--border-top-left-radius: 6px;
     --c2-chat-message__message--border-top-right-radius: 6px;
     --c2-chat-message__message--border-bottom-left-radius: 6px;
@@ -145,7 +145,7 @@ Each card is a whole chat room: the list scrolls the conversation and the compos
   }
   .desk-intro {
     align-self: center;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     font-size: 12px;
   }
 </style>

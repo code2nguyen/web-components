@@ -1,5 +1,46 @@
+export interface ExampleHit {
+  component: ComponentEntry
+  example: Example
+  score: number
+}
+
+/**
+ * Search across every component's gallery for a look ("compact", "glass", "danger", "pill", "underline"): the card's
+ * label and section weigh most, then its description and use case, then the component it belongs to.
+ */
+export function searchExamples(registry: Registry, query: string, limit = 12, only?: ComponentEntry): ExampleHit[] {
+  const terms = tokens(query)
+  if (terms.length === 0) return []
+  const hits: ExampleHit[] = []
+  for (const component of only ? [only] : Object.values(registry.components)) {
+    for (const example of component.examples) {
+      if (example.kind !== 'gallery') continue
+      const fields: [string, number][] = [
+        [`${example.label} ${example.section ?? ''}`, 4],
+        [`${example.description ?? ''} ${example.useWhen ?? ''} ${example.accessibility ?? ''}`, 2],
+        [`${component.title} ${component.id} ${(example.tags ?? []).join(' ')}`, 2],
+      ]
+      let score = 0
+      let matched = 0
+      for (const term of terms) {
+        let best = 0
+        for (const [text, weight] of fields) {
+          const haystack = tokens(text)
+          if (haystack.includes(term)) best = Math.max(best, weight * 2)
+          else if (term.length > 2 && haystack.some((h) => h.startsWith(term) || (h.length > 3 && term.startsWith(h)))) best = Math.max(best, weight)
+        }
+        if (best) matched++
+        score += best
+      }
+      // Cards matching more of the query outrank one term matched strongly.
+      if (score > 0) hits.push({ component, example, score: score * matched })
+    }
+  }
+  return hits.sort((a, b) => b.score - a.score || a.component.title.localeCompare(b.component.title)).slice(0, limit)
+}
+
 /** Tokenised scoring over component names, descriptions, attributes, slots, example labels and icon names. */
-import type { ComponentEntry, Registry } from './registry-types.ts'
+import type { ComponentEntry, Example, Registry } from './registry-types.ts'
 
 export interface SearchHit {
   component: ComponentEntry
