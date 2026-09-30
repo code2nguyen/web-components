@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:#71717a">Wrote the first published algorithm.</div></c2-hover-card>`,
   'chat-message-list': `<c2-chat-message-list style="width:260px;height:170px;border:1px solid #e4e4e7;border-radius:8px;--c2-chat-message-list__content--padding:10px;--c2-chat-message-list__content--gap:10px">
   <c2-chat-message style="--c2-chat-message--font-size:13px"><c2-avatar name="Nova AI" initials="AI" slot="avatar" style="--c2-avatar--size:24px"></c2-avatar><div>How can I help today?</div></c2-chat-message>
   <c2-chat-message align="right" style="--c2-chat-message--font-size:13px"><div>Summarize my inbox.</div></c2-chat-message>

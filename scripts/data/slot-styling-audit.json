@@ -822,6 +822,18 @@
       "reason": "The semantic mobile-trigger region owns the mobile-trigger slot's component-side presentation."
     },
     {
+      "tag": "c2-hover-card",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-hover-card",
+      "slot": "trigger",
+      "decision": "assigned-content",
+      "reason": "The trigger slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-icon-button",
       "slot": "",
       "decision": "assigned-content",

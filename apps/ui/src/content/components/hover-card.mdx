@@ -1,0 +1,78 @@
+---
+title: 'Hover Card'
+description: 'Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { HoverCard } from '@c2n/hover-card'
+
+`c2-hover-card` previews what sits behind a trigger — a profile behind a mention, the summary behind a link. Put the trigger in the `trigger` slot and the card content in the default slot. The card opens `open-delay` milliseconds (700 by default) after the trigger is hovered or focused and closes `close-delay` milliseconds (300) after the pointer and focus have left both the trigger and the card, or at once on Escape. Unlike [`c2-tooltip`](../tooltip), the card is interactive: the pointer can move into it, and links and buttons inside it follow the trigger in the tab order. Touch input does not open it. It renders as a `popover` in the top layer, so `overflow: hidden` ancestors never clip it, and floating-ui flips the preferred `placement` when there is no room. Treat the content as supplementary: anything in the card should also be reachable another way.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/hover-card
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/hover-card
+<style>
+  .mention {
+    color: rgb(2, 101, 220);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .mention:hover {
+    text-decoration: underline;
+  }
+  .profile {
+    display: flex;
+    gap: 12px;
+  }
+  .avatar {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
+  }
+  .muted {
+    margin: 4px 0 0;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 13px;
+  }
+  .clip {
+    overflow: hidden;
+    width: 200px;
+    height: 48px;
+    border: 1px dashed #a1a1aa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .compact {
+    --c2-hover-card--width: 220px;
+    --c2-hover-card--padding-top: 10px;
+    --c2-hover-card--padding-right: 12px;
+    --c2-hover-card--padding-bottom: 10px;
+    --c2-hover-card--padding-left: 12px;
+    --c2-hover-card--font-size: 13px;
+  }
+</style>
+<div data-label="Profile preview">
+  <span>Reviewed by <c2-hover-card client:only="lit"><a class="mention" slot="trigger" href="#hover-card">@ada</a><div class="profile"><div class="avatar"></div><div><strong>Ada Lovelace</strong><p class="muted">Wrote the first published algorithm. Joined March 1843.</p><a class="mention" href="#hover-card">Follow</a></div></div></c2-hover-card> yesterday.</span>
+</div>
+<div data-label="Placements and delays">
+  <c2-hover-card placement="top" open-delay="0" client:only="lit"><a class="mention" slot="trigger" href="#hover-card">top, instant</a>Opens above the trigger with no delay.</c2-hover-card>
+  <c2-hover-card placement="right" class="compact" client:only="lit"><a class="mention" slot="trigger" href="#hover-card">right, compact</a>A narrower card with tighter padding.</c2-hover-card>
+  <c2-hover-card close-delay="800" client:only="lit"><a class="mention" slot="trigger" href="#hover-card">lingers</a>Stays for 800 ms after the pointer leaves.</c2-hover-card>
+</div>
+<div data-label="Never clipped">
+  <div class="clip"><c2-hover-card open-delay="200" client:only="lit"><a class="mention" slot="trigger" href="#hover-card">Hover me</a>Escapes the overflow: hidden box around the trigger.</c2-hover-card></div>
+</div>
+```

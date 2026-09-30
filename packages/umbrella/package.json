@@ -161,6 +161,10 @@
       "types": "./lib/header.d.ts",
       "default": "./lib/header.js"
     },
+    "./hover-card": {
+      "types": "./lib/hover-card.d.ts",
+      "default": "./lib/hover-card.js"
+    },
     "./icon-button": {
       "types": "./lib/icon-button.d.ts",
       "default": "./lib/icon-button.js"
@@ -405,6 +409,7 @@
     "@c2n/date-selector": "0.0.19",
     "@c2n/details": "0.0.19",
     "@c2n/header": "0.0.19",
+    "@c2n/hover-card": "0.0.19",
     "@c2n/icon-button": "0.0.19",
     "@c2n/kbd": "0.0.19",
     "@c2n/label": "0.0.19",
