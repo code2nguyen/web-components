@@ -881,6 +881,12 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
+      "tag": "c2-google-map",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot holds marker and route definitions, which render nothing in place; each is styled through its own variables."
+    },
+    {
       "tag": "c2-header",
       "slot": "",
       "decision": "part",

@@ -39,6 +39,10 @@ jobs:
       - name: Build UI app
         shell: 'bash'
         run: npm run ui:build
+        env:
+          # Browser key for the Google Maps examples, baked into the pages (restricted to the site's referrers).
+          # Optional: without it the map examples say a key is needed.
+          PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Check component documentation coverage
         run: npm run docs:check

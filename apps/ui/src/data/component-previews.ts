@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'google-map': `<c2-google-map center="10.7769,106.7009" zoom="13" disable-default-ui style="width:260px;--c2-google-map__container--height:150px"><c2-google-map-marker position="10.7769,106.7009" label="Saigon Opera House"></c2-google-map-marker></c2-google-map>`,
   'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:#71717a">Wrote the first published algorithm.</div></c2-hover-card>`,
   command: `<c2-command style="width:260px;--c2-command__field--min-height:40px;--c2-command__list--max-height:150px">
   <c2-command-group heading="Suggestions">
