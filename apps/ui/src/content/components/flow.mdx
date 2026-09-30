@@ -16,7 +16,7 @@ import { Flow } from '@c2n/flow'
 
 The flow lays itself out: one column per dependency depth (`direction="LR"`) or one row (`"TB"`), with siblings ordered to avoid crossings. Cycles are allowed and their closing edge loops round the outside. Drag a node to arrange the graph yourself; with a `storage-key` the arrangement and the chosen direction are saved in `localStorage` and restored on the next visit, and when the graph has changed in between, the saved layout is merged: kept steps stay put, new ones are placed next to their neighbours.
 
-Right-click the canvas or a node (or long-press it, or press Shift+F10) for the view controls: zoom in, zoom out, fit view, layout direction, auto layout and lock layout. Hover or focus a node for a card with its status and details.
+Right-click the canvas or a node (or long-press it, or press Shift+F10) for the view controls: zoom in, zoom out, fit view, layout direction, auto layout and lock layout. With focus in the flow, Ctrl/⌘ + `+`, Ctrl/⌘ + `-` and Ctrl/⌘ + `0` zoom and fit, and Ctrl/⌘ + scroll zooms around the pointer. Hover or focus a node for a card with its status and details.
 
 ## Installation
 

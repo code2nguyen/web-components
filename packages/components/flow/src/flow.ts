@@ -5,6 +5,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
+import { ariaKeyShortcuts, isApplePlatform, matchesStroke, parseShortcut } from '@c2n/core/shortcut-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { ContextMenuContext, ContextMenuSelectEventDetail } from '@c2n/context-menu'
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
@@ -68,6 +69,15 @@ const NUDGE_LARGE = 24
 const TWEEN_DURATION = 320
 const ESTIMATED_SIZE: FlowSize = { width: 200, height: 56 }
 
+/** The zoom shortcuts every canvas app uses: ⌘ on Apple platforms, Ctrl elsewhere. `=` is the unshifted `+` key. */
+const ZOOM_IN_KEYS = 'mod+plus, mod+='
+const ZOOM_OUT_KEYS = 'mod+minus'
+const FIT_KEYS = 'mod+0'
+
+function matchesKeys(keys: string, event: KeyboardEvent) {
+  return parseShortcut(keys).some(({ strokes }) => strokes.length === 1 && matchesStroke(strokes[0], event))
+}
+
 type EdgeState = 'idle' | 'done' | 'active' | 'failed' | 'blocked'
 
 const finished = (status: FlowStatus) => status === 'success' || status === 'warning'
@@ -113,7 +123,8 @@ const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in 
  *
  * **Keyboard.** One node is in the tab order; arrow keys follow the edges (forward to the next step, back to the
  * previous one, across to a sibling of the same rank), Enter selects, Alt+arrow moves the node (8px, 24px with
- * Shift), `+` / `-` zoom and `0` fits the view. Ctrl/⌘ + wheel zooms; a plain wheel keeps scrolling the page.
+ * Shift), Ctrl/⌘ + `+` and Ctrl/⌘ + `-` zoom and Ctrl/⌘ + `0` fits the view, while focus is in the flow (the
+ * browser's page zoom keeps those keys everywhere else). Ctrl/⌘ + wheel zooms; a plain wheel keeps scrolling the page.
  *
  * @tag c2-flow
  *
@@ -630,15 +641,13 @@ export class Flow extends LitElement {
       } else if (this.selected) this.select(null)
       return
     }
-    if (!event.altKey && !event.ctrlKey && !event.metaKey) {
-      if (event.key === '+' || event.key === '=') return this.keyZoom(event, ZOOM_STEP)
-      if (event.key === '-' || event.key === '_') return this.keyZoom(event, 1 / ZOOM_STEP)
-      if (event.key === '0') {
-        event.preventDefault()
-        this.viewTouched = false
-        this.fitView()
-        return
-      }
+    if (matchesKeys(ZOOM_IN_KEYS, event)) return this.keyZoom(event, ZOOM_STEP)
+    if (matchesKeys(ZOOM_OUT_KEYS, event)) return this.keyZoom(event, 1 / ZOOM_STEP)
+    if (matchesKeys(FIT_KEYS, event)) {
+      event.preventDefault()
+      this.viewTouched = false
+      this.fitView()
+      return
     }
     if (!id) return
     if (event.key === 'Enter' || event.key === ' ') {
@@ -842,6 +851,8 @@ export class Flow extends LitElement {
 
   private defaultMenuItems(node: FlowNode | null) {
     const lr = this.direction === 'LR'
+    // Written the way each platform's own menus do: ⌘+ on Apple platforms, Ctrl + + elsewhere.
+    const mod = isApplePlatform() ? '⌘' : 'Ctrl '
     return html`
       ${
         node
@@ -850,9 +861,15 @@ export class Flow extends LitElement {
               <hr />`
           : nothing
       }
-      <c2-menu-item value="flow:zoom-in" keep-open>${this.menuIcon(MENU_ICONS.zoomIn)}Zoom in<c2-kbd slot="shortcut">+</c2-kbd></c2-menu-item>
-      <c2-menu-item value="flow:zoom-out" keep-open>${this.menuIcon(MENU_ICONS.zoomOut)}Zoom out<c2-kbd slot="shortcut">−</c2-kbd></c2-menu-item>
-      <c2-menu-item value="flow:fit">${this.menuIcon(MENU_ICONS.fit)}Fit view<c2-kbd slot="shortcut">0</c2-kbd></c2-menu-item>
+      <c2-menu-item value="flow:zoom-in" keep-open aria-keyshortcuts=${ariaKeyShortcuts(ZOOM_IN_KEYS)}
+        >${this.menuIcon(MENU_ICONS.zoomIn)}Zoom in<c2-kbd slot="shortcut">${mod}+</c2-kbd></c2-menu-item
+      >
+      <c2-menu-item value="flow:zoom-out" keep-open aria-keyshortcuts=${ariaKeyShortcuts(ZOOM_OUT_KEYS)}
+        >${this.menuIcon(MENU_ICONS.zoomOut)}Zoom out<c2-kbd slot="shortcut">${mod}−</c2-kbd></c2-menu-item
+      >
+      <c2-menu-item value="flow:fit" aria-keyshortcuts=${ariaKeyShortcuts(FIT_KEYS)}
+        >${this.menuIcon(MENU_ICONS.fit)}Fit view<c2-kbd slot="shortcut">${mod}0</c2-kbd></c2-menu-item
+      >
       <hr />
       <h6>Layout</h6>
       <c2-menu-item type="radio" name="flow-direction" value="flow:direction-lr" .checked=${lr}>Left to right</c2-menu-item>

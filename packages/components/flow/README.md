@@ -25,6 +25,6 @@ built-in auto layout, draggable nodes saved to `localStorage`, a hover card and 
   `card:<id>` slot replaces it; `no-card` turns it off.
 - **Custom nodes:** `renderNode(context)` returns a Lit template, a node or a string; or render into the `node:<id>` slot.
 - **Events:** `node-click`, `selection-change`, `layout-change`, `flow-menu-select` (none bubble).
-- **Keyboard:** arrows follow edges, Enter selects, Alt+arrow moves, `+` / `-` zoom, `0` fits. Ctrl/⌘ + wheel zooms.
+- **Keyboard:** arrows follow edges, Enter selects, Alt+arrow moves, Ctrl/⌘ + `+` / `-` zoom and Ctrl/⌘ + `0` fits while focus is in the flow. Ctrl/⌘ + wheel zooms.
 - Theme it with the `--c2-flow--*` variables: canvas, dot grid, rank and node gaps, node box, edges, status colours and
   card.

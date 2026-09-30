@@ -140,8 +140,8 @@ test('the canvas context menu groups the view controls and switches the layout d
     await expect(item(page, value)).toBeVisible()
   }
   await expect(item(page, 'flow:details')).toHaveCount(0)
-  await expect(item(page, 'flow:zoom-in').locator('c2-kbd[slot="shortcut"]')).toHaveText('+')
-  await expect(item(page, 'flow:fit').locator('c2-kbd[slot="shortcut"]')).toHaveText('0')
+  await expect(item(page, 'flow:zoom-in').locator('c2-kbd[slot="shortcut"]')).toHaveText('Ctrl +')
+  await expect(item(page, 'flow:fit').locator('c2-kbd[slot="shortcut"]')).toHaveText('Ctrl 0')
   await expect(item(page, 'flow:direction-lr')).toHaveJSProperty('checked', true)
   // Nothing has been moved yet, so there is no custom layout to discard.
   await expect(item(page, 'flow:auto-layout')).toHaveJSProperty('disabled', true)
@@ -338,4 +338,24 @@ test('a status change restyles the node and its edges without moving anything', 
   await expect(node(page, 'test')).toHaveClass(/status--error/)
   await expect(page.locator('c2-flow .edge--failed')).toHaveCount(1)
   expect(await layout(page)).toEqual(before)
+})
+
+test('Ctrl/⌘ + plus, minus and 0 zoom and fit while focus is in the flow; the bare keys do nothing', async ({ page, renderScenario }) => {
+  await renderScenario(flow())
+  const scale = () => page.locator('c2-flow .viewport').evaluate((element) => Number(/scale\(([\d.]+)\)/.exec((element as HTMLElement).style.transform)?.[1]))
+  const fitted = await scale()
+  await node(page, 'checkout').focus()
+
+  await page.keyboard.press('-')
+  await page.keyboard.press('0')
+  expect(await scale()).toBe(fitted)
+
+  await page.keyboard.press('ControlOrMeta+-')
+  await expect.poll(scale).toBeCloseTo(fitted / 1.2, 3)
+  await page.keyboard.press('ControlOrMeta+=')
+  await page.keyboard.press('ControlOrMeta+=')
+  await expect.poll(scale).toBeCloseTo(fitted * 1.2, 3)
+  await page.keyboard.press('ControlOrMeta+0')
+  await expect.poll(scale).toBeCloseTo(fitted, 3)
+  await expect(item(page, 'flow:zoom-in')).toHaveCount(0)
 })
