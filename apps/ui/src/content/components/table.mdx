@@ -86,6 +86,14 @@ Put one `c2-table-column` per column in the default slot, and hand the table its
     <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
   </c2-table>
 </div>
+<div data-label="Grouped">
+  <c2-table client:only="lit" class="grid" row-key="id" group-by="team" selection="multiple" checkbox-selection rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"amount":240}]'>
+    <c2-table-column field="task" header="Task" width="2fr"></c2-table-column>
+    <c2-table-column field="team" header="Team" hidden></c2-table-column>
+    <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" summary="sum"></c2-table-column>
+    <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
+  </c2-table>
+</div>
 <div data-label="Empty">
   <c2-table client:only="lit" class="compact" empty-message="No rows match this filter">
     <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
@@ -189,6 +197,46 @@ table.summaryValues = { amount: totals.amount, qty: totals.qty }
 `renderSummary` renders the cell from `{ column, rows, value }` like `renderCell` does a body cell. Style the row with
 `--c2-table__summary--{height,background,color,font-size,font-weight,box-shadow}`, and one figure with
 `::part(summary-content-<id>)`. The row is hidden while the table is empty, loading its first rows or showing an error.
+
+### Grouping rows
+
+`group-by` gathers the rows into collapsible groups, outermost level first, and turns the grid into a `treegrid`.
+With the default `group-display="row"` a group is a row of the same grid: its label and row count in the first
+column (or the one marked `group-column`, which also indents the rows under it), and under every column with a
+`summary` that aggregate over the group's rows, formatted like the column. So one `summary="sum"` gives the subtotals
+and the total. `group-display="band"` draws a full-width band per group instead, holding its label and count.
+
+```html tag=CodeBlock
+<c2-table row-key="id" group-by="region,status" selection="multiple" checkbox-selection rows="...">
+  <c2-table-column field="customer" header="Customer" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="amount" header="Amount" align="end" format="currency" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+Groups are ordered by their value: ascending, the direction the table is sorted by that field, or a level's own
+`sort`. The rows inside a group keep the table's sort. A group's label is its value formatted by the column of that
+field (hidden columns included), `empty-group-label` for rows without one, and `renderGroup` or a
+`slot="group:<key>"` child for anything else. From script a level can compute its value:
+
+```typescript tag=CodeBlock
+table.groupBy = [{ field: 'month', getValue: (row) => String(row.placed).slice(0, 7), sort: 'desc' }, 'status']
+table.renderGroup = ({ value, summary }) => `${value} · ${summary.amount} €`
+```
+
+A group is named by its path, `region=EMEA/status=Paid`. Every group is open until `expanded-groups` lists the open
+ones (`;`-separated in the attribute) or `groups-collapsed` starts them closed; the first click writes the whole list
+into `expandedGroups`, so it can be stored and handed back. `group-toggle` reports a click, `expandGroup(key)`,
+`collapseGroup(key)`, `expandAll()` and `collapseAll()` do it from script, and `getGroups()` lists every group with
+its rows and aggregates. A group's checkbox selects the rows under it (the selection still holds row keys only),
+and ←/→ on a group's first cell close, open and climb the tree.
+
+The groups of the rows at the top of the view stay under the header while their rows scroll. Pages count display
+lines, so a closed group takes one line, and a page that starts inside a group repeats that group's headers above
+its first line. Grouping is done on the client: with a `dataSource` the table only holds the rows it fetched, so it
+ignores `group-by` and says so in the console. Style a group with `--c2-table__group-row--*`,
+`--c2-table__group-band--background`, `--c2-table__group--indent`, `--c2-table__group-toggle--*` and
+`--c2-table__group-count--*`, or with the `group-row`, `group-cell`, `group-label` and `group-count` parts.
 
 ### Rendering a cell
 
