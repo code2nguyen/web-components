@@ -1,0 +1,168 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-command,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    font-family: null,
+    width: null,
+
+    border-top: 1px solid #e4e4e7,
+    border-right: 1px solid #e4e4e7,
+    border-bottom: 1px solid #e4e4e7,
+    border-left: 1px solid #e4e4e7,
+
+    border-top-left-radius: 8px,
+    border-top-right-radius: 8px,
+    border-bottom-left-radius: 8px,
+    border-bottom-right-radius: 8px,
+
+    box-shadow: null,
+
+    field--min-height: 48px,
+    field--gap: 8px,
+    field--padding-right: 12px,
+    field--padding-left: 12px,
+    field--border-bottom: 1px solid #e4e4e7,
+    field--font-size: 14px,
+    placeholder--color: #71717a,
+
+    icon--size: 16px,
+    icon--color: #71717a,
+
+    list--max-height: 320px,
+    list--padding-top: 4px,
+    list--padding-right: 4px,
+    list--padding-bottom: 4px,
+    list--padding-left: 4px,
+    list--gap: null,
+
+    empty--color: #71717a,
+    empty--font-size: 14px,
+    empty--padding: 24px 8px,
+
+    footer--border-top: 1px solid #e4e4e7,
+    footer--padding: 8px 12px,
+    footer--color: #71717a,
+    footer--font-size: 12px,
+  )
+);
+
+:host {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: css.cssVar(width);
+
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  box-shadow: css.cssVar(box-shadow);
+
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  flex: none;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: css.cssVar(field--min-height);
+  gap: css.cssVar(field--gap);
+  padding-right: css.cssVar(field--padding-right);
+  padding-left: css.cssVar(field--padding-left);
+  border-bottom: css.cssVar(field--border-bottom);
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: css.cssVar(field--font-size);
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+}
+
+.search-icon,
+::slotted([slot='prefix-icon']) {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+::slotted([slot='suffix']) {
+  flex: none;
+}
+
+.list {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: css.cssVar(list--max-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-top: css.cssVar(list--padding-top);
+  scroll-padding-bottom: css.cssVar(list--padding-bottom);
+  gap: css.cssVar(list--gap);
+  padding-top: css.cssVar(list--padding-top);
+  padding-right: css.cssVar(list--padding-right);
+  padding-bottom: css.cssVar(list--padding-bottom);
+  padding-left: css.cssVar(list--padding-left);
+}
+
+// Nothing matches: the empty message replaces the (padded) list.
+:host(:state(empty)) .list {
+  display: none;
+}
+
+.empty {
+  display: none;
+  text-align: center;
+  color: css.cssVar(empty--color);
+  font-size: css.cssVar(empty--font-size);
+  padding: css.cssVar(empty--padding);
+}
+
+:host(:state(empty)) .empty {
+  display: block;
+}
+
+.footer {
+  flex: none;
+  display: flex;
+  align-items: center;
+  border-top: css.cssVar(footer--border-top);
+  padding: css.cssVar(footer--padding);
+  color: css.cssVar(footer--color);
+  font-size: css.cssVar(footer--font-size);
+
+  &[hidden] {
+    display: none;
+  }
+}
