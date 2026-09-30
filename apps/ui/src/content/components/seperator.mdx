@@ -27,7 +27,7 @@ npm install @c2n/seperator
     max-width: 100%;
     font-size: 13px;
     line-height: 1.5;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .stack p {
     margin: 0;
@@ -38,19 +38,19 @@ npm install @c2n/seperator
     gap: 12px;
     height: 32px;
     padding: 0 12px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
     font-size: 13px;
-    color: #3f3f46;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
   .list {
     display: grid;
     width: 280px;
     max-width: 100%;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
     font-size: 13px;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
   .list-item {
     display: flex;
@@ -61,7 +61,7 @@ npm install @c2n/seperator
   .heading {
     --c2-seperator__line-start--flex: 0 0 0px;
     --c2-seperator__label--gap: 0px;
-    --c2-seperator__label--color: #18181b;
+    --c2-seperator__label--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-seperator__label--font-weight: 600;
     --c2-seperator__label--text-transform: uppercase;
     --c2-seperator__label--letter-spacing: 0.06em;

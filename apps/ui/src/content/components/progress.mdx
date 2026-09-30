@@ -33,13 +33,13 @@ npm install @c2n/progress
     width: 260px;
     max-width: 100%;
     padding: 16px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
     font-size: 13px;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .card strong {
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
     font-weight: 500;
   }
   .success {

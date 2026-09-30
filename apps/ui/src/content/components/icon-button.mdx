@@ -40,9 +40,9 @@ npm install @c2n/icon-button
   .filled {
     border-radius: 999px;
     box-shadow: 0 0 0 1px rgb(127 127 127 / 0.35);
-    --c2-icon-button--background-color: #18181b;
-    --c2-icon-button__hover--background-color: #3f3f46;
-    --c2-icon-button__icon--color: #ffffff;
+    --c2-icon-button--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-icon-button__state-layer--size: 40px;
     --c2-icon-button__icon--width: 20px;
     --c2-icon-button__icon--height: 20px;
@@ -77,21 +77,21 @@ npm install @c2n/icon-button
     display: inline-flex;
     gap: 2px;
     padding: 4px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
-    background: #ffffff;
+    background: var(--c2-theme--color-surface, #ffffff);
   }
   .toolbar-item {
     --c2-icon-button__state-layer--size: 32px;
     --c2-icon-button__icon--width: 18px;
     --c2-icon-button__icon--height: 18px;
     --c2-icon-button--border-radius: 6px;
-    --c2-icon-button__icon--color: #52525b;
-    --c2-icon-button__hover--background-color: #f4f4f5;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .toolbar-item-active {
-    --c2-icon-button--background-color: #e4e4e7;
-    --c2-icon-button__icon--color: #18181b;
+    --c2-icon-button--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-icon-button__icon--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <div data-label="Default">
