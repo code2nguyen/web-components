@@ -1,4 +1,4 @@
-import { LitElement, html, isServer, nothing, unsafeCSS, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
+import { LitElement, html, isServer, nothing, render, unsafeCSS, type CSSResultGroup, type PropertyValues, type TemplateResult } from 'lit'
 import { query, state } from 'lit/decorators.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -412,6 +412,8 @@ export abstract class ChartBase extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues): void {
+    // Read the declared series before the first frame is built, so a hydrated chart does not start from inferred ones.
+    if (!this.hasUpdated && !isServer) this.#collectSeries(true)
     // The fields that shape the frame count as data: a chart switched to another x or label field at runtime must
     // re-read its rows, which the builder's signature cache would otherwise hand back unchanged.
     if (changed.has('data') || changed.has('revision') || changed.has('xField') || changed.has('labelField') || changed.has('xType')) {
@@ -441,6 +443,7 @@ export abstract class ChartBase extends LitElement {
       this.dispatchEvent(new CustomEvent<ChartTooltipContext | null>('tooltip-change', { detail: null }))
     }
     this.#syncTooltipPopover()
+    this.#renderLegendEntries()
     if ([...changed.keys()].some((key) => key !== 'hoverContext')) this.notifyLegendChange()
   }
 
@@ -662,7 +665,11 @@ export abstract class ChartBase extends LitElement {
     if (this.#appended > 0 && this.adapter.appendData) this.adapter.appendData(projected, this.#appended)
     else this.adapter.setData(projected)
     this.#appended = 0
-    if (this.legendDependsOnData) this.notifyLegendChange()
+    if (this.legendDependsOnData) {
+      // The data path skips Lit's update, so a legend drawn from the data (pie slices) is refreshed here.
+      this.#renderLegendEntries()
+      this.notifyLegendChange()
+    }
   }
 
   #handleResize(entries: ResizeObserverEntry[]): void {
@@ -681,18 +688,23 @@ export abstract class ChartBase extends LitElement {
     this.themeRevision += 1
   }
 
+  #handleSlotChange = (): void => this.#collectSeries(true)
+
   #handleSeriesChange = (event: Event): void => {
     // The children's change event is internal plumbing; it must not escape the chart.
     event.stopPropagation()
     this.#collectSeries()
   }
 
-  #collectSeries(): void {
+  #collectSeries(onlyIfChanged = false): void {
+    // Before the first render there is no slot yet, and after hydrating server-rendered markup its `slotchange`
+    // has already fired, before Lit bound the listener. The default slot's assignment is the host's
+    // unslotted element children, so read those directly until the slot can answer.
     const slot = this.renderRoot?.querySelector<HTMLSlotElement>('slot.definitions')
-    if (!slot) return
+    const assigned = slot ? slot.assignedElements({ flatten: true }) : Array.from(this.children).filter((element) => !element.hasAttribute('slot'))
 
     const found: ChartSeries[] = []
-    for (const element of slot.assignedElements({ flatten: true })) {
+    for (const element of assigned) {
       // Matched by tag rather than `instanceof`, and searched at any depth: in the docs site every element
       // of an example is its own Astro island, so a definition arrives wrapped in one or more hosts.
       if (element.localName === SERIES_TAG) found.push(element as ChartSeries)
@@ -705,6 +717,9 @@ export abstract class ChartBase extends LitElement {
       for (const element of found) customElements.upgrade(element)
     }
 
+    // The same definitions again (the first `slotchange` after the early read) must not schedule an update. A
+    // definition's own change event always does, since the elements are the same but their config is not.
+    if (onlyIfChanged && found.length === this.seriesElements.length && found.every((element, index) => element === this.seriesElements[index])) return
     this.seriesElements = found
   }
 
@@ -923,7 +938,7 @@ export abstract class ChartBase extends LitElement {
       </div>
       <div class="theme-probe" aria-hidden="true">${PROBE_COLORS.map(() => html`<i></i>`)}<span class="axis-font-probe"></span></div>
       <!-- slot-presence-policy: series definitions are data inputs, not conditional presentation regions; collection is reconciled by the chart lifecycle. -->
-      <slot class="definitions" @slotchange=${this.#collectSeries}></slot>
+      <slot class="definitions" @slotchange=${this.#handleSlotChange}></slot>
     `
   }
 
@@ -974,25 +989,39 @@ export abstract class ChartBase extends LitElement {
     }))
   }
 
+  /**
+   * The legend box and its slot. The generated entries are not part of this template: they are rendered into the
+   * slot, as its fallback content, after every update (`#renderLegendEntries`). A server cannot see the chart's
+   * `c2-chart-series` children, so entries it rendered would name inferred series, and hydration keeps
+   * server-rendered values without patching them, so the page would show them for good.
+   */
   private renderLegend(): TemplateResult {
     return html`
       <div class="legend legend--${this.legend}" part="legend">
-        <slot name="legend">
-          ${this.legendItems().map(
-            (item) => html`
-              <button class="legend-item" part="legend-item" type="button" aria-pressed=${item.visible ? 'true' : 'false'} @click=${item.toggle}>
-                ${
-                  this.renderLegendItem?.(item.series, item.index) ??
-                  html`
-                    <span class="legend-marker" part="legend-marker" style="background:${item.color}"></span>
-                    <span class="legend-label">${item.label}</span>
-                  `
-                }
-              </button>
-            `,
-          )}
-        </slot>
+        <slot name="legend"></slot>
       </div>
     `
+  }
+
+  #renderLegendEntries(): void {
+    const slot = this.renderRoot?.querySelector<HTMLSlotElement>('.legend > slot[name="legend"]')
+    if (!slot) return
+    render(
+      this.legendItems().map(
+        (item) => html`
+          <button class="legend-item" part="legend-item" type="button" aria-pressed=${item.visible ? 'true' : 'false'} @click=${item.toggle}>
+            ${
+              this.renderLegendItem?.(item.series, item.index) ??
+              html`
+                <span class="legend-marker" part="legend-marker" style="background:${item.color}"></span>
+                <span class="legend-label">${item.label}</span>
+              `
+            }
+          </button>
+        `,
+      ),
+      slot,
+      { host: this },
+    )
   }
 }

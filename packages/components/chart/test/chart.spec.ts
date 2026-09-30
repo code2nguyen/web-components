@@ -724,3 +724,17 @@ test('shows a legend by default, and the sparkline does not', async ({ page, sce
   // A sparkline is defined by what it leaves out.
   expect(await spark.evaluate((element) => element.shadowRoot?.querySelectorAll('.legend-item').length)).toBe(0)
 })
+
+test('reads declared series on the first update, before any slotchange', async ({ page, scenario }) => {
+  await scenario('default')
+  const labels = await page.evaluate(async () => {
+    const chart = document.createElement('c2-line-chart') as HTMLElement & { resolvedSeries: { label?: string }[]; updateComplete: Promise<boolean> }
+    chart.innerHTML = '<c2-chart-series field="s0" label="Declared"></c2-chart-series>'
+    ;(chart as unknown as { data: unknown }).data = [{ t: 0, s0: 1, s1: 2 }]
+    document.querySelector('main')?.append(chart)
+    await chart.updateComplete
+    // Read synchronously after the first update: a slotchange would only arrive in a later task.
+    return chart.resolvedSeries.map((series) => series.label)
+  })
+  expect(labels).toEqual(['Declared'])
+})

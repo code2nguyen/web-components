@@ -238,14 +238,24 @@ export function regionLabelPoint(circles: readonly OverlapCircle[], mask: number
 }
 
 /**
- * Where a label that does not fit inside its region goes instead: straight out from the diagram's centre
- * through `from`, to the first point that is clear of every circle by `gap`.
+ * Where a label that does not fit inside its region goes instead: out from `from` along `direction` (by
+ * default, straight away from the diagram's centre), to the first point that is clear of every circle by `gap`.
  */
-export function leaderEnd(circles: readonly OverlapCircle[], from: OverlapPoint, gap: number): OverlapPoint & { direction: OverlapPoint } {
-  const cx = circles.reduce((sum, c) => sum + c.x, 0) / circles.length
-  const cy = circles.reduce((sum, c) => sum + c.y, 0) / circles.length
-  let dx = from.x - cx
-  let dy = from.y - cy
+export function leaderEnd(
+  circles: readonly OverlapCircle[],
+  from: OverlapPoint,
+  gap: number,
+  direction?: OverlapPoint,
+): OverlapPoint & { direction: OverlapPoint } {
+  let dx: number
+  let dy: number
+  if (direction) {
+    dx = direction.x
+    dy = direction.y
+  } else {
+    dx = from.x - circles.reduce((sum, c) => sum + c.x, 0) / circles.length
+    dy = from.y - circles.reduce((sum, c) => sum + c.y, 0) / circles.length
+  }
   let length = Math.hypot(dx, dy)
   if (length < 1e-6) {
     dx = Math.SQRT1_2
@@ -261,4 +271,17 @@ export function leaderEnd(circles: readonly OverlapCircle[], from: OverlapPoint,
     if (maskAt(circles, point) === 0 && edgeClearance(circles, point) >= gap) break
   }
   return { ...point, direction: { x: dx, y: dy } }
+}
+
+/** An axis-aligned box, for keeping labels apart. */
+export interface OverlapBox {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+}
+
+/** Whether two boxes overlap once each is grown by `pad`. */
+export function boxesOverlap(a: OverlapBox, b: OverlapBox, pad = 0): boolean {
+  return a.x1 - pad < b.x2 && b.x1 - pad < a.x2 && a.y1 - pad < b.y2 && b.y1 - pad < a.y2
 }

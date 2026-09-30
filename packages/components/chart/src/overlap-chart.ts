@@ -1,4 +1,4 @@
-import { html, nothing, unsafeCSS, type CSSResultGroup, type TemplateResult } from 'lit'
+import { html, nothing, render, unsafeCSS, type CSSResultGroup, type TemplateResult } from 'lit'
 import { state } from 'lit/decorators.js'
 import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -13,11 +13,13 @@ import type { ChartTheme } from './chart-theme.js'
 import {
   OVERLAP_MAX_SETS,
   fitOverlap,
+  boxesOverlap,
   leaderEnd,
   regionLabelPoint,
   regionPath,
   solveOverlap,
   overlapRegions,
+  type OverlapBox,
   type OverlapCircle,
   type OverlapLayoutMode,
   type OverlapPoint,
@@ -83,7 +85,7 @@ interface OverlapPixels {
   labels: Map<number, OverlapLabel>
   /** Where the tooltip points for each region: its label position inside the region. */
   anchors: Map<number, OverlapPoint>
-  setLabels: { x: number; y: number; align: 'left' | 'center' | 'right'; verticalAlign: 'top' | 'bottom'; name: string; total: string }[]
+  setLabels: { x: number; y: number; align: 'left' | 'center' | 'right'; verticalAlign: 'top' | 'bottom'; name: string; total: string; width: number }[]
 }
 
 /** Values read from the host's CSS custom properties for each option build. */
@@ -276,6 +278,8 @@ export class OverlapChart extends EchartsChartBase {
   /** One datum per circle for the fill and outline series, and one per drawable region in between. */
   protected override projectData(_frame: ChartFrame, _context: ChartBuildContext): unknown {
     const model = this.#computeModel()
+    // A data-only change skips Lit's update, so the region table is refreshed on the data path too.
+    this.#renderAccessibleSummary()
     if (!model) return [[], [], []]
     const sets = model.sets.map((set, index) => ({ name: set.label, value: [index] }))
     return [sets, model.drawn.map((region) => ({ name: this.regionName(region), value: [region.mask] })), sets]
@@ -358,51 +362,67 @@ export class OverlapChart extends EchartsChartBase {
 
   protected override updated(changed: Map<PropertyKey, unknown>): void {
     super.updated(changed)
+    this.#renderAccessibleSummary()
     const model = this.#computeModel()
     const label = model ? `Venn diagram of ${model.sets.map((set) => set.label).join(', ')}` : 'Venn diagram'
     if (this.plotElement?.getAttribute('aria-label') !== label) this.plotElement?.setAttribute('aria-label', label)
   }
 
+  /**
+   * The region table and the live announcement are rendered into a static container after each update rather than
+   * in this template, for the reason the legend is: a server cannot see the set definitions, and hydration would
+   * keep whatever it rendered.
+   */
   protected override render(): TemplateResult {
+    return html`${super.render()}
+      <div class="overlap-a11y-root"></div>`
+  }
+
+  #renderAccessibleSummary(): void {
+    const root = this.renderRoot?.querySelector<HTMLElement>('.overlap-a11y-root')
+    if (!root) return
     const model = this.validationError() ? undefined : this.#computeModel()
     const focused = model?.drawn.find((region) => region.mask === this.focusedMask)
-    return html`
-      ${super.render()}
-      ${
-        model
-          ? html`
-              <table class="overlap-a11y">
-                <caption>
-                  ${model.sets.map((set) => set.label).join(', ')}
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Region</th>
-                    <th scope="col">Members</th>
-                    <th scope="col">Share</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${[...model.regions]
-                    .sort((a, b) => b.size - a.size)
-                    .map(
-                      (region) => html`
-                        <tr>
-                          <th scope="row">${this.regionName(region)}</th>
-                          <td>${this.#formatCount(region.size)}</td>
-                          <td>${this.#formatShare(region.share)}</td>
-                        </tr>
-                      `,
-                    )}
-                </tbody>
-              </table>
-            `
-          : nothing
-      }
-      <div class="overlap-a11y" aria-live="polite">
-        ${focused ? `${this.regionName(focused)}: ${this.#formatCount(focused.size)}, ${this.#formatShare(focused.share)}` : ''}
-      </div>
-    `
+    render(
+      html`
+        ${
+          model
+            ? html`
+                <table class="overlap-a11y">
+                  <caption>
+                    ${model.sets.map((set) => set.label).join(', ')}
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Region</th>
+                      <th scope="col">Members</th>
+                      <th scope="col">Share</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${[...model.regions]
+                      .sort((a, b) => b.size - a.size)
+                      .map(
+                        (region) => html`
+                          <tr>
+                            <th scope="row">${this.regionName(region)}</th>
+                            <td>${this.#formatCount(region.size)}</td>
+                            <td>${this.#formatShare(region.share)}</td>
+                          </tr>
+                        `,
+                      )}
+                  </tbody>
+                </table>
+              `
+            : nothing
+        }
+        <div class="overlap-a11y" aria-live="polite">
+          ${focused ? `${this.regionName(focused)}: ${this.#formatCount(focused.size)}, ${this.#formatShare(focused.share)}` : ''}
+        </div>
+      `,
+      root,
+      { host: this },
+    )
   }
 
   // ------------------------------------------------------------ internals ---
@@ -470,12 +490,87 @@ export class OverlapChart extends EchartsChartBase {
     const key = `${width}x${height}|${model.signature}|${this.labels}|${JSON.stringify(style)}|${this.locale ?? ''}`
     if (this.#pixels?.key === key) return this.#pixels
 
-    const charWidth = (size: number) => size * 0.6
+    const fontFamily = this.#fontFamily(this.themeController.theme) ?? 'sans-serif'
+    const measure = (text: string, size: number, weight: number) => measureText(text, `${weight} ${size}px ${fontFamily}`, size)
     const circles = fitOverlap(model.circles, width, height, { x: 8, y: style.setFontSize + 16 })
     const paths = new Map<number, string>()
     const labels = new Map<number, OverlapLabel>()
     const anchors = new Map<number, OverlapPoint>()
+    const lineHeight = (size: number) => Math.ceil(size * 1.25)
 
+    // Set names first: they sit outside their circles and everything placed later keeps clear of them.
+    const cy = circles.reduce((sum, c) => sum + c.y, 0) / circles.length
+    const setLabels = circles.map((circle, index) => {
+      const set = model.sets[index]
+      const region = model.regions.find((item) => item.mask === 1 << index)
+      const total = this.#formatCount(region?.total ?? 0)
+      const below = circle.y > cy + 1
+      const textWidth =
+        measure('● ', style.setFontSize, 400) + measure(set.label, style.setFontSize, style.setFontWeight) + measure(` ${total}`, style.setFontSize, 400)
+      return {
+        x: circle.x,
+        y: below ? circle.y + circle.radius + 8 : circle.y - circle.radius - 8,
+        align: 'center' as const,
+        verticalAlign: below ? ('top' as const) : ('bottom' as const),
+        name: set.label,
+        total,
+        width: textWidth,
+      }
+    })
+    const setBox = (label: (typeof setLabels)[number]): OverlapBox => {
+      const h = lineHeight(style.setFontSize)
+      const y1 = label.verticalAlign === 'top' ? label.y : label.y - h
+      return { x1: label.x - label.width / 2, y1, x2: label.x + label.width / 2, y2: y1 + h }
+    }
+    const clampX = (label: (typeof setLabels)[number]) => {
+      label.x = Math.min(Math.max(label.x, label.width / 2 + 4), width - label.width / 2 - 4)
+    }
+    setLabels.forEach(clampX)
+    // A name drawn over another circle is flipped to the other side of its own circle when that side is clear.
+    setLabels.forEach((label, index) => {
+      if (!boxTouchesCircles(setBox(label), circles, 2, index)) return
+      const circle = circles[index]
+      const flipped = {
+        ...label,
+        verticalAlign: label.verticalAlign === 'top' ? ('bottom' as const) : ('top' as const),
+        y: label.verticalAlign === 'top' ? circle.y - circle.radius - 8 : circle.y + circle.radius + 8,
+      }
+      const box = setBox(flipped)
+      if (box.y1 >= 0 && box.y2 <= height && !boxTouchesCircles(box, circles, 2, index)) Object.assign(label, flipped)
+    })
+    // Two names on the same side of the diagram can meet: push them apart, then stack them if there is no room.
+    for (let pass = 0; pass < 8; pass += 1) {
+      let moved = false
+      for (let i = 0; i < setLabels.length; i += 1) {
+        for (let j = i + 1; j < setLabels.length; j += 1) {
+          const a = setLabels[i]
+          const b = setLabels[j]
+          const boxA = setBox(a)
+          const boxB = setBox(b)
+          if (!boxesOverlap(boxA, boxB, 4)) continue
+          moved = true
+          const [left, right] = a.x <= b.x ? [a, b] : [b, a]
+          const overlap = Math.min(boxA.x2, boxB.x2) - Math.max(boxA.x1, boxB.x1) + 10
+          left.x -= overlap / 2
+          right.x += overlap / 2
+          clampX(left)
+          clampX(right)
+          if (boxesOverlap(setBox(a), setBox(b), 4)) {
+            const step = lineHeight(style.setFontSize) + 2
+            b.y += b.verticalAlign === 'top' ? step : -step
+          }
+        }
+      }
+      if (!moved) break
+    }
+    const obstacles: OverlapBox[] = setLabels.map(setBox)
+
+    const textBox = (x: number, y: number, textWidth: number, align: OverlapLabel['align']): OverlapBox => {
+      const h = lineHeight(style.regionFontSize)
+      const x1 = align === 'center' ? x - textWidth / 2 : align === 'left' ? x : x - textWidth
+      return { x1, y1: y - h / 2, x2: x1 + textWidth, y2: y + h / 2 }
+    }
+    const pending: { region: OverlapRegion; text: string; textWidth: number; point: OverlapPoint }[] = []
     for (const region of model.drawn) {
       paths.set(region.mask, regionPath(circles, region.mask))
       const point = regionLabelPoint(circles, region.mask)
@@ -483,35 +578,50 @@ export class OverlapChart extends EchartsChartBase {
       anchors.set(region.mask, point)
       if (this.labels === 'none' || (region.size === 0 && this.layout === 'proportional')) continue
       const text = this.labels === 'percent' ? this.#formatShare(region.share) : this.#formatCount(region.size)
-      const textWidth = text.length * charWidth(style.regionFontSize)
-      if (point.clearance >= Math.max(style.regionFontSize * 0.75, textWidth / 2 + 2)) {
+      const weight = region.size === 0 ? 400 : 500
+      const textWidth = measure(text, style.regionFontSize, weight)
+      // Inside when the whole text box fits in the clear disc around the region's centre, corners included.
+      if (point.clearance >= Math.hypot(textWidth / 2, style.regionFontSize * 0.55) + 1) {
         labels.set(region.mask, { text, x: point.x, y: point.y, align: 'center' })
-        continue
+        obstacles.push(textBox(point.x, point.y, textWidth, 'center'))
+      } else {
+        pending.push({ region, text, textWidth, point })
       }
-      // Too small for its text: the number moves outside, joined to the region by a line.
-      const end = leaderEnd(circles, point, 10)
-      const align = end.direction.x >= 0 ? 'left' : 'right'
-      const x = align === 'left' ? Math.min(end.x, width - textWidth - 8) : Math.max(end.x, textWidth + 8)
-      const y = Math.min(Math.max(end.y, style.regionFontSize), height - style.regionFontSize)
-      labels.set(region.mask, { text, x: x + (align === 'left' ? 4 : -4), y, align, leader: { from: point, to: { x, y } } })
     }
 
-    const cy = circles.reduce((sum, c) => sum + c.y, 0) / circles.length
-    const setLabels = circles.map((circle, index) => {
-      const set = model.sets[index]
-      const region = model.regions.find((item) => item.mask === 1 << index)
-      const total = this.#formatCount(region?.total ?? 0)
-      const below = circle.y > cy + 1
-      const half = ((set.label.length + total.length + 3) * charWidth(style.setFontSize)) / 2
-      return {
-        x: Math.min(Math.max(circle.x, half + 4), width - half - 4),
-        y: below ? circle.y + circle.radius + 8 : circle.y - circle.radius - 8,
-        align: 'center' as const,
-        verticalAlign: below ? ('top' as const) : ('bottom' as const),
-        name: set.label,
-        total,
+    // Too small for its text: the number moves outside, joined to the region by a line. The first direction
+    // tried points away from the diagram's centre; the rest fan out from it until one is clear of every label.
+    const offsets = [0, 25, -25, 50, -50, 75, -75, 105, -105, 140, -140, 180].map((degrees) => (degrees * Math.PI) / 180)
+    const cx = circles.reduce((sum, c) => sum + c.x, 0) / circles.length
+    for (const { region, text, textWidth, point } of pending) {
+      const outward = Math.atan2(point.y - cy, point.x - cx || 1e-6)
+      // Among the spots clear of every other label, the shortest leader wins; touching a circle counts as 40px
+      // of extra line, so a short line across an outline beats a long one around it.
+      let chosen: OverlapLabel | undefined
+      let chosenBox: OverlapBox | undefined
+      let best = Infinity
+      let fallback: OverlapLabel | undefined
+      for (const offset of offsets) {
+        const angle = outward + offset
+        const end = leaderEnd(circles, point, 10, { x: Math.cos(angle), y: Math.sin(angle) })
+        const align = end.direction.x >= 0 ? 'left' : 'right'
+        const x = end.x + (align === 'left' ? 4 : -4)
+        const box = textBox(x, end.y, textWidth, align)
+        const label: OverlapLabel = { text, x, y: end.y, align, leader: { from: point, to: { x: end.x, y: end.y } } }
+        fallback ??= label
+        const inside = box.x1 >= 2 && box.x2 <= width - 2 && box.y1 >= 0 && box.y2 <= height
+        if (!inside || obstacles.some((other) => boxesOverlap(box, other, 3))) continue
+        const score = Math.hypot(end.x - point.x, end.y - point.y) + (boxTouchesCircles(box, circles, 2) ? 40 : 0)
+        if (score < best) {
+          best = score
+          chosen = label
+          chosenBox = box
+        }
       }
-    })
+      if (chosenBox) obstacles.push(chosenBox)
+      chosen ??= fallback
+      if (chosen) labels.set(region.mask, chosen)
+    }
 
     this.#pixels = { key, circles, paths, labels, anchors, setLabels }
     return this.#pixels
@@ -706,6 +816,26 @@ export class OverlapChart extends EchartsChartBase {
   #handleBlur = (): void => {
     if (this.focusedMask !== null) this.#focusRegion(undefined)
   }
+}
+
+/** Whether a label box touches or crosses any circle other than the one at `skip`. */
+function boxTouchesCircles(box: OverlapBox, circles: readonly OverlapCircle[], gap: number, skip = -1): boolean {
+  return circles.some((circle, index) => {
+    if (index === skip) return false
+    const x = Math.min(Math.max(circle.x, box.x1), box.x2)
+    const y = Math.min(Math.max(circle.y, box.y1), box.y2)
+    return Math.hypot(circle.x - x, circle.y - y) < circle.radius + gap
+  })
+}
+
+let measureContext: CanvasRenderingContext2D | null | undefined
+
+/** Width of `text` in `font`, measured on a canvas; an estimate where there is none (a test runner without one). */
+function measureText(text: string, font: string, size: number): number {
+  if (measureContext === undefined) measureContext = typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d')
+  if (!measureContext) return text.length * size * 0.6
+  measureContext.font = font
+  return measureContext.measureText(text).width
 }
 
 /** ECharts rich text uses `{style|text}`: a brace or a pipe in a label would end the run early. */
