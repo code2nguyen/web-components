@@ -189,6 +189,10 @@
       "types": "./lib/log-viewer.d.ts",
       "default": "./lib/log-viewer.js"
     },
+    "./marker": {
+      "types": "./lib/marker.d.ts",
+      "default": "./lib/marker.js"
+    },
     "./masonry": {
       "types": "./lib/masonry.d.ts",
       "default": "./lib/masonry.js"
@@ -412,6 +416,7 @@
     "@c2n/list": "0.0.19",
     "@c2n/list-item": "0.0.19",
     "@c2n/log-viewer": "0.0.19",
+    "@c2n/marker": "0.0.19",
     "@c2n/masonry": "0.0.19",
     "@c2n/mat-icon": "0.0.19",
     "@c2n/menu": "0.0.19",

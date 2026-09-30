@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/marker:build",
         "../../components/chat-message-list:build",
         "../../components/shortcut:build",
         "../../components/carousel:build",
