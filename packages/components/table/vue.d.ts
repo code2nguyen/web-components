@@ -36,7 +36,13 @@ declare module 'vue' {
         'page-size'?: unknown
         'summary-values'?: unknown
         'summary-scope'?: unknown
+        'group-by'?: unknown
+        'group-display'?: unknown
+        'expanded-groups'?: unknown
+        'groups-collapsed'?: unknown
+        'empty-group-label'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
+        onGroupToggle?: (event: EventOf<Table, 'group-toggle'>) => void
         onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
         onRowClick?: (event: EventOf<Table, 'row-click'>) => void
         onCellClick?: (event: EventOf<Table, 'cell-click'>) => void
@@ -54,6 +60,7 @@ declare module 'vue' {
         'summary-label'?: unknown
         'summary-align'?: unknown
         'summary-span'?: unknown
+        'group-column'?: unknown
       }
     >
   }

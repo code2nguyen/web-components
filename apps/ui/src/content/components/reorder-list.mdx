@@ -29,10 +29,10 @@ npm install @c2n/reorder-list
     }
     .release-task {
       padding: 12px;
-      border: 1px solid #d4d4d8;
+      border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
       border-radius: 8px;
       background: white;
-      color: #18181b;
+      color: var(--c2-theme--color-on-surface, #18181b);
     }
   </style>
   <c2-reorder-list client:only="lit" class="release-queue" editable aria-label="Deployment queue">

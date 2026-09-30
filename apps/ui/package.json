@@ -75,6 +75,7 @@
     "@c2n/phosphor-icons": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
+    "@c2n/reorder-list": "*",
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",

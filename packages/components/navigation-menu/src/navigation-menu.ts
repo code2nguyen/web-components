@@ -25,6 +25,9 @@ export interface NavigationMenuEventMap {
   'value-change': CustomEvent<ValueChangeEventDetail>
 }
 
+/** How long after hover opened a panel a click on its trigger still counts as part of the same motion, in ms. */
+const HOVER_CLICK_GRACE = 250
+
 export interface NavigationMenu {
   addEventListener: TypedAddEventListener<NavigationMenu, NavigationMenuEventMap>
   removeEventListener: TypedRemoveEventListener<NavigationMenu, NavigationMenuEventMap>
@@ -38,8 +41,9 @@ export interface NavigationMenu {
  *
  * The bar owns which panel is open: `value` is the `value` of that item (`''` when closed), and `value-change` fires
  * on every change. Panels open on hover after `open-delay` and close after `close-delay` once the pointer leaves both
- * the item and its panel; a click on a trigger opens its panel straight away. Set `open-on="click"` for a bar that
- * ignores hover entirely, where a click on the open trigger closes it again.
+ * the item and its panel; a click on a trigger opens its panel straight away, and a click on the open trigger closes
+ * it (hover then leaves that item shut until the pointer moves on). Set `open-on="click"` for a bar that ignores
+ * hover entirely.
  *
  * Keyboard: every item is a tab stop. On a trigger, ArrowLeft / ArrowRight and Home / End move along the bar (moving
  * while a panel is open switches to that item's panel), ArrowDown, Enter or Space opens the panel and moves focus to
@@ -180,6 +184,12 @@ export class NavigationMenu extends LitElement {
 
   private openTimer: ReturnType<typeof setTimeout> | undefined
   private closeTimer: ReturnType<typeof setTimeout> | undefined
+
+  /** When hover last opened a panel, so the click that usually follows the pointer does not close it again. */
+  private hoverOpenedAt = 0
+
+  /** The item a click just closed: hover leaves it shut until the pointer moves to another item or leaves the bar. */
+  private hoverSuppressed?: NavigationMenuItem
 
   /** Whether the document-level dismissal listeners are attached; they only run while a panel is open. */
   private dismissing = false
@@ -439,10 +449,15 @@ export class NavigationMenu extends LitElement {
       return
     }
     if (this.value) {
-      this.setValue(item.value)
+      this.openByHover(item)
       return
     }
-    this.openTimer = setTimeout(() => this.setValue(item.value), Math.max(0, this.openDelay))
+    this.openTimer = setTimeout(() => this.openByHover(item), Math.max(0, this.openDelay))
+  }
+
+  private openByHover(item: NavigationMenuItem) {
+    this.hoverOpenedAt = performance.now()
+    this.setValue(item.value)
   }
 
   private scheduleClose() {
@@ -459,10 +474,13 @@ export class NavigationMenu extends LitElement {
       this.clearTimers()
       return
     }
+    if (item === this.hoverSuppressed) return
+    this.hoverSuppressed = undefined
     this.scheduleOpen(item)
   }
 
   private handlePointerLeave = () => {
+    this.hoverSuppressed = undefined
     if (this.openOn !== 'hover' || !this.value) return
     this.scheduleClose()
   }
@@ -491,9 +509,18 @@ export class NavigationMenu extends LitElement {
     }
     if (item.disabled || !item.hasPanel) return
     event.preventDefault()
-    // In hover mode the pointer is already on the item, so a click commits the panel rather than toggling it:
-    // closing here would race the hover delay and the very next pointer move would reopen the panel anyway.
-    this.setValue(this.openOn === 'hover' || !item.expanded ? item.value : '')
+    if (!item.expanded) {
+      this.setValue(item.value)
+      return
+    }
+    // A click on the open trigger closes it. The one exception is the click that lands just after hover opened the
+    // panel: that visitor pointed and clicked in one motion and meant to open it, so the panel stays.
+    const justOpenedByHover = performance.now() - this.hoverOpenedAt < HOVER_CLICK_GRACE
+    this.hoverOpenedAt = 0
+    if (justOpenedByHover) return
+    // The pointer is still on the item, so keep hover from reopening what the click just closed.
+    this.hoverSuppressed = item
+    this.setValue('')
   }
 
   /** Opens or closes the list behind the mobile button. */

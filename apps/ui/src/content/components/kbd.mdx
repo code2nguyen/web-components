@@ -28,22 +28,22 @@ npm install @c2n/kbd
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .sep {
-    color: #a1a1aa;
+    color: var(--c2-theme--color-outline-strong, #a1a1aa);
     font-size: 12px;
   }
   .flat {
     --c2-kbd--box-shadow: none;
     --c2-kbd--background-color: transparent;
-    --c2-kbd--border: 1px solid #d4d4d8;
+    --c2-kbd--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
   }
   .dark {
-    --c2-kbd--background-color: #27272a;
-    --c2-kbd--color: #e4e4e7;
-    --c2-kbd--border: 1px solid #3f3f46;
-    --c2-kbd--box-shadow: 0 1px 0 #18181b;
+    --c2-kbd--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kbd--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-kbd--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kbd--box-shadow: 0 1px 0 var(--c2-theme--color-inverse-surface, #18181b);
   }
   .round {
     --c2-kbd--border-radius: 999px;
