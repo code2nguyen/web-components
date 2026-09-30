@@ -100,6 +100,10 @@ import '@c2n/tooltip'
 // Icons that gallery examples slot into a `client:only` island. Their children are raw markup, so nothing else
 // loads their modules — an MDX `import` only runs while the page is built, never in the browser.
 import '@c2n/feather-icons/icons/file-text.js'
+import '@c2n/feather-icons/icons/file-plus.js'
+import '@c2n/feather-icons/icons/edit-2.js'
+import '@c2n/feather-icons/icons/copy.js'
+import '@c2n/feather-icons/icons/trash-2.js'
 import '@c2n/feather-icons/icons/folder.js'
 import '@c2n/feather-icons/icons/hash.js'
 import '@c2n/feather-icons/icons/layers.js'

@@ -220,10 +220,10 @@ greet('world')"></c2-code-editor>`,
 </div>`,
   menu: `<c2-menu aria-label="Row actions">
   <c2-button slot="trigger">Actions</c2-button>
-  <c2-menu-item value="edit">Edit</c2-menu-item>
-  <c2-menu-item value="duplicate">Duplicate</c2-menu-item>
+  <c2-menu-item value="edit"><c2-feather-edit-2 slot="prefix-icon"></c2-feather-edit-2>Edit</c2-menu-item>
+  <c2-menu-item value="duplicate"><c2-feather-copy slot="prefix-icon"></c2-feather-copy>Duplicate</c2-menu-item>
   <hr />
-  <c2-menu-item value="delete" destructive>Delete</c2-menu-item>
+  <c2-menu-item value="delete" destructive><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-menu-item>
 </c2-menu>`,
   modal: `<div class="preview-row">
   <c2-button onclick="this.nextElementSibling.show()">Open modal</c2-button>

@@ -4,10 +4,13 @@ description: 'Ready-made looks for c2-menu: surface, rows, dark and compact menu
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
 
 import { Menu } from '@c2n/menu'
 import { Button } from '@c2n/button'
 import { Kbd } from '@c2n/kbd'
+
+<ExampleModules />
 
 ## Surface
 
@@ -16,7 +19,7 @@ Each card shows a trigger; open the menu to see the look. `--c2-menu--*` is the 
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-menu class="default" aria-label="Default" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="new">New file</c2-menu-item><c2-menu-item value="duplicate">Duplicate</c2-menu-item><hr /><c2-menu-item value="delete" destructive>Delete</c2-menu-item></c2-menu>
+<c2-menu class="default" aria-label="Default" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="new"><c2-feather-file-plus slot="prefix-icon"></c2-feather-file-plus>New file</c2-menu-item><c2-menu-item value="duplicate"><c2-feather-copy slot="prefix-icon"></c2-feather-copy>Duplicate</c2-menu-item><hr /><c2-menu-item value="delete" destructive><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-menu-item></c2-menu>
 ```
 
 ```html tag=MdxCodeBlock,label=Soft
