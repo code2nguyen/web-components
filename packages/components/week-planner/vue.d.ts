@@ -20,6 +20,7 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-week-planner': DefineComponent<
       C2Props<WeekPlanner> & {
+        'alternate-weeks'?: unknown
         'start-hour'?: unknown
         'end-hour'?: unknown
         'week-start'?: unknown

@@ -60,6 +60,10 @@ export const overrides: Record<string, Override> = {
     token: 'color-surface-container',
     value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-surface-container, #f4f4f5)',
   },
+  '--c2-calendar__day__today--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
+  },
   '--c2-calendar__month__marked--background': {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',

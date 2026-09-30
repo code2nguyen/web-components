@@ -4,6 +4,8 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+// Registers `c2-button-group` and `c2-button`, the odd/even week switch.
+import '@c2n/button-group'
 import styles from './week-planner.scss?inline'
 
 export type WeekPlannerDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
@@ -110,9 +112,11 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
 /**
  * A typical week at a glance: seven day columns on an hour scale, each event a block from its start to its end time.
  * It has no dates — a slot says which weekday it happens on and repeats every week, or only in odd or even ISO weeks
- * (`weeks: "odd"`), as school and shared-custody schedules do. When any event uses odd/even, an Odd week | Even week
- * switch appears above the grid, opening on the kind of the current week. Today's column is tinted and carries a
- * line at the current time. Overlapping events sit side by side; the hour range grows to fit every event.
+ * (`weeks: "odd"`), as school and shared-custody schedules do. Odd and even weeks are off by default: set
+ * `alternate-weeks` to honour `weeks` and show an Odd week | Even week switch (a segmented `c2-button-group`, themed
+ * through its own `--c2-button-group__*` variables) above the grid, opening on the kind of the current week. Without
+ * it every event shows each week. Today's column is tinted, inside the grid lines, and carries a line at the current
+ * time. Overlapping events sit side by side; the hour range grows to fit every event.
  *
  * @tag c2-week-planner
  *
@@ -146,10 +150,6 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @cssproperty {font-size} [--c2-week-planner__event--font-size=12px]
  * @cssproperty {font-weight} [--c2-week-planner__event--font-weight=500]
  * @cssproperty {opacity} [--c2-week-planner__event__hover--opacity=0.88]
- * @cssproperty {border} [--c2-week-planner__switch--border=1px solid #bcbcc6]
- * @cssproperty {border-radius} [--c2-week-planner__switch--border-radius=6px]
- * @cssproperty {color} [--c2-week-planner__switch__selected--background=rgb(2, 101, 220)]
- * @cssproperty {color} [--c2-week-planner__switch__selected--color=#ffffff]
  * @cssproperty {outline} [--c2-week-planner__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-week-planner__focus--outline-offset=2px]
  */
@@ -162,7 +162,9 @@ export class WeekPlanner extends LitElement {
 
   /** The typical week: `{ id?, title, day, start, end, weeks?, color? }` entries. Accepts a JSON string as an attribute. */
   @property({ converter: jsonPropertyConverter }) events: WeekPlannerEvent[] = []
-  /** Kind of week shown when events use odd/even weeks. Defaults to the kind of the current ISO week. */
+  /** Honours each event's `weeks` and shows the Odd week | Even week switch. Off by default: every event shows each week. */
+  @property({ type: Boolean, attribute: 'alternate-weeks' }) alternateWeeks = false
+  /** Kind of week shown with `alternate-weeks`. Defaults to the kind of the current ISO week. */
   @property({ type: String }) parity: WeekPlannerParity | '' = ''
   /** First hour on the scale; earlier events extend it. */
   @property({ type: Number, attribute: 'start-hour' }) startHour = 8
@@ -219,17 +221,29 @@ export class WeekPlanner extends LitElement {
   private renderSwitch() {
     const week = isoWeek(this.now)
     const shown = this.shownParity
-    const button = (parity: WeekPlannerParity, label: string) =>
-      html`<button type="button" aria-pressed=${shown === parity ? 'true' : 'false'} @click=${() => this.showParity(parity)}>${label}</button>`
     return html`<header class="header">
-      <div class="switch" role="group" aria-label="Kind of week">${button('odd', 'Odd week')}${button('even', 'Even week')}</div>
+      <c2-button-group
+        class="switch"
+        appearance="segmented"
+        size="s"
+        aria-label="Kind of week"
+        .value=${shown}
+        @change=${(event: CustomEvent<{ value: string }>) => {
+          // The group's change is composed; the planner reports it as parity-change instead.
+          event.stopPropagation()
+          if (event.detail.value === 'odd' || event.detail.value === 'even') this.showParity(event.detail.value)
+        }}
+      >
+        <c2-button value="odd">Odd week</c2-button>
+        <c2-button value="even">Even week</c2-button>
+      </c2-button-group>
       <span class="current">This week (${week}) is ${this.currentParity}</span>
     </header>`
   }
 
   override render() {
     const all = this.validEvents
-    const usesParity = all.some(({ event }) => event.weeks === 'odd' || event.weeks === 'even')
+    const usesParity = this.alternateWeeks
     const shown = this.shownParity
     const visible = all.filter(({ event }) => !usesParity || !event.weeks || event.weeks === 'all' || event.weeks === shown)
 

@@ -27,10 +27,6 @@
     event--font-size: 12px,
     event--font-weight: 500,
     event__hover--opacity: 0.88,
-    switch--border: 1px solid #bcbcc6,
-    switch--border-radius: 6px,
-    switch__selected--background: rgb(2, 101, 220),
-    switch__selected--color: #ffffff,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     focus--outline-offset: 2px,
   )
@@ -62,35 +58,6 @@
   margin-bottom: 10px;
 }
 
-.switch {
-  display: inline-flex;
-  overflow: hidden;
-  border: css.cssVar(switch--border);
-  border-radius: css.cssVar(switch--border-radius);
-
-  button {
-    margin: 0;
-    padding: 5px 12px;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    font: inherit;
-    font-size: 12px;
-    transition: animation.standard(background), animation.standard(color);
-
-    &[aria-pressed='true'] {
-      background: css.cssVar(switch__selected--background);
-      color: css.cssVar(switch__selected--color);
-    }
-
-    &:focus-visible {
-      outline: css.cssVar(focus--outline);
-      outline-offset: -2px;
-    }
-  }
-}
-
 .current {
   color: css.cssVar(hour-label--color);
   font-size: 12px;
@@ -113,8 +80,10 @@
   color: css.cssVar(day-header--color);
   font-size: css.cssVar(day-header--font-size);
 
+  // Today's tints stop inside the column's own border, so the grid lines keep their colour.
   &.today {
     background: css.cssVar(day__today--background);
+    background-clip: padding-box;
     color: css.cssVar(day-header__today--color);
     font-weight: css.cssVar(day-header__today--font-weight);
   }
@@ -137,6 +106,7 @@
 
   &.today {
     background: css.cssVar(day__today--background);
+    background-clip: padding-box;
   }
 }
 

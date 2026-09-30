@@ -31,17 +31,27 @@ test('skips events whose times do not make sense', async ({ page, scenario }) =>
 })
 
 test('marks today with a tinted column and a now line', async ({ page, scenario }) => {
-  await scenario()
+  await scenario('alternate')
   const planner = page.locator('c2-week-planner')
   await expect(planner.getByRole('group', { name: 'Wednesday, today' })).toBeVisible()
-  await expect(planner.locator('.day.today')).toHaveCSS('background-color', 'rgba(2, 101, 220, 0.05)')
+  const column = planner.locator('.day.today')
+  await expect(column).toHaveCSS('background-color', 'rgba(2, 101, 220, 0.05)')
+  // The tint stays inside the column's border: the grid line keeps its own colour.
+  await expect(column).toHaveCSS('background-clip', 'padding-box')
   await expect(planner.locator('.now')).toHaveCount(1)
 })
 
-test('opens on the current kind of week and switches to the other', async ({ page, scenario }) => {
+test('shows every event each week while alternate weeks are off', async ({ page, scenario }) => {
   await scenario()
+  await expect(page.locator('c2-week-planner').locator('c2-button-group')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Pick-up/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Gym/ })).toBeVisible()
+})
+
+test('opens on the current kind of week and switches to the other', async ({ page, scenario }) => {
+  await scenario('alternate')
   await expect(page.getByText('This week (40) is even')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Even week' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('c2-week-planner').locator('c2-button-group')).toHaveJSProperty('value', 'even')
   await expect(page.getByRole('button', { name: /^Pick-up/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^Gym/ })).toHaveCount(0)
   // Every-week events stay in both.
@@ -49,6 +59,7 @@ test('opens on the current kind of week and switches to the other', async ({ pag
 
   await page.getByRole('button', { name: 'Odd week' }).click()
   await expect(page.getByRole('status')).toHaveText('parity:odd')
+  await expect(page.locator('c2-week-planner').locator('c2-button-group')).toHaveJSProperty('value', 'odd')
   await expect(page.getByRole('button', { name: /^Gym/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^Pick-up/ })).toHaveCount(0)
   await expect(page.getByRole('button', { name: /^Stand-up/ })).toBeVisible()
@@ -56,9 +67,24 @@ test('opens on the current kind of week and switches to the other', async ({ pag
   await expect(page.locator('c2-week-planner').locator('.day.today')).toHaveCount(0)
 })
 
-test('hides the switch when no event uses odd or even weeks', async ({ page, scenario }) => {
-  await scenario('every-week')
-  await expect(page.getByRole('group', { name: 'Kind of week' })).toHaveCount(0)
+test('switches with the arrow keys', async ({ page, scenario }) => {
+  await scenario('odd')
+  await page.getByRole('button', { name: 'Odd week' }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('status')).toHaveText('parity:even')
+  await expect(page.getByRole('button', { name: /^Pick-up/ })).toBeVisible()
+})
+
+test('keeps the button group change event inside', async ({ page, scenario }) => {
+  await scenario('alternate')
+  await page.evaluate(() => {
+    const leaks: Event[] = []
+    ;(window as Window & { leaks?: Event[] }).leaks = leaks
+    document.querySelector('c2-week-planner')!.addEventListener('change', (event) => leaks.push(event))
+  })
+  await page.getByRole('button', { name: 'Odd week' }).click()
+  await expect(page.getByRole('status')).toHaveText('parity:odd')
+  expect(await page.evaluate(() => (window as Window & { leaks?: Event[] }).leaks!.length)).toBe(0)
 })
 
 test('extends the hour scale to fit early events', async ({ page, scenario }) => {
@@ -76,7 +102,7 @@ test('fires event-click from pointer and keyboard', async ({ page, scenario }) =
 })
 
 test('has no axe violations', async ({ page, scenario }) => {
-  await scenario()
+  await scenario('alternate')
   await expect(page.getByRole('region', { name: 'Week plan' })).toBeVisible()
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])

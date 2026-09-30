@@ -122,8 +122,9 @@ function dayDiff(from: Date, to: Date): number {
  * @cssproperty {font-size} [--c2-calendar__day--font-size=12px]
  * @cssproperty {color} [--c2-calendar__day__outside--background=#fafafa] - Background of the neighbouring months' days.
  * @cssproperty {color} [--c2-calendar__day__outside--color=#71717a]
- * @cssproperty {color} [--c2-calendar__day__today--background=rgb(2, 101, 220)]
- * @cssproperty {color} [--c2-calendar__day__today--color=#ffffff]
+ * @cssproperty {color} [--c2-calendar__day__today--background=rgba(2, 101, 220, 0.05)] - Tint of today's box; it stays inside the grid lines.
+ * @cssproperty {color} [--c2-calendar__day__today--color=rgb(2, 101, 220)] - Colour of today's date number.
+ * @cssproperty {font-weight} [--c2-calendar__day__today--font-weight=600]
  * @cssproperty {color} [--c2-calendar__event--background=rgb(2, 101, 220)] - Bar colour of an event without its own `color`.
  * @cssproperty {color} [--c2-calendar__event--color=#ffffff]
  * @cssproperty {pixel} [--c2-calendar__event--height=22px]
@@ -357,7 +358,7 @@ export class Calendar extends LitElement {
       ${days.map((date, index) => {
         const value = toIso(date)
         const outside = date.getMonth() !== this.visibleMonth.getMonth()
-        return html`<div class="day ${outside ? 'outside' : ''}" style=${styleMap({ gridColumn: String(index + 1) })}>
+        return html`<div class="day ${outside ? 'outside' : ''} ${value === today ? 'today' : ''}" style=${styleMap({ gridColumn: String(index + 1) })}>
           <span class="date ${value === today ? 'today' : ''}" aria-current=${value === today ? 'date' : nothing}>${date.getDate()}</span>
         </div>`
       })}

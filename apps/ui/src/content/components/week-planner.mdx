@@ -10,9 +10,10 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { WeekPlanner } from '@c2n/week-planner'
 
 `c2-week-planner` shows a typical week: seven day columns on an hour scale, each event a block from its start to its end
-time. It has no dates and no navigation. An event names the weekday it happens on and repeats every week, or only in
-odd or even weeks (`weeks: "odd"`), as school and shared-custody schedules do. Today's column is tinted and carries a
-line at the current time. Overlapping events sit side by side, and the hour range (`start-hour`, `end-hour`, 8 to 18 by
+time. It has no dates and no navigation. An event names the weekday it happens on and repeats every week, or, with
+`alternate-weeks`, only in odd or even weeks (`weeks: "odd"`), as school and shared-custody schedules do. Today's
+column is tinted (`--c2-week-planner__day__today--background`, drawn inside the grid lines) and carries a line at the
+current time. Overlapping events sit side by side, and the hour range (`start-hour`, `end-hour`, 8 to 18 by
 default) grows to fit every event.
 
 ## Installation
@@ -34,6 +35,7 @@ npm install @c2n/week-planner
 </div>
 <div data-label="Odd and even weeks">
   <c2-week-planner
+    alternate-weeks
     locale="en-US"
     start-hour="9"
     end-hour="19"
@@ -51,8 +53,10 @@ is any CSS colour for that block (pick one that keeps white text readable); othe
 
 ## Odd and even weeks
 
-`weeks` is `"all"` (the default), `"odd"` or `"even"`, counted by ISO week number, where week 1 holds the year's first
-Thursday. As soon as one entry uses odd or even, an **Odd week | Even week** switch appears above the grid. It opens on
+Alternate weeks are off by default: every entry shows each week and `weeks` is ignored. Add the `alternate-weeks`
+attribute to turn them on. `weeks` is then `"all"` (the default), `"odd"` or `"even"`, counted by ISO week number,
+where week 1 holds the year's first Thursday, and an **Odd week | Even week** switch appears above the grid: a
+segmented `c2-button-group`, styled through its own `--c2-button-group__*` variables set on the planner. It opens on
 the kind of the current week, which it names beside it ("This week (40) is even"), and every-week entries appear in
 both. Set `parity="odd"` or `parity="even"` to choose the view yourself; the switch fires `parity-change` with the kind
 now shown. Today's column is only marked while the switch shows the current kind of week.

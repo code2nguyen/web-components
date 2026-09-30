@@ -24,6 +24,7 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-week-planner': Omit<C2Props<WeekPlanner>, 'events'> & {
+        'alternate-weeks'?: Attribute
         'start-hour'?: Attribute
         'end-hour'?: Attribute
         'week-start'?: Attribute

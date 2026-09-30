@@ -51,7 +51,9 @@
   "wireit": {
     "type-check": {
       "dependencies": [
-        "../../core:build"
+        "../../core:build",
+        "../button:build",
+        "../button-group:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -63,6 +65,8 @@
     }
   },
   "dependencies": {
+    "@c2n/button": "0.0.19",
+    "@c2n/button-group": "0.0.19",
     "@c2n/core": "0.0.19",
     "lit": "3.3.3"
   },

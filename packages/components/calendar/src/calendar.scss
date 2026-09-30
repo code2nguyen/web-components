@@ -20,8 +20,9 @@
     day--font-size: 12px,
     day__outside--background: #fafafa,
     day__outside--color: #71717a,
-    day__today--background: rgb(2, 101, 220),
-    day__today--color: #ffffff,
+    day__today--background: rgba(2, 101, 220, 0.05),
+    day__today--color: rgb(2, 101, 220),
+    day__today--font-weight: 600,
     event--background: rgb(2, 101, 220),
     event--color: #ffffff,
     event--height: 22px,
@@ -176,6 +177,12 @@
     background: css.cssVar(day__outside--background);
     color: css.cssVar(day__outside--color);
   }
+
+  // The tint stops inside the cell's own borders, so the grid lines keep their colour.
+  &.today {
+    background: css.cssVar(day__today--background);
+    background-clip: padding-box;
+  }
 }
 
 .date {
@@ -191,9 +198,8 @@
   font-variant-numeric: tabular-nums;
 
   &.today {
-    background: css.cssVar(day__today--background);
     color: css.cssVar(day__today--color);
-    font-weight: 600;
+    font-weight: css.cssVar(day__today--font-weight);
   }
 }
 
