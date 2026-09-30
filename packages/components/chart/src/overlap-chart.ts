@@ -205,6 +205,9 @@ export class OverlapChart extends EchartsChartBase {
 
   protected override readonly features: readonly EchartsFeature[] = ['custom']
 
+  // Highlights redraw the chart under the pointer, so they must land in one step; see `createEchartsAdapter`.
+  protected override readonly lazyEngineUpdates = false
+
   /** Row field holding the set keys of a combination. */
   @property({ type: String, attribute: 'sets-field' }) setsField = 'sets'
 
@@ -226,6 +229,14 @@ export class OverlapChart extends EchartsChartBase {
 
   /** Set keys of the selected region, for example `["web", "api"]`; `selected="web;api"` as an attribute. */
   @property({ converter: arrayPropertyConverter }) selected: string[] = []
+
+  /**
+   * What a click inside the circles selects. `region` (the default) selects the exclusive region under the pointer;
+   * `set` selects a whole circle: the smallest one under the pointer, and the next one there on each further click,
+   * until the selection clears. Hovering then highlights the circle a click would select. A set's name always
+   * selects its set.
+   */
+  @property({ type: String }) selection: 'region' | 'set' = 'region'
 
   /** Key of the selected set: its whole circle is selected. Clears `selected` when the reader picks a set. */
   @property({ type: String, attribute: 'selected-set' }) selectedSet: string | null = null
@@ -250,6 +261,9 @@ export class OverlapChart extends EchartsChartBase {
 
   /** The set whose name the pointer is on, for the plot's DOM click. */
   #pointerSet: string | null = null
+
+  /** The region the pointer is on, for the plot's DOM click in `selection="set"` mode. */
+  #pointerRegion: OverlapRegion | null = null
 
   #model?: OverlapModel
   #pixels?: OverlapPixels
@@ -433,8 +447,9 @@ export class OverlapChart extends EchartsChartBase {
       this.#hoverKind = null
       super.handleEngineHover(null)
       this.#pointerSet = null
+      this.#pointerRegion = null
+      if (kind === 'set' || (kind === 'region' && this.selection === 'set')) this.hoveredSet = null
       if (kind === 'set') {
-        this.hoveredSet = null
         this.dispatchEvent(new CustomEvent<OverlapSetDetail | null>('set-hover', { detail: null }))
       } else if (kind === 'region') {
         this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: null }))
@@ -464,6 +479,10 @@ export class OverlapChart extends EchartsChartBase {
       this.dispatchEvent(new CustomEvent<OverlapSetDetail | null>('set-hover', { detail: null }))
     }
     this.#hoverKind = 'region'
+    this.#pointerRegion = region
+    // In set mode the circle a click would select is highlighted, so the reader sees what they are about to pick.
+    if (this.selection === 'set')
+      this.hoveredSet = this.#setCandidates(region).includes(this.selectedSet ?? '') ? this.selectedSet : (this.#setCandidates(region)[0] ?? null)
     super.handleEngineHover(detail)
     this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: { ...region, sets: [...region.sets] } }))
   }
@@ -471,7 +490,8 @@ export class OverlapChart extends EchartsChartBase {
   protected override handleEngineClick(detail: { index: number; seriesIndex: number }): void {
     const model = this.#computeModel()
     // A click on a set's name is handled by `#handlePlotClick`, which a redraw under the pointer cannot drop.
-    if (detail.seriesIndex !== REGION_SERIES) return
+    // In set mode the hover highlight redraws under the pointer too, so that click also comes from the DOM.
+    if (detail.seriesIndex !== REGION_SERIES || this.selection === 'set') return
     const region = model?.drawn[detail.index]
     if (region) this.#activate(region)
   }
@@ -1001,6 +1021,32 @@ export class OverlapChart extends EchartsChartBase {
     this.#notifySelection()
   }
 
+  /** The sets a region lies in, smallest circle first: the order a click in `selection="set"` mode walks. */
+  #setCandidates(region: OverlapRegion): string[] {
+    return [...region.sets].sort((a, b) => (this.setDetail(a)?.total ?? 0) - (this.setDetail(b)?.total ?? 0))
+  }
+
+  /** A click, or Enter, on a region in `selection="set"` mode: selects the next circle there, then none. */
+  #activateSetAt(region: OverlapRegion): void {
+    this.dispatchEvent(new CustomEvent<OverlapRegion>('region-click', { detail: { ...region, sets: [...region.sets] } }))
+    const candidates = this.#setCandidates(region)
+    const current = candidates.indexOf(this.selectedSet ?? '')
+    const target = current < 0 ? candidates[0] : candidates[current + 1]
+    if (!this.selectable) {
+      if (candidates[0]) this.#activateSet(candidates[0])
+      return
+    }
+    if (target) {
+      this.#activateSet(target)
+    } else {
+      this.selectedSet = null
+      this.selected = []
+      this.#notifySelection()
+    }
+    // Keep the hover highlight on what is now selected, or back on the first candidate once it clears.
+    if (this.#pointerRegion === region) this.hoveredSet = target ?? candidates[0] ?? null
+  }
+
   #notifySelection(): void {
     this.dispatchEvent(
       new CustomEvent<OverlapSelectionChangeEventDetail>('selection-change', { detail: { selected: [...this.selected], selectedSet: this.selectedSet } }),
@@ -1067,6 +1113,7 @@ export class OverlapChart extends EchartsChartBase {
         {
           const item = order[current]
           if ('set' in item) this.#activateSet(item.set)
+          else if (this.selection === 'set') this.#activateSetAt(item.region)
           else this.#activate(item.region)
         }
         break
@@ -1087,6 +1134,7 @@ export class OverlapChart extends EchartsChartBase {
 
   #handlePlotClick = (): void => {
     if (this.#hoverKind === 'set' && this.#pointerSet) this.#activateSet(this.#pointerSet)
+    else if (this.#hoverKind === 'region' && this.#pointerRegion && this.selection === 'set') this.#activateSetAt(this.#pointerRegion)
   }
 
   #handleBlur = (): void => {

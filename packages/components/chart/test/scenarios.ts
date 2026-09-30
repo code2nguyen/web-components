@@ -193,8 +193,9 @@ function build(): void {
     case 'overlap':
     case 'overlap-uniform':
     case 'overlap-selectable':
+    case 'overlap-select-set':
       main.innerHTML = `
-        <c2-overlap-chart id="chart" ${scenario === 'overlap-uniform' ? 'layout="uniform" labels="percent"' : ''} ${scenario === 'overlap-selectable' ? 'selectable' : ''}>
+        <c2-overlap-chart id="chart" ${scenario === 'overlap-uniform' ? 'layout="uniform" labels="percent"' : ''} ${scenario === 'overlap-selectable' ? 'selectable' : ''} ${scenario === 'overlap-select-set' ? 'selectable selection="set"' : ''}>
           <c2-chart-series field="web" label="Web app"></c2-chart-series>
           <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
           <c2-chart-series field="api" label="Public API"></c2-chart-series>

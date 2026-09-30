@@ -15,7 +15,16 @@ export interface EchartsOptions extends EChartsCoreOption {
   series?: Record<string, unknown>[]
 }
 
-export async function createEchartsAdapter(features: readonly EchartsFeature[], renderer: 'canvas' | 'svg'): Promise<ChartAdapter<EchartsOptions, unknown[]>> {
+/**
+ * `lazy` (the default) coalesces updates into the next frame. A chart whose updates are rare and follow the pointer
+ * (a hover highlight) passes `false`: ECharts swaps its data at once but redraws only on that frame, and a pointer
+ * event in between reaches an element whose data is gone, which throws and leaves the instance refusing updates.
+ */
+export async function createEchartsAdapter(
+  features: readonly EchartsFeature[],
+  renderer: 'canvas' | 'svg',
+  lazy = true,
+): Promise<ChartAdapter<EchartsOptions, unknown[]>> {
   const echarts = await loadECharts(features, renderer)
 
   let instance: ECharts | undefined
@@ -65,7 +74,7 @@ export async function createEchartsAdapter(features: readonly EchartsFeature[], 
 
     /** Series data only: ECharts merges it without re-evaluating axes, colours or layout. */
     setData(data) {
-      instance?.setOption({ series: data.map((series) => ({ data: series })) }, { notMerge: false, lazyUpdate: true, silent: true })
+      instance?.setOption({ series: data.map((series) => ({ data: series })) }, { notMerge: false, lazyUpdate: lazy, silent: true })
     },
 
     /**
@@ -73,7 +82,7 @@ export async function createEchartsAdapter(features: readonly EchartsFeature[], 
      * forever. A merge otherwise keeps the current data and zoom, which is what a theme change wants.
      */
     setOptions(options, mode) {
-      instance?.setOption(options, { notMerge: mode === 'replace', lazyUpdate: true })
+      instance?.setOption(options, { notMerge: mode === 'replace', lazyUpdate: lazy })
       // A replace drops the visibility state, so re-apply it.
       if (mode === 'replace') for (const index of hidden) adapter.setSeriesVisibility(index, false)
     },

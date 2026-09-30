@@ -18,6 +18,9 @@ export abstract class EchartsChartBase extends ChartBase {
   /** Which ECharts renderer to use. SVG prints and scales crisply; canvas is faster with many marks. */
   @property({ type: String }) renderer: 'canvas' | 'svg' = 'canvas'
 
+  /** Whether engine updates wait for the next frame. See `createEchartsAdapter`; a chart turns it off only for a reason. */
+  protected readonly lazyEngineUpdates: boolean = true
+
   /** The ECharts modules this chart type needs registered. Keeps the rest of the library unloaded. */
   protected abstract readonly features: readonly EchartsFeature[]
 
@@ -41,7 +44,7 @@ export abstract class EchartsChartBase extends ChartBase {
   protected override createAdapter(): Promise<ChartAdapter> {
     // `legend` is always registered: hidden or not, `dispatchAction('legendUnSelect')` is the only public
     // way to toggle a series, so the component depends on the module even when it draws its own legend.
-    return createEchartsAdapter([...this.features, 'legend'], this.renderer) as unknown as Promise<ChartAdapter>
+    return createEchartsAdapter([...this.features, 'legend'], this.renderer, this.lazyEngineUpdates) as unknown as Promise<ChartAdapter>
   }
 
   protected override projectData(frame: ChartFrame, context: ChartBuildContext): unknown {

@@ -9,9 +9,12 @@ apiTags: ['c2-overlap-chart', 'c2-chart-series']
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import OverlapSelectionDemo from '../../components/OverlapSelectionDemo.astro'
 
 import { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+<OverlapSelectionDemo />
 
 How two or three groups overlap: users on web, mobile and the API, customers who bought each of three products,
 people with each of three skills. Each set is a circle, each shared area is labelled with the number of members in
@@ -35,6 +38,19 @@ npm install @c2n/chart echarts
     width: 100%;
     --c2-chart--height: 320px;
   }
+  .select-demo {
+    display: grid;
+    width: 100%;
+    gap: 8px;
+  }
+  .select-demo .plot {
+    --c2-chart__set__dimmed--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-chart__set__dimmed--fill-style: hatch;
+  }
+  .select-demo__status {
+    font-size: 12px;
+    color: var(--c2-theme--color-on-surface-variant, #52525b);
+  }
 </style>
 
 <div data-label="Three sets">
@@ -46,6 +62,22 @@ npm install @c2n/chart echarts
     <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
     <c2-chart-series field="api" label="Public API"></c2-chart-series>
   </c2-overlap-chart>
+</div>
+
+<div data-label="Click a circle" data-overlap-selection>
+  <div class="select-demo">
+    <c2-overlap-chart
+      class="plot"
+      selectable
+      selection="set"
+      data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'
+    >
+      <c2-chart-series field="web" label="Web app"></c2-chart-series>
+      <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
+      <c2-chart-series field="api" label="Public API"></c2-chart-series>
+    </c2-overlap-chart>
+    <span class="select-demo__status" data-overlap-status data-overlap-status-idle="Click inside a circle to select it; click the same spot again to move to the next circle there.">Click inside a circle to select it; click the same spot again to move to the next circle there.</span>
+  </div>
 </div>
 
 <div data-label="Two sets">
@@ -117,7 +149,11 @@ members, its share of the whole, and how many belong to no other set. `set-hover
 `highlighted-set` does the same from your application, for instance while the pointer is on a row of a table next to
 the chart.
 
-With `selectable`, clicking a region selects that region and clicking a set's name selects the whole set. `selected`
+With `selectable`, clicking a region selects that region and clicking a set's name selects the whole set. Add
+`selection="set"` to make a click anywhere inside a circle select that whole circle, as the "Click a circle" example
+above does: in an overlap the smallest circle under the pointer comes first, and each further click on the same spot
+moves to the next circle there, then clears. While the pointer is over the circles, the one a click would select is
+highlighted. `selected`
 holds the region's set keys, `selected-set` the set's key, and `selection-change` fires with both; a second click
 clears the selection. None of these events bubble, so listen on the element itself.
 

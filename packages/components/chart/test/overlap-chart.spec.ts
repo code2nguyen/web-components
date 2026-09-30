@@ -326,3 +326,46 @@ test('while one set is highlighted, the others take the dimmed colour and fill s
   expect((await render('dots')).dimmed).toEqual({ fill: 'pattern', opacity: 0.4 })
   expect((await render('none')).dimmed).toBeNull()
 })
+
+test('selection="set" selects the whole circle under the pointer, the smallest first, then the next, then none', async ({ page, scenario }) => {
+  const errors: string[] = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+  await scenario('overlap-select-set')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  // Engine data order: web, mobile, web+mobile, api, web+api, mobile+api, web+mobile+api.
+  const anchor = (index: number) =>
+    chart.evaluate(
+      (element, index) =>
+        (element as unknown as { tooltipContextAt(detail: object): { px: number; py: number } }).tooltipContextAt({ index, seriesIndex: 1, px: 0, py: 0 }),
+      index,
+    )
+  const box = await chart.locator('.plot').boundingBox()
+  if (!box) throw new Error('the plot has no box')
+  const selectedSet = () => chart.evaluate((element) => (element as OverlapElement).selectedSet)
+  const hovered = () => chart.evaluate((element) => (element as unknown as { hoveredSet: string | null }).hoveredSet)
+
+  const webOnly = await anchor(0)
+  await page.mouse.click(box.x + webOnly.px, box.y + webOnly.py)
+  await expect.poll(selectedSet).toBe('web')
+  await page.mouse.click(box.x + webOnly.px, box.y + webOnly.py)
+  await expect.poll(selectedSet).toBeNull()
+
+  const shared = await anchor(2)
+  await page.mouse.move(box.x + shared.px, box.y + shared.py, { steps: 3 })
+  // Mobile (12,960) is smaller than web (18,420), so it is what a click here would pick, and what hovering shows.
+  await expect.poll(hovered).toBe('mobile')
+  await page.mouse.click(box.x + shared.px, box.y + shared.py)
+  await expect.poll(selectedSet).toBe('mobile')
+  await page.mouse.click(box.x + shared.px, box.y + shared.py)
+  await expect.poll(selectedSet).toBe('web')
+  await expect.poll(hovered).toBe('web')
+  await page.mouse.click(box.x + shared.px, box.y + shared.py)
+  await expect.poll(selectedSet).toBeNull()
+  expect(await chart.evaluate((element) => (element as OverlapElement).selected)).toEqual([])
+  // A redraw under the pointer used to leave ECharts handling events on elements whose data was gone.
+  expect(errors).toEqual([])
+})
