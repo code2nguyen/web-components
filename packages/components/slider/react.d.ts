@@ -24,7 +24,11 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-slider': C2Props<Slider> & {
+        'value-start'?: Attribute
+        'value-end'?: Attribute
         'show-value'?: Attribute
+        'start-label'?: Attribute
+        'end-label'?: Attribute
         'aria-label'?: Attribute
         'aria-labelledby'?: Attribute
       }
