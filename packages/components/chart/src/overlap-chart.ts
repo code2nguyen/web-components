@@ -198,8 +198,8 @@ const SET_SERIES = 2
  * @cssproperty {opacity} [--c2-chart__region__hover--opacity=0.12] - Opacity of the text-coloured wash over the hovered or focused region.
  * @cssproperty {opacity} [--c2-chart__region__selected--opacity=0.24] - Opacity of the text-coloured wash over the selected region.
  * @cssproperty {opacity} [--c2-chart__set__highlight--fill-opacity=0.4] - Fill opacity of the highlighted or selected set's circle.
- * @cssproperty {opacity} [--c2-chart__set-overlap__highlight--fill-opacity=0.22] - Extra shading, in the highlighted set's colour, over each part of its circle it shares with another set, so the overlaps stand out.
- * @cssproperty {opacity} [--c2-chart__set__dimmed--opacity=0.4] - How much of their usual fill and outline the other circles keep while one set is highlighted.
+ * @cssproperty {opacity} [--c2-chart__set-overlap__highlight--fill-opacity=0.35] - Opacity of the tint, in the other set's colour, over each part of the highlighted circle it shares with another set, so the mixed zones stand out.
+ * @cssproperty {opacity} [--c2-chart__set__dimmed--opacity=0.6] - How much of their usual fill and outline the other circles keep while one set is highlighted.
  * @cssproperty {color} [--c2-chart__set__dimmed--color=transparent] - Colour the other circles take while one set is highlighted, a neutral grey for instance. `transparent` keeps each set's own colour.
  * @cssproperty {string} [--c2-chart__set__dimmed--fill-style=solid] - How the other circles are filled while one set is highlighted: `solid`, `hatch` (diagonal lines), `dots`, or `none` (outline only).
  * @cssproperty {font-size} [--c2-chart__region-label--font-size=14px] - Font size of the count or percentage in each region.
@@ -689,8 +689,8 @@ export class OverlapChart extends EchartsChartBase {
       hoverOpacity: read('--c2-chart__region__hover--opacity', 0.12),
       selectedOpacity: read('--c2-chart__region__selected--opacity', 0.24),
       highlightFillOpacity: read('--c2-chart__set__highlight--fill-opacity', 0.4),
-      dimmedOpacity: read('--c2-chart__set__dimmed--opacity', 0.4),
-      overlapFillOpacity: read('--c2-chart__set-overlap__highlight--fill-opacity', 0.22),
+      dimmedOpacity: read('--c2-chart__set__dimmed--opacity', 0.6),
+      overlapFillOpacity: read('--c2-chart__set-overlap__highlight--fill-opacity', 0.35),
       dimmedColor: this.#probeColor('.overlap-dimmed-probe'),
       dimmedFillStyle: readFillStyle(style.getPropertyValue('--c2-chart__set__dimmed--fill-style')),
       regionFontSize: read('--c2-chart__region-label--font-size', 14),
@@ -863,12 +863,13 @@ export class OverlapChart extends EchartsChartBase {
       children.push({ type: 'circle', shape, style: { fill: set.color, fillOpacity: style.setFillOpacity } })
     } else if (active === set.key) {
       children.push({ type: 'circle', shape, style: { fill: set.color, fillOpacity: style.highlightFillOpacity } })
-      // Inside the highlighted circle, every part it shares with another set is shaded deeper in its own colour, so
-      // the reader sees which of its sections overlap (a part shared with two sets gets two layers).
+      // Inside the highlighted circle, every part it shares with another set is tinted in that other set's colour, so
+      // the reader sees which of its sections are mixed and with whom (a part shared with two sets mixes both).
       pixels?.circles.forEach((other, index) => {
-        if (index === params.dataIndex) return
+        const otherSet = this.#model?.sets[index]
+        if (index === params.dataIndex || !otherSet) return
         const pathData = lensPath(circle, other)
-        if (pathData) children.push({ type: 'path', shape: { pathData }, style: { fill: set.color, fillOpacity: style.overlapFillOpacity } })
+        if (pathData) children.push({ type: 'path', shape: { pathData }, style: { fill: otherSet.color, fillOpacity: style.overlapFillOpacity } })
       })
     } else {
       // Another set is highlighted: this one takes the dimmed colour and fill style, but only outside the highlighted

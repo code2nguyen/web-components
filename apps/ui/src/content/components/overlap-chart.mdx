@@ -43,10 +43,6 @@ npm install @c2n/chart echarts
     width: 100%;
     gap: 8px;
   }
-  .select-demo .plot {
-    --c2-chart__set__dimmed--color: var(--c2-theme--color-on-surface-variant, #71717a);
-    --c2-chart__set__dimmed--fill-style: hatch;
-  }
   .select-demo__status {
     font-size: 12px;
     color: var(--c2-theme--color-on-surface-variant, #52525b);
@@ -203,9 +199,10 @@ Circles take the shared palette, `--c2-chart__series-1--color` to `--c2-chart__s
 `--c2-chart__set--fill-opacity` with a full-strength outline of `--c2-chart__set--stroke-width`. Overlaps read darker
 because the fills stack. The hovered and selected regions get a wash in the text colour, set by
 `--c2-chart__region__hover--opacity` and `--c2-chart__region__selected--opacity`. A highlighted set comes forward: its
-circle fills to `--c2-chart__set__highlight--fill-opacity`, its outline is drawn on top with a glow, and the parts it
-shares with other circles are shaded deeper by `--c2-chart__set-overlap__highlight--fill-opacity`, so you can see
-which sections of it overlap. The other circles keep `--c2-chart__set__dimmed--opacity` of their usual fill and outline. They can also change look: `--c2-chart__set__dimmed--color` repaints them in one colour (the
+circle fills to `--c2-chart__set__highlight--fill-opacity`, its outline is drawn on top with a glow, and each part it
+shares with another circle is tinted in that circle's colour at `--c2-chart__set-overlap__highlight--fill-opacity`,
+so the mixed zones stand out and show which set they are shared with. The other circles keep their colour at
+`--c2-chart__set__dimmed--opacity` of their usual fill and outline. They can also change look: `--c2-chart__set__dimmed--color` repaints them in one colour (the
 default `transparent` keeps each set's own), and `--c2-chart__set__dimmed--fill-style` fills them with `solid`,
 `hatch` (diagonal lines), `dots`, or `none` for outlines only.
 
