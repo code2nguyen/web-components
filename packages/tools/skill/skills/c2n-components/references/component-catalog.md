@@ -48,6 +48,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
+- **Week Planner** — `c2-week-planner` · `@c2n/week-planner` — Typical-week schedule with time blocks, and optional odd and even weeks.
 
 ## Feedback
 

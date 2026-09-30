@@ -90,5 +90,6 @@ import '@c2n/tooltip/react'
 import '@c2n/tree/react'
 import '@c2n/upload/react'
 import '@c2n/virtual-list/react'
+import '@c2n/week-planner/react'
 
 export {}

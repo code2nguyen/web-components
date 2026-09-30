@@ -92,6 +92,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/week-planner:build",
         "./packages/components/calendar:build",
         "./packages/components/hover-card:build",
         "./packages/components/command:build",

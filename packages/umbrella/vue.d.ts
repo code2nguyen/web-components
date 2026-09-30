@@ -90,5 +90,6 @@ import '@c2n/tooltip/vue'
 import '@c2n/tree/vue'
 import '@c2n/upload/vue'
 import '@c2n/virtual-list/vue'
+import '@c2n/week-planner/vue'
 
 export {}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-week-planner</title>
+    <script type="module" src="/src/week-planner.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 900px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      h3 {
+        margin: 0 0 8px;
+        color: #71717a;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .compact {
+        --c2-week-planner__hour--height: 32px;
+        --c2-week-planner__event--background: #7c3aed;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h3>Family week, with odd/even weeks</h3>
+      <c2-week-planner
+        id="plan"
+        events='[
+          {"id":"standup-mon","title":"Team stand-up","day":"mon","start":"08:30","end":"09:00"},
+          {"id":"standup-tue","title":"Team stand-up","day":"tue","start":"08:30","end":"09:00"},
+          {"id":"standup-thu","title":"Team stand-up","day":"thu","start":"08:30","end":"09:00"},
+          {"id":"standup-fri","title":"Team stand-up","day":"fri","start":"08:30","end":"09:00"},
+          {"id":"workshop","title":"Client workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},
+          {"id":"review","title":"Design review","day":"tue","start":"11:00","end":"12:30","color":"#be185d"},
+          {"id":"pickup","title":"Kids: school pick-up","day":"wed","start":"13:30","end":"17:00","weeks":"even","color":"#0f766e"},
+          {"id":"football","title":"Kids: football","day":"sat","start":"09:00","end":"12:00","weeks":"even","color":"#0f766e"},
+          {"id":"gym","title":"Gym","day":"wed","start":"18:00","end":"19:30","weeks":"odd","color":"#52525b"},
+          {"id":"piano","title":"Piano lesson","day":"sat","start":"10:00","end":"11:00","weeks":"odd","color":"#0369a1"}
+        ]'
+      ></c2-week-planner>
+      <p id="log" style="color: #71717a; font-size: 13px">Click an event.</p>
+    </section>
+    <section>
+      <h3>Every week, Sunday first, compact</h3>
+      <c2-week-planner
+        class="compact"
+        week-start="sunday"
+        start-hour="9"
+        end-hour="17"
+        events='[{"title":"Office hours","day":"mon","start":"09:00","end":"12:00"},{"title":"Office hours","day":"thu","start":"13:00","end":"16:00"}]'
+      ></c2-week-planner>
+    </section>
+    <script type="module">
+      const log = document.querySelector('#log')
+      const plan = document.querySelector('#plan')
+      plan.addEventListener('event-click', (event) => (log.textContent = `Clicked: ${event.detail.event.title}`))
+      plan.addEventListener('parity-change', (event) => (log.textContent = `Showing ${event.detail.parity} weeks`))
+    </script>
+  </body>
+</html>

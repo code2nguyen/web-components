@@ -51,6 +51,23 @@ export const overrides: Record<string, Override> = {
     value: '2px dashed var(--c2-theme--color-primary, #2563eb)',
   },
   '--c2-masonry-item__dragging--box-shadow': { token: 'shadow-md' },
+  // Planner tints are the accent at a low strength, so they follow the brand colour and read on a dark surface.
+  '--c2-week-planner__day__today--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
+  },
+  '--c2-week-planner__hour--border': {
+    token: 'color-surface-container',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-surface-container, #f4f4f5)',
+  },
+  '--c2-calendar__month__marked--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
+  '--c2-calendar__month__marked__hover--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 18%, transparent)',
+  },
   // Border Beam geometry and timing belong to the decorative effect. Its principal colour and radius follow the
   // active theme while the second gradient stop remains an intentionally coordinated accent.
   '--c2-border-beam--outset': { exclude: 'container border alignment geometry' },

@@ -1,0 +1,68 @@
+---
+title: 'Week Planner'
+description: 'Typical-week schedule with time blocks, and optional odd and even weeks.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { WeekPlanner } from '@c2n/week-planner'
+
+`c2-week-planner` shows a typical week: seven day columns on an hour scale, each event a block from its start to its end
+time. It has no dates and no navigation. An event names the weekday it happens on and repeats every week, or only in
+odd or even weeks (`weeks: "odd"`), as school and shared-custody schedules do. Today's column is tinted and carries a
+line at the current time. Overlapping events sit side by side, and the hour range (`start-hour`, `end-hour`, 8 to 18 by
+default) grows to fit every event.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/week-planner
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/week-planner
+<div data-label="Every week">
+  <c2-week-planner
+    locale="en-US"
+    start-hour="8"
+    end-hour="13"
+    events='[{"title":"Team stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Team stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Client workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},{"title":"Design review","day":"tue","start":"11:00","end":"12:30","color":"#be185d"},{"title":"Focus time","day":"fri","start":"09:00","end":"12:00","color":"#52525b"}]'
+  ></c2-week-planner>
+</div>
+<div data-label="Odd and even weeks">
+  <c2-week-planner
+    locale="en-US"
+    start-hour="9"
+    end-hour="19"
+    events='[{"title":"Kids: school pick-up","day":"wed","start":"13:30","end":"17:00","weeks":"even","color":"#0f766e"},{"title":"Kids: football","day":"sat","start":"09:00","end":"12:00","weeks":"even","color":"#0f766e"},{"title":"Gym","day":"wed","start":"18:00","end":"19:00","weeks":"odd","color":"#52525b"},{"title":"Piano lesson","day":"sat","start":"10:00","end":"11:00","weeks":"odd","color":"#0369a1"},{"title":"Swimming","day":"mon","start":"17:00","end":"18:00"}]'
+  ></c2-week-planner>
+</div>
+```
+
+## Events
+
+Each entry is `{ id?, title, day, start, end, weeks?, color? }`: `day` is `mon` to `sun`, `start` and `end` are 24-hour
+`HH:MM` times (`24:00` ends at midnight). Entries whose times are invalid or end before they start are skipped. `color`
+is any CSS colour for that block (pick one that keeps white text readable); otherwise
+`--c2-week-planner__event--background` applies.
+
+## Odd and even weeks
+
+`weeks` is `"all"` (the default), `"odd"` or `"even"`, counted by ISO week number, where week 1 holds the year's first
+Thursday. As soon as one entry uses odd or even, an **Odd week | Even week** switch appears above the grid. It opens on
+the kind of the current week, which it names beside it ("This week (40) is even"), and every-week entries appear in
+both. Set `parity="odd"` or `parity="even"` to choose the view yourself; the switch fires `parity-change` with the kind
+now shown. Today's column is only marked while the switch shows the current kind of week.
+
+Blocks are buttons: clicking one, or pressing Enter on it, fires `event-click` with the entry in `event.detail.event`.
+
+```ts tag=CodeBlock
+import '@c2n/week-planner'
+
+const planner = document.querySelector('c2-week-planner')!
+planner.events = [{ id: 'pickup', title: 'School pick-up', day: 'wed', start: '13:30', end: '17:00', weeks: 'even' }]
+planner.addEventListener('event-click', (event) => console.log(event.detail.event.id))
+```

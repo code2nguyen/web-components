@@ -1,0 +1,254 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-week-planner,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    padding: 12px,
+    font-family: inherit,
+    font-size: 14px,
+    grid--border: 1px solid #e4e4e7,
+    hour--border: 1px solid #f4f4f5,
+    hour--height: 48px,
+    hour-label--width: 48px,
+    hour-label--color: #71717a,
+    hour-label--font-size: 11px,
+    day-header--color: #71717a,
+    day-header--font-size: 12px,
+    day-header__today--color: rgb(2, 101, 220),
+    day-header__today--font-weight: 600,
+    day__today--background: rgba(2, 101, 220, 0.05),
+    now--color: #dc2626,
+    event--background: rgb(2, 101, 220),
+    event--color: #ffffff,
+    event--border-radius: 4px,
+    event--font-size: 12px,
+    event--font-weight: 500,
+    event__hover--opacity: 0.88,
+    switch--border: 1px solid #bcbcc6,
+    switch--border-radius: 6px,
+    switch__selected--background: rgb(2, 101, 220),
+    switch__selected--color: #ffffff,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+  )
+);
+
+:host {
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-week-planner {
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.switch {
+  display: inline-flex;
+  overflow: hidden;
+  border: css.cssVar(switch--border);
+  border-radius: css.cssVar(switch--border-radius);
+
+  button {
+    margin: 0;
+    padding: 5px 12px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    transition: animation.standard(background), animation.standard(color);
+
+    &[aria-pressed='true'] {
+      background: css.cssVar(switch__selected--background);
+      color: css.cssVar(switch__selected--color);
+    }
+
+    &:focus-visible {
+      outline: css.cssVar(focus--outline);
+      outline-offset: -2px;
+    }
+  }
+}
+
+.current {
+  color: css.cssVar(hour-label--color);
+  font-size: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: css.cssVar(hour-label--width) repeat(7, minmax(0, 1fr));
+  border-top: css.cssVar(grid--border);
+}
+
+.corner,
+.day-header {
+  border-bottom: css.cssVar(grid--border);
+}
+
+.day-header {
+  padding: 6px;
+  border-left: css.cssVar(grid--border);
+  color: css.cssVar(day-header--color);
+  font-size: css.cssVar(day-header--font-size);
+
+  &.today {
+    background: css.cssVar(day__today--background);
+    color: css.cssVar(day-header__today--color);
+    font-weight: css.cssVar(day-header__today--font-weight);
+  }
+}
+
+.hour-label {
+  box-sizing: border-box;
+  height: css.cssVar(hour--height);
+  padding: 2px 6px 0 0;
+  color: css.cssVar(hour-label--color);
+  font-size: css.cssVar(hour-label--font-size);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.day {
+  position: relative;
+  min-width: 0;
+  border-left: css.cssVar(grid--border);
+
+  &.today {
+    background: css.cssVar(day__today--background);
+  }
+}
+
+.hour-line {
+  box-sizing: border-box;
+  height: css.cssVar(hour--height);
+  border-bottom: css.cssVar(hour--border);
+}
+
+.event {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--from) * #{css.cssVar(hour--height)} + 1px);
+  left: calc(var(--column) / var(--columns) * 100% + 2px);
+  display: flex;
+  width: calc(100% / var(--columns) - 4px);
+  height: calc(var(--span) * #{css.cssVar(hour--height)} - 2px);
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: css.cssVar(event--border-radius);
+  background: var(--event-color, #{css.cssVar(event--background)});
+  color: css.cssVar(event--color);
+  cursor: pointer;
+  font: inherit;
+  font-size: css.cssVar(event--font-size);
+  line-height: 1.3;
+  text-align: left;
+  transition: animation.standard(opacity);
+  container-type: inline-size;
+
+  &.short {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding-block: 0;
+  }
+
+  &:hover {
+    opacity: css.cssVar(event__hover--opacity);
+  }
+
+  &:focus-visible {
+    z-index: 2;
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.event-title,
+.event-time {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-title {
+  flex: 0 1 auto;
+  font-weight: css.cssVar(event--font-weight);
+}
+
+// A block tall enough for several lines wraps its title instead of cutting it to a few letters.
+.event:not(.short) .event-title {
+  flex-shrink: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.event-time {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+// The block is the size container, so its text can drop the time rather than clip it to a stub. The time stays in
+// the accessible name and the tooltip.
+@container (max-width: 72px) {
+  .event-time {
+    display: none;
+  }
+}
+
+@container (max-width: 180px) {
+  .short .event-time {
+    display: none;
+  }
+}
+
+.now {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--from) * #{css.cssVar(hour--height)} - 1px);
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: css.cssVar(now--color);
+  pointer-events: none;
+
+  &::before {
+    position: absolute;
+    top: -3px;
+    left: -4px;
+    width: 8px;
+    height: 8px;
+    content: '';
+    border-radius: 999px;
+    background: inherit;
+  }
+}

@@ -3,6 +3,7 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/week-planner'
 import '@c2n/calendar'
 import '@c2n/hover-card'
 import '@c2n/command'
