@@ -11,6 +11,7 @@ import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
 import type { BarChart } from '@c2n/chart/bar-chart.js'
+import type { BubbleChart } from '@c2n/chart/bubble-chart.js'
 import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
@@ -70,6 +71,35 @@ declare module 'vue' {
         onChartError?: (event: EventOf<BarChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<BarChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<BarChart, 'point-click'>) => void
+      }
+    >
+    'c2-bubble-chart': DefineComponent<
+      C2Props<BubbleChart> & {
+        'y-field'?: unknown
+        'size-field'?: unknown
+        'series-field'?: unknown
+        'x-scale'?: unknown
+        'y-scale'?: unknown
+        'size-max'?: unknown
+        'bubble-labels'?: unknown
+        'size-legend'?: unknown
+        'size-label'?: unknown
+        'x-label'?: unknown
+        'y-label'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<BubbleChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<BubbleChart, 'series-toggle'>) => void
+        onLegendChange?: (event: EventOf<BubbleChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<BubbleChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<BubbleChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<BubbleChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<BubbleChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<BubbleChart, 'point-click'>) => void
       }
     >
     'c2-candlestick-chart': DefineComponent<
