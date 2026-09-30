@@ -15,6 +15,7 @@ import '../src/sparkline'
 import '../src/pie-chart'
 import '../src/gauge-chart'
 import '../src/radar-chart'
+import '../src/pyramid-chart'
 import '../src/scatter-chart'
 import '../src/candlestick-chart'
 import '../src/chart-series'
@@ -179,6 +180,12 @@ function build(): void {
           <c2-chart-series field="target" label="Target"></c2-chart-series>
         </c2-radar-chart>`
       break
+    case 'pyramid':
+      main.innerHTML = `
+        <c2-pyramid-chart id="chart" label-field="plan">
+          <c2-chart-series field="accounts" label="Accounts"></c2-chart-series>
+        </c2-pyramid-chart>`
+      break
     case 'scatter':
       main.innerHTML = `
         <c2-scatter-chart id="chart" x-field="risk" symbol-size="14">
@@ -197,6 +204,7 @@ function build(): void {
         <c2-pie-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-pie-chart>
         <c2-gauge-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-gauge-chart>
         <c2-radar-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-radar-chart>
+        <c2-pyramid-chart label-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-pyramid-chart>
         <c2-scatter-chart x-field="t"><c2-chart-series field="s0"></c2-chart-series></c2-scatter-chart>
         <c2-candlestick-chart label-field="t"></c2-candlestick-chart>`
       break
@@ -259,7 +267,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart, c2-candlestick-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-scatter-chart, c2-candlestick-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -278,6 +286,13 @@ function build(): void {
     ]
   } else if (scenario === 'gauge') {
     chart.data = [{ metric: 'Target', value: 78 }]
+  } else if (scenario === 'pyramid') {
+    chart.data = [
+      { plan: 'Starter', accounts: 4870 },
+      { plan: 'Enterprise', accounts: 42 },
+      { plan: 'Team', accounts: 1260 },
+      { plan: 'Business', accounts: 318 },
+    ]
   } else if (scenario === 'radar') {
     chart.data = [
       { metric: 'Quality', current: 82, target: 90 },
@@ -331,7 +346,7 @@ function build(): void {
     chart.data = series(1, 100)
   } else if (scenario === 'family') {
     for (const element of main.querySelectorAll<ChartBase>(
-      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart',
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-scatter-chart',
     )) {
       element.data = series(1, 4)
     }
@@ -374,7 +389,9 @@ build()
 
 void whenDrawn(
   Array.from(
-    main.querySelectorAll('c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-scatter-chart, c2-candlestick-chart'),
+    main.querySelectorAll(
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-scatter-chart, c2-candlestick-chart',
+    ),
   ),
 ).then(() => {
   main.dataset.ready = 'true'

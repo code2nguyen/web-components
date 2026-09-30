@@ -8,10 +8,11 @@
 import type * as echarts from 'echarts/core'
 
 /** A registerable ECharts module, keyed by the chart type or component that needs it. */
-export type EchartsFeature = 'pie' | 'gauge' | 'radar' | 'scatter' | 'candlestick' | 'bar' | 'line' | 'grid' | 'legend' | 'tooltip' | 'dataZoom'
+export type EchartsFeature = 'pie' | 'funnel' | 'gauge' | 'radar' | 'scatter' | 'candlestick' | 'bar' | 'line' | 'grid' | 'legend' | 'tooltip' | 'dataZoom'
 
 const LOADERS: Record<EchartsFeature, () => Promise<unknown[]>> = {
   pie: () => import('echarts/charts').then((m) => [m.PieChart]),
+  funnel: () => import('echarts/charts').then((m) => [m.FunnelChart]),
   gauge: () => import('echarts/charts').then((m) => [m.GaugeChart]),
   radar: () => import('echarts/charts').then((m) => [m.RadarChart]),
   scatter: () => import('echarts/charts').then((m) => [m.ScatterChart]),

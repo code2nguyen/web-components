@@ -1,4 +1,5 @@
 import { test, expect } from './fixture'
+import { layoutPyramid } from '../src/pyramid-layout'
 
 test('the chart family resolves first-paint theme probes without scheduling a second Lit update', async ({ page, scenario }) => {
   const warnings: string[] = []
@@ -8,9 +9,9 @@ test('the chart family resolves first-paint theme probes without scheduling a se
 
   await scenario('family')
   const charts = page.locator(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart, c2-candlestick-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-scatter-chart, c2-candlestick-chart',
   )
-  await expect(charts).toHaveCount(9)
+  await expect(charts).toHaveCount(10)
   await expect.poll(() => charts.evaluateAll((elements) => elements.every((element) => element.hasAttribute('data-chart-ready')))).toBe(true)
   expect(warnings.filter((warning) => warning.includes('c2-') && warning.includes('chart'))).toEqual([])
 
@@ -313,6 +314,7 @@ test('draws a donut through the ECharts engine', async ({ page, scenario }) => {
 for (const [scenarioName, tag] of [
   ['gauge', 'c2-gauge-chart'],
   ['radar', 'c2-radar-chart'],
+  ['pyramid', 'c2-pyramid-chart'],
   ['scatter', 'c2-scatter-chart'],
   ['candlestick', 'c2-candlestick-chart'],
 ] as const) {
@@ -595,6 +597,179 @@ test('configures pie label content from markup', async ({ page, scenario }) => {
   })
 
   expect(label).toMatchObject({ labels: 'outside', content: 'percent', show: true, position: 'outside', formatter: '{d}%' })
+})
+
+test('lays pyramid levels out by area, height, width or rank', () => {
+  const values = [4870, 42, 1260, 318]
+  const area = layoutPyramid(values, { sizing: 'area', sort: 'ascending' })
+  // Smallest at the apex, and each level's share of the triangle's area is its share of the total.
+  expect(area.map((level) => level.index)).toEqual([1, 3, 2, 0])
+  const total = values.reduce((sum, value) => sum + value, 0)
+  let cumulative = 0
+  for (const level of area) {
+    cumulative += level.value
+    expect(level.depth).toBeCloseTo(level === area[area.length - 1] ? 1 : Math.sqrt(cumulative / total), 10)
+  }
+  expect(area.reduce((sum, level) => sum + (level.height ?? 0), 0)).toBeCloseTo(1, 10)
+
+  const height = layoutPyramid(values, { sizing: 'height', sort: 'descending' })
+  expect(height.map((level) => level.index)).toEqual([0, 2, 3, 1])
+  expect(height[0].height).toBeCloseTo(4870 / total, 10)
+
+  expect(layoutPyramid(values, { sizing: 'equal', sort: 'none' }).map((level) => [level.index, level.depth])).toEqual([
+    [0, 0.25],
+    [1, 0.5],
+    [2, 0.75],
+    [3, 1],
+  ])
+
+  // ECharts orders a width-sized funnel by value, so the sort is not honoured and every level is one height.
+  const width = layoutPyramid(values, { sizing: 'width', sort: 'descending' })
+  expect(width.map((level) => level.index)).toEqual([1, 3, 2, 0])
+  expect(width.every((level) => level.height === undefined)).toBe(true)
+  expect(width[3].depth).toBe(1)
+
+  // A flat top: with the apex as wide as the base, area and height are the same thing.
+  const flat = layoutPyramid([1, 3], { sizing: 'area', sort: 'none', apexRatio: 1 })
+  expect(flat[0].depth).toBeCloseTo(0.25, 10)
+
+  // Empty, zero, negative and excluded rows are not drawn.
+  expect(layoutPyramid([5, 0, -2, null, 3], { sizing: 'area', sort: 'none', exclude: new Set([4]) }).map((level) => level.index)).toEqual([0])
+  expect(layoutPyramid([], { sizing: 'area', sort: 'ascending' })).toEqual([])
+})
+
+test('hands ECharts a funnel whose synthetic depths follow the pyramid layout', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
+
+  const result = await chart.evaluate((element) => {
+    const pyramid = element as unknown as {
+      frame: unknown
+      buildContext(): unknown
+      projectData(frame: unknown, context: unknown): { name: string; value: number; real: number; itemStyle: { height?: string } }[][]
+      seriesOption(index: number, context: unknown): Record<string, unknown> & { label: { position: string; formatter(params: unknown): string } }
+    }
+    const context = pyramid.buildContext()
+    const [data] = pyramid.projectData(pyramid.frame, context)
+    const option = pyramid.seriesOption(0, context)
+    return {
+      names: data.map((datum) => datum.name),
+      increasing: data.every((datum, index) => index === 0 || datum.value > data[index - 1].value),
+      heights: data.reduce((sum, datum) => sum + parseFloat(datum.itemStyle.height ?? '0'), 0),
+      type: option.type,
+      sort: option.sort,
+      orient: option.orient,
+      extent: [option.min, option.max],
+      position: option.label.position,
+      label: option.label.formatter({ data: data[3] }),
+    }
+  })
+
+  expect(result.names).toEqual(['Enterprise', 'Business', 'Team', 'Starter'])
+  expect(result.increasing).toBe(true)
+  expect(result.heights).toBeCloseTo(100, 6)
+  expect(result).toMatchObject({ type: 'funnel', sort: 'ascending', orient: 'vertical', extent: [0, 1], position: 'right', label: 'Starter · 4,870' })
+})
+
+test('maps the apex and the level variables onto the funnel', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const read = (apex: string, style: string) =>
+    chart.evaluate(
+      (element, [nextApex, nextStyle]) => {
+        const pyramid = element as unknown as {
+          apex: string
+          buildContext(): unknown
+          seriesOption(index: number, context: unknown): Record<string, unknown> & { label: { position: string } }
+        }
+        pyramid.apex = nextApex
+        element.setAttribute('style', nextStyle)
+        const option = pyramid.seriesOption(0, pyramid.buildContext())
+        return {
+          sort: option.sort,
+          orient: option.orient,
+          align: option.funnelAlign,
+          gap: option.gap,
+          min: option.minSize,
+          max: option.maxSize,
+          position: option.label.position,
+        }
+      },
+      [apex, style],
+    )
+
+  expect(await read('bottom', '')).toEqual({ sort: 'descending', orient: 'vertical', align: 'center', gap: 0, min: '0%', max: '100%', position: 'right' })
+  expect(await read('start', '')).toMatchObject({ sort: 'ascending', orient: 'horizontal', position: 'bottom' })
+  expect(await read('end', 'direction: rtl')).toMatchObject({ sort: 'ascending', orient: 'horizontal' })
+  expect(
+    await read('top', '--c2-chart__level--gap: 4px; --c2-chart__level--align: end; --c2-chart__level--min-width: 10%; --c2-chart__level--max-width: 240px'),
+  ).toEqual({ sort: 'ascending', orient: 'vertical', align: 'right', gap: 4, min: '10%', max: '240', position: 'left' })
+})
+
+test('reports the clicked pyramid level by its data row', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  // The base level is the widest and the easiest to hit: just above the bottom edge, in the middle of the funnel.
+  const target = await chart.evaluate((element) => {
+    const pyramid = element as unknown as {
+      getPlotBounds(): DOMRect
+      buildContext(): unknown
+      seriesOption(index: number, context: unknown): { left: number; right: number; bottom: number }
+    }
+    const bounds = pyramid.getPlotBounds()
+    const option = pyramid.seriesOption(0, pyramid.buildContext())
+    return { x: bounds.left + option.left + (bounds.width - option.left - option.right) / 2, y: bounds.bottom - option.bottom - 6 }
+  })
+  await chart.evaluate((element) => {
+    const events: unknown[] = []
+    ;(element as unknown as { pointEvents: unknown[] }).pointEvents = events
+    for (const type of ['point-hover', 'point-click']) element.addEventListener(type, (event) => events.push([type, (event as CustomEvent).detail]))
+  })
+  const events = () => chart.evaluate((element) => (element as unknown as { pointEvents: [string, unknown][] }).pointEvents)
+  // The entry animation is still growing the levels, so hover until the base answers before clicking it.
+  await expect
+    .poll(async () => {
+      await page.mouse.move(target.x, target.y)
+      return (await events()).some(([type]) => type === 'point-hover')
+    })
+    .toBe(true)
+  await page.mouse.click(target.x, target.y)
+  // ECharts drew Starter last, at index 3; the events name its row, which is the first.
+  await expect.poll(async () => (await events()).find(([type]) => type === 'point-click')?.[1]).toMatchObject({ index: 0, label: 'Starter', y: 4870 })
+  expect((await events()).find(([type]) => type === 'point-hover')?.[1]).toMatchObject({ index: 0, label: 'Starter' })
+})
+
+test("lists a pyramid's levels in the legend, and lays the rest out again when one is hidden", async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
+  expect(labels).toEqual(['Starter', 'Enterprise', 'Team', 'Business'])
+
+  await chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.click())
+  await expect
+    .poll(() => chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.getAttribute('aria-pressed')))
+    .toBe('false')
+
+  const drawn = await chart.evaluate((element) => {
+    const pyramid = element as unknown as {
+      frame: unknown
+      buildContext(): unknown
+      projectData(frame: unknown, context: unknown): { name: string; value: number }[][]
+    }
+    const [data] = pyramid.projectData(pyramid.frame, pyramid.buildContext())
+    return data.map((datum) => [datum.name, datum.value])
+  })
+  expect(drawn.map(([name]) => name)).toEqual(['Enterprise', 'Business', 'Team'])
+  // The base is the new widest level, so the three remaining levels still fill the triangle.
+  expect(drawn[2][1]).toBe(1)
 })
 
 test('drives the grid from markup in both directions', async ({ page, scenario }) => {
