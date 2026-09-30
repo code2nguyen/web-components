@@ -52,6 +52,7 @@
     "type-check": {
       "dependencies": [
         "../../core:build",
+        "../badge:build",
         "../button:build",
         "../button-group:build"
       ],
@@ -65,6 +66,7 @@
     }
   },
   "dependencies": {
+    "@c2n/badge": "0.0.19",
     "@c2n/button": "0.0.19",
     "@c2n/button-group": "0.0.19",
     "@c2n/core": "0.0.19",

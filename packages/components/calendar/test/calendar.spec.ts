@@ -4,7 +4,7 @@ import { test, expect } from './fixture'
 test('draws a multi-day event as a bar on every week it covers', async ({ page, scenario }) => {
   await scenario()
   await expect(page.getByRole('heading', { name: 'September 2026' })).toBeVisible()
-  const vacation = page.getByRole('button', { name: 'Vacation, September 10, 2026 to September 15, 2026' })
+  const vacation = page.getByRole('button', { name: 'Vacation, September 10, 2026 – September 15, 2026' })
   // Thursday 10 – Sunday 13, then Monday 14 – Tuesday 15 on the next row.
   await expect(vacation).toHaveCount(2)
   const [first, second] = [await vacation.nth(0).boundingBox(), await vacation.nth(1).boundingBox()]
@@ -58,7 +58,7 @@ test('navigates months and reports the change', async ({ page, scenario }) => {
 test('reads month and events from attributes', async ({ page, scenario }) => {
   await scenario('attribute')
   await expect(page.getByRole('heading', { name: 'November 2026' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Ski trip, November 20, 2026 to November 22, 2026' })).toHaveCount(1)
+  await expect(page.getByRole('button', { name: 'Ski trip, November 20, 2026 – November 22, 2026' })).toHaveCount(1)
 })
 
 test('keeps a Sunday-first week in one row', async ({ page, scenario }) => {
@@ -150,4 +150,25 @@ test('keeps white text on an event with its own colour when the theme darkens th
   await page.locator('c2-calendar').evaluate((element) => (element as HTMLElement).style.setProperty('--c2-calendar__event--color', 'rgb(24, 24, 27)'))
   await expect(page.getByRole('button', { name: /^Vacation/ }).first()).toHaveCSS('color', 'rgb(255, 255, 255)')
   await expect(page.getByRole('button', { name: /^Flight/ })).toHaveCSS('color', 'rgb(24, 24, 27)')
+})
+
+test('speaks the language set in locale', async ({ page, scenario }) => {
+  await scenario('french')
+  await expect(page.getByRole('heading', { name: 'septembre 2026' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Aujourd’hui' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Mois suivant' })).toBeVisible()
+  await expect(page.locator('c2-calendar').locator('.weekdays span').first()).toHaveText('lun.')
+  await page.getByRole('button', { name: 'septembre 2026', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: 'Choisir un mois' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'octobre 2026, contient des événements' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Année suivante' })).toBeVisible()
+})
+
+test.describe('without a locale attribute', () => {
+  test.use({ locale: 'fr-FR' })
+
+  test("follows the browser's language", async ({ page, scenario }) => {
+    await scenario('browser-locale')
+    await expect(page.getByRole('button', { name: 'Aujourd’hui' })).toBeVisible()
+  })
 })

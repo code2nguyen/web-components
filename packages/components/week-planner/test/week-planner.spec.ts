@@ -8,8 +8,8 @@ test.beforeEach(async ({ page }) => {
 
 test('places a block from its start to its end time', async ({ page, scenario }) => {
   await scenario('every-week')
-  const workshop = await page.getByRole('button', { name: 'Workshop, Tuesday 10:00 to 12:00' }).boundingBox()
-  const standup = await page.getByRole('button', { name: 'Stand-up, Monday 08:30 to 09:00' }).boundingBox()
+  const workshop = await page.getByRole('button', { name: 'Workshop, Tuesday 10:00–12:00' }).boundingBox()
+  const standup = await page.getByRole('button', { name: 'Stand-up, Monday 08:30–09:00' }).boundingBox()
   // 48px per hour: two hours tall, half an hour tall.
   expect(workshop!.height).toBeCloseTo(96 - 2, 0)
   expect(standup!.height).toBeCloseTo(24 - 2, 0)
@@ -52,7 +52,9 @@ test('shows every event each week while alternate weeks are off', async ({ page,
 
 test('opens on the current kind of week and switches to the other', async ({ page, scenario }) => {
   await scenario('alternate')
-  await expect(page.getByText('This week (40) is even')).toBeVisible()
+  // The current week's number sits in a badge on its own button only.
+  await expect(page.getByRole('button', { name: 'Even week 40 this week' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Odd week', exact: true })).toBeVisible()
   await expect(page.locator('c2-week-planner').locator('c2-button-group')).toHaveJSProperty('value', 'even')
   await expect(page.getByRole('button', { name: /^Pick-up/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^Gym/ })).toHaveCount(0)
@@ -115,4 +117,23 @@ test('keeps white text on an event with its own colour when the theme darkens th
   await page.locator('c2-week-planner').evaluate((element) => (element as HTMLElement).style.setProperty('--c2-week-planner__event--color', 'rgb(24, 24, 27)'))
   await expect(page.getByRole('button', { name: /^Review/ })).toHaveCSS('color', 'rgb(255, 255, 255)')
   await expect(page.getByRole('button', { name: /^Workshop/ })).toHaveCSS('color', 'rgb(24, 24, 27)')
+})
+
+test('speaks the language set in locale', async ({ page, scenario }) => {
+  await scenario('french')
+  await expect(page.getByRole('region', { name: 'Planning de la semaine' })).toBeVisible()
+  await expect(page.locator('c2-week-planner').locator('c2-button-group')).toHaveAttribute('aria-label', 'Type de semaine')
+  await expect(page.getByRole('button', { name: 'Semaine paire 40 cette semaine' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Semaine impaire', exact: true })).toBeVisible()
+  await expect(page.locator('c2-week-planner').locator('.day-header').first()).toHaveText('lun.')
+  await expect(page.getByRole('group', { name: /^mercredi, aujourd/ })).toBeVisible()
+})
+
+test.describe('without a locale attribute', () => {
+  test.use({ locale: 'fr-FR' })
+
+  test("follows the browser's language", async ({ page, scenario }) => {
+    await scenario('browser-locale')
+    await expect(page.getByRole('button', { name: 'Semaine paire 40 cette semaine' })).toBeVisible()
+  })
 })

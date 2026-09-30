@@ -58,9 +58,20 @@
   margin-bottom: 10px;
 }
 
-.current {
-  color: css.cssVar(hour-label--color);
-  font-size: 12px;
+.week-number {
+  margin-left: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .grid {

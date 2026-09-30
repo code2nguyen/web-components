@@ -19,6 +19,9 @@ subject.events = [
 ]
 if (scenario === 'alternate' || scenario === 'odd') subject.alternateWeeks = true
 if (scenario === 'odd') subject.parity = 'odd'
+if (scenario === 'french') subject.locale = 'fr'
+if (scenario === 'french' || scenario === 'browser-locale') subject.alternateWeeks = true
+if (scenario === 'browser-locale') subject.removeAttribute('locale')
 if (scenario === 'every-week') subject.events = subject.events.filter((event) => !event.weeks)
 if (scenario === 'early') subject.events = [{ title: 'Early run', day: 'fri', start: '06:00', end: '07:00' }]
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))

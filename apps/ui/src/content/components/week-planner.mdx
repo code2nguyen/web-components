@@ -57,11 +57,30 @@ Alternate weeks are off by default: every entry shows each week and `weeks` is i
 attribute to turn them on. `weeks` is then `"all"` (the default), `"odd"` or `"even"`, counted by ISO week number,
 where week 1 holds the year's first Thursday, and an **Odd week | Even week** switch appears above the grid: a
 segmented `c2-button-group`, styled through its own `--c2-button-group__*` variables set on the planner. It opens on
-the kind of the current week, which it names beside it ("This week (40) is even"), and every-week entries appear in
-both. Set `parity="odd"` or `parity="even"` to choose the view yourself; the switch fires `parity-change` with the kind
+the kind of the current week, whose button carries the current ISO week number in a `c2-badge`, and every-week
+entries appear in both. Set `parity="odd"` or `parity="even"` to choose the view yourself; the switch fires `parity-change` with the kind
 now shown. Today's column is only marked while the switch shows the current kind of week.
 
 Blocks are buttons: clicking one, or pressing Enter on it, fires `event-click` with the entry in `event.detail.event`.
+
+## Language
+
+The planner's text follows `locale` (`fr`, `en-GB`, …) and, when it is not set, the browser's language. Day names,
+"today" and "this week" come from the browser's `Intl` data, so they exist in every language; the switch labels
+(Odd week, Even week) and the accessible names are built in for English, French, German, Spanish, Italian, Portuguese,
+Dutch and Vietnamese, and fall back to English otherwise.
+
+```html tag=UsageBlock,package=@c2n/week-planner
+<div data-label="French">
+  <c2-week-planner
+    alternate-weeks
+    locale="fr"
+    start-hour="8"
+    end-hour="12"
+    events='[{"title":"Réunion d’équipe","day":"mon","start":"08:30","end":"09:30"},{"title":"Enfants : piscine","day":"wed","start":"09:00","end":"11:00","weeks":"even","color":"#0f766e"},{"title":"Marché","day":"sat","start":"09:00","end":"10:30","weeks":"odd","color":"#b45309"}]'
+  ></c2-week-planner>
+</div>
+```
 
 ```ts tag=CodeBlock
 import '@c2n/week-planner'

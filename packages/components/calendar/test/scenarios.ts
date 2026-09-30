@@ -24,6 +24,8 @@ if (scenario === 'attribute') {
   subject.setAttribute('month', '2026-11')
   subject.setAttribute('events', JSON.stringify([{ title: 'Ski trip', start: '2026-11-20', end: '2026-11-22' }]))
 }
+if (scenario === 'french') subject.locale = 'fr'
+if (scenario === 'browser-locale') subject.removeAttribute('locale')
 if (scenario === 'sunday') subject.weekStart = 'sunday'
 if (scenario === 'no-picker') subject.setAttribute('month-picker', 'false')
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))

@@ -4,8 +4,9 @@ import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-// Registers `c2-button-group` and `c2-button`, the odd/even week switch.
+// Registers `c2-button-group` and `c2-button`, the odd/even week switch, and `c2-badge`, the current week's number.
 import '@c2n/button-group'
+import '@c2n/badge'
 import styles from './week-planner.scss?inline'
 
 export type WeekPlannerDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
@@ -58,6 +59,25 @@ interface Placed {
   to: number
   column: number
   columns: number
+}
+
+interface Labels {
+  odd: string
+  even: string
+  kind: string
+  plan: string
+}
+
+/** Words the browser cannot translate through `Intl`, by language; any other language falls back to English. */
+const LABELS: Record<string, Labels> = {
+  en: { odd: 'Odd week', even: 'Even week', kind: 'Kind of week', plan: 'Week plan' },
+  fr: { odd: 'Semaine impaire', even: 'Semaine paire', kind: 'Type de semaine', plan: 'Planning de la semaine' },
+  de: { odd: 'Ungerade Woche', even: 'Gerade Woche', kind: 'Wochentyp', plan: 'Wochenplan' },
+  es: { odd: 'Semana impar', even: 'Semana par', kind: 'Tipo de semana', plan: 'Plan semanal' },
+  it: { odd: 'Settimana dispari', even: 'Settimana pari', kind: 'Tipo di settimana', plan: 'Piano settimanale' },
+  pt: { odd: 'Semana ímpar', even: 'Semana par', kind: 'Tipo de semana', plan: 'Plano semanal' },
+  nl: { odd: 'Oneven week', even: 'Even week', kind: 'Soort week', plan: 'Weekplanning' },
+  vi: { odd: 'Tuần lẻ', even: 'Tuần chẵn', kind: 'Loại tuần', plan: 'Kế hoạch tuần' },
 }
 
 const DAYS: WeekPlannerDay[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
@@ -120,7 +140,11 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * (`weeks: "odd"`), as school and shared-custody schedules do. Odd and even weeks are off by default: set
  * `alternate-weeks` to honour `weeks` and show an Odd week | Even week switch (a segmented `c2-button-group`, themed
  * through its own `--c2-button-group__*` variables) above the grid, opening on the kind of the current week. Without
- * it every event shows each week. Today's column is tinted, inside the grid lines, and carries a line at the current
+ * it every event shows each week. The current week's number sits in a badge on its button.
+ *
+ * Text follows `locale`, or the browser's language when it is not set: day names and "today"/"this week" come from
+ * `Intl`, and the switch labels from a built-in list (English, French, German, Spanish, Italian, Portuguese, Dutch,
+ * Vietnamese; other languages fall back to English). Today's column is tinted, inside the grid lines, and carries a line at the current
  * time. Overlapping events sit side by side; the hour range grows to fit every event.
  *
  * @tag c2-week-planner
@@ -177,10 +201,10 @@ export class WeekPlanner extends LitElement {
   @property({ type: Number, attribute: 'end-hour' }) endHour = 18
   /** First day of the week. */
   @property({ attribute: 'week-start', reflect: true }) weekStart: WeekPlannerWeekStart = 'monday'
-  /** Locale used for the day names. Defaults to the document language. */
+  /** Language of the planner's text and day names, e.g. `fr` or `en-GB`. Defaults to the browser's language. */
   @property({ type: String }) locale = ''
-  /** Accessible name for the planner. */
-  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = 'Week plan'
+  /** Accessible name for the planner. Defaults to "Week plan" in the planner's language. */
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   override connectedCallback() {
     super.connectedCallback()
@@ -194,7 +218,20 @@ export class WeekPlanner extends LitElement {
   }
 
   private get effectiveLocale() {
-    return this.locale || this.ownerDocument?.documentElement.lang || 'en-US'
+    return this.locale || (typeof navigator !== 'undefined' && navigator.language) || 'en-US'
+  }
+
+  private get labels(): Labels {
+    return LABELS[this.effectiveLocale.toLowerCase().split('-')[0]] ?? LABELS.en
+  }
+
+  /** "today", "this week", … in the planner's language. */
+  private relative(unit: 'day' | 'week') {
+    try {
+      return new Intl.RelativeTimeFormat(this.effectiveLocale, { numeric: 'auto' }).format(0, unit)
+    } catch {
+      return unit === 'day' ? 'today' : 'this week'
+    }
   }
 
   private get currentParity(): WeekPlannerParity {
@@ -226,12 +263,19 @@ export class WeekPlanner extends LitElement {
   private renderSwitch() {
     const week = isoWeek(this.now)
     const shown = this.shownParity
+    const labels = this.labels
+    const badge = (parity: WeekPlannerParity) =>
+      parity === this.currentParity
+        ? html`<c2-badge slot="suffix-icon" class="week-number" tone="primary" title=${this.relative('week')}
+            >${week}<span class="visually-hidden">${this.relative('week')}</span></c2-badge
+          >`
+        : nothing
     return html`<header class="header">
       <c2-button-group
         class="switch"
         appearance="segmented"
         size="s"
-        aria-label="Kind of week"
+        aria-label=${labels.kind}
         .value=${shown}
         @change=${(event: CustomEvent<{ value: string }>) => {
           // The group's change is composed; the planner reports it as parity-change instead.
@@ -239,10 +283,9 @@ export class WeekPlanner extends LitElement {
           if (event.detail.value === 'odd' || event.detail.value === 'even') this.showParity(event.detail.value)
         }}
       >
-        <c2-button value="odd">Odd week</c2-button>
-        <c2-button value="even">Even week</c2-button>
+        <c2-button value="odd">${labels.odd}${badge('odd')}</c2-button>
+        <c2-button value="even">${labels.even}${badge('even')}</c2-button>
       </c2-button-group>
-      <span class="current">This week (${week}) is ${this.currentParity}</span>
     </header>`
   }
 
@@ -266,7 +309,7 @@ export class WeekPlanner extends LitElement {
     const nowMinutes = this.now.getHours() * 60 + this.now.getMinutes()
     const nowOffset = nowMinutes / 60 - firstHour
 
-    return html`<section class="c2-week-planner" aria-label=${this.ariaLabel ?? nothing}>
+    return html`<section class="c2-week-planner" aria-label=${this.ariaLabel || this.labels.plan}>
       ${usesParity ? this.renderSwitch() : nothing}
       <div class="grid" style=${styleMap({ '--hours': String(hours) })}>
         <div class="corner"></div>
@@ -278,7 +321,11 @@ export class WeekPlanner extends LitElement {
           const day = DAYS[index]
           const dayName = longName.format(dayDate(index))
           const placed = placeDay(visible.filter(({ event }) => event.day === day))
-          return html`<div class="day ${index === today ? 'today' : ''}" role="group" aria-label=${index === today ? `${dayName}, today` : dayName}>
+          return html`<div
+            class="day ${index === today ? 'today' : ''}"
+            role="group"
+            aria-label=${index === today ? `${dayName}, ${this.relative('day')}` : dayName}
+          >
             ${Array.from({ length: hours }, () => html`<div class="hour-line"></div>`)}
             ${placed.map(
               (item) =>
@@ -286,7 +333,7 @@ export class WeekPlanner extends LitElement {
                   class="event ${item.to - item.from < 45 ? 'short' : ''}"
                   type="button"
                   part="event"
-                  aria-label=${`${item.event.title}, ${dayName} ${formatMinutes(item.from)} to ${formatMinutes(item.to)}`}
+                  aria-label=${`${item.event.title}, ${dayName} ${formatMinutes(item.from)}–${formatMinutes(item.to)}`}
                   title=${item.event.title}
                   style=${styleMap({
                     '--from': String(item.from / 60 - firstHour),
