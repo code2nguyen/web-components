@@ -55,6 +55,7 @@
       "dependencies": [
         "type-check",
         "../../components/context-menu:build",
+        "../../components/otp-input:build",
         "../../components/chat-message-list:build",
         "../../components/shortcut:build",
         "../../components/carousel:build",

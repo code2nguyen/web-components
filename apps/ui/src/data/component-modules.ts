@@ -5,6 +5,7 @@
  */
 import '@c2n/context-menu'
 import './context-menu-examples'
+import '@c2n/otp-input'
 import '@c2n/chat-message-list'
 import './chat-message-list-examples'
 import '@c2n/shortcut'

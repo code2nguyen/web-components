@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@c2n/context-menu": "*",
+    "@c2n/otp-input": "*",
     "@c2n/chat-message-list": "*",
     "@c2n/shortcut": "*",
     "@c2n/carousel": "*",
