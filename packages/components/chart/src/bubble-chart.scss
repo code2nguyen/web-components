@@ -6,7 +6,10 @@
     bubble--border-width: 1px,
     bubble--min-size: 8px,
     bubble--max-size: 64px,
-    bubble-label--color: #27272a,
+    // Read as `var(--…bubble-label--color, var(--c2-chart--color, #18181b))`: a label follows the chart's text colour,
+    // which the theme switches for dark mode.
+    bubble-label--color: #18181b,
+    color: #18181b,
     bubble-label--font-size: 11px,
     size-legend--color: #71717a,
   )
@@ -51,7 +54,7 @@
  */
 .bubble-probe {
   display: none;
-  color: css.cssVar(bubble-label--color);
+  color: css.cssVar(bubble-label--color, color);
   font-size: css.cssVar(bubble-label--font-size);
   width: css.cssVar(bubble--min-size);
   height: css.cssVar(bubble--max-size);

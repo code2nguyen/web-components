@@ -178,3 +178,18 @@ test('has no automated accessibility violations', async ({ page }) => {
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('draws bubble labels in the chart text colour unless their own variable is set', async ({ page }) => {
+  await open(page)
+  const chart = page.locator('c2-bubble-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const colors = await chart.evaluate((element) => {
+    const bubble = element as unknown as BubbleInternals & { bubbleStyle(): { labelColor: string } }
+    element.style.setProperty('--c2-chart--color', 'rgb(1, 2, 3)')
+    const inherited = bubble.bubbleStyle().labelColor
+    element.style.setProperty('--c2-chart__bubble-label--color', 'rgb(4, 5, 6)')
+    return [inherited, bubble.bubbleStyle().labelColor]
+  })
+  // The dark theme switches --c2-chart--color, so a label that followed a fixed colour would vanish on a dark card.
+  expect(colors).toEqual(['rgb(1, 2, 3)', 'rgb(4, 5, 6)'])
+})

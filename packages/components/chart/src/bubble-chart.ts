@@ -32,7 +32,7 @@ interface BubbleStyle {
   labelFontSize: number
 }
 
-const STYLE_FALLBACK: BubbleStyle = { opacity: 0.5, hoverOpacity: 0.85, borderWidth: 1, minSize: 8, maxSize: 64, labelColor: '#27272a', labelFontSize: 11 }
+const STYLE_FALLBACK: BubbleStyle = { opacity: 0.5, hoverOpacity: 0.85, borderWidth: 1, minSize: 8, maxSize: 64, labelColor: '#18181b', labelFontSize: 11 }
 
 /** Average glyph width as a share of the font size, for deciding whether a label fits inside its bubble. */
 const GLYPH_WIDTH = 0.58
@@ -99,7 +99,7 @@ function roundNicely(value: number): number {
  * @cssproperty {pixel} [--c2-chart__bubble--border-width=1px] - Width of a bubble's outline, drawn in its series colour.
  * @cssproperty {pixel} [--c2-chart__bubble--min-size=8px] - Diameter of the smallest bubble, and of a row with no size.
  * @cssproperty {pixel} [--c2-chart__bubble--max-size=64px] - Diameter of the bubble holding the largest size.
- * @cssproperty {color} [--c2-chart__bubble-label--color=#27272a] - Colour of the labels drawn inside bubbles.
+ * @cssproperty {color} [--c2-chart__bubble-label--color=#18181b] - Colour of the labels drawn inside bubbles. Falls back to `--c2-chart--color`, so it follows the theme.
  * @cssproperty {font-size} [--c2-chart__bubble-label--font-size=11px] - Font size of the labels drawn inside bubbles.
  * @cssproperty {color} [--c2-chart__size-legend--color=#71717a] - Colour of the size key's circles and text.
  */
