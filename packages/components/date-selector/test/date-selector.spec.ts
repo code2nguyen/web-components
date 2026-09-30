@@ -70,3 +70,12 @@ test('has an accessible calendar structure without axe violations', async ({ pag
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('a hovered selected day keeps its selected fill', async ({ page, scenario }) => {
+  await scenario()
+  const day = page.getByRole('gridcell', { name: /September 18, 2026/ })
+  // Clicking leaves the pointer over the day, as a tap does on touch screens where :hover sticks.
+  await day.click()
+  await expect(day).toHaveAttribute('aria-selected', 'true')
+  await expect(day.locator('span')).toHaveCSS('background-color', 'rgb(2, 101, 220)')
+})
