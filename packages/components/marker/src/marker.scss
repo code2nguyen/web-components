@@ -1,0 +1,109 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-marker,
+  $theme: (
+    mark--background-color: rgba(250, 204, 21, 0.4),
+    mark--border-radius: 4px,
+    mark--padding: 0 2px,
+    mark--color: inherit,
+    stroke--color: rgb(2, 101, 220),
+    stroke--width: 2px,
+    stroke--offset: 4px,
+    mark--transition-duration: 600ms,
+    mark--transition-delay: 0s,
+    mark--transition-timing-function: cubic-bezier(0.25, 1, 0.5, 1),
+  )
+);
+
+:host {
+  display: inline;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.mark {
+  position: relative;
+  padding: css.cssVar(mark--padding);
+  color: css.cssVar(mark--color);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0% 100%;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.is-animated {
+  transition-property: background-size;
+  transition-duration: css.cssVar(mark--transition-duration);
+  transition-delay: css.cssVar(mark--transition-delay);
+  transition-timing-function: css.cssVar(mark--transition-timing-function);
+}
+
+.mark--highlight {
+  border-radius: css.cssVar(mark--border-radius);
+  background-image: linear-gradient(css.cssVar(mark--background-color), css.cssVar(mark--background-color));
+
+  &.is-drawn {
+    background-size: 100% 100%;
+  }
+}
+
+.mark--underline,
+.mark--strike-through {
+  background-image: linear-gradient(css.cssVar(stroke--color), css.cssVar(stroke--color));
+  background-size: 0% css.cssVar(stroke--width);
+
+  &.is-drawn {
+    background-size: 100% css.cssVar(stroke--width);
+  }
+}
+
+.mark--strike-through {
+  background-position: left 55%;
+}
+
+.mark--box,
+.mark--circle {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.outline {
+  position: absolute;
+  top: calc(-1 * #{css.cssVar(stroke--offset)});
+  left: calc(-1 * #{css.cssVar(stroke--offset)});
+  width: calc(100% + 2 * #{css.cssVar(stroke--offset)});
+  height: calc(100% + 2 * #{css.cssVar(stroke--offset)});
+  overflow: visible;
+  pointer-events: none;
+
+  path {
+    fill: none;
+    stroke: css.cssVar(stroke--color);
+    stroke-width: css.cssVar(stroke--width);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+    vector-effect: non-scaling-stroke;
+  }
+}
+
+.is-drawn .outline path {
+  stroke-dashoffset: 0;
+}
+
+.is-animated .outline path {
+  transition-property: stroke-dashoffset;
+  transition-duration: css.cssVar(mark--transition-duration);
+  transition-delay: css.cssVar(mark--transition-delay);
+  transition-timing-function: css.cssVar(mark--transition-timing-function);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .is-animated,
+  .is-animated .outline path {
+    transition: none;
+  }
+}

@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  marker: `<p style="max-width:240px;margin:0;font-size:15px;line-height:1.8;text-align:center">Deploys are <c2-marker>fully automated</c2-marker>, <c2-marker variant="underline">reviewed</c2-marker> and <c2-marker variant="circle">reversible</c2-marker>.</p>`,
   'context-menu': `<c2-context-menu>
   <div style="display:grid;place-items:center;width:200px;height:96px;border:1px dashed #a1a1aa;border-radius:8px;color:#71717a;font-size:13px">Right-click me</div>
   <c2-menu slot="menu" aria-label="Canvas">

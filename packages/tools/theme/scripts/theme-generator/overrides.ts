@@ -10,6 +10,8 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // The highlighter is a translucent hue on purpose: it tints any surface, light or dark, and the text keeps its colour.
+  '--c2-marker__mark--background-color': { exclude: 'translucent highlighter hue' },
   // Message body text is a slightly softer ink than the title; it is still body text on the surface.
   '--c2-chat-message__message--color': { token: 'color-on-surface' },
   // Terminal typography and colors form one readable palette; a generic sans/light theme must not split it.

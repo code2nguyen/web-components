@@ -3,6 +3,7 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/marker'
 import '@c2n/context-menu'
 import './context-menu-examples'
 import '@c2n/otp-input'

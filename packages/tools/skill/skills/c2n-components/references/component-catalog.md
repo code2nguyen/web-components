@@ -38,6 +38,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
 - **List Item** — `c2-list-item` · `@c2n/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
 - **Log Viewer** — `c2-log-viewer` · `@c2n/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
+- **Marker** — `c2-marker` · `@c2n/marker` — An inline marker that highlights, underlines, strikes through, boxes or circles a run of text.
 - **QR Code** — `c2-qr-code` · `@c2n/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Reorder List** — `c2-reorder-list` · `@c2n/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
 - **Stat** — `c2-stat` · `@c2n/stat` — Displays a KPI with an optional icon, trend and supporting description.

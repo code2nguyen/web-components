@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/marker:build",
         "../../components/context-menu:build",
         "../../components/otp-input:build",
         "../../components/chat-message-list:build",
