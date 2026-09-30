@@ -215,11 +215,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<PyramidChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<PyramidChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<PyramidChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<PyramidChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<PyramidChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<PyramidChart, 'chart-ready'>) => void
