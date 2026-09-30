@@ -284,6 +284,8 @@ export const overrides: Record<string, Override> = {
   '--c2-color-select--border-bottom-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-bottom-right-radius': { exclude: 'swatch detail radius' },
   // The destructive row tint has no error-container token to hang on; the label itself maps to color-error.
+  // The focused row is marked by its highlight, like a hovered one; a ring on top of it is opt-in.
+  '--c2-menu-item__focus--outline': { exclude: 'the row highlight is the focus indicator' },
   '--c2-menu-item__destructive__hover--background': { exclude: 'destructive tint (the label maps to color-error)' },
   // The panel description is deliberately the normal weight, which the scale has no token for.
   '--c2-navigation-menu-link__description--font-weight': { exclude: 'normal weight, below the font-weight scale' },

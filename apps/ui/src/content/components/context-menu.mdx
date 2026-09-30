@@ -35,6 +35,11 @@ Right-click (or long-press) inside each example. The table row builds its menu f
 
 ```html tag=UsageBlock,package=@c2n/context-menu
 <style>
+  .demo {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 560px;
+  }
   .canvas {
     display: grid;
     place-items: center;
@@ -59,7 +64,7 @@ Right-click (or long-press) inside each example. The table row builds its menu f
   }
 </style>
 <div data-label="Static menu">
-  <div>
+  <div class="demo">
     <c2-context-menu client:only="lit" data-context-menu-demo="canvas">
       <div class="canvas">Right-click the canvas</div>
       <c2-menu slot="menu" aria-label="Canvas">
@@ -74,7 +79,7 @@ Right-click (or long-press) inside each example. The table row builds its menu f
   </div>
 </div>
 <div data-label="Per cell">
-  <div>
+  <div class="demo">
     <c2-context-menu client:only="lit" data-context-menu-demo="table" menu-label="Cell actions">
       <c2-table
         class="quotes"

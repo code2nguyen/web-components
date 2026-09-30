@@ -46,7 +46,7 @@
     destructive--color: #dc2626,
     destructive__hover--background: #fef2f2,
 
-    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline: none,
     focus--outline-offset: -2px,
 
     disabled--opacity: variables.$disabled-content-opacity,
@@ -166,7 +166,7 @@
   outline: none;
 }
 
-// The keyboard-focused row is highlighted like a hovered one, and keeps its ring.
+// The keyboard-focused row is highlighted like a hovered one; the highlight is the focus indicator, so no ring by default.
 :host(:focus-visible) .c2-menu-item {
   background: css.cssVar(hover--background, background);
   color: css.cssVar(hover--color, color);
