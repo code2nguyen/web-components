@@ -1034,3 +1034,160 @@ test('coalesces 100-item destination renders and keeps one auto-scroll frame pen
   expect(result.documentKeydownListeners).toBe(0)
   await expectCleanPointerState(page.locator('c2-reorder-list'))
 })
+
+// Swipe ------------------------------------------------------------------------------------------------------------
+
+async function swipeItem(page: import('@playwright/test').Page, selector: string, distance: number): Promise<void> {
+  const box = await page.locator(selector).boundingBox()
+  if (!box) throw new Error('Missing swipe geometry')
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + distance / 3, y, { steps: 3 })
+  await page.mouse.move(x + distance, y, { steps: 6 })
+  await page.mouse.up()
+}
+
+async function recordSwipeActions(host: import('@playwright/test').Locator, cancel = false): Promise<void> {
+  await host.evaluate((element, prevent) => {
+    const log: string[] = []
+    element.addEventListener('swipe-action', (event) => {
+      const { action, item, trigger } = (event as CustomEvent).detail
+      log.push(`${action.id}:${item.key}:${trigger}`)
+      ;(element as HTMLElement).dataset.swipeLog = log.join(' ')
+      if (prevent) event.preventDefault()
+    })
+  }, cancel)
+}
+
+const swipeActions = JSON.stringify([
+  { id: 'archive', label: 'Archive', tone: 'warning', key: 'e' },
+  { id: 'delete', label: 'Delete', tone: 'danger', key: 'Delete' },
+  { id: 'done', label: 'Done', side: 'start', tone: 'success', icon: 'check' },
+])
+
+test('is not swipeable unless asked', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list aria-label="Tasks">${rows}</c2-reorder-list>`)
+  await swipeItem(page, '#first', -160)
+  await expect(page.locator('c2-reorder-list').locator('[part="swipe-actions"]')).toHaveCount(0)
+})
+
+test('swipes an item to reveal the default Delete, which removes it', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list swipeable aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await recordSwipeActions(host)
+
+  await swipeItem(page, '#first', -110)
+  const remove = host.getByRole('button', { name: 'Delete' })
+  await expect(remove).toBeVisible()
+  await expect(host.locator('[part="swipe-content"]').first()).toHaveAttribute('style', /translateX\(-76px\)/)
+  await remove.click()
+
+  await expect(page.locator('#first')).toHaveCount(0)
+  await expect(host).toHaveAttribute('data-swipe-log', 'delete:first:button')
+  expect(await visualIds(host)).toEqual(['second', 'third'])
+})
+
+test('a canceled swipe action leaves the item to the application', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list swipeable aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await recordSwipeActions(host, true)
+
+  await swipeItem(page, '#second', -110)
+  await host.getByRole('button', { name: 'Delete' }).click()
+  await expect(page.locator('#second')).toHaveCount(1)
+  await expect(host).toHaveAttribute('data-swipe-log', 'delete:second:button')
+  await expect(host.locator('[part="swipe-actions"]:not([hidden])')).toHaveCount(0)
+})
+
+test('custom actions reveal on both sides and a full swipe runs the outermost one', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list swipeable swipe-actions='${swipeActions}' aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await recordSwipeActions(host, true)
+
+  await swipeItem(page, '#first', -170)
+  await expect(host.getByRole('button', { name: 'Archive' })).toBeVisible()
+  await expect(host.getByRole('button', { name: 'Delete' })).toBeVisible()
+  const archiveBox = (await host.getByRole('button', { name: 'Archive' }).boundingBox())!
+  const deleteBox = (await host.getByRole('button', { name: 'Delete' }).boundingBox())!
+  expect(archiveBox.x).toBeGreaterThan(deleteBox.x)
+
+  await page.mouse.click(10, 10)
+  await swipeItem(page, '#second', 120)
+  await expect(host.getByRole('button', { name: 'Done' })).toBeVisible()
+
+  await swipeItem(page, '#third', -620)
+  await expect(host).toHaveAttribute('data-swipe-log', 'archive:third:full-swipe')
+})
+
+test('closes an open item by tapping it, swiping back, tapping elsewhere or pressing Escape', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-reorder-list swipeable aria-label="Tasks">${rows.replace('>First<', '><button type="button" id="open-first">First</button><')}</c2-reorder-list>`,
+  )
+  const host = page.locator('c2-reorder-list')
+  const visible = host.locator('[part="swipe-actions"]:not([hidden])')
+  await host.evaluate((element) => {
+    element.querySelector('#second')!.addEventListener('click', () => ((element as HTMLElement).dataset.clicked = 'second'))
+  })
+
+  await swipeItem(page, '#second', -110)
+  await expect(visible).toHaveCount(1)
+  await page.locator('#second').click({ position: { x: 200, y: 20 } })
+  await expect(visible).toHaveCount(0)
+  await expect(host).not.toHaveAttribute('data-clicked', 'second')
+
+  await swipeItem(page, '#second', -110)
+  await swipeItem(page, '#second', 110)
+  await expect(visible).toHaveCount(0)
+
+  await swipeItem(page, '#second', -110)
+  await page.mouse.click(5, 5)
+  await expect(visible).toHaveCount(0)
+
+  await swipeItem(page, '#second', -110)
+  await page.keyboard.press('Escape')
+  await expect(visible).toHaveCount(0)
+})
+
+test('runs swipe actions from the keyboard on a focused item', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list swipeable swipe-actions='${swipeActions}' aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await recordSwipeActions(host)
+  const wrappers = host.locator('[part="item"]')
+
+  await wrappers.first().focus()
+  await expect(wrappers.first()).toHaveAttribute('aria-describedby', /swipe-instructions/)
+  await page.keyboard.press('e')
+  await expect(host).toHaveAttribute('data-swipe-log', 'archive:first:key')
+  await page.keyboard.press('Delete')
+  await expect(page.locator('#first')).toHaveCount(0)
+  await expect(wrappers.first()).toBeFocused()
+  await expect(host).toHaveAttribute('data-swipe-log', 'archive:first:key delete:first:key')
+})
+
+test('reorders vertically and swipes horizontally in the same list', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list editable swipeable aria-label="Tasks">${rows}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+
+  await drag(page, '#first', '#third')
+  await expect.poll(() => visualIds(host)).toEqual(['second', 'third', 'first'])
+
+  await swipeItem(page, '#second', -110)
+  await expect(host.getByRole('button', { name: 'Delete' })).toBeVisible()
+})
+
+test('skips items marked data-swipe="false"', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list swipeable aria-label="Tasks">${rows.replace('id="first"', 'id="first" data-swipe="false"')}</c2-reorder-list>`)
+  const host = page.locator('c2-reorder-list')
+  await swipeItem(page, '#first', -110)
+  await expect(host.locator('[part="swipe-actions"]')).toHaveCount(2)
+  await expect(host.locator('[part="swipe-actions"]:not([hidden])')).toHaveCount(0)
+})
+
+test('has no detectable accessibility violations with swipe actions revealed', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-reorder-list swipeable swipe-actions='${swipeActions}' aria-label="Tasks">${rows}</c2-reorder-list>`)
+  await swipeItem(page, '#first', -170)
+  await expect(page.locator('c2-reorder-list').getByRole('button', { name: 'Archive' })).toBeVisible()
+  await accessible(page)
+})

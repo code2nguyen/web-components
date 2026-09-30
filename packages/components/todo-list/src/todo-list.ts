@@ -8,7 +8,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/reorder-list'
-import type { ReorderEventDetail } from '@c2n/reorder-list'
+import type { ReorderEventDetail, ReorderSwipeAction, ReorderSwipeActionEventDetail } from '@c2n/reorder-list'
 import '@c2n/task-icons'
 import { isTaskIconName, taskIconCatalog, taskIconCategories, taskIconTag, type TaskIconName, type TaskIconCategory } from '@c2n/task-icons/task-icon-names.js'
 import { suggestTaskIcon } from '@c2n/task-icons/suggest-task-icon.js'
@@ -101,12 +101,19 @@ export interface TodoList {
 }
 
 type TaskEventFactory = (detail: TodoTaskEventDetail) => CustomEvent<TodoTaskEventDetail>
-type MenuAction = 'note' | 'style' | 'drop' | 'archive' | 'delete'
+type MenuAction = 'note' | 'icon' | 'drop' | 'archive' | 'delete'
+type Submenu = 'highlight' | 'ink'
 
 const STORAGE_PREFIX = 'c2-todo-list:'
 const ICON_COLUMNS = 8
-const SWIPE_OPEN = -152
 const TOAST_MS = 5000
+// Swiping a row left reveals Archive and Delete, swiping it right checks it. The list cancels the inner list's own
+// delete and applies each action to its data.
+const SWIPE_ACTIONS: ReorderSwipeAction[] = [
+  { id: 'archive', label: 'Archive', side: 'end', tone: 'warning', icon: 'archive' },
+  { id: 'delete', label: 'Delete', side: 'end', tone: 'danger', icon: 'delete' },
+  { id: 'toggle', label: 'Done', side: 'start', tone: 'success', icon: 'check' },
+]
 const v = (name: string) => `--c2-todo-list__${name}`
 
 interface Preset {
@@ -312,16 +319,6 @@ function splitDraft(draft: string): { label: string; note?: string } {
   return note ? { label: label.trim(), note } : { label: draft.trim() }
 }
 
-interface Swipe {
-  id: string
-  pointerId: number
-  x0: number
-  y0: number
-  base: number
-  dx: number
-  active: boolean
-}
-
 interface Toast {
   message: string
   undo: () => void
@@ -329,15 +326,18 @@ interface Toast {
 
 /**
  * A to-do list with the feel of a paper one: tasks are plain text, checked off with a hand-drawn tick (or cross) and
- * a pen-stroke through the text. Progress shows as a ring beside the heading, a bar, or a large hero ring. Click a
- * task to add a note; drag the grip to reorder; swipe a row left to archive or delete it and right to check it, or
- * use its ⋯ menu (also a right-click, and the keys E, Delete, X and N). Archived tasks collect in a section at the
- * bottom, and every removal can be undone.
+ * a pen stroke through the text. Progress shows as a ring beside the heading, a bar, or a large hero ring. Click a
+ * task to add a note, drag a row to reorder it, and swipe it left to archive or delete it or right to check it (the
+ * swipe and the reordering come from `c2-reorder-list`). The row's ⋯ menu (also a right-click, and the keys N, I, X,
+ * E and Delete) holds the same actions plus the task's icon, highlighter and text colour, each changed in place.
+ * Archived tasks collect in a section at the bottom, and every removal can be undone.
  *
- * Tasks can carry an optional icon from `@c2n/task-icons`, a highlighter background and a pen colour for the text.
- * With `customizable`, a palette button opens a panel for the background (whose text colour follows), the pen, the
- * done mark, the progress style, the density and the selected task's icon and colours; with `storage-key` those
- * choices are remembered in `localStorage`.
+ * With `customizable`, a palette button swaps the tasks for a panel that styles the whole list: the background
+ * (whose text colour and pens follow from it), the pen, the done mark, the density and the progress style. With
+ * `storage-key` those choices are remembered in `localStorage`.
+ *
+ * The swipe actions are drawn by the inner `c2-reorder-list`: recolour them with its
+ * `--c2-reorder-list__swipe-action__{warning,danger,success}--background-color` variables, set on this element.
  *
  * @tag c2-todo-list
  *
@@ -389,9 +389,6 @@ interface Toast {
  * @cssproperty {color} [--c2-todo-list__add--border-color=#d4d4d8] - Colour of the dashed border around the add field.
  * @cssproperty {color} [--c2-todo-list__panel--background-color=#fafafa] - Background of the customize panel and task menu.
  * @cssproperty {border-radius} [--c2-todo-list__panel--border-radius=8px] - Corner radius of the customize panel and task menu.
- * @cssproperty {color} [--c2-todo-list__archive-action--background-color=#a16207] - Swipe action that archives a task.
- * @cssproperty {color} [--c2-todo-list__delete-action--background-color=#dc2626] - Swipe action that deletes a task.
- * @cssproperty {color} [--c2-todo-list__done-action--background-color=#15803d] - Swipe-right hint that checks a task.
  * @cssproperty {color} [--c2-todo-list__toast--background-color=#18181b] - Background of the undo message.
  * @cssproperty {color} [--c2-todo-list__toast--color=#fafafa] - Text of the undo message.
  * @cssproperty {outline} [--c2-todo-list__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of every control.
@@ -427,7 +424,7 @@ export class TodoList extends LitElement {
   /** How progress is drawn: a ring beside the heading, a bar under it, a large ring above it, or not at all. The viewer's choice in the customize panel wins. */
   @property() progress: TodoProgress = 'ring'
 
-  /** Shows the palette button and its customize panel. */
+  /** Shows the palette button and its customize panel, where the viewer styles the whole list. */
   @property({ type: Boolean }) customizable = false
 
   /**
@@ -439,7 +436,7 @@ export class TodoList extends LitElement {
   /** With `storage-key`, also remembers the tasks, which then win over the `tasks` the page provides. */
   @property({ type: Boolean, attribute: 'persist-tasks' }) persistTasks = false
 
-  /** Tasks cannot be checked, added, reordered, removed or edited. The look can still be customized. */
+  /** Tasks cannot be checked, added, reordered, swiped, removed or edited. The look can still be customized. */
   @property({ type: Boolean }) readonly = false
 
   /** Placeholder of the add field. */
@@ -450,11 +447,10 @@ export class TodoList extends LitElement {
 
   @state() private filter: TodoFilter = 'all'
   @state() private panelOpen = false
-  @state() private selectedId: string | undefined
   @state() private expandedId: string | undefined
   @state() private menuId: string | undefined
-  @state() private swipe: Swipe | undefined
-  @state() private swipedId: string | undefined
+  @state() private submenu: Submenu | undefined
+  @state() private iconPickerId: string | undefined
   @state() private toast: Toast | undefined
   @state() private showArchived = false
   @state() private draft = ''
@@ -463,15 +459,16 @@ export class TodoList extends LitElement {
   private loadedKey: string | undefined
   private pendingFocus: (() => void) | undefined
   private toastTimer: ReturnType<typeof setTimeout> | undefined
-  private suppressClick = false
 
   override connectedCallback(): void {
     super.connectedCallback()
     document.addEventListener('pointerdown', this.handleOutsidePointer, true)
+    document.addEventListener('keydown', this.handleDocumentEscape)
   }
 
   override disconnectedCallback(): void {
     document.removeEventListener('pointerdown', this.handleOutsidePointer, true)
+    document.removeEventListener('keydown', this.handleDocumentEscape)
     clearTimeout(this.toastTimer)
     super.disconnectedCallback()
   }
@@ -652,89 +649,206 @@ export class TodoList extends LitElement {
     this.dispatchEvent(new CustomEvent<TodoTasksChangeEventDetail>('tasks-change', { detail: { tasks } }))
   }
 
-  // Menus, notes and the panel -----------------------------------------------------------------------------------
+  private handleSwipeAction(event: CustomEvent<ReorderSwipeActionEventDetail>): void {
+    // The list owns its tasks, so it cancels the inner list's own delete and applies the action to the data instead.
+    event.preventDefault()
+    event.stopPropagation()
+    const task = this.tasks.find((item) => item.id === event.detail.item.key)
+    if (!task) return
+    const id = event.detail.action.id
+    if (id === 'archive') this.archiveTask(task)
+    else if (id === 'delete') this.removeTask(task)
+    else if (id === 'toggle') this.toggleTask(task)
+  }
+
+  // Menus, popovers and notes ----------------------------------------------------------------------------------------
 
   private closeRow(task: TodoTask): void {
-    if (this.menuId === task.id) this.menuId = undefined
-    if (this.swipedId === task.id) this.swipedId = undefined
+    if (this.menuId === task.id) this.closeMenus()
+    if (this.iconPickerId === task.id) this.iconPickerId = undefined
     if (this.expandedId === task.id) this.expandedId = undefined
-    if (this.selectedId === task.id) this.selectedId = undefined
+  }
+
+  private closeMenus(): void {
+    this.menuId = undefined
+    this.submenu = undefined
   }
 
   private readonly handleOutsidePointer = (event: PointerEvent): void => {
-    if (!this.menuId && !this.swipedId) return
+    if (!this.menuId && !this.iconPickerId) return
     const path = event.composedPath()
-    const within = (predicate: (node: HTMLElement) => boolean) => path.some((node) => node instanceof HTMLElement && predicate(node))
-    if (this.menuId && !within((node) => node.classList.contains('menu') || node.classList.contains('more'))) this.menuId = undefined
-    if (this.swipedId && !within((node) => node.dataset.swipeRow === this.swipedId)) this.swipedId = undefined
+    const within = (...classes: string[]) => path.some((node) => node instanceof HTMLElement && classes.some((name) => node.classList.contains(name)))
+    if (this.menuId && !within('menu', 'more')) this.closeMenus()
+    if (this.iconPickerId && !within('icon-popover', 'task-icon')) this.iconPickerId = undefined
+  }
+
+  /** Escape closes an open menu or icon picker wherever focus is, e.g. after a menu opened on hover. */
+  private readonly handleDocumentEscape = (event: KeyboardEvent): void => {
+    if (event.key !== 'Escape' || event.defaultPrevented) return
+    const task = this.tasks.find((item) => item.id === (this.menuId ?? this.iconPickerId))
+    if (!task) return
+    if (this.menuId && this.submenu) {
+      this.submenu = undefined
+    } else if (this.menuId) {
+      this.closeMenus()
+      this.focusRowButton(task, '.more')
+    } else {
+      this.closeIconPicker(task)
+    }
   }
 
   private openMenu(task: TodoTask, focusFirst: boolean): void {
+    this.iconPickerId = undefined
+    this.submenu = undefined
     this.menuId = this.menuId === task.id ? undefined : task.id
-    if (this.menuId && focusFirst) this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.menu [role="menuitem"]')?.focus()
+    if (this.menuId && focusFirst) this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.menu > [role="menuitem"]')?.focus()
   }
 
-  private closeMenu(task: TodoTask): void {
-    this.menuId = undefined
-    this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>(`[data-swipe-row="${task.id}"] .more`)?.focus()
+  private focusRowButton(task: TodoTask, selector: string): void {
+    this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>(`[data-reorder-key="${task.id}"] ${selector}`)?.focus()
   }
 
   private handleMenuKey(event: KeyboardEvent, task: TodoTask): void {
-    const items = [...this.renderRoot.querySelectorAll<HTMLElement>('.menu [role="menuitem"]')]
-    const index = items.indexOf(event.target as HTMLElement)
+    const target = event.target as HTMLElement
+    if (target.closest('.submenu')) return
+    const items = [...this.renderRoot.querySelectorAll<HTMLElement>('.menu > [role="menuitem"]')]
+    const index = items.indexOf(target)
     if (event.key === 'Escape') {
       event.preventDefault()
       event.stopPropagation()
-      this.closeMenu(task)
+      this.closeMenus()
+      this.focusRowButton(task, '.more')
     } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
       event.stopPropagation()
+      this.submenu = undefined
       items[(index + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus()
+    } else if ((event.key === 'ArrowRight' || event.key === 'ArrowLeft') && target.dataset.submenu) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.openSubmenu(target.dataset.submenu as Submenu, true)
     } else if (event.key === 'Tab') {
-      this.menuId = undefined
+      this.closeMenus()
+    }
+  }
+
+  private openSubmenu(name: Submenu, focus: boolean): void {
+    this.submenu = name
+    if (focus) this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.submenu [aria-checked="true"], .submenu [role="menuitemradio"]')?.focus()
+  }
+
+  private handleSubmenuKey(event: KeyboardEvent): void {
+    const swatches = [...this.renderRoot.querySelectorAll<HTMLElement>('.submenu [role="menuitemradio"]')]
+    const index = swatches.indexOf(event.target as HTMLElement)
+    const back = () => {
+      const name = this.submenu
+      this.submenu = undefined
+      this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>(`.menu [data-submenu="${name}"]`)?.focus()
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      back()
+    } else if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+      event.preventDefault()
+      event.stopPropagation()
+      const next = index + (event.key === 'ArrowRight' ? 1 : -1)
+      if (next < 0) back()
+      else swatches[Math.min(next, swatches.length - 1)]?.focus()
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      event.stopPropagation()
+    } else if (event.key === 'Tab') {
+      this.closeMenus()
     }
   }
 
   private runMenu(task: TodoTask, action: MenuAction): void {
-    this.menuId = undefined
+    this.closeMenus()
     if (action === 'note') this.openNote(task)
-    if (action === 'style') {
-      this.selectedId = task.id
-      this.panelOpen = true
-      this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.task-editor [role="radio"][aria-checked="true"]')?.focus()
-    }
+    if (action === 'icon') this.openIconPicker(task, '.more')
     if (action === 'drop') this.toggleDropped(task)
     if (action === 'archive') this.archiveTask(task)
     if (action === 'delete') this.removeTask(task)
   }
 
+  private openIconPicker(task: TodoTask, returnTo: string): void {
+    if (this.readonly) return
+    this.closeMenus()
+    this.iconQuery = ''
+    this.iconReturn = returnTo
+    this.iconPickerId = this.iconPickerId === task.id ? undefined : task.id
+    if (this.iconPickerId) {
+      this.pendingFocus = () => {
+        this.renderRoot.querySelector<HTMLElement>('.icon-popover .icon-search')?.focus()
+        // Open on the current icon's category rather than the top of the set.
+        const picker = this.renderRoot.querySelector<HTMLElement>('.icon-popover .icon-picker')
+        const current = picker?.querySelector<HTMLElement>('.icon-option[aria-pressed="true"]')
+        const group = current?.closest<HTMLElement>('.icon-group')
+        if (picker && group) picker.scrollTop = group.offsetTop - picker.offsetTop
+      }
+    }
+  }
+
+  private iconReturn = '.more'
+
+  private closeIconPicker(task: TodoTask): void {
+    this.iconPickerId = undefined
+    const selector = this.iconOf(task) ? '.task-icon' : this.iconReturn
+    this.focusRowButton(task, selector)
+  }
+
   private openNote(task: TodoTask): void {
-    if (this.suppressClick) return
     this.expandedId = this.expandedId === task.id ? undefined : task.id
     if (this.expandedId && !this.readonly) this.pendingFocus = () => this.renderRoot.querySelector<HTMLTextAreaElement>('.note-input')?.focus()
   }
 
   private handleRowKey(event: KeyboardEvent, task: TodoTask): void {
     const target = event.target as HTMLElement
-    if (target.matches('textarea, input') || event.metaKey || event.ctrlKey || event.altKey || this.readonly) return
+    if (target.closest('textarea, input, .menu, .icon-popover') || event.metaKey || event.ctrlKey || event.altKey || this.readonly) return
     const key = event.key.toLowerCase()
     if (key === 'e') this.archiveTask(task)
     else if (key === 'delete' || key === 'backspace') this.removeTask(task)
     else if (key === 'x') this.toggleDropped(task)
     else if (key === 'n') this.openNote(task)
+    else if (key === 'i') this.openIconPicker(task, '.more')
     else if (key === 'contextmenu' || (event.shiftKey && key === 'f10')) this.openMenu(task, true)
     else return
     event.preventDefault()
+    event.stopPropagation()
   }
 
   private handlePanelKey(event: KeyboardEvent): void {
     if (event.key !== 'Escape') return
     event.stopPropagation()
+    this.closePanel()
+  }
+
+  private openPanel(): void {
+    this.closeMenus()
+    this.iconPickerId = undefined
+    this.panelOpen = !this.panelOpen
+    if (this.panelOpen) this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.panel [role="radio"][aria-checked="true"]')?.focus()
+  }
+
+  private resetFromPanel(): void {
+    this.resetLook()
+    // Reset disables itself; keep the keyboard in the panel.
+    this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.panel [role="radio"][aria-checked="true"]')?.focus()
+  }
+
+  private closePanel(): void {
     this.panelOpen = false
     this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.customize')?.focus()
   }
 
-  private moveIconFocus(event: KeyboardEvent): void {
+  private moveIconFocus(event: KeyboardEvent, task: TodoTask): void {
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      this.closeIconPicker(task)
+      return
+    }
     const buttons = [...this.renderRoot.querySelectorAll<HTMLElement>('.icon-option')]
     const index = buttons.indexOf(event.target as HTMLElement)
     if (index < 0) return
@@ -747,60 +861,6 @@ export class TodoList extends LitElement {
     event.preventDefault()
     buttons.forEach((button, position) => (button.tabIndex = position === next ? 0 : -1))
     buttons[next].focus()
-  }
-
-  // Swipe ------------------------------------------------------------------------------------------------------------
-
-  private handleSwipeDown(event: PointerEvent, task: TodoTask): void {
-    // Only the grip starts a reorder; everything else in the row belongs to the swipe and the row's own controls.
-    if ((event.target as HTMLElement).closest('.grip')) return
-    event.stopPropagation()
-    if (this.readonly || !event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return
-    if ((event.target as HTMLElement).closest('textarea, input')) return
-    this.suppressClick = false
-    this.swipe = {
-      id: task.id!,
-      pointerId: event.pointerId,
-      x0: event.clientX,
-      y0: event.clientY,
-      base: this.swipedId === task.id ? SWIPE_OPEN : 0,
-      dx: 0,
-      active: false,
-    }
-  }
-
-  private handleSwipeMove(event: PointerEvent): void {
-    const swipe = this.swipe
-    if (!swipe || swipe.pointerId !== event.pointerId) return
-    const deltaX = event.clientX - swipe.x0
-    const deltaY = event.clientY - swipe.y0
-    if (!swipe.active) {
-      if (Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
-        this.swipe = undefined
-        return
-      }
-      if (Math.abs(deltaX) < 8) return
-      ;(event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId)
-    }
-    this.swipe = { ...swipe, active: true, dx: Math.max(-190, Math.min(130, swipe.base + deltaX)) }
-  }
-
-  private handleSwipeUp(event: PointerEvent, task: TodoTask): void {
-    const swipe = this.swipe
-    if (!swipe || swipe.pointerId !== event.pointerId) return
-    this.swipe = undefined
-    if (!swipe.active) return
-    this.suppressClick = true
-    setTimeout(() => (this.suppressClick = false))
-    if (swipe.dx > 90) {
-      this.swipedId = undefined
-      this.toggleTask(task)
-    } else if (swipe.dx < -70) {
-      this.swipedId = task.id
-      this.menuId = undefined
-    } else {
-      this.swipedId = undefined
-    }
   }
 
   // Render -----------------------------------------------------------------------------------------------------------
@@ -835,20 +895,28 @@ export class TodoList extends LitElement {
     const urgent = active.filter((task) => task.urgent && !task.done && !task.dropped).length
     const summary = total === 0 ? 'No tasks yet' : allDone ? 'All done. Nice work.' : `${closed} of ${total} done`
     const meta = urgent && !allDone ? `${summary} · ${urgent} urgent` : summary
+    const panel = this.panelOpen && this.customizable
     const classes = {
       container: true,
       [`progress-${progress}`]: true,
       [`background-${this.look.background ?? 'default'}`]: true,
       'all-done': allDone,
       readonly: this.readonly,
+      customizing: panel,
     }
 
     return html`
       <section class=${classMap(classes)} style=${styleMap(containerStyle)}>
         ${this.renderHeader(progress, percent, closed, total, meta)}
         ${progress === 'bar' ? html`<div class="bar" aria-hidden="true"><span class="bar-fill" style=${styleMap({ width: `${percent}%` })}></span></div>` : nothing}
-        ${this.panelOpen && this.customizable ? this.renderPanel() : nothing} ${total > 0 ? this.renderFilters(total, closed) : nothing}
-        ${this.renderTasks(active)} ${this.readonly ? nothing : this.renderAdd()} ${this.renderArchive()}
+        ${
+          panel
+            ? this.renderPanel()
+            : html`<div class="view">
+                ${total > 0 ? this.renderFilters(total, closed) : nothing} ${this.renderTasks(active)} ${this.readonly ? nothing : this.renderAdd()}
+                ${this.renderArchive()}
+              </div>`
+        }
         ${
           this.toast
             ? html`<div class="toast" role="status">
@@ -906,7 +974,7 @@ export class TodoList extends LitElement {
                   aria-label="Customize look"
                   aria-expanded=${this.panelOpen ? 'true' : 'false'}
                   aria-controls="panel"
-                  @click=${() => (this.panelOpen = !this.panelOpen)}
+                  @click=${this.openPanel}
                 >
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 21.5a9.5 9.5 0 1 1 9.5-9.5c0 2.7-2.1 4-3.9 4h-1.9a1.9 1.9 0 0 0-1.4 3.2 1.4 1.4 0 0 1-2.3 2.3z"></path>
@@ -953,7 +1021,10 @@ export class TodoList extends LitElement {
         class="tasks"
         aria-label=${this.heading ? `${this.heading} tasks` : 'Tasks'}
         ?editable=${reorderable}
+        ?swipeable=${!this.readonly}
+        .swipeActions=${SWIPE_ACTIONS}
         @reorder=${this.handleReorder}
+        @swipe-action=${this.handleSwipeAction}
         @change=${(event: Event) => event.stopPropagation()}
       >
         ${repeat(
@@ -975,51 +1046,23 @@ export class TodoList extends LitElement {
   private renderTask(task: TodoTask, reorderable: boolean) {
     const id = task.id!
     const icon = this.iconOf(task)
-    const swipe = this.swipe?.id === id ? this.swipe : undefined
-    const offset = swipe?.active ? swipe.dx : this.swipedId === id ? SWIPE_OPEN : 0
     const closed = !!task.done || !!task.dropped
     const expanded = this.expandedId === id
-    const selected = this.panelOpen && this.customizable && this.selectedId === id
     const ink = task.ink && includes(todoPens, task.ink) ? task.ink : undefined
     const highlight = task.highlight && includes(todoHighlights, task.highlight) ? task.highlight : undefined
     const status = task.dropped ? `${task.label}, won’t do` : task.label
     return html`
-      <div class="task-slot" data-reorder-key=${id} data-reorder-label=${task.label} data-swipe-row=${id}>
-        ${
-          this.readonly
-            ? nothing
-            : html`<div class=${classMap({ 'swipe-actions': true, visible: offset !== 0 })} aria-hidden="true">
-                <span class="swipe-done" style=${styleMap({ opacity: String(Math.max(0, Math.min(1, offset / 90))) })}>
-                  <svg class="pen" viewBox="0 0 24 24"><path d=${TICK}></path></svg>${task.done ? 'Undo' : 'Done'}
-                </span>
-                <span class="swipe-buttons">
-                  <button class="swipe-archive" type="button" tabindex="-1" @click=${() => this.archiveTask(task)}>
-                    <svg viewBox="0 0 24 24"><path d="M3.5 4.5h17v4h-17zM5 8.5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10M10 12.5h4"></path></svg>Archive
-                  </button>
-                  <button class="swipe-delete" type="button" tabindex="-1" @click=${() => this.removeTask(task)}>
-                    <svg viewBox="0 0 24 24">
-                      <path d="M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5.5 6.5l1 13A1.5 1.5 0 0 0 8 21h8a1.5 1.5 0 0 0 1.5-1.5l1-13"></path></svg
-                    >Delete
-                  </button>
-                </span>
-              </div>`
-        }
+      <div class="task-slot" data-reorder-key=${id} data-reorder-label=${task.label}>
         <div
           class=${classMap({
             task: true,
             done: !!task.done,
             dropped: !!task.dropped,
             closed,
-            selected,
-            swiping: !!swipe?.active,
+            active: this.menuId === id || this.iconPickerId === id,
             [`ink-${ink}`]: !!ink,
             [`highlight-${highlight}`]: !!highlight,
           })}
-          style=${styleMap({ transform: offset ? `translateX(${offset}px)` : '' })}
-          @pointerdown=${(event: PointerEvent) => this.handleSwipeDown(event, task)}
-          @pointermove=${this.handleSwipeMove}
-          @pointerup=${(event: PointerEvent) => this.handleSwipeUp(event, task)}
-          @pointercancel=${() => (this.swipe = undefined)}
           @keydown=${(event: KeyboardEvent) => this.handleRowKey(event, task)}
           @contextmenu=${(event: MouseEvent) => {
             if (this.readonly) return
@@ -1051,10 +1094,25 @@ export class TodoList extends LitElement {
           >
             ${this.renderMark(task)}
           </button>
-          ${icon ? html`<span class="task-icon">${renderTaskIcon(icon)}</span>` : nothing}
+          ${
+            icon
+              ? this.readonly
+                ? html`<span class="task-icon">${renderTaskIcon(icon)}</span>`
+                : html`<button
+                    class="task-icon"
+                    type="button"
+                    aria-label=${`Change icon for ${task.label}`}
+                    aria-haspopup="dialog"
+                    aria-expanded=${this.iconPickerId === id ? 'true' : 'false'}
+                    @click=${() => this.openIconPicker(task, '.task-icon')}
+                  >
+                    ${renderTaskIcon(icon)}
+                  </button>`
+              : nothing
+          }
           <div class="body">
-            <button class="label" type="button" aria-expanded=${expanded ? 'true' : 'false'} @click=${() => this.openNote(task)}>
-              <span class="label-text"
+            <span class="label" @click=${() => this.openNote(task)}
+              ><span class="label-text"
                 >${task.label}${
                   task.done
                     ? html`<svg class="strike" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
@@ -1062,9 +1120,9 @@ export class TodoList extends LitElement {
                       </svg>`
                     : nothing
                 }</span
-              >
-            </button>
-            ${task.note && !expanded ? html`<p class="note">${task.note.split('\n')[0]}</p>` : nothing}
+              ></span
+            >
+            ${task.note && !expanded ? html`<p class="note" @click=${() => this.openNote(task)}>${task.note.split('\n')[0]}</p>` : nothing}
             ${
               expanded
                 ? html`<textarea
@@ -1110,35 +1168,179 @@ export class TodoList extends LitElement {
                 </button>`
           }
         </div>
-        ${this.menuId === id ? this.renderMenu(task) : nothing}
+        ${this.menuId === id ? this.renderMenu(task) : nothing} ${this.iconPickerId === id ? this.renderIconPopover(task) : nothing}
       </div>
     `
   }
 
   private renderMenu(task: TodoTask) {
-    const items: [MenuAction, string, string, string][] = [
-      ['note', task.note ? 'Edit note' : 'Add a note', 'N', 'M4 5h16v11H9l-5 4z'],
-      ['drop', task.dropped ? 'Undo won’t do' : 'Won’t do', 'X', 'M6.5 6.5l11 11M17.5 6.5l-11 11'],
-      ['archive', 'Archive', 'E', 'M3.5 4.5h17v4h-17zM5 8.5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10M10 12.5h4'],
-      ['delete', 'Delete', 'Del', 'M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5.5 6.5l1 13A1.5 1.5 0 0 0 8 21h8a1.5 1.5 0 0 0 1.5-1.5l1-13'],
-    ]
-    if (this.customizable) items.splice(1, 0, ['style', 'Icon & colour', '', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z'])
+    const item = (action: MenuAction, label: string, key: string, path: string, classes: Record<string, boolean> = {}) => html`
+      <button
+        class=${classMap({ 'menu-item': true, ...classes })}
+        type="button"
+        role="menuitem"
+        @mouseenter=${() => (this.submenu = undefined)}
+        @click=${() => this.runMenu(task, action)}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d=${path}></path></svg>
+        <span class="menu-label">${label}</span>
+        ${key ? html`<kbd>${key}</kbd>` : nothing}
+      </button>
+    `
+    const trigger = (name: Submenu, label: string, swatch: string) => html`
+      <button
+        class=${classMap({ 'menu-item': true, 'has-submenu': true, open: this.submenu === name })}
+        type="button"
+        role="menuitem"
+        aria-haspopup="menu"
+        aria-expanded=${this.submenu === name ? 'true' : 'false'}
+        data-submenu=${name}
+        @mouseenter=${() => this.openSubmenu(name, false)}
+        @click=${() => this.openSubmenu(name, true)}
+      >
+        <span class=${`menu-swatch ${swatch}`} aria-hidden="true"></span>
+        <span class="menu-label">${label}</span>
+        <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+      </button>
+    `
     return html`
       <div class="menu" role="menu" aria-label=${`Actions for ${task.label}`} @keydown=${(event: KeyboardEvent) => this.handleMenuKey(event, task)}>
-        ${items.map(
-          ([action, label, key, path]) => html`
-            <button
-              class=${classMap({ 'menu-item': true, danger: action === 'delete', separated: action === 'archive' })}
+        ${item('note', task.note ? 'Edit note' : 'Add a note', 'N', 'M4 5h16v11H9l-5 4z')}
+        ${item('icon', this.iconOf(task) ? 'Change icon' : 'Add an icon', 'I', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z')}
+        ${trigger('highlight', 'Highlight', task.highlight ? `highlight-swatch highlight-${task.highlight}` : 'highlight-swatch none')}
+        ${trigger('ink', 'Text colour', task.ink ? `pen-swatch pen-${task.ink}` : 'pen-swatch default')}
+        ${item('drop', task.dropped ? 'Undo won’t do' : 'Won’t do', 'X', 'M6.5 6.5l11 11M17.5 6.5l-11 11')}
+        ${item('archive', 'Archive', 'E', 'M3.5 4.5h17v4h-17zM5 8.5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10M10 12.5h4', { separated: true })}
+        ${item('delete', 'Delete', 'Del', 'M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5.5 6.5l1 13A1.5 1.5 0 0 0 8 21h8a1.5 1.5 0 0 0 1.5-1.5l1-13', {
+          danger: true,
+        })}
+        ${this.submenu ? this.renderSubmenu(task, this.submenu) : nothing}
+      </div>
+    `
+  }
+
+  private renderSubmenu(task: TodoTask, name: Submenu) {
+    const choose = (patch: Partial<TodoTask>) => {
+      this.patchTask(task, patch)
+    }
+    const radio = (checked: boolean) => (checked ? 'true' : 'false')
+    const swatches =
+      name === 'highlight'
+        ? [
+            html`<button
+              class="highlight-swatch none"
               type="button"
-              role="menuitem"
-              @click=${() => this.runMenu(task, action)}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d=${path}></path></svg>
-              <span class="menu-label">${label}</span>
-              ${key ? html`<kbd>${key}</kbd>` : nothing}
-            </button>
-          `,
-        )}
+              role="menuitemradio"
+              aria-checked=${radio(!task.highlight)}
+              aria-label="No highlight"
+              title="None"
+              @click=${() => choose({ highlight: undefined })}
+            ></button>`,
+            ...todoHighlights.map(
+              (highlight) =>
+                html`<button
+                  class="highlight-swatch highlight-${highlight}"
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked=${radio(task.highlight === highlight)}
+                  aria-label=${HIGHLIGHT_LABELS[highlight]}
+                  title=${HIGHLIGHT_LABELS[highlight]}
+                  @click=${() => choose({ highlight })}
+                >
+                  <span aria-hidden="true">Aa</span>
+                </button>`,
+            ),
+          ]
+        : [
+            html`<button
+              class="pen-swatch default"
+              type="button"
+              role="menuitemradio"
+              aria-checked=${radio(!task.ink)}
+              aria-label="Default text colour"
+              title="Default"
+              @click=${() => choose({ ink: undefined })}
+            ></button>`,
+            ...todoPens.map(
+              (pen) =>
+                html`<button
+                  class="pen-swatch pen-${pen}"
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked=${radio(task.ink === pen)}
+                  aria-label=${`${PEN_LABELS[pen]} text`}
+                  title=${PEN_LABELS[pen]}
+                  @click=${() => choose({ ink: pen })}
+                ></button>`,
+            ),
+          ]
+    return html`<div
+      class=${`submenu submenu-${name}`}
+      role="menu"
+      aria-label=${name === 'highlight' ? 'Highlight' : 'Text colour'}
+      @keydown=${this.handleSubmenuKey}
+      @mouseenter=${() => (this.submenu = name)}
+    >
+      ${swatches}
+    </div>`
+  }
+
+  private renderIconPopover(task: TodoTask) {
+    const current = this.iconOf(task)
+    const query = this.iconQuery.trim().toLowerCase()
+    const matches = (icon: (typeof taskIconCatalog)[number]) =>
+      !query || icon.name.includes(query) || icon.title.toLowerCase().includes(query) || icon.keywords.some((keyword) => keyword.startsWith(query))
+    const groups = iconGroups.map((group) => ({ ...group, icons: group.icons.filter(matches) })).filter((group) => group.icons.length > 0)
+    const names = groups.flatMap((group) => group.icons.map((icon) => icon.name))
+    const focusable = current && names.includes(current) ? current : names[0]
+    const pick = (icon: TaskIconName | undefined) => {
+      this.patchTask(task, { icon })
+      this.closeIconPicker({ ...task, icon })
+    }
+    return html`
+      <div
+        class=${classMap({ 'icon-popover': true, [`ink-${task.ink}`]: !!task.ink })}
+        role="dialog"
+        aria-label=${`Icon for ${task.label}`}
+        @keydown=${(event: KeyboardEvent) => this.moveIconFocus(event, task)}
+      >
+        <div class="icon-tools">
+          <input
+            class="icon-search"
+            type="search"
+            aria-label="Search icons"
+            placeholder=${`Search ${taskIconCatalog.length} icons`}
+            .value=${this.iconQuery}
+            @input=${(event: Event) => (this.iconQuery = (event.target as HTMLInputElement).value)}
+          />
+          <button class="no-icon" type="button" aria-pressed=${current ? 'false' : 'true'} @click=${() => pick(undefined)}>No icon</button>
+        </div>
+        <div class="icon-picker">
+          ${groups.map(
+            (group) => html`
+              <div class="icon-group" role="group" aria-label=${group.label}>
+                <span class="icon-group-label" aria-hidden="true">${group.label}</span>
+                <div class="icon-grid">
+                  ${group.icons.map(
+                    ({ name, title }) =>
+                      html`<button
+                        class="icon-option"
+                        type="button"
+                        aria-label=${title}
+                        title=${title}
+                        aria-pressed=${name === current ? 'true' : 'false'}
+                        tabindex=${name === focusable ? 0 : -1}
+                        @click=${() => pick(name)}
+                      >
+                        ${renderTaskIcon(name)}
+                      </button>`,
+                  )}
+                </div>
+              </div>
+            `,
+          )}
+          ${groups.length === 0 ? html`<p class="hint">No icon matches “${this.iconQuery}”.</p>` : nothing}
+        </div>
       </div>
     `
   }
@@ -1208,14 +1410,14 @@ export class TodoList extends LitElement {
     const progress = look.progress ?? this.progress
     const density = look.density ?? 'cozy'
     const doneMark = look.doneMark ?? 'tick'
-    const selected = this.tasks.find((task) => task.id === this.selectedId && !task.archived)
     const radio = (checked: boolean) => (checked ? 'true' : 'false')
     return html`
-      <div class="panel" id="panel" role="region" aria-label="Customize" @keydown=${this.handlePanelKey}>
+      <div class="panel" id="panel" role="region" aria-label="Customize the list" @keydown=${this.handlePanelKey}>
         <div class="panel-head">
-          <span class="panel-title">Customize</span>
-          <button class="reset" type="button" ?disabled=${Object.keys(look).length === 0} @click=${() => this.resetLook()}>Reset</button>
+          <span class="panel-title">Customize the list</span>
+          <button class="reset" type="button" ?disabled=${Object.keys(look).length === 0} @click=${this.resetFromPanel}>Reset</button>
         </div>
+        <p class="hint">Applies to the whole list. Style one task from its ⋯ menu, or click its icon.</p>
 
         <div class="field">
           <span class="field-label" id="background-label">Background</span>
@@ -1312,121 +1514,12 @@ export class TodoList extends LitElement {
           </div>
         </div>
 
-        ${this.readonly ? nothing : this.renderTaskEditor(selected)} ${this.storageKey ? html`<p class="saved">Saved in this browser</p>` : nothing}
-      </div>
-    `
-  }
-
-  private renderTaskEditor(task: TodoTask | undefined) {
-    if (!task) {
-      return html`<div class="field task-editor">
-        <span class="field-label">Task</span>
-        <p class="hint">Choose “Icon & colour” in a task’s ⋯ menu to give it an icon, a highlighter or a pen colour.</p>
-      </div>`
-    }
-    const current = this.iconOf(task)
-    const query = this.iconQuery.trim().toLowerCase()
-    const matches = (icon: (typeof taskIconCatalog)[number]) =>
-      !query || icon.name.includes(query) || icon.title.toLowerCase().includes(query) || icon.keywords.some((keyword) => keyword.startsWith(query))
-    const groups = iconGroups.map((group) => ({ ...group, icons: group.icons.filter(matches) })).filter((group) => group.icons.length > 0)
-    const names = groups.flatMap((group) => group.icons.map((icon) => icon.name))
-    const focusable = current && names.includes(current) ? current : names[0]
-    const radio = (checked: boolean) => (checked ? 'true' : 'false')
-    return html`
-      <div class="field task-editor">
-        <span class="field-label">Task · <span class="editing">${task.label}</span></span>
-
-        <span class="sub-label" id="highlight-label">Highlighter</span>
-        <div class="swatches" role="radiogroup" aria-labelledby="highlight-label">
-          <button
-            class="highlight-swatch none"
-            type="button"
-            role="radio"
-            aria-checked=${radio(!task.highlight)}
-            aria-label="No highlighter"
-            title="None"
-            @click=${() => this.patchTask(task, { highlight: undefined })}
-          ></button>
-          ${todoHighlights.map(
-            (highlight) =>
-              html`<button
-                class="highlight-swatch highlight-${highlight}"
-                type="button"
-                role="radio"
-                aria-checked=${radio(task.highlight === highlight)}
-                aria-label=${HIGHLIGHT_LABELS[highlight]}
-                title=${HIGHLIGHT_LABELS[highlight]}
-                @click=${() => this.patchTask(task, { highlight })}
-              >
-                <span aria-hidden="true">Aa</span>
-              </button>`,
-          )}
-        </div>
-
-        <span class="sub-label" id="ink-label">Text colour</span>
-        <div class="swatches" role="radiogroup" aria-labelledby="ink-label">
-          <button
-            class="pen-swatch default"
-            type="button"
-            role="radio"
-            aria-checked=${radio(!task.ink)}
-            aria-label="Default text colour"
-            title="Default"
-            @click=${() => this.patchTask(task, { ink: undefined })}
-          ></button>
-          ${todoPens.map(
-            (pen) =>
-              html`<button
-                class="pen-swatch pen-${pen}"
-                type="button"
-                role="radio"
-                aria-checked=${radio(task.ink === pen)}
-                aria-label=${`${PEN_LABELS[pen]} text`}
-                title=${PEN_LABELS[pen]}
-                @click=${() => this.patchTask(task, { ink: pen })}
-              ></button>`,
-          )}
-        </div>
-
-        <span class="sub-label">Icon</span>
-        <div class="icon-tools">
-          <button class="no-icon" type="button" aria-pressed=${current ? 'false' : 'true'} @click=${() => this.patchTask(task, { icon: undefined })}>
-            No icon
+        <div class="panel-foot">
+          ${this.storageKey ? html`<span class="saved">Saved in this browser</span>` : html`<span></span>`}
+          <button class="done-button" type="button" @click=${this.closePanel}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+            Back to the list
           </button>
-          <input
-            class="icon-search"
-            type="search"
-            aria-label="Search icons"
-            placeholder=${`Search ${taskIconCatalog.length} icons`}
-            .value=${this.iconQuery}
-            @input=${(event: Event) => (this.iconQuery = (event.target as HTMLInputElement).value)}
-          />
-        </div>
-        <div class=${classMap({ 'icon-picker': true, [`ink-${task.ink}`]: !!task.ink })} @keydown=${this.moveIconFocus}>
-          ${groups.map(
-            (group) => html`
-              <div class="icon-group" role="group" aria-label=${group.label}>
-                <span class="icon-group-label" aria-hidden="true">${group.label}</span>
-                <div class="icon-grid">
-                  ${group.icons.map(
-                    ({ name, title }) =>
-                      html`<button
-                        class="icon-option"
-                        type="button"
-                        aria-label=${title}
-                        title=${title}
-                        aria-pressed=${name === current ? 'true' : 'false'}
-                        tabindex=${name === focusable ? 0 : -1}
-                        @click=${() => this.patchTask(task, { icon: name })}
-                      >
-                        ${renderTaskIcon(name)}
-                      </button>`,
-                  )}
-                </div>
-              </div>
-            `,
-          )}
-          ${groups.length === 0 ? html`<p class="hint">No icon matches “${this.iconQuery}”.</p>` : nothing}
         </div>
       </div>
     `

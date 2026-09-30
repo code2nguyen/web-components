@@ -344,6 +344,12 @@ export const overrides: Record<string, Override> = {
   '--c2-symbol__accent--color': { exclude: 'decorative golden highlight' },
   '--c2-symbol__success--color': { exclude: 'semantic success colour' },
   '--c2-symbol__warning--color': { exclude: 'semantic warning colour' },
+  // Reorder list swipe actions are semantic colours, like the todo list's: they stay put in every theme.
+  '--c2-reorder-list__swipe-action__danger--background-color': { token: 'color-error' },
+  '--c2-reorder-list__swipe-action__warning--background-color': { exclude: 'semantic warning action' },
+  '--c2-reorder-list__swipe-action__success--background-color': { exclude: 'semantic success action' },
+  '--c2-reorder-list__swipe-action__neutral--background-color': { exclude: 'neutral action fill under white text' },
+  '--c2-reorder-list__swipe-action--color': { exclude: 'white text on the coloured actions' },
   // Todo list: the pens follow the chart palette and the error colour, so a brand theme and dark mode recolour the
   // ink as they recolour a chart; the highlighters are hues mixed into whatever background the list has, and the
   // swipe actions are semantic colours that stay put.

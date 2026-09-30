@@ -15,14 +15,17 @@ as tasks are crossed off; set `progress` to `bar`, `hero` or `none` to draw it d
 list's icon (Groceries gets a cart), and any task can carry its own icon from
 [`@c2n/task-icons`](../../icons/task-icons), a highlighter for what matters, or a pen colour for its text.
 
-Click a task to write a note under it, or type one after a dash in the add field (“Oat milk - 2 L barista”). Drag
-the grip to reorder. Swipe a row left for **Archive** and **Delete**, or right to check it. On a desktop the same
-actions are in the row's ⋯ menu (or a right-click) and on the keys **E**, **Delete**, **X** (won't do) and **N**
-(note). Archived tasks collect at the bottom, and every archive or delete can be undone.
+Click a task to write a note under it, or type one after a dash in the add field (“Oat milk - 2 L barista”). Drag a
+row up or down to reorder it. Swipe it left for **Archive** and **Delete**, or right for **Done** (both come from
+[`c2-reorder-list`](../reorder-list)); tap the row, swipe it back or press Escape to close it without doing anything.
+On a desktop the same actions are in the row's ⋯ menu (or a right-click) and on the keys **E**, **Delete**, **X**
+(won't do), **N** (note) and **I** (icon). The menu also changes the task's **Highlight** and **Text colour** from a
+swatch submenu, and clicking a task's icon opens the icon picker, so one task is styled in place without a panel.
+Archived tasks collect at the bottom, and every archive or delete can be undone.
 
-Add `customizable` for a palette button. Its panel sets the background (the text colour and the pens on offer follow
-from it), the pen, the done mark, the density and the progress style, plus the icon, highlighter and text colour of
-the selected task. With a `storage-key` those choices are remembered in `localStorage`; `persist-tasks` remembers the
+Add `customizable` for a palette button. It swaps the tasks for a panel that styles the whole list: the background
+(the text colour and the pens on offer follow from it), the pen, the done mark, the density and the progress style;
+**Back to the list** (or Escape) returns to the tasks. With a `storage-key` those choices are remembered in `localStorage`; `persist-tasks` remembers the
 tasks too.
 
 ## Installation

@@ -22,6 +22,8 @@ declare module 'vue' {
       C2Props<ReorderList> & {
         dragstartthreshold?: unknown
         autoscrolldisabled?: unknown
+        'swipe-actions'?: unknown
+        onSwipeAction?: (event: EventOf<ReorderList, 'swipe-action'>) => void
         onReorder?: (event: EventOf<ReorderList, 'reorder'>) => void
         onChange?: (event: EventOf<ReorderList, 'change'>) => void
         onReorderError?: (event: EventOf<ReorderList, 'reorder-error'>) => void

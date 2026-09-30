@@ -2,13 +2,14 @@
 
 `<c2-todo-list>` is a to-do list with the feel of a paper one. Tasks are plain text, checked off with a hand-drawn
 tick (or cross) and a pen stroke through the text; a task you drop gets a red ✗. Progress shows as a ring beside the
-heading, a bar, or a large hero ring. Click a task to add a note, drag the grip to reorder, swipe a row left to
-archive or delete it and right to check it, or use its ⋯ menu (also a right-click, and the keys E, Delete, X and N).
-Archived tasks collect at the bottom and every removal can be undone.
+heading, a bar, or a large hero ring. Click a task to add a note, drag a row to reorder it, swipe it left to archive
+or delete it and right to check it (the swipe and the reordering come from `@c2n/reorder-list`), or use its ⋯ menu
+(also a right-click, and the keys N, I, X, E and Delete), which also sets the task's highlight and text colour from a
+swatch submenu. Click a task's icon to change it. Archived tasks collect at the bottom and every removal can be undone.
 
 Tasks can carry an optional icon from `@c2n/task-icons`, a highlighter background and a pen colour for their text.
-With `customizable`, a palette button opens a panel for the background (whose text colour and pens follow from it),
-the pen, the done mark, the density and the progress style; with `storage-key` those choices are remembered in
+With `customizable`, a palette button swaps the tasks for a panel that styles the whole list: the background (whose
+text colour and pens follow from it), the pen, the done mark, the density and the progress style; with `storage-key` those choices are remembered in
 `localStorage`.
 
 ```bash

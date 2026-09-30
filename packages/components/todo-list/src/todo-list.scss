@@ -36,9 +36,6 @@
     add--border-color: #d4d4d8,
     panel--background-color: #fafafa,
     panel--border-radius: 8px,
-    archive-action--background-color: #a16207,
-    delete-action--background-color: #dc2626,
-    done-action--background-color: #15803d,
     toast--background-color: #18181b,
     toast--color: #fafafa,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
@@ -68,6 +65,7 @@ $pens: blue, red, green, violet, graphite;
 $highlights: yellow, green, blue, pink, orange, violet;
 // How much highlighter ink is mixed into the background: light enough for any pen to stay readable on it.
 $highlight-strength: 22%;
+$menu-item-height: 36px;
 
 :host {
   display: block;
@@ -399,75 +397,22 @@ svg {
   --c2-reorder-list__placeholder--border-width: 1.5px;
   --c2-reorder-list__item__focus--outline-color: #{$accent};
   --c2-reorder-list__item__focus--outline-offset: -2px;
+  // The inner list draws the swipe actions; their colours are its own `--c2-reorder-list__swipe-action__*`
+  // variables, which a page can set on this list since custom properties inherit into it.
+  --c2-reorder-list__swipe-content--background-color: #{$surface};
+  --c2-reorder-list--item-padding: 0px;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(container--gap);
+  min-width: 0;
 }
 
 .task-slot {
   position: relative;
   display: block;
-}
-
-.swipe-actions {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: space-between;
-  overflow: hidden;
-  border-radius: css.cssVar(row--border-radius);
-  visibility: hidden;
-
-  &.visible {
-    visibility: visible;
-  }
-}
-
-.swipe-done {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  padding-left: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #ffffff;
-  background-color: css.cssVar(done-action--background-color);
-
-  svg {
-    width: 20px;
-    height: 20px;
-    stroke-width: 2.6;
-  }
-}
-
-.swipe-buttons {
-  display: flex;
-  flex-shrink: 0;
-}
-
-.swipe-archive,
-.swipe-delete {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  width: 76px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #ffffff;
-
-  svg {
-    width: 18px;
-    height: 18px;
-    stroke-width: 1.8;
-  }
-}
-
-.swipe-archive {
-  background-color: css.cssVar(archive-action--background-color);
-}
-
-.swipe-delete {
-  background-color: css.cssVar(delete-action--background-color);
 }
 
 .task {
@@ -480,12 +425,10 @@ svg {
   border-radius: css.cssVar(row--border-radius);
   // The row covers the swipe actions behind it, so it always paints a background of its own.
   background-color: $surface;
-  touch-action: pan-y;
-  transition:
-    transform calc($duration * 1.2) cubic-bezier(0.2, 0.8, 0.2, 1),
-    background-color $duration ease;
+  transition: background-color $duration ease;
 
-  &:hover {
+  &:hover,
+  &.active {
     background-color: css.cssVar(row__hover--background-color);
   }
 
@@ -506,15 +449,7 @@ svg {
     opacity: 0;
   }
 
-  &.selected {
-    outline: 1.5px solid $accent;
-    outline-offset: -1.5px;
-  }
 
-  &.swiping {
-    transition: background-color $duration ease;
-    user-select: none;
-  }
 }
 
 .grip {
@@ -527,7 +462,6 @@ svg {
   color: $muted;
   opacity: 0;
   cursor: grab;
-  touch-action: none;
   transition: opacity $duration ease;
 
   svg {
@@ -585,10 +519,22 @@ svg {
 
 .task-icon {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  padding-top: calc((#{css.cssVar(mark--size)} - #{css.cssVar(icon--size)}) / 2);
+  width: calc(#{css.cssVar(icon--size)} + 8px);
+  height: css.cssVar(mark--size);
+  margin: 0 -4px;
+  border-radius: 8px;
   color: var(--_ink, #{$accent});
-  transition: opacity $duration ease;
+  transition:
+    opacity $duration ease,
+    background-color $duration ease;
+
+  &:is(button):hover,
+  &[aria-expanded='true'] {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+  }
 
   .icon {
     width: css.cssVar(icon--size);
@@ -608,6 +554,7 @@ svg {
 .label {
   display: block;
   max-width: 100%;
+  cursor: text;
   min-height: css.cssVar(mark--size);
   padding: 4px 0;
   text-align: left;
@@ -646,6 +593,7 @@ svg {
 }
 
 .note {
+  cursor: text;
   margin: -2px 0 2px;
   font-size: css.cssVar(meta--font-size);
   line-height: 1.4;
@@ -779,6 +727,104 @@ svg {
 
 .menu-label {
   flex: 1;
+}
+
+.menu-item {
+  height: $menu-item-height;
+  padding-top: 0;
+  padding-bottom: 0;
+
+  &.has-submenu.open {
+    background-color: css.cssVar(chip--background-color);
+  }
+
+  .chevron {
+    width: 12px;
+    height: 12px;
+    color: $muted;
+  }
+}
+
+.menu-item .menu-swatch {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  box-shadow: none;
+
+  &.pen-swatch {
+    border-radius: 999px;
+  }
+
+  &.none {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 30%, transparent);
+  }
+}
+
+// A submenu opens beside the menu, level with the item that opened it.
+.submenu {
+  position: absolute;
+  right: calc(100% + 6px);
+  display: grid;
+  grid-template-columns: repeat(4, 30px);
+  gap: 6px;
+  padding: 8px;
+  border-radius: css.cssVar(panel--border-radius);
+  background-color: $surface;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+  animation: reveal calc($duration * 0.8) ease-out;
+
+  .highlight-swatch {
+    width: 30px;
+    height: 26px;
+    font-size: 11px;
+  }
+
+  .pen-swatch {
+    width: 26px;
+    height: 26px;
+    margin: 0 2px;
+  }
+
+  [role='menuitemradio'][aria-checked='true'] {
+    box-shadow:
+      0 0 0 2px #{$surface},
+      0 0 0 4px #{$accent};
+  }
+}
+
+.submenu-highlight {
+  top: calc(6px + #{$menu-item-height} * 2);
+}
+
+.submenu-ink {
+  top: calc(6px + #{$menu-item-height} * 3);
+}
+
+.icon-popover {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% - 4px);
+  left: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 360px;
+  padding: 10px;
+  border-radius: css.cssVar(panel--border-radius);
+  color: $ink;
+  background-color: $surface;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+  animation: reveal calc($duration * 0.8) ease-out;
+
+  .icon-picker {
+    max-height: 240px;
+  }
 }
 
 .empty {
@@ -965,13 +1011,43 @@ svg {
   border-radius: css.cssVar(panel--border-radius);
   background-color: css.cssVar(panel--background-color);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 6%, transparent);
-  animation: reveal calc($duration * 1.2) ease-out;
+  animation: panel-in calc($duration * 1.4) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.view {
+  animation: view-in calc($duration * 1.4) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.done-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: css.cssVar(on-accent--color);
+  background-color: $accent;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+  }
 }
 
 .panel-title {
@@ -1273,6 +1349,20 @@ svg {
   from {
     opacity: 0;
     transform: translateY(-4px);
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
   }
 }
 
