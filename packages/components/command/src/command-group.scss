@@ -1,0 +1,43 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-command-group,
+  $theme: (
+    heading--color: #71717a,
+    heading--font-size: 12px,
+    heading--font-weight: 500,
+    heading--letter-spacing: null,
+    heading--text-transform: null,
+    heading--padding-top: 8px,
+    heading--padding-right: 8px,
+    heading--padding-bottom: 4px,
+    heading--padding-left: 8px,
+  )
+);
+
+:host {
+  display: block;
+  flex: none;
+}
+
+:host([hidden]),
+:host(:state(filtered)) {
+  display: none;
+}
+
+.heading {
+  color: css.cssVar(heading--color);
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  letter-spacing: css.cssVar(heading--letter-spacing);
+  text-transform: css.cssVar(heading--text-transform);
+  line-height: 16px;
+  padding-top: css.cssVar(heading--padding-top);
+  padding-right: css.cssVar(heading--padding-right);
+  padding-bottom: css.cssVar(heading--padding-bottom);
+  padding-left: css.cssVar(heading--padding-left);
+  user-select: none;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+}

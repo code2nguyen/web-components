@@ -108,6 +108,55 @@ export interface TableColumnConfig {
   renderSummary?: TableSummaryRenderer
   /** Client-side sort comparator for the column's values. */
   comparator?: (a: unknown, b: unknown) => number
+  /**
+   * Puts the group tree in this column while the table is grouped: the chevron, the group's label and its row count
+   * on each group row, and the indentation of the rows under it. Defaults to the first column.
+   */
+  groupColumn?: boolean
+}
+
+/** One level of row grouping: the rows are bucketed by the value of `field`, or by `getValue(row)` when given. */
+export interface TableGroupBy {
+  /** Field whose value names the group; may be a dotted path. Also the level's name in the group keys. */
+  field: string
+  /** Computes the group value instead of reading `field`, such as the month of a date. Property only. */
+  getValue?: (row: TableRow) => unknown
+  /**
+   * Order of the groups of this level. Defaults to the direction the table is sorted by `field`, ascending when it
+   * is not. A function compares two group values.
+   */
+  sort?: SortDirection | ((a: unknown, b: unknown) => number)
+}
+
+/**
+ * `group-display`: `row` puts each group on a row of the grid, with the column aggregates of its rows under their own
+ * columns; `band` draws one full-width band per group, holding its label and row count.
+ */
+export type TableGroupDisplay = 'row' | 'band'
+
+export interface TableGroupContext {
+  /** Stable key of the group, built from its path: `region=EMEA/status=Paid`. */
+  key: string
+  /** Depth of the group, 0 for the outermost level. */
+  level: number
+  /** The `field` of the level. */
+  field: string
+  /** The value every row of the group shares. */
+  value: unknown
+  /** Every row of the group, sorted, including the rows of its sub-groups. */
+  rows: TableRow[]
+  expanded: boolean
+  /** The aggregates of the group's rows, keyed by column `id`: one entry per column with a `summary`. */
+  summary: Record<string, unknown>
+}
+
+/** Renders the label of a group in place of its formatted value. */
+export type TableGroupRenderer = (context: TableGroupContext) => unknown
+
+export interface TableGroupToggleEventDetail {
+  key: string
+  expanded: boolean
+  group: TableGroupContext
 }
 
 export interface TableRowsRequest {
@@ -164,6 +213,31 @@ export interface TableColumnResizeEventDetail {
 
 /** Reads a possibly dotted `field` path out of a row. Re-exported from `@c2n/core` so the table keeps its own subpath. */
 export { getFieldValue } from '@c2n/core/data-helper.js'
+
+/** Splits the `group-by` attribute: a JSON array, or field names separated by commas or semicolons. */
+function parseGroupBy(value: string): (string | TableGroupBy)[] {
+  const text = value.trim()
+  if (text.startsWith('[')) {
+    try {
+      const parsed: unknown = JSON.parse(text)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+  return text
+    .split(/[;,]/)
+    .map((field) => field.trim())
+    .filter(Boolean)
+}
+
+/** `region,status` ⇄ `['region', 'status']`; a string assigned to the property is parsed the same way. */
+export const groupByConverter = {
+  toAttribute: (value: (string | TableGroupBy)[]) =>
+    Array.isArray(value) && value.length && value.every((entry) => typeof entry === 'string') ? value.join(',') : null,
+  fromAttribute: (value: string | null): (string | TableGroupBy)[] => (value ? parseGroupBy(value) : []),
+  fromProperty: (value: unknown) => (typeof value === 'string' ? parseGroupBy(value) : value),
+}
 
 /** `name:asc;age:desc` ⇄ `SortModel[]`, so the sort can be set from markup. */
 export const sortModelConverter = {

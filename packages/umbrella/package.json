@@ -137,6 +137,14 @@
       "types": "./lib/color-slider.d.ts",
       "default": "./lib/color-slider.js"
     },
+    "./command": {
+      "types": "./lib/command.d.ts",
+      "default": "./lib/command.js"
+    },
+    "./context-menu": {
+      "types": "./lib/context-menu.d.ts",
+      "default": "./lib/context-menu.js"
+    },
     "./copy-button": {
       "types": "./lib/copy-button.d.ts",
       "default": "./lib/copy-button.js"
@@ -193,6 +201,10 @@
       "types": "./lib/log-viewer.d.ts",
       "default": "./lib/log-viewer.js"
     },
+    "./marker": {
+      "types": "./lib/marker.d.ts",
+      "default": "./lib/marker.js"
+    },
     "./masonry": {
       "types": "./lib/masonry.d.ts",
       "default": "./lib/masonry.js"
@@ -216,6 +228,10 @@
     "./number-input": {
       "types": "./lib/number-input.d.ts",
       "default": "./lib/number-input.js"
+    },
+    "./otp-input": {
+      "types": "./lib/otp-input.d.ts",
+      "default": "./lib/otp-input.js"
     },
     "./overlay": {
       "types": "./lib/overlay.d.ts",
@@ -403,6 +419,8 @@
     "@c2n/color-area": "0.0.19",
     "@c2n/color-select": "0.0.19",
     "@c2n/color-slider": "0.0.19",
+    "@c2n/command": "0.0.19",
+    "@c2n/context-menu": "0.0.19",
     "@c2n/copy-button": "0.0.19",
     "@c2n/dashboard": "0.0.19",
     "@c2n/date-input": "0.0.19",
@@ -417,12 +435,14 @@
     "@c2n/list": "0.0.19",
     "@c2n/list-item": "0.0.19",
     "@c2n/log-viewer": "0.0.19",
+    "@c2n/marker": "0.0.19",
     "@c2n/masonry": "0.0.19",
     "@c2n/mat-icon": "0.0.19",
     "@c2n/menu": "0.0.19",
     "@c2n/modal": "0.0.19",
     "@c2n/navigation-menu": "0.0.19",
     "@c2n/number-input": "0.0.19",
+    "@c2n/otp-input": "0.0.19",
     "@c2n/overlay": "0.0.19",
     "@c2n/pagination": "0.0.19",
     "@c2n/progress": "0.0.19",

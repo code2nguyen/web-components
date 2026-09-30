@@ -40,7 +40,7 @@ The examples below are real application patterns rather than visual variants. Th
     line-height: 1.4;
   }
   .autocomplete-example [slot='header'] strong {
-    color: #3f3f46;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     font-weight: 600;
   }
   .autocomplete-example [slot] > :first-child {
@@ -52,7 +52,7 @@ The examples below are real application patterns rather than visual variants. Th
     border-radius: 999px;
     padding: 3px 10px;
     color: #6d28d9;
-    background: #f5f3ff;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     font: inherit;
     font-weight: 600;
     white-space: nowrap;

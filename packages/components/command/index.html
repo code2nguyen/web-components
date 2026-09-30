@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-command</title>
+    <script type="module" src="/src/command.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        gap: 32px;
+        max-width: 480px;
+      }
+      .dark {
+        --c2-command--background: #18181b;
+        --c2-command--color: #fafafa;
+        --c2-command--border-top: 1px solid #3f3f46;
+        --c2-command--border-right: 1px solid #3f3f46;
+        --c2-command--border-bottom: 1px solid #3f3f46;
+        --c2-command--border-left: 1px solid #3f3f46;
+        --c2-command__field--border-bottom: 1px solid #3f3f46;
+        --c2-command-item--color: #fafafa;
+        --c2-command-item__active--background: #27272a;
+        --c2-command-separator--color: #3f3f46;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h3>Groups, keywords, disabled row, separator</h3>
+    <c2-command id="basic">
+      <c2-command-group heading="Suggestions">
+        <c2-command-item value="calendar">Calendar</c2-command-item>
+        <c2-command-item value="emoji" keywords="smiley face">Search emoji</c2-command-item>
+        <c2-command-item value="calculator" disabled>Calculator</c2-command-item>
+      </c2-command-group>
+      <c2-command-separator></c2-command-separator>
+      <c2-command-group heading="Settings">
+        <c2-command-item value="profile">Profile<span slot="shortcut">⌘P</span></c2-command-item>
+        <c2-command-item value="billing">Billing<span slot="shortcut">⌘B</span></c2-command-item>
+      </c2-command-group>
+    </c2-command>
+    <output id="last">Last command: –</output>
+
+    <h3>Links, descriptions, footer, loop</h3>
+    <c2-command loop placeholder="Jump to…">
+      <c2-command-item href="#button">Button<span slot="description">Actions and form submits</span></c2-command-item>
+      <c2-command-item href="#select">Select<span slot="description">Pick one option</span></c2-command-item>
+      <span slot="empty">No page matches.</span>
+      <span slot="footer">↑↓ navigate · ↵ open</span>
+    </c2-command>
+
+    <h3>Dark</h3>
+    <c2-command class="dark">
+      <c2-command-item>Deploy</c2-command-item>
+      <c2-command-item>View logs</c2-command-item>
+    </c2-command>
+
+    <script type="module">
+      document.querySelector('#basic').addEventListener('command-select', (event) => {
+        document.querySelector('#last').textContent = `Last command: ${event.detail.value}`
+      })
+    </script>
+  </body>
+</html>

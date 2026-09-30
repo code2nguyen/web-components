@@ -29,8 +29,8 @@ npm install @c2n/status-panel
     --c2-status-panel__container--min-height: 0px;
     --c2-status-panel__container--padding: 36px;
     --c2-status-panel__container--gap: 20px;
-    --c2-status-panel__container--border: 1px solid #e4e4e7;
-    --c2-status-panel__container--background-color: #ffffff;
+    --c2-status-panel__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-status-panel__container--background-color: var(--c2-theme--color-surface, #ffffff);
     --c2-status-panel__media--size: 150px;
     --c2-status-panel__media-icon--size: 150px;
     --c2-status-panel__media__error--background-color: transparent;
@@ -46,9 +46,9 @@ npm install @c2n/status-panel
   .release-summary {
     display: grid;
     overflow: hidden;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
-    background: #fafafa;
+    background: var(--c2-theme--color-surface-container-low, #fafafa);
     text-align: left;
   }
   .release-summary__row {
@@ -56,25 +56,25 @@ npm install @c2n/status-panel
     grid-template-columns: 110px 1fr;
     gap: 16px;
     padding: 12px 14px;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     font-size: 13px;
     line-height: 18px;
   }
   .release-summary__row + .release-summary__row {
-    border-top: 1px solid #e4e4e7;
+    border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .release-summary__label {
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .release-summary strong {
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
     font-weight: 600;
   }
   .recovery-secondary {
-    --c2-button__container--border: 1px solid #bcbcc6;
-    --c2-button__container--background-color: #ffffff;
-    --c2-button__container--color: #18181b;
-    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .compact-state {
     --c2-status-panel__container--min-height: 0px;
@@ -94,10 +94,10 @@ npm install @c2n/status-panel
     object-fit: contain;
   }
   .secondary-action {
-    --c2-button__container--border: 1px solid #bcbcc6;
-    --c2-button__container--background-color: #ffffff;
-    --c2-button__container--color: #18181b;
-    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <div data-label="Empty state">

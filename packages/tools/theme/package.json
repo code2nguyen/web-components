@@ -55,6 +55,10 @@
       "dependencies": [
         "type-check",
         "../../components/hover-card:build",
+        "../../components/command:build",
+        "../../components/marker:build",
+        "../../components/context-menu:build",
+        "../../components/otp-input:build",
         "../../components/chat-message-list:build",
         "../../components/shortcut:build",
         "../../components/carousel:build",

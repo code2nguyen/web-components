@@ -18,6 +18,10 @@
   },
   "dependencies": {
     "@c2n/hover-card": "*",
+    "@c2n/command": "*",
+    "@c2n/marker": "*",
+    "@c2n/context-menu": "*",
+    "@c2n/otp-input": "*",
     "@c2n/chat-message-list": "*",
     "@c2n/shortcut": "*",
     "@c2n/carousel": "*",
@@ -74,6 +78,7 @@
     "@c2n/phosphor-icons": "*",
     "@c2n/progress": "*",
     "@c2n/qr-code": "*",
+    "@c2n/reorder-list": "*",
     "@c2n/questionnaire": "*",
     "@c2n/radio": "*",
     "@c2n/rate": "*",

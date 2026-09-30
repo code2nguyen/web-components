@@ -32,6 +32,41 @@ export function describeComponentPreset(preset: ComponentPreset): string {
 }
 
 export const componentPresets: Record<string, ComponentPresetGroup> = {
+  'c2-marker': {
+    html: `<p style="max-width:320px;margin:0;font-size:16px;line-height:1.7">Deploys are <c2-marker>fully automated</c2-marker> from merge to production.</p>`,
+    presets: [
+      {
+        name: 'Soft pill',
+        description: 'A rounded violet wash with room around the words, for tags inside prose.',
+        css: {
+          '--c2-marker__mark--background-color': 'rgba(139, 92, 246, 0.22)',
+          '--c2-marker__mark--border-radius': '999px',
+          '--c2-marker__mark--padding': '1px 8px',
+        },
+      },
+      {
+        name: 'Red pen circle',
+        description: 'A loose red circle drawn around the words when they scroll into view.',
+        css: {
+          '--c2-marker__stroke--color': '#dc2626',
+          '--c2-marker__stroke--width': '3px',
+          '--c2-marker__stroke--offset': '6px',
+          '--c2-marker__mark--transition-duration': '1s',
+        },
+        attributes: { variant: 'circle', animated: '' },
+      },
+      {
+        name: 'Thick underline',
+        description: 'A heavy primary underline that sweeps in from the left.',
+        css: {
+          '--c2-marker__stroke--width': '4px',
+          '--c2-marker__mark--padding': '0',
+          '--c2-marker__mark--transition-duration': '800ms',
+        },
+        attributes: { variant: 'underline', animated: '' },
+      },
+    ],
+  },
   'c2-carousel': {
     html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
     presets: [

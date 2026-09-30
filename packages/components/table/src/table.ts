@@ -11,11 +11,13 @@ import { property, arrayPropertyConverter, jsonPropertyConverter } from '@c2n/co
 import { VirtualScrollController } from '@c2n/core/controllers/virtual-scroll.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { defaultCompare } from '@c2n/core/data-helper.js'
+import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
 import { provide } from '@lit/context'
 import { PAGER_CONNECT_EVENT, pagerContext, type PagerConnectEventDetail, type PagerContext } from '@c2n/core/contexts/pager.js'
 import { COLUMN_CHANGE_EVENT, TableColumn } from './table-column.js'
 import {
   getFieldValue,
+  groupByConverter,
   sortModelConverter,
   type ColumnPin,
   type SortDirection,
@@ -24,6 +26,11 @@ import {
   type TableColumnConfig,
   type TableColumnResizeEventDetail,
   type TableDataSource,
+  type TableGroupBy,
+  type TableGroupContext,
+  type TableGroupDisplay,
+  type TableGroupRenderer,
+  type TableGroupToggleEventDetail,
   type TableRow,
   type TableRowEventDetail,
   type TableRowStyler,
@@ -61,6 +68,69 @@ interface SummaryCell {
   index: number
   span: number
 }
+
+/** One group of the row tree, built from the sorted rows whenever they or `groupBy` change. */
+interface GroupNode {
+  key: string
+  level: number
+  field: string
+  value: unknown
+  /** Indices of the group's rows, sub-groups included, in the array the tree was built from. */
+  rowIndices: number[]
+  children: GroupNode[]
+  parent?: GroupNode
+  /** Where the group's own row sits in the display list; -1 while a closed parent hides it. */
+  position: number
+  /** The rows, their keys and the aggregates, computed on first use: the tree is rebuilt whenever the rows change. */
+  rows?: TableRow[]
+  keys?: string[]
+  selection?: { value: string[]; count: number }
+  summary?: { inputs: unknown[]; values: Map<string, unknown> }
+}
+
+/** One line of a grouped body: a group row, or a data row pointing into the array the tree was built from. */
+type DisplayItem = { kind: 'group'; node: GroupNode } | { kind: 'row'; rowIndex: number; parent: GroupNode }
+
+interface Grouping {
+  levels: TableGroupBy[]
+  /** The rows the tree indexes into: the sorted rows, or the transition rows while an update animates. */
+  source: TableRow[]
+  roots: GroupNode[]
+  nodes: Map<string, GroupNode>
+  items: DisplayItem[]
+}
+
+/** Group keys are `field=value` pairs joined by `/`, so those characters (and `;`, the list separator) are escaped. */
+function encodeGroupPart(value: string): string {
+  return value.replace(/[%/=;]/g, (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)
+}
+
+/** Groups rows by the string form of their value: `1` and `"1"` share a group, and an empty value is its own. */
+function groupBucketId(value: unknown): string {
+  if (value === null || value === undefined || value === '') return ''
+  if (value instanceof Date) return value.toISOString()
+  if (typeof value === 'object') return JSON.stringify(value)
+  return String(value)
+}
+
+/** Keys of the expanded groups: a `;`-separated list in the attribute, since a key holds `/` and `=`. */
+const groupKeysConverter = {
+  ...arrayPropertyConverter,
+  fromAttribute: (value: string | null) => (value === null ? undefined : arrayPropertyConverter.fromAttribute(value)),
+  toAttribute: (value: string[] | undefined) => (Array.isArray(value) ? arrayPropertyConverter.toAttribute(value) : null),
+}
+
+const CHEVRON = html`<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d="M6 9l6 6 6-6" />
+</svg>`
 
 /** A column's identity: its `id` (the `column-id` attribute on an element, never the HTML `id`), otherwise its field. */
 function columnKey(column: TableColumnConfig): string {
@@ -193,6 +263,7 @@ export interface TableEventMap {
   'cell-click': CustomEvent<TableCellEventDetail>
   'column-resize': CustomEvent<TableColumnResizeEventDetail>
   'page-change': CustomEvent<TablePageChangeEventDetail>
+  'group-toggle': CustomEvent<TableGroupToggleEventDetail>
 }
 
 export interface Table {
@@ -258,6 +329,29 @@ export interface Table {
  * </c2-table>
  * ```
  *
+ * **Grouping.** `group-by="region,status"` gathers the rows into collapsible groups, outermost level first; the grid
+ * becomes a `treegrid`. With the default `group-display="row"` each group is a row of the grid: its label and row
+ * count in the first column (or the one marked `group-column`), and under every column with a `summary` that
+ * aggregate over the group's rows, formatted like the column. `group-display="band"` draws one full-width band per
+ * group instead. A group is named by its path, `region=EMEA/status=Paid`: `expanded-groups` lists the open ones
+ * (every group is open until then, or closed with `groups-collapsed`), `group-toggle` reports a click, and a group's
+ * checkbox selects its rows. The groups of the rows at the top stay under the header while their rows scroll, and
+ * a page that starts inside a group repeats its headers; pages count display lines, so a closed group takes one.
+ * Grouping is done on the client and does not apply to a `dataSource`.
+ *
+ * ```html
+ * <c2-table row-key="id" group-by="region" selection="multiple" checkbox-selection>
+ *   <c2-table-column field="customer" header="Customer"></c2-table-column>
+ *   <c2-table-column field="region" hidden></c2-table-column>
+ *   <c2-table-column field="amount" format="currency" align="end" summary="sum"></c2-table-column>
+ * </c2-table>
+ * ```
+ *
+ * Wrapped in a `c2-context-menu`, a right-clicked or long-pressed body cell answers the menu's request with the same
+ * detail as `cell-click` (`row`, `rowIndex`, `key`, `column`, `value`), which the menu passes on as `context.data`
+ * with this table as `context.source`, so `renderContextMenu` can build the rows for that cell. The cell also takes
+ * the keyboard focus.
+ *
  * @tag c2-table
  *
  * @slot default - The column definitions: `c2-table-column` elements. They render nothing themselves.
@@ -268,6 +362,7 @@ export interface Table {
  * @slot error - Replaces the built-in message shown when `error` is set.
  * @slot fallback - Meaningful server-rendered table content. It remains visible before custom-element upgrade and is
  * retained in the light DOM but hidden after the interactive grid mounts, avoiding duplicate client content.
+ * @slot group:{groupKey} - Label of one group, e.g. `slot="group:region=EMEA"`, in place of its formatted value and row count. The copy of the group kept under the header while its rows scroll shows the built-in label.
  * @slot cell:{rowKey}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:AAPL:change"`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback.
  *
  * @slotcomponent c2-table-column
@@ -278,6 +373,7 @@ export interface Table {
  * @event {CustomEvent<TableRowEventDetail>} row-click - Fired when a row is clicked, before the selection is applied.
  * @event {CustomEvent<TableCellEventDetail>} cell-click - Fired when a cell is clicked; adds `detail.column` and `detail.value`.
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
+ * @event {CustomEvent<TableGroupToggleEventDetail>} group-toggle - Fired after the user opens or closes a group, with its `key`, whether it is now `expanded`, and the `group` itself (its rows and aggregates). `expandedGroups` already holds the new state. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
  * @csspart toolbar - Row above the grid containing the `toolbar` slot.
@@ -299,6 +395,11 @@ export interface Table {
  * @csspart summary-row - The totals row kept at the bottom of the grid.
  * @csspart summary-cell - Every cell of the summary row. Each also carries `summary-cell-<id>`, named after its column.
  * @csspart summary-content - The content wrapper inside a summary cell; also `summary-content-<id>`.
+ * @csspart group-row - Every group row. Also `group-row-level-<n>` (0 for the outermost level), `group-band` with `group-display="band"`, and `group-row-echo` on a copy kept under the header.
+ * @csspart group-cell - Every cell of a group row. Each also carries `group-cell-<id>`, named after its column.
+ * @csspart group-toggle - The chevron of a group row.
+ * @csspart group-label - The group's value, or what `renderGroup` returned.
+ * @csspart group-count - The number of rows in the group.
  *
  * @cssproperty {color} [--c2-table--background=#ffffff]
  * @cssproperty {color} [--c2-table--color=#18181b]
@@ -373,6 +474,23 @@ export interface Table {
  * @cssproperty {font-size} [--c2-table__summary--font-size=14px]
  * @cssproperty {font-weight} [--c2-table__summary--font-weight=600]
  * @cssproperty {box-shadow} [--c2-table__summary--box-shadow=0 -1px 0 0 #e4e4e7] - Separator above the summary row; a shadow rather than a border so it lands on the last row's own border instead of doubling it.
+ *
+ * @cssproperty {color} [--c2-table__group-row--background=#fafafa]
+ * @cssproperty {color} [--c2-table__group-row--color=#18181b]
+ * @cssproperty {font-weight} [--c2-table__group-row--font-weight=600]
+ * @cssproperty {color} [--c2-table__group-row__hover--background=#f4f4f5]
+ * @cssproperty {box-shadow} [--c2-table__group-row__echo--box-shadow=0 1px 0 0 #e4e4e7] - Separator under a group row kept under the header.
+ * @cssproperty {color} [--c2-table__group-band--background=#f4f4f5] - Background of a group with `group-display="band"`.
+ * @cssproperty {pixel} [--c2-table__group--indent=24px] - Indentation per group level; the default lines rows up with their group's label.
+ * @cssproperty {pixel} [--c2-table__group-toggle--size=16px]
+ * @cssproperty {color} [--c2-table__group-toggle--color=#71717a]
+ * @cssproperty {time} [--c2-table__group-toggle--transition-duration=150ms] - Chevron turn when a group opens or closes; respects reduced motion.
+ * @cssproperty {color} [--c2-table__group-count--background=#f4f4f5]
+ * @cssproperty {color} [--c2-table__group-count--color=#52525b]
+ * @cssproperty {font-size} [--c2-table__group-count--font-size=12px]
+ * @cssproperty {font-weight} [--c2-table__group-count--font-weight=600]
+ * @cssproperty {padding} [--c2-table__group-count--padding=1px 7px]
+ * @cssproperty {border-radius} [--c2-table__group-count--border-radius=999px]
  *
  * @cssproperty {pixel} [--c2-table__selection-cell--width=44px] - Width of the `checkbox-selection` column.
  *
@@ -510,6 +628,30 @@ export class Table extends LitElement {
   /** Rows the summary aggregates cover: `all` rows, or only the `page` on show. A `dataSource` is only aggregated per page. */
   @property({ type: String, attribute: 'summary-scope' }) summaryScope: TableSummaryScope = 'all'
 
+  /**
+   * Groups the rows by these fields, outermost first: `group-by="region,status"` in the attribute, and field names or
+   * {@link TableGroupBy} objects in the property. Not applied to a `dataSource`, which only holds the rows it fetched.
+   */
+  @property({ converter: groupByConverter, attribute: 'group-by' }) groupBy: (string | TableGroupBy)[] = []
+
+  /** `row` gives each group a row of the grid with its column aggregates; `band` draws a full-width band per group. */
+  @property({ type: String, attribute: 'group-display' }) groupDisplay: TableGroupDisplay = 'row'
+
+  /**
+   * Keys of the open groups (`region=EMEA/status=Paid`). While unset, every group follows `groups-collapsed`; the
+   * first toggle writes the full list here, so it can be read, stored and handed back. `;`-separated in the attribute.
+   */
+  @property({ converter: groupKeysConverter, attribute: 'expanded-groups' }) expandedGroups?: string[]
+
+  /** Starts every group closed while `expandedGroups` is unset. */
+  @property({ type: Boolean, attribute: 'groups-collapsed' }) groupsCollapsed = false
+
+  /** Renders a group's label in place of its formatted value. The slot `group:<key>` wins over both. */
+  @property({ attribute: false }) renderGroup?: TableGroupRenderer
+
+  /** Label of the group of rows whose value is empty. */
+  @property({ type: String, attribute: 'empty-group-label' }) emptyGroupLabel = 'No value'
+
   @state() private columnElements: TableColumn[] = []
   @state() private widthOverrides: Record<string, number> = {}
   @state() private focusedCell: { row: number; column: number } = { row: HEADER_ROW, column: 0 }
@@ -534,6 +676,11 @@ export class Table extends LitElement {
   #rowUpdateStates = new Map<string, RowUpdateState>()
   #warnedPositionalKeys = false
   #summaryCache?: { inputs: unknown[]; rows: TableRow[]; values: Map<string, unknown> }
+  #groupingCache?: { treeInputs: unknown[]; itemInputs: unknown[]; grouping: Grouping }
+  #warnedGroupedSource = false
+  #headerHeightPx = 0
+  /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
+  #echoSignature = ''
 
   /**
    * Shared with a `c2-pagination` slotted into the `footer`. Rebuilt rather than mutated whenever the paging state
@@ -561,6 +708,8 @@ export class Table extends LitElement {
    * million-row total.
    */
   get rowCount(): number {
+    const grouping = this.#grouping()
+    if (grouping) return this.paginated ? Math.max(0, Math.min(this.pageSize, grouping.items.length - this.#pageStart)) : grouping.items.length
     if (!this.paginated) return this.dataSource ? this.totalRows : (this.#transitionRows?.length ?? this.totalRows)
     const onPage = Math.max(0, Math.min(this.pageSize, this.totalRows - this.#pageStart))
     if (!this.dataSource) return onPage
@@ -581,7 +730,15 @@ export class Table extends LitElement {
   /** Number of pages, at least 1. */
   get pageCount(): number {
     if (!this.paginated) return 1
-    return Math.max(1, Math.ceil(this.totalRows / this.pageSize))
+    return Math.max(1, Math.ceil(this.#lineCount / this.pageSize))
+  }
+
+  /**
+   * Lines the body is made of across every page: the rows, or while grouped the visible group and data rows. Pages
+   * and `aria-rowcount` count these, so a collapsed group takes one line.
+   */
+  get #lineCount(): number {
+    return this.#grouping()?.items.length ?? this.totalRows
   }
 
   /** Index of the first row of the current page within the whole dataset. */
@@ -669,7 +826,7 @@ export class Table extends LitElement {
   getSelectedRows(): TableRow[] {
     const keys = new Set(this.value)
     const selected: TableRow[] = []
-    for (let index = 0; index < this.rowCount; index++) {
+    for (let index = 0; index < this.#rowTotal; index++) {
       const row = this.#rowAt(index)
       if (row && keys.has(this.#keyAt(index, row))) selected.push(row)
     }
@@ -680,11 +837,19 @@ export class Table extends LitElement {
   selectAll() {
     if (this.selection !== 'multiple') return
     const keys: string[] = []
-    for (let index = 0; index < this.rowCount; index++) {
+    for (let index = 0; index < this.#rowTotal; index++) {
       const row = this.#rowAt(index)
       if (row) keys.push(this.#keyAt(index, row))
     }
     this.#commitSelection(keys)
+  }
+
+  /**
+   * Upper bound of the row indices `getSelectedRows` and `selectAll` visit: the rows on show, or while grouped every
+   * row, including those in closed groups — they are selected by their group's checkbox too.
+   */
+  get #rowTotal(): number {
+    return this.#grouping()?.source.length ?? this.rowCount
   }
 
   /** Clears the selection. */
@@ -692,9 +857,54 @@ export class Table extends LitElement {
     this.#commitSelection([])
   }
 
-  /** Scrolls the row at `index` into view. */
+  /** Scrolls the row at `index` into view; while grouped, only a row whose groups are open has a place to scroll to. */
   scrollToIndex(index: number) {
-    this.#virtualizer.scrollToIndex(index - this.#pageStart, this.#headerHeight())
+    const grouping = this.#grouping()
+    if (!grouping) {
+      this.#scrollToLine(index)
+      return
+    }
+    const line = grouping.items.findIndex((item) => item.kind === 'row' && item.rowIndex === index)
+    if (line >= 0) this.#scrollToLine(line)
+  }
+
+  /** Whether the rows are currently grouped: `groupBy` names a level and the rows are the table's own. */
+  get grouped(): boolean {
+    return this.#grouping() !== undefined
+  }
+
+  /** Every group, outermost first and each followed by its sub-groups, whether its parent is open or not. */
+  getGroups(): TableGroupContext[] {
+    const grouping = this.#grouping()
+    if (!grouping) return []
+    const groups: TableGroupContext[] = []
+    const visit = (node: GroupNode) => {
+      groups.push(this.#groupContext(node, grouping))
+      node.children.forEach(visit)
+    }
+    grouping.roots.forEach(visit)
+    return groups
+  }
+
+  /** Opens the group with `key`. Does not fire `group-toggle`, which reports what the user did. */
+  expandGroup(key: string) {
+    this.#setGroupExpanded(key, true)
+  }
+
+  /** Closes the group with `key`. */
+  collapseGroup(key: string) {
+    this.#setGroupExpanded(key, false)
+  }
+
+  /** Opens every group. */
+  expandAll() {
+    const grouping = this.#grouping()
+    if (grouping) this.expandedGroups = [...grouping.nodes.keys()]
+  }
+
+  /** Closes every group. */
+  collapseAll() {
+    this.expandedGroups = []
   }
 
   /** Drops the `dataSource` cache and reloads the visible rows. */
@@ -707,7 +917,15 @@ export class Table extends LitElement {
   protected override willUpdate(changed: PropertyValues) {
     if ((changed.has('animateUpdates') && !this.animateUpdates) || (changed.has('updateDuration') && this.updateDuration <= 0)) this.#cancelRowsAnimation()
     if (changed.has('rows')) this.#prepareRowsAnimation(changed.get('rows'))
-    if (!this.hasUpdated || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements')) this.#applySort()
+    const regroup = changed.has('groupBy') || changed.has('dataSource')
+    if (!this.hasUpdated || regroup || changed.has('rows') || changed.has('sortModel') || changed.has('columns') || changed.has('columnElements'))
+      this.#applySort()
+    if (this.dataSource && this.#groupLevels().length && !this.#warnedGroupedSource) {
+      this.#warnedGroupedSource = true
+      console.warn(
+        '[c2-table] group-by is ignored with a dataSource: the table only holds the rows it has fetched, so it cannot know every group. Group the rows yourself, or pass them in rows.',
+      )
+    }
     // Another page size re-cuts the blocks, so the cache has to go; another page does not — and must not, or
     // `remoteTotal` would drop back to "unknown" and the pager would collapse to a single page mid-navigation.
     if (changed.has('dataSource') || changed.has('blockSize') || changed.has('pageSize') || (this.dataSource && changed.has('sortModel'))) {
@@ -740,13 +958,14 @@ export class Table extends LitElement {
       return
     }
     const busy = this.loading || this.#isBootstrapping
-    if (current && current.page === this.page && current.pageSize === this.pageSize && current.totalItems === this.totalRows && current.busy === busy) {
+    const totalItems = this.#lineCount
+    if (current && current.page === this.page && current.pageSize === this.pageSize && current.totalItems === totalItems && current.busy === busy) {
       return
     }
     this.pager = {
       page: this.page,
       pageSize: this.pageSize,
-      totalItems: this.totalRows,
+      totalItems,
       busy,
       pageChanged: (page) => this.goToPage(page),
       pageSizeChanged: (pageSize) => this.setPageSize(pageSize),
@@ -794,6 +1013,7 @@ export class Table extends LitElement {
     }
     this.#warnPositionalKeys()
     this.#measureRowHeight()
+    this.#measureHeaderHeight()
     this.#measureColumnWidths()
     this.#syncFocusToWindow()
     if (this.#pendingFocus) {
@@ -810,23 +1030,36 @@ export class Table extends LitElement {
     // The virtualizer windows the page; the body renders dataset indices, so shift its range by the page offset.
     const offset = this.#pageStart
     const summary = this.#hasSummary(columns)
+    const grouping = this.#grouping()
+    const stuck = grouping ? this.#stuckGroups(grouping) : []
+    this.#echoSignature = stuck.map((node) => node.key).join('\n')
+    const prefix = grouping ? this.#pagePrefix(grouping) * this.#rowHeightPx : 0
 
     return html`
       <div class="toolbar" part="toolbar" ?hidden=${!this.slotPresence.has('toolbar')}>
         <slot name="toolbar" @slotchange=${this.slotPresence.handleSlotChange}></slot>
       </div>
-      <div class="viewport" part="viewport">
+      <div class="viewport" part="viewport" @scroll=${this.#handleViewportScroll}>
         <div
           class="grid"
-          role="grid"
+          role=${grouping ? 'treegrid' : 'grid'}
           part="grid"
-          aria-rowcount=${this.totalRows + (summary ? 2 : 1)}
+          aria-rowcount=${this.#lineCount + (summary ? 2 : 1)}
           aria-colcount=${columns.length}
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
           style=${styleMap({ '--_grid-template': this.#gridTemplate(columns) })}
           @keydown=${this.#handleKeyDown}
         >
-          ${this.#renderHeaderRow(columns, pins)} ${range.paddingTop > 0 ? html`<div class="spacer" style="height:${range.paddingTop}px"></div>` : nothing}
+          ${this.#renderHeaderRow(columns, pins)}
+          ${
+            grouping && stuck.length
+              ? html`<div class="group-echoes" style=${styleMap({ top: `${this.#headerHeightPx}px` })}>
+                  ${stuck.map((node) => this.#renderGroupRow(node, -1, columns, pins, grouping, true))}
+                </div>`
+              : nothing
+          }
+          ${prefix > 0 ? html`<div class="spacer spacer--group-prefix" style="height:${prefix}px"></div>` : nothing}
+          ${range.paddingTop > 0 ? html`<div class="spacer" style="height:${range.paddingTop}px"></div>` : nothing}
           ${this.#renderBody(columns, pins, offset + range.start, offset + range.end)}
           ${range.paddingBottom > 0 ? html`<div class="spacer" style="height:${range.paddingBottom}px"></div>` : nothing}
           ${summary ? this.#renderSummaryRow(columns, pins) : nothing}
@@ -854,16 +1087,180 @@ export class Table extends LitElement {
         </div>
       </div>`
     }
-    const indices: number[] = []
-    for (let index = start; index < end; index++) indices.push(index)
+    const lines: number[] = []
+    const grouping = this.#grouping()
+    // The window is the virtualizer's from the last layout; closing a group shortens the list before it catches up.
+    const last = grouping ? Math.min(end, this.#pageStart + this.rowCount) : end
+    for (let line = start; line < last; line++) lines.push(line)
+    if (grouping) {
+      return repeat(
+        lines,
+        (line) => {
+          const item = grouping.items[line]
+          if (item.kind === 'group') return `group:${item.node.key}`
+          return this.#keyAt(item.rowIndex, grouping.source[item.rowIndex])
+        },
+        (line) => {
+          const item = grouping.items[line]
+          return item.kind === 'group' ? this.#renderGroupRow(item.node, line, columns, pins, grouping, false) : this.#renderRow(line, columns, pins)
+        },
+      )
+    }
     return repeat(
-      indices,
+      lines,
       (index) => {
         const row = this.#rowAt(index)
         return row ? this.#keyAt(index, row) : `skeleton:${index}`
       },
       (index) => this.#renderRow(index, columns, pins),
     )
+  }
+
+  /** The column holding the group tree: the one marked `group-column`, else the first data column. */
+  #groupTreeColumn(columns: TableColumnConfig[]): TableColumnConfig | undefined {
+    return columns.find((column) => column.groupColumn && column.field !== SELECTION_FIELD) ?? columns.find((column) => column.field !== SELECTION_FIELD)
+  }
+
+  #renderGroupLabel(node: GroupNode, grouping: Grouping, echo: boolean) {
+    const column = this.#fieldColumn(node.field)
+    const empty = node.value === null || node.value === undefined || node.value === ''
+    const label = this.renderGroup
+      ? this.renderGroup(this.#groupContext(node, grouping))
+      : empty
+        ? this.emptyGroupLabel
+        : column
+          ? this.#formatValue(column, node.value)
+          : String(node.value)
+    const content = html`<span class="group-label" part="group-label">${label}</span>
+      <span class="group-count" part="group-count">${node.rowIndices.length}</span>`
+    // Two slots of one name would split the slotted label between the row and its stuck copy; the copy shows the fallback.
+    return echo ? content : html`<slot name=${`group:${node.key}`}>${content}</slot>`
+  }
+
+  #renderGroupCheckbox(node: GroupNode, grouping: Grouping) {
+    if (this.selection !== 'multiple') return nothing
+    const keys = this.#groupKeys(node, grouping)
+    // Counted once per selection rather than on every scroll frame: a group can hold thousands of rows.
+    if (node.selection?.value !== this.value) {
+      const selected = new Set(this.value)
+      node.selection = { value: this.value, count: keys.filter((key) => selected.has(key)).length }
+    }
+    const count = node.selection.count
+    const all = count > 0 && count === keys.length
+    return html`<c2-checkbox
+      aria-label="Select group rows"
+      ?checked=${all}
+      ?indeterminate=${count > 0 && !all}
+      @click=${(event: Event) => event.stopPropagation()}
+      @change=${(event: Event) => {
+        event.stopPropagation()
+        const own = new Set(keys)
+        const rest = this.value.filter((key) => !own.has(key))
+        this.#commitSelection((event.target as Checkbox).checked ? [...rest, ...keys] : rest)
+      }}
+    ></c2-checkbox>`
+  }
+
+  /**
+   * One group's row. `line` is its display line, or -1 for a copy stuck under the header ("echo"), which is hidden
+   * from assistive technology — the real row is further up — holds nothing focusable, and toggles the real group.
+   */
+  #renderGroupRow(node: GroupNode, line: number, columns: TableColumnConfig[], pins: Map<string, PinPlacement>, grouping: Grouping, echo: boolean) {
+    const expanded = this.#isGroupExpanded(node.key)
+    const band = this.groupDisplay === 'band'
+    const treeColumn = this.#groupTreeColumn(columns)
+    const focusable = (columnIndex: number) => (echo ? undefined : this.#tabIndexFor(line, columnIndex))
+    const toggle = html`<span class="group-toggle" part="group-toggle" style=${styleMap({ '--_group-level': String(node.level) })}>${CHEVRON}</span>`
+    const rowParts = ['group-row', `group-row-level-${node.level}`, band ? 'group-band' : '', echo ? 'group-row-echo' : ''].filter(Boolean).join(' ')
+
+    let cells: unknown
+    if (band) {
+      const selectionColumn = columns.findIndex((column) => column.field === SELECTION_FIELD)
+      cells = html`<div
+        class="cell cell--group cell--band"
+        role="gridcell"
+        part="group-cell"
+        aria-colindex="1"
+        aria-colspan=${columns.length}
+        tabindex=${ifDefined(focusable(this.focusedCell.row === line ? this.focusedCell.column : 0))}
+        @click=${() => this.#focusLine(line)}
+      >
+        <span class="band-content">
+          ${selectionColumn >= 0 && !echo ? this.#renderGroupCheckbox(node, grouping) : nothing} ${toggle} ${this.#renderGroupLabel(node, grouping, echo)}
+        </span>
+      </div>`
+    } else {
+      const values = this.#groupSummary(node, grouping)
+      cells = columns.map((column, columnIndex) => {
+        const pinClasses = this.#pinClasses(column, pins)
+        const style = styleMap(this.#pinStyle(column, pins))
+        if (column.field === SELECTION_FIELD) {
+          return html`<div
+            class=${classMap({ cell: true, 'cell--selection': true, ...pinClasses })}
+            role="gridcell"
+            part="group-cell selection-cell"
+            aria-colindex=${columnIndex + 1}
+            tabindex=${ifDefined(focusable(columnIndex))}
+            style=${style}
+          >
+            ${echo ? nothing : this.#renderGroupCheckbox(node, grouping)}
+          </div>`
+        }
+        const part = columnKey(column).replace(/[^\w-]/g, '-')
+        if (column === treeColumn) {
+          return html`<div
+            class=${classMap({ cell: true, 'cell--group': true, 'cell--group-tree': true, ...pinClasses })}
+            role="gridcell"
+            part="group-cell group-cell-${part}"
+            aria-colindex=${columnIndex + 1}
+            tabindex=${ifDefined(focusable(columnIndex))}
+            style=${style}
+            @click=${() => this.#focusLine(line, columnIndex)}
+          >
+            ${toggle} ${this.#renderGroupLabel(node, grouping, echo)}
+          </div>`
+        }
+        const value = values.get(columnKey(column))
+        const content =
+          value === undefined || value === null || value === ''
+            ? ''
+            : column.summary === 'count'
+              ? this.#formatValue({ field: column.field, format: 'number', locale: column.locale }, value)
+              : this.#formatValue(column, value)
+        return html`<div
+          class=${classMap({ cell: true, 'cell--group': true, [`cell--align-${column.summaryAlign ?? column.align ?? 'start'}`]: true, ...pinClasses, ...(column.cellClass ? { [column.cellClass]: true } : {}) })}
+          role="gridcell"
+          part="group-cell group-cell-${part}"
+          aria-colindex=${columnIndex + 1}
+          tabindex=${ifDefined(focusable(columnIndex))}
+          style=${style}
+          @click=${() => this.#focusLine(line, columnIndex)}
+        >
+          <span class="cell-content">${content}</span>
+        </div>`
+      })
+    }
+
+    return html`
+      <div
+        class=${classMap({ row: true, 'row--group': true, 'row--band': band, 'row--group-echo': echo, 'row--group-collapsed': !expanded, [`row--group-level-${node.level}`]: true })}
+        role=${ifDefined(echo ? undefined : 'row')}
+        part=${rowParts}
+        data-group-key=${node.key}
+        aria-level=${ifDefined(echo ? undefined : node.level + 1)}
+        aria-expanded=${ifDefined(echo ? undefined : String(expanded))}
+        aria-rowindex=${ifDefined(echo ? undefined : line + 2)}
+        aria-hidden=${ifDefined(echo ? 'true' : undefined)}
+        @click=${() => this.#toggleGroup(node)}
+      >
+        ${cells}
+      </div>
+    `
+  }
+
+  /** Moves the roving tabindex to a cell of display line `line` (a click on a group row, which does not select). */
+  #focusLine(line: number, column = this.focusedCell.column) {
+    if (line >= 0) this.focusedCell = { row: line, column }
   }
 
   #renderHeaderRow(columns: TableColumnConfig[], pins: Map<string, PinPlacement>) {
@@ -876,7 +1273,7 @@ export class Table extends LitElement {
 
   #renderHeaderCell(column: TableColumnConfig, columnIndex: number, pins: Map<string, PinPlacement>) {
     if (column.field === SELECTION_FIELD) {
-      const total = this.rowCount
+      const total = this.#rowTotal
       const selected = this.value.length
       const allSelected = total > 0 && selected >= total
       return html`
@@ -957,9 +1354,15 @@ export class Table extends LitElement {
     `
   }
 
-  #renderRow(index: number, columns: TableColumnConfig[], pins: Map<string, PinPlacement>) {
+  /** A data row on display line `line`, which is also its row index unless the rows are grouped. */
+  #renderRow(line: number, columns: TableColumnConfig[], pins: Map<string, PinPlacement>) {
+    const index = this.#rowIndexAt(line)
     const row = this.#rowAt(index)
     const key = row ? this.#keyAt(index, row) : ''
+    const grouping = this.#grouping()
+    const item = grouping?.items[line]
+    const depth = item?.kind === 'row' ? item.parent.level + 1 : 0
+    const treeColumn = grouping && this.groupDisplay !== 'band' ? this.#groupTreeColumn(columns) : undefined
     const selected = key !== '' && this.value.includes(key)
     const selectable = this.selection !== 'none'
     const updateState = key ? this.#rowUpdateStates.get(key) : undefined
@@ -970,7 +1373,7 @@ export class Table extends LitElement {
         class=${classMap({
           row: true,
           'row--body': true,
-          'row--odd': index % 2 === 1,
+          'row--odd': line % 2 === 1,
           'row--selected': selected,
           'row--clickable': selectable,
           'row--highlighted': Boolean(updateState && this.highlightUpdates),
@@ -980,18 +1383,28 @@ export class Table extends LitElement {
         part=${['row', selected ? 'row-selected' : '', updateState ? `row-${updateState}` : ''].filter(Boolean).join(' ')}
         data-row-key=${key}
         data-update-state=${ifDefined(updateState)}
-        aria-rowindex=${index + 2}
+        aria-rowindex=${line + 2}
+        aria-level=${ifDefined(grouping ? depth + 1 : undefined)}
         aria-selected=${ifDefined(selectable ? String(selected) : undefined)}
         aria-hidden=${ifDefined(updateState === 'removed' ? 'true' : undefined)}
         style=${styleMap({ ...rowStyle, '--_update-duration': `${Math.max(0, this.updateDuration)}ms` })}
-        @click=${(event: MouseEvent) => this.#handleRowClick(event, index)}
+        @click=${(event: MouseEvent) => this.#handleRowClick(event, line)}
       >
-        ${columns.map((column, columnIndex) => this.#renderCell(row, index, column, columnIndex, pins))}
+        ${columns.map((column, columnIndex) => this.#renderCell(row, line, index, column, columnIndex, pins, column === treeColumn ? depth : 0))}
       </div>
     `
   }
 
-  #renderCell(row: TableRow | undefined, rowIndex: number, column: TableColumnConfig, columnIndex: number, pins: Map<string, PinPlacement>) {
+  /** `line` is the cell's display line (focus, keyboard), `rowIndex` the row's index (data, keys); `indent` is its group depth. */
+  #renderCell(
+    row: TableRow | undefined,
+    line: number,
+    rowIndex: number,
+    column: TableColumnConfig,
+    columnIndex: number,
+    pins: Map<string, PinPlacement>,
+    indent = 0,
+  ) {
     const classes = {
       cell: true,
       [`cell--align-${column.align ?? 'start'}`]: true,
@@ -1001,7 +1414,7 @@ export class Table extends LitElement {
     }
     const shared = {
       class: classMap(classes),
-      tabindex: this.#tabIndexFor(rowIndex, columnIndex),
+      tabindex: this.#tabIndexFor(line, columnIndex),
       style: styleMap(this.#pinStyle(column, pins)),
     }
 
@@ -1022,7 +1435,7 @@ export class Table extends LitElement {
                   aria-label="Select row"
                   ?checked=${this.value.includes(key)}
                   @click=${(event: Event) => event.stopPropagation()}
-                  @change=${() => this.#handleCheckboxToggle(rowIndex)}
+                  @change=${() => this.#handleCheckboxToggle(line)}
                 ></c2-checkbox>`
               : nothing
           }
@@ -1052,9 +1465,15 @@ export class Table extends LitElement {
         aria-colindex=${columnIndex + 1}
         tabindex=${shared.tabindex}
         style=${shared.style}
-        @click=${() => this.#handleCellClick(rowIndex, columnIndex, column, value)}
+        @click=${() => this.#handleCellClick(line, columnIndex, column, value)}
+        @c2-context-menu-request=${(event: Event) => this.#handleContextMenuRequest(event, line, columnIndex, column, value)}
       >
-        <span class="cell-content" part="cell-content cell-content-${fieldPart}">${content}</span>
+        <span
+          class=${classMap({ 'cell-content': true, 'cell-content--indented': indent > 0 })}
+          part="cell-content cell-content-${fieldPart}"
+          style=${styleMap(indent > 0 ? { '--_group-level': String(indent) } : {})}
+          >${content}</span
+        >
       </div>
     `
   }
@@ -1098,6 +1517,7 @@ export class Table extends LitElement {
       this.#transitionRows,
       this.#animationProgress,
       this.dataSource ? this.#blocks.get(this.page - 1) : undefined,
+      pageScope ? this.#grouping()?.items : undefined,
       start,
       count,
     ]
@@ -1105,7 +1525,9 @@ export class Table extends LitElement {
     if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached
 
     const rows: TableRow[] = []
-    for (let index = start; index < start + count; index++) {
+    for (let cursor = start; cursor < start + count; cursor++) {
+      // The page is made of display lines, so while grouped its rows are those on the page's data lines.
+      const index = pageScope ? this.#rowIndexAt(cursor) : cursor
       const row = this.#rowAt(index)
       // A row collapsing out during an animated update is already gone from the data, so it no longer counts.
       if (row && this.#rowUpdateStates.get(this.#keyAt(index, row)) !== 'removed') rows.push(row)
@@ -1133,7 +1555,7 @@ export class Table extends LitElement {
   #renderSummaryRow(columns: TableColumnConfig[], pins: Map<string, PinPlacement>) {
     const { rows, values } = this.#summaryData(columns)
     return html`
-      <div class="row row--summary" role="row" part="summary-row" aria-rowindex=${this.totalRows + 2}>
+      <div class="row row--summary" role="row" part="summary-row" aria-rowindex=${this.#lineCount + 2}>
         ${this.#summaryCells(columns).map((cell) => this.#renderSummaryCell(cell, rows, values, pins))}
       </div>
     `
@@ -1281,6 +1703,7 @@ export class Table extends LitElement {
 
   /** `index` is the row's position in the whole dataset, on every page. */
   #rowAt(index: number): TableRow | undefined {
+    if (index < 0) return undefined
     if (this.dataSource) {
       const size = this.#effectiveBlockSize
       return this.#blocks.get(Math.floor(index / size))?.[index % size]
@@ -1319,7 +1742,272 @@ export class Table extends LitElement {
     this.#sortedRows = this.#sortRows(rows)
   }
 
+  /** Sorts by `sortModel`, then, while grouped, gathers the rows of each group together in the order of the groups. */
   #sortRows(rows: TableRow[]): TableRow[] {
+    const sorted = this.#sortBySortModel(rows)
+    const levels = this.groupBy?.length ? this.#groupLevels() : []
+    if (this.dataSource || !levels.length) return sorted
+    const ordered: TableRow[] = []
+    const visit = (node: GroupNode) => {
+      if (node.children.length) node.children.forEach(visit)
+      else for (const index of node.rowIndices) ordered.push(sorted[index])
+    }
+    this.#buildGroupTree(sorted, levels).roots.forEach(visit)
+    return ordered
+  }
+
+  /** The grouping levels, normalized from `groupBy`; empty when the table is not grouped. */
+  #groupLevels(): TableGroupBy[] {
+    if (!Array.isArray(this.groupBy)) return []
+    return this.groupBy
+      .map((entry) => (typeof entry === 'string' ? { field: entry.trim() } : entry))
+      .filter((entry): entry is TableGroupBy => Boolean(entry && typeof entry.field === 'string' && entry.field))
+  }
+
+  /**
+   * The group tree and the display list, or `undefined` when the rows are not grouped. Cached in two layers on their
+   * inputs: the tree only depends on the rows and the levels, and opening a group should not re-bucket 10k rows.
+   */
+  #grouping(): Grouping | undefined {
+    // Read per rendered row, so an ungrouped table leaves before allocating anything.
+    if (!this.groupBy?.length) return undefined
+    const levels = this.#groupLevels()
+    if (this.dataSource || !levels.length) return undefined
+    const source = this.#transitionRows ?? this.#sortedRows
+    const treeInputs = [source, this.groupBy, this.sortModel, this.columnElements, this.columns, this.rowKey, this.getRowKey]
+    const itemInputs = [this.expandedGroups, this.groupsCollapsed]
+    const cached = this.#groupingCache
+    const sameTree = cached && cached.treeInputs.every((input, index) => input === treeInputs[index])
+    if (sameTree && cached.itemInputs.every((input, index) => input === itemInputs[index])) return cached.grouping
+
+    const tree = sameTree ? cached.grouping : this.#buildGroupTree(source, levels)
+    const expanded = this.expandedGroups ? new Set(this.expandedGroups) : undefined
+    const items: DisplayItem[] = []
+    const flatten = (node: GroupNode) => {
+      node.position = items.length
+      items.push({ kind: 'group', node })
+      if (expanded ? expanded.has(node.key) : !this.groupsCollapsed) {
+        if (node.children.length) node.children.forEach(flatten)
+        else for (const rowIndex of node.rowIndices) items.push({ kind: 'row', rowIndex, parent: node })
+      }
+    }
+    for (const node of tree.nodes.values()) node.position = -1
+    tree.roots.forEach(flatten)
+
+    const grouping: Grouping = { ...tree, items }
+    this.#groupingCache = { treeInputs, itemInputs, grouping }
+    return grouping
+  }
+
+  /**
+   * Buckets `source` level by level. Rows keep their order inside a bucket; the buckets of a level are ordered by
+   * their value, following the level's `sort`, else the direction the table is sorted by that field, else ascending.
+   */
+  #buildGroupTree(source: TableRow[], levels: TableGroupBy[]): Omit<Grouping, 'items'> {
+    const nodes = new Map<string, GroupNode>()
+    const build = (indices: number[], level: number, parent: GroupNode | undefined): GroupNode[] => {
+      const spec = levels[level]
+      const comparator = this.#groupComparator(spec)
+      const buckets = new Map<string, { value: unknown; indices: number[] }>()
+      for (const index of indices) {
+        const row = source[index]
+        const value = spec.getValue ? spec.getValue(row) : getFieldValue(row, spec.field)
+        const id = groupBucketId(value)
+        const bucket = buckets.get(id)
+        if (bucket) bucket.indices.push(index)
+        else buckets.set(id, { value, indices: [index] })
+      }
+      const children = [...buckets].map(([id, bucket]) => {
+        const part = `${encodeGroupPart(spec.field)}=${encodeGroupPart(id)}`
+        const node: GroupNode = {
+          key: parent ? `${parent.key}/${part}` : part,
+          level,
+          field: spec.field,
+          value: bucket.value,
+          rowIndices: bucket.indices,
+          children: [],
+          parent,
+          position: -1,
+        }
+        nodes.set(node.key, node)
+        if (level + 1 < levels.length) node.children = build(bucket.indices, level + 1, node)
+        return node
+      })
+      return children.sort((left, right) => comparator(left.value, right.value))
+    }
+    const roots = build(
+      source.map((_, index) => index),
+      0,
+      undefined,
+    )
+    return { levels, source, roots, nodes }
+  }
+
+  #groupComparator(spec: TableGroupBy): (a: unknown, b: unknown) => number {
+    if (typeof spec.sort === 'function') return spec.sort
+    const column = this.#fieldColumn(spec.field)
+    const compare = column?.comparator ?? defaultCompare
+    const direction = spec.sort ?? this.sortModel.find((entry) => entry.field === spec.field)?.direction ?? 'asc'
+    return direction === 'desc' ? (a, b) => -compare(a, b) : compare
+  }
+
+  /** The column definition showing `field`, hidden ones included: a grouped column is usually hidden, but formats the label. */
+  #fieldColumn(field: string): TableColumnConfig | undefined {
+    const source: TableColumnConfig[] = this.columnElements.length ? this.columnElements : (this.columns ?? [])
+    return source.find((column) => column.field === field)
+  }
+
+  #isGroupExpanded(key: string): boolean {
+    return this.expandedGroups ? this.expandedGroups.includes(key) : !this.groupsCollapsed
+  }
+
+  #setGroupExpanded(key: string, expanded: boolean): boolean {
+    const grouping = this.#grouping()
+    if (!grouping?.nodes.has(key) || this.#isGroupExpanded(key) === expanded) return false
+    // Until a group is toggled the list is implicit; write it out whole so it reads back as the state on screen.
+    const current = this.expandedGroups ?? (this.groupsCollapsed ? [] : [...grouping.nodes.keys()])
+    this.expandedGroups = expanded ? [...current, key] : current.filter((entry) => entry !== key)
+    return true
+  }
+
+  #toggleGroup(node: GroupNode) {
+    const expanded = !this.#isGroupExpanded(node.key)
+    if (!this.#setGroupExpanded(node.key, expanded)) return
+    const grouping = this.#grouping()
+    if (!grouping) return
+    this.dispatchEvent(
+      new CustomEvent<TableGroupToggleEventDetail>('group-toggle', {
+        detail: { key: node.key, expanded, group: this.#groupContext(node, grouping) },
+        bubbles: false,
+        composed: true,
+      }),
+    )
+  }
+
+  #groupRows(node: GroupNode, grouping: Grouping): TableRow[] {
+    node.rows ??= node.rowIndices.map((index) => grouping.source[index])
+    return node.rows
+  }
+
+  #groupKeys(node: GroupNode, grouping: Grouping): string[] {
+    node.keys ??= node.rowIndices.map((index) => this.#keyAt(index, grouping.source[index]))
+    return node.keys
+  }
+
+  #groupContext(node: GroupNode, grouping: Grouping): TableGroupContext {
+    return {
+      key: node.key,
+      level: node.level,
+      field: node.field,
+      value: node.value,
+      rows: this.#groupRows(node, grouping),
+      expanded: this.#isGroupExpanded(node.key),
+      summary: Object.fromEntries(this.#groupSummary(node, grouping)),
+    }
+  }
+
+  /** The column aggregates of a group's rows, keyed by column id; the same `summary` the totals row uses. */
+  #groupSummary(node: GroupNode, grouping: Grouping): Map<string, unknown> {
+    const columns = this.resolvedColumns
+    const inputs = [this.columnElements, this.columns, ...columns.map((column) => column.summary)]
+    const cached = node.summary
+    if (cached && cached.inputs.length === inputs.length && cached.inputs.every((input, index) => input === inputs[index])) return cached.values
+    const rows = this.#groupRows(node, grouping)
+    const values = new Map<string, unknown>()
+    for (const column of columns) {
+      if (typeof column.summary === 'function') values.set(columnKey(column), column.summary({ column, rows }))
+      else if (column.summary && column.field)
+        values.set(
+          columnKey(column),
+          aggregate(
+            column.summary,
+            rows.map((row) => getFieldValue(row, column.field)),
+          ),
+        )
+    }
+    node.summary = { inputs, values }
+    return values
+  }
+
+  /** The item on display line `line`: its group, or the group at `level` above it. */
+  #groupAtLevel(item: DisplayItem | undefined, level: number): GroupNode | undefined {
+    let node: GroupNode | undefined = item?.kind === 'group' ? item.node : item?.parent
+    while (node && node.level > level) node = node.parent
+    return node?.level === level ? node : undefined
+  }
+
+  /** How many group levels a line sits under: the number of groups that can be stuck above it. */
+  #depthOf(item: DisplayItem | undefined): number {
+    if (!item) return 0
+    return item.kind === 'group' ? item.node.level : item.parent.level + 1
+  }
+
+  /**
+   * Blank lines above a page that starts inside a group, where that group's headers are repeated. Every page counts
+   * `pageSize` lines of its own; the repeated headers come on top.
+   */
+  #pagePrefix(grouping: Grouping): number {
+    return this.paginated && this.#pageStart > 0 ? this.#depthOf(grouping.items[this.#pageStart]) : 0
+  }
+
+  /**
+   * The groups whose own row has scrolled past the header (or sits on an earlier page) while lines of theirs are
+   * still on screen, outermost first. They are drawn stuck under the header, one line per level, the way CSS sticky
+   * would place them — the real rows cannot do it themselves, as the virtualizer drops them once off screen.
+   */
+  #stuckGroups(grouping: Grouping): GroupNode[] {
+    const count = this.rowCount
+    if (count === 0) return []
+    const start = this.#pageStart
+    const end = start + count - 1
+    const scrollTop = Math.max(0, this.viewport?.scrollTop ?? 0)
+    // `base + level` is the line behind the level's slot under the header; the page's blank lines come first.
+    const base = start + Math.floor(scrollTop / this.#rowHeightPx) - this.#pagePrefix(grouping)
+    const stuck: GroupNode[] = []
+    for (let level = 0; level < grouping.levels.length; level++) {
+      const line = Math.min(end, Math.max(start, base + level))
+      const node = this.#groupAtLevel(grouping.items[line], level)
+      if (!node || node.position >= Math.max(start, base + level)) break
+      stuck.push(node)
+    }
+    return stuck
+  }
+
+  #handleViewportScroll = () => {
+    const grouping = this.#grouping()
+    if (!grouping) return
+    const signature = this.#stuckGroups(grouping)
+      .map((node) => node.key)
+      .join('\n')
+    if (signature !== this.#echoSignature) this.requestUpdate()
+  }
+
+  /** The data row index on display line `line`, or -1 for a group row. Lines and rows are the same thing ungrouped. */
+  #rowIndexAt(line: number): number {
+    const grouping = this.#grouping()
+    if (!grouping) return line
+    const item = grouping.items[line]
+    return item?.kind === 'row' ? item.rowIndex : -1
+  }
+
+  /** Scrolls display line `line` into view, below the header and, while grouped, below the groups stuck under it. */
+  #scrollToLine(line: number) {
+    const grouping = this.#grouping()
+    if (!grouping) {
+      this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight())
+      return
+    }
+    const viewport = this.viewport
+    if (!viewport) return
+    const height = this.#rowHeightPx
+    const top = (line - this.#pageStart + this.#pagePrefix(grouping)) * height
+    const covered = this.#depthOf(grouping.items[line]) * height
+    const visible = viewport.clientHeight - this.#headerHeight()
+    if (top - covered < viewport.scrollTop) viewport.scrollTop = Math.max(0, top - covered)
+    else if (top + height > viewport.scrollTop + visible) viewport.scrollTop = top + height - visible
+  }
+
+  #sortBySortModel(rows: TableRow[]): TableRow[] {
     if (this.dataSource || this.sortModel.length === 0) return rows
     const columns = this.resolvedColumns
     return [...rows].sort((left, right) => {
@@ -1543,19 +2231,21 @@ export class Table extends LitElement {
     this.dispatchEvent(new CustomEvent<TableSortChangeEventDetail>('sort-change', { detail: { sort: this.sortModel }, bubbles: true, composed: true }))
   }
 
-  #handleRowClick(event: MouseEvent, index: number) {
+  #handleRowClick(event: MouseEvent, line: number) {
+    const index = this.#rowIndexAt(line)
     const row = this.#rowAt(index)
     if (!row) return
     const key = this.#keyAt(index, row)
     this.dispatchEvent(new CustomEvent<TableRowEventDetail>('row-click', { detail: { row, rowIndex: index, key }, bubbles: true, composed: true }))
     if (this.selection === 'none') return
-    this.#applySelection(index, { toggle: event.metaKey || event.ctrlKey, range: event.shiftKey })
+    this.#applySelection(line, { toggle: event.metaKey || event.ctrlKey, range: event.shiftKey })
   }
 
-  #handleCellClick(rowIndex: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
+  #handleCellClick(line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
+    const rowIndex = this.#rowIndexAt(line)
     const row = this.#rowAt(rowIndex)
     if (!row) return
-    this.focusedCell = { row: rowIndex, column: columnIndex }
+    this.focusedCell = { row: line, column: columnIndex }
     this.dispatchEvent(
       new CustomEvent<TableCellEventDetail>('cell-click', {
         detail: { row, rowIndex, key: this.#keyAt(rowIndex, row), column, value },
@@ -1563,6 +2253,15 @@ export class Table extends LitElement {
         composed: true,
       }),
     )
+  }
+
+  /** An enclosing `c2-context-menu` asks what was right-clicked: the cell, with the same detail as `cell-click`. */
+  #handleContextMenuRequest(event: Event, line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
+    const rowIndex = this.#rowIndexAt(line)
+    const row = this.#rowAt(rowIndex)
+    if (!row) return
+    this.focusedCell = { row: line, column: columnIndex }
+    provideContextMenuData(event, this, { row, rowIndex, key: this.#keyAt(rowIndex, row), column, value } satisfies TableCellEventDetail)
   }
 
   #handleCheckboxToggle(index: number) {
@@ -1575,7 +2274,9 @@ export class Table extends LitElement {
     else this.clearSelection()
   }
 
-  #applySelection(index: number, modifiers: { toggle: boolean; range: boolean }) {
+  /** `line` is a display line; a range covers the data rows on the lines between the anchor and it. */
+  #applySelection(line: number, modifiers: { toggle: boolean; range: boolean }) {
+    const index = this.#rowIndexAt(line)
     const row = this.#rowAt(index)
     if (!row) return
     const key = this.#keyAt(index, row)
@@ -1583,24 +2284,25 @@ export class Table extends LitElement {
     // Clicking the row that is the selection again clears it — with a modifier or without — so a selection can be
     // undone by the same gesture that made it.
     if (this.selection === 'single') {
-      this.#selectionAnchor = index
+      this.#selectionAnchor = line
       this.#commitSelection(this.value.includes(key) ? [] : [key])
       return
     }
 
     if (modifiers.range && this.#selectionAnchor >= 0) {
-      const from = Math.min(this.#selectionAnchor, index)
-      const to = Math.max(this.#selectionAnchor, index)
+      const from = Math.min(this.#selectionAnchor, line)
+      const to = Math.max(this.#selectionAnchor, line)
       const keys = new Set(modifiers.toggle ? this.value : [])
       for (let cursor = from; cursor <= to; cursor++) {
-        const rangeRow = this.#rowAt(cursor)
-        if (rangeRow) keys.add(this.#keyAt(cursor, rangeRow))
+        const cursorIndex = this.#rowIndexAt(cursor)
+        const rangeRow = this.#rowAt(cursorIndex)
+        if (rangeRow) keys.add(this.#keyAt(cursorIndex, rangeRow))
       }
       this.#commitSelection([...keys])
       return
     }
 
-    this.#selectionAnchor = index
+    this.#selectionAnchor = line
     if (modifiers.toggle) {
       this.#commitSelection(this.value.includes(key) ? this.value.filter((entry) => entry !== key) : [...this.value, key])
       return
@@ -1671,6 +2373,29 @@ export class Table extends LitElement {
     // A spanning summary cell covers several column indices; on that row, left/right move from cell to cell.
     const summaryCells = summary ? this.#summaryCells(columns) : []
     const summaryCellAt = (index: number) => [...summaryCells].reverse().find((cell) => cell.index <= index) ?? summaryCells[0]
+    const grouping = this.#grouping()
+    const groupItem = grouping && row >= 0 ? grouping.items[row] : undefined
+    const groupNode = groupItem?.kind === 'group' ? groupItem.node : undefined
+    // The treegrid keys act on the cell holding the tree (the whole row in a band): elsewhere ←/→ keep moving between cells.
+    const onTree = Boolean(groupNode && (this.groupDisplay === 'band' || columns[column] === this.#groupTreeColumn(columns)))
+
+    if (groupNode && onTree && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) {
+      event.preventDefault()
+      const expanded = this.#isGroupExpanded(groupNode.key)
+      if (event.key === 'ArrowRight' && !expanded) this.#toggleGroup(groupNode)
+      else if (event.key === 'ArrowLeft' && expanded) this.#toggleGroup(groupNode)
+      else if (event.key === 'ArrowLeft' && groupNode.parent && groupNode.parent.position >= first) row = groupNode.parent.position
+      else if (event.key === 'ArrowRight' && this.groupDisplay !== 'band') column = Math.min(columns.length - 1, column + 1)
+      this.focusedCell = { row, column }
+      this.#pendingFocus = true
+      this.#scrollToLine(row)
+      return
+    }
+    if (groupNode && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault()
+      this.#toggleGroup(groupNode)
+      return
+    }
 
     switch (event.key) {
       case 'ArrowDown':
@@ -1718,7 +2443,7 @@ export class Table extends LitElement {
     event.preventDefault()
     this.focusedCell = { row, column }
     this.#pendingFocus = true
-    if (row >= 0) this.scrollToIndex(row)
+    if (row >= 0) this.#scrollToLine(row)
   }
 
   #headerHeight(): number {
@@ -1726,13 +2451,24 @@ export class Table extends LitElement {
   }
 
   #measureRowHeight() {
-    const first = this.renderRoot.querySelector('.row--body')
+    // A group row has the height of a data row, so a table with every group closed still measures one.
+    const first = this.renderRoot.querySelector('.row--body, .row--group:not(.row--group-echo)')
     if (!first) return
     // Not rounded: the spacers model the whole list as `count * height`, so a fraction of a pixel per row turns into
     // thousands of pixels of drift between the scrollbar and the rendered window over a long list.
     const height = first.getBoundingClientRect().height
     if (height > 0 && Math.abs(height - this.#measuredRowHeight) > 0.01) {
       this.#measuredRowHeight = height
+      this.requestUpdate()
+    }
+  }
+
+  /** Where the stuck group rows start: right under the header, whose height is themed. */
+  #measureHeaderHeight() {
+    if (!this.#grouping()) return
+    const height = this.#headerHeight()
+    if (height > 0 && Math.abs(height - this.#headerHeightPx) > 0.01) {
+      this.#headerHeightPx = height
       this.requestUpdate()
     }
   }

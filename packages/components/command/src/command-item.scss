@@ -1,0 +1,130 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-command-item,
+  $theme: (
+    min-height: 36px,
+    gap: 8px,
+
+    border-top-left-radius: 6px,
+    border-top-right-radius: 6px,
+    border-bottom-left-radius: 6px,
+    border-bottom-right-radius: 6px,
+
+    padding-top: 8px,
+    padding-right: 8px,
+    padding-bottom: 8px,
+    padding-left: 8px,
+
+    font-size: 14px,
+    font-weight: null,
+    font-family: null,
+    line-height: 20px,
+
+    color: #18181b,
+    background: transparent,
+
+    active--background: #f4f4f5,
+    active--color: null,
+
+    description--color: #71717a,
+    description--font-size: 12px,
+    description--line-height: 16px,
+
+    shortcut--color: #71717a,
+    shortcut--font-size: 12px,
+
+    icon--size: 16px,
+    icon--color: #71717a,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+  )
+);
+
+:host {
+  display: block;
+  flex: none;
+  user-select: none;
+}
+
+:host([hidden]),
+:host(:state(filtered)) {
+  display: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-decoration: none;
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  transition: animation.standard(background), animation.standard(color);
+
+  &.active {
+    background: css.cssVar(active--background, background);
+    color: css.cssVar(active--color, color);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.description {
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+  line-height: css.cssVar(description--line-height);
+  font-weight: normal;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+::slotted([slot='shortcut']) {
+  flex: none;
+  color: css.cssVar(shortcut--color);
+  font-size: css.cssVar(shortcut--font-size);
+  --c2-kbd--color: #{css.cssVar(shortcut--color)};
+  --c2-kbd--font-size: #{css.cssVar(shortcut--font-size)};
+}
+
+::slotted([slot='prefix-icon']),
+::slotted([slot='suffix-icon']) {
+  flex: none;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+:host([disabled]) .row {
+  cursor: default;
+  opacity: css.cssVar(disabled--opacity);
+}

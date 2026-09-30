@@ -1,5 +1,9 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
+import command from '@c2n/command/custom-elements.json'
+import marker from '@c2n/marker/custom-elements.json'
+import contextMenu from '@c2n/context-menu/custom-elements.json'
+import otpInput from '@c2n/otp-input/custom-elements.json'
 import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
@@ -87,6 +91,10 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     hoverCard,
+    command,
+    marker,
+    contextMenu,
+    otpInput,
     chatMessageList,
     shortcut,
     carousel,

@@ -48,22 +48,22 @@ npm install @codemirror/state @codemirror/view @codemirror/commands @codemirror/
 ```html tag=UsageBlock,package=@c2n/code-editor
 <style>
   .midnight {
-    --c2-code-editor--background: #0d1117;
-    --c2-code-editor--color: #c9d1d9;
-    --c2-code-editor--border: 1px solid #30363d;
+    --c2-code-editor--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-code-editor--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
+    --c2-code-editor--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 87%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor__gutter--color: #6e7681;
-    --c2-code-editor__gutter--border-right: 1px solid #21262d;
-    --c2-code-editor__gutter__active--color: #c9d1d9;
+    --c2-code-editor__gutter--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 94%, var(--c2-theme--color-surface, #ffffff));
+    --c2-code-editor__gutter__active--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor__active-line--background: rgba(110, 118, 129, 0.1);
-    --c2-code-editor__cursor--color: #c9d1d9;
+    --c2-code-editor__cursor--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
     --c2-code-editor__theme--token-keyword: #ff7b72;
     --c2-code-editor__theme--token-string: #a5d6ff;
     --c2-code-editor__theme--token-comment: #8b949e;
     --c2-code-editor__theme--token-constant: #79c0ff;
     --c2-code-editor__theme--token-function: #d2a8ff;
     --c2-code-editor__theme--token-property: #79c0ff;
-    --c2-code-editor__theme--token-variable: #c9d1d9;
-    --c2-code-editor__theme--token-punctuation: #c9d1d9;
+    --c2-code-editor__theme--token-variable: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
+    --c2-code-editor__theme--token-punctuation: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 20%, var(--c2-theme--color-surface, #ffffff));
   }
   .compact {
     --c2-code-editor--min-height: 84px;

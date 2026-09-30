@@ -178,7 +178,7 @@ h2 {
     transition: animation.standard(background), animation.standard(color);
   }
 
-  &:hover:not(:disabled) span {
+  &:hover:not(:disabled):not([aria-selected='true']) span {
     background: css.cssVar(day__hover--background);
   }
 

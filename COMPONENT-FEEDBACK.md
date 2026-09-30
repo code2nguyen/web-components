@@ -22,6 +22,20 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### `c2-command` cannot fill a height-capped container
+
+- **Severity:** papercut
+- **Hit while:** building the docs site's ⌘K palette on `c2-command` inside a `c2-modal` (`SearchPalette.astro`),
+  2026-09-30.
+- **Expected:** a palette in a height-capped modal keeps its field and footer in view and scrolls only its list.
+- **What happens:** the list's only height control is `--c2-command__list--max-height` (320px by default), a fixed
+  length. A long list pushes the footer past the modal's `max-height`, and the modal body grows a second scrollbar
+  next to the list's. The workaround is a `max-height` on the host equal to the modal's content box, plus
+  `--c2-command__list--max-height: none` so the list flexes. Setting `display: block` on the host, as for most
+  components, also breaks it, since the host's own flex column is what lets the list shrink.
+- **Smallest fix:** document the "fill the container" recipe, or give the host a `--c2-command--max-height`
+  (default `none`) so one variable caps the whole palette and the list takes what is left.
+
 ### Status panel needs three variables to host an illustration
 
 - **Severity:** papercut

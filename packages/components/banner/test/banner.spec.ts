@@ -29,6 +29,18 @@ test('shows a variant icon unless no-icon is set', async ({ page, scenario }) =>
   await expect(page.locator('c2-banner [part="icon"]')).toHaveCount(0)
 })
 
+test('a narrow dismissible banner keeps the icon, message and close button on one row', async ({ page, scenario }) => {
+  await scenario('narrow')
+  const banner = page.locator('c2-banner')
+  const middle = async (part: string) => {
+    const box = await banner.locator(part).boundingBox()
+    return box ? box.y + box.height / 2 : Number.NaN
+  }
+  const icon = await middle('[part="icon"]')
+  expect(Math.abs((await middle('[part="content"]')) - icon)).toBeLessThan(4)
+  expect(Math.abs((await middle('[part="close"]')) - icon)).toBeLessThan(4)
+})
+
 test('the dismiss button hides the banner with a mouse', async ({ page, scenario }) => {
   await scenario('dismissible')
   await page.getByRole('button', { name: 'Dismiss notice' }).click()

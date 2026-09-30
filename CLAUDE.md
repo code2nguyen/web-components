@@ -42,6 +42,8 @@ Release: the `Release to npm` workflow (`.github/workflows/release.yml`, manual 
 
 `lerna version` writes the new version into `lerna.json` and every publishable `package.json`, runs the lifecycle scripts, then stages and commits. The **root** `version` script stamps the build-only MCP registry before `build-skill.ts` regenerates and stages the versioned skill catalog and plugin manifests. The registry itself remains ignored and is rebuilt by CI and package prepack. `--force-publish` is there because fixed-mode `lerna version` otherwise exits with "No changed packages to version" when a dispatch's only changes are in tooling.
 
+Claude Code on the web: `.claude/hooks/session-start.sh` (registered in `.claude/settings.json`, remote sessions only) runs `npm install` and `build:registry` for `@c2n/mcp`, so the `c2n` server in `.mcp.json` can start in a fresh clone (it needs `node_modules` and the ignored `data/registry.json`), and exports `CHROMIUM_PATH` for the container's preinstalled Chromium, which `playwright.config.ts` launches when set.
+
 CI (`.github/workflows/deploy.yml`, Node 24) runs `npm ci`, `npm run lint`, `npm run format:check`, `npm run ui:build`, `npm run build:tools`, `npm run mcp:smoke`, a `git diff --exit-code` freshness check on the generated skill catalog / plugin files, and deploys `apps/ui/dist/` to GitHub Pages. Match those checks before pushing. A husky `pre-commit` hook runs lint-staged (prettier + eslint --fix).
 
 ## Repository layout
