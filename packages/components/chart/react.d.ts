@@ -78,6 +78,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute

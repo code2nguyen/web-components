@@ -94,11 +94,13 @@ declare module 'vue' {
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
+        'legend-action'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
         onTooltipChange?: (event: EventOf<BubbleChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<BubbleChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<BubbleChart, 'series-highlight'>) => void
         onLegendChange?: (event: EventOf<BubbleChart, 'legend-change'>) => void
         onRangeChange?: (event: EventOf<BubbleChart, 'range-change'>) => void
         onChartReady?: (event: EventOf<BubbleChart, 'chart-ready'>) => void
