@@ -63,14 +63,14 @@ npm install @c2n/steps
 ```html tag=UsageBlock,package=@c2n/steps
 <style>
   .trace {
-    --c2-steps--background: #faf9f5;
-    --c2-steps--border: 1px solid #e8e6dd;
+    --c2-steps--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
+    --c2-steps--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));
     --c2-steps--border-radius: 8px;
     --c2-steps--padding-block: 4px;
-    --c2-step__row--border-bottom: 1px solid #ecebe3;
-    --c2-step__row__hover--background: #f3f1e8;
+    --c2-step__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 8%, var(--c2-theme--color-surface, #ffffff));
+    --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
     --c2-step__marker--size: 13px;
-    --c2-step__success--color: #3f3f46;
+    --c2-step__success--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, var(--c2-theme--color-surface, #ffffff));
     --c2-step__label--font-weight: 400;
   }
   /* A marker slot holding an icon wants room and no ring around it. */
@@ -85,12 +85,12 @@ npm install @c2n/steps
     --c2-step__label--font-family: inherit;
     --c2-step__label--font-size: 13px;
     --c2-step__row--padding-block: 5px;
-    --c2-step__marker--border: 1px solid #d6d3c4;
+    --c2-step__marker--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 18%, var(--c2-theme--color-surface, #ffffff));
   }
   /* The chevron rotates on its own; the slot only says what to draw. */
   .chevrons {
     --c2-step__toggle--size: 12px;
-    --c2-step__toggle--color: #a8a29a;
+    --c2-step__toggle--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 38%, var(--c2-theme--color-surface, #ffffff));
   }
   /* The detail on its own line under the label. Nothing else to set: the gap follows the direction. */
   .stacked {
@@ -102,11 +102,11 @@ npm install @c2n/steps
   /* A wizard: a rail, roomier markers, and the body font instead of the trace's monospace. */
   .wizard {
     --c2-step__rail--width: 2px;
-    --c2-step__rail--color: #e4e4e7;
+    --c2-step__rail--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-step__rail--gap: 6px;
     --c2-step__marker--size: 26px;
     --c2-step__marker--font-size: 12px;
-    --c2-step__marker--background: #ffffff;
+    --c2-step__marker--background: var(--c2-theme--color-surface, #ffffff);
     --c2-step__row--border-bottom: none;
     --c2-step__row--padding-block: 6px;
     --c2-step__row--padding-inline: 0px;

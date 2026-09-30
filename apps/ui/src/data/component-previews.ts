@@ -37,7 +37,7 @@ export const componentPreviews: Record<string, string> = {
   <c2-dash-card col="2" row="1"><span slot="header">Price</span></c2-dash-card>
   <c2-dash-card col="2" row="2"><span slot="header">Orders</span></c2-dash-card>
 </c2-dashboard>`,
-  steps: `<c2-steps style="width:300px;--c2-steps--background:#faf9f5;--c2-steps--border:1px solid #e8e6dd;--c2-steps--border-radius:8px;--c2-steps--padding-block:2px;--c2-step__row--border-bottom:1px solid #ecebe3;--c2-step__marker--size:12px;--c2-step__row--padding-block:5px;--c2-step__label--font-size:12px;--c2-step__label--font-weight:400;--c2-step__success--color:#3f3f46" aria-label="Run trace">
+  steps: `<c2-steps style="width:300px;--c2-steps--background:color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));--c2-steps--border:1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 10%, var(--c2-theme--color-surface, #ffffff));--c2-steps--border-radius:8px;--c2-steps--padding-block:2px;--c2-step__row--border-bottom:1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 8%, var(--c2-theme--color-surface, #ffffff));--c2-step__marker--size:12px;--c2-step__row--padding-block:5px;--c2-step__label--font-size:12px;--c2-step__label--font-weight:400;--c2-step__success--color:color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, var(--c2-theme--color-surface, #ffffff))" aria-label="Run trace">
   <c2-step status="success" label="build" trailing="24 s"></c2-step>
   <c2-step label="test">
     <c2-step status="success" label="unit" trailing="8 s"></c2-step>
