@@ -144,11 +144,15 @@ function dayDiff(from: Date, to: Date): number {
  * @cssproperty {pixel} [--c2-calendar__picker--width=280px]
  * @cssproperty {pixel} [--c2-calendar__month--height=44px]
  * @cssproperty {border-radius} [--c2-calendar__month--border-radius=6px]
+ * @cssproperty {color} [--c2-calendar__month--color=#71717a] - A month without events.
  * @cssproperty {color} [--c2-calendar__month__hover--background=#f4f4f5]
  * @cssproperty {color} [--c2-calendar__month__selected--background=rgb(2, 101, 220)] - The month shown in the calendar.
  * @cssproperty {color} [--c2-calendar__month__selected--color=#ffffff]
  * @cssproperty {outline} [--c2-calendar__month__current--outline=1px solid #a1a1aa] - Today's month.
  * @cssproperty {font-weight} [--c2-calendar__month__marked--font-weight=600] - A month that has events.
+ * @cssproperty {color} [--c2-calendar__month__marked--color=#18181b]
+ * @cssproperty {color} [--c2-calendar__month__marked--background=rgba(2, 101, 220, 0.1)] - Soft tint behind a month that has events.
+ * @cssproperty {color} [--c2-calendar__month__marked__hover--background=rgba(2, 101, 220, 0.18)]
  * @cssproperty {color} [--c2-calendar__marker--color=rgb(2, 101, 220)] - Dot on a month (or year arrow) that has events.
  * @cssproperty {pixel} [--c2-calendar__marker--size=6px]
  */

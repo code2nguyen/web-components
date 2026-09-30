@@ -41,11 +41,15 @@
     picker--width: 280px,
     month--height: 44px,
     month--border-radius: 6px,
+    month--color: #71717a,
     month__hover--background: #f4f4f5,
     month__selected--background: rgb(2, 101, 220),
     month__selected--color: #ffffff,
     month__current--outline: 1px solid #a1a1aa,
     month__marked--font-weight: 600,
+    month__marked--color: #18181b,
+    month__marked--background: rgba(2, 101, 220, 0.1),
+    month__marked__hover--background: rgba(2, 101, 220, 0.18),
     marker--color: rgb(2, 101, 220),
     marker--size: 6px,
   )
@@ -337,17 +341,19 @@
   border: 0;
   border-radius: css.cssVar(month--border-radius);
   background: transparent;
-  color: inherit;
+  color: css.cssVar(month--color);
   cursor: pointer;
   font: inherit;
   font-size: css.cssVar(font-size);
-  transition: animation.standard(background);
+  transition: animation.standard(background), animation.standard(color);
 
   .marker {
     visibility: hidden;
   }
 
   &.marked {
+    background: css.cssVar(month__marked--background);
+    color: css.cssVar(month__marked--color);
     font-weight: css.cssVar(month__marked--font-weight);
 
     .marker {
@@ -355,7 +361,11 @@
     }
   }
 
-  &.current {
+  &.marked:hover:not(.selected) {
+    background: css.cssVar(month__marked__hover--background);
+  }
+
+  &.current:not(.selected) {
     outline: css.cssVar(month__current--outline);
     outline-offset: -1px;
   }
