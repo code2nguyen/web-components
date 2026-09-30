@@ -1,0 +1,821 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-todo-list,
+  $theme: (
+    container--background-color: #ffffff,
+    container--color: #18181b,
+    container--border: 1px solid #e4e4e7,
+    container--border-radius: 14px,
+    container--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    container--padding: 20px,
+    container--gap: 16px,
+    heading--font-size: 18px,
+    heading--font-weight: 600,
+    meta--color: #71717a,
+    meta--font-size: 12px,
+    accent--color: #0265dc,
+    on-accent--color: #ffffff,
+    track--color: #e4e4e7,
+    ring--size: 44px,
+    ring--stroke-width: 4.5,
+    hero-ring--size: 120px,
+    hero-ring--stroke-width: 7,
+    bar--height: 8px,
+    chip--background-color: #f4f4f5,
+    row--padding: 10px 8px,
+    row--gap: 12px,
+    row--border-radius: 8px,
+    row__hover--background-color: #fafafa,
+    row__selected--background-color: #f4f4f5,
+    tile--size: 36px,
+    tile--border-radius: 10px,
+    icon--size: 18px,
+    check--size: 22px,
+    check--border-color: #d4d4d8,
+    label--font-size: 14px,
+    label__done--color: #71717a,
+    add--border-color: #d4d4d8,
+    panel--background-color: #fafafa,
+    panel--border-radius: 8px,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    transition-duration: 200ms,
+    swatch-blue--color: #0265dc,
+    swatch-teal--color: #0f766e,
+    swatch-green--color: #15803d,
+    swatch-amber--color: #a16207,
+    swatch-orange--color: #ea580c,
+    swatch-pink--color: #db2777,
+    swatch-violet--color: #7c3aed,
+    swatch-slate--color: #52525b,
+  )
+);
+
+$colors: blue, teal, green, amber, orange, pink, violet, slate;
+$duration: css.cssVar(transition-duration);
+$accent: css.cssVar(accent--color);
+$muted: css.cssVar(meta--color);
+// Text on a chip: the ink colour softened, so it keeps its contrast on the tinted chip of every background.
+$chip-text: color-mix(in srgb, #{css.cssVar(container--color)} 76%, transparent);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+:is(button, input):focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+svg {
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// Every task colour, as a private `--_hue` a tile or the icon picker reads; a palette swatch paints it directly.
+@each $color in $colors {
+  .color-#{$color} {
+    --_hue: #{css.cssVar(swatch-#{$color}--color)};
+  }
+
+  .color-swatch.color-#{$color} {
+    background-color: css.cssVar(swatch-#{$color}--color);
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(container--gap);
+  padding: css.cssVar(container--padding);
+  color: css.cssVar(container--color);
+  background-color: css.cssVar(container--background-color);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  box-shadow: css.cssVar(container--box-shadow);
+  transition:
+    background-color $duration ease,
+    color $duration ease;
+}
+
+// Header -----------------------------------------------------------------------------------------------------------
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.heading {
+  margin: 0;
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0;
+  font-size: css.cssVar(meta--font-size);
+  color: $muted;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.customize {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: $muted;
+  transition:
+    background-color $duration ease,
+    color $duration ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.75;
+  }
+
+  .dot {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  &:hover,
+  &[aria-expanded='true'] {
+    color: css.cssVar(container--color);
+    background-color: css.cssVar(chip--background-color);
+  }
+}
+
+.ring {
+  position: relative;
+  flex-shrink: 0;
+  width: css.cssVar(ring--size);
+  height: css.cssVar(ring--size);
+
+  > svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    stroke-width: css.cssVar(ring--stroke-width);
+  }
+}
+
+.ring-track {
+  stroke: css.cssVar(track--color);
+}
+
+.ring-fill {
+  stroke: $accent;
+  transition: stroke-dasharray calc($duration * 2.5) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ring-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: css.cssVar(container--color);
+}
+
+.ring-check {
+  width: 45%;
+  height: 45%;
+  stroke: $accent;
+  stroke-width: 3;
+  animation: pop calc($duration * 2) cubic-bezier(0.2, 0.8, 0.2, 1.4);
+}
+
+// A large ring above the heading: the progress is the headline.
+.progress-hero {
+  .header {
+    position: relative;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .ring {
+    order: -2;
+    flex-basis: 100%;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: css.cssVar(hero-ring--size);
+
+    > svg {
+      width: css.cssVar(hero-ring--size);
+      stroke-width: css.cssVar(hero-ring--stroke-width);
+    }
+  }
+
+  .ring-value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+
+    small {
+      font-size: 0.55em;
+      font-weight: 600;
+      margin-left: 1px;
+    }
+  }
+
+  .titles {
+    flex: 0 1 auto;
+    align-items: center;
+  }
+
+  .actions {
+    order: -1;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+.bar {
+  height: css.cssVar(bar--height);
+  border-radius: 999px;
+  overflow: hidden;
+  background-color: css.cssVar(track--color);
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: $accent;
+  transition: width calc($duration * 2.5) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+// Filters ----------------------------------------------------------------------------------------------------------
+
+.filters {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background-color: css.cssVar(chip--background-color);
+}
+
+.filter,
+.segment {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $chip-text;
+  white-space: nowrap;
+  transition:
+    background-color $duration ease,
+    color $duration ease,
+    box-shadow $duration ease;
+
+  &:hover {
+    color: css.cssVar(container--color);
+  }
+
+  &[aria-pressed='true'],
+  &[aria-checked='true'] {
+    color: css.cssVar(container--color);
+    background-color: css.cssVar(container--background-color);
+    box-shadow:
+      0 1px 2px rgba(24, 24, 27, 0.08),
+      0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+  }
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+
+// Tasks ------------------------------------------------------------------------------------------------------------
+
+.tasks {
+  list-style: none;
+  margin: 0 -8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(row--gap);
+  min-width: 0;
+  padding: css.cssVar(row--padding);
+  border-radius: css.cssVar(row--border-radius);
+  transition: background-color $duration ease;
+
+  &:hover {
+    background-color: css.cssVar(row__hover--background-color);
+  }
+
+  &.selected {
+    background-color: css.cssVar(row__selected--background-color);
+  }
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: css.cssVar(check--size);
+  height: css.cssVar(check--size);
+  border-radius: 999px;
+  border: 2px solid css.cssVar(check--border-color);
+  color: css.cssVar(on-accent--color);
+  transition:
+    background-color $duration ease,
+    border-color $duration ease,
+    transform $duration ease;
+
+  svg {
+    width: 62%;
+    height: 62%;
+    stroke-width: 3.2;
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    transition: stroke-dashoffset $duration ease;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $accent;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.88);
+  }
+}
+
+.task.done .check {
+  border-color: $accent;
+  background-color: $accent;
+
+  svg {
+    stroke-dashoffset: 0;
+  }
+}
+
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: css.cssVar(tile--size);
+  height: css.cssVar(tile--size);
+  border-radius: css.cssVar(tile--border-radius);
+  color: var(--_hue);
+  background-color: color-mix(in srgb, var(--_hue) 14%, transparent);
+  transition:
+    transform $duration ease,
+    opacity $duration ease,
+    filter $duration ease,
+    box-shadow $duration ease;
+
+  .icon {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+  }
+
+  &:is(button):hover {
+    transform: translateY(-1px) rotate(-4deg);
+  }
+
+  &[aria-pressed='true'] {
+    box-shadow:
+      0 0 0 2px css.cssVar(container--background-color),
+      0 0 0 4px var(--_hue);
+  }
+}
+
+.task.done .tile {
+  opacity: 0.5;
+  filter: saturate(0.4);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  font-size: css.cssVar(label--font-size);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  // The strike-through grows from the left instead of snapping in.
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 55%;
+  background-size: 0 1.5px;
+  transition:
+    background-size $duration ease,
+    color $duration ease;
+}
+
+.task.done .label {
+  color: css.cssVar(label__done--color);
+  background-size: 100% 1.5px;
+}
+
+.due {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $chip-text;
+  background-color: css.cssVar(chip--background-color);
+
+  &.urgent {
+    color: $accent;
+    background-color: color-mix(in srgb, #{$accent} 12%, transparent);
+  }
+}
+
+.remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: $muted;
+  opacity: 0;
+  transition:
+    opacity $duration ease,
+    background-color $duration ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2;
+  }
+
+  &:hover {
+    background-color: css.cssVar(chip--background-color);
+  }
+
+  .task:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  // Touch screens have no hover to reveal it.
+  @media (hover: none) {
+    opacity: 0.6;
+  }
+}
+
+.empty {
+  margin: 0;
+  padding: 20px 8px;
+  text-align: center;
+  font-size: css.cssVar(label--font-size);
+  color: $muted;
+}
+
+// Add field --------------------------------------------------------------------------------------------------------
+
+.add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 12px;
+  border: 1px dashed css.cssVar(add--border-color);
+  border-radius: 12px;
+  transition: border-color $duration ease;
+
+  &:focus-within {
+    border-color: $accent;
+  }
+}
+
+.add-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  stroke: $accent;
+  stroke-width: 2;
+}
+
+.add-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  font-size: css.cssVar(label--font-size);
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: $muted;
+  }
+}
+
+.add-button {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: css.cssVar(on-accent--color);
+  background-color: $accent;
+  transition: opacity $duration ease;
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+// Customize panel --------------------------------------------------------------------------------------------------
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border-radius: css.cssVar(panel--border-radius);
+  background-color: css.cssVar(panel--background-color);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 6%, transparent);
+  animation: reveal calc($duration * 1.2) ease-out;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.reset {
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $muted;
+  background-color: css.cssVar(container--background-color);
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 12px;
+
+  @container (max-width: 360px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.container {
+  container-type: inline-size;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editing {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+  color: css.cssVar(container--color);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.background-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  // Default shows the list's own colours; a preset shows its surface over its ground.
+  background: linear-gradient(
+    135deg,
+    var(--_swatch, #{css.cssVar(container--background-color)}) 50%,
+    var(--_ground, #{css.cssVar(chip--background-color)}) 50%
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 14%, transparent);
+  transition: box-shadow $duration ease;
+}
+
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  transition: box-shadow $duration ease;
+
+  &.small {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+  }
+}
+
+:is(.background-swatch, .color-swatch)[aria-checked='true'] {
+  box-shadow:
+    0 0 0 2px css.cssVar(panel--background-color),
+    0 0 0 4px $accent;
+}
+
+.color-swatch[aria-checked='true'] {
+  box-shadow:
+    0 0 0 2px css.cssVar(panel--background-color),
+    0 0 0 4px var(--_hue);
+}
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9px;
+  background-color: color-mix(in srgb, currentColor 6%, transparent);
+
+  .segment {
+    padding: 0 6px;
+    min-height: 28px;
+  }
+}
+
+.icon-search {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  background-color: css.cssVar(container--background-color);
+  font-size: 12px;
+
+  &::placeholder {
+    color: $muted;
+  }
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+  max-height: 176px;
+  overflow-y: auto;
+  padding: 2px;
+  margin: -2px;
+  scrollbar-width: thin;
+
+  .hint {
+    grid-column: 1 / -1;
+  }
+}
+
+.icon-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 32px;
+  border-radius: 8px;
+  color: $muted;
+
+  .icon {
+    width: 18px;
+    height: 18px;
+  }
+  transition:
+    background-color $duration ease,
+    color $duration ease;
+
+  &:hover {
+    color: var(--_hue);
+    background-color: color-mix(in srgb, var(--_hue) 10%, transparent);
+  }
+
+  &[aria-pressed='true'] {
+    color: var(--_hue);
+    background-color: color-mix(in srgb, var(--_hue) 16%, transparent);
+    box-shadow: inset 0 0 0 1.5px var(--_hue);
+  }
+}
+
+.hint,
+.saved {
+  margin: 0;
+  font-size: 12px;
+  color: $muted;
+}
+
+// Motion -----------------------------------------------------------------------------------------------------------
+
+@keyframes pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}

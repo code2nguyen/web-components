@@ -344,6 +344,23 @@ export const overrides: Record<string, Override> = {
   '--c2-symbol__accent--color': { exclude: 'decorative golden highlight' },
   '--c2-symbol__success--color': { exclude: 'semantic success colour' },
   '--c2-symbol__warning--color': { exclude: 'semantic warning colour' },
+  // Todo list: the task palette is the categorical chart palette, so a brand theme and dark mode recolour the tiles as
+  // they recolour a chart; green has no chart slot and stays a stable hue. The tile radius sits between the radius
+  // steps on purpose (a squircle, not a button), and the heading is one step above body text.
+  '--c2-todo-list__container--box-shadow': { token: 'shadow-md' },
+  '--c2-todo-list__on-accent--color': { token: 'color-on-primary' },
+  '--c2-todo-list__check--border-color': { token: 'color-outline' },
+  '--c2-todo-list__add--border-color': { token: 'color-outline' },
+  '--c2-todo-list__swatch-blue--color': { token: 'chart-series-1' },
+  '--c2-todo-list__swatch-orange--color': { token: 'chart-series-2' },
+  '--c2-todo-list__swatch-teal--color': { token: 'chart-series-3' },
+  '--c2-todo-list__swatch-pink--color': { token: 'chart-series-4' },
+  '--c2-todo-list__swatch-amber--color': { token: 'chart-series-5' },
+  '--c2-todo-list__swatch-violet--color': { token: 'chart-series-6' },
+  '--c2-todo-list__swatch-slate--color': { token: 'chart-series-8' },
+  '--c2-todo-list__swatch-green--color': { exclude: 'task palette green, no chart slot' },
+  '--c2-todo-list__tile--border-radius': { exclude: 'icon tile squircle between the radius steps' },
+  '--c2-todo-list__heading--font-size': { exclude: 'list heading, one step above body text' },
   // Carousel indicator dots are small fills, not surfaces: they take the strong outline and the muted text colour.
   '--c2-carousel__indicator--background-color': { token: 'color-outline-strong' },
   '--c2-carousel__indicator__hover--background-color': { token: 'color-on-surface-variant' },

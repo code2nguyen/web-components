@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/todo-list:build",
         "../../components/hover-card:build",
         "../../components/command:build",
         "../../components/marker:build",
@@ -138,6 +139,7 @@
         "../../icons/feather-icons:build",
         "../../icons/phosphor-icons:build",
         "../../icons/symbols:build",
+        "../../icons/task-icons:build",
         "../../../open-packages/chatbot:build"
       ],
       "command": "tsc -p tsconfig.lib.json && node scripts/theme-generator/index.ts"

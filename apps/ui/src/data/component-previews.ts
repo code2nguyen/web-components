@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'todo-list': `<c2-todo-list heading="Launch week" style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:4px 6px;--c2-todo-list__tile--size:28px;--c2-todo-list__icon--size:15px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px" readonly tasks='[{"label":"Send the invoice","icon":"mail","color":"blue","done":true},{"label":"Team standup","icon":"meeting","color":"violet","done":true},{"label":"Gym session","icon":"gym","color":"orange"}]'></c2-todo-list>`,
   'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:#71717a">Wrote the first published algorithm.</div></c2-hover-card>`,
   command: `<c2-command style="width:260px;--c2-command__field--min-height:40px;--c2-command__list--max-height:150px">
   <c2-command-group heading="Suggestions">
@@ -194,6 +195,12 @@ greet('world')"></c2-code-editor>`,
   <c2-phosphor-camera></c2-phosphor-camera>
   <c2-phosphor-gear weight="duotone"></c2-phosphor-gear>
   <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
+</div>`,
+  'task-icons': `<div class="preview-row" style="gap:18px;--c2-task-icon--size:28px;color:#0265dc">
+  <c2-task-icon-mail></c2-task-icon-mail>
+  <c2-task-icon-run style="color:#ea580c"></c2-task-icon-run>
+  <c2-task-icon-cook style="color:#0f766e"></c2-task-icon-cook>
+  <c2-task-icon-meditate style="color:#7c3aed"></c2-task-icon-meditate>
 </div>`,
   symbols: `<div class="preview-row" style="gap:10px;--c2-symbol--size:84px">
   <c2-symbol-celebration></c2-symbol-celebration>

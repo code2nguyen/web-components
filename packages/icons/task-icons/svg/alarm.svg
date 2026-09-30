@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <circle class="tone" cx="12" cy="13" r="7.5"/>
+  <path d="M12 9.5V13l2 1.5M3.5 5.5l3-2.5M20.5 5.5l-3-2.5M6.5 19.5L5 21M17.5 19.5L19 21"/>
+</svg>

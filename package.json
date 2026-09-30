@@ -92,6 +92,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/todo-list:build",
         "./packages/components/hover-card:build",
         "./packages/components/command:build",
         "./packages/components/marker:build",
@@ -153,6 +154,7 @@
         "./packages/icons/feather-icons:build",
         "./packages/icons/phosphor-icons:build",
         "./packages/icons/symbols:build",
+        "./packages/icons/task-icons:build",
         "./open-packages/chatbot:build",
         "./packages/components/chat-input:build",
         "./packages/components/chat-message:build",

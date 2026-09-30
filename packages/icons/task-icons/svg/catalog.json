@@ -1,0 +1,877 @@
+{
+  "alarm": {
+    "title": "Wake up",
+    "category": "planning",
+    "keywords": ["wake", "up", "alarm", "early", "reminder", "morning"]
+  },
+  "announce": {
+    "title": "Announce",
+    "category": "communication",
+    "keywords": ["announce", "announcement", "marketing", "campaign", "promote", "news", "broadcast"]
+  },
+  "apple": {
+    "title": "Eat well",
+    "category": "health",
+    "keywords": ["eat", "healthy", "diet", "nutrition", "fruit", "snack", "apple"]
+  },
+  "appointment": {
+    "title": "Appointment",
+    "category": "planning",
+    "keywords": ["appointment", "booking", "reservation", "confirm", "rsvp", "event"]
+  },
+  "baby": {
+    "title": "Baby",
+    "category": "family",
+    "keywords": ["baby", "bottle", "feed", "nursery", "toddler", "newborn", "diapers"]
+  },
+  "backup": {
+    "title": "Backup",
+    "category": "tech",
+    "keywords": ["backup", "upload", "save", "sync", "export"]
+  },
+  "bag": {
+    "title": "Shopping",
+    "category": "shopping",
+    "keywords": ["shopping", "bag", "buy", "purchase", "mall", "clothes", "store"]
+  },
+  "bake": {
+    "title": "Bake",
+    "category": "food",
+    "keywords": ["bake", "cupcake", "dessert", "cake", "cookies", "sweet"]
+  },
+  "balloon": {
+    "title": "Party",
+    "category": "family",
+    "keywords": ["party", "celebrate", "invite", "event", "balloon", "fun"]
+  },
+  "bank": {
+    "title": "Bank",
+    "category": "finance",
+    "keywords": ["bank", "account", "loan", "mortgage", "appointment", "finance"]
+  },
+  "basketball": {
+    "title": "Basketball",
+    "category": "sport",
+    "keywords": ["basketball", "hoops", "court", "game"]
+  },
+  "bath": {
+    "title": "Bath",
+    "category": "home",
+    "keywords": ["bath", "shower", "self-care", "bathroom", "spa"]
+  },
+  "beach": {
+    "title": "Holiday",
+    "category": "travel",
+    "keywords": ["holiday", "beach", "vacation", "summer", "sun", "off"]
+  },
+  "bed": {
+    "title": "Bed",
+    "category": "home",
+    "keywords": ["bed", "make", "bed", "bedroom", "hotel", "sheets", "guest"]
+  },
+  "bell": {
+    "title": "Reminder",
+    "category": "planning",
+    "keywords": ["reminder", "bell", "notify", "alert", "remember"]
+  },
+  "bike": {
+    "title": "Cycle",
+    "category": "sport",
+    "keywords": ["cycle", "bike", "bicycle", "ride", "commute", "spin"]
+  },
+  "bill": {
+    "title": "Bills",
+    "category": "finance",
+    "keywords": ["bills", "invoice", "receipt", "pay", "rent", "utilities", "expense"]
+  },
+  "birthday": {
+    "title": "Birthday",
+    "category": "family",
+    "keywords": ["birthday", "cake", "anniversary", "candles", "celebrate"]
+  },
+  "boat": {
+    "title": "Boat",
+    "category": "travel",
+    "keywords": ["boat", "ferry", "cruise", "sail", "ship"]
+  },
+  "book": {
+    "title": "Book",
+    "category": "learning",
+    "keywords": ["book", "read", "reading", "novel", "chapter", "library", "literature"]
+  },
+  "bookmark": {
+    "title": "Save",
+    "category": "planning",
+    "keywords": ["save", "bookmark", "later", "read", "later", "keep"]
+  },
+  "books": {
+    "title": "Library",
+    "category": "learning",
+    "keywords": ["library", "books", "research", "reading", "list", "shelf"]
+  },
+  "branch": {
+    "title": "Branch",
+    "category": "tech",
+    "keywords": ["branch", "git", "merge", "pull", "request", "pr", "version", "review"]
+  },
+  "briefcase": {
+    "title": "Work",
+    "category": "work",
+    "keywords": ["work", "job", "office", "business", "career", "client", "project"]
+  },
+  "bug": {
+    "title": "Bug",
+    "category": "tech",
+    "keywords": ["bug", "fix", "issue", "debug", "error", "crash", "qa", "test"]
+  },
+  "burger": {
+    "title": "Snack",
+    "category": "food",
+    "keywords": ["snack", "burger", "fast", "food", "lunch", "bbq"]
+  },
+  "bus": {
+    "title": "Bus",
+    "category": "travel",
+    "keywords": ["bus", "school", "run", "commute", "transit", "shuttle"]
+  },
+  "calculator": {
+    "title": "Math",
+    "category": "learning",
+    "keywords": ["math", "calculate", "numbers", "accounting", "budget"]
+  },
+  "calendar": {
+    "title": "Calendar",
+    "category": "planning",
+    "keywords": ["calendar", "schedule", "plan", "week", "month", "agenda", "date"]
+  },
+  "call": {
+    "title": "Call",
+    "category": "communication",
+    "keywords": ["call", "phone", "ring", "dial", "contact", "mom", "dad", "hotline"]
+  },
+  "camera": {
+    "title": "Photos",
+    "category": "leisure",
+    "keywords": ["photos", "camera", "photography", "pictures", "album", "shoot"]
+  },
+  "camping": {
+    "title": "Camping",
+    "category": "travel",
+    "keywords": ["camping", "tent", "outdoors", "festival", "scout"]
+  },
+  "car": {
+    "title": "Car",
+    "category": "travel",
+    "keywords": ["car", "drive", "service", "mot", "garage", "road", "trip", "parking"]
+  },
+  "card": {
+    "title": "Card",
+    "category": "finance",
+    "keywords": ["card", "credit", "debit", "payment", "subscription", "bank"]
+  },
+  "cart": {
+    "title": "Groceries",
+    "category": "shopping",
+    "keywords": ["groceries", "shopping", "cart", "supermarket", "food", "list", "milk", "bread", "eggs"]
+  },
+  "charge": {
+    "title": "Charge",
+    "category": "tech",
+    "keywords": ["charge", "battery", "power", "energy", "electric"]
+  },
+  "chat": {
+    "title": "Message",
+    "category": "communication",
+    "keywords": ["message", "chat", "text", "sms", "slack", "dm", "ping"]
+  },
+  "check-circle": {
+    "title": "Done",
+    "category": "planning",
+    "keywords": ["done", "complete", "finish", "check", "verify", "confirm"]
+  },
+  "checklist": {
+    "title": "Checklist",
+    "category": "work",
+    "keywords": ["checklist", "todo", "tasks", "list", "review", "audit", "clipboard"]
+  },
+  "clean": {
+    "title": "Clean",
+    "category": "home",
+    "keywords": ["clean", "spray", "wipe", "tidy", "dust", "bathroom", "kitchen"]
+  },
+  "clock": {
+    "title": "Time",
+    "category": "planning",
+    "keywords": ["time", "clock", "hours", "timesheet", "schedule"]
+  },
+  "clothes": {
+    "title": "Clothes",
+    "category": "home",
+    "keywords": ["clothes", "shirt", "iron", "wardrobe", "outfit", "fold", "dress"]
+  },
+  "cloud": {
+    "title": "Cloud",
+    "category": "tech",
+    "keywords": ["cloud", "sync", "storage", "upload", "drive"]
+  },
+  "code": {
+    "title": "Code",
+    "category": "tech",
+    "keywords": ["code", "develop", "program", "implement", "feature", "refactor", "dev"]
+  },
+  "coffee": {
+    "title": "Coffee",
+    "category": "food",
+    "keywords": ["coffee", "break", "cafe", "latte", "espresso", "morning"]
+  },
+  "coin": {
+    "title": "Coins",
+    "category": "finance",
+    "keywords": ["coins", "change", "tip", "allowance", "pocket", "money"]
+  },
+  "compass": {
+    "title": "Explore",
+    "category": "travel",
+    "keywords": ["explore", "compass", "adventure", "discover", "navigate"]
+  },
+  "contact": {
+    "title": "Contact",
+    "category": "communication",
+    "keywords": ["contact", "address", "card", "network", "linkedin", "reach", "out"]
+  },
+  "conversation": {
+    "title": "Discussion",
+    "category": "communication",
+    "keywords": ["discussion", "conversation", "feedback", "talk", "interview", "chat", "catch-up"]
+  },
+  "cook": {
+    "title": "Cook",
+    "category": "food",
+    "keywords": ["cook", "dinner", "lunch", "meal", "prep", "kitchen", "recipe", "soup"]
+  },
+  "craft": {
+    "title": "Craft",
+    "category": "leisure",
+    "keywords": ["craft", "scissors", "sew", "diy", "cut", "knit", "hobby"]
+  },
+  "database": {
+    "title": "Data",
+    "category": "tech",
+    "keywords": ["data", "database", "migrate", "query", "sql", "spreadsheet"]
+  },
+  "delivery": {
+    "title": "Delivery",
+    "category": "shopping",
+    "keywords": ["delivery", "truck", "shipping", "order", "courier", "logistics"]
+  },
+  "dishes": {
+    "title": "Dishes",
+    "category": "home",
+    "keywords": ["dishes", "wash", "up", "dishwasher", "bowl", "kitchen"]
+  },
+  "doctor": {
+    "title": "Doctor",
+    "category": "health",
+    "keywords": ["doctor", "appointment", "clinic", "checkup", "hospital", "physician"]
+  },
+  "document": {
+    "title": "Document",
+    "category": "work",
+    "keywords": ["document", "doc", "write", "draft", "spec", "paper", "file", "brief", "proposal"]
+  },
+  "download": {
+    "title": "Download",
+    "category": "tech",
+    "keywords": ["download", "import", "install", "get", "fetch"]
+  },
+  "eye": {
+    "title": "Eyes",
+    "category": "health",
+    "keywords": ["eyes", "vision", "optician", "glasses", "watch", "review", "look"]
+  },
+  "family": {
+    "title": "Family",
+    "category": "family",
+    "keywords": ["family", "parents", "kids", "children", "home", "visit"]
+  },
+  "fire": {
+    "title": "Hot",
+    "category": "planning",
+    "keywords": ["hot", "streak", "fire", "trending", "burn", "motivation"]
+  },
+  "first-aid": {
+    "title": "First aid",
+    "category": "health",
+    "keywords": ["first", "aid", "emergency", "care", "kit", "injury"]
+  },
+  "flag": {
+    "title": "Milestone",
+    "category": "planning",
+    "keywords": ["milestone", "flag", "deadline", "finish", "important", "priority"]
+  },
+  "flask": {
+    "title": "Science",
+    "category": "learning",
+    "keywords": ["science", "lab", "experiment", "chemistry", "research", "test"]
+  },
+  "flight": {
+    "title": "Flight",
+    "category": "travel",
+    "keywords": ["flight", "plane", "airport", "trip", "vacation", "check", "in", "fly"]
+  },
+  "flower": {
+    "title": "Garden",
+    "category": "nature",
+    "keywords": ["garden", "flower", "gardening", "bloom", "spring", "florist"]
+  },
+  "folder": {
+    "title": "Folder",
+    "category": "work",
+    "keywords": ["folder", "files", "organize", "archive", "sort", "drive"]
+  },
+  "football": {
+    "title": "Football",
+    "category": "sport",
+    "keywords": ["football", "soccer", "ball", "match", "game", "sport"]
+  },
+  "fuel": {
+    "title": "Fuel",
+    "category": "travel",
+    "keywords": ["fuel", "gas", "petrol", "refuel", "charge", "car"]
+  },
+  "game": {
+    "title": "Game",
+    "category": "leisure",
+    "keywords": ["game", "play", "video", "games", "console", "fun", "gaming"]
+  },
+  "gift": {
+    "title": "Gift",
+    "category": "family",
+    "keywords": ["gift", "present", "wrap", "christmas", "surprise", "buy", "for"]
+  },
+  "globe": {
+    "title": "World",
+    "category": "learning",
+    "keywords": ["world", "globe", "geography", "international", "online", "web", "travel"]
+  },
+  "graduation": {
+    "title": "Study",
+    "category": "learning",
+    "keywords": ["study", "learn", "course", "class", "school", "university", "exam", "graduate", "degree"]
+  },
+  "gym": {
+    "title": "Workout",
+    "category": "sport",
+    "keywords": ["workout", "gym", "weights", "lift", "strength", "training", "fitness", "exercise"]
+  },
+  "headphones": {
+    "title": "Listen",
+    "category": "learning",
+    "keywords": ["listen", "podcast", "audiobook", "music", "audio", "lesson"]
+  },
+  "health": {
+    "title": "Health",
+    "category": "health",
+    "keywords": ["health", "heart", "checkup", "cardio", "wellbeing", "blood", "pressure"]
+  },
+  "heart": {
+    "title": "Love",
+    "category": "family",
+    "keywords": ["love", "date", "partner", "romance", "heart", "favourite", "care"]
+  },
+  "hike": {
+    "title": "Hike",
+    "category": "sport",
+    "keywords": ["hike", "mountain", "climb", "trek", "trail", "outdoors", "ski"]
+  },
+  "home": {
+    "title": "Home",
+    "category": "home",
+    "keywords": ["home", "house", "chores", "household", "family", "rent", "mortgage"]
+  },
+  "hourglass": {
+    "title": "Waiting",
+    "category": "planning",
+    "keywords": ["waiting", "hourglass", "pending", "later", "deadline", "patience"]
+  },
+  "idea": {
+    "title": "Idea",
+    "category": "work",
+    "keywords": ["idea", "brainstorm", "think", "plan", "concept", "inspiration", "innovate"]
+  },
+  "inbox": {
+    "title": "Inbox",
+    "category": "work",
+    "keywords": ["inbox", "triage", "zero", "sort", "queue"]
+  },
+  "invest": {
+    "title": "Invest",
+    "category": "finance",
+    "keywords": ["invest", "stocks", "growth", "portfolio", "trading", "crypto", "chart"]
+  },
+  "key": {
+    "title": "Keys",
+    "category": "home",
+    "keywords": ["keys", "key", "lock", "door", "access", "password", "car"]
+  },
+  "language": {
+    "title": "Language",
+    "category": "learning",
+    "keywords": ["language", "translate", "learn", "spanish", "french", "english", "vocabulary", "duolingo"]
+  },
+  "laptop": {
+    "title": "Computer",
+    "category": "tech",
+    "keywords": ["computer", "laptop", "setup", "install", "online", "remote"]
+  },
+  "laundry": {
+    "title": "Laundry",
+    "category": "home",
+    "keywords": ["laundry", "wash", "washing", "machine", "clothes", "dry"]
+  },
+  "leaf": {
+    "title": "Eco",
+    "category": "nature",
+    "keywords": ["eco", "green", "recycle", "compost", "sustainable", "nature"]
+  },
+  "lesson": {
+    "title": "Lesson",
+    "category": "learning",
+    "keywords": ["lesson", "teach", "class", "lecture", "training", "tutor", "whiteboard"]
+  },
+  "like": {
+    "title": "Like",
+    "category": "communication",
+    "keywords": ["like", "thumbs", "up", "approve", "feedback", "review", "rate"]
+  },
+  "list": {
+    "title": "List",
+    "category": "planning",
+    "keywords": ["list", "items", "outline", "agenda"]
+  },
+  "lock": {
+    "title": "Private",
+    "category": "planning",
+    "keywords": ["private", "lock", "secure", "confidential", "password"]
+  },
+  "luggage": {
+    "title": "Pack",
+    "category": "travel",
+    "keywords": ["pack", "luggage", "suitcase", "trip", "vacation", "holiday"]
+  },
+  "mail": {
+    "title": "Email",
+    "category": "communication",
+    "keywords": ["email", "mail", "send", "reply", "inbox", "message", "newsletter", "follow-up"]
+  },
+  "map": {
+    "title": "Plan route",
+    "category": "travel",
+    "keywords": ["map", "route", "plan", "itinerary", "directions", "explore"]
+  },
+  "medal": {
+    "title": "Medal",
+    "category": "sport",
+    "keywords": ["medal", "badge", "reward", "prize", "race", "finish"]
+  },
+  "meditate": {
+    "title": "Meditate",
+    "category": "health",
+    "keywords": ["meditate", "yoga", "mindfulness", "breathe", "calm", "relax", "zen"]
+  },
+  "meeting": {
+    "title": "Meeting",
+    "category": "work",
+    "keywords": ["meeting", "standup", "sync", "team", "huddle", "workshop", "conference", "1:1", "one-on-one"]
+  },
+  "microphone": {
+    "title": "Sing",
+    "category": "leisure",
+    "keywords": ["sing", "microphone", "karaoke", "podcast", "record", "voice"]
+  },
+  "money": {
+    "title": "Money",
+    "category": "finance",
+    "keywords": ["money", "cash", "pay", "salary", "transfer", "finance"]
+  },
+  "monitor": {
+    "title": "Screen",
+    "category": "tech",
+    "keywords": ["screen", "monitor", "desktop", "display", "website"]
+  },
+  "mood": {
+    "title": "Mood",
+    "category": "health",
+    "keywords": ["mood", "happy", "smile", "feelings", "gratitude", "mental", "health"]
+  },
+  "moon": {
+    "title": "Evening",
+    "category": "nature",
+    "keywords": ["evening", "night", "moon", "wind", "down", "bedtime"]
+  },
+  "movie": {
+    "title": "Movie",
+    "category": "leisure",
+    "keywords": ["movie", "film", "cinema", "watch", "netflix", "video", "edit"]
+  },
+  "music": {
+    "title": "Music",
+    "category": "leisure",
+    "keywords": ["music", "song", "playlist", "practice", "instrument", "piano", "guitar", "concert"]
+  },
+  "news": {
+    "title": "News",
+    "category": "communication",
+    "keywords": ["news", "newspaper", "blog", "article", "read", "press"]
+  },
+  "note": {
+    "title": "Note",
+    "category": "planning",
+    "keywords": ["note", "sticky", "memo", "jot", "down", "write"]
+  },
+  "notebook": {
+    "title": "Notes",
+    "category": "learning",
+    "keywords": ["notes", "notebook", "lecture", "journal", "log", "minutes"]
+  },
+  "open-book": {
+    "title": "Read",
+    "category": "learning",
+    "keywords": ["read", "study", "revise", "notes", "textbook", "bible"]
+  },
+  "package": {
+    "title": "Parcel",
+    "category": "shopping",
+    "keywords": ["parcel", "package", "box", "ship", "return", "order", "post", "moving"]
+  },
+  "paint": {
+    "title": "Paint",
+    "category": "leisure",
+    "keywords": ["paint", "art", "colour", "draw", "creative", "decorate"]
+  },
+  "passport": {
+    "title": "Passport",
+    "category": "travel",
+    "keywords": ["passport", "visa", "id", "documents", "renew", "travel"]
+  },
+  "pencil": {
+    "title": "Homework",
+    "category": "learning",
+    "keywords": ["homework", "write", "edit", "draw", "sketch", "essay", "assignment"]
+  },
+  "person": {
+    "title": "Person",
+    "category": "work",
+    "keywords": ["person", "contact", "user", "profile", "account", "hr", "mentor"]
+  },
+  "pet": {
+    "title": "Pet",
+    "category": "family",
+    "keywords": ["pet", "dog", "cat", "vet", "walk", "dog", "feed", "paw"]
+  },
+  "pill": {
+    "title": "Medicine",
+    "category": "health",
+    "keywords": ["medicine", "pill", "vitamins", "prescription", "pharmacy", "meds"]
+  },
+  "pin": {
+    "title": "Place",
+    "category": "travel",
+    "keywords": ["place", "location", "visit", "address", "pin", "venue"]
+  },
+  "pizza": {
+    "title": "Takeaway",
+    "category": "food",
+    "keywords": ["takeaway", "pizza", "order", "food", "delivery", "snack"]
+  },
+  "plant": {
+    "title": "Plants",
+    "category": "home",
+    "keywords": ["plants", "water", "houseplant", "garden", "pot", "grow"]
+  },
+  "presentation": {
+    "title": "Presentation",
+    "category": "work",
+    "keywords": ["presentation", "slides", "pitch", "demo", "talk", "keynote", "deck", "webinar"]
+  },
+  "print": {
+    "title": "Print",
+    "category": "work",
+    "keywords": ["print", "printer", "scan", "copy", "paper"]
+  },
+  "puzzle": {
+    "title": "Practice",
+    "category": "learning",
+    "keywords": ["practice", "puzzle", "problem", "solve", "brain", "game", "riddle"]
+  },
+  "rain": {
+    "title": "Weather",
+    "category": "nature",
+    "keywords": ["weather", "rain", "umbrella", "forecast", "storm"]
+  },
+  "repair": {
+    "title": "Repair",
+    "category": "home",
+    "keywords": ["repair", "fix", "wrench", "tools", "maintenance", "diy", "plumber"]
+  },
+  "repeat": {
+    "title": "Habit",
+    "category": "planning",
+    "keywords": ["habit", "routine", "daily", "recurring", "repeat", "weekly", "streak"]
+  },
+  "reply": {
+    "title": "Reply",
+    "category": "communication",
+    "keywords": ["reply", "respond", "answer", "follow", "up", "get", "back"]
+  },
+  "report": {
+    "title": "Report",
+    "category": "work",
+    "keywords": ["report", "analytics", "metrics", "kpi", "review", "numbers", "quarterly", "summary"]
+  },
+  "restaurant": {
+    "title": "Restaurant",
+    "category": "food",
+    "keywords": ["restaurant", "eat", "out", "dinner", "lunch", "reservation", "book", "table", "food"]
+  },
+  "robot": {
+    "title": "AI",
+    "category": "tech",
+    "keywords": ["ai", "robot", "automation", "bot", "assistant", "machine", "learning"]
+  },
+  "rocket": {
+    "title": "Launch",
+    "category": "tech",
+    "keywords": ["launch", "ship", "release", "deploy", "go", "live", "rocket", "start"]
+  },
+  "run": {
+    "title": "Run",
+    "category": "sport",
+    "keywords": ["run", "running", "jog", "marathon", "sprint", "cardio", "sneakers"]
+  },
+  "savings": {
+    "title": "Savings",
+    "category": "finance",
+    "keywords": ["savings", "save", "piggy", "bank", "emergency", "fund", "goal"]
+  },
+  "search": {
+    "title": "Research",
+    "category": "learning",
+    "keywords": ["research", "search", "find", "look", "up", "investigate", "explore"]
+  },
+  "send": {
+    "title": "Send",
+    "category": "communication",
+    "keywords": ["send", "submit", "deliver", "share", "dispatch", "post"]
+  },
+  "server": {
+    "title": "Server",
+    "category": "tech",
+    "keywords": ["server", "infrastructure", "hosting", "ops", "devops", "maintenance"]
+  },
+  "settings": {
+    "title": "Settings",
+    "category": "tech",
+    "keywords": ["settings", "configure", "setup", "preferences", "admin", "maintenance"]
+  },
+  "share": {
+    "title": "Share",
+    "category": "communication",
+    "keywords": ["share", "social", "post", "publish", "network"]
+  },
+  "shield": {
+    "title": "Security",
+    "category": "tech",
+    "keywords": ["security", "privacy", "protect", "insurance", "password", "safe"]
+  },
+  "shop": {
+    "title": "Store",
+    "category": "shopping",
+    "keywords": ["store", "shop", "market", "errand", "pick", "up", "local", "business"]
+  },
+  "signature": {
+    "title": "Sign",
+    "category": "work",
+    "keywords": ["sign", "signature", "contract", "agreement", "approve", "form", "paperwork"]
+  },
+  "sleep": {
+    "title": "Sleep",
+    "category": "health",
+    "keywords": ["sleep", "rest", "nap", "bed", "early", "night", "routine"]
+  },
+  "smartphone": {
+    "title": "Phone",
+    "category": "tech",
+    "keywords": ["phone", "mobile", "app", "smartphone", "text"]
+  },
+  "sofa": {
+    "title": "Relax",
+    "category": "home",
+    "keywords": ["relax", "sofa", "couch", "chill", "rest", "lounge", "furniture"]
+  },
+  "sparkles": {
+    "title": "New",
+    "category": "planning",
+    "keywords": ["new", "sparkle", "magic", "self-care", "special", "fresh", "start"]
+  },
+  "star": {
+    "title": "Favourite",
+    "category": "planning",
+    "keywords": ["favourite", "star", "important", "highlight", "top", "priority", "wish"]
+  },
+  "stopwatch": {
+    "title": "Timer",
+    "category": "sport",
+    "keywords": ["timer", "stopwatch", "time", "trial", "pomodoro", "interval"]
+  },
+  "sun": {
+    "title": "Sun",
+    "category": "nature",
+    "keywords": ["sun", "morning", "outside", "daylight", "summer", "sunscreen"]
+  },
+  "sweep": {
+    "title": "Sweep",
+    "category": "home",
+    "keywords": ["sweep", "broom", "vacuum", "floor", "mop", "tidy"]
+  },
+  "swim": {
+    "title": "Swim",
+    "category": "sport",
+    "keywords": ["swim", "pool", "beach", "laps", "water", "sport"]
+  },
+  "tag": {
+    "title": "Price",
+    "category": "shopping",
+    "keywords": ["price", "tag", "sale", "label", "discount", "sell"]
+  },
+  "target": {
+    "title": "Goal",
+    "category": "work",
+    "keywords": ["goal", "target", "objective", "okr", "focus", "aim", "milestone"]
+  },
+  "tax": {
+    "title": "Taxes",
+    "category": "finance",
+    "keywords": ["taxes", "tax", "return", "percent", "discount", "interest", "accountant"]
+  },
+  "tea": {
+    "title": "Tea",
+    "category": "food",
+    "keywords": ["tea", "cup", "herbal", "break", "afternoon"]
+  },
+  "team": {
+    "title": "Team",
+    "category": "work",
+    "keywords": ["team", "people", "colleagues", "hire", "onboarding", "interview", "recruit", "coworkers"]
+  },
+  "tennis": {
+    "title": "Tennis",
+    "category": "sport",
+    "keywords": ["tennis", "padel", "squash", "badminton", "racket", "ball"]
+  },
+  "terminal": {
+    "title": "Terminal",
+    "category": "tech",
+    "keywords": ["terminal", "script", "command", "cli", "shell", "automate"]
+  },
+  "ticket": {
+    "title": "Tickets",
+    "category": "travel",
+    "keywords": ["tickets", "concert", "event", "cinema", "book", "reservation", "show"]
+  },
+  "toolbox": {
+    "title": "DIY",
+    "category": "home",
+    "keywords": ["diy", "toolbox", "build", "assemble", "project", "hardware"]
+  },
+  "tooth": {
+    "title": "Dentist",
+    "category": "health",
+    "keywords": ["dentist", "tooth", "teeth", "floss", "brush"]
+  },
+  "train": {
+    "title": "Train",
+    "category": "travel",
+    "keywords": ["train", "commute", "rail", "metro", "subway", "station"]
+  },
+  "trash": {
+    "title": "Trash",
+    "category": "home",
+    "keywords": ["trash", "garbage", "bin", "recycle", "take", "out", "declutter"]
+  },
+  "tree": {
+    "title": "Outdoors",
+    "category": "nature",
+    "keywords": ["outdoors", "tree", "park", "forest", "nature", "walk", "fresh", "air"]
+  },
+  "trophy": {
+    "title": "Trophy",
+    "category": "sport",
+    "keywords": ["trophy", "win", "award", "competition", "achievement", "champion"]
+  },
+  "tv": {
+    "title": "TV",
+    "category": "leisure",
+    "keywords": ["tv", "series", "show", "stream", "watch", "episode"]
+  },
+  "urgent": {
+    "title": "Urgent",
+    "category": "planning",
+    "keywords": ["urgent", "warning", "attention", "asap", "critical", "risk"]
+  },
+  "vegetables": {
+    "title": "Vegetables",
+    "category": "food",
+    "keywords": ["vegetables", "carrot", "veggies", "produce", "greens", "vegan", "salad"]
+  },
+  "video-call": {
+    "title": "Video call",
+    "category": "communication",
+    "keywords": ["video", "call", "zoom", "meet", "facetime", "stream", "record"]
+  },
+  "volunteer": {
+    "title": "Care",
+    "category": "family",
+    "keywords": ["care", "volunteer", "charity", "help", "donate", "support", "kindness"]
+  },
+  "walk": {
+    "title": "Walk",
+    "category": "health",
+    "keywords": ["walk", "steps", "stroll", "footsteps", "10k"]
+  },
+  "wallet": {
+    "title": "Wallet",
+    "category": "finance",
+    "keywords": ["wallet", "spend", "budget", "expenses", "allowance"]
+  },
+  "water": {
+    "title": "Water",
+    "category": "health",
+    "keywords": ["water", "drink", "hydrate", "glass", "bottle"]
+  },
+  "wedding": {
+    "title": "Wedding",
+    "category": "family",
+    "keywords": ["wedding", "rings", "engagement", "marry", "anniversary"]
+  },
+  "wifi": {
+    "title": "Internet",
+    "category": "tech",
+    "keywords": ["internet", "wifi", "network", "router", "connection"]
+  },
+  "wine": {
+    "title": "Drinks",
+    "category": "family",
+    "keywords": ["drinks", "wine", "dinner", "date", "bar", "friends", "evening"]
+  },
+  "write": {
+    "title": "Write",
+    "category": "leisure",
+    "keywords": ["write", "blog", "story", "poem", "journal", "letter", "author"]
+  },
+  "zap": {
+    "title": "Quick",
+    "category": "planning",
+    "keywords": ["quick", "fast", "quick", "win", "energy", "boost", "power"]
+  }
+}

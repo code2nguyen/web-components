@@ -1,0 +1,148 @@
+---
+title: 'Task icons'
+description: '175 duotone icons for to-do items: work, home, health, sport, learning, food, money, travel and more.'
+package: '@c2n/task-icons'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+import TaskIconGallery from '../../components/TaskIconGallery.astro'
+
+import {
+  MailTaskIcon as TaskIconMail,
+  MeetingTaskIcon as TaskIconMeeting,
+  CallTaskIcon as TaskIconCall,
+  CodeTaskIcon as TaskIconCode,
+  RunTaskIcon as TaskIconRun,
+  GymTaskIcon as TaskIconGym,
+  OpenBookTaskIcon as TaskIconOpenBook,
+  MeditateTaskIcon as TaskIconMeditate,
+  CookTaskIcon as TaskIconCook,
+  CartTaskIcon as TaskIconCart,
+  PetTaskIcon as TaskIconPet,
+  FlightTaskIcon as TaskIconFlight,
+  RocketTaskIcon as TaskIconRocket,
+} from '@c2n/task-icons'
+
+# Task icons
+
+`@c2n/task-icons` is a set of icons for the things people put on a to-do list, one web component each:
+`c2-task-icon-<name>`. The set is grouped by subject: work, communication, tech, learning, health, sport, home,
+family, food, shopping, money, travel, leisure, nature and planning. Between them, the groups cover most tasks
+people write down, from “send the invoice” and “1:1 with Sam” to “walk the dog”, “yoga class” and “renew passport”.
+[`c2-todo-list`](../../components/todo-list) draws its task tiles and its icon picker with this set.
+
+Each icon is drawn for this library on a 24×24 grid in two tones: an outline in `currentColor` over a soft tint of
+the same colour. Put one in a coloured tile, a button or a line of text and it takes that colour.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/task-icons
+```
+
+## Import
+
+Import individual icons to keep bundles small:
+
+```typescript tag=CodeBlock
+import '@c2n/task-icons/icons/mail.js'
+import '@c2n/task-icons/icons/run.js'
+```
+
+or register the whole set at once:
+
+```typescript tag=CodeBlock
+import '@c2n/task-icons'
+```
+
+## Examples
+
+```html tag=MdxCodeBlock,compact=true
+<style>
+  .task-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .task-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    color: var(--tile);
+    background: color-mix(in srgb, var(--tile) 14%, transparent);
+  }
+</style>
+<div class="task-tiles">
+  <span class="task-tile" style="--tile: #0265dc"><c2-task-icon-mail></c2-task-icon-mail></span>
+  <span class="task-tile" style="--tile: #7c3aed"><c2-task-icon-meeting></c2-task-icon-meeting></span>
+  <span class="task-tile" style="--tile: #db2777"><c2-task-icon-call></c2-task-icon-call></span>
+  <span class="task-tile" style="--tile: #0f766e"><c2-task-icon-code></c2-task-icon-code></span>
+  <span class="task-tile" style="--tile: #ea580c"><c2-task-icon-run></c2-task-icon-run></span>
+  <span class="task-tile" style="--tile: #b45309"><c2-task-icon-gym></c2-task-icon-gym></span>
+  <span class="task-tile" style="--tile: #15803d"><c2-task-icon-open-book></c2-task-icon-open-book></span>
+  <span class="task-tile" style="--tile: #7c3aed"><c2-task-icon-meditate></c2-task-icon-meditate></span>
+  <span class="task-tile" style="--tile: #c2410c"><c2-task-icon-cook></c2-task-icon-cook></span>
+  <span class="task-tile" style="--tile: #0f766e"><c2-task-icon-cart></c2-task-icon-cart></span>
+  <span class="task-tile" style="--tile: #b45309"><c2-task-icon-pet></c2-task-icon-pet></span>
+  <span class="task-tile" style="--tile: #0265dc"><c2-task-icon-flight></c2-task-icon-flight></span>
+</div>
+```
+
+Size an icon with `--c2-task-icon--size` and its outline with `--c2-task-icon--stroke-width`. Setting
+`--c2-task-icon__tone--opacity` to `0` draws outlines only.
+
+```html tag=MdxCodeBlock,compact=true
+<style>
+  .task-large {
+    --c2-task-icon--size: 48px;
+    --c2-task-icon--stroke-width: 1.4;
+    color: #7c3aed;
+  }
+  .task-outline {
+    --c2-task-icon__tone--opacity: 0;
+  }
+</style>
+<c2-task-icon-rocket class="task-large"></c2-task-icon-rocket>
+<c2-task-icon-rocket class="task-large task-outline"></c2-task-icon-rocket>
+```
+
+## Suggesting an icon
+
+Every icon carries keywords (`call`: call, phone, ring, dial, contact, mom, dad…). `suggestTaskIcon()` returns the icon
+whose keywords best match a piece of text, or `undefined`. This is how `c2-todo-list` gives a new task a fitting
+icon.
+
+```typescript tag=CodeBlock
+import { suggestTaskIcon } from '@c2n/task-icons/suggest-task-icon.js'
+
+suggestTaskIcon('Book the dentist') // 'tooth'
+suggestTaskIcon('Team standup') // 'meeting'
+suggestTaskIcon('Water the plants') // 'plant'
+```
+
+`taskIconCatalog` (from `@c2n/task-icons/task-icon-names.js`) lists the name, title, category and keywords of
+every icon, for your own pickers, and `taskIconTag(name)` gives the element's tag name.
+
+## Accessibility
+
+An icon is decorative by default: its SVG is hidden from assistive technology, which is right next to a task label.
+When the icon carries meaning on its own, give it a `label`; it is then exposed as an image with that name.
+
+```html tag=CodeBlock
+<c2-task-icon-cart label="Groceries"></c2-task-icon-cart>
+```
+
+## API
+
+Every task icon element shares the same API.
+
+<ApiTable componentTag="c2-task-icon-mail"></ApiTable>
+
+## All task icons
+
+<TaskIconGallery />

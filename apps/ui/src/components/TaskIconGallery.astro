@@ -1,0 +1,198 @@
+---
+import { taskIconCatalog, taskIconCategories, taskIconTag } from '@c2n/task-icons/task-icon-names.js'
+import MdxCodeBlock from './MdxCodeBlock.astro'
+import SiteCard from './ui/SiteCard.astro'
+import SiteTextField from './ui/SiteTextField.astro'
+
+// Icons are emitted as plain markup (not SSR'd through the Lit renderer); the client script registers them.
+const categoryTitles: Record<(typeof taskIconCategories)[number], string> = {
+  work: 'Work',
+  communication: 'Communication',
+  tech: 'Tech',
+  learning: 'Learning',
+  health: 'Health and wellbeing',
+  sport: 'Sport and fitness',
+  home: 'Home and chores',
+  family: 'Family and social',
+  food: 'Food and drink',
+  shopping: 'Shopping',
+  finance: 'Money',
+  travel: 'Travel and transport',
+  leisure: 'Leisure and creativity',
+  nature: 'Nature and weather',
+  planning: 'Planning and status',
+}
+const groups = taskIconCategories.map((category) => ({
+  category,
+  title: categoryTitles[category],
+  items: taskIconCatalog
+    .filter((icon) => icon.category === category)
+    .map((icon) => ({ ...icon, tag: taskIconTag(icon.name), markup: `<${taskIconTag(icon.name)}></${taskIconTag(icon.name)}>` })),
+}))
+const studioUid = 'task-icon-gallery-studio'
+const studioTag = 'c2-task-icon-rocket'
+const studioCode = `<${studioTag}></${studioTag}>`
+---
+
+<div class="task-icon-gallery__toolbar">
+  <SiteTextField
+    class="task-icon-gallery__filter"
+    label="Filter task icons"
+    search
+    size="sm"
+    placeholder={`Filter ${taskIconCatalog.length} icons by subject…`}
+  />
+  <span class="task-icon-gallery__count">{taskIconCatalog.length} icons · select one to customize</span>
+</div>
+{
+  groups.map(({ category, title, items }) => (
+    <section class="task-icon-gallery__group" data-category={category}>
+      <h3 class="task-icon-gallery__group-title">{title}</h3>
+      <div class="task-icon-gallery">
+        {items.map(({ name, title: iconTitle, keywords, tag, markup }) => (
+          <div class="task-icon-gallery__item" data-name={name} data-search={`${name} ${iconTitle} ${keywords.join(' ')}`.toLowerCase()}>
+            <SiteCard hydrate="defined" interactive class="task-icon-gallery__card" title={keywords.join(', ')}>
+              <div slot="media" class="task-icon-gallery__media">
+                <Fragment set:html={markup} />
+              </div>
+              <span class="task-icon-gallery__title">{iconTitle}</span>
+              <code class="task-icon-gallery__tag">{tag}</code>
+            </SiteCard>
+            <c2-copy-button class="task-icon-gallery__copy" pin value={markup} label={`Copy ${name} HTML`} />
+          </div>
+        ))}
+      </div>
+    </section>
+  ))
+}
+<p class="task-icon-gallery__empty" hidden>No task icon matches.</p>
+
+<MdxCodeBlock code={studioCode} lang="html" uid={studioUid} style="" label="Selected task icon" offscreen>
+  <Fragment set:html={`<${studioTag} data-target-uid="${studioUid}"></${studioTag}>`} />
+</MdxCodeBlock>
+
+<script>
+  import '@c2n/copy-button'
+  import '@c2n/task-icons'
+</script>
+
+<style lang="scss">
+  .task-icon-gallery__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 16px 0 12px;
+  }
+  .task-icon-gallery__filter {
+    flex: 1;
+    min-width: 200px;
+    max-width: 360px;
+  }
+  .task-icon-gallery__count {
+    font-size: 12.5px;
+    color: var(--site-color-on-surface-muted);
+  }
+  .task-icon-gallery__group {
+    margin: 0 0 20px;
+    &[hidden] {
+      display: none;
+    }
+  }
+  .task-icon-gallery__group-title {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--site-color-on-surface-variant);
+  }
+  .task-icon-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    --c2-task-icon--size: 32px;
+  }
+  .task-icon-gallery__item {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    &[hidden] {
+      display: none;
+    }
+  }
+  .task-icon-gallery__card {
+    flex: 1;
+    min-width: 0;
+    --c2-card__hover--background: var(--site-color-surface-container-1);
+  }
+  .task-icon-gallery__media {
+    display: flex;
+    justify-content: center;
+    padding: 14px 0 6px;
+    color: var(--site-color-primary);
+  }
+  .task-icon-gallery__title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--site-color-on-surface);
+  }
+  .task-icon-gallery__tag {
+    display: block;
+    overflow: hidden;
+    font-size: 11px;
+    color: var(--site-color-on-surface-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .task-icon-gallery__copy {
+    z-index: 1;
+    --c2-copy-button__pin--offset-x: 6px;
+    --c2-copy-button__pin--offset-y: 6px;
+    --c2-copy-button__container--height: 26px;
+    --c2-copy-button__container--min-width: 26px;
+    --c2-copy-button__container--padding-left: 5px;
+    --c2-copy-button__container--padding-right: 5px;
+    --c2-copy-button__container--background-color: var(--site-color-surface);
+    --c2-copy-button__container--border: 1px solid var(--site-color-outline-variant);
+    --c2-copy-button__container__hover--background-color: var(--site-color-surface-container-2);
+    --c2-copy-button__icon--size: 14px;
+  }
+  .task-icon-gallery__empty {
+    text-align: center;
+    color: var(--site-color-on-surface-muted);
+    &[hidden] {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import type { TextField } from '@c2n/text-field'
+  import { openIconInStudio } from '../utils/playground.ts'
+
+  const filter = document.querySelector<TextField>('.task-icon-gallery__filter')
+  const groups = Array.from(document.querySelectorAll<HTMLElement>('.task-icon-gallery__group'))
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.task-icon-gallery__item'))
+  const empty = document.querySelector<HTMLElement>('.task-icon-gallery__empty')
+
+  filter?.addEventListener('input', () => {
+    const query = filter.value.trim().toLowerCase()
+    items.forEach((item) => {
+      item.hidden = !!query && !(item.dataset.search ?? '').includes(query)
+    })
+    groups.forEach((group) => {
+      group.hidden = !group.querySelector('.task-icon-gallery__item:not([hidden])')
+    })
+    if (empty) empty.hidden = groups.some((group) => !group.hidden)
+  })
+
+  items.forEach((item) => {
+    // An interactive c2-card fires `click` for pointer, Enter and Space alike.
+    item.querySelector('.task-icon-gallery__card')?.addEventListener('click', () => {
+      openIconInStudio({ uid: 'task-icon-gallery-studio', tagName: `c2-task-icon-${item.dataset.name ?? ''}` })
+    })
+  })
+</script>

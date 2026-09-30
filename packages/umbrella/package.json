@@ -353,6 +353,10 @@
       "types": "./lib/toast.d.ts",
       "default": "./lib/toast.js"
     },
+    "./todo-list": {
+      "types": "./lib/todo-list.d.ts",
+      "default": "./lib/todo-list.js"
+    },
     "./tooltip": {
       "types": "./lib/tooltip.d.ts",
       "default": "./lib/tooltip.js"
@@ -474,6 +478,7 @@
     "@c2n/time-input": "0.0.19",
     "@c2n/timeline": "0.0.19",
     "@c2n/toast": "0.0.19",
+    "@c2n/todo-list": "0.0.19",
     "@c2n/tooltip": "0.0.19",
     "@c2n/tree": "0.0.19",
     "@c2n/upload": "0.0.19",

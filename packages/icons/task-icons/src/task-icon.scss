@@ -1,0 +1,54 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-task-icon,
+  $theme: (
+    size: 24px,
+    color: currentColor,
+    stroke-width: 1.75,
+    tone--color: currentColor,
+    tone--opacity: 0.18,
+  )
+);
+
+// Every source SVG in `svg/` is a 24x24 duotone drawing. An element without a class is an outline; `tone` adds the
+// soft fill behind that outline, `fill` is the soft fill alone and `solid` a small solid mark (a dot, a flame). The
+// generator rejects any other class and any hard-coded colour, so these variables are the whole palette of the set.
+
+:host {
+  display: inline-flex;
+  width: css.cssVar(size);
+  height: css.cssVar(size);
+  color: css.cssVar(color);
+  line-height: 0;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: css.cssVar(stroke-width);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tone,
+.fill {
+  fill: css.cssVar(tone--color);
+  fill-opacity: css.cssVar(tone--opacity);
+}
+
+.fill,
+.solid {
+  stroke: none;
+}
+
+.solid {
+  fill: currentColor;
+}

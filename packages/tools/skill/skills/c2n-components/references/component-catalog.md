@@ -46,6 +46,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Steps** — `c2-steps, c2-step` · `@c2n/steps` — A vertical trace of a task as it runs: statuses, durations, and stages that open while they work and close when they are done. Children: `c2-step`.
 - **Table** — `c2-table, c2-table-column` · `@c2n/table` — Virtualized data grid with declarative columns, sorting, selection, pinning and resizing. Children: `c2-pagination`, `c2-table-column`.
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
+- **Todo List** — `c2-todo-list` · `@c2n/todo-list` — A to-do list with a progress ring, icon tiles per task and a built-in, remembered customize panel.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
 
@@ -69,6 +70,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Mat Icon** — `c2-mat-icon` · `@c2n/mat-icon` — 2,234 Material Icons ligatures rendered through a single element.
 - **Phosphor Icons** — `c2-phosphor-{name}` · `@c2n/phosphor-icons` — 1,512 flexible icons in six weights, one web component each.
 - **Symbols** — `c2-symbol-{name}` · `@c2n/symbols` — 157 themeable spot illustrations for empty states, status panels, onboarding and error pages.
+- **Task icons** — `c2-task-icon-{name}` · `@c2n/task-icons` — 175 duotone icons for to-do items: work, home, health, sport, learning, food, money, travel and more.
 
 ## Inputs
 
