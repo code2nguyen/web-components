@@ -55,9 +55,14 @@ export interface TodoTask {
   urgent?: boolean
 }
 
+/** Colour palettes: each sets the six highlighters and the five pens, in a light and a dark variant. */
+export const todoPalettes = ['classic', 'pastel', 'vivid', 'earth', 'ocean', 'retro'] as const
+export type TodoPalette = (typeof todoPalettes)[number]
+
 /** What the customize panel changes. Every key is optional: a missing key keeps the authored look. */
 export interface TodoListLook {
   background?: TodoBackground
+  palette?: TodoPalette
   pen?: TodoPen
   doneMark?: TodoDoneMark
   progress?: TodoProgress
@@ -123,12 +128,10 @@ interface Preset {
   muted: string
   line: string
   soft: string
-  pens: Record<TodoPen, string>
   dark?: boolean
 }
 
-// Each background is a complete, checked palette: its text colour follows from it, and it only offers pens that read
-// on it (4.5:1 or better). The values are set inline on an element inside the shadow root, so a viewer's choice
+// Each background sets its surfaces and its text colour; the pens and highlighters on it come from a palette. The values are set inline on an element inside the shadow root, so a viewer's choice
 // wins over the variables an application sets on the host; `Reset` removes them and hands the look back.
 const PRESETS: Record<Exclude<TodoBackground, 'default'>, Preset> = {
   paper: {
@@ -138,7 +141,6 @@ const PRESETS: Record<Exclude<TodoBackground, 'default'>, Preset> = {
     muted: '#6f665b',
     line: '#e6dfd2',
     soft: '#f3eee3',
-    pens: { blue: '#2b59c3', red: '#b8322a', green: '#2f7148', violet: '#6b3fb5', graphite: '#4a4744' },
   },
   mint: {
     label: 'Mint',
@@ -147,7 +149,6 @@ const PRESETS: Record<Exclude<TodoBackground, 'default'>, Preset> = {
     muted: '#43645a',
     line: '#cfe6da',
     soft: '#e2f3ea',
-    pens: { blue: '#1d4ed8', red: '#b4234f', green: '#0f6b63', violet: '#7a3db8', graphite: '#3c4f48' },
   },
   sky: {
     label: 'Sky',
@@ -156,7 +157,6 @@ const PRESETS: Record<Exclude<TodoBackground, 'default'>, Preset> = {
     muted: '#475b76',
     line: '#d3e1f4',
     soft: '#e4eefb',
-    pens: { blue: '#1d4ed8', red: '#be123c', green: '#0f6b63', violet: '#6d28d9', graphite: '#3f4b5c' },
   },
   blush: {
     label: 'Blush',
@@ -165,7 +165,6 @@ const PRESETS: Record<Exclude<TodoBackground, 'default'>, Preset> = {
     muted: '#744857',
     line: '#f1d6de',
     soft: '#f9e5ea',
-    pens: { blue: '#1d4ed8', red: '#be185d', green: '#0f6b63', violet: '#6d28d9', graphite: '#4d3a42' },
   },
   sand: {
     label: 'Sand',
@@ -174,7 +173,6 @@ const PRESETS: Record<Exclude<TodoBackground, 'default'>, Preset> = {
     muted: '#6d5a41',
     line: '#e8dcc6',
     soft: '#f0e6d3',
-    pens: { blue: '#1e40af', red: '#9a3412', green: '#166534', violet: '#6b21a8', graphite: '#4a3f33' },
   },
   night: {
     label: 'Night',
@@ -183,7 +181,6 @@ const PRESETS: Record<Exclude<TodoBackground, 'default'>, Preset> = {
     muted: '#a3a0a8',
     line: '#2e2e35',
     soft: '#26262c',
-    pens: { blue: '#7fb0ff', red: '#ff8a80', green: '#6ee7b7', violet: '#c4b5fd', graphite: '#c9c7cc' },
     dark: true,
   },
 }
@@ -202,12 +199,84 @@ function presetVars(preset: Preset): Record<string, string> {
     [v('panel--background-color')]: preset.soft,
     [v('mark--color')]: preset.muted,
     [v('add--border-color')]: preset.line,
-    [v('accent--color')]: preset.pens.blue,
-    [v('dropped--color')]: preset.pens.red,
     [v('on-accent--color')]: preset.dark ? '#0b1220' : '#ffffff',
   }
-  for (const pen of todoPens) vars[v(`pen-${pen}--color`)] = preset.pens[pen]
   if (preset.dark) vars[v('container--box-shadow')] = '0 24px 60px rgba(0, 0, 0, 0.45)'
+  return vars
+}
+
+interface Palette {
+  label: string
+  /** How much highlighter ink is mixed into a light background, in percent; dark backgrounds take `darkStrength`. */
+  strength: number
+  darkStrength: number
+  highlights: Record<TodoHighlight, string>
+  light: Record<TodoPen, string>
+  dark: Record<TodoPen, string>
+}
+
+// Every palette is checked by script: each pen, and each background's text colour, reads at 4.5:1 or better on every
+// background preset, plain and under each of the palette's highlighters, in the matching light or dark variant.
+const PALETTES: Record<TodoPalette, Palette> = {
+  classic: {
+    label: 'Classic',
+    strength: 22,
+    darkStrength: 18,
+    highlights: { yellow: '#facc15', green: '#22c55e', blue: '#3b82f6', pink: '#ec4899', orange: '#f97316', violet: '#8b5cf6' },
+    light: { blue: '#0255bb', red: '#ad1f1f', green: '#0c645e', violet: '#6d34d2', graphite: '#585860' },
+    dark: { blue: '#67abff', red: '#f88686', green: '#2dd4bf', violet: '#b198fa', graphite: '#a5a5ad' },
+  },
+  pastel: {
+    label: 'Pastel',
+    strength: 50,
+    darkStrength: 18,
+    highlights: { yellow: '#fde68a', green: '#a7f3d0', blue: '#bfdbfe', pink: '#fbcfe8', orange: '#fed7aa', violet: '#ddd6fe' },
+    light: { blue: '#3552a0', red: '#a8334a', green: '#2c6656', violet: '#62469a', graphite: '#4f5460' },
+    dark: { blue: '#a3bdf7', red: '#f5a8b3', green: '#95dcc4', violet: '#cdbbf4', graphite: '#cfd3da' },
+  },
+  vivid: {
+    label: 'Vivid',
+    strength: 30,
+    darkStrength: 18,
+    highlights: { yellow: '#facc15', green: '#22c55e', blue: '#0ea5e9', pink: '#f43f5e', orange: '#f97316', violet: '#a855f7' },
+    light: { blue: '#1b48c7', red: '#a31919', green: '#116032', violet: '#7420be', graphite: '#3f3f46' },
+    dark: { blue: '#6aaefc', red: '#fb8484', green: '#4ade80', violet: '#c996fd', graphite: '#d4d4d8' },
+  },
+  earth: {
+    label: 'Earth',
+    strength: 30,
+    darkStrength: 18,
+    highlights: { yellow: '#d4a017', green: '#8fae7e', blue: '#7d98b3', pink: '#c98a8a', orange: '#d2764a', violet: '#9c7aa6' },
+    light: { blue: '#34507a', red: '#923926', green: '#465f33', violet: '#664673', graphite: '#554b44' },
+    dark: { blue: '#aec0da', red: '#eba993', green: '#bdd3a2', violet: '#d1b7dc', graphite: '#dad1c8' },
+  },
+  ocean: {
+    label: 'Ocean',
+    strength: 34,
+    darkStrength: 18,
+    highlights: { yellow: '#f6d98b', green: '#7dd3c0', blue: '#7cc4f5', pink: '#f7a1a1', orange: '#fbbf8a', violet: '#b8b3f0' },
+    light: { blue: '#0b4a82', red: '#a83341', green: '#0c615d', violet: '#5344a6', graphite: '#434f60' },
+    dark: { blue: '#93c8ff', red: '#ffa8b2', green: '#84e3d9', violet: '#bdb5ff', graphite: '#cfd8e3' },
+  },
+  retro: {
+    label: 'Retro',
+    strength: 28,
+    darkStrength: 18,
+    highlights: { yellow: '#e0b83a', green: '#9bb34a', blue: '#2fa4a0', pink: '#d6456f', orange: '#f08a3c', violet: '#8e5bb5' },
+    light: { blue: '#1d4972', red: '#953421', green: '#385f1d', violet: '#643687', graphite: '#473d35' },
+    dark: { blue: '#94bcea', red: '#f4a592', green: '#bade90', violet: '#d4aeef', graphite: '#dcd3ca' },
+  },
+}
+
+function paletteVars(palette: Palette, dark: boolean): Record<string, string> {
+  const pens = dark ? palette.dark : palette.light
+  const vars: Record<string, string> = {
+    [v('accent--color')]: pens.blue,
+    [v('dropped--color')]: pens.red,
+    '--_highlight-strength': `${dark ? palette.darkStrength : palette.strength}%`,
+  }
+  for (const pen of todoPens) vars[v(`pen-${pen}--color`)] = pens[pen]
+  for (const highlight of todoHighlights) vars[v(`highlight-${highlight}--color`)] = palette.highlights[highlight]
   return vars
 }
 
@@ -300,11 +369,30 @@ function sanitizeLook(value: unknown): TodoListLook {
   if (!isRecord(value)) return {}
   const look: TodoListLook = {}
   if (includes(todoBackgrounds, value.background)) look.background = value.background
+  if (includes(todoPalettes, value.palette)) look.palette = value.palette
   if (includes(todoPens, value.pen)) look.pen = value.pen
   if (value.doneMark === 'tick' || value.doneMark === 'cross') look.doneMark = value.doneMark
   if (PROGRESS_OPTIONS.some(([option]) => option === value.progress)) look.progress = value.progress as TodoProgress
   if (value.density === 'cozy' || value.density === 'compact') look.density = value.density
   return look
+}
+
+/** Whether a `#rgb`, `#rrggbb` or `rgb()` colour is dark enough to call for light pens. */
+function isDark(color: string): boolean {
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color)?.[1]
+  const full = hex?.length === 3 ? [...hex].map((digit) => digit + digit).join('') : hex
+  const channels = full
+    ? [0, 2, 4].map((index) => Number.parseInt(full.slice(index, index + 2), 16))
+    : color
+        .match(/[\d.]+/g)
+        ?.slice(0, 3)
+        .map(Number)
+  if (!channels || channels.length < 3) return false
+  const [r, g, b] = channels.map((channel) => {
+    const value = channel / 255
+    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.2
 }
 
 function sanitizeTasks(value: unknown): TodoTask[] | undefined {
@@ -455,6 +543,8 @@ export class TodoList extends LitElement {
   @state() private showArchived = false
   @state() private draft = ''
   @state() private iconQuery = ''
+  /** Whether the default background turned out dark (a dark theme), which picks a palette's dark variant. */
+  @state() private darkSurface = false
 
   private loadedKey: string | undefined
   private pendingFocus: (() => void) | undefined
@@ -484,6 +574,12 @@ export class TodoList extends LitElement {
   }
 
   protected override updated(): void {
+    if (this.look.palette && (!this.look.background || this.look.background === 'default')) {
+      // The resolved variable, not the painted colour, which is mid-transition right after a change.
+      const surface = getComputedStyle(this).getPropertyValue(v('container--background-color')).trim()
+      const dark = isDark(surface || '#ffffff')
+      if (dark !== this.darkSurface) this.darkSurface = dark
+    }
     const focus = this.pendingFocus
     this.pendingFocus = undefined
     focus?.()
@@ -886,8 +982,13 @@ export class TodoList extends LitElement {
     const percent = total ? Math.round((closed / total) * 100) : 0
     const progress = this.look.progress ?? this.progress
     const preset = this.look.background && this.look.background !== 'default' ? PRESETS[this.look.background] : undefined
+    // A background preset or a chosen palette brings the palette's checked pens and highlighters; with neither, the
+    // list keeps the application's variables and the theme.
+    const palette = preset || this.look.palette ? PALETTES[this.look.palette ?? 'classic'] : undefined
+    const dark = preset ? !!preset.dark : this.darkSurface
     const containerStyle: Record<string, string> = {
       ...(preset ? presetVars(preset) : {}),
+      ...(palette ? paletteVars(palette, dark) : {}),
       ...(this.look.density === 'compact' ? COMPACT_VARS : {}),
       ...(this.look.pen ? { [v('accent--color')]: `var(${v(`pen-${this.look.pen}--color`)}, ${PEN_DEFAULTS[this.look.pen]})` } : {}),
     }
@@ -1435,6 +1536,28 @@ export class TodoList extends LitElement {
                 @click=${() => this.setLook({ background: option })}
               >
                 <span aria-hidden="true">Aa</span>
+              </button>`
+            })}
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="palette-label">Palette</span>
+          <div class="palettes" role="radiogroup" aria-labelledby="palette-label">
+            ${todoPalettes.map((option) => {
+              const choice = PALETTES[option]
+              const selected = (look.palette ?? (look.background && look.background !== 'default' ? 'classic' : undefined)) === option
+              return html`<button
+                class="palette-swatch"
+                type="button"
+                role="radio"
+                aria-checked=${radio(selected)}
+                @click=${() => this.setLook({ palette: option })}
+              >
+                <span class="palette-chips" aria-hidden="true">
+                  ${todoHighlights.map((highlight) => html`<span class="palette-chip" style=${styleMap({ background: choice.highlights[highlight] })}></span>`)}
+                </span>
+                <span class="palette-name">${choice.label}</span>
               </button>`
             })}
           </div>

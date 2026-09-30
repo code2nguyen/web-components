@@ -64,7 +64,8 @@ $chip-text: color-mix(in srgb, #{$ink} 76%, transparent);
 $pens: blue, red, green, violet, graphite;
 $highlights: yellow, green, blue, pink, orange, violet;
 // How much highlighter ink is mixed into the background: light enough for any pen to stay readable on it.
-$highlight-strength: 22%;
+// A palette sets its own strength (lighter mixes on dark backgrounds, stronger ones for pale pastels).
+$highlight-strength: var(--_highlight-strength, 22%);
 $menu-item-height: 36px;
 
 :host {
@@ -1213,6 +1214,54 @@ svg {
   .highlight-swatch.highlight-#{$highlight},
   .task.highlight-#{$highlight} {
     background-color: color-mix(in srgb, #{css.cssVar(highlight-#{$highlight}--color)} #{$highlight-strength}, #{$surface});
+  }
+}
+
+.palettes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.palette-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 10px;
+  text-align: left;
+  background-color: $surface;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 14%, transparent);
+  transition: box-shadow $duration ease;
+
+  &[aria-checked='true'] {
+    box-shadow:
+      inset 0 0 0 1px transparent,
+      0 0 0 2px css.cssVar(panel--background-color),
+      0 0 0 4px $accent;
+  }
+}
+
+.palette-chips {
+  display: flex;
+  gap: 3px;
+}
+
+.palette-chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.palette-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@container (max-width: 360px) {
+  .palettes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

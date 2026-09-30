@@ -62,7 +62,10 @@ main.innerHTML = `<c2-todo-list id="subject" heading="${setup.heading}" ${setup.
 const subject = document.querySelector<TodoList>('#subject')!
 subject.tasks = setup.tasks
 const look = params.get('look')
-if (look && looks[look]) subject.look = looks[look]
+// `look=earth-sand` picks a palette and a background.
+const combined = look?.match(/^(classic|pastel|vivid|earth|ocean|retro)-(default|paper|mint|sky|blush|sand|night)$/)
+if (combined) subject.look = { palette: combined[1], background: combined[2] } as TodoListLook
+else if (look && looks[look]) subject.look = looks[look]
 
 const events: string[] = []
 for (const type of [

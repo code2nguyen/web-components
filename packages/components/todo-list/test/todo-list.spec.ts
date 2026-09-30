@@ -242,10 +242,11 @@ test('a background sets the text colour and the pens it offers', async ({ page, 
   await list.getByRole('radio', { name: 'Night' }).click()
   await expect(list.locator('.container')).toHaveCSS('background-color', 'rgb(26, 26, 31)')
   await expect(list.locator('.heading')).toHaveCSS('color', 'rgb(241, 240, 238)')
-  await expect(list.locator('.pen-swatch.pen-green').first()).toHaveCSS('background-color', 'rgb(110, 231, 183)')
+  // Night takes the classic palette's dark pens.
+  await expect(list.locator('.pen-swatch.pen-green').first()).toHaveCSS('background-color', 'rgb(45, 212, 191)')
 
   await list.getByRole('radiogroup', { name: 'Pen' }).getByRole('radio', { name: 'Green ink' }).click()
-  await expect(list.locator('.ring-fill')).toHaveCSS('stroke', 'rgb(110, 231, 183)')
+  await expect(list.locator('.ring-fill')).toHaveCSS('stroke', 'rgb(45, 212, 191)')
 
   await list.getByRole('radio', { name: 'Cross' }).click()
   await list.getByRole('radio', { name: 'Bar' }).click()
@@ -261,6 +262,44 @@ test('a background sets the text colour and the pens it offers', async ({ page, 
   await expect(list.locator('.ring')).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(list.locator('.tasks')).toBeVisible()
+})
+
+test('a palette recolours the highlighters and pens, in a light or dark variant', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  const passport = list.locator('[data-reorder-key="c"] .task')
+  const before = await passport.evaluate((element) => getComputedStyle(element).backgroundColor)
+
+  await list.getByRole('button', { name: 'Customize look' }).click()
+  const palettes = list.getByRole('radiogroup', { name: 'Palette' })
+  await expect(palettes.getByRole('radio')).toHaveText(['Classic', 'Pastel', 'Vivid', 'Earth', 'Ocean', 'Retro'])
+  await palettes.getByRole('radio', { name: 'Earth' }).click()
+  await expect(palettes.getByRole('radio', { name: 'Earth' })).toHaveAttribute('aria-checked', 'true')
+  // Earth's violet pen, light variant, on the default white background.
+  await expect(list.locator('.pen-swatch.pen-violet').first()).toHaveCSS('background-color', 'rgb(102, 70, 115)')
+
+  await list.getByRole('radio', { name: 'Night' }).click()
+  await expect(list.locator('.pen-swatch.pen-violet').first()).toHaveCSS('background-color', 'rgb(209, 183, 220)')
+  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ palette: 'earth', background: 'night' })
+
+  await list.getByRole('button', { name: 'Back to the list' }).click()
+  await expect(passport).not.toHaveCSS('background-color', before)
+  await expect(list.locator('[data-reorder-key="f"] .label')).toHaveCSS('color', 'rgb(209, 183, 220)')
+  // The per-task submenu offers the palette's colours.
+  await list.getByRole('button', { name: 'Actions for Dentist appointment' }).click()
+  await list.getByRole('menuitem', { name: 'Text colour' }).hover()
+  await expect(list.getByRole('menuitemradio', { name: 'Violet ink text' })).toHaveCSS('background-color', 'rgb(209, 183, 220)')
+})
+
+test('a palette on the default background follows a dark theme', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  await list.evaluate((element: TodoList) => {
+    element.style.setProperty('--c2-todo-list__container--background-color', '#18181b')
+    element.style.setProperty('--c2-todo-list__container--color', '#f4f4f5')
+    element.look = { palette: 'ocean' }
+  })
+  await expect(list.locator('[data-reorder-key="f"] .label')).toHaveCSS('color', 'rgb(189, 181, 255)')
 })
 
 test('changes a task’s highlighter and text colour from its menu, in place', async ({ page, scenario }) => {
@@ -394,6 +433,24 @@ test('draws the bar and hero progress styles', async ({ page, scenario }) => {
 for (const name of ['default', 'groceries', 'plain'] as const) {
   test(`has no detectable accessibility violations: ${name}`, async ({ page, scenario }) => {
     await scenario(name)
+    await accessible(page)
+  })
+}
+
+for (const look of [
+  'classic-sand',
+  'pastel-paper',
+  'vivid-default',
+  'earth-mint',
+  'ocean-sky',
+  'retro-blush',
+  'pastel-night',
+  'vivid-night',
+  'retro-night',
+] as const) {
+  test(`has no detectable accessibility violations with the ${look} palette and background`, async ({ page }) => {
+    await page.goto(`/packages/components/todo-list/test/scenarios.html?scenario=default&look=${look}`)
+    await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
     await accessible(page)
   })
 }

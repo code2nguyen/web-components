@@ -24,7 +24,8 @@ swatch submenu, and clicking a task's icon opens the icon picker, so one task is
 Archived tasks collect at the bottom, and every archive or delete can be undone.
 
 Add `customizable` for a palette button. It swaps the tasks for a panel that styles the whole list: the background
-(the text colour and the pens on offer follow from it), the pen, the done mark, the density and the progress style;
+(the text colour follows from it), a colour **palette** (Classic, Pastel, Vivid, Earth, Ocean or Retro: its six
+highlighters and five pens, in a light and a dark variant), the pen, the done mark, the density and the progress style;
 **Back to the list** (or Escape) returns to the tasks. With a `storage-key` those choices are remembered in `localStorage`; `persist-tasks` remembers the
 tasks too.
 
@@ -115,9 +116,9 @@ Every change fires its own event (`task-toggle`, `task-add`, `task-remove`, `tas
 
 ## Customization and storage
 
-The viewer's choices are a small object, `{ background, pen, doneMark, progress, density }`, readable and writable
-as the `look` property and announced by `look-change`. Each background is a checked palette: its text colour follows
-from it and it offers only pens that read well on it, and the highlighters are mixed into it, so any combination
-stays legible. The look is applied inside the component, so it wins over the CSS variables the page sets, and
+The viewer's choices are a small object, `{ background, palette, pen, doneMark, progress, density }`, readable and writable
+as the `look` property and announced by `look-change`. Each background sets its text colour, and each palette's pens and highlighters were checked
+against every background, plain and under every highlighter, in a light and a dark variant (a palette on the default
+background follows a dark theme too), so any combination stays legible at 4.5:1 or better. The look is applied inside the component, so it wins over the CSS variables the page sets, and
 **Reset** (or `resetLook()`) hands it back to the page and the theme. With `storage-key="this-week"` the look is
 stored under `c2-todo-list:this-week`; give every list its own key.
