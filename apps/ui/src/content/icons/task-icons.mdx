@@ -1,6 +1,6 @@
 ---
 title: 'Task icons'
-description: '175 duotone icons for to-do items: work, home, health, sport, learning, food, money, travel and more.'
+description: '191 duotone icons for to-do items: work, home, health, sport, learning, food, money, travel and more.'
 package: '@c2n/task-icons'
 ---
 
@@ -31,7 +31,7 @@ import {
 `c2-task-icon-<name>`. The set is grouped by subject: work, communication, tech, learning, health, sport, home,
 family, food, shopping, money, travel, leisure, nature and planning. Between them, the groups cover most tasks
 people write down, from “send the invoice” and “1:1 with Sam” to “walk the dog”, “yoga class” and “renew passport”.
-[`c2-todo-list`](../../components/todo-list) draws its task tiles and its icon picker with this set.
+[`c2-todo-list`](../../components/todo-list) draws its task icons and its icon picker with this set, grouped by these categories.
 
 Each icon is drawn for this library on a 24×24 grid in two tones: an outline in `currentColor` over a soft tint of
 the same colour. Put one in a coloured tile, a button or a line of text and it takes that colour.
@@ -114,8 +114,8 @@ Size an icon with `--c2-task-icon--size` and its outline with `--c2-task-icon--s
 ## Suggesting an icon
 
 Every icon carries keywords (`call`: call, phone, ring, dial, contact, mom, dad…). `suggestTaskIcon()` returns the icon
-whose keywords best match a piece of text, or `undefined`. This is how `c2-todo-list` gives a new task a fitting
-icon.
+whose keywords best match a piece of text, or `undefined`. `c2-todo-list` uses it to pick a list's icon from its
+heading (“Groceries” gets a cart).
 
 ```typescript tag=CodeBlock
 import { suggestTaskIcon } from '@c2n/task-icons/suggest-task-icon.js'

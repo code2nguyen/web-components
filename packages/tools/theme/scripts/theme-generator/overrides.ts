@@ -344,22 +344,28 @@ export const overrides: Record<string, Override> = {
   '--c2-symbol__accent--color': { exclude: 'decorative golden highlight' },
   '--c2-symbol__success--color': { exclude: 'semantic success colour' },
   '--c2-symbol__warning--color': { exclude: 'semantic warning colour' },
-  // Todo list: the task palette is the categorical chart palette, so a brand theme and dark mode recolour the tiles as
-  // they recolour a chart; green has no chart slot and stays a stable hue. The tile radius sits between the radius
-  // steps on purpose (a squircle, not a button), and the heading is one step above body text.
+  // Todo list: the pens follow the chart palette and the error colour, so a brand theme and dark mode recolour the
+  // ink as they recolour a chart; the highlighters are hues mixed into whatever background the list has, and the
+  // swipe actions are semantic colours that stay put.
   '--c2-todo-list__container--box-shadow': { token: 'shadow-md' },
   '--c2-todo-list__on-accent--color': { token: 'color-on-primary' },
-  '--c2-todo-list__check--border-color': { token: 'color-outline' },
   '--c2-todo-list__add--border-color': { token: 'color-outline' },
-  '--c2-todo-list__swatch-blue--color': { token: 'chart-series-1' },
-  '--c2-todo-list__swatch-orange--color': { token: 'chart-series-2' },
-  '--c2-todo-list__swatch-teal--color': { token: 'chart-series-3' },
-  '--c2-todo-list__swatch-pink--color': { token: 'chart-series-4' },
-  '--c2-todo-list__swatch-amber--color': { token: 'chart-series-5' },
-  '--c2-todo-list__swatch-violet--color': { token: 'chart-series-6' },
-  '--c2-todo-list__swatch-slate--color': { token: 'chart-series-8' },
-  '--c2-todo-list__swatch-green--color': { exclude: 'task palette green, no chart slot' },
-  '--c2-todo-list__tile--border-radius': { exclude: 'icon tile squircle between the radius steps' },
+  '--c2-todo-list__row__divider--color': { token: 'color-surface-container' },
+  '--c2-todo-list__mark--color': { token: 'color-outline-strong' },
+  '--c2-todo-list__dropped--color': { token: 'color-error' },
+  '--c2-todo-list__pen-blue--color': { token: 'chart-series-1' },
+  '--c2-todo-list__pen-red--color': { token: 'color-error' },
+  '--c2-todo-list__pen-green--color': { token: 'chart-series-3' },
+  '--c2-todo-list__pen-violet--color': { token: 'chart-series-6' },
+  '--c2-todo-list__pen-graphite--color': { token: 'color-on-surface-variant' },
+  '--c2-todo-list__toast--background-color': { token: 'color-inverse-surface' },
+  '--c2-todo-list__toast--color': { token: 'color-on-inverse-surface' },
+  '--c2-todo-list__highlight-yellow--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-green--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-blue--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-pink--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-orange--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-violet--color': { exclude: 'highlighter hue, mixed into the list background' },
   '--c2-todo-list__heading--font-size': { exclude: 'list heading, one step above body text' },
   // Carousel indicator dots are small fills, not surfaces: they take the strong outline and the muted text colour.
   '--c2-carousel__indicator--background-color': { token: 'color-outline-strong' },

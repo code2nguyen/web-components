@@ -1,34 +1,81 @@
 import '../src/todo-list'
-import type { TodoList } from '../src/todo-list'
+import type { TodoList, TodoListLook, TodoTask } from '../src/todo-list'
 
-const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
+const params = new URLSearchParams(location.search)
+const scenario = params.get('scenario') ?? 'default'
 const main = document.querySelector('main')!
 
-const tasks = JSON.stringify([
-  { id: 'a', label: 'Draft the announcement', icon: 'mail', color: 'blue', done: true },
-  { id: 'b', label: 'Review pricing copy', icon: 'document', color: 'teal', done: true, due: 'Mon' },
-  { id: 'c', label: 'Ship the build', icon: 'rocket', color: 'violet', due: 'Today', urgent: true },
-  { id: 'd', label: 'Book the team dinner', icon: 'restaurant', color: 'amber' },
-])
+const week: TodoTask[] = [
+  { id: 'a', label: 'Send the Q3 report to Léa', icon: 'mail', done: true, due: 'Mon' },
+  { id: 'b', label: 'Dentist appointment', note: 'Dr. Martin, 14 rue Oberkampf\nBring the insurance card', due: 'Tue 9:30' },
+  { id: 'c', label: 'Renew passport', highlight: 'yellow', due: 'Today', urgent: true },
+  { id: 'd', label: 'Call the plumber about the leak', dropped: true },
+  { id: 'e', label: 'Book the train to Lyon', icon: 'flight', note: 'Friday evening, back Sunday' },
+  { id: 'f', label: 'Birthday present for Anna', icon: 'gift', ink: 'violet', due: 'Sat' },
+  { id: 'g', label: 'Pay the electricity bill', archived: true },
+]
 
-const attributes: Record<string, string> = {
-  default: 'customizable',
-  persist: 'customizable storage-key="spec" persist-tasks',
-  readonly: 'readonly',
-  bar: 'progress="bar"',
-  hero: 'progress="hero" customizable',
+const groceries: TodoTask[] = [
+  { id: 'g1', label: 'Tomatoes', icon: 'vegetables', note: '6, on the vine', done: true },
+  { id: 'g2', label: 'Green lentils', icon: 'legumes', note: '500 g' },
+  { id: 'g3', label: 'Spinach', icon: 'salad', dropped: true },
+  { id: 'g4', label: 'Oat milk', icon: 'milk', note: '2 L · barista', done: true },
+  { id: 'g5', label: 'Comté', icon: 'cheese', highlight: 'orange', note: 'For Saturday’s dinner' },
+  { id: 'g6', label: 'Free-range eggs', icon: 'egg' },
+  { id: 'g7', label: 'Salmon fillets', icon: 'fish' },
+  { id: 'g8', label: 'Sourdough loaf', icon: 'bread', done: true },
+  { id: 'g9', label: 'Basmati rice', icon: 'grain' },
+]
+
+const plain: TodoTask[] = [
+  { id: 'p1', label: 'Water the plants', done: true },
+  { id: 'p2', label: 'Call mom' },
+  { id: 'p3', label: 'Finish chapter 4', highlight: 'pink' },
+  { id: 'p4', label: 'Go for a run' },
+]
+
+const looks: Record<string, TodoListLook> = {
+  paper: { background: 'paper' },
+  night: { background: 'night', pen: 'green' },
+  mint: { background: 'mint', pen: 'violet', doneMark: 'cross' },
+  sky: { background: 'sky', progress: 'hero' },
 }
 
-main.innerHTML =
-  scenario === 'empty'
-    ? '<c2-todo-list id="subject" heading="Weekend"><span slot="empty">Nothing planned yet.</span></c2-todo-list>'
-    : scenario === 'all-done'
-      ? `<c2-todo-list id="subject" heading="Weekend" tasks='${JSON.stringify([{ id: 'a', label: 'Long run', done: true }])}'></c2-todo-list>`
-      : `<c2-todo-list id="subject" heading="Launch week" ${attributes[scenario] ?? ''} tasks='${tasks}'></c2-todo-list>`
+type Setup = { heading: string; attributes: string; tasks: TodoTask[] }
+const setups: Record<string, Setup> = {
+  default: { heading: 'This week', attributes: 'customizable', tasks: week },
+  persist: { heading: 'This week', attributes: 'customizable storage-key="spec" persist-tasks', tasks: week },
+  readonly: { heading: 'This week', attributes: 'readonly', tasks: week },
+  bar: { heading: 'This week', attributes: 'progress="bar"', tasks: week },
+  hero: { heading: 'This week', attributes: 'progress="hero" customizable', tasks: week },
+  groceries: { heading: 'Groceries', attributes: 'customizable', tasks: groceries },
+  plain: { heading: 'Sunday', attributes: 'customizable icon="none"', tasks: plain },
+  'all-done': { heading: 'Weekend', attributes: '', tasks: [{ id: 'a', label: 'Long run', done: true }] },
+  empty: { heading: 'Weekend', attributes: '', tasks: [] },
+}
+const setup = setups[scenario] ?? setups.default
+
+main.innerHTML = `<c2-todo-list id="subject" heading="${setup.heading}" ${setup.attributes}>${
+  scenario === 'empty' ? '<span slot="empty">Nothing planned yet.</span>' : ''
+}</c2-todo-list>`
 
 const subject = document.querySelector<TodoList>('#subject')!
+subject.tasks = setup.tasks
+const look = params.get('look')
+if (look && looks[look]) subject.look = looks[look]
+
 const events: string[] = []
-for (const type of ['task-toggle', 'task-add', 'task-remove', 'task-change', 'tasks-change', 'look-change'] as const) {
+for (const type of [
+  'task-toggle',
+  'task-add',
+  'task-remove',
+  'task-archive',
+  'task-restore',
+  'task-change',
+  'task-reorder',
+  'tasks-change',
+  'look-change',
+] as const) {
   subject.addEventListener(type, () => {
     events.push(type)
     subject.dataset.events = events.join(' ')

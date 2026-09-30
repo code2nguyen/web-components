@@ -1,9 +1,9 @@
 # Task icons
 
-175 duotone icons for to-do items, one Lit web component each: `<c2-task-icon-mail>`, `<c2-task-icon-meeting>`,
+191 duotone icons for to-do items, one Lit web component each: `<c2-task-icon-mail>`, `<c2-task-icon-meeting>`,
 `<c2-task-icon-run>`, `<c2-task-icon-cook>`, and more. They cover the subjects a task list is usually about, in
 fifteen groups: work, communication, tech, learning, health, sport, home, family, food, shopping, finance, travel,
-leisure, nature and planning. `@c2n/todo-list` draws its task tiles and its icon picker with them.
+leisure, nature and planning. `@c2n/todo-list` draws its task icons and its icon picker with them.
 
 The artwork is drawn for this package (MIT, like the rest of the repository) on one 24×24 grid: an outline in
 `currentColor` over a soft tint of the same colour, so an icon takes the colour of the text or tile it sits in.
@@ -41,7 +41,7 @@ An icon is decorative by default (`aria-hidden`). Give it a `label` when no near
 ## Picking an icon for a task
 
 Every icon carries keywords (`call`: call, phone, ring, dial, contact, mom, dad…). `suggestTaskIcon()` returns the
-icon whose keywords best match a piece of text, which is how a to-do list can give a new task a fitting icon:
+icon whose keywords best match a piece of text, which is how a to-do list can pick an icon for a list from its title:
 
 ```typescript
 import { suggestTaskIcon } from '@c2n/task-icons/suggest-task-icon.js'

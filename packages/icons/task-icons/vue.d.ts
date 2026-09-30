@@ -31,7 +31,9 @@ import type {
   BookTaskIcon,
   BookmarkTaskIcon,
   BooksTaskIcon,
+  BottleTaskIcon,
   BranchTaskIcon,
+  BreadTaskIcon,
   BriefcaseTaskIcon,
   BugTaskIcon,
   BurgerTaskIcon,
@@ -48,6 +50,7 @@ import type {
   ChatTaskIcon,
   CheckCircleTaskIcon,
   ChecklistTaskIcon,
+  CheeseTaskIcon,
   CleanTaskIcon,
   ClockTaskIcon,
   ClothesTaskIcon,
@@ -59,6 +62,7 @@ import type {
   ContactTaskIcon,
   ConversationTaskIcon,
   CookTaskIcon,
+  CookieTaskIcon,
   CraftTaskIcon,
   DatabaseTaskIcon,
   DeliveryTaskIcon,
@@ -66,21 +70,26 @@ import type {
   DoctorTaskIcon,
   DocumentTaskIcon,
   DownloadTaskIcon,
+  EggTaskIcon,
   EyeTaskIcon,
   FamilyTaskIcon,
   FireTaskIcon,
   FirstAidTaskIcon,
+  FishTaskIcon,
   FlagTaskIcon,
   FlaskTaskIcon,
   FlightTaskIcon,
   FlowerTaskIcon,
   FolderTaskIcon,
   FootballTaskIcon,
+  FrozenTaskIcon,
   FuelTaskIcon,
   GameTaskIcon,
   GiftTaskIcon,
   GlobeTaskIcon,
   GraduationTaskIcon,
+  GrainTaskIcon,
+  GrapesTaskIcon,
   GymTaskIcon,
   HeadphonesTaskIcon,
   HealthTaskIcon,
@@ -88,14 +97,17 @@ import type {
   HikeTaskIcon,
   HomeTaskIcon,
   HourglassTaskIcon,
+  IceCreamTaskIcon,
   IdeaTaskIcon,
   InboxTaskIcon,
   InvestTaskIcon,
+  JarTaskIcon,
   KeyTaskIcon,
   LanguageTaskIcon,
   LaptopTaskIcon,
   LaundryTaskIcon,
   LeafTaskIcon,
+  LegumesTaskIcon,
   LessonTaskIcon,
   LikeTaskIcon,
   ListTaskIcon,
@@ -103,10 +115,12 @@ import type {
   LuggageTaskIcon,
   MailTaskIcon,
   MapTaskIcon,
+  MeatTaskIcon,
   MedalTaskIcon,
   MeditateTaskIcon,
   MeetingTaskIcon,
   MicrophoneTaskIcon,
+  MilkTaskIcon,
   MoneyTaskIcon,
   MonitorTaskIcon,
   MoodTaskIcon,
@@ -139,6 +153,7 @@ import type {
   RobotTaskIcon,
   RocketTaskIcon,
   RunTaskIcon,
+  SaladTaskIcon,
   SavingsTaskIcon,
   SearchTaskIcon,
   SendTaskIcon,
@@ -165,6 +180,7 @@ import type {
   TennisTaskIcon,
   TerminalTaskIcon,
   TicketTaskIcon,
+  ToiletriesTaskIcon,
   ToolboxTaskIcon,
   ToothTaskIcon,
   TrainTaskIcon,
@@ -213,7 +229,9 @@ declare module 'vue' {
     'c2-task-icon-book': DefineComponent<C2Props<BookTaskIcon>>
     'c2-task-icon-bookmark': DefineComponent<C2Props<BookmarkTaskIcon>>
     'c2-task-icon-books': DefineComponent<C2Props<BooksTaskIcon>>
+    'c2-task-icon-bottle': DefineComponent<C2Props<BottleTaskIcon>>
     'c2-task-icon-branch': DefineComponent<C2Props<BranchTaskIcon>>
+    'c2-task-icon-bread': DefineComponent<C2Props<BreadTaskIcon>>
     'c2-task-icon-briefcase': DefineComponent<C2Props<BriefcaseTaskIcon>>
     'c2-task-icon-bug': DefineComponent<C2Props<BugTaskIcon>>
     'c2-task-icon-burger': DefineComponent<C2Props<BurgerTaskIcon>>
@@ -230,6 +248,7 @@ declare module 'vue' {
     'c2-task-icon-chat': DefineComponent<C2Props<ChatTaskIcon>>
     'c2-task-icon-check-circle': DefineComponent<C2Props<CheckCircleTaskIcon>>
     'c2-task-icon-checklist': DefineComponent<C2Props<ChecklistTaskIcon>>
+    'c2-task-icon-cheese': DefineComponent<C2Props<CheeseTaskIcon>>
     'c2-task-icon-clean': DefineComponent<C2Props<CleanTaskIcon>>
     'c2-task-icon-clock': DefineComponent<C2Props<ClockTaskIcon>>
     'c2-task-icon-clothes': DefineComponent<C2Props<ClothesTaskIcon>>
@@ -241,6 +260,7 @@ declare module 'vue' {
     'c2-task-icon-contact': DefineComponent<C2Props<ContactTaskIcon>>
     'c2-task-icon-conversation': DefineComponent<C2Props<ConversationTaskIcon>>
     'c2-task-icon-cook': DefineComponent<C2Props<CookTaskIcon>>
+    'c2-task-icon-cookie': DefineComponent<C2Props<CookieTaskIcon>>
     'c2-task-icon-craft': DefineComponent<C2Props<CraftTaskIcon>>
     'c2-task-icon-database': DefineComponent<C2Props<DatabaseTaskIcon>>
     'c2-task-icon-delivery': DefineComponent<C2Props<DeliveryTaskIcon>>
@@ -248,21 +268,26 @@ declare module 'vue' {
     'c2-task-icon-doctor': DefineComponent<C2Props<DoctorTaskIcon>>
     'c2-task-icon-document': DefineComponent<C2Props<DocumentTaskIcon>>
     'c2-task-icon-download': DefineComponent<C2Props<DownloadTaskIcon>>
+    'c2-task-icon-egg': DefineComponent<C2Props<EggTaskIcon>>
     'c2-task-icon-eye': DefineComponent<C2Props<EyeTaskIcon>>
     'c2-task-icon-family': DefineComponent<C2Props<FamilyTaskIcon>>
     'c2-task-icon-fire': DefineComponent<C2Props<FireTaskIcon>>
     'c2-task-icon-first-aid': DefineComponent<C2Props<FirstAidTaskIcon>>
+    'c2-task-icon-fish': DefineComponent<C2Props<FishTaskIcon>>
     'c2-task-icon-flag': DefineComponent<C2Props<FlagTaskIcon>>
     'c2-task-icon-flask': DefineComponent<C2Props<FlaskTaskIcon>>
     'c2-task-icon-flight': DefineComponent<C2Props<FlightTaskIcon>>
     'c2-task-icon-flower': DefineComponent<C2Props<FlowerTaskIcon>>
     'c2-task-icon-folder': DefineComponent<C2Props<FolderTaskIcon>>
     'c2-task-icon-football': DefineComponent<C2Props<FootballTaskIcon>>
+    'c2-task-icon-frozen': DefineComponent<C2Props<FrozenTaskIcon>>
     'c2-task-icon-fuel': DefineComponent<C2Props<FuelTaskIcon>>
     'c2-task-icon-game': DefineComponent<C2Props<GameTaskIcon>>
     'c2-task-icon-gift': DefineComponent<C2Props<GiftTaskIcon>>
     'c2-task-icon-globe': DefineComponent<C2Props<GlobeTaskIcon>>
     'c2-task-icon-graduation': DefineComponent<C2Props<GraduationTaskIcon>>
+    'c2-task-icon-grain': DefineComponent<C2Props<GrainTaskIcon>>
+    'c2-task-icon-grapes': DefineComponent<C2Props<GrapesTaskIcon>>
     'c2-task-icon-gym': DefineComponent<C2Props<GymTaskIcon>>
     'c2-task-icon-headphones': DefineComponent<C2Props<HeadphonesTaskIcon>>
     'c2-task-icon-health': DefineComponent<C2Props<HealthTaskIcon>>
@@ -270,14 +295,17 @@ declare module 'vue' {
     'c2-task-icon-hike': DefineComponent<C2Props<HikeTaskIcon>>
     'c2-task-icon-home': DefineComponent<C2Props<HomeTaskIcon>>
     'c2-task-icon-hourglass': DefineComponent<C2Props<HourglassTaskIcon>>
+    'c2-task-icon-ice-cream': DefineComponent<C2Props<IceCreamTaskIcon>>
     'c2-task-icon-idea': DefineComponent<C2Props<IdeaTaskIcon>>
     'c2-task-icon-inbox': DefineComponent<C2Props<InboxTaskIcon>>
     'c2-task-icon-invest': DefineComponent<C2Props<InvestTaskIcon>>
+    'c2-task-icon-jar': DefineComponent<C2Props<JarTaskIcon>>
     'c2-task-icon-key': DefineComponent<C2Props<KeyTaskIcon>>
     'c2-task-icon-language': DefineComponent<C2Props<LanguageTaskIcon>>
     'c2-task-icon-laptop': DefineComponent<C2Props<LaptopTaskIcon>>
     'c2-task-icon-laundry': DefineComponent<C2Props<LaundryTaskIcon>>
     'c2-task-icon-leaf': DefineComponent<C2Props<LeafTaskIcon>>
+    'c2-task-icon-legumes': DefineComponent<C2Props<LegumesTaskIcon>>
     'c2-task-icon-lesson': DefineComponent<C2Props<LessonTaskIcon>>
     'c2-task-icon-like': DefineComponent<C2Props<LikeTaskIcon>>
     'c2-task-icon-list': DefineComponent<C2Props<ListTaskIcon>>
@@ -285,10 +313,12 @@ declare module 'vue' {
     'c2-task-icon-luggage': DefineComponent<C2Props<LuggageTaskIcon>>
     'c2-task-icon-mail': DefineComponent<C2Props<MailTaskIcon>>
     'c2-task-icon-map': DefineComponent<C2Props<MapTaskIcon>>
+    'c2-task-icon-meat': DefineComponent<C2Props<MeatTaskIcon>>
     'c2-task-icon-medal': DefineComponent<C2Props<MedalTaskIcon>>
     'c2-task-icon-meditate': DefineComponent<C2Props<MeditateTaskIcon>>
     'c2-task-icon-meeting': DefineComponent<C2Props<MeetingTaskIcon>>
     'c2-task-icon-microphone': DefineComponent<C2Props<MicrophoneTaskIcon>>
+    'c2-task-icon-milk': DefineComponent<C2Props<MilkTaskIcon>>
     'c2-task-icon-money': DefineComponent<C2Props<MoneyTaskIcon>>
     'c2-task-icon-monitor': DefineComponent<C2Props<MonitorTaskIcon>>
     'c2-task-icon-mood': DefineComponent<C2Props<MoodTaskIcon>>
@@ -321,6 +351,7 @@ declare module 'vue' {
     'c2-task-icon-robot': DefineComponent<C2Props<RobotTaskIcon>>
     'c2-task-icon-rocket': DefineComponent<C2Props<RocketTaskIcon>>
     'c2-task-icon-run': DefineComponent<C2Props<RunTaskIcon>>
+    'c2-task-icon-salad': DefineComponent<C2Props<SaladTaskIcon>>
     'c2-task-icon-savings': DefineComponent<C2Props<SavingsTaskIcon>>
     'c2-task-icon-search': DefineComponent<C2Props<SearchTaskIcon>>
     'c2-task-icon-send': DefineComponent<C2Props<SendTaskIcon>>
@@ -347,6 +378,7 @@ declare module 'vue' {
     'c2-task-icon-tennis': DefineComponent<C2Props<TennisTaskIcon>>
     'c2-task-icon-terminal': DefineComponent<C2Props<TerminalTaskIcon>>
     'c2-task-icon-ticket': DefineComponent<C2Props<TicketTaskIcon>>
+    'c2-task-icon-toiletries': DefineComponent<C2Props<ToiletriesTaskIcon>>
     'c2-task-icon-toolbox': DefineComponent<C2Props<ToolboxTaskIcon>>
     'c2-task-icon-tooth': DefineComponent<C2Props<ToothTaskIcon>>
     'c2-task-icon-train': DefineComponent<C2Props<TrainTaskIcon>>

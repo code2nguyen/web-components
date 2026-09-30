@@ -25,9 +25,12 @@ declare module 'vue' {
         'persist-tasks'?: unknown
         onLookChange?: (event: EventOf<TodoList, 'look-change'>) => void
         onTasksChange?: (event: EventOf<TodoList, 'tasks-change'>) => void
+        onTaskReorder?: (event: EventOf<TodoList, 'task-reorder'>) => void
         onTaskToggle?: (event: EventOf<TodoList, 'task-toggle'>) => void
         onTaskAdd?: (event: EventOf<TodoList, 'task-add'>) => void
         onTaskRemove?: (event: EventOf<TodoList, 'task-remove'>) => void
+        onTaskArchive?: (event: EventOf<TodoList, 'task-archive'>) => void
+        onTaskRestore?: (event: EventOf<TodoList, 'task-restore'>) => void
         onTaskChange?: (event: EventOf<TodoList, 'task-change'>) => void
       }
     >

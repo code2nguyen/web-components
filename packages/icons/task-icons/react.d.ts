@@ -36,7 +36,9 @@ import type {
   BookTaskIcon,
   BookmarkTaskIcon,
   BooksTaskIcon,
+  BottleTaskIcon,
   BranchTaskIcon,
+  BreadTaskIcon,
   BriefcaseTaskIcon,
   BugTaskIcon,
   BurgerTaskIcon,
@@ -53,6 +55,7 @@ import type {
   ChatTaskIcon,
   CheckCircleTaskIcon,
   ChecklistTaskIcon,
+  CheeseTaskIcon,
   CleanTaskIcon,
   ClockTaskIcon,
   ClothesTaskIcon,
@@ -64,6 +67,7 @@ import type {
   ContactTaskIcon,
   ConversationTaskIcon,
   CookTaskIcon,
+  CookieTaskIcon,
   CraftTaskIcon,
   DatabaseTaskIcon,
   DeliveryTaskIcon,
@@ -71,21 +75,26 @@ import type {
   DoctorTaskIcon,
   DocumentTaskIcon,
   DownloadTaskIcon,
+  EggTaskIcon,
   EyeTaskIcon,
   FamilyTaskIcon,
   FireTaskIcon,
   FirstAidTaskIcon,
+  FishTaskIcon,
   FlagTaskIcon,
   FlaskTaskIcon,
   FlightTaskIcon,
   FlowerTaskIcon,
   FolderTaskIcon,
   FootballTaskIcon,
+  FrozenTaskIcon,
   FuelTaskIcon,
   GameTaskIcon,
   GiftTaskIcon,
   GlobeTaskIcon,
   GraduationTaskIcon,
+  GrainTaskIcon,
+  GrapesTaskIcon,
   GymTaskIcon,
   HeadphonesTaskIcon,
   HealthTaskIcon,
@@ -93,14 +102,17 @@ import type {
   HikeTaskIcon,
   HomeTaskIcon,
   HourglassTaskIcon,
+  IceCreamTaskIcon,
   IdeaTaskIcon,
   InboxTaskIcon,
   InvestTaskIcon,
+  JarTaskIcon,
   KeyTaskIcon,
   LanguageTaskIcon,
   LaptopTaskIcon,
   LaundryTaskIcon,
   LeafTaskIcon,
+  LegumesTaskIcon,
   LessonTaskIcon,
   LikeTaskIcon,
   ListTaskIcon,
@@ -108,10 +120,12 @@ import type {
   LuggageTaskIcon,
   MailTaskIcon,
   MapTaskIcon,
+  MeatTaskIcon,
   MedalTaskIcon,
   MeditateTaskIcon,
   MeetingTaskIcon,
   MicrophoneTaskIcon,
+  MilkTaskIcon,
   MoneyTaskIcon,
   MonitorTaskIcon,
   MoodTaskIcon,
@@ -144,6 +158,7 @@ import type {
   RobotTaskIcon,
   RocketTaskIcon,
   RunTaskIcon,
+  SaladTaskIcon,
   SavingsTaskIcon,
   SearchTaskIcon,
   SendTaskIcon,
@@ -170,6 +185,7 @@ import type {
   TennisTaskIcon,
   TerminalTaskIcon,
   TicketTaskIcon,
+  ToiletriesTaskIcon,
   ToolboxTaskIcon,
   ToothTaskIcon,
   TrainTaskIcon,
@@ -219,7 +235,9 @@ declare module 'react' {
       'c2-task-icon-book': C2Props<BookTaskIcon>
       'c2-task-icon-bookmark': C2Props<BookmarkTaskIcon>
       'c2-task-icon-books': C2Props<BooksTaskIcon>
+      'c2-task-icon-bottle': C2Props<BottleTaskIcon>
       'c2-task-icon-branch': C2Props<BranchTaskIcon>
+      'c2-task-icon-bread': C2Props<BreadTaskIcon>
       'c2-task-icon-briefcase': C2Props<BriefcaseTaskIcon>
       'c2-task-icon-bug': C2Props<BugTaskIcon>
       'c2-task-icon-burger': C2Props<BurgerTaskIcon>
@@ -236,6 +254,7 @@ declare module 'react' {
       'c2-task-icon-chat': C2Props<ChatTaskIcon>
       'c2-task-icon-check-circle': C2Props<CheckCircleTaskIcon>
       'c2-task-icon-checklist': C2Props<ChecklistTaskIcon>
+      'c2-task-icon-cheese': C2Props<CheeseTaskIcon>
       'c2-task-icon-clean': C2Props<CleanTaskIcon>
       'c2-task-icon-clock': C2Props<ClockTaskIcon>
       'c2-task-icon-clothes': C2Props<ClothesTaskIcon>
@@ -247,6 +266,7 @@ declare module 'react' {
       'c2-task-icon-contact': C2Props<ContactTaskIcon>
       'c2-task-icon-conversation': C2Props<ConversationTaskIcon>
       'c2-task-icon-cook': C2Props<CookTaskIcon>
+      'c2-task-icon-cookie': C2Props<CookieTaskIcon>
       'c2-task-icon-craft': C2Props<CraftTaskIcon>
       'c2-task-icon-database': C2Props<DatabaseTaskIcon>
       'c2-task-icon-delivery': C2Props<DeliveryTaskIcon>
@@ -254,21 +274,26 @@ declare module 'react' {
       'c2-task-icon-doctor': C2Props<DoctorTaskIcon>
       'c2-task-icon-document': C2Props<DocumentTaskIcon>
       'c2-task-icon-download': C2Props<DownloadTaskIcon>
+      'c2-task-icon-egg': C2Props<EggTaskIcon>
       'c2-task-icon-eye': C2Props<EyeTaskIcon>
       'c2-task-icon-family': C2Props<FamilyTaskIcon>
       'c2-task-icon-fire': C2Props<FireTaskIcon>
       'c2-task-icon-first-aid': C2Props<FirstAidTaskIcon>
+      'c2-task-icon-fish': C2Props<FishTaskIcon>
       'c2-task-icon-flag': C2Props<FlagTaskIcon>
       'c2-task-icon-flask': C2Props<FlaskTaskIcon>
       'c2-task-icon-flight': C2Props<FlightTaskIcon>
       'c2-task-icon-flower': C2Props<FlowerTaskIcon>
       'c2-task-icon-folder': C2Props<FolderTaskIcon>
       'c2-task-icon-football': C2Props<FootballTaskIcon>
+      'c2-task-icon-frozen': C2Props<FrozenTaskIcon>
       'c2-task-icon-fuel': C2Props<FuelTaskIcon>
       'c2-task-icon-game': C2Props<GameTaskIcon>
       'c2-task-icon-gift': C2Props<GiftTaskIcon>
       'c2-task-icon-globe': C2Props<GlobeTaskIcon>
       'c2-task-icon-graduation': C2Props<GraduationTaskIcon>
+      'c2-task-icon-grain': C2Props<GrainTaskIcon>
+      'c2-task-icon-grapes': C2Props<GrapesTaskIcon>
       'c2-task-icon-gym': C2Props<GymTaskIcon>
       'c2-task-icon-headphones': C2Props<HeadphonesTaskIcon>
       'c2-task-icon-health': C2Props<HealthTaskIcon>
@@ -276,14 +301,17 @@ declare module 'react' {
       'c2-task-icon-hike': C2Props<HikeTaskIcon>
       'c2-task-icon-home': C2Props<HomeTaskIcon>
       'c2-task-icon-hourglass': C2Props<HourglassTaskIcon>
+      'c2-task-icon-ice-cream': C2Props<IceCreamTaskIcon>
       'c2-task-icon-idea': C2Props<IdeaTaskIcon>
       'c2-task-icon-inbox': C2Props<InboxTaskIcon>
       'c2-task-icon-invest': C2Props<InvestTaskIcon>
+      'c2-task-icon-jar': C2Props<JarTaskIcon>
       'c2-task-icon-key': C2Props<KeyTaskIcon>
       'c2-task-icon-language': C2Props<LanguageTaskIcon>
       'c2-task-icon-laptop': C2Props<LaptopTaskIcon>
       'c2-task-icon-laundry': C2Props<LaundryTaskIcon>
       'c2-task-icon-leaf': C2Props<LeafTaskIcon>
+      'c2-task-icon-legumes': C2Props<LegumesTaskIcon>
       'c2-task-icon-lesson': C2Props<LessonTaskIcon>
       'c2-task-icon-like': C2Props<LikeTaskIcon>
       'c2-task-icon-list': C2Props<ListTaskIcon>
@@ -291,10 +319,12 @@ declare module 'react' {
       'c2-task-icon-luggage': C2Props<LuggageTaskIcon>
       'c2-task-icon-mail': C2Props<MailTaskIcon>
       'c2-task-icon-map': C2Props<MapTaskIcon>
+      'c2-task-icon-meat': C2Props<MeatTaskIcon>
       'c2-task-icon-medal': C2Props<MedalTaskIcon>
       'c2-task-icon-meditate': C2Props<MeditateTaskIcon>
       'c2-task-icon-meeting': C2Props<MeetingTaskIcon>
       'c2-task-icon-microphone': C2Props<MicrophoneTaskIcon>
+      'c2-task-icon-milk': C2Props<MilkTaskIcon>
       'c2-task-icon-money': C2Props<MoneyTaskIcon>
       'c2-task-icon-monitor': C2Props<MonitorTaskIcon>
       'c2-task-icon-mood': C2Props<MoodTaskIcon>
@@ -327,6 +357,7 @@ declare module 'react' {
       'c2-task-icon-robot': C2Props<RobotTaskIcon>
       'c2-task-icon-rocket': C2Props<RocketTaskIcon>
       'c2-task-icon-run': C2Props<RunTaskIcon>
+      'c2-task-icon-salad': C2Props<SaladTaskIcon>
       'c2-task-icon-savings': C2Props<SavingsTaskIcon>
       'c2-task-icon-search': C2Props<SearchTaskIcon>
       'c2-task-icon-send': C2Props<SendTaskIcon>
@@ -353,6 +384,7 @@ declare module 'react' {
       'c2-task-icon-tennis': C2Props<TennisTaskIcon>
       'c2-task-icon-terminal': C2Props<TerminalTaskIcon>
       'c2-task-icon-ticket': C2Props<TicketTaskIcon>
+      'c2-task-icon-toiletries': C2Props<ToiletriesTaskIcon>
       'c2-task-icon-toolbox': C2Props<ToolboxTaskIcon>
       'c2-task-icon-tooth': C2Props<ToothTaskIcon>
       'c2-task-icon-train': C2Props<TrainTaskIcon>

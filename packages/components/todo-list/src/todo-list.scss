@@ -21,40 +21,53 @@
     hero-ring--stroke-width: 7,
     bar--height: 8px,
     chip--background-color: #f4f4f5,
-    row--padding: 10px 8px,
-    row--gap: 12px,
+    row--padding: 9px 8px,
+    row--gap: 8px,
     row--border-radius: 8px,
+    row__divider--color: #f4f4f5,
     row__hover--background-color: #fafafa,
-    row__selected--background-color: #f4f4f5,
-    tile--size: 36px,
-    tile--border-radius: 10px,
-    icon--size: 18px,
-    check--size: 22px,
-    check--border-color: #d4d4d8,
+    mark--size: 28px,
+    mark--color: #a1a1aa,
+    mark--stroke-width: 2.6,
+    dropped--color: #dc2626,
     label--font-size: 14px,
     label__done--color: #71717a,
+    icon--size: 20px,
     add--border-color: #d4d4d8,
     panel--background-color: #fafafa,
     panel--border-radius: 8px,
+    archive-action--background-color: #a16207,
+    delete-action--background-color: #dc2626,
+    done-action--background-color: #15803d,
+    toast--background-color: #18181b,
+    toast--color: #fafafa,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     transition-duration: 200ms,
-    swatch-blue--color: #0265dc,
-    swatch-teal--color: #0f766e,
-    swatch-green--color: #15803d,
-    swatch-amber--color: #a16207,
-    swatch-orange--color: #ea580c,
-    swatch-pink--color: #db2777,
-    swatch-violet--color: #7c3aed,
-    swatch-slate--color: #52525b,
+    pen-blue--color: #0265dc,
+    pen-red--color: #dc2626,
+    pen-green--color: #0f766e,
+    pen-violet--color: #7c3aed,
+    pen-graphite--color: #71717a,
+    highlight-yellow--color: #facc15,
+    highlight-green--color: #22c55e,
+    highlight-blue--color: #3b82f6,
+    highlight-pink--color: #ec4899,
+    highlight-orange--color: #f97316,
+    highlight-violet--color: #8b5cf6,
   )
 );
 
-$colors: blue, teal, green, amber, orange, pink, violet, slate;
 $duration: css.cssVar(transition-duration);
 $accent: css.cssVar(accent--color);
 $muted: css.cssVar(meta--color);
+$surface: css.cssVar(container--background-color);
+$ink: css.cssVar(container--color);
 // Text on a chip: the ink colour softened, so it keeps its contrast on the tinted chip of every background.
-$chip-text: color-mix(in srgb, #{css.cssVar(container--color)} 76%, transparent);
+$chip-text: color-mix(in srgb, #{$ink} 76%, transparent);
+$pens: blue, red, green, violet, graphite;
+$highlights: yellow, green, blue, pink, orange, violet;
+// How much highlighter ink is mixed into the background: light enough for any pen to stay readable on it.
+$highlight-strength: 22%;
 
 :host {
   display: block;
@@ -70,7 +83,8 @@ $chip-text: color-mix(in srgb, #{css.cssVar(container--color)} 76%, transparent)
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
   color: inherit;
   margin: 0;
@@ -88,7 +102,7 @@ button {
   }
 }
 
-:is(button, input):focus-visible {
+:is(button, input, textarea):focus-visible {
   outline: css.cssVar(focus--outline);
   outline-offset: 2px;
 }
@@ -101,27 +115,18 @@ svg {
   stroke-linejoin: round;
 }
 
-// Every task colour, as a private `--_hue` a tile or the icon picker reads; a palette swatch paints it directly.
-@each $color in $colors {
-  .color-#{$color} {
-    --_hue: #{css.cssVar(swatch-#{$color}--color)};
-  }
-
-  .color-swatch.color-#{$color} {
-    background-color: css.cssVar(swatch-#{$color}--color);
-  }
-}
-
 .container {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: css.cssVar(container--gap);
   padding: css.cssVar(container--padding);
-  color: css.cssVar(container--color);
-  background-color: css.cssVar(container--background-color);
+  color: $ink;
+  background-color: $surface;
   border: css.cssVar(container--border);
   border-radius: css.cssVar(container--border-radius);
   box-shadow: css.cssVar(container--box-shadow);
+  container-type: inline-size;
   transition:
     background-color $duration ease,
     color $duration ease;
@@ -132,7 +137,7 @@ svg {
 .header {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -157,6 +162,23 @@ svg {
   margin: 0;
   font-size: css.cssVar(meta--font-size);
   color: $muted;
+}
+
+.list-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: $accent;
+  background-color: color-mix(in srgb, #{$accent} 12%, transparent);
+
+  .icon {
+    width: 22px;
+    height: 22px;
+  }
 }
 
 .actions {
@@ -191,7 +213,7 @@ svg {
 
   &:hover,
   &[aria-expanded='true'] {
-    color: css.cssVar(container--color);
+    color: $ink;
     background-color: css.cssVar(chip--background-color);
   }
 }
@@ -228,12 +250,20 @@ svg {
   font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: css.cssVar(container--color);
+}
+
+.ring-value.with-icon {
+  color: $accent;
+
+  .icon {
+    width: 46%;
+    height: 46%;
+  }
 }
 
 .ring-check {
-  width: 45%;
-  height: 45%;
+  width: 50%;
+  height: 50%;
   stroke: $accent;
   stroke-width: 3;
   animation: pop calc($duration * 2) cubic-bezier(0.2, 0.8, 0.2, 1.4);
@@ -280,7 +310,6 @@ svg {
   }
 
   .actions {
-    order: -1;
     position: absolute;
     top: 0;
     right: 0;
@@ -302,7 +331,7 @@ svg {
   transition: width calc($duration * 2.5) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-// Filters ----------------------------------------------------------------------------------------------------------
+// Filters and segmented controls -----------------------------------------------------------------------------------
 
 .filters {
   display: flex;
@@ -332,177 +361,337 @@ svg {
     box-shadow $duration ease;
 
   &:hover {
-    color: css.cssVar(container--color);
+    color: $ink;
   }
 
   &[aria-pressed='true'],
   &[aria-checked='true'] {
-    color: css.cssVar(container--color);
-    background-color: css.cssVar(container--background-color);
+    color: $ink;
+    background-color: $surface;
     box-shadow:
       0 1px 2px rgba(24, 24, 27, 0.08),
       0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke: $accent;
+    stroke-width: 2.6;
   }
 }
 
 .count {
   font-variant-numeric: tabular-nums;
-  opacity: 0.65;
+  opacity: 0.7;
 }
 
 // Tasks ------------------------------------------------------------------------------------------------------------
 
 .tasks {
-  list-style: none;
+  display: block;
   margin: 0 -8px;
-  padding: 0;
+  --c2-reorder-list--container-border-width: 0px;
+  --c2-reorder-list--container-border-radius: 0px;
+  --c2-reorder-list--item-background: transparent;
+  --c2-reorder-list--placeholder-background: color-mix(in srgb, #{$accent} 8%, transparent);
+  --c2-reorder-list__placeholder--border-color: #{$accent};
+  --c2-reorder-list__placeholder--border-width: 1.5px;
+  --c2-reorder-list__item__focus--outline-color: #{$accent};
+  --c2-reorder-list__item__focus--outline-offset: -2px;
+}
+
+.task-slot {
+  position: relative;
+  display: block;
+}
+
+.swipe-actions {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  overflow: hidden;
+  border-radius: css.cssVar(row--border-radius);
+  visibility: hidden;
+
+  &.visible {
+    visibility: visible;
+  }
+}
+
+.swipe-done {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  padding-left: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: css.cssVar(done-action--background-color);
+
+  svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.6;
+  }
+}
+
+.swipe-buttons {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.swipe-archive,
+.swipe-delete {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 76px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.8;
+  }
+}
+
+.swipe-archive {
+  background-color: css.cssVar(archive-action--background-color);
+}
+
+.swipe-delete {
+  background-color: css.cssVar(delete-action--background-color);
 }
 
 .task {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: css.cssVar(row--gap);
   min-width: 0;
   padding: css.cssVar(row--padding);
   border-radius: css.cssVar(row--border-radius);
-  transition: background-color $duration ease;
+  // The row covers the swipe actions behind it, so it always paints a background of its own.
+  background-color: $surface;
+  touch-action: pan-y;
+  transition:
+    transform calc($duration * 1.2) cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color $duration ease;
 
   &:hover {
     background-color: css.cssVar(row__hover--background-color);
   }
 
+  // A hairline between rows, inset so it does not run into the rounded corners.
+  &::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 0;
+    height: 1px;
+    background-color: css.cssVar(row__divider--color);
+    pointer-events: none;
+  }
+
+  &:hover::after,
+  &[class*='highlight-']::after {
+    opacity: 0;
+  }
+
   &.selected {
-    background-color: css.cssVar(row__selected--background-color);
+    outline: 1.5px solid $accent;
+    outline-offset: -1.5px;
+  }
+
+  &.swiping {
+    transition: background-color $duration ease;
+    user-select: none;
   }
 }
 
-.check {
+.grip {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 14px;
+  height: css.cssVar(mark--size);
+  margin-right: -4px;
+  color: $muted;
+  opacity: 0;
+  cursor: grab;
+  touch-action: none;
+  transition: opacity $duration ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .task:hover &,
+  .task:focus-within & {
+    opacity: 0.8;
+  }
+
+  @media (hover: none) {
+    opacity: 0.5;
+  }
+}
+
+.mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: css.cssVar(check--size);
-  height: css.cssVar(check--size);
+  width: css.cssVar(mark--size);
+  height: css.cssVar(mark--size);
   border-radius: 999px;
-  border: 2px solid css.cssVar(check--border-color);
-  color: css.cssVar(on-accent--color);
-  transition:
-    background-color $duration ease,
-    border-color $duration ease,
-    transform $duration ease;
 
   svg {
-    width: 62%;
-    height: 62%;
-    stroke-width: 3.2;
-    stroke-dasharray: 24;
-    stroke-dashoffset: 24;
-    transition: stroke-dashoffset $duration ease;
+    width: 100%;
+    height: 100%;
   }
 
-  &:hover:not(:disabled) {
-    border-color: $accent;
+  .open {
+    stroke: css.cssVar(mark--color);
+    stroke-width: 1.5;
+    transition: stroke $duration ease;
   }
 
-  &:active:not(:disabled) {
-    transform: scale(0.88);
+  &:hover:not(:disabled) .open {
+    stroke: $accent;
+  }
+
+  .stroke {
+    stroke: $accent;
+    stroke-width: css.cssVar(mark--stroke-width);
+    stroke-dasharray: 40;
+    animation: draw calc($duration * 1.8) ease-out both;
+  }
+
+  .dropped {
+    stroke: css.cssVar(dropped--color);
   }
 }
 
-.task.done .check {
-  border-color: $accent;
-  background-color: $accent;
-
-  svg {
-    stroke-dashoffset: 0;
-  }
-}
-
-.tile {
+.task-icon {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-  width: css.cssVar(tile--size);
-  height: css.cssVar(tile--size);
-  border-radius: css.cssVar(tile--border-radius);
-  color: var(--_hue);
-  background-color: color-mix(in srgb, var(--_hue) 14%, transparent);
-  transition:
-    transform $duration ease,
-    opacity $duration ease,
-    filter $duration ease,
-    box-shadow $duration ease;
+  padding-top: calc((#{css.cssVar(mark--size)} - #{css.cssVar(icon--size)}) / 2);
+  color: var(--_ink, #{$accent});
+  transition: opacity $duration ease;
 
   .icon {
     width: css.cssVar(icon--size);
     height: css.cssVar(icon--size);
   }
-
-  &:is(button):hover {
-    transform: translateY(-1px) rotate(-4deg);
-  }
-
-  &[aria-pressed='true'] {
-    box-shadow:
-      0 0 0 2px css.cssVar(container--background-color),
-      0 0 0 4px var(--_hue);
-  }
 }
 
-.task.done .tile {
-  opacity: 0.5;
-  filter: saturate(0.4);
+.task.closed .task-icon {
+  opacity: 0.45;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
 }
 
 .label {
-  flex: 1;
-  min-width: 0;
+  display: block;
+  max-width: 100%;
+  min-height: css.cssVar(mark--size);
+  padding: 4px 0;
+  text-align: left;
   font-size: css.cssVar(label--font-size);
-  line-height: 1.35;
+  line-height: 1.45;
+  color: var(--_ink, #{$ink});
+  overflow-wrap: anywhere;
+  transition: color $duration ease;
+}
+
+.label-text {
+  position: relative;
+}
+
+.task.closed .label {
+  color: css.cssVar(label__done--color);
+}
+
+.strike {
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  width: calc(100% + 6px);
+  height: 10px;
+  margin-top: -4px;
+  overflow: visible;
+  pointer-events: none;
+
+  path {
+    stroke: $accent;
+    stroke-width: 1.8;
+    opacity: 0.8;
+    stroke-dasharray: 400;
+    animation: draw-long calc($duration * 2.2) ease-out calc($duration / 2) both;
+  }
+}
+
+.note {
+  margin: -2px 0 2px;
+  font-size: css.cssVar(meta--font-size);
+  line-height: 1.4;
+  color: $muted;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  // The strike-through grows from the left instead of snapping in.
-  background-image: linear-gradient(currentColor, currentColor);
-  background-repeat: no-repeat;
-  background-position: 0 55%;
-  background-size: 0 1.5px;
-  transition:
-    background-size $duration ease,
-    color $duration ease;
 }
 
-.task.done .label {
-  color: css.cssVar(label__done--color);
-  background-size: 100% 1.5px;
+.note-input {
+  display: block;
+  width: 100%;
+  margin: 2px 0 4px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  resize: vertical;
+  font-size: 13px;
+  line-height: 1.5;
+  background-color: css.cssVar(chip--background-color);
+
+  &::placeholder {
+    color: $muted;
+  }
 }
 
 .due {
   flex-shrink: 0;
-  padding: 3px 8px;
-  border-radius: 999px;
+  padding-top: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: $chip-text;
-  background-color: css.cssVar(chip--background-color);
+  color: $muted;
 
   &.urgent {
-    color: $accent;
-    background-color: color-mix(in srgb, #{$accent} 12%, transparent);
+    font-weight: 600;
+    color: css.cssVar(pen-red--color);
   }
 }
 
-.remove {
+.more {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   width: 28px;
-  height: 28px;
+  height: css.cssVar(mark--size);
   border-radius: 8px;
   color: $muted;
   opacity: 0;
@@ -511,24 +700,85 @@ svg {
     background-color $duration ease;
 
   svg {
-    width: 14px;
-    height: 14px;
-    stroke-width: 2;
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    stroke: none;
   }
 
-  &:hover {
-    background-color: css.cssVar(chip--background-color);
+  &:hover,
+  &.open {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
   }
 
   .task:hover &,
-  &:focus-visible {
+  &:focus-visible,
+  &.open {
     opacity: 1;
   }
 
-  // Touch screens have no hover to reveal it.
+  // Touch screens have no hover to reveal it; the swipe covers the common actions.
   @media (hover: none) {
     opacity: 0.6;
   }
+}
+
+.menu {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% - 4px);
+  right: 4px;
+  display: flex;
+  flex-direction: column;
+  min-width: 210px;
+  padding: 6px;
+  border-radius: css.cssVar(panel--border-radius);
+  color: $ink;
+  background-color: $surface;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+  animation: reveal calc($duration * 0.8) ease-out;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: left;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.75;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: css.cssVar(chip--background-color);
+  }
+
+  &.separated {
+    margin-top: 5px;
+    box-shadow: 0 -3px 0 -2px color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  &.danger {
+    color: css.cssVar(pen-red--color);
+  }
+
+  kbd {
+    font-family: inherit;
+    font-size: 11px;
+    color: $muted;
+  }
+}
+
+.menu-label {
+  flex: 1;
 }
 
 .empty {
@@ -596,6 +846,115 @@ svg {
   }
 }
 
+// Archive and undo -------------------------------------------------------------------------------------------------
+
+.archive {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: -6px;
+}
+
+.archive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 4px 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $muted;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.75;
+  }
+
+  .chevron {
+    width: 12px;
+    height: 12px;
+    transition: transform $duration ease;
+  }
+
+  &[aria-expanded='true'] .chevron {
+    transform: rotate(90deg);
+  }
+}
+
+.archived {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.archived-task {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px 4px 22px;
+  font-size: 13px;
+  color: $muted;
+}
+
+.archived-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-button {
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $accent;
+
+  &.danger {
+    color: css.cssVar(pen-red--color);
+  }
+
+  &:hover {
+    background-color: css.cssVar(chip--background-color);
+  }
+}
+
+.toast {
+  position: sticky;
+  bottom: 8px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: -4px;
+  padding: 10px 10px 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: css.cssVar(toast--color);
+  background-color: css.cssVar(toast--background-color);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  animation: reveal-up calc($duration * 1.2) ease-out;
+}
+
+.toast-message {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toast-undo {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: css.cssVar(toast--color);
+}
+
 // Customize panel --------------------------------------------------------------------------------------------------
 
 .panel {
@@ -625,8 +984,8 @@ svg {
   border-radius: 7px;
   font-size: 12px;
   font-weight: 500;
-  color: $muted;
-  background-color: css.cssVar(container--background-color);
+  color: $chip-text;
+  background-color: $surface;
 
   &:disabled {
     opacity: 0.38;
@@ -642,16 +1001,12 @@ svg {
 
 .field-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 
   @container (max-width: 360px) {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-.container {
-  container-type: inline-size;
 }
 
 .field-label {
@@ -665,11 +1020,23 @@ svg {
   white-space: nowrap;
 }
 
+.sub-label {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $chip-text;
+}
+
 .editing {
   text-transform: none;
   letter-spacing: 0;
   font-weight: 500;
-  color: css.cssVar(container--color);
+  color: $ink;
+}
+
+.task-editor {
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent);
 }
 
 .swatches {
@@ -678,65 +1045,131 @@ svg {
   gap: 8px;
 }
 
-.background-swatch {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  // Default shows the list's own colours; a preset shows its surface over its ground.
-  background: linear-gradient(
-    135deg,
-    var(--_swatch, #{css.cssVar(container--background-color)}) 50%,
-    var(--_ground, #{css.cssVar(chip--background-color)}) 50%
-  );
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 14%, transparent);
-  transition: box-shadow $duration ease;
-}
-
-.color-swatch {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
+:is(.background-swatch, .pen-swatch, .highlight-swatch) {
   transition: box-shadow $duration ease;
 
-  &.small {
-    width: 22px;
-    height: 22px;
-    border-radius: 7px;
+  &[aria-checked='true'] {
+    box-shadow:
+      0 0 0 2px css.cssVar(panel--background-color),
+      0 0 0 4px $accent;
   }
 }
 
-:is(.background-swatch, .color-swatch)[aria-checked='true'] {
-  box-shadow:
-    0 0 0 2px css.cssVar(panel--background-color),
-    0 0 0 4px $accent;
+.background-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--_swatch-ink, #{$ink});
+  background-color: var(--_swatch, #{$surface});
+
+  &:not([aria-checked='true']) {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent);
+  }
 }
 
-.color-swatch[aria-checked='true'] {
-  box-shadow:
-    0 0 0 2px css.cssVar(panel--background-color),
-    0 0 0 4px var(--_hue);
+.pen-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+
+  &.default {
+    background-color: $ink;
+  }
 }
 
-.segmented {
+.highlight-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $ink;
+
+  &.none {
+    background: linear-gradient(
+      135deg,
+      transparent calc(50% - 1px),
+      color-mix(in srgb, currentColor 30%, transparent) calc(50% - 1px),
+      color-mix(in srgb, currentColor 30%, transparent) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 20%, transparent);
+  }
+}
+
+// On a highlighted row the grey text and the red pen are pulled towards the ink, so they keep their contrast on the
+// tint of every background.
+.task[class*='highlight-'] {
+  :is(.note, .due) {
+    color: $chip-text;
+  }
+
+  .due.urgent {
+    color: color-mix(in srgb, #{css.cssVar(pen-red--color)} 70%, #{$ink});
+  }
+
+  &.closed .label {
+    color: $chip-text;
+  }
+}
+
+// Every pen and highlighter paints its swatch directly, so each documented variable has a real consumer; a task or
+// the icon picker takes the same colour as a private `--_ink`, a highlighted task as its row background.
+@each $pen in $pens {
+  .pen-swatch.pen-#{$pen} {
+    background-color: css.cssVar(pen-#{$pen}--color);
+  }
+
+  .ink-#{$pen} {
+    --_ink: #{css.cssVar(pen-#{$pen}--color)};
+  }
+}
+
+@each $highlight in $highlights {
+  .highlight-swatch.highlight-#{$highlight},
+  .task.highlight-#{$highlight} {
+    background-color: color-mix(in srgb, #{css.cssVar(highlight-#{$highlight}--color)} #{$highlight-strength}, #{$surface});
+  }
+}
+
+.icon-tools {
   display: flex;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 9px;
-  background-color: color-mix(in srgb, currentColor 6%, transparent);
+  gap: 8px;
+}
 
-  .segment {
-    padding: 0 6px;
-    min-height: 28px;
+.no-icon {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $chip-text;
+  background-color: $surface;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 14%, transparent);
+
+  &[aria-pressed='true'] {
+    color: $accent;
+    box-shadow: inset 0 0 0 1.5px $accent;
   }
 }
 
 .icon-search {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 34px;
   padding: 0 10px;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
-  background-color: css.cssVar(container--background-color);
+  background-color: $surface;
   font-size: 12px;
 
   &::placeholder {
@@ -744,19 +1177,33 @@ svg {
   }
 }
 
-.icon-grid {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 4px;
-  max-height: 176px;
+.icon-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 232px;
   overflow-y: auto;
   padding: 2px;
   margin: -2px;
   scrollbar-width: thin;
+}
 
-  .hint {
-    grid-column: 1 / -1;
-  }
+.icon-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.icon-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: $muted;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
 }
 
 .icon-option {
@@ -766,25 +1213,25 @@ svg {
   aspect-ratio: 1;
   min-height: 32px;
   border-radius: 8px;
-  color: $muted;
+  color: $chip-text;
+  transition:
+    background-color $duration ease,
+    color $duration ease;
 
   .icon {
     width: 18px;
     height: 18px;
   }
-  transition:
-    background-color $duration ease,
-    color $duration ease;
 
   &:hover {
-    color: var(--_hue);
-    background-color: color-mix(in srgb, var(--_hue) 10%, transparent);
+    color: var(--_ink, #{$accent});
+    background-color: color-mix(in srgb, var(--_ink, #{$accent}) 10%, transparent);
   }
 
   &[aria-pressed='true'] {
-    color: var(--_hue);
-    background-color: color-mix(in srgb, var(--_hue) 16%, transparent);
-    box-shadow: inset 0 0 0 1.5px var(--_hue);
+    color: var(--_ink, #{$accent});
+    background-color: color-mix(in srgb, var(--_ink, #{$accent}) 16%, transparent);
+    box-shadow: inset 0 0 0 1.5px var(--_ink, #{$accent});
   }
 }
 
@@ -797,6 +1244,24 @@ svg {
 
 // Motion -----------------------------------------------------------------------------------------------------------
 
+@keyframes draw {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes draw-long {
+  from {
+    stroke-dashoffset: 400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 @keyframes pop {
   from {
     transform: scale(0.4);
@@ -808,6 +1273,13 @@ svg {
   from {
     opacity: 0;
     transform: translateY(-4px);
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
   }
 }
 

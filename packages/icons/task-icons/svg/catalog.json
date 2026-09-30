@@ -109,10 +109,20 @@
     "category": "learning",
     "keywords": ["library", "books", "research", "reading", "list", "shelf"]
   },
+  "bottle": {
+    "title": "Drinks",
+    "category": "food",
+    "keywords": ["drinks", "bottle", "juice", "soda", "water", "beer", "beverages"]
+  },
   "branch": {
     "title": "Branch",
     "category": "tech",
     "keywords": ["branch", "git", "merge", "pull", "request", "pr", "version", "review"]
+  },
+  "bread": {
+    "title": "Bread",
+    "category": "food",
+    "keywords": ["bread", "bakery", "baguette", "loaf", "toast", "pain"]
   },
   "briefcase": {
     "title": "Work",
@@ -194,6 +204,11 @@
     "category": "work",
     "keywords": ["checklist", "todo", "tasks", "list", "review", "audit", "clipboard"]
   },
+  "cheese": {
+    "title": "Cheese",
+    "category": "food",
+    "keywords": ["cheese", "dairy", "fromage", "deli"]
+  },
   "clean": {
     "title": "Clean",
     "category": "home",
@@ -249,6 +264,11 @@
     "category": "food",
     "keywords": ["cook", "dinner", "lunch", "meal", "prep", "kitchen", "recipe", "soup"]
   },
+  "cookie": {
+    "title": "Snacks",
+    "category": "food",
+    "keywords": ["snacks", "cookie", "biscuit", "sweets", "chocolate", "chips", "candy"]
+  },
   "craft": {
     "title": "Craft",
     "category": "leisure",
@@ -284,6 +304,11 @@
     "category": "tech",
     "keywords": ["download", "import", "install", "get", "fetch"]
   },
+  "egg": {
+    "title": "Eggs",
+    "category": "food",
+    "keywords": ["eggs", "egg", "breakfast", "oeufs"]
+  },
   "eye": {
     "title": "Eyes",
     "category": "health",
@@ -303,6 +328,11 @@
     "title": "First aid",
     "category": "health",
     "keywords": ["first", "aid", "emergency", "care", "kit", "injury"]
+  },
+  "fish": {
+    "title": "Fish",
+    "category": "food",
+    "keywords": ["fish", "seafood", "salmon", "tuna", "fishmonger", "poisson"]
   },
   "flag": {
     "title": "Milestone",
@@ -334,6 +364,11 @@
     "category": "sport",
     "keywords": ["football", "soccer", "ball", "match", "game", "sport"]
   },
+  "frozen": {
+    "title": "Frozen",
+    "category": "food",
+    "keywords": ["frozen", "freezer", "ice", "snow", "cold", "surgeles"]
+  },
   "fuel": {
     "title": "Fuel",
     "category": "travel",
@@ -358,6 +393,16 @@
     "title": "Study",
     "category": "learning",
     "keywords": ["study", "learn", "course", "class", "school", "university", "exam", "graduate", "degree"]
+  },
+  "grain": {
+    "title": "Grains",
+    "category": "food",
+    "keywords": ["grains", "rice", "pasta", "cereal", "flour", "oats", "wheat"]
+  },
+  "grapes": {
+    "title": "Fruit",
+    "category": "food",
+    "keywords": ["fruit", "grapes", "berries", "banana", "orange", "fruits"]
   },
   "gym": {
     "title": "Workout",
@@ -394,6 +439,11 @@
     "category": "planning",
     "keywords": ["waiting", "hourglass", "pending", "later", "deadline", "patience"]
   },
+  "ice-cream": {
+    "title": "Dessert",
+    "category": "food",
+    "keywords": ["dessert", "ice", "cream", "sweet", "treat", "gelato"]
+  },
   "idea": {
     "title": "Idea",
     "category": "work",
@@ -408,6 +458,11 @@
     "title": "Invest",
     "category": "finance",
     "keywords": ["invest", "stocks", "growth", "portfolio", "trading", "crypto", "chart"]
+  },
+  "jar": {
+    "title": "Pantry",
+    "category": "food",
+    "keywords": ["pantry", "jar", "jam", "honey", "sauce", "spices", "condiments"]
   },
   "key": {
     "title": "Keys",
@@ -433,6 +488,11 @@
     "title": "Eco",
     "category": "nature",
     "keywords": ["eco", "green", "recycle", "compost", "sustainable", "nature"]
+  },
+  "legumes": {
+    "title": "Legumes",
+    "category": "food",
+    "keywords": ["legumes", "beans", "peas", "lentils", "chickpeas", "pulses"]
   },
   "lesson": {
     "title": "Lesson",
@@ -469,6 +529,11 @@
     "category": "travel",
     "keywords": ["map", "route", "plan", "itinerary", "directions", "explore"]
   },
+  "meat": {
+    "title": "Meat",
+    "category": "food",
+    "keywords": ["meat", "steak", "beef", "pork", "butcher", "bbq", "chicken", "viande"]
+  },
   "medal": {
     "title": "Medal",
     "category": "sport",
@@ -488,6 +553,11 @@
     "title": "Sing",
     "category": "leisure",
     "keywords": ["sing", "microphone", "karaoke", "podcast", "record", "voice"]
+  },
+  "milk": {
+    "title": "Dairy",
+    "category": "food",
+    "keywords": ["milk", "dairy", "yogurt", "cream", "butter", "lait"]
   },
   "money": {
     "title": "Money",
@@ -649,6 +719,11 @@
     "category": "sport",
     "keywords": ["run", "running", "jog", "marathon", "sprint", "cardio", "sneakers"]
   },
+  "salad": {
+    "title": "Greens",
+    "category": "food",
+    "keywords": ["greens", "salad", "lettuce", "spinach", "herbs", "leafy", "legume", "produce"]
+  },
   "savings": {
     "title": "Savings",
     "category": "finance",
@@ -778,6 +853,11 @@
     "title": "Tickets",
     "category": "travel",
     "keywords": ["tickets", "concert", "event", "cinema", "book", "reservation", "show"]
+  },
+  "toiletries": {
+    "title": "Toiletries",
+    "category": "food",
+    "keywords": ["toiletries", "soap", "shampoo", "toothpaste", "hygiene"]
   },
   "toolbox": {
     "title": "DIY",

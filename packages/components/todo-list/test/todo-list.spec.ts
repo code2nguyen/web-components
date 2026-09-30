@@ -1,150 +1,268 @@
+import type { Locator, Page } from '@playwright/test'
 import { accessible } from '../../../../tests/component-fixture'
 import type { TodoList } from '../src/todo-list'
 import { test, expect } from './fixture'
+
+const tasksOf = (list: Locator) =>
+  list.evaluate((element: TodoList) => element.tasks.map(({ id, label, done, dropped, archived }) => ({ id, label, done, dropped, archived })))
+const labels = (list: Locator) => list.locator('.task .label-text')
+
+async function swipe(page: Page, row: Locator, distance: number) {
+  const box = (await row.boundingBox())!
+  const y = box.y + box.height / 2
+  const x = box.x + box.width / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + distance / 2, y, { steps: 5 })
+  await page.mouse.move(x + distance, y, { steps: 5 })
+  await page.mouse.up()
+}
 
 test('summarises progress in the ring and the heading', async ({ page, scenario }) => {
   await scenario()
   const list = page.locator('c2-todo-list')
 
-  await expect(list.getByRole('heading', { name: 'Launch week' })).toBeVisible()
-  await expect(list.locator('.meta')).toHaveText('2 of 4 done · 1 urgent')
-  await expect(list.getByRole('img', { name: '50% complete, 2 of 4 tasks done' })).toBeVisible()
-  await expect(list.locator('.ring-value')).toHaveText('50')
+  await expect(list.getByRole('heading', { name: 'This week' })).toBeVisible()
+  await expect(list.locator('.meta')).toHaveText('2 of 6 done · 1 urgent')
+  await expect(list.getByRole('img', { name: '33% complete, 2 of 6 tasks done' })).toBeVisible()
+  // The heading suggests the list icon, drawn inside the ring; archived tasks are not counted.
+  await expect(list.locator('.ring-value c2-task-icon-calendar')).toBeAttached()
+  await expect(list.locator('.task')).toHaveCount(6)
 })
 
-test('checks a task with the pointer and the keyboard', async ({ page, scenario, tab }) => {
+test('checks a task with a hand-drawn tick, by pointer and by keyboard', async ({ page, scenario }) => {
   await scenario()
   const list = page.locator('c2-todo-list')
-  const ship = list.getByRole('checkbox', { name: 'Ship the build' })
+  const passport = list.getByRole('checkbox', { name: 'Renew passport' })
 
-  await ship.click()
-  await expect(ship).toHaveAttribute('aria-checked', 'true')
-  await expect(list.locator('.meta')).toHaveText('3 of 4 done')
+  await passport.click()
+  await expect(passport).toHaveAttribute('aria-checked', 'true')
+  await expect(passport.locator('path')).toHaveAttribute('d', /^M4\.5 12\.6/)
+  await expect(list.locator('[data-swipe-row="c"] .strike')).toBeAttached()
+  await expect(list.locator('.meta')).toHaveText('3 of 6 done')
   await expect(list).toHaveAttribute('data-events', 'task-toggle tasks-change')
-  await expect.poll(() => list.evaluate((element: TodoList) => element.tasks.find((task) => task.id === 'c')?.done)).toBe(true)
 
-  await ship.focus()
-  await tab()
-  await tab()
-  await tab()
-  await expect(list.getByRole('checkbox', { name: 'Book the team dinner' })).toBeFocused()
-  await page.keyboard.press('Space')
-  await expect(list.locator('.meta')).toHaveText('All done. Nice work.')
-  await expect(list.locator('.ring-check')).toBeVisible()
+  await passport.press('Space')
+  await expect(passport).toHaveAttribute('aria-checked', 'false')
 })
 
-test('adds a task from the add field and gives it a fitting icon', async ({ page, scenario }) => {
+test('adds a plain task, with a note after a dash', async ({ page, scenario }) => {
   await scenario()
   const list = page.locator('c2-todo-list')
   const input = list.getByRole('textbox', { name: 'New task' })
-  const add = list.getByRole('button', { name: 'Add', exact: true })
 
-  await expect(add).toBeDisabled()
-  await input.fill('Book the dentist')
+  await expect(list.getByRole('button', { name: 'Add', exact: true })).toBeDisabled()
+  await input.fill('Oat milk - 2 L barista')
   await input.press('Enter')
 
-  const row = list.locator('.task').filter({ hasText: 'Book the dentist' })
-  await expect(row).toBeVisible()
-  await expect(row.locator('c2-task-icon-tooth')).toBeAttached()
+  const row = list.locator('.task').filter({ hasText: 'Oat milk' })
+  await expect(row.locator('.label-text')).toHaveText('Oat milk')
+  await expect(row.locator('.note')).toHaveText('2 L barista')
+  await expect(row.locator('.task-icon')).toHaveCount(0)
   await expect(input).toHaveValue('')
-  await expect(list.locator('.meta')).toHaveText('2 of 5 done · 1 urgent')
   await expect(list).toHaveAttribute('data-events', 'task-add tasks-change')
 })
 
-test('deletes a task and keeps focus in the list', async ({ page, scenario }) => {
+test('opens a note by clicking the task and saves it', async ({ page, scenario }) => {
   await scenario()
   const list = page.locator('c2-todo-list')
 
-  await list.getByRole('button', { name: 'Delete Review pricing copy' }).click()
-  await expect(list.locator('.task')).toHaveCount(3)
-  await expect(list.getByRole('checkbox', { name: 'Ship the build' })).toBeFocused()
-  await expect(list).toHaveAttribute('data-events', 'task-remove tasks-change')
+  await list.getByRole('button', { name: 'Book the train to Lyon', exact: true }).click()
+  const note = list.getByRole('textbox', { name: 'Note for Book the train to Lyon' })
+  await expect(note).toBeFocused()
+  await expect(note).toHaveValue('Friday evening, back Sunday')
+  await note.fill('Friday 18:04, seat 42')
+  await note.press('Escape')
+
+  await expect(note).toHaveCount(0)
+  await expect(list.locator('[data-swipe-row="e"] .note')).toHaveText('Friday 18:04, seat 42')
+  await expect(list).toHaveAttribute('data-events', 'task-change tasks-change')
+})
+
+test('the ⋯ menu marks a task won’t do, archives it and undoes the archive', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  const more = list.getByRole('button', { name: 'Actions for Dentist appointment' })
+
+  await more.click()
+  await expect(more).toHaveAttribute('aria-expanded', 'true')
+  await list.getByRole('menuitem', { name: 'Won’t do' }).click()
+  await expect(list.getByRole('checkbox', { name: 'Dentist appointment, won’t do' })).toBeVisible()
+  await expect(list.locator('.meta')).toHaveText('3 of 6 done · 1 urgent')
+
+  await more.click()
+  await list.getByRole('menuitem', { name: 'Archive' }).click()
+  await expect(list.locator('[data-swipe-row="b"]')).toHaveCount(0)
+  await expect(list.locator('.toast')).toContainText('Archived “Dentist appointment”')
+  await expect(list.getByRole('button', { name: /Archived · 2/ })).toBeVisible()
+
+  await list.getByRole('button', { name: 'Undo' }).click()
+  await expect(list.locator('[data-swipe-row="b"]')).toHaveCount(1)
+  await expect(list).toHaveAttribute('data-events', 'task-change tasks-change task-archive tasks-change task-restore tasks-change')
+})
+
+test('opens the menu with the keyboard and closes it with Escape', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  const more = list.getByRole('button', { name: 'Actions for Dentist appointment' })
+
+  await more.focus()
+  await more.press('ArrowDown')
+  await expect(list.getByRole('menuitem', { name: 'Edit note' })).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(list.getByRole('menuitem', { name: 'Icon & colour' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(list.getByRole('menu')).toHaveCount(0)
+  await expect(more).toBeFocused()
+
+  // Right-click opens the same menu.
+  await list.locator('[data-swipe-row="e"] .body').click({ button: 'right' })
+  await expect(list.getByRole('menu', { name: 'Actions for Book the train to Lyon' })).toBeVisible()
+})
+
+test('archives, drops and deletes with shortcut keys, keeping focus in the list', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+
+  await list.getByRole('checkbox', { name: 'Book the train to Lyon' }).focus()
+  await page.keyboard.press('x')
+  await expect(list.getByRole('checkbox', { name: 'Book the train to Lyon, won’t do' })).toBeFocused()
+  await page.keyboard.press('e')
+  await expect(list.locator('[data-swipe-row="e"]')).toHaveCount(0)
+  await expect(list.getByRole('checkbox', { name: 'Birthday present for Anna' })).toBeFocused()
+  await page.keyboard.press('Delete')
+  await expect(list.locator('[data-swipe-row="f"]')).toHaveCount(0)
+  await expect(list.locator('.toast')).toContainText('Deleted “Birthday present for Anna”')
+  await expect(list.getByRole('checkbox', { name: 'Call the plumber about the leak, won’t do' })).toBeFocused()
+
+  await list.getByRole('button', { name: 'Undo' }).click()
+  await expect.poll(async () => (await tasksOf(list)).map((task) => task.id)).toEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+})
+
+test('swipes left to reveal archive and delete, and right to check', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  const row = list.locator('[data-swipe-row="c"] .task')
+
+  await swipe(page, row, -160)
+  const archive = list.locator('[data-swipe-row="c"] .swipe-archive')
+  await expect(archive).toBeVisible()
+  await archive.click()
+  await expect(list.locator('[data-swipe-row="c"]')).toHaveCount(0)
+  await expect(list.locator('.meta')).toHaveText('2 of 5 done')
+
+  await swipe(page, list.locator('[data-swipe-row="b"] .task'), 140)
+  await expect(list.getByRole('checkbox', { name: 'Dentist appointment' })).toHaveAttribute('aria-checked', 'true')
+  // A swipe is not a click: the note did not open.
+  await expect(list.locator('.note-input')).toHaveCount(0)
+})
+
+test('reorders tasks by dragging the grip', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  const first = list.locator('[data-swipe-row="a"]')
+  const third = list.locator('[data-swipe-row="c"]')
+
+  await first.hover()
+  const grip = (await first.locator('.grip').boundingBox())!
+  const target = (await third.boundingBox())!
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + 30, { steps: 4 })
+  await page.mouse.move(grip.x + grip.width / 2, target.y + target.height - 4, { steps: 8 })
+  await page.mouse.up()
+
+  await expect.poll(async () => (await tasksOf(list)).map((task) => task.id)).toEqual(['b', 'c', 'a', 'd', 'e', 'f', 'g'])
+  await expect(labels(list).first()).toHaveText('Dentist appointment')
+  await expect(list).toHaveAttribute('data-events', 'task-reorder tasks-change')
+})
+
+test('restores and deletes archived tasks', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  const toggle = list.getByRole('button', { name: /Archived · 1/ })
+
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await list.getByRole('button', { name: 'Restore Pay the electricity bill' }).click()
+  await expect(list.locator('[data-swipe-row="g"]')).toBeVisible()
+  await expect(list.getByRole('button', { name: /Archived/ })).toHaveCount(0)
+  await expect(list).toHaveAttribute('data-events', 'task-restore tasks-change')
 })
 
 test('filters tasks by state', async ({ page, scenario }) => {
   await scenario()
   const list = page.locator('c2-todo-list')
 
-  await list.getByRole('button', { name: 'To do 2' }).click()
-  await expect(list.locator('.task .label')).toHaveText(['Ship the build', 'Book the team dinner'])
+  await list.getByRole('button', { name: 'To do 4' }).click()
+  await expect(labels(list)).toHaveText(['Dentist appointment', 'Renew passport', 'Book the train to Lyon', 'Birthday present for Anna'])
+  await expect(list.locator('.grip')).toHaveCount(0)
   await list.getByRole('button', { name: 'Done 2' }).click()
-  await expect(list.locator('.task .label')).toHaveText(['Draft the announcement', 'Review pricing copy'])
-  await list.getByRole('button', { name: 'All 4' }).click()
-  await expect(list.locator('.task')).toHaveCount(4)
+  await expect(labels(list)).toHaveText(['Send the Q3 report to Léa', 'Call the plumber about the leak'])
 })
 
-test('customizes the background, accent and progress style', async ({ page, scenario }) => {
+test('a background sets the text colour and the pens it offers', async ({ page, scenario }) => {
   await scenario()
   const list = page.locator('c2-todo-list')
-  const customize = list.getByRole('button', { name: 'Customize look' })
 
-  await customize.click()
-  await expect(customize).toHaveAttribute('aria-expanded', 'true')
-  await list.getByRole('radio', { name: 'Midnight' }).click()
-  await expect(list.locator('.container')).toHaveCSS('background-color', 'rgb(24, 24, 27)')
+  await list.getByRole('button', { name: 'Customize look' }).click()
+  await list.getByRole('radio', { name: 'Night' }).click()
+  await expect(list.locator('.container')).toHaveCSS('background-color', 'rgb(26, 26, 31)')
+  await expect(list.locator('.heading')).toHaveCSS('color', 'rgb(241, 240, 238)')
+  await expect(list.locator('.pen-swatch.pen-green').first()).toHaveCSS('background-color', 'rgb(110, 231, 183)')
 
-  await list.getByRole('radio', { name: 'Pink' }).first().click()
-  await expect(list.locator('.ring-fill')).toHaveCSS('stroke', 'rgb(244, 114, 182)')
+  await list.getByRole('radiogroup', { name: 'Pen' }).getByRole('radio', { name: 'Green ink' }).click()
+  await expect(list.locator('.ring-fill')).toHaveCSS('stroke', 'rgb(110, 231, 183)')
+
+  await list.getByRole('radio', { name: 'Cross' }).click()
+  await expect(list.locator('[data-swipe-row="a"] .mark path')).toHaveAttribute('d', /^M6\.5 6\.8/)
 
   await list.getByRole('radio', { name: 'Bar' }).click()
   await expect(list.locator('.bar')).toBeVisible()
-  await expect(list.locator('.ring')).toHaveCount(0)
-
-  await list.getByRole('radio', { name: 'Compact' }).click()
-  await expect(list.locator('.tile').first()).toHaveCSS('width', '30px')
-  await expect
-    .poll(() => list.evaluate((element: TodoList) => element.look))
-    .toEqual({ background: 'midnight', accent: 'pink', progress: 'bar', density: 'compact' })
+  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ background: 'night', pen: 'green', doneMark: 'cross', progress: 'bar' })
 
   await list.getByRole('button', { name: 'Reset' }).click()
   await expect(list.locator('.container')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
   await expect(list.locator('.ring')).toBeVisible()
-  await expect(list).toHaveAttribute('data-events', 'look-change look-change look-change look-change look-change')
 })
 
-test('changes a task icon and colour from its tile', async ({ page, scenario }) => {
-  await scenario()
-  const list = page.locator('c2-todo-list')
-  const tile = list.getByRole('button', { name: 'Change icon for Book the team dinner' })
-
-  await tile.click()
-  await expect(list.getByRole('region', { name: 'Customize' })).toBeVisible()
-  await expect(tile).toHaveAttribute('aria-pressed', 'true')
-
-  await list.getByRole('searchbox', { name: 'Search icons' }).fill('pizza')
-  await list.getByRole('button', { name: 'Takeaway' }).click()
-  await expect(tile.locator('c2-task-icon-pizza')).toBeAttached()
-
-  await list.getByRole('radiogroup', { name: 'Icon colour' }).getByRole('radio', { name: 'Green' }).click()
-  await expect(tile).toHaveCSS('color', 'rgb(21, 128, 61)')
-  await expect.poll(() => list.evaluate((element: TodoList) => element.tasks.find((task) => task.id === 'd'))).toMatchObject({ icon: 'pizza', color: 'green' })
-  await expect(list).toHaveAttribute('data-events', 'task-change tasks-change task-change tasks-change')
-})
-
-test('moves through the icon picker with the arrow keys', async ({ page, scenario }) => {
+test('gives one task a highlighter, a pen colour and an icon', async ({ page, scenario }) => {
   await scenario()
   const list = page.locator('c2-todo-list')
 
-  await list.getByRole('button', { name: 'Change icon for Ship the build' }).click()
-  const current = list.locator('.icon-option[aria-pressed="true"]')
-  await current.focus()
-  await page.keyboard.press('ArrowRight')
-  await expect(list.locator('.icon-option[tabindex="0"]')).toBeFocused()
-  await expect(list.locator('.icon-option[tabindex="0"]')).not.toHaveAttribute('aria-pressed', 'true')
-  await page.keyboard.press('Home')
-  await expect(list.locator('.icon-option').first()).toBeFocused()
+  await list.getByRole('button', { name: 'Actions for Dentist appointment' }).click()
+  await list.getByRole('menuitem', { name: 'Icon & colour' }).click()
+  const row = list.locator('[data-swipe-row="b"] .task')
+  await expect(row).toHaveClass(/selected/)
+
+  await list.getByRole('radio', { name: 'Pink highlighter' }).click()
+  await expect(row).toHaveClass(/highlight-pink/)
+  await expect(row).not.toHaveCSS('background-color', 'rgb(255, 255, 255)')
+
+  await list.getByRole('radio', { name: 'Violet ink text' }).click()
+  await expect(row.locator('.label')).toHaveCSS('color', 'rgb(124, 58, 237)')
+
+  await list.getByRole('searchbox', { name: 'Search icons' }).fill('dentist')
+  await list.locator('.icon-picker').getByRole('button', { name: 'Dentist', exact: true }).click()
+  await expect(row.locator('c2-task-icon-tooth')).toBeAttached()
+  await list.getByRole('button', { name: 'No icon' }).click()
+  await expect(row.locator('.task-icon')).toHaveCount(0)
+
+  await expect
+    .poll(() => list.evaluate((element: TodoList) => element.tasks.find((task) => task.id === 'b')))
+    .toMatchObject({ highlight: 'pink', ink: 'violet' })
 })
 
-test('closes the panel with Escape and returns focus to its button', async ({ page, scenario }) => {
-  await scenario()
+test('groups the icon picker by category', async ({ page, scenario }) => {
+  await scenario('groceries')
   const list = page.locator('c2-todo-list')
-  const customize = list.getByRole('button', { name: 'Customize look' })
 
-  await customize.click()
-  await list.getByRole('radio', { name: 'Mint' }).focus()
-  await page.keyboard.press('Escape')
-  await expect(list.getByRole('region', { name: 'Customize' })).toHaveCount(0)
-  await expect(customize).toBeFocused()
+  await list.getByRole('button', { name: 'Actions for Green lentils' }).click()
+  await list.getByRole('menuitem', { name: 'Icon & colour' }).click()
+  const food = list.getByRole('group', { name: 'Food & groceries' })
+  await expect(food.getByRole('button', { name: 'Legumes' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(food.getByRole('button', { name: 'Dairy' })).toBeVisible()
+  await expect(food.getByRole('button', { name: 'Meat' })).toBeVisible()
 })
 
 test('remembers the look and the tasks in localStorage', async ({ page, scenario }) => {
@@ -152,19 +270,19 @@ test('remembers the look and the tasks in localStorage', async ({ page, scenario
   const list = page.locator('c2-todo-list')
 
   await list.getByRole('button', { name: 'Customize look' }).click()
-  await list.getByRole('radio', { name: 'Mint' }).click()
+  await list.getByRole('radio', { name: 'Sand' }).click()
   await list.getByRole('radio', { name: 'Hero' }).click()
-  await list.getByRole('checkbox', { name: 'Ship the build' }).click()
+  await list.getByRole('checkbox', { name: 'Renew passport' }).click()
   await expect(list.getByText('Saved in this browser')).toBeVisible()
 
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('c2-todo-list:spec') ?? 'null'))
-  expect(stored.look).toEqual({ background: 'mint', progress: 'hero' })
+  expect(stored.look).toEqual({ background: 'sand', progress: 'hero' })
   expect(stored.tasks.find((task: { id: string }) => task.id === 'c').done).toBe(true)
 
   await scenario('persist')
-  await expect(list.locator('.container')).toHaveCSS('background-color', 'rgb(244, 251, 248)')
+  await expect(list.locator('.container')).toHaveCSS('background-color', 'rgb(248, 241, 228)')
   await expect(list.locator('.progress-hero')).toBeVisible()
-  await expect(list.getByRole('checkbox', { name: 'Ship the build' })).toHaveAttribute('aria-checked', 'true')
+  await expect(list.getByRole('checkbox', { name: 'Renew passport' })).toHaveAttribute('aria-checked', 'true')
 
   await list.getByRole('button', { name: 'Customize look' }).click()
   await list.getByRole('button', { name: 'Reset' }).click()
@@ -173,22 +291,24 @@ test('remembers the look and the tasks in localStorage', async ({ page, scenario
 
 test('ignores a stored look that is no longer valid', async ({ page, scenario }) => {
   await scenario()
-  await page.evaluate(() => localStorage.setItem('c2-todo-list:spec', JSON.stringify({ look: { background: 'neon', accent: 'pink', progress: 42 } })))
+  await page.evaluate(() => localStorage.setItem('c2-todo-list:spec', JSON.stringify({ look: { background: 'neon', pen: 'green', progress: 42 } })))
   await scenario('persist')
   const list = page.locator('c2-todo-list')
 
-  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ accent: 'pink' })
-  await expect(list.locator('.task')).toHaveCount(4)
+  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ pen: 'green' })
+  await expect(list.locator('.task')).toHaveCount(6)
 })
 
 test('readonly lists cannot be changed', async ({ page, scenario }) => {
   await scenario('readonly')
   const list = page.locator('c2-todo-list')
 
-  await expect(list.getByRole('checkbox', { name: 'Ship the build' })).toBeDisabled()
+  await expect(list.getByRole('checkbox', { name: 'Renew passport' })).toBeDisabled()
   await expect(list.getByRole('textbox', { name: 'New task' })).toHaveCount(0)
-  await expect(list.getByRole('button', { name: /^Delete / })).toHaveCount(0)
-  await expect(list.getByRole('button', { name: 'Customize look' })).toHaveCount(0)
+  await expect(list.getByRole('button', { name: /^Actions for / })).toHaveCount(0)
+  await expect(list.locator('.grip')).toHaveCount(0)
+  await list.locator('[data-swipe-row="c"] .body').click({ button: 'right' })
+  await expect(list.getByRole('menu')).toHaveCount(0)
 })
 
 test('shows the empty slot and the finished state', async ({ page, scenario }) => {
@@ -200,30 +320,41 @@ test('shows the empty slot and the finished state', async ({ page, scenario }) =
 
   await scenario('all-done')
   await expect(list.locator('.meta')).toHaveText('All done. Nice work.')
-  await expect(list.getByRole('img', { name: '100% complete, 1 of 1 tasks done' })).toBeVisible()
+  await expect(list.locator('.ring-check')).toBeVisible()
 })
 
 test('draws the bar and hero progress styles', async ({ page, scenario }) => {
   await scenario('bar')
   const list = page.locator('c2-todo-list')
-  await expect(list.locator('.bar-fill')).toHaveAttribute('style', /width:\s*50%/)
+  await expect(list.locator('.bar-fill')).toHaveAttribute('style', /width:\s*33%/)
   await expect(list.locator('.ring')).toHaveCount(0)
+  await expect(list.locator('.list-icon c2-task-icon-calendar')).toBeAttached()
 
   await scenario('hero')
-  await expect(list.locator('.progress-hero .ring-value')).toHaveText('50%')
+  await expect(list.locator('.progress-hero .ring-value')).toHaveText('33%')
 })
 
-for (const name of ['default', 'hero'] as const) {
+for (const name of ['default', 'groceries', 'plain'] as const) {
   test(`has no detectable accessibility violations: ${name}`, async ({ page, scenario }) => {
     await scenario(name)
     await accessible(page)
   })
 }
 
-test('has no detectable accessibility violations with the panel open on a dark background', async ({ page, scenario }) => {
+for (const look of ['paper', 'night', 'mint', 'sky'] as const) {
+  test(`has no detectable accessibility violations on the ${look} background`, async ({ page }) => {
+    await page.goto(`/packages/components/todo-list/test/scenarios.html?scenario=default&look=${look}`)
+    await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
+    await accessible(page)
+  })
+}
+
+test('has no detectable accessibility violations with the panel and a menu open', async ({ page, scenario }) => {
   await scenario()
   const list = page.locator('c2-todo-list')
-  await list.getByRole('button', { name: 'Change icon for Ship the build' }).click()
-  await list.getByRole('radio', { name: 'Midnight' }).click()
+  await list.getByRole('button', { name: 'Actions for Renew passport' }).click()
+  await list.getByRole('menuitem', { name: 'Icon & colour' }).click()
+  await list.getByRole('radio', { name: 'Blush' }).click()
+  await list.getByRole('button', { name: 'Actions for Dentist appointment' }).click()
   await accessible(page)
 })

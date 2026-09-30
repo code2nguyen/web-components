@@ -14,7 +14,7 @@
       }
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
         gap: 24px;
         align-items: start;
       }
@@ -28,18 +28,31 @@
   <body>
     <div class="grid">
       <c2-todo-list
-        heading="Launch week"
+        heading="This week"
         customizable
-        storage-key="harness-launch-week"
+        storage-key="harness-this-week"
         persist-tasks
         tasks='[
-          {"label": "Draft the launch announcement", "done": true, "due": "Mon"},
-          {"label": "Record the demo walkthrough", "done": true},
-          {"label": "Review pricing page copy", "done": true},
-          {"label": "Ship the v2.0 build", "icon": "rocket", "due": "Today", "urgent": true},
-          {"label": "Book the team dinner", "due": "Fri"},
-          {"label": "Thank the beta testers"},
-          {"label": "Plan the next sprint", "due": "Next week"}
+          {"label": "Send the Q3 report to Léa", "icon": "mail", "done": true, "due": "Mon"},
+          {"label": "Dentist appointment", "note": "Dr. Martin, 14 rue Oberkampf", "due": "Tue 9:30"},
+          {"label": "Renew passport", "highlight": "yellow", "due": "Today", "urgent": true},
+          {"label": "Call the plumber about the leak", "dropped": true},
+          {"label": "Book the train to Lyon", "icon": "flight", "note": "Friday evening, back Sunday"},
+          {"label": "Birthday present for Anna", "icon": "gift", "ink": "violet", "due": "Sat"},
+          {"label": "Pay the electricity bill", "archived": true}
+        ]'
+      ></c2-todo-list>
+
+      <c2-todo-list
+        heading="Groceries"
+        customizable
+        tasks='[
+          {"label": "Tomatoes", "icon": "vegetables", "note": "6, on the vine", "done": true},
+          {"label": "Green lentils", "icon": "legumes", "note": "500 g"},
+          {"label": "Oat milk", "icon": "milk", "note": "2 L · barista", "done": true},
+          {"label": "Comté", "icon": "cheese", "highlight": "orange"},
+          {"label": "Salmon fillets", "icon": "fish"},
+          {"label": "Sourdough loaf", "icon": "bread"}
         ]'
       ></c2-todo-list>
 
@@ -48,26 +61,22 @@
         heading="Reading list"
         progress="hero"
         tasks='[
-          {"label": "Piranesi", "icon": "book", "done": true},
-          {"label": "The Overstory", "icon": "tree", "done": true},
-          {"label": "Klara and the Sun", "icon": "sun"},
-          {"label": "Tomorrow, and Tomorrow", "icon": "game"}
+          {"label": "Piranesi", "done": true},
+          {"label": "The Overstory", "done": true},
+          {"label": "Klara and the Sun", "highlight": "violet"},
+          {"label": "Tomorrow, and Tomorrow, and Tomorrow"}
         ]'
       ></c2-todo-list>
 
       <c2-todo-list
-        heading="Groceries"
-        progress="bar"
+        heading="Weekend"
+        customizable
         readonly
-        tasks='[
-          {"label": "Oat milk", "icon": "cart", "done": true},
-          {"label": "Sourdough loaf", "icon": "bake"},
-          {"label": "Blueberries", "icon": "apple"},
-          {"label": "Coffee beans", "icon": "coffee"}
-        ]'
+        icon="none"
+        tasks='[{"label": "Long run", "done": true}, {"label": "Farmers market"}]'
       ></c2-todo-list>
 
-      <c2-todo-list heading="Weekend" customizable>
+      <c2-todo-list heading="Someday" customizable>
         <span slot="empty">Nothing planned. Add something fun.</span>
       </c2-todo-list>
     </div>

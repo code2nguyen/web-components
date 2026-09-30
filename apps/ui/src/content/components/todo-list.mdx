@@ -1,6 +1,6 @@
 ---
 title: 'Todo List'
-description: 'A to-do list with a progress ring, icon tiles per task and a built-in, remembered customize panel.'
+description: 'A to-do list with the feel of paper: hand-drawn ticks, notes, highlighters, swipe and drag, and a remembered look.'
 category: 'Data display'
 ---
 
@@ -9,16 +9,21 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { TodoList } from '@c2n/todo-list'
 
-`c2-todo-list` is a task list made to be looked at: a progress ring beside the heading fills as tasks are checked
-off, and every task gets a coloured tile with an icon from [`@c2n/task-icons`](../../icons/task-icons). A new task
-typed into the add field picks a fitting icon from its words (“Book the dentist” gets a tooth). Set `progress` to
-`bar`, `hero` or `none` to change how progress is drawn.
+`c2-todo-list` is a task list that feels like a paper one. Tasks are plain text. Checking one draws an ink tick (or a
+cross) and a pen stroke through the text, and a task you drop gets a red ✗. A progress ring beside the heading fills
+as tasks are crossed off; set `progress` to `bar`, `hero` or `none` to draw it differently. The heading suggests the
+list's icon (Groceries gets a cart), and any task can carry its own icon from
+[`@c2n/task-icons`](../../icons/task-icons), a highlighter for what matters, or a pen colour for its text.
 
-Add `customizable` to show a palette button. Its panel lets the viewer choose a background, an accent, the progress
-style and the density, and change each task's icon and colour. Give the list a `storage-key` and those choices are
-remembered in `localStorage`; add `persist-tasks` to remember the tasks as well. The list updates its `tasks`
-property as the viewer works and fires `task-toggle`, `task-add`, `task-remove`, `task-change` and `tasks-change`,
-so an application can save them wherever it keeps its data.
+Click a task to write a note under it, or type one after a dash in the add field (“Oat milk - 2 L barista”). Drag
+the grip to reorder. Swipe a row left for **Archive** and **Delete**, or right to check it. On a desktop the same
+actions are in the row's ⋯ menu (or a right-click) and on the keys **E**, **Delete**, **X** (won't do) and **N**
+(note). Archived tasks collect at the bottom, and every archive or delete can be undone.
+
+Add `customizable` for a palette button. Its panel sets the background (the text colour and the pens on offer follow
+from it), the pen, the done mark, the density and the progress style, plus the icon, highlighter and text colour of
+the selected task. With a `storage-key` those choices are remembered in `localStorage`; `persist-tasks` remembers the
+tasks too.
 
 ## Installation
 
@@ -32,39 +37,42 @@ npm install @c2n/todo-list
 <style>
   .todo-usage {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
   }
 </style>
 <div data-label="Customizable, remembered">
   <c2-todo-list
     class="todo-usage"
-    heading="Launch week"
+    heading="This week"
     customizable
-    storage-key="docs-launch-week"
-    tasks='[{"label":"Draft the launch announcement","done":true,"due":"Mon"},{"label":"Record the demo walkthrough","done":true},{"label":"Ship the v2.0 build","icon":"rocket","due":"Today","urgent":true},{"label":"Book the team dinner","due":"Fri"},{"label":"Thank the beta testers"}]'
+    storage-key="docs-this-week"
+    tasks='[{"label":"Send the Q3 report to Léa","icon":"mail","done":true,"due":"Mon"},{"label":"Dentist appointment","note":"Dr. Martin, 14 rue Oberkampf","due":"Tue 9:30"},{"label":"Renew passport","highlight":"yellow","due":"Today","urgent":true},{"label":"Call the plumber","dropped":true},{"label":"Birthday present for Anna","icon":"gift","ink":"violet","due":"Sat"}]'
   ></c2-todo-list>
 </div>
-<div data-label="Bar and hero progress">
+<div data-label="Shopping list">
   <c2-todo-list
     class="todo-usage"
     heading="Groceries"
+    tasks='[{"label":"Tomatoes","icon":"vegetables","note":"6, on the vine","done":true},{"label":"Green lentils","icon":"legumes","note":"500 g"},{"label":"Oat milk","icon":"milk","done":true},{"label":"Comté","icon":"cheese","highlight":"orange"},{"label":"Salmon fillets","icon":"fish"},{"label":"Sourdough loaf","icon":"bread"}]'
+  ></c2-todo-list>
+</div>
+<div data-label="Bar, hero and readonly">
+  <c2-todo-list
+    class="todo-usage"
+    heading="Sunday"
+    icon="none"
     progress="bar"
-    tasks='[{"label":"Oat milk","icon":"cart","done":true},{"label":"Sourdough loaf","icon":"bake"},{"label":"Blueberries","icon":"apple"}]'
+    tasks='[{"label":"Water the plants","done":true},{"label":"Call mom"},{"label":"Finish chapter 4","highlight":"pink"}]'
   ></c2-todo-list>
   <c2-todo-list
     class="todo-usage"
     heading="Reading list"
     progress="hero"
-    tasks='[{"label":"Piranesi","icon":"book","done":true},{"label":"The Overstory","icon":"tree","done":true},{"label":"Klara and the Sun","icon":"sun"}]'
+    readonly
+    tasks='[{"label":"Piranesi","done":true},{"label":"The Overstory","done":true},{"label":"Klara and the Sun"}]'
   ></c2-todo-list>
 </div>
-<div data-label="Readonly and empty">
-  <c2-todo-list
-    class="todo-usage"
-    heading="Sprint 14"
-    readonly
-    tasks='[{"label":"Auth token refresh","icon":"code","done":true},{"label":"Flaky upload test","icon":"bug","done":true},{"label":"Release notes","icon":"news"}]'
-  ></c2-todo-list>
+<div data-label="Empty">
   <c2-todo-list class="todo-usage" heading="Weekend">
     <span slot="empty">Nothing planned yet. Add something fun.</span>
   </c2-todo-list>
@@ -73,31 +81,40 @@ npm install @c2n/todo-list
 
 ## Tasks
 
-`tasks` is an array of objects; only `label` is required. It can be set as a property or as a JSON attribute.
+`tasks` is an array of objects; only `label` is required. It can be set as a property or as a JSON attribute, and the
+list updates it as the viewer works.
 
 ```typescript tag=CodeBlock
 list.tasks = [
-  { id: '1', label: 'Call mom', icon: 'call', color: 'pink' },
-  { id: '2', label: 'Gym session', done: true },
-  { id: '3', label: 'Pay rent', due: 'Today', urgent: true },
+  { id: '1', label: 'Oat milk', note: '2 L barista', icon: 'milk' },
+  { id: '2', label: 'Renew passport', highlight: 'yellow', due: 'Today', urgent: true },
+  { id: '3', label: 'Gym session', done: true },
 ]
 list.addEventListener('tasks-change', (event) => save(event.detail.tasks))
 ```
 
-| Field    | Description                                                                 |
-| -------- | --------------------------------------------------------------------------- |
-| `id`     | Stable identity. Generated when missing.                                    |
-| `label`  | The task.                                                                   |
-| `done`   | Checked.                                                                    |
-| `icon`   | A `@c2n/task-icons` name. Suggested from the label when missing.            |
-| `color`  | `blue`, `teal`, `green`, `amber`, `orange`, `pink`, `violet` or `slate`.    |
-| `due`    | Short text shown as a chip: `Today`, `Fri`, `9:30`.                         |
-| `urgent` | Draws the due chip in the accent colour and counts the task in the summary. |
+| Field       | Description                                                                             |
+| ----------- | --------------------------------------------------------------------------------------- |
+| `id`        | Stable identity. Generated when missing.                                                |
+| `label`     | The task, as plain text.                                                                |
+| `note`      | More information, shown as a second line: a quantity, an address, a link.               |
+| `done`      | Checked off with a tick.                                                                |
+| `dropped`   | Crossed off without being done (“won't do”). Counts as closed in the progress.          |
+| `archived`  | In the archive section at the bottom: out of the list and the progress, restorable.     |
+| `icon`      | An optional `@c2n/task-icons` name. Tasks have no icon unless you give them one.        |
+| `highlight` | `yellow`, `green`, `blue`, `pink`, `orange` or `violet`: a highlighter behind the task. |
+| `ink`       | `blue`, `red`, `green`, `violet` or `graphite`: the pen colour of the task's text.      |
+| `due`       | Short text after the task: `Today`, `Fri`, `9:30`.                                      |
+| `urgent`    | Draws the due text in the red pen and counts the task in the summary.                   |
+
+Every change fires its own event (`task-toggle`, `task-add`, `task-remove`, `task-archive`, `task-restore`,
+`task-change`, `task-reorder`) followed by `tasks-change` with the whole new list.
 
 ## Customization and storage
 
-The viewer's choices are a small object, `{ background, accent, progress, density }`, readable and writable as the
-`look` property and announced by `look-change`. They are applied inside the component, so they win over the CSS
-variables the page sets, and **Reset** (or `resetLook()`) hands the look back to the page and the theme. With
-`storage-key="launch-week"` the look is stored under `c2-todo-list:launch-week`; give every list its own key.
-Without `customizable` the list has no panel, and its look is only what its CSS variables say.
+The viewer's choices are a small object, `{ background, pen, doneMark, progress, density }`, readable and writable
+as the `look` property and announced by `look-change`. Each background is a checked palette: its text colour follows
+from it and it offers only pens that read well on it, and the highlighters are mixed into it, so any combination
+stays legible. The look is applied inside the component, so it wins over the CSS variables the page sets, and
+**Reset** (or `resetLook()`) hands it back to the page and the theme. With `storage-key="this-week"` the look is
+stored under `c2-todo-list:this-week`; give every list its own key.
