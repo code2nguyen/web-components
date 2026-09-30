@@ -1789,6 +1789,12 @@
     },
     {
       "tag": "c2-table",
+      "slot": "group:{groupKey}",
+      "decision": "assigned-content",
+      "reason": "The group:{groupKey} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-table",
       "slot": "loading",
       "decision": "part",
       "parts": ["state"],
