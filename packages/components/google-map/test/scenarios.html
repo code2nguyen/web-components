@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Google Map test scenarios</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+      }
+      main {
+        display: grid;
+        gap: 16px;
+      }
+      c2-google-map,
+      c2-google-street-view {
+        width: 400px;
+        --c2-google-map__container--height: 200px;
+        --c2-google-street-view__container--height: 200px;
+      }
+    </style>
+    <script type="module" src="./scenarios.ts"></script>
+  </head>
+  <body>
+    <main aria-label="Google Map scenario"></main>
+  </body>
+</html>

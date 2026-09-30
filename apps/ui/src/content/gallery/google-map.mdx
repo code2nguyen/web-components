@@ -1,0 +1,76 @@
+---
+description: 'Map frames, pin colours and route lines styled through their CSS variables.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { GoogleMap } from '@c2n/google-map'
+import { GoogleMapMarker } from '@c2n/google-map/google-map-marker.js'
+import { GoogleMapRoute } from '@c2n/google-map/google-map-route.js'
+import { GoogleStreetView } from '@c2n/google-map/google-street-view.js'
+
+## Maps
+
+The frame is the map's own variables (`--c2-google-map__container--*`). Pins and route lines are drawn by Google, so
+their colours are read from `--c2-google-map-marker__*` and `--c2-google-map-route__*` when they are drawn.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-google-map center="10.7769,106.7009" zoom="13"></c2-google-map>
+```
+
+```html tag=MdxCodeBlock,label=Rounded card
+<style>
+  .map-card {
+    width: 100%;
+    --c2-google-map__container--height: 260px;
+    --c2-google-map__container--border-radius: 14px;
+    --c2-google-map__container--border: 1px solid var(--c2-theme--color-border, #e4e4e7);
+  }
+</style>
+<c2-google-map class="map-card" center="21.0285,105.8542" zoom="14" disable-default-ui>
+  <c2-google-map-marker position="21.0285,105.8542" label="Hoan Kiem Lake"></c2-google-map-marker>
+</c2-google-map>
+```
+
+```html tag=MdxCodeBlock,label=Coloured pins
+<style>
+  .map-pins {
+    width: 100%;
+    --c2-google-map__container--height: 260px;
+  }
+  .map-pins .pin-open {
+    --c2-google-map-marker__pin--background-color: #16a34a;
+    --c2-google-map-marker__pin--border-color: #15803d;
+  }
+  .map-pins .pin-closed {
+    --c2-google-map-marker__pin--background-color: #dc2626;
+    --c2-google-map-marker__pin--border-color: #b91c1c;
+    --c2-google-map-marker__pin--scale: 0.8;
+  }
+</style>
+<c2-google-map class="map-pins" center="10.7769,106.7009" zoom="14">
+  <c2-google-map-marker class="pin-open" position="10.7725,106.6980" label="Store 1, open" glyph="1"></c2-google-map-marker>
+  <c2-google-map-marker class="pin-open" position="10.7798,106.6990" label="Store 2, open" glyph="2"></c2-google-map-marker>
+  <c2-google-map-marker class="pin-closed" position="10.7769,106.7031" label="Store 3, closed" glyph="3"></c2-google-map-marker>
+</c2-google-map>
+```
+
+```html tag=MdxCodeBlock,label=Walking route
+<style>
+  .map-walk {
+    width: 100%;
+    --c2-google-map__container--height: 260px;
+    --c2-google-map-route__line--color: #7c3aed;
+    --c2-google-map-route__line--width: 4;
+    --c2-google-map-route__outline--width: 0;
+  }
+</style>
+<c2-google-map class="map-walk">
+  <c2-google-map-route origin="Hoan Kiem Lake, Hanoi" destination="Temple of Literature, Hanoi" travel-mode="walking"></c2-google-map-route>
+</c2-google-map>
+```
+
+</GalleryGrid>

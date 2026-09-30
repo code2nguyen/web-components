@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/google-map:build",
         "../../components/hover-card:build",
         "../../components/command:build",
         "../../components/marker:build",

@@ -17,6 +17,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/google-map": "*",
     "@c2n/hover-card": "*",
     "@c2n/command": "*",
     "@c2n/marker": "*",
