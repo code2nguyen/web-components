@@ -337,6 +337,11 @@ export abstract class ChartBase extends LitElement {
     return ''
   }
 
+  /** Whether changing chart data can change the legend model. Pie charts use row labels as entries. */
+  protected get legendDependsOnData(): boolean {
+    return false
+  }
+
   /**
    * Whether a change reshapes the frame, so the rows must be read again. `x-field`, `label-field` and `x-type`
    * always do, and so does the series list: definitions that arrive after `data` would otherwise leave the frame
@@ -345,11 +350,6 @@ export abstract class ChartBase extends LitElement {
    */
   protected reshapesFrame(changed: PropertyValues): boolean {
     return changed.has('series') || changed.has('seriesElements')
-  }
-
-  /** Whether changing chart data can change the legend model. Pie charts use row labels as entries. */
-  protected get legendDependsOnData(): boolean {
-    return false
   }
 
   // ------------------------------------------------------------ lifecycle ---
