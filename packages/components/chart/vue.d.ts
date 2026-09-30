@@ -18,6 +18,7 @@ import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
+import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
@@ -164,6 +165,25 @@ declare module 'vue' {
         onChartError?: (event: EventOf<PieChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<PieChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<PieChart, 'point-click'>) => void
+      }
+    >
+    'c2-pyramid-chart': DefineComponent<
+      C2Props<PyramidChart> & {
+        'label-content'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<PyramidChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<PyramidChart, 'series-toggle'>) => void
+        onLegendChange?: (event: EventOf<PyramidChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<PyramidChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<PyramidChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<PyramidChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<PyramidChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<PyramidChart, 'point-click'>) => void
       }
     >
     'c2-radar-chart': DefineComponent<
