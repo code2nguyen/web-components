@@ -269,6 +269,12 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       { name: 'Equal circles', description: 'Same-sized circles, so every region has room for its label.', attributes: { layout: 'uniform' } },
       { name: 'Shares', description: 'Each region as a share of all members, without a legend.', attributes: { labels: 'percent', legend: 'none' } },
       {
+        name: 'Focus view',
+        description: 'One set highlighted, the others hatched in grey.',
+        attributes: { 'highlighted-set': 'api' },
+        css: { '--c2-chart__set__dimmed--color': '#a1a1aa', '--c2-chart__set__dimmed--fill-style': 'hatch' },
+      },
+      {
         name: 'Soft fills',
         description: 'Stronger tinted fills with no outlines, in a violet, pink and cyan palette.',
         css: {

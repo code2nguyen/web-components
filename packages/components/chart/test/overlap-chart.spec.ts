@@ -188,6 +188,7 @@ test("hovering a set's name highlights the whole set and describes it in the too
   await page.mouse.move(box.x + 2, box.y + 2)
   await page.mouse.move(box.x + anchor.px, box.y + anchor.py + 9, { steps: 4 })
   await expect.poll(() => page.evaluate(() => (window as unknown as { setHovers: (string | null)[] }).setHovers.at(-1))).toBe('web')
+  await expect.poll(() => chart.evaluate((element) => (element as unknown as { hoveredSet: string | null }).hoveredSet)).toBe('web')
   const tooltip = chart.locator('.tooltip')
   await expect(tooltip).toContainText('Web app')
   await expect(tooltip).toContainText('18,420')
@@ -291,4 +292,37 @@ test('has no automated accessibility violations', async ({ page, scenario }) => 
   await expect(page.locator('c2-overlap-chart')).toHaveAttribute('data-chart-ready', 'true')
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
+})
+
+test('while one set is highlighted, the others take the dimmed colour and fill style', async ({ page, scenario }) => {
+  await scenario('overlap')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const render = (fillStyle: string) =>
+    chart.evaluate(async (element, fillStyle) => {
+      element.style.setProperty('--c2-chart__set__dimmed--color', '#010203')
+      element.style.setProperty('--c2-chart__set__dimmed--fill-style', fillStyle)
+      element.setAttribute('highlighted-set', 'web')
+      await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+      type Item = { children: { style: Record<string, unknown> }[] }
+      type Series = { renderItem(params: { dataIndex: number }, api: { getWidth(): number; getHeight(): number }): Item }
+      const subject = element as unknown as { buildOptions(context: unknown): { series: Series[] }; buildContext(): unknown }
+      const { series } = subject.buildOptions(subject.buildContext())
+      const api = { getWidth: () => 640, getHeight: () => 320 }
+      const fill = (index: number) => series[0].renderItem({ dataIndex: index }, api).children[0]?.style
+      const stroke = (index: number) => series[2].renderItem({ dataIndex: index }, api).children[0].style
+      const summary = (style?: Record<string, unknown>) =>
+        style ? { fill: typeof style.fill === 'string' ? style.fill : 'pattern', opacity: style.opacity ?? style.fillOpacity } : null
+      return { highlighted: summary(fill(0)), dimmed: summary(fill(1)), dimmedStroke: stroke(1).stroke, highlightedStroke: stroke(0).stroke }
+    }, fillStyle)
+
+  const solid = await render('solid')
+  expect(solid.highlighted).toEqual({ fill: 'rgb(2, 101, 220)', opacity: 0.32 })
+  expect(solid.dimmed?.fill).toBe('rgb(1, 2, 3)')
+  expect(solid.dimmed?.opacity).toBeCloseTo(0.16 * 0.4)
+  expect(solid.dimmedStroke).toBe('rgb(1, 2, 3)')
+  expect(solid.highlightedStroke).toBe('rgb(2, 101, 220)')
+  expect((await render('hatch')).dimmed).toEqual({ fill: 'pattern', opacity: 0.4 })
+  expect((await render('dots')).dimmed).toEqual({ fill: 'pattern', opacity: 0.4 })
+  expect((await render('none')).dimmed).toBeNull()
 })

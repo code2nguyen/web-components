@@ -122,6 +122,9 @@ interface OverlapStyle {
   selectedOpacity: number
   highlightFillOpacity: number
   dimmedOpacity: number
+  /** Resolved `--c2-chart__set__dimmed--color`, or `undefined` to keep each set's own colour. */
+  dimmedColor?: string
+  dimmedFillStyle: OverlapFillStyle
   regionFontSize: number
   setFontSize: number
   setFontWeight: number
@@ -189,6 +192,8 @@ const SET_SERIES = 2
  * @cssproperty {opacity} [--c2-chart__region__selected--opacity=0.24] - Opacity of the text-coloured wash over the selected region, or over the whole circle of the selected set.
  * @cssproperty {opacity} [--c2-chart__set__highlight--fill-opacity=0.32] - Fill opacity of the highlighted or selected set's circle.
  * @cssproperty {opacity} [--c2-chart__set__dimmed--opacity=0.4] - How much of their usual fill and outline the other circles keep while one set is highlighted.
+ * @cssproperty {color} [--c2-chart__set__dimmed--color=transparent] - Colour the other circles take while one set is highlighted, a neutral grey for instance. `transparent` keeps each set's own colour.
+ * @cssproperty {string} [--c2-chart__set__dimmed--fill-style=solid] - How the other circles are filled while one set is highlighted: `solid`, `hatch` (diagonal lines), `dots`, or `none` (outline only).
  * @cssproperty {font-size} [--c2-chart__region-label--font-size=14px] - Font size of the count or percentage in each region.
  * @cssproperty {font-size} [--c2-chart__set-label--font-size=14px] - Font size of each set's name and total, drawn outside its circle.
  * @cssproperty {font-weight} [--c2-chart__set-label--font-weight=600] - Font weight of each set's name.
@@ -237,11 +242,14 @@ export class OverlapChart extends EchartsChartBase {
   /** The set the keyboard focus is on, by key. Never set together with `focusedMask`. */
   @state() private focusedSet: string | null = null
 
-  /** The set whose legend entry the pointer or the focus is on, by key. */
+  /** The set whose name or legend entry the pointer or the focus is on, by key. */
   @state() private hoveredSet: string | null = null
 
   /** What the last engine hover was on, so leaving it fires the matching `null` event. */
   #hoverKind: 'region' | 'set' | null = null
+
+  /** The set whose name the pointer is on, for the plot's DOM click. */
+  #pointerSet: string | null = null
 
   #model?: OverlapModel
   #pixels?: OverlapPixels
@@ -424,7 +432,9 @@ export class OverlapChart extends EchartsChartBase {
       const kind = this.#hoverKind
       this.#hoverKind = null
       super.handleEngineHover(null)
+      this.#pointerSet = null
       if (kind === 'set') {
+        this.hoveredSet = null
         this.dispatchEvent(new CustomEvent<OverlapSetDetail | null>('set-hover', { detail: null }))
       } else if (kind === 'region') {
         this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: null }))
@@ -437,8 +447,10 @@ export class OverlapChart extends EchartsChartBase {
       if (!set || !info) return
       if (this.#hoverKind === 'region') this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: null }))
       this.#hoverKind = 'set'
-      // No `hoveredSet` here: that would redraw the chart under the pointer, and a redraw between a press and its
-      // release loses the click. ECharts' own hover state highlights the circle instead (see `#renderOutline`).
+      this.#pointerSet = set.key
+      // This redraws the chart under the pointer, which ECharts' own click would not survive (the pressed element
+      // is replaced before the release), so a click on a name is read from the plot's DOM click instead.
+      this.hoveredSet = set.key
       super.handleEngineHover(detail)
       this.dispatchEvent(new CustomEvent<OverlapSetDetail | null>('set-hover', { detail: info }))
       return
@@ -447,6 +459,8 @@ export class OverlapChart extends EchartsChartBase {
     if (!region) return
     // Straight from a set to a region (the keyboard does that, with no leave in between): the set is left first.
     if (this.#hoverKind === 'set') {
+      this.hoveredSet = null
+      this.#pointerSet = null
       this.dispatchEvent(new CustomEvent<OverlapSetDetail | null>('set-hover', { detail: null }))
     }
     this.#hoverKind = 'region'
@@ -456,11 +470,7 @@ export class OverlapChart extends EchartsChartBase {
 
   protected override handleEngineClick(detail: { index: number; seriesIndex: number }): void {
     const model = this.#computeModel()
-    if (detail.seriesIndex === SET_SERIES) {
-      const set = model?.sets[detail.index]
-      if (set) this.#activateSet(set.key)
-      return
-    }
+    // A click on a set's name is handled by `#handlePlotClick`, which a redraw under the pointer cannot drop.
     if (detail.seriesIndex !== REGION_SERIES) return
     const region = model?.drawn[detail.index]
     if (region) this.#activate(region)
@@ -506,6 +516,7 @@ export class OverlapChart extends EchartsChartBase {
     plot.setAttribute('aria-roledescription', 'Venn diagram')
     plot.addEventListener('keydown', this.#handleKeydown)
     plot.addEventListener('blur', this.#handleBlur)
+    plot.addEventListener('click', this.#handlePlotClick)
   }
 
   protected override updated(changed: Map<PropertyKey, unknown>): void {
@@ -523,6 +534,7 @@ export class OverlapChart extends EchartsChartBase {
    */
   protected override render(): TemplateResult {
     return html`${super.render()}
+      <i class="overlap-dimmed-probe" aria-hidden="true"></i>
       <div class="overlap-a11y-root"></div>`
   }
 
@@ -617,6 +629,16 @@ export class OverlapChart extends EchartsChartBase {
     return this.#model
   }
 
+  /**
+   * A colour variable resolved to `rgb(…)` through a hidden probe, as the chart theme does: `getPropertyValue`
+   * would hand back a `var()` or `color-mix()` chain no engine can parse. A transparent result means "unset".
+   */
+  #probeColor(selector: string): string | undefined {
+    const probe = this.renderRoot?.querySelector<HTMLElement>(selector)
+    const color = probe ? getComputedStyle(probe).color : ''
+    return !color || color === 'transparent' || /^rgba\([^)]*,\s*0\)$/.test(color) ? undefined : color
+  }
+
   #readStyle(): OverlapStyle {
     const style = getComputedStyle(this)
     const read = (name: string, fallback: number): number => {
@@ -630,6 +652,8 @@ export class OverlapChart extends EchartsChartBase {
       selectedOpacity: read('--c2-chart__region__selected--opacity', 0.24),
       highlightFillOpacity: read('--c2-chart__set__highlight--fill-opacity', 0.32),
       dimmedOpacity: read('--c2-chart__set__dimmed--opacity', 0.4),
+      dimmedColor: this.#probeColor('.overlap-dimmed-probe'),
+      dimmedFillStyle: readFillStyle(style.getPropertyValue('--c2-chart__set__dimmed--fill-style')),
       regionFontSize: read('--c2-chart__region-label--font-size', 14),
       setFontSize: read('--c2-chart__set-label--font-size', 14),
       setFontWeight: read('--c2-chart__set-label--font-weight', 600),
@@ -788,8 +812,18 @@ export class OverlapChart extends EchartsChartBase {
     if (!circle || !set) return null
     const style = this.#style as OverlapStyle
     const active = this.#activeSet()
-    const fillOpacity = !active ? style.setFillOpacity : active === set.key ? style.highlightFillOpacity : style.setFillOpacity * style.dimmedOpacity
-    const children: unknown[] = [{ type: 'circle', shape: { cx: circle.x, cy: circle.y, r: circle.radius }, style: { fill: set.color, fillOpacity } }]
+    const shape = { cx: circle.x, cy: circle.y, r: circle.radius }
+    const children: unknown[] = []
+    if (!active || active === set.key) {
+      children.push({ type: 'circle', shape, style: { fill: set.color, fillOpacity: active ? style.highlightFillOpacity : style.setFillOpacity } })
+    } else {
+      // Another set is highlighted: this one takes the dimmed colour and fill style.
+      const color = style.dimmedColor ?? set.color
+      const pattern = style.dimmedFillStyle === 'hatch' || style.dimmedFillStyle === 'dots' ? patternFill(color, style.dimmedFillStyle) : undefined
+      if (pattern) children.push({ type: 'circle', shape, style: { fill: pattern, opacity: style.dimmedOpacity } })
+      else if (style.dimmedFillStyle !== 'none')
+        children.push({ type: 'circle', shape, style: { fill: color, fillOpacity: style.setFillOpacity * style.dimmedOpacity } })
+    }
     // The selected set gets the same text-coloured wash a selected region gets, over its whole circle.
     if (this.selectedSet === set.key) {
       children.push({
@@ -868,26 +902,16 @@ export class OverlapChart extends EchartsChartBase {
     return {
       type: 'group',
       children: [
-        // Hovering the name puts this whole group in ECharts' emphasis state, which fills the circle to the
-        // highlight opacity and thickens its outline without redrawing anything.
-        {
-          type: 'circle',
-          silent: true,
-          shape: { cx: circle.x, cy: circle.y, r: circle.radius },
-          style: { fill: set.color, fillOpacity: 0 },
-          emphasis: { style: { fillOpacity: emphasised ? 0 : Math.max(0, style.highlightFillOpacity - style.setFillOpacity) } },
-        },
         {
           type: 'circle',
           silent: true,
           shape: { cx: circle.x, cy: circle.y, r: circle.radius },
           style: {
             fill: 'none',
-            stroke: set.color,
+            stroke: active && !emphasised ? (style.dimmedColor ?? set.color) : set.color,
             lineWidth: emphasised ? style.setStrokeWidth + 1.5 : style.setStrokeWidth,
             strokeOpacity: active && !emphasised ? style.dimmedOpacity : 1,
           },
-          emphasis: { style: { lineWidth: style.setStrokeWidth + 1.5, strokeOpacity: 1 } },
         },
         {
           type: 'text',
@@ -1061,9 +1085,56 @@ export class OverlapChart extends EchartsChartBase {
     }
   }
 
+  #handlePlotClick = (): void => {
+    if (this.#hoverKind === 'set' && this.#pointerSet) this.#activateSet(this.#pointerSet)
+  }
+
   #handleBlur = (): void => {
     if (this.focusedMask !== null || this.focusedSet !== null) this.#focusRegion(undefined)
   }
+}
+
+/** How a dimmed circle is filled: its usual wash, diagonal lines, dots, or not at all. */
+export type OverlapFillStyle = 'solid' | 'hatch' | 'dots' | 'none'
+
+function readFillStyle(value: string): OverlapFillStyle {
+  const keyword = value.trim()
+  return keyword === 'hatch' || keyword === 'dots' || keyword === 'none' ? keyword : 'solid'
+}
+
+const patterns = new Map<string, { image: HTMLCanvasElement; repeat: 'repeat' }>()
+
+/** A repeating tile of diagonal lines or dots in `color`, as the engine's pattern fill. `undefined` without a DOM. */
+function patternFill(color: string, kind: 'hatch' | 'dots'): { image: HTMLCanvasElement; repeat: 'repeat' } | undefined {
+  const key = `${kind}|${color}`
+  const cached = patterns.get(key)
+  if (cached) return cached
+  if (typeof document === 'undefined') return undefined
+  const size = 8
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const context = canvas.getContext('2d')
+  if (!context) return undefined
+  context.strokeStyle = color
+  context.fillStyle = color
+  if (kind === 'hatch') {
+    context.lineWidth = 1.5
+    context.beginPath()
+    // Three segments so the lines run on across the tile edges without a seam.
+    for (const offset of [-size, 0, size]) {
+      context.moveTo(offset, size)
+      context.lineTo(offset + size, 0)
+    }
+    context.stroke()
+  } else {
+    context.beginPath()
+    context.arc(size / 2, size / 2, 1.4, 0, Math.PI * 2)
+    context.fill()
+  }
+  const pattern = { image: canvas, repeat: 'repeat' as const }
+  patterns.set(key, pattern)
+  return pattern
 }
 
 /** Whether a label box touches or crosses any circle other than the one at `skip`. */

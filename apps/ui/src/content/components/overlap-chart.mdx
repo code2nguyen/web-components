@@ -159,5 +159,17 @@ Circles take the shared palette, `--c2-chart__series-1--color` to `--c2-chart__s
 because the fills stack. The hovered and selected regions get a wash in the text colour, set by
 `--c2-chart__region__hover--opacity` and `--c2-chart__region__selected--opacity`. A highlighted set fills to
 `--c2-chart__set__highlight--fill-opacity`, and the other circles keep `--c2-chart__set__dimmed--opacity` of their
-usual fill and outline. The labels always use the text
+usual fill and outline. They can also change look: `--c2-chart__set__dimmed--color` repaints them in one colour (the
+default `transparent` keeps each set's own), and `--c2-chart__set__dimmed--fill-style` fills them with `solid`,
+`hatch` (diagonal lines), `dots`, or `none` for outlines only.
+
+```html tag=CodeBlock
+<style>
+  .focus-view {
+    --c2-chart__set__dimmed--color: #a1a1aa;
+    --c2-chart__set__dimmed--fill-style: hatch;
+  }
+</style>
+<c2-overlap-chart class="focus-view" highlighted-set="api" data="…">…</c2-overlap-chart>
+``` The labels always use the text
 colours, so every circle is named in words rather than by colour alone.

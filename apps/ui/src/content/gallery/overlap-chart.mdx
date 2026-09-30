@@ -66,7 +66,10 @@ import { Card } from '@c2n/card'
 ```
 
 ```html tag=MdxCodeBlock,label=Highlighted set
-<c2-overlap-chart highlighted-set="api" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
+<style>
+  .overlap-focus { --c2-chart__set__dimmed--color: var(--c2-theme--color-on-surface-variant, #a1a1aa); --c2-chart__set__dimmed--fill-style: hatch; }
+</style>
+<c2-overlap-chart class="overlap-focus" highlighted-set="api" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
   <c2-chart-series field="web" label="Web"></c2-chart-series>
   <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
   <c2-chart-series field="api" label="API"></c2-chart-series>
