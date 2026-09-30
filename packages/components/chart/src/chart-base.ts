@@ -139,7 +139,7 @@ export interface ChartBase {
  *
  * @event {CustomEvent<{ engine: string }>} chart-ready - Fired after the engine has loaded and drawn for the first time. The host also gains `data-chart-ready`, which is what a test should wait on.
  * @event {CustomEvent<{ error: unknown }>} chart-error - Fired when the engine fails to load or to draw. `detail.error` is the underlying failure.
- * @event {CustomEvent<ChartPointEventDetail>} point-click - Fired when a datum is clicked. Does not bubble: several components fire point events, so a listener belongs on the element itself.
+ * @event {CustomEvent<ChartPointEventDetail>} point-click - Fired when a datum is clicked; the chart then highlights the clicked series (a second click on it clears the highlight). Cancelable: `preventDefault()` keeps the highlight as it is. Does not bubble: several components fire point events, so a listener belongs on the element itself.
  * @event {CustomEvent<ChartPointEventDetail | null>} point-hover - Fired as the pointer moves between data points, and with a `null` detail when it leaves the plot. Does not bubble.
  * @event {CustomEvent<ChartTooltipContext | null>} tooltip-change - Fired with the complete tooltip model as the pointer moves, and with `null` when it leaves. Used by `c2-chart-tooltip`.
  * @event {CustomEvent<ChartLegendChangeEventDetail>} legend-change - Fired when legend entries or visibility change. Used by `c2-chart-legend`.
@@ -941,10 +941,27 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
-  /** The engine reports a clicked datum. A chart with its own events extends this. */
+  /**
+   * The engine reports a clicked datum: `point-click` fires, and unless a listener cancels it the clicked series is
+   * highlighted, or the highlight cleared when it already was. A chart with its own events extends this.
+   */
   protected handleEngineClick(detail: { index: number; seriesIndex: number }): void {
     const point = this.pointAt(detail.index, detail.seriesIndex)
-    if (point) this.dispatchEvent(new CustomEvent<ChartPointEventDetail>('point-click', { detail: point }))
+    if (!point) return
+    const event = new CustomEvent<ChartPointEventDetail>('point-click', { detail: point, cancelable: true })
+    this.dispatchEvent(event)
+    if (event.defaultPrevented) return
+    const key = this.highlightKeyAt(detail)
+    if (key !== undefined) this.highlight(this.highlighted === key ? null : key)
+  }
+
+  /**
+   * What a click on this datum highlights: its series field. A chart with a single series has nothing to set apart,
+   * so it returns `undefined`; a pie overrides this to name the slice.
+   */
+  protected highlightKeyAt(detail: { index: number; seriesIndex: number }): string | undefined {
+    const series = this.resolvedSeries
+    return series.length > 1 ? series[detail.seriesIndex]?.field : undefined
   }
 
   /** Formats an x value for the tooltip. Time charts get a date, everything else a number. */

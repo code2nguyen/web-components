@@ -182,7 +182,7 @@ const SET_SERIES = 2
  *
  * @event {CustomEvent<OverlapRegion>} region-click - Fired when a region is clicked or chosen with Enter. `detail.sets` names its sets, `detail.size` counts the members in exactly those sets and `detail.total` those in all of them. Does not bubble.
  * @event {CustomEvent<OverlapRegion | null>} region-hover - Fired as the pointer or the keyboard focus moves onto a region, and with a `null` detail when it leaves. Does not bubble.
- * @event {CustomEvent<OverlapSetDetail>} set-click - Fired when a set's name is clicked, or chosen with Enter. `detail.total` counts its members and `detail.only` those in no other set. Does not bubble.
+ * @event {CustomEvent<OverlapSetDetail>} set-click - Fired when a set's name is clicked, or chosen with Enter; the set is then highlighted (a second click clears it). Cancelable: `preventDefault()` keeps the highlight as it is. `detail.total` counts its members and `detail.only` those in no other set. Does not bubble.
  * @event {CustomEvent<OverlapSetDetail | null>} set-hover - Fired as the pointer or the keyboard focus moves onto a set's name, and with a `null` detail when it leaves. Does not bubble.
  * @event {CustomEvent<OverlapSelectionChangeEventDetail>} selection-change - Fired when the reader selects or clears a region or a set of a `selectable` chart. `detail.selected` holds the selected region's set keys and `detail.selectedSet` the selected set's key. Does not bubble.
  *
@@ -1011,7 +1011,10 @@ export class OverlapChart extends EchartsChartBase {
   #activateSet(key: string): void {
     const info = this.setDetail(key)
     if (!info) return
-    this.dispatchEvent(new CustomEvent<OverlapSetDetail>('set-click', { detail: info }))
+    const event = new CustomEvent<OverlapSetDetail>('set-click', { detail: info, cancelable: true })
+    this.dispatchEvent(event)
+    // As on every chart, clicking a set highlights it, and clicking it again clears the highlight.
+    if (!event.defaultPrevented) this.highlight(this.highlighted === key ? null : key)
     if (!this.selectable) return
     this.selectedSet = this.selectedSet === key ? null : key
     this.selected = []
@@ -1038,6 +1041,8 @@ export class OverlapChart extends EchartsChartBase {
     } else {
       this.selectedSet = null
       this.selected = []
+      // The walk ends with nothing selected, and nothing highlighted either.
+      if (this.highlighted !== null && candidates.includes(this.highlighted)) this.highlight(null)
       this.#notifySelection()
     }
     // Keep the hover highlight on what is now selected, or back on the first candidate once it clears.

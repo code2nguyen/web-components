@@ -199,6 +199,17 @@ chart supports both modes: pie charts highlight a slice, overlap charts a whole 
 with the key, and `highlighted` holds it: the series `field`, the slice label, or the set key. Setting `highlighted`
 from the application does the same in either mode. A linked `c2-chart-legend` follows the chart's mode.
 
+Clicking a series in the plot always highlights it, whatever `legend-action` is: a line, a bar, a scatter point or a
+pie slice. Clicking it again clears the highlight. `point-click` fires first and is cancelable, so an application that
+uses clicks for something else calls `preventDefault()` to keep the highlight as it is:
+
+```js tag=CodeBlock
+chart.addEventListener('point-click', (event) => {
+  event.preventDefault() // open a detail view instead of highlighting
+  openDetails(event.detail.series.field, event.detail.index)
+})
+```
+
 ```html tag=MdxCodeBlock,label=Highlight from the legend
 <c2-line-chart
   x-field="year"

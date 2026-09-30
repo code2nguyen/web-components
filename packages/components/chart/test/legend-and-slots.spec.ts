@@ -14,6 +14,9 @@ interface Case {
   keys: string[]
   /** The engine hover that shows the tooltip. */
   hover: { index: number; seriesIndex: number }
+  /** What a click on `click` highlights, or `null` when the chart has nothing to set apart. */
+  clickKey: string | null
+  click: { index: number; seriesIndex: number }
   /** How a dimmed series shows up in the options, or `null` for a single-series chart with nothing to dim. */
   dim: 'uplot' | 'echarts' | 'pie' | 'overlap' | null
 }
@@ -31,11 +34,61 @@ const overlapRows = [
 ]
 
 const cases: Case[] = [
-  { tag: 'c2-line-chart', attributes: 'x-field="t"', series: two, data: rows, keys: ['s0', 's1'], hover: { index: 0, seriesIndex: 0 }, dim: 'uplot' },
-  { tag: 'c2-area-chart', attributes: 'x-field="t"', series: two, data: rows, keys: ['s0', 's1'], hover: { index: 0, seriesIndex: 0 }, dim: 'uplot' },
-  { tag: 'c2-bar-chart', attributes: 'x-field="t"', series: two, data: rows, keys: ['s0', 's1'], hover: { index: 0, seriesIndex: 0 }, dim: 'uplot' },
-  { tag: 'c2-scatter-chart', attributes: 'x-field="t"', series: two, data: rows, keys: ['s0', 's1'], hover: { index: 0, seriesIndex: 0 }, dim: 'echarts' },
-  { tag: 'c2-radar-chart', attributes: 'label-field="t"', series: two, data: rows, keys: ['s0', 's1'], hover: { index: 0, seriesIndex: 0 }, dim: 'echarts' },
+  {
+    tag: 'c2-line-chart',
+    attributes: 'x-field="t"',
+    series: two,
+    data: rows,
+    keys: ['s0', 's1'],
+    hover: { index: 0, seriesIndex: 0 },
+    clickKey: 's1',
+    click: { index: 1, seriesIndex: 1 },
+    dim: 'uplot',
+  },
+  {
+    tag: 'c2-area-chart',
+    attributes: 'x-field="t"',
+    series: two,
+    data: rows,
+    keys: ['s0', 's1'],
+    hover: { index: 0, seriesIndex: 0 },
+    clickKey: 's1',
+    click: { index: 1, seriesIndex: 1 },
+    dim: 'uplot',
+  },
+  {
+    tag: 'c2-bar-chart',
+    attributes: 'x-field="t"',
+    series: two,
+    data: rows,
+    keys: ['s0', 's1'],
+    hover: { index: 0, seriesIndex: 0 },
+    clickKey: 's1',
+    click: { index: 1, seriesIndex: 1 },
+    dim: 'uplot',
+  },
+  {
+    tag: 'c2-scatter-chart',
+    attributes: 'x-field="t"',
+    series: two,
+    data: rows,
+    keys: ['s0', 's1'],
+    hover: { index: 0, seriesIndex: 0 },
+    clickKey: 's1',
+    click: { index: 1, seriesIndex: 1 },
+    dim: 'echarts',
+  },
+  {
+    tag: 'c2-radar-chart',
+    attributes: 'label-field="t"',
+    series: two,
+    data: rows,
+    keys: ['s0', 's1'],
+    hover: { index: 0, seriesIndex: 0 },
+    clickKey: 's1',
+    click: { index: 1, seriesIndex: 1 },
+    dim: 'echarts',
+  },
   {
     tag: 'c2-pie-chart',
     attributes: 'label-field="t"',
@@ -46,6 +99,8 @@ const cases: Case[] = [
     ],
     keys: ['North', 'South'],
     hover: { index: 0, seriesIndex: 0 },
+    clickKey: 'South',
+    click: { index: 1, seriesIndex: 0 },
     dim: 'pie',
   },
   {
@@ -55,6 +110,8 @@ const cases: Case[] = [
     data: [{ t: 'Now', s0: 64 }],
     keys: ['s0'],
     hover: { index: 0, seriesIndex: 0 },
+    clickKey: null,
+    click: { index: 0, seriesIndex: 0 },
     dim: null,
   },
   {
@@ -67,6 +124,8 @@ const cases: Case[] = [
     ],
     keys: ['open'],
     hover: { index: 0, seriesIndex: 0 },
+    clickKey: null,
+    click: { index: 1, seriesIndex: 0 },
     dim: null,
   },
   {
@@ -76,6 +135,9 @@ const cases: Case[] = [
     data: overlapRows,
     keys: ['a', 'b'],
     hover: { index: 0, seriesIndex: 1 },
+    // A region is not a series; an overlap chart highlights a set from its name (see overlap-chart.spec.ts).
+    clickKey: null,
+    click: { index: 0, seriesIndex: 1 },
     dim: 'overlap',
   },
 ]
@@ -176,6 +238,61 @@ for (const item of cases) {
     expect(await page.evaluate(() => (window as unknown as { seen: (string | null)[] }).seen)).toEqual([item.keys[0], null])
   })
 }
+
+for (const item of cases) {
+  test(`${item.tag}: clicking a series in the plot highlights it, and clicking it again clears it`, async ({ page, scenario }) => {
+    await scenario('empty')
+    await mount(page, item, '')
+    const chart = page.locator('#subject')
+    const click = () =>
+      chart.evaluate((element, click) => {
+        ;(element as unknown as { handleEngineClick(detail: object): void }).handleEngineClick(click)
+        return (element as unknown as { highlighted: string | null }).highlighted
+      }, item.click)
+    expect(await click()).toBe(item.clickKey)
+    expect(await click()).toBeNull()
+    // A listener that cancels point-click keeps the highlight as it is.
+    await chart.evaluate((element) => element.addEventListener('point-click', (event) => event.preventDefault()))
+    expect(await click()).toBeNull()
+  })
+}
+
+test('a real click on a uPlot chart fires point-click and highlights the clicked series', async ({ page, scenario }) => {
+  await scenario('empty')
+  await mount(page, cases[0], '')
+  const chart = page.locator('#subject')
+  await chart.evaluate((element) => {
+    const clicks: number[] = []
+    element.addEventListener('point-click', (event) => clicks.push((event as CustomEvent<{ seriesIndex: number }>).detail.seriesIndex))
+    ;(window as unknown as { clicks: number[] }).clicks = clicks
+  })
+  const box = await chart.locator('.plot').boundingBox()
+  if (!box) throw new Error('the plot has no box')
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 })
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+  await expect.poll(() => page.evaluate(() => (window as unknown as { clicks: number[] }).clicks.length)).toBe(1)
+  const [seriesIndex] = await page.evaluate(() => (window as unknown as { clicks: number[] }).clicks)
+  expect(await chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBe(['s0', 's1'][seriesIndex])
+})
+
+test('the release of a drag-to-zoom is not reported as a click', async ({ page, scenario }) => {
+  await scenario('empty')
+  await mount(page, cases[0], 'zoom')
+  const chart = page.locator('#subject')
+  await chart.evaluate((element) => {
+    const clicks: number[] = []
+    element.addEventListener('point-click', () => clicks.push(1))
+    ;(window as unknown as { clicks: number[] }).clicks = clicks
+  })
+  const box = await chart.locator('.plot').boundingBox()
+  if (!box) throw new Error('the plot has no box')
+  await page.mouse.move(box.x + box.width / 3, box.y + box.height / 2, { steps: 3 })
+  await page.mouse.down()
+  await page.mouse.move(box.x + (box.width * 2) / 3, box.y + box.height / 2, { steps: 4 })
+  await page.mouse.up()
+  expect(await page.evaluate(() => (window as unknown as { clicks: number[] }).clicks)).toEqual([])
+  expect(await chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBeNull()
+})
 
 test("a linked c2-chart-legend follows the chart's legend-action", async ({ page, scenario }) => {
   await scenario('empty')

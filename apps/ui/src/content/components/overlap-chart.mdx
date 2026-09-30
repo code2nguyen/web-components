@@ -145,7 +145,8 @@ Hovering a region shows its name, its count, its share and the total for the com
 Clicking fires `region-click`.
 
 Hovering a set's name, or its entry in the legend, highlights its whole circle; the tooltip then describes the set: its
-members, its share of the whole, and how many belong to no other set. `set-hover` and `set-click` report the set.
+members, its share of the whole, and how many belong to no other set. `set-hover` and `set-click` report the set. Clicking a set's name also highlights it, as a click on a series does on every
+chart; clicking it again clears the highlight, and `preventDefault()` on `set-click` keeps it as it is.
 `highlighted` does the same from your application, for instance while the pointer is on a row of a table next to
 the chart.
 

@@ -112,6 +112,11 @@ export class PieChart extends EchartsChartBase {
     return 'named'
   }
 
+  /** A click on a slice highlights that slice. */
+  protected override highlightKeyAt(detail: { index: number; seriesIndex: number }): string | undefined {
+    return this.frame?.labels?.[detail.index]
+  }
+
   /** A pie's highlight names a slice, so the other slices fade back one datum at a time. */
   protected override projectData(frame: ChartFrame, context: ChartBuildContext): unknown {
     const projected = super.projectData(frame, context) as { name?: string; itemStyle?: Record<string, unknown> }[][]

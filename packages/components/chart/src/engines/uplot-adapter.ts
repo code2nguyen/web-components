@@ -21,6 +21,10 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
   let data: AlignedData = [[]] as unknown as AlignedData
   /** Set while we are rebuilding, so the scale hook does not report our own restore as a user zoom. */
   let restoring = false
+  /** The datum under the cursor, as last reported to `hover`: what a click on the plot lands on. */
+  let hovered: { index: number; seriesIndex: number } | null = null
+  /** Where the press started, so the release of a drag-to-zoom is not also reported as a click. */
+  let pressedAt: { x: number; y: number } | null = null
 
   /** Adds our hooks to whatever the element built, without the element knowing uPlot's hook shape. */
   const withHooks = (options: Options): Options => ({
@@ -31,6 +35,7 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
         (self: uPlot) => {
           const index = self.cursor.idx
           if (index === null || index === undefined) {
+            hovered = null
             events?.hover(null)
             return
           }
@@ -50,6 +55,7 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
           }
           const pointer = self.cursor.event
           const bounds = container?.getBoundingClientRect()
+          hovered = { index, seriesIndex: nearestSeriesIndex }
           events?.hover({
             index,
             seriesIndex: nearestSeriesIndex,
@@ -76,9 +82,25 @@ export async function createUplotAdapter(): Promise<ChartAdapter<Options, Aligne
     },
   })
 
+  /**
+   * uPlot has no click hook, so the overlay's own pointer events stand in for one. A click reports the datum the
+   * cursor is on, the one `hover` last reported; a press that moved more than a few pixels was a drag, not a click.
+   */
+  const handlePress = (event: PointerEvent) => {
+    pressedAt = { x: event.clientX, y: event.clientY }
+  }
+  const handleClick = (event: MouseEvent) => {
+    const start = pressedAt
+    pressedAt = null
+    if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 4) return
+    if (hovered) events?.click(hovered)
+  }
+
   const build = (options: Options, next: AlignedData) => {
     if (!container) return
     instance = new UPlot(withHooks(options), next, container)
+    instance.over.addEventListener('pointerdown', handlePress)
+    instance.over.addEventListener('click', handleClick)
   }
 
   return {

@@ -170,8 +170,8 @@ declare module 'vue' {
         onSetHover?: (event: EventOf<OverlapChart, 'set-hover'>) => void
         onRegionHover?: (event: EventOf<OverlapChart, 'region-hover'>) => void
         onRegionClick?: (event: EventOf<OverlapChart, 'region-click'>) => void
-        onSetClick?: (event: EventOf<OverlapChart, 'set-click'>) => void
         onSelectionChange?: (event: EventOf<OverlapChart, 'selection-change'>) => void
+        onSetClick?: (event: EventOf<OverlapChart, 'set-click'>) => void
         onTooltipChange?: (event: EventOf<OverlapChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<OverlapChart, 'series-toggle'>) => void
         onSeriesHighlight?: (event: EventOf<OverlapChart, 'series-highlight'>) => void
