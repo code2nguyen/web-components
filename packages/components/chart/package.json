@@ -48,6 +48,14 @@
       "types": "./types/src/candlestick-chart.d.ts",
       "default": "./dist/candlestick-chart.js"
     },
+    "./overlap-chart.js": {
+      "types": "./types/src/overlap-chart.d.ts",
+      "default": "./dist/overlap-chart.js"
+    },
+    "./overlap-layout.js": {
+      "types": "./types/src/overlap-layout.d.ts",
+      "default": "./dist/overlap-layout.js"
+    },
     "./chart-series.js": {
       "types": "./types/src/chart-series.d.ts",
       "default": "./dist/chart-series.js"
@@ -118,6 +126,8 @@
     "pyramid chart",
     "scatter plot",
     "candlestick chart",
+    "venn diagram",
+    "overlap chart",
     "sparkline",
     "uplot",
     "echarts",
@@ -156,6 +166,7 @@
   },
   "dependencies": {
     "@c2n/core": "0.0.19",
+    "@upsetjs/venn.js": "2.0.0",
     "lit": "3.3.3"
   },
   "devDependencies": {

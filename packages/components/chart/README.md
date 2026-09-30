@@ -1,10 +1,10 @@
 # @c2n/chart
 
-Line, area, bar, sparkline, pie, gauge, scatter and candlestick charts as custom elements, from one package.
+Line, area, bar, sparkline, pie, gauge, scatter, candlestick and overlap (Venn) charts as custom elements, from one package.
 
 ```bash
 npm install @c2n/chart uplot     # line, area, bar, sparkline
-npm install @c2n/chart echarts   # pie, gauge, scatter, candlestick
+npm install @c2n/chart echarts   # pie, gauge, scatter, candlestick, overlap
 ```
 
 ```html
@@ -35,6 +35,7 @@ import '@c2n/chart' // all of them
 | `c2-gauge-chart`       | ECharts | A bounded current value or target               |
 | `c2-scatter-chart`     | ECharts | Relationships, clusters and outliers            |
 | `c2-candlestick-chart` | ECharts | Open-high-low-close financial sessions          |
+| `c2-overlap-chart`     | ECharts | How two or three sets overlap (Venn diagram)    |
 | `c2-chart-series`      | —       | A series definition; renders nothing            |
 | `c2-chart-legend`      | —       | A linked legend placed anywhere in the layout   |
 | `c2-chart-tooltip`     | —       | A linked floating or inline tooltip             |

@@ -195,6 +195,8 @@ test('legend toggles a series and fires series-toggle without bubbling', async (
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
 
   const result = await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
     let onElement = 0
     let onDocument = 0
     element.addEventListener('series-toggle', () => (onElement += 1))
@@ -222,6 +224,10 @@ test('links independently positioned legend and tooltip elements by id', async (
   const labels = await legend.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.item') ?? [])].map((item) => item.textContent?.trim()))
   expect(labels).toEqual(['First', 'Second'])
 
+  await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
   await legend.evaluate((element) => (element.shadowRoot?.querySelector('.item') as HTMLButtonElement).click())
   await expect.poll(() => legend.evaluate((element) => element.shadowRoot?.querySelector('.item')?.getAttribute('aria-pressed'))).toBe('false')
 
@@ -574,6 +580,10 @@ test("lists a pie chart's slices in the legend, and toggles one", async ({ page,
   const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
   expect(labels.length).toBeGreaterThan(1)
 
+  await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
   await chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.click())
   await expect
     .poll(() => chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.getAttribute('aria-pressed')))
@@ -743,9 +753,11 @@ test('reports the clicked pyramid level by its data row', async ({ page, scenari
   // ECharts drew Starter last, at index 3; the events name its row, which is the first.
   await expect.poll(async () => (await events()).find(([type]) => type === 'point-click')?.[1]).toMatchObject({ index: 0, label: 'Starter', y: 4870 })
   expect((await events()).find(([type]) => type === 'point-hover')?.[1]).toMatchObject({ index: 0, label: 'Starter' })
+  // A click on a level highlights it, as a click on a pie slice does.
+  await expect.poll(() => chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBe('Starter')
 })
 
-test("lists a pyramid's levels in the legend, and lays the rest out again when one is hidden", async ({ page, scenario }) => {
+test("lists a pyramid's levels in the legend, and highlights one by default", async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
@@ -753,10 +765,30 @@ test("lists a pyramid's levels in the legend, and lays the rest out again when o
   const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
   expect(labels).toEqual(['Starter', 'Enterprise', 'Team', 'Business'])
 
-  await chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.click())
-  await expect
-    .poll(() => chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.getAttribute('aria-pressed')))
-    .toBe('false')
+  await chart.locator('.legend-item').first().click()
+  await expect.poll(() => chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBe('Starter')
+
+  const opacities = await chart.evaluate((element) => {
+    const pyramid = element as unknown as {
+      frame: unknown
+      buildContext(): unknown
+      projectData(frame: unknown, context: unknown): { name: string; itemStyle: { opacity?: number } }[][]
+    }
+    const [data] = pyramid.projectData(pyramid.frame, pyramid.buildContext())
+    return Object.fromEntries(data.map((datum) => [datum.name, datum.itemStyle.opacity ?? 1]))
+  })
+  // Every level is still drawn; only the others fade back.
+  expect(opacities).toEqual({ Enterprise: 0.25, Business: 0.25, Team: 0.25, Starter: 1 })
+})
+
+test('with legend-action="toggle", hiding a pyramid level lays the rest out again', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await chart.evaluate((element) => element.setAttribute('legend-action', 'toggle'))
+
+  await chart.locator('.legend-item').first().click()
+  await expect(chart.locator('.legend-item').first()).toHaveAttribute('aria-pressed', 'false')
 
   const drawn = await chart.evaluate((element) => {
     const pyramid = element as unknown as {
@@ -898,4 +930,18 @@ test('shows a legend by default, and the sparkline does not', async ({ page, sce
   await expect(spark).toHaveAttribute('data-chart-ready', 'true')
   // A sparkline is defined by what it leaves out.
   expect(await spark.evaluate((element) => element.shadowRoot?.querySelectorAll('.legend-item').length)).toBe(0)
+})
+
+test('reads declared series on the first update, before any slotchange', async ({ page, scenario }) => {
+  await scenario('default')
+  const labels = await page.evaluate(async () => {
+    const chart = document.createElement('c2-line-chart') as HTMLElement & { resolvedSeries: { label?: string }[]; updateComplete: Promise<boolean> }
+    chart.innerHTML = '<c2-chart-series field="s0" label="Declared"></c2-chart-series>'
+    ;(chart as unknown as { data: unknown }).data = [{ t: 0, s0: 1, s1: 2 }]
+    document.querySelector('main')?.append(chart)
+    await chart.updateComplete
+    // Read synchronously after the first update: a slotchange would only arrive in a later task.
+    return chart.resolvedSeries.map((series) => series.label)
+  })
+  expect(labels).toEqual(['Declared'])
 })

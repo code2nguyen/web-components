@@ -111,6 +111,10 @@
       const detail = (event as CustomEvent<{ visible: boolean; series: { label?: string; field: string } }>).detail
       output.textContent = `series-toggle · ${detail.series.label ?? detail.series.field}: ${detail.visible ? 'visible' : 'hidden'}`
     })
+    chart.addEventListener('series-highlight', (event) => {
+      const key = (event as CustomEvent<{ key: string | null }>).detail.key
+      output.textContent = key ? `series-highlight · ${key}` : 'series-highlight · cleared'
+    })
     chart.addEventListener('range-change', (event) => {
       const detail = (event as CustomEvent<{ min: number; max: number }>).detail
       output.textContent = `range-change · ${detail.min.toFixed(1)} → ${detail.max.toFixed(1)}`

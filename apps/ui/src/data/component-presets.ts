@@ -263,6 +263,30 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-overlap-chart': {
+    html: `<c2-overlap-chart style="width:420px;height:300px" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web app"></c2-chart-series><c2-chart-series field="mobile" label="Mobile app"></c2-chart-series><c2-chart-series field="api" label="Public API"></c2-chart-series></c2-overlap-chart>`,
+    presets: [
+      { name: 'Equal circles', description: 'Same-sized circles, so every region has room for its label.', attributes: { layout: 'uniform' } },
+      { name: 'Shares', description: 'Each region as a share of all members, without a legend.', attributes: { labels: 'percent', legend: 'none' } },
+      {
+        name: 'Focus view',
+        description: 'One set highlighted, the others hatched in grey.',
+        attributes: { highlighted: 'api' },
+        css: { '--c2-chart__set__dimmed--color': '#a1a1aa', '--c2-chart__set__dimmed--fill-style': 'hatch' },
+      },
+      {
+        name: 'Soft fills',
+        description: 'Stronger tinted fills with no outlines, in a violet, pink and cyan palette.',
+        css: {
+          '--c2-chart__series-1--color': '#7c3aed',
+          '--c2-chart__series-2--color': '#db2777',
+          '--c2-chart__series-3--color': '#0891b2',
+          '--c2-chart__set--fill-opacity': '0.24',
+          '--c2-chart__set--stroke-width': '0',
+        },
+      },
+    ],
+  },
   'c2-autocomplete': {
     html: `<c2-autocomplete style="width:240px" aria-label="Search" placeholder="Search…" item-key="value" label-field="label" description-field="description" suggestions='[{"value":"ada","label":"Ada Lovelace","description":"Platform engineering"},{"value":"api","label":"Autocomplete API notes","description":"Updated yesterday"}]'></c2-autocomplete>`,
     presets: [

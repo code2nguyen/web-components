@@ -5,7 +5,7 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import { EchartsChartBase } from './echarts-chart-base.js'
 import { columnValue } from './chart-data.js'
 import type { ChartEventMap, ChartLegendItem } from './chart-base.js'
-import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
+import type { ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import type { ChartFrame } from './chart-types.js'
 import { layoutPyramid, type PyramidLevel, type PyramidSizing, type PyramidSort } from './pyramid-layout.js'
@@ -28,7 +28,7 @@ interface PyramidDatum {
   value: number
   real: number
   share: number
-  itemStyle: { color: string; height?: string; width?: string }
+  itemStyle: { color: string; height?: string; width?: string; opacity?: number }
 }
 
 /**
@@ -139,13 +139,16 @@ export class PyramidChart extends EchartsChartBase {
       label,
       color: theme.palette[index % theme.palette.length],
       visible: !this.hiddenLevels.has(label),
-      toggle: () => this.setLevelVisible(label, this.hiddenLevels.has(label)),
+      ...this.legendEntryState(label, !this.hiddenLevels.has(label), (visible) => this.setLevelVisible(label, visible)),
       series,
       index,
     }))
   }
 
-  /** Shows or hides one level, as the legend does. The remaining levels are laid out again to fill the shape. */
+  /**
+   * Shows or hides one level, as the legend does with `legend-action="toggle"`. The remaining levels are laid out
+   * again to fill the shape.
+   */
   setLevelVisible(label: string, visible: boolean): void {
     const next = new Set(this.hiddenLevels)
     if (visible) next.delete(label)
@@ -155,21 +158,25 @@ export class PyramidChart extends EchartsChartBase {
   }
 
   /**
-   * ECharts reports a level by its position in the data it was handed, which leaves out hidden and empty
-   * levels. The events are translated back to data rows here, so the tooltip and the point events read the
-   * right row.
+   * ECharts reports a level by its position in the data it was handed, which leaves out hidden and empty levels
+   * and follows the layout order. Both engine events are translated back to data rows here, so the tooltip, the
+   * point events and a click's highlight all read the right row.
    */
-  protected override async createAdapter(): Promise<ChartAdapter> {
-    const adapter = await super.createAdapter()
-    const create = adapter.create.bind(adapter)
-    const row = (index: number) => this.#drawnRows[index] ?? index
-    adapter.create = (container, options, data, events) =>
-      create(container, options, data, {
-        ...events,
-        hover: (detail) => events.hover(detail && { ...detail, index: row(detail.index) }),
-        click: (detail) => events.click({ ...detail, index: row(detail.index) }),
-      })
-    return adapter
+  protected override handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
+    super.handleEngineHover(detail && { ...detail, index: this.#rowOf(detail.index) })
+  }
+
+  protected override handleEngineClick(detail: { index: number; seriesIndex: number }): void {
+    super.handleEngineClick({ ...detail, index: this.#rowOf(detail.index) })
+  }
+
+  /** A click on a level highlights that level. */
+  protected override highlightKeyAt(detail: { index: number; seriesIndex: number }): string | undefined {
+    return this.frame?.labels?.[detail.index]
+  }
+
+  #rowOf(index: number): number {
+    return this.#drawnRows[index] ?? index
   }
 
   /** The drawn levels, apex first. */
@@ -199,11 +206,15 @@ export class PyramidChart extends EchartsChartBase {
     const length = this.#horizontal ? box.width : box.height
     // Level heights are shares of the whole length, which also holds the gaps between them.
     const available = length > 0 ? Math.max(0, 1 - (gap * Math.max(0, levels.length - 1)) / length) : 1
+    // A highlight names a level, so the other levels fade back one datum at a time, as a pie's slices do.
+    const highlighted = this.highlighted !== null && (frame.labels ?? []).includes(this.highlighted) ? this.highlighted : null
     const data: PyramidDatum[] = levels.map((level) => {
+      const name = frame.labels?.[level.index] ?? String(level.index)
       const itemStyle: PyramidDatum['itemStyle'] = { color: palette[level.index % palette.length] }
       if (level.height !== undefined) itemStyle[this.#horizontal ? 'width' : 'height'] = `${level.height * available * 100}%`
+      if (highlighted !== null && name !== highlighted) itemStyle.opacity = context.theme.dimmedOpacity
       return {
-        name: frame.labels?.[level.index] ?? String(level.index),
+        name,
         value: level.depth,
         real: level.value,
         share: total > 0 ? level.value / total : 0,

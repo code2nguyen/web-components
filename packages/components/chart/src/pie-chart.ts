@@ -6,6 +6,7 @@ import { EchartsChartBase } from './echarts-chart-base.js'
 import type { ChartLegendItem } from './chart-base.js'
 import type { ChartEventMap } from './chart-base.js'
 import type { ChartBuildContext } from './chart-adapter.js'
+import type { ChartFrame } from './chart-types.js'
 import type { ChartAdapter } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import './chart-series.js'
@@ -86,7 +87,7 @@ export class PieChart extends EchartsChartBase {
       label,
       color: theme.palette[index % theme.palette.length],
       visible: !this.hiddenSlices.has(label),
-      toggle: () => this.setSliceVisible(label, this.hiddenSlices.has(label)),
+      ...this.legendEntryState(label, !this.hiddenSlices.has(label), (visible) => this.setSliceVisible(label, visible)),
       series,
       index,
     }))
@@ -109,6 +110,26 @@ export class PieChart extends EchartsChartBase {
 
   protected override dataShape(): 'pairs' | 'values' | 'named' {
     return 'named'
+  }
+
+  /** A click on a slice highlights that slice. */
+  protected override highlightKeyAt(detail: { index: number; seriesIndex: number }): string | undefined {
+    return this.frame?.labels?.[detail.index]
+  }
+
+  /** A pie's highlight names a slice, so the other slices fade back one datum at a time. */
+  protected override projectData(frame: ChartFrame, context: ChartBuildContext): unknown {
+    const projected = super.projectData(frame, context) as { name?: string; itemStyle?: Record<string, unknown> }[][]
+    const highlighted = this.highlighted
+    if (highlighted === null || !(frame.labels ?? []).includes(highlighted)) return projected
+    const opacity = context.theme.dimmedOpacity
+    // The highlighted slice lifts off the page with a soft shadow in its own colour's direction; the rest fade back.
+    const lift = { shadowBlur: 12, shadowColor: 'rgba(0, 0, 0, 0.35)' }
+    return projected.map((series) =>
+      series.map((datum) =>
+        datum.name === highlighted ? { ...datum, itemStyle: { ...datum.itemStyle, ...lift } } : { ...datum, itemStyle: { ...datum.itemStyle, opacity } },
+      ),
+    )
   }
 
   protected override seriesOption(_index: number, context: ChartBuildContext): Record<string, unknown> {

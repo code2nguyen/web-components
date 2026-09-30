@@ -5,6 +5,17 @@ import { createEchartsAdapter, type EchartsOptions } from './engines/echarts-ada
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import type { ChartFrame } from './chart-types.js'
 
+/** Multiplies the opacity of every style block a series option can carry. */
+export function dimSeries(option: Record<string, unknown>, opacity: number): Record<string, unknown> {
+  const dimmed: Record<string, unknown> = { ...option }
+  for (const key of ['itemStyle', 'lineStyle', 'areaStyle', 'label']) {
+    const style = option[key] as { opacity?: number } | undefined
+    if (key === 'areaStyle' && !style) continue
+    dimmed[key] = { ...style, opacity: (style?.opacity ?? 1) * opacity }
+  }
+  return dimmed
+}
+
 /**
  * The ECharts half of the hierarchy. A concrete chart declares the engine modules it needs and how one
  * series is configured; everything else — theme, text styles, the disabled built-in tooltip and legend —
@@ -17,6 +28,9 @@ export abstract class EchartsChartBase extends ChartBase {
 
   /** Which ECharts renderer to use. SVG prints and scales crisply; canvas is faster with many marks. */
   @property({ type: String }) renderer: 'canvas' | 'svg' = 'canvas'
+
+  /** Whether engine updates wait for the next frame. See `createEchartsAdapter`; a chart turns it off only for a reason. */
+  protected readonly lazyEngineUpdates: boolean = true
 
   /** The ECharts modules this chart type needs registered. Keeps the rest of the library unloaded. */
   protected abstract readonly features: readonly EchartsFeature[]
@@ -41,7 +55,7 @@ export abstract class EchartsChartBase extends ChartBase {
   protected override createAdapter(): Promise<ChartAdapter> {
     // `legend` is always registered: hidden or not, `dispatchAction('legendUnSelect')` is the only public
     // way to toggle a series, so the component depends on the module even when it draws its own legend.
-    return createEchartsAdapter([...this.features, 'legend'], this.renderer) as unknown as Promise<ChartAdapter>
+    return createEchartsAdapter([...this.features, 'legend'], this.renderer, this.lazyEngineUpdates) as unknown as Promise<ChartAdapter>
   }
 
   protected override projectData(frame: ChartFrame, context: ChartBuildContext): unknown {
@@ -72,10 +86,14 @@ export abstract class EchartsChartBase extends ChartBase {
       // `dispatchAction('legendUnSelect')` is the only public way to toggle a series, so we register it.
       legend: { show: false },
       ...this.coordinateSystem(context),
-      series: series.map((item, index) => ({
-        name: item.label ?? item.field,
-        ...this.seriesOption(index, context),
-      })),
+      series: series.map((item, index) => {
+        const option: Record<string, unknown> = { name: item.label ?? item.field, ...this.seriesOption(index, context) }
+        // A highlighted series comes forward (drawn on top, a heavier line) and the others fade back.
+        if (context.highlighted < 0) return option
+        if (index !== context.highlighted) return dimSeries(option, theme.dimmedOpacity)
+        const lineStyle = option.lineStyle as { width?: number } | undefined
+        return { ...option, z: 3, lineStyle: { ...lineStyle, width: (lineStyle?.width ?? theme.lineWidth) + 1 } }
+      }),
     }
     return options
   }

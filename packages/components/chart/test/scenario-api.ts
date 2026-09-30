@@ -26,6 +26,8 @@ export interface ChartScenarioApi {
   /** Sends a normalized hover callback through the adapter boundary. */
   hover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void
   element(): HTMLElement
+  /** The overlap chart's pure layout functions, for geometry tests that need a real canvas. */
+  overlapLayout: typeof import('../src/overlap-layout')
 }
 
 declare global {
