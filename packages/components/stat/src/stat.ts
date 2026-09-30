@@ -42,6 +42,7 @@ export type StatTone = 'neutral' | 'positive' | 'negative' | 'warning'
  * @cssproperty {font-size} [--c2-stat__value--font-size=24px]
  * @cssproperty {font-weight} [--c2-stat__value--font-weight=600]
  * @cssproperty {pixel} [--c2-stat__value--line-height=32px]
+ * @cssproperty {number} [--c2-stat__placeholder--opacity=0.4] - Opacity of the `--` shown while `value` is missing.
  * @cssproperty {font-size} [--c2-stat__label--font-size=14px]
  * @cssproperty {color} [--c2-stat__label--color=#71717a]
  * @cssproperty {font-size} [--c2-stat__description--font-size=12px]
@@ -66,7 +67,7 @@ export class Stat extends LitElement {
         <span class="icon" part="icon" aria-hidden="true"><slot name="icon"></slot></span>
         <div class="content">
           <div class="value-row">
-            <div class="value" part="value"><slot name="value">${this.value ?? '--'}</slot></div>
+            <div class="value" part="value"><slot name="value">${this.value ?? html`<span class="placeholder">--</span>`}</slot></div>
             <div class="trend" part="trend"><slot name="trend"></slot></div>
           </div>
           <div class="label" part="label"><slot name="label">${this.label}</slot></div>
