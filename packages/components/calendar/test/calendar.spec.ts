@@ -74,3 +74,75 @@ test('has no axe violations', async ({ page, scenario }) => {
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
+
+test.describe('month picker', () => {
+  test('marks the months that have events', async ({ page, scenario }) => {
+    await scenario()
+    await page.getByRole('button', { name: 'September 2026' }).click()
+    const picker = page.getByRole('dialog', { name: 'Choose a month' })
+    await expect(picker).toBeVisible()
+    await expect(picker.getByRole('button', { name: 'September 2026, has events' })).toBeFocused()
+    await expect(picker.getByRole('button', { name: 'October 2026, has events' })).toBeVisible()
+    await expect(picker.getByRole('button', { name: 'November 2026', exact: true })).toBeVisible()
+    await expect(picker.getByRole('button', { name: 'Previous year, has events' })).toBeVisible()
+    await expect(picker.getByRole('button', { name: 'Next year, has events' })).toBeVisible()
+  })
+
+  test('jumps to a month of another year in a few clicks', async ({ page, scenario }) => {
+    await scenario()
+    await page.getByRole('button', { name: 'September 2026' }).click()
+    await page.getByRole('button', { name: /^Next year/ }).click()
+    await expect(page.getByRole('dialog').getByText('2027')).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Next year/ })).toHaveAccessibleName('Next year')
+    await page.getByRole('button', { name: 'June 2027, has events' }).click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'June 2027' })).toBeVisible()
+    await expect(page.getByRole('status')).toHaveText('month:2027-06')
+    await expect(page.getByRole('button', { name: 'Future trip, June 1, 2027' })).toBeVisible()
+  })
+
+  test('moves with the keyboard and picks with Enter', async ({ page, scenario }) => {
+    await scenario()
+    await page.getByRole('button', { name: 'September 2026' }).focus()
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('ArrowRight')
+    await expect(page.getByRole('button', { name: /^October 2026/ })).toBeFocused()
+    await page.keyboard.press('ArrowUp')
+    await expect(page.getByRole('button', { name: /^June 2026/ })).toBeFocused()
+    await page.keyboard.press('PageUp')
+    await expect(page.getByRole('button', { name: /^June 2025/ })).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('heading', { name: 'June 2025' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'June 2025' })).toBeFocused()
+  })
+
+  test('closes on Escape and on an outside click without changing month', async ({ page, scenario }) => {
+    await scenario()
+    const title = page.getByRole('button', { name: 'September 2026' })
+    await title.click()
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(title).toBeFocused()
+    await expect(title).toHaveAttribute('aria-expanded', 'false')
+
+    await title.click()
+    await page.mouse.click(5, 5)
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'September 2026' })).toBeVisible()
+  })
+
+  test('can be turned off', async ({ page, scenario }) => {
+    await scenario('no-picker')
+    await expect(page.getByRole('heading', { name: 'September 2026' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'September 2026' })).toHaveCount(0)
+  })
+
+  test('has no axe violations while open', async ({ page, scenario }) => {
+    await scenario()
+    await page.getByRole('button', { name: 'September 2026' }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+    expect(results.violations).toEqual([])
+  })
+})

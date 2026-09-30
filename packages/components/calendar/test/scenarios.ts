@@ -14,6 +14,10 @@ subject.events = [
   { id: 'vacation', title: 'Vacation', start: '2026-09-10', end: '2026-09-15', color: '#0f766e' },
   { id: 'flight', title: 'Flight', start: '2026-09-10' },
   { id: 'broken', title: 'Broken', start: 'not a date' },
+  // Crosses into October, so both months are marked in the picker; 2025 and 2027 give each year arrow a dot.
+  { id: 'move', title: 'Moving week', start: '2026-09-28', end: '2026-10-04' },
+  { id: 'past', title: 'Past trip', start: '2025-03-02' },
+  { id: 'future', title: 'Future trip', start: '2027-06-01' },
 ]
 if (scenario === 'attribute') {
   subject.removeAttribute('month')
@@ -21,6 +25,7 @@ if (scenario === 'attribute') {
   subject.setAttribute('events', JSON.stringify([{ title: 'Ski trip', start: '2026-11-20', end: '2026-11-22' }]))
 }
 if (scenario === 'sunday') subject.weekStart = 'sunday'
+if (scenario === 'no-picker') subject.setAttribute('month-picker', 'false')
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))
 subject.addEventListener('month-change', (event) => (output.value = `month:${event.detail.month}`))
 

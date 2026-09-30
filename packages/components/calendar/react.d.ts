@@ -25,6 +25,7 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-calendar': Omit<C2Props<Calendar>, 'events'> & {
         'week-start'?: Attribute
+        'month-picker'?: Attribute
         'aria-label'?: Attribute
         events?: Calendar['events'] | string
       }

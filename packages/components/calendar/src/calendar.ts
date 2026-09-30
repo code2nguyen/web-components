@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
-import { state } from 'lit/decorators.js'
+import { queryAll, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -94,6 +94,10 @@ function dayDiff(from: Date, to: Date): number {
  * plan through `events` (a property, or a JSON attribute) with local-calendar `YYYY-MM-DD` dates, which never shift
  * across time zones. The header moves between months; `month` picks the one shown.
  *
+ * The month title opens a month picker (turn it off with `month-picker="false"`): a year stepper over the twelve
+ * months, where a dot marks every month that has events and the year arrows carry a dot while earlier or later years
+ * do. Arrow keys move between months, Page Up/Page Down change the year, Enter picks and Escape closes.
+ *
  * @tag c2-calendar
  *
  * @event {CustomEvent<CalendarEventClickDetail>} event-click - Fired when an event bar is activated; `detail.event` is the entry from `events`.
@@ -131,12 +135,33 @@ function dayDiff(from: Date, to: Date): number {
  * @cssproperty {opacity} [--c2-calendar__event__hover--opacity=0.88]
  * @cssproperty {outline} [--c2-calendar__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-calendar__focus--outline-offset=2px]
+ * @cssproperty {color} [--c2-calendar__title__hover--background=#f4f4f5] - Month title button, when the picker is on.
+ * @cssproperty {color} [--c2-calendar__picker--background=#ffffff]
+ * @cssproperty {border} [--c2-calendar__picker--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-calendar__picker--border-radius=8px]
+ * @cssproperty {box-shadow} [--c2-calendar__picker--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {padding} [--c2-calendar__picker--padding=12px]
+ * @cssproperty {pixel} [--c2-calendar__picker--width=280px]
+ * @cssproperty {pixel} [--c2-calendar__month--height=44px]
+ * @cssproperty {border-radius} [--c2-calendar__month--border-radius=6px]
+ * @cssproperty {color} [--c2-calendar__month__hover--background=#f4f4f5]
+ * @cssproperty {color} [--c2-calendar__month__selected--background=rgb(2, 101, 220)] - The month shown in the calendar.
+ * @cssproperty {color} [--c2-calendar__month__selected--color=#ffffff]
+ * @cssproperty {outline} [--c2-calendar__month__current--outline=1px solid #a1a1aa] - Today's month.
+ * @cssproperty {font-weight} [--c2-calendar__month__marked--font-weight=600] - A month that has events.
+ * @cssproperty {color} [--c2-calendar__marker--color=rgb(2, 101, 220)] - Dot on a month (or year arrow) that has events.
+ * @cssproperty {pixel} [--c2-calendar__marker--size=6px]
  */
 @customElement('c2-calendar')
 export class Calendar extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @state() private visibleMonth = beginningOfMonth(new Date())
+  @state() private pickerOpen = false
+  @state() private pickerYear = new Date().getFullYear()
+  /** Month index (0–11) holding the picker's roving tab stop. */
+  @state() private pickerFocus = 0
+  @queryAll('.picker-month') private readonly monthButtons!: NodeListOf<HTMLButtonElement>
 
   /** The plan: `{ id?, title, start, end?, color? }` entries with `YYYY-MM-DD` dates. Accepts a JSON string as an attribute. */
   @property({ converter: jsonPropertyConverter }) events: CalendarEvent[] = []
@@ -146,6 +171,8 @@ export class Calendar extends LitElement {
   @property({ type: String }) locale = ''
   /** First day of each week. */
   @property({ attribute: 'week-start', reflect: true }) weekStart: CalendarWeekStart = 'monday'
+  /** Makes the month title open a year and month picker. Set `month-picker="false"` for a plain title. */
+  @property({ type: Boolean, attribute: 'month-picker' }) monthPicker = true
   /** Accessible name for the calendar; defaults to the month title. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
@@ -154,6 +181,11 @@ export class Calendar extends LitElement {
       const month = parseMonth(this.month)
       if (month) this.visibleMonth = month
     }
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback()
+    this.ownerDocument.removeEventListener('pointerdown', this.handleOutsidePointer, true)
   }
 
   private get effectiveLocale() {
@@ -169,6 +201,129 @@ export class Calendar extends LitElement {
 
   private openEvent(event: CalendarEvent) {
     this.dispatchEvent(new CustomEvent<CalendarEventClickDetail>('event-click', { detail: { event }, bubbles: true, composed: true }))
+  }
+
+  /** `YYYY-MM` of every month an event touches. */
+  private markedMonths() {
+    const months = new Set<string>()
+    for (const event of Array.isArray(this.events) ? this.events : []) {
+      const start = fromIso(event?.start)
+      if (!start) continue
+      const end = fromIso(event.end) ?? start
+      // A malformed multi-decade event should not stall rendering: stop after 100 years of months.
+      for (let month = beginningOfMonth(start), count = 0; month <= end && count < 1200; month = beginningOfMonth(month, 1), count++) months.add(toMonth(month))
+    }
+    return months
+  }
+
+  private handleOutsidePointer = (event: PointerEvent) => {
+    if (!event.composedPath().includes(this)) this.closePicker(false)
+  }
+
+  private async openPicker() {
+    this.pickerYear = this.visibleMonth.getFullYear()
+    this.pickerFocus = this.visibleMonth.getMonth()
+    this.pickerOpen = true
+    this.ownerDocument.addEventListener('pointerdown', this.handleOutsidePointer, true)
+    await this.updateComplete
+    this.monthButtons[this.pickerFocus]?.focus()
+  }
+
+  private closePicker(restoreFocus = true) {
+    if (!this.pickerOpen) return
+    this.pickerOpen = false
+    this.ownerDocument.removeEventListener('pointerdown', this.handleOutsidePointer, true)
+    if (restoreFocus) this.renderRoot.querySelector<HTMLButtonElement>('.title-button')?.focus()
+  }
+
+  private pickMonth(month: number) {
+    this.showMonth(new Date(this.pickerYear, month, 1, 12))
+    this.closePicker()
+  }
+
+  private async movePickerFocus(month: number) {
+    const year = this.pickerYear + Math.floor(month / 12)
+    this.pickerYear = year
+    this.pickerFocus = ((month % 12) + 12) % 12
+    await this.updateComplete
+    this.monthButtons[this.pickerFocus]?.focus()
+  }
+
+  private handlePickerKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      this.closePicker()
+      return
+    }
+    if (!(event.target as HTMLElement).classList.contains('picker-month')) return
+    const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -4, ArrowDown: 4, PageUp: -12, PageDown: 12 }
+    let target = event.key in moves ? this.pickerFocus + moves[event.key] : null
+    if (event.key === 'Home') target = 0
+    if (event.key === 'End') target = 11
+    if (target === null) return
+    event.preventDefault()
+    this.movePickerFocus(target)
+  }
+
+  private handlePickerFocusout(event: FocusEvent) {
+    const next = event.relatedTarget as Node | null
+    if (next && !this.renderRoot.contains(next)) this.closePicker(false)
+  }
+
+  private renderPicker(locale: string) {
+    const marked = this.markedMonths()
+    const year = this.pickerYear
+    const short = new Intl.DateTimeFormat(locale, { month: 'short' })
+    const long = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' })
+    const now = new Date()
+    const shown = this.visibleMonth
+    const keys = [...marked]
+    const earlier = keys.some((key) => key < `${year}-01`)
+    const later = keys.some((key) => key > `${year}-12`)
+    return html`<div class="picker" role="dialog" aria-label="Choose a month" @keydown=${this.handlePickerKeydown} @focusout=${this.handlePickerFocusout}>
+      <div class="picker-year">
+        <button
+          class="nav"
+          type="button"
+          aria-label=${earlier ? 'Previous year, has events' : 'Previous year'}
+          @click=${() => this.movePickerFocus(this.pickerFocus - 12)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+          ${earlier ? html`<span class="marker" aria-hidden="true"></span>` : nothing}
+        </button>
+        <span class="picker-year-label" aria-live="polite">${year}</span>
+        <button
+          class="nav"
+          type="button"
+          aria-label=${later ? 'Next year, has events' : 'Next year'}
+          @click=${() => this.movePickerFocus(this.pickerFocus + 12)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+          ${later ? html`<span class="marker" aria-hidden="true"></span>` : nothing}
+        </button>
+      </div>
+      <div class="picker-months">
+        ${Array.from({ length: 12 }, (_, month) => {
+          const date = new Date(year, month, 1, 12)
+          const hasEvents = marked.has(toMonth(date))
+          const selected = year === shown.getFullYear() && month === shown.getMonth()
+          const current = year === now.getFullYear() && month === now.getMonth()
+          const label = [long.format(date), hasEvents ? 'has events' : '', current ? 'this month' : ''].filter(Boolean).join(', ')
+          return html`<button
+            class="picker-month ${hasEvents ? 'marked' : ''} ${selected ? 'selected' : ''} ${current ? 'current' : ''}"
+            type="button"
+            aria-label=${label}
+            aria-current=${selected ? 'true' : nothing}
+            tabindex=${month === this.pickerFocus ? '0' : '-1'}
+            @click=${() => this.pickMonth(month)}
+          >
+            <span>${short.format(date)}</span>
+            <span class="marker" aria-hidden="true"></span>
+          </button>`
+        })}
+      </div>
+    </div>`
   }
 
   private get firstGridDay() {
@@ -251,7 +406,22 @@ export class Calendar extends LitElement {
 
     return html`<section class="c2-calendar" aria-label=${this.ariaLabel || title}>
       <header class="header">
-        <h2 class="title" aria-live="polite">${title}</h2>
+        <h2 class="title" aria-live="polite">
+          ${
+            this.monthPicker
+              ? html`<button
+                  class="title-button"
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-expanded=${this.pickerOpen ? 'true' : 'false'}
+                  @click=${() => (this.pickerOpen ? this.closePicker() : this.openPicker())}
+                >
+                  ${title}
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>`
+              : title
+          }
+        </h2>
         <div class="navigation">
           <button class="nav" type="button" aria-label="Previous month" @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, -1))}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
@@ -261,6 +431,7 @@ export class Calendar extends LitElement {
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
           </button>
         </div>
+        ${this.monthPicker && this.pickerOpen ? this.renderPicker(locale) : nothing}
       </header>
       <div class="weekdays" aria-hidden="true">${Array.from({ length: 7 }, (_, index) => html`<span>${weekdays.format(addDays(first, index))}</span>`)}</div>
       <div class="weeks">${Array.from({ length: weeks }, (_, week) => this.renderWeek(addDays(first, week * 7), today, dateLabel))}</div>
