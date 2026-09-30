@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OTP Input</title>
+    <script type="module" src="/src/otp-input.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+      }
+      .pill {
+        --c2-otp-input__cell--border-radius: 999px;
+        --c2-otp-input__cell__focus--border: 1px solid #7c3aed;
+        --c2-otp-input__cell__focus--outline: 3px solid rgba(124, 58, 237, 0.25);
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <c2-otp-input aria-label="Verification code"></c2-otp-input>
+      <c2-otp-input aria-label="Grouped code" group="3" value="482"></c2-otp-input>
+      <c2-otp-input aria-label="Recovery code" mode="alphanumeric" length="8" group="4" placeholder="·"></c2-otp-input>
+      <c2-otp-input aria-label="PIN" length="4" masked value="12"></c2-otp-input>
+      <c2-otp-input aria-label="Expired code" length="4" value="9031" error error-text="That code has expired."></c2-otp-input>
+      <c2-otp-input aria-label="Read-only code" length="4" value="5520" readonly></c2-otp-input>
+      <c2-otp-input class="pill" aria-label="Themed code" length="4"></c2-otp-input>
+    </main>
+    <script type="module">
+      document.querySelector('c2-otp-input').addEventListener('complete', (event) => console.log('complete', event.detail.value))
+    </script>
+  </body>
+</html>

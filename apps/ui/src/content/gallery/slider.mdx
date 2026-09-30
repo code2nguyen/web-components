@@ -62,6 +62,18 @@ Curated looks for `c2-slider`. Open any card in the studio to start from it. The
 <c2-slider min="0" max="10" step="1" value="6" ticks show-value style="width: 220px" aria-label="Ticks"></c2-slider>
 ```
 
+```html tag=MdxCodeBlock,label=Price range
+<style>
+  .price-range {
+    width: 220px;
+    margin-top: 20px;
+    --c2-slider__track--height: 6px;
+    --c2-slider__value--opacity: 1;
+  }
+</style>
+<c2-slider class="price-range" mode="range" value-start="25" value-end="75" show-value aria-label="Price"></c2-slider>
+```
+
 ```html tag=MdxCodeBlock,label=Always visible value
 <style>
   .readout {
