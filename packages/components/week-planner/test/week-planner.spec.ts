@@ -38,6 +38,8 @@ test('marks today with a tinted column and a now line', async ({ page, scenario 
   await expect(column).toHaveCSS('background-color', 'rgba(2, 101, 220, 0.05)')
   // The tint stays inside the column's border: the grid line keeps its own colour.
   await expect(column).toHaveCSS('background-clip', 'padding-box')
+  // Hour lines are translucent, so they still show over the tint instead of blending into it.
+  await expect(column.locator('.hour-line').first()).toHaveCSS('border-bottom-color', 'rgba(24, 24, 27, 0.06)')
   await expect(planner.locator('.now')).toHaveCount(1)
 })
 

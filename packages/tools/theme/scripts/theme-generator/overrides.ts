@@ -56,9 +56,10 @@ export const overrides: Record<string, Override> = {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
   },
+  // Translucent text colour rather than an opaque grey, so the line still shows over today's tinted column.
   '--c2-week-planner__hour--border': {
-    token: 'color-surface-container',
-    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-surface-container, #f4f4f5)',
+    token: 'color-on-surface',
+    value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent)',
   },
   '--c2-calendar__day__today--background': {
     token: 'color-primary',

@@ -133,7 +133,7 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @cssproperty {font-family} [--c2-week-planner--font-family=inherit]
  * @cssproperty {font-size} [--c2-week-planner--font-size=14px]
  * @cssproperty {border} [--c2-week-planner__grid--border=1px solid #e4e4e7] - Lines between the day columns.
- * @cssproperty {border} [--c2-week-planner__hour--border=1px solid #f4f4f5] - Line under each hour.
+ * @cssproperty {border} [--c2-week-planner__hour--border=1px solid rgba(24, 24, 27, 0.06)] - Line under each hour. Translucent, so it stays visible over today's tint.
  * @cssproperty {pixel} [--c2-week-planner__hour--height=48px]
  * @cssproperty {pixel} [--c2-week-planner__hour-label--width=48px]
  * @cssproperty {color} [--c2-week-planner__hour-label--color=#71717a]
