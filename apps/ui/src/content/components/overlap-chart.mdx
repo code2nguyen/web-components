@@ -70,6 +70,7 @@ npm install @c2n/chart echarts
       class="plot"
       selectable
       selection="set"
+      labels="count-percent"
       data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'
     >
       <c2-chart-series field="web" label="Web app"></c2-chart-series>
@@ -137,7 +138,8 @@ exactly; the labels and the tooltip always show the exact counts. `layout="unifo
 every region has room for its label even when it is tiny or empty.
 
 A region too small for its number gets the number outside, joined to it by a leader line. `labels` switches the
-numbers between `count`, `percent` (share of all members) and `none`.
+numbers between `count`, `percent` (share of all members), `count-percent` (both, as in the "Click a circle" example)
+and `none`.
 
 ## Interaction
 
@@ -168,8 +170,9 @@ clears the selection. None of these events bubble, so listen on the element itse
 </script>
 ```
 
-The legend switches a set off and lays the diagram out again without it; with `legend-action="highlight"` a click
-highlights the set instead, as `highlighted` does. The plot is one tab stop: the arrow keys move
+Every circle is named beside it, so the chart shows no separate legend by default; `legend="bottom"` (or `top`,
+`start`, `end`) adds one. A legend click highlights the set, as `highlighted` does; with `legend-action="toggle"` it
+switches the set off and lays the diagram out again without it. The plot is one tab stop: the arrow keys move
 through the sets and then the regions from the largest to the smallest, Enter selects, and Escape clears. A table of
 every region is rendered for assistive technology.
 

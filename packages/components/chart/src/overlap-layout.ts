@@ -191,6 +191,17 @@ function intersectionPath(members: readonly OverlapCircle[], clockwise: boolean)
 }
 
 /**
+ * The part of circle `a` outside circle `b`, as SVG path data under the non-zero rule: `a` wound one way and the
+ * lens they share the other way, so the lens cancels out. `a` itself when they do not meet, `''` when `b` covers `a`.
+ */
+export function differencePath(a: OverlapCircle, b: OverlapCircle): string {
+  const lens = intersectionPath([a, b], false)
+  if (!lens) return circlePath(a, true)
+  if (Math.hypot(a.x - b.x, a.y - b.y) + a.radius <= b.radius) return ''
+  return `${circlePath(a, true)} ${lens}`
+}
+
+/**
  * The outline of the exclusive region `mask` (inside exactly those circles), as SVG path data that fills
  * and hit-tests correctly under the non-zero rule. `''` when the region does not exist in this layout.
  */

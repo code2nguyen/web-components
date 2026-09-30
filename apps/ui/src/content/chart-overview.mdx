@@ -193,9 +193,9 @@ own tooltip bubble, which still follows the pointer. Update slotted content from
 
 ### Hide or highlight from the legend
 
-A legend click hides or shows its series by default. With `legend-action="highlight"` it emphasises the series
-instead and fades the others back to `--c2-chart__series__dimmed--opacity` (0.25); a second click clears it. Every
-chart supports both modes: pie charts highlight a slice, overlap charts a whole set. The chart fires `series-highlight`
+A legend click highlights its series by default: the series stays at full strength and the others fade back to
+`--c2-chart__series__dimmed--opacity` (0.25); a second click clears it. With `legend-action="toggle"` the click hides
+or shows the series instead. Every chart supports both modes: pie charts highlight a slice, overlap charts a whole set. The chart fires `series-highlight`
 with the key, and `highlighted` holds it: the series `field`, the slice label, or the set key. Setting `highlighted`
 from the application does the same in either mode. A linked `c2-chart-legend` follows the chart's mode.
 
@@ -284,11 +284,11 @@ chart.dataSource = source
 ## Events and interaction
 
 Every chart reports `chart-ready`, `chart-error`, `point-click`, `point-hover`, `tooltip-change`,
-`legend-change` and `series-toggle`. Cartesian charts also emit `range-change` after zooming or brushing.
+`legend-change`, `series-highlight` and `series-toggle`. Cartesian charts also emit `range-change` after zooming or brushing.
 Point and range events do not bubble, so attach listeners to the chart itself. Use `data-chart-ready` as the
 stable test signal after the first frame is drawn.
 
-Hover a point or toggle a legend item below to see the same semantic event model used by external presenters.
+Hover a point, or click a series or a legend item below, to see the same semantic event model used by external presenters.
 
 ```html tag=MdxCodeBlock,label=Semantic event stream
 <style>

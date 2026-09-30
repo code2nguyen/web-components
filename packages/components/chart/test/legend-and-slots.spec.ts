@@ -314,10 +314,17 @@ test("a linked c2-chart-legend follows the chart's legend-action", async ({ page
   await expect(legend.locator('.item').first()).toHaveClass(/item--dimmed/)
 })
 
-test('the default legend-action still hides the clicked series', async ({ page, scenario }) => {
+test('the default legend-action is highlight, and toggle still hides the clicked series', async ({ page, scenario }) => {
   await scenario('empty')
   await mount(page, cases[0], '')
   const chart = page.locator('#subject')
+  await chart.locator('.legend-item').first().click()
+  await expect.poll(() => chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBe('s0')
+  await chart.locator('.legend-item').first().click()
+  await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
   await chart.locator('.legend-item').first().click()
   await expect(chart.locator('.legend-item').first()).toHaveAttribute('aria-pressed', 'false')
   await expect(chart.locator('.legend-item').first()).toHaveClass(/legend-item--dimmed/)

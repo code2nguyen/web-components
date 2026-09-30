@@ -14,6 +14,7 @@ import {
   OVERLAP_MAX_SETS,
   fitOverlap,
   boxesOverlap,
+  differencePath,
   leaderEnd,
   regionLabelPoint,
   regionPath,
@@ -96,6 +97,8 @@ interface OverlapModel {
 
 interface OverlapLabel {
   text: string
+  /** A second, smaller line under `text`: the share, with `labels="count-percent"`. */
+  secondary?: string
   x: number
   y: number
   align: 'left' | 'center' | 'right'
@@ -221,8 +224,8 @@ export class OverlapChart extends EchartsChartBase {
    */
   @property({ type: String }) layout: OverlapLayoutMode = 'proportional'
 
-  /** What each region shows: its member count, its share of all members, or nothing. */
-  @property({ type: String }) labels: 'count' | 'percent' | 'none' = 'count'
+  /** What each region shows: its member count, its share of all members, both (`6,140 · 23.3%`), or nothing. */
+  @property({ type: String }) labels: 'count' | 'percent' | 'count-percent' | 'none' = 'count'
 
   /** Lets the reader select a region by clicking it or pressing Enter, which fires `selection-change`. */
   @property({ type: Boolean }) selectable = false
@@ -270,6 +273,8 @@ export class OverlapChart extends EchartsChartBase {
     super()
     // A region has no x position to follow, so the tooltip describes the hovered region only.
     this.tooltip = 'item'
+    // Every circle is named beside it, so a legend would say the same thing a second time. `legend` still adds one.
+    this.legend = 'none'
   }
 
   // ----------------------------------------------------------- public API ---
@@ -760,27 +765,31 @@ export class OverlapChart extends EchartsChartBase {
     }
     const obstacles: OverlapBox[] = setLabels.map(setBox)
 
-    const textBox = (x: number, y: number, textWidth: number, align: OverlapLabel['align']): OverlapBox => {
-      const h = lineHeight(style.regionFontSize)
+    const textBox = (x: number, y: number, textWidth: number, align: OverlapLabel['align'], h = lineHeight(style.regionFontSize)): OverlapBox => {
       const x1 = align === 'center' ? x - textWidth / 2 : align === 'left' ? x : x - textWidth
       return { x1, y1: y - h / 2, x2: x1 + textWidth, y2: y + h / 2 }
     }
-    const pending: { region: OverlapRegion; text: string; textWidth: number; point: OverlapPoint }[] = []
+    const secondarySize = Math.round(style.regionFontSize * 0.86)
+    const pending: { region: OverlapRegion; text: string; secondary?: string; textWidth: number; textHeight: number; point: OverlapPoint }[] = []
     for (const region of model.drawn) {
       paths.set(region.mask, regionPath(circles, region.mask))
       const point = regionLabelPoint(circles, region.mask)
       if (!point) continue
       anchors.set(region.mask, point)
       if (this.labels === 'none' || (region.size === 0 && this.layout === 'proportional')) continue
+      // With both, the count stays the headline and the share goes on a smaller second line, which keeps the label
+      // narrow enough to stay inside most regions.
       const text = this.labels === 'percent' ? this.#formatShare(region.share) : this.#formatCount(region.size)
+      const secondary = this.labels === 'count-percent' ? this.#formatShare(region.share) : undefined
       const weight = region.size === 0 ? 400 : 500
-      const textWidth = measure(text, style.regionFontSize, weight)
+      const textWidth = Math.max(measure(text, style.regionFontSize, weight), secondary ? measure(secondary, secondarySize, 400) : 0)
+      const textHeight = lineHeight(style.regionFontSize) + (secondary ? lineHeight(secondarySize) : 0)
       // Inside when the whole text box fits in the clear disc around the region's centre, corners included.
-      if (point.clearance >= Math.hypot(textWidth / 2, style.regionFontSize * 0.55) + 1) {
-        labels.set(region.mask, { text, x: point.x, y: point.y, align: 'center' })
-        obstacles.push(textBox(point.x, point.y, textWidth, 'center'))
+      if (point.clearance >= Math.hypot(textWidth / 2, textHeight / 2) + 1) {
+        labels.set(region.mask, { text, secondary, x: point.x, y: point.y, align: 'center' })
+        obstacles.push(textBox(point.x, point.y, textWidth, 'center', textHeight))
       } else {
-        pending.push({ region, text, textWidth, point })
+        pending.push({ region, text, secondary, textWidth, textHeight, point })
       }
     }
 
@@ -788,7 +797,7 @@ export class OverlapChart extends EchartsChartBase {
     // tried points away from the diagram's centre; the rest fan out from it until one is clear of every label.
     const offsets = [0, 25, -25, 50, -50, 75, -75, 105, -105, 140, -140, 180].map((degrees) => (degrees * Math.PI) / 180)
     const cx = circles.reduce((sum, c) => sum + c.x, 0) / circles.length
-    for (const { region, text, textWidth, point } of pending) {
+    for (const { region, text, secondary, textWidth, textHeight, point } of pending) {
       const outward = Math.atan2(point.y - cy, point.x - cx || 1e-6)
       // Among the spots clear of every other label, the shortest leader wins; touching a circle counts as 40px
       // of extra line, so a short line across an outline beats a long one around it.
@@ -801,8 +810,8 @@ export class OverlapChart extends EchartsChartBase {
         const end = leaderEnd(circles, point, 10, { x: Math.cos(angle), y: Math.sin(angle) })
         const align = end.direction.x >= 0 ? 'left' : 'right'
         const x = end.x + (align === 'left' ? 4 : -4)
-        const box = textBox(x, end.y, textWidth, align)
-        const label: OverlapLabel = { text, x, y: end.y, align, leader: { from: point, to: { x: end.x, y: end.y } } }
+        const box = textBox(x, end.y, textWidth, align, textHeight)
+        const label: OverlapLabel = { text, secondary, x, y: end.y, align, leader: { from: point, to: { x: end.x, y: end.y } } }
         fallback ??= label
         const inside = box.x1 >= 2 && box.x2 <= width - 2 && box.y1 >= 0 && box.y2 <= height
         if (!inside || obstacles.some((other) => boxesOverlap(box, other, 3))) continue
@@ -834,12 +843,17 @@ export class OverlapChart extends EchartsChartBase {
     if (!active || active === set.key) {
       children.push({ type: 'circle', shape, style: { fill: set.color, fillOpacity: active ? style.highlightFillOpacity : style.setFillOpacity } })
     } else {
-      // Another set is highlighted: this one takes the dimmed colour and fill style.
+      // Another set is highlighted: this one takes the dimmed colour and fill style, but only outside the highlighted
+      // circle, so the areas it shares with that set read as part of the highlight rather than being painted over.
       const color = style.dimmedColor ?? set.color
+      const activeIndex = this.#model?.sets.findIndex((item) => item.key === active) ?? -1
+      const activeCircle = activeIndex >= 0 ? pixels?.circles[activeIndex] : undefined
+      const pathData = activeCircle ? differencePath(circle, activeCircle) : undefined
+      const outline = pathData === undefined ? { type: 'circle', shape } : pathData ? { type: 'path', shape: { pathData } } : undefined
       const pattern = style.dimmedFillStyle === 'hatch' || style.dimmedFillStyle === 'dots' ? patternFill(color, style.dimmedFillStyle) : undefined
-      if (pattern) children.push({ type: 'circle', shape, style: { fill: pattern, opacity: style.dimmedOpacity } })
-      else if (style.dimmedFillStyle !== 'none')
-        children.push({ type: 'circle', shape, style: { fill: color, fillOpacity: style.setFillOpacity * style.dimmedOpacity } })
+      if (outline && pattern) children.push({ ...outline, style: { fill: pattern, opacity: style.dimmedOpacity } })
+      else if (outline && style.dimmedFillStyle !== 'none')
+        children.push({ ...outline, style: { fill: color, fillOpacity: style.setFillOpacity * style.dimmedOpacity } })
     }
     // The selected set gets the same text-coloured wash a selected region gets, over its whole circle.
     if (this.selectedSet === set.key) {
@@ -890,7 +904,7 @@ export class OverlapChart extends EchartsChartBase {
         type: 'text',
         silent: true,
         style: {
-          text: label.text,
+          text: label.secondary ? `{main|${escapeRich(label.text)}}\n{share|${escapeRich(label.secondary)}}` : label.text,
           x: label.x,
           y: label.y,
           align: label.align,
@@ -899,6 +913,20 @@ export class OverlapChart extends EchartsChartBase {
           fontSize: style.regionFontSize,
           fontWeight: region.size === 0 ? 400 : 500,
           fontFamily: this.#fontFamily(theme),
+          ...(label.secondary
+            ? {
+                rich: {
+                  main: {
+                    fill: region.size === 0 ? theme.mutedColor : theme.color,
+                    fontSize: style.regionFontSize,
+                    fontWeight: region.size === 0 ? 400 : 500,
+                    fontFamily: this.#fontFamily(theme),
+                    align: label.align,
+                  },
+                  share: { fill: theme.mutedColor, fontSize: Math.round(style.regionFontSize * 0.86), fontFamily: this.#fontFamily(theme), align: label.align },
+                },
+              }
+            : {}),
         },
       })
     }

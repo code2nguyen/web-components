@@ -256,6 +256,10 @@ test('the legend switches a set off and lays the diagram out without it, keeping
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
   await chart.locator('.legend-item', { hasText: 'Public API' }).click()
   await expect.poll(() => chart.evaluate((element) => (element as OverlapElement).regions.length)).toBe(3)
   const regions = await chart.evaluate((element) => (element as OverlapElement).regions.map((r) => [r.sets.join('+'), r.size]))
@@ -368,4 +372,77 @@ test('selection="set" selects the whole circle under the pointer, the smallest f
   expect(await chart.evaluate((element) => (element as OverlapElement).selected)).toEqual([])
   // A redraw under the pointer used to leave ECharts handling events on elements whose data was gone.
   expect(errors).toEqual([])
+})
+
+test('the overlap chart has no legend by default, since every circle is named beside it', async ({ page, scenario }) => {
+  await scenario('empty')
+  await page.evaluate(() => {
+    const main = document.querySelector('main') as HTMLElement
+    main.innerHTML =
+      '<c2-overlap-chart id="subject"><c2-chart-series field="a" label="A"></c2-chart-series><c2-chart-series field="b" label="B"></c2-chart-series></c2-overlap-chart>'
+    ;(main.firstElementChild as HTMLElement & { data: unknown }).data = [
+      { sets: ['a'], size: 10 },
+      { sets: ['b'], size: 8 },
+      { sets: ['a', 'b'], size: 3 },
+    ]
+  })
+  const chart = page.locator('#subject')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart.locator('.legend')).toHaveCount(0)
+})
+
+test('labels="count-percent" shows the count with the share on a second line', async ({ page, scenario }) => {
+  await scenario('overlap')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const texts = await chart.evaluate(async (element) => {
+    element.setAttribute('labels', 'count-percent')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+    type Item = { children: { type: string; style: { text?: string } }[] } | null
+    const subject = element as unknown as { buildOptions(c: unknown): { series: { renderItem(p: object, api: object): Item }[] }; buildContext(): unknown }
+    const series = subject.buildOptions(subject.buildContext()).series[1]
+    const api = { getWidth: () => 640, getHeight: () => 320 }
+    return [0, 2].map((index) => series.renderItem({ dataIndex: index }, api)?.children.find((child) => child.type === 'text')?.style.text)
+  })
+  // The count is the headline, the share a smaller second line.
+  expect(texts).toEqual(['{main|10,130}\n{share|38.4%}', '{main|6,140}\n{share|23.3%}'])
+})
+
+test("the other circles' dimmed fill stays outside the highlighted circle", async ({ page, scenario }) => {
+  await scenario('overlap')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const result = await chart.evaluate(async (element) => {
+    element.setAttribute('highlighted', 'web')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+    type Item = { children: { type: string; shape: { pathData?: string } }[] }
+    const subject = element as unknown as { buildOptions(c: unknown): { series: { renderItem(p: object, api: object): Item }[] }; buildContext(): unknown }
+    const series = subject.buildOptions(subject.buildContext()).series[0]
+    const api = { getWidth: () => 640, getHeight: () => 320 }
+    const mobile = series.renderItem({ dataIndex: 1 }, api).children[0]
+    const path = new Path2D(mobile.shape.pathData ?? '')
+    const layout = window.chartScenario.overlapLayout
+    const pixels = (element as unknown as { tooltipContextAt(d: object): { px: number; py: number } }).tooltipContextAt({
+      index: 2,
+      seriesIndex: 1,
+      px: 0,
+      py: 0,
+    })
+    const mobileOnly = (element as unknown as { tooltipContextAt(d: object): { px: number; py: number } }).tooltipContextAt({
+      index: 1,
+      seriesIndex: 1,
+      px: 0,
+      py: 0,
+    })
+    const context = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D
+    void layout
+    return {
+      type: mobile.type,
+      // The web + mobile overlap is part of the highlight, so mobile's dimmed fill must leave it alone...
+      inShared: context.isPointInPath(path, pixels.px, pixels.py, 'nonzero'),
+      // ...while the part of mobile outside web is still dimmed.
+      inMobileOnly: context.isPointInPath(path, mobileOnly.px, mobileOnly.py, 'nonzero'),
+    }
+  })
+  expect(result).toEqual({ type: 'path', inShared: false, inMobileOnly: true })
 })

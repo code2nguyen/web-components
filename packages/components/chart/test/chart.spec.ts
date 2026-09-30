@@ -194,6 +194,8 @@ test('legend toggles a series and fires series-toggle without bubbling', async (
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
 
   const result = await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
     let onElement = 0
     let onDocument = 0
     element.addEventListener('series-toggle', () => (onElement += 1))
@@ -221,6 +223,10 @@ test('links independently positioned legend and tooltip elements by id', async (
   const labels = await legend.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.item') ?? [])].map((item) => item.textContent?.trim()))
   expect(labels).toEqual(['First', 'Second'])
 
+  await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
   await legend.evaluate((element) => (element.shadowRoot?.querySelector('.item') as HTMLButtonElement).click())
   await expect.poll(() => legend.evaluate((element) => element.shadowRoot?.querySelector('.item')?.getAttribute('aria-pressed'))).toBe('false')
 
@@ -572,6 +578,10 @@ test("lists a pie chart's slices in the legend, and toggles one", async ({ page,
   const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
   expect(labels.length).toBeGreaterThan(1)
 
+  await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
   await chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.click())
   await expect
     .poll(() => chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.getAttribute('aria-pressed')))

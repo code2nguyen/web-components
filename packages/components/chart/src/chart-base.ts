@@ -144,8 +144,8 @@ export interface ChartBase {
  * @event {CustomEvent<ChartTooltipContext | null>} tooltip-change - Fired with the complete tooltip model as the pointer moves, and with `null` when it leaves. Used by `c2-chart-tooltip`.
  * @event {CustomEvent<ChartLegendChangeEventDetail>} legend-change - Fired when legend entries or visibility change. Used by `c2-chart-legend`.
  * @event {CustomEvent<ChartRangeEventDetail>} range-change - Fired after the user zooms or brushes. `detail.min` and `detail.max` are the new x bounds. Does not bubble.
- * @event {CustomEvent<ChartSeriesToggleEventDetail>} series-toggle - Fired when a legend entry is toggled. Does not bubble.
- * @event {CustomEvent<ChartSeriesHighlightEventDetail>} series-highlight - Fired when the reader highlights a series from the legend in `legend-action="highlight"` mode, or clears it. `detail.key` names it, or is `null`. Does not bubble.
+ * @event {CustomEvent<ChartSeriesToggleEventDetail>} series-toggle - Fired when a series is hidden or shown, from the legend with `legend-action="toggle"` or through `setSeriesVisible`. Does not bubble.
+ * @event {CustomEvent<ChartSeriesHighlightEventDetail>} series-highlight - Fired when the reader highlights a series, from the legend or by clicking it in the plot, or clears the highlight. `detail.key` names it, or is `null`. Does not bubble.
  *
  * @csspart frame - The outer flex column holding the legend and the plot area.
  * @csspart plot-area - The positioned box the engine draws into.
@@ -205,7 +205,7 @@ export interface ChartBase {
  * @cssproperty {padding} [--c2-chart__legend--padding=8px 0 0] - Padding around the legend.
  * @cssproperty {color} [--c2-chart__legend--color=#71717a] - Legend text colour.
  * @cssproperty {font-size} [--c2-chart__legend--font-size=12px] - Legend font size.
- * @cssproperty {opacity} [--c2-chart__legend__disabled--opacity=0.38] - Opacity of a legend entry whose series is hidden, or, in `legend-action="highlight"` mode, of the entries that are not highlighted.
+ * @cssproperty {opacity} [--c2-chart__legend__disabled--opacity=0.38] - Opacity of the legend entries that are not highlighted while one is, or, with `legend-action="toggle"`, of an entry whose series is hidden.
  * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  * @cssproperty {pixel} [--c2-chart__legend-marker--size=10px] - Size of the legend colour swatch.
  * @cssproperty {border-radius} [--c2-chart__legend-marker--border-radius=999px] - Corner radius of the legend colour swatch.
@@ -265,10 +265,11 @@ export abstract class ChartBase extends LitElement {
   @property({ type: String }) legend: 'none' | 'top' | 'bottom' | 'start' | 'end' = 'bottom'
 
   /**
-   * What clicking a legend entry does. `toggle` (the default) hides or shows the series; `highlight` emphasises it
-   * and dims the others, and a second click clears the highlight. A linked `c2-chart-legend` follows the same mode.
+   * What clicking a legend entry does. `highlight` (the default) emphasises the series and dims the others, and a
+   * second click clears the highlight, just as a click on the series in the plot does; `toggle` hides or shows the
+   * series instead. A linked `c2-chart-legend` follows the same mode.
    */
-  @property({ type: String, attribute: 'legend-action' }) legendAction: 'toggle' | 'highlight' = 'toggle'
+  @property({ type: String, attribute: 'legend-action' }) legendAction: 'toggle' | 'highlight' = 'highlight'
 
   /**
    * Key of the series drawn emphasised, the others dimmed: the series `field`, or a pie's slice label, or an overlap
