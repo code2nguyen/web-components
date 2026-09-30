@@ -54,6 +54,11 @@ export interface ChartFrame {
   revision: number
   /** Category labels, when the x axis is categorical (`x-type="category"`, pie, gauge). */
   labels?: string[]
+  /**
+   * Per-row measures that are not series, keyed by field — the bubble chart's size. Each column is aligned
+   * with `x` and grows, shifts and trims with it.
+   */
+  extras?: Record<string, ChartColumn>
 }
 
 /** Marks a value as a `ChartFrame` without an `instanceof` check surviving a bundler boundary. */
@@ -127,6 +132,8 @@ export interface ChartPointEventDetail {
   y: number | null
   /** The category label, when the chart is categorical. */
   label?: string
+  /** The size measure, on a chart that has one (the bubble chart). */
+  size?: number | null
 }
 
 /** One row of the tooltip: a series and its value at the hovered index. */
@@ -152,6 +159,12 @@ export interface ChartTooltipContext {
   /** Position within the plot area, in CSS pixels. */
   px: number
   py: number
+  /** The row's label (`label-field`), on a chart whose points are named rather than placed by it. */
+  label?: string
+  /** The hovered point's size measure, on a chart that has one (the bubble chart). */
+  size?: number | null
+  /** `size` formatted for display. */
+  formattedSize?: string
 }
 
 /** Detail of the `range-change` event. */

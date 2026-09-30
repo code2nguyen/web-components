@@ -1,0 +1,64 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    bubble--opacity: 0.5,
+    bubble__hover--opacity: 0.85,
+    bubble--border-width: 1px,
+    bubble--min-size: 8px,
+    bubble--max-size: 64px,
+    bubble-label--color: #27272a,
+    bubble-label--font-size: 11px,
+    size-legend--color: #71717a,
+  )
+);
+
+// The size key sits after the series entries in the built-in legend, pushed to its far end.
+.size-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+  color: css.cssVar(size-legend--color);
+}
+
+.size-legend svg {
+  display: block;
+  overflow: visible;
+}
+
+.size-legend circle {
+  fill: none;
+  stroke: currentColor;
+}
+
+.size-legend line {
+  stroke: currentColor;
+  stroke-dasharray: 1 2;
+}
+
+.size-legend text {
+  fill: currentColor;
+  font-size: 11px;
+}
+
+.tooltip-subtitle {
+  opacity: 0.72;
+}
+
+/*
+ * Theme probes, read by `bubbleStyle()`. Computed values resolve `var()` chains and relative lengths into what
+ * the engine accepts; `display: none` keeps them free. The border needs a style, or its computed width is 0.
+ */
+.bubble-probe {
+  display: none;
+  color: css.cssVar(bubble-label--color);
+  font-size: css.cssVar(bubble-label--font-size);
+  width: css.cssVar(bubble--min-size);
+  height: css.cssVar(bubble--max-size);
+  border-top: css.cssVar(bubble--border-width) solid;
+  opacity: css.cssVar(bubble--opacity);
+}
+
+.bubble-probe--hover {
+  opacity: css.cssVar(bubble__hover--opacity);
+}

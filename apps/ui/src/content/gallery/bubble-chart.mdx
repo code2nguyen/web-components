@@ -1,0 +1,51 @@
+---
+title: 'Bubble chart gallery'
+description: 'Bubble charts with grouped rows, labels inside the bubbles and a compact card.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { BubbleChart } from '@c2n/chart/bubble-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+<ExampleModules />
+
+The default example plots approximate, rounded 2023 figures after the World Bank's [World Development Indicators](https://databank.worldbank.org/source/world-development-indicators) (GDP per capita in current US$, life expectancy at birth, population in millions); check the source before reusing them. The asset-class example is illustrative.
+
+<GalleryGrid min="440">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-bubble-chart x-field="gdp" y-field="life" size-field="pop" size-label="Population (M)" label-field="country" series-field="region" x-scale="log" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"South Africa","region":"Africa","gdp":6020,"life":62.3,"pop":60},{"country":"Kenya","region":"Africa","gdp":1950,"life":62.7,"pop":55},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"Colombia","region":"Americas","gdp":6980,"life":77.7,"pop":52},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240},{"country":"Bangladesh","region":"Asia","gdp":2530,"life":72.4,"pop":173},{"country":"Vietnam","region":"Asia","gdp":4350,"life":74.6,"pop":99},{"country":"Germany","region":"Europe","gdp":52750,"life":81.0,"pop":84},{"country":"France","region":"Europe","gdp":44460,"life":82.8,"pop":68},{"country":"United Kingdom","region":"Europe","gdp":48870,"life":81.1,"pop":68},{"country":"Italy","region":"Europe","gdp":38370,"life":83.7,"pop":59},{"country":"Poland","region":"Europe","gdp":22110,"life":78.6,"pop":37},{"country":"Russia","region":"Europe","gdp":13820,"life":73.2,"pop":144}]'></c2-bubble-chart>
+```
+
+```html tag=MdxCodeBlock,label=Labels inside bubbles
+<style>
+  .bubble-labelled {
+    --c2-chart__bubble--opacity: 0.22;
+    --c2-chart__bubble--max-size: 88px;
+    --c2-chart__bubble-label--font-size: 11px;
+  }
+</style>
+<c2-bubble-chart class="bubble-labelled" x-field="vol" size-field="aum" size-label="AUM ($B)" label-field="asset" x-label="Volatility (%)" y-label="Expected return (%)" data='[{"asset":"Global equity","vol":16,"equity":8.2,"aum":900},{"asset":"EM equity","vol":23,"equity":9.6,"aum":260},{"asset":"Real estate","vol":14,"alternatives":6.4,"aum":180},{"asset":"Private credit","vol":9,"alternatives":7.4,"aum":150},{"asset":"Gold","vol":15,"alternatives":4.2,"aum":60},{"asset":"Core bonds","vol":5,"bonds":3.6,"aum":640},{"asset":"Cash","vol":1,"bonds":2.4,"aum":120}]'>
+  <c2-chart-series field="equity" label="Equity"></c2-chart-series>
+  <c2-chart-series field="bonds" label="Bonds"></c2-chart-series>
+  <c2-chart-series field="alternatives" label="Alternatives"></c2-chart-series>
+</c2-bubble-chart>
+```
+
+```html tag=MdxCodeBlock,label=Compact · no size key
+<style>
+  .bubble-compact {
+    --c2-chart--height: 260px;
+    --c2-chart__bubble--opacity: 0.7;
+    --c2-chart__bubble--border-width: 0;
+    --c2-chart__bubble--min-size: 6px;
+    --c2-chart__bubble--max-size: 40px;
+  }
+</style>
+<c2-bubble-chart class="bubble-compact" x-field="gdp" y-field="life" size-field="pop" label-field="country" series-field="region" x-scale="log" bubble-labels="none" size-legend="none" legend="top" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240}]'></c2-bubble-chart>
+```
+
+</GalleryGrid>
