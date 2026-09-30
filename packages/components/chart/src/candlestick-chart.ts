@@ -110,7 +110,7 @@ export class CandlestickChart extends EchartsChartBase {
         label: this.name,
         color: this.themeController.theme.positive,
         visible,
-        toggle: () => this.setSeriesVisible(0, !visible),
+        ...this.legendEntryState(this.openField, visible, (next) => this.setSeriesVisible(0, next)),
         series: { field: this.openField, label: this.name },
         index: 0,
       },

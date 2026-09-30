@@ -7,7 +7,7 @@ interface OverlapElement extends HTMLElement {
   regions: RegionDetail[]
   selected: string[]
   selectedSet: string | null
-  highlightedSet: string | null
+  highlighted: string | null
   layout: string
   updateComplete: Promise<boolean>
   projectData(frame: unknown, context: unknown): unknown[][]
@@ -223,7 +223,7 @@ test('a selectable chart selects a whole set from its name, and fires set-click'
   ])
 })
 
-test('a legend entry highlights its set while hovered, and highlighted-set does so from the application', async ({ page, scenario }) => {
+test('a legend entry highlights its set while hovered, and highlighted does so from the application', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
@@ -232,8 +232,8 @@ test('a legend entry highlights its set while hovered, and highlighted-set does 
   await expect.poll(active).toBe('api')
   await page.mouse.move(0, 0)
   await expect.poll(active).toBeNull()
-  await chart.evaluate((element) => element.setAttribute('highlighted-set', 'mobile'))
-  expect(await chart.evaluate((element) => (element as OverlapElement).highlightedSet)).toBe('mobile')
+  await chart.evaluate((element) => element.setAttribute('highlighted', 'mobile'))
+  expect(await chart.evaluate((element) => (element as OverlapElement).highlighted)).toBe('mobile')
 })
 
 test('a custom renderTooltip receives the hovered region or set', async ({ page, scenario }) => {
@@ -302,7 +302,7 @@ test('while one set is highlighted, the others take the dimmed colour and fill s
     chart.evaluate(async (element, fillStyle) => {
       element.style.setProperty('--c2-chart__set__dimmed--color', '#010203')
       element.style.setProperty('--c2-chart__set__dimmed--fill-style', fillStyle)
-      element.setAttribute('highlighted-set', 'web')
+      element.setAttribute('highlighted', 'web')
       await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
       type Item = { children: { style: Record<string, unknown> }[] }
       type Series = { renderItem(params: { dataIndex: number }, api: { getWidth(): number; getHeight(): number }): Item }

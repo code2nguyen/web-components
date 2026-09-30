@@ -290,7 +290,7 @@
   cursor: pointer;
 }
 
-.legend-item[aria-pressed='false'] {
+.legend-item--dimmed {
   opacity: css.cssVar(legend__disabled--opacity);
 }
 

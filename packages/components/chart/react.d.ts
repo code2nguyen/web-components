@@ -42,6 +42,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -55,6 +56,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -68,6 +70,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -87,6 +90,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -98,6 +102,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -107,10 +112,10 @@ declare module 'react' {
         'sets-field'?: Attribute
         'size-field'?: Attribute
         'selected-set'?: Attribute
-        'highlighted-set'?: Attribute
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -125,6 +130,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -137,6 +143,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -148,6 +155,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute
@@ -159,6 +167,7 @@ declare module 'react' {
         'x-field'?: Attribute
         'label-field'?: Attribute
         'x-type'?: Attribute
+        'legend-action'?: Attribute
         'empty-message'?: Attribute
         'max-points'?: Attribute
         'lazy-render'?: Attribute

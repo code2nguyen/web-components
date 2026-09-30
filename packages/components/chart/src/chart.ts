@@ -18,7 +18,7 @@ import './chart-series.js'
 import './chart-legend.js'
 import './chart-tooltip.js'
 
-export { ChartBase, type ChartEventMap, type ChartLegendChangeEventDetail, type ChartLegendItem } from './chart-base.js'
+export { ChartBase, type ChartEventMap, type ChartLegendChangeEventDetail, type ChartLegendItem, type ChartSeriesHighlightEventDetail } from './chart-base.js'
 export { UplotChartBase, type UplotSeriesStyle } from './uplot-chart-base.js'
 export { EchartsChartBase } from './echarts-chart-base.js'
 export { LineChart } from './line-chart.js'

@@ -17,6 +17,8 @@ export interface ChartBuildContext {
   hidden: ReadonlySet<number>
   /** Category labels, when the chart is categorical. */
   labels?: string[]
+  /** Index of the series the reader highlighted from the legend, or `-1`. The others are drawn dimmed. */
+  highlighted: number
   width: number
   height: number
 }

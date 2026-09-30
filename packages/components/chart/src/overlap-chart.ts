@@ -166,8 +166,8 @@ const SET_SERIES = 2
  * The legend switches a set off and lays the diagram out again without it. With more than three sets the chart
  * shows its error state, because circles cannot draw every region of four sets.
  *
- * Hovering a set's name, or its legend entry, highlights its whole circle; `highlighted-set` does the same from
- * the application (a row of a table next to the chart, say). On a `selectable` chart, clicking a region selects
+ * Hovering a set's name, or its legend entry, highlights its whole circle; `highlighted` does the same from the
+ * application (a row of a table next to the chart, say), and so does a legend click with `legend-action="highlight"`. On a `selectable` chart, clicking a region selects
  * that region and clicking a set's name selects the whole set.
  *
  * The plot is one tab stop: the arrow keys move through the sets and then the regions from the largest to the
@@ -240,9 +240,6 @@ export class OverlapChart extends EchartsChartBase {
 
   /** Key of the selected set: its whole circle is selected. Clears `selected` when the reader picks a set. */
   @property({ type: String, attribute: 'selected-set' }) selectedSet: string | null = null
-
-  /** Key of a set to highlight from the application, as hovering its name does. */
-  @property({ type: String, attribute: 'highlighted-set' }) highlightedSet: string | null = null
 
   /** Formats the counts in the labels and the tooltip. Falls back to the chart's number format. Property only. */
   @property({ attribute: false }) format?: (value: number) => string
@@ -975,7 +972,7 @@ export class OverlapChart extends EchartsChartBase {
   /** The set drawn emphasised, if any: the hovered one, else the focused one, else the one the application highlights. */
   #activeSet(): string | null {
     const visible = new Set(this.#computeModel()?.sets.map((set) => set.key))
-    for (const key of [this.hoveredSet, this.focusedSet, this.highlightedSet, this.selectedSet]) if (key && visible.has(key)) return key
+    for (const key of [this.hoveredSet, this.focusedSet, this.highlighted, this.selectedSet]) if (key && visible.has(key)) return key
     return null
   }
 

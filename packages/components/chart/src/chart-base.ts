@@ -54,7 +54,15 @@ const VIEW_ONLY_KEYS: ReadonlySet<string> = new Set([
 export interface ChartLegendItem {
   label: string
   color: string
+  /** Whether the entry's series (or slice, or set) is drawn at all. */
   visible: boolean
+  /** What `highlighted` names this entry by: the series field, a pie's slice label, an overlap chart's set key. */
+  key: string
+  /** The entry's pressed state under the chart's `legend-action`: shown in `toggle` mode, highlighted in `highlight` mode. */
+  pressed: boolean
+  /** Whether the entry is drawn faded: hidden in `toggle` mode, another entry highlighted in `highlight` mode. */
+  dimmed: boolean
+  /** Runs the chart's `legend-action` for this entry: hides or shows it, or highlights it or clears the highlight. */
   toggle: () => void
   series: ChartSeriesConfig
   index: number
@@ -90,6 +98,13 @@ export interface ChartEventMap {
   'legend-change': CustomEvent<ChartLegendChangeEventDetail>
   'range-change': CustomEvent<ChartRangeEventDetail>
   'series-toggle': CustomEvent<ChartSeriesToggleEventDetail>
+  'series-highlight': CustomEvent<ChartSeriesHighlightEventDetail>
+}
+
+/** Detail of `series-highlight`. */
+export interface ChartSeriesHighlightEventDetail {
+  /** Key of the highlighted series, slice or set, or `null` when the highlight was cleared. */
+  key: string | null
 }
 
 export interface ChartBase {
@@ -130,6 +145,7 @@ export interface ChartBase {
  * @event {CustomEvent<ChartLegendChangeEventDetail>} legend-change - Fired when legend entries or visibility change. Used by `c2-chart-legend`.
  * @event {CustomEvent<ChartRangeEventDetail>} range-change - Fired after the user zooms or brushes. `detail.min` and `detail.max` are the new x bounds. Does not bubble.
  * @event {CustomEvent<ChartSeriesToggleEventDetail>} series-toggle - Fired when a legend entry is toggled. Does not bubble.
+ * @event {CustomEvent<ChartSeriesHighlightEventDetail>} series-highlight - Fired when the reader highlights a series from the legend in `legend-action="highlight"` mode, or clears it. `detail.key` names it, or is `null`. Does not bubble.
  *
  * @csspart frame - The outer flex column holding the legend and the plot area.
  * @csspart plot-area - The positioned box the engine draws into.
@@ -189,7 +205,8 @@ export interface ChartBase {
  * @cssproperty {padding} [--c2-chart__legend--padding=8px 0 0] - Padding around the legend.
  * @cssproperty {color} [--c2-chart__legend--color=#71717a] - Legend text colour.
  * @cssproperty {font-size} [--c2-chart__legend--font-size=12px] - Legend font size.
- * @cssproperty {opacity} [--c2-chart__legend__disabled--opacity=0.38] - Opacity of a legend entry whose series is hidden.
+ * @cssproperty {opacity} [--c2-chart__legend__disabled--opacity=0.38] - Opacity of a legend entry whose series is hidden, or, in `legend-action="highlight"` mode, of the entries that are not highlighted.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  * @cssproperty {pixel} [--c2-chart__legend-marker--size=10px] - Size of the legend colour swatch.
  * @cssproperty {border-radius} [--c2-chart__legend-marker--border-radius=999px] - Corner radius of the legend colour swatch.
  *
@@ -246,6 +263,18 @@ export abstract class ChartBase extends LitElement {
    * unreadable without one, and a single-series chart simply renders a one-entry legend.
    */
   @property({ type: String }) legend: 'none' | 'top' | 'bottom' | 'start' | 'end' = 'bottom'
+
+  /**
+   * What clicking a legend entry does. `toggle` (the default) hides or shows the series; `highlight` emphasises it
+   * and dims the others, and a second click clears the highlight. A linked `c2-chart-legend` follows the same mode.
+   */
+  @property({ type: String, attribute: 'legend-action' }) legendAction: 'toggle' | 'highlight' = 'toggle'
+
+  /**
+   * Key of the series drawn emphasised, the others dimmed: the series `field`, or a pie's slice label, or an overlap
+   * chart's set key. Set by a legend click in `highlight` mode, and settable from the application in either mode.
+   */
+  @property({ type: String }) highlighted: string | null = null
 
   /** Whether the tooltip follows the whole x position or only the hovered datum. */
   @property({ type: String }) tooltip: 'none' | 'item' | 'axis' = 'axis'
@@ -496,6 +525,29 @@ export abstract class ChartBase extends LitElement {
     )
   }
 
+  /** Highlights a series, slice or set by key, or clears the highlight with `null`, and fires `series-highlight`. */
+  highlight(key: string | null): void {
+    if (this.highlighted === key) return
+    this.highlighted = key
+    this.dispatchEvent(new CustomEvent<ChartSeriesHighlightEventDetail>('series-highlight', { detail: { key } }))
+  }
+
+  /**
+   * The `key`, `pressed`, `dimmed` and `toggle` of one legend entry under the current `legend-action`. Every chart's
+   * `legendItems` goes through this, so a linked `c2-chart-legend` follows the mode without knowing it.
+   */
+  protected legendEntryState(
+    key: string,
+    visible: boolean,
+    setVisible: (visible: boolean) => void,
+  ): Pick<ChartLegendItem, 'key' | 'pressed' | 'dimmed' | 'toggle'> {
+    if (this.legendAction === 'highlight') {
+      const active = this.highlighted === key
+      return { key, pressed: active, dimmed: this.highlighted !== null && !active, toggle: () => this.highlight(active ? null : key) }
+    }
+    return { key, pressed: visible, dimmed: !visible, toggle: () => setVisible(!visible) }
+  }
+
   /** Current entries for a linked `c2-chart-legend`. */
   getLegendItems(): ChartLegendItem[] {
     return this.legendItems()
@@ -599,6 +651,7 @@ export abstract class ChartBase extends LitElement {
       series: this.resolvedSeries,
       hidden: this.hiddenSeries,
       labels: this.frame?.labels,
+      highlighted: this.highlighted === null ? -1 : this.resolvedSeries.findIndex((series) => series.field === this.highlighted),
       width: this.#measured.width || this.plotElement?.clientWidth || 0,
       height: this.#measured.height || this.plotElement?.clientHeight || 0,
     }
@@ -988,7 +1041,7 @@ export abstract class ChartBase extends LitElement {
       label: item.label ?? item.field,
       color: this.colorOf(item, index),
       visible: !this.hiddenSeries.has(index),
-      toggle: () => this.setSeriesVisible(index, this.hiddenSeries.has(index)),
+      ...this.legendEntryState(item.field, !this.hiddenSeries.has(index), (visible) => this.setSeriesVisible(index, visible)),
       series: item,
       index,
     }))
@@ -1015,10 +1068,10 @@ export abstract class ChartBase extends LitElement {
       this.legendItems().map(
         (item) => html`
           <button
-            class="legend-item"
+            class="legend-item ${item.dimmed ? 'legend-item--dimmed' : ''}"
             part="legend-item"
             type="button"
-            aria-pressed=${item.visible ? 'true' : 'false'}
+            aria-pressed=${item.pressed ? 'true' : 'false'}
             @click=${item.toggle}
             @pointerenter=${() => item.highlight?.(true)}
             @pointerleave=${() => item.highlight?.(false)}

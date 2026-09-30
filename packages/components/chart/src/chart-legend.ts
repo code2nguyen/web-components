@@ -56,10 +56,10 @@ export class ChartLegend extends ChartLinkedElement {
       this.items.map(
         (item) => html`
           <button
-            class="item"
+            class="item ${item.dimmed ? 'item--dimmed' : ''}"
             part="item"
             type="button"
-            aria-pressed=${item.visible ? 'true' : 'false'}
+            aria-pressed=${item.pressed ? 'true' : 'false'}
             @click=${() => item.toggle()}
             @pointerenter=${() => item.highlight?.(true)}
             @pointerleave=${() => item.highlight?.(false)}

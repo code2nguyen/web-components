@@ -5,6 +5,17 @@ import { createEchartsAdapter, type EchartsOptions } from './engines/echarts-ada
 import type { EchartsFeature } from './engines/echarts-loader.js'
 import type { ChartFrame } from './chart-types.js'
 
+/** Multiplies the opacity of every style block a series option can carry. */
+export function dimSeries(option: Record<string, unknown>, opacity: number): Record<string, unknown> {
+  const dimmed: Record<string, unknown> = { ...option }
+  for (const key of ['itemStyle', 'lineStyle', 'areaStyle', 'label']) {
+    const style = option[key] as { opacity?: number } | undefined
+    if (key === 'areaStyle' && !style) continue
+    dimmed[key] = { ...style, opacity: (style?.opacity ?? 1) * opacity }
+  }
+  return dimmed
+}
+
 /**
  * The ECharts half of the hierarchy. A concrete chart declares the engine modules it needs and how one
  * series is configured; everything else — theme, text styles, the disabled built-in tooltip and legend —
@@ -75,10 +86,11 @@ export abstract class EchartsChartBase extends ChartBase {
       // `dispatchAction('legendUnSelect')` is the only public way to toggle a series, so we register it.
       legend: { show: false },
       ...this.coordinateSystem(context),
-      series: series.map((item, index) => ({
-        name: item.label ?? item.field,
-        ...this.seriesOption(index, context),
-      })),
+      series: series.map((item, index) => {
+        const option = { name: item.label ?? item.field, ...this.seriesOption(index, context) }
+        // Another series is highlighted from the legend: this one fades back.
+        return context.highlighted >= 0 && index !== context.highlighted ? dimSeries(option, theme.dimmedOpacity) : option
+      }),
     }
     return options
   }

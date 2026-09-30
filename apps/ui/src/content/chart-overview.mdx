@@ -176,6 +176,41 @@ tooltip.renderTooltip = (context) => html`
 `
 ```
 
+### Slots
+
+Every chart also takes its legend and tooltip as slots, like its `empty`, `loading` and `error` states. Markup in
+`slot="legend"` replaces the generated entries in place, and markup in `slot="tooltip"` becomes the body of the chart's
+own tooltip bubble, which still follows the pointer. Update slotted content from the `legend-change` and
+`tooltip-change` events; `renderLegendItem` and `renderTooltip` on the chart are the function form of the same thing.
+
+```html tag=CodeBlock
+<c2-line-chart id="revenue" x-field="month" data="…">
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  <div slot="legend">Revenue, USD billions</div>
+  <div slot="tooltip"><strong class="month"></strong> <span class="value"></span></div>
+</c2-line-chart>
+```
+
+### Hide or highlight from the legend
+
+A legend click hides or shows its series by default. With `legend-action="highlight"` it emphasises the series
+instead and fades the others back to `--c2-chart__series__dimmed--opacity` (0.25); a second click clears it. Every
+chart supports both modes: pie charts highlight a slice, overlap charts a whole set. The chart fires `series-highlight`
+with the key, and `highlighted` holds it: the series `field`, the slice label, or the set key. Setting `highlighted`
+from the application does the same in either mode. A linked `c2-chart-legend` follows the chart's mode.
+
+```html tag=MdxCodeBlock,label=Highlight from the legend
+<c2-line-chart
+  x-field="year"
+  legend-action="highlight"
+  data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"netIncome":112.01}]'
+>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+  <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+</c2-line-chart>
+```
+
 ## Realtime updates
 
 The realtime path is shared and intentionally separate from presentation updates:

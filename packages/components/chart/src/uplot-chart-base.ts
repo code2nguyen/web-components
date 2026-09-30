@@ -114,6 +114,8 @@ export abstract class UplotChartBase extends ChartBase {
           show: !context.hidden.has(index),
           scale: item.axis === 'right' ? RIGHT_SCALE : undefined,
           ...this.seriesStyle(item, index, context),
+          // Another series is highlighted from the legend: this one fades back.
+          ...(context.highlighted >= 0 && index !== context.highlighted ? { alpha: theme.dimmedOpacity } : {}),
         })),
       ],
     }

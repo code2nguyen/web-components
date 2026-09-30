@@ -271,7 +271,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       {
         name: 'Focus view',
         description: 'One set highlighted, the others hatched in grey.',
-        attributes: { 'highlighted-set': 'api' },
+        attributes: { highlighted: 'api' },
         css: { '--c2-chart__set__dimmed--color': '#a1a1aa', '--c2-chart__set__dimmed--fill-style': 'hatch' },
       },
       {
