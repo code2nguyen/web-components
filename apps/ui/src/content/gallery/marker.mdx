@@ -1,0 +1,133 @@
+---
+description: 'Pen, highlighter and annotation looks for calling out words in headlines, pricing and changelogs.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Marker } from '@c2n/marker'
+
+## Presets
+
+The surrounding text sets the font; `c2-marker` only adds the mark. `--c2-marker__mark--background-color` colours the highlighter, and `--c2-marker__stroke--color` with `--c2-marker__stroke--width` shape every line and outline.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .marker-line-default {
+    max-width: 320px;
+    margin: 0;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+</style>
+<p class="marker-line-default">Deploys are <c2-marker>fully automated</c2-marker> from merge to production.</p>
+```
+
+```html tag=MdxCodeBlock,label=Hero headline
+<style>
+  .marker-hero {
+    max-width: 340px;
+    margin: 0;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .marker-hero c2-marker {
+    --c2-marker__stroke--color: #f97316;
+    --c2-marker__stroke--width: 3px;
+    --c2-marker__stroke--offset: 6px;
+    --c2-marker__mark--transition-duration: 1s;
+  }
+</style>
+<p class="marker-hero">Ship docs your team <c2-marker variant="circle" animated>actually reads</c2-marker></p>
+```
+
+```html tag=MdxCodeBlock,label=Soft pill
+<style>
+  .marker-pill-copy {
+    max-width: 320px;
+    margin: 0;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 16px;
+    line-height: 1.8;
+  }
+  .marker-pill {
+    --c2-marker__mark--background-color: rgba(139, 92, 246, 0.22);
+    --c2-marker__mark--border-radius: 999px;
+    --c2-marker__mark--padding: 1px 8px;
+  }
+</style>
+<p class="marker-pill-copy">Search now covers <c2-marker class="marker-pill">every workspace</c2-marker> you can open, including archived ones.</p>
+```
+
+```html tag=MdxCodeBlock,label=Price cut
+<style>
+  .marker-price {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .marker-price c2-marker {
+    --c2-marker__stroke--color: #dc2626;
+    --c2-marker__stroke--width: 3px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .marker-price small {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    font-size: 14px;
+    font-weight: 500;
+  }
+</style>
+<p class="marker-price"><c2-marker variant="strike-through">$49</c2-marker> $29 <small>/ month</small></p>
+```
+
+```html tag=MdxCodeBlock,label=Editor's note
+<style>
+  .marker-note {
+    max-width: 320px;
+    margin: 0;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .marker-note c2-marker {
+    --c2-marker__stroke--color: #16a34a;
+    --c2-marker__stroke--width: 1.5px;
+    --c2-marker__stroke--offset: 3px;
+  }
+</style>
+<p class="marker-note">Rate limits reset <c2-marker variant="box">every 60 seconds</c2-marker>, not every hour as the old guide said.</p>
+```
+
+```html tag=MdxCodeBlock,label=Warm highlighter
+<style>
+  .marker-warm-copy {
+    max-width: 320px;
+    margin: 0;
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .marker-warm {
+    --c2-marker__mark--background-color: rgba(251, 113, 133, 0.35);
+    --c2-marker__mark--border-radius: 2px;
+    --c2-marker__mark--transition-duration: 900ms;
+  }
+</style>
+<p class="marker-warm-copy">
+  Three things changed this week: <c2-marker class="marker-warm" animated>faster builds, smaller bundles and a new theme editor</c2-marker> that previews every token live.
+</p>
+```
+
+</GalleryGrid>

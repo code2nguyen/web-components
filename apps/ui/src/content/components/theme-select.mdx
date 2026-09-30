@@ -35,11 +35,11 @@ npm install @c2n/theme-select
 ```html tag=UsageBlock,package=@c2n/theme-select
 <style>
   .boxed {
-    --c2-theme-select__trigger--border: 1px solid #bcbcc6;
+    --c2-theme-select__trigger--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
   }
   .pill {
     --c2-theme-select__trigger--border-radius: 999px;
-    --c2-theme-select__trigger--background: #f4f4f5;
+    --c2-theme-select__trigger--background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 

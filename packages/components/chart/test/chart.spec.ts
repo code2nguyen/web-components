@@ -324,6 +324,27 @@ for (const [scenarioName, tag] of [
   })
 }
 
+test('fits the scatter axes to the data and themes the vertical grid lines', async ({ page, scenario }) => {
+  await scenario('scatter')
+  const scatter = page.locator('c2-scatter-chart')
+  await expect(scatter).toHaveAttribute('data-chart-ready', 'true')
+  const result = await scatter.evaluate(async (element) => {
+    const chart = element as unknown as {
+      style: CSSStyleDeclaration
+      updateComplete: Promise<boolean>
+      buildContext(): { theme: { gridColor: string } }
+      buildOptions(context: unknown): Record<'xAxis' | 'yAxis', { scale?: boolean; splitLine?: { lineStyle?: { color?: string } } }>
+    }
+    chart.style.setProperty('--c2-chart__grid--color', 'rgb(1, 2, 3)')
+    window.dispatchEvent(new Event('c2n-theme-change'))
+    await chart.updateComplete
+    const context = chart.buildContext()
+    const { xAxis, yAxis } = chart.buildOptions(context)
+    return { grid: context.theme.gridColor, x: [xAxis.scale, xAxis.splitLine?.lineStyle?.color], y: [yAxis.scale, yAxis.splitLine?.lineStyle?.color] }
+  })
+  expect(result).toEqual({ grid: 'rgb(1, 2, 3)', x: [true, 'rgb(1, 2, 3)'], y: [true, 'rgb(1, 2, 3)'] })
+})
+
 test('builds radar indicators and one profile per declared series', async ({ page, scenario }) => {
   await scenario('radar')
   const radar = page.locator('c2-radar-chart')

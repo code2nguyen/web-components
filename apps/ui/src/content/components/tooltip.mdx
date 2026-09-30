@@ -28,19 +28,19 @@ npm install @c2n/tooltip
     font-size: 13px;
     padding: 6px 12px;
     border-radius: 8px;
-    border: 1px solid #d4d4d8;
-    background: #ffffff;
-    color: #18181b;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
     cursor: pointer;
   }
   .trigger:hover {
-    background: #f4f4f5;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .clip {
     overflow: hidden;
     width: 200px;
     height: 56px;
-    border: 1px dashed #a1a1aa;
+    border: 1px dashed var(--c2-theme--color-outline-strong, #a1a1aa);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -52,9 +52,9 @@ npm install @c2n/tooltip
     font-size: 14px;
   }
   .light {
-    --c2-tooltip--background-color: #ffffff;
-    --c2-tooltip--color: #18181b;
-    --c2-tooltip--border: 1px solid #e4e4e7;
+    --c2-tooltip--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-tooltip--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-tooltip--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-tooltip--box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
   kbd {

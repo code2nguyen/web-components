@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-marker</title>
+    <script type="module" src="/src/marker.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 640px;
+        padding: 32px;
+        color: #18181b;
+        background: #fafafa;
+        font:
+          16px/1.7 system-ui,
+          sans-serif;
+      }
+      .red {
+        --c2-marker__stroke--color: #dc2626;
+      }
+      .mint {
+        --c2-marker__mark--background-color: rgba(16, 185, 129, 0.3);
+        --c2-marker__mark--border-radius: 999px;
+        --c2-marker__mark--padding: 0 6px;
+      }
+      .slow {
+        --c2-marker__mark--transition-duration: 1.4s;
+        --c2-marker__mark--transition-delay: 200ms;
+      }
+      .spacer {
+        height: 90vh;
+        color: #71717a;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Variants</h2>
+    <p>
+      <c2-marker>highlight</c2-marker> · <c2-marker variant="underline">underline</c2-marker> · <c2-marker variant="strike-through">strike-through</c2-marker> ·
+      <c2-marker variant="box">box</c2-marker> ·
+      <c2-marker variant="circle">circle</c2-marker>
+    </p>
+
+    <h2>Wrapping across lines</h2>
+    <p style="max-width: 280px">A highlight <c2-marker>follows the text when it wraps onto several lines of a narrow column</c2-marker> like a real pen.</p>
+
+    <h2>Themed</h2>
+    <p>
+      <c2-marker class="mint">Shipped</c2-marker> the release, <c2-marker class="red" variant="circle">three days early</c2-marker>, and
+      <c2-marker class="red" variant="strike-through">nothing</c2-marker> broke.
+    </p>
+
+    <p class="spacer">Scroll down to see the animated marks draw themselves.</p>
+
+    <h2>Animated on scroll</h2>
+    <p>
+      Our onboarding is <c2-marker animated class="slow">twice as fast</c2-marker>, <c2-marker animated variant="underline">fully guided</c2-marker> and
+      <c2-marker animated variant="circle" class="red slow">free</c2-marker>.
+    </p>
+  </body>
+</html>

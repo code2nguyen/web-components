@@ -1,0 +1,126 @@
+---
+description: 'Ready-made looks for c2-context-menu: the surface is a c2-menu, so every card is themed through --c2-menu--* variables set on the context menu. Right-click (or long-press) a card to see its look.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { ContextMenu } from '@c2n/context-menu'
+
+<ExampleModules />
+
+## Surfaces
+
+Right-click inside a card to open its menu. The variables are set on `c2-context-menu` and inherited by the menu it opens, so one class themes the area's menu without touching the `c2-menu` markup.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .area {
+    display: grid;
+    place-items: center;
+    width: 240px;
+    height: 120px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 14px;
+  }
+</style>
+<c2-context-menu client:only="lit">
+  <div class="area">Right-click here</div>
+  <c2-menu slot="menu" aria-label="Canvas">
+    <c2-menu-item value="zoom-in">Zoom in</c2-menu-item>
+    <c2-menu-item value="zoom-out">Zoom out</c2-menu-item>
+    <hr />
+    <c2-menu-item value="reset">Reset view</c2-menu-item>
+  </c2-menu>
+</c2-context-menu>
+```
+
+```html tag=MdxCodeBlock,label=Soft
+<style>
+  .area {
+    display: grid;
+    place-items: center;
+    width: 240px;
+    height: 120px;
+    border-radius: 14px;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 14px;
+  }
+  .soft {
+    --c2-menu--border-top: 1px solid transparent;
+    --c2-menu--border-right: 1px solid transparent;
+    --c2-menu--border-bottom: 1px solid transparent;
+    --c2-menu--border-left: 1px solid transparent;
+    --c2-menu--border-top-left-radius: 14px;
+    --c2-menu--border-top-right-radius: 14px;
+    --c2-menu--border-bottom-left-radius: 14px;
+    --c2-menu--border-bottom-right-radius: 14px;
+    --c2-menu--box-shadow: 0 16px 40px rgba(24, 24, 27, 0.16);
+    --c2-menu--padding-top: 8px;
+    --c2-menu--padding-right: 8px;
+    --c2-menu--padding-bottom: 8px;
+    --c2-menu--padding-left: 8px;
+    --c2-menu--min-width: 180px;
+  }
+</style>
+<c2-context-menu class="soft" client:only="lit">
+  <div class="area">Photo</div>
+  <c2-menu slot="menu" aria-label="Photo">
+    <c2-menu-item value="open">Open</c2-menu-item>
+    <c2-menu-item value="share">Share…</c2-menu-item>
+    <c2-menu-item value="favorite" type="checkbox">Favourite</c2-menu-item>
+    <hr />
+    <c2-menu-item value="delete" destructive>Move to trash</c2-menu-item>
+  </c2-menu>
+</c2-context-menu>
+```
+
+```html tag=MdxCodeBlock,label=Compact editor
+<style>
+  .area {
+    width: 240px;
+    height: 120px;
+    padding: 12px;
+    box-sizing: border-box;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 6px;
+    font: 13px/1.5 ui-monospace, monospace;
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
+  .compact {
+    --c2-menu--min-width: 200px;
+    --c2-menu--border-top-left-radius: 6px;
+    --c2-menu--border-top-right-radius: 6px;
+    --c2-menu--border-bottom-left-radius: 6px;
+    --c2-menu--border-bottom-right-radius: 6px;
+    --c2-menu-item--min-height: 26px;
+    --c2-menu-item--font-size: 12px;
+    --c2-menu__heading--font-size: 10px;
+  }
+</style>
+<c2-context-menu class="compact" client:only="lit">
+  <div class="area">const total = rows.length</div>
+  <c2-menu slot="menu" aria-label="Editor">
+    <h6>Edit</h6>
+    <c2-menu-item value="cut">Cut<c2-kbd slot="shortcut">⌘X</c2-kbd></c2-menu-item>
+    <c2-menu-item value="copy">Copy<c2-kbd slot="shortcut">⌘C</c2-kbd></c2-menu-item>
+    <c2-menu-item value="paste">Paste<c2-kbd slot="shortcut">⌘V</c2-kbd></c2-menu-item>
+    <hr />
+    <c2-menu-item value="refactor">
+      Refactor
+      <c2-menu slot="submenu" aria-label="Refactor">
+        <c2-menu-item value="rename">Rename symbol</c2-menu-item>
+        <c2-menu-item value="extract">Extract function</c2-menu-item>
+      </c2-menu>
+    </c2-menu-item>
+  </c2-menu>
+</c2-context-menu>
+```
+
+</GalleryGrid>

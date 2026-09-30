@@ -42,10 +42,10 @@ npm install @c2n/masonry
     --c2-masonry--gap: 8px;
     --c2-masonry--row-height: 9px;
     --c2-masonry--padding: 8px;
-    --c2-masonry--background: #f4f4f5;
+    --c2-masonry--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-masonry--border-radius: 12px;
-    --c2-masonry-item--background: #ffffff;
-    --c2-masonry-item--border: 1px solid #e4e4e7;
+    --c2-masonry-item--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-masonry-item--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-masonry-item--border-radius: 8px;
     --c2-masonry-item__content--padding: 14px;
     --c2-masonry-item__handle--background: transparent;
@@ -54,7 +54,7 @@ npm install @c2n/masonry
 
   .operations-grid h3 {
     margin: 0;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     font-size: 12px;
     font-weight: 600;
   }
@@ -70,7 +70,7 @@ npm install @c2n/masonry
   .operations-grid p {
     margin: 6px 0 0;
     font-size: 12px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 
   .operations-grid .card-heading {
@@ -111,7 +111,7 @@ npm install @c2n/masonry
     margin-top: 15px;
     overflow: hidden;
     border-radius: 999px;
-    background: #e4e4e7;
+    background: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 
   .operations-grid .track span {
@@ -127,7 +127,7 @@ npm install @c2n/masonry
     justify-content: space-between;
     gap: 8px;
     margin-top: 8px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     font-size: 11px;
   }
 
@@ -137,7 +137,7 @@ npm install @c2n/masonry
     margin: 13px 0 0;
     padding: 0;
     list-style: none;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     font-size: 12px;
   }
 
@@ -148,7 +148,7 @@ npm install @c2n/masonry
   }
 
   .operations-grid .activity-list time {
-    color: #a1a1aa;
+    color: var(--c2-theme--color-outline-strong, #a1a1aa);
     font-variant-numeric: tabular-nums;
   }
 

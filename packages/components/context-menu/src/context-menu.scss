@@ -1,0 +1,29 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-context-menu,
+  $theme: ()
+);
+
+// The element wraps an area without adding a box of its own.
+:host {
+  display: contents;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+// A long press on a touch screen opens the menu, not the browser's callout for links and images.
+::slotted(:not([slot])) {
+  -webkit-touch-callout: none;
+}
+
+// A point under the pointer for the menu to hang from.
+.anchor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  visibility: hidden;
+}

@@ -1,6 +1,6 @@
 ---
 title: 'Table gallery'
-description: 'Ready-made c2-table setups: columns and formats, sorting and selection, toolbars and footers, states, and looks from a hairline report to a trading terminal.'
+description: 'Ready-made c2-table setups: columns and formats, sorting and selection, grouping, toolbars and footers, states, and looks from a hairline report to a trading terminal.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -8,6 +8,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 import SparklineMarketTable from '../../components/SparklineMarketTable.astro'
+import GroupByTableToolbar from '../../components/GroupByTableToolbar.astro'
 
 import { Table } from '@c2n/table'
 import { TableColumn } from '@c2n/table/table-column.js'
@@ -18,6 +19,7 @@ import { Button } from '@c2n/button'
 
 <ExampleModules />
 <SparklineMarketTable />
+<GroupByTableToolbar />
 
 ## Columns and data
 
@@ -604,6 +606,101 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   <c2-table-column field="hours" header="Hours" width="120px" align="end" format="number" summary="sum"></c2-table-column>
   <c2-table-column field="rate" header="Rate" width="120px" align="end" format="currency" summary="max"></c2-table-column>
   <c2-table-column field="amount" header="Amount" width="160px" align="end" format="currency" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+## Grouping
+
+`group-by` gathers the rows into collapsible groups, outermost level first: `group-by="region,status"` nests the statuses of each region. By default each group is a row of the grid — its label and row count in the first column, and under every column with a `summary` that figure for the group's rows, so subtotals line up with the totals row. `group-display="band"` draws a full-width band per group instead. The groups of the rows at the top of the view stay under the header while they scroll, a group's checkbox selects its rows, and `groups-collapsed` starts them closed. The table does not ship a "group by" picker: the last card builds one from a `c2-button-group` in the `toolbar` slot that sets `groupBy`.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Grouped rows
+<style>
+  .grouped-rows {
+    height: 360px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="grouped-rows" row-key="id" group-by="region,status" selection="multiple" checkbox-selection rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Group bands
+<style>
+  .grouped-bands {
+    height: 360px;
+    width: 100%;
+    --c2-table__group-band--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-table__group-count--background: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-table client:only="lit" class="grouped-bands" row-key="id" group-by="status" group-display="band" rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)"></c2-table-column>
+  <c2-table-column field="region" header="Region" width="110px"></c2-table-column>
+  <c2-table-column field="status" header="Status" hidden></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Collapsed groups
+<style>
+  .grouped-collapsed {
+    height: 240px;
+    width: 100%;
+    --c2-table__group-row--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__group-toggle--color: rgb(2, 101, 220);
+  }
+</style>
+<c2-table client:only="lit" class="grouped-collapsed" row-key="id" group-by="region" groups-collapsed rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Toolbar: group by
+<style>
+  .grouped-toolbar {
+    height: 400px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+  }
+  .grouped-toolbar .bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    font-size: 12px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 72%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button-group__segmented-item--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-table client:only="lit" class="grouped-toolbar" data-group-by-table row-key="id" group-by="region" rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <div class="bar" slot="toolbar">
+    <span>Group by</span>
+    <c2-button-group appearance="segmented" selection="single" size="s" value="region" aria-label="Group by">
+      <c2-button value="none">None</c2-button>
+      <c2-button value="region">Region</c2-button>
+      <c2-button value="status">Status</c2-button>
+      <c2-button value="region,status">Region › Status</c2-button>
+    </c2-button-group>
+  </div>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
 </c2-table>
 ```
 
