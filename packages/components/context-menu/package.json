@@ -1,6 +1,6 @@
 {
   "name": "@c2n/context-menu",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "type": "module",
   "main": "dist/context-menu.js",
   "exports": {
@@ -67,8 +67,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.18",
-    "@c2n/menu": "0.0.18",
+    "@c2n/core": "0.0.19",
+    "@c2n/menu": "0.0.19",
     "lit": "3.3.3"
   },
   "devDependencies": {

@@ -90,6 +90,24 @@
     </section>
 
     <section>
+      <h2>Range mode: two thumbs (value-start / value-end), ticks, vertical</h2>
+      <div class="field">
+        <header><label>Price</label><output id="price-out">20 – 80</output></header>
+        <c2-slider id="price" mode="range" value-start="20" value-end="80" show-value aria-label="Price"></c2-slider>
+      </div>
+      <script>
+        const price = document.getElementById('price')
+        price.formatValue = (v) => `$${v}`
+        price.addEventListener('input', () => (document.getElementById('price-out').textContent = `${price.valueStart} – ${price.valueEnd}`))
+      </script>
+      <c2-slider mode="range" min="0" max="10" step="1" value-start="3" value-end="7" ticks show-value aria-label="Rating range"></c2-slider>
+      <div class="row" style="margin-top: 24px">
+        <c2-slider mode="range" orientation="vertical" value-start="30" value-end="70" show-value aria-label="Vertical range"></c2-slider>
+        <div dir="rtl" style="flex: 1"><c2-slider mode="range" value-start="30" value-end="60" aria-label="RTL range"></c2-slider></div>
+      </div>
+    </section>
+
+    <section>
       <h2>Vertical (height from --c2-slider__container--length) and RTL</h2>
       <div class="row">
         <c2-slider orientation="vertical" value="40" show-value aria-label="Vertical"></c2-slider>

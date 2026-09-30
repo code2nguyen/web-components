@@ -50,3 +50,74 @@ test('fieldset disabled state removes the slider from FormData', async ({ page, 
   await expect(page.getByRole('slider')).toBeDisabled()
   await expect.poll(() => page.locator('form').evaluate((element) => new FormData(element as HTMLFormElement).has('volume'))).toBe(false)
 })
+test('range mode exposes two sliders that cannot cross and publish input and change', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-slider mode="range" aria-label="Price" min="0" max="100" step="10" value-start="20" value-end="30" show-value ticks></c2-slider>')
+  const host = page.locator('c2-slider')
+  const start = page.getByRole('slider', { name: 'Price, Minimum' })
+  const end = page.getByRole('slider', { name: 'Price, Maximum' })
+  await expect(start).toHaveValue('20')
+  await expect(end).toHaveValue('30')
+  await watch(host, 'change')
+  await start.press('ArrowRight')
+  await expect(host).toHaveJSProperty('valueStart', 30)
+  await expect(host).toHaveAttribute('data-events', '[null]')
+  await start.press('ArrowRight')
+  await expect(host).toHaveJSProperty('valueStart', 30)
+  await expect(start).toHaveValue('30')
+  await end.press('Home')
+  await expect(host).toHaveJSProperty('valueEnd', 30)
+  await end.press('End')
+  await expect(end).toHaveAttribute('aria-valuetext', '100')
+  await expect(page.locator('c2-slider [part~="thumb-end"] [part="value"]')).toHaveText('100')
+  await accessible(page)
+})
+test('range mode moves the nearer thumb on a track press', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-slider mode="range" aria-label="Price" value-start="20" value-end="80" style="width: 400px"></c2-slider>')
+  const host = page.locator('c2-slider')
+  const track = page.locator('c2-slider [part="track"]')
+  await watch(host, 'change')
+  const box = (await track.boundingBox())!
+  await page.mouse.click(box.x + box.width * 0.9, box.y + box.height / 2)
+  await expect.poll(() => host.evaluate((element) => (element as HTMLElement & { valueEnd: number }).valueEnd)).toBeGreaterThan(85)
+  await expect(host).toHaveJSProperty('valueStart', 20)
+  await expect(host).toHaveAttribute('data-events', '[null]')
+  await page.mouse.click(box.x + box.width * 0.05, box.y + box.height / 2)
+  await expect.poll(() => host.evaluate((element) => (element as HTMLElement & { valueStart: number }).valueStart)).toBeLessThan(10)
+})
+test('range mode sorts programmatic values and submits both ends', async ({ page, renderScenario }) => {
+  await renderScenario('<form><c2-slider mode="range" name="price" aria-label="Price" value-start="40" value-end="60"></c2-slider></form>')
+  const host = page.locator('c2-slider')
+  const form = page.locator('form')
+  const entries = () => form.evaluate((element) => new FormData(element as HTMLFormElement).getAll('price'))
+  await expect.poll(entries).toEqual(['40', '60'])
+  await props(host, { valueStart: 90 })
+  await expect(host).toHaveJSProperty('valueStart', 60)
+  await expect(host).toHaveJSProperty('valueEnd', 90)
+  await expect.poll(entries).toEqual(['60', '90'])
+  await form.evaluate((element) => (element as HTMLFormElement).reset())
+  await expect(host).toHaveJSProperty('valueStart', 40)
+  await expect(host).toHaveJSProperty('valueEnd', 60)
+})
+test('range mode drags either thumb, including where both meet', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-slider mode="range" aria-label="Price" value-start="90" value-end="90" style="width: 400px"></c2-slider>')
+  const host = page.locator('c2-slider')
+  const drag = async (part: string, dx: number) => {
+    const box = (await page.locator(`c2-slider [part~="${part}"]`).boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2 + dx, box.y + box.height / 2, { steps: 5 })
+    await page.mouse.up()
+  }
+  await drag('thumb-start', -120)
+  await expect.poll(() => host.evaluate((element) => (element as HTMLElement & { valueStart: number }).valueStart)).toBeLessThan(70)
+  await expect(host).toHaveJSProperty('valueEnd', 90)
+  await drag('thumb-end', -300)
+  await expect
+    .poll(() =>
+      host.evaluate((element) => {
+        const slider = element as HTMLElement & { valueEnd: number; valueStart: number }
+        return slider.valueEnd - slider.valueStart
+      }),
+    )
+    .toBe(0)
+})
