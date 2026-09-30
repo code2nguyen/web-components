@@ -1,0 +1,45 @@
+---
+title: 'OTP Input'
+description: 'Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.'
+category: 'Inputs'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { OtpInput } from '@c2n/otp-input'
+
+`c2-otp-input` collects a verification code as a row of cells. One native input sits over the cells, so typing, Backspace, pasting a whole code and SMS or password-manager autofill (`autocomplete="one-time-code"`) behave natively and screen readers announce a single text box. Set `length` for the number of cells, `mode="alphanumeric"` to accept letters, `group` to split the cells with a separator, and `masked` to hide what was typed. The element fires `complete` once every cell is filled, and reports `tooShort` validity for a partial code.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/otp-input
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/otp-input
+<div data-label="Default">
+  <c2-otp-input aria-label="Verification code"></c2-otp-input>
+</div>
+<div data-label="Grouped">
+  <c2-otp-input aria-label="Grouped code" group="3" value="482"></c2-otp-input>
+</div>
+<div data-label="Alphanumeric">
+  <c2-otp-input aria-label="Recovery code" mode="alphanumeric" length="8" group="4" placeholder="·"></c2-otp-input>
+</div>
+<div data-label="Masked PIN">
+  <c2-otp-input aria-label="PIN" length="4" masked value="12"></c2-otp-input>
+</div>
+<div data-label="Supporting text">
+  <c2-otp-input aria-label="Code sent by SMS" length="4" help="We sent a code to •••• 4821."></c2-otp-input>
+  <c2-otp-input aria-label="Expired code" length="4" value="9031" error error-text="That code has expired."></c2-otp-input>
+</div>
+<div data-label="States">
+  <c2-otp-input aria-label="Read-only code" length="4" value="5520" readonly></c2-otp-input>
+  <c2-otp-input aria-label="Disabled code" length="4" value="5520" disabled></c2-otp-input>
+</div>
+```
+
+The value only ever holds accepted characters, cut to `length`: in the default `numeric` mode a pasted `123-456` becomes `123456`. The caret always sits after the last character, so Backspace removes characters from the end. `complete` fires only for user input, with the code in `detail.value`; setting `value` from script does not fire it.

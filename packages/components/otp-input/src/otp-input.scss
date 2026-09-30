@@ -1,0 +1,180 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-otp-input,
+  $theme: (
+    gap: 8px,
+    font-family: inherit,
+    cell--width: 40px,
+    cell--height: 44px,
+    cell--border: 1px solid #bcbcc6,
+    cell--border-radius: 6px,
+    cell--color: #18181b,
+    cell--background: #ffffff,
+    cell--font-size: 20px,
+    cell--font-weight: 600,
+    cell__hover--border: 1px solid #a1a1aa,
+    cell__focus--border: 1px solid #0265dc,
+    cell__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    cell__focus--outline-offset: 0px,
+    cell__error--border: 1px solid #dc2626,
+    cell__read-only--background: #fafafa,
+    placeholder--color: #71717a,
+    caret--color: #18181b,
+    caret--width: 1px,
+    caret--height: 20px,
+    caret--animation-duration: 1s,
+    separator--color: #71717a,
+    separator--width: 8px,
+    separator--height: 2px,
+    disabled--opacity: variables.$disabled-content-opacity,
+    supporting-text--gap: 4px,
+    supporting-text--font-size: 12px,
+    supporting-text--line-height: 16px,
+    supporting-text--color: #71717a,
+    supporting-text__error--color: #dc2626,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  gap: css.cssVar(supporting-text--gap);
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  position: relative;
+  display: inline-flex;
+  font-family: css.cssVar(font-family);
+
+  &.disabled {
+    opacity: css.cssVar(disabled--opacity);
+    pointer-events: none;
+  }
+}
+
+.cells {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(gap);
+}
+
+.cell {
+  position: relative;
+  display: grid;
+  box-sizing: border-box;
+  flex: none;
+  width: css.cssVar(cell--width);
+  height: css.cssVar(cell--height);
+  place-items: center;
+  border: css.cssVar(cell--border);
+  border-radius: css.cssVar(cell--border-radius);
+  color: css.cssVar(cell--color);
+  background: css.cssVar(cell--background);
+  font-size: css.cssVar(cell--font-size);
+  font-weight: css.cssVar(cell--font-weight);
+  line-height: 1;
+  outline: 0 solid transparent;
+  outline-offset: css.cssVar(cell__focus--outline-offset);
+  transition: animation.standard(border-color), animation.standard(outline-color);
+}
+
+.field:hover .cell {
+  border: css.cssVar(cell__hover--border);
+}
+
+.field .cell.active {
+  border: css.cssVar(cell__focus--border);
+  outline: css.cssVar(cell__focus--outline);
+}
+
+.field.error .cell {
+  border: css.cssVar(cell__error--border);
+}
+
+.field.read-only .cell {
+  background: css.cssVar(cell__read-only--background);
+}
+
+.placeholder {
+  color: css.cssVar(placeholder--color);
+  font-weight: normal;
+}
+
+.caret {
+  position: absolute;
+  width: css.cssVar(caret--width);
+  height: css.cssVar(caret--height);
+  background: css.cssVar(caret--color);
+  animation: c2-otp-input-caret css.cssVar(caret--animation-duration) step-end infinite;
+}
+
+@keyframes c2-otp-input-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.separator {
+  flex: none;
+  width: css.cssVar(separator--width);
+  height: css.cssVar(separator--height);
+  border-radius: 999px;
+  background: css.cssVar(separator--color);
+}
+
+// The native input covers every cell so a click or tap anywhere focuses it, while the cells draw its value.
+input {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: transparent;
+  background: transparent;
+  caret-color: transparent;
+  font: inherit;
+
+  // Keep the selection highlight and the autofill tint from painting over the cells.
+  &::selection {
+    background: transparent;
+  }
+
+  &:-webkit-autofill {
+    transition: background-color 600000s 0s;
+    -webkit-text-fill-color: transparent;
+  }
+
+  &:read-only {
+    cursor: default;
+  }
+}
+
+.supporting-text {
+  color: css.cssVar(supporting-text--color);
+  font-size: css.cssVar(supporting-text--font-size);
+  line-height: css.cssVar(supporting-text--line-height);
+
+  &.error {
+    color: css.cssVar(supporting-text__error--color);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
+
+  .cell {
+    transition: none;
+  }
+}

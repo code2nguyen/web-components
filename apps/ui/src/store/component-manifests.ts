@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import otpInput from '@c2n/otp-input/custom-elements.json'
 import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
@@ -85,6 +86,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    otpInput,
     chatMessageList,
     shortcut,
     carousel,

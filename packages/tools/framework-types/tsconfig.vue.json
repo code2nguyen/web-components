@@ -18,6 +18,7 @@
         "c2-code-editor": true,
         "c2-date-input": true,
         "c2-number-input": true,
+        "c2-otp-input": true,
         "c2-radio-group": true,
         "c2-rate": true,
         "c2-select": true,
