@@ -110,20 +110,54 @@ numbers between `count`, `percent` (share of all members) and `none`.
 ## Interaction
 
 Hovering a region shows its name, its count, its share and the total for the combination, and fires `region-hover`.
-Clicking fires `region-click`. With `selectable`, a click also selects the region, `selected` holds its set keys and
-`selection-change` fires; a second click clears it. None of these events bubble, so listen on the element itself.
+Clicking fires `region-click`.
+
+Hovering a set's name, or its entry in the legend, highlights its whole circle; the tooltip then describes the set: its
+members, its share of the whole, and how many belong to no other set. `set-hover` and `set-click` report the set.
+`highlighted-set` does the same from your application, for instance while the pointer is on a row of a table next to
+the chart.
+
+With `selectable`, clicking a region selects that region and clicking a set's name selects the whole set. `selected`
+holds the region's set keys, `selected-set` the set's key, and `selection-change` fires with both; a second click
+clears the selection. None of these events bubble, so listen on the element itself.
+
+```html tag=CodeBlock
+<c2-overlap-chart selectable highlighted-set="api" data="…">…</c2-overlap-chart>
+<script>
+  const chart = document.querySelector('c2-overlap-chart')
+  chart.addEventListener('selection-change', (event) => {
+    const { selected, selectedSet } = event.detail // ['web', 'api'] and null, or [] and 'web'
+  })
+</script>
+```
 
 The legend switches a set off and lays the diagram out again without it. The plot is one tab stop: the arrow keys move
-between regions from the largest to the smallest, Enter selects, and Escape clears. A table of every region is rendered
-for assistive technology.
+through the sets and then the regions from the largest to the smallest, Enter selects, and Escape clears. A table of
+every region is rendered for assistive technology.
 
 A circle diagram cannot draw every region of four or more sets, so with more than three the chart shows its error
 state.
+
+## Custom tooltip
+
+The tooltip is customised the way it is on every chart: markup in the `tooltip` slot, a `renderTooltip` function, or a
+linked `c2-chart-tooltip` placed anywhere on the page. `renderTooltip` and the `tooltip-change` event receive the
+shared tooltip model plus the hovered `region` (with `sets`, `size`, `total` and `share`) or the hovered `set` (with
+`label`, `total`, `only` and `share`):
+
+```js tag=CodeBlock
+chart.renderTooltip = ({ region, set }) =>
+  set
+    ? `${set.label}: ${set.total.toLocaleString()} members, ${set.only.toLocaleString()} in no other set`
+    : `${chart.regionName(region)}: ${region.size.toLocaleString()} (${Math.round(region.share * 100)}%)`
+```
 
 ## Theming
 
 Circles take the shared palette, `--c2-chart__series-1--color` to `--c2-chart__series-3--color`, at
 `--c2-chart__set--fill-opacity` with a full-strength outline of `--c2-chart__set--stroke-width`. Overlaps read darker
 because the fills stack. The hovered and selected regions get a wash in the text colour, set by
-`--c2-chart__region__hover--opacity` and `--c2-chart__region__selected--opacity`. The labels always use the text
+`--c2-chart__region__hover--opacity` and `--c2-chart__region__selected--opacity`. A highlighted set fills to
+`--c2-chart__set__highlight--fill-opacity`, and the other circles keep `--c2-chart__set__dimmed--opacity` of their
+usual fill and outline. The labels always use the text
 colours, so every circle is named in words rather than by colour alone.

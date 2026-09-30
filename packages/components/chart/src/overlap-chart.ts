@@ -4,7 +4,7 @@ import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import overlapStyles from './overlap-chart.scss?inline'
-import { ChartBase, type ChartEventMap } from './chart-base.js'
+import { ChartBase, type ChartEventMap, type ChartLegendItem } from './chart-base.js'
 import { EchartsChartBase } from './echarts-chart-base.js'
 import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
 import type { EchartsFeature } from './engines/echarts-loader.js'
@@ -30,16 +30,42 @@ import './chart-series.js'
 
 export type { OverlapRegion, OverlapRow, OverlapLayoutMode } from './overlap-layout.js'
 
-/** Detail of `selection-change`. */
+/** A whole set (one circle), as `set-hover` and `set-click` report it and the tooltip describes it. */
+export interface OverlapSetDetail {
+  /** The set's key: its `c2-chart-series` `field`. */
+  set: string
+  label: string
+  /** Every member of the set, whatever else they belong to. */
+  total: number
+  /** Members of this set and no other visible set. */
+  only: number
+  /** `total` as a share of the union, from 0 to 1. */
+  share: number
+}
+
+/**
+ * What `renderTooltip`, the `tooltip-change` event and a linked `c2-chart-tooltip` receive: the shared tooltip
+ * model plus the hovered region, or the hovered set when the pointer or the focus is on a set's name.
+ */
+export interface OverlapTooltipContext extends ChartTooltipContext {
+  region?: OverlapRegion
+  set?: OverlapSetDetail
+}
+
+/** Detail of `selection-change`. At most one of the two is set. */
 export interface OverlapSelectionChangeEventDetail {
-  /** Set keys of the selected region, or `[]` when nothing is selected. */
+  /** Set keys of the selected region, or `[]` when no region is selected. */
   selected: string[]
+  /** Key of the selected set (a whole circle), or `null`. */
+  selectedSet: string | null
 }
 
 /** Events fired by `c2-overlap-chart`, on top of the ones every chart fires. */
 export interface OverlapChartEventMap extends ChartEventMap {
   'region-click': CustomEvent<OverlapRegion>
   'region-hover': CustomEvent<OverlapRegion | null>
+  'set-click': CustomEvent<OverlapSetDetail>
+  'set-hover': CustomEvent<OverlapSetDetail | null>
   'selection-change': CustomEvent<OverlapSelectionChangeEventDetail>
 }
 
@@ -94,6 +120,8 @@ interface OverlapStyle {
   setStrokeWidth: number
   hoverOpacity: number
   selectedOpacity: number
+  highlightFillOpacity: number
+  dimmedOpacity: number
   regionFontSize: number
   setFontSize: number
   setFontWeight: number
@@ -108,8 +136,9 @@ interface RenderApi {
   getHeight(): number
 }
 
-/** Engine series order. Only the regions series is interactive. */
+/** Engine series order. The regions and the set names are interactive; the fills and outlines are not. */
 const REGION_SERIES = 1
+const SET_SERIES = 2
 
 /**
  * A Venn diagram of two or three sets, drawn by ECharts. Each set is a circle and each overlap is the area the
@@ -134,8 +163,15 @@ const REGION_SERIES = 1
  * The legend switches a set off and lays the diagram out again without it. With more than three sets the chart
  * shows its error state, because circles cannot draw every region of four sets.
  *
- * The plot is one tab stop: the arrow keys move between regions from the largest to the smallest, Enter
- * selects the focused region when `selectable` is set, and Escape clears the focus and the selection.
+ * Hovering a set's name, or its legend entry, highlights its whole circle; `highlighted-set` does the same from
+ * the application (a row of a table next to the chart, say). On a `selectable` chart, clicking a region selects
+ * that region and clicking a set's name selects the whole set.
+ *
+ * The plot is one tab stop: the arrow keys move through the sets and then the regions from the largest to the
+ * smallest, Enter selects the focused one when `selectable` is set, and Escape clears the focus and the selection.
+ *
+ * `renderTooltip` and `tooltip-change` receive an `OverlapTooltipContext`, which carries the hovered `region` or
+ * `set` on top of the shared tooltip model.
  *
  * @tag c2-overlap-chart
  *
@@ -143,12 +179,16 @@ const REGION_SERIES = 1
  *
  * @event {CustomEvent<OverlapRegion>} region-click - Fired when a region is clicked or chosen with Enter. `detail.sets` names its sets, `detail.size` counts the members in exactly those sets and `detail.total` those in all of them. Does not bubble.
  * @event {CustomEvent<OverlapRegion | null>} region-hover - Fired as the pointer or the keyboard focus moves onto a region, and with a `null` detail when it leaves. Does not bubble.
- * @event {CustomEvent<OverlapSelectionChangeEventDetail>} selection-change - Fired when the reader selects or clears a region of a `selectable` chart. `detail.selected` holds the region's set keys, or `[]`. Does not bubble.
+ * @event {CustomEvent<OverlapSetDetail>} set-click - Fired when a set's name is clicked, or chosen with Enter. `detail.total` counts its members and `detail.only` those in no other set. Does not bubble.
+ * @event {CustomEvent<OverlapSetDetail | null>} set-hover - Fired as the pointer or the keyboard focus moves onto a set's name, and with a `null` detail when it leaves. Does not bubble.
+ * @event {CustomEvent<OverlapSelectionChangeEventDetail>} selection-change - Fired when the reader selects or clears a region or a set of a `selectable` chart. `detail.selected` holds the selected region's set keys and `detail.selectedSet` the selected set's key. Does not bubble.
  *
  * @cssproperty {opacity} [--c2-chart__set--fill-opacity=0.16] - Opacity of each circle's fill. Overlaps read darker because the fills stack.
  * @cssproperty {pixel} [--c2-chart__set--stroke-width=2px] - Width of each circle's outline, drawn in the set's colour.
  * @cssproperty {opacity} [--c2-chart__region__hover--opacity=0.12] - Opacity of the text-coloured wash over the hovered or focused region.
- * @cssproperty {opacity} [--c2-chart__region__selected--opacity=0.24] - Opacity of the text-coloured wash over the selected region.
+ * @cssproperty {opacity} [--c2-chart__region__selected--opacity=0.24] - Opacity of the text-coloured wash over the selected region, or over the whole circle of the selected set.
+ * @cssproperty {opacity} [--c2-chart__set__highlight--fill-opacity=0.32] - Fill opacity of the highlighted or selected set's circle.
+ * @cssproperty {opacity} [--c2-chart__set__dimmed--opacity=0.4] - How much of their usual fill and outline the other circles keep while one set is highlighted.
  * @cssproperty {font-size} [--c2-chart__region-label--font-size=14px] - Font size of the count or percentage in each region.
  * @cssproperty {font-size} [--c2-chart__set-label--font-size=14px] - Font size of each set's name and total, drawn outside its circle.
  * @cssproperty {font-weight} [--c2-chart__set-label--font-weight=600] - Font weight of each set's name.
@@ -182,11 +222,26 @@ export class OverlapChart extends EchartsChartBase {
   /** Set keys of the selected region, for example `["web", "api"]`; `selected="web;api"` as an attribute. */
   @property({ converter: arrayPropertyConverter }) selected: string[] = []
 
+  /** Key of the selected set: its whole circle is selected. Clears `selected` when the reader picks a set. */
+  @property({ type: String, attribute: 'selected-set' }) selectedSet: string | null = null
+
+  /** Key of a set to highlight from the application, as hovering its name does. */
+  @property({ type: String, attribute: 'highlighted-set' }) highlightedSet: string | null = null
+
   /** Formats the counts in the labels and the tooltip. Falls back to the chart's number format. Property only. */
   @property({ attribute: false }) format?: (value: number) => string
 
   /** The region the keyboard focus is on, as its mask. */
   @state() private focusedMask: number | null = null
+
+  /** The set the keyboard focus is on, by key. Never set together with `focusedMask`. */
+  @state() private focusedSet: string | null = null
+
+  /** The set whose legend entry the pointer or the focus is on, by key. */
+  @state() private hoveredSet: string | null = null
+
+  /** What the last engine hover was on, so leaving it fires the matching `null` event. */
+  #hoverKind: 'region' | 'set' | null = null
 
   #model?: OverlapModel
   #pixels?: OverlapPixels
@@ -213,11 +268,23 @@ export class OverlapChart extends EchartsChartBase {
     return names.join(' + ')
   }
 
+  /** A set's totals, as `set-hover` and `set-click` report them. `undefined` for a set that is not visible. */
+  setDetail(key: string): OverlapSetDetail | undefined {
+    const model = this.#computeModel()
+    const index = model?.sets.findIndex((set) => set.key === key) ?? -1
+    if (!model || index < 0) return undefined
+    const own = model.regions.find((region) => region.mask === 1 << index)
+    const total = own?.total ?? 0
+    return { set: key, label: model.sets[index].label, total, only: own?.size ?? 0, share: model.union > 0 ? total / model.union : 0 }
+  }
+
   /** Switches a set off or on, as the legend does, and lays the diagram out again. The last visible set stays on. */
   override setSeriesVisible(index: number, visible: boolean): void {
     if (!visible && this.#visibleSets().length <= 1 && !this.hiddenSeries.has(index)) return
     super.setSeriesVisible(index, visible)
     this.focusedMask = null
+    this.focusedSet = null
+    this.hoveredSet = null
     // Hiding a set is a new layout, not a hidden engine series: push the re-projected data.
     if (this.data) this.updateData(this.data)
   }
@@ -233,6 +300,17 @@ export class OverlapChart extends EchartsChartBase {
   protected override validationError(): string {
     const count = this.resolvedSeries.length
     return count > OVERLAP_MAX_SETS ? `A Venn diagram shows at most ${OVERLAP_MAX_SETS} sets; this one has ${count}.` : ''
+  }
+
+  /** Hovering or focusing a legend entry highlights that set's circle. */
+  protected override legendItems(): ChartLegendItem[] {
+    return super.legendItems().map((item) => ({
+      ...item,
+      highlight: (active: boolean) => {
+        const key = item.visible ? item.series.field : null
+        this.hoveredSet = active ? key : this.hoveredSet === key ? null : this.hoveredSet
+      },
+    }))
   }
 
   protected override get legendDependsOnData(): boolean {
@@ -262,18 +340,19 @@ export class OverlapChart extends EchartsChartBase {
     return {
       ...options,
       series: [
-        { ...common, name: 'sets', silent: true, z: 1, renderItem: (params: RenderParams, api: RenderApi) => this.#renderSetFill(params, api, context.theme) },
-        { ...common, name: 'regions', z: 2, renderItem: (params: RenderParams, api: RenderApi) => this.#renderRegion(params, api, context.theme) },
-        {
-          ...common,
-          name: 'outlines',
-          silent: true,
-          z: 3,
-          renderItem: (params: RenderParams, api: RenderApi) => this.#renderOutline(params, api, context.theme),
-        },
+        { ...common, name: 'sets', silent: true, z: 1, renderItem: this.#renderSetFillItem },
+        { ...common, name: 'regions', z: 2, renderItem: this.#renderRegionItem },
+        // Not silent: a set's name is where the reader hovers and clicks the whole set. Its circle stays silent.
+        { ...common, name: 'outlines', z: 3, renderItem: this.#renderOutlineItem },
       ],
     }
   }
+
+  // The same functions on every option build: a new `renderItem` makes ECharts replace the series' elements
+  // instead of updating them, and a hover highlight rebuilt between a press and its release would then lose the click.
+  #renderSetFillItem = (params: RenderParams, api: RenderApi): unknown => this.#renderSetFill(params, api, this.themeController.theme)
+  #renderRegionItem = (params: RenderParams, api: RenderApi): unknown => this.#renderRegion(params, api, this.themeController.theme)
+  #renderOutlineItem = (params: RenderParams, api: RenderApi): unknown => this.#renderOutline(params, api, this.themeController.theme)
 
   /** One datum per circle for the fill and outline series, and one per drawable region in between. */
   protected override projectData(_frame: ChartFrame, _context: ChartBuildContext): unknown {
@@ -285,8 +364,33 @@ export class OverlapChart extends EchartsChartBase {
     return [sets, model.drawn.map((region) => ({ name: this.regionName(region), value: [region.mask] })), sets]
   }
 
-  protected override tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
-    const region = this.#computeModel()?.drawn[detail.index]
+  protected override tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): OverlapTooltipContext {
+    if (detail.seriesIndex === SET_SERIES) {
+      const set = this.#computeModel()?.sets[detail.index]
+      const info = set ? this.setDetail(set.key) : undefined
+      const label = this.#pixels?.setLabels[detail.index]
+      if (set && info) {
+        return {
+          index: detail.index,
+          x: detail.index,
+          formattedX: set.label,
+          entries: [
+            {
+              seriesIndex: SET_SERIES,
+              series: { field: set.key, label: set.label },
+              value: info.total,
+              formatted: this.#formatCount(info.total),
+              color: set.color,
+            },
+          ],
+          px: label?.x ?? detail.px,
+          // The top edge of the name, so the tooltip opens above it rather than over it.
+          py: label ? label.y - (label.verticalAlign === 'bottom' ? Math.ceil((this.#style?.setFontSize ?? 14) * 1.25) : 0) : detail.py,
+          set: info,
+        }
+      }
+    }
+    const region = detail.seriesIndex === REGION_SERIES ? this.#computeModel()?.drawn[detail.index] : undefined
     if (!region) return { index: detail.index, x: detail.index, formattedX: '', entries: [], px: detail.px, py: detail.py }
     const name = this.regionName(region)
     const anchor = this.#pixels?.anchors.get(region.mask) ?? { x: detail.px, y: detail.py }
@@ -305,6 +409,7 @@ export class OverlapChart extends EchartsChartBase {
       ],
       px: anchor.x,
       py: anchor.y,
+      region: { ...region, sets: [...region.sets] },
     }
   }
 
@@ -314,30 +419,73 @@ export class OverlapChart extends EchartsChartBase {
   }
 
   protected override handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
-    const region = detail ? this.#computeModel()?.drawn[detail.index] : undefined
-    if (detail && (detail.seriesIndex !== REGION_SERIES || !region)) return
+    const model = this.#computeModel()
+    if (!detail) {
+      const kind = this.#hoverKind
+      this.#hoverKind = null
+      super.handleEngineHover(null)
+      if (kind === 'set') {
+        this.dispatchEvent(new CustomEvent<OverlapSetDetail | null>('set-hover', { detail: null }))
+      } else if (kind === 'region') {
+        this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: null }))
+      }
+      return
+    }
+    if (detail.seriesIndex === SET_SERIES) {
+      const set = model?.sets[detail.index]
+      const info = set ? this.setDetail(set.key) : undefined
+      if (!set || !info) return
+      if (this.#hoverKind === 'region') this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: null }))
+      this.#hoverKind = 'set'
+      // No `hoveredSet` here: that would redraw the chart under the pointer, and a redraw between a press and its
+      // release loses the click. ECharts' own hover state highlights the circle instead (see `#renderOutline`).
+      super.handleEngineHover(detail)
+      this.dispatchEvent(new CustomEvent<OverlapSetDetail | null>('set-hover', { detail: info }))
+      return
+    }
+    const region = detail.seriesIndex === REGION_SERIES ? model?.drawn[detail.index] : undefined
+    if (!region) return
+    // Straight from a set to a region (the keyboard does that, with no leave in between): the set is left first.
+    if (this.#hoverKind === 'set') {
+      this.dispatchEvent(new CustomEvent<OverlapSetDetail | null>('set-hover', { detail: null }))
+    }
+    this.#hoverKind = 'region'
     super.handleEngineHover(detail)
-    this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: region ? { ...region } : null }))
+    this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: { ...region, sets: [...region.sets] } }))
   }
 
   protected override handleEngineClick(detail: { index: number; seriesIndex: number }): void {
+    const model = this.#computeModel()
+    if (detail.seriesIndex === SET_SERIES) {
+      const set = model?.sets[detail.index]
+      if (set) this.#activateSet(set.key)
+      return
+    }
     if (detail.seriesIndex !== REGION_SERIES) return
-    const region = this.#computeModel()?.drawn[detail.index]
+    const region = model?.drawn[detail.index]
     if (region) this.#activate(region)
   }
 
-  protected override defaultTooltip(context: ChartTooltipContext): TemplateResult {
-    const region = this.#computeModel()?.drawn[context.index]
-    if (!region) return super.defaultTooltip(context)
-    const outside = this.#visibleSets()
-      .filter((set) => !region.sets.includes(set.key))
-      .map((set) => set.label)
+  protected override defaultTooltip(context: OverlapTooltipContext): TemplateResult {
     const row = (label: string, value: string) => html`
       <div class="tooltip-row">
         <span class="tooltip-label">${label}</span>
         <span class="tooltip-value">${value}</span>
       </div>
     `
+    const set = context.set
+    if (set) {
+      return html`
+        <div class="tooltip-title">${set.label}</div>
+        ${row('Members', this.#formatCount(set.total))} ${row('Share of total', this.#formatShare(set.share))}
+        ${set.only !== set.total ? row('In no other set', this.#formatCount(set.only)) : nothing}
+      `
+    }
+    const region = context.region
+    if (!region) return super.defaultTooltip(context)
+    const outside = this.#visibleSets()
+      .filter((item) => !region.sets.includes(item.key))
+      .map((item) => item.label)
     return html`
       <div class="tooltip-title">${context.formattedX}</div>
       ${outside.length > 0 && region.sets.length > 1 ? html`<div class="tooltip-subtitle">Not in ${outside.join(' or ')}</div>` : nothing}
@@ -383,6 +531,12 @@ export class OverlapChart extends EchartsChartBase {
     if (!root) return
     const model = this.validationError() ? undefined : this.#computeModel()
     const focused = model?.drawn.find((region) => region.mask === this.focusedMask)
+    const focusedSet = this.focusedSet ? this.setDetail(this.focusedSet) : undefined
+    const announcement = focusedSet
+      ? `${focusedSet.label}: ${this.#formatCount(focusedSet.total)} members, ${this.#formatShare(focusedSet.share)}`
+      : focused
+        ? `${this.regionName(focused)}: ${this.#formatCount(focused.size)}, ${this.#formatShare(focused.share)}`
+        : ''
     render(
       html`
         ${
@@ -416,9 +570,7 @@ export class OverlapChart extends EchartsChartBase {
               `
             : nothing
         }
-        <div class="overlap-a11y" aria-live="polite">
-          ${focused ? `${this.regionName(focused)}: ${this.#formatCount(focused.size)}, ${this.#formatShare(focused.share)}` : ''}
-        </div>
+        <div class="overlap-a11y" aria-live="polite">${announcement}</div>
       `,
       root,
       { host: this },
@@ -476,6 +628,8 @@ export class OverlapChart extends EchartsChartBase {
       setStrokeWidth: read('--c2-chart__set--stroke-width', 2),
       hoverOpacity: read('--c2-chart__region__hover--opacity', 0.12),
       selectedOpacity: read('--c2-chart__region__selected--opacity', 0.24),
+      highlightFillOpacity: read('--c2-chart__set__highlight--fill-opacity', 0.32),
+      dimmedOpacity: read('--c2-chart__set__dimmed--opacity', 0.4),
       regionFontSize: read('--c2-chart__region-label--font-size', 14),
       setFontSize: read('--c2-chart__set-label--font-size', 14),
       setFontWeight: read('--c2-chart__set-label--font-weight', 600),
@@ -627,16 +781,24 @@ export class OverlapChart extends EchartsChartBase {
     return this.#pixels
   }
 
-  #renderSetFill(params: RenderParams, api: RenderApi, _theme: ChartTheme): unknown {
+  #renderSetFill(params: RenderParams, api: RenderApi, theme: ChartTheme): unknown {
     const pixels = this.#layoutPixels(api.getWidth(), api.getHeight())
     const circle = pixels?.circles[params.dataIndex]
     const set = this.#model?.sets[params.dataIndex]
     if (!circle || !set) return null
-    return {
-      type: 'circle',
-      shape: { cx: circle.x, cy: circle.y, r: circle.radius },
-      style: { fill: set.color, fillOpacity: this.#style?.setFillOpacity ?? 0.16 },
+    const style = this.#style as OverlapStyle
+    const active = this.#activeSet()
+    const fillOpacity = !active ? style.setFillOpacity : active === set.key ? style.highlightFillOpacity : style.setFillOpacity * style.dimmedOpacity
+    const children: unknown[] = [{ type: 'circle', shape: { cx: circle.x, cy: circle.y, r: circle.radius }, style: { fill: set.color, fillOpacity } }]
+    // The selected set gets the same text-coloured wash a selected region gets, over its whole circle.
+    if (this.selectedSet === set.key) {
+      children.push({
+        type: 'circle',
+        shape: { cx: circle.x, cy: circle.y, r: circle.radius },
+        style: { fill: theme.color, fillOpacity: style.selectedOpacity },
+      })
     }
+    return { type: 'group', children }
   }
 
   #renderRegion(params: RenderParams, api: RenderApi, theme: ChartTheme): unknown {
@@ -700,16 +862,36 @@ export class OverlapChart extends EchartsChartBase {
     if (!circle || !label || !set) return null
     const style = this.#style as OverlapStyle
     const fontFamily = this.#fontFamily(theme)
+    const active = this.#activeSet()
+    const emphasised = active === set.key
+    const focused = this.focusedSet === set.key
     return {
       type: 'group',
       children: [
+        // Hovering the name puts this whole group in ECharts' emphasis state, which fills the circle to the
+        // highlight opacity and thickens its outline without redrawing anything.
         {
           type: 'circle',
+          silent: true,
           shape: { cx: circle.x, cy: circle.y, r: circle.radius },
-          style: { fill: 'none', stroke: set.color, lineWidth: style.setStrokeWidth },
+          style: { fill: set.color, fillOpacity: 0 },
+          emphasis: { style: { fillOpacity: emphasised ? 0 : Math.max(0, style.highlightFillOpacity - style.setFillOpacity) } },
+        },
+        {
+          type: 'circle',
+          silent: true,
+          shape: { cx: circle.x, cy: circle.y, r: circle.radius },
+          style: {
+            fill: 'none',
+            stroke: set.color,
+            lineWidth: emphasised ? style.setStrokeWidth + 1.5 : style.setStrokeWidth,
+            strokeOpacity: active && !emphasised ? style.dimmedOpacity : 1,
+          },
+          emphasis: { style: { lineWidth: style.setStrokeWidth + 1.5, strokeOpacity: 1 } },
         },
         {
           type: 'text',
+          cursor: 'pointer',
           style: {
             text: `{dot|●} {name|${escapeRich(label.name)}} {total|${escapeRich(label.total)}}`,
             x: label.x,
@@ -725,8 +907,32 @@ export class OverlapChart extends EchartsChartBase {
             },
           },
         },
+        // The keyboard focus on a set is drawn around its name, the thing a pointer would be on.
+        ...(focused
+          ? [
+              {
+                type: 'rect',
+                silent: true,
+                shape: this.#setLabelRect(label, style.setFontSize),
+                style: { fill: 'none', stroke: theme.color, lineWidth: 1.5, lineDash: [4, 3] },
+              },
+            ]
+          : []),
       ],
     }
+  }
+
+  #setLabelRect(label: OverlapPixels['setLabels'][number], fontSize: number): { x: number; y: number; width: number; height: number; r: number } {
+    const height = Math.ceil(fontSize * 1.25) + 6
+    const y = label.verticalAlign === 'top' ? label.y - 3 : label.y - height + 3
+    return { x: label.x - label.width / 2 - 5, y, width: label.width + 10, height, r: 4 }
+  }
+
+  /** The set drawn emphasised, if any: the hovered one, else the focused one, else the one the application highlights. */
+  #activeSet(): string | null {
+    const visible = new Set(this.#computeModel()?.sets.map((set) => set.key))
+    for (const key of [this.hoveredSet, this.focusedSet, this.highlightedSet, this.selectedSet]) if (key && visible.has(key)) return key
+    return null
   }
 
   #fontFamily(theme: ChartTheme): string | undefined {
@@ -756,13 +962,32 @@ export class OverlapChart extends EchartsChartBase {
     this.dispatchEvent(new CustomEvent<OverlapRegion>('region-click', { detail: { ...region, sets: [...region.sets] } }))
     if (!this.selectable) return
     this.selected = this.#isSelected(region) ? [] : [...region.sets]
-    this.dispatchEvent(new CustomEvent<OverlapSelectionChangeEventDetail>('selection-change', { detail: { selected: [...this.selected] } }))
+    this.selectedSet = null
+    this.#notifySelection()
+  }
+
+  /** Click on a set's name, or Enter on it: fires `set-click` and, on a selectable chart, toggles the set's selection. */
+  #activateSet(key: string): void {
+    const info = this.setDetail(key)
+    if (!info) return
+    this.dispatchEvent(new CustomEvent<OverlapSetDetail>('set-click', { detail: info }))
+    if (!this.selectable) return
+    this.selectedSet = this.selectedSet === key ? null : key
+    this.selected = []
+    this.#notifySelection()
+  }
+
+  #notifySelection(): void {
+    this.dispatchEvent(
+      new CustomEvent<OverlapSelectionChangeEventDetail>('selection-change', { detail: { selected: [...this.selected], selectedSet: this.selectedSet } }),
+    )
   }
 
   /** Moves the keyboard focus onto a region and shows its tooltip, as hovering it would. */
   #focusRegion(region: OverlapRegion | undefined): void {
     const model = this.#computeModel()
     this.focusedMask = region?.mask ?? null
+    this.focusedSet = null
     if (!model || !region) {
       this.handleEngineHover(null)
       return
@@ -771,14 +996,30 @@ export class OverlapChart extends EchartsChartBase {
     this.handleEngineHover({ index: model.drawn.indexOf(region), seriesIndex: REGION_SERIES, px: anchor.x, py: anchor.y })
   }
 
+  /** Moves the keyboard focus onto a set's name and shows its tooltip, as hovering the name would. */
+  #focusSet(key: string): void {
+    const model = this.#computeModel()
+    const index = model?.sets.findIndex((set) => set.key === key) ?? -1
+    if (!model || index < 0) return
+    this.focusedMask = null
+    this.focusedSet = key
+    this.handleEngineHover({ index, seriesIndex: SET_SERIES, px: 0, py: 0 })
+  }
+
   #handleKeydown = (event: KeyboardEvent): void => {
     const model = this.#computeModel()
     if (!model || model.drawn.length === 0) return
-    const order = [...model.drawn].sort((a, b) => b.size - a.size)
-    const current = order.findIndex((region) => region.mask === this.focusedMask)
+    // The whole sets first, in declaration order, then the regions from the largest to the smallest.
+    const order: ({ set: string } | { region: OverlapRegion })[] = [
+      ...model.sets.map((set) => ({ set: set.key })),
+      ...[...model.drawn].sort((a, b) => b.size - a.size).map((region) => ({ region })),
+    ]
+    const current = order.findIndex((item) => ('set' in item ? item.set === this.focusedSet : item.region.mask === this.focusedMask))
     const move = (index: number) => {
       event.preventDefault()
-      this.#focusRegion(order[(index + order.length) % order.length])
+      const item = order[(index + order.length) % order.length]
+      if ('set' in item) this.#focusSet(item.set)
+      else this.#focusRegion(item.region)
     }
     switch (event.key) {
       case 'ArrowRight':
@@ -799,22 +1040,29 @@ export class OverlapChart extends EchartsChartBase {
       case ' ':
         if (current < 0) return
         event.preventDefault()
-        this.#activate(order[current])
-        break
-      case 'Escape':
-        if (current < 0 && this.selected.length === 0) return
-        event.preventDefault()
-        this.#focusRegion(undefined)
-        if (this.selectable && this.selected.length > 0) {
-          this.selected = []
-          this.dispatchEvent(new CustomEvent<OverlapSelectionChangeEventDetail>('selection-change', { detail: { selected: [] } }))
+        {
+          const item = order[current]
+          if ('set' in item) this.#activateSet(item.set)
+          else this.#activate(item.region)
         }
         break
+      case 'Escape': {
+        const hasSelection = this.selected.length > 0 || this.selectedSet !== null
+        if (current < 0 && !hasSelection) return
+        event.preventDefault()
+        this.#focusRegion(undefined)
+        if (this.selectable && hasSelection) {
+          this.selected = []
+          this.selectedSet = null
+          this.#notifySelection()
+        }
+        break
+      }
     }
   }
 
   #handleBlur = (): void => {
-    if (this.focusedMask !== null) this.#focusRegion(undefined)
+    if (this.focusedMask !== null || this.focusedSet !== null) this.#focusRegion(undefined)
   }
 }
 

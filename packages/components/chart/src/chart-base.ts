@@ -58,6 +58,11 @@ export interface ChartLegendItem {
   toggle: () => void
   series: ChartSeriesConfig
   index: number
+  /**
+   * Called with `true` while the entry is hovered or focused and `false` when it is left, for a chart that can
+   * emphasise the entry's mark (the overlap chart lights up the set's circle). Absent on most charts.
+   */
+  highlight?: (active: boolean) => void
 }
 
 /** Detail emitted whenever the component-owned legend model changes. */
@@ -1009,7 +1014,17 @@ export abstract class ChartBase extends LitElement {
     render(
       this.legendItems().map(
         (item) => html`
-          <button class="legend-item" part="legend-item" type="button" aria-pressed=${item.visible ? 'true' : 'false'} @click=${item.toggle}>
+          <button
+            class="legend-item"
+            part="legend-item"
+            type="button"
+            aria-pressed=${item.visible ? 'true' : 'false'}
+            @click=${item.toggle}
+            @pointerenter=${() => item.highlight?.(true)}
+            @pointerleave=${() => item.highlight?.(false)}
+            @focus=${() => item.highlight?.(true)}
+            @blur=${() => item.highlight?.(false)}
+          >
             ${
               this.renderLegendItem?.(item.series, item.index) ??
               html`

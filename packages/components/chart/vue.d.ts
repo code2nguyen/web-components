@@ -149,14 +149,18 @@ declare module 'vue' {
       C2Props<OverlapChart> & {
         'sets-field'?: unknown
         'size-field'?: unknown
+        'selected-set'?: unknown
+        'highlighted-set'?: unknown
         'x-field'?: unknown
         'label-field'?: unknown
         'x-type'?: unknown
         'empty-message'?: unknown
         'max-points'?: unknown
         'lazy-render'?: unknown
+        onSetHover?: (event: EventOf<OverlapChart, 'set-hover'>) => void
         onRegionHover?: (event: EventOf<OverlapChart, 'region-hover'>) => void
         onRegionClick?: (event: EventOf<OverlapChart, 'region-click'>) => void
+        onSetClick?: (event: EventOf<OverlapChart, 'set-click'>) => void
         onSelectionChange?: (event: EventOf<OverlapChart, 'selection-change'>) => void
         onTooltipChange?: (event: EventOf<OverlapChart, 'tooltip-change'>) => void
         onSeriesToggle?: (event: EventOf<OverlapChart, 'series-toggle'>) => void

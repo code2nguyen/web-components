@@ -6,6 +6,8 @@ type RegionDetail = { sets: string[]; size: number; total: number; share: number
 interface OverlapElement extends HTMLElement {
   regions: RegionDetail[]
   selected: string[]
+  selectedSet: string | null
+  highlightedSet: string | null
   layout: string
   updateComplete: Promise<boolean>
   projectData(frame: unknown, context: unknown): unknown[][]
@@ -142,21 +144,111 @@ test('a selectable chart selects a region on click and clears it on a second cli
   expect(seen[1]).toEqual([])
 })
 
-test('the keyboard walks regions from largest to smallest and Enter selects', async ({ page, scenario }) => {
+test('the keyboard walks the sets, then the regions from largest to smallest, and Enter selects', async ({ page, scenario }) => {
   await scenario('overlap-selectable')
   const chart = page.locator('c2-overlap-chart')
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
   const plot = chart.locator('.plot')
   await plot.focus()
   await page.keyboard.press('ArrowRight')
+  await expect(chart.locator('[aria-live]')).toHaveText('Web app: 18,420 members, 69.8%')
+  await page.keyboard.press('Enter')
+  await expect.poll(() => chart.evaluate((element) => (element as OverlapElement).selectedSet)).toBe('web')
+  await page.keyboard.press('End')
+  await page.keyboard.press('Home')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
   await expect(chart.locator('[aria-live]')).toHaveText('Web app only: 10,130, 38.4%')
   await page.keyboard.press('ArrowRight')
   await expect(chart.locator('[aria-live]')).toHaveText('Web app + Mobile app: 6,140, 23.3%')
   await page.keyboard.press('Enter')
-  await expect.poll(() => chart.evaluate((element) => (element as OverlapElement).selected)).toEqual(['web', 'mobile'])
+  // Picking a region replaces the selected set.
+  await expect
+    .poll(() => chart.evaluate((element) => [(element as OverlapElement).selected, (element as OverlapElement).selectedSet]))
+    .toEqual([['web', 'mobile'], null])
   await page.keyboard.press('Escape')
   await expect.poll(() => chart.evaluate((element) => (element as OverlapElement).selected)).toEqual([])
   await expect(chart.locator('[aria-live]')).toHaveText('')
+})
+
+test("hovering a set's name highlights the whole set and describes it in the tooltip", async ({ page, scenario }) => {
+  await scenario('overlap')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const anchor = await chart.evaluate((element) => {
+    const seen: (string | null)[] = []
+    element.addEventListener('set-hover', (event) => seen.push((event as CustomEvent<{ set: string } | null>).detail?.set ?? null))
+    ;(window as unknown as { setHovers: (string | null)[] }).setHovers = seen
+    const chart = element as unknown as { tooltipContextAt(detail: object): { px: number; py: number } }
+    return chart.tooltipContextAt({ index: 0, seriesIndex: 2, px: 0, py: 0 })
+  })
+  const box = await chart.locator('.plot').boundingBox()
+  if (!box) throw new Error('the plot has no box')
+  await page.mouse.move(box.x + 2, box.y + 2)
+  await page.mouse.move(box.x + anchor.px, box.y + anchor.py + 9, { steps: 4 })
+  await expect.poll(() => page.evaluate(() => (window as unknown as { setHovers: (string | null)[] }).setHovers.at(-1))).toBe('web')
+  const tooltip = chart.locator('.tooltip')
+  await expect(tooltip).toContainText('Web app')
+  await expect(tooltip).toContainText('18,420')
+  await expect(tooltip).toContainText('In no other set')
+  await expect(tooltip).toContainText('10,130')
+  // Holding still over the name must not make the chart redraw its way into a hover loop.
+  const before = await page.evaluate(() => (window as unknown as { setHovers: unknown[] }).setHovers.length)
+  await page.waitForTimeout(500)
+  expect(await page.evaluate(() => (window as unknown as { setHovers: unknown[] }).setHovers.length)).toBe(before)
+  await page.mouse.move(box.x + 2, box.y + 2, { steps: 4 })
+  await expect.poll(() => page.evaluate(() => (window as unknown as { setHovers: (string | null)[] }).setHovers.at(-1))).toBeNull()
+})
+
+test('a selectable chart selects a whole set from its name, and fires set-click', async ({ page, scenario }) => {
+  await scenario('overlap-selectable')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const anchor = await chart.evaluate((element) => {
+    const seen: unknown[] = []
+    element.addEventListener('set-click', (event) => seen.push((event as CustomEvent).detail))
+    element.addEventListener('selection-change', (event) => seen.push((event as CustomEvent).detail))
+    ;(window as unknown as { seen: unknown[] }).seen = seen
+    return (element as unknown as { tooltipContextAt(detail: object): { px: number; py: number } }).tooltipContextAt({ index: 1, seriesIndex: 2, px: 0, py: 0 })
+  })
+  const box = await chart.locator('.plot').boundingBox()
+  if (!box) throw new Error('the plot has no box')
+  await page.mouse.click(box.x + anchor.px, box.y + anchor.py + 9)
+  await expect.poll(() => chart.evaluate((element) => (element as OverlapElement).selectedSet)).toBe('mobile')
+  expect(await page.evaluate(() => (window as unknown as { seen: unknown[] }).seen)).toEqual([
+    { set: 'mobile', label: 'Mobile app', total: 12960, only: 5800, share: 12960 / 26380 },
+    { selected: [], selectedSet: 'mobile' },
+  ])
+})
+
+test('a legend entry highlights its set while hovered, and highlighted-set does so from the application', async ({ page, scenario }) => {
+  await scenario('overlap')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const active = () => chart.evaluate((element) => (element as unknown as { hoveredSet: string | null }).hoveredSet)
+  await chart.locator('.legend-item', { hasText: 'Public API' }).hover()
+  await expect.poll(active).toBe('api')
+  await page.mouse.move(0, 0)
+  await expect.poll(active).toBeNull()
+  await chart.evaluate((element) => element.setAttribute('highlighted-set', 'mobile'))
+  expect(await chart.evaluate((element) => (element as OverlapElement).highlightedSet)).toBe('mobile')
+})
+
+test('a custom renderTooltip receives the hovered region or set', async ({ page, scenario }) => {
+  await scenario('overlap')
+  const chart = page.locator('c2-overlap-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await chart.evaluate((element) => {
+    ;(
+      element as unknown as { renderTooltip: (context: { region?: { sets: string[]; total: number }; set?: { label: string; only: number } }) => string }
+    ).renderTooltip = (context) =>
+      context.set ? `set ${context.set.label} ${context.set.only}` : `region ${context.region?.sets.join('+')} of ${context.region?.total}`
+  })
+  await chart.evaluate(() => window.chartScenario.hover({ index: 2, seriesIndex: 1, px: 10, py: 10 }))
+  await expect(chart.locator('.tooltip')).toHaveText('region web+mobile of 6880')
+  await chart.evaluate(() => window.chartScenario.hover({ index: 2, seriesIndex: 2, px: 10, py: 10 }))
+  await expect(chart.locator('.tooltip')).toHaveText('set Public API 1880')
 })
 
 test('the legend switches a set off and lays the diagram out without it, keeping the last one on', async ({ page, scenario }) => {

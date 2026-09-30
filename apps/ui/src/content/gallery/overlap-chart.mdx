@@ -65,6 +65,14 @@ import { Card } from '@c2n/card'
 </c2-overlap-chart>
 ```
 
+```html tag=MdxCodeBlock,label=Highlighted set
+<c2-overlap-chart highlighted-set="api" legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
+  <c2-chart-series field="web" label="Web"></c2-chart-series>
+  <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
+  <c2-chart-series field="api" label="API"></c2-chart-series>
+</c2-overlap-chart>
+```
+
 ```html tag=MdxCodeBlock,label=Two products
 <c2-overlap-chart data='[{"sets":["plan"],"size":4820},{"sets":["addon"],"size":1960},{"sets":["plan","addon"],"size":1540}]'>
   <c2-chart-series field="plan" label="Pro plan"></c2-chart-series>
