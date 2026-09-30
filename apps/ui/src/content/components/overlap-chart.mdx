@@ -1,0 +1,129 @@
+---
+title: 'Overlap chart'
+description: 'A Venn diagram of two or three sets, where each circle is a set and each shared area counts the members of exactly that combination.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-overlap-chart'
+apiTags: ['c2-overlap-chart', 'c2-chart-series']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { OverlapChart } from '@c2n/chart/overlap-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+How two or three groups overlap: users on web, mobile and the API, customers who bought each of three products,
+people with each of three skills. Each set is a circle, each shared area is labelled with the number of members in
+exactly that combination, and hovering a region names it and gives its share of the whole.
+
+**Engine.** The diagram is drawn by [ECharts](https://echarts.apache.org/) through its custom series, like the pie
+and gauge charts, so it shares their tooltip, legend, theme and loading states. The circle positions are solved by
+[`@upsetjs/venn.js`](https://github.com/upsetjs/venn.js), a small dependency installed with the package.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .plot {
+    width: 100%;
+    --c2-chart--height: 320px;
+  }
+</style>
+
+<div data-label="Three sets">
+  <c2-overlap-chart
+    class="plot"
+    data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'
+  >
+    <c2-chart-series field="web" label="Web app"></c2-chart-series>
+    <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
+    <c2-chart-series field="api" label="Public API"></c2-chart-series>
+  </c2-overlap-chart>
+</div>
+
+<div data-label="Two sets">
+  <c2-overlap-chart class="plot" data='[{"sets":["trial"],"size":3200},{"sets":["news"],"size":5400},{"sets":["trial","news"],"size":1150}]'>
+    <c2-chart-series field="trial" label="Trial signups"></c2-chart-series>
+    <c2-chart-series field="news" label="Newsletter"></c2-chart-series>
+  </c2-overlap-chart>
+</div>
+
+<div data-label="Equal circles, percent">
+  <c2-overlap-chart
+    class="plot"
+    layout="uniform"
+    labels="percent"
+    selectable
+    data='[{"sets":["design"],"size":42},{"sets":["frontend"],"size":58},{"sets":["backend"],"size":51},{"sets":["design","frontend"],"size":19},{"sets":["design","backend"],"size":2},{"sets":["frontend","backend"],"size":24},{"sets":["design","frontend","backend"],"size":2}]'
+  >
+    <c2-chart-series field="design" label="Design"></c2-chart-series>
+    <c2-chart-series field="frontend" label="Frontend"></c2-chart-series>
+    <c2-chart-series field="backend" label="Backend"></c2-chart-series>
+  </c2-overlap-chart>
+</div>
+```
+
+## Data
+
+Declare each set with a `c2-chart-series`, where `field` is the set's key and `label` its name. Then pass one row per
+combination, with the number of members in **all** of its sets, which is the shape most analytics exports and
+`venn.js` use:
+
+```html tag=CodeBlock
+<c2-overlap-chart
+  data='[
+    { "sets": ["web"], "size": 18420 },
+    { "sets": ["web", "mobile"], "size": 6880 },
+    { "sets": ["web", "mobile", "api"], "size": 740 }
+  ]'
+>
+  <c2-chart-series field="web" label="Web app"></c2-chart-series>
+  <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
+  <c2-chart-series field="api" label="Public API"></c2-chart-series>
+</c2-overlap-chart>
+```
+
+A combination you leave out counts as 0. The chart works out every exclusive region from those totals: 740 users in
+all three sets means the "Web app + Mobile app" region holds 6,880 − 740 = 6,140. If your rows name their fields
+differently, point `sets-field` and `size-field` at them.
+
+The `regions` property returns the exclusive regions largest first, each with `sets`, `size` (members in exactly those
+sets), `total` (members in all of them) and `share`, ready for a table next to the chart.
+
+## Layout
+
+`layout="proportional"` (the default) sizes each circle by its set and places them so each pairwise overlap has the
+right area. With three sets the triple overlap is a best fit, because three circles cannot match every combination
+exactly; the labels and the tooltip always show the exact counts. `layout="uniform"` draws equal circles instead, so
+every region has room for its label even when it is tiny or empty.
+
+A region too small for its number gets the number outside, joined to it by a leader line. `labels` switches the
+numbers between `count`, `percent` (share of all members) and `none`.
+
+## Interaction
+
+Hovering a region shows its name, its count, its share and the total for the combination, and fires `region-hover`.
+Clicking fires `region-click`. With `selectable`, a click also selects the region, `selected` holds its set keys and
+`selection-change` fires; a second click clears it. None of these events bubble, so listen on the element itself.
+
+The legend switches a set off and lays the diagram out again without it. The plot is one tab stop: the arrow keys move
+between regions from the largest to the smallest, Enter selects, and Escape clears. A table of every region is rendered
+for assistive technology.
+
+A circle diagram cannot draw every region of four or more sets, so with more than three the chart shows its error
+state.
+
+## Theming
+
+Circles take the shared palette, `--c2-chart__series-1--color` to `--c2-chart__series-3--color`, at
+`--c2-chart__set--fill-opacity` with a full-strength outline of `--c2-chart__set--stroke-width`. Overlaps read darker
+because the fills stack. The hovered and selected regions get a wash in the text colour, set by
+`--c2-chart__region__hover--opacity` and `--c2-chart__region__selected--opacity`. The labels always use the text
+colours, so every circle is named in words rather than by colour alone.

@@ -17,6 +17,7 @@ import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
+import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
@@ -142,6 +143,29 @@ declare module 'vue' {
         onChartError?: (event: EventOf<LineChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<LineChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<LineChart, 'point-click'>) => void
+      }
+    >
+    'c2-overlap-chart': DefineComponent<
+      C2Props<OverlapChart> & {
+        'sets-field'?: unknown
+        'size-field'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onRegionHover?: (event: EventOf<OverlapChart, 'region-hover'>) => void
+        onRegionClick?: (event: EventOf<OverlapChart, 'region-click'>) => void
+        onSelectionChange?: (event: EventOf<OverlapChart, 'selection-change'>) => void
+        onTooltipChange?: (event: EventOf<OverlapChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<OverlapChart, 'series-toggle'>) => void
+        onLegendChange?: (event: EventOf<OverlapChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<OverlapChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<OverlapChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<OverlapChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<OverlapChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<OverlapChart, 'point-click'>) => void
       }
     >
     'c2-pie-chart': DefineComponent<

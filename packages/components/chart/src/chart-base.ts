@@ -329,6 +329,14 @@ export abstract class ChartBase extends LitElement {
     for (const index of this.hiddenSeries) adapter.setSeriesVisibility(index, false)
   }
 
+  /**
+   * A problem with the input this chart type cannot draw, shown in the error state like `error` but owned by
+   * the chart rather than the author. Empty when the input is drawable.
+   */
+  protected validationError(): string {
+    return ''
+  }
+
   /** Whether changing chart data can change the legend model. Pie charts use row labels as entries. */
   protected get legendDependsOnData(): boolean {
     return false
@@ -590,7 +598,7 @@ export abstract class ChartBase extends LitElement {
 
   /** True once there is something to draw and somewhere to draw it. */
   #canRender(): boolean {
-    if (!this.#visible || this.engineFailed || this.error || this.loading) return false
+    if (!this.#visible || this.engineFailed || this.error || this.validationError() || this.loading) return false
     if (!this.plotElement || !this.frame || this.frame.length === 0) return false
     const { width, height } = this.buildContext()
     return width > 0 && height > 0
@@ -628,8 +636,8 @@ export abstract class ChartBase extends LitElement {
       }
       const context = this.buildContext()
       await adapter.create(this.plotElement, this.buildOptions(context), this.projectData(this.frame, context), {
-        hover: (detail) => this.#handleHover(detail),
-        click: (detail) => this.#handleClick(detail),
+        hover: (detail) => this.handleEngineHover(detail),
+        click: (detail) => this.handleEngineClick(detail),
         rangeChange: (detail) => this.dispatchEvent(new CustomEvent<ChartRangeEventDetail>('range-change', { detail })),
       })
       this.adapter = adapter
@@ -727,7 +735,8 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
-  #handleHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
+  /** The engine reports a hovered datum, or `null` when the pointer leaves. A chart with its own events extends this. */
+  protected handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
     if (!detail || !this.frame) {
       this.#tooltipContext = null
       this.#setHover(null)
@@ -735,12 +744,12 @@ export abstract class ChartBase extends LitElement {
       this.dispatchEvent(new CustomEvent<ChartPointEventDetail | null>('point-hover', { detail: null }))
       return
     }
-    const context = this.#tooltipContextAt(detail)
+    const context = this.tooltipContextAt(detail)
     const tooltipContext = this.tooltip === 'none' ? null : context
     this.#tooltipContext = tooltipContext
     this.#setHover(this.hasLinkedTooltip ? null : tooltipContext)
     this.dispatchEvent(new CustomEvent<ChartTooltipContext | null>('tooltip-change', { detail: tooltipContext }))
-    const point = this.#pointAt(detail.index, detail.seriesIndex)
+    const point = this.pointAt(detail.index, detail.seriesIndex)
     if (point) this.dispatchEvent(new CustomEvent<ChartPointEventDetail>('point-hover', { detail: point }))
   }
 
@@ -811,7 +820,8 @@ export abstract class ChartBase extends LitElement {
     tooltip.style.top = `${top}px`
   }
 
-  #tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
+  /** The tooltip model for a hovered datum. A chart whose data is not a frame of series columns overrides it. */
+  protected tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
     const frame = this.frame as ChartFrame
     const theme = this.themeController.theme
     const series = this.resolvedSeries
@@ -843,7 +853,8 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
-  #pointAt(index: number, seriesIndex: number): ChartPointEventDetail | undefined {
+  /** The `point-hover`/`point-click` detail for a datum, or `undefined` to fire neither. */
+  protected pointAt(index: number, seriesIndex: number): ChartPointEventDetail | undefined {
     const frame = this.frame
     const series = this.resolvedSeries[seriesIndex]
     if (!frame || !series) return undefined
@@ -857,8 +868,9 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
-  #handleClick(detail: { index: number; seriesIndex: number }): void {
-    const point = this.#pointAt(detail.index, detail.seriesIndex)
+  /** The engine reports a clicked datum. A chart with its own events extends this. */
+  protected handleEngineClick(detail: { index: number; seriesIndex: number }): void {
+    const point = this.pointAt(detail.index, detail.seriesIndex)
     if (point) this.dispatchEvent(new CustomEvent<ChartPointEventDetail>('point-click', { detail: point }))
   }
 
@@ -921,7 +933,7 @@ export abstract class ChartBase extends LitElement {
     return html`<slot name="tooltip">${context ? (this.renderTooltip?.(context) ?? this.defaultTooltip(context)) : nothing}</slot>`
   }
 
-  private defaultTooltip(context: ChartTooltipContext): TemplateResult {
+  protected defaultTooltip(context: ChartTooltipContext): TemplateResult {
     return html`
       <div class="tooltip-title">${context.formattedX}</div>
       ${context.entries.map(
@@ -937,7 +949,8 @@ export abstract class ChartBase extends LitElement {
   }
 
   private renderState(): TemplateResult | typeof nothing {
-    if (this.error) return html`<div class="state" part="state"><slot name="error">${this.error}</slot></div>`
+    const error = this.error || this.validationError()
+    if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
     if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
     if (!this.frame || this.frame.length === 0) {
       return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage}</slot></div>`

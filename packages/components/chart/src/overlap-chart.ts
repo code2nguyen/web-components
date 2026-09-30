@@ -1,0 +1,720 @@
+import { html, nothing, unsafeCSS, type CSSResultGroup, type TemplateResult } from 'lit'
+import { state } from 'lit/decorators.js'
+import { property, arrayPropertyConverter } from '@c2n/core/lit-helper.js'
+import { customElement } from '@c2n/core/element-helper.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import overlapStyles from './overlap-chart.scss?inline'
+import { ChartBase, type ChartEventMap } from './chart-base.js'
+import { EchartsChartBase } from './echarts-chart-base.js'
+import type { ChartAdapter, ChartBuildContext } from './chart-adapter.js'
+import type { EchartsFeature } from './engines/echarts-loader.js'
+import type { ChartFrame, ChartPointEventDetail, ChartSeriesConfig, ChartTooltipContext } from './chart-types.js'
+import type { ChartTheme } from './chart-theme.js'
+import {
+  OVERLAP_MAX_SETS,
+  fitOverlap,
+  leaderEnd,
+  regionLabelPoint,
+  regionPath,
+  solveOverlap,
+  overlapRegions,
+  type OverlapCircle,
+  type OverlapLayoutMode,
+  type OverlapPoint,
+  type OverlapRegion,
+  type OverlapRow,
+} from './overlap-layout.js'
+import './chart-series.js'
+
+export type { OverlapRegion, OverlapRow, OverlapLayoutMode } from './overlap-layout.js'
+
+/** Detail of `selection-change`. */
+export interface OverlapSelectionChangeEventDetail {
+  /** Set keys of the selected region, or `[]` when nothing is selected. */
+  selected: string[]
+}
+
+/** Events fired by `c2-overlap-chart`, on top of the ones every chart fires. */
+export interface OverlapChartEventMap extends ChartEventMap {
+  'region-click': CustomEvent<OverlapRegion>
+  'region-hover': CustomEvent<OverlapRegion | null>
+  'selection-change': CustomEvent<OverlapSelectionChangeEventDetail>
+}
+
+export interface OverlapChart {
+  addEventListener: TypedAddEventListener<OverlapChart, OverlapChartEventMap>
+  removeEventListener: TypedRemoveEventListener<OverlapChart, OverlapChartEventMap>
+}
+
+/** A visible set: its key, its label, its colour, and its index among the declared sets. */
+interface OverlapSet {
+  key: string
+  label: string
+  color: string
+  index: number
+}
+
+/** Everything that does not depend on the plot's size. Recomputed only when its signature changes. */
+interface OverlapModel {
+  signature: string
+  sets: OverlapSet[]
+  regions: OverlapRegion[]
+  union: number
+  /** Circles in abstract units, one per visible set. */
+  circles: OverlapCircle[]
+  /** The regions with an area in this layout, in engine data order. */
+  drawn: OverlapRegion[]
+}
+
+interface OverlapLabel {
+  text: string
+  x: number
+  y: number
+  align: 'left' | 'center' | 'right'
+  /** Set when the label sits outside its region: the line runs from the region to the text. */
+  leader?: { from: OverlapPoint; to: OverlapPoint }
+}
+
+/** The model scaled into one plot size. */
+interface OverlapPixels {
+  key: string
+  circles: OverlapCircle[]
+  paths: Map<number, string>
+  labels: Map<number, OverlapLabel>
+  /** Where the tooltip points for each region: its label position inside the region. */
+  anchors: Map<number, OverlapPoint>
+  setLabels: { x: number; y: number; align: 'left' | 'center' | 'right'; verticalAlign: 'top' | 'bottom'; name: string; total: string }[]
+}
+
+/** Values read from the host's CSS custom properties for each option build. */
+interface OverlapStyle {
+  setFillOpacity: number
+  setStrokeWidth: number
+  hoverOpacity: number
+  selectedOpacity: number
+  regionFontSize: number
+  setFontSize: number
+  setFontWeight: number
+}
+
+/** The subset of ECharts' `renderItem` arguments this chart uses. */
+interface RenderParams {
+  dataIndex: number
+}
+interface RenderApi {
+  getWidth(): number
+  getHeight(): number
+}
+
+/** Engine series order. Only the regions series is interactive. */
+const REGION_SERIES = 1
+
+/**
+ * A Venn diagram of two or three sets, drawn by ECharts. Each set is a circle and each overlap is the area the
+ * circles share, labelled with the number of members in exactly that combination.
+ *
+ * Declare the sets with `c2-chart-series`, where `field` is the set's key, and pass one `data` row per
+ * combination with the number of members in *all* of its sets. A combination left out counts as 0, and the
+ * chart works out every exclusive region from those totals.
+ *
+ * ```html
+ * <c2-overlap-chart data='[
+ *     { "sets": ["web"], "size": 18420 }, { "sets": ["mobile"], "size": 12960 }, { "sets": ["api"], "size": 4310 },
+ *     { "sets": ["web", "mobile"], "size": 6880 }, { "sets": ["web", "api"], "size": 2150 },
+ *     { "sets": ["mobile", "api"], "size": 1020 }, { "sets": ["web", "mobile", "api"], "size": 740 }
+ *   ]'>
+ *   <c2-chart-series field="web" label="Web app"></c2-chart-series>
+ *   <c2-chart-series field="mobile" label="Mobile app"></c2-chart-series>
+ *   <c2-chart-series field="api" label="Public API"></c2-chart-series>
+ * </c2-overlap-chart>
+ * ```
+ *
+ * The legend switches a set off and lays the diagram out again without it. With more than three sets the chart
+ * shows its error state, because circles cannot draw every region of four sets.
+ *
+ * The plot is one tab stop: the arrow keys move between regions from the largest to the smallest, Enter
+ * selects the focused region when `selectable` is set, and Escape clears the focus and the selection.
+ *
+ * @tag c2-overlap-chart
+ *
+ * @slotcomponent c2-chart-series
+ *
+ * @event {CustomEvent<OverlapRegion>} region-click - Fired when a region is clicked or chosen with Enter. `detail.sets` names its sets, `detail.size` counts the members in exactly those sets and `detail.total` those in all of them. Does not bubble.
+ * @event {CustomEvent<OverlapRegion | null>} region-hover - Fired as the pointer or the keyboard focus moves onto a region, and with a `null` detail when it leaves. Does not bubble.
+ * @event {CustomEvent<OverlapSelectionChangeEventDetail>} selection-change - Fired when the reader selects or clears a region of a `selectable` chart. `detail.selected` holds the region's set keys, or `[]`. Does not bubble.
+ *
+ * @cssproperty {opacity} [--c2-chart__set--fill-opacity=0.16] - Opacity of each circle's fill. Overlaps read darker because the fills stack.
+ * @cssproperty {pixel} [--c2-chart__set--stroke-width=2px] - Width of each circle's outline, drawn in the set's colour.
+ * @cssproperty {opacity} [--c2-chart__region__hover--opacity=0.12] - Opacity of the text-coloured wash over the hovered or focused region.
+ * @cssproperty {opacity} [--c2-chart__region__selected--opacity=0.24] - Opacity of the text-coloured wash over the selected region.
+ * @cssproperty {font-size} [--c2-chart__region-label--font-size=14px] - Font size of the count or percentage in each region.
+ * @cssproperty {font-size} [--c2-chart__set-label--font-size=14px] - Font size of each set's name and total, drawn outside its circle.
+ * @cssproperty {font-weight} [--c2-chart__set-label--font-weight=600] - Font weight of each set's name.
+ * @cssproperty {outline} [--c2-chart__plot__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the plot when it is reached with the keyboard.
+ */
+@customElement('c2-overlap-chart')
+export class OverlapChart extends EchartsChartBase {
+  static override styles: CSSResultGroup = [ChartBase.styles, unsafeCSS(overlapStyles)]
+
+  protected override readonly features: readonly EchartsFeature[] = ['custom']
+
+  /** Row field holding the set keys of a combination. */
+  @property({ type: String, attribute: 'sets-field' }) setsField = 'sets'
+
+  /** Row field holding the number of members in all of the combination's sets. */
+  @property({ type: String, attribute: 'size-field' }) sizeField = 'size'
+
+  /**
+   * `proportional` sizes the circles and their overlaps by the counts; with three sets the triple overlap is a
+   * best fit, since three circles cannot match every combination exactly. `uniform` draws equal circles so
+   * every region has room for its label.
+   */
+  @property({ type: String }) layout: OverlapLayoutMode = 'proportional'
+
+  /** What each region shows: its member count, its share of all members, or nothing. */
+  @property({ type: String }) labels: 'count' | 'percent' | 'none' = 'count'
+
+  /** Lets the reader select a region by clicking it or pressing Enter, which fires `selection-change`. */
+  @property({ type: Boolean }) selectable = false
+
+  /** Set keys of the selected region, for example `["web", "api"]`; `selected="web;api"` as an attribute. */
+  @property({ converter: arrayPropertyConverter }) selected: string[] = []
+
+  /** Formats the counts in the labels and the tooltip. Falls back to the chart's number format. Property only. */
+  @property({ attribute: false }) format?: (value: number) => string
+
+  /** The region the keyboard focus is on, as its mask. */
+  @state() private focusedMask: number | null = null
+
+  #model?: OverlapModel
+  #pixels?: OverlapPixels
+  #style?: OverlapStyle
+
+  constructor() {
+    super()
+    // A region has no x position to follow, so the tooltip describes the hovered region only.
+    this.tooltip = 'item'
+  }
+
+  // ----------------------------------------------------------- public API ---
+
+  /** Every exclusive region of the visible sets, including empty ones, largest first. For a table view or an export. */
+  get regions(): OverlapRegion[] {
+    return (this.#computeModel()?.regions ?? []).map((region) => ({ ...region, sets: [...region.sets] })).sort((a, b) => b.size - a.size)
+  }
+
+  /** The readable name of a region: `Web app only`, `Web app + Public API`. */
+  regionName(region: Pick<OverlapRegion, 'sets'>): string {
+    const sets = this.#visibleSets()
+    const names = sets.filter((set) => region.sets.includes(set.key)).map((set) => set.label)
+    if (sets.length > 1 && names.length === 1) return `${names[0]} only`
+    return names.join(' + ')
+  }
+
+  /** Switches a set off or on, as the legend does, and lays the diagram out again. The last visible set stays on. */
+  override setSeriesVisible(index: number, visible: boolean): void {
+    if (!visible && this.#visibleSets().length <= 1 && !this.hiddenSeries.has(index)) return
+    super.setSeriesVisible(index, visible)
+    this.focusedMask = null
+    // Hiding a set is a new layout, not a hidden engine series: push the re-projected data.
+    if (this.data) this.updateData(this.data)
+  }
+
+  // ------------------------------------------------------ chart overrides ---
+
+  /** Sets are toggled by recomputing the layout, so the engine is never asked to hide one of its own series. */
+  protected override async createAdapter(): Promise<ChartAdapter> {
+    const adapter = await super.createAdapter()
+    return { ...adapter, setSeriesVisibility: () => undefined }
+  }
+
+  protected override validationError(): string {
+    const count = this.resolvedSeries.length
+    return count > OVERLAP_MAX_SETS ? `A Venn diagram shows at most ${OVERLAP_MAX_SETS} sets; this one has ${count}.` : ''
+  }
+
+  protected override get legendDependsOnData(): boolean {
+    return this.seriesElements.length === 0 && !this.series?.length
+  }
+
+  /** Without declared sets, every key that appears in a row is a set, in order of first appearance. */
+  protected override inferredSeries(): ChartSeriesConfig[] {
+    const keys: string[] = []
+    for (const row of this.#rows()) for (const key of row.sets) if (!keys.includes(key)) keys.push(key)
+    return keys.map((key) => ({ field: key, label: key }))
+  }
+
+  protected override coordinateSystem(): Record<string, unknown> {
+    return {}
+  }
+
+  protected override seriesOption(): Record<string, unknown> {
+    return {}
+  }
+
+  protected override buildOptions(context: ChartBuildContext): unknown {
+    const options = super.buildOptions(context) as Record<string, unknown>
+    this.#style = this.#readStyle()
+    this.#pixels = undefined
+    const common = { type: 'custom', coordinateSystem: 'none', animationDurationUpdate: 0 }
+    return {
+      ...options,
+      series: [
+        { ...common, name: 'sets', silent: true, z: 1, renderItem: (params: RenderParams, api: RenderApi) => this.#renderSetFill(params, api, context.theme) },
+        { ...common, name: 'regions', z: 2, renderItem: (params: RenderParams, api: RenderApi) => this.#renderRegion(params, api, context.theme) },
+        {
+          ...common,
+          name: 'outlines',
+          silent: true,
+          z: 3,
+          renderItem: (params: RenderParams, api: RenderApi) => this.#renderOutline(params, api, context.theme),
+        },
+      ],
+    }
+  }
+
+  /** One datum per circle for the fill and outline series, and one per drawable region in between. */
+  protected override projectData(_frame: ChartFrame, _context: ChartBuildContext): unknown {
+    const model = this.#computeModel()
+    if (!model) return [[], [], []]
+    const sets = model.sets.map((set, index) => ({ name: set.label, value: [index] }))
+    return [sets, model.drawn.map((region) => ({ name: this.regionName(region), value: [region.mask] })), sets]
+  }
+
+  protected override tooltipContextAt(detail: { index: number; seriesIndex: number; px: number; py: number }): ChartTooltipContext {
+    const region = this.#computeModel()?.drawn[detail.index]
+    if (!region) return { index: detail.index, x: detail.index, formattedX: '', entries: [], px: detail.px, py: detail.py }
+    const name = this.regionName(region)
+    const anchor = this.#pixels?.anchors.get(region.mask) ?? { x: detail.px, y: detail.py }
+    return {
+      index: detail.index,
+      x: detail.index,
+      formattedX: name,
+      entries: [
+        {
+          seriesIndex: REGION_SERIES,
+          series: { field: region.sets.join('&'), label: name },
+          value: region.size,
+          formatted: this.#formatCount(region.size),
+          color: this.#regionColor(region),
+        },
+      ],
+      px: anchor.x,
+      py: anchor.y,
+    }
+  }
+
+  /** A region is not a point: `point-hover` and `point-click` stay quiet and the region events fire instead. */
+  protected override pointAt(): ChartPointEventDetail | undefined {
+    return undefined
+  }
+
+  protected override handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
+    const region = detail ? this.#computeModel()?.drawn[detail.index] : undefined
+    if (detail && (detail.seriesIndex !== REGION_SERIES || !region)) return
+    super.handleEngineHover(detail)
+    this.dispatchEvent(new CustomEvent<OverlapRegion | null>('region-hover', { detail: region ? { ...region } : null }))
+  }
+
+  protected override handleEngineClick(detail: { index: number; seriesIndex: number }): void {
+    if (detail.seriesIndex !== REGION_SERIES) return
+    const region = this.#computeModel()?.drawn[detail.index]
+    if (region) this.#activate(region)
+  }
+
+  protected override defaultTooltip(context: ChartTooltipContext): TemplateResult {
+    const region = this.#computeModel()?.drawn[context.index]
+    if (!region) return super.defaultTooltip(context)
+    const outside = this.#visibleSets()
+      .filter((set) => !region.sets.includes(set.key))
+      .map((set) => set.label)
+    const row = (label: string, value: string) => html`
+      <div class="tooltip-row">
+        <span class="tooltip-label">${label}</span>
+        <span class="tooltip-value">${value}</span>
+      </div>
+    `
+    return html`
+      <div class="tooltip-title">${context.formattedX}</div>
+      ${outside.length > 0 && region.sets.length > 1 ? html`<div class="tooltip-subtitle">Not in ${outside.join(' or ')}</div>` : nothing}
+      ${row('In this region', this.#formatCount(region.size))} ${row('Share of total', this.#formatShare(region.share))}
+      ${region.total !== region.size ? row(region.sets.length > 1 ? 'In all of these' : 'Set total', this.#formatCount(region.total)) : nothing}
+    `
+  }
+
+  // ------------------------------------------------------------ lifecycle ---
+
+  protected override firstUpdated(): void {
+    super.firstUpdated()
+    const plot = this.plotElement
+    if (!plot) return
+    // The plot is the chart's one tab stop. It is inside the shadow root, so nothing is written on the host.
+    plot.tabIndex = 0
+    plot.setAttribute('role', 'group')
+    plot.setAttribute('aria-roledescription', 'Venn diagram')
+    plot.addEventListener('keydown', this.#handleKeydown)
+    plot.addEventListener('blur', this.#handleBlur)
+  }
+
+  protected override updated(changed: Map<PropertyKey, unknown>): void {
+    super.updated(changed)
+    const model = this.#computeModel()
+    const label = model ? `Venn diagram of ${model.sets.map((set) => set.label).join(', ')}` : 'Venn diagram'
+    if (this.plotElement?.getAttribute('aria-label') !== label) this.plotElement?.setAttribute('aria-label', label)
+  }
+
+  protected override render(): TemplateResult {
+    const model = this.validationError() ? undefined : this.#computeModel()
+    const focused = model?.drawn.find((region) => region.mask === this.focusedMask)
+    return html`
+      ${super.render()}
+      ${
+        model
+          ? html`
+              <table class="overlap-a11y">
+                <caption>
+                  ${model.sets.map((set) => set.label).join(', ')}
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Region</th>
+                    <th scope="col">Members</th>
+                    <th scope="col">Share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${[...model.regions]
+                    .sort((a, b) => b.size - a.size)
+                    .map(
+                      (region) => html`
+                        <tr>
+                          <th scope="row">${this.regionName(region)}</th>
+                          <td>${this.#formatCount(region.size)}</td>
+                          <td>${this.#formatShare(region.share)}</td>
+                        </tr>
+                      `,
+                    )}
+                </tbody>
+              </table>
+            `
+          : nothing
+      }
+      <div class="overlap-a11y" aria-live="polite">
+        ${focused ? `${this.regionName(focused)}: ${this.#formatCount(focused.size)}, ${this.#formatShare(focused.share)}` : ''}
+      </div>
+    `
+  }
+
+  // ------------------------------------------------------------ internals ---
+
+  /** The rows as `{ sets, size }`, whatever the fields are called. Rows without a set list are skipped. */
+  #rows(): OverlapRow[] {
+    const data = this.data
+    if (!Array.isArray(data)) return []
+    const rows: OverlapRow[] = []
+    for (const row of data as unknown[]) {
+      if (!row || typeof row !== 'object' || Array.isArray(row)) continue
+      const record = row as Record<string, unknown>
+      const sets = record[this.setsField]
+      if (!Array.isArray(sets) || sets.length === 0) continue
+      rows.push({ sets: sets.map(String), size: Number(record[this.sizeField]) || 0 })
+    }
+    return rows
+  }
+
+  #visibleSets(): OverlapSet[] {
+    const theme = this.themeController.theme
+    return this.resolvedSeries
+      .map((series, index) => ({ key: series.field, label: series.label ?? series.field, color: this.colorOf(series, index, theme), index }))
+      .filter((set) => !this.hiddenSeries.has(set.index))
+  }
+
+  #computeModel(): OverlapModel | undefined {
+    const sets = this.#visibleSets()
+    if (sets.length === 0 || sets.length > OVERLAP_MAX_SETS) return undefined
+    const rows = this.#rows()
+    const keys = sets.map((set) => set.key)
+    const signature = JSON.stringify([keys, sets.map((set) => [set.label, set.color]), this.layout, rows])
+    if (this.#model?.signature === signature) return this.#model
+
+    const { regions, union } = overlapRegions(keys, rows)
+    const circles = solveOverlap(keys, regions, this.layout)
+    const drawn = regions.filter((region) => regionPath(circles, region.mask) !== '')
+    this.#model = { signature, sets, regions, union, circles, drawn }
+    this.#pixels = undefined
+    return this.#model
+  }
+
+  #readStyle(): OverlapStyle {
+    const style = getComputedStyle(this)
+    const read = (name: string, fallback: number): number => {
+      const value = parseFloat(style.getPropertyValue(name))
+      return Number.isFinite(value) ? value : fallback
+    }
+    return {
+      setFillOpacity: read('--c2-chart__set--fill-opacity', 0.16),
+      setStrokeWidth: read('--c2-chart__set--stroke-width', 2),
+      hoverOpacity: read('--c2-chart__region__hover--opacity', 0.12),
+      selectedOpacity: read('--c2-chart__region__selected--opacity', 0.24),
+      regionFontSize: read('--c2-chart__region-label--font-size', 14),
+      setFontSize: read('--c2-chart__set-label--font-size', 14),
+      setFontWeight: read('--c2-chart__set-label--font-weight', 600),
+    }
+  }
+
+  /** Scales the model into the plot and places every label. Cached per size, model and label mode. */
+  #layoutPixels(width: number, height: number): OverlapPixels | undefined {
+    const model = this.#computeModel()
+    const style = this.#style ?? this.#readStyle()
+    if (!model) return undefined
+    const key = `${width}x${height}|${model.signature}|${this.labels}|${JSON.stringify(style)}|${this.locale ?? ''}`
+    if (this.#pixels?.key === key) return this.#pixels
+
+    const charWidth = (size: number) => size * 0.6
+    const circles = fitOverlap(model.circles, width, height, { x: 8, y: style.setFontSize + 16 })
+    const paths = new Map<number, string>()
+    const labels = new Map<number, OverlapLabel>()
+    const anchors = new Map<number, OverlapPoint>()
+
+    for (const region of model.drawn) {
+      paths.set(region.mask, regionPath(circles, region.mask))
+      const point = regionLabelPoint(circles, region.mask)
+      if (!point) continue
+      anchors.set(region.mask, point)
+      if (this.labels === 'none' || (region.size === 0 && this.layout === 'proportional')) continue
+      const text = this.labels === 'percent' ? this.#formatShare(region.share) : this.#formatCount(region.size)
+      const textWidth = text.length * charWidth(style.regionFontSize)
+      if (point.clearance >= Math.max(style.regionFontSize * 0.75, textWidth / 2 + 2)) {
+        labels.set(region.mask, { text, x: point.x, y: point.y, align: 'center' })
+        continue
+      }
+      // Too small for its text: the number moves outside, joined to the region by a line.
+      const end = leaderEnd(circles, point, 10)
+      const align = end.direction.x >= 0 ? 'left' : 'right'
+      const x = align === 'left' ? Math.min(end.x, width - textWidth - 8) : Math.max(end.x, textWidth + 8)
+      const y = Math.min(Math.max(end.y, style.regionFontSize), height - style.regionFontSize)
+      labels.set(region.mask, { text, x: x + (align === 'left' ? 4 : -4), y, align, leader: { from: point, to: { x, y } } })
+    }
+
+    const cy = circles.reduce((sum, c) => sum + c.y, 0) / circles.length
+    const setLabels = circles.map((circle, index) => {
+      const set = model.sets[index]
+      const region = model.regions.find((item) => item.mask === 1 << index)
+      const total = this.#formatCount(region?.total ?? 0)
+      const below = circle.y > cy + 1
+      const half = ((set.label.length + total.length + 3) * charWidth(style.setFontSize)) / 2
+      return {
+        x: Math.min(Math.max(circle.x, half + 4), width - half - 4),
+        y: below ? circle.y + circle.radius + 8 : circle.y - circle.radius - 8,
+        align: 'center' as const,
+        verticalAlign: below ? ('top' as const) : ('bottom' as const),
+        name: set.label,
+        total,
+      }
+    })
+
+    this.#pixels = { key, circles, paths, labels, anchors, setLabels }
+    return this.#pixels
+  }
+
+  #renderSetFill(params: RenderParams, api: RenderApi, _theme: ChartTheme): unknown {
+    const pixels = this.#layoutPixels(api.getWidth(), api.getHeight())
+    const circle = pixels?.circles[params.dataIndex]
+    const set = this.#model?.sets[params.dataIndex]
+    if (!circle || !set) return null
+    return {
+      type: 'circle',
+      shape: { cx: circle.x, cy: circle.y, r: circle.radius },
+      style: { fill: set.color, fillOpacity: this.#style?.setFillOpacity ?? 0.16 },
+    }
+  }
+
+  #renderRegion(params: RenderParams, api: RenderApi, theme: ChartTheme): unknown {
+    const pixels = this.#layoutPixels(api.getWidth(), api.getHeight())
+    const region = this.#model?.drawn[params.dataIndex]
+    const pathData = region ? pixels?.paths.get(region.mask) : undefined
+    if (!pixels || !region || !pathData) return null
+    const style = this.#style as OverlapStyle
+    const selected = this.#isSelected(region)
+    const focused = this.focusedMask === region.mask
+    const base = selected ? style.selectedOpacity : focused ? style.hoverOpacity : 0
+    const children: unknown[] = [
+      {
+        type: 'path',
+        shape: { pathData },
+        style: {
+          fill: theme.color,
+          fillOpacity: base,
+          stroke: focused ? theme.color : 'none',
+          lineWidth: focused ? 2 : 0,
+          lineDash: focused ? [4, 3] : undefined,
+        },
+        emphasis: { style: { fillOpacity: selected ? Math.min(1, style.selectedOpacity + 0.06) : style.hoverOpacity } },
+      },
+    ]
+    const label = pixels.labels.get(region.mask)
+    if (label) {
+      if (label.leader) {
+        children.push({
+          type: 'line',
+          silent: true,
+          shape: { x1: label.leader.from.x, y1: label.leader.from.y, x2: label.leader.to.x, y2: label.leader.to.y },
+          style: { stroke: theme.mutedColor, lineWidth: 1 },
+        })
+        children.push({ type: 'circle', silent: true, shape: { cx: label.leader.from.x, cy: label.leader.from.y, r: 2 }, style: { fill: theme.color } })
+      }
+      children.push({
+        type: 'text',
+        silent: true,
+        style: {
+          text: label.text,
+          x: label.x,
+          y: label.y,
+          align: label.align,
+          verticalAlign: 'middle',
+          fill: region.size === 0 ? theme.mutedColor : theme.color,
+          fontSize: style.regionFontSize,
+          fontWeight: region.size === 0 ? 400 : 500,
+          fontFamily: this.#fontFamily(theme),
+        },
+      })
+    }
+    return { type: 'group', children }
+  }
+
+  #renderOutline(params: RenderParams, api: RenderApi, theme: ChartTheme): unknown {
+    const pixels = this.#layoutPixels(api.getWidth(), api.getHeight())
+    const circle = pixels?.circles[params.dataIndex]
+    const label = pixels?.setLabels[params.dataIndex]
+    const set = this.#model?.sets[params.dataIndex]
+    if (!circle || !label || !set) return null
+    const style = this.#style as OverlapStyle
+    const fontFamily = this.#fontFamily(theme)
+    return {
+      type: 'group',
+      children: [
+        {
+          type: 'circle',
+          shape: { cx: circle.x, cy: circle.y, r: circle.radius },
+          style: { fill: 'none', stroke: set.color, lineWidth: style.setStrokeWidth },
+        },
+        {
+          type: 'text',
+          style: {
+            text: `{dot|●} {name|${escapeRich(label.name)}} {total|${escapeRich(label.total)}}`,
+            x: label.x,
+            y: label.y,
+            align: label.align,
+            verticalAlign: label.verticalAlign,
+            fontSize: style.setFontSize,
+            fontFamily,
+            rich: {
+              dot: { fill: set.color, fontSize: style.setFontSize, fontFamily },
+              name: { fill: theme.color, fontWeight: style.setFontWeight, fontSize: style.setFontSize, fontFamily },
+              total: { fill: theme.mutedColor, fontSize: style.setFontSize, fontFamily },
+            },
+          },
+        },
+      ],
+    }
+  }
+
+  #fontFamily(theme: ChartTheme): string | undefined {
+    return theme.fontFamily === 'inherit' ? getComputedStyle(this).fontFamily || undefined : theme.fontFamily
+  }
+
+  #isSelected(region: OverlapRegion): boolean {
+    return this.selected.length === region.sets.length && region.sets.every((key) => this.selected.includes(key))
+  }
+
+  /** A single set's region wears its colour in the tooltip; an overlap wears the text colour. */
+  #regionColor(region: OverlapRegion): string {
+    if (region.sets.length !== 1) return this.themeController.theme.color
+    return this.#visibleSets().find((set) => set.key === region.sets[0])?.color ?? this.themeController.theme.color
+  }
+
+  #formatCount(value: number): string {
+    return this.format?.(value) ?? this.formatValue(value)
+  }
+
+  #formatShare(share: number): string {
+    return new Intl.NumberFormat(this.locale, { style: 'percent', maximumFractionDigits: 1 }).format(share)
+  }
+
+  /** Click or Enter: fires `region-click` and, on a selectable chart, toggles the selection. */
+  #activate(region: OverlapRegion): void {
+    this.dispatchEvent(new CustomEvent<OverlapRegion>('region-click', { detail: { ...region, sets: [...region.sets] } }))
+    if (!this.selectable) return
+    this.selected = this.#isSelected(region) ? [] : [...region.sets]
+    this.dispatchEvent(new CustomEvent<OverlapSelectionChangeEventDetail>('selection-change', { detail: { selected: [...this.selected] } }))
+  }
+
+  /** Moves the keyboard focus onto a region and shows its tooltip, as hovering it would. */
+  #focusRegion(region: OverlapRegion | undefined): void {
+    const model = this.#computeModel()
+    this.focusedMask = region?.mask ?? null
+    if (!model || !region) {
+      this.handleEngineHover(null)
+      return
+    }
+    const anchor = this.#pixels?.anchors.get(region.mask) ?? { x: 0, y: 0 }
+    this.handleEngineHover({ index: model.drawn.indexOf(region), seriesIndex: REGION_SERIES, px: anchor.x, py: anchor.y })
+  }
+
+  #handleKeydown = (event: KeyboardEvent): void => {
+    const model = this.#computeModel()
+    if (!model || model.drawn.length === 0) return
+    const order = [...model.drawn].sort((a, b) => b.size - a.size)
+    const current = order.findIndex((region) => region.mask === this.focusedMask)
+    const move = (index: number) => {
+      event.preventDefault()
+      this.#focusRegion(order[(index + order.length) % order.length])
+    }
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        move(current + 1)
+        break
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        move(current < 0 ? order.length - 1 : current - 1)
+        break
+      case 'Home':
+        move(0)
+        break
+      case 'End':
+        move(order.length - 1)
+        break
+      case 'Enter':
+      case ' ':
+        if (current < 0) return
+        event.preventDefault()
+        this.#activate(order[current])
+        break
+      case 'Escape':
+        if (current < 0 && this.selected.length === 0) return
+        event.preventDefault()
+        this.#focusRegion(undefined)
+        if (this.selectable && this.selected.length > 0) {
+          this.selected = []
+          this.dispatchEvent(new CustomEvent<OverlapSelectionChangeEventDetail>('selection-change', { detail: { selected: [] } }))
+        }
+        break
+    }
+  }
+
+  #handleBlur = (): void => {
+    if (this.focusedMask !== null) this.#focusRegion(undefined)
+  }
+}
+
+/** ECharts rich text uses `{style|text}`: a brace or a pipe in a label would end the run early. */
+function escapeRich(text: string): string {
+  return text.replace(/[{}|]/g, ' ')
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'c2-overlap-chart': OverlapChart
+  }
+}

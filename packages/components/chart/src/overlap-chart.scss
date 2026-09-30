@@ -1,0 +1,30 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-chart,
+  $theme: (
+    plot__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+// The plot is the chart's tab stop; a pointer click focuses it too, so only keyboard focus draws the ring.
+.plot:focus {
+  outline: none;
+}
+
+.plot:focus-visible {
+  outline: css.cssVar(plot__focus--outline);
+  outline-offset: -2px;
+}
+
+.tooltip-subtitle {
+  opacity: 0.72;
+}
+
+// The region table and the live announcement are for assistive technology only.
+.overlap-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

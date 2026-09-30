@@ -1,0 +1,86 @@
+---
+title: 'Overlap chart gallery'
+description: 'Venn diagram cards for audience overlap, skills coverage, subsets and custom palettes.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { OverlapChart } from '@c2n/chart/overlap-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { Card } from '@c2n/card'
+
+<ExampleModules />
+
+<GalleryGrid min="300">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-overlap-chart data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
+  <c2-chart-series field="web" label="Web"></c2-chart-series>
+  <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
+  <c2-chart-series field="api" label="API"></c2-chart-series>
+</c2-overlap-chart>
+```
+
+```html tag=MdxCodeBlock,label=Audience overlap card
+<style>
+  .overlap-story { width: 100%; --c2-card--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7); --c2-card--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7); --c2-card--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7); --c2-card--border-left: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7); --c2-card--border-top-left-radius: 14px; --c2-card--border-top-right-radius: 14px; --c2-card--border-bottom-left-radius: 14px; --c2-card--border-bottom-right-radius: 14px; --c2-card--background: var(--c2-theme--color-surface, #ffffff); --c2-card--padding-top: 4px; --c2-card--padding-right: 18px; --c2-card--padding-bottom: 4px; --c2-card--padding-left: 18px; --c2-card__header--padding-top: 20px; --c2-card__header--padding-right: 20px; --c2-card__header--padding-bottom: 0; --c2-card__header--padding-left: 20px; --c2-card__footer--padding-top: 4px; --c2-card__footer--padding-right: 20px; --c2-card__footer--padding-bottom: 18px; --c2-card__footer--padding-left: 20px; }
+  .overlap-story__heading, .overlap-story__footer { display: grid; gap: 4px; }
+  .overlap-story__heading strong { font-size: 15px; }
+  .overlap-story__heading span, .overlap-story__footer span:last-child { color: var(--c2-theme--color-on-surface-variant, #52525b); font-size: 12px; }
+  .overlap-story__footer { font-size: 12px; }
+  .overlap-story c2-overlap-chart { width: 100%; --c2-chart--height: 260px; --c2-chart--padding: 0; --c2-chart--border-top: none; --c2-chart--border-right: none; --c2-chart--border-bottom: none; --c2-chart--border-left: none; --c2-chart--background: transparent; }
+</style>
+<c2-card class="overlap-story">
+  <div slot="header" class="overlap-story__heading">
+    <strong>Which surfaces do active users touch?</strong>
+    <span>Unique active users, last 30 days</span>
+  </div>
+  <c2-overlap-chart legend="none" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'>
+    <c2-chart-series field="web" label="Web"></c2-chart-series>
+    <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
+    <c2-chart-series field="api" label="API"></c2-chart-series>
+  </c2-overlap-chart>
+  <div slot="footer" class="overlap-story__footer">
+    <strong>740 users use all three surfaces</strong>
+    <span>26,380 unique users in total</span>
+  </div>
+</c2-card>
+```
+
+```html tag=MdxCodeBlock,label=Skills coverage
+<c2-overlap-chart layout="uniform" labels="percent" legend="none" data='[{"sets":["design"],"size":42},{"sets":["frontend"],"size":58},{"sets":["backend"],"size":51},{"sets":["design","frontend"],"size":19},{"sets":["design","backend"],"size":2},{"sets":["frontend","backend"],"size":24},{"sets":["design","frontend","backend"],"size":2}]'>
+  <c2-chart-series field="design" label="Design"></c2-chart-series>
+  <c2-chart-series field="frontend" label="Frontend"></c2-chart-series>
+  <c2-chart-series field="backend" label="Backend"></c2-chart-series>
+</c2-overlap-chart>
+```
+
+```html tag=MdxCodeBlock,label=Subset and disjoint set
+<c2-overlap-chart legend="none" data='[{"sets":["active"],"size":9400},{"sets":["churned"],"size":2100},{"sets":["reactivated"],"size":600},{"sets":["active","reactivated"],"size":600}]'>
+  <c2-chart-series field="active" label="Active"></c2-chart-series>
+  <c2-chart-series field="churned" label="Churned"></c2-chart-series>
+  <c2-chart-series field="reactivated" label="Reactivated"></c2-chart-series>
+</c2-overlap-chart>
+```
+
+```html tag=MdxCodeBlock,label=Two products
+<c2-overlap-chart data='[{"sets":["plan"],"size":4820},{"sets":["addon"],"size":1960},{"sets":["plan","addon"],"size":1540}]'>
+  <c2-chart-series field="plan" label="Pro plan"></c2-chart-series>
+  <c2-chart-series field="addon" label="Storage add-on"></c2-chart-series>
+</c2-overlap-chart>
+```
+
+```html tag=MdxCodeBlock,label=Soft palette
+<style>
+  .overlap-soft { --c2-chart__series-1--color: #7c3aed; --c2-chart__series-2--color: #db2777; --c2-chart__series-3--color: #0891b2; --c2-chart__set--fill-opacity: 0.24; --c2-chart__set--stroke-width: 0; }
+</style>
+<c2-overlap-chart class="overlap-soft" layout="uniform" data='[{"sets":["email"],"size":1240},{"sets":["push"],"size":980},{"sets":["sms"],"size":410},{"sets":["email","push"],"size":520},{"sets":["email","sms"],"size":160},{"sets":["push","sms"],"size":130},{"sets":["email","push","sms"],"size":70}]'>
+  <c2-chart-series field="email" label="Email"></c2-chart-series>
+  <c2-chart-series field="push" label="Push"></c2-chart-series>
+  <c2-chart-series field="sms" label="SMS"></c2-chart-series>
+</c2-overlap-chart>
+```
+
+</GalleryGrid>
