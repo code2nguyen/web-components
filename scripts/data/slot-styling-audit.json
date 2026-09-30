@@ -600,6 +600,18 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-context-menu",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer-owned area that opens the menu; style it through its own class. The host draws no box (display: contents)."
+    },
+    {
+      "tag": "c2-context-menu",
+      "slot": "menu",
+      "decision": "assigned-content",
+      "reason": "The menu slot takes a consumer-owned c2-menu; style its surface through the --c2-menu--* contract, set on the menu or inherited from the context menu."
+    },
+    {
       "tag": "c2-copy-button",
       "slot": "",
       "decision": "assigned-content",
@@ -1133,6 +1145,12 @@
     },
     {
       "tag": "c2-number-input",
+      "slot": "supporting-text",
+      "decision": "assigned-content",
+      "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-otp-input",
       "slot": "supporting-text",
       "decision": "assigned-content",
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
@@ -1786,6 +1804,12 @@
       "decision": "part",
       "parts": ["footer"],
       "reason": "The semantic footer region owns the footer slot's component-side presentation."
+    },
+    {
+      "tag": "c2-table",
+      "slot": "group:{groupKey}",
+      "decision": "assigned-content",
+      "reason": "The group:{groupKey} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-table",

@@ -30,9 +30,9 @@ npm install @c2n/link-button
     display: inline-flex;
     gap: 4px;
     padding: 4px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
-    background: #ffffff;
+    background: var(--c2-theme--color-surface, #ffffff);
   }
   .nav-item {
     --c2-link-button__container--padding-left: 12px;
@@ -40,12 +40,12 @@ npm install @c2n/link-button
     --c2-link-button__container--padding-top: 6px;
     --c2-link-button__container--padding-bottom: 6px;
     --c2-link-button__container--border-radius: 6px;
-    --c2-link-button__container--color: #52525b;
-    --c2-link-button__container__hover--color: #18181b;
-    --c2-link-button__container__hover--background-color: #f4f4f5;
+    --c2-link-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-link-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-link-button__container__hover--text-decoration: none;
-    --c2-link-button__container__selected--color: #18181b;
-    --c2-link-button__container__selected--background-color: #e4e4e7;
+    --c2-link-button__container__selected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-link-button__container__selected--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <div data-label="Button vs link">

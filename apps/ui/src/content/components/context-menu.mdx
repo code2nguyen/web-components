@@ -1,0 +1,160 @@
+---
+title: 'Context Menu'
+description: 'A menu opened by right-clicking or long-pressing an area, built from a slotted c2-menu or a render function per clicked spot.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { ContextMenu } from '@c2n/context-menu'
+
+<ExampleModules />
+
+`c2-context-menu` wraps an area and opens a menu where that area is right-clicked, long-pressed on a touch screen, or asked for with the keyboard's context-menu key or Shift+F10. Only its default-slot children open it; the rest of the page, and the menu itself, keep the browser's behaviour. The element draws no box of its own (`display: contents`), so it can wrap a table, a canvas or a whole panel without changing the layout.
+
+The menu is a `c2-menu` placed at the pointer, so it has the same keyboard support, submenus, checkable rows and light dismiss, and it flips to stay on screen. Give it one of two ways, or both:
+
+- **Static** — a `c2-menu` slotted into `menu`: the same commands wherever the area is clicked, such as zoom in and zoom out on a chart or canvas.
+- **Dynamic** — a `renderContextMenu` function, called on every opening with the context (the element under the pointer, the data it stands for, the coordinates and the trigger), which returns the rows for that spot. When it returns nothing the slotted menu is used, and when there is neither the browser shows its own menu.
+
+Every row activated fires `context-menu-select`, which carries the row's `value` together with the `context` the menu was opened on, so one listener knows both what was chosen and where.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/context-menu
+```
+
+`@c2n/menu` is a dependency of the package and is registered for you.
+
+## Usage
+
+Right-click (or long-press) inside each example. The table row builds its menu from the cell that was clicked.
+
+```html tag=UsageBlock,package=@c2n/context-menu
+<style>
+  .demo {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 560px;
+  }
+  .canvas {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 160px;
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 30%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 14px;
+    user-select: none;
+  }
+  .quotes {
+    width: 100%;
+    height: 176px;
+  }
+  .result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<div data-label="Static menu">
+  <div class="demo">
+    <c2-context-menu client:only="lit" data-context-menu-demo="canvas">
+      <div class="canvas">Right-click the canvas</div>
+      <c2-menu slot="menu" aria-label="Canvas">
+        <c2-menu-item value="zoom-in">Zoom in<c2-kbd slot="shortcut">+</c2-kbd></c2-menu-item>
+        <c2-menu-item value="zoom-out">Zoom out<c2-kbd slot="shortcut">−</c2-kbd></c2-menu-item>
+        <c2-menu-item value="fit">Fit to screen</c2-menu-item>
+        <hr />
+        <c2-menu-item value="grid" type="checkbox" checked>Show grid</c2-menu-item>
+      </c2-menu>
+    </c2-context-menu>
+    <output class="result"></output>
+  </div>
+</div>
+<div data-label="Per cell">
+  <div class="demo">
+    <c2-context-menu client:only="lit" data-context-menu-demo="table" menu-label="Cell actions">
+      <c2-table
+        class="quotes"
+        row-key="symbol"
+        aria-label="Quotes"
+        rows='[{"symbol":"AAPL","sector":"Tech","price":190.4},{"symbol":"MSFT","sector":"Tech","price":410.2},{"symbol":"JPM","sector":"Finance","price":198.7},{"symbol":"XOM","sector":"Energy","price":118.3}]'
+      >
+        <c2-table-column field="symbol" header="Symbol"></c2-table-column>
+        <c2-table-column field="sector" header="Sector"></c2-table-column>
+        <c2-table-column field="price" header="Price" format="currency" align="end"></c2-table-column>
+      </c2-table>
+    </c2-context-menu>
+    <output class="result"></output>
+  </div>
+</div>
+```
+
+### A menu per clicked spot
+
+`renderContextMenu` is a property, since it holds a function. It receives a `ContextMenuContext` and returns rows — a Lit template, a DOM node or an array of them — or `null` to fall back to the slotted menu:
+
+```typescript tag=CodeBlock
+import { html } from 'lit'
+import type { ContextMenu } from '@c2n/context-menu'
+import type { TableCellEventDetail } from '@c2n/table/table-types.js'
+
+const menu = document.querySelector<ContextMenu>('c2-context-menu')!
+
+menu.renderContextMenu = ({ data, source }) => {
+  if (source?.localName !== 'c2-table') return null // the header or empty space: no menu
+  const cell = data as TableCellEventDetail
+  return html`
+    <c2-menu-item value="copy">Copy “${cell.value}”</c2-menu-item>
+    <c2-menu-item value="filter">Filter by ${cell.column.header}</c2-menu-item>
+    <hr />
+    <c2-menu-item value="remove" destructive>Remove ${cell.key}</c2-menu-item>
+  `
+}
+
+menu.addEventListener('context-menu-select', ({ detail }) => {
+  const cell = detail.context.data as TableCellEventDetail
+  if (detail.value === 'copy') navigator.clipboard.writeText(String(cell.value))
+})
+```
+
+The context holds:
+
+| Field           | Meaning                                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| `target`        | The innermost element under the pointer, inside shadow roots included.                                      |
+| `data`          | What that element stands for, as answered by the component that owns it — see below.                       |
+| `source`        | The component that answered, or `null`.                                                                     |
+| `x`, `y`        | Viewport coordinates the menu opens at.                                                                     |
+| `trigger`       | `pointer`, `touch` (long press), `keyboard` (context-menu key or Shift+F10) or `api` (`show(x, y, target)`). |
+| `originalEvent` | The event that opened the menu.                                                                             |
+
+For plain markup, read `target` directly — `target.closest('[data-file]')` finds the row of a file list.
+
+### Data from the component under the pointer
+
+Before opening, the menu dispatches a composed `c2-context-menu-request` event on the node under the pointer. It crosses shadow roots, so a component that owns that node can say what it stands for. `c2-table` answers for its body cells with the same detail as `cell-click` — `row`, `rowIndex`, `key`, `column` and `value` — so a wrapped table needs no wiring at all. The innermost answer wins, so a component inside a table cell can answer for itself.
+
+A component of your own answers with `provideContextMenuData` from `@c2n/core/context-menu-helper.js`, without depending on this package:
+
+```typescript tag=CodeBlock
+import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
+
+// Inside a Lit template: this chart answers with the point under the pointer.
+html`<canvas @c2-context-menu-request=${(event: Event) => provideContextMenuData(event, this, this.pointAt(event))}></canvas>`
+```
+
+Because the data is asked for rather than pushed, a right click, a long press, the keyboard and `show()` all carry the same context.
+
+### Which menu wins
+
+A nested `c2-context-menu` opens instead of the one around it, and any handler that already called `preventDefault()` on the `contextmenu` event keeps both closed. `context-menu-open` fires before the menu opens and is cancelable, and `disabled` lets the browser's own menu through. A long press waits `long-press-duration` milliseconds (500 by default) and is cancelled by a finger that moves, which is a scroll; the click the lifted finger produces is swallowed, so a long press on a row does not also open it.
+
+The surface is styled through the `--c2-menu--*` variables, set on the `c2-context-menu` or anywhere above it.

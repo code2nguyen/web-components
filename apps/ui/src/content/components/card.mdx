@@ -36,7 +36,7 @@ npm install @c2n/card
     margin: 0;
     font-size: 13px;
     line-height: 1.5;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .card .cover {
     height: 110px;
@@ -44,9 +44,9 @@ npm install @c2n/card
   }
   .card .ghost {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .lift {
     --c2-card--box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);

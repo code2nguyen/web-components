@@ -93,6 +93,8 @@
     "build": {
       "dependencies": [
         "./packages/components/marker:build",
+        "./packages/components/context-menu:build",
+        "./packages/components/otp-input:build",
         "./packages/components/chat-message-list:build",
         "./packages/components/shortcut:build",
         "./packages/components/carousel:build",

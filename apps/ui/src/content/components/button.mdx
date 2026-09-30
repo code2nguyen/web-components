@@ -25,10 +25,10 @@ Drop text into the default slot; use `prefix-icon`, `suffix-icon` and `running-i
 <style>
   .outline {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
-    --c2-button__container__active--background-color: #e4e4e7;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-button__container__active--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <div data-label="Text">

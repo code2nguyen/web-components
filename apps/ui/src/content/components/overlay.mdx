@@ -22,13 +22,13 @@ npm install @c2n/overlay
 ```html tag=UsageBlock,package=@c2n/overlay
 <style>
   .surface {
-    background: #ffffff;
-    border: 1px solid #e4e4e7;
+    background: var(--c2-theme--color-surface, #ffffff);
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     padding: 12px 14px;
     font-size: 14px;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
   .menu {
     display: grid;
@@ -46,24 +46,24 @@ npm install @c2n/overlay
     color: inherit;
   }
   .menu button:hover {
-    background: #f4f4f5;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .trigger {
     font: inherit;
     font-size: 13px;
     padding: 6px 12px;
     border-radius: 8px;
-    border: 1px solid #d4d4d8;
-    background: #ffffff;
-    color: #18181b;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
     cursor: pointer;
   }
   .trigger:hover {
-    background: #f4f4f5;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .anchor {
     padding: 6px 10px;
-    border: 1px dashed #a1a1aa;
+    border: 1px dashed var(--c2-theme--color-outline-strong, #a1a1aa);
     border-radius: 6px;
     font-size: 13px;
   }

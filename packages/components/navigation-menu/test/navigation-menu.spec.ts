@@ -102,6 +102,51 @@ test('hovering a plain link closes the open panel', async ({ page, renderScenari
   await expect(page.getByRole('group', { name: 'Products' })).not.toBeVisible()
 })
 
+test('clicking the open trigger closes its panel, and hover leaves it shut until the pointer moves on', async ({ page, renderScenario }) => {
+  // The default delays: the grace for a click right after a hover-open is measured against them.
+  await renderScenario(bar(''))
+  const trigger = page.getByRole('button', { name: 'Products' })
+  const panel = page.getByRole('group', { name: 'Products' })
+
+  await trigger.click()
+  await expect(panel).toBeVisible()
+  await trigger.click()
+  await expect(panel).not.toBeVisible()
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+  // Off the trigger into the gap before the next item and back: hover does not reopen what the click closed. With the
+  // delay zeroed, a reopen would land within a frame, so two frames later the panel must still be shut.
+  const host = page.locator('c2-navigation-menu')
+  await host.evaluate((element) => ((element as unknown as { openDelay: number }).openDelay = 0))
+  const item = (await page.locator('c2-navigation-menu-item[value="products"]').boundingBox())!
+  const middle = item.y + item.height / 2
+  await page.mouse.move(item.x + item.width + 2, middle)
+  await page.mouse.move(item.x + item.width / 2, middle)
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await expect(host).toHaveJSProperty('value', '')
+  await expect(panel).not.toBeVisible()
+
+  // Another item resets that: coming back opens the panel on hover again.
+  await page.getByRole('button', { name: 'Solutions' }).hover()
+  await expect(page.getByRole('group', { name: 'Solutions' })).toBeVisible()
+  await trigger.hover()
+  await expect(panel).toBeVisible()
+})
+
+test('a click that lands just after hover opened the panel keeps it open', async ({ page, renderScenario }) => {
+  await renderScenario(bar())
+  const trigger = page.getByRole('button', { name: 'Products' })
+  const panel = page.getByRole('group', { name: 'Products' })
+
+  // With no open delay the move opens the panel, and the click in the same motion must not close it.
+  await trigger.click()
+  await expect(panel).toBeVisible()
+  await expect(page.locator('c2-navigation-menu')).toHaveJSProperty('value', 'products')
+  // The next deliberate click does.
+  await trigger.click()
+  await expect(panel).not.toBeVisible()
+})
+
 test('open-on="click" ignores hover and toggles on click', async ({ page, renderScenario }) => {
   await renderScenario(bar('open-on="click"'))
   const trigger = page.getByRole('button', { name: 'Products' })

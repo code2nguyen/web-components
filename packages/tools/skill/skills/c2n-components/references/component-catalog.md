@@ -81,6 +81,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Date Selector** — `c2-date-selector` · `@c2n/date-selector` — Accessible one- or two-month calendar for choosing a date range.
 - **Label** — `c2-label` · `@c2n/label` — Caption that names and activates the control referenced by its for attribute, with a required marker.
 - **Number Input** — `c2-number-input` · `@c2n/number-input` — Form-associated numeric input with native validation, step controls, adornments and helper states.
+- **OTP Input** — `c2-otp-input` · `@c2n/otp-input` — Form-associated one-time-code field with one cell per character, paste and SMS autofill, grouping and masking.
 - **Questionnaire** — `c2-questionnaire` · `@c2n/questionnaire` — A multi-step single- and multiple-choice flow with validation, shortcuts and form submission.
 - **Radio** — `c2-radio, c2-radio-group` · `@c2n/radio` — Radio options built on native inputs, grouped into one value with keyboard navigation. Children: `c2-radio`.
 - **Rate** — `c2-rate` · `@c2n/rate` — Accessible star rating input with hover preview, keyboard control and optional half values.
@@ -112,6 +113,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Navigation
 
 - **Breadcrumb** — `c2-breadcrumb` · `@c2n/breadcrumb` — Navigation trail of link buttons with separators, a current page and optional collapsing. Children: `c2-link-button`.
+- **Context Menu** — `c2-context-menu` · `@c2n/context-menu` — A menu opened by right-clicking or long-pressing an area, built from a slotted c2-menu or a render function per clicked spot. Children: `c2-menu`.
 - **Link Button** — `c2-link-button` · `@c2n/link-button` — Text-styled control for link and navigation actions, rendered as a real anchor or a button.
 - **Menu** — `c2-menu, c2-menu-item` · `@c2n/menu` — Commands, links, checkboxes and submenus in a popover anchored to a trigger. Children: `c2-menu-item`.
 - **Navigation Menu** — `c2-navigation-menu, c2-navigation-menu-item, c2-navigation-menu-link` · `@c2n/navigation-menu` — Site navigation bar whose triggers open panels of links below the header. Children: `c2-navigation-menu-item`, `c2-navigation-menu-link`.

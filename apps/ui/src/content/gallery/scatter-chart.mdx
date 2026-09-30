@@ -16,13 +16,15 @@ import { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 <ExampleModules />
 <ChartFinancialGallery />
 
-Figures are USD billions from Apple's public [SEC Company Facts API](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json).
+The default card uses illustrative usage data (weekly active hours against 90-day retention, by plan). The other figures are USD billions from Apple's public [SEC Company Facts API](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json).
 
 <GalleryGrid min="440">
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-scatter-chart x-field="rd" data='[{"year":2021,"rd":21.914,"revenue":365.817},{"year":2022,"rd":26.251,"revenue":394.328},{"year":2023,"rd":29.915,"revenue":383.285},{"year":2024,"rd":31.37,"revenue":391.035},{"year":2025,"rd":34.55,"revenue":416.161}]'>
-  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+<c2-scatter-chart x-field="hours" data='[{"hours":2.5,"starter":33.2},{"hours":4.2,"starter":32.6},{"hours":4.9,"starter":35.9},{"hours":5.7,"starter":34.9},{"hours":7.4,"starter":42.8},{"hours":7.9,"starter":32.1},{"hours":9.1,"starter":44.6},{"hours":10.3,"growth":45.9},{"hours":11.0,"starter":28.8},{"hours":11.5,"growth":51.9},{"hours":12.5,"starter":51.1},{"hours":13.3,"starter":43.9},{"hours":13.7,"growth":62.3},{"hours":13.9,"starter":30.7},{"hours":15.3,"growth":58.7},{"hours":15.4,"starter":33.1},{"hours":16.7,"growth":60.2},{"hours":18.2,"growth":52.2},{"hours":20.5,"growth":70.6},{"hours":21.8,"growth":64.8},{"hours":22.5,"growth":54.1},{"hours":23.4,"scale":81.1},{"hours":23.5,"scale":67.5},{"hours":23.9,"growth":51.4},{"hours":26.1,"growth":60.7},{"hours":26.4,"scale":74.9},{"hours":27.8,"growth":61.5},{"hours":28.0,"scale":74.4},{"hours":28.1,"scale":79.4},{"hours":30.7,"scale":73.3},{"hours":31.1,"scale":75.0},{"hours":33.9,"scale":85.9},{"hours":34.2,"scale":75.1},{"hours":35.7,"scale":72.0},{"hours":38.2,"scale":76.2},{"hours":39.3,"scale":82.7}]'>
+  <c2-chart-series field="starter" label="Starter"></c2-chart-series>
+  <c2-chart-series field="growth" label="Growth"></c2-chart-series>
+  <c2-chart-series field="scale" label="Scale"></c2-chart-series>
 </c2-scatter-chart>
 ```
 

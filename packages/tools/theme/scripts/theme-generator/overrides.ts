@@ -12,6 +12,8 @@ const onPrimary = { token: 'color-on-primary' }
 export const overrides: Record<string, Override> = {
   // The highlighter is a translucent hue on purpose: it tints any surface, light or dark, and the text keeps its colour.
   '--c2-marker__mark--background-color': { exclude: 'translucent highlighter hue' },
+  // Message body text is a slightly softer ink than the title; it is still body text on the surface.
+  '--c2-chat-message__message--color': { token: 'color-on-surface' },
   // Terminal typography and colors form one readable palette; a generic sans/light theme must not split it.
   '--c2-log-viewer--background': { exclude: 'default terminal palette' },
   '--c2-log-viewer--color': { exclude: 'default terminal palette' },
@@ -284,6 +286,8 @@ export const overrides: Record<string, Override> = {
   '--c2-color-select--border-bottom-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-bottom-right-radius': { exclude: 'swatch detail radius' },
   // The destructive row tint has no error-container token to hang on; the label itself maps to color-error.
+  // The focused row is marked by its highlight, like a hovered one; a ring on top of it is opt-in.
+  '--c2-menu-item__focus--outline': { exclude: 'the row highlight is the focus indicator' },
   '--c2-menu-item__destructive__hover--background': { exclude: 'destructive tint (the label maps to color-error)' },
   // The panel description is deliberately the normal weight, which the scale has no token for.
   '--c2-navigation-menu-link__description--font-weight': { exclude: 'normal weight, below the font-weight scale' },
