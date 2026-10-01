@@ -59,6 +59,57 @@ function withAlpha(color: string, alpha: number): string | undefined {
   return `rgba(${value >> 16}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`
 }
 
+/** ECharts' tick rounding: `value` snapped to 1, 2, 3, 5 or 10 times a power of ten. */
+function niceStep(value: number): number {
+  const exponent = Math.floor(Math.log10(value))
+  const fraction = value / 10 ** exponent
+  const nice = fraction < 1.5 ? 1 : fraction < 2.5 ? 2 : fraction < 4 ? 3 : fraction < 7 ? 5 : 10
+  return nice * 10 ** exponent
+}
+
+/**
+ * The axis window that keeps every bubble inside the plot: `[min, max]` in axis units, given each point's
+ * position and radius in pixels and the plot's length along the axis. A log axis is solved in decades and
+ * widened to whole ones; a linear one is widened to the step ECharts will tick it at, so the window's ends
+ * are labelled ticks rather than odd values. `undefined` when there is nothing to fit.
+ */
+function bubbleAxisExtent(values: readonly number[], radii: readonly number[], length: number, log: boolean): [number, number] | undefined {
+  const positions = log ? values.map(Math.log10) : values
+  if (positions.length === 0 || !(length > 0)) return undefined
+  let low = Math.min(...positions)
+  let high = Math.max(...positions)
+  if (low === high) {
+    const spread = log ? 0.5 : Math.abs(low) * 0.1 || 1
+    low -= spread
+    high += spread
+  }
+  // Axis units per pixel depend on the window, and the window on the units per pixel: a fixed point that a few
+  // rounds settle. A bubble wider than the plot cannot fit, so the radius is capped at a third of it.
+  const fit = (span: number) => {
+    const unit = span / length
+    let min = Infinity
+    let max = -Infinity
+    positions.forEach((position, index) => {
+      const reach = Math.min(radii[index], length / 3) * unit
+      min = Math.min(min, position - reach)
+      max = Math.max(max, position + reach)
+    })
+    return [min, max]
+  }
+  for (let round = 0; round < 6; round += 1) [low, high] = fit(high - low)
+  if (log) return [10 ** Math.floor(low), 10 ** Math.ceil(high)]
+  // Snap both ends to the step ECharts derives from the snapped window, until that step stops changing.
+  let step = niceStep((high - low) / 5)
+  for (let round = 0; round < 4; round += 1) {
+    const snappedLow = Math.floor(low / step + 1e-9) * step
+    const snappedHigh = Math.ceil(high / step - 1e-9) * step
+    const next = niceStep((snappedHigh - snappedLow) / 5)
+    if (next === step) return [snappedLow, snappedHigh]
+    step = next
+  }
+  return [Math.floor(low / step) * step, Math.ceil(high / step) * step]
+}
+
 /** Rounds to two significant digits, so the size key reads 1.4B and 350M rather than 1,429 and 357.25. */
 function roundNicely(value: number): number {
   if (value <= 0) return 0
@@ -152,6 +203,9 @@ export class BubbleChart extends EchartsChartBase {
   /** Per series, the frame row of each drawn point, in draw order: the engine reports the draw index. */
   #rows: number[][] = []
 
+  /** Every drawn point, read by the axis bounds whenever ECharts lays the chart out. */
+  #points: BubblePoint[] = []
+
   constructor() {
     super()
     this.tooltip = 'item'
@@ -240,6 +294,7 @@ export class BubbleChart extends EchartsChartBase {
       return points.sort((a, b) => b[4] - a[4])
     })
     this.#rows = projected.map((points) => points.map((point) => point[3]))
+    this.#points = projected.flat()
     return projected
   }
 
@@ -274,11 +329,49 @@ export class BubbleChart extends EchartsChartBase {
       name ? { name, nameLocation: 'middle', nameGap: gap, nameTextStyle: { color: theme.mutedColor, fontSize: theme.axisFontSize } } : {}
     // Row labels name bubbles here; they are never the x axis' categories.
     const xType = this.xScale === 'log' ? 'log' : this.xType === 'time' ? 'time' : 'value'
-    return {
-      grid: { ...system.grid, left: system.grid.left + (this.yLabel ? 20 : 0), bottom: system.grid.bottom + (this.xLabel ? 20 : 0) },
-      xAxis: { ...system.xAxis, type: xType, data: undefined, scale: true, ...title(this.xLabel, 30) },
-      yAxis: { ...system.yAxis, type: this.yScale === 'log' ? 'log' : 'value', scale: true, ...title(this.yLabel, 44) },
+    const grid: Record<string, number> = {
+      ...system.grid,
+      left: system.grid.left + (this.yLabel ? 20 : 0),
+      bottom: system.grid.bottom + (this.xLabel ? 20 : 0),
     }
+    return {
+      grid,
+      xAxis: {
+        ...system.xAxis,
+        type: xType,
+        data: undefined,
+        scale: true,
+        // A time axis keeps ECharts' own window: its ticks are dates, not steps of a number.
+        ...(xType === 'time' ? {} : this.#bubbleBounds(0, xType === 'log', () => (this.plotElement?.clientWidth ?? 0) - grid.left - grid.right)),
+        ...title(this.xLabel, 30),
+      },
+      yAxis: {
+        ...system.yAxis,
+        type: this.yScale === 'log' ? 'log' : 'value',
+        scale: true,
+        ...this.#bubbleBounds(1, this.yScale === 'log', () => (this.plotElement?.clientHeight ?? 0) - grid.top - grid.bottom),
+        ...title(this.yLabel, 44),
+      },
+    }
+  }
+
+  /**
+   * `min`/`max` callbacks that widen an axis until every bubble fits inside the plot, rather than spilling over
+   * the axis at the extremes. Callbacks, because ECharts calls them on every layout: a resize or a data-only
+   * update refits without rebuilding the options.
+   */
+  #bubbleBounds(axis: 0 | 1, log: boolean, length: () => number): { min: (extent: { min: number }) => number; max: (extent: { max: number }) => number } {
+    const extent = () => {
+      const points = this.#points
+      const outline = this.bubbleStyle().borderWidth
+      return bubbleAxisExtent(
+        points.map((point) => point[axis]),
+        points.map((point) => point[4] / 2 + outline),
+        length(),
+        log,
+      )
+    }
+    return { min: (data) => extent()?.[0] ?? data.min, max: (data) => extent()?.[1] ?? data.max }
   }
 
   protected override seriesOption(index: number, context: ChartBuildContext): Record<string, unknown> {

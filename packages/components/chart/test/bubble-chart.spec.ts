@@ -201,3 +201,44 @@ test('draws bubble labels in the chart text colour unless their own variable is 
   // The dark theme switches --c2-chart--color, so a label that followed a fixed colour would vanish on a dark card.
   expect(colors).toEqual(['rgb(1, 2, 3)', 'rgb(4, 5, 6)'])
 })
+
+test('widens both axes to rounded ticks so no bubble spills over the plot edge', async ({ page }) => {
+  await open(page, 'wide')
+  const chart = page.locator('c2-bubble-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const result = await chart.evaluate((element) => {
+    type Bound = (extent: { min: number; max: number }) => number
+    type Axis = { min: Bound; max: Bound }
+    const bubble = element as unknown as BubbleInternals & { renderRoot: ShadowRoot }
+    const options = bubble.buildOptions(bubble.buildContext()) as unknown as { grid: Record<string, number>; xAxis: Axis; yAxis: Axis }
+    const plot = bubble.renderRoot.querySelector('.plot') as HTMLElement
+    const points = bubble.projectData(bubble.frame).flat()
+    const check = (axis: Axis, coordinate: 0 | 1, length: number) => {
+      const values = points.map((point) => point[coordinate])
+      const extent = { min: Math.min(...values), max: Math.max(...values) }
+      const min = axis.min(extent)
+      const max = axis.max(extent)
+      const unit = (max - min) / length
+      return {
+        min,
+        max,
+        inside: points.every((point) => point[coordinate] - (point[4] / 2) * unit >= min && point[coordinate] + (point[4] / 2) * unit <= max),
+      }
+    }
+    const { grid } = options
+    return {
+      x: check(options.xAxis, 0, plot.clientWidth - grid.left - grid.right),
+      y: check(options.yAxis, 1, plot.clientHeight - grid.top - grid.bottom),
+    }
+  })
+
+  // Volatility runs 5–23 and return 3.6–9.6; both windows open past the data onto whole steps.
+  expect(result.x.inside).toBe(true)
+  expect(result.y.inside).toBe(true)
+  expect(result.x.min).toBeLessThan(5)
+  expect(result.x.max).toBeGreaterThan(23)
+  expect(result.y.min).toBeLessThan(3.6)
+  expect(result.y.max).toBeGreaterThan(9.6)
+  for (const value of [result.x.min, result.x.max, result.y.min, result.y.max]) expect(Number.isInteger(value)).toBe(true)
+})

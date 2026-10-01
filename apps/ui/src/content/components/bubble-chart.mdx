@@ -13,7 +13,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { BubbleChart } from '@c2n/chart/bubble-chart.js'
 import { ChartSeries } from '@c2n/chart/chart-series.js'
 
-The default example plots approximate, rounded 2023 figures after the World Bank's [World Development Indicators](https://databank.worldbank.org/source/world-development-indicators) (GDP per capita in current US$, life expectancy at birth, population in millions); check the source before reusing them. The asset-class example is illustrative.
+The default example plots approximate, rounded 2023 figures after the World Bank's [World Development Indicators](https://databank.worldbank.org/source/world-development-indicators) (GDP per capita in current US$, life expectancy at birth, population in millions); check the source before reusing them. The product-portfolio example (a growth–share matrix: each business unit is a column holding its products' market growth) is illustrative.
 
 ## Installation
 
@@ -35,10 +35,10 @@ npm install @c2n/chart echarts
 </div>
 
 <div data-label="One column per series">
-  <c2-bubble-chart class="bubble-usage" x-field="vol" size-field="aum" size-label="AUM ($B)" label-field="asset" x-label="Volatility (%)" y-label="Expected return (%)" data='[{"asset":"Global equity","vol":16,"equity":8.2,"aum":900},{"asset":"EM equity","vol":23,"equity":9.6,"aum":260},{"asset":"Real estate","vol":14,"alternatives":6.4,"aum":180},{"asset":"Private credit","vol":9,"alternatives":7.4,"aum":150},{"asset":"Gold","vol":15,"alternatives":4.2,"aum":60},{"asset":"Core bonds","vol":5,"bonds":3.6,"aum":640},{"asset":"Cash","vol":1,"bonds":2.4,"aum":120}]'>
-    <c2-chart-series field="equity" label="Equity"></c2-chart-series>
-    <c2-chart-series field="bonds" label="Bonds"></c2-chart-series>
-    <c2-chart-series field="alternatives" label="Alternatives"></c2-chart-series>
+  <c2-bubble-chart class="bubble-usage" x-field="share" size-field="revenue" size-label="Revenue ($M)" label-field="product" x-label="Relative market share" y-label="Market growth (%)" data='[{"product":"Compute","share":1.2,"infrastructure":22,"revenue":610},{"product":"Storage","share":1.9,"infrastructure":14,"revenue":420},{"product":"CDN","share":0.4,"infrastructure":18,"revenue":90},{"product":"CRM","share":2.3,"applications":4,"revenue":780},{"product":"Email","share":1.6,"applications":3,"revenue":240},{"product":"Analytics","share":0.7,"applications":20,"revenue":160},{"product":"Consulting","share":0.5,"services":5,"revenue":130},{"product":"Security","share":0.3,"services":24,"revenue":55},{"product":"Training","share":0.9,"services":8,"revenue":70}]'>
+    <c2-chart-series field="infrastructure" label="Infrastructure"></c2-chart-series>
+    <c2-chart-series field="applications" label="Applications"></c2-chart-series>
+    <c2-chart-series field="services" label="Services"></c2-chart-series>
   </c2-bubble-chart>
 </div>
 ```
@@ -49,6 +49,8 @@ npm install @c2n/chart echarts
 - **One column per series.** Each `c2-chart-series` reads its own `field` as the y value, as on the [scatter chart](../scatter-chart), and every series shares the one size column. A row may carry only one series' field.
 
 Size is encoded as **area**: the diameter grows with the square root of the value, between `--c2-chart__bubble--min-size` and `--c2-chart__bubble--max-size`, so a value twice as large looks twice as large. The largest size in the data draws at the maximum; set `size-max` to pin that value when several charts must be compared. Within each series the larger bubbles are drawn first, so the small ones stay on top and hoverable.
+
+Each axis is widened past the data until every bubble fits inside the plot, and its ends are rounded to ticks: a smallest x of 16 with a large bubble on it starts the axis at 14, not at 16 with half the bubble over the axis. A log axis widens to whole decades.
 
 `x-scale="log"` and `y-scale="log"` suit a measure that spans orders of magnitude; rows at or below zero are skipped on a log axis. `bubble-labels` is `auto` (label the bubbles whose text fits inside), `all` or `none`. `size-legend` ends the built-in legend with a key to the sizes, titled by `size-label`, as in the first example; it is off by default. The key is part of the built-in legend, so `legend="none"` or a linked `c2-chart-legend` hides it too.
 
