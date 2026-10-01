@@ -127,14 +127,14 @@ menu.addEventListener('context-menu-select', ({ detail }) => {
 
 The context holds:
 
-| Field           | Meaning                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------- |
-| `target`        | The innermost element under the pointer, inside shadow roots included.                                      |
-| `data`          | What that element stands for, as answered by the component that owns it — see below.                       |
-| `source`        | The component that answered, or `null`.                                                                     |
-| `x`, `y`        | Viewport coordinates the menu opens at.                                                                     |
+| Field           | Meaning                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------ |
+| `target`        | The innermost element under the pointer, inside shadow roots included.                                       |
+| `data`          | What that element stands for, as answered by the component that owns it — see below.                         |
+| `source`        | The component that answered, or `null`.                                                                      |
+| `x`, `y`        | Viewport coordinates the menu opens at.                                                                      |
 | `trigger`       | `pointer`, `touch` (long press), `keyboard` (context-menu key or Shift+F10) or `api` (`show(x, y, target)`). |
-| `originalEvent` | The event that opened the menu.                                                                             |
+| `originalEvent` | The event that opened the menu.                                                                              |
 
 For plain markup, read `target` directly — `target.closest('[data-file]')` finds the row of a file list.
 
