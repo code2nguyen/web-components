@@ -73,7 +73,7 @@ export type FlowRenderer = (context: FlowRenderContext) => unknown
 export interface FlowContextMenuContext<T = unknown> {
   /** The node that was right-clicked, or `null` for the canvas. */
   node: FlowNode<T> | null
-  /** The built-in rows (details, zoom, fit, direction, auto layout, lock) for that spot. */
+  /** The built-in rows for that spot: the view controls on the canvas, `nothing` on a node. */
   defaultItems: unknown
   /** Viewport coordinates the menu opens at. */
   x: number
@@ -81,8 +81,9 @@ export interface FlowContextMenuContext<T = unknown> {
 }
 
 /**
- * Returns the rows of the context menu. `undefined` keeps the built-in rows; `null` lets the browser show its own
- * menu. To extend the built-in menu, return your rows together with `context.defaultItems`.
+ * Returns the rows of the context menu. `undefined` keeps the built-in rows (none on a node, so the browser shows its
+ * own menu there); `null` lets the browser show its own menu. To extend the canvas menu, return your rows together
+ * with `context.defaultItems`.
  */
 export type FlowContextMenuRenderer = (context: FlowContextMenuContext) => unknown
 

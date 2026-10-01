@@ -28,5 +28,4 @@ export const MENU_ICONS = {
   zoomOut: svg`<circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14M5 7h4"></path>`,
   fit: svg`<path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"></path>`,
   layout: svg`<rect x="1.5" y="3" width="4" height="3" rx="0.8"></rect><rect x="10.5" y="1.5" width="4" height="3" rx="0.8"></rect><rect x="10.5" y="11.5" width="4" height="3" rx="0.8"></rect><path d="M5.5 4.5h2.5v-1.5h2.5M8 4.5v8.5h2.5"></path>`,
-  details: svg`<circle cx="8" cy="8" r="6"></circle><path d="M8 7.2v3.8M8 5h.01"></path>`,
 }

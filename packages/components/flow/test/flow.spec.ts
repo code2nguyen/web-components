@@ -184,34 +184,67 @@ test('zoom rows keep the menu open and scale the view; fit view restores it', as
   await expect.poll(scale).toBeCloseTo(fitted, 3)
 })
 
-test('a node context menu names the node and Show details fires node-click', async ({ page, renderScenario }) => {
+test('a node opens no menu of its own: the canvas rows stay on the canvas', async ({ page, renderScenario }) => {
+  await renderScenario(flow())
+  const { x, y } = await center(node(page, 'install'))
+  await page.mouse.click(x, y, { button: 'right' })
+  await expect(item(page, 'flow:zoom-in')).toHaveCount(0)
+  await expect(page.locator('c2-flow c2-context-menu c2-menu')).not.toHaveJSProperty('open', true)
+})
+
+test('the canvas menu shows every row without scrolling', async ({ page, renderScenario }) => {
+  await renderScenario(flow())
+  await rightClickCanvas(page)
+  await expect(item(page, 'flow:lock')).toBeVisible()
+  const list = page.locator('c2-flow c2-context-menu c2-menu .menu')
+  expect(await list.evaluate((element) => element.scrollHeight - element.clientHeight)).toBe(0)
+})
+
+test('a node menu from renderContextMenu names the node and flow:details fires node-click', async ({ page, renderScenario }) => {
   await renderScenario(flow())
   await watch(host(page), 'node-click')
+  await host(page).evaluate(async (element: Flow) => {
+    element.renderContextMenu = ({ node }) => {
+      if (!node) return undefined
+      const heading = document.createElement('h6')
+      heading.textContent = node.label
+      const details = document.createElement('c2-menu-item')
+      details.setAttribute('value', 'flow:details')
+      details.textContent = 'Show details'
+      return [heading, details]
+    }
+    await element.updateComplete
+  })
   const { x, y } = await center(node(page, 'install'))
   await page.mouse.click(x, y, { button: 'right' })
 
   await expect(page.locator('c2-flow c2-context-menu h6').first()).toHaveText('Install')
+  await expect(item(page, 'flow:zoom-in')).toHaveCount(0)
   await item(page, 'flow:details').click()
   await expect(node(page, 'install')).toHaveClass(/is-selected/)
   expect((await events(host(page)))[0].node.id).toBe('install')
 })
 
-test('renderContextMenu extends the built-in rows and its own rows fire flow-menu-select with the node', async ({ page, renderScenario }) => {
+test('renderContextMenu extends the canvas rows and its own rows fire flow-menu-select with the node', async ({ page, renderScenario }) => {
   await renderScenario(flow())
   await watch(host(page), 'flow-menu-select')
   await host(page).evaluate(async (element: Flow) => {
     element.renderContextMenu = ({ node, defaultItems }) => {
-      if (!node) return undefined
       const retry = document.createElement('c2-menu-item')
       retry.setAttribute('value', 'retry')
-      retry.textContent = `Retry ${node.label}`
-      return [retry, document.createElement('hr'), defaultItems]
+      retry.textContent = node ? `Retry ${node.label}` : 'Retry all'
+      return node ? [retry] : [retry, document.createElement('hr'), defaultItems]
     }
     await element.updateComplete
   })
+  await rightClickCanvas(page)
+  await expect(item(page, 'flow:zoom-in')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(item(page, 'flow:zoom-in')).toBeHidden()
+
   const { x, y } = await center(node(page, 'test'))
   await page.mouse.click(x, y, { button: 'right' })
-  await expect(item(page, 'flow:zoom-in')).toBeVisible()
+  await expect(item(page, 'flow:zoom-in')).toHaveCount(0)
   await item(page, 'retry').click()
   const [selection] = await events(host(page))
   expect(selection).toMatchObject({ value: 'retry', node: { id: 'test' } })
@@ -284,6 +317,18 @@ test('keyboard: one node in the tab order, arrows follow edges, Enter selects, A
 
 test('Shift+F10 on a focused node opens its context menu', async ({ page, renderScenario }) => {
   await renderScenario(flow())
+  await host(page).evaluate(async (element: Flow) => {
+    element.renderContextMenu = ({ node }) => {
+      if (!node) return undefined
+      const heading = document.createElement('h6')
+      heading.textContent = node.label
+      const details = document.createElement('c2-menu-item')
+      details.setAttribute('value', 'flow:details')
+      details.textContent = 'Show details'
+      return [heading, details]
+    }
+    await element.updateComplete
+  })
   await node(page, 'checkout').focus()
   await page.keyboard.press('Shift+F10')
   await expect(item(page, 'flow:details')).toBeVisible()
@@ -344,18 +389,24 @@ test('Ctrl/⌘ + plus, minus and 0 zoom and fit while focus is in the flow; the 
   await renderScenario(flow())
   const scale = () => page.locator('c2-flow .viewport').evaluate((element) => Number(/scale\(([\d.]+)\)/.exec((element as HTMLElement).style.transform)?.[1]))
   const fitted = await scale()
+  // The modifier the page reads as `mod`. Playwright's ControlOrMeta follows the host OS instead, which differs on macOS.
+  const mod = await page.evaluate(() =>
+    /mac|iphone|ipad|ipod/i.test((navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform)
+      ? 'Meta'
+      : 'Control',
+  )
   await node(page, 'checkout').focus()
 
   await page.keyboard.press('-')
   await page.keyboard.press('0')
   expect(await scale()).toBe(fitted)
 
-  await page.keyboard.press('ControlOrMeta+-')
+  await page.keyboard.press(`${mod}+-`)
   await expect.poll(scale).toBeCloseTo(fitted / 1.2, 3)
-  await page.keyboard.press('ControlOrMeta+=')
-  await page.keyboard.press('ControlOrMeta+=')
+  await page.keyboard.press(`${mod}+=`)
+  await page.keyboard.press(`${mod}+=`)
   await expect.poll(scale).toBeCloseTo(fitted * 1.2, 3)
-  await page.keyboard.press('ControlOrMeta+0')
+  await page.keyboard.press(`${mod}+0`)
   await expect.poll(scale).toBeCloseTo(fitted, 3)
   await expect(item(page, 'flow:zoom-in')).toHaveCount(0)
 })

@@ -92,11 +92,15 @@ flow.addEventListener('node-click', ({ detail }) => openDetails(detail.node))
 
 ## Context menu
 
-`renderContextMenu` receives the node that was right-clicked (or `null` for the canvas) and the built-in rows. Return your own rows next to `defaultItems` to extend the menu; they fire `flow-menu-select` with the node. Return `undefined` to keep the built-in rows, or `null` to let the browser show its own menu.
+`renderContextMenu` receives the node that was right-clicked (or `null` for the canvas) and the built-in rows. The view controls (zoom, fit, layout) belong to the canvas: a node has no built-in rows, so right-clicking one opens a menu only when you return rows for it. Return your own rows next to `defaultItems` to extend the canvas menu; they fire `flow-menu-select` with the node. A row with `value="flow:details"` selects the node and fires `node-click`. Return `undefined` to keep the built-in rows, or `null` to let the browser show its own menu.
 
 ```ts tag=CodeBlock
-flow.renderContextMenu = ({ node, defaultItems }) =>
-  node?.status === 'error' ? html`<c2-menu-item value="retry">Retry ${node.label}</c2-menu-item><hr />${defaultItems}` : undefined
+flow.renderContextMenu = ({ node }) =>
+  node
+    ? html`<h6>${node.label}</h6>
+        <c2-menu-item value="flow:details">Show details</c2-menu-item>
+        ${node.status === 'error' ? html`<c2-menu-item value="retry">Retry</c2-menu-item>` : nothing}`
+    : undefined
 
 flow.addEventListener('flow-menu-select', ({ detail }) => {
   if (detail.value === 'retry') retry(detail.node!.id)

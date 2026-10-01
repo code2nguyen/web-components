@@ -8,9 +8,11 @@
     border-radius: 8px,
     font-family: null,
 
-    dot--color: #d4d4d8,
+    dot--color: #ebebed,
     dot--size: 1px,
-    dot--gap: 16px,
+    dot--gap: 20px,
+    dot--min-gap: 14px,
+    dot--max-gap: 32px,
 
     rank--gap: 72px,
     node--gap: 20px,
@@ -76,6 +78,8 @@
   position: relative;
   height: css.cssVar(height);
   font-family: css.cssVar(font-family);
+  // The canvas menu lists every view control at once; c2-menu's default height would scroll its last rows away.
+  --c2-menu--max-height: 480px;
   // Read by the layout, which runs in script.
   --_rank-gap: #{css.cssVar(rank--gap)};
   --_node-gap: #{css.cssVar(node--gap)};
@@ -96,7 +100,9 @@
   border-radius: css.cssVar(border-radius);
   background-color: css.cssVar(background-color);
   background-image: radial-gradient(circle, css.cssVar(dot--color) css.cssVar(dot--size), transparent calc(#{css.cssVar(dot--size)} + 0.2px));
-  background-size: calc(#{css.cssVar(dot--gap)} * var(--_zoom, 1)) calc(#{css.cssVar(dot--gap)} * var(--_zoom, 1));
+  // The grid follows the zoom, within bounds: zoomed far out it would turn into a texture, far in into sparse specks.
+  --_dot-gap: clamp(#{css.cssVar(dot--min-gap)}, calc(#{css.cssVar(dot--gap)} * var(--_zoom, 1)), #{css.cssVar(dot--max-gap)});
+  background-size: var(--_dot-gap) var(--_dot-gap);
   cursor: grab;
   // Vertical swipes keep scrolling the page; horizontal ones pan the canvas.
   touch-action: pan-y;

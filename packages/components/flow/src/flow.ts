@@ -110,9 +110,11 @@ const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in 
  * already-placed neighbours, removed ones are dropped. **Auto layout** in the context menu, or `resetLayout()`,
  * goes back to the computed layout.
  *
- * **Context menu.** Right-click, long-press, or Shift+F10 / the context-menu key opens a `c2-context-menu` with the
- * view controls: zoom in, zoom out, fit view, layout direction, auto layout and lock layout, plus **Show details** on
- * a node. `renderContextMenu` replaces or extends those rows; rows it adds fire `flow-menu-select`.
+ * **Context menu.** Right-click, long-press, or Shift+F10 / the context-menu key on the canvas opens a
+ * `c2-context-menu` with the view controls: zoom in, zoom out, fit view, layout direction, auto layout and lock
+ * layout. A node has no menu of its own until `renderContextMenu` returns rows for it; the canvas rows never open on
+ * a node. `renderContextMenu` replaces or extends the canvas rows; rows it adds fire `flow-menu-select`, except
+ * `value="flow:details"`, which selects the node and fires `node-click`.
  *
  * **Hover card.** Hovering or focusing a node opens a card next to it after `open-delay` milliseconds, with its
  * status, description and `details`. The pointer can move into the card, so it can hold links and buttons.
@@ -131,7 +133,7 @@ const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in 
  * @slot node:{id} - Body of the node whose `id` is `{id}`, e.g. `slot="node:build"`. Replaces `renderNode` and the default body for that node.
  * @slot card:{id} - Content of the hover card of node `{id}`. Replaces `renderCard` and the default card for that node.
  *
- * @event {CustomEvent<FlowNodeEventDetail>} node-click - A node was clicked, activated with Enter or Space, or chosen with **Show details** in the context menu. Does not bubble.
+ * @event {CustomEvent<FlowNodeEventDetail>} node-click - A node was clicked, activated with Enter or Space, or chosen with a `flow:details` context-menu row. Does not bubble.
  * @event {CustomEvent<FlowSelectionChangeDetail>} selection-change - The selected node changed through the user. `detail.selected` is its id, or `null`. Does not bubble.
  * @event {CustomEvent<FlowLayoutChangeDetail>} layout-change - The user moved a node, switched direction or went back to auto layout, or `setLayout()` was called. Does not bubble.
  * @event {CustomEvent<FlowMenuSelectDetail>} flow-menu-select - A context-menu row added by `renderContextMenu` was activated, with the node it was opened on. Does not bubble.
@@ -144,9 +146,11 @@ const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in 
  * @cssproperty {border} [--c2-flow--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-flow--border-radius=8px]
  * @cssproperty {font-family} --c2-flow--font-family
- * @cssproperty {color} [--c2-flow__dot--color=#d4d4d8] - Colour of the canvas dot grid.
+ * @cssproperty {color} [--c2-flow__dot--color=#ebebed] - Colour of the canvas dot grid.
  * @cssproperty {pixel} [--c2-flow__dot--size=1px] - Radius of one grid dot.
- * @cssproperty {pixel} [--c2-flow__dot--gap=16px] - Spacing of the dot grid at 100% zoom.
+ * @cssproperty {pixel} [--c2-flow__dot--gap=20px] - Spacing of the dot grid at 100% zoom; it scales with the zoom, within the two bounds below.
+ * @cssproperty {pixel} [--c2-flow__dot--min-gap=14px] - Smallest dot spacing, reached when zoomed out.
+ * @cssproperty {pixel} [--c2-flow__dot--max-gap=32px] - Largest dot spacing, reached when zoomed in.
  * @cssproperty {pixel} [--c2-flow__rank--gap=72px] - Space between two ranks of the auto layout.
  * @cssproperty {pixel} [--c2-flow__node--gap=20px] - Space between two nodes of the same rank.
  * @cssproperty {pixel} [--c2-flow__node--width=200px]
@@ -825,11 +829,16 @@ export class Flow extends LitElement {
 
   private buildMenu = (context: ContextMenuContext) => {
     const node = (context.data as { node?: FlowNode } | undefined)?.node ?? null
-    this.menuNode = node
-    this.hideCard(true)
-    const defaultItems = this.defaultMenuItems(node)
-    const rows = this.renderContextMenu?.({ node, defaultItems, x: context.x, y: context.y })
-    return rows === undefined ? defaultItems : rows
+    // The view controls belong to the canvas: a node has no built-in rows, so it opens a menu only when
+    // `renderContextMenu` gives it one.
+    const defaultItems = node ? nothing : this.defaultMenuItems()
+    const custom = this.renderContextMenu?.({ node, defaultItems, x: context.x, y: context.y })
+    const rows = custom === undefined ? (node ? null : defaultItems) : custom
+    if (rows !== null && rows !== undefined && rows !== nothing && rows !== false) {
+      this.menuNode = node
+      this.hideCard(true)
+    }
+    return rows
   }
 
   private menuIcon(icon: unknown) {
@@ -849,18 +858,11 @@ export class Flow extends LitElement {
     </svg>`
   }
 
-  private defaultMenuItems(node: FlowNode | null) {
+  private defaultMenuItems() {
     const lr = this.direction === 'LR'
     // Written the way each platform's own menus do: ⌘+ on Apple platforms, Ctrl + + elsewhere.
     const mod = isApplePlatform() ? '⌘' : 'Ctrl '
     return html`
-      ${
-        node
-          ? html`<h6>${node.label}</h6>
-              <c2-menu-item value="flow:details">${this.menuIcon(MENU_ICONS.details)}Show details</c2-menu-item>
-              <hr />`
-          : nothing
-      }
       <c2-menu-item value="flow:zoom-in" keep-open aria-keyshortcuts=${ariaKeyShortcuts(ZOOM_IN_KEYS)}
         >${this.menuIcon(MENU_ICONS.zoomIn)}Zoom in<c2-kbd slot="shortcut">${mod}+</c2-kbd></c2-menu-item
       >
