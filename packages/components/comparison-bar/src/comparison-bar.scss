@@ -1,0 +1,88 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-comparison-bar,
+  $theme: (
+    width: 100%,
+    height: 6px,
+    gap: 12px,
+    track--gap: 4px,
+    border-radius: 999px,
+    transition-duration: 0.3s,
+    start-segment--background-color: #0265dc,
+    end-segment--background-color: #dc2626,
+    start-value--color: #0265dc,
+    end-value--color: #dc2626,
+    value--font-size: 14px,
+    value--font-weight: 500,
+  )
+);
+
+:host {
+  display: block;
+  width: css.cssVar(width);
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-comparison-bar {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(gap);
+}
+
+.c2-comparison-bar-value {
+  flex: none;
+  font-size: css.cssVar(value--font-size);
+  font-weight: css.cssVar(value--font-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  &.is-start {
+    color: css.cssVar(start-value--color);
+  }
+
+  &.is-end {
+    color: css.cssVar(end-value--color);
+  }
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.c2-comparison-bar-track {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: css.cssVar(track--gap);
+}
+
+.c2-comparison-bar-segment {
+  // Grow from zero so the two flex-grow factors split the width exactly by share; a 0% side collapses to nothing.
+  flex-basis: 0;
+  min-width: 0;
+  height: css.cssVar(height);
+  border-radius: css.cssVar(border-radius);
+  transition: flex-grow css.cssVar(transition-duration) cubic-bezier(0.2, 0, 0, 1);
+
+  &.is-start {
+    background-color: css.cssVar(start-segment--background-color);
+  }
+
+  &.is-end {
+    background-color: css.cssVar(end-segment--background-color);
+  }
+
+  // A side with no share leaves no sliver and no gap beside the other one.
+  &.is-empty {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-comparison-bar-segment {
+    transition: none;
+  }
+}

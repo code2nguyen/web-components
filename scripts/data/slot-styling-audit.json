@@ -648,6 +648,20 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-comparison-bar",
+      "slot": "start",
+      "decision": "part",
+      "parts": ["start-value"],
+      "reason": "The start value region owns the start slot's component-side presentation."
+    },
+    {
+      "tag": "c2-comparison-bar",
+      "slot": "end",
+      "decision": "part",
+      "parts": ["end-value"],
+      "reason": "The end value region owns the end slot's component-side presentation."
+    },
+    {
       "tag": "c2-command",
       "slot": "default",
       "decision": "assigned-content",

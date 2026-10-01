@@ -1,0 +1,48 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ComparisonBar } from '@c2n/comparison-bar'
+
+## Presets
+
+Curated looks for `c2-comparison-bar`. Open any card in the studio to start from it. The two segment colours and the
+two value colours do most of the work; height, radius and the gap between segments set the shape.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-comparison-bar start-value="22.43" end-value="77.57" start-label="Bid" end-label="Ask" show-value></c2-comparison-bar>
+```
+
+```html tag=MdxCodeBlock,label=Order book
+<style>
+  .order-book {
+    width: 280px;
+    --c2-comparison-bar__start-segment--background-color: #2ebd85;
+    --c2-comparison-bar__start-value--color: #2ebd85;
+    --c2-comparison-bar__end-segment--background-color: #f6465d;
+    --c2-comparison-bar__end-value--color: #f6465d;
+    --c2-comparison-bar__value--font-size: 13px;
+  }
+</style>
+<c2-comparison-bar class="order-book" start-value="22.43" end-value="77.57" start-label="Bid" end-label="Ask" show-value></c2-comparison-bar>
+```
+
+```html tag=MdxCodeBlock,label=Solid block
+<style>
+  .solid-block {
+    width: 280px;
+    --c2-comparison-bar--height: 14px;
+    --c2-comparison-bar--border-radius: 0;
+    --c2-comparison-bar__track--gap: 0;
+    --c2-comparison-bar__start-segment--background-color: #7c3aed;
+    --c2-comparison-bar__start-value--color: #7c3aed;
+    --c2-comparison-bar__end-segment--background-color: #f59e0b;
+    --c2-comparison-bar__end-value--color: #b45309;
+    --c2-comparison-bar__value--font-weight: 600;
+  }
+</style>
+<c2-comparison-bar class="solid-block" start-value="64" end-value="36" precision="0" start-label="Team A" end-label="Team B" show-value></c2-comparison-bar>
+```
+
+</GalleryGrid>
