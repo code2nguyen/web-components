@@ -16,13 +16,46 @@ test('places a block from its start to its end time', async ({ page, scenario })
   expect(workshop!.x).toBeGreaterThan(standup!.x)
 })
 
-test('puts overlapping events side by side', async ({ page, scenario }) => {
+test('cascades overlapping events instead of splitting the column', async ({ page, scenario }) => {
   await scenario('every-week')
+  const column = await page.locator('c2-week-planner').getByRole('group', { name: 'Tuesday' }).boundingBox()
   const workshop = await page.getByRole('button', { name: /^Workshop/ }).boundingBox()
   const review = await page.getByRole('button', { name: /^Review/ }).boundingBox()
-  expect(review!.x).toBeGreaterThan(workshop!.x)
-  expect(review!.width).toBeCloseTo(workshop!.width, 0)
+  // The first takes the whole column, the second steps in by a quarter and runs to the right edge.
+  // Within 1.5px: the column box includes its 1px grid line.
+  const near = (actual: number, expected: number) => expect(Math.abs(actual - expected)).toBeLessThan(1.5)
+  near(workshop!.width, column!.width - 4)
+  near(review!.x - column!.x, column!.width / 4 + 2)
+  near(review!.x + review!.width, workshop!.x + workshop!.width)
   expect(review!.y).toBeGreaterThan(workshop!.y)
+})
+
+test('keeps every line of a block inside it when the hour rows are short', async ({ page, scenario }) => {
+  await scenario('every-week')
+  const planner = page.locator('c2-week-planner')
+  await planner.evaluate((element) => element.style.setProperty('--c2-week-planner__hour--height', '24px'))
+  // Review (90 minutes) is 34px: too short for title and time on two lines, so they share one row. Workshop (two
+  // hours, 46px) keeps two.
+  await expect(page.getByRole('button', { name: /^Review/ }).locator('.event-body')).toHaveCSS('flex-direction', 'row')
+  await expect(page.getByRole('button', { name: /^Workshop/ }).locator('.event-body')).toHaveCSS('flex-direction', 'column')
+  // (Stand-up, 30 minutes, is 10px: no line fits, the block just clips it.)
+  for (const name of [/^Workshop/, /^Review/]) {
+    const event = page.getByRole('button', { name }).first()
+    const box = (await event.boundingBox())!
+    for (const part of await event.locator('.event-title, .event-time').all()) {
+      if (!(await part.isVisible())) continue
+      const line = (await part.boundingBox())!
+      expect(line.y).toBeGreaterThanOrEqual(box.y - 0.5)
+      expect(line.y + line.height).toBeLessThanOrEqual(box.y + box.height + 0.5)
+    }
+  }
+})
+
+test('wraps a title between words and never splits a word', async ({ page, scenario }) => {
+  await scenario('every-week')
+  const title = page.getByRole('button', { name: /^Workshop/ }).locator('.event-title')
+  await expect(title).toHaveCSS('overflow-wrap', 'normal')
+  await expect(title).toHaveCSS('hyphens', 'manual')
 })
 
 test('skips events whose times do not make sense', async ({ page, scenario }) => {
@@ -156,4 +189,75 @@ test.describe('first day of the week', () => {
     await page.locator('c2-week-planner').evaluate((element) => element.setAttribute('week-start', 'monday'))
     await expect(page.locator('c2-week-planner').locator('.day-header').first()).toHaveText('Mon')
   })
+})
+
+test('shows one day of a swipeable strip on a narrow planner, opening on today', async ({ page, scenario }) => {
+  await scenario('narrow')
+  const planner = page.locator('c2-week-planner')
+  const scroller = planner.locator('.scroller')
+  const today = planner.getByRole('group', { name: 'Wednesday, today' })
+  await expect(today).toBeInViewport({ ratio: 1 })
+  await expect(planner.getByRole('group', { name: 'Tuesday' })).not.toBeInViewport()
+  const { width } = (await today.boundingBox())!
+  expect(width).toBeCloseTo((await scroller.boundingBox())!.width, 0)
+  await expect(scroller).toHaveCSS('scroll-snap-type', 'x mandatory')
+
+  // The arrows page one day at a time; the hour labels stay where they are.
+  const label = planner.locator('.hour-label').first()
+  const labelBox = await label.boundingBox()
+  await planner.getByRole('button', { name: 'Previous days' }).click()
+  await expect(planner.getByRole('group', { name: 'Tuesday' })).toBeInViewport({ ratio: 1 })
+  await expect(page.getByRole('button', { name: /^Workshop/ })).toBeInViewport()
+  expect((await label.boundingBox())!.x).toBeCloseTo(labelBox!.x, 0)
+  await planner.getByRole('button', { name: 'Previous days' }).click()
+  await expect(planner.getByRole('group', { name: 'Monday' })).toBeInViewport({ ratio: 1 })
+  await expect(planner.getByRole('button', { name: 'Previous days' })).toBeDisabled()
+})
+
+test('shows three days on a medium planner and all seven on a wide one', async ({ page, scenario }) => {
+  await scenario('medium')
+  const planner = page.locator('c2-week-planner')
+  await expect(planner.getByRole('group', { name: 'Wednesday, today' })).toBeInViewport({ ratio: 1 })
+  const columns = planner.locator('.day')
+  const scrollerWidth = (await planner.locator('.scroller').boundingBox())!.width
+  expect((await columns.first().boundingBox())!.width).toBeCloseTo(scrollerWidth / 3, 0)
+  await expect(planner.getByRole('button', { name: 'Next days' })).toBeVisible()
+
+  await scenario()
+  await expect(planner.getByRole('button', { name: 'Next days' })).toBeHidden()
+  for (const day of ['Monday', 'Sunday']) await expect(planner.getByRole('group', { name: day })).toBeInViewport({ ratio: 1 })
+})
+
+test('keeps a content-sized planner from collapsing', async ({ page, scenario }) => {
+  await scenario()
+  const planner = page.locator('c2-week-planner')
+  await planner.evaluate((element) => element.style.removeProperty('width'))
+  // The scenario's flex row sizes its items from their content; the planner falls back to its intrinsic 720px.
+  await expect.poll(async () => (await planner.boundingBox())!.width).toBeGreaterThan(700)
+})
+
+test('has no automatically detectable accessibility violations on a narrow planner', async ({ page, scenario }) => {
+  await scenario('narrow')
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(results.violations).toEqual([])
+})
+
+test('shows a heading that also names the planner', async ({ page, scenario }) => {
+  await scenario('heading')
+  const planner = page.locator('c2-week-planner')
+  await expect(planner.getByRole('heading', { name: 'Team schedule', level: 2 })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Team schedule' })).toBeVisible()
+
+  // Next to the switch, the heading takes the free space and pushes the switch to the end.
+  await scenario('heading-alternate')
+  const heading = await planner.getByRole('heading', { name: 'Team schedule' }).boundingBox()
+  const evenWeek = await planner.getByRole('button', { name: /^Even week/ }).boundingBox()
+  expect(evenWeek!.x).toBeGreaterThan(heading!.x + heading!.width - 1)
+  expect(Math.abs(evenWeek!.y + evenWeek!.height / 2 - (heading!.y + heading!.height / 2))).toBeLessThan(2)
+})
+
+test('has no header without a heading or the switch on a wide planner', async ({ page, scenario }) => {
+  await scenario()
+  await expect(page.locator('c2-week-planner').locator('.header')).toBeHidden()
+  await expect(page.locator('c2-week-planner').getByRole('heading')).toHaveCount(0)
 })

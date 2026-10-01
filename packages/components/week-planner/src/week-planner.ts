@@ -1,5 +1,5 @@
 import { LitElement, html, nothing, unsafeCSS } from 'lit'
-import { state } from 'lit/decorators.js'
+import { query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
@@ -67,18 +67,34 @@ interface Labels {
   even: string
   kind: string
   plan: string
+  previous: string
+  next: string
 }
 
 /** Words the browser cannot translate through `Intl`, by language; any other language falls back to English. */
 const LABELS: Record<string, Labels> = {
-  en: { odd: 'Odd week', even: 'Even week', kind: 'Kind of week', plan: 'Week plan' },
-  fr: { odd: 'Semaine impaire', even: 'Semaine paire', kind: 'Type de semaine', plan: 'Planning de la semaine' },
-  de: { odd: 'Ungerade Woche', even: 'Gerade Woche', kind: 'Wochentyp', plan: 'Wochenplan' },
-  es: { odd: 'Semana impar', even: 'Semana par', kind: 'Tipo de semana', plan: 'Plan semanal' },
-  it: { odd: 'Settimana dispari', even: 'Settimana pari', kind: 'Tipo di settimana', plan: 'Piano settimanale' },
-  pt: { odd: 'Semana ímpar', even: 'Semana par', kind: 'Tipo de semana', plan: 'Plano semanal' },
-  nl: { odd: 'Oneven week', even: 'Even week', kind: 'Soort week', plan: 'Weekplanning' },
-  vi: { odd: 'Tuần lẻ', even: 'Tuần chẵn', kind: 'Loại tuần', plan: 'Kế hoạch tuần' },
+  en: { odd: 'Odd week', even: 'Even week', kind: 'Kind of week', plan: 'Week plan', previous: 'Previous days', next: 'Next days' },
+  fr: {
+    odd: 'Semaine impaire',
+    even: 'Semaine paire',
+    kind: 'Type de semaine',
+    plan: 'Planning de la semaine',
+    previous: 'Jours précédents',
+    next: 'Jours suivants',
+  },
+  de: { odd: 'Ungerade Woche', even: 'Gerade Woche', kind: 'Wochentyp', plan: 'Wochenplan', previous: 'Vorherige Tage', next: 'Nächste Tage' },
+  es: { odd: 'Semana impar', even: 'Semana par', kind: 'Tipo de semana', plan: 'Plan semanal', previous: 'Días anteriores', next: 'Días siguientes' },
+  it: {
+    odd: 'Settimana dispari',
+    even: 'Settimana pari',
+    kind: 'Tipo di settimana',
+    plan: 'Piano settimanale',
+    previous: 'Giorni precedenti',
+    next: 'Giorni successivi',
+  },
+  pt: { odd: 'Semana ímpar', even: 'Semana par', kind: 'Tipo de semana', plan: 'Plano semanal', previous: 'Dias anteriores', next: 'Próximos dias' },
+  nl: { odd: 'Oneven week', even: 'Even week', kind: 'Soort week', plan: 'Weekplanning', previous: 'Vorige dagen', next: 'Volgende dagen' },
+  vi: { odd: 'Tuần lẻ', even: 'Tuần chẵn', kind: 'Loại tuần', plan: 'Kế hoạch tuần', previous: 'Những ngày trước', next: 'Những ngày sau' },
 }
 
 const DAYS: WeekPlannerDay[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
@@ -141,12 +157,17 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * (`weeks: "odd"`), as school and shared-custody schedules do. Odd and even weeks are off by default: set
  * `alternate-weeks` to honour `weeks` and show an Odd week | Even week switch (a segmented `c2-button-group`, themed
  * through its own `--c2-button-group__*` variables) above the grid, opening on the kind of the current week. Without
- * it every event shows each week. The current week's number sits in a badge on its button.
+ * it every event shows each week. The current week's number sits in a badge on its button. `heading` puts a title at
+ * the start of the header.
  *
  * Text follows `locale`, or the browser's language when it is not set: day names and "today"/"this week" come from
  * `Intl`, and the switch labels from a built-in list (English, French, German, Spanish, Italian, Portuguese, Dutch,
  * Vietnamese; other languages fall back to English). Today's column is tinted, inside the grid lines, and carries a line at the current
- * time. Overlapping events sit side by side; the hour range grows to fit every event.
+ * time. Overlapping events cascade, each stepped in from the one it overlaps; the hour range grows to fit every event.
+ *
+ * Below 640px of width the planner shows three days, and below 420px one, of a strip that scrolls sideways and snaps
+ * to a day: swiped on a touch screen, paged with the previous/next arrows that then appear in its header. It opens on
+ * today, and the hour labels stay in place.
  *
  * @tag c2-week-planner
  *
@@ -162,12 +183,17 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @cssproperty {padding} [--c2-week-planner--padding=12px]
  * @cssproperty {font-family} [--c2-week-planner--font-family=inherit]
  * @cssproperty {font-size} [--c2-week-planner--font-size=14px]
+ * @cssproperty {font-size} [--c2-week-planner__title--font-size=14px] - The `heading`.
+ * @cssproperty {font-weight} [--c2-week-planner__title--font-weight=600]
  * @cssproperty {border} [--c2-week-planner__grid--border=1px solid #e4e4e7] - Lines between the day columns.
  * @cssproperty {border} [--c2-week-planner__hour--border=1px solid rgba(24, 24, 27, 0.06)] - Line under each hour. Translucent, so it stays visible over today's tint.
  * @cssproperty {pixel} [--c2-week-planner__hour--height=48px]
  * @cssproperty {pixel} [--c2-week-planner__hour-label--width=48px]
  * @cssproperty {color} [--c2-week-planner__hour-label--color=#71717a]
  * @cssproperty {font-size} [--c2-week-planner__hour-label--font-size=11px]
+ * @cssproperty {pixel} [--c2-week-planner__navigation--size=28px] - Previous/next day arrows, shown when the planner is too narrow for seven days.
+ * @cssproperty {border-radius} [--c2-week-planner__navigation--border-radius=6px]
+ * @cssproperty {color} [--c2-week-planner__navigation__hover--background=#f4f4f5]
  * @cssproperty {color} [--c2-week-planner__day-header--color=#71717a]
  * @cssproperty {font-size} [--c2-week-planner__day-header--font-size=12px]
  * @cssproperty {color} [--c2-week-planner__day-header__today--color=rgb(2, 101, 220)]
@@ -188,7 +214,15 @@ export class WeekPlanner extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @state() private now = new Date()
+  /** The day strip is scrolled to its first / last day; disables the matching arrow on a narrow planner. */
+  @state() private atStart = true
+  @state() private atEnd = true
+  @query('.scroller') private scroller?: HTMLElement
   private clock?: ReturnType<typeof setInterval>
+  private resizeObserver?: ResizeObserver
+  private overflowing = false
+  /** Index of the leftmost day the strip shows, restored when a resize would leave it between two days. */
+  private firstShownDay = 0
 
   /** The typical week: `{ id?, title, day, start, end, weeks?, color? }` entries. Accepts a JSON string as an attribute. */
   @property({ converter: jsonPropertyConverter }) events: WeekPlannerEvent[] = []
@@ -204,7 +238,9 @@ export class WeekPlanner extends LitElement {
   @property({ attribute: 'week-start', reflect: true }) weekStart: WeekPlannerWeekStart | '' = ''
   /** Language of the planner's text and day names, e.g. `fr` or `en-GB`. Defaults to the browser's language. */
   @property({ type: String }) locale = ''
-  /** Accessible name for the planner. Defaults to "Week plan" in the planner's language. */
+  /** Title shown at the start of the header, e.g. "Kids' schedule". It also names the planner for assistive technology. */
+  @property() heading = ''
+  /** Accessible name for the planner. Defaults to `heading`, else "Week plan" in the planner's language. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   override connectedCallback() {
@@ -216,6 +252,50 @@ export class WeekPlanner extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback()
     clearInterval(this.clock)
+    this.resizeObserver?.disconnect()
+    this.resizeObserver = undefined
+    this.overflowing = false
+  }
+
+  override updated() {
+    // A narrow planner shows one or three days of a scrollable strip; the observer brings today into view when the
+    // strip starts to overflow and keeps the arrows' disabled state in step with the width.
+    if (!this.resizeObserver && this.scroller && typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.handleResize())
+      this.resizeObserver.observe(this.scroller)
+    }
+  }
+
+  private handleResize() {
+    const scroller = this.scroller
+    if (!scroller) return
+    const overflowing = scroller.scrollWidth > scroller.clientWidth + 1
+    const headers = [...scroller.querySelectorAll<HTMLElement>('.day-header')]
+    if (overflowing) {
+      const target = this.overflowing ? headers[this.firstShownDay] : (scroller.querySelector<HTMLElement>('.day-header.today') ?? headers[0])
+      if (target) scroller.scrollLeft = target.offsetLeft
+    }
+    this.overflowing = overflowing
+    this.updateEdges()
+  }
+
+  private updateEdges() {
+    const scroller = this.scroller
+    if (!scroller) return
+    this.atStart = scroller.scrollLeft <= 1
+    const dayWidth = scroller.querySelector<HTMLElement>('.day-header')?.offsetWidth
+    if (dayWidth) this.firstShownDay = Math.min(6, Math.max(0, Math.round(scroller.scrollLeft / dayWidth)))
+    this.atEnd = scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 1
+  }
+
+  /** Moves the strip by the number of days it shows, so the arrows page through the week. */
+  private scrollDays(direction: 1 | -1) {
+    const scroller = this.scroller
+    const day = scroller?.querySelector<HTMLElement>('.day-header')
+    if (!scroller || !day?.offsetWidth) return
+    const shown = Math.max(1, Math.round(scroller.clientWidth / day.offsetWidth))
+    const reduceMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    scroller.scrollBy({ left: direction * shown * day.offsetWidth, behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
   private get effectiveLocale() {
@@ -269,6 +349,18 @@ export class WeekPlanner extends LitElement {
     this.dispatchEvent(new CustomEvent<WeekPlannerEventClickDetail>('event-click', { detail: { event }, bubbles: true, composed: true }))
   }
 
+  private renderNavigation() {
+    const labels = this.labels
+    return html`<div class="navigation">
+      <button class="nav" type="button" aria-label=${labels.previous} ?disabled=${this.atStart} @click=${() => this.scrollDays(-1)}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+      </button>
+      <button class="nav" type="button" aria-label=${labels.next} ?disabled=${this.atEnd} @click=${() => this.scrollDays(1)}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+      </button>
+    </div>`
+  }
+
   private renderSwitch() {
     const week = isoWeek(this.now)
     const shown = this.shownParity
@@ -279,23 +371,46 @@ export class WeekPlanner extends LitElement {
             >${week}<span class="visually-hidden">${this.relative('week')}</span></c2-badge
           >`
         : nothing
-    return html`<header class="header">
-      <c2-button-group
-        class="switch"
-        appearance="segmented"
-        size="s"
-        aria-label=${labels.kind}
-        .value=${shown}
-        @change=${(event: CustomEvent<{ value: string }>) => {
-          // The group's change is composed; the planner reports it as parity-change instead.
-          event.stopPropagation()
-          if (event.detail.value === 'odd' || event.detail.value === 'even') this.showParity(event.detail.value)
-        }}
-      >
-        <c2-button value="odd">${labels.odd}${badge('odd')}</c2-button>
-        <c2-button value="even">${labels.even}${badge('even')}</c2-button>
-      </c2-button-group>
-    </header>`
+    return html`<c2-button-group
+      class="switch"
+      appearance="segmented"
+      size="s"
+      aria-label=${labels.kind}
+      .value=${shown}
+      @change=${(event: CustomEvent<{ value: string }>) => {
+        // The group's change is composed; the planner reports it as parity-change instead.
+        event.stopPropagation()
+        if (event.detail.value === 'odd' || event.detail.value === 'even') this.showParity(event.detail.value)
+      }}
+    >
+      <c2-button value="odd">${labels.odd}${badge('odd')}</c2-button>
+      <c2-button value="even">${labels.even}${badge('even')}</c2-button>
+    </c2-button-group>`
+  }
+
+  private renderEvent(item: Placed, dayName: string, firstHour: number) {
+    return html`<button
+      class="event"
+      type="button"
+      part="event"
+      aria-label=${`${item.event.title}, ${dayName} ${formatMinutes(item.from)}–${formatMinutes(item.to)}`}
+      title=${item.event.title}
+      style=${styleMap({
+        '--from': String(item.from / 60 - firstHour),
+        '--span': String((item.to - item.from) / 60),
+        '--column': String(item.column),
+        '--columns': String(item.columns),
+        '--event-color': item.event.color || null,
+        // A colour of the author's own keeps its text colour in every theme; only the default follows it.
+        '--event-text-color': item.event.color ? item.event.textColor || '#ffffff' : null,
+      })}
+      @click=${() => this.openEvent(item.event)}
+    >
+      <span class="event-body">
+        <span class="event-title">${item.event.title}</span>
+        <span class="event-time">${formatMinutes(item.from)}–${formatMinutes(item.to)}</span>
+      </span>
+    </button>`
   }
 
   override render() {
@@ -319,54 +434,40 @@ export class WeekPlanner extends LitElement {
     const nowMinutes = this.now.getHours() * 60 + this.now.getMinutes()
     const nowOffset = nowMinutes / 60 - firstHour
 
-    return html`<section class="c2-week-planner" aria-label=${this.ariaLabel || this.labels.plan}>
-      ${usesParity ? this.renderSwitch() : nothing}
-      <div class="grid" style=${styleMap({ '--hours': String(hours) })}>
-        <div class="corner"></div>
-        ${order.map((index) => html`<div class="day-header ${index === today ? 'today' : ''}" aria-hidden="true">${shortName.format(dayDate(index))}</div>`)}
-        <div class="hours" aria-hidden="true">
-          ${Array.from({ length: hours }, (_, hour) => html`<div class="hour-label">${formatMinutes((firstHour + hour) * 60)}</div>`)}
-        </div>
-        ${order.map((index) => {
-          const day = DAYS[index]
-          const dayName = longName.format(dayDate(index))
-          const placed = placeDay(visible.filter(({ event }) => event.day === day))
-          return html`<div
-            class="day ${index === today ? 'today' : ''}"
-            role="group"
-            aria-label=${index === today ? `${dayName}, ${this.relative('day')}` : dayName}
-          >
-            ${Array.from({ length: hours }, () => html`<div class="hour-line"></div>`)}
-            ${placed.map(
-              (item) =>
-                html`<button
-                  class="event ${item.to - item.from < 45 ? 'short' : ''}"
-                  type="button"
-                  part="event"
-                  aria-label=${`${item.event.title}, ${dayName} ${formatMinutes(item.from)}–${formatMinutes(item.to)}`}
-                  title=${item.event.title}
-                  style=${styleMap({
-                    '--from': String(item.from / 60 - firstHour),
-                    '--span': String((item.to - item.from) / 60),
-                    '--column': String(item.column),
-                    '--columns': String(item.columns),
-                    '--event-color': item.event.color || null,
-                    // A colour of the author's own keeps its text colour in every theme; only the default follows it.
-                    '--event-text-color': item.event.color ? item.event.textColor || '#ffffff' : null,
-                  })}
-                  @click=${() => this.openEvent(item.event)}
+    return html`<section class="c2-week-planner" aria-label=${this.ariaLabel || this.heading || this.labels.plan}>
+      <div class="body">
+        <header class="header ${usesParity || this.heading ? '' : 'navigation-only'}">
+          ${this.heading ? html`<h2 class="title">${this.heading}</h2>` : nothing} ${usesParity ? this.renderSwitch() : nothing}${this.renderNavigation()}
+        </header>
+        <div class="frame">
+          <div class="gutter" aria-hidden="true">
+            <div class="corner">&nbsp;</div>
+            ${Array.from({ length: hours }, (_, hour) => html`<div class="hour-label">${formatMinutes((firstHour + hour) * 60)}</div>`)}
+          </div>
+          <div class="scroller" @scroll=${this.updateEdges}>
+            <div class="grid" style=${styleMap({ '--hours': String(hours) })}>
+              ${order.map((index) => html`<div class="day-header ${index === today ? 'today' : ''}" aria-hidden="true">${shortName.format(dayDate(index))}</div>`)}
+              ${order.map((index) => {
+                const day = DAYS[index]
+                const dayName = longName.format(dayDate(index))
+                const placed = placeDay(visible.filter(({ event }) => event.day === day))
+                return html`<div
+                  class="day ${index === today ? 'today' : ''}"
+                  role="group"
+                  aria-label=${index === today ? `${dayName}, ${this.relative('day')}` : dayName}
                 >
-                  <span class="event-title">${item.event.title}</span>
-                  <span class="event-time">${formatMinutes(item.from)}–${formatMinutes(item.to)}</span>
-                </button>`,
-            )}
-            ${
-              index === today && nowOffset >= 0 && nowOffset <= hours
-                ? html`<div class="now" style=${styleMap({ '--from': String(nowOffset) })} aria-hidden="true"></div>`
-                : nothing
-            }
-          </div>`
-        })}
+                  ${Array.from({ length: hours }, () => html`<div class="hour-line"></div>`)}
+                  ${placed.map((item) => this.renderEvent(item, dayName, firstHour))}
+                  ${
+                    index === today && nowOffset >= 0 && nowOffset <= hours
+                      ? html`<div class="now" style=${styleMap({ '--from': String(nowOffset) })} aria-hidden="true"></div>`
+                      : nothing
+                  }
+                </div>`
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </section>`
   }

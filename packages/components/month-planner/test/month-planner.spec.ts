@@ -194,3 +194,45 @@ test.describe('first day of the week', () => {
     await expect(page.locator('c2-month-planner').locator('.weekdays span').first()).toHaveText('Mon')
   })
 })
+
+test('turns compact on a narrow planner: day dots and the selected day listed below', async ({ page, scenario }) => {
+  await page.clock.install({ time: new Date(2026, 8, 30, 10, 24) })
+  await scenario('compact')
+  const planner = page.locator('c2-month-planner')
+  // Bars give way to dots; today is the selected day and its events are listed.
+  await expect(planner.locator('.event').first()).toBeHidden()
+  const today = planner.getByRole('button', { name: 'September 30, 2026, today, has events' })
+  await expect(today).toHaveAttribute('aria-pressed', 'true')
+  await expect(planner.getByRole('heading', { name: 'Wednesday, September 30' })).toBeVisible()
+  await expect(planner.getByRole('button', { name: 'Moving week, September 28, 2026 – October 4, 2026' })).toBeVisible()
+
+  await planner.getByRole('button', { name: 'September 10, 2026, has events' }).click()
+  await expect(planner.getByRole('heading', { name: 'Thursday, September 10' })).toBeVisible()
+  await expect(planner.locator('.agenda-event')).toHaveCount(2)
+  await planner.getByRole('button', { name: 'Flight, September 10, 2026' }).click()
+  await expect(page.getByRole('status')).toHaveText('click:flight')
+
+  // Arrow keys move the selection; a day with nothing planned says so.
+  await planner.getByRole('button', { name: 'September 10, 2026, has events' }).focus()
+  await page.keyboard.press('ArrowUp')
+  await expect(planner.getByRole('heading', { name: 'Thursday, September 3' })).toBeVisible()
+  await expect(planner.getByRole('button', { name: 'September 3, 2026' })).toBeFocused()
+  await expect(planner.getByText('No events')).toBeVisible()
+})
+
+test('moves to the next month when the compact selection crosses it', async ({ page, scenario }) => {
+  await page.clock.install({ time: new Date(2026, 8, 30, 10, 24) })
+  await scenario('compact')
+  const planner = page.locator('c2-month-planner')
+  await planner.getByRole('button', { name: 'September 28, 2026, has events' }).click()
+  for (let step = 0; step < 3; step++) await page.keyboard.press('ArrowRight')
+  await expect(planner.getByRole('heading', { name: 'October 2026' })).toBeVisible()
+  await expect(planner.getByRole('button', { name: 'October 1, 2026, has events' })).toBeFocused()
+  await expect(page.getByRole('status')).toHaveText('month:2026-10')
+})
+
+test('has no automatically detectable accessibility violations when compact', async ({ page, scenario }) => {
+  await scenario('compact')
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  expect(results.violations).toEqual([])
+})

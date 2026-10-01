@@ -1,7 +1,7 @@
 ---
 title: 'Month Planner'
 description: 'Month calendar that draws events and trips as bars across the days they cover.'
-category: 'Data display'
+category: 'Planning'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -58,3 +58,30 @@ planner.events = [{ id: 'trip', title: 'Vacation', start: '2026-09-10', end: '20
 planner.addEventListener('event-click', (event) => console.log(event.detail.event.id))
 planner.addEventListener('month-change', (event) => console.log(event.detail.month))
 ```
+
+## Narrow screens
+
+Below 480px of width the planner turns compact, the way a phone calendar does: each day is its date over one dot per
+event (three at most), a tap picks a day, and that day's events are listed under the month as buttons that fire the
+same `event-click`. Arrow keys move between days, crossing into the next or previous month. It opens on today, or on
+the 1st when another month is shown. The breakpoint follows the planner's own width, not the viewport's.
+
+```html tag=UsageBlock,package=@c2n/month-planner
+<style>
+  .phone {
+    width: 360px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Compact">
+  <c2-month-planner
+    class="phone"
+    month="2026-09"
+    locale="en-US"
+    events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"summit","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
+  ></c2-month-planner>
+</div>
+```
+
+In a layout that sizes it from its content, such as a centred flex column, the planner takes 720px or the space
+available, whichever is smaller; give it a `width` to choose another.

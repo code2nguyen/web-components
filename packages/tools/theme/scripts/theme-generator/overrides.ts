@@ -279,6 +279,9 @@ export const overrides: Record<string, Override> = {
   '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
   '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
   '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
+  // Month planner, compact layout: the selected day is an inverse-surface circle, today's a primary one.
+  '--c2-month-planner__date__selected--color': { token: 'color-on-inverse-surface' },
+  '--c2-month-planner__date__today__selected--color': onPrimary,
   // Code viewer: monospace font and theme-neutral translucent greys / status colours that work on any syntax theme.
   '--c2-code-viewer--font-family': { exclude: 'monospace font, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },

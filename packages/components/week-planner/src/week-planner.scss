@@ -9,12 +9,17 @@
     padding: 12px,
     font-family: inherit,
     font-size: 14px,
+    title--font-size: 14px,
+    title--font-weight: 600,
     grid--border: 1px solid #e4e4e7,
     hour--border: 1px solid rgba(24, 24, 27, 0.06),
     hour--height: 48px,
     hour-label--width: 48px,
     hour-label--color: #71717a,
     hour-label--font-size: 11px,
+    navigation--size: 28px,
+    navigation--border-radius: 6px,
+    navigation__hover--background: #f4f4f5,
     day-header--color: #71717a,
     day-header--font-size: 12px,
     day-header__today--color: rgb(2, 101, 220),
@@ -34,6 +39,7 @@
 
 :host {
   display: block;
+  max-inline-size: 100%;
 }
 
 :host([hidden]) {
@@ -51,11 +57,125 @@
   font-size: css.cssVar(font-size);
 }
 
+// The container the day strip sizes itself against: its own content box, inside the planner's padding.
+.body {
+  container: planner / inline-size;
+  // Containment drops the content's width; a layout that sizes the planner from its content (a centred flex column,
+  // a table cell) gets this instead, capped by the space available.
+  contain-intrinsic-inline-size: 720px;
+}
+
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   margin-bottom: 10px;
+
+  // Without the switch or a heading, the header only holds the arrows, which a planner wide enough for seven days
+  // does not need.
+  &.navigation-only {
+    display: none;
+  }
+}
+
+// The heading takes the free space, pushing the switch and the arrows to the end; a long one is cut, not wrapped.
+.title {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation {
+  display: none;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.nav {
+  display: inline-flex;
+  width: css.cssVar(navigation--size);
+  height: css.cssVar(navigation--size);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(navigation--border-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  transition: animation.standard(background);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(navigation__hover--background);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+// Seven columns fit a wide planner. A narrow one shows three days, or one, of a strip that scrolls sideways and snaps
+// to a day: swiped on a touch screen, paged with the arrows elsewhere. The hour labels stay put.
+.scroller {
+  position: relative;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@container planner (max-width: 639.98px) {
+  .header.navigation-only {
+    display: flex;
+  }
+
+  .navigation {
+    display: flex;
+  }
+
+  .grid {
+    --day-width: calc((100cqi - #{css.cssVar(hour-label--width)}) / 3);
+  }
+}
+
+@container planner (max-width: 419.98px) {
+  .grid {
+    --day-width: calc(100cqi - #{css.cssVar(hour-label--width)});
+  }
+
+  // The strip clips at its edge; keep the dot on the line inside the column.
+  .now::before {
+    left: 0;
+  }
 }
 
 .week-number {
@@ -76,8 +196,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: css.cssVar(hour-label--width) repeat(7, minmax(0, 1fr));
-  border-top: css.cssVar(grid--border);
+  grid-template-columns: repeat(7, var(--day-width, minmax(0, 1fr)));
 }
 
 .corner,
@@ -85,7 +204,21 @@
   border-bottom: css.cssVar(grid--border);
 }
 
+// The hour labels sit outside the scrolling strip, so they hold still while the days move.
+.frame {
+  display: grid;
+  grid-template-columns: css.cssVar(hour-label--width) minmax(0, 1fr);
+  border-top: css.cssVar(grid--border);
+}
+
+// Same box as a day header, so the hour rows line up with the day columns.
+.corner {
+  padding: 6px;
+  font-size: css.cssVar(day-header--font-size);
+}
+
 .day-header {
+  scroll-snap-align: start;
   padding: 6px;
   border-left: css.cssVar(grid--border);
   color: css.cssVar(day-header--color);
@@ -131,16 +264,17 @@
   position: absolute;
   z-index: 1;
   top: calc(var(--from) * #{css.cssVar(hour--height)} + 1px);
-  left: calc(var(--column) / var(--columns) * 100% + 2px);
-  display: flex;
-  width: calc(100% / var(--columns) - 4px);
+  // Overlapping events cascade instead of splitting the column into slivers: each one steps in by a share of the
+  // column and runs to its right edge, drawn over the one before it (which starts no later, so its title shows
+  // above). Two overlapping events get the full column and three quarters of it rather than a half each.
+  left: calc(var(--column) / (var(--columns) * 2) * 100% + 2px);
+  display: block;
+  width: calc(100% - var(--column) / (var(--columns) * 2) * 100% - 4px);
   height: calc(var(--span) * #{css.cssVar(hour--height)} - 2px);
-  flex-direction: column;
-  align-items: flex-start;
   overflow: hidden;
   box-sizing: border-box;
   margin: 0;
-  padding: 3px 6px;
+  padding: 0;
   border: 0;
   border-radius: css.cssVar(event--border-radius);
   background: var(--event-color, #{css.cssVar(event--background)});
@@ -151,16 +285,14 @@
   line-height: 1.3;
   text-align: left;
   transition: animation.standard(opacity);
-  container-type: inline-size;
+  // The block is a size container, so its text adapts to the room it has: wraps, goes on one row, or drops the time.
+  container-type: size;
+  // Separates a block from the one it covers.
+  box-shadow: 0 0 0 1px css.cssVar(background);
 
-  &.short {
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-    padding-block: 0;
-  }
-
+  // A covered block comes to the front while it is pointed at.
   &:hover {
+    z-index: 2;
     opacity: css.cssVar(event__hover--opacity);
   }
 
@@ -169,6 +301,15 @@
     outline: css.cssVar(focus--outline);
     outline-offset: css.cssVar(focus--outline-offset);
   }
+}
+
+.event-body {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding: 3px 6px;
 }
 
 .event-title,
@@ -180,17 +321,11 @@
   white-space: nowrap;
 }
 
+// The title wraps between words; a word is never split into pieces.
 .event-title {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   font-weight: css.cssVar(event--font-weight);
-}
-
-// A block tall enough for several lines wraps its title instead of cutting it to a few letters.
-.event:not(.short) .event-title {
-  flex-shrink: 0;
   white-space: normal;
-  overflow-wrap: break-word;
-  hyphens: auto;
 }
 
 .event-time {
@@ -198,16 +333,38 @@
   font-variant-numeric: tabular-nums;
 }
 
-// The block is the size container, so its text can drop the time rather than clip it to a stub. The time stays in
-// the accessible name and the tooltip.
-@container (max-width: 72px) {
+// The time stays in the accessible name and the tooltip whenever it is hidden.
+@container (max-width: 84px) {
   .event-time {
     display: none;
   }
 }
 
-@container (max-width: 180px) {
-  .short .event-time {
+// Too narrow to wrap words: one line, cut with an ellipsis (the full title is in the tooltip and accessible name).
+@container (max-width: 48px) {
+  .event-title {
+    white-space: nowrap;
+  }
+}
+
+// Too short for two lines at the default 12px font: title and time share one row, centred. (Not in em: browsers
+// disagree on which font size an em in a container query refers to.)
+@container (max-height: 38px) {
+  .event-body {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding-block: 0;
+  }
+
+  .event-title {
+    flex: 0 1 auto;
+    white-space: nowrap;
+  }
+}
+
+@container (max-height: 38px) and (max-width: 192px) {
+  .event-time {
     display: none;
   }
 }

@@ -64,6 +64,7 @@ interface Labels {
   nextYear: string
   chooseMonth: string
   hasEvents: string
+  noEvents: string
 }
 
 /** Words the browser cannot translate through `Intl`, by language; any other language falls back to English. */
@@ -75,6 +76,7 @@ const LABELS: Record<string, Labels> = {
     nextYear: 'Next year',
     chooseMonth: 'Choose a month',
     hasEvents: 'has events',
+    noEvents: 'No events',
   },
   fr: {
     previousMonth: 'Mois précédent',
@@ -83,6 +85,7 @@ const LABELS: Record<string, Labels> = {
     nextYear: 'Année suivante',
     chooseMonth: 'Choisir un mois',
     hasEvents: 'contient des événements',
+    noEvents: 'Aucun événement',
   },
   de: {
     previousMonth: 'Vorheriger Monat',
@@ -91,6 +94,7 @@ const LABELS: Record<string, Labels> = {
     nextYear: 'Nächstes Jahr',
     chooseMonth: 'Monat auswählen',
     hasEvents: 'hat Termine',
+    noEvents: 'Keine Termine',
   },
   es: {
     previousMonth: 'Mes anterior',
@@ -99,6 +103,7 @@ const LABELS: Record<string, Labels> = {
     nextYear: 'Año siguiente',
     chooseMonth: 'Elegir un mes',
     hasEvents: 'tiene eventos',
+    noEvents: 'Sin eventos',
   },
   it: {
     previousMonth: 'Mese precedente',
@@ -107,6 +112,7 @@ const LABELS: Record<string, Labels> = {
     nextYear: 'Anno successivo',
     chooseMonth: 'Scegli un mese',
     hasEvents: 'ha eventi',
+    noEvents: 'Nessun evento',
   },
   pt: {
     previousMonth: 'Mês anterior',
@@ -115,6 +121,7 @@ const LABELS: Record<string, Labels> = {
     nextYear: 'Próximo ano',
     chooseMonth: 'Escolher um mês',
     hasEvents: 'tem eventos',
+    noEvents: 'Sem eventos',
   },
   nl: {
     previousMonth: 'Vorige maand',
@@ -123,6 +130,7 @@ const LABELS: Record<string, Labels> = {
     nextYear: 'Volgend jaar',
     chooseMonth: 'Kies een maand',
     hasEvents: 'heeft afspraken',
+    noEvents: 'Geen afspraken',
   },
   vi: {
     previousMonth: 'Tháng trước',
@@ -131,6 +139,7 @@ const LABELS: Record<string, Labels> = {
     nextYear: 'Năm sau',
     chooseMonth: 'Chọn tháng',
     hasEvents: 'có sự kiện',
+    noEvents: 'Không có sự kiện',
   },
 }
 
@@ -180,6 +189,10 @@ function dayDiff(from: Date, to: Date): number {
  * The month title opens a month picker (turn it off with `month-picker="false"`): a year stepper over the twelve
  * months, where a dot and a soft tint mark every month that has events. Arrow keys move between months, Page Up/Page Down change the year, Enter picks and Escape closes.
  *
+ * Below 480px of width the planner turns compact, as a phone calendar does: each day is its date over one dot per
+ * event, a tap picks a day (arrow keys move between days) and that day's events are listed under the grid. It opens
+ * on today, or on the 1st of another month.
+ *
  * Text follows `locale`, or the browser's language when it is not set: month and day names, "Today" and "this month"
  * come from `Intl`, and the navigation labels from a built-in list (English, French, German, Spanish, Italian,
  * Portuguese, Dutch, Vietnamese; other languages fall back to English).
@@ -190,6 +203,7 @@ function dayDiff(from: Date, to: Date): number {
  * @event {CustomEvent<MonthPlannerMonthChangeDetail>} month-change - Fired when the header navigation shows another month; `detail.month` is `YYYY-MM`.
  *
  * @csspart event - Each event bar (one per week the event covers).
+ * @csspart agenda-event - Each event in the compact layout's list of the selected day.
  *
  * @cssproperty {color} [--c2-month-planner--background=#ffffff]
  * @cssproperty {color} [--c2-month-planner--color=#18181b]
@@ -242,6 +256,12 @@ function dayDiff(from: Date, to: Date): number {
  * @cssproperty {color} [--c2-month-planner__month__marked__hover--background=rgba(2, 101, 220, 0.18)]
  * @cssproperty {color} [--c2-month-planner__marker--color=rgb(2, 101, 220)] - Dot on a month that has events.
  * @cssproperty {pixel} [--c2-month-planner__marker--size=6px]
+ * @cssproperty {color} [--c2-month-planner__date__selected--background=#18181b] - Circle behind the selected day, in the compact layout.
+ * @cssproperty {color} [--c2-month-planner__date__selected--color=#ffffff]
+ * @cssproperty {color} [--c2-month-planner__date__today__selected--background=rgb(2, 101, 220)] - Circle behind today when it is selected.
+ * @cssproperty {color} [--c2-month-planner__date__today__selected--color=#ffffff]
+ * @cssproperty {pixel} [--c2-month-planner__dot--size=5px] - Event dot under a day, in the compact layout.
+ * @cssproperty {color} [--c2-month-planner__agenda-event__hover--background=#f4f4f5]
  */
 @customElement('c2-month-planner')
 export class MonthPlanner extends LitElement {
@@ -249,6 +269,8 @@ export class MonthPlanner extends LitElement {
 
   @state() private visibleMonth = beginningOfMonth(new Date())
   @state() private pickerOpen = false
+  /** Day picked in the compact layout, as `YYYY-MM-DD`; its events are listed under the grid. */
+  @state() private selectedDay = ''
   @state() private pickerYear = new Date().getFullYear()
   /** Month index (0–11) holding the picker's roving tab stop. */
   @state() private pickerFocus = 0
@@ -441,15 +463,42 @@ export class MonthPlanner extends LitElement {
     return addDays(first, -offset)
   }
 
+  /** Every event with valid dates, its end clamped to its start. */
+  private get datedEvents() {
+    return (Array.isArray(this.events) ? this.events : []).flatMap((event) => {
+      const start = fromIso(event?.start)
+      const end = fromIso(event?.end) ?? start
+      return start && end ? [{ event, start, end: end < start ? start : end }] : []
+    })
+  }
+
+  /** The compact layout's selected day: the picked one while it is in the month shown, else today, else the 1st. */
+  private get shownDay(): string {
+    const month = toMonth(this.visibleMonth)
+    if (this.selectedDay.startsWith(month)) return this.selectedDay
+    const today = toIso(new Date())
+    return today.startsWith(month) ? today : toIso(this.visibleMonth)
+  }
+
+  private async selectDay(date: Date, focus = false) {
+    if (date.getMonth() !== this.visibleMonth.getMonth() || date.getFullYear() !== this.visibleMonth.getFullYear()) this.showMonth(beginningOfMonth(date))
+    this.selectedDay = toIso(date)
+    if (!focus) return
+    await this.updateComplete
+    this.renderRoot.querySelector<HTMLButtonElement>('.day-select[tabindex="0"]')?.focus()
+  }
+
+  private handleDayKeydown(event: KeyboardEvent, date: Date) {
+    const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }
+    if (!(event.key in moves)) return
+    event.preventDefault()
+    this.selectDay(addDays(date, moves[event.key]), true)
+  }
+
   /** Cuts every event that touches the week into one bar and stacks overlapping bars into lanes. */
   private segmentsOf(weekStart: Date): Segment[] {
     const weekEnd = addDays(weekStart, 6)
-    const events = (Array.isArray(this.events) ? this.events : [])
-      .flatMap((event) => {
-        const start = fromIso(event?.start)
-        const end = fromIso(event?.end) ?? start
-        return start && end ? [{ event, start, end: end < start ? start : end }] : []
-      })
+    const events = this.datedEvents
       .filter((item) => item.start <= weekEnd && item.end >= weekStart)
       .sort((a, b) => a.start.getTime() - b.start.getTime() || b.end.getTime() - a.end.getTime())
 
@@ -470,8 +519,9 @@ export class MonthPlanner extends LitElement {
     return end > start ? `${event.title}, ${dateLabel.format(start)} – ${dateLabel.format(end)}` : `${event.title}, ${dateLabel.format(start)}`
   }
 
-  private renderWeek(weekStart: Date, today: string, dateLabel: Intl.DateTimeFormat) {
+  private renderWeek(weekStart: Date, today: string, selected: string, dateLabel: Intl.DateTimeFormat) {
     const segments = this.segmentsOf(weekStart)
+    const dated = this.datedEvents
     const lanes = segments.reduce((count, segment) => Math.max(count, segment.lane + 1), 0)
     const days = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index))
     return html`<div class="week" style=${styleMap({ '--lanes': String(lanes) })}>
@@ -480,6 +530,7 @@ export class MonthPlanner extends LitElement {
         const outside = date.getMonth() !== this.visibleMonth.getMonth()
         return html`<div class="day ${outside ? 'outside' : ''} ${value === today ? 'today' : ''}" style=${styleMap({ gridColumn: String(index + 1) })}>
           <span class="date ${value === today ? 'today' : ''}" aria-current=${value === today ? 'date' : nothing}>${date.getDate()}</span>
+          ${this.renderDaySelect(date, value, value === today, value === selected, dated, dateLabel)}
         </div>`
       })}
       ${segments.map(
@@ -505,6 +556,71 @@ export class MonthPlanner extends LitElement {
     </div>`
   }
 
+  /** The compact layout's day: a date in a circle over one dot per event (three at most), picking the listed day. */
+  private renderDaySelect(
+    date: Date,
+    value: string,
+    today: boolean,
+    selected: boolean,
+    dated: { event: MonthPlannerEvent; start: Date; end: Date }[],
+    dateLabel: Intl.DateTimeFormat,
+  ) {
+    const onDay = dated.filter((item) => item.start <= date && item.end >= date)
+    const label = `${dateLabel.format(date)}${today ? `, ${this.relative('day')}` : ''}${onDay.length ? `, ${this.labels.hasEvents}` : ''}`
+    return html`<button
+      class="day-select"
+      type="button"
+      tabindex=${selected ? '0' : '-1'}
+      aria-pressed=${selected ? 'true' : 'false'}
+      aria-label=${label}
+      @click=${() => this.selectDay(date)}
+      @keydown=${(event: KeyboardEvent) => this.handleDayKeydown(event, date)}
+    >
+      <span class="date-number" aria-hidden="true">${date.getDate()}</span>
+      <span class="dots" aria-hidden="true"
+        >${onDay.slice(0, 3).map((item) => html`<span class="dot" style=${styleMap({ '--event-color': item.event.color || null })}></span>`)}</span
+      >
+      <span class="visually-hidden">${value}</span>
+    </button>`
+  }
+
+  /** The compact layout's list of the selected day's events. */
+  private renderAgenda(selected: string, locale: string) {
+    const day = fromIso(selected)!
+    const heading = new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric' }).format(day)
+    const range = new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' })
+    const dateLabel = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric', year: 'numeric' })
+    const onDay = this.datedEvents.filter((item) => item.start <= day && item.end >= day)
+    return html`<section class="agenda" aria-label=${heading}>
+      <h3 class="agenda-heading">${heading}</h3>
+      ${
+        onDay.length
+          ? html`<ul class="agenda-list">
+              ${onDay.map(
+                (item) =>
+                  html`<li>
+                    <button
+                      class="agenda-event"
+                      type="button"
+                      part="agenda-event"
+                      aria-label=${this.eventLabel(item.event, dateLabel)}
+                      style=${styleMap({ '--event-color': item.event.color || null })}
+                      @click=${() => this.openEvent(item.event)}
+                    >
+                      <span class="swatch" aria-hidden="true"></span>
+                      <span class="agenda-text">
+                        <span class="agenda-name">${item.event.title}</span>
+                        ${item.end > item.start ? html`<span class="agenda-when">${range.format(item.start)} – ${range.format(item.end)}</span>` : nothing}
+                      </span>
+                    </button>
+                  </li>`,
+              )}
+            </ul>`
+          : html`<p class="agenda-empty">${this.labels.noEvents}</p>`
+      }
+    </section>`
+  }
+
   override render() {
     const locale = this.effectiveLocale
     const title = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(this.visibleMonth)
@@ -514,6 +630,7 @@ export class MonthPlanner extends LitElement {
     const first = this.firstGridDay
     const last = beginningOfMonth(this.visibleMonth, 1)
     const weeks = Math.ceil(dayDiff(first, last) / 7)
+    const selected = this.shownDay
 
     return html`<section class="c2-month-planner" aria-label=${this.ariaLabel || title}>
       <header class="header">
@@ -545,7 +662,8 @@ export class MonthPlanner extends LitElement {
         ${this.monthPicker && this.pickerOpen ? this.renderPicker(locale) : nothing}
       </header>
       <div class="weekdays" aria-hidden="true">${Array.from({ length: 7 }, (_, index) => html`<span>${weekdays.format(addDays(first, index))}</span>`)}</div>
-      <div class="weeks">${Array.from({ length: weeks }, (_, week) => this.renderWeek(addDays(first, week * 7), today, dateLabel))}</div>
+      <div class="weeks">${Array.from({ length: weeks }, (_, week) => this.renderWeek(addDays(first, week * 7), today, selected, dateLabel))}</div>
+      ${this.renderAgenda(selected, locale)}
     </section>`
   }
 }

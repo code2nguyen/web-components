@@ -39,7 +39,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **List Item** — `c2-list-item` · `@c2n/list-item` — Selectable row with icon slots, used on its own or as the option of list and select.
 - **Log Viewer** — `c2-log-viewer` · `@c2n/log-viewer` — Explore large logs with variable-height virtual scrolling and sticky tabular attributes.
 - **Marker** — `c2-marker` · `@c2n/marker` — An inline marker that highlights, underlines, strikes through, boxes or circles a run of text.
-- **Month Planner** — `c2-month-planner` · `@c2n/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
 - **QR Code** — `c2-qr-code` · `@c2n/qr-code` — Generate accessible, themeable QR codes locally as crisp SVG graphics.
 - **Reorder List** — `c2-reorder-list` · `@c2n/reorder-list` — Reorder a vertical queue with pointer or keyboard input while the application owns persistence.
 - **Stat** — `c2-stat` · `@c2n/stat` — Displays a KPI with an optional icon, trend and supporting description.
@@ -48,7 +47,6 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Timeline** — `c2-timeline, c2-timeline-item` · `@c2n/timeline` — A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs. Children: `c2-timeline-item`.
 - **Tree** — `c2-tree, c2-tree-item` · `@c2n/tree` — Hierarchical tree view with expansion, selection, checkboxes and lazy loading. Children: `c2-tree-item`.
 - **Virtual List** — `c2-virtual-list` · `@c2n/virtual-list` — Windowed list with built-in search, sorting, selection and an async data source.
-- **Week Planner** — `c2-week-planner` · `@c2n/week-planner` — Typical-week schedule with time blocks, and optional odd and even weeks.
 
 ## Feedback
 
@@ -124,3 +122,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Pagination** — `c2-pagination` · `@c2n/pagination` — Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page.
 - **Side Nav** — `c2-side-nav` · `@c2n/side-nav` — Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones.
 - **Tabs** — `c2-tabs, c2-tab` · `@c2n/tabs` — Tab strip that shows one content panel at a time. Children: `c2-tab`.
+
+## Planning
+
+- **Month Planner** — `c2-month-planner` · `@c2n/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
+- **Week Planner** — `c2-week-planner` · `@c2n/week-planner` — Typical-week schedule with time blocks, and optional odd and even weeks.

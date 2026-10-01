@@ -33,6 +33,7 @@ if (localeWeek) {
 }
 if (scenario === 'french' || scenario === 'browser-locale') subject.removeAttribute('week-start')
 if (scenario === 'browser-locale') subject.removeAttribute('locale')
+if (scenario === 'compact') subject.style.width = '360px'
 if (scenario === 'sunday') subject.weekStart = 'sunday'
 if (scenario === 'no-picker') subject.setAttribute('month-picker', 'false')
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))

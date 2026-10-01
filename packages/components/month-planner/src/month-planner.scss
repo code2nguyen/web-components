@@ -53,11 +53,18 @@
     month__marked__hover--background: rgba(2, 101, 220, 0.18),
     marker--color: rgb(2, 101, 220),
     marker--size: 6px,
+    date__selected--background: #18181b,
+    date__selected--color: #ffffff,
+    date__today__selected--background: rgb(2, 101, 220),
+    date__today__selected--color: #ffffff,
+    dot--size: 5px,
+    agenda-event__hover--background: #f4f4f5,
   )
 );
 
 :host {
   display: block;
+  max-inline-size: 100%;
 }
 
 :host([hidden]) {
@@ -65,6 +72,10 @@
 }
 
 .c2-month-planner {
+  container: month-planner / inline-size;
+  // Containment drops the content's width; a layout that sizes the planner from its content (a centred flex column,
+  // a table cell) gets this instead, capped by the space available.
+  contain-intrinsic-inline-size: 720px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -87,7 +98,9 @@
 }
 
 .title {
+  min-width: 0;
   margin: 0;
+  white-space: nowrap;
   font: inherit;
   font-weight: css.cssVar(title--font-weight);
 }
@@ -391,4 +404,208 @@
   height: css.cssVar(marker--size);
   border-radius: 999px;
   background: css.cssVar(marker--color);
+}
+
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// The compact layout's pieces, shown by the container query below.
+.day-select,
+.agenda {
+  display: none;
+}
+
+.day-select {
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin: 0;
+  padding: 2px 0 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible .date-number {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.date-number {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  transition: animation.standard(background);
+
+  .today & {
+    color: css.cssVar(day__today--color);
+    font-weight: css.cssVar(day__today--font-weight);
+  }
+
+  [aria-pressed='true'] & {
+    background: css.cssVar(date__selected--background);
+    color: css.cssVar(date__selected--color);
+    font-weight: css.cssVar(day__today--font-weight);
+  }
+
+  .today [aria-pressed='true'] & {
+    background: css.cssVar(date__today__selected--background);
+    color: css.cssVar(date__today__selected--color);
+  }
+}
+
+.dots {
+  display: flex;
+  height: css.cssVar(dot--size);
+  gap: 2px;
+}
+
+.dot {
+  width: css.cssVar(dot--size);
+  height: css.cssVar(dot--size);
+  border-radius: 999px;
+  background: var(--event-color, #{css.cssVar(event--background)});
+}
+
+.agenda {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: css.cssVar(day--border);
+}
+
+.agenda-heading {
+  margin: 0 0 6px;
+  font: inherit;
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.agenda-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agenda-event {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  gap: 10px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px;
+  border: 0;
+  border-radius: css.cssVar(navigation--border-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: animation.standard(background);
+
+  &:hover {
+    background: css.cssVar(agenda-event__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.swatch {
+  flex: 0 0 4px;
+  min-height: 20px;
+  border-radius: 2px;
+  background: var(--event-color, #{css.cssVar(event--background)});
+}
+
+.agenda-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agenda-name {
+  overflow: hidden;
+  font-weight: css.cssVar(event--font-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenda-when,
+.agenda-empty {
+  color: css.cssVar(weekday--color);
+  font-size: css.cssVar(day--font-size);
+}
+
+.agenda-empty {
+  margin: 0;
+  padding: 8px 0;
+}
+
+// A planner too narrow for bars reads like a phone calendar: date numbers with event dots, no grid lines, and the
+// selected day's events listed under the month.
+@container month-planner (max-width: 479.98px) {
+  .event,
+  .date {
+    display: none;
+  }
+
+  .day-select {
+    display: flex;
+  }
+
+  .agenda {
+    display: block;
+  }
+
+  .weekdays span {
+    padding-inline: 0;
+    text-align: center;
+  }
+
+  .weeks {
+    border: 0;
+  }
+
+  .week {
+    min-height: 0;
+    grid-template-rows: auto;
+  }
+
+  .day {
+    grid-row: 1;
+    padding: 2px 0;
+    border: 0;
+    border-top: css.cssVar(day--border);
+
+    &.outside,
+    &.today {
+      background: none;
+    }
+  }
 }

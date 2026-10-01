@@ -30,6 +30,11 @@ if (scenario === 'french' || scenario === 'browser-locale') subject.removeAttrib
 if (scenario === 'french' || scenario === 'browser-locale') subject.alternateWeeks = true
 if (scenario === 'browser-locale') subject.removeAttribute('locale')
 if (scenario === 'every-week') subject.events = subject.events.filter((event) => !event.weeks)
+// Container widths: 360px shows one day, 560px three.
+if (scenario === 'narrow') subject.style.width = '360px'
+if (scenario === 'medium') subject.style.width = '560px'
+if (scenario === 'heading' || scenario === 'heading-alternate') subject.heading = 'Team schedule'
+if (scenario === 'heading-alternate') subject.alternateWeeks = true
 if (scenario === 'early') subject.events = [{ title: 'Early run', day: 'fri', start: '06:00', end: '07:00' }]
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))
 subject.addEventListener('parity-change', (event) => (output.value = `parity:${event.detail.parity}`))

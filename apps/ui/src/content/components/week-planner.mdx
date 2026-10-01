@@ -1,7 +1,7 @@
 ---
 title: 'Week Planner'
 description: 'Typical-week schedule with time blocks, and optional odd and even weeks.'
-category: 'Data display'
+category: 'Planning'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
@@ -13,7 +13,8 @@ import { WeekPlanner } from '@c2n/week-planner'
 time. It has no dates and no navigation. An event names the weekday it happens on and repeats every week, or, with
 `alternate-weeks`, only in odd or even weeks (`weeks: "odd"`), as school and shared-custody schedules do. Today's
 column is tinted (`--c2-week-planner__day__today--background`, drawn inside the grid lines) and carries a line at the
-current time. Overlapping events sit side by side, and the hour range (`start-hour`, `end-hour`, 8 to 18 by
+current time. Overlapping events cascade, each stepped in from the one before and drawn over it, so the earlier one's
+title stays readable, and the hour range (`start-hour`, `end-hour`, 8 to 18 by
 default) grows to fit every event.
 
 ## Installation
@@ -35,6 +36,7 @@ npm install @c2n/week-planner
 </div>
 <div data-label="Odd and even weeks">
   <c2-week-planner
+    heading="Kids’ schedule"
     alternate-weeks
     locale="en-US"
     start-hour="9"
@@ -51,6 +53,13 @@ Each entry is `{ id?, title, day, start, end, weeks?, color?, textColor? }`: `da
 is any CSS colour for that block (its text stays white in both themes; add `textColor` for a light `color`); otherwise
 `--c2-week-planner__event--background` applies.
 
+## Heading
+
+`heading` puts a title at the start of the header (`--c2-week-planner__title--font-size`,
+`--c2-week-planner__title--font-weight`) and becomes the planner's accessible name, unless `aria-label` is set. It is
+called `heading` rather than `title` because `title` is the browser's tooltip attribute, which would hover over the
+whole planner.
+
 ## Odd and even weeks
 
 Alternate weeks are off by default: every entry shows each week and `weeks` is ignored. Add the `alternate-weeks`
@@ -62,6 +71,49 @@ entries appear in both. Set `parity="odd"` or `parity="even"` to choose the view
 now shown. Today's column is only marked while the switch shows the current kind of week.
 
 Blocks are buttons: clicking one, or pressing Enter on it, fires `event-click` with the entry in `event.detail.event`.
+
+## Narrow screens
+
+Below 640px of width the planner shows three days, and below 420px a single day, of a strip that scrolls sideways
+and snaps to a day: swipe it on a touch screen, or page through the week with the previous/next arrows that appear in
+its header. It opens on today and the hour labels stay in place. The breakpoints follow the planner's own width, not
+the viewport's, so a planner in a narrow sidebar switches too.
+
+```html tag=UsageBlock,package=@c2n/week-planner
+<style>
+  .phone {
+    width: 360px;
+    max-width: 100%;
+  }
+  .tablet {
+    width: 560px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="One day">
+  <c2-week-planner
+    class="phone"
+    heading="Team week"
+    locale="en-US"
+    start-hour="8"
+    end-hour="13"
+    events='[{"title":"Team stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Team stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Client workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},{"title":"Design review","day":"tue","start":"11:00","end":"12:30","color":"#be185d"},{"title":"Focus time","day":"fri","start":"09:00","end":"12:00","color":"#52525b"}]'
+  ></c2-week-planner>
+</div>
+<div data-label="Three days">
+  <c2-week-planner
+    class="tablet"
+    heading="Team week"
+    locale="en-US"
+    start-hour="8"
+    end-hour="13"
+    events='[{"title":"Team stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Team stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Client workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},{"title":"Design review","day":"tue","start":"11:00","end":"12:30","color":"#be185d"},{"title":"Focus time","day":"fri","start":"09:00","end":"12:00","color":"#52525b"}]'
+  ></c2-week-planner>
+</div>
+```
+
+In a layout that sizes it from its content, such as a centred flex column, the planner takes 720px or the space
+available, whichever is smaller; give it a `width` to choose another.
 
 ## Language
 
