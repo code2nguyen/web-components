@@ -430,6 +430,14 @@ export const overrides: Record<string, Override> = {
   '--c2-notepad__paper-green--background': { token: 'color-surface', value: 'color-mix(in srgb, #bddcb2 35%, var(--c2-theme--color-surface, #ffffff))' },
   '--c2-notepad__paper-blue--background': { token: 'color-surface', value: 'color-mix(in srgb, #b8ceee 35%, var(--c2-theme--color-surface, #ffffff))' },
   '--c2-notepad__paper-pink--background': { token: 'color-surface', value: 'color-mix(in srgb, #f4b8c3 35%, var(--c2-theme--color-surface, #ffffff))' },
+  // Each paper's ink is the theme text colour with a touch of the paper's hue, so it follows light and dark mode.
+  '--c2-notepad__paper-yellow--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #966800)' },
+  '--c2-notepad__paper-green--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #39cc57)' },
+  '--c2-notepad__paper-blue--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #3390ff)' },
+  '--c2-notepad__paper-pink--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #ff4786)' },
+  // Night paper is a dark sheet with light ink in either mode.
+  '--c2-notepad__paper-night--background': { exclude: 'night paper is dark in both modes' },
+  '--c2-notepad__paper-night--color': { exclude: 'night paper is dark in both modes' },
   '--c2-notepad__glue--background': { exclude: 'binding material colour' },
   '--c2-notepad__writing--font-family': { exclude: 'the bundled handwriting face is the component identity' },
   '--c2-notepad__sheet--border-radius': { exclude: 'paper corner, not a control radius' },

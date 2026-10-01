@@ -52,9 +52,9 @@ export interface NotepadPageTearEventDetail {
 /** Ruling of the page. */
 export type NotepadPaper = 'lined' | 'grid' | 'dot' | 'blank'
 /** Colour of the page; `default` is `--c2-notepad__sheet--background`. */
-export type NotepadPaperColor = 'default' | 'yellow' | 'green' | 'blue' | 'pink'
+export type NotepadPaperColor = 'default' | 'yellow' | 'green' | 'blue' | 'pink' | 'night'
 export const PAPERS: readonly NotepadPaper[] = ['lined', 'grid', 'dot', 'blank']
-export const PAPER_COLORS: readonly NotepadPaperColor[] = ['default', 'yellow', 'green', 'blue', 'pink']
+export const PAPER_COLORS: readonly NotepadPaperColor[] = ['default', 'yellow', 'green', 'blue', 'pink', 'night']
 
 /** Detail of `paper-change`. */
 export interface NotepadPaperChangeEventDetail {
@@ -92,14 +92,26 @@ const HIGHLIGHT_SWATCHES: Record<NotepadHighlight, string> = {
 }
 
 const PAPER_LABELS: Record<NotepadPaper, string> = { lined: 'Lined', grid: 'Grid', dot: 'Dot grid', blank: 'Blank' }
-const PAPER_COLOR_LABELS: Record<NotepadPaperColor, string> = { default: 'White', yellow: 'Yellow', green: 'Green', blue: 'Blue', pink: 'Pink' }
-const PAPER_SWATCHES: Record<NotepadPaperColor, string> = {
-  default: 'var(--c2-notepad__sheet--background, #fdfcf7)',
-  yellow: 'var(--c2-notepad__paper-yellow--background, #fcf0bf)',
-  green: 'var(--c2-notepad__paper-green--background, #e8f3e4)',
-  blue: 'var(--c2-notepad__paper-blue--background, #e6eef9)',
-  pink: 'var(--c2-notepad__paper-pink--background, #fbe6ea)',
+const PAPER_COLOR_LABELS: Record<NotepadPaperColor, string> = {
+  default: 'White',
+  yellow: 'Yellow',
+  green: 'Green',
+  blue: 'Blue',
+  pink: 'Pink',
+  night: 'Night',
 }
+/** Each paper colour is a pair: the sheet and the ink written on it. */
+const PAPER_SWATCHES: Record<NotepadPaperColor, string> = {
+  default: '--_swatch: var(--c2-notepad__sheet--background, #fdfcf7); --_swatch-ink: var(--c2-notepad__writing--color, #1e2a4a)',
+  yellow: '--_swatch: var(--c2-notepad__paper-yellow--background, #fcf0bf); --_swatch-ink: var(--c2-notepad__paper-yellow--color, #2b2410)',
+  green: '--_swatch: var(--c2-notepad__paper-green--background, #e8f3e4); --_swatch-ink: var(--c2-notepad__paper-green--color, #1d3324)',
+  blue: '--_swatch: var(--c2-notepad__paper-blue--background, #e6eef9); --_swatch-ink: var(--c2-notepad__paper-blue--color, #1c2a4a)',
+  pink: '--_swatch: var(--c2-notepad__paper-pink--background, #fbe6ea); --_swatch-ink: var(--c2-notepad__paper-pink--color, #3d1f2b)',
+  night: '--_swatch: var(--c2-notepad__paper-night--background, #232a33); --_swatch-ink: var(--c2-notepad__paper-night--color, #e9e4d4)',
+}
+/** Hover-card timing: a short delay before opening so passing over the button does not flash the card. */
+const HOVER_OPEN_DELAY = 150
+const HOVER_CLOSE_DELAY = 250
 
 const BOX = `<svg viewBox="0 0 22 22" aria-hidden="true"><path d="M3.5 4.2c4.6-.6 10-.5 15 .2.6 4.5.5 9.6-.2 14.2-4.8.5-9.9.6-14.6.1-.6-4.7-.6-9.7-.2-14.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path class="tick" d="M5.5 11.5l4 4.2L19 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 
@@ -242,9 +254,15 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__toolbar__button__active--background=rgba(60, 50, 30, 0.14)]
  * @cssproperty {color} [--c2-notepad__perforation--color=#b9bfc8] - Perforated line of a tearable pad.
  * @cssproperty {color} [--c2-notepad__paper-yellow--background=#fcf0bf] - Sheet colour for `paper-color="yellow"`.
+ * @cssproperty {color} [--c2-notepad__paper-yellow--color=#2b2410] - Ink colour for `paper-color="yellow"`.
  * @cssproperty {color} [--c2-notepad__paper-green--background=#e8f3e4] - Sheet colour for `paper-color="green"`.
+ * @cssproperty {color} [--c2-notepad__paper-green--color=#1d3324] - Ink colour for `paper-color="green"`.
  * @cssproperty {color} [--c2-notepad__paper-blue--background=#e6eef9] - Sheet colour for `paper-color="blue"`.
+ * @cssproperty {color} [--c2-notepad__paper-blue--color=#1c2a4a] - Ink colour for `paper-color="blue"`.
  * @cssproperty {color} [--c2-notepad__paper-pink--background=#fbe6ea] - Sheet colour for `paper-color="pink"`.
+ * @cssproperty {color} [--c2-notepad__paper-pink--color=#3d1f2b] - Ink colour for `paper-color="pink"`.
+ * @cssproperty {color} [--c2-notepad__paper-night--background=#232a33] - Sheet colour for `paper-color="night"`.
+ * @cssproperty {color} [--c2-notepad__paper-night--color=#e9e4d4] - Ink colour for `paper-color="night"`.
  * @cssproperty {color} [--c2-notepad__error--color=#dc2626] - Error note and margin of an invalid notepad.
  * @cssproperty {outline} [--c2-notepad__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {opacity} [--c2-notepad__disabled--opacity=0.38]
@@ -290,7 +308,7 @@ export class Notepad extends LitElement {
   @property({ type: Number }) page = 1
   /** Ruling of the page: `lined`, `grid`, `dot` or `blank`. The writer changes it through the paper picker. */
   @property({ reflect: true }) paper: NotepadPaper = 'lined'
-  /** Colour of the page: `default`, `yellow`, `green`, `blue` or `pink`. The writer changes it through the paper picker. */
+  /** Colour of the page and its ink: `default`, `yellow`, `green`, `blue`, `pink` or `night`. The writer changes it through the paper picker. */
   @property({ attribute: 'paper-color', reflect: true }) paperColor: NotepadPaperColor = 'default'
   /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the ruling and the paper colour. */
   @property({ type: Boolean, attribute: 'paper-picker', reflect: true }) paperPicker = false
@@ -310,6 +328,9 @@ export class Notepad extends LitElement {
   @query('.paper-menu') private paperMenu?: HTMLElement
   @query('.paper-button') private paperButton?: HTMLElement
   @state() private paperMenuOpen = false
+  /** Opened by a click, a tap or the keyboard, so it stays open when the pointer leaves. */
+  private paperMenuPinned = false
+  private hoverTimer?: ReturnType<typeof setTimeout>
 
   private view?: EditorView
   private readonly slotPresence = new SlotPresenceController(this, ['header'])
@@ -923,26 +944,57 @@ export class Notepad extends LitElement {
 
   // ---- paper picker ---------------------------------------------------------------------------------------------
 
-  private togglePaperMenu() {
+  /** The picker behaves as a hover card: the pointer opens it, a click, a tap or the keyboard pins it open. */
+  private openPaperMenu(focus: boolean) {
     const menu = this.paperMenu
     const button = this.paperButton
     if (!menu || !button) return
-    if (menu.matches(':popover-open')) {
-      menu.hidePopover()
+    clearTimeout(this.hoverTimer)
+    if (!menu.matches(':popover-open')) {
+      menu.showPopover()
+      const box = button.getBoundingClientRect()
+      const x = Math.min(Math.max(8, box.left + box.width / 2 - menu.offsetWidth / 2), innerWidth - menu.offsetWidth - 8)
+      // Room for the arrow between the button and the card.
+      const below = box.bottom + 10
+      const above = below + menu.offsetHeight > innerHeight - 8
+      const y = above ? Math.max(8, box.top - menu.offsetHeight - 10) : below
+      menu.style.left = `${Math.round(x)}px`
+      menu.style.top = `${Math.round(y)}px`
+      menu.dataset.side = above ? 'top' : 'bottom'
+      menu.style.setProperty('--_arrow-x', `${Math.round(box.left + box.width / 2 - x)}px`)
+    }
+    if (focus) void this.updateComplete.then(() => menu.querySelector<HTMLElement>('[role=radio][aria-checked=true]')?.focus())
+  }
+
+  private closePaperMenu() {
+    clearTimeout(this.hoverTimer)
+    this.paperMenuPinned = false
+    if (this.paperMenu?.matches(':popover-open')) this.paperMenu.hidePopover()
+  }
+
+  private handlePaperButtonClick(event: MouseEvent) {
+    if (this.paperMenuPinned) {
+      this.closePaperMenu()
       return
     }
-    menu.showPopover()
-    const box = button.getBoundingClientRect()
-    const x = Math.min(Math.max(8, box.right - menu.offsetWidth), innerWidth - menu.offsetWidth - 8)
-    const below = box.bottom + 6
-    const y = below + menu.offsetHeight > innerHeight - 8 ? Math.max(8, box.top - menu.offsetHeight - 6) : below
-    menu.style.left = `${Math.round(x)}px`
-    menu.style.top = `${Math.round(y)}px`
-    void this.updateComplete.then(() => menu.querySelector<HTMLElement>('[role=radio][aria-checked=true]')?.focus())
+    this.paperMenuPinned = true
+    // From the keyboard (detail 0) the focus moves into the card; a click leaves it on the button.
+    this.openPaperMenu(event.detail === 0)
+  }
+
+  private handlePaperHover(event: PointerEvent) {
+    if (event.pointerType !== 'mouse') return
+    clearTimeout(this.hoverTimer)
+    if (event.type === 'pointerenter') {
+      if (!this.paperMenu?.matches(':popover-open')) this.hoverTimer = setTimeout(() => this.openPaperMenu(false), HOVER_OPEN_DELAY)
+    } else if (!this.paperMenuPinned) {
+      this.hoverTimer = setTimeout(() => this.closePaperMenu(), HOVER_CLOSE_DELAY)
+    }
   }
 
   private handlePaperMenuToggle(event: ToggleEvent) {
     this.paperMenuOpen = event.newState === 'open'
+    if (!this.paperMenuOpen) this.paperMenuPinned = false
     // Closed by Escape or a pick from the keyboard: give focus back to the button that opened it.
     if (!this.paperMenuOpen && this.paperMenu?.contains(this.renderRoot instanceof ShadowRoot ? this.renderRoot.activeElement : null)) this.paperButton?.focus()
   }
@@ -958,7 +1010,9 @@ export class Notepad extends LitElement {
     const radio = (event.target as Element).closest<HTMLElement>('[role=radio]')
     if (!radio) return
     const group = [...(radio.parentElement?.querySelectorAll<HTMLElement>('[role=radio]') ?? [])]
-    const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
+    // The colours sit in rows of three: up and down move a whole row.
+    const columns = radio.parentElement?.classList.contains('colors') ? 3 : 1
+    const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowDown' ? columns : event.key === 'ArrowUp' ? -columns : 0
     if (!step) return
     event.preventDefault()
     // Radio semantics: moving to a choice selects it.
@@ -976,6 +1030,8 @@ export class Notepad extends LitElement {
       aria-label="Paper"
       @toggle=${this.handlePaperMenuToggle}
       @keydown=${this.handlePaperMenuKeydown}
+      @pointerenter=${this.handlePaperHover}
+      @pointerleave=${this.handlePaperHover}
     >
       <span class="label" id="paper-lines">Lines</span>
       <div class="row" role="radiogroup" aria-labelledby="paper-lines">
@@ -995,7 +1051,7 @@ export class Notepad extends LitElement {
         )}
       </div>
       <span class="label" id="paper-colors">Paper</span>
-      <div class="row" role="radiogroup" aria-labelledby="paper-colors">
+      <div class="row colors" role="radiogroup" aria-labelledby="paper-colors">
         ${PAPER_COLORS.map(
           (color) =>
             html`<button
@@ -1007,7 +1063,7 @@ export class Notepad extends LitElement {
               tabindex=${this.paperColor === color ? 0 : -1}
               @click=${() => this.choosePaper(this.paper, color)}
             >
-              <span class="swatch" style=${`--_swatch: ${PAPER_SWATCHES[color]}`}></span>
+              <span class="swatch" style=${PAPER_SWATCHES[color]}>Aa</span>
             </button>`,
         )}
       </div>
@@ -1184,7 +1240,9 @@ export class Notepad extends LitElement {
                     aria-haspopup="dialog"
                     aria-expanded=${String(this.paperMenuOpen)}
                     ?disabled=${this.disabled || this.disabledByForm}
-                    @click=${this.togglePaperMenu}
+                    @click=${this.handlePaperButtonClick}
+                    @pointerenter=${this.handlePaperHover}
+                    @pointerleave=${this.handlePaperHover}
                   >
                     <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
                       <rect x="2" y="1" width="8" height="10" rx="1" />

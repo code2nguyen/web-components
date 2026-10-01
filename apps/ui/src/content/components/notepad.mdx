@@ -115,13 +115,15 @@ notepad.addEventListener('page-tear', (event) => archive.push(event.detail.value
 
 ## Choosing the paper
 
-Set `paper-picker` to add a "Paper" button at the top of the sheet. It opens a small picker where the writer chooses the ruling (lined, grid, dot grid or blank) and the paper colour (white, yellow, green, blue or pink). The choice is held in two reflected properties, `paper` and `paperColor` (`paper-color`), which you can also set yourself without the picker. The picker fires `paper-change` with both values, so the app can remember each writer's choice:
+Set `paper-picker` to add a "Paper" button at the top of the sheet. It behaves like a hover card: point at it and a small card opens under it, with an arrow pointing at the button. Click or tap the button to keep the card open; from the keyboard, Enter opens it with the focus on the current choice. The card has the rulings (lined, grid, dot grid, blank) and six paper colours in two rows. Each colour sets the sheet and its ink together: white, yellow, green, blue, pink and night, a dark sheet with light ink. The arrow keys move between choices and pick as they go (up and down move a whole row of colours), and Escape closes the card.
+
+The choice is held in two reflected properties, `paper` and `paperColor` (`paper-color`), which you can also set yourself without the picker. The picker fires `paper-change` with both values, so the app can remember each writer's choice:
 
 ```ts tag=CodeBlock
 notepad.addEventListener('paper-change', (event) => savePreference(event.detail.paper, event.detail.paperColor))
 ```
 
-The colours are still CSS variables: `--c2-notepad__paper-yellow--background` and the others decide what each choice looks like, and under `@c2n/theme` they darken with the surface in dark mode.
+The colours are still CSS variables: `--c2-notepad__paper-yellow--background` and `--c2-notepad__paper-yellow--color` (and the same pair for each colour) decide what each choice looks like. Under `@c2n/theme` the pastel papers darken with the surface in dark mode and their inks lighten.
 
 ## Paper and binding
 

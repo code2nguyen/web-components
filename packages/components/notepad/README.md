@@ -18,7 +18,7 @@ import '@c2n/notepad'
 
 `value` is line-based Markdown: one line per line, `- [ ]` / `- [x]` checklist items, `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, and inline HTML for what Markdown cannot say (`<u>`, `<span data-ink="red">`, `<mark data-color="pink">`). `text` returns plain text. The element is form-associated (`name`, `required`, `maxlength`, reset, disabled fieldsets).
 
-`paper-picker` adds a "Paper" button that lets the writer pick the ruling (`paper`: lined, grid, dot, blank) and the paper colour (`paper-color`: default, yellow, green, blue, pink).
+`paper-picker` adds a "Paper" button that lets the writer pick the ruling (`paper`: lined, grid, dot, blank) and the paper colour with its ink (`paper-color`: default, yellow, green, blue, pink, night). It opens on hover, like a hover card.
 
 Events: `input`, `change`, `format-change`, `check-change`, `page-tear` (cancelable), `paper-change`. Methods: `formatSelection(mark, color?)`, `clearFormatting()`, `tearOff()`, `reset()`, `checkValidity()`, `reportValidity()`, `setCustomValidity()`.
 

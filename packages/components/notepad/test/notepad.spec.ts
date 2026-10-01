@@ -293,7 +293,9 @@ test('the paper picker changes the ruling and the paper colour', async ({ page, 
   const plain = await sheet.evaluate((element) => getComputedStyle(element).backgroundColor)
   await watch(host, 'paper-change')
 
-  await button.click()
+  // From the keyboard the card opens with the focus on the current choice.
+  await button.focus()
+  await page.keyboard.press('Enter')
   const menu = page.getByRole('dialog', { name: 'Paper' })
   await expect(menu).toBeVisible()
   await expect(button).toHaveAttribute('aria-expanded', 'true')
@@ -308,12 +310,20 @@ test('the paper picker changes the ruling and the paper colour', async ({ page, 
 
   await menu.getByRole('radio', { name: 'Yellow', exact: true }).click()
   await expect(host).toHaveAttribute('paper-color', 'yellow')
+  // The colours are two rows of three (White Yellow Green / Blue Pink Night): ArrowDown moves a whole row.
+  await page.keyboard.press('ArrowDown')
+  await expect(host).toHaveAttribute('paper-color', 'pink')
+  await expect(menu.getByRole('radio', { name: 'Pink', exact: true })).toBeFocused()
+  await page.keyboard.press('ArrowUp')
+  await expect(host).toHaveAttribute('paper-color', 'yellow')
   await expect.poll(() => sheet.evaluate((element) => getComputedStyle(element).backgroundColor)).not.toBe(plain)
   await expect(host).toHaveAttribute(
     'data-events',
     JSON.stringify([
       { paper: 'grid', paperColor: 'default' },
       { paper: 'dot', paperColor: 'default' },
+      { paper: 'dot', paperColor: 'yellow' },
+      { paper: 'dot', paperColor: 'pink' },
       { paper: 'dot', paperColor: 'yellow' },
     ]),
   )
@@ -323,6 +333,34 @@ test('the paper picker changes the ruling and the paper colour', async ({ page, 
   await expect(button).toBeFocused()
   await expect(button).toHaveAttribute('aria-expanded', 'false')
   await accessible(page)
+})
+
+test('the paper picker opens on hover like a hover card, with an arrow at the button', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes" paper-picker></c2-notepad><p>Elsewhere</p>')
+  const button = page.getByRole('button', { name: 'Paper' })
+  const menu = page.getByRole('dialog', { name: 'Paper' })
+  await button.hover()
+  await expect(menu).toBeVisible()
+  // Hover does not take the focus away from wherever the writer was.
+  await expect(menu.getByRole('radio', { name: 'Lined', exact: true })).not.toBeFocused()
+  // The arrow sits under the middle of the button.
+  const arrow = await menu.evaluate((element) => parseFloat(getComputedStyle(element).getPropertyValue('--_arrow-x')) + element.getBoundingClientRect().left)
+  const box = (await button.boundingBox())!
+  expect(Math.abs(arrow - (box.x + box.width / 2))).toBeLessThan(2)
+
+  // Moving onto the card keeps it open; leaving both closes it.
+  await menu.getByRole('radio', { name: 'Pink', exact: true }).hover()
+  await expect(menu).toBeVisible()
+  await page.getByText('Elsewhere').hover()
+  await expect(menu).toBeHidden()
+
+  // A click pins it open, so leaving with the pointer does not close it.
+  await button.click()
+  await page.getByText('Elsewhere').hover()
+  await page.waitForTimeout(400)
+  await expect(menu).toBeVisible()
+  await button.click()
+  await expect(menu).toBeHidden()
 })
 
 test('paper and paper-color work without the picker', async ({ page, renderScenario }) => {

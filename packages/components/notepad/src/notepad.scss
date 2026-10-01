@@ -50,9 +50,15 @@
     toolbar__button__active--background: rgba(60, 50, 30, 0.14),
     perforation--color: #b9bfc8,
     paper-yellow--background: #fcf0bf,
+    paper-yellow--color: #2b2410,
     paper-green--background: #e8f3e4,
+    paper-green--color: #1d3324,
     paper-blue--background: #e6eef9,
+    paper-blue--color: #1c2a4a,
     paper-pink--background: #fbe6ea,
+    paper-pink--color: #3d1f2b,
+    paper-night--background: #232a33,
+    paper-night--color: #e9e4d4,
     error--color: #dc2626,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     disabled--opacity: 0.38,
@@ -76,26 +82,55 @@
 
 :host {
   --_paper: #{css.cssVar(sheet--background)};
+  --_ink: #{css.cssVar(writing--color)};
 }
 :host([paper-color='yellow']) {
   --_paper: #{css.cssVar(paper-yellow--background)};
+  --_ink: #{css.cssVar(paper-yellow--color)};
 }
 :host([paper-color='green']) {
   --_paper: #{css.cssVar(paper-green--background)};
+  --_ink: #{css.cssVar(paper-green--color)};
 }
 :host([paper-color='blue']) {
   --_paper: #{css.cssVar(paper-blue--background)};
+  --_ink: #{css.cssVar(paper-blue--color)};
 }
 :host([paper-color='pink']) {
   --_paper: #{css.cssVar(paper-pink--background)};
+  --_ink: #{css.cssVar(paper-pink--color)};
+}
+:host([paper-color='night']) {
+  --_paper: #{css.cssVar(paper-night--background)};
+  --_ink: #{css.cssVar(paper-night--color)};
+}
+// On night paper the inks would be dark on dark: lift each one towards white, and black ink becomes the paper's ink.
+:host([paper-color='night']) .writing {
+  span[data-ink='blue'] {
+    color: color-mix(in srgb, #{css.cssVar(ink-blue--color)} 55%, #ffffff);
+  }
+  span[data-ink='red'] {
+    color: color-mix(in srgb, #{css.cssVar(ink-red--color)} 55%, #ffffff);
+  }
+  span[data-ink='green'] {
+    color: color-mix(in srgb, #{css.cssVar(ink-green--color)} 55%, #ffffff);
+  }
+  span[data-ink='black'] {
+    color: var(--_ink);
+  }
+}
+// Night paper is dark: the rules and the margin are dimmed into it rather than drawn at full strength.
+:host([paper-color='night']) .sheet {
+  --_rule-c: color-mix(in srgb, #{css.cssVar(rule--color)} 35%, var(--_paper));
+  --_margin-c: color-mix(in srgb, #{css.cssVar(margin--color)} 45%, var(--_paper));
 }
 :host([paper='grid']) .sheet {
-  --_grid-c: #{css.cssVar(rule--color)};
+  --_grid-c: var(--_rule-c);
 }
 :host([paper='dot']) .sheet {
   --_rule-c: transparent;
   --_margin-c: transparent;
-  --_dot-c: color-mix(in srgb, #{css.cssVar(rule--color)} 50%, #{css.cssVar(writing--color)});
+  --_dot-c: color-mix(in srgb, #{css.cssVar(rule--color)} 50%, var(--_ink));
 }
 :host([paper='blank']) .sheet {
   --_rule-c: transparent;
@@ -304,7 +339,7 @@
   margin: 0;
   padding: 0 16px var(--_rule) calc(var(--_inset) + 12px);
   outline: none;
-  color: css.cssVar(writing--color);
+  color: var(--_ink);
   caret-color: currentColor;
   font-family: css.cssVar(writing--font-family);
   font-size: var(--_size);
@@ -349,7 +384,7 @@
   &::selection,
   *::selection {
     background: css.cssVar(selection--background);
-    color: css.cssVar(writing--color);
+    color: var(--_ink);
   }
   span[data-ink='blue']::selection,
   span[data-ink='blue'] ::selection {
@@ -560,7 +595,7 @@
   inset: 0;
   z-index: -1;
   background:
-    repeating-linear-gradient(-45deg, transparent 0 9px, color-mix(in srgb, #{css.cssVar(toolbar--background)} 86%, #ffffff) 9px 12px),
+    repeating-linear-gradient(-45deg, transparent 0 9px, color-mix(in srgb, #{css.cssVar(toolbar--background)} 93%, #ffffff) 9px 12px),
     #{css.cssVar(toolbar--background)};
   clip-path: polygon(
     0 8%,
@@ -657,7 +692,7 @@
       0 0 0 3px rgba(0, 0, 0, 0.2);
   }
   .ink.default {
-    --_swatch: #{css.cssVar(writing--color)};
+    --_swatch: var(--_ink);
   }
   .hi {
     width: 18px;
@@ -789,19 +824,44 @@
     background-size: 5px 5px;
   }
   .thumb.dot {
-    background-image: radial-gradient(
-      circle at 2.5px 2.5px,
-      color-mix(in srgb, #{css.cssVar(rule--color)} 50%, #{css.cssVar(writing--color)}) 0.8px,
-      transparent 1px
-    );
+    background-image: radial-gradient(circle at 2.5px 2.5px, color-mix(in srgb, #{css.cssVar(rule--color)} 50%, var(--_ink)) 0.8px, transparent 1px);
     background-size: 5px 5px;
   }
+  .colors {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+  }
+  // A scrap of each paper with a word in its ink.
   .swatch {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 30px;
+    border-radius: 2px;
     background: var(--_swatch);
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    color: var(--_swatch-ink);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+    font-family: css.cssVar(writing--font-family);
+    font-size: 16px;
+    line-height: 1;
+  }
+  // The arrow points at the Paper button, as on a tooltip.
+  &::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: var(--_arrow-x, 50%);
+    width: 16px;
+    height: 9px;
+    translate: -50% 0;
+    background: css.cssVar(toolbar--background);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+  &[data-side='top']::after {
+    top: auto;
+    bottom: -8px;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
   }
 }
 
