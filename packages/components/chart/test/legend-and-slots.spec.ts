@@ -79,6 +79,18 @@ const cases: Case[] = [
     dim: 'echarts',
   },
   {
+    tag: 'c2-bubble-chart',
+    // The size key renders after the entries; it must not count as one, nor keep the slot from replacing them.
+    attributes: 'x-field="t" size-field="s1"',
+    series: two,
+    data: rows,
+    keys: ['s0', 's1'],
+    hover: { index: 0, seriesIndex: 0 },
+    clickKey: 's1',
+    click: { index: 1, seriesIndex: 1 },
+    dim: 'echarts',
+  },
+  {
     tag: 'c2-radar-chart',
     attributes: 'label-field="t"',
     series: two,

@@ -40,6 +40,10 @@
       "types": "./types/src/scatter-chart.d.ts",
       "default": "./dist/scatter-chart.js"
     },
+    "./bubble-chart.js": {
+      "types": "./types/src/bubble-chart.d.ts",
+      "default": "./dist/bubble-chart.js"
+    },
     "./candlestick-chart.js": {
       "types": "./types/src/candlestick-chart.d.ts",
       "default": "./dist/candlestick-chart.js"
@@ -120,6 +124,7 @@
     "gauge chart",
     "radar chart",
     "scatter plot",
+    "bubble chart",
     "candlestick chart",
     "venn diagram",
     "overlap chart",
