@@ -727,7 +727,7 @@
       "context": "kbd-default",
       "state": "base",
       "value": "inset 0 3px 5px rgb(231, 17, 73)",
-      "controlValue": "none",
+      "controlValue": "0 2px 0 rgb(0, 0, 0)",
       "target": "c2-kbd .c2-kbd",
       "assertion": "computed-style",
       "declaration": "box-shadow",

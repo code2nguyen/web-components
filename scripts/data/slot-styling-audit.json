@@ -881,6 +881,18 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-flow",
+      "slot": "card:{id}",
+      "decision": "assigned-content",
+      "reason": "The card:{id} slot projects consumer-owned light DOM into the node's hover card; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-flow",
+      "slot": "node:{id}",
+      "decision": "assigned-content",
+      "reason": "The node:{id} slot projects consumer-owned light DOM as the node's body; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-gauge-chart",
       "slot": "actions",
       "decision": "part",

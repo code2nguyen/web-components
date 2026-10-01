@@ -1,0 +1,85 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Flow } from '@c2n/flow'
+
+## Presets
+
+Looks for `c2-flow`. The node variables (`--c2-flow__node--*`) and the edge colours do most of the work; the status colours are shared by the glyphs, the edges and the node borders.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .flow-default {
+    width: 100%;
+  }
+</style>
+<c2-flow client:only="lit" class="flow-default" aria-label="Pipeline" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>
+```
+
+```html tag=MdxCodeBlock,label=Compact steps
+<style>
+  .flow-compact {
+    width: 100%;
+    --c2-flow--height: 300px;
+    --c2-flow__node--width: 150px;
+    --c2-flow__node--padding-top: 6px;
+    --c2-flow__node--padding-bottom: 6px;
+    --c2-flow__node--padding-left: 10px;
+    --c2-flow__node--padding-right: 10px;
+    --c2-flow__node--border-radius: 999px;
+    --c2-flow__label--font-size: 12px;
+    --c2-flow__rank--gap: 40px;
+    --c2-flow__node--gap: 12px;
+    --c2-flow__dot--color: transparent;
+  }
+</style>
+<c2-flow client:only="lit" class="flow-compact" aria-label="Warehouse load" direction="TB" edge-type="step" nodes='[{"id":"orders","label":"Extract orders","status":"success","description":"postgres"},{"id":"customers","label":"Extract customers","status":"success","description":"crm api"},{"id":"validate","label":"Validate","status":"warning","description":"14 rows quarantined"},{"id":"transform","label":"Transform","status":"success","description":"dbt"},{"id":"load","label":"Load warehouse","status":"error","description":"No active warehouse"},{"id":"report","label":"Quality report","status":"skipped"},{"id":"dash","label":"Refresh dashboards","status":"skipped"}]' edges='[{"source":"orders","target":"validate"},{"source":"customers","target":"validate"},{"source":"validate","target":"transform"},{"source":"transform","target":"load"},{"source":"load","target":"report"},{"source":"load","target":"dash"}]'></c2-flow>
+```
+
+```html tag=MdxCodeBlock,label=Night canvas
+<style>
+  .flow-night {
+    width: 100%;
+    --c2-flow--height: 260px;
+    --c2-flow--background-color: #0b1020;
+    --c2-flow--border: 1px solid #1e293b;
+    --c2-flow__dot--color: #1e293b;
+    --c2-flow__node--background-color: #111827;
+    --c2-flow__node--color: #e5e7eb;
+    --c2-flow__node--border: 1px solid #334155;
+    --c2-flow__node__hover--border-color: #64748b;
+    --c2-flow__description--color: #94a3b8;
+    --c2-flow__handle--background-color: #111827;
+    --c2-flow__handle--border-color: #64748b;
+    --c2-flow__edge--color: #334155;
+    --c2-flow__edge__done--color: #64748b;
+    --c2-flow__edge__active--color: #38bdf8;
+    --c2-flow__running--color: #38bdf8;
+    --c2-flow__success--color: #4ade80;
+    --c2-flow__pending--color: #64748b;
+  }
+</style>
+<c2-flow client:only="lit" class="flow-night" aria-label="Pipeline" edge-type="step" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>
+```
+
+```html tag=MdxCodeBlock,label=Square blueprint
+<style>
+  .flow-blueprint {
+    width: 100%;
+    --c2-flow--height: 260px;
+    --c2-flow--border-radius: 0;
+    --c2-flow__dot--gap: 12px;
+    --c2-flow__node--border-radius: 0;
+    --c2-flow__node--box-shadow: 3px 3px 0 color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, var(--c2-theme--color-surface, #ffffff));
+    --c2-flow__node--border: 1.5px solid var(--c2-theme--color-on-surface, #18181b);
+    --c2-flow__edge--width: 2px;
+    --c2-flow__edge__done--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-flow__handle--border-color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-flow client:only="lit" class="flow-blueprint" aria-label="Batch with retries" nodes='[{"id":"fetch","label":"Fetch","status":"success"},{"id":"process","label":"Process batch","status":"running","description":"attempt 3"},{"id":"check","label":"Check result","status":"pending"},{"id":"publish","label":"Publish","status":"pending"}]' edges='[{"source":"fetch","target":"process"},{"source":"process","target":"check"},{"source":"check","target":"process"},{"source":"check","target":"publish"}]'></c2-flow>
+```
+
+</GalleryGrid>

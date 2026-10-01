@@ -139,6 +139,12 @@
   animation-duration: 600ms;
 }
 
+/* Horizontal bars grow rightwards from their left baseline, which is the line chart's reveal. */
+:host(c2-bar-chart[orientation='horizontal'][data-chart-engine='uplot'][animation='auto']) .plot .u-under,
+:host(c2-bar-chart[orientation='horizontal'][data-chart-engine='uplot']:not([animation])) .plot .u-under {
+  animation-name: c2-chart-plot-reveal;
+}
+
 @keyframes c2-chart-plot-reveal {
   from {
     clip-path: inset(0 100% 0 0);

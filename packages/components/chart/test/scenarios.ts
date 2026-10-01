@@ -153,6 +153,27 @@ function build(): void {
           <c2-chart-series field="large" label="Large" color="#ff0000"></c2-chart-series>
         </c2-bar-chart>`
       break
+    case 'stacked-bars':
+    case 'percent-bars':
+    case 'horizontal-bars':
+    case 'horizontal-grouped-bars':
+    case 'labelled-bars':
+    case 'labelled-stacked-bars': {
+      const attributes = {
+        'stacked-bars': 'stack="normal"',
+        'percent-bars': 'stack="percent"',
+        'horizontal-bars': 'stack="normal" orientation="horizontal"',
+        'horizontal-grouped-bars': 'orientation="horizontal"',
+        'labelled-bars': 'value-labels',
+        'labelled-stacked-bars': 'stack="normal" value-labels',
+      }[scenario]
+      main.innerHTML = `
+        <c2-bar-chart id="chart" label-field="quarter" x-type="category" legend="none" animation="none" ${attributes}>
+          <c2-chart-series field="small" label="Small" color="#0000ff"></c2-chart-series>
+          <c2-chart-series field="large" label="Large" color="#ff0000"></c2-chart-series>
+        </c2-bar-chart>`
+      break
+    }
     case 'dual-axis':
       // Two quantities three orders of magnitude apart: on one scale the small one is a flat line.
       main.innerHTML = `
@@ -357,7 +378,7 @@ function build(): void {
   } else if (scenario === 'intraday') {
     const base = Date.UTC(2024, 0, 1, 9)
     chart.data = Array.from({ length: 6 }, (_, index) => ({ at: base + index * 900_000, v: 10 + index }))
-  } else if (scenario === 'grouped-bars') {
+  } else if (scenario === 'grouped-bars' || scenario.endsWith('-bars')) {
     chart.data = [
       { quarter: 'Q1', small: 20, large: 80 },
       { quarter: 'Q2', small: 25, large: 90 },

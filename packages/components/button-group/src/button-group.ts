@@ -16,10 +16,16 @@ export type ButtonGroupAppearance = 'joined' | 'segmented'
 export type ButtonGroupSize = 's' | 'm' | 'l'
 
 const GROUP_DISABLED = 'data-c2-button-group-disabled'
+/** Marks an item whose `tabindex` the group manages, holding the author's own value (empty when there was none). */
+const ROVING = 'data-c2-button-group-tabindex'
+
+/** Native elements that take focus without a `tabindex`. */
+const NATIVELY_FOCUSABLE = 'button, input, select, textarea, a[href], [contenteditable=""], [contenteditable="true"]'
 
 /** Events fired by {@link ButtonGroup}, keyed for `addEventListener`. */
 export interface ButtonGroupEventMap {
   change: CustomEvent<{ value: string }>
+  input: Event
 }
 
 export interface ButtonGroup {
@@ -32,13 +38,23 @@ export interface ButtonGroup {
  * are `c2-button` or `c2-icon-button` elements (any element works for layout). With `selection="single"` the group is
  * a segmented control that keeps one item pressed; with `selection="multiple"` each item toggles independently. Set
  * `orientation="vertical"` to stack either appearance and use Up/Down keyboard navigation. The
- * pressed items carry `selected` (and `aria-pressed`), the group reports them in `value` and fires `change`.
+ * pressed items carry `selected` (and `aria-pressed`), the group reports them in `value` and fires `input` and `change`.
+ *
+ * A single-selection group is one Tab stop, like a radio group: Tab lands on the pressed item and the arrow keys move
+ * the selection. Set `toolbar` for a toolbar: the group takes the `toolbar` role and stays one Tab stop, and the arrow
+ * keys, Home and End move focus across every focusable child (buttons, `c2-select`, `c2-text-field`, links) without
+ * changing the selection, which Space and Enter still do. A key the focused control uses itself — a caret moving in a
+ * text field, a select opening — is left to it.
+ *
+ * With a `name`, the group is a form control: it submits its pressed values under that name (one entry per value
+ * with `selection="multiple"`), resets with its form and follows a disabled `<fieldset>`.
  *
  * @tag c2-button-group
  *
  * @slot - The buttons, in order.
  *
  * @event {CustomEvent<{ value: string }>} change - Fired after the user changes the selection. `detail.value` is the new `value`. Not fired for programmatic changes.
+ * @event {Event} input - Fired just before `change`, for two-way bindings that listen for `input`. Not fired for programmatic changes.
  *
  * @cssproperty {pixel} [--c2-button-group--gap=0px] - Space between items. Zero attaches them; a positive gap separates them into individually rounded buttons.
  * @cssproperty {border-radius} [--c2-button-group--border-radius=6px] - Outside corner radius. With a positive gap, applies to every item.
@@ -69,6 +85,7 @@ export interface ButtonGroup {
 @customElement('c2-button-group')
 export class ButtonGroup extends LitElement {
   static override styles = unsafeCSS(styles)
+  static formAssociated = true
 
   // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
@@ -92,12 +109,28 @@ export class ButtonGroup extends LitElement {
   /** Segmented control size. */
   @property({ reflect: true }) size: ButtonGroupSize = 'm'
 
+  /**
+   * Makes the group a toolbar: the `toolbar` role, one Tab stop, and arrow-key focus across every focusable child,
+   * which may be any control rather than only buttons.
+   */
+  @property({ type: Boolean, reflect: true }) toolbar = false
+
+  /** Name the pressed values are submitted under. Without one the group takes no part in a form. */
+  @property() name = ''
+
   /** Makes the group and every item share the available width. */
   @property({ type: Boolean, reflect: true }) stretched = false
 
   /** Accessible name of the group. */
   @property({ type: String, attribute: 'aria-label' })
   override ariaLabel!: string
+
+  /** The item that holds the group's Tab stop in a toolbar: the one focused last. */
+  private activeItem?: HTMLElement
+  /** `value` as the page first set it, restored by a form reset. */
+  private defaultValue?: string
+  /** Disabled by an ancestor `<fieldset>`, which the group treats like its own `disabled`. */
+  @state() private formDisabled = false
 
   private observer?: MutationObserver
   private resizeObserver?: ResizeObserver
@@ -110,12 +143,14 @@ export class ButtonGroup extends LitElement {
     if (!isServer) {
       this.addEventListener('click', this.handleClick)
       this.addEventListener('keydown', this.handleKeyDown)
+      this.addEventListener('focusin', this.handleFocusIn)
     }
   }
 
   override connectedCallback() {
     super.connectedCallback()
-    this.internals.role = 'group'
+    this.internals.role = this.toolbar ? 'toolbar' : 'group'
+    this.defaultValue ??= this.value
     if (!isServer) {
       this.observer ??= new MutationObserver(() => this.syncItems())
       this.observer.observe(this, { childList: true })
@@ -146,8 +181,36 @@ export class ButtonGroup extends LitElement {
     return item.getAttribute('value') ?? String(index)
   }
 
+  /** Form reset: back to the value the page started with. */
+  formResetCallback() {
+    this.value = this.defaultValue ?? ''
+  }
+
+  /** A disabled `<fieldset>` disables the group exactly like its own `disabled`. */
+  formDisabledCallback(disabled: boolean) {
+    this.formDisabled = disabled
+  }
+
+  private get effectiveDisabled(): boolean {
+    return this.disabled || this.formDisabled
+  }
+
   override updated(changed: PropertyValues<this>) {
-    if (changed.has('value') || changed.has('selection') || changed.has('disabled') || changed.has('appearance')) this.syncItems()
+    if (changed.has('toolbar')) {
+      this.internals.role = this.toolbar ? 'toolbar' : 'group'
+      if (this.toolbar) this.internals.ariaOrientation = this.orientation
+      else this.internals.ariaOrientation = null
+    } else if (changed.has('orientation') && this.toolbar) this.internals.ariaOrientation = this.orientation
+    if (changed.has('value') || changed.has('selection') || changed.has('name')) this.syncFormValue()
+    if (
+      changed.has('value') ||
+      changed.has('selection') ||
+      changed.has('disabled') ||
+      changed.has('formDisabled' as keyof ButtonGroup) ||
+      changed.has('appearance') ||
+      changed.has('toolbar')
+    )
+      this.syncItems()
     if (
       changed.has('value') ||
       changed.has('selection') ||
@@ -157,6 +220,22 @@ export class ButtonGroup extends LitElement {
       changed.has('stretched')
     )
       this.queueIndicatorUpdate()
+  }
+
+  /** What the form submits: nothing without a name, one entry per pressed value otherwise. */
+  private syncFormValue() {
+    const values = this.effectiveSelection === 'none' ? [] : this.selectedValues
+    if (!this.name || !values.length) {
+      this.internals.setFormValue(null)
+      return
+    }
+    if (values.length === 1) {
+      this.internals.setFormValue(values[0])
+      return
+    }
+    const data = new FormData()
+    for (const value of values) data.append(this.name, value)
+    this.internals.setFormValue(data)
   }
 
   private get effectiveSelection(): ButtonGroupSelection {
@@ -179,7 +258,7 @@ export class ButtonGroup extends LitElement {
       if (selectable && selected.has(this.itemValue(item, index))) item.setAttribute('selected', '')
       else item.removeAttribute('selected')
 
-      if (this.disabled) {
+      if (this.effectiveDisabled) {
         if (!item.hasAttribute('disabled')) {
           item.setAttribute('disabled', '')
           item.setAttribute(GROUP_DISABLED, '')
@@ -189,17 +268,98 @@ export class ButtonGroup extends LitElement {
         item.removeAttribute(GROUP_DISABLED)
       }
     })
+    this.syncTabStops(items)
     this.resizeObserver?.disconnect()
     this.resizeObserver?.observe(this)
     items.forEach((item) => this.resizeObserver?.observe(item))
     this.queueIndicatorUpdate()
   }
 
+  /** Whether the group is one Tab stop whose position it manages: a toolbar, or a single-selection group. */
+  private get roving(): boolean {
+    return this.toolbar || this.effectiveSelection === 'single'
+  }
+
+  /** Items the arrow keys can reach: enabled and focusable, in order. */
+  private get focusableItems(): HTMLElement[] {
+    return this.items.filter(
+      (item) =>
+        !item.hasAttribute('disabled') &&
+        !item.hidden &&
+        // A component takes focus by delegating it (`c2-button`, `c2-select`) or by forwarding `focus()` to its inner
+        // control (`c2-text-field`); a managed item has had its own `tabindex` lowered by us.
+        (item.shadowRoot?.delegatesFocus === true ||
+          item.focus !== HTMLElement.prototype.focus ||
+          item.hasAttribute(ROVING) ||
+          item.tabIndex >= 0 ||
+          item.matches(NATIVELY_FOCUSABLE)),
+    )
+  }
+
+  /**
+   * Keeps exactly one item in the Tab order while roving: the last focused item in a toolbar, otherwise the pressed
+   * one, falling back to the first. The others get `tabindex="-1"`, which takes a host's whole shadow tree out of the
+   * Tab order; the current one keeps the author's own `tabindex`, which is remembered and put back when roving stops.
+   * (Giving it `tabindex="0"` instead would make a host that forwards `focus()` a Tab stop of its own.)
+   */
+  private syncTabStops(items = this.items) {
+    if (!this.roving || this.effectiveDisabled) {
+      for (const item of items) this.releaseTabStop(item)
+      return
+    }
+    const focusable = this.focusableItems
+    const pressed = focusable.find((item) => item.hasAttribute('selected'))
+    const current =
+      this.toolbar && this.activeItem && focusable.includes(this.activeItem)
+        ? this.activeItem
+        : (pressed ?? (this.activeItem && focusable.includes(this.activeItem) ? this.activeItem : focusable[0]))
+    for (const item of items) {
+      if (!focusable.includes(item)) {
+        this.releaseTabStop(item)
+        continue
+      }
+      if (!item.hasAttribute(ROVING)) item.setAttribute(ROVING, item.getAttribute('tabindex') ?? '')
+      if (item !== current) item.setAttribute('tabindex', '-1')
+      else {
+        const original = item.getAttribute(ROVING)
+        if (original) item.setAttribute('tabindex', original)
+        else item.removeAttribute('tabindex')
+      }
+    }
+  }
+
+  private releaseTabStop(item: HTMLElement) {
+    if (!item.hasAttribute(ROVING)) return
+    const original = item.getAttribute(ROVING)
+    if (original) item.setAttribute('tabindex', original)
+    else item.removeAttribute('tabindex')
+    item.removeAttribute(ROVING)
+  }
+
+  /** The direct child that contains the event's target, if any. */
+  private itemOf(event: Event): HTMLElement | undefined {
+    return event.composedPath().find((node): node is HTMLElement => node instanceof HTMLElement && node.parentElement === this)
+  }
+
+  private handleFocusIn = (event: FocusEvent) => {
+    const item = this.itemOf(event)
+    if (!item || item === this.activeItem) return
+    this.activeItem = item
+    if (this.toolbar) this.syncTabStops()
+  }
+
+  /** Sets the selection the way a user does: `value`, then `input` and `change`. */
+  private commit(next: string) {
+    this.value = next
+    this.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    this.dispatchEvent(new CustomEvent('change', { detail: { value: next }, bubbles: true, composed: true }))
+  }
+
   private handleClick = (event: Event) => {
     const selection = this.effectiveSelection
-    if (selection === 'none' || this.disabled) return
+    if (selection === 'none' || this.effectiveDisabled) return
     const items = this.items
-    const item = event.composedPath().find((node): node is HTMLElement => node instanceof HTMLElement && node.parentElement === this)
+    const item = this.itemOf(event)
     if (!item || item.hasAttribute('disabled')) return
     const value = this.itemValue(item, items.indexOf(item))
     let next: string
@@ -210,17 +370,22 @@ export class ButtonGroup extends LitElement {
       const values = this.selectedValues
       next = values.includes(value) ? values.filter((entry) => entry !== value).join(',') : [...values, value].join(',')
     }
-    this.value = next
-    this.dispatchEvent(new CustomEvent('change', { detail: { value: next }, bubbles: true, composed: true }))
+    this.commit(next)
   }
 
   private handleKeyDown = (event: KeyboardEvent) => {
     const directionKeys = this.orientation === 'vertical' ? ['ArrowUp', 'ArrowDown'] : ['ArrowLeft', 'ArrowRight']
-    if (this.effectiveSelection !== 'single' || this.disabled || ![...directionKeys, 'Home', 'End'].includes(event.key)) return
-    const enabledItems = this.items.filter((item) => !item.hasAttribute('disabled'))
+    if (!this.roving || this.effectiveDisabled || ![...directionKeys, 'Home', 'End'].includes(event.key)) return
+    // The focused control used the key itself: a select opening, a menu moving, a slider stepping.
+    if (event.defaultPrevented) return
+    // A caret moves on the arrow keys and Home/End, so a text control keeps them.
+    const origin = event.composedPath()[0]
+    if (origin instanceof HTMLElement && (origin.matches('input:not([type=button], [type=checkbox], [type=radio]), textarea') || origin.isContentEditable))
+      return
+    const enabledItems = this.focusableItems
     if (!enabledItems.length) return
-    const current = event.composedPath().find((node): node is HTMLElement => node instanceof HTMLElement && enabledItems.includes(node))
-    if (!current) return
+    const current = this.itemOf(event)
+    if (!current || !enabledItems.includes(current)) return
 
     event.preventDefault()
     const currentIndex = enabledItems.indexOf(current)
@@ -233,11 +398,18 @@ export class ButtonGroup extends LitElement {
       nextIndex = (currentIndex + (backwards ? -1 : 1) + enabledItems.length) % enabledItems.length
     }
     const nextItem = enabledItems[nextIndex]
-    const value = this.itemValue(nextItem, this.items.indexOf(nextItem))
+    this.activeItem = nextItem
+    // A toolbar moves focus only; a single-selection group selects what it moves to, as a radio group does.
+    if (this.toolbar) {
+      // The Tab stop moves first: changing the `tabindex` of a host whose inner control already has focus drops it.
+      this.syncTabStops()
+      nextItem.focus()
+      return
+    }
     nextItem.focus()
+    const value = this.itemValue(nextItem, this.items.indexOf(nextItem))
     if (this.value === value) return
-    this.value = value
-    this.dispatchEvent(new CustomEvent('change', { detail: { value }, bubbles: true, composed: true }))
+    this.commit(value)
   }
 
   private queueIndicatorUpdate() {

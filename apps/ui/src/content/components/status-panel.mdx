@@ -31,10 +31,7 @@ npm install @c2n/status-panel
     --c2-status-panel__container--gap: 20px;
     --c2-status-panel__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-status-panel__container--background-color: var(--c2-theme--color-surface, #ffffff);
-    --c2-status-panel__media--size: 150px;
-    --c2-status-panel__media-icon--size: 150px;
-    --c2-status-panel__media__error--background-color: transparent;
-    --c2-status-panel__media--border-radius: 0px;
+    --c2-status-panel__illustration--size: 150px;
     --c2-status-panel__title--font-size: 20px;
     --c2-status-panel__title--line-height: 28px;
     --c2-status-panel__content--background-color: transparent;
@@ -85,10 +82,7 @@ npm install @c2n/status-panel
   .illustrated-state {
     --c2-status-panel__container--min-height: 0px;
     --c2-status-panel__container--padding: 28px 24px;
-    --c2-status-panel__media--size: 150px;
-    --c2-status-panel__media-icon--size: 150px;
-    --c2-status-panel__media--background-color: transparent;
-    --c2-status-panel__media--border-radius: 0px;
+    --c2-status-panel__illustration--size: 150px;
   }
   .illustrated-state > img[slot='media'] {
     object-fit: contain;
@@ -111,7 +105,7 @@ npm install @c2n/status-panel
   <c2-status-panel client:only="lit" class="compact-state" status="warning" heading="Storage almost full" description="Remove unused files to avoid interruptions."></c2-status-panel>
 </div>
 <div data-label="Error with details">
-  <c2-status-panel client:load class="recovery-state" status="error">
+  <c2-status-panel client:load class="recovery-state" media="illustration" status="error">
     <img slot="media" src="/web-components/status-panel-recovery.svg" alt="" />
     <span slot="title">This release needs one quick fix</span>
     <span slot="description">Choose a production owner before publishing. Your release is safely saved as a draft.</span>
@@ -124,7 +118,7 @@ npm install @c2n/status-panel
   </c2-status-panel>
 </div>
 <div data-label="Illustration">
-  <c2-status-panel client:load class="illustrated-state" heading="No matching projects" description="Try a broader search or clear the active filters.">
+  <c2-status-panel client:load class="illustrated-state" media="illustration" heading="No matching projects" description="Try a broader search or clear the active filters.">
     <img slot="media" src="/web-components/status-panel-search.svg" alt="" />
     <c2-button slot="actions">Clear filters</c2-button>
   </c2-status-panel>
@@ -133,4 +127,4 @@ npm install @c2n/status-panel
 
 The `media`, `title`, `description`, `actions` and `content` slots accept any composition. `heading` and `description` are convenient text fallbacks; slotted content takes precedence. Set `heading-level` to match the surrounding document hierarchy. The component is not a live region by default—add `role="status"` for a dynamically completed operation or `role="alert"` only when an error requires immediate attention.
 
-The default `neutral` status suits empty and unavailable states. `info`, `success`, `warning` and `error` change the built-in icon and its semantic colour treatment. Use `align="start"` for detail-heavy panels and customize the container, media and content surfaces with the documented CSS variables.
+The default `neutral` status suits empty and unavailable states. `info`, `success`, `warning` and `error` change the built-in icon and its semantic colour treatment. Set `media="illustration"` when the `media` slot holds artwork (an image or a `c2-symbol-*`): the tinted disc goes away and `--c2-status-panel__illustration--size` sizes the region. Set `media="none"` to render no media region at all. Use `align="start"` for detail-heavy panels and customize the container, media and content surfaces with the documented CSS variables.

@@ -5,7 +5,7 @@ import { Kbd } from '@c2n/kbd'
 
 ## Presets
 
-Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keycap is mostly four variables — `--c2-kbd--background-color`, `--c2-kbd--border`, `--c2-kbd--border-radius` and `--c2-kbd--box-shadow` — and dropping the shadow is what turns a raised key into a flat inline tag.
+Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keycap is mostly four variables — `--c2-kbd--background-color`, `--c2-kbd--border`, `--c2-kbd--border-radius` and `--c2-kbd--box-shadow` — and the default is a flat, light tag: adding a shadow is what turns it into a raised key.
 
 <GalleryGrid>
 
@@ -13,15 +13,16 @@ Curated looks for `c2-kbd`. Open any card in the studio to start from it. A keyc
 <c2-kbd>⌘ + K</c2-kbd>
 ```
 
-```html tag=MdxCodeBlock,label=Flat
+```html tag=MdxCodeBlock,label=Raised
 <style>
-  .flat {
-    --c2-kbd--background-color: transparent;
+  .raised {
+    --c2-kbd--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-kbd--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-kbd--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
-    --c2-kbd--box-shadow: none;
+    --c2-kbd--box-shadow: 0 1px 0 var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
-<c2-kbd class="flat">Tab</c2-kbd>
+<c2-kbd class="raised">Tab</c2-kbd>
 ```
 
 ```html tag=MdxCodeBlock,label=Dark

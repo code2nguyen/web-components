@@ -3,17 +3,42 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import { repeat } from 'lit/directives/repeat.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
-import type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker } from './step-types.js'
+import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
 import { rollupStatus } from './step-icons.js'
 import styles from './steps.scss?inline'
 
-import './step.js'
+import { STEP_SELECT_EVENT, type StepSelectRequestDetail } from './step.js'
 
-export type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker } from './step-types.js'
+export type { StepContext, StepNode, StepRenderer, StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
 export type { StepToggleEventDetail, StepEventMap } from './step.js'
+
+/** Detail of the `selection-change` event of {@link Steps}. */
+export interface StepsSelectionChangeEventDetail {
+  /** The selected step's `value` — its `id` when it came from `steps` — or its dotted path when it has none. */
+  value: string
+  /** Dotted position of the selected step through the tree. */
+  path: string
+}
+
+/** Events fired by {@link Steps}, keyed for `addEventListener`. */
+export interface StepsEventMap {
+  /** A step was selected by the reader in an `interactive` list. Not fired for programmatic changes; does not bubble. */
+  'selection-change': CustomEvent<StepsSelectionChangeEventDetail>
+}
+
+export interface Steps {
+  addEventListener: TypedAddEventListener<Steps, StepsEventMap>
+  removeEventListener: TypedRemoveEventListener<Steps, StepsEventMap>
+}
 
 /** The parent-written half of a `c2-step`, which `c2-steps` assigns on every pass. */
 type ManagedStep = HTMLElement & {
+  value: string
+  disabled: boolean
+  orientation: StepsOrientation
+  interactive: boolean
+  selected: boolean
   level: number
   position: number
   path: string
@@ -27,7 +52,8 @@ type ManagedStep = HTMLElement & {
 }
 
 /**
- * A vertical list of steps: the trace of a task as it runs, or a wizard's progress. Each row is a marker, a label,
+ * A list of steps: the trace of a task as it runs, or a wizard's progress — vertical by default, or across the top
+ * of a view with `orientation="horizontal"`. Each row is a marker, a label,
  * an optional dimmed `detail` beside it and `trailing` text at the end — a duration, a count, a timestamp.
  *
  * **A step with sub-steps is a group**, and a group is a disclosure: its own row is the summary and its sub-steps
@@ -63,12 +89,25 @@ type ManagedStep = HTMLElement & {
  * Numbering follows the tree: `marker="number"` draws a dotted path, so the first child of the third step reads
  * `3.1` rather than a second `1`.
  *
+ * **Horizontal.** `orientation="horizontal"` lays the top-level steps out side by side, each a column with its
+ * marker on a connector rail and its text underneath. Sub-steps are not drawn there — a group still rolls their
+ * status up, so a stage reads as running or failed — and the list scrolls sideways rather than squeezing a step
+ * below `--c2-step__row__horizontal--min-width`.
+ *
+ * **Interactive.** `interactive` turns every row that is not a disclosure into a button, and the list keeps one
+ * selected step: `selected` names it by its `value` (a data node's `id`), or by its dotted path when it has none.
+ * Pressing a step selects it and fires `selection-change`; a `disabled` step cannot be selected. That is how a view
+ * follows a task — select the step that is running to show its log, select the result when it finishes, and the
+ * reader can still press the first step to go back to the log. Selection is independent of `status`: the list
+ * never moves it on its own.
+ *
  * @tag c2-steps
  *
  * @slot - The `c2-step` children. Ignored when `steps` is set.
  *
  * @slotcomponent c2-step
  *
+ * @event {CustomEvent<StepsSelectionChangeEventDetail>} selection-change - The reader selected another step of an `interactive` list. `detail.value` is the new `selected`, `detail.path` where the step sits. Not fired for programmatic changes. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself.
  * @event {CustomEvent<StepToggleEventDetail>} step-toggle - Fired by a `c2-step` when a group opens or closes, and bubbling to here. `event.target` is the step; `detail.path` says where it sits.
  *
  * @cssproperty {pixel} [--c2-steps--gap=0px] - Space between rows. A stepper usually wants some; a trace does not.
@@ -79,6 +118,7 @@ type ManagedStep = HTMLElement & {
  * @cssproperty {padding} [--c2-steps--padding-inline=0px]
  * @cssproperty {overflow} [--c2-steps--overflow-y=visible] - `auto` with a `max-height` keeps a long run in its own scroller.
  * @cssproperty {max-height} [--c2-steps--max-height=none]
+ * @cssproperty {overflow} [--c2-steps__horizontal--overflow-x=auto] - How a horizontal list that is wider than its box behaves.
  */
 @customElement('c2-steps')
 export class Steps extends LitElement {
@@ -90,6 +130,18 @@ export class Steps extends LitElement {
 
   /** How each marker is drawn: a status glyph, the step's number, or nothing. */
   @property({ reflect: true }) marker: StepsMarker = 'icon'
+
+  /** Which way the list runs. A horizontal list draws its top-level steps side by side, and no sub-steps. */
+  @property({ reflect: true }) orientation: StepsOrientation = 'vertical'
+
+  /** Makes every row that is not a disclosure a button that selects its step. */
+  @property({ type: Boolean, reflect: true }) interactive = false
+
+  /**
+   * The selected step of an `interactive` list: its `value` (a data node's `id`), or its dotted path when it has
+   * none. Empty selects nothing. Set it to move the selection; the reader's presses set it too.
+   */
+  @property() selected = ''
 
   /**
    * Index of the active step, for a wizard. `-1` (the default) leaves every status alone; otherwise a top-level
@@ -156,11 +208,13 @@ export class Steps extends LitElement {
   override connectedCallback() {
     super.connectedCallback()
     this.internals.role = 'list'
+    this.addEventListener(STEP_SELECT_EVENT, this.handleSelectRequest)
     this.observer ??= new MutationObserver(() => this.syncSteps())
     this.observer.observe(this, { subtree: true, childList: true, attributes: true, attributeFilter: ['status'] })
   }
 
   override disconnectedCallback() {
+    this.removeEventListener(STEP_SELECT_EVENT, this.handleSelectRequest)
     this.observer?.disconnect()
     super.disconnectedCallback()
   }
@@ -187,6 +241,33 @@ export class Steps extends LitElement {
     Object.assign(node, patch)
     this.requestUpdate()
     return true
+  }
+
+  /**
+   * Selects a step by its `value` (a data node's `id`) or dotted path, as a press on it would — including the
+   * `selection-change` event. Returns `false`, and changes nothing, for an unknown or `disabled` step. Setting
+   * `selected` does the same without the event.
+   */
+  select(value: string): boolean {
+    const step = this.allSteps().find((element) => Steps.keyOf(element as ManagedStep) === value) as ManagedStep | undefined
+    if (!step || step.disabled) return false
+    if (value === this.selected) return true
+    this.selected = value
+    this.dispatchEvent(
+      new CustomEvent<StepsSelectionChangeEventDetail>('selection-change', { detail: { value, path: step.path }, bubbles: false, composed: true }),
+    )
+    return true
+  }
+
+  /** What a step is called in `selected`: its `value`, or its dotted path. */
+  private static keyOf(step: ManagedStep): string {
+    return step.value || step.path
+  }
+
+  /** A row asks to be selected; only this list decides, and the request goes no further than here. */
+  private readonly handleSelectRequest = (event: Event) => {
+    event.stopPropagation()
+    if (this.interactive) this.select((event as CustomEvent<StepSelectRequestDetail>).detail.value)
   }
 
   /** Brings every group back into view. */
@@ -252,6 +333,9 @@ export class Steps extends LitElement {
         element.path = parentPath ? `${parentPath}.${index + 1}` : String(index + 1)
         element.last = index === steps.length - 1
         element.marker = this.marker
+        element.orientation = this.orientation
+        element.interactive = this.interactive
+        element.selected = !!this.selected && Steps.keyOf(element) === this.selected
         element.grouped = grouped
         if (!this.known.has(element)) {
           this.known.add(element)
@@ -309,6 +393,8 @@ export class Steps extends LitElement {
     // A renderer replaces the attribute, rather than competing with it for the same slot.
     return html`<c2-step
       status=${ifDefined(node.status)}
+      value=${ifDefined(node.id)}
+      ?disabled=${node.disabled ?? false}
       ?collapsed=${node.collapsed ?? false}
       label=${ifDefined(this.renderItem || this.renderLabel ? undefined : node.label)}
       detail=${ifDefined(this.renderItem || this.renderDetail ? undefined : node.detail)}

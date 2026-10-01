@@ -21,6 +21,7 @@ declare module 'vue' {
     'c2-button-group': DefineComponent<
       C2Props<ButtonGroup> & {
         'aria-label'?: unknown
+        onInput?: (event: EventOf<ButtonGroup, 'input'>) => void
         onChange?: (event: EventOf<ButtonGroup, 'change'>) => void
       }
     >

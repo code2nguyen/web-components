@@ -24,6 +24,13 @@ export type StepsMarker =
   /** No marker column at all. */
   | 'none'
 
+/** Which way the list runs. */
+export type StepsOrientation =
+  /** One row per step, top to bottom — a trace, with its groups as disclosures. */
+  | 'vertical'
+  /** One column per top-level step, side by side — a stepper across the top of a view. Sub-steps are not drawn. */
+  | 'horizontal'
+
 /** One node of the `steps` property, the data-driven alternative to `c2-step` children. */
 export interface StepNode {
   /**
@@ -47,6 +54,8 @@ export interface StepNode {
   children?: StepNode[]
   /** Starts this group folded away. A group is expanded by default: every step in the list is a row you can see. */
   collapsed?: boolean
+  /** In an `interactive` list, keeps the step from being selected — a result that does not exist yet. */
+  disabled?: boolean
 }
 
 /** What a renderer is handed for one step. */

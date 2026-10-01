@@ -18,7 +18,7 @@ const destinations = [
 
 <Main title="Page not found · c2n web components" description="The page you were looking for does not exist.">
   <div class="not-found">
-    <StatusPanel client:load class="not-found__panel" heading-level={1}>
+    <StatusPanel client:load class="not-found__panel" media="illustration" heading-level={1}>
       <NotFoundSymbol client:load slot="media" />
       <span slot="title">This page wandered off</span>
       <span slot="description">
@@ -59,9 +59,7 @@ const destinations = [
     :global(.not-found__panel) {
       --c2-status-panel__container--min-height: 0;
       --c2-status-panel__container--padding: 24px 0 0;
-      --c2-status-panel__media--size: 168px;
-      --c2-status-panel__media-icon--size: 168px;
-      --c2-status-panel__media--background-color: transparent;
+      --c2-status-panel__illustration--size: 168px;
       --c2-status-panel__title--font-size: 28px;
       --c2-status-panel__title--line-height: 36px;
       --c2-status-panel__title--color: var(--site-color-on-surface);
@@ -126,8 +124,7 @@ const destinations = [
       padding-top: 24px;
 
       :global(.not-found__panel) {
-        --c2-status-panel__media--size: 128px;
-        --c2-status-panel__media-icon--size: 128px;
+        --c2-status-panel__illustration--size: 128px;
         --c2-symbol--size: 128px;
         --c2-status-panel__title--font-size: 22px;
         --c2-status-panel__title--line-height: 30px;

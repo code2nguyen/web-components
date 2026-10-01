@@ -96,6 +96,7 @@ export const overrides: Record<string, Override> = {
   '--c2-status-panel__container--border': { exclude: 'transparent opt-in panel frame' },
   '--c2-status-panel__media--size': { exclude: 'status media geometry' },
   '--c2-status-panel__media-icon--size': { exclude: 'status icon geometry' },
+  '--c2-status-panel__illustration--size': { exclude: 'status illustration geometry' },
   '--c2-status-panel__media__success--background-color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__warning--background-color': { exclude: 'semantic warning colour' },
@@ -383,4 +384,11 @@ export const overrides: Record<string, Override> = {
   // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
   '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
   '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },
+  // Flow: the edges of steps that have not run are drawn lines, the resting outline grey; the dot grid is that grey at
+  // 40% strength, so it stays a backdrop on any canvas colour in either mode. The success and warning colours are
+  // semantic status colours, as on c2-steps.
+  '--c2-flow__dot--color': { token: 'color-outline', value: 'color-mix(in srgb, var(--c2-theme--color-outline, #d4d4d8) 40%, transparent)' },
+  '--c2-flow__edge--color': { token: 'color-outline' },
+  '--c2-flow__success--color': { exclude: 'success status colour' },
+  '--c2-flow__warning--color': { exclude: 'warning status colour' },
 }
