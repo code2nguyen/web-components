@@ -22,16 +22,16 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
     box-sizing: border-box;
     height: 100%;
     padding: 16px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
-    background: #ffffff;
-    color: #18181b;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
     font-size: 12px;
   }
 
   .masonry-default-tile h3 {
     margin: 0;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     font-size: 12px;
     font-weight: 600;
   }
@@ -46,7 +46,7 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
 
   .masonry-default-tile p {
     margin: 6px 0 0;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 
   .masonry-default-tile .positive {
@@ -73,7 +73,7 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
     height: 7px;
     margin-top: 15px;
     border-radius: 999px;
-    background: #e4e4e7;
+    background: var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 
   .masonry-default-tile .progress-track span {
@@ -90,7 +90,7 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
     margin: 12px 0 0;
     padding: 0;
     list-style: none;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
 
   .masonry-default-tile .mini-list li {
@@ -100,7 +100,7 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
   }
 
   .masonry-default-tile .mini-list li span {
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-masonry client:only="lit" class="masonry-default">
@@ -151,7 +151,7 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
 
   .night-watch strong {
     display: block;
-    color: #f8fafc;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
     font-size: 27px;
     line-height: 1.1;
     letter-spacing: -0.04em;
@@ -204,7 +204,7 @@ Two dashboard-sized examples show the packing, not just isolated tiles. The firs
   }
 
   .night-watch .night-list b {
-    color: #f8fafc;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-masonry client:only="lit" class="night-watch" editable>

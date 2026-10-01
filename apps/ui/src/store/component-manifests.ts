@@ -1,4 +1,20 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import flow from '@c2n/flow/custom-elements.json'
+import weekPlanner from '@c2n/week-planner/custom-elements.json'
+import monthPlanner from '@c2n/month-planner/custom-elements.json'
+import hoverCard from '@c2n/hover-card/custom-elements.json'
+import command from '@c2n/command/custom-elements.json'
+import marker from '@c2n/marker/custom-elements.json'
+import contextMenu from '@c2n/context-menu/custom-elements.json'
+import otpInput from '@c2n/otp-input/custom-elements.json'
+import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
+import shortcut from '@c2n/shortcut/custom-elements.json'
+import carousel from '@c2n/carousel/custom-elements.json'
+import tagInput from '@c2n/tag-input/custom-elements.json'
+import timeline from '@c2n/timeline/custom-elements.json'
+import splitPanel from '@c2n/split-panel/custom-elements.json'
+import banner from '@c2n/banner/custom-elements.json'
+import timeInput from '@c2n/time-input/custom-elements.json'
 import logViewer from '@c2n/log-viewer/custom-elements.json'
 import masonry from '@c2n/masonry/custom-elements.json'
 import dashboard from '@c2n/dashboard/custom-elements.json'
@@ -70,12 +86,29 @@ import textField from '@c2n/text-field/custom-elements.json'
 import tooltip from '@c2n/tooltip/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
+import symbols from '@c2n/symbols/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    flow,
+    weekPlanner,
+    monthPlanner,
+    hoverCard,
+    command,
+    marker,
+    contextMenu,
+    otpInput,
+    chatMessageList,
+    shortcut,
+    carousel,
+    tagInput,
+    timeline,
+    splitPanel,
+    banner,
+    timeInput,
     logViewer,
     masonry,
     dashboard,
@@ -147,6 +180,7 @@ export const componentManifests = (function () {
     label,
     featherIcons,
     phosphorIcons,
+    symbols,
   ].reduce((result, item) => {
     const pkg = item as Package
     const tags: string[] = []

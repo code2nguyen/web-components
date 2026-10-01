@@ -1,0 +1,285 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/variables';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-tag-input,
+  $theme: (
+    min-height: 36px,
+    gap: 6px,
+
+    border-top-left-radius: 6px,
+    border-top-right-radius: 6px,
+    border-bottom-left-radius: 6px,
+    border-bottom-right-radius: 6px,
+
+    padding-top: 5px,
+    padding-right: 10px,
+    padding-bottom: 5px,
+    padding-left: 6px,
+
+    border-top: 1px solid #bcbcc6,
+    border-right: 1px solid #bcbcc6,
+    border-bottom: 1px solid #bcbcc6,
+    border-left: 1px solid #bcbcc6,
+
+    color: #18181b,
+    background: #ffffff,
+    font-size: 14px,
+    font-family: null,
+    line-height: 20px,
+
+    placeholder--color: #71717a,
+    input--min-width: 80px,
+
+    hover--border-top: 1px solid #a1a1aa,
+    hover--border-right: 1px solid #a1a1aa,
+    hover--border-bottom: 1px solid #a1a1aa,
+    hover--border-left: 1px solid #a1a1aa,
+
+    focus--border-top: 1px solid #476ef9,
+    focus--border-right: 1px solid #476ef9,
+    focus--border-bottom: 1px solid #476ef9,
+    focus--border-left: 1px solid #476ef9,
+    focus--outline: none,
+    error--border-top: 1px solid #dc2626,
+    error--border-right: 1px solid #dc2626,
+    error--border-bottom: 1px solid #dc2626,
+    error--border-left: 1px solid #dc2626,
+    error__focus--outline: none,
+    read-only--border-top: 1px solid #e4e4e7,
+    read-only--border-right: 1px solid #e4e4e7,
+    read-only--border-bottom: 1px solid #e4e4e7,
+    read-only--border-left: 1px solid #e4e4e7,
+    read-only--background: #fafafa,
+
+    disabled--opacity: variables.$disabled-content-opacity,
+
+    icon--size: 16px,
+    icon--color: #71717a,
+
+    tag--height: 24px,
+    tag--gap: 2px,
+    tag--padding-left: 8px,
+    tag--padding-right: 2px,
+    tag--border-radius: 4px,
+    tag--border: 1px solid #e4e4e7,
+    tag--background: #f4f4f5,
+    tag--color: #18181b,
+    tag--font-size: 12px,
+    tag--font-weight: 500,
+    tag--max-width: 240px,
+    tag__focus--background: #e4e4e7,
+    tag__invalid--border: 1px solid #dc2626,
+    tag__invalid--background: #ffffff,
+    tag__invalid--color: #dc2626,
+
+    remove-icon--size: 14px,
+    remove-icon--color: #71717a,
+    remove-icon__hover--color: #18181b,
+  )
+);
+
+:host {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: middle;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: text;
+
+  min-height: css.cssVar(min-height);
+  gap: css.cssVar(gap);
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+
+  border-top: css.cssVar(border-top);
+  border-right: css.cssVar(border-right);
+  border-bottom: css.cssVar(border-bottom);
+  border-left: css.cssVar(border-left);
+
+  border-top-left-radius: css.cssVar(border-top-left-radius);
+  border-top-right-radius: css.cssVar(border-top-right-radius);
+  border-bottom-left-radius: css.cssVar(border-bottom-left-radius);
+  border-bottom-right-radius: css.cssVar(border-bottom-right-radius);
+
+  color: css.cssVar(color);
+  background: css.cssVar(background);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+
+  // The ring exists at rest with a transparent colour so focusing only fades the colour in.
+  outline: css.cssVar(focus--outline);
+  outline-color: transparent;
+
+  transition: animation.standard(border), animation.standard(background), animation.standard(outline-color);
+
+  &:hover {
+    border-top: css.cssVar(hover--border-top);
+    border-right: css.cssVar(hover--border-right);
+    border-bottom: css.cssVar(hover--border-bottom);
+    border-left: css.cssVar(hover--border-left);
+  }
+
+  &.focus-within {
+    border-top: css.cssVar(focus--border-top);
+    border-right: css.cssVar(focus--border-right);
+    border-bottom: css.cssVar(focus--border-bottom);
+    border-left: css.cssVar(focus--border-left);
+    outline: css.cssVar(focus--outline);
+  }
+
+  &.error {
+    border-top: css.cssVar(error--border-top);
+    border-right: css.cssVar(error--border-right);
+    border-bottom: css.cssVar(error--border-bottom);
+    border-left: css.cssVar(error--border-left);
+
+    &.focus-within {
+      outline: css.cssVar(error__focus--outline);
+    }
+  }
+
+  &.read-only {
+    cursor: default;
+    border-top: css.cssVar(read-only--border-top);
+    border-right: css.cssVar(read-only--border-right);
+    border-bottom: css.cssVar(read-only--border-bottom);
+    border-left: css.cssVar(read-only--border-left);
+    background: css.cssVar(read-only--background);
+  }
+
+  &.disabled {
+    cursor: default;
+    opacity: css.cssVar(disabled--opacity);
+    pointer-events: none;
+  }
+}
+
+// The list is flattened into the field's flex row so tags and the input wrap together.
+.tags {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: css.cssVar(tag--max-width);
+  height: css.cssVar(tag--height);
+  gap: css.cssVar(tag--gap);
+  padding-left: css.cssVar(tag--padding-left);
+  padding-right: css.cssVar(tag--padding-right);
+  border: css.cssVar(tag--border);
+  border-radius: css.cssVar(tag--border-radius);
+  background: css.cssVar(tag--background);
+  color: css.cssVar(tag--color);
+  font-size: css.cssVar(tag--font-size);
+  font-weight: css.cssVar(tag--font-weight);
+  line-height: 1;
+  cursor: default;
+  outline: none;
+  transition: animation.standard(background);
+
+  &:focus-visible,
+  &:focus {
+    background: css.cssVar(tag__focus--background);
+  }
+
+  &.invalid {
+    border: css.cssVar(tag__invalid--border);
+    background: css.cssVar(tag__invalid--background);
+    color: css.cssVar(tag__invalid--color);
+
+    &:focus {
+      background: css.cssVar(tag__focus--background);
+    }
+  }
+}
+
+// Without a remove button (read-only, disabled) the tag is padded evenly.
+.read-only .tag,
+.disabled .tag {
+  padding-right: css.cssVar(tag--padding-left);
+}
+
+.tag-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.remove-button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 2px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: css.cssVar(remove-icon--color);
+  transition: animation.standard(color);
+
+  &:hover {
+    color: css.cssVar(remove-icon__hover--color);
+  }
+
+  svg,
+  ::slotted(*) {
+    width: css.cssVar(remove-icon--size);
+    height: css.cssVar(remove-icon--size);
+    --c2-feather-icon--size: #{css.cssVar(remove-icon--size)};
+    --c2-mat-icon--font-size: #{css.cssVar(remove-icon--size)};
+  }
+}
+
+.input {
+  flex: 1;
+  min-width: css.cssVar(input--min-width);
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+
+  &::placeholder {
+    color: css.cssVar(placeholder--color);
+    opacity: 1;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+::slotted([slot='prefix-icon']) {
+  flex: none;
+  color: css.cssVar(icon--color);
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+}
+
+::slotted(svg[slot='prefix-icon']) {
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+}

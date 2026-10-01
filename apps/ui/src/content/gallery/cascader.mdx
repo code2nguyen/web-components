@@ -46,21 +46,21 @@ Every example is driven by nested `options`. Open a trigger to see each hierarch
 <style>
   .catalog-cascader {
     --c2-cascader__trigger--width: 250px;
-    --c2-cascader__trigger--background: #18181b;
-    --c2-cascader__trigger--color: #fafafa;
-    --c2-cascader__trigger--border: 1px solid #3f3f46;
-    --c2-cascader__trigger__hover--background: #27272a;
-    --c2-cascader__trigger__hover--border: 1px solid #52525b;
+    --c2-cascader__trigger--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-cascader__trigger--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-cascader__trigger--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-cascader__trigger__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-cascader__trigger__hover--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-cascader__trigger__open--border: 1px solid #f59e0b;
-    --c2-cascader__placeholder--color: #a1a1aa;
-    --c2-cascader__icon--color: #a1a1aa;
-    --c2-cascader__panel--background: #18181b;
-    --c2-cascader__panel--border: 1px solid #3f3f46;
-    --c2-cascader__column--border: 1px solid #3f3f46;
-    --c2-cascader__option--color: #e4e4e7;
-    --c2-cascader__option__hover--background: #27272a;
-    --c2-cascader__option__active--background: #3f3f46;
-    --c2-cascader__option__active--color: #ffffff;
+    --c2-cascader__placeholder--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-cascader__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-cascader__panel--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-cascader__panel--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-cascader__column--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-cascader__option--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-cascader__option__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-cascader__option__active--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-cascader__option__active--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-cascader__option__selected--color: #fbbf24;
   }
 </style>

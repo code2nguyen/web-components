@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Kbd } from '@c2n/kbd'
 
-`c2-kbd` renders a keyboard key. It wraps a native `<kbd>`, so a screen reader announces it as keyboard input rather than as decoration, and it is styled entirely through CSS variables — cap height, radius, the shadow that gives it depth, and the monospace stack.
+`c2-kbd` renders a keyboard key. It wraps a native `<kbd>`, so a screen reader announces it as keyboard input rather than as decoration, and it is styled entirely through CSS variables — cap height, radius, the optional shadow that gives it depth, and the monospace stack.
 
 Use one element for a whole shortcut (`Ctrl + K`) when it reads as a single chord, or one element per key when you want the separators to sit between real keycaps. Both are correct; the second lets you style each cap.
 
@@ -28,22 +28,23 @@ npm install @c2n/kbd
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: #52525b;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .sep {
-    color: #a1a1aa;
+    color: var(--c2-theme--color-outline-strong, #a1a1aa);
     font-size: 12px;
   }
-  .flat {
-    --c2-kbd--box-shadow: none;
-    --c2-kbd--background-color: transparent;
-    --c2-kbd--border: 1px solid #d4d4d8;
+  .raised {
+    --c2-kbd--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-kbd--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kbd--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-kbd--box-shadow: 0 1px 0 var(--c2-theme--color-outline-strong, #a1a1aa);
   }
   .dark {
-    --c2-kbd--background-color: #27272a;
-    --c2-kbd--color: #e4e4e7;
-    --c2-kbd--border: 1px solid #3f3f46;
-    --c2-kbd--box-shadow: 0 1px 0 #18181b;
+    --c2-kbd--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kbd--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-kbd--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kbd--box-shadow: 0 1px 0 var(--c2-theme--color-inverse-surface, #18181b);
   }
   .round {
     --c2-kbd--border-radius: 999px;
@@ -76,7 +77,7 @@ npm install @c2n/kbd
   <span class="hint">Press <c2-kbd>/</c2-kbd> to search, or <c2-kbd>?</c2-kbd> for every shortcut.</span>
 </div>
 <div data-label="Themed">
-  <c2-kbd class="flat">Tab</c2-kbd>
+  <c2-kbd class="raised">Tab</c2-kbd>
   <c2-kbd class="dark">⌘ + K</c2-kbd>
   <c2-kbd class="round">A</c2-kbd>
 </div>
@@ -84,4 +85,4 @@ npm install @c2n/kbd
 
 The element is presentational: it never takes focus and carries no interactive role. When the same shortcut is already announced by the control it belongs to — a menu item that reads "Search, Command K" — set `aria-hidden="true"` on the host so it is not read twice.
 
-`--c2-kbd--min-width` keeps single letters square while longer labels such as `Enter` grow past it, so a row of mixed keys stays even. Turn the raised look off by setting `--c2-kbd--box-shadow` to `none`; that is the whole difference between a keycap and a flat inline tag.
+`--c2-kbd--min-width` keeps single letters square while longer labels such as `Enter` grow past it, so a row of mixed keys stays even. The default is flat; set `--c2-kbd--box-shadow` (for example `0 1px 0 #a1a1aa`) for a raised keycap, which is the whole difference between the two.

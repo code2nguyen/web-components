@@ -1,4 +1,5 @@
 import '../src/status-panel'
+import '@c2n/symbols/symbols/offline.js'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
@@ -12,6 +13,13 @@ if (scenario === 'custom') {
       <button slot="actions">Review</button>
       <div slot="content">Row 42</div>
     </c2-status-panel>`
+} else if (scenario === 'symbol') {
+  main.innerHTML = `
+    <c2-status-panel id="subject" status="error" media="illustration" heading="You are offline" style="--c2-status-panel__illustration--size: 96px">
+      <c2-symbol-offline slot="media"></c2-symbol-offline>
+    </c2-status-panel>`
+} else if (scenario === 'no-media') {
+  main.innerHTML = `<c2-status-panel id="subject" media="none" heading="Nothing scheduled"></c2-status-panel>`
 } else if (scenario === 'dynamic') {
   main.innerHTML = `<c2-status-panel id="subject" heading="Waiting"></c2-status-panel>`
 } else if (scenario === 'loading') {

@@ -32,11 +32,11 @@ Every look below is a handful of `--c2-checkbox__container*` custom properties o
 ```html tag=MdxCodeBlock,label=Neutral
 <style>
   .neutral {
-    --c2-checkbox__container__selected--background-color: #18181b;
-    --c2-checkbox__container--border-top: 1px solid #a1a1aa;
-    --c2-checkbox__container--border-right: 1px solid #a1a1aa;
-    --c2-checkbox__container--border-bottom: 1px solid #a1a1aa;
-    --c2-checkbox__container--border-left: 1px solid #a1a1aa;
+    --c2-checkbox__container__selected--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container--border-top: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-checkbox__container--border-right: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-checkbox__container--border-bottom: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-checkbox__container--border-left: 1px solid var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
   }
 </style>
@@ -68,7 +68,7 @@ Every look below is a handful of `--c2-checkbox__container*` custom properties o
     --c2-checkbox__container--border-top-right-radius: 2px;
     --c2-checkbox__container--border-bottom-left-radius: 2px;
     --c2-checkbox__container--border-bottom-right-radius: 2px;
-    --c2-checkbox__container__selected--background-color: #18181b;
+    --c2-checkbox__container__selected--background-color: var(--c2-theme--color-inverse-surface, #18181b);
   }
 </style>
 <c2-checkbox checked class="large-square"></c2-checkbox>
@@ -123,26 +123,26 @@ Match the container and state-layer sizes to turn the checkbox into a compact to
     --c2-checkbox__container--border-top-right-radius: 10px;
     --c2-checkbox__container--border-bottom-left-radius: 10px;
     --c2-checkbox__container--border-bottom-right-radius: 10px;
-    --c2-checkbox__container--border-top: 1px solid #d4d4d8;
-    --c2-checkbox__container--border-right: 1px solid #d4d4d8;
-    --c2-checkbox__container--border-bottom: 1px solid #d4d4d8;
-    --c2-checkbox__container--border-left: 1px solid #d4d4d8;
-    --c2-checkbox__container--background-color: #ffffff;
-    --c2-checkbox__container__selected--background-color: #18181b;
-    --c2-checkbox__container__selected--border-top: 1px solid #18181b;
-    --c2-checkbox__container__selected--border-right: 1px solid #18181b;
-    --c2-checkbox__container__selected--border-bottom: 1px solid #18181b;
-    --c2-checkbox__container__selected--border-left: 1px solid #18181b;
+    --c2-checkbox__container--border-top: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-checkbox__container--border-right: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-checkbox__container--border-bottom: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-checkbox__container--border-left: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-checkbox__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-checkbox__container__selected--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container__selected--border-top: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container__selected--border-right: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container__selected--border-bottom: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container__selected--border-left: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
     --c2-checkbox__checkmark--size: 18px;
-    --c2-checkbox__checkmark--color: #ffffff;
+    --c2-checkbox__checkmark--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-checkbox__uncheckmark--size: 18px;
-    --c2-checkbox__uncheckmark--color: #3f3f46;
+    --c2-checkbox__uncheckmark--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-checkbox__state-layer--border-top-left-radius: 10px;
     --c2-checkbox__state-layer--border-top-right-radius: 10px;
     --c2-checkbox__state-layer--border-bottom-left-radius: 10px;
     --c2-checkbox__state-layer--border-bottom-right-radius: 10px;
-    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
-    --c2-checkbox__state-layer__hover__selected--color: #ffffff;
+    --c2-checkbox__state-layer__hover__unselected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-checkbox__state-layer__hover__selected--color: var(--c2-theme--color-on-primary, #ffffff);
     --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
   }
 </style>
@@ -183,7 +183,7 @@ The touch target is the hover layer. It is transparent by default: give it a col
     --c2-checkbox__state-layer--border-top-right-radius: 999px;
     --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
     --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
-    --c2-checkbox__state-layer__hover__unselected--color: #bcbcc6;
+    --c2-checkbox__state-layer__hover__unselected--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
     --c2-checkbox__state-layer__hover__selected--color: #476ef9;
   }
 </style>
@@ -225,7 +225,7 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
     --c2-checkbox__checkmark--size: 20px;
     --c2-checkbox__checkmark--color: #2563eb;
     --c2-checkbox__uncheckmark--size: 20px;
-    --c2-checkbox__uncheckmark--color: #d4d4d8;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline, #d4d4d8);
   }
 </style>
 <c2-checkbox checked class="tick-only">
@@ -237,11 +237,11 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
 ```html tag=MdxCodeBlock,label=Stroke check
 <style>
   .stroke-check {
-    --c2-checkbox__container--border-top: 1.5px solid #18181b;
-    --c2-checkbox__container--border-right: 1.5px solid #18181b;
-    --c2-checkbox__container--border-bottom: 1.5px solid #18181b;
-    --c2-checkbox__container--border-left: 1.5px solid #18181b;
-    --c2-checkbox__container__selected--background-color: #18181b;
+    --c2-checkbox__container--border-top: 1.5px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container--border-right: 1.5px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container--border-bottom: 1.5px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container--border-left: 1.5px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-checkbox__container__selected--background-color: var(--c2-theme--color-inverse-surface, #18181b);
     --c2-checkbox__checkmark--size: 12px;
     --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
   }
@@ -300,7 +300,7 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
     --c2-checkbox__checkmark--size: 22px;
     --c2-checkbox__checkmark--color: #e11d48;
     --c2-checkbox__uncheckmark--size: 22px;
-    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-checkbox__state-layer--size: 36px;
     --c2-checkbox__state-layer--border-top-left-radius: 999px;
     --c2-checkbox__state-layer--border-top-right-radius: 999px;
@@ -330,7 +330,7 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
     --c2-checkbox__checkmark--size: 22px;
     --c2-checkbox__checkmark--color: #f59e0b;
     --c2-checkbox__uncheckmark--size: 22px;
-    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-checkbox__state-layer--size: 36px;
     --c2-checkbox__state-layer--border-top-left-radius: 999px;
     --c2-checkbox__state-layer--border-top-right-radius: 999px;
@@ -358,12 +358,12 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
     --c2-checkbox__container--border-left: 0px solid transparent;
     --c2-checkbox__container__selected--background-color: transparent;
     --c2-checkbox__checkmark--size: 22px;
-    --c2-checkbox__checkmark--color: #18181b;
+    --c2-checkbox__checkmark--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-checkbox__uncheckmark--size: 22px;
-    --c2-checkbox__uncheckmark--color: #52525b;
+    --c2-checkbox__uncheckmark--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-checkbox__state-layer--size: 36px;
-    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
-    --c2-checkbox__state-layer__hover__selected--color: #18181b;
+    --c2-checkbox__state-layer__hover__unselected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-checkbox__state-layer__hover__selected--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
   }
 </style>
@@ -384,12 +384,12 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
     --c2-checkbox__container--border-left: 0px solid transparent;
     --c2-checkbox__container__selected--background-color: transparent;
     --c2-checkbox__checkmark--size: 20px;
-    --c2-checkbox__checkmark--color: #18181b;
+    --c2-checkbox__checkmark--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-checkbox__uncheckmark--size: 20px;
-    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-checkbox__state-layer--size: 36px;
-    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
-    --c2-checkbox__state-layer__hover__selected--color: #18181b;
+    --c2-checkbox__state-layer__hover__unselected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-checkbox__state-layer__hover__selected--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
   }
 </style>
@@ -412,7 +412,7 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
     --c2-checkbox__checkmark--size: 20px;
     --c2-checkbox__checkmark--color: #2563eb;
     --c2-checkbox__uncheckmark--size: 20px;
-    --c2-checkbox__uncheckmark--color: #71717a;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-checkbox__state-layer--size: 36px;
     --c2-checkbox__state-layer--border-top-left-radius: 999px;
     --c2-checkbox__state-layer--border-top-right-radius: 999px;
@@ -441,7 +441,7 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
     --c2-checkbox__checkmark--size: 20px;
     --c2-checkbox__checkmark--color: #b45309;
     --c2-checkbox__uncheckmark--size: 20px;
-    --c2-checkbox__uncheckmark--color: #71717a;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-checkbox__state-layer--size: 36px;
     --c2-checkbox__state-layer__hover__unselected--color: #b45309;
     --c2-checkbox__state-layer__hover__selected--color: #b45309;
@@ -466,7 +466,7 @@ The `checkmark`, `mixedmark` and `uncheckmark` slots take any SVG. Remove the bo
     --c2-checkbox__checkmark--size: 22px;
     --c2-checkbox__checkmark--color: #16a34a;
     --c2-checkbox__uncheckmark--size: 22px;
-    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-checkbox__container__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
   }
 </style>
@@ -500,7 +500,7 @@ The marks can also be the library's own icons: drop a `c2-feather-*` element or 
 ```html tag=MdxCodeBlock,label=Material check
 <style>
   .material-check {
-    --c2-checkbox__container__selected--background-color: #18181b;
+    --c2-checkbox__container__selected--background-color: var(--c2-theme--color-inverse-surface, #18181b);
     --c2-checkbox__checkmark--size: 16px;
     --c2-checkbox__mixedmark--size: 16px;
     --c2-checkbox__container__focus--outline: 2px solid rgba(24, 24, 27, 0.3);
@@ -525,7 +525,7 @@ The marks can also be the library's own icons: drop a `c2-feather-*` element or 
     --c2-checkbox__checkmark--size: 22px;
     --c2-checkbox__checkmark--color: #e11d48;
     --c2-checkbox__uncheckmark--size: 22px;
-    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-checkbox__state-layer--size: 36px;
     --c2-checkbox__state-layer--border-top-left-radius: 999px;
     --c2-checkbox__state-layer--border-top-right-radius: 999px;
@@ -555,7 +555,7 @@ The marks can also be the library's own icons: drop a `c2-feather-*` element or 
     --c2-checkbox__checkmark--size: 24px;
     --c2-checkbox__checkmark--color: #e11d48;
     --c2-checkbox__uncheckmark--size: 24px;
-    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-checkbox__state-layer--size: 36px;
     --c2-checkbox__state-layer--border-top-left-radius: 999px;
     --c2-checkbox__state-layer--border-top-right-radius: 999px;
@@ -585,7 +585,7 @@ The marks can also be the library's own icons: drop a `c2-feather-*` element or 
     --c2-checkbox__checkmark--size: 24px;
     --c2-checkbox__checkmark--color: #f59e0b;
     --c2-checkbox__uncheckmark--size: 24px;
-    --c2-checkbox__uncheckmark--color: #a1a1aa;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-checkbox__state-layer--size: 36px;
     --c2-checkbox__state-layer--border-top-left-radius: 999px;
     --c2-checkbox__state-layer--border-top-right-radius: 999px;
@@ -614,7 +614,7 @@ The marks can also be the library's own icons: drop a `c2-feather-*` element or 
     --c2-checkbox__checkmark--size: 20px;
     --c2-checkbox__checkmark--color: #2563eb;
     --c2-checkbox__uncheckmark--size: 20px;
-    --c2-checkbox__uncheckmark--color: #71717a;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-checkbox__state-layer--size: 36px;
     --c2-checkbox__state-layer__hover__unselected--color: #2563eb;
     --c2-checkbox__state-layer__hover__selected--color: #2563eb;
@@ -637,7 +637,7 @@ The marks can also be the library's own icons: drop a `c2-feather-*` element or 
     --c2-checkbox__container--border-left: 0px solid transparent;
     --c2-checkbox__container__selected--background-color: transparent;
     --c2-checkbox__checkmark--size: 20px;
-    --c2-checkbox__checkmark--color: #18181b;
+    --c2-checkbox__checkmark--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-checkbox__uncheckmark--size: 20px;
     --c2-checkbox__uncheckmark--color: #f59e0b;
     --c2-checkbox__state-layer--size: 36px;
@@ -646,7 +646,7 @@ The marks can also be the library's own icons: drop a `c2-feather-*` element or 
     --c2-checkbox__state-layer--border-bottom-left-radius: 999px;
     --c2-checkbox__state-layer--border-bottom-right-radius: 999px;
     --c2-checkbox__state-layer__hover__unselected--color: #f59e0b;
-    --c2-checkbox__state-layer__hover__selected--color: #18181b;
+    --c2-checkbox__state-layer__hover__selected--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-checkbox checked class="theme">
@@ -666,12 +666,12 @@ The marks can also be the library's own icons: drop a `c2-feather-*` element or 
     --c2-checkbox__container--border-left: 0px solid transparent;
     --c2-checkbox__container__selected--background-color: transparent;
     --c2-checkbox__checkmark--size: 20px;
-    --c2-checkbox__checkmark--color: #dc2626;
+    --c2-checkbox__checkmark--color: var(--c2-theme--color-error, #dc2626);
     --c2-checkbox__uncheckmark--size: 20px;
-    --c2-checkbox__uncheckmark--color: #18181b;
+    --c2-checkbox__uncheckmark--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-checkbox__state-layer--size: 36px;
-    --c2-checkbox__state-layer__hover__unselected--color: #18181b;
-    --c2-checkbox__state-layer__hover__selected--color: #dc2626;
+    --c2-checkbox__state-layer__hover__unselected--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-checkbox__state-layer__hover__selected--color: var(--c2-theme--color-error, #dc2626);
   }
 </style>
 <c2-checkbox class="mute">

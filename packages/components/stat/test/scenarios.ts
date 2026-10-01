@@ -10,6 +10,7 @@ main.innerHTML = `<c2-stat id="subject" value="2M+" label="Instruments" tone="po
 const subject = document.querySelector('c2-stat')!
 // Branch on `scenario` to set up each state the spec drives, rather than mutating the element from the test.
 if (scenario === 'description') subject.innerHTML += '<span slot="description">Updated today</span>'
+if (scenario === 'no-value') subject.removeAttribute('value')
 
 await subject.updateComplete
 main.dataset.ready = 'true'

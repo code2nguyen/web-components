@@ -115,3 +115,25 @@ test('copy and success icons expose size and stroke styling without changing tex
   await expect(icon).toHaveCSS('stroke-width', '2.5px')
   expect(await text.evaluate((element) => element.getBoundingClientRect().height)).toBe(height)
 })
+
+test.describe('touch', () => {
+  test.use({ hasTouch: true })
+
+  test('a tap reveals only the tapped entry copy button', async ({ page, scenario }) => {
+    await scenario('entries')
+    await captureClipboard(page)
+    const viewer = page.locator('c2-log-viewer')
+    const first = viewer.getByRole('button', { name: 'Copy message 1', exact: true })
+    const second = viewer.getByRole('button', { name: 'Copy message 2', exact: true })
+    await expect(first).toHaveCSS('opacity', '0')
+    await expect(second).toHaveCSS('opacity', '0')
+    await viewer.locator('[data-index="1"][part="entry"]').tap()
+    await expect(second).toHaveCSS('opacity', '1')
+    await expect(first).toHaveCSS('opacity', '0')
+    await second.tap()
+    expect(await page.evaluate(() => (window as unknown as { logClipboardWrites: string[] }).logClipboardWrites)).toEqual(['Retry requested\nAttempt 2'])
+    await viewer.locator('[data-index="0"][part="entry"]').tap()
+    await expect(first).toHaveCSS('opacity', '1')
+    await expect(second).toHaveCSS('opacity', '0')
+  })
+})

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <circle class="primary-soft" cx="80" cy="80" r="42"/>
+  <path class="accent" d="M90 28 52 88h26l-10 44 40-62H82Z"/>
+  <path class="line-primary" d="M36 60a46 46 0 0 1 16-22M124 100a46 46 0 0 1-16 22"/>
+  <path class="primary" d="M128 34Q129.7 38.3 134 40Q129.7 41.7 128 46Q126.3 41.7 122 40Q126.3 38.3 128 34Z"/>
+  <circle class="accent" cx="34" cy="116" r="4"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="surface line" x="22" y="32" width="116" height="82" rx="8"/>
+  <rect class="primary-soft" x="29" y="39" width="102" height="68" rx="3"/>
+  <circle class="primary" cx="72" cy="64" r="13"/>
+  <path class="primary" d="M48 107a24 24 0 0 1 48 0Z"/>
+  <rect class="accent line-surface" x="100" y="76" width="26" height="24" rx="4"/>
+  <circle class="error line-surface" cx="68" cy="124" r="9"/>
+  <circle class="ink line-surface" cx="92" cy="124" r="9"/>
+  <path class="line-surface" d="M63 124h10M92 120v8"/>
+  <path class="accent" d="M132 16Q133.7 20.3 138 22Q133.7 23.7 132 28Q130.3 23.7 126 22Q130.3 20.3 132 16Z"/>
+</svg>

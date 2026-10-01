@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <ellipse class="muted" cx="80" cy="134" rx="28" ry="5"/>
+  <rect class="surface line" x="48" y="26" width="58" height="102" rx="10"/>
+  <rect class="primary-soft" x="55" y="38" width="44" height="76" rx="3"/>
+  <path class="line" d="M70 32h14"/>
+  <rect class="surface line" x="58.0" y="68" width="11" height="16" rx="2.5"/>
+  <rect class="surface line" x="71.5" y="68" width="11" height="16" rx="2.5"/>
+  <rect class="surface line" x="85.0" y="68" width="11" height="16" rx="2.5"/>
+  <circle class="ink" cx="63.5" cy="76" r="2.2"/>
+  <circle class="ink" cx="77" cy="76" r="2.2"/>
+  <circle class="ink" cx="90.5" cy="76" r="2.2"/>
+  <path class="success line-surface" d="M112 84l17.0 6.72v12.6c0 12.6-7.48 19.32-17.0 22.68-9.520000000000001-3.36-17.0-10.08-17.0-22.68v-12.6Z"/>
+  <path class="line-surface" d="m104 104 5.5 5.5 10-10"/>
+  <path class="accent" d="M126 30Q127.7 34.3 132 36Q127.7 37.7 126 42Q124.3 37.7 120 36Q124.3 34.3 126 30Z"/>
+  <path class="line-accent" d="M30 46v8M26 50h8"/>
+</svg>

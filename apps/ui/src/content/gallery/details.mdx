@@ -37,9 +37,9 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details--border-bottom-left-radius: 12px;
     --c2-details--border-bottom-right-radius: 12px;
     --c2-details--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --c2-details__header--background: #fafafa;
-    --c2-details__header__hover--background: #f4f4f5;
-    --c2-details__content--border-top: 1px solid #f4f4f5;
+    --c2-details__header--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-details__header__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-details__content--border-top: 1px solid var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-details__content--padding-top: 12px;
   }
 </style>
@@ -60,7 +60,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details--border-top: none;
     --c2-details--border-right: none;
     --c2-details--border-left: none;
-    --c2-details--border-bottom: 1px solid #e4e4e7;
+    --c2-details--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-details--background: transparent;
     --c2-details--border-top-left-radius: 0px;
     --c2-details--border-top-right-radius: 0px;
@@ -70,7 +70,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details__header--padding-right: 0px;
     --c2-details__header__hover--background: transparent;
     --c2-details__header__hover--color: #2563eb;
-    --c2-details__header__icon--color: #a1a1aa;
+    --c2-details__header__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-details style="width: 240px" class="g borderless" expanded>
@@ -143,19 +143,19 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     line-height: 1.5;
   }
   .dark {
-    --c2-details--background: #18181b;
-    --c2-details--border-top: 1px solid #27272a;
-    --c2-details--border-right: 1px solid #27272a;
-    --c2-details--border-bottom: 1px solid #27272a;
-    --c2-details--border-left: 1px solid #27272a;
+    --c2-details--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-details--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-details--border-top-left-radius: 10px;
     --c2-details--border-top-right-radius: 10px;
     --c2-details--border-bottom-left-radius: 10px;
     --c2-details--border-bottom-right-radius: 10px;
-    --c2-details__header--color: #fafafa;
-    --c2-details__header__hover--background: #27272a;
-    --c2-details__header__icon--color: #71717a;
-    --c2-details__content--color: #a1a1aa;
+    --c2-details__header--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-details__header__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details__header__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-details__content--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-details style="width: 240px" class="g dark" expanded>
@@ -176,8 +176,8 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details--border-top-right-radius: 10px;
     --c2-details--border-bottom-left-radius: 10px;
     --c2-details--border-bottom-right-radius: 10px;
-    --c2-details__header__content--color: #71717a;
-    --c2-details__content--border-top: 1px solid #f4f4f5;
+    --c2-details__header__content--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-details__content--border-top: 1px solid var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-details__content--padding-top: 12px;
   }
 </style>
@@ -199,7 +199,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details--border-top: none;
     --c2-details--border-right: none;
     --c2-details--border-left: none;
-    --c2-details--border-bottom: 1px solid #e4e4e7;
+    --c2-details--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-details--background: transparent;
     --c2-details--border-top-left-radius: 0px;
     --c2-details--border-top-right-radius: 0px;
@@ -211,7 +211,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details__header__hover--background: transparent;
     --c2-details__header__icon--width: 16px;
     --c2-details__header__icon--height: 16px;
-    --c2-details__header__icon--color: #18181b;
+    --c2-details__header__icon--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-details__content--padding-left: 0px;
     --c2-details__content--padding-right: 0px;
   }
@@ -236,9 +236,9 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details--border-top-right-radius: 10px;
     --c2-details--border-bottom-left-radius: 10px;
     --c2-details--border-bottom-right-radius: 10px;
-    --c2-details__header__open--background: #f0fdf4;
+    --c2-details__header__open--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__header__open--color: #166534;
-    --c2-details__header__hover--background: #f0fdf4;
+    --c2-details__header__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__header__icon--color: #16a34a;
     --c2-details__content--border-top: 1px solid #dcfce7;
     --c2-details__content--padding-top: 12px;

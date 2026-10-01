@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <ellipse class="muted" cx="80" cy="128" rx="44" ry="5"/>
+  <path class="accent" d="M34 112v6c0 4 10 7 22 7s22-3 22-7v-6Z"/>
+  <ellipse class="accent line-surface" cx="56" cy="112" rx="22" ry="7"/>
+  <path class="accent" d="M34 101v6c0 4 10 7 22 7s22-3 22-7v-6Z"/>
+  <ellipse class="accent line-surface" cx="56" cy="101" rx="22" ry="7"/>
+  <path class="accent" d="M34 90v6c0 4 10 7 22 7s22-3 22-7v-6Z"/>
+  <ellipse class="accent line-surface" cx="56" cy="90" rx="22" ry="7"/>
+  <path class="accent" d="M34 79v6c0 4 10 7 22 7s22-3 22-7v-6Z"/>
+  <ellipse class="accent line-surface" cx="56" cy="79" rx="22" ry="7"/>
+  <path class="line-success" d="m86 104 14-16 10 8 20-26"/>
+  <path class="line-success" d="M118 70h12v12"/>
+  <path class="primary" d="M124 29Q126 34 131 36Q126 38 124 43Q122 38 117 36Q122 34 124 29Z"/>
+  <path class="line-accent" d="M34 36v8M30 40h8"/>
+</svg>

@@ -7,6 +7,16 @@ test('every generated icon keeps its individual source/manifest styling contract
   const families = [
     { directory: 'feather-icons', names: ['--c2-feather-icon--size', '--c2-feather-icon--color', '--c2-feather-icon--stroke-width'] },
     { directory: 'phosphor-icons', names: ['--c2-phosphor-icon--size', '--c2-phosphor-icon--color'] },
+    {
+      directory: 'symbols',
+      names: [
+        '--c2-symbol--size',
+        '--c2-symbol--stroke-width',
+        ...['backdrop', 'surface', 'muted', 'line', 'ink', 'primary', 'primary-soft', 'accent', 'success', 'warning', 'error'].map(
+          (role) => `--c2-symbol__${role}--color`,
+        ),
+      ],
+    },
   ]
   for (const family of families) {
     const packageRoot = resolve('packages/icons', family.directory)
@@ -81,6 +91,33 @@ for (const sample of [
         target: 'c2-phosphor-acorn svg',
         assertion: 'computed-style' as const,
         declaration: 'color',
+      },
+    ],
+  },
+  {
+    tag: 'c2-symbol-success',
+    cases: [
+      {
+        name: '--c2-symbol--size',
+        value: '77px',
+        target: 'c2-symbol-success',
+        assertion: 'geometry' as const,
+        valueSyntax: 'width',
+        geometryMetric: 'width' as const,
+      },
+      {
+        name: '--c2-symbol__success--color',
+        value: 'rgb(231, 17, 73)',
+        target: 'c2-symbol-success circle.success',
+        assertion: 'computed-style' as const,
+        declaration: 'fill',
+      },
+      {
+        name: '--c2-symbol--stroke-width',
+        value: '5',
+        target: 'c2-symbol-success path.line-surface',
+        assertion: 'computed-style' as const,
+        declaration: 'stroke-width',
       },
     ],
   },

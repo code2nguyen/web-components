@@ -1,0 +1,94 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-hover-card,
+  $theme: (
+    background-color: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    box-shadow: '0 8px 24px rgba(24, 24, 27, 0.08)',
+
+    font-size: 14px,
+    font-family: null,
+    line-height: 1.5,
+
+    padding-top: 16px,
+    padding-right: 16px,
+    padding-bottom: 16px,
+    padding-left: 16px,
+
+    width: 320px,
+    offset: 8px,
+    transition-duration: 150ms,
+    enter-transform: scale(0.96),
+  )
+);
+
+:host {
+  display: inline-block;
+}
+
+// Popover in the top layer, placed by floating-ui with `position: fixed`.
+.c2-hover-card {
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  margin: 0;
+  overflow: visible;
+  box-sizing: border-box;
+  width: css.cssVar(width);
+  max-width: calc(100vw - 16px);
+
+  padding-top: css.cssVar(padding-top);
+  padding-right: css.cssVar(padding-right);
+  padding-bottom: css.cssVar(padding-bottom);
+  padding-left: css.cssVar(padding-left);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background-color);
+  color: css.cssVar(color);
+  box-shadow: css.cssVar(box-shadow);
+  font-size: css.cssVar(font-size);
+  font-family: css.cssVar(font-family);
+  line-height: css.cssVar(line-height);
+  text-align: left;
+  overflow-wrap: break-word;
+
+  opacity: 0;
+  transform: css.cssVar(enter-transform);
+  transform-origin: top center;
+  transition:
+    opacity css.cssVar(transition-duration) animation.$standard-easing,
+    transform css.cssVar(transition-duration) animation.$standard-easing,
+    display css.cssVar(transition-duration) allow-discrete,
+    overlay css.cssVar(transition-duration) allow-discrete;
+}
+
+.c2-hover-card:popover-open {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .c2-hover-card:popover-open {
+    opacity: 0;
+    transform: css.cssVar(enter-transform);
+  }
+}
+
+.c2-hover-card[data-placement^='top'] {
+  transform-origin: bottom center;
+}
+.c2-hover-card[data-placement^='left'] {
+  transform-origin: center right;
+}
+.c2-hover-card[data-placement^='right'] {
+  transform-origin: center left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-hover-card {
+    transition: none;
+  }
+}

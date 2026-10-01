@@ -29,6 +29,18 @@
       <c2-date-selector from="2026-09-10" to="2026-09-15" locale="en-US"></c2-date-selector>
       <c2-date-selector class="compact" months="1" from="2026-10-05" min="2026-10-01" max="2026-10-24" locale="en-US"></c2-date-selector>
       <c2-date-selector months="1" disabled locale="en-US"></c2-date-selector>
+      <c2-date-selector id="from-two-days-ago" months="1" locale="en-US" aria-label="From two days ago"></c2-date-selector>
+      <c2-date-selector id="past-only" months="1" locale="en-US" aria-label="Past dates only"></c2-date-selector>
     </main>
+    <script type="module">
+      // Local-calendar YYYY-MM-DD for today + offset days (toISOString() is UTC and can be off by one).
+      const isoDaysFromToday = (offset) => {
+        const date = new Date()
+        date.setDate(date.getDate() + offset)
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      }
+      document.querySelector('#from-two-days-ago').min = isoDaysFromToday(-2)
+      document.querySelector('#past-only').max = isoDaysFromToday(-1)
+    </script>
   </body>
 </html>

@@ -30,6 +30,24 @@ export interface TableRowContext {
   key: string
 }
 
+/** Built-in aggregates of the summary row. `count` counts the rows whose value is neither empty nor null. */
+export type TableSummaryAggregate = 'sum' | 'avg' | 'min' | 'max' | 'count'
+
+export interface TableSummaryContext {
+  column: TableColumnConfig
+  /** The rows the summary covers: every row, or the current page with `summary-scope="page"`. */
+  rows: TableRow[]
+}
+
+export interface TableSummaryRenderContext extends TableSummaryContext {
+  /** The value for the column: the table's `summaryValues` entry when it has one, otherwise the column's aggregate. */
+  value: unknown
+}
+
+/** Computes a column's summary value from its rows; the result is formatted like a cell of the column. */
+export type TableSummaryFunction = (context: TableSummaryContext) => unknown
+export type TableSummaryRenderer = (context: TableSummaryRenderContext) => unknown
+
 export type TableRowStyle = Record<string, string | number | null | undefined>
 export type TableRowStyler = (context: TableRowContext) => TableRowStyle | undefined
 
@@ -38,7 +56,12 @@ export type TableCellRenderer = (context: TableCellContext) => unknown
 export type TableHeaderRenderer = (context: TableHeaderContext) => unknown
 
 export interface TableColumnConfig {
-  /** Key of the value in the row object; may be a dotted path. */
+  /**
+   * Stable identity of the column. Defaults to `field`; set it when two columns show the same field, or when a
+   * computed column has no field. Widths, pinning, the `cell-<id>` parts and the summary row are keyed by it.
+   */
+  id?: string
+  /** Key of the value in the row object; may be a dotted path. May be empty for a computed column that has an `id`. */
   field: string
   /** Header label. Defaults to the field. */
   header?: string
@@ -67,14 +90,73 @@ export interface TableColumnConfig {
    * body with its own template language. The table puts a `<slot name="cell:<row key>:<field>">` in the cell;
    * `renderCell` (or the formatted value) stays as the fallback while nothing is slotted into it.
    *
-   * Requires `rowKey`. Only the rows the virtualizer has rendered have a slot, so children for the rest simply
+   * Requires a row key (`rowKey` or `getRowKey`). Only the rows the virtualizer has rendered have a slot, so children for the rest simply
    * wait — write one child per row and let the table pick.
    */
   cellSlot?: boolean
   renderCell?: TableCellRenderer
   renderHeader?: TableHeaderRenderer
+  /** Value of the column in the summary row: a built-in aggregate, or a function of the rows. */
+  summary?: TableSummaryAggregate | TableSummaryFunction
+  /** Text shown in the column's summary cell when it has no value, such as `Total`. */
+  summaryLabel?: string
+  /** Alignment of the summary cell. Defaults to the column's `align`. */
+  summaryAlign?: ColumnAlign
+  /** Number of columns the summary cell spans, starting at this one. The spanned columns' summaries are not shown. */
+  summarySpan?: number
+  /** Renders the summary cell body instead of the formatted value. */
+  renderSummary?: TableSummaryRenderer
   /** Client-side sort comparator for the column's values. */
   comparator?: (a: unknown, b: unknown) => number
+  /**
+   * Puts the group tree in this column while the table is grouped: the chevron, the group's label and its row count
+   * on each group row, and the indentation of the rows under it. Defaults to the first column.
+   */
+  groupColumn?: boolean
+}
+
+/** One level of row grouping: the rows are bucketed by the value of `field`, or by `getValue(row)` when given. */
+export interface TableGroupBy {
+  /** Field whose value names the group; may be a dotted path. Also the level's name in the group keys. */
+  field: string
+  /** Computes the group value instead of reading `field`, such as the month of a date. Property only. */
+  getValue?: (row: TableRow) => unknown
+  /**
+   * Order of the groups of this level. Defaults to the direction the table is sorted by `field`, ascending when it
+   * is not. A function compares two group values.
+   */
+  sort?: SortDirection | ((a: unknown, b: unknown) => number)
+}
+
+/**
+ * `group-display`: `row` puts each group on a row of the grid, with the column aggregates of its rows under their own
+ * columns; `band` draws one full-width band per group, holding its label and row count.
+ */
+export type TableGroupDisplay = 'row' | 'band'
+
+export interface TableGroupContext {
+  /** Stable key of the group, built from its path: `region=EMEA/status=Paid`. */
+  key: string
+  /** Depth of the group, 0 for the outermost level. */
+  level: number
+  /** The `field` of the level. */
+  field: string
+  /** The value every row of the group shares. */
+  value: unknown
+  /** Every row of the group, sorted, including the rows of its sub-groups. */
+  rows: TableRow[]
+  expanded: boolean
+  /** The aggregates of the group's rows, keyed by column `id`: one entry per column with a `summary`. */
+  summary: Record<string, unknown>
+}
+
+/** Renders the label of a group in place of its formatted value. */
+export type TableGroupRenderer = (context: TableGroupContext) => unknown
+
+export interface TableGroupToggleEventDetail {
+  key: string
+  expanded: boolean
+  group: TableGroupContext
 }
 
 export interface TableRowsRequest {
@@ -101,7 +183,7 @@ export interface TableDataSource {
 }
 
 export interface TableSelectionChangeEventDetail {
-  /** Keys of the selected rows (`row-key` field, or the row index when no `row-key` is set). */
+  /** Keys of the selected rows, as strings: the `row-key` field (or `getRowKey`), or the row's position when there is neither. */
   value: string[]
   /** The selected rows themselves; only the loaded ones when a `dataSource` is used. */
   rows: TableRow[]
@@ -123,12 +205,39 @@ export interface TableCellEventDetail extends TableRowEventDetail {
 }
 
 export interface TableColumnResizeEventDetail {
+  /** The column's `id`, which is its `field` unless one was set. */
+  id: string
   field: string
   width: number
 }
 
 /** Reads a possibly dotted `field` path out of a row. Re-exported from `@c2n/core` so the table keeps its own subpath. */
 export { getFieldValue } from '@c2n/core/data-helper.js'
+
+/** Splits the `group-by` attribute: a JSON array, or field names separated by commas or semicolons. */
+function parseGroupBy(value: string): (string | TableGroupBy)[] {
+  const text = value.trim()
+  if (text.startsWith('[')) {
+    try {
+      const parsed: unknown = JSON.parse(text)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+  return text
+    .split(/[;,]/)
+    .map((field) => field.trim())
+    .filter(Boolean)
+}
+
+/** `region,status` ⇄ `['region', 'status']`; a string assigned to the property is parsed the same way. */
+export const groupByConverter = {
+  toAttribute: (value: (string | TableGroupBy)[]) =>
+    Array.isArray(value) && value.length && value.every((entry) => typeof entry === 'string') ? value.join(',') : null,
+  fromAttribute: (value: string | null): (string | TableGroupBy)[] => (value ? parseGroupBy(value) : []),
+  fromProperty: (value: unknown) => (typeof value === 'string' ? parseGroupBy(value) : value),
+}
 
 /** `name:asc;age:desc` ⇄ `SortModel[]`, so the sort can be set from markup. */
 export const sortModelConverter = {

@@ -94,7 +94,7 @@ export interface MenuItem {
  * @cssproperty {color} [--c2-menu-item__destructive--color=#dc2626] - Label and icon colour of a `destructive` row.
  * @cssproperty {color} [--c2-menu-item__destructive__hover--background=#fef2f2]
  *
- * @cssproperty {outline} [--c2-menu-item__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {outline} [--c2-menu-item__focus--outline=none] - A ring around the keyboard-focused row, drawn on top of its highlight.
  * @cssproperty {pixel} [--c2-menu-item__focus--outline-offset=-2px]
  *
  * @cssproperty {opacity} [--c2-menu-item__disabled--opacity=0.38]
@@ -156,8 +156,9 @@ export class MenuItem extends LitElement {
 
   @query('slot[name="submenu"]') private submenuSlot?: HTMLSlotElement
 
-  /** `role` written by the author, kept over the automatic one. */
-  private authorRole: string | null = null
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
 
   /** Whether a menu is slotted into `submenu`. */
   get hasSubmenu(): boolean {
@@ -176,11 +177,6 @@ export class MenuItem extends LitElement {
     const assigned = this.contentSlot?.assignedNodes({ flatten: true }) ?? []
     const text = assigned.map((node) => (node as HTMLElement).innerText ?? node.textContent ?? '').join(' ')
     return (text.trim() || this.contentSlot?.textContent?.trim() || this.value).trim()
-  }
-
-  override connectedCallback() {
-    super.connectedCallback()
-    if (this.authorRole === null) this.authorRole = this.getAttribute('role')
   }
 
   /**
@@ -229,23 +225,12 @@ export class MenuItem extends LitElement {
   }
 
   private syncAria() {
-    const role =
-      this.authorRole ?? (this.href ? 'menuitem' : this.type === 'checkbox' ? 'menuitemcheckbox' : this.type === 'radio' ? 'menuitemradio' : 'menuitem')
-    this.setAttribute('role', role)
-
-    if (this.type === 'checkbox' || this.type === 'radio') this.setAttribute('aria-checked', String(this.checked))
-    else this.removeAttribute('aria-checked')
-
-    if (this.hasSubmenu) {
-      this.setAttribute('aria-haspopup', 'menu')
-      this.setAttribute('aria-expanded', String(this.expanded))
-    } else {
-      this.removeAttribute('aria-haspopup')
-      this.removeAttribute('aria-expanded')
-    }
-
-    if (this.disabled) this.setAttribute('aria-disabled', 'true')
-    else this.removeAttribute('aria-disabled')
+    // An author-set `role` on the host wins in the accessibility tree over this one.
+    this.internals.role = this.href ? 'menuitem' : this.type === 'checkbox' ? 'menuitemcheckbox' : this.type === 'radio' ? 'menuitemradio' : 'menuitem'
+    this.internals.ariaChecked = this.type === 'checkbox' || this.type === 'radio' ? String(this.checked) : null
+    this.internals.ariaHasPopup = this.hasSubmenu ? 'menu' : null
+    this.internals.ariaExpanded = this.hasSubmenu ? String(this.expanded) : null
+    this.internals.ariaDisabled = this.disabled ? 'true' : null
 
     // The menu assigns the roving tabindex; a disabled row is never a tab stop.
     if (this.disabled) this.tabIndex = -1

@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Modal, ModalEventMap } from '@c2n/modal'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Modal } from '@c2n/modal'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -21,9 +24,9 @@ declare module 'vue' {
         'no-escape'?: unknown
         'hide-close'?: unknown
         'no-scroll-lock'?: unknown
-        onOpen?: (event: ModalEventMap['open']) => void
-        onClose?: (event: ModalEventMap['close']) => void
-        onCancel?: (event: ModalEventMap['cancel']) => void
+        onOpen?: (event: EventOf<Modal, 'open'>) => void
+        onClose?: (event: EventOf<Modal, 'close'>) => void
+        onCancel?: (event: EventOf<Modal, 'cancel'>) => void
       }
     >
   }

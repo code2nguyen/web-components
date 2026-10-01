@@ -66,7 +66,7 @@ Hover or click a trigger to open its panel.
     grid-column: 1 / -1;
     margin-top: 6px;
     padding-top: 8px;
-    border-top: 1px solid #e4e4e7;
+    border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <div data-label="Mega panel and links">
@@ -240,7 +240,7 @@ Hover or click a trigger to open its panel.
 </c2-navigation-menu>
 ```
 
-`mode` reflects, so the current layout is in the DOM (`c2-navigation-menu[mode='mobile']`) for your own CSS to hang off.
+`mode` reflects once it has switched, so the mobile layout is in the DOM (`c2-navigation-menu[mode='mobile']`) for your own CSS to hang off. The default `bar` is not written onto a bare element, so match it as `c2-navigation-menu:not([mode='mobile'])`.
 
 Leave `mobile-breakpoint` unset when the switch depends on something the window width does not describe — a container width, a user setting, an app-wide breakpoint you already track — and drive `mode` yourself:
 

@@ -8,23 +8,27 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Step, StepEventMap } from '@c2n/steps/step.js'
-import type { Steps, StepsEventMap } from '@c2n/steps'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Step } from '@c2n/steps/step.js'
+import type { Steps } from '@c2n/steps'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
     'c2-step': DefineComponent<
       C2Props<Step> & {
-        onStepToggle?: (event: StepEventMap['step-toggle']) => void
+        onStepToggle?: (event: EventOf<Step, 'step-toggle'>) => void
       }
     >
     'c2-steps': DefineComponent<
       C2Props<Steps> & {
         'aria-label'?: unknown
-        onStepToggle?: (event: StepsEventMap['step-toggle']) => void
+        onSelectionChange?: (event: EventOf<Steps, 'selection-change'>) => void
+        onStepToggle?: (event: EventOf<Steps, 'step-toggle'>) => void
       }
     >
   }

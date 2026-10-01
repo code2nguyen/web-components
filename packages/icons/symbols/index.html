@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@c2n/symbols</title>
+    <script type="module" src="/src/index.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        color: #1f2937;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .small {
+        --c2-symbol--size: 64px;
+      }
+      .brand {
+        --c2-symbol__primary--color: #7c3aed;
+        --c2-symbol__primary-soft--color: #ede9fe;
+        --c2-symbol__backdrop--color: transparent;
+      }
+      .dark {
+        padding: 16px;
+        border-radius: 8px;
+        background: #18181b;
+        --c2-symbol__backdrop--color: #27272a;
+        --c2-symbol__surface--color: #18181b;
+        --c2-symbol__muted--color: #3f3f46;
+        --c2-symbol__line--color: #71717a;
+        --c2-symbol__ink--color: #a1a1aa;
+        --c2-symbol__primary--color: #5aa3ff;
+        --c2-symbol__primary-soft--color: #0f2d5c;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+      }
+      .grid figure {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 4px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+      }
+      .grid figcaption {
+        font-size: 11px;
+        color: #6b7280;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Size, brand colours and dark surface</h2>
+    <div class="demo">
+      <c2-symbol-empty-inbox class="small"></c2-symbol-empty-inbox>
+      <c2-symbol-empty-inbox></c2-symbol-empty-inbox>
+      <c2-symbol-empty-inbox class="brand"></c2-symbol-empty-inbox>
+      <div class="dark"><c2-symbol-empty-inbox></c2-symbol-empty-inbox></div>
+    </div>
+
+    <h2>All symbols</h2>
+    <div class="grid" id="grid"></div>
+
+    <script type="module">
+      import { symbolCatalog, symbolTag } from '/src/symbol-names.ts'
+      const grid = document.getElementById('grid')
+      for (const { name, title } of symbolCatalog) {
+        const figure = document.createElement('figure')
+        figure.append(document.createElement(symbolTag(name)))
+        const caption = document.createElement('figcaption')
+        caption.textContent = `${title} · ${name}`
+        figure.append(caption)
+        grid.append(figure)
+      }
+    </script>
+  </body>
+</html>

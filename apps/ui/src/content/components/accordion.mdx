@@ -26,8 +26,8 @@ Importing `@c2n/accordion` also registers `c2-details`.
   .demo {
     width: 320px;
     max-width: 100%;
-    --c2-details__header--color: #18181b;
-    --c2-details__content--color: #52525b;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-details__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
   .demo p {
     margin: 0;

@@ -107,6 +107,7 @@ function toTracks(input: number | string | string[]): string[] {
  * @tag c2-dashboard
  *
  * @slot - The `c2-dash-card` panes. Anything else becomes an ordinary grid item, placed by your own CSS.
+ * @slotcomponent c2-dash-card
  *
  * @event {CustomEvent<DashboardLayoutChangeDetail>} layout-change - The tracks or stable card order changed: a
  * gesture ended, `setPanelOrder()`/`reset()` was called, or another entry of `layouts` took over. Includes the active

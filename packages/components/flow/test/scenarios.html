@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>flow scenarios</title>
+    <style>
+      body {
+        margin: 32px;
+        font: 16px system-ui;
+        color: #18181b;
+        background: white;
+      }
+      main {
+        width: 960px;
+      }
+      c2-flow {
+        --c2-flow--height: 420px;
+      }
+    </style>
+    <script type="module">
+      import '../src/flow.ts'
+      document.documentElement.dataset.modulesReady = 'true'
+    </script>
+  </head>
+  <body>
+    <main aria-label="Component scenario"></main>
+  </body>
+</html>

@@ -47,6 +47,12 @@ export class ScatterChart extends EchartsChartBase {
     this.tooltip = 'item'
   }
 
+  /** A scatter plot looks for relationships, so both value axes fit the data instead of starting at zero. */
+  protected override coordinateSystem(context: ChartBuildContext): Record<string, unknown> {
+    const system = super.coordinateSystem(context) as { xAxis: Record<string, unknown>; yAxis: Record<string, unknown> }
+    return { ...system, xAxis: { ...system.xAxis, scale: true }, yAxis: { ...system.yAxis, scale: true } }
+  }
+
   protected override seriesOption(index: number, context: ChartBuildContext): Record<string, unknown> {
     return {
       type: 'scatter',

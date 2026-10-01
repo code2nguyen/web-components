@@ -1,12 +1,22 @@
 /** The c2n MCP server: tools and resources over the bundled registry. */
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { installedPackage } from './installed.ts'
+import { importPath, installedPackage, umbrellaInstalled } from './installed.ts'
 import { generateCode, type CodeFormat } from './lib/generate-code.ts'
 import { loadRegistry, resolveElement, suggest } from './registry.ts'
 import type { GuideTopic, Registry } from './registry-types.ts'
-import { MAX_CHARS, elementApiNames, renderComponent, renderComponentList, renderExamples, renderPresets, renderTheme, truncate } from './render.ts'
-import { searchComponents } from './search.ts'
+import {
+  MAX_CHARS,
+  elementApiNames,
+  renderComponent,
+  renderComponentList,
+  renderExampleIndex,
+  renderExamples,
+  renderPresets,
+  renderTheme,
+  truncate,
+} from './render.ts'
+import { searchComponents, searchExamples } from './search.ts'
 
 const GUIDE_TOPICS = ['workflow', 'theming', 'variant-components', 'frameworks'] as const
 const readOnly = { readOnlyHint: true, openWorldHint: false } as const
@@ -36,8 +46,15 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       instructions: [
         'c2n web components (Lit custom elements, tag prefix c2-, npm scope @c2n).',
+        'Their APIs change between releases, so never write a c2-* tag, attribute, slot, event or --c2-* variable from memory:',
+        'call get_component for every component before using it, and use only the names it returns.',
         'Start with list_components or search_components, then get_component for the API and get_examples for markup.',
-        'Call get_theme before writing CSS: apps set ~35 --c2-theme--* tokens once; prefer per-component variables on a class or element, and use only documented ::part() hooks when variables cannot express the change.',
+        'Use the import lines get_component gives: a project that installed @c2n/components imports @c2n/components/<name>, not @c2n/<name>.',
+        'get_component also names the child elements a container expects (c2-dashboard holds c2-dash-card, c2-tabs holds c2-tab): build them in.',
+        'Call get_theme before writing CSS: apps set ~35 --c2-theme--* tokens once; restyle a component only through the --c2-<component>__<part>--<property> variables get_component lists, set on a class or the element,',
+        'never with border, padding, background, color or size rules on the c2-* host, and use only documented ::part() hooks when variables cannot express the change.',
+        'For the look, browse the docs gallery before inventing CSS: get_examples with view "index" lists every card of a component (summary, screenshot), search_examples finds a look across components;',
+        'adapt the chosen card to the application tokens (its remaining colour literals are accents to swap), and start a variant from it with generate_variant `example`.',
         'When a look repeats, call generate_variant (css | html | lit) instead of repeating inline styles.',
         'get_workflow_guide explains the application workflow, theming, variant components and framework notes.',
       ].join(' '),
@@ -115,7 +132,8 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           ...resolved.component,
           examples: undefined,
           installed: installed?.version ?? null,
-          resolved: { tag: resolved.tag, modulePath: resolved.modulePath, className: resolved.className },
+          installedVia: installed?.via?.package ?? null,
+          resolved: { tag: resolved.tag, modulePath: importPath(resolved.modulePath, resolved.component.package, installed), className: resolved.className },
         })
       return text(
         renderComponent(resolved.component, {
@@ -156,11 +174,15 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       title: 'Get examples',
       description:
-        'Markup examples of a component: usage rows from the docs, styled gallery variants (with intent, use-when and accessibility metadata when curated) and the landing preview.',
+        'Markup examples of a component: usage rows from the docs, styled gallery cards (the looks shown on the docs site, each with a summary of what it changes and light/dark screenshots) and the landing preview. Start with `view: "index"` to see every look on one page, then fetch the chosen card by its slug.',
       inputSchema: {
         tag: tagSchema,
+        view: z
+          .enum(['full', 'index'])
+          .default('full')
+          .describe('`index`: one line per example (label, slug, summary, screenshot), no code and no paging; `full`: markup and CSS'),
         kind: z.enum(['usage', 'gallery', 'preview']).optional().describe('Only this kind'),
-        label: z.string().optional().describe('Substring filter on the example label'),
+        label: z.string().optional().describe('Substring filter on the example label, or a gallery slug from the index'),
         section: z.string().optional().describe('Gallery section filter (e.g. "Variants", "Sizes")'),
         query: z.string().optional().describe('Search label, section, description, use case, accessibility note and component tags'),
         limit: z.number().int().min(1).max(20).default(8),
@@ -169,7 +191,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
       },
       annotations: readOnly,
     },
-    ({ tag, kind, label, section, query, limit, offset, format }) => {
+    ({ tag, view, kind, label, section, query, limit, offset, format }) => {
       const resolved = resolveElement(registry, tag)
       if (!resolved) return notFound(registry, tag)
       const needle = query?.toLowerCase()
@@ -178,14 +200,54 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           `${e.label} ${e.section ?? ''} ${e.description ?? ''} ${e.useWhen ?? ''} ${e.accessibility ?? ''} ${(e.tags ?? []).join(' ')}`.toLowerCase()
         return (
           (!kind || e.kind === kind) &&
-          (!label || e.label.toLowerCase().includes(label.toLowerCase())) &&
+          (!label || e.slug === label || e.label.toLowerCase().includes(label.toLowerCase())) &&
           (!section || (e.section ?? '').toLowerCase().includes(section.toLowerCase())) &&
           (!needle || searchable.includes(needle))
         )
       })
-      const page = all.slice(offset, offset + limit)
-      if (format === 'json') return json({ total: all.length, offset, examples: page })
-      return text(all.length ? renderExamples(resolved.component, page, all.length, offset) : `No examples match for ${resolved.tag}.`)
+      if (view === 'index') {
+        if (format === 'json')
+          return json(
+            all.map(({ kind, label, slug, section, description, useWhen, screenshots }) => ({ kind, label, slug, section, description, useWhen, screenshots })),
+          )
+        return text(all.length ? renderExampleIndex(resolved.component, all) : `No examples match for ${resolved.tag}.`)
+      }
+      // An exact slug names one card; a label substring may still match several.
+      const exact = label ? all.filter((e) => e.slug === label) : []
+      const matched = exact.length ? exact : all
+      const page = matched.slice(offset, offset + limit)
+      if (format === 'json') return json({ total: matched.length, offset, examples: page })
+      return text(matched.length ? renderExamples(resolved.component, page, matched.length, offset) : `No examples match for ${resolved.tag}.`)
+    },
+  )
+
+  server.registerTool(
+    'search_examples',
+    {
+      title: 'Search gallery looks',
+      description:
+        'Search every component\'s gallery for a look or a use case ("compact", "glass", "pill", "danger", "underline input", "KPI"): returns matching cards across components with their summary and screenshot. Fetch one with get_examples `label: <slug>`.',
+      inputSchema: {
+        query: z.string().min(2).describe('The look or situation you want'),
+        tag: tagSchema.optional().describe('Limit to one component'),
+        limit: z.number().int().min(1).max(30).default(12),
+      },
+      annotations: readOnly,
+    },
+    ({ query, tag, limit }) => {
+      const resolved = tag ? resolveElement(registry, tag) : undefined
+      if (tag && !resolved) return notFound(registry, tag)
+      const hits = searchExamples(registry, query, limit, resolved?.component)
+      if (hits.length === 0) return text(`No gallery card matches "${query}". Try \`get_examples\` with \`view: "index"\` for one component.`)
+      return text(
+        `${hits.length} look(s) for "${query}"\n\n` +
+          hits
+            .map(
+              ({ component, example }) =>
+                `- **${component.title} · ${example.label}**${example.section ? ` (${example.section})` : ''} — ${example.description ?? ''}${example.screenshots ? ` [look](${example.screenshots.light})` : ''}\n  get_examples \`{ tag: "${component.elements[0].tag}", label: "${example.slug}" }\``,
+            )
+            .join('\n'),
+      )
     },
   )
 
@@ -226,7 +288,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
               }
             : registry.theme,
         )
-      return text(renderTheme(registry.theme, registry, resolved?.component))
+      return text(renderTheme(registry.theme, registry, resolved?.component, umbrellaInstalled()))
     },
   )
 
@@ -235,7 +297,7 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
     {
       title: 'Generate a variant component',
       description:
-        'Turns CSS variable / attribute overrides of a component into copy-paste code: a CSS class, HTML + <style>, a Lit subclass registered under your own tag, or JSON. Validates variable and attribute names against the component API. Start from a preset with `preset`.',
+        'Turns CSS variable / attribute overrides of a component into copy-paste code: a CSS class, HTML + <style>, a Lit subclass registered under your own tag, or JSON. Validates variable and attribute names against the component API. Start from a curated preset with `preset`, or from a gallery card with `example` (its slug or label).',
       inputSchema: {
         tag: tagSchema,
         name: z
@@ -248,12 +310,16 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           .describe('Component CSS variables to fix, e.g. {"--c2-button__container--background-color": "var(--c2-theme--color-error)"}'),
         attributes: z.record(z.string(), z.string()).optional().describe('Attributes to fix, e.g. {"running": "true"}'),
         preset: z.string().optional().describe('Name of a curated preset to start from (its values are merged under `css`)'),
-        html: z.string().optional().describe('Base markup; defaults to the preset markup or `<tag>Label</tag>`'),
+        example: z
+          .string()
+          .optional()
+          .describe('Gallery card to start from, by slug or label (get_examples view: index): its themed variables for this component are merged under `css`'),
+        html: z.string().optional().describe('Base markup; defaults to the example or preset markup, else `<tag>Label</tag>`'),
         format: z.enum(['css', 'html', 'lit', 'json', 'all']).default('all'),
       },
       annotations: readOnly,
     },
-    ({ tag, name, css, attributes, preset, html, format }) => {
+    ({ tag, name, css, attributes, preset, example, html, format }) => {
       const resolved = resolveElement(registry, tag)
       if (!resolved) return notFound(registry, tag)
       if (name.startsWith('c2-')) return { ...text('Variant names must not start with `c2-`; use your own prefix (app-, site-, my-).'), isError: true }
@@ -265,8 +331,22 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
           ),
           isError: true,
         }
-      const changes = { css: { ...(presetItem?.css ?? {}), ...(css ?? {}) }, attributes: { ...(presetItem?.attributes ?? {}), ...(attributes ?? {}) } }
+      const gallery = resolved.component.examples.filter((e) => e.kind === 'gallery')
+      const card = example ? (gallery.find((e) => e.slug === example) ?? gallery.find((e) => e.label.toLowerCase() === example.toLowerCase())) : undefined
+      if (example && !card)
+        return {
+          ...text(`Unknown gallery card "${example}" for ${resolved.tag}. Call get_examples with \`view: "index"\` for the slugs.`),
+          isError: true,
+        }
       const api = elementApiNames(resolved.element)
+      // A card's CSS may style several elements and its own layout; only this element's variables become the variant.
+      const cardCss = Object.fromEntries(
+        [...(card?.css ?? '').matchAll(/(--c2-[a-z0-9_-]+)\s*:\s*([^;}]+)/g)].filter((m) => api.css.includes(m[1])).map((m) => [m[1], m[2].trim()]),
+      )
+      const changes = {
+        css: { ...cardCss, ...(presetItem?.css ?? {}), ...(css ?? {}) },
+        attributes: { ...(presetItem?.attributes ?? {}), ...(attributes ?? {}) },
+      }
       const warnings: string[] = []
       for (const variable of Object.keys(changes.css)) {
         if (!api.css.includes(variable) && !variable.startsWith('--c2-theme--')) {
@@ -278,8 +358,17 @@ export function createServer(registry: Registry = loadRegistry()): McpServer {
         if (!api.attributes.includes(attribute) && !attribute.startsWith('data-') && !attribute.startsWith('aria-'))
           warnings.push(`Unknown attribute \`${attribute}\` (attributes: ${api.attributes.join(', ') || 'none'})`)
       }
-      const baseHtml = html ?? resolved.component.presets?.html ?? `<${resolved.tag}>Label</${resolved.tag}>`
-      const input = { tag: resolved.tag, html: baseHtml, changes, name, className: resolved.className, modulePath: resolved.modulePath }
+      // The card's class carried its look; the variant brings its own, so drop it from this element only.
+      const cardHtml = card?.html.replace(new RegExp(`(<${resolved.tag}\\b[^>]*?)\\sclass="[^"]*"`), '$1')
+      const baseHtml = html ?? cardHtml ?? resolved.component.presets?.html ?? `<${resolved.tag}>Label</${resolved.tag}>`
+      const input = {
+        tag: resolved.tag,
+        html: baseHtml,
+        changes,
+        name,
+        className: resolved.className,
+        modulePath: importPath(resolved.modulePath, resolved.component.package, installedPackage(resolved.component.package)),
+      }
       const formats: CodeFormat[] = format === 'all' ? ['css', 'html', 'lit'] : [format]
       const out: string[] = []
       if (warnings.length) out.push(`> ${warnings.join('\n> ')}\n`)

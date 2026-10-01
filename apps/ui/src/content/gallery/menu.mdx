@@ -4,10 +4,13 @@ description: 'Ready-made looks for c2-menu: surface, rows, dark and compact menu
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
 
 import { Menu } from '@c2n/menu'
 import { Button } from '@c2n/button'
 import { Kbd } from '@c2n/kbd'
+
+<ExampleModules />
 
 ## Surface
 
@@ -16,7 +19,7 @@ Each card shows a trigger; open the menu to see the look. `--c2-menu--*` is the 
 <GalleryGrid>
 
 ```html tag=MdxCodeBlock,label=Default
-<c2-menu class="default" aria-label="Default" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="new">New file</c2-menu-item><c2-menu-item value="duplicate">Duplicate</c2-menu-item><hr /><c2-menu-item value="delete" destructive>Delete</c2-menu-item></c2-menu>
+<c2-menu class="default" aria-label="Default" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="new"><c2-feather-file-plus slot="prefix-icon"></c2-feather-file-plus>New file</c2-menu-item><c2-menu-item value="duplicate"><c2-feather-copy slot="prefix-icon"></c2-feather-copy>Duplicate</c2-menu-item><hr /><c2-menu-item value="delete" destructive><c2-feather-trash-2 slot="prefix-icon"></c2-feather-trash-2>Delete</c2-menu-item></c2-menu>
 ```
 
 ```html tag=MdxCodeBlock,label=Soft
@@ -73,18 +76,18 @@ Each card shows a trigger; open the menu to see the look. `--c2-menu--*` is the 
 ```html tag=MdxCodeBlock,label=Dark
 <style>
   .dark {
-    --c2-menu--background: #18181b;
-    --c2-menu--border-top: 1px solid #3f3f46;
-    --c2-menu--border-right: 1px solid #3f3f46;
-    --c2-menu--border-bottom: 1px solid #3f3f46;
-    --c2-menu--border-left: 1px solid #3f3f46;
+    --c2-menu--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-menu--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-menu--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-menu--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-menu--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-menu--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    --c2-menu__separator--color: #3f3f46;
-    --c2-menu__heading--color: #a1a1aa;
-    --c2-menu-item--color: #fafafa;
-    --c2-menu-item__hover--background: #27272a;
-    --c2-menu-item__icon--color: #a1a1aa;
-    --c2-menu-item__shortcut--color: #71717a;
+    --c2-menu__separator--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-menu__heading--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-menu-item--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-menu-item__icon--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-menu-item__shortcut--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-menu-item__destructive--color: #f87171;
     --c2-menu-item__destructive__hover--background: rgba(248, 113, 113, 0.14);
   }
@@ -96,7 +99,7 @@ Each card shows a trigger; open the menu to see the look. `--c2-menu--*` is the 
 <style>
   .wide {
     --c2-menu--min-width: 260px;
-    --c2-menu__heading--color: #3f3f46;
+    --c2-menu__heading--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-menu__heading--font-size: 12px;
     --c2-menu__heading--text-transform: none;
     --c2-menu__heading--letter-spacing: 0;
@@ -165,8 +168,8 @@ The rows are your own `c2-menu-item` children, so every `--c2-menu-item--*` vari
     --c2-menu-item--border-bottom-right-radius: 999px;
     --c2-menu-item--padding-left: 14px;
     --c2-menu-item--padding-right: 14px;
-    --c2-menu-item__hover--background: #18181b;
-    --c2-menu-item__hover--color: #ffffff;
+    --c2-menu-item__hover--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-menu-item__hover--color: var(--c2-theme--color-on-primary, #ffffff);
   }
 </style>
 <c2-menu class="pill" aria-label="Pill" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="day">Today</c2-menu-item><c2-menu-item value="week">This week</c2-menu-item><c2-menu-item value="month">This month</c2-menu-item></c2-menu>
@@ -184,9 +187,9 @@ The rows are your own `c2-menu-item` children, so every `--c2-menu-item--*` vari
 ```html tag=MdxCodeBlock,label=Checkable
 <style>
   .checkable {
-    --c2-menu-item__indicator--color: #0265dc;
+    --c2-menu-item__indicator--color: var(--c2-theme--color-primary, #0265dc);
     --c2-menu-item__indicator--size: 14px;
-    --c2-menu-item__hover--background: #eff6ff;
+    --c2-menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-menu class="checkable" aria-label="Checkable" keep-open client:only="lit"><c2-button slot="trigger">Open</c2-button><h6>Panels</h6><c2-menu-item type="checkbox" value="sidebar" checked>Sidebar</c2-menu-item><c2-menu-item type="checkbox" value="terminal">Terminal</c2-menu-item><hr /><h6>Density</h6><c2-menu-item type="radio" name="density" value="comfortable" checked>Comfortable</c2-menu-item><c2-menu-item type="radio" name="density" value="compact">Compact</c2-menu-item></c2-menu>
@@ -201,7 +204,7 @@ The rows are your own `c2-menu-item` children, so every `--c2-menu-item--*` vari
     --c2-menu-item--padding-bottom: 10px;
     --c2-menu-item--gap: 12px;
     --c2-menu-item__description--font-size: 12px;
-    --c2-menu-item__description--color: #71717a;
+    --c2-menu-item__description--color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 </style>
 <c2-menu class="spacious" aria-label="Spacious" client:only="lit"><c2-button slot="trigger">Open</c2-button><c2-menu-item value="profile">Profile<span slot="description">Name, avatar and handle</span></c2-menu-item><c2-menu-item value="billing">Billing<span slot="description">Plan, invoices and cards</span></c2-menu-item><c2-menu-item value="team">Team<span slot="description">Members and roles</span></c2-menu-item></c2-menu>

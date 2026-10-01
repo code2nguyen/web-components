@@ -52,7 +52,7 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 <style>
   .segmented {
     --c2-tabs--box-shadow: none;
-    --c2-tabs--background-color: #e4e4e7;
+    --c2-tabs--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-tabs--border-radius: 10px;
     --c2-tabs--padding-top: 4px;
     --c2-tabs--padding-right: 4px;
@@ -67,13 +67,13 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--border-bottom-right-radius: 7px;
     --c2-tabs__tab--padding-top: 6px;
     --c2-tabs__tab--padding-bottom: 6px;
-    --c2-tabs__tab--color: #52525b;
+    --c2-tabs__tab--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-tabs__tab--font-weight: 500;
     --c2-tabs__tab--font-size: 13px;
-    --c2-tabs__tab__hover--color: #18181b;
+    --c2-tabs__tab__hover--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-tabs__tab__hover--background-color: rgba(255, 255, 255, 0.5);
-    --c2-tabs__tab__selected--background-color: #ffffff;
-    --c2-tabs__tab__selected--color: #18181b;
+    --c2-tabs__tab__selected--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-tabs selected-tab="t2" style="width: 260px" class="segmented" client:only="lit"
@@ -94,11 +94,11 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs--padding-bottom: 4px;
     --c2-tabs--padding-left: 4px;
     --c2-tabs--border-radius: 999px;
-    --c2-tabs--background-color: #f4f4f5;
+    --c2-tabs--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-tabs__indicator--height: calc(100% - 8px);
     --c2-tabs__indicator--bottom: 4px;
     --c2-tabs__indicator--border-radius: 999px;
-    --c2-tabs__indicator--color: #18181b;
+    --c2-tabs__indicator--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-tabs__tab--border-top-left-radius: 999px;
     --c2-tabs__tab--border-top-right-radius: 999px;
     --c2-tabs__tab--border-bottom-left-radius: 999px;
@@ -107,9 +107,9 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--padding-bottom: 6px;
     --c2-tabs__tab--font-size: 13px;
     --c2-tabs__tab--font-weight: 500;
-    --c2-tabs__tab--color: #52525b;
-    --c2-tabs__tab__hover--color: #18181b;
-    --c2-tabs__tab__selected--color: #fafafa;
+    --c2-tabs__tab--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tabs__tab__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
   }
 </style>
 <c2-tabs selected-tab="t1" style="width: 260px" class="sliding-pill" client:only="lit"
@@ -123,8 +123,8 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 ```html tag=MdxCodeBlock,label=Browser tabs
 <style>
   .browser-tabs {
-    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #d4d4d8;
-    --c2-tabs--background-color: #f4f4f5;
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px var(--c2-theme--color-outline, #d4d4d8);
+    --c2-tabs--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-tabs--padding-top: 6px;
     --c2-tabs--padding-left: 6px;
     --c2-tabs--padding-right: 6px;
@@ -136,11 +136,11 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--padding-top: 7px;
     --c2-tabs__tab--padding-bottom: 7px;
     --c2-tabs__tab--font-size: 13px;
-    --c2-tabs__tab--color: #52525b;
-    --c2-tabs__tab__hover--color: #18181b;
-    --c2-tabs__tab__hover--background-color: #e4e4e7;
-    --c2-tabs__tab__selected--background-color: #ffffff;
-    --c2-tabs__tab__selected--color: #18181b;
+    --c2-tabs__tab--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tabs__tab__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-tabs__tab__hover--background-color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tabs__tab__selected--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-tabs selected-tab="t2" style="width: 260px" class="browser-tabs" client:only="lit"
@@ -154,7 +154,7 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 ```html tag=MdxCodeBlock,label=Material
 <style>
   .material {
-    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #cac4d0;
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 23%, var(--c2-theme--color-surface, #ffffff));
     --c2-tabs__tab--flex: 1 1 0;
     --c2-tabs__indicator--color: #6750a4;
     --c2-tabs__indicator--height: 3px;
@@ -165,8 +165,8 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--border-top-right-radius: 8px;
     --c2-tabs__tab--font-size: 14px;
     --c2-tabs__tab--font-weight: 500;
-    --c2-tabs__tab--color: #49454f;
-    --c2-tabs__tab__hover--color: #1d1b20;
+    --c2-tabs__tab--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 78%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tabs__tab__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 98%, var(--c2-theme--color-surface, #ffffff));
     --c2-tabs__tab__hover--background-color: rgba(103, 80, 164, 0.08);
     --c2-tabs__tab__selected--color: #6750a4;
     --c2-tabs__tab__selected--background-color: transparent;
@@ -184,8 +184,8 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 ```html tag=MdxCodeBlock,label=Terminal
 <style>
   .terminal {
-    --c2-tabs--background-color: #18181b;
-    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #27272a;
+    --c2-tabs--background-color: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-tabs--border-radius: 8px 8px 0 0;
     --c2-tabs--padding-left: 6px;
     --c2-tabs--padding-right: 6px;
@@ -197,10 +197,10 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--padding-bottom: 10px;
     --c2-tabs__tab--padding-left: 8px;
     --c2-tabs__tab--padding-right: 8px;
-    --c2-tabs__tab--color: #71717a;
-    --c2-tabs__tab__hover--color: #e4e4e7;
-    --c2-tabs__tab__hover--background-color: #27272a;
-    --c2-tabs__tab__selected--color: #fafafa;
+    --c2-tabs__tab--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-tabs__tab__hover--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tabs__tab__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
     --c2-tabs__tab__selected--background-color: transparent;
     --c2-tabs__tab__focus--outline: 2px solid rgba(34, 197, 94, 0.5);
   }
@@ -235,11 +235,11 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 <style>
   .full-width {
     --c2-tabs--justify-content: space-between;
-    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #e4e4e7;
-    --c2-tabs__indicator--color: #18181b;
-    --c2-tabs__tab--color: #71717a;
-    --c2-tabs__tab__hover--color: #18181b;
-    --c2-tabs__tab__selected--color: #18181b;
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tabs__indicator--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-tabs__tab--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-tabs__tab__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-tabs__tab--font-weight: 500;
   }
 </style>
@@ -256,15 +256,15 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
   .icon-label {
     --c2-feather-icon--size: 15px;
     --c2-tabs--gap: 2px;
-    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #e4e4e7;
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-tabs__indicator--color: #0f766e;
     --c2-tabs__tab--padding-left: 12px;
     --c2-tabs__tab--padding-right: 12px;
     --c2-tabs__tab--font-size: 13px;
     --c2-tabs__tab--font-weight: 500;
-    --c2-tabs__tab--color: #71717a;
+    --c2-tabs__tab--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-tabs__tab__hover--color: #134e4a;
-    --c2-tabs__tab__hover--background-color: #f0fdfa;
+    --c2-tabs__tab__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     --c2-tabs__tab__selected--color: #0f766e;
   }
 </style>

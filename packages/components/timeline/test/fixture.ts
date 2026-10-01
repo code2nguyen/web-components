@@ -1,0 +1,13 @@
+import { expect } from '@playwright/test'
+import { test as base } from '../../../../tests/fixture'
+
+export const test = base.extend<{ scenario: (name?: string) => Promise<void> }>({
+  scenario: async ({ page }, use) => {
+    await use(async (name = 'default') => {
+      await page.goto(`/packages/components/timeline/test/scenarios.html?scenario=${encodeURIComponent(name)}`)
+      await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
+    })
+  },
+})
+// Re-exported from the component fixture for its `toHaveHostAria` matcher.
+export { expect } from '../../../../tests/component-fixture'

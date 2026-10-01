@@ -104,7 +104,7 @@ All variables have usable defaults. Change colors, typography and measured spaci
 
 - `token`: Colored log token; severity and timestamp tokens use the existing level and timestamp colors.
 - `copy-icon`: Copy and success SVG icon.
-- `copy-button`: Copy the complete message of a visible entry; revealed on hover or keyboard focus.
+- `copy-button`: Copy the complete message of a visible entry; revealed on hover, tap or keyboard focus.
 - `highlight`: Matching visible entry or plain text slice in highlight mode.
 - `viewport`: Keyboard accessible scroll surface.
 - `content`: Virtual content and its total scroll extent.

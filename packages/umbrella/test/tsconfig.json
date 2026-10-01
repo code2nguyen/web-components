@@ -1,0 +1,15 @@
+{
+  "extends": "@c2n/config/tsconfig.lib.json",
+  "include": ["barrel.ts", "react.tsx", "vue.ts", "../*.d.ts", "../lib/*.d.ts"],
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false,
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "declaration": false,
+    "declarationMap": false,
+    "skipLibCheck": false,
+    "jsx": "react-jsx",
+    "types": []
+  }
+}

@@ -17,6 +17,8 @@ export interface ChartBuildContext {
   hidden: ReadonlySet<number>
   /** Category labels, when the chart is categorical. */
   labels?: string[]
+  /** Index of the series the reader highlighted from the legend, or `-1`. The others are drawn dimmed. */
+  highlighted: number
   width: number
   height: number
 }
@@ -59,6 +61,12 @@ export interface ChartAdapter<TOptions = unknown, TData = unknown> {
    * one series and many slices. Only the engines that can do it implement it.
    */
   setDatumVisibility?(name: string, visible: boolean): void
+
+  /**
+   * Repaints from the current options and data, recomputing every mark. Optional: for a chart whose marks depend on
+   * which series are shown (a stacked bar chart), which a visibility toggle alone would leave stale.
+   */
+  redraw?(): void
 
   resize(width: number, height: number): void
 

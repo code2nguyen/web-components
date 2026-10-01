@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <path class="line-accent" d="M88 70c2-10 12-10 12-20s10-12 16-10"/>
+  <path class="line-primary" d="M96 90c8-4 14 4 22-2"/>
+  <path class="primary" d="M36 126 60 62l38 38Z"/>
+  <path class="line-surface" d="M47 97l16 16M54 78l27 27"/>
+  <ellipse class="primary-soft line" cx="79" cy="81" rx="27" ry="7" transform="rotate(45 79 81)"/>
+  <rect class="success" x="110" y="64" width="9" height="4" rx="1.5" transform="rotate(35 114 66)"/>
+  <rect class="error" x="70" y="36" width="9" height="4" rx="1.5" transform="rotate(-30 74 38)"/>
+  <rect class="accent" x="118" y="104" width="9" height="4" rx="1.5" transform="rotate(-20 122 106)"/>
+  <path class="accent" d="M124 22Q126.2 27.8 132 30Q126.2 32.2 124 38Q121.8 32.2 116 30Q121.8 27.8 124 22Z"/>
+  <path class="primary" d="M54 35Q55.4 38.6 59 40Q55.4 41.4 54 45Q52.6 41.4 49 40Q52.6 38.6 54 35Z"/>
+  <circle class="primary" cx="106" cy="116" r="3.5"/>
+  <circle class="error" cx="128" cy="82" r="3"/>
+  <circle class="accent" cx="36" cy="58" r="4"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="surface line" x="22" y="54" width="116" height="52" rx="26"/>
+  <circle class="muted" cx="50" cy="80" r="12"/>
+  <path class="line-ink" d="M46 77v.01M54 77v.01M45 87a6 6 0 0 1 10 0"/>
+  <circle class="muted" cx="80" cy="80" r="12"/>
+  <path class="line-ink" d="M76 77v.01M84 77v.01M75 86h10"/>
+  <circle class="accent" cx="110" cy="80" r="15"/>
+  <path class="line-ink" d="M105 76v.01M115 76v.01M103 83a7 7 0 0 0 14 0"/>
+  <path class="ink line-surface" d="m116 94 5 22 5-7 9 2Z"/>
+  <path class="accent" d="M126 29Q128 34 133 36Q128 38 126 43Q124 38 119 36Q124 34 126 29Z"/>
+  <path class="line-primary" d="M34 31v10M29 36h10"/>
+  <circle class="accent" cx="36" cy="124" r="4"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <circle class="primary-soft" cx="80" cy="80" r="44"/>
+  <path class="line-primary" d="M49.2 71.6A34 34 0 0 1 110.8 71.6"/>
+  <path class="line-primary" d="M54.4 81.5A26 26 0 0 1 105.6 81.5M54 86c0 10 2 18 6 24"/>
+  <path class="line-primary" d="M62 86A18 18 0 0 1 98 86M98 86c0 12-3 22-8 30M62 86c0 14 4 24 10 32"/>
+  <path class="line-primary" d="M70 86A10 10 0 0 1 90 86M70 86c0 14 3 26 8 34M90 86c0 10-1 18-4 26"/>
+  <path class="line-primary" d="M80 86c0 12 1 22 4 30"/>
+  <path class="accent" d="M128 25Q130 30 135 32Q130 34 128 39Q126 34 121 32Q126 30 128 25Z"/>
+  <path class="line-accent" d="M32 114v8M28 118h8"/>
+</svg>

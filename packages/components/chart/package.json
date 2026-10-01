@@ -1,6 +1,6 @@
 {
   "name": "@c2n/chart",
-  "version": "0.0.16",
+  "version": "0.0.19",
   "type": "module",
   "main": "dist/chart.js",
   "exports": {
@@ -36,13 +36,33 @@
       "types": "./types/src/radar-chart.d.ts",
       "default": "./dist/radar-chart.js"
     },
+    "./pyramid-chart.js": {
+      "types": "./types/src/pyramid-chart.d.ts",
+      "default": "./dist/pyramid-chart.js"
+    },
+    "./butterfly-chart.js": {
+      "types": "./types/src/butterfly-chart.d.ts",
+      "default": "./dist/butterfly-chart.js"
+    },
     "./scatter-chart.js": {
       "types": "./types/src/scatter-chart.d.ts",
       "default": "./dist/scatter-chart.js"
     },
+    "./bubble-chart.js": {
+      "types": "./types/src/bubble-chart.d.ts",
+      "default": "./dist/bubble-chart.js"
+    },
     "./candlestick-chart.js": {
       "types": "./types/src/candlestick-chart.d.ts",
       "default": "./dist/candlestick-chart.js"
+    },
+    "./overlap-chart.js": {
+      "types": "./types/src/overlap-chart.d.ts",
+      "default": "./dist/overlap-chart.js"
+    },
+    "./overlap-layout.js": {
+      "types": "./types/src/overlap-layout.d.ts",
+      "default": "./dist/overlap-layout.js"
     },
     "./chart-series.js": {
       "types": "./types/src/chart-series.d.ts",
@@ -111,8 +131,14 @@
     "line chart",
     "gauge chart",
     "radar chart",
+    "pyramid chart",
+    "butterfly chart",
+    "population pyramid",
     "scatter plot",
+    "bubble chart",
     "candlestick chart",
+    "venn diagram",
+    "overlap chart",
     "sparkline",
     "uplot",
     "echarts",
@@ -150,7 +176,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.16",
+    "@c2n/core": "0.0.19",
+    "@upsetjs/venn.js": "2.0.0",
     "lit": "3.3.3"
   },
   "devDependencies": {

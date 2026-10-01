@@ -1,0 +1,16 @@
+---
+/** Wires the "Toolbar: group by" card of the table gallery: its segmented control sets the table's `groupBy`. */
+---
+
+<script>
+  import '@c2n/button-group'
+  import '@c2n/table'
+
+  // The table is a `client:only` island and may not exist yet, so listen once on the document; `change` bubbles.
+  document.addEventListener('change', (event) => {
+    const group = event.target as HTMLElement & { value: string }
+    if (group.localName !== 'c2-button-group') return
+    const table = group.closest<HTMLElement & { groupBy: string[] }>('c2-table[data-group-by-table]')
+    if (table) table.groupBy = group.value === 'none' ? [] : group.value.split(',')
+  })
+</script>

@@ -21,7 +21,7 @@ Curated looks for `c2-breadcrumb`. Open any card in the studio to start from it.
 <style>
   .slash {
     --c2-breadcrumb--gap: 6px;
-    --c2-breadcrumb__separator--color: #d4d4d8;
+    --c2-breadcrumb__separator--color: var(--c2-theme--color-outline, #d4d4d8);
     --c2-breadcrumb__item--font-weight: 400;
   }
 </style>
@@ -36,12 +36,12 @@ Curated looks for `c2-breadcrumb`. Open any card in the studio to start from it.
 ```html tag=MdxCodeBlock,label=Quiet
 <style>
   .quiet {
-    --c2-breadcrumb__item--color: #a1a1aa;
+    --c2-breadcrumb__item--color: var(--c2-theme--color-outline-strong, #a1a1aa);
     --c2-breadcrumb__item--font-weight: 400;
-    --c2-breadcrumb__item__hover--color: #52525b;
-    --c2-breadcrumb__item__current--color: #52525b;
+    --c2-breadcrumb__item__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-breadcrumb__item__current--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-breadcrumb__item__current--font-weight: 400;
-    --c2-breadcrumb__separator--color: #d4d4d8;
+    --c2-breadcrumb__separator--color: var(--c2-theme--color-outline, #d4d4d8);
     --c2-breadcrumb__separator--size: 12px;
   }
 </style>
@@ -76,10 +76,10 @@ Curated looks for `c2-breadcrumb`. Open any card in the studio to start from it.
 ```html tag=MdxCodeBlock,label=Accent current
 <style>
   .accent {
-    --c2-breadcrumb__item--color: #52525b;
-    --c2-breadcrumb__item__hover--color: #0265dc;
+    --c2-breadcrumb__item--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-breadcrumb__item__hover--color: var(--c2-theme--color-primary, #0265dc);
     --c2-breadcrumb__item__hover--text-decoration: underline;
-    --c2-breadcrumb__item__current--color: #0265dc;
+    --c2-breadcrumb__item__current--color: var(--c2-theme--color-primary, #0265dc);
     --c2-breadcrumb__item__current--font-weight: 600;
   }
 </style>
@@ -114,7 +114,7 @@ Curated looks for `c2-breadcrumb`. Open any card in the studio to start from it.
     width: 240px;
     max-width: 100%;
     padding: 4px;
-    border: 1px dashed #d4d4d8;
+    border: 1px dashed var(--c2-theme--color-outline, #d4d4d8);
     border-radius: 6px;
   }
 </style>
@@ -144,12 +144,12 @@ Curated looks for `c2-breadcrumb`. Open any card in the studio to start from it.
   .dark {
     padding: 12px 16px;
     border-radius: 10px;
-    background: #18181b;
-    --c2-breadcrumb__item--color: #a1a1aa;
-    --c2-breadcrumb__item__hover--color: #fafafa;
-    --c2-breadcrumb__item__hover--background-color: #27272a;
-    --c2-breadcrumb__item__current--color: #fafafa;
-    --c2-breadcrumb__separator--color: #52525b;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-breadcrumb__item--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-breadcrumb__item__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-breadcrumb__item__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-breadcrumb__item__current--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-breadcrumb__separator--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-breadcrumb client:only="lit" class="dark">

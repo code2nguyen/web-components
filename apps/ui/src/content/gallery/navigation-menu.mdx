@@ -34,7 +34,7 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
     --c2-navigation-menu-item__expanded--background: transparent;
     --c2-navigation-menu-item__indicator--inset: 0px;
     --c2-navigation-menu-item__indicator--bottom: -2px;
-    --c2-navigation-menu-item__indicator--color: #18181b;
+    --c2-navigation-menu-item__indicator--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-navigation-menu-item__indicator--border-radius: 0px;
   }
   .underline .stack {
@@ -50,7 +50,7 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
 <style>
   .pill {
     --c2-navigation-menu--gap: 2px;
-    --c2-navigation-menu--background: #f4f4f5;
+    --c2-navigation-menu--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-navigation-menu--padding-top: 4px;
     --c2-navigation-menu--padding-right: 4px;
     --c2-navigation-menu--padding-bottom: 4px;
@@ -63,9 +63,9 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
     --c2-navigation-menu-item--border-top-right-radius: 999px;
     --c2-navigation-menu-item--border-bottom-left-radius: 999px;
     --c2-navigation-menu-item--border-bottom-right-radius: 999px;
-    --c2-navigation-menu-item__hover--background: #ffffff;
-    --c2-navigation-menu-item__expanded--background: #ffffff;
-    --c2-navigation-menu-item__current--background: #ffffff;
+    --c2-navigation-menu-item__hover--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-navigation-menu-item__expanded--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-navigation-menu-item__current--background: var(--c2-theme--color-surface, #ffffff);
     --c2-navigation-menu-item__indicator--height: 0px;
   }
   .pill .stack {
@@ -88,8 +88,8 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
     --c2-navigation-menu-item--border-bottom-right-radius: 8px;
     --c2-navigation-menu-item__expanded--border-bottom-left-radius: 8px;
     --c2-navigation-menu-item__expanded--border-bottom-right-radius: 8px;
-    --c2-navigation-menu-item__expanded--background: #e4e4e7;
-    --c2-navigation-menu-item__current--background: #f4f4f5;
+    --c2-navigation-menu-item__expanded--background: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-navigation-menu-item__current--background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .no-indicator .stack {
     display: grid;
@@ -103,7 +103,7 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
 ```html tag=MdxCodeBlock,label=Dark header
 <style>
   .dark {
-    --c2-navigation-menu--background: #09090b;
+    --c2-navigation-menu--background: var(--c2-theme--color-on-surface, #18181b);
     --c2-navigation-menu--padding-top: 6px;
     --c2-navigation-menu--padding-right: 10px;
     --c2-navigation-menu--padding-bottom: 6px;
@@ -112,22 +112,22 @@ Each card is a small bar; hover or click a trigger to see its panel. `--c2-navig
     --c2-navigation-menu--border-top-right-radius: 10px;
     --c2-navigation-menu--border-bottom-left-radius: 10px;
     --c2-navigation-menu--border-bottom-right-radius: 10px;
-    --c2-navigation-menu-item--color: #a1a1aa;
-    --c2-navigation-menu-item__hover--color: #fafafa;
-    --c2-navigation-menu-item__hover--background: #27272a;
-    --c2-navigation-menu-item__expanded--color: #fafafa;
-    --c2-navigation-menu-item__expanded--background: #27272a;
-    --c2-navigation-menu-item__current--color: #fafafa;
+    --c2-navigation-menu-item--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-navigation-menu-item__hover--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-navigation-menu-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-navigation-menu-item__expanded--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-navigation-menu-item__expanded--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-navigation-menu-item__current--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
     --c2-navigation-menu-item__indicator--color: #a78bfa;
-    --c2-navigation-menu-item__panel--background: #18181b;
-    --c2-navigation-menu-item__panel--border-top: 1px solid #3f3f46;
-    --c2-navigation-menu-item__panel--border-right: 1px solid #3f3f46;
-    --c2-navigation-menu-item__panel--border-bottom: 1px solid #3f3f46;
-    --c2-navigation-menu-item__panel--border-left: 1px solid #3f3f46;
+    --c2-navigation-menu-item__panel--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-navigation-menu-item__panel--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-navigation-menu-item__panel--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-navigation-menu-item__panel--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-navigation-menu-item__panel--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-navigation-menu-item__panel--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-    --c2-navigation-menu-link--color: #fafafa;
-    --c2-navigation-menu-link__hover--background: #27272a;
-    --c2-navigation-menu-link__description--color: #a1a1aa;
+    --c2-navigation-menu-link--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-navigation-menu-link__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-navigation-menu-link__description--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
   .dark .stack {
     display: grid;
@@ -194,10 +194,10 @@ The panel surface is `--c2-navigation-menu-item__panel--*` and the rows inside i
 <style>
   .tinted {
     --c2-navigation-menu-item__indicator--color: #7c3aed;
-    --c2-navigation-menu-link__hover--background: #f5f3ff;
+    --c2-navigation-menu-link__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     --c2-navigation-menu-link__hover--color: #5b21b6;
     --c2-navigation-menu-link__current--color: #7c3aed;
-    --c2-navigation-menu-link__current--background: #f5f3ff;
+    --c2-navigation-menu-link__current--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     --c2-navigation-menu-link__focus--outline: 2px solid rgba(124, 58, 237, 0.4);
   }
   .tinted .stack {
@@ -222,7 +222,7 @@ The panel surface is `--c2-navigation-menu-item__panel--*` and the rows inside i
 <c2-navigation-menu class="mobile-look" aria-label="Mobile" mode="mobile" client:only="lit"><c2-navigation-menu-item value="fixed">Fixed Income Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#a">Reference Data</c2-navigation-menu-link><c2-navigation-menu-link href="#b">Corporate Actions</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="regulatory">Regulatory Products<div class="stack" slot="panel"><c2-navigation-menu-link href="#c">ERISA Portfolio Analytics</c2-navigation-menu-link></div></c2-navigation-menu-item><c2-navigation-menu-item value="home" href="#home">Home</c2-navigation-menu-item></c2-navigation-menu>
 ```
 
-```html tag=MdxCodeBlock,label=Mobile, collapsible groups
+```html tag=MdxCodeBlock,label=Collapsible mobile
 <style>
   .mobile-collapsible {
     --c2-navigation-menu__mobile-trigger--border-radius: 999px;

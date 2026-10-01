@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <ellipse class="muted" cx="80" cy="132" rx="42" ry="5"/>
+  <path class="surface line" d="M43.6 56H130l-12 42H54.4Z"/>
+  <path class="line" d="M56 70h64M58 84h58"/>
+  <path class="line" d="M26 42h14l18 70h58"/>
+  <circle class="primary line" cx="64" cy="122" r="7"/>
+  <circle class="primary line" cx="110" cy="122" r="7"/>
+</svg>

@@ -34,17 +34,32 @@ The examples below are real application patterns rather than visual variants. Th
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .autocomplete-example [slot='header'] strong {
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    font-weight: 600;
+  }
+  .autocomplete-example [slot] > :first-child {
+    min-width: 0;
   }
   .autocomplete-example [slot] button {
-    border: 1px solid #c4b5fd;
+    flex: none;
+    border: 1px solid #ddd6fe;
     border-radius: 999px;
-    padding: 4px 9px;
+    padding: 3px 10px;
     color: #6d28d9;
-    background: #f5f3ff;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
     font: inherit;
     font-weight: 600;
+    white-space: nowrap;
     cursor: pointer;
+  }
+  .autocomplete-example [slot] button:hover {
+    background: #ede9fe;
   }
 </style>
 <div data-label="Mention teammate">
@@ -61,8 +76,8 @@ The examples below are real application patterns rather than visual variants. Th
     search-fields="name;role;location"
     suggestions='[{"id":"ada","name":"Ada Lovelace","role":"Staff engineer","location":"London","status":"online"},{"id":"grace","name":"Grace Hopper","role":"Compiler lead","location":"New York","status":"busy"},{"id":"katherine","name":"Katherine Johnson","role":"Data scientist","location":"Hampton","status":"away"}]'
   >
-    <div slot="header"><strong>People in this workspace</strong> · <button type="button" data-invite-person>Invite person</button></div>
-    <div slot="footer"><span data-example-status>Selection keeps the @ query</span> · <button type="button" data-view-team>View team</button></div>
+    <div slot="header"><strong>People in this workspace</strong><button type="button" data-invite-person>Invite person</button></div>
+    <div slot="footer"><span data-example-status>Selection keeps the @ query</span><button type="button" data-view-team>View team</button></div>
   </c2-autocomplete>
 </div>
 <div data-label="Remote catalog">
@@ -79,7 +94,7 @@ The examples below are real application patterns rather than visual variants. Th
     debounce="250"
     show-empty
   >
-    <div slot="header"><strong>Product catalog</strong> · <button type="button" data-scan-product>Scan barcode</button></div>
+    <div slot="header"><strong>Product catalog</strong><button type="button" data-scan-product>Scan barcode</button></div>
     <span slot="loading">Checking live inventory…</span>
     <span slot="empty">No products match this search.</span>
     <span slot="footer" data-example-status>Inventory comes from an asynchronous data source</span>

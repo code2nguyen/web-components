@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Slider } from '@c2n/slider'
 
-`c2-slider` wraps a native `<input type="range">`, so dragging, keyboard steps (Arrow keys, Page Up/Down, Home and End), right-to-left layouts and the `slider` role all come from the browser. The component draws the track, the filled part, the thumb, optional step `ticks` and a value bubble that `show-value` reveals while hovering, dragging or focused. `value`, `min`, `max` and `step` behave like the native attributes; `input` fires on every step of a drag and `change` when the value is committed. Add `name` to submit the current value through `FormData(form)`; form reset, fieldset disabling and the standard constraint-validation methods are supported. Set the `formatValue` property to format the bubble and `aria-valuetext` together.
+`c2-slider` wraps a native `<input type="range">`, so dragging, keyboard steps (Arrow keys, Page Up/Down, Home and End), right-to-left layouts and the `slider` role all come from the browser. The component draws the track, the filled part, the thumb, optional step `ticks` and a value bubble that `show-value` reveals while hovering, dragging or focused. `value`, `min`, `max` and `step` behave like the native attributes; `input` fires on every step of a drag and `change` when the value is committed. Add `name` to submit the current value through `FormData(form)`; form reset, fieldset disabling and the standard constraint-validation methods are supported. Set the `formatValue` property to format the bubble and `aria-valuetext` together. Set `mode="range"` to select an interval with two thumbs instead: `value-start` and `value-end` (`valueStart`/`valueEnd`) replace `value`, the thumbs cannot cross, a press on the track moves the nearer thumb, and the form receives two entries under `name`, start first.
 
 ## Installation
 
@@ -31,10 +31,10 @@ npm install @c2n/slider
     display: flex;
     justify-content: space-between;
     font-size: 13px;
-    color: #3f3f46;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
   .field header span:last-child {
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     font-variant-numeric: tabular-nums;
   }
   .wide {
@@ -71,6 +71,12 @@ npm install @c2n/slider
     <c2-slider min="0" max="1" step="0.25" value="0.5" ticks show-value aria-label="Quarter steps"></c2-slider>
   </div>
 </div>
+<div data-label="Range">
+  <div class="stack wide">
+    <c2-slider mode="range" value-start="20" value-end="80" show-value aria-label="Price"></c2-slider>
+    <c2-slider mode="range" min="0" max="10" step="1" value-start="3" value-end="7" ticks aria-label="Rating range"></c2-slider>
+  </div>
+</div>
 <div data-label="Disabled">
   <c2-slider class="wide" value="30" disabled aria-label="Disabled"></c2-slider>
 </div>
@@ -83,6 +89,6 @@ npm install @c2n/slider
 </div>
 ```
 
-Label the slider with `aria-label` or point `aria-labelledby` at a visible label, as in the Default row; the value itself is announced through `aria-valuetext`, which uses the same `formatValue` as the bubble. A horizontal slider fills the width of its container, so size it from the outside; a vertical one is an inline box whose height is `--c2-slider__container--length`.
+Label the slider with `aria-label` or point `aria-labelledby` at a visible label, as in the Default row; the value itself is announced through `aria-valuetext`, which uses the same `formatValue` as the bubble. In range mode each thumb is its own `slider`, named from `aria-label` and `start-label`/`end-label` ("Price, Minimum" and "Price, Maximum" by default). A horizontal slider fills the width of its container, so size it from the outside; a vertical one is an inline box whose height is `--c2-slider__container--length`.
 
 Because the native input owns the interaction, the thumb you see is a drawing: the invisible native thumb has the same size, so a press lands where the visual thumb sits. Theme the drawing with `--c2-slider__track--*`, `--c2-slider__fill--color` and `--c2-slider__thumb--*`; the thumb has hover and active halos (`__hover--box-shadow`, `__active--box-shadow`) and a focus ring. Tick marks pick a different colour on the filled part (`--c2-slider__tick__filled--color`), and the bubble is themed with `--c2-slider__value--*`, including a resting `--c2-slider__value--opacity` for an always-visible readout.

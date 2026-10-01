@@ -1,0 +1,83 @@
+---
+description: 'Ready-made looks for c2-tag-input: pills, soft filled, compact and brand-coloured tags. Open any card in the studio to start from it.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TagInput } from '@c2n/tag-input'
+
+## Presets
+
+The field box follows `c2-text-field` (`--c2-tag-input--*` borders, radii, padding and `__hover` / `__focus` / `__error` states); the tags have their own `--c2-tag-input__tag--*` height, radius, border, fill and text.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .default {
+    width: 320px;
+  }
+</style>
+<c2-tag-input class="default" aria-label="Recipients" placeholder="Add recipients" value="ann@example.com;bob@example.com"></c2-tag-input>
+```
+
+```html tag=MdxCodeBlock,label=Pills
+<style>
+  .pills {
+    width: 320px;
+    --c2-tag-input__tag--border-radius: 999px;
+    --c2-tag-input__tag--padding-left: 10px;
+    --c2-tag-input__tag--border: 1px solid transparent;
+    --c2-tag-input__tag--background: #edf1fe;
+    --c2-tag-input__tag--color: #2f56e6;
+    --c2-tag-input__remove-icon--color: #2f56e6;
+  }
+</style>
+<c2-tag-input class="pills" aria-label="Topics" placeholder="Add a topic" value="design;frontend;a11y"></c2-tag-input>
+```
+
+```html tag=MdxCodeBlock,label=Soft filled
+<style>
+  .soft-filled {
+    width: 320px;
+    --c2-tag-input--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-tag-input--border-top: 1px solid transparent;
+    --c2-tag-input--border-right: 1px solid transparent;
+    --c2-tag-input--border-bottom: 1px solid transparent;
+    --c2-tag-input--border-left: 1px solid transparent;
+    --c2-tag-input__hover--border-top: 1px solid transparent;
+    --c2-tag-input__hover--border-right: 1px solid transparent;
+    --c2-tag-input__hover--border-bottom: 1px solid transparent;
+    --c2-tag-input__hover--border-left: 1px solid transparent;
+    --c2-tag-input--border-top-left-radius: 10px;
+    --c2-tag-input--border-top-right-radius: 10px;
+    --c2-tag-input--border-bottom-left-radius: 10px;
+    --c2-tag-input--border-bottom-right-radius: 10px;
+    --c2-tag-input__tag--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-tag-input__tag--border-radius: 6px;
+  }
+</style>
+<c2-tag-input class="soft-filled" aria-label="Labels" placeholder="Add a label" value="bug;needs review"></c2-tag-input>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 280px;
+    --c2-tag-input--min-height: 28px;
+    --c2-tag-input--font-size: 12px;
+    --c2-tag-input--line-height: 16px;
+    --c2-tag-input--padding-top: 3px;
+    --c2-tag-input--padding-bottom: 3px;
+    --c2-tag-input--padding-left: 4px;
+    --c2-tag-input--gap: 4px;
+    --c2-tag-input__tag--height: 20px;
+    --c2-tag-input__tag--padding-left: 6px;
+    --c2-tag-input__remove-icon--size: 12px;
+  }
+</style>
+<c2-tag-input class="compact" aria-label="Filters" placeholder="Filter" value="status:open;owner:me"></c2-tag-input>
+```
+
+</GalleryGrid>

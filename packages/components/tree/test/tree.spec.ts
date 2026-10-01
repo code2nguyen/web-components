@@ -11,6 +11,10 @@ const files = `
 
 const tree = (attributes = '') => `<c2-tree aria-label="Files" ${attributes}>${files}</c2-tree>`
 
+// Rows state `role="treeitem"` and their name through ElementInternals, which `getByRole` cannot read, so they are
+// found by their reflected `value` instead. Not by text: a branch's text includes all of its children.
+const itemOf = (page: Page, value: string) => page.locator(`c2-tree-item[value="${value}"]`)
+
 test('tree item label and actions parts coexist with consumer-owned projected content', async ({ page, renderScenario }) => {
   await renderScenario(
     '<c2-tree aria-label="Files"><c2-tree-item value="root" expanded><span class="slot-probe" slot="label">Root</span><span class="slot-probe" slot="actions">Action</span><span class="slot-probe" slot="icon">Icon</span><span class="slot-probe" slot="toggle-icon">Toggle</span><c2-tree-item class="slot-probe" value="child" label="Child"></c2-tree-item></c2-tree-item></c2-tree>',
@@ -38,13 +42,13 @@ test('the toggle expands a branch, reveals its children and reports the change',
   await watch(host, 'expansion-change')
 
   // A collapsed branch must keep its children out of the accessibility tree entirely, not merely hide them.
-  await expect(page.getByRole('treeitem', { name: 'app.ts' })).toHaveCount(0)
-  await expect(page.getByRole('treeitem', { name: 'src' })).toHaveAttribute('aria-expanded', 'false')
+  await expect(itemOf(page, 'app')).toBeHidden()
+  await expect(itemOf(page, 'src')).toHaveHostAria('aria-expanded', 'false')
 
   await toggleOf(page, 'src').click()
 
-  await expect(page.getByRole('treeitem', { name: 'app.ts' })).toBeVisible()
-  await expect(page.getByRole('treeitem', { name: 'src' })).toHaveAttribute('aria-expanded', 'true')
+  await expect(itemOf(page, 'app')).toBeVisible()
+  await expect(itemOf(page, 'src')).toHaveHostAria('aria-expanded', 'true')
   await expect(host).toHaveJSProperty('expandedItems', ['src'])
   await expect(host).toHaveAttribute(
     'data-events',
@@ -53,46 +57,46 @@ test('the toggle expands a branch, reveals its children and reports the change',
   await accessible(page)
 
   await toggleOf(page, 'src').click()
-  await expect(page.getByRole('treeitem', { name: 'app.ts' })).toHaveCount(0)
+  await expect(itemOf(page, 'app')).toBeHidden()
   await expect(host).toHaveJSProperty('expandedItems', [])
 })
 
 test('arrow keys walk only the visible rows and move in and out of a branch', async ({ page, renderScenario }) => {
   await renderScenario(tree())
-  const src = page.getByRole('treeitem', { name: 'src' })
+  const src = itemOf(page, 'src')
   await src.focus()
 
   // Collapsed, so Down skips the hidden children and lands on the next root.
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('treeitem', { name: 'README.md' })).toBeFocused()
+  await expect(itemOf(page, 'readme')).toBeFocused()
 
   await page.keyboard.press('ArrowUp')
   await expect(src).toBeFocused()
 
   await page.keyboard.press('ArrowRight')
-  await expect(src).toHaveAttribute('aria-expanded', 'true')
+  await expect(src).toHaveHostAria('aria-expanded', 'true')
   await page.keyboard.press('ArrowRight')
-  await expect(page.getByRole('treeitem', { name: 'app.ts' })).toBeFocused()
+  await expect(itemOf(page, 'app')).toBeFocused()
 
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('treeitem', { name: 'main.ts' })).toBeFocused()
+  await expect(itemOf(page, 'main')).toBeFocused()
 
   await page.keyboard.press('ArrowLeft')
   await expect(src).toBeFocused()
   await page.keyboard.press('ArrowLeft')
-  await expect(src).toHaveAttribute('aria-expanded', 'false')
+  await expect(src).toHaveHostAria('aria-expanded', 'false')
 
   await page.keyboard.press('End')
-  await expect(page.getByRole('treeitem', { name: 'README.md' })).toBeFocused()
+  await expect(itemOf(page, 'readme')).toBeFocused()
   await page.keyboard.press('Home')
   await expect(src).toBeFocused()
 })
 
 test('typeahead jumps to a row and Enter selects it', async ({ page, renderScenario }) => {
   await renderScenario(tree())
-  await page.getByRole('treeitem', { name: 'src' }).focus()
+  await itemOf(page, 'src').focus()
   await page.keyboard.press('r')
-  await expect(page.getByRole('treeitem', { name: 'README.md' })).toBeFocused()
+  await expect(itemOf(page, 'readme')).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(page.locator('c2-tree')).toHaveJSProperty('value', ['readme'])
 })
@@ -105,7 +109,7 @@ test('single selection replaces, and selection-change stays off the ancestors', 
 
   await rowOf(page, 'src').click()
   await expect(host).toHaveJSProperty('value', ['src'])
-  await expect(page.getByRole('treeitem', { name: 'src' })).toHaveAttribute('aria-selected', 'true')
+  await expect(itemOf(page, 'src')).toHaveHostAria('aria-selected', 'true')
 
   await rowOf(page, 'readme').click()
   await expect(host).toHaveJSProperty('value', ['readme'])
@@ -138,12 +142,12 @@ test('a checkbox carries its tick to descendants and leaves the parent indetermi
 
   await checkboxOf(page, 'src').click()
   await expect(host).toHaveJSProperty('value', ['src', 'app', 'main'])
-  await expect(page.getByRole('treeitem', { name: 'src' })).not.toHaveAttribute('indeterminate', '')
+  await expect(itemOf(page, 'src')).not.toHaveAttribute('indeterminate', '')
 
   // Clearing one child leaves the branch partially selected.
   await checkboxOf(page, 'app').click()
   await expect(host).toHaveJSProperty('value', ['main'])
-  await expect(page.getByRole('treeitem', { name: 'src' })).toHaveAttribute('indeterminate', '')
+  await expect(itemOf(page, 'src')).toHaveAttribute('indeterminate', '')
 
   // And re-ticking the last child restores the parent.
   await checkboxOf(page, 'app').click()
@@ -166,7 +170,7 @@ test('propagation skips a disabled descendant and still settles the parent', asy
   // The disabled row is never added: it could not be clicked back out again.
   await expect(host).toHaveJSProperty('value', ['src', 'app'])
   // And it is left out of the tally, so the branch reads as fully selected rather than stuck half-ticked.
-  await expect(page.getByRole('treeitem', { name: 'src' })).not.toHaveAttribute('indeterminate', '')
+  await expect(itemOf(page, 'src')).not.toHaveAttribute('indeterminate', '')
 })
 
 test('a lazy branch shows a spinner, then renders whatever the loader resolved', async ({ page, renderScenario }) => {
@@ -184,14 +188,14 @@ test('a lazy branch shows a spinner, then renders whatever the loader resolved',
   })
 
   await toggleOf(page, 'src').click()
-  await expect(page.getByRole('treeitem', { name: 'src' }).locator('c2-spinner')).toBeVisible()
+  await expect(itemOf(page, 'src').locator('c2-spinner')).toBeVisible()
 
   await page.evaluate(() => {
     ;(window as unknown as { resolveChildren: (nodes: unknown) => void }).resolveChildren([{ value: 'app', label: 'app.ts' }])
   })
 
-  await expect(page.getByRole('treeitem', { name: 'app.ts' })).toBeVisible()
-  await expect(page.getByRole('treeitem', { name: 'src' }).locator('c2-spinner')).toHaveCount(0)
+  await expect(itemOf(page, 'app')).toBeVisible()
+  await expect(itemOf(page, 'src').locator('c2-spinner')).toHaveCount(0)
   await expect(host).toHaveJSProperty('expandedItems', ['src'])
 })
 
@@ -209,7 +213,7 @@ test('a rejected load surfaces the error and leaves the branch retryable', async
 
   await toggleOf(page, 'src').click()
   await expect(host).toHaveAttribute('data-events', '[{"node":{"value":"src","label":"src","disabled":false,"hasChildren":true},"error":{}}]')
-  await expect(page.getByRole('treeitem', { name: 'src' }).locator('c2-spinner')).toHaveCount(0)
+  await expect(itemOf(page, 'src').locator('c2-spinner')).toHaveCount(0)
 })
 
 test('the data-driven mode builds the same tree as the markup', async ({ page, renderScenario }) => {
@@ -229,9 +233,11 @@ test('the data-driven mode builds the same tree as the markup', async ({ page, r
     ],
   })
 
-  await expect(page.getByRole('treeitem')).toHaveCount(4)
-  await expect(page.getByRole('treeitem', { name: 'app.ts' })).toHaveAttribute('aria-level', '2')
-  await expect(page.getByRole('treeitem', { name: 'src' })).toHaveAttribute('aria-expanded', 'true')
+  const rows = page.locator('c2-tree-item')
+  await expect(rows).toHaveCount(4)
+  for (const row of await rows.all()) await expect(row).toHaveHostAria('role', 'treeitem')
+  await expect(itemOf(page, 'app')).toHaveHostAria('aria-level', '2')
+  await expect(itemOf(page, 'src')).toHaveHostAria('aria-expanded', 'true')
 
   await rowOf(page, 'main').click()
   await expect(host).toHaveJSProperty('value', ['main'])
@@ -243,16 +249,16 @@ test('the tree is a single tab stop and remembers the focused row', async ({ pag
   await page.locator('#before').focus()
 
   await tab()
-  await expect(page.getByRole('treeitem', { name: 'src' })).toBeFocused()
+  await expect(itemOf(page, 'src')).toBeFocused()
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('treeitem', { name: 'README.md' })).toBeFocused()
+  await expect(itemOf(page, 'readme')).toBeFocused()
 
   // The roving tabindex means the whole tree is one stop, not one per row.
   await tab()
   await expect(page.locator('#after')).toBeFocused()
 
   await tab(true)
-  await expect(page.getByRole('treeitem', { name: 'README.md' })).toBeFocused()
+  await expect(itemOf(page, 'readme')).toBeFocused()
 })
 
 test('a disabled row cannot be selected or expanded', async ({ page, renderScenario }) => {
@@ -273,9 +279,9 @@ test('a disabled row cannot be selected or expanded', async ({ page, renderScena
   await expect(host).toHaveJSProperty('expandedItems', [])
 
   // And keyboard traversal skips it altogether.
-  await page.getByRole('treeitem', { name: 'README.md' }).focus()
+  await itemOf(page, 'readme').focus()
   await page.keyboard.press('Home')
-  await expect(page.getByRole('treeitem', { name: 'README.md' })).toBeFocused()
+  await expect(itemOf(page, 'readme')).toBeFocused()
 })
 
 test('expandAll and collapseAll reach every branch in both modes', async ({ page, renderScenario }) => {
@@ -284,10 +290,10 @@ test('expandAll and collapseAll reach every branch in both modes', async ({ page
 
   await host.evaluate((el) => (el as HTMLElement & { expandAll(): void }).expandAll())
   await expect(host).toHaveJSProperty('expandedItems', ['src'])
-  await expect(page.getByRole('treeitem', { name: 'app.ts' })).toBeVisible()
+  await expect(itemOf(page, 'app')).toBeVisible()
 
   await host.evaluate((el) => (el as HTMLElement & { collapseAll(): void }).collapseAll())
-  await expect(page.getByRole('treeitem', { name: 'app.ts' })).toHaveCount(0)
+  await expect(itemOf(page, 'app')).toBeHidden()
 
   // The data-driven mode has to reach collapsed branches too, whose rows are not rendered yet.
   await renderScenario('<c2-tree aria-label="Regions"></c2-tree>')
@@ -297,7 +303,7 @@ test('expandAll and collapseAll reach every branch in both modes', async ({ page
   })
   await data.evaluate((el) => (el as HTMLElement & { expandAll(): void }).expandAll())
   await expect(data).toHaveJSProperty('expandedItems', ['emea', 'fr'])
-  await expect(page.getByRole('treeitem', { name: 'Paris' })).toBeVisible()
+  await expect(itemOf(page, 'paris')).toBeVisible()
 })
 
 test('indent guides line up under each ancestor toggle, clear of the row corner', async ({ page, renderScenario }) => {
@@ -352,11 +358,13 @@ test('an empty or malformed items attribute renders instead of throwing', async 
   await renderScenario('<c2-tree aria-label="Empty" items=""></c2-tree><c2-tree aria-label="Broken" items="{nope"></c2-tree>')
   await expect(page.locator('c2-tree').first()).toHaveJSProperty('items', [])
   await expect(page.locator('c2-tree').nth(1)).toHaveJSProperty('items', [])
-  await expect(page.getByRole('tree')).toHaveCount(2)
+  await expect(page.locator('c2-tree')).toHaveCount(2)
+  await expect(page.locator('c2-tree').first()).toHaveHostAria('role', 'tree')
+  await expect(page.locator('c2-tree').nth(1)).toHaveHostAria('role', 'tree')
 
   // And it recovers when real data arrives.
   await props(page.locator('c2-tree').first(), { items: [{ value: 'a', label: 'Alpha' }] })
-  await expect(page.getByRole('treeitem', { name: 'Alpha' })).toBeVisible()
+  await expect(itemOf(page, 'a')).toBeVisible()
 })
 
 test('renderItem takes over the row content and outranks the per-part renderers', async ({ page, renderScenario }) => {
@@ -376,12 +384,14 @@ test('renderItem takes over the row content and outranks the per-part renderers'
     await el.updateComplete
   })
 
-  await expect(page.getByRole('treeitem', { name: 'EMEA (2)' })).toBeVisible()
-  await expect(page.getByRole('treeitem', { name: 'France (7)' })).toBeVisible()
+  await expect(itemOf(page, 'emea')).toBeVisible()
+  await expect(itemOf(page, 'emea')).toHaveHostAria('aria-label', 'EMEA (2)')
+  await expect(itemOf(page, 'fr')).toBeVisible()
+  await expect(itemOf(page, 'fr')).toHaveHostAria('aria-label', 'France (7)')
   await expect(page.getByText('should be ignored')).toHaveCount(0)
 
   // The toggle and selection still work, since renderItem only owns the content.
-  await page.getByRole('treeitem', { name: 'France (7)' }).locator('.row').first().click()
+  await itemOf(page, 'fr').locator('.row').first().click()
   await expect(host).toHaveJSProperty('value', ['fr'])
 })
 
@@ -419,7 +429,7 @@ test('Enter follows a linked row instead of selecting it', async ({ page, render
     </c2-tree>`)
   const host = page.locator('c2-tree')
 
-  await page.getByRole('treeitem', { name: 'Theming' }).focus()
+  await itemOf(page, 'theming').focus()
   await page.keyboard.press('Enter')
   await expect.poll(() => new URL(page.url()).hash).toBe('#theming')
   // The row navigates and selects, the same as clicking it — `c2-list` treats a linked row this way too, and a
@@ -427,7 +437,7 @@ test('Enter follows a linked row instead of selecting it', async ({ page, render
   await expect(host).toHaveJSProperty('value', ['theming'])
 
   // A row without href still selects.
-  await page.getByRole('treeitem', { name: 'Plain' }).focus()
+  await itemOf(page, 'plain').focus()
   await page.keyboard.press('Enter')
   await expect(host).toHaveJSProperty('value', ['plain'])
 })
@@ -460,18 +470,18 @@ test('a hidden row drops out of the keyboard order', async ({ page, renderScenar
     .locator('c2-tree-item[value="app"]')
     .first()
     .evaluate((el) => ((el as HTMLElement).hidden = true))
-  await page.getByRole('treeitem', { name: 'src' }).focus()
+  await itemOf(page, 'src').focus()
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('treeitem', { name: 'main.ts' })).toBeFocused()
+  await expect(itemOf(page, 'main')).toBeFocused()
 
   // Hiding a branch takes its children with it.
   await page
     .locator('c2-tree-item[value="src"]')
     .first()
     .evaluate((el) => ((el as HTMLElement).hidden = true))
-  await page.getByRole('treeitem', { name: 'README.md' }).focus()
+  await itemOf(page, 'readme').focus()
   await page.keyboard.press('Home')
-  await expect(page.getByRole('treeitem', { name: 'README.md' })).toBeFocused()
+  await expect(itemOf(page, 'readme')).toBeFocused()
 })
 
 test('expand-on-click toggles a branch from the whole row, by pointer and by keyboard', async ({ page, renderScenario }) => {
@@ -484,11 +494,11 @@ test('expand-on-click toggles a branch from the whole row, by pointer and by key
       </c2-tree-item>
     </c2-tree>`)
   const host = page.locator('c2-tree')
-  const group = page.getByRole('treeitem', { name: 'Guides' })
+  const group = itemOf(page, 'Guides')
 
   // The row's centre is past the toggle, so this is the click that used to do nothing.
   await rowOf(page, 'Guides').click()
-  await expect(group).toHaveAttribute('aria-expanded', 'true')
+  await expect(group).toHaveHostAria('aria-expanded', 'true')
   await expect(host).toHaveJSProperty('expandedItems', ['Guides'])
 
   await rowOf(page, 'Guides').click()
@@ -508,4 +518,54 @@ test('expand-on-click toggles a branch from the whole row, by pointer and by key
   await page.getByRole('link', { name: 'Theming' }).click()
   await expect.poll(() => new URL(page.url()).hash).toBe('#theming')
   await expect(host).toHaveJSProperty('expandedItems', ['Guides'])
+})
+
+test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, renderScenario }) => {
+  await renderScenario(tree('selection="multiple"'))
+  const host = page.locator('c2-tree')
+
+  // Every attribute the component itself wrote on a host (anything but the author's, the roving tabindex and the
+  // state it reflects) is one React reports as a hydration mismatch.
+  const writtenAria = () =>
+    page.locator('c2-tree, c2-tree-item').evaluateAll((elements) =>
+      elements.flatMap((element) =>
+        element
+          .getAttributeNames()
+          .filter((name) => name === 'role' || (name.startsWith('aria-') && !(element.localName === 'c2-tree' && name === 'aria-label')))
+          .map((name) => `${element.localName}[value="${element.getAttribute('value') ?? ''}"] ${name}`),
+      ),
+    )
+  // Read straight from internals: these properties do not follow the plain kebab-to-camel spelling.
+  const internalsOf = (value: string) =>
+    itemOf(page, value).evaluate((element) => {
+      const internals = (element as unknown as { internals: ElementInternals }).internals
+      return { level: internals.ariaLevel, setSize: internals.ariaSetSize, posInSet: internals.ariaPosInSet }
+    })
+
+  expect(await writtenAria()).toEqual([])
+  await expect(host).toHaveHostAria('role', 'tree')
+  await expect(host).toHaveHostAria('aria-label', 'Files')
+  expect(await host.evaluate((element) => (element as unknown as { internals: ElementInternals }).internals.ariaMultiSelectable)).toBe('true')
+  await expect(itemOf(page, 'src')).toHaveHostAria('role', 'treeitem')
+  await expect(itemOf(page, 'src')).toHaveHostAria('aria-label', 'src')
+  await expect(itemOf(page, 'src')).toHaveHostAria('aria-expanded', 'false')
+  await expect(itemOf(page, 'src')).toHaveHostAria('aria-selected', 'false')
+  await expect(itemOf(page, 'readme')).toHaveHostAria('aria-expanded', null)
+  expect(await internalsOf('readme')).toEqual({ level: '1', setSize: '2', posInSet: '2' })
+
+  await toggleOf(page, 'src').click()
+  await rowOf(page, 'main').click()
+  await expect(host).toHaveJSProperty('value', ['main'])
+
+  expect(await writtenAria()).toEqual([])
+  await expect(itemOf(page, 'src')).toHaveHostAria('aria-expanded', 'true')
+  await expect(itemOf(page, 'main')).toHaveHostAria('aria-selected', 'true')
+  await expect(itemOf(page, 'main')).toHaveHostAria('aria-label', 'main.ts')
+  await expect(itemOf(page, 'app')).toHaveHostAria('aria-selected', 'false')
+  expect(await internalsOf('main')).toEqual({ level: '2', setSize: '2', posInSet: '2' })
+
+  // An author-set attribute still wins over the component's own value.
+  await itemOf(page, 'readme').evaluate((element) => element.setAttribute('aria-label', 'Read me first'))
+  await expect(itemOf(page, 'readme')).toHaveHostAria('aria-label', 'Read me first')
+  await accessible(page)
 })

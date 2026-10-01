@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Toast, ToastEventMap, ToastRegion, ToastRegionEventMap } from '@c2n/toast'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Toast, ToastRegion } from '@c2n/toast'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -21,8 +24,8 @@ declare module 'vue' {
         'show-progress'?: unknown
         'action-label'?: unknown
         'close-label'?: unknown
-        onToastClose?: (event: ToastEventMap['toast-close']) => void
-        onToastAction?: (event: ToastEventMap['toast-action']) => void
+        onToastClose?: (event: EventOf<Toast, 'toast-close'>) => void
+        onToastAction?: (event: EventOf<Toast, 'toast-action'>) => void
       }
     >
     'c2-toast-region': DefineComponent<
@@ -32,8 +35,8 @@ declare module 'vue' {
         'exit-animation'?: unknown
         'animation-duration'?: unknown
         'show-progress'?: unknown
-        onToastAction?: (event: ToastRegionEventMap['toast-action']) => void
-        onToastDismiss?: (event: ToastRegionEventMap['toast-dismiss']) => void
+        onToastAction?: (event: EventOf<ToastRegion, 'toast-action'>) => void
+        onToastDismiss?: (event: EventOf<ToastRegion, 'toast-dismiss'>) => void
       }
     >
   }

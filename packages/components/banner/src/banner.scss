@@ -1,0 +1,171 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-banner,
+  $theme: (
+    offset: 0px,
+    z-index: 10,
+    container--background: #fafafa,
+    container--color: #18181b,
+    container--border: 1px solid #e4e4e7,
+    container--border-radius: 8px,
+    container--padding: 12px 16px,
+    container--gap: 12px,
+    container--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.05),
+    container--font-family: inherit,
+    container--font-size: 14px,
+    container--line-height: 1.5,
+    container__variant--background-mix: 8%,
+    container__variant--border-mix: 32%,
+    heading--font-weight: 600,
+    icon--size: 20px,
+    icon--color: #71717a,
+    icon--padding: 6px,
+    icon--border-radius: 999px,
+    icon--background-mix: 14%,
+    icon__info--color: #2563eb,
+    icon__success--color: #15803d,
+    icon__warning--color: #a16207,
+    icon__error--color: #dc2626,
+    actions--gap: 8px,
+    close--color: #71717a,
+    close__hover--background: #f4f4f5,
+    close--border-radius: 4px,
+    close__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+  )
+);
+
+:host {
+  display: block;
+  min-width: 0;
+}
+:host([hidden]) {
+  display: none;
+}
+:host([position='top']) {
+  position: sticky;
+  top: css.cssVar(offset);
+  z-index: css.cssVar(z-index);
+}
+:host([position='bottom']) {
+  position: fixed;
+  inset-inline: 0;
+  bottom: css.cssVar(offset);
+  z-index: css.cssVar(z-index);
+}
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  background: css.cssVar(container--background);
+  color: css.cssVar(container--color);
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  padding: css.cssVar(container--padding);
+  gap: css.cssVar(container--gap);
+  box-shadow: css.cssVar(container--box-shadow);
+  font-family: css.cssVar(container--font-family);
+  font-size: css.cssVar(container--font-size);
+  line-height: css.cssVar(container--line-height);
+}
+// Pinned: a full-width bar with square corners and a border on its inner edge only.
+:host([position='top']) .banner,
+:host([position='bottom']) .banner {
+  border-width: 0;
+  border-radius: 0;
+}
+:host([position='top']) .banner {
+  border-bottom: css.cssVar(container--border);
+}
+:host([position='bottom']) .banner {
+  border-top: css.cssVar(container--border);
+}
+@each $variant in info, success, warning, error {
+  :host([variant='#{$variant}']) {
+    .banner {
+      background: color-mix(
+        in srgb,
+        #{css.cssVar(icon__#{$variant}--color)} #{css.cssVar(container__variant--background-mix)},
+        #{css.cssVar(container--background)}
+      );
+      border-color: color-mix(in srgb, #{css.cssVar(icon__#{$variant}--color)} #{css.cssVar(container__variant--border-mix)}, transparent);
+    }
+    .icon {
+      color: css.cssVar(icon__#{$variant}--color);
+    }
+  }
+}
+.icon {
+  --c2-feather-icon--size: #{css.cssVar(icon--size)};
+  --c2-mat-icon--font-size: #{css.cssVar(icon--size)};
+  display: inline-flex;
+  flex: none;
+  // The size is the glyph's; the padding draws a soft disc in the icon's own colour around it.
+  box-sizing: content-box;
+  width: css.cssVar(icon--size);
+  height: css.cssVar(icon--size);
+  padding: css.cssVar(icon--padding);
+  border-radius: css.cssVar(icon--border-radius);
+  color: css.cssVar(icon--color);
+  background: color-mix(in srgb, currentColor #{css.cssVar(icon--background-mix)}, transparent);
+}
+.icon svg,
+::slotted([slot='icon']) {
+  width: 100%;
+  height: 100%;
+}
+.content {
+  flex: 1 1 10em;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.heading {
+  font-weight: css.cssVar(heading--font-weight);
+  margin-inline-end: 0.5em;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+  &[hidden] {
+    display: none;
+  }
+}
+.close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  margin-inline-start: auto;
+  border: none;
+  border-radius: css.cssVar(close--border-radius);
+  background: transparent;
+  color: css.cssVar(close--color);
+  font: inherit;
+  cursor: pointer;
+  &:hover {
+    background: css.cssVar(close__hover--background);
+  }
+  &:focus-visible {
+    outline: css.cssVar(close__focus--outline);
+    outline-offset: 2px;
+  }
+  svg,
+  ::slotted(*) {
+    width: 100%;
+    height: 100%;
+  }
+}
+@media (forced-colors: active) {
+  .banner {
+    border-color: CanvasText;
+  }
+  .icon {
+    background: none;
+  }
+}

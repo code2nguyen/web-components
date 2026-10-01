@@ -27,17 +27,17 @@ npm install @c2n/sheet
   }
   .ghost {
     --c2-button__container--background-color: transparent;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #d4d4d8;
-    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .rounded {
     --c2-sheet--border-radius: 14px;
   }
   .divided {
     --c2-sheet__header--padding-bottom: 14px;
-    --c2-sheet__header--border-bottom: 1px solid #e4e4e7;
-    --c2-sheet__footer--border-top: 1px solid #e4e4e7;
+    --c2-sheet__header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-sheet__footer--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .short {
     --c2-sheet--size: 280px;
@@ -92,7 +92,7 @@ npm install @c2n/sheet
 </div>
 ```
 
-Reach for a sheet when the content belongs *beside* the page: filters over a list, a record's details, a form the user fills in without losing their place. Reach for `c2-modal` when the page must stop for a decision, and for `c2-side-nav` when the panel is navigation that is part of the layout rather than a transient overlay.
+Reach for a sheet when the content belongs _beside_ the page: filters over a list, a record's details, a form the user fills in without losing their place. Reach for `c2-modal` when the page must stop for a decision, and for `c2-side-nav` when the panel is navigation that is part of the layout rather than a transient overlay.
 
 Keep the trigger and the sheet next to each other in the markup, and give the sheet a name — a `title` slot labels it automatically, `label` names one without a visible heading. Focus moves into the panel on open and returns to the trigger on close, so a sheet opened from a toolbar button lands the user back where they were.
 

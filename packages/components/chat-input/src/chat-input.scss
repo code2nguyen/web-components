@@ -11,9 +11,9 @@
     container--gap: 8px,
     container__hover--border: 1px solid #a1a1aa,
     container__focus--border: 1px solid #476ef9,
-    container__focus--box-shadow: 0 0 0 3px rgba(71, 110, 249, 0.2),
+    container__focus--box-shadow: none,
     container__invalid--border: 1px solid #dc2626,
-    container__invalid__focus--box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2),
+    container__invalid__focus--box-shadow: none,
     container__disabled--opacity: 0.5,
 
     textarea--max-height: 192px,

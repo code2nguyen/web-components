@@ -41,6 +41,10 @@ export type SeperatorOrientation = 'horizontal' | 'vertical'
 export class Seperator extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** Direction of the line. A vertical seperator stretches to its flex row; give it a height elsewhere. */
   @property({ reflect: true }) orientation: SeperatorOrientation = 'horizontal'
 
@@ -52,13 +56,8 @@ export class Seperator extends LitElement {
   /** `slotchange` does not fire for server-rendered slots, so read the label once after the first render. */
   override updated(changed: PropertyValues<this>) {
     if (changed.has('decorative') || changed.has('orientation')) {
-      if (this.decorative) {
-        this.setAttribute('role', 'none')
-        this.removeAttribute('aria-orientation')
-      } else {
-        this.setAttribute('role', 'separator')
-        this.setAttribute('aria-orientation', this.orientation)
-      }
+      this.internals.role = this.decorative ? 'none' : 'separator'
+      this.internals.ariaOrientation = this.decorative ? null : this.orientation
     }
   }
 

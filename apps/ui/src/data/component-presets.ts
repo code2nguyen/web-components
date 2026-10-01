@@ -32,6 +32,83 @@ export function describeComponentPreset(preset: ComponentPreset): string {
 }
 
 export const componentPresets: Record<string, ComponentPresetGroup> = {
+  'c2-marker': {
+    html: `<p style="max-width:320px;margin:0;font-size:16px;line-height:1.7">Deploys are <c2-marker>fully automated</c2-marker> from merge to production.</p>`,
+    presets: [
+      {
+        name: 'Soft pill',
+        description: 'A rounded violet wash with room around the words, for tags inside prose.',
+        css: {
+          '--c2-marker__mark--background-color': 'rgba(139, 92, 246, 0.22)',
+          '--c2-marker__mark--border-radius': '999px',
+          '--c2-marker__mark--padding': '1px 8px',
+        },
+      },
+      {
+        name: 'Red pen circle',
+        description: 'A loose red circle drawn around the words when they scroll into view.',
+        css: {
+          '--c2-marker__stroke--color': '#dc2626',
+          '--c2-marker__stroke--width': '3px',
+          '--c2-marker__stroke--offset': '6px',
+          '--c2-marker__mark--transition-duration': '1s',
+        },
+        attributes: { variant: 'circle', animated: '' },
+      },
+      {
+        name: 'Thick underline',
+        description: 'A heavy primary underline that sweeps in from the left.',
+        css: {
+          '--c2-marker__stroke--width': '4px',
+          '--c2-marker__mark--padding': '0',
+          '--c2-marker__mark--transition-duration': '800ms',
+        },
+        attributes: { variant: 'underline', animated: '' },
+      },
+    ],
+  },
+  'c2-carousel': {
+    html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
+    presets: [
+      {
+        name: 'Glass controls',
+        description: 'Translucent dark buttons over the slides and a rounder viewport.',
+        css: {
+          '--c2-carousel__track--border-radius': '14px',
+          '--c2-carousel__control--background-color': 'rgba(24, 24, 27, 0.55)',
+          '--c2-carousel__control--color': '#ffffff',
+          '--c2-carousel__control--border': '1px solid rgba(255, 255, 255, 0.2)',
+          '--c2-carousel__control__hover--background-color': 'rgba(24, 24, 27, 0.75)',
+          '--c2-carousel__indicator__selected--background-color': '#18181b',
+        },
+      },
+      {
+        name: 'Peek cards',
+        description: 'The next slide peeks in; swipe or use the indicators, no floating buttons.',
+        css: {
+          '--c2-carousel__slide--width': '80%',
+          '--c2-carousel--gap': '12px',
+          '--c2-carousel__control--display': 'none',
+        },
+      },
+      {
+        name: 'Square and flat',
+        description: 'No rounding or shadow, bar indicators aligned to the start.',
+        css: {
+          '--c2-carousel__track--border-radius': '0',
+          '--c2-carousel__control--border-radius': '0',
+          '--c2-carousel__control--box-shadow': 'none',
+          '--c2-carousel__control--border': '1px solid #18181b',
+          '--c2-carousel__indicator--width': '16px',
+          '--c2-carousel__indicator--height': '2px',
+          '--c2-carousel__indicator--border-radius': '0',
+          '--c2-carousel__indicator__selected--width': '32px',
+          '--c2-carousel__indicator__selected--background-color': '#18181b',
+          '--c2-carousel__indicators--justify-content': 'flex-start',
+        },
+      },
+    ],
+  },
   'c2-tree': {
     html: `<c2-tree style="width:220px" aria-label="Files" expanded-items="src" value="app"><c2-tree-item value="src" label="src"><c2-tree-item value="app" label="app.ts"></c2-tree-item><c2-tree-item value="main" label="main.ts"></c2-tree-item></c2-tree-item><c2-tree-item value="readme" label="README.md"></c2-tree-item></c2-tree>`,
     presets: [
@@ -182,6 +259,30 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-chart__series-2--color': '#0ea5e9',
           '--c2-chart__series-3--color': '#6366f1',
           '--c2-chart__series-4--color': '#a78bfa',
+        },
+      },
+    ],
+  },
+  'c2-overlap-chart': {
+    html: `<c2-overlap-chart style="width:420px;height:300px" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web app"></c2-chart-series><c2-chart-series field="mobile" label="Mobile app"></c2-chart-series><c2-chart-series field="api" label="Public API"></c2-chart-series></c2-overlap-chart>`,
+    presets: [
+      { name: 'Equal circles', description: 'Same-sized circles, so every region has room for its label.', attributes: { layout: 'uniform' } },
+      { name: 'Shares', description: 'Each region as a share of all members, without a legend.', attributes: { labels: 'percent', legend: 'none' } },
+      {
+        name: 'Focus view',
+        description: 'One set highlighted, the others hatched in grey.',
+        attributes: { highlighted: 'api' },
+        css: { '--c2-chart__set__dimmed--color': '#a1a1aa', '--c2-chart__set__dimmed--fill-style': 'hatch' },
+      },
+      {
+        name: 'Soft fills',
+        description: 'Stronger tinted fills with no outlines, in a violet, pink and cyan palette.',
+        css: {
+          '--c2-chart__series-1--color': '#7c3aed',
+          '--c2-chart__series-2--color': '#db2777',
+          '--c2-chart__series-3--color': '#0891b2',
+          '--c2-chart__set--fill-opacity': '0.24',
+          '--c2-chart__set--stroke-width': '0',
         },
       },
     ],
@@ -421,12 +522,13 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
     html: `<c2-kbd>⌘ + K</c2-kbd>`,
     presets: [
       {
-        name: 'Flat',
-        description: 'No shadow, hairline border — an inline tag rather than a key',
+        name: 'Raised',
+        description: 'A keycap with a bottom edge, darker fill and border',
         css: {
-          '--c2-kbd--background-color': 'transparent',
+          '--c2-kbd--background-color': '#f4f4f5',
+          '--c2-kbd--color': '#52525b',
           '--c2-kbd--border': '1px solid #d4d4d8',
-          '--c2-kbd--box-shadow': 'none',
+          '--c2-kbd--box-shadow': '0 1px 0 #a1a1aa',
         },
       },
       {
@@ -533,6 +635,42 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-label__required-indicator--color': '#a1a1aa',
         },
       },
+    ],
+  },
+  'c2-split-panel': {
+    html: `<c2-split-panel style="width: 260px; height: 120px; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden"><div slot="start" style="padding: 10px; font-size: 12px">Start</div><div slot="end" style="padding: 10px; font-size: 12px">End</div></c2-split-panel>`,
+    presets: [
+      {
+        name: 'Bare line',
+        description: 'No grip; the line turns accent on hover.',
+        css: { '--c2-split-panel__handle--display': 'none', '--c2-split-panel__divider__hover--background': 'rgb(2, 101, 220)' },
+      },
+      {
+        name: 'Thick bar',
+        description: 'An 8px grey bar with a borderless grip.',
+        css: {
+          '--c2-split-panel__divider--opacity': '1',
+          '--c2-split-panel__divider--size': '8px',
+          '--c2-split-panel__divider--background': '#f4f4f5',
+          '--c2-split-panel__divider__hover--background': '#e4e4e7',
+          '--c2-split-panel__handle--background': 'transparent',
+          '--c2-split-panel__handle--border': 'none',
+        },
+      },
+      {
+        name: 'Accent grip',
+        description: 'A tall accent pill in the middle of the divider.',
+        css: {
+          '--c2-split-panel__divider--opacity': '1',
+          '--c2-split-panel__handle--width': '8px',
+          '--c2-split-panel__handle--height': '40px',
+          '--c2-split-panel__handle--background': 'rgb(2, 101, 220)',
+          '--c2-split-panel__handle--border': 'none',
+          '--c2-split-panel__handle--border-radius': '999px',
+          '--c2-split-panel__handle--color': '#ffffff',
+        },
+      },
+      { name: 'Stacked', description: 'Panels on top of each other.', attributes: { orientation: 'vertical' } },
     ],
   },
   'c2-sheet': {
@@ -1359,6 +1497,43 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-timeline': {
+    html: `<c2-timeline aria-label="Order history" style="width:300px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success">Paid with a card ending 4242.</c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary">Handed to the carrier.</c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
+    presets: [
+      {
+        name: 'Filled dots',
+        description: 'Solid ink markers on a hairline connector, with a bolder label.',
+        css: {
+          '--c2-timeline-item__marker--size': '10px',
+          '--c2-timeline-item__marker--background': '#18181b',
+          '--c2-timeline-item__marker--border': '2px solid #18181b',
+          '--c2-timeline-item__connector--width': '1px',
+          '--c2-timeline-item__label--font-weight': '600',
+        },
+      },
+      {
+        name: 'Split dates',
+        description: 'Timestamps in their own column before the rail, for scanning by date.',
+        attributes: { layout: 'split' },
+        css: {
+          '--c2-timeline-item--gap': '16px',
+          '--c2-timeline-item__timestamp__split--width': '88px',
+        },
+      },
+      {
+        name: 'Dashed roadmap',
+        description: 'Heavier violet rings joined by a dashed connector.',
+        css: {
+          '--c2-timeline-item__marker--size': '14px',
+          '--c2-timeline-item__marker--border': '3px solid #bcbcc6',
+          '--c2-timeline-item__marker__primary--border-color': '#7c3aed',
+          '--c2-timeline-item__marker__success--border-color': '#7c3aed',
+          '--c2-timeline-item__connector--background': 'repeating-linear-gradient(to bottom, #d4d4d8 0 4px, transparent 4px 8px)',
+          '--c2-timeline-item__timestamp--color': '#7c3aed',
+        },
+      },
+    ],
+  },
   'c2-steps': {
     html: `<c2-steps aria-label="Pipeline"><c2-step label="build" trailing="24 s"><c2-step status="success" label="install dependencies" trailing="19 s"></c2-step><c2-step status="success" label="compile" trailing="5 s"></c2-step></c2-step><c2-step label="test"><c2-step status="success" label="unit" trailing="8 s"></c2-step><c2-step status="running" label="e2e"></c2-step></c2-step><c2-step status="pending" label="ship"></c2-step></c2-steps>`,
     presets: [
@@ -2046,6 +2221,42 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-modal__close__hover--background': '#27272a',
           '--c2-modal__close__hover--color': '#fafafa',
           '--c2-modal__backdrop--background': 'rgba(0, 0, 0, 0.7)',
+        },
+      },
+    ],
+  },
+  'c2-hover-card': {
+    html: `<c2-hover-card open-delay="200"><a slot="trigger" href="#">@ada</a>Ada Lovelace wrote the first published algorithm.</c2-hover-card>`,
+    presets: [
+      {
+        name: 'Dark',
+        description: 'Dark surface with a subtle outline and deeper shadow.',
+        css: {
+          '--c2-hover-card--background-color': '#18181b',
+          '--c2-hover-card--color': '#fafafa',
+          '--c2-hover-card--border': '1px solid #3f3f46',
+          '--c2-hover-card--box-shadow': '0 12px 32px rgba(0, 0, 0, 0.35)',
+        },
+      },
+      {
+        name: 'Compact',
+        css: {
+          '--c2-hover-card--width': '200px',
+          '--c2-hover-card--font-size': '12px',
+          '--c2-hover-card--padding-top': '8px',
+          '--c2-hover-card--padding-right': '10px',
+          '--c2-hover-card--padding-bottom': '8px',
+          '--c2-hover-card--padding-left': '10px',
+          '--c2-hover-card--border-radius': '6px',
+        },
+        attributes: { 'open-delay': '0' },
+      },
+      {
+        name: 'Rounded',
+        css: {
+          '--c2-hover-card--border-radius': '14px',
+          '--c2-hover-card--width': '280px',
+          '--c2-hover-card--box-shadow': '0 24px 60px rgba(0, 0, 0, 0.18)',
         },
       },
     ],
@@ -2947,6 +3158,39 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-dash-card__header--font-weight': '500',
           '--c2-dash-card__handle__hover--background': 'rgba(9, 9, 11, 0.18)',
           '--c2-dash-card__handle__active--background': 'rgba(9, 9, 11, 0.38)',
+        },
+      },
+    ],
+  },
+  'c2-tag-input': {
+    html: `<c2-tag-input aria-label="Recipients" placeholder="Add recipients" value="ann@example.com;bob@example.com" style="width: 320px"></c2-tag-input>`,
+    presets: [
+      {
+        name: 'Pills',
+        description: 'Fully rounded brand-tinted tags without a border.',
+        css: {
+          '--c2-tag-input__tag--border-radius': '999px',
+          '--c2-tag-input__tag--padding-left': '10px',
+          '--c2-tag-input__tag--border': '1px solid transparent',
+          '--c2-tag-input__tag--background': '#edf1fe',
+          '--c2-tag-input__tag--color': '#2f56e6',
+          '--c2-tag-input__remove-icon--color': '#2f56e6',
+        },
+      },
+      {
+        name: 'Compact',
+        description: 'A 28px field with 20px tags for toolbars and filters.',
+        css: {
+          '--c2-tag-input--min-height': '28px',
+          '--c2-tag-input--font-size': '12px',
+          '--c2-tag-input--line-height': '16px',
+          '--c2-tag-input--padding-top': '3px',
+          '--c2-tag-input--padding-bottom': '3px',
+          '--c2-tag-input--padding-left': '4px',
+          '--c2-tag-input--gap': '4px',
+          '--c2-tag-input__tag--height': '20px',
+          '--c2-tag-input__tag--padding-left': '6px',
+          '--c2-tag-input__remove-icon--size': '12px',
         },
       },
     ],

@@ -1,0 +1,553 @@
+{
+  "name": "@c2n/components",
+  "version": "0.0.19",
+  "description": "Every c2n web component in one install: the whole library, one import per component, JSX and Vue template types for every tag, and the base theme",
+  "type": "module",
+  "sideEffects": true,
+  "keywords": [
+    "web components",
+    "custom elements",
+    "lit",
+    "react",
+    "vue",
+    "design system"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../tools/framework-types:build"
+      ],
+      "command": "node scripts/type-check.ts"
+    }
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./accordion": {
+      "types": "./lib/accordion.d.ts",
+      "default": "./lib/accordion.js"
+    },
+    "./attachment": {
+      "types": "./lib/attachment.d.ts",
+      "default": "./lib/attachment.js"
+    },
+    "./autocomplete": {
+      "types": "./lib/autocomplete.d.ts",
+      "default": "./lib/autocomplete.js"
+    },
+    "./avatar": {
+      "types": "./lib/avatar.d.ts",
+      "default": "./lib/avatar.js"
+    },
+    "./badge": {
+      "types": "./lib/badge.d.ts",
+      "default": "./lib/badge.js"
+    },
+    "./banner": {
+      "types": "./lib/banner.d.ts",
+      "default": "./lib/banner.js"
+    },
+    "./border-beam": {
+      "types": "./lib/border-beam.d.ts",
+      "default": "./lib/border-beam.js"
+    },
+    "./breadcrumb": {
+      "types": "./lib/breadcrumb.d.ts",
+      "default": "./lib/breadcrumb.js"
+    },
+    "./button": {
+      "types": "./lib/button.d.ts",
+      "default": "./lib/button.js"
+    },
+    "./button-group": {
+      "types": "./lib/button-group.d.ts",
+      "default": "./lib/button-group.js"
+    },
+    "./card": {
+      "types": "./lib/card.d.ts",
+      "default": "./lib/card.js"
+    },
+    "./carousel": {
+      "types": "./lib/carousel.d.ts",
+      "default": "./lib/carousel.js"
+    },
+    "./cascader": {
+      "types": "./lib/cascader.d.ts",
+      "default": "./lib/cascader.js"
+    },
+    "./chart": {
+      "types": "./lib/chart.d.ts",
+      "default": "./lib/chart.js"
+    },
+    "./chat-input": {
+      "types": "./lib/chat-input.d.ts",
+      "default": "./lib/chat-input.js"
+    },
+    "./chat-message": {
+      "types": "./lib/chat-message.d.ts",
+      "default": "./lib/chat-message.js"
+    },
+    "./chat-message-list": {
+      "types": "./lib/chat-message-list.d.ts",
+      "default": "./lib/chat-message-list.js"
+    },
+    "./chatbot": {
+      "types": "./lib/chatbot.d.ts",
+      "default": "./lib/chatbot.js"
+    },
+    "./checkbox": {
+      "types": "./lib/checkbox.d.ts",
+      "default": "./lib/checkbox.js"
+    },
+    "./code-editor": {
+      "types": "./lib/code-editor.d.ts",
+      "default": "./lib/code-editor.js"
+    },
+    "./code-viewer": {
+      "types": "./lib/code-viewer.d.ts",
+      "default": "./lib/code-viewer.js"
+    },
+    "./color-area": {
+      "types": "./lib/color-area.d.ts",
+      "default": "./lib/color-area.js"
+    },
+    "./color-select": {
+      "types": "./lib/color-select.d.ts",
+      "default": "./lib/color-select.js"
+    },
+    "./color-slider": {
+      "types": "./lib/color-slider.d.ts",
+      "default": "./lib/color-slider.js"
+    },
+    "./command": {
+      "types": "./lib/command.d.ts",
+      "default": "./lib/command.js"
+    },
+    "./context-menu": {
+      "types": "./lib/context-menu.d.ts",
+      "default": "./lib/context-menu.js"
+    },
+    "./copy-button": {
+      "types": "./lib/copy-button.d.ts",
+      "default": "./lib/copy-button.js"
+    },
+    "./dashboard": {
+      "types": "./lib/dashboard.d.ts",
+      "default": "./lib/dashboard.js"
+    },
+    "./date-input": {
+      "types": "./lib/date-input.d.ts",
+      "default": "./lib/date-input.js"
+    },
+    "./date-selector": {
+      "types": "./lib/date-selector.d.ts",
+      "default": "./lib/date-selector.js"
+    },
+    "./details": {
+      "types": "./lib/details.d.ts",
+      "default": "./lib/details.js"
+    },
+    "./flow": {
+      "types": "./lib/flow.d.ts",
+      "default": "./lib/flow.js"
+    },
+    "./header": {
+      "types": "./lib/header.d.ts",
+      "default": "./lib/header.js"
+    },
+    "./hover-card": {
+      "types": "./lib/hover-card.d.ts",
+      "default": "./lib/hover-card.js"
+    },
+    "./icon-button": {
+      "types": "./lib/icon-button.d.ts",
+      "default": "./lib/icon-button.js"
+    },
+    "./kbd": {
+      "types": "./lib/kbd.d.ts",
+      "default": "./lib/kbd.js"
+    },
+    "./label": {
+      "types": "./lib/label.d.ts",
+      "default": "./lib/label.js"
+    },
+    "./link-button": {
+      "types": "./lib/link-button.d.ts",
+      "default": "./lib/link-button.js"
+    },
+    "./list": {
+      "types": "./lib/list.d.ts",
+      "default": "./lib/list.js"
+    },
+    "./list-item": {
+      "types": "./lib/list-item.d.ts",
+      "default": "./lib/list-item.js"
+    },
+    "./log-viewer": {
+      "types": "./lib/log-viewer.d.ts",
+      "default": "./lib/log-viewer.js"
+    },
+    "./marker": {
+      "types": "./lib/marker.d.ts",
+      "default": "./lib/marker.js"
+    },
+    "./masonry": {
+      "types": "./lib/masonry.d.ts",
+      "default": "./lib/masonry.js"
+    },
+    "./mat-icon": {
+      "types": "./lib/mat-icon.d.ts",
+      "default": "./lib/mat-icon.js"
+    },
+    "./menu": {
+      "types": "./lib/menu.d.ts",
+      "default": "./lib/menu.js"
+    },
+    "./modal": {
+      "types": "./lib/modal.d.ts",
+      "default": "./lib/modal.js"
+    },
+    "./month-planner": {
+      "types": "./lib/month-planner.d.ts",
+      "default": "./lib/month-planner.js"
+    },
+    "./navigation-menu": {
+      "types": "./lib/navigation-menu.d.ts",
+      "default": "./lib/navigation-menu.js"
+    },
+    "./number-input": {
+      "types": "./lib/number-input.d.ts",
+      "default": "./lib/number-input.js"
+    },
+    "./otp-input": {
+      "types": "./lib/otp-input.d.ts",
+      "default": "./lib/otp-input.js"
+    },
+    "./overlay": {
+      "types": "./lib/overlay.d.ts",
+      "default": "./lib/overlay.js"
+    },
+    "./pagination": {
+      "types": "./lib/pagination.d.ts",
+      "default": "./lib/pagination.js"
+    },
+    "./progress": {
+      "types": "./lib/progress.d.ts",
+      "default": "./lib/progress.js"
+    },
+    "./qr-code": {
+      "types": "./lib/qr-code.d.ts",
+      "default": "./lib/qr-code.js"
+    },
+    "./questionnaire": {
+      "types": "./lib/questionnaire.d.ts",
+      "default": "./lib/questionnaire.js"
+    },
+    "./radio": {
+      "types": "./lib/radio.d.ts",
+      "default": "./lib/radio.js"
+    },
+    "./rate": {
+      "types": "./lib/rate.d.ts",
+      "default": "./lib/rate.js"
+    },
+    "./reorder-list": {
+      "types": "./lib/reorder-list.d.ts",
+      "default": "./lib/reorder-list.js"
+    },
+    "./select": {
+      "types": "./lib/select.d.ts",
+      "default": "./lib/select.js"
+    },
+    "./seperator": {
+      "types": "./lib/seperator.d.ts",
+      "default": "./lib/seperator.js"
+    },
+    "./sheet": {
+      "types": "./lib/sheet.d.ts",
+      "default": "./lib/sheet.js"
+    },
+    "./shortcut": {
+      "types": "./lib/shortcut.d.ts",
+      "default": "./lib/shortcut.js"
+    },
+    "./side-nav": {
+      "types": "./lib/side-nav.d.ts",
+      "default": "./lib/side-nav.js"
+    },
+    "./skeleton": {
+      "types": "./lib/skeleton.d.ts",
+      "default": "./lib/skeleton.js"
+    },
+    "./slider": {
+      "types": "./lib/slider.d.ts",
+      "default": "./lib/slider.js"
+    },
+    "./spinner": {
+      "types": "./lib/spinner.d.ts",
+      "default": "./lib/spinner.js"
+    },
+    "./split-panel": {
+      "types": "./lib/split-panel.d.ts",
+      "default": "./lib/split-panel.js"
+    },
+    "./stat": {
+      "types": "./lib/stat.d.ts",
+      "default": "./lib/stat.js"
+    },
+    "./status-panel": {
+      "types": "./lib/status-panel.d.ts",
+      "default": "./lib/status-panel.js"
+    },
+    "./steps": {
+      "types": "./lib/steps.d.ts",
+      "default": "./lib/steps.js"
+    },
+    "./switch": {
+      "types": "./lib/switch.d.ts",
+      "default": "./lib/switch.js"
+    },
+    "./table": {
+      "types": "./lib/table.d.ts",
+      "default": "./lib/table.js"
+    },
+    "./tabs": {
+      "types": "./lib/tabs.d.ts",
+      "default": "./lib/tabs.js"
+    },
+    "./tag-input": {
+      "types": "./lib/tag-input.d.ts",
+      "default": "./lib/tag-input.js"
+    },
+    "./text-field": {
+      "types": "./lib/text-field.d.ts",
+      "default": "./lib/text-field.js"
+    },
+    "./textarea": {
+      "types": "./lib/textarea.d.ts",
+      "default": "./lib/textarea.js"
+    },
+    "./theme-select": {
+      "types": "./lib/theme-select.d.ts",
+      "default": "./lib/theme-select.js"
+    },
+    "./time-input": {
+      "types": "./lib/time-input.d.ts",
+      "default": "./lib/time-input.js"
+    },
+    "./timeline": {
+      "types": "./lib/timeline.d.ts",
+      "default": "./lib/timeline.js"
+    },
+    "./toast": {
+      "types": "./lib/toast.d.ts",
+      "default": "./lib/toast.js"
+    },
+    "./tooltip": {
+      "types": "./lib/tooltip.d.ts",
+      "default": "./lib/tooltip.js"
+    },
+    "./tree": {
+      "types": "./lib/tree.d.ts",
+      "default": "./lib/tree.js"
+    },
+    "./upload": {
+      "types": "./lib/upload.d.ts",
+      "default": "./lib/upload.js"
+    },
+    "./virtual-list": {
+      "types": "./lib/virtual-list.d.ts",
+      "default": "./lib/virtual-list.js"
+    },
+    "./week-planner": {
+      "types": "./lib/week-planner.d.ts",
+      "default": "./lib/week-planner.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./theme.css": "./theme.css",
+    "./base.css": "./base.css",
+    "./tokens.css": "./tokens.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "lib",
+    "react.js",
+    "react.d.ts",
+    "vue.js",
+    "vue.d.ts",
+    "theme.css",
+    "base.css",
+    "tokens.css"
+  ],
+  "dependencies": {
+    "@c2n/accordion": "0.0.19",
+    "@c2n/attachment": "0.0.19",
+    "@c2n/autocomplete": "0.0.19",
+    "@c2n/avatar": "0.0.19",
+    "@c2n/badge": "0.0.19",
+    "@c2n/banner": "0.0.19",
+    "@c2n/border-beam": "0.0.19",
+    "@c2n/breadcrumb": "0.0.19",
+    "@c2n/button": "0.0.19",
+    "@c2n/button-group": "0.0.19",
+    "@c2n/card": "0.0.19",
+    "@c2n/carousel": "0.0.19",
+    "@c2n/cascader": "0.0.19",
+    "@c2n/chart": "0.0.19",
+    "@c2n/chat-input": "0.0.19",
+    "@c2n/chat-message": "0.0.19",
+    "@c2n/chat-message-list": "0.0.19",
+    "@c2n/chatbot": "0.0.19",
+    "@c2n/checkbox": "0.0.19",
+    "@c2n/code-editor": "0.0.19",
+    "@c2n/code-viewer": "0.0.19",
+    "@c2n/color-area": "0.0.19",
+    "@c2n/color-select": "0.0.19",
+    "@c2n/color-slider": "0.0.19",
+    "@c2n/command": "0.0.19",
+    "@c2n/context-menu": "0.0.19",
+    "@c2n/copy-button": "0.0.19",
+    "@c2n/dashboard": "0.0.19",
+    "@c2n/date-input": "0.0.19",
+    "@c2n/date-selector": "0.0.19",
+    "@c2n/details": "0.0.19",
+    "@c2n/flow": "0.0.19",
+    "@c2n/header": "0.0.19",
+    "@c2n/hover-card": "0.0.19",
+    "@c2n/icon-button": "0.0.19",
+    "@c2n/kbd": "0.0.19",
+    "@c2n/label": "0.0.19",
+    "@c2n/link-button": "0.0.19",
+    "@c2n/list": "0.0.19",
+    "@c2n/list-item": "0.0.19",
+    "@c2n/log-viewer": "0.0.19",
+    "@c2n/marker": "0.0.19",
+    "@c2n/masonry": "0.0.19",
+    "@c2n/mat-icon": "0.0.19",
+    "@c2n/menu": "0.0.19",
+    "@c2n/modal": "0.0.19",
+    "@c2n/month-planner": "0.0.19",
+    "@c2n/navigation-menu": "0.0.19",
+    "@c2n/number-input": "0.0.19",
+    "@c2n/otp-input": "0.0.19",
+    "@c2n/overlay": "0.0.19",
+    "@c2n/pagination": "0.0.19",
+    "@c2n/progress": "0.0.19",
+    "@c2n/qr-code": "0.0.19",
+    "@c2n/questionnaire": "0.0.19",
+    "@c2n/radio": "0.0.19",
+    "@c2n/rate": "0.0.19",
+    "@c2n/reorder-list": "0.0.19",
+    "@c2n/select": "0.0.19",
+    "@c2n/seperator": "0.0.19",
+    "@c2n/sheet": "0.0.19",
+    "@c2n/shortcut": "0.0.19",
+    "@c2n/side-nav": "0.0.19",
+    "@c2n/skeleton": "0.0.19",
+    "@c2n/slider": "0.0.19",
+    "@c2n/spinner": "0.0.19",
+    "@c2n/split-panel": "0.0.19",
+    "@c2n/stat": "0.0.19",
+    "@c2n/status-panel": "0.0.19",
+    "@c2n/steps": "0.0.19",
+    "@c2n/switch": "0.0.19",
+    "@c2n/table": "0.0.19",
+    "@c2n/tabs": "0.0.19",
+    "@c2n/tag-input": "0.0.19",
+    "@c2n/text-field": "0.0.19",
+    "@c2n/textarea": "0.0.19",
+    "@c2n/theme": "0.0.19",
+    "@c2n/theme-select": "0.0.19",
+    "@c2n/time-input": "0.0.19",
+    "@c2n/timeline": "0.0.19",
+    "@c2n/toast": "0.0.19",
+    "@c2n/tooltip": "0.0.19",
+    "@c2n/tree": "0.0.19",
+    "@c2n/upload": "0.0.19",
+    "@c2n/virtual-list": "0.0.19",
+    "@c2n/week-planner": "0.0.19"
+  },
+  "peerDependencies": {
+    "@codemirror/autocomplete": "^6.0.0",
+    "@codemirror/commands": "^6.0.0",
+    "@codemirror/lang-css": "^6.0.0",
+    "@codemirror/lang-html": "^6.0.0",
+    "@codemirror/lang-javascript": "^6.0.0",
+    "@codemirror/lang-json": "^6.0.0",
+    "@codemirror/language": "^6.0.0",
+    "@codemirror/search": "^6.0.0",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0",
+    "@lezer/highlight": "^1.0.0",
+    "echarts": "^5.5.0 || ^6.0.0",
+    "uplot": "^1.6.31"
+  },
+  "peerDependenciesMeta": {
+    "@codemirror/autocomplete": {
+      "optional": true
+    },
+    "@codemirror/commands": {
+      "optional": true
+    },
+    "@codemirror/lang-css": {
+      "optional": true
+    },
+    "@codemirror/lang-html": {
+      "optional": true
+    },
+    "@codemirror/lang-javascript": {
+      "optional": true
+    },
+    "@codemirror/lang-json": {
+      "optional": true
+    },
+    "@codemirror/language": {
+      "optional": true
+    },
+    "@codemirror/search": {
+      "optional": true
+    },
+    "@codemirror/state": {
+      "optional": true
+    },
+    "@codemirror/view": {
+      "optional": true
+    },
+    "@lezer/highlight": {
+      "optional": true
+    },
+    "echarts": {
+      "optional": true
+    },
+    "uplot": {
+      "optional": true
+    }
+  }
+}

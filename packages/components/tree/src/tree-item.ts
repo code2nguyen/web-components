@@ -105,6 +105,10 @@ export interface TreeItem {
 export class TreeItem extends LitElement {
   static override styles = unsafeCSS(styles)
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
+  private readonly internals = this.attachInternals()
+
   /** Identity of the row. Selection and expansion are tracked by this value, so it must be unique in the tree. */
   @property({ type: String, reflect: true }) value = ''
 
@@ -221,28 +225,22 @@ export class TreeItem extends LitElement {
   }
 
   /**
-   * ARIA is written imperatively on the host: `role="treeitem"` has to sit on the element the tree moves focus
-   * to, and the `role="group"` holding the children must be a descendant of it.
+   * ARIA is set on the host: `role="treeitem"` has to sit on the element the tree moves focus to, and the
+   * `role="group"` holding the children must be a descendant of it.
    */
   #syncAria() {
-    this.setAttribute('role', 'treeitem')
-    this.setAttribute('aria-level', String(this.level + 1))
-    this.setAttribute('aria-setsize', String(this.setSize))
-    this.setAttribute('aria-posinset', String(this.posInSet))
-
-    if (this.isBranch) this.setAttribute('aria-expanded', String(this.expanded))
-    else this.removeAttribute('aria-expanded')
-
-    if (this.selectable) this.setAttribute('aria-selected', String(this.selected))
-    else this.removeAttribute('aria-selected')
-
-    if (this.disabled) this.setAttribute('aria-disabled', 'true')
-    else this.removeAttribute('aria-disabled')
+    this.internals.role = 'treeitem'
+    this.internals.ariaLevel = String(this.level + 1)
+    this.internals.ariaSetSize = String(this.setSize)
+    this.internals.ariaPosInSet = String(this.posInSet)
+    this.internals.ariaExpanded = this.isBranch ? String(this.expanded) : null
+    this.internals.ariaSelected = this.selectable ? String(this.selected) : null
+    this.internals.ariaDisabled = this.disabled ? 'true' : null
 
     // A treeitem takes its name from its contents, and the children group *is* content — without this a branch
     // announces its whole subtree. `aria-labelledby` cannot help: IDREFs do not cross the shadow boundary the
     // label lives behind.
-    this.setAttribute('aria-label', this.resolvedLabel)
+    this.internals.ariaLabel = this.resolvedLabel
   }
 
   #readLabelSlot() {

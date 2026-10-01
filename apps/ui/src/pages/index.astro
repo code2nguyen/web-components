@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
 import Main from '../layouts/Main.astro'
-import CodeBlock from '../components/CodeBlock.astro'
 import ComponentGallery from '../components/ComponentGallery.astro'
 import { componentPreviews } from '../data/component-previews'
 import SiteButton from '../components/ui/SiteButton.astro'
@@ -11,23 +10,9 @@ import { FeatherArrowRightIcon, FeatherLayersIcon, FeatherPackageIcon, FeatherSl
 const base = import.meta.env.BASE_URL
 const componentCount = (await getCollection('components')).length
 const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.localeCompare(b.data.title))
-
-const installCode = `npm install @c2n/text-field`
-const importCode = `import '@c2n/text-field'
-
-// then anywhere in your markup
-<c2-text-field placeholder="Your email"></c2-text-field>`
-const themeCode = `.newsletter c2-text-field {
-  --c2-text-field--border-radius: 12px;
-  --c2-text-field--background: #f4f4f5;
-  --c2-text-field__focus--border: 1px solid #2563eb;
-}`
-const slotCode = `<c2-text-field placeholder="Search">
-  <svg slot="prefix-icon" viewBox="0 0 24 24">…</svg>
-</c2-text-field>`
 ---
 
-<Main title="c2n web components">
+<Main title="c2n web components" section="overview">
   <div class="home">
     <section class="hero">
       <p class="eyebrow">c2n web components</p>
@@ -41,7 +26,7 @@ const slotCode = `<c2-text-field placeholder="Search">
           Browse components
           <FeatherArrowRightIcon client:load slot="suffix-icon" />
         </SiteButton>
-        <SiteButton href={`${base}/icons/`} variant="ghost">Icon sets</SiteButton>
+        <SiteButton href={`${base}/getting-started/`} variant="ghost">Get started</SiteButton>
       </div>
       <ul class="hero__facts">
         <li>
@@ -90,53 +75,6 @@ const slotCode = `<c2-text-field placeholder="Search">
           ))
         }
       </ul>
-    </section>
-
-    <section class="section" id="getting-started" aria-labelledby="getting-started-title">
-      <div class="section__header">
-        <h2 id="getting-started-title">Getting started</h2>
-        <p>Three steps from an empty project to a themed component.</p>
-      </div>
-      <ol class="steps">
-        <li class="step">
-          <div class="step__text">
-            <span class="step__number">1</span>
-            <h3>Install the packages you need</h3>
-            <p>
-              Each component ships as its own package under the <code>@c2n</code> scope, so you only pay for what you use. Lit is a peer dependency shared between
-              them.
-            </p>
-          </div>
-          <CodeBlock code={installCode} lang="bash" />
-        </li>
-        <li class="step">
-          <div class="step__text">
-            <span class="step__number">2</span>
-            <h3>Import once, use anywhere</h3>
-            <p>Importing a package registers its <code>c2-*</code> custom element. After that it is plain HTML.</p>
-          </div>
-          <CodeBlock code={importCode} lang="html" />
-        </li>
-        <li class="step">
-          <div class="step__text">
-            <span class="step__number">3</span>
-            <h3>Theme with CSS custom properties</h3>
-            <p>
-              Every visual detail is exposed as a variable named <code>--c2-&lt;component&gt;__&lt;part&gt;--&lt;property&gt;</code>. Set them on any ancestor
-              to restyle a component, a section, or the whole app. Or load <a href={`${base}/guides/theming`}>@c2n/theme</a> and set a handful of design tokens once.
-            </p>
-          </div>
-          <CodeBlock code={themeCode} lang="css" />
-        </li>
-        <li class="step">
-          <div class="step__text">
-            <span class="step__number">4</span>
-            <h3>Extend with slots</h3>
-            <p>Named slots let you replace icons and inject content without forking the component.</p>
-          </div>
-          <CodeBlock code={slotCode} lang="html" />
-        </li>
-      </ol>
     </section>
   </div>
 </Main>
@@ -271,63 +209,9 @@ const slotCode = `<c2-text-field placeholder="Search">
     }
   }
 
-  .steps {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
-  .step {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: 32px;
-    align-items: start;
-    &__text {
-      position: relative;
-      padding-left: 44px;
-      h3 {
-        margin: 0 0 8px;
-        font-size: 1.1rem;
-        font-weight: 600;
-      }
-      p {
-        margin: 0;
-        color: var(--site-color-on-surface-variant);
-      }
-      code {
-        font-size: 0.85em;
-        padding: 2px 6px;
-        border-radius: 5px;
-        background: var(--site-color-surface-container-3);
-        color: var(--site-color-on-surface);
-      }
-    }
-    &__number {
-      position: absolute;
-      left: 0;
-      top: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--site-color-primary-soft);
-      color: var(--site-color-primary);
-      font-size: 13px;
-      font-weight: 600;
-    }
-  }
-
   @media (max-width: 959.98px) {
     .hero {
       padding: 56px 0 40px;
-    }
-    .step {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 16px;
     }
   }
 </style>

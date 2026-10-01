@@ -20,7 +20,7 @@ export interface Tab {
 /**
  * A single tab inside `<c2-tabs>`. Its `for` attribute names the `id` of the panel it controls.
  * The parent owns selection: it sets `selected` and the roving `tabindex`; this element exposes
- * them as `role="tab"`, `aria-selected`, `aria-controls` and `aria-disabled`.
+ * them as `role="tab"`, `aria-selected`, `aria-controls` and `aria-disabled` through `ElementInternals`, so no host attribute is written.
  *
  * @tag c2-tab
  *
@@ -47,8 +47,13 @@ export class Tab extends LitElement {
   @consume({ context: selectedTabContext, subscribe: true })
   private selectedTab: string = ''
 
+  // Semantics live on ElementInternals, not host attributes: an attribute the element writes on itself is one the
+  // server never rendered, and React reports it as a hydration mismatch. An author-set `role` still wins.
+  private readonly internals = this.attachInternals()
+
   constructor() {
     super()
+    this.internals.role = 'tab'
     if (!isServer) {
       this.addEventListener('click', this.handleClick)
       this.addEventListener('keydown', this.handleKeydown)
@@ -61,20 +66,15 @@ export class Tab extends LitElement {
     // throws `NotSupportedError`. Parser-created tabs never hit the check, so this only shows up when a framework
     // builds the element imperatively — Angular's renderer does, and the whole tab strip dies with it.
     if (!isServer) this.setAttribute('slot', 'tab')
-    if (!this.hasAttribute('role')) this.setAttribute('role', 'tab')
     if (!this.hasAttribute('tabindex')) this.tabIndex = -1
   }
 
-  override updated(changed: PropertyValues<this>) {
-    if (changed.has('selected')) this.setAttribute('aria-selected', String(this.selected))
-    if (changed.has('disabled')) {
-      if (this.disabled) this.setAttribute('aria-disabled', 'true')
-      else this.removeAttribute('aria-disabled')
-    }
-    if (changed.has('for')) {
-      if (this.for) this.setAttribute('aria-controls', this.for)
-      else this.removeAttribute('aria-controls')
-    }
+  override updated(_changed: PropertyValues<this>) {
+    this.internals.ariaSelected = String(this.selected)
+    this.internals.ariaDisabled = this.disabled ? 'true' : null
+    // Resolved on every update: the panel may be added after the tab, and `<c2-tabs>` re-requests an update then.
+    const panel = this.for ? (this.getRootNode() as Document | ShadowRoot).getElementById?.(this.for) : null
+    this.internals.ariaControlsElements = panel ? [panel] : null
   }
 
   private handleClick = () => {

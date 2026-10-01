@@ -23,7 +23,7 @@ npm install @c2n/qr-code
 <style>
   .brand-code {
     --c2-qr-code__module--color: #1d4ed8;
-    --c2-qr-code__background--color: #eff6ff;
+    --c2-qr-code__background--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
   }
 
   .qr-mark {
@@ -32,8 +32,8 @@ npm install @c2n/qr-code
     height: 100%;
     place-items: center;
     border-radius: 4px;
-    background: #18181b;
-    color: #ffffff;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    color: var(--c2-theme--color-on-primary, #ffffff);
     font: 700 10px/1 system-ui;
   }
 </style>

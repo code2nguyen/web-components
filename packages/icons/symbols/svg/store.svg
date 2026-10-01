@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <ellipse class="muted" cx="80" cy="128" rx="46" ry="5"/>
+  <rect class="surface line" x="34" y="56" width="92" height="68" rx="2"/>
+  <rect class="primary-soft line" x="44" y="78" width="32" height="26" rx="3"/>
+  <rect class="primary-soft line" x="86" y="80" width="28" height="44" rx="2"/>
+  <circle class="ink" cx="108" cy="104" r="2.5"/>
+  <path class="primary" d="M28 38h20.8v20h-20.8Z"/>
+  <path class="primary" d="M28 58a10.4 10.4 0 0 0 20.8 0Z"/>
+  <path class="primary-soft" d="M48.8 38h20.8v20h-20.8Z"/>
+  <path class="primary-soft" d="M48.8 58a10.4 10.4 0 0 0 20.8 0Z"/>
+  <path class="primary" d="M69.6 38h20.8v20h-20.8Z"/>
+  <path class="primary" d="M69.6 58a10.4 10.4 0 0 0 20.8 0Z"/>
+  <path class="primary-soft" d="M90.4 38h20.8v20h-20.8Z"/>
+  <path class="primary-soft" d="M90.4 58a10.4 10.4 0 0 0 20.8 0Z"/>
+  <path class="primary" d="M111.2 38h20.8v20h-20.8Z"/>
+  <path class="primary" d="M111.2 58a10.4 10.4 0 0 0 20.8 0Z"/>
+  <path class="line" d="M30 38h100"/>
+  <path class="accent" d="M132 20Q133.7 24.3 138 26Q133.7 27.7 132 32Q130.3 27.7 126 26Q130.3 24.3 132 20Z"/>
+  <circle class="accent" cx="26" cy="30" r="4"/>
+</svg>

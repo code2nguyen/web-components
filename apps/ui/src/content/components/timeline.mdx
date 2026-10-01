@@ -1,0 +1,59 @@
+---
+title: 'Timeline'
+description: 'A vertical sequence of dated events on a connected rail: order history, activity feeds, changelogs.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Timeline, TimelineItem } from '@c2n/timeline'
+
+`c2-timeline` lists `c2-timeline-item` entries in order, each a marker on a rail with a label, a timestamp and any
+content below them. Set `label` and `timestamp` for plain text, or fill the `label`, `timestamp` and `marker` slots
+when an entry needs a link, a relative time or an icon; `datetime` makes the timestamp a machine-readable `<time>`.
+`tone` colours an entry's marker, and `layout="split"` moves the timestamps into a column of their own before the
+rail. The connector stops at the last entry by itself, including for entries added later.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/timeline
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/timeline
+<style>
+  .timeline-demo { width: 340px; }
+  .timeline-icons {
+    width: 340px;
+    --c2-timeline-item__marker--size: 24px;
+    --c2-timeline-item__marker--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+  }
+</style>
+<div data-label="Stacked">
+  <c2-timeline class="timeline-demo" aria-label="Order history">
+    <c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" datetime="2026-09-12T09:14" tone="success">Paid with a card ending 4242.</c2-timeline-item>
+    <c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" datetime="2026-09-13T16:02" tone="primary">Handed to the carrier, tracking number 1Z 999 AA1.</c2-timeline-item>
+    <c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item>
+  </c2-timeline>
+</div>
+<div data-label="Split">
+  <c2-timeline class="timeline-demo" layout="split" aria-label="Milestones">
+    <c2-timeline-item label="Kick-off" timestamp="Jan 2026" tone="success"></c2-timeline-item>
+    <c2-timeline-item label="Public beta" timestamp="May 2026" tone="success"></c2-timeline-item>
+    <c2-timeline-item label="General availability" timestamp="Oct 2026" tone="primary"></c2-timeline-item>
+  </c2-timeline>
+</div>
+<div data-label="Icon markers">
+  <c2-timeline class="timeline-icons" aria-label="Activity">
+    <c2-timeline-item label="Deploy failed" timestamp="2 min ago" tone="danger">
+      <svg slot="marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+    </c2-timeline-item>
+    <c2-timeline-item label="Build passed" timestamp="5 min ago" tone="success">
+      <svg slot="marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+    </c2-timeline-item>
+  </c2-timeline>
+</div>
+```

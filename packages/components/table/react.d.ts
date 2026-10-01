@@ -24,7 +24,7 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel'> & {
+      'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'groupBy' | 'expandedGroups'> & {
         'row-key'?: Attribute
         'checkbox-selection'?: Attribute
         sort?: Attribute
@@ -38,16 +38,31 @@ declare module 'react' {
         'block-size'?: Attribute
         'empty-message'?: Attribute
         'page-size'?: Attribute
+        'summary-values'?: Attribute
+        'summary-scope'?: Attribute
+        'group-by'?: Attribute
+        'group-display'?: Attribute
+        'expanded-groups'?: Attribute
+        'groups-collapsed'?: Attribute
+        'empty-group-label'?: Attribute
         rows?: Table['rows'] | string
         columns?: Table['columns'] | string
         value?: Table['value'] | string
         sortModel?: Table['sortModel'] | string
+        summaryValues?: Table['summaryValues'] | string
+        groupBy?: Table['groupBy'] | string
+        expandedGroups?: Table['expandedGroups'] | string
       }
       'c2-table-column': Omit<C2Props<TableColumn>, 'formatOptions'> & {
+        'column-id'?: Attribute
         'min-width'?: Attribute
         'format-options'?: Attribute
         'cell-class'?: Attribute
         'cell-slot'?: Attribute
+        'summary-label'?: Attribute
+        'summary-align'?: Attribute
+        'summary-span'?: Attribute
+        'group-column'?: Attribute
         formatOptions?: TableColumn['formatOptions'] | string
       }
     }

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="ink" x="102" y="91" width="13" height="34" rx="6.5" transform="rotate(-45 108.5 108)"/>
+  <circle class="surface line" cx="72" cy="72" r="32"/>
+  <circle class="primary-soft" cx="72" cy="72" r="23"/>
+  <path class="line-primary" d="M59 66a15 15 0 0 1 9-10"/>
+  <path class="line-primary" d="M126 34v10M121 39h10"/>
+  <circle class="accent" cx="36" cy="118" r="3.5"/>
+</svg>

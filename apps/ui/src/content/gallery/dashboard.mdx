@@ -21,16 +21,16 @@ variables: `--c2-dashboard--background` with `--c2-dashboard--padding` turns the
     height: 460px;
     --c2-dashboard--gap: 10px;
     --c2-dashboard--padding: 10px;
-    --c2-dashboard--background: #f1f2f4;
+    --c2-dashboard--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
     --c2-dashboard--border-radius: 14px;
-    --c2-dash-card--background: #ffffff;
-    --c2-dash-card--border: 1px solid #e4e4e7;
+    --c2-dash-card--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-dash-card--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-dash-card--border-radius: 10px;
-    --c2-dash-card__expanded--background: #ffffff;
+    --c2-dash-card__expanded--background: var(--c2-theme--color-surface, #ffffff);
     --c2-dash-card__header--min-height: 40px;
     --c2-dash-card__header--font-size: 13px;
-    --c2-dash-card__header--border-bottom: 1px solid #e4e4e7;
-    --c2-dash-card__footer--border-top: 1px solid #e4e4e7;
+    --c2-dash-card__header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-dash-card__footer--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 
   /* `body` is a part, so the pane's content area can be made to stretch whatever is inside it. */
@@ -84,7 +84,7 @@ variables: `--c2-dashboard--background` with `--c2-dashboard--padding` turns the
   }
 
   .desk-down {
-    color: #dc2626;
+    color: var(--c2-theme--color-error, #dc2626);
   }
 </style>
 <c2-dashboard client:only="lit" class="desk" columns="260px 1fr" rows="1fr 1fr" storage-key="c2n-demo-desk">
@@ -145,7 +145,7 @@ built-in fullscreen button — and a `footer` under the content. `storage-key` k
   .bare {
     height: 220px;
     padding: 10px;
-    background: #f4f4f5;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
     border-radius: 12px;
   }
 
@@ -154,9 +154,9 @@ built-in fullscreen button — and a `footer` under the content. `storage-key` k
     height: 100%;
     place-items: center;
     font-size: 13px;
-    color: #71717a;
-    background: #ffffff;
-    border: 1px solid #e4e4e7;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    background: var(--c2-theme--color-surface, #ffffff);
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 8px;
   }
 </style>
@@ -235,12 +235,12 @@ markup inside the panes. The cards below move that surface onto the component it
     height: 220px;
     --c2-dashboard--gap: 14px;
     --c2-dashboard--padding: 14px;
-    --c2-dashboard--background: #f1f2f4;
+    --c2-dashboard--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
     --c2-dashboard--border-radius: 18px;
-    --c2-dash-card--background: #ffffff;
+    --c2-dash-card--background: var(--c2-theme--color-surface, #ffffff);
     --c2-dash-card--border-radius: 14px;
     --c2-dash-card--box-shadow: 0 1px 2px rgba(9, 9, 11, 0.06), 0 8px 24px rgba(9, 9, 11, 0.08);
-    --c2-dash-card__expanded--background: #ffffff;
+    --c2-dash-card__expanded--background: var(--c2-theme--color-surface, #ffffff);
     --c2-dash-card__header--font-weight: 500;
     --c2-dash-card__handle__hover--background: rgba(9, 9, 11, 0.18);
     --c2-dash-card__handle__active--background: rgba(9, 9, 11, 0.38);

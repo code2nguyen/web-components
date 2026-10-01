@@ -1,6 +1,6 @@
 ---
 title: 'Table gallery'
-description: 'Ready-made c2-table setups: columns and formats, sorting and selection, toolbars and footers, states, and looks from a hairline report to a trading terminal.'
+description: 'Ready-made c2-table setups: columns and formats, sorting and selection, grouping, toolbars and footers, states, and looks from a hairline report to a trading terminal.'
 ---
 
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
@@ -8,6 +8,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import ExampleModules from '../../components/ExampleModules.astro'
 import SparklineMarketTable from '../../components/SparklineMarketTable.astro'
+import GroupByTableToolbar from '../../components/GroupByTableToolbar.astro'
 
 import { Table } from '@c2n/table'
 import { TableColumn } from '@c2n/table/table-column.js'
@@ -18,6 +19,7 @@ import { Button } from '@c2n/button'
 
 <ExampleModules />
 <SparklineMarketTable />
+<GroupByTableToolbar />
 
 ## Columns and data
 
@@ -82,8 +84,8 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .pinned {
     height: 296px;
     width: 100%;
-    --c2-table__pinned-start--box-shadow: 2px 0 0 0 #e4e4e7;
-    --c2-table__pinned-end--box-shadow: -2px 0 0 0 #e4e4e7;
+    --c2-table__pinned-start--box-shadow: 2px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table__pinned-end--box-shadow: -2px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7);
   }
 </style>
 <c2-table client:only="lit" class="pinned" row-key="id" rows='[{"id":"1","order":"#10841","customer":"Northwind Trading","channel":"Online","items":12,"total":8420.5,"margin":0.182,"status":"Paid","placed":"2026-02-11T09:24:00Z"},{"id":"2","order":"#10840","customer":"Contoso Ltd","channel":"Partner","items":4,"total":1290,"margin":0.241,"status":"Pending","placed":"2026-02-11T08:02:00Z"},{"id":"3","order":"#10839","customer":"Fabrikam","channel":"Online","items":31,"total":18640.75,"margin":0.129,"status":"Paid","placed":"2026-02-10T17:41:00Z"},{"id":"4","order":"#10838","customer":"Tailspin Toys","channel":"Retail","items":7,"total":3150.2,"margin":0.204,"status":"Refunded","placed":"2026-02-10T14:15:00Z"},{"id":"5","order":"#10837","customer":"Adventure Works","channel":"Partner","items":19,"total":9875,"margin":0.163,"status":"Paid","placed":"2026-02-09T11:58:00Z"},{"id":"6","order":"#10836","customer":"Wide World Importers","channel":"Online","items":2,"total":480.9,"margin":0.315,"status":"Pending","placed":"2026-02-09T10:07:00Z"}]'>
@@ -103,7 +105,7 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .resizable {
     height: 296px;
     width: 100%;
-    --c2-table__resizer--color: #e4e4e7;
+    --c2-table__resizer--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table__resizer__hover--color: rgb(2, 101, 220);
   }
 </style>
@@ -128,8 +130,8 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
     border-radius: 999px;
     font-size: 12px;
     font-weight: 500;
-    color: #3f3f46;
-    background: #f4f4f5;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .pills::part(cell-content-team) {
     padding: 2px 10px;
@@ -179,7 +181,7 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .sortable-card {
     height: 296px;
     width: 100%;
-    --c2-table__header-cell__hover--background: #f4f4f5;
+    --c2-table__header-cell__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <c2-table client:only="lit" class="sortable-card" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -216,7 +218,7 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .multi {
     height: 296px;
     width: 100%;
-    --c2-table__header-cell__sorted--color: #18181b;
+    --c2-table__header-cell__sorted--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-table client:only="lit" class="multi" sortable multi-sort sort="team:asc;score:desc" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -271,8 +273,8 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .single-card {
     height: 296px;
     width: 100%;
-    --c2-table__row__selected--background: #18181b;
-    --c2-table__row__selected--color: #ffffff;
+    --c2-table__row__selected--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-table__row__selected--color: var(--c2-theme--color-on-primary, #ffffff);
   }
 </style>
 <c2-table client:only="lit" class="single-card" selection="single" value="3" row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -319,13 +321,13 @@ flickering between colors. Every third replay tick performs an add or delete so 
     height: 326px;
     --c2-table__header--height: 42px;
     --c2-table__row--height: 56px;
-    --c2-table__row--border-bottom: 1px solid var(--site-color-outline-variant);
+    --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-outline-variant);
   }
   .market-controls {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: var(--site-color-on-surface-muted);
+    color: var(--c2-theme--color-on-surface-variant);
     font-size: 12px;
   }
 </style>
@@ -373,7 +375,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     height: 320px;
     width: 100%;
     --c2-table__toolbar--padding: 10px 12px;
-    --c2-table__toolbar--background: #fafafa;
+    --c2-table__toolbar--background: var(--c2-theme--color-surface-container-low, #fafafa);
   }
   .toolbar-title .bar {
     display: flex;
@@ -387,10 +389,10 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     margin-right: auto;
   }
   .toolbar-title .ghost {
-    --c2-button__container--background-color: #ffffff;
-    --c2-button__container--color: #18181b;
-    --c2-button__container--border: 1px solid #e4e4e7;
-    --c2-button__container__hover--background-color: #f4f4f5;
+    --c2-button__container--background-color: var(--c2-theme--color-surface, #ffffff);
+    --c2-button__container--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-button__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
 <c2-table client:only="lit" class="toolbar-title" sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -451,7 +453,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     height: 320px;
     width: 100%;
     --c2-table__toolbar--padding: 10px 12px;
-    --c2-table__toolbar--border-bottom: 1px solid #e4e4e7;
+    --c2-table__toolbar--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .toolbar-filters .bar {
     display: flex;
@@ -500,8 +502,8 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
     height: 330px;
     width: 100%;
     --c2-table__footer--padding: 10px 12px;
-    --c2-table__footer--background: #fafafa;
-    --c2-table__footer--border-top: 1px solid #e4e4e7;
+    --c2-table__footer--background: var(--c2-theme--color-surface-container-low, #fafafa);
+    --c2-table__footer--border-top: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
   }
   .footer-total .bar {
     display: flex;
@@ -511,7 +513,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
   }
   .footer-total .label {
     font-size: 12px;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .footer-total .total {
     margin-left: auto;
@@ -560,6 +562,150 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
 
 </GalleryGrid>
 
+## Totals
+
+A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals row. It is a row of the same grid, so each figure sits in its own column's track — through resizing, pinning and horizontal scroll — takes the column's `format` and alignment, and stays at the bottom of the viewport while the rows scroll under it. `summary-label` writes text into a column with no figure, and `summary-span` stretches it over the columns after it. Style it with the `--c2-table__summary--*` variables, or one column's figure with `::part(summary-content-<id>)`.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Invoice totals
+<style>
+  .invoice {
+    height: 296px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="invoice" row-key="id" rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"rate":95,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"rate":110,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"rate":120,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"rate":80,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"rate":95,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"rate":80,"amount":240},{"id":"7","task":"Performance budget","team":"Engineering","hours":11,"rate":120,"amount":1320},{"id":"8","task":"Onboarding flow","team":"Design","hours":16,"rate":95,"amount":1520},{"id":"9","task":"Docs migration","team":"Content","hours":10,"rate":80,"amount":800},{"id":"10","task":"QA sweep","team":"Engineering","hours":8,"rate":110,"amount":880}]'>
+  <c2-table-column field="task" header="Task" width="minmax(160px, 2fr)" summary-label="Total" summary-span="2"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
+  <c2-table-column field="hours" header="Hours" width="90px" align="end" format="number" summary="sum"></c2-table-column>
+  <c2-table-column field="rate" header="Rate" width="100px" align="end" format="currency" summary="avg"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="120px" align="end" format="currency" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Ledger footer
+<style>
+  .ledger {
+    height: 296px;
+    width: 100%;
+    --c2-table__summary--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-table__summary--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-table__summary--box-shadow: none;
+    --c2-table__summary--height: 40px;
+  }
+  .ledger::part(summary-content-amount) {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgb(22, 163, 74);
+  }
+</style>
+<c2-table client:only="lit" class="ledger" row-key="id" rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"rate":95,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"rate":110,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"rate":120,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"rate":80,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"rate":95,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"rate":80,"amount":240},{"id":"7","task":"Performance budget","team":"Engineering","hours":11,"rate":120,"amount":1320},{"id":"8","task":"Onboarding flow","team":"Design","hours":16,"rate":95,"amount":1520},{"id":"9","task":"Docs migration","team":"Content","hours":10,"rate":80,"amount":800},{"id":"10","task":"QA sweep","team":"Engineering","hours":8,"rate":110,"amount":880}]'>
+  <c2-table-column field="task" header="Task" width="200px" pinned="start" summary="count"></c2-table-column>
+  <c2-table-column field="team" header="Team" width="160px"></c2-table-column>
+  <c2-table-column field="hours" header="Hours" width="120px" align="end" format="number" summary="sum"></c2-table-column>
+  <c2-table-column field="rate" header="Rate" width="120px" align="end" format="currency" summary="max"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="160px" align="end" format="currency" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
+## Grouping
+
+`group-by` gathers the rows into collapsible groups, outermost level first: `group-by="region,status"` nests the statuses of each region. By default each group is a row of the grid — its label and row count in the first column, and under every column with a `summary` that figure for the group's rows, so subtotals line up with the totals row. `group-display="band"` draws a full-width band per group instead. The groups of the rows at the top of the view stay under the header while they scroll, a group's checkbox selects its rows, and `groups-collapsed` starts them closed. The table does not ship a "group by" picker: the last card builds one from a `c2-button-group` in the `toolbar` slot that sets `groupBy`.
+
+<GalleryGrid min="560">
+
+```html tag=MdxCodeBlock,label=Grouped rows
+<style>
+  .grouped-rows {
+    height: 360px;
+    width: 100%;
+  }
+</style>
+<c2-table client:only="lit" class="grouped-rows" row-key="id" group-by="region,status" selection="multiple" checkbox-selection rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Group bands
+<style>
+  .grouped-bands {
+    height: 360px;
+    width: 100%;
+    --c2-table__group-band--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-table__group-count--background: var(--c2-theme--color-surface, #ffffff);
+  }
+</style>
+<c2-table client:only="lit" class="grouped-bands" row-key="id" group-by="status" group-display="band" rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)"></c2-table-column>
+  <c2-table-column field="region" header="Region" width="110px"></c2-table-column>
+  <c2-table-column field="status" header="Status" hidden></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Collapsed groups
+<style>
+  .grouped-collapsed {
+    height: 240px;
+    width: 100%;
+    --c2-table__group-row--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__group-toggle--color: rgb(2, 101, 220);
+  }
+</style>
+<c2-table client:only="lit" class="grouped-collapsed" row-key="id" group-by="region" groups-collapsed rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+```html tag=MdxCodeBlock,label=Toolbar: group by
+<style>
+  .grouped-toolbar {
+    height: 400px;
+    width: 100%;
+    --c2-table__toolbar--padding: 8px 12px;
+  }
+  .grouped-toolbar .bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    font-size: 12px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 72%, var(--c2-theme--color-surface, #ffffff));
+    --c2-button-group__segmented-item--color: var(--c2-theme--color-on-surface, #18181b);
+  }
+</style>
+<c2-table client:only="lit" class="grouped-toolbar" data-group-by-table row-key="id" group-by="region" rows='[{"id":"o1","customer":"Acme GmbH","region":"EMEA","status":"Paid","amount":12400,"qty":16},{"id":"o2","customer":"Nordlys AS","region":"EMEA","status":"Paid","amount":10080,"qty":14},{"id":"o3","customer":"Brio SpA","region":"EMEA","status":"Paid","amount":9000,"qty":10},{"id":"o4","customer":"Kaspar and Co","region":"EMEA","status":"Pending","amount":9450,"qty":12},{"id":"o5","customer":"Ljus AB","region":"EMEA","status":"Pending","amount":7280,"qty":9},{"id":"o6","customer":"Halcyon Inc","region":"Americas","status":"Paid","amount":14200,"qty":18},{"id":"o7","customer":"Pampa SA","region":"Americas","status":"Failed","amount":4100,"qty":5},{"id":"o8","customer":"Maple Ltd","region":"Americas","status":"Paid","amount":11600,"qty":13},{"id":"o9","customer":"Tundra Co","region":"Americas","status":"Pending","amount":7000,"qty":8},{"id":"o10","customer":"Kiwi Ltd","region":"APAC","status":"Paid","amount":8340,"qty":11},{"id":"o11","customer":"Sakura KK","region":"APAC","status":"Paid","amount":7600,"qty":10},{"id":"o12","customer":"Lotus Pte","region":"APAC","status":"Pending","amount":5400,"qty":8}]'>
+  <div class="bar" slot="toolbar">
+    <span>Group by</span>
+    <c2-button-group appearance="segmented" selection="single" size="s" value="region" aria-label="Group by">
+      <c2-button value="none">None</c2-button>
+      <c2-button value="region">Region</c2-button>
+      <c2-button value="status">Status</c2-button>
+      <c2-button value="region,status">Region › Status</c2-button>
+    </c2-button-group>
+  </div>
+  <c2-table-column field="customer" header="Customer" width="minmax(180px, 2fr)" summary-label="Total"></c2-table-column>
+  <c2-table-column field="region" header="Region" hidden></c2-table-column>
+  <c2-table-column field="status" header="Status" width="110px"></c2-table-column>
+  <c2-table-column field="amount" header="Amount" width="130px" align="end" format="currency" summary="sum"></c2-table-column>
+  <c2-table-column field="qty" header="Qty" width="80px" align="end" format="number" summary="sum"></c2-table-column>
+</c2-table>
+```
+
+</GalleryGrid>
+
 ## States
 
 `loading` shows a spinner until the data lands — or whatever you slot into `loading` — `error` replaces the body with a message and a way out, and an empty `rows` array shows `empty-message` or the `empty` slot. Give the host a height and the body scrolls inside it; past `virtual-threshold` rows it virtualizes on its own.
@@ -571,7 +717,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
   .loading-card {
     height: 296px;
     width: 100%;
-    --c2-table__skeleton--background: #f4f4f5;
+    --c2-table__skeleton--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-table__skeleton--border-radius: 4px;
   }
 </style>
@@ -601,7 +747,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
   .skeleton-card .line {
     height: 10px;
     border-radius: 4px;
-    background: linear-gradient(90deg, #f4f4f5 0%, #e4e4e7 50%, #f4f4f5 100%);
+    background: linear-gradient(90deg, var(--c2-theme--color-surface-container, #f4f4f5) 0%, var(--c2-theme--color-outline-variant, #e4e4e7) 50%, var(--c2-theme--color-surface-container, #f4f4f5) 100%);
   }
   .skeleton-card .line:nth-child(2) {
     width: 82%;
@@ -634,7 +780,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
   .empty-card {
     height: 296px;
     width: 100%;
-    --c2-table__state--color: #71717a;
+    --c2-table__state--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-table__state--padding: 40px 16px;
   }
   .empty-card .empty {
@@ -644,7 +790,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
   }
   .empty-card .empty strong {
     font-size: 14px;
-    color: #18181b;
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-table client:only="lit" class="empty-card" row-key="id" rows='[]'>
@@ -667,7 +813,7 @@ A `c2-pagination` in the `footer` is wired up rather than decorative: the table 
   .error-card {
     height: 296px;
     width: 100%;
-    --c2-table__state__error--color: #dc2626;
+    --c2-table__state__error--color: var(--c2-theme--color-error, #dc2626);
     --c2-table__state--padding: 32px 16px;
   }
   .error-card .failed {
@@ -733,12 +879,12 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     --c2-table--border-bottom-left-radius: 0;
     --c2-table--border-bottom-right-radius: 0;
     --c2-table__header--background: transparent;
-    --c2-table__header--border-bottom: 1px solid #18181b;
-    --c2-table__header--color: #18181b;
+    --c2-table__header--border-bottom: 1px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-table__header--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-table__header--letter-spacing: 0.08em;
     --c2-table__header-cell--padding: 0 8px;
-    --c2-table__row--border-bottom: 1px solid #f4f4f5;
-    --c2-table__row__hover--background: #fafafa;
+    --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-table__row__hover--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-table__cell--padding: 0 8px;
   }
 </style>
@@ -761,13 +907,13 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     --c2-table--border-top-right-radius: 0;
     --c2-table--border-bottom-left-radius: 0;
     --c2-table--border-bottom-right-radius: 0;
-    --c2-table__header--background: #f4f4f5;
+    --c2-table__header--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-table__header--height: 32px;
     --c2-table__header--font-size: 12px;
-    --c2-table__header--border-bottom: 1px solid #d4d4d8;
+    --c2-table__header--border-bottom: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-table__row--height: 30px;
-    --c2-table__row--border-bottom: 1px solid #e4e4e7;
-    --c2-table__cell--border-right: 1px solid #e4e4e7;
+    --c2-table__row--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table__cell--border-right: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table__cell--padding: 0 8px;
     --c2-table__cell--font-size: 12px;
     --c2-table__header-cell--padding: 0 8px;
@@ -789,20 +935,20 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
   .console {
     height: 296px;
     width: 100%;
-    --c2-table--background: #18181b;
-    --c2-table--color: #fafafa;
-    --c2-table--border-top: 1px solid #3f3f46;
-    --c2-table--border-right: 1px solid #3f3f46;
-    --c2-table--border-bottom: 1px solid #3f3f46;
-    --c2-table--border-left: 1px solid #3f3f46;
-    --c2-table__header--background: #27272a;
-    --c2-table__header--color: #a1a1aa;
-    --c2-table__header--border-bottom: 1px solid #3f3f46;
-    --c2-table__row--border-bottom: 1px solid #27272a;
-    --c2-table__row__hover--background: #27272a;
-    --c2-table__cell--color: #fafafa;
-    --c2-table__sort-icon--color: #52525b;
-    --c2-table__sort-icon__active--color: #a1a1aa;
+    --c2-table--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-table--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-table--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__header--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__header--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-table__header--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__cell--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-table__sort-icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__sort-icon__active--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-table client:only="lit" class="console" sortable row-key="id" rows='[{"id":"1","service":"api-gateway","region":"eu-west-1","tier":"Edge","uptime":0.9998,"p95":124,"requests":1284000,"state":"Healthy"},{"id":"2","service":"auth","region":"eu-west-1","tier":"Core","uptime":0.9991,"p95":86,"requests":642000,"state":"Healthy"},{"id":"3","service":"billing","region":"us-east-1","tier":"Core","uptime":0.9912,"p95":412,"requests":98400,"state":"Degraded"},{"id":"4","service":"search","region":"us-east-1","tier":"Edge","uptime":0.9975,"p95":238,"requests":874000,"state":"Healthy"},{"id":"5","service":"notifications","region":"ap-south-1","tier":"Async","uptime":0.9834,"p95":1840,"requests":41200,"state":"Down"},{"id":"6","service":"reports","region":"eu-west-1","tier":"Async","uptime":0.9989,"p95":690,"requests":18600,"state":"Healthy"}]'>
@@ -821,7 +967,7 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
   .soft {
     height: 310px;
     width: 100%;
-    --c2-table--background: #fafafa;
+    --c2-table--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-table--border-top: none;
     --c2-table--border-right: none;
     --c2-table--border-bottom: none;
@@ -831,13 +977,13 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     --c2-table--border-bottom-left-radius: 14px;
     --c2-table--border-bottom-right-radius: 14px;
     --c2-table--box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.08);
-    --c2-table__header--background: #fafafa;
+    --c2-table__header--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-table__header--border-bottom: none;
     --c2-table__header--height: 40px;
     --c2-table__row--height: 44px;
     --c2-table__row--border-bottom: none;
-    --c2-table__row__odd--background: #ffffff;
-    --c2-table__row__hover--background: #f4f4f5;
+    --c2-table__row__odd--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__row__hover--background: var(--c2-theme--color-surface-container, #f4f4f5);
     --c2-table__cell--padding: 0 16px;
     --c2-table__header-cell--padding: 0 16px;
   }
@@ -858,10 +1004,10 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     height: 296px;
     width: 100%;
     --c2-table__row--border-bottom: none;
-    --c2-table__row__odd--background: #f4f4f5;
-    --c2-table__row__hover--background: #e4e4e7;
-    --c2-table__header--background: #ffffff;
-    --c2-table__header--border-bottom: 2px solid #18181b;
+    --c2-table__row__odd--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-table__row__hover--background: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table__header--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__header--border-bottom: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
   }
 </style>
 <c2-table client:only="lit" class="zebra" stripe sortable row-key="id" rows='[{"id":"1","name":"Ada Lovelace","team":"Analytics","role":"Principal","score":128000,"status":"Active","updated":"2026-02-11"},{"id":"2","name":"Grace Hopper","team":"Compilers","role":"Staff","score":96500,"status":"Active","updated":"2026-02-09"},{"id":"3","name":"Alan Turing","team":"Research","role":"Principal","score":87200,"status":"On leave","updated":"2026-01-28"},{"id":"4","name":"Radia Perlman","team":"Networks","role":"Staff","score":74800,"status":"Active","updated":"2026-02-10"},{"id":"5","name":"Barbara Liskov","team":"Research","role":"Distinguished","score":69100,"status":"Active","updated":"2026-02-05"},{"id":"6","name":"Katherine Johnson","team":"Flight","role":"Senior","score":58400,"status":"Archived","updated":"2026-01-19"}]'>
@@ -938,30 +1084,30 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
   .terminal {
     height: 296px;
     width: 100%;
-    --c2-table--background: #09090b;
-    --c2-table--color: #e4e4e7;
+    --c2-table--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table--font-size: 12px;
-    --c2-table--border-top: 1px solid #27272a;
-    --c2-table--border-right: 1px solid #27272a;
-    --c2-table--border-bottom: 1px solid #27272a;
-    --c2-table--border-left: 1px solid #27272a;
-    --c2-table__header--background: #09090b;
-    --c2-table__header--color: #71717a;
+    --c2-table--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__header--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table__header--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-table__header--height: 30px;
     --c2-table__header--letter-spacing: 0.08em;
-    --c2-table__header--border-bottom: 1px solid #27272a;
+    --c2-table__header--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
     --c2-table__row--height: 30px;
     --c2-table__row--border-bottom: none;
-    --c2-table__row__odd--background: #111113;
-    --c2-table__row__hover--background: #1c1c1f;
-    --c2-table__cell--color: #e4e4e7;
+    --c2-table__row__odd--background: var(--c2-theme--color-on-surface, #18181b);
+    --c2-table__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 98%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__cell--color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table__cell--font-size: 12px;
-    --c2-table__sort-icon--color: #3f3f46;
+    --c2-table__sort-icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
     --c2-table__sort-icon__active--color: #22c55e;
   }
   .terminal::part(cell-symbol) {
     font-weight: 600;
-    color: #fafafa;
+    color: var(--c2-theme--color-on-inverse-surface, #fafafa);
   }
   .terminal::part(cell-last), .terminal::part(cell-change), .terminal::part(cell-pct), .terminal::part(cell-volume) {
     font-variant-numeric: tabular-nums;

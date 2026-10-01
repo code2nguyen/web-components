@@ -81,6 +81,8 @@ const total = section === 'components' ? components.length : groups.reduce((coun
 
 // One group is just a list with a heading: nothing to collapse, nothing worth filtering.
 const collapsible = groups.length > 1
+// Counts help only in the component catalogue; a handful of icon sets, guides or examples is counted at a glance.
+const showCounts = section === 'components'
 
 /**
  * The nav as a `c2-tree`, emitted as a raw string.
@@ -123,7 +125,9 @@ const treeHtml = collapsible
           return rawElement(
             'c2-tree-item',
             { value: group.title, class: 'sidebar__group', 'data-group': group.title },
-            `<span slot="label">${escapeHtml(group.title)}</span>` + `<span slot="actions" class="sidebar__count" data-total="${count}">${count}</span>` + rows,
+            `<span slot="label">${escapeHtml(group.title)}</span>` +
+              (showCounts ? `<span slot="actions" class="sidebar__count" data-total="${count}">${count}</span>` : '') +
+              rows,
           )
         })
         .join(''),
@@ -156,20 +160,20 @@ const treeHtml = collapsible
     )
   }
 
-  {
-    drawer && !collapsible && (
-      <div class="sidebar__drawer-actions">
+  {/* Without a filter row, the drawer's close control shares the overview link's row instead of taking one of its own. */}
+  <div class="sidebar__head">
+    <a href={overview.href} class:list={['sidebar__overview', { active: !currentId }]}>
+      <span>{overview.label}</span>
+      {showCounts && <span class="sidebar__count">{total}</span>}
+    </a>
+    {
+      drawer && !collapsible && (
         <SiteIconButton label="Close navigation" tooltip={false} size="sm" side-nav-toggle>
           <FeatherXIcon client:load />
         </SiteIconButton>
-      </div>
-    )
-  }
-
-  <a href={overview.href} class:list={['sidebar__overview', { active: !currentId }]}>
-    <span>{overview.label}</span>
-    <span class="sidebar__count">{total}</span>
-  </a>
+      )
+    }
+  </div>
 
   {
     collapsible ? (
@@ -231,18 +235,20 @@ const treeHtml = collapsible
     min-width: 0;
   }
 
-  .sidebar__drawer-actions {
+  .sidebar__head {
     display: flex;
-    justify-content: flex-end;
-    padding-bottom: 12px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
   }
 
   .sidebar__overview {
+    flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 6px 8px;
-    margin-bottom: 10px;
     border-radius: var(--site-radius-sm);
     color: var(--site-color-on-surface-variant);
     font-weight: 500;

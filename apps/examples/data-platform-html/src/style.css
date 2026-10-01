@@ -1847,8 +1847,11 @@ c2-badge[tone='primary'],
   --c2-badge--padding-right: 8px;
 }
 
+/* `neutral` is the default tone, which the component does not reflect onto the host. */
 c2-badge[tone='neutral'],
-.pm-top-row c2-badge[tone='neutral'] {
+c2-badge:not([tone]),
+.pm-top-row c2-badge[tone='neutral'],
+.pm-top-row c2-badge:not([tone]) {
   --c2-badge--background: rgba(255, 255, 255, 0.07);
   --c2-badge--color: #cbd5e1;
   --c2-badge--border: 1px solid rgba(255, 255, 255, 0.14);

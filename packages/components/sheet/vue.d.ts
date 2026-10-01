@@ -8,10 +8,13 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Sheet, SheetEventMap } from '@c2n/sheet'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Sheet } from '@c2n/sheet'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
@@ -21,9 +24,9 @@ declare module 'vue' {
         'no-escape'?: unknown
         'hide-close'?: unknown
         'no-scroll-lock'?: unknown
-        onOpen?: (event: SheetEventMap['open']) => void
-        onClose?: (event: SheetEventMap['close']) => void
-        onCancel?: (event: SheetEventMap['cancel']) => void
+        onOpen?: (event: EventOf<Sheet, 'open'>) => void
+        onClose?: (event: EventOf<Sheet, 'close'>) => void
+        onCancel?: (event: EventOf<Sheet, 'cancel'>) => void
       }
     >
   }

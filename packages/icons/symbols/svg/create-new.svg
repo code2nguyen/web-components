@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <rect class="surface line" stroke-dasharray="6 6" x="32" y="34" width="96" height="92" rx="12"/>
+  <circle class="primary" cx="80" cy="80" r="22"/>
+  <path class="line-surface" d="M80 70v20M70 80h20"/>
+  <path class="accent" d="M128 21Q130 26 135 28Q130 30 128 35Q126 30 121 28Q126 26 128 21Z"/>
+  <circle class="primary" cx="28" cy="124" r="4"/>
+</svg>

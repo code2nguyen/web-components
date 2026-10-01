@@ -10,6 +10,10 @@ export type Override = { token: string; value?: string } | { exclude: string }
 const onPrimary = { token: 'color-on-primary' }
 
 export const overrides: Record<string, Override> = {
+  // The highlighter is a translucent hue on purpose: it tints any surface, light or dark, and the text keeps its colour.
+  '--c2-marker__mark--background-color': { exclude: 'translucent highlighter hue' },
+  // Message body text is a slightly softer ink than the title; it is still body text on the surface.
+  '--c2-chat-message__message--color': { token: 'color-on-surface' },
   // Terminal typography and colors form one readable palette; a generic sans/light theme must not split it.
   '--c2-log-viewer--background': { exclude: 'default terminal palette' },
   '--c2-log-viewer--color': { exclude: 'default terminal palette' },
@@ -47,6 +51,28 @@ export const overrides: Record<string, Override> = {
     value: '2px dashed var(--c2-theme--color-primary, #2563eb)',
   },
   '--c2-masonry-item__dragging--box-shadow': { token: 'shadow-md' },
+  // Planner tints are the accent at a low strength, so they follow the brand colour and read on a dark surface.
+  '--c2-week-planner__day__today--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
+  },
+  // Translucent text colour rather than an opaque grey, so the line still shows over today's tinted column.
+  '--c2-week-planner__hour--border': {
+    token: 'color-on-surface',
+    value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent)',
+  },
+  '--c2-month-planner__day__today--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
+  },
+  '--c2-month-planner__month__marked--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
+  '--c2-month-planner__month__marked__hover--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 18%, transparent)',
+  },
   // Border Beam geometry and timing belong to the decorative effect. Its principal colour and radius follow the
   // active theme while the second gradient stop remains an intentionally coordinated accent.
   '--c2-border-beam--outset': { exclude: 'container border alignment geometry' },
@@ -70,6 +96,7 @@ export const overrides: Record<string, Override> = {
   '--c2-status-panel__container--border': { exclude: 'transparent opt-in panel frame' },
   '--c2-status-panel__media--size': { exclude: 'status media geometry' },
   '--c2-status-panel__media-icon--size': { exclude: 'status icon geometry' },
+  '--c2-status-panel__illustration--size': { exclude: 'status illustration geometry' },
   '--c2-status-panel__media__success--background-color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__warning--background-color': { exclude: 'semantic warning colour' },
@@ -146,6 +173,8 @@ export const overrides: Record<string, Override> = {
   '--c2-questionnaire__primary-action--color': onPrimary,
   // A date selector is commonly used as a floating booking panel, so its surface follows the shared popover shadow.
   '--c2-date-selector--box-shadow': { token: 'shadow-md' },
+  // The calendar's month picker floats over the grid like any popover.
+  '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },
@@ -209,6 +238,11 @@ export const overrides: Record<string, Override> = {
     token: 'color-primary-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
   },
+  // Selected + hovered table row: the same stronger tint of the selected surface as the list item.
+  '--c2-table__row__selected__hover--background': {
+    token: 'color-primary-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary-container, #edf1fe), var(--c2-theme--color-primary, #0265dc) 8%)',
+  },
   // Keep the left edge of the color slider on the same outline token as its siblings.
   '--c2-color-slider--border-left': {
     token: 'border',
@@ -246,6 +280,9 @@ export const overrides: Record<string, Override> = {
   '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
   '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
   '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
+  // Month planner, compact layout: the selected day is an inverse-surface circle, today's a primary one.
+  '--c2-month-planner__date__selected--color': { token: 'color-on-inverse-surface' },
+  '--c2-month-planner__date__today__selected--color': onPrimary,
   // Code viewer: monospace font and theme-neutral translucent greys / status colours that work on any syntax theme.
   '--c2-code-viewer--font-family': { exclude: 'monospace font, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -255,18 +292,30 @@ export const overrides: Record<string, Override> = {
   '--c2-code-viewer__line__highlighted--background': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-code-viewer__line__highlighted--border-left': { exclude: 'highlight colour tied to the syntax theme' },
   '--c2-side-nav__scrollbar--color': { exclude: 'translucent scrollbar thumb works on any surface' },
-  // Autocomplete uses its accent border as the focus indicator; adding the global ring creates a doubled border.
+  // Text-entry fields use their accent border as the focus indicator; adding the global ring creates a doubled border.
   '--c2-autocomplete__focus--outline': { exclude: 'focus is indicated by the accent border' },
-  // Error focus ring stays red on purpose.
-  '--c2-text-field__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
-  '--c2-date-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
-  '--c2-number-input__error__focus--outline': { exclude: 'error focus ring is intentionally red' },
+  '--c2-text-field__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-textarea__container__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-tag-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-date-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-time-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  '--c2-number-input__focus--outline': { exclude: 'focus is indicated by the accent border' },
+  // A selected tag is marked by a darker fill, not a ring.
+  '--c2-tag-input__tag__focus--background': { token: 'color-outline-variant' },
+  // The error state is carried by the red border, so no error ring either.
+  '--c2-text-field__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-date-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-time-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-number-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
+  '--c2-tag-input__error__focus--outline': { exclude: 'error state is indicated by the red border' },
   // 1px radii on the colour picker swatch are a detail, not a shape token.
   '--c2-color-select--border-top-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-top-right-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-bottom-left-radius': { exclude: 'swatch detail radius' },
   '--c2-color-select--border-bottom-right-radius': { exclude: 'swatch detail radius' },
   // The destructive row tint has no error-container token to hang on; the label itself maps to color-error.
+  // The focused row is marked by its highlight, like a hovered one; a ring on top of it is opt-in.
+  '--c2-menu-item__focus--outline': { exclude: 'the row highlight is the focus indicator' },
   '--c2-menu-item__destructive__hover--background': { exclude: 'destructive tint (the label maps to color-error)' },
   // The panel description is deliberately the normal weight, which the scale has no token for.
   '--c2-navigation-menu-link__description--font-weight': { exclude: 'normal weight, below the font-weight scale' },
@@ -313,4 +362,33 @@ export const overrides: Record<string, Override> = {
   '--c2-dashboard--border-radius': { exclude: 'square by default; the grid is a frame only once an app fills it' },
   '--c2-dash-card--border-radius': { exclude: 'bare pane; the surface inside it owns the radius' },
   '--c2-dash-card__handle__hover--background': { token: 'color-primary-glow' },
+  // Symbols are drawn with colour roles, not parts: each role follows the surface or accent token it stands in for,
+  // so a brand theme and dark mode recolour every illustration. The outline is the stronger border grey (the text
+  // rule would read #a1a1aa as secondary text); the golden highlight, success and warning stay stable, as status-panel's and steps' do.
+  '--c2-symbol__backdrop--color': { token: 'color-surface-container' },
+  '--c2-symbol__surface--color': { token: 'color-surface' },
+  '--c2-symbol__line--color': { token: 'color-outline-strong' },
+  '--c2-symbol__primary-soft--color': { token: 'color-primary-container' },
+  '--c2-symbol__accent--color': { exclude: 'decorative golden highlight' },
+  '--c2-symbol__success--color': { exclude: 'semantic success colour' },
+  '--c2-symbol__warning--color': { exclude: 'semantic warning colour' },
+  // Carousel indicator dots are small fills, not surfaces: they take the strong outline and the muted text colour.
+  '--c2-carousel__indicator--background-color': { token: 'color-outline-strong' },
+  '--c2-carousel__indicator__hover--background-color': { token: 'color-on-surface-variant' },
+  // Timeline: the connector is the standard hairline grey; success and warning markers are semantic status colours.
+  '--c2-timeline-item__connector--background': { token: 'color-outline-variant' },
+  '--c2-timeline-item__marker__success--border-color': { exclude: 'success status colour' },
+  '--c2-timeline-item__marker__success--color': { exclude: 'success status colour' },
+  '--c2-timeline-item__marker__warning--border-color': { exclude: 'warning status colour' },
+  '--c2-timeline-item__marker__warning--color': { exclude: 'warning status colour' },
+  // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
+  '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
+  '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },
+  // Flow: the edges of steps that have not run are drawn lines, the resting outline grey; the dot grid is that grey at
+  // 40% strength, so it stays a backdrop on any canvas colour in either mode. The success and warning colours are
+  // semantic status colours, as on c2-steps.
+  '--c2-flow__dot--color': { token: 'color-outline', value: 'color-mix(in srgb, var(--c2-theme--color-outline, #d4d4d8) 40%, transparent)' },
+  '--c2-flow__edge--color': { token: 'color-outline' },
+  '--c2-flow__success--color': { exclude: 'success status colour' },
+  '--c2-flow__warning--color': { exclude: 'warning status colour' },
 }

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <ellipse class="muted" cx="80" cy="132" rx="40" ry="5"/>
+  <path class="accent" d="M80 58c-6-14-26-22-30-10-3 9 14 11 30 10Z"/>
+  <path class="accent" d="M80 58c6-14 26-22 30-10 3 9-14 11-30 10Z"/>
+  <rect class="primary-soft line" x="42" y="72" width="76" height="52" rx="4"/>
+  <rect class="primary" x="36" y="56" width="88" height="18" rx="4"/>
+  <path class="accent" d="M73 56h14v68H73Z"/>
+  <path class="line-ink" opacity="0.25" d="M44 74h72"/>
+  <path class="primary" d="M126 23Q128 28 133 30Q128 32 126 37Q124 32 119 30Q124 28 126 23Z"/>
+  <path class="line-accent" d="M32 36v8M28 40h8"/>
+  <circle class="primary-soft" cx="130" cy="102" r="4"/>
+</svg>

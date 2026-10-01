@@ -1,0 +1,93 @@
+---
+title: 'Chat Message List'
+description: 'Scrolling conversation log that follows new messages, counts unread ones and loads older history.'
+category: 'Chat'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { ChatMessageList } from '@c2n/chat-message-list'
+import { ChatMessage } from '@c2n/chat-message'
+import { ChatInput } from '@c2n/chat-input'
+import { Avatar } from '@c2n/avatar'
+
+<ExampleModules />
+
+`c2-chat-message-list` is the scrolling part of a chat room: put `c2-chat-message` rows inside it and a `c2-chat-input` below it, and you have a chatbot. It is an accessible `log` region that stays pinned to the latest message while the reader is at the bottom — including a reply that grows while it streams. Once the reader scrolls up, it keeps their place, and a floating button jumps back with a count of the messages that arrived in the meantime. Set `has-more` and it fires `load-older` when the reader reaches the top; set `loading` while the history request runs, then prepend the older rows and the view does not move.
+
+Give the list a height (or let it fill a flex column); it scrolls its own content. The application owns the messages: append, prepend or update the children and the list reacts. Call `scrollToBottom()` after the user sends a message so their own message is always shown.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chat-message-list @c2n/chat-message @c2n/chat-input
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chat-message-list
+<style>
+  .chat-room {
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 560px);
+    height: 420px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 14px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    overflow: hidden;
+  }
+  .chat-room c2-chat-message-list {
+    flex: 1;
+  }
+  .chat-room c2-chat-input {
+    margin: 12px;
+  }
+  .chat-room .chat-demo-outgoing {
+    --c2-chat-message__message--background: #edf1fe;
+    --c2-chat-message__message--padding-top: 8px;
+    --c2-chat-message__message--padding-right: 12px;
+    --c2-chat-message__message--padding-bottom: 8px;
+    --c2-chat-message__message--padding-left: 12px;
+    --c2-chat-message__message--border-top-left-radius: 14px;
+    --c2-chat-message__message--border-top-right-radius: 14px;
+    --c2-chat-message__message--border-bottom-left-radius: 14px;
+    --c2-chat-message__message--border-bottom-right-radius: 4px;
+  }
+  .chat-room-empty {
+    height: 200px;
+    width: min(100%, 560px);
+    border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 28%, var(--c2-theme--color-surface, #ffffff));
+    border-radius: 14px;
+  }
+</style>
+
+<div data-label="Chat room">
+  <section class="chat-room" data-chat-demo>
+    <c2-chat-message-list has-more label="Conversation with Nova">
+      <c2-chat-message>
+        <c2-avatar slot="avatar" name="Nova AI" initials="AI"></c2-avatar>
+        <span slot="title">Nova</span>
+        <div>Hi! Ask me anything. Scroll up to load older messages.</div>
+      </c2-chat-message>
+      <c2-chat-message class="chat-demo-outgoing" align="right">
+        <span slot="title">You</span>
+        <div>How does the list decide when to scroll?</div>
+      </c2-chat-message>
+      <c2-chat-message>
+        <c2-avatar slot="avatar" name="Nova AI" initials="AI"></c2-avatar>
+        <span slot="title">Nova</span>
+        <div>It follows new messages only while you are at the bottom. Send one and see.</div>
+      </c2-chat-message>
+    </c2-chat-message-list>
+    <c2-chat-input aria-label="Message" placeholder="Send a message…"></c2-chat-input>
+  </section>
+</div>
+<div data-label="Empty">
+  <c2-chat-message-list class="chat-room-empty">
+    <span slot="empty">No messages yet. Say hello!</span>
+  </c2-chat-message-list>
+</div>
+```

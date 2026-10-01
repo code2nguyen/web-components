@@ -43,11 +43,11 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
   .outlined {
     --c2-avatar--size: 40px;
     --c2-avatar--background: transparent;
-    --c2-avatar--color: #18181b;
-    --c2-avatar--border-top: 2px solid #18181b;
-    --c2-avatar--border-right: 2px solid #18181b;
-    --c2-avatar--border-bottom: 2px solid #18181b;
-    --c2-avatar--border-left: 2px solid #18181b;
+    --c2-avatar--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-avatar--border-top: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-avatar--border-right: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-avatar--border-bottom: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-avatar--border-left: 2px solid var(--c2-theme--color-inverse-surface, #18181b);
   }
 </style>
 <c2-avatar name="Elisa Jasmin" initial-count="2" class="outlined" client:only="lit"></c2-avatar>
@@ -94,7 +94,7 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
 <style>
   .editable-photo {
     --c2-avatar--size: 72px;
-    --c2-avatar--box-shadow: 0 0 0 3px #ffffff, 0 0 0 4px #d4d4d8;
+    --c2-avatar--box-shadow: 0 0 0 3px var(--c2-theme--color-surface, #ffffff), 0 0 0 4px var(--c2-theme--color-outline, #d4d4d8);
   }
 </style>
 <c2-avatar editable name="Elisa Jasmin" src="/web-components/chat.avif" class="editable-photo" client:only="lit"></c2-avatar>
@@ -116,7 +116,7 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
   .online {
     --c2-avatar--size: 44px;
     --c2-avatar__badge--size: 12px;
-    --c2-avatar__badge--border: 2px solid #ffffff;
+    --c2-avatar__badge--border: 2px solid var(--c2-theme--color-surface, #ffffff);
   }
 </style>
 <c2-avatar name="Elisa Jasmin" initial-count="2" class="online" status="online" client:only="lit"></c2-avatar>
@@ -126,7 +126,7 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
 <style>
   .count-badge {
     --c2-avatar--size: 44px;
-    --c2-avatar--background: #18181b;
+    --c2-avatar--background: var(--c2-theme--color-inverse-surface, #18181b);
     --c2-avatar__badge--offset: 2px;
   }
   .count-badge .count {
@@ -165,7 +165,7 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
 <style>
   .pastel {
     --c2-avatar--size: 36px;
-    --c2-avatar--color: #18181b;
+    --c2-avatar--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-avatar__auto-color--saturation: 70%;
     --c2-avatar__auto-color--lightness: 85%;
   }
@@ -207,7 +207,7 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
   .total-group {
     --c2-avatar-group--max-width: 132px;
     --c2-avatar-group--overlap: 8px;
-    --c2-avatar-group__overflow--background: #18181b;
+    --c2-avatar-group__overflow--background: var(--c2-theme--color-inverse-surface, #18181b);
   }
   .total-group c2-avatar {
     --c2-avatar--size: 32px;
@@ -226,8 +226,8 @@ Curated looks for `c2-avatar`. Open any card in the studio to start from it. `--
 <style>
   .icon {
     --c2-avatar--size: 44px;
-    --c2-avatar--background: #f4f4f5;
-    --c2-avatar--color: #52525b;
+    --c2-avatar--background: var(--c2-theme--color-surface-container, #f4f4f5);
+    --c2-avatar--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-avatar name="Team" class="icon" client:only="lit">

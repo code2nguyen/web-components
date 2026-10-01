@@ -1,0 +1,873 @@
+{
+  "repository": "https://github.com/code2nguyen/web-components",
+  "releases": [
+    {
+      "version": "0.0.19",
+      "date": "2026-09-29",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["mcp", "skill"],
+              "text": "Know about @c2n/components",
+              "hash": "8bc883e"
+            },
+            {
+              "scopes": ["mcp"],
+              "text": "Gallery looks for agents: index, search, themed CSS, screenshots",
+              "hash": "660a575"
+            },
+            {
+              "scopes": ["components"],
+              "text": "Add @c2n/components, every component in one install",
+              "hash": "8eaeeb6"
+            },
+            {
+              "scopes": ["skill"],
+              "text": "GitHub Copilot support, proxy-safe MCP startup, dashboard composition",
+              "hash": "db7e699"
+            },
+            {
+              "scopes": ["table"],
+              "text": "String row keys, getRowKey and row-based selection helpers",
+              "hash": "ed68c34"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Sticky summary row keyed by column id",
+              "hash": "9b608ea"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["gallery", "chart"],
+              "text": "Readable gallery cards in dark mode, category x ticks",
+              "hash": "b95a708"
+            },
+            {
+              "scopes": ["core"],
+              "text": "Keep reflected defaults off the host",
+              "hash": "284e7bd"
+            },
+            {
+              "scopes": ["framework-types"],
+              "text": "Make every generated vue.d.ts compile",
+              "hash": "b664fb4"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Apply the selected row colour to its cells",
+              "hash": "c84b829"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Clicking the selected row again clears the selection",
+              "hash": "c1cbe45"
+            },
+            {
+              "scopes": ["masonry"],
+              "text": "Stop writing tabindex on connect, which broke SSR hydration",
+              "hash": "1f99f81"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Gallery audit, automatic checks on every card in both themes",
+              "hash": "b700c08"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep the release version badge visible on mobile",
+              "hash": "996e419"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.18",
+      "date": "2026-09-29",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["chat-message-list"],
+              "text": "Theme the log's scrollbar",
+              "hash": "6fb2e4b"
+            },
+            {
+              "scopes": ["carousel"],
+              "text": "Mouse drag, click-to-peek and edge-zone hover controls",
+              "hash": "0ace2b8"
+            },
+            {
+              "scopes": ["split-panel"],
+              "text": "Hide the divider until hovered, recolour it on focus",
+              "hash": "b833880"
+            },
+            {
+              "scopes": ["banner"],
+              "text": "Add position (sticky top / fixed bottom) and polish defaults",
+              "hash": "7b7815b"
+            },
+            {
+              "scopes": ["time-input"],
+              "text": "Replace native picker with a compact themeable picker",
+              "hash": "2737319"
+            },
+            {
+              "scopes": ["carousel"],
+              "text": "Add c2-carousel component",
+              "hash": "1aebf68"
+            },
+            {
+              "scopes": ["timeline"],
+              "text": "Add c2-timeline and c2-timeline-item",
+              "hash": "28a99fa"
+            },
+            {
+              "scopes": ["split-panel"],
+              "text": "Add c2-split-panel component",
+              "hash": "3af43c5"
+            },
+            {
+              "scopes": ["banner"],
+              "text": "Add c2-banner component",
+              "hash": "26fdea3"
+            },
+            {
+              "scopes": ["tag-input"],
+              "text": "Add c2-tag-input for entering lists such as email recipients",
+              "hash": "ced1869"
+            },
+            {
+              "scopes": ["time-input"],
+              "text": "Add c2-time-input component",
+              "hash": "84d3a66"
+            },
+            {
+              "scopes": ["shortcut"],
+              "text": "Add c2-shortcut and the core shortcut helper",
+              "hash": "feffb80"
+            },
+            {
+              "scopes": ["date-selector"],
+              "text": "Disable month navigation past min/max, add relative range examples",
+              "hash": "f3863bb"
+            },
+            {
+              "scopes": ["chat-message-list"],
+              "text": "Add c2-chat-message-list conversation log",
+              "hash": "a67bc1f"
+            },
+            {
+              "scopes": ["symbols"],
+              "text": "Expand the set to 157 illustrations",
+              "hash": "9caa65a"
+            },
+            {
+              "scopes": ["symbols"],
+              "text": "Add @c2n/symbols spot illustrations",
+              "hash": "593fac7"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["shortcut"],
+              "text": "Accept composed keys only and click inner controls",
+              "hash": "0f9ad88"
+            },
+            {
+              "scopes": ["carousel"],
+              "text": "Ignore a stale scrollend while a programmatic scroll is in flight",
+              "hash": "d9bac17"
+            },
+            {
+              "scopes": ["timeline"],
+              "text": "Show slotted content after hydration, add release notes gallery card",
+              "hash": "2dbd7f8"
+            },
+            {
+              "scopes": ["icon-button"],
+              "text": "Center the button in its host when the host is stretched or sized",
+              "hash": "b6e9645"
+            },
+            {
+              "scopes": ["side-nav"],
+              "text": "No focus ring on the first drawer link after a tap",
+              "hash": "1977453"
+            },
+            {
+              "scopes": ["date-input"],
+              "text": "Calendar icon focuses the input and tolerates showPicker() throwing",
+              "hash": "c9a3f5c"
+            },
+            {
+              "scopes": ["date-selector"],
+              "text": "No range strip behind a lone start date",
+              "hash": "3b65fc3"
+            },
+            {
+              "scopes": ["table"],
+              "text": "Keep selected row background under the pointer, show row hover, resize columns by default",
+              "hash": "a42568c"
+            },
+            {
+              "scopes": ["log-viewer"],
+              "text": "Reveal copy button per tapped entry on touch devices",
+              "hash": "1d54b2d"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Tidy autocomplete example header/footer on narrow screens",
+              "hash": "d0e8dff"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Keep Astro's island bootstrap out of named slots",
+              "hash": "1fbe4fd"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep long usage-row labels from overlapping examples on mobile",
+              "hash": "18f709e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.17",
+      "date": "2026-09-28",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Add virtual log viewer with sticky columns and log highlighting",
+              "hash": "647f60b"
+            },
+            {
+              "scopes": [],
+              "text": "Add persistent masonry component",
+              "hash": "3989120"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Stabilize virtual log keyboard scrolling in CI",
+              "hash": "9854ce5"
+            },
+            {
+              "scopes": [],
+              "text": "Complete log viewer styling and wrapped token contracts",
+              "hash": "468f0ac"
+            },
+            {
+              "scopes": [],
+              "text": "Fix tabs accessibility and chart font sizing",
+              "hash": "fe083e5"
+            }
+          ]
+        },
+        {
+          "type": "improve",
+          "title": "Improvements",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Make switch thumb follow track height",
+              "hash": "faea792"
+            },
+            {
+              "scopes": [],
+              "text": "Allow table scroll to chain to the page",
+              "hash": "b3c5cd7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.16",
+      "date": "2026-09-24",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Add diagnostic CSS styling contract audit",
+              "hash": "e674886"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["nextjs"],
+              "text": "Track JSX custom element declarations",
+              "hash": "3605230"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.15",
+      "date": "2026-09-23",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Add Next.js observability example and c2n improvements",
+              "hash": "6077abb"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["button"],
+              "text": "Rerender after form-disabled state changes",
+              "hash": "fd97e6d"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Restore mobile site navigation",
+              "hash": "05a6ebf"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.14",
+      "date": "2026-09-21",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["reorder-list"],
+              "text": "Make reordering reliable and accessible",
+              "hash": "4be70ff"
+            },
+            {
+              "scopes": [],
+              "text": "Complete slot styling contracts",
+              "hash": "678a94c"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["core"],
+              "text": "Read a \"false\" boolean attribute as false, and parse JSON assigned to a property",
+              "hash": "9cdf0cb"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Render API descriptions as safe markdown",
+              "hash": "1301984"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.13",
+      "date": "2026-09-18",
+      "sections": [
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Ship custom-elements.json in every published package",
+              "hash": "822f232"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "llms-full.txt from the skill, richer llms.txt, footer links",
+              "hash": "c81f3fa"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.12",
+      "date": "2026-09-18",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["dashboard"],
+              "text": "Responsive layouts, enter/leave motion, and SSR-safe attributes",
+              "hash": "e729283"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.11",
+      "date": "2026-09-18",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["dashboard"],
+              "text": "Add @c2n/dashboard, a grid of resizable panes",
+              "hash": "498233e"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["dashboard"],
+              "text": "Sync the new package with v0.0.10",
+              "hash": "e5d01a4"
+            },
+            {
+              "scopes": ["theme-select"],
+              "text": "Keep the menu open while the pointer crosses into it",
+              "hash": "94e8ba4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.10",
+      "date": "2026-09-18",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["steps"],
+              "text": "Add @c2n/steps, plus border-beam, code-editor, theme-select and avatar-group",
+              "hash": "7a897e3"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Sync the new packages with v0.0.9, and declare composed children",
+              "hash": "182c364"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.9",
+      "date": "2026-09-17",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["tree"],
+              "text": "Add @c2n/tree and rebuild the docs sidebar on it",
+              "hash": "a093add"
+            },
+            {
+              "scopes": [],
+              "text": "Expand component library and examples",
+              "hash": "38fc60e"
+            },
+            {
+              "scopes": [],
+              "text": "Improve chart examples and add radar charts",
+              "hash": "06e2b60"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Make questionnaire options directly interactive",
+              "hash": "4750d9c"
+            },
+            {
+              "scopes": [],
+              "text": "Keep chart hover active during entry animation",
+              "hash": "ba1bb76"
+            },
+            {
+              "scopes": [],
+              "text": "Resolve chart theme before first paint",
+              "hash": "2ad952a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.8",
+      "date": "2026-09-15",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Add date and number inputs",
+              "hash": "36e70a2"
+            },
+            {
+              "scopes": [],
+              "text": "Add date selector component",
+              "hash": "cb5aca9"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Preserve number input width in WebKit",
+              "hash": "de560e4"
+            },
+            {
+              "scopes": [],
+              "text": "Correct date selector test semantics",
+              "hash": "f17a244"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.7",
+      "date": "2026-09-15",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Framework integration for React, Vue and Angular",
+              "hash": "3502f6d"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Refine docs shell interactions",
+              "hash": "790bfa0"
+            },
+            {
+              "scopes": [],
+              "text": "Expand chart and realtime table demos",
+              "hash": "453ef10"
+            },
+            {
+              "scopes": [],
+              "text": "Improve chat components",
+              "hash": "a0a3bfb"
+            },
+            {
+              "scopes": [],
+              "text": "Add autocomplete component",
+              "hash": "a72d74c"
+            },
+            {
+              "scopes": [],
+              "text": "Improve data platform navigation",
+              "hash": "31d76bc"
+            },
+            {
+              "scopes": [],
+              "text": "Expand components and native form support",
+              "hash": "a6b4ed3"
+            },
+            {
+              "scopes": [],
+              "text": "Improve component docs and agent tooling",
+              "hash": "f50b2ac"
+            },
+            {
+              "scopes": [],
+              "text": "Add attachment components and improve galleries",
+              "hash": "1d4843a"
+            },
+            {
+              "scopes": ["virtual-list"],
+              "text": "Add the virtualized list with built-in search",
+              "hash": "977a0b3"
+            },
+            {
+              "scopes": ["pagination"],
+              "text": "Add the pagination component and wire it into the table",
+              "hash": "336cfe2"
+            },
+            {
+              "scopes": ["sheet"],
+              "text": "Add the edge-anchored sheet component",
+              "hash": "a67a13a"
+            },
+            {
+              "scopes": ["skeleton"],
+              "text": "Add the skeleton placeholder component",
+              "hash": "7123837"
+            },
+            {
+              "scopes": ["progress"],
+              "text": "Add the linear progress component",
+              "hash": "0120a74"
+            },
+            {
+              "scopes": ["kbd"],
+              "text": "Add the kbd component",
+              "hash": "a8c11d9"
+            },
+            {
+              "scopes": [],
+              "text": "Add virtualized table component",
+              "hash": "fa0df0b"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": [],
+              "text": "Publish regenerated framework metadata",
+              "hash": "f1b9394"
+            },
+            {
+              "scopes": [],
+              "text": "Resume releases from historical tags",
+              "hash": "01a7970"
+            },
+            {
+              "scopes": [],
+              "text": "Resolve release before version lifecycle",
+              "hash": "6059c47"
+            },
+            {
+              "scopes": [],
+              "text": "Make npm releases resumable",
+              "hash": "c95b86f"
+            },
+            {
+              "scopes": [],
+              "text": "Keep framework types on workspace version",
+              "hash": "9a10c49"
+            },
+            {
+              "scopes": ["tabs"],
+              "text": "Move c2-tab's slot attribute out of the constructor",
+              "hash": "c0711ce"
+            },
+            {
+              "scopes": ["list-item"],
+              "text": "Stop squashing non-icon content in the icon slots",
+              "hash": "b8e5d71"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Split the chart docs, rebuild the sidebar, and dogfood c2n in the docs site",
+              "hash": "e3636e2"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Add data-platform-html example app and component polish",
+              "hash": "f670d12"
+            },
+            {
+              "scopes": ["examples"],
+              "text": "Add example apps section with a Vue 3 inbox",
+              "hash": "a5dc4d6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.6",
+      "date": "2026-09-10",
+      "sections": [
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Keep the sidebar scroll offset across navigations",
+              "hash": "124f2e0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.5",
+      "date": "2026-09-10",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["copy-button"],
+              "text": "New @c2n/copy-button component",
+              "hash": "9aa425f"
+            },
+            {
+              "scopes": [],
+              "text": "Docs app restructure, design tokens, MCP server, skill plugin and studio inspector redesign",
+              "hash": "1ce7584"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["copy-button"],
+              "text": "Stop the abandoned button flipping back to the copy icon",
+              "hash": "2081bdb"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.4",
+      "date": "2022-11-04",
+      "sections": []
+    },
+    {
+      "version": "0.0.3",
+      "date": "2022-11-03",
+      "sections": []
+    },
+    {
+      "version": "0.0.2",
+      "date": "2022-09-22",
+      "sections": [
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["checkbox"],
+              "text": "Checked state does not reactive on vuejs binding",
+              "hash": "a8cfa44"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.0.1",
+      "date": "2022-09-22",
+      "sections": []
+    }
+  ]
+}

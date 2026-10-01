@@ -1,0 +1,123 @@
+import { test, expect } from './fixture'
+
+test('renders a list of entries with their label, timestamp and content', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-timeline')
+  await expect(list).toBeVisible()
+  await expect(list).toHaveHostAria('role', 'list')
+  await expect(list).toHaveAccessibleName('Order history')
+  const items = list.locator('c2-timeline-item')
+  await expect(items).toHaveCount(3)
+  for (const item of await items.all()) await expect(item).toHaveHostAria('role', 'listitem')
+  const first = page.locator('c2-timeline-item').first()
+  await expect(first.locator('[part="label"]')).toHaveText('Order placed')
+  await expect(first.locator('time')).toHaveAttribute('datetime', '2026-09-12T09:14')
+  await expect(first.locator('time')).toHaveText('Sep 12, 09:14')
+  await expect(first.locator('[part="content"]')).toBeVisible()
+})
+
+test('an entry with no content or datetime renders neither', async ({ page, scenario }) => {
+  await scenario()
+  const delayed = page.locator('c2-timeline-item[label="Delivery delayed"]')
+  await expect(delayed.locator('[part="timestamp"]')).toHaveText('Sep 15, 08:30')
+  await expect(delayed.locator('time')).toHaveCount(0)
+  await expect(delayed.locator('[part="content"]')).toBeHidden()
+})
+
+test('the connector stops at the last entry', async ({ page, scenario }) => {
+  await scenario()
+  const connectors = page.locator('c2-timeline-item [part="connector"]')
+  await expect(connectors.nth(0)).toBeVisible()
+  await expect(connectors.nth(1)).toBeVisible()
+  await expect(connectors.nth(2)).toBeHidden()
+})
+
+test('the connector reaches the next marker', async ({ page, scenario }) => {
+  await scenario()
+  const connector = await page.locator('c2-timeline-item [part="connector"]').first().boundingBox()
+  const nextMarker = await page.locator('c2-timeline-item [part="marker"]').nth(1).boundingBox()
+  expect(connector && nextMarker).toBeTruthy()
+  const gap = nextMarker!.y - (connector!.y + connector!.height)
+  expect(gap).toBeGreaterThanOrEqual(0)
+  expect(gap).toBeLessThanOrEqual(8)
+})
+
+test('an entry appended later becomes the last one', async ({ page, scenario }) => {
+  await scenario()
+  await page.getByRole('button', { name: 'Add entry' }).click()
+  const connectors = page.locator('c2-timeline-item [part="connector"]')
+  await expect(connectors).toHaveCount(4)
+  await expect(connectors.nth(2)).toBeVisible()
+  await expect(connectors.nth(3)).toBeHidden()
+})
+
+test('entries behind a wrapper are still found', async ({ page, scenario }) => {
+  await scenario('wrapped')
+  const connectors = page.locator('c2-timeline-item [part="connector"]')
+  await expect(connectors.nth(1)).toBeVisible()
+  await expect(connectors.nth(2)).toBeHidden()
+})
+
+test('the split layout puts the timestamp before the rail, level with the label', async ({ page, scenario }) => {
+  await scenario('split')
+  const item = page.locator('c2-timeline-item').first()
+  const timestamp = (await item.locator('[part="timestamp"]').boundingBox())!
+  const marker = (await item.locator('[part="marker"]').boundingBox())!
+  const label = (await item.locator('[part="label"]').boundingBox())!
+  expect(timestamp.x + timestamp.width).toBeLessThanOrEqual(marker.x)
+  expect(marker.x + marker.width).toBeLessThanOrEqual(label.x)
+  expect(Math.abs(timestamp.y - label.y)).toBeLessThan(1)
+})
+
+test('the stacked layout puts the timestamp under the label', async ({ page, scenario }) => {
+  await scenario()
+  const item = page.locator('c2-timeline-item').first()
+  const timestamp = (await item.locator('[part="timestamp"]').boundingBox())!
+  const label = (await item.locator('[part="label"]').boundingBox())!
+  expect(timestamp.y).toBeGreaterThanOrEqual(label.y + label.height - 1)
+  expect(Math.abs(timestamp.x - label.x)).toBeLessThan(1)
+})
+
+test('tone colours the marker', async ({ page, scenario }) => {
+  await scenario()
+  const border = (tone: string) => page.locator(`c2-timeline-item[tone="${tone}"] [part="marker"]`).evaluate((el) => getComputedStyle(el).borderTopColor)
+  expect(await border('success')).toBe('rgb(21, 128, 61)')
+  expect(await border('primary')).toBe('rgb(2, 101, 220)')
+  expect(await border('warning')).toBe('rgb(161, 98, 7)')
+})
+
+test('slots replace the label, the timestamp and the marker', async ({ page, scenario }) => {
+  await scenario('slots')
+  const item = page.locator('c2-timeline-item').first()
+  await expect(item.getByRole('link', { name: 'v2.0.0' })).toBeVisible()
+  await expect(item.locator('[part="timestamp"]')).toBeVisible()
+  await expect(item.getByText('two days ago')).toBeVisible()
+  await expect(item.locator('svg[slot="marker"]')).toBeVisible()
+  // The second entry has only a label: no empty timestamp or content rows.
+  const second = page.locator('c2-timeline-item').nth(1)
+  await expect(second.locator('[part="timestamp"]')).toBeHidden()
+  await expect(second.locator('[part="content"]')).toBeHidden()
+})
+
+// React hydrates server markup against what the element looks like after it upgrades, and reports every attribute
+// the element wrote on itself as a mismatch. The list and listitem roles therefore live on ElementInternals.
+test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, scenario }) => {
+  await scenario()
+  const hostSemantics = () =>
+    page.locator('c2-timeline, c2-timeline-item').evaluateAll((elements) =>
+      elements.flatMap((element) =>
+        element
+          .getAttributeNames()
+          .filter((name) => name === 'role' || name.startsWith('aria-'))
+          .map((name) => `${element.localName}[${name}]`),
+      ),
+    )
+  // The one host attribute left is the author's own label.
+  await expect(page.locator('c2-timeline')).toHaveHostAria('role', 'list')
+  expect(await hostSemantics()).toEqual(['c2-timeline[aria-label]'])
+
+  await page.getByRole('button', { name: 'Add entry' }).click()
+  const added = page.locator('c2-timeline-item').nth(3)
+  await expect(added).toHaveHostAria('role', 'listitem')
+  expect(await hostSemantics()).toEqual(['c2-timeline[aria-label]'])
+})

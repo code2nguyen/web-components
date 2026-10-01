@@ -1,0 +1,649 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-month-planner,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    padding: 12px,
+    font-family: inherit,
+    font-size: 14px,
+    title--font-weight: 600,
+    heading--font-size: 14px,
+    heading--font-weight: 600,
+    actions--gap: 8px,
+    navigation--size: 32px,
+    navigation--border-radius: 6px,
+    navigation__hover--background: #f4f4f5,
+    weekday--color: #71717a,
+    weekday--font-size: 12px,
+    day--border: 1px solid #e4e4e7,
+    day--min-height: 88px,
+    day--font-size: 12px,
+    day__outside--background: #fafafa,
+    day__outside--color: #71717a,
+    day__today--background: rgba(2, 101, 220, 0.05),
+    day__today--color: rgb(2, 101, 220),
+    day__today--font-weight: 600,
+    event--background: rgb(2, 101, 220),
+    event--color: #ffffff,
+    event--height: 22px,
+    event--gap: 2px,
+    event--border-radius: 4px,
+    event--font-size: 12px,
+    event--font-weight: 500,
+    event__hover--opacity: 0.88,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+    title__hover--background: #f4f4f5,
+    picker--background: #ffffff,
+    picker--border: 1px solid #e4e4e7,
+    picker--border-radius: 8px,
+    picker--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    picker--padding: 12px,
+    picker--width: 280px,
+    month--height: 44px,
+    month--border-radius: 6px,
+    month--color: #71717a,
+    month__hover--background: #f4f4f5,
+    month__selected--background: rgb(2, 101, 220),
+    month__selected--color: #ffffff,
+    month__current--outline: 1px solid #a1a1aa,
+    month__marked--font-weight: 600,
+    month__marked--color: #18181b,
+    month__marked--background: rgba(2, 101, 220, 0.1),
+    month__marked__hover--background: rgba(2, 101, 220, 0.18),
+    marker--color: rgb(2, 101, 220),
+    marker--size: 6px,
+    date__selected--background: #18181b,
+    date__selected--color: #ffffff,
+    date__today__selected--background: rgb(2, 101, 220),
+    date__today__selected--color: #ffffff,
+    dot--size: 5px,
+    agenda-event__hover--background: #f4f4f5,
+  )
+);
+
+:host {
+  display: block;
+  max-inline-size: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-month-planner {
+  container: month-planner / inline-size;
+  // Containment drops the content's width; a layout that sizes the planner from its content (a centred flex column,
+  // a table cell) gets this instead, capped by the space available.
+  contain-intrinsic-inline-size: 720px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+// The planner's own title, in front of the month; a long one is cut, not wrapped.
+.heading {
+  overflow: hidden;
+  min-width: 0;
+  flex: 0 1 auto;
+  margin: 0;
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// The `actions` slot and the month navigation sit together at the end of the header.
+.trailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.title {
+  min-width: 0;
+  margin: 0;
+  white-space: nowrap;
+  font: inherit;
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav {
+  display: inline-flex;
+  min-width: css.cssVar(navigation--size);
+  height: css.cssVar(navigation--size);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(navigation--border-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  transition: animation.standard(background);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover {
+    background: css.cssVar(navigation__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.today-button {
+  padding: 0 10px;
+  font-size: css.cssVar(day--font-size);
+}
+
+.weekdays,
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.weekdays span {
+  padding: 4px 6px;
+  color: css.cssVar(weekday--color);
+  font-size: css.cssVar(weekday--font-size);
+}
+
+.weeks {
+  border-top: css.cssVar(day--border);
+  border-left: css.cssVar(day--border);
+}
+
+.week {
+  // Row 1 reserves the day number (22px plus the day's 4px top padding), one row per lane follows, and the last row
+  // absorbs the remaining height. The day cells span every row, so the first row cannot size itself from them.
+  grid-template-rows: 26px repeat(var(--lanes, 0), css.cssVar(event--height)) 1fr;
+  row-gap: css.cssVar(event--gap);
+  min-height: css.cssVar(day--min-height);
+}
+
+.day {
+  grid-row: 1 / -1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  border-right: css.cssVar(day--border);
+  border-bottom: css.cssVar(day--border);
+
+  &.outside {
+    background: css.cssVar(day__outside--background);
+    color: css.cssVar(day__outside--color);
+  }
+
+  // The tint stops inside the cell's own borders, so the grid lines keep their colour.
+  &.today {
+    background: css.cssVar(day__today--background);
+    background-clip: padding-box;
+  }
+}
+
+.date {
+  display: inline-flex;
+  min-width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: css.cssVar(day--font-size);
+  font-variant-numeric: tabular-nums;
+
+  &.today {
+    color: css.cssVar(day__today--color);
+    font-weight: css.cssVar(day__today--font-weight);
+  }
+}
+
+.event {
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  box-sizing: border-box;
+  // A bar that continues into the next or previous week runs to the grid line; a real start or end is inset.
+  margin: 0;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 0;
+  background: var(--event-color, #{css.cssVar(event--background)});
+  color: var(--event-text-color, #{css.cssVar(event--color)});
+  cursor: pointer;
+  font: inherit;
+  font-size: css.cssVar(event--font-size);
+  font-weight: css.cssVar(event--font-weight);
+  text-align: left;
+  transition: animation.standard(opacity);
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &.starts {
+    margin-left: 4px;
+    border-top-left-radius: css.cssVar(event--border-radius);
+    border-bottom-left-radius: css.cssVar(event--border-radius);
+  }
+
+  &.ends {
+    margin-right: 4px;
+    border-top-right-radius: css.cssVar(event--border-radius);
+    border-bottom-right-radius: css.cssVar(event--border-radius);
+  }
+
+  &:hover {
+    opacity: css.cssVar(event__hover--opacity);
+  }
+
+  &:focus-visible {
+    z-index: 2;
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.title-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: css.cssVar(navigation--border-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  transition: animation.standard(background);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: animation.standard(transform);
+  }
+
+  &[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+  }
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background: css.cssVar(title__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.picker {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + 4px);
+  left: 0;
+  width: css.cssVar(picker--width);
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: css.cssVar(picker--padding);
+  border: css.cssVar(picker--border);
+  border-radius: css.cssVar(picker--border-radius);
+  box-shadow: css.cssVar(picker--box-shadow);
+  background: css.cssVar(picker--background);
+  color: css.cssVar(color);
+}
+
+.picker-year {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.picker-year-label {
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.picker-months {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.picker-month {
+  display: flex;
+  height: css.cssVar(month--height);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(month--border-radius);
+  background: transparent;
+  color: css.cssVar(month--color);
+  cursor: pointer;
+  font: inherit;
+  font-size: css.cssVar(font-size);
+  transition: animation.standard(background), animation.standard(color);
+
+  .marker {
+    visibility: hidden;
+  }
+
+  &.marked {
+    background: css.cssVar(month__marked--background);
+    color: css.cssVar(month__marked--color);
+    font-weight: css.cssVar(month__marked--font-weight);
+
+    .marker {
+      visibility: visible;
+    }
+  }
+
+  &.marked:hover:not(.selected) {
+    background: css.cssVar(month__marked__hover--background);
+  }
+
+  &.current:not(.selected) {
+    outline: css.cssVar(month__current--outline);
+    outline-offset: -1px;
+  }
+
+  &:hover:not(.selected) {
+    background: css.cssVar(month__hover--background);
+  }
+
+  &.selected {
+    background: css.cssVar(month__selected--background);
+    color: css.cssVar(month__selected--color);
+
+    .marker {
+      background: currentColor;
+    }
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.marker {
+  display: block;
+  width: css.cssVar(marker--size);
+  height: css.cssVar(marker--size);
+  border-radius: 999px;
+  background: css.cssVar(marker--color);
+}
+
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// The compact layout's pieces, shown by the container query below.
+.day-select,
+.agenda {
+  display: none;
+}
+
+.day-select {
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin: 0;
+  padding: 2px 0 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible .date-number {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.date-number {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+  transition: animation.standard(background);
+
+  .today & {
+    color: css.cssVar(day__today--color);
+    font-weight: css.cssVar(day__today--font-weight);
+  }
+
+  [aria-pressed='true'] & {
+    background: css.cssVar(date__selected--background);
+    color: css.cssVar(date__selected--color);
+    font-weight: css.cssVar(day__today--font-weight);
+  }
+
+  .today [aria-pressed='true'] & {
+    background: css.cssVar(date__today__selected--background);
+    color: css.cssVar(date__today__selected--color);
+  }
+}
+
+.dots {
+  display: flex;
+  height: css.cssVar(dot--size);
+  gap: 2px;
+}
+
+.dot {
+  width: css.cssVar(dot--size);
+  height: css.cssVar(dot--size);
+  border-radius: 999px;
+  background: var(--event-color, #{css.cssVar(event--background)});
+}
+
+.agenda {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: css.cssVar(day--border);
+}
+
+.agenda-heading {
+  margin: 0 0 6px;
+  font: inherit;
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.agenda-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agenda-event {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  gap: 10px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px;
+  border: 0;
+  border-radius: css.cssVar(navigation--border-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: animation.standard(background);
+
+  &:hover {
+    background: css.cssVar(agenda-event__hover--background);
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.swatch {
+  flex: 0 0 4px;
+  min-height: 20px;
+  border-radius: 2px;
+  background: var(--event-color, #{css.cssVar(event--background)});
+}
+
+.agenda-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agenda-name {
+  overflow: hidden;
+  font-weight: css.cssVar(event--font-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenda-when,
+.agenda-empty {
+  color: css.cssVar(weekday--color);
+  font-size: css.cssVar(day--font-size);
+}
+
+.agenda-empty {
+  margin: 0;
+  padding: 8px 0;
+}
+
+// A planner too narrow for bars reads like a phone calendar: date numbers with event dots, no grid lines, and the
+// selected day's events listed under the month.
+@container month-planner (max-width: 479.98px) {
+  .event,
+  .date {
+    display: none;
+  }
+
+  .day-select {
+    display: flex;
+  }
+
+  .agenda {
+    display: block;
+  }
+
+  .weekdays span {
+    padding-inline: 0;
+    text-align: center;
+  }
+
+  .weeks {
+    border: 0;
+  }
+
+  .week {
+    min-height: 0;
+    grid-template-rows: auto;
+  }
+
+  .day {
+    grid-row: 1;
+    padding: 2px 0;
+    border: 0;
+    border-top: css.cssVar(day--border);
+
+    &.outside,
+    &.today {
+      background: none;
+    }
+  }
+}

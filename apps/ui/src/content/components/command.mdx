@@ -1,0 +1,63 @@
+---
+title: 'Command'
+description: 'A searchable list of commands: type to filter, arrows to highlight, Enter to run. The core of a ⌘K palette.'
+category: 'Navigation'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Command } from '@c2n/command'
+import { Kbd } from '@c2n/kbd'
+
+`c2-command` is a search field above a list of `c2-command-item` rows, optionally sorted into `c2-command-group`s with a `heading` and divided by `c2-command-separator`s. Typing filters the rows: a row matches when every word of the query appears in its label, its `value` or its `keywords` (synonyms that are not shown). Groups left without a match disappear with their heading, separators hide while a query is typed, and the `empty` slot replaces the list when nothing matches.
+
+Focus never leaves the search field. Arrow Up/Down move the highlight between the enabled matching rows (`loop` wraps at the ends), the pointer highlights the row under it, and Enter or a click activates a row. Activation fires `command-select` with the row's `value` and `data`; a row with `href` then navigates, unless the event was cancelled. The field is a `combobox` whose `aria-activedescendant` follows the highlighted `option`.
+
+Put it inside a `c2-modal` and open it from a `c2-shortcut` binding for a ⌘K palette, or place it inline — in a page, a sidebar or a popover. When results come from a server, set `manual-filter`: the palette then shows every row as given, and your `input` listener reads `query` and replaces the rows.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/command
+```
+
+`c2-command-item`, `c2-command-group` and `c2-command-separator` ship in the same package and are registered with it.
+
+## Usage
+
+Type into any palette below; try `face` (a keyword of "Search emoji") or `zzz`.
+
+```html tag=UsageBlock,package=@c2n/command
+<style>
+  .usage-command {
+    width: 100%;
+    max-width: 420px;
+    --c2-command__list--max-height: 240px;
+  }
+</style>
+<div data-label="Groups">
+  <c2-command class="usage-command" client:only="lit">
+    <c2-command-group heading="Suggestions">
+      <c2-command-item value="calendar">Calendar</c2-command-item>
+      <c2-command-item value="emoji" keywords="smiley face">Search emoji</c2-command-item>
+      <c2-command-item value="calculator" disabled>Calculator</c2-command-item>
+    </c2-command-group>
+    <c2-command-separator></c2-command-separator>
+    <c2-command-group heading="Settings">
+      <c2-command-item value="profile">Profile<c2-kbd slot="shortcut">⌘P</c2-kbd></c2-command-item>
+      <c2-command-item value="billing">Billing<c2-kbd slot="shortcut">⌘B</c2-kbd></c2-command-item>
+      <c2-command-item value="settings">Settings<c2-kbd slot="shortcut">⌘S</c2-kbd></c2-command-item>
+    </c2-command-group>
+  </c2-command>
+</div>
+<div data-label="Descriptions and footer">
+  <c2-command class="usage-command" placeholder="Jump to a page…" loop client:only="lit">
+    <c2-command-item value="button">Button<span slot="description">Actions and form submits</span></c2-command-item>
+    <c2-command-item value="select">Select<span slot="description">Pick one option from a list</span></c2-command-item>
+    <c2-command-item value="table">Table<span slot="description">Sortable, selectable rows</span></c2-command-item>
+    <span slot="empty">No page matches that search.</span>
+    <span slot="footer">↑↓ to navigate · ↵ to open</span>
+  </c2-command>
+</div>
+```

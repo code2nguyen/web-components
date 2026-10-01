@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <circle class="backdrop" cx="80" cy="80" r="64"/>
+  <path class="line-ink" d="M58 78l-16-8M56 94H38M60 110l-14 12M102 78l16-8M104 94h18M100 110l14 12M74 44l-6-12M86 44l6-12"/>
+  <circle class="ink" cx="80" cy="54" r="13"/>
+  <ellipse class="error" cx="80" cy="92" rx="25" ry="31"/>
+  <path class="line-surface" d="M80 62v60"/>
+  <circle class="surface" cx="70" cy="84" r="4"/>
+  <circle class="surface" cx="92" cy="100" r="4"/>
+  <circle class="surface" cx="70" cy="106" r="3"/>
+  <path class="accent" d="M126 30Q127.7 34.3 132 36Q127.7 37.7 126 42Q124.3 37.7 120 36Q124.3 34.3 126 30Z"/>
+  <path class="line-primary" d="M32 36v8M28 40h8"/>
+</svg>

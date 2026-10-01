@@ -17,8 +17,9 @@ import { Button } from '@c2n/button'
 <ChartFinancialGallery />
 <ChartOverviewDemo />
 
-The family contains [line](../line-chart), [area](../area-chart), [bar](../bar-chart), [scatter](../scatter-chart),
-[candlestick](../candlestick-chart), [gauge](../gauge-chart), [pie](../pie-chart) and
+The family contains [line](../line-chart), [area](../area-chart), [bar](../bar-chart), [scatter](../scatter-chart), [bubble](../bubble-chart),
+[candlestick](../candlestick-chart), [gauge](../gauge-chart), [radar](../radar-chart), [pie](../pie-chart), [pyramid](../pyramid-chart), [butterfly](../butterfly-chart),
+[overlap](../overlap-chart) and
 [sparkline](../sparkline). They are separate custom elements, but they inherit the same `ChartBase` and use the same
 normalized frame, series definitions, theme tokens, presenters, state UI, events and update pipeline.
 
@@ -64,6 +65,7 @@ The components lazy-load optional peer engines only when first rendered. Line, a
 <div class="engine-pair">
   <c2-line-chart
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"revenue":365.817,"netIncome":94.68},{"year":2022,"revenue":394.328,"netIncome":99.803},{"year":2023,"revenue":383.285,"netIncome":96.995},{"year":2024,"revenue":391.035,"netIncome":93.736},{"year":2025,"revenue":416.161,"netIncome":112.01}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
@@ -113,6 +115,7 @@ numeric fields are inferred from the first row.
 <c2-area-chart
   class="shared-data-chart"
   x-field="year"
+  label-field="year"
   fill-opacity="0.12"
   data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"operatingIncome":108.949},{"year":2022,"revenue":394.328,"grossProfit":170.782,"operatingIncome":119.437},{"year":2023,"revenue":383.285,"grossProfit":169.148,"operatingIncome":114.301},{"year":2024,"revenue":391.035,"grossProfit":180.683,"operatingIncome":123.216},{"year":2025,"revenue":416.161,"grossProfit":195.201,"operatingIncome":133.05}]'
 >
@@ -148,6 +151,7 @@ context rather than repeating the chart labels.
   <c2-bar-chart
     id="overview-finance-chart"
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"netIncome":112.01}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
@@ -171,6 +175,53 @@ tooltip.renderTooltip = (context) => html`
     <span>${metricIcon(entry.series.label, entry.color)} ${entry.formatted} · ${percentageOrYoY(entry)}</span>
   `)}
 `
+```
+
+### Slots
+
+Every chart also takes its legend and tooltip as slots, like its `empty`, `loading` and `error` states. Markup in
+`slot="legend"` replaces the generated entries in place, and markup in `slot="tooltip"` becomes the body of the chart's
+own tooltip bubble, which still follows the pointer. Update slotted content from the `legend-change` and
+`tooltip-change` events; `renderLegendItem` and `renderTooltip` on the chart are the function form of the same thing.
+
+```html tag=CodeBlock
+<c2-line-chart id="revenue" x-field="month" data="…">
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  <div slot="legend">Revenue, USD billions</div>
+  <div slot="tooltip"><strong class="month"></strong> <span class="value"></span></div>
+</c2-line-chart>
+```
+
+### Hide or highlight from the legend
+
+A legend click highlights its series by default: the series comes forward at full strength, drawn above the others
+with a slightly heavier line (a deeper fill on an area chart, a shadow on a pie slice), and the others fade back to
+`--c2-chart__series__dimmed--opacity` (0.25); a second click clears it. With `legend-action="toggle"` the click hides
+or shows the series instead. Every chart supports both modes: pie charts highlight a slice, overlap charts a whole set. The chart fires `series-highlight`
+with the key, and `highlighted` holds it: the series `field`, the slice label, or the set key. Setting `highlighted`
+from the application does the same in either mode. A linked `c2-chart-legend` follows the chart's mode.
+
+Clicking a series in the plot always highlights it, whatever `legend-action` is: a line, a bar, a scatter point, a
+pie slice, or the band of a stacked area under the pointer. Clicking it again clears the highlight. `point-click` fires first and is cancelable, so an application that
+uses clicks for something else calls `preventDefault()` to keep the highlight as it is:
+
+```js tag=CodeBlock
+chart.addEventListener('point-click', (event) => {
+  event.preventDefault() // open a detail view instead of highlighting
+  openDetails(event.detail.series.field, event.detail.index)
+})
+```
+
+```html tag=MdxCodeBlock,label=Highlight from the legend
+<c2-line-chart
+  x-field="year"
+  legend-action="highlight"
+  data='[{"year":2021,"revenue":365.817,"grossProfit":152.836,"netIncome":94.68},{"year":2022,"revenue":394.328,"grossProfit":170.782,"netIncome":99.803},{"year":2023,"revenue":383.285,"grossProfit":169.148,"netIncome":96.995},{"year":2024,"revenue":391.035,"grossProfit":180.683,"netIncome":93.736},{"year":2025,"revenue":416.161,"grossProfit":195.201,"netIncome":112.01}]'
+>
+  <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
+  <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
+  <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
+</c2-line-chart>
 ```
 
 ## Realtime updates
@@ -208,7 +259,7 @@ append real samples directly and leave animation off so transitions never overla
 </style>
 
 <div class="overview-live" data-chart-overview-realtime>
-  <c2-line-chart x-field="year" max-points="5">
+  <c2-line-chart x-field="year" label-field="year" max-points="5">
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
     <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>
     <c2-chart-series field="netIncome" label="Net income"></c2-chart-series>
@@ -235,11 +286,11 @@ chart.dataSource = source
 ## Events and interaction
 
 Every chart reports `chart-ready`, `chart-error`, `point-click`, `point-hover`, `tooltip-change`,
-`legend-change` and `series-toggle`. Cartesian charts also emit `range-change` after zooming or brushing.
+`legend-change`, `series-highlight` and `series-toggle`. Cartesian charts also emit `range-change` after zooming or brushing.
 Point and range events do not bubble, so attach listeners to the chart itself. Use `data-chart-ready` as the
 stable test signal after the first frame is drawn.
 
-Hover a point or toggle a legend item below to see the same semantic event model used by external presenters.
+Hover a point, or click a series or a legend item below, to see the same semantic event model used by external presenters.
 
 ```html tag=MdxCodeBlock,label=Semantic event stream
 <style>
@@ -265,6 +316,7 @@ Hover a point or toggle a legend item below to see the same semantic event model
   <c2-line-chart
     zoom
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"revenue":365.817,"netIncome":94.68},{"year":2022,"revenue":394.328,"netIncome":99.803},{"year":2023,"revenue":383.285,"netIncome":96.995},{"year":2024,"revenue":391.035,"netIncome":93.736},{"year":2025,"revenue":416.161,"netIncome":112.01}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
@@ -306,6 +358,7 @@ default, 32px for a sparkline). A `ResizeObserver` keeps the engine canvas synch
   <c2-bar-chart
     lazy-render
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"revenue":365.817},{"year":2022,"revenue":394.328},{"year":2023,"revenue":383.285},{"year":2024,"revenue":391.035},{"year":2025,"revenue":416.161}]'
   >
     <c2-chart-series field="revenue" label="Revenue"></c2-chart-series>
@@ -342,6 +395,7 @@ the engine. Theme changes redraw without replacing data.
 <div class="executive-theme">
   <c2-area-chart
     x-field="year"
+    label-field="year"
     data='[{"year":2021,"grossProfit":152.836,"operatingIncome":108.949},{"year":2022,"grossProfit":170.782,"operatingIncome":119.437},{"year":2023,"grossProfit":169.148,"operatingIncome":114.301},{"year":2024,"grossProfit":180.683,"operatingIncome":123.216},{"year":2025,"grossProfit":195.201,"operatingIncome":133.05}]'
   >
     <c2-chart-series field="grossProfit" label="Gross profit"></c2-chart-series>

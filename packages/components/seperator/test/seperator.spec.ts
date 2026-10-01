@@ -12,14 +12,39 @@ test('label presence follows assignment, text, insertion, removal and reassignme
 
 test('semantic separators expose orientation and a slotted label', async ({ page, renderScenario }) => {
   await renderScenario('<c2-seperator>Or continue</c2-seperator>')
-  await expect(page.getByRole('separator')).toHaveAttribute('aria-orientation', 'horizontal')
+  const host = page.locator('c2-seperator')
+  await expect(host).toHaveHostAria('role', 'separator')
+  await expect(host).toHaveHostAria('aria-orientation', 'horizontal')
   await expect(page.getByText('Or continue')).toBeVisible()
-  await props(page.locator('c2-seperator'), { orientation: 'vertical' })
-  await expect(page.getByRole('separator')).toHaveAttribute('aria-orientation', 'vertical')
+  await props(host, { orientation: 'vertical' })
+  await expect(host).toHaveHostAria('aria-orientation', 'vertical')
   await accessible(page)
 })
 test('decorative mode removes separator semantics', async ({ page, renderScenario }) => {
   await renderScenario('<c2-seperator decorative></c2-seperator>')
+  const host = page.locator('c2-seperator')
+  await expect(host).toHaveHostAria('role', 'none')
+  await expect(host).toHaveHostAria('aria-orientation', null)
+  // Nothing inside the shadow root re-introduces the role either.
   await expect(page.getByRole('separator')).toHaveCount(0)
-  await expect(page.locator('c2-seperator')).not.toHaveAttribute('aria-orientation')
+})
+
+// React hydrates server markup against what the element looks like after it upgrades, and reports every attribute
+// the element wrote on itself as a mismatch. The role and orientation therefore live on ElementInternals.
+test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-seperator>Or continue</c2-seperator>')
+  const host = page.locator('c2-seperator')
+  const hostSemantics = () => host.evaluate((element) => element.getAttributeNames().filter((name) => name === 'role' || name.startsWith('aria-')))
+
+  await expect(host).toHaveHostAria('role', 'separator')
+  expect(await hostSemantics()).toEqual([])
+
+  await props(host, { orientation: 'vertical' })
+  await expect(host).toHaveHostAria('aria-orientation', 'vertical')
+  expect(await hostSemantics()).toEqual([])
+
+  await props(host, { decorative: true })
+  await expect(host).toHaveHostAria('role', 'none')
+  await expect(host).toHaveHostAria('aria-orientation', null)
+  expect(await hostSemantics()).toEqual([])
 })

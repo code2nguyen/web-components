@@ -1,0 +1,157 @@
+---
+title: 'Symbols'
+description: '157 themeable spot illustrations for empty states, status panels, onboarding and error pages.'
+package: '@c2n/symbols'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+import ApiTable from '../../components/ApiTable.astro'
+import SymbolGallery from '../../components/SymbolGallery.astro'
+
+import {
+  EmptyInboxSymbol as SymbolEmptyInbox,
+  NoResultsSymbol as SymbolNoResults,
+  OfflineSymbol as SymbolOffline,
+  ServerErrorSymbol as SymbolServerError,
+  UploadSymbol as SymbolUpload,
+  CelebrationSymbol as SymbolCelebration,
+  PaymentSuccessSymbol as SymbolPaymentSuccess,
+  AiAssistantSymbol as SymbolAiAssistant,
+  CookieConsentSymbol as SymbolCookieConsent,
+} from '@c2n/symbols'
+import { StatusPanel } from '@c2n/status-panel'
+import { Button } from '@c2n/button'
+
+# Symbols
+
+`@c2n/symbols` is a set of spot illustrations, one web component each: `c2-symbol-<name>`. Use them wherever a view needs a
+picture rather than an icon: the media of a `c2-status-panel`, an empty table or list, a 404 page, an onboarding step,
+a payment confirmation, a permission prompt. The set covers empty states, status and celebration, errors and limits,
+security and privacy, commerce, communication, files and data, and onboarding.
+
+The artwork is drawn for this library on one 160×160 grid. Every colour in it comes from a small set of **colour roles**
+(backdrop, surface, outline, accent, a golden highlight, success, warning, error), so the whole set follows `@c2n/theme` — brand colour and
+dark mode included — and one CSS variable recolours a role everywhere.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/symbols
+```
+
+## Import
+
+Import individual symbols to keep bundles small:
+
+```typescript tag=CodeBlock
+import '@c2n/symbols/symbols/empty-inbox.js'
+import '@c2n/symbols/symbols/no-results.js'
+```
+
+or register the whole set at once:
+
+```typescript tag=CodeBlock
+import '@c2n/symbols'
+```
+
+## Examples
+
+```html tag=MdxCodeBlock,compact=true
+<c2-symbol-empty-inbox></c2-symbol-empty-inbox>
+<c2-symbol-no-results></c2-symbol-no-results>
+<c2-symbol-payment-success></c2-symbol-payment-success>
+<c2-symbol-celebration></c2-symbol-celebration>
+<c2-symbol-ai-assistant></c2-symbol-ai-assistant>
+<c2-symbol-cookie-consent></c2-symbol-cookie-consent>
+<c2-symbol-offline></c2-symbol-offline>
+```
+
+Size a symbol with `--c2-symbol--size` and recolour it through its roles. Setting `--c2-symbol__backdrop--color` to
+`transparent` removes the disc behind the artwork.
+
+```html tag=MdxCodeBlock,compact=true
+<style>
+  .brand {
+    --c2-symbol--size: 88px;
+    --c2-symbol__primary--color: #7c3aed;
+    --c2-symbol__primary-soft--color: #ede9fe;
+  }
+  .bare {
+    --c2-symbol--size: 88px;
+    --c2-symbol__backdrop--color: transparent;
+  }
+</style>
+<c2-symbol-upload class="brand"></c2-symbol-upload>
+<c2-symbol-upload class="bare"></c2-symbol-upload>
+<c2-symbol-server-error class="bare"></c2-symbol-server-error>
+```
+
+### In a status panel
+
+Slot a symbol into the panel's `media` slot and set `media="illustration"`: the panel drops its tinted status disc (the
+symbol brings its own backdrop) and sizes the artwork with `--c2-status-panel__illustration--size`.
+
+```html tag=MdxCodeBlock
+<style>
+  .illustrated {
+    --c2-status-panel__illustration--size: 128px;
+  }
+</style>
+<c2-status-panel class="illustrated" media="illustration" heading="No results" description="Try a different keyword or clear the filters.">
+  <c2-symbol-no-results slot="media"></c2-symbol-no-results>
+  <c2-button slot="actions">Clear filters</c2-button>
+</c2-status-panel>
+```
+
+A success state reads the same way:
+
+```html tag=MdxCodeBlock
+<style>
+  .illustrated-success {
+    --c2-status-panel__illustration--size: 128px;
+  }
+</style>
+<c2-status-panel class="illustrated-success" media="illustration" status="success" heading="Payment received" description="Your Pro plan is active. A receipt is on its way to your inbox.">
+  <c2-symbol-payment-success slot="media"></c2-symbol-payment-success>
+  <c2-button slot="actions">Go to dashboard</c2-button>
+</c2-status-panel>
+```
+
+## Accessibility
+
+A symbol is decorative by default: its SVG is hidden from assistive technology, which is right when a heading next to it
+already says what it shows. When the picture carries meaning on its own, give it a `label`; it is then exposed as an image
+with that name.
+
+```html tag=CodeBlock
+<c2-symbol-offline label="You are offline"></c2-symbol-offline>
+```
+
+## Theming
+
+| Role        | Variable                           | Follows the theme token                |
+| ----------- | ---------------------------------- | -------------------------------------- |
+| Size        | `--c2-symbol--size`                | —                                      |
+| Outline     | `--c2-symbol--stroke-width`        | —                                      |
+| Backdrop    | `--c2-symbol__backdrop--color`     | `--c2-theme--color-surface-container`  |
+| Surface     | `--c2-symbol__surface--color`      | `--c2-theme--color-surface`            |
+| Muted       | `--c2-symbol__muted--color`        | `--c2-theme--color-outline-variant`    |
+| Outline     | `--c2-symbol__line--color`         | `--c2-theme--color-outline-strong`     |
+| Ink         | `--c2-symbol__ink--color`          | `--c2-theme--color-on-surface-variant` |
+| Accent      | `--c2-symbol__primary--color`      | `--c2-theme--color-primary`            |
+| Soft accent | `--c2-symbol__primary-soft--color` | `--c2-theme--color-primary-container`  |
+| Highlight   | `--c2-symbol__accent--color`       | — (golden: stars, coins, confetti)     |
+| Success     | `--c2-symbol__success--color`      | — (stays green)                        |
+| Warning     | `--c2-symbol__warning--color`      | — (stays amber)                        |
+| Error       | `--c2-symbol__error--color`        | `--c2-theme--color-error`              |
+
+## API
+
+Every symbol element shares the same API.
+
+<ApiTable componentTag="c2-symbol-empty-inbox"></ApiTable>
+
+## All symbols
+
+<SymbolGallery />

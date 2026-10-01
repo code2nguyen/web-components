@@ -1,4 +1,8 @@
+import type { Page } from '@playwright/test'
 import { test, expect, watch, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
+
+// Rows state their role and aria-* through ElementInternals, which getByRole cannot see, so they are found by value.
+const row = (page: Page, value: string) => page.locator(`c2-menu-item[value="${value}"]`)
 
 test('item description presence reconciles initially and after later mutations', async ({ page, renderScenario }) => {
   const description = page.locator('c2-menu-item').locator('.description')
@@ -52,7 +56,8 @@ test('the trigger opens the menu and a row reports its value and closes it', asy
   await expect(page.getByRole('menu', { name: 'File actions' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Actions' })).toHaveAttribute('aria-expanded', 'true')
 
-  await page.getByRole('menuitem', { name: 'Open' }).click()
+  await expect(row(page, 'open')).toHaveHostAria('role', 'menuitem')
+  await row(page, 'open').click()
   await expect(page.getByRole('menu', { name: 'File actions' })).not.toBeVisible()
   await expect(host).toHaveJSProperty('open', false)
   await expect(host).toHaveAttribute('data-events', '[{"value":"open","checked":false}]')
@@ -102,22 +107,22 @@ test('the keyboard opens, walks the enabled rows and activates one', async ({ pa
   await watch(host, 'menu-select')
 
   await page.getByRole('button', { name: 'Actions' }).press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'New file' })).toBeFocused()
+  await expect(row(page, 'new')).toBeFocused()
 
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'Open' })).toBeFocused()
+  await expect(row(page, 'open')).toBeFocused()
 
   // Save is disabled, so ArrowDown skips it and lands on the last row; ArrowDown again wraps to the first.
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'Delete' })).toBeFocused()
+  await expect(row(page, 'delete')).toBeFocused()
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'New file' })).toBeFocused()
+  await expect(row(page, 'new')).toBeFocused()
   await page.keyboard.press('ArrowUp')
-  await expect(page.getByRole('menuitem', { name: 'Delete' })).toBeFocused()
+  await expect(row(page, 'delete')).toBeFocused()
   await page.keyboard.press('Home')
-  await expect(page.getByRole('menuitem', { name: 'New file' })).toBeFocused()
+  await expect(row(page, 'new')).toBeFocused()
   await page.keyboard.press('End')
-  await expect(page.getByRole('menuitem', { name: 'Delete' })).toBeFocused()
+  await expect(row(page, 'delete')).toBeFocused()
 
   await page.keyboard.press('Enter')
   await expect(page.getByRole('menu')).not.toBeVisible()
@@ -127,7 +132,7 @@ test('the keyboard opens, walks the enabled rows and activates one', async ({ pa
 test('ArrowUp opens the menu on the last row', async ({ page, renderScenario }) => {
   await renderScenario(commands)
   await page.getByRole('button', { name: 'Actions' }).press('ArrowUp')
-  await expect(page.getByRole('menuitem', { name: 'Delete' })).toBeFocused()
+  await expect(row(page, 'delete')).toBeFocused()
 })
 
 test('Escape closes the menu and returns focus to the trigger', async ({ page, renderScenario }) => {
@@ -142,7 +147,7 @@ test('Escape closes the menu and returns focus to the trigger', async ({ page, r
 test('Tab closes the menu instead of walking into it', async ({ page, renderScenario }) => {
   await renderScenario(commands)
   await page.getByRole('button', { name: 'Actions' }).press('Enter')
-  await expect(page.getByRole('menuitem', { name: 'New file' })).toBeFocused()
+  await expect(row(page, 'new')).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(page.getByRole('menu')).not.toBeVisible()
   await expect(page.getByRole('button', { name: 'Actions' })).toBeFocused()
@@ -151,9 +156,9 @@ test('Tab closes the menu instead of walking into it', async ({ page, renderScen
 test('typing a letter jumps to the matching row', async ({ page, renderScenario }) => {
   await renderScenario(commands)
   await page.getByRole('button', { name: 'Actions' }).press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'New file' })).toBeFocused()
+  await expect(row(page, 'new')).toBeFocused()
   await page.keyboard.press('d')
-  await expect(page.getByRole('menuitem', { name: 'Delete' })).toBeFocused()
+  await expect(row(page, 'delete')).toBeFocused()
 })
 
 test('typing a second letter narrows the match instead of starting over', async ({ page, renderScenario }) => {
@@ -163,12 +168,12 @@ test('typing a second letter narrows the match instead of starting over', async 
     <c2-menu-item value="order">Order by</c2-menu-item>
   </c2-menu>`)
   await page.getByRole('button', { name: 'Actions' }).press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'Open' })).toBeFocused()
+  await expect(row(page, 'open')).toBeFocused()
   await page.keyboard.press('o')
-  await expect(page.getByRole('menuitem', { name: 'Order by' })).toBeFocused()
+  await expect(row(page, 'order')).toBeFocused()
   // Still inside the typeahead window, so the presses accumulate into "or" rather than cycling on "r".
   await page.keyboard.press('r')
-  await expect(page.getByRole('menuitem', { name: 'Order by' })).toBeFocused()
+  await expect(row(page, 'order')).toBeFocused()
 })
 
 test('a disabled row reports nothing and leaves the menu open', async ({ page, renderScenario }) => {
@@ -176,16 +181,18 @@ test('a disabled row reports nothing and leaves the menu open', async ({ page, r
   const host = page.locator('c2-menu')
   await watch(host, 'menu-select')
   await page.getByRole('button', { name: 'Actions' }).click()
-  await page.getByRole('menuitem', { name: 'Save' }).click({ force: true })
+  await row(page, 'save').click({ force: true })
   await expect(page.getByRole('menu')).toBeVisible()
   await expect(host).toHaveAttribute('data-events', '[]')
-  await expect(page.getByRole('menuitem', { name: 'Save' })).toHaveAttribute('aria-disabled', 'true')
+  await expect(row(page, 'save')).toHaveHostAria('aria-disabled', 'true')
 })
 
 test('separators and headings stay out of the menu semantics', async ({ page, renderScenario }) => {
   await renderScenario(commands)
   await page.getByRole('button', { name: 'Actions' }).click()
-  await expect(page.getByRole('menuitem')).toHaveCount(4)
+  const rows = page.locator('c2-menu-item')
+  await expect(rows).toHaveCount(4)
+  for (const item of await rows.all()) await expect(item).toHaveHostAria('role', 'menuitem')
   await expect(page.locator('c2-menu h3')).toHaveAttribute('role', 'presentation')
   await expect(page.getByRole('separator')).toHaveCount(1)
   await accessible(page)
@@ -206,15 +213,17 @@ test('checkbox rows toggle and keep-open leaves the menu up', async ({ page, ren
   await watch(host, 'menu-select')
   await page.getByRole('button', { name: 'Actions' }).click()
 
-  const sidebar = page.getByRole('menuitemcheckbox', { name: 'Sidebar' })
-  const terminal = page.getByRole('menuitemcheckbox', { name: 'Terminal' })
-  await expect(sidebar).toHaveAttribute('aria-checked', 'true')
-  await expect(terminal).toHaveAttribute('aria-checked', 'false')
+  const sidebar = row(page, 'sidebar')
+  const terminal = row(page, 'terminal')
+  await expect(sidebar).toHaveHostAria('role', 'menuitemcheckbox')
+  await expect(terminal).toHaveHostAria('role', 'menuitemcheckbox')
+  await expect(sidebar).toHaveHostAria('aria-checked', 'true')
+  await expect(terminal).toHaveHostAria('aria-checked', 'false')
 
   await terminal.click()
-  await expect(terminal).toHaveAttribute('aria-checked', 'true')
+  await expect(terminal).toHaveHostAria('aria-checked', 'true')
   await sidebar.click()
-  await expect(sidebar).toHaveAttribute('aria-checked', 'false')
+  await expect(sidebar).toHaveHostAria('aria-checked', 'false')
   await expect(page.getByRole('menu')).toBeVisible()
   await expect(host).toHaveAttribute('data-events', '[{"value":"terminal","checked":true},{"value":"sidebar","checked":false}]')
   await accessible(page)
@@ -223,16 +232,18 @@ test('checkbox rows toggle and keep-open leaves the menu up', async ({ page, ren
 test('picking a radio row unchecks the rest of its group', async ({ page, renderScenario }) => {
   await renderScenario(checkables)
   await page.getByRole('button', { name: 'Actions' }).click()
-  const comfortable = page.getByRole('menuitemradio', { name: 'Comfortable' })
-  const compact = page.getByRole('menuitemradio', { name: 'Compact' })
+  const comfortable = row(page, 'comfortable')
+  const compact = row(page, 'compact')
 
+  await expect(comfortable).toHaveHostAria('role', 'menuitemradio')
+  await expect(compact).toHaveHostAria('role', 'menuitemradio')
   await compact.click()
-  await expect(compact).toHaveAttribute('aria-checked', 'true')
-  await expect(comfortable).toHaveAttribute('aria-checked', 'false')
+  await expect(compact).toHaveHostAria('aria-checked', 'true')
+  await expect(comfortable).toHaveHostAria('aria-checked', 'false')
 
   // Picking the row again keeps it checked rather than clearing the group.
   await compact.click()
-  await expect(compact).toHaveAttribute('aria-checked', 'true')
+  await expect(compact).toHaveHostAria('aria-checked', 'true')
 })
 
 const submenu = `<c2-menu aria-label="Share">
@@ -253,16 +264,16 @@ test('hovering a row with a submenu opens it, and picking a nested row closes bo
   await watch(host, 'menu-select')
   await page.getByRole('button', { name: 'Actions' }).click()
 
-  const parentRow = page.getByRole('menuitem', { name: 'Invite people' })
-  await expect(parentRow).toHaveAttribute('aria-haspopup', 'menu')
-  await expect(parentRow).toHaveAttribute('aria-expanded', 'false')
+  const parentRow = row(page, 'invite')
+  await expect(parentRow).toHaveHostAria('aria-haspopup', 'menu')
+  await expect(parentRow).toHaveHostAria('aria-expanded', 'false')
 
   await parentRow.hover()
   await expect(page.getByRole('menu', { name: 'Invite' })).toBeVisible()
-  await expect(parentRow).toHaveAttribute('aria-expanded', 'true')
+  await expect(parentRow).toHaveHostAria('aria-expanded', 'true')
   await accessible(page)
 
-  await page.getByRole('menuitem', { name: 'By Slack' }).click()
+  await row(page, 'slack').click()
   await expect(page.getByRole('menu', { name: 'Invite' })).not.toBeVisible()
   await expect(page.getByRole('menu', { name: 'Share' })).not.toBeVisible()
   await expect(host).toHaveAttribute('data-events', '[{"value":"slack","checked":false}]')
@@ -271,28 +282,28 @@ test('hovering a row with a submenu opens it, and picking a nested row closes bo
 test('hovering another row closes an open submenu', async ({ page, renderScenario }) => {
   await renderScenario(submenu)
   await page.getByRole('button', { name: 'Actions' }).click()
-  await page.getByRole('menuitem', { name: 'Invite people' }).hover()
+  await row(page, 'invite').hover()
   await expect(page.getByRole('menu', { name: 'Invite' })).toBeVisible()
-  await page.getByRole('menuitem', { name: 'Copy link' }).hover()
+  await row(page, 'copy-link').hover()
   await expect(page.getByRole('menu', { name: 'Invite' })).not.toBeVisible()
-  await expect(page.getByRole('menuitem', { name: 'Invite people' })).toHaveAttribute('aria-expanded', 'false')
+  await expect(row(page, 'invite')).toHaveHostAria('aria-expanded', 'false')
 })
 
 test('ArrowRight enters a submenu and ArrowLeft returns to its row', async ({ page, renderScenario }) => {
   await renderScenario(submenu)
   await page.getByRole('button', { name: 'Actions' }).press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'Copy link' })).toBeFocused()
+  await expect(row(page, 'copy-link')).toBeFocused()
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'Invite people' })).toBeFocused()
+  await expect(row(page, 'invite')).toBeFocused()
 
   await page.keyboard.press('ArrowRight')
-  await expect(page.getByRole('menuitem', { name: 'By email' })).toBeFocused()
+  await expect(row(page, 'email')).toBeFocused()
   await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'By Slack' })).toBeFocused()
+  await expect(row(page, 'slack')).toBeFocused()
 
   await page.keyboard.press('ArrowLeft')
   await expect(page.getByRole('menu', { name: 'Invite' })).not.toBeVisible()
-  await expect(page.getByRole('menuitem', { name: 'Invite people' })).toBeFocused()
+  await expect(row(page, 'invite')).toBeFocused()
   await expect(page.getByRole('menu', { name: 'Share' })).toBeVisible()
 })
 
@@ -326,7 +337,8 @@ test('a link row navigates and still reports its value', async ({ page, renderSc
   const host = page.locator('c2-menu')
   await watch(host, 'menu-select')
   await page.getByRole('button', { name: 'Actions' }).press('ArrowDown')
-  await expect(page.getByRole('menuitem', { name: 'Documentation' })).toBeFocused()
+  await expect(row(page, 'docs')).toBeFocused()
+  await expect(row(page, 'docs')).toHaveHostAria('role', 'menuitem')
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(/#docs$/)
   await expect(host).toHaveAttribute('data-events', '[{"value":"docs","checked":false}]')
@@ -347,7 +359,7 @@ test('a c2-button trigger carries the popup semantics on the control inside it',
   await expect(button).toHaveAttribute('aria-expanded', 'true')
   await accessible(page)
 
-  await page.getByRole('menuitem', { name: 'Remove' }).click()
+  await row(page, 'remove').click()
   await expect(button).toHaveAttribute('aria-expanded', 'false')
   await expect(button).toBeFocused()
 })
@@ -360,4 +372,43 @@ test('disabled never opens', async ({ page, renderScenario }) => {
   await page.getByRole('button', { name: 'Actions' }).click({ force: true })
   await expect(page.getByRole('menu')).not.toBeVisible()
   await expect(page.locator('c2-menu')).toHaveJSProperty('open', false)
+})
+
+test('menu items state their semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-menu aria-label="Mixed" keep-open>
+    ${trigger}
+    <c2-menu-item value="copy">Copy</c2-menu-item>
+    <c2-menu-item value="off" disabled>Off</c2-menu-item>
+    <c2-menu-item type="checkbox" value="wrap">Wrap lines</c2-menu-item>
+    <c2-menu-item value="more">
+      More
+      <c2-menu slot="submenu" aria-label="More">
+        <c2-menu-item value="nested">Nested</c2-menu-item>
+      </c2-menu>
+    </c2-menu-item>
+  </c2-menu>`)
+  // Every attribute on each row must be one the markup above already carried.
+  const written = () =>
+    page
+      .locator('c2-menu-item')
+      .evaluateAll((items) => items.flatMap((item) => item.getAttributeNames().filter((name) => name === 'role' || name.startsWith('aria-'))))
+  expect(await written()).toEqual([])
+
+  await expect(row(page, 'copy')).toHaveHostAria('role', 'menuitem')
+  await expect(row(page, 'copy')).toHaveHostAria('aria-checked', null)
+  await expect(row(page, 'off')).toHaveHostAria('aria-disabled', 'true')
+  await expect(row(page, 'wrap')).toHaveHostAria('role', 'menuitemcheckbox')
+  await expect(row(page, 'wrap')).toHaveHostAria('aria-checked', 'false')
+  await expect(row(page, 'more')).toHaveHostAria('aria-haspopup', 'menu')
+  await expect(row(page, 'more')).toHaveHostAria('aria-expanded', 'false')
+
+  await page.getByRole('button', { name: 'Actions' }).click()
+  await row(page, 'wrap').click()
+  await expect(row(page, 'wrap')).toHaveHostAria('aria-checked', 'true')
+  await row(page, 'more').hover()
+  await expect(page.getByRole('menu', { name: 'More' })).toBeVisible()
+  await expect(row(page, 'more')).toHaveHostAria('aria-expanded', 'true')
+  await expect(row(page, 'nested')).toHaveHostAria('role', 'menuitem')
+  expect(await written()).toEqual([])
+  await accessible(page)
 })

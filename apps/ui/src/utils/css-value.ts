@@ -214,6 +214,7 @@ export const KEYWORD_OPTIONS: Record<string, string[]> = {
   'text-transform': ['none', 'capitalize', 'uppercase', 'lowercase'],
   'text-decoration': ['none', 'underline', 'overline', 'line-through'],
   'object-fit': ['fill', 'contain', 'cover', 'none', 'scale-down'],
+  'scrollbar-width': ['auto', 'thin', 'none'],
   'stroke-linecap': ['butt', 'round', 'square'],
   'border-style': [...BORDER_STYLES],
   position: ['static', 'relative', 'absolute', 'fixed', 'sticky'],

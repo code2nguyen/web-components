@@ -35,8 +35,11 @@
     "clean": "npx del-cli **/node_modules **/dist **/types **/custom-elements.json package-lock.json -f",
     "build:tools": "wireit",
     "mcp:inspect": "npm run inspect -w packages/tools/mcp",
+    "gallery:shots": "node apps/ui/scripts/gallery-shots.mjs",
+    "gallery:audit": "node apps/ui/scripts/gallery-shots.mjs --audit",
     "mcp:smoke": "npm run smoke -w packages/tools/mcp",
     "docs:check": "node scripts/check-component-docs.mjs",
+    "changelog": "node scripts/generate-changelog.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
@@ -61,6 +64,7 @@
     "packages/components/*",
     "packages/icons/*",
     "packages/core",
+    "packages/umbrella",
     "packages/tools/*",
     "apps/ui",
     "apps/examples/*",
@@ -89,6 +93,22 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/flow:build",
+        "./packages/components/week-planner:build",
+        "./packages/components/month-planner:build",
+        "./packages/components/hover-card:build",
+        "./packages/components/command:build",
+        "./packages/components/marker:build",
+        "./packages/components/context-menu:build",
+        "./packages/components/otp-input:build",
+        "./packages/components/chat-message-list:build",
+        "./packages/components/shortcut:build",
+        "./packages/components/carousel:build",
+        "./packages/components/tag-input:build",
+        "./packages/components/timeline:build",
+        "./packages/components/split-panel:build",
+        "./packages/components/banner:build",
+        "./packages/components/time-input:build",
         "./packages/components/log-viewer:build",
         "./packages/components/masonry:build",
         "./packages/components/dashboard:build",
@@ -136,6 +156,7 @@
         "./packages/components/button:build",
         "./packages/icons/feather-icons:build",
         "./packages/icons/phosphor-icons:build",
+        "./packages/icons/symbols:build",
         "./open-packages/chatbot:build",
         "./packages/components/chat-input:build",
         "./packages/components/chat-message:build",
@@ -186,6 +207,7 @@
     "build:tools": {
       "dependencies": [
         "./packages/tools/framework-types:build",
+        "./packages/umbrella:type-check",
         "./packages/tools/mcp:build",
         "./packages/tools/skill:build"
       ]

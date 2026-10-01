@@ -8,23 +8,27 @@
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
 
 import type { DefineComponent, HTMLAttributes } from 'vue'
-import type { Tab, TabEventMap } from '@c2n/tabs/tab.js'
-import type { Tabs, TabsEventMap } from '@c2n/tabs'
+import type { EventMapOf } from '@c2n/core/event-helper.js'
+import type { Tab } from '@c2n/tabs/tab.js'
+import type { Tabs } from '@c2n/tabs'
 
 /** The element's own public properties, plus every attribute Vue understands on a host element. */
 type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
+/** The event an element fires under `name`, read from the map its `addEventListener` carries (its own or inherited). */
+type EventOf<T extends EventTarget, Name extends string> = Name extends keyof EventMapOf<T> ? EventMapOf<T>[Name] : CustomEvent
 
 declare module 'vue' {
   interface GlobalComponents {
     'c2-tab': DefineComponent<
       C2Props<Tab> & {
-        onTabChange?: (event: TabEventMap['tab-change']) => void
+        onTabChange?: (event: EventOf<Tab, 'tab-change'>) => void
       }
     >
     'c2-tabs': DefineComponent<
       C2Props<Tabs> & {
+        'aria-label'?: unknown
         'selected-tab'?: unknown
-        onSelectionChange?: (event: TabsEventMap['selection-change']) => void
+        onSelectionChange?: (event: EventOf<Tabs, 'selection-change'>) => void
       }
     >
   }

@@ -24,7 +24,7 @@ A label inherits the text around it; each look below sets a few `--c2-label__con
   .medium {
     --c2-label__container--font-size: 14px;
     --c2-label__container--font-weight: 500;
-    --c2-label__container--color: #18181b;
+    --c2-label__container--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-label class="medium" required>Email address</c2-label>
@@ -37,7 +37,7 @@ A label inherits the text around it; each look below sets a few `--c2-label__con
     --c2-label__container--font-weight: 600;
     --c2-label__container--letter-spacing: 0.08em;
     --c2-label__container--text-transform: uppercase;
-    --c2-label__container--color: #71717a;
+    --c2-label__container--color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 </style>
 <c2-label class="eyebrow">Billing details</c2-label>
@@ -48,7 +48,7 @@ A label inherits the text around it; each look below sets a few `--c2-label__con
   .muted {
     --c2-label__container--font-size: 13px;
     --c2-label__container--font-weight: 400;
-    --c2-label__container--color: #a1a1aa;
+    --c2-label__container--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-label class="muted">Optional note</c2-label>
@@ -60,7 +60,7 @@ A label inherits the text around it; each look below sets a few `--c2-label__con
     --c2-label__container--font-size: 20px;
     --c2-label__container--font-weight: 600;
     --c2-label__container--letter-spacing: -0.01em;
-    --c2-label__container--color: #18181b;
+    --c2-label__container--color: var(--c2-theme--color-on-surface, #18181b);
   }
 </style>
 <c2-label class="large" required>Project name</c2-label>
@@ -72,7 +72,7 @@ A label inherits the text around it; each look below sets a few `--c2-label__con
     --c2-label__container--font-family: Georgia, 'Times New Roman', serif;
     --c2-label__container--font-size: 17px;
     --c2-label__container--font-weight: 400;
-    --c2-label__container--color: #3f3f46;
+    --c2-label__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <c2-label class="serif">Your story</c2-label>
@@ -91,7 +91,7 @@ The asterisk is the default content of the `required-indicator` slot; restyle it
   .bold-red {
     --c2-label__container--font-size: 14px;
     --c2-label__container--font-weight: 500;
-    --c2-label__required-indicator--color: #dc2626;
+    --c2-label__required-indicator--color: var(--c2-theme--color-error, #dc2626);
     --c2-label__required-indicator--font-weight: 700;
     --c2-label__required-indicator--font-size: 16px;
   }
@@ -105,7 +105,7 @@ The asterisk is the default content of the `required-indicator` slot; restyle it
     --c2-label__container--font-size: 14px;
     --c2-label__container--font-weight: 500;
     --c2-label__container--gap: 2px;
-    --c2-label__required-indicator--color: #a1a1aa;
+    --c2-label__required-indicator--color: var(--c2-theme--color-outline-strong, #a1a1aa);
   }
 </style>
 <c2-label class="subtle" required>Password</c2-label>
@@ -117,7 +117,7 @@ The asterisk is the default content of the `required-indicator` slot; restyle it
     --c2-label__container--font-size: 14px;
     --c2-label__container--font-weight: 500;
     --c2-label__container--gap: 6px;
-    --c2-label__required-indicator--color: #71717a;
+    --c2-label__required-indicator--color: var(--c2-theme--color-on-surface-variant, #71717a);
     --c2-label__required-indicator--font-size: 12px;
     --c2-label__required-indicator--font-weight: 400;
   }
@@ -141,7 +141,7 @@ The asterisk is the default content of the `required-indicator` slot; restyle it
   .stacked-label {
     --c2-label__container--font-size: 13px;
     --c2-label__container--font-weight: 500;
-    --c2-label__container--color: #3f3f46;
+    --c2-label__container--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
   }
 </style>
 <div class="stacked">
