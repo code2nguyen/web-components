@@ -1,0 +1,128 @@
+---
+title: 'Pyramid chart'
+description: 'Ranked levels of a whole, stacked from a narrow apex to a wide base, where one row is one level.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-pyramid-chart'
+apiTags: ['c2-pyramid-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { PyramidChart } from '@c2n/chart/pyramid-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+
+A pyramid shows the parts of a whole in order: customer tiers, a test suite, headcount by level. `label-field`
+names each level, a single `c2-chart-series` supplies its value, and one row is one level. It is drawn by
+ECharts and, like the [pie chart](../pie-chart), has no axes, a per-level tooltip and a legend whose entries
+highlight a level (or, with `legend-action="toggle"`, switch it off). Clicking a level highlights it too.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .pyramid-plot {
+    width: 100%;
+    --c2-chart--height: 280px;
+  }
+  .pyramid-steps {
+    width: 100%;
+    --c2-chart--height: 240px;
+    --c2-chart__series-1--color: #0f766e;
+    --c2-chart__series-2--color: #14b8a6;
+    --c2-chart__series-3--color: #5eead4;
+  }
+  .pyramid-org {
+    width: 100%;
+    --c2-chart--height: 260px;
+    --c2-chart__level--gap: 4px;
+    --c2-chart__level--align: start;
+  }
+</style>
+
+<div data-label="Accounts by plan">
+  <c2-pyramid-chart
+    class="pyramid-plot"
+    label-field="plan"
+    data='[{"plan":"Enterprise","accounts":42},{"plan":"Business","accounts":318},{"plan":"Team","accounts":1260},{"plan":"Starter","accounts":4870}]'
+  >
+    <c2-chart-series field="accounts" label="Accounts"></c2-chart-series>
+  </c2-pyramid-chart>
+</div>
+
+<div data-label="Equal levels">
+  <c2-pyramid-chart
+    class="pyramid-steps"
+    label-field="kind"
+    sizing="equal"
+    labels="inside"
+    legend="none"
+    data='[{"kind":"E2E","tests":40},{"kind":"Integration","tests":180},{"kind":"Unit","tests":1200}]'
+  >
+    <c2-chart-series field="tests" label="Tests"></c2-chart-series>
+  </c2-pyramid-chart>
+</div>
+
+<div data-label="Gap and alignment">
+  <c2-pyramid-chart
+    class="pyramid-org"
+    label-field="level"
+    label-content="name-percent"
+    legend="none"
+    data='[{"level":"Executive","people":6},{"level":"Director","people":18},{"level":"Manager","people":41},{"level":"Individual contributor","people":149}]'
+  >
+    <c2-chart-series field="people" label="People"></c2-chart-series>
+  </c2-pyramid-chart>
+</div>
+```
+
+### Sizing
+
+`sizing` decides what a level's size means, and it is the choice that matters most:
+
+- `area` (the default) keeps the outline a triangle and gives each level a share of its area equal to its share
+  of the total. It is the reading a pyramid invites, and small levels near the apex still get a visible band.
+- `height` keeps the triangle and makes each level's height proportional to its value. It reads like a stacked
+  bar; very small levels shrink to a sliver.
+- `width` is the classic funnel: every level is the same height and its base is as wide as its value. The
+  outline stops being a triangle, and the levels are always ordered by value.
+- `equal` gives every level the same height inside a perfect triangle, so only the order is encoded and the
+  values have to be read from the labels.
+
+### Order and orientation
+
+`sort="ascending"` (the default) puts the smallest value at the apex, `descending` the largest, and `none`
+keeps the order of the rows, read from the apex. `apex` says where the point is: `top`, `bottom` for an
+inverted pyramid that reads top to bottom as a narrowing process (the smallest stage still sits at the point), or `start` and `end` to lay it on its side (they follow the
+writing direction).
+
+```html tag=CodeBlock
+<c2-pyramid-chart label-field="stage" apex="bottom" legend="none" data='[…]'>
+  <c2-chart-series field="candidates" label="Candidates"></c2-chart-series>
+</c2-pyramid-chart>
+```
+
+### Labels and styling
+
+`labels` is `outside` by default, because the apex level is rarely wide enough to hold text; `inside` and
+`none` are the alternatives. `label-content` picks `name`, `value`, `percent`, `name-value` (the default) or
+`name-percent`. Outside labels that would collide near the apex are pushed apart, and an inside label that does
+not fit its level is left to the tooltip.
+
+The shape is styled through CSS variables on the host: `--c2-chart__level--border-radius` rounds every level's
+corners, the apex included (`4px` by default, `0` for sharp corners), `--c2-chart__level--gap` spaces the levels apart,
+`--c2-chart__level--min-width` gives the pyramid a flat top, `--c2-chart__level--max-width` narrows its base,
+and `--c2-chart__level--align` (`start`, `center`, `end`) moves it across its axis. `--c2-chart__slice--border`
+draws the edge between levels, as it does between pie slices. Level colours come from
+`--c2-chart__series-1…8--color`, one per row.
+
+Switching a level off from the legend, or with `setLevelVisible(label, false)`, lays the remaining levels out
+again so they still fill the shape.

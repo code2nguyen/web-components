@@ -1,0 +1,392 @@
+@use '@c2n/sass/animation';
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-week-planner,
+  $theme: (
+    background: #ffffff,
+    color: #18181b,
+    border: 1px solid #e4e4e7,
+    border-radius: 8px,
+    padding: 12px,
+    font-family: inherit,
+    font-size: 14px,
+    title--font-size: 14px,
+    title--font-weight: 600,
+    grid--border: 1px solid #e4e4e7,
+    hour--border: 1px solid rgba(24, 24, 27, 0.06),
+    hour--height: 48px,
+    hour-label--width: 48px,
+    hour-label--color: #71717a,
+    hour-label--font-size: 11px,
+    navigation--size: 28px,
+    navigation--border-radius: 6px,
+    navigation__hover--background: #f4f4f5,
+    day-header--color: #71717a,
+    day-header--font-size: 12px,
+    day-header__today--color: rgb(2, 101, 220),
+    day-header__today--font-weight: 600,
+    day__today--background: rgba(2, 101, 220, 0.05),
+    now--color: #dc2626,
+    event--background: rgb(2, 101, 220),
+    event--color: #ffffff,
+    event--border-radius: 4px,
+    event--font-size: 12px,
+    event--font-weight: 500,
+    event__hover--opacity: 0.88,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    focus--outline-offset: 2px,
+  )
+);
+
+:host {
+  display: block;
+  max-inline-size: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-week-planner {
+  box-sizing: border-box;
+  padding: css.cssVar(padding);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  background: css.cssVar(background);
+  color: css.cssVar(color);
+  font-family: css.cssVar(font-family);
+  font-size: css.cssVar(font-size);
+}
+
+// The container the day strip sizes itself against: its own content box, inside the planner's padding.
+.body {
+  container: planner / inline-size;
+  // Containment drops the content's width; a layout that sizes the planner from its content (a centred flex column,
+  // a table cell) gets this instead, capped by the space available.
+  contain-intrinsic-inline-size: 720px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+
+  // Without the switch or a heading, the header only holds the arrows, which a planner wide enough for seven days
+  // does not need.
+  &.navigation-only {
+    display: none;
+  }
+}
+
+// The heading takes the free space, pushing the switch and the arrows to the end; a long one is cut, not wrapped.
+.title {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: css.cssVar(title--font-size);
+  font-weight: css.cssVar(title--font-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navigation {
+  display: none;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.nav {
+  display: inline-flex;
+  width: css.cssVar(navigation--size);
+  height: css.cssVar(navigation--size);
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(navigation--border-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  transition: animation.standard(background);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:hover:not(:disabled) {
+    background: css.cssVar(navigation__hover--background);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.4;
+  }
+
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+// Seven columns fit a wide planner. A narrow one shows three days, or one, of a strip that scrolls sideways and snaps
+// to a day: swiped on a touch screen, paged with the arrows elsewhere. The hour labels stay put.
+.scroller {
+  position: relative;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@container planner (max-width: 639.98px) {
+  .header.navigation-only {
+    display: flex;
+  }
+
+  .navigation {
+    display: flex;
+  }
+
+  .grid {
+    --day-width: calc((100cqi - #{css.cssVar(hour-label--width)}) / 3);
+  }
+}
+
+@container planner (max-width: 419.98px) {
+  .grid {
+    --day-width: calc(100cqi - #{css.cssVar(hour-label--width)});
+  }
+
+  // The strip clips at its edge; keep the dot on the line inside the column.
+  .now::before {
+    left: 0;
+  }
+}
+
+.week-number {
+  margin-left: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, var(--day-width, minmax(0, 1fr)));
+}
+
+.corner,
+.day-header {
+  border-bottom: css.cssVar(grid--border);
+}
+
+// The hour labels sit outside the scrolling strip, so they hold still while the days move.
+.frame {
+  display: grid;
+  grid-template-columns: css.cssVar(hour-label--width) minmax(0, 1fr);
+  border-top: css.cssVar(grid--border);
+}
+
+// Same box as a day header, so the hour rows line up with the day columns.
+.corner {
+  padding: 6px;
+  font-size: css.cssVar(day-header--font-size);
+}
+
+.day-header {
+  scroll-snap-align: start;
+  padding: 6px;
+  border-left: css.cssVar(grid--border);
+  color: css.cssVar(day-header--color);
+  font-size: css.cssVar(day-header--font-size);
+
+  // Today's tints stop inside the column's own border, so the grid lines keep their colour.
+  &.today {
+    background: css.cssVar(day__today--background);
+    background-clip: padding-box;
+    color: css.cssVar(day-header__today--color);
+    font-weight: css.cssVar(day-header__today--font-weight);
+  }
+}
+
+.hour-label {
+  box-sizing: border-box;
+  height: css.cssVar(hour--height);
+  padding: 2px 6px 0 0;
+  color: css.cssVar(hour-label--color);
+  font-size: css.cssVar(hour-label--font-size);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.day {
+  position: relative;
+  min-width: 0;
+  border-left: css.cssVar(grid--border);
+
+  &.today {
+    background: css.cssVar(day__today--background);
+    background-clip: padding-box;
+  }
+}
+
+.hour-line {
+  box-sizing: border-box;
+  height: css.cssVar(hour--height);
+  border-bottom: css.cssVar(hour--border);
+}
+
+.event {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--from) * #{css.cssVar(hour--height)} + 1px);
+  // Overlapping events cascade instead of splitting the column into slivers: each one steps in by a share of the
+  // column and runs to its right edge, drawn over the one before it (which starts no later, so its title shows
+  // above). Two overlapping events get the full column and three quarters of it rather than a half each.
+  left: calc(var(--column) / (var(--columns) * 2) * 100% + 2px);
+  display: block;
+  width: calc(100% - var(--column) / (var(--columns) * 2) * 100% - 4px);
+  height: calc(var(--span) * #{css.cssVar(hour--height)} - 2px);
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: css.cssVar(event--border-radius);
+  background: var(--event-color, #{css.cssVar(event--background)});
+  color: var(--event-text-color, #{css.cssVar(event--color)});
+  cursor: pointer;
+  font: inherit;
+  font-size: css.cssVar(event--font-size);
+  line-height: 1.3;
+  text-align: left;
+  transition: animation.standard(opacity);
+  // The block is a size container, so its text adapts to the room it has: wraps, goes on one row, or drops the time.
+  container-type: size;
+  // Separates a block from the one it covers.
+  box-shadow: 0 0 0 1px css.cssVar(background);
+
+  // A covered block comes to the front while it is pointed at.
+  &:hover {
+    z-index: 2;
+    opacity: css.cssVar(event__hover--opacity);
+  }
+
+  &:focus-visible {
+    z-index: 2;
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+}
+
+.event-body {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+  padding: 3px 6px;
+}
+
+.event-title,
+.event-time {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// The title wraps between words; a word is never split into pieces.
+.event-title {
+  flex: 0 0 auto;
+  font-weight: css.cssVar(event--font-weight);
+  white-space: normal;
+}
+
+.event-time {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+// The time stays in the accessible name and the tooltip whenever it is hidden.
+@container (max-width: 84px) {
+  .event-time {
+    display: none;
+  }
+}
+
+// Too narrow to wrap words: one line, cut with an ellipsis (the full title is in the tooltip and accessible name).
+@container (max-width: 48px) {
+  .event-title {
+    white-space: nowrap;
+  }
+}
+
+// Too short for two lines at the default 12px font: title and time share one row, centred. (Not in em: browsers
+// disagree on which font size an em in a container query refers to.)
+@container (max-height: 38px) {
+  .event-body {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding-block: 0;
+  }
+
+  .event-title {
+    flex: 0 1 auto;
+    white-space: nowrap;
+  }
+}
+
+@container (max-height: 38px) and (max-width: 192px) {
+  .event-time {
+    display: none;
+  }
+}
+
+.now {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--from) * #{css.cssVar(hour--height)} - 1px);
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: css.cssVar(now--color);
+  pointer-events: none;
+
+  &::before {
+    position: absolute;
+    top: -3px;
+    left: -4px;
+    width: 8px;
+    height: 8px;
+    content: '';
+    border-radius: 999px;
+    background: inherit;
+  }
+}

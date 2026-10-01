@@ -1,0 +1,59 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { MonthPlanner } from '@c2n/month-planner'
+
+## Presets
+
+The event bar variables carry the look: its colour, height and radius. The day height and grid line set how dense the
+month reads.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-month-planner
+  month="2026-09"
+  locale="en-US"
+  events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18"},{"title":"Review","start":"2026-09-24"}]'
+></c2-month-planner>
+```
+
+```html tag=MdxCodeBlock,label=Soft pills
+<style>
+  .soft-pills {
+    --c2-month-planner--border: 0px solid transparent;
+    --c2-month-planner__day--min-height: 64px;
+    --c2-month-planner__event--border-radius: 999px;
+    --c2-month-planner__event--background: #7c3aed;
+    --c2-month-planner__day__today--background: rgba(124, 58, 237, 0.06);
+    --c2-month-planner__day__today--color: #6d28d9;
+  }
+</style>
+<c2-month-planner
+  class="soft-pills"
+  month="2026-10"
+  week-start="sunday"
+  locale="en-US"
+  events='[{"title":"Team offsite","start":"2026-10-12","end":"2026-10-14"},{"title":"Half term","start":"2026-10-19","end":"2026-10-23","color":"#0369a1"}]'
+></c2-month-planner>
+```
+
+```html tag=MdxCodeBlock,label=Compact team leave
+<style>
+  .compact-leave {
+    --c2-month-planner__day--min-height: 56px;
+    --c2-month-planner__event--height: 18px;
+    --c2-month-planner__event--font-size: 11px;
+    --c2-month-planner__event--border-radius: 2px;
+    --c2-month-planner__event--background: #047857;
+  }
+</style>
+<c2-month-planner
+  class="compact-leave"
+  month="2026-12"
+  locale="en-US"
+  events='[{"title":"Ana — leave","start":"2026-12-21","end":"2027-01-01"},{"title":"Ben — leave","start":"2026-12-24","end":"2026-12-28","color":"#be185d"},{"title":"Office closed","start":"2026-12-25","color":"#52525b"}]'
+></c2-month-planner>
+```
+
+</GalleryGrid>

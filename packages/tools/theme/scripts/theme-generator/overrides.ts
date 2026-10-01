@@ -51,6 +51,28 @@ export const overrides: Record<string, Override> = {
     value: '2px dashed var(--c2-theme--color-primary, #2563eb)',
   },
   '--c2-masonry-item__dragging--box-shadow': { token: 'shadow-md' },
+  // Planner tints are the accent at a low strength, so they follow the brand colour and read on a dark surface.
+  '--c2-week-planner__day__today--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
+  },
+  // Translucent text colour rather than an opaque grey, so the line still shows over today's tinted column.
+  '--c2-week-planner__hour--border': {
+    token: 'color-on-surface',
+    value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent)',
+  },
+  '--c2-month-planner__day__today--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
+  },
+  '--c2-month-planner__month__marked--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
+  '--c2-month-planner__month__marked__hover--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 18%, transparent)',
+  },
   // Border Beam geometry and timing belong to the decorative effect. Its principal colour and radius follow the
   // active theme while the second gradient stop remains an intentionally coordinated accent.
   '--c2-border-beam--outset': { exclude: 'container border alignment geometry' },
@@ -150,6 +172,8 @@ export const overrides: Record<string, Override> = {
   '--c2-questionnaire__primary-action--color': onPrimary,
   // A date selector is commonly used as a floating booking panel, so its surface follows the shared popover shadow.
   '--c2-date-selector--box-shadow': { token: 'shadow-md' },
+  // The calendar's month picker floats over the grid like any popover.
+  '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },
@@ -255,6 +279,9 @@ export const overrides: Record<string, Override> = {
   '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
   '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
   '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
+  // Month planner, compact layout: the selected day is an inverse-surface circle, today's a primary one.
+  '--c2-month-planner__date__selected--color': { token: 'color-on-inverse-surface' },
+  '--c2-month-planner__date__today__selected--color': onPrimary,
   // Code viewer: monospace font and theme-neutral translucent greys / status colours that work on any syntax theme.
   '--c2-code-viewer--font-family': { exclude: 'monospace font, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -385,4 +412,11 @@ export const overrides: Record<string, Override> = {
   // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
   '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
   '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },
+  // Flow: the edges of steps that have not run are drawn lines, the resting outline grey; the dot grid is that grey at
+  // 40% strength, so it stays a backdrop on any canvas colour in either mode. The success and warning colours are
+  // semantic status colours, as on c2-steps.
+  '--c2-flow__dot--color': { token: 'color-outline', value: 'color-mix(in srgb, var(--c2-theme--color-outline, #d4d4d8) 40%, transparent)' },
+  '--c2-flow__edge--color': { token: 'color-outline' },
+  '--c2-flow__success--color': { exclude: 'success status colour' },
+  '--c2-flow__warning--color': { exclude: 'warning status colour' },
 }

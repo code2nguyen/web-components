@@ -181,6 +181,8 @@ jobs:
           fi
           # Some generated public metadata embeds its package version. Regenerate it after Lerna updates package.json.
           npm run build:tools
+          # Files everything since the last release under this version (CHANGELOG.md + the docs site's changelog data).
+          npm run changelog -- --next "$VERSION"
 
       # Each package ships only what its `files` field lists, and `dist/` is built above and never
       # committed — so this is the one place a missing entry shows up before it reaches the registry.
@@ -258,6 +260,7 @@ jobs:
             exit 1
           fi
           npm run build:tools
+          npm run changelog -- --next "$VERSION"
           git add --update
           git commit -m "chore(release): publish v$VERSION"
 
@@ -310,8 +313,11 @@ jobs:
           if gh release view "v$VERSION" >/dev/null 2>&1; then
             echo "GitHub release v$VERSION already exists."
           else
+            # The release's CHANGELOG.md section, followed by GitHub's list of merged pull requests.
+            awk -v heading="## [$VERSION]" 'index($0, heading) == 1 { found = 1; next } found && /^## / { exit } found' CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"
             gh release create "v$VERSION" \
               --title "v$VERSION" \
+              --notes-file "$RUNNER_TEMP/release-notes.md" \
               --generate-notes \
               --verify-tag \
               $prerelease

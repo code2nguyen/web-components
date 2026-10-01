@@ -377,6 +377,16 @@ export abstract class ChartBase extends LitElement {
     return false
   }
 
+  /**
+   * Whether a change reshapes the frame, so the rows must be read again. `x-field`, `label-field` and `x-type`
+   * always do, and so does the series list: definitions that arrive after `data` would otherwise leave the frame
+   * holding the columns inferred from the first row. A chart with more row fields (the bubble chart's size) adds
+   * its own. The builder's signature cache makes a change that reads the same fields free.
+   */
+  protected reshapesFrame(changed: PropertyValues): boolean {
+    return changed.has('series') || changed.has('seriesElements')
+  }
+
   // ------------------------------------------------------------ lifecycle ---
 
   override connectedCallback(): void {
@@ -451,7 +461,14 @@ export abstract class ChartBase extends LitElement {
     if (!this.hasUpdated && !isServer) this.#collectSeries(true)
     // The fields that shape the frame count as data: a chart switched to another x or label field at runtime must
     // re-read its rows, which the builder's signature cache would otherwise hand back unchanged.
-    if (changed.has('data') || changed.has('revision') || changed.has('xField') || changed.has('labelField') || changed.has('xType')) {
+    if (
+      changed.has('data') ||
+      changed.has('revision') ||
+      changed.has('xField') ||
+      changed.has('labelField') ||
+      changed.has('xType') ||
+      this.reshapesFrame(changed)
+    ) {
       this.frame = this.frameBuilder.build(this.data, this.normalizeContext())
       this.#dataDirty = true
     }
@@ -1075,8 +1092,14 @@ export abstract class ChartBase extends LitElement {
     return html`
       <div class="legend legend--${this.legend}" part="legend">
         <slot name="legend"></slot>
+        ${this.renderLegendExtras()}
       </div>
     `
+  }
+
+  /** Content drawn after the series entries in the built-in legend, such as the bubble chart's size key. */
+  protected renderLegendExtras(): unknown {
+    return nothing
   }
 
   #renderLegendEntries(): void {

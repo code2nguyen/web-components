@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { test, expect } from './fixture'
 
-for (const state of ['default', 'number', 'wizard', 'flat', 'statuses', 'data']) {
+for (const state of ['default', 'number', 'wizard', 'flat', 'statuses', 'data', 'horizontal', 'interactive', 'interactive-vertical']) {
   test(`${state} has accessible semantics and no axe violations`, async ({ page, scenario }) => {
     await scenario(state)
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()

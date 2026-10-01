@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-month-planner</title>
+    <script type="module" src="/src/month-planner.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 32px;
+        max-width: 880px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      h3 {
+        margin: 0 0 8px;
+        color: #71717a;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .soft {
+        --c2-month-planner--border: 0px solid transparent;
+        --c2-month-planner__day--min-height: 64px;
+        --c2-month-planner__event--border-radius: 999px;
+        --c2-month-planner__event--background: #7c3aed;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h3>Vacation plan</h3>
+      <c2-month-planner
+        id="plan"
+        month="2026-09"
+        events='[
+          {"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},
+          {"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},
+          {"id":"conf","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},
+          {"id":"review","title":"Quarterly review","start":"2026-09-24"},
+          {"id":"move","title":"Moving week","start":"2026-09-28","end":"2026-10-04","color":"#be185d"},
+          {"title":"Spring break","start":"2026-03-30","end":"2026-04-03"},
+          {"title":"Summer in Crete","start":"2026-06-27","end":"2026-07-12","color":"#0f766e"},
+          {"title":"Christmas with family","start":"2026-12-23","end":"2026-12-27"},
+          {"title":"Ski week","start":"2027-02-13","end":"2027-02-20"}
+        ]'
+      ></c2-month-planner>
+      <p id="log" style="color: #71717a; font-size: 13px">Click an event.</p>
+    </section>
+    <section>
+      <h3>Sunday first, themed</h3>
+      <c2-month-planner
+        class="soft"
+        month="2026-10"
+        week-start="sunday"
+        events='[{"title":"Team offsite","start":"2026-10-12","end":"2026-10-14"},{"title":"Half term","start":"2026-10-19","end":"2026-10-23","color":"#0369a1"}]'
+      ></c2-month-planner>
+    </section>
+    <script type="module">
+      const log = document.querySelector('#log')
+      const plan = document.querySelector('#plan')
+      plan.addEventListener('event-click', (event) => (log.textContent = `Clicked: ${event.detail.event.title}`))
+      plan.addEventListener('month-change', (event) => (log.textContent = `Showing ${event.detail.month}`))
+    </script>
+  </body>
+</html>
