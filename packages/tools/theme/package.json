@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/notepad:build",
         "../../components/flow:build",
         "../../components/week-planner:build",
         "../../components/month-planner:build",

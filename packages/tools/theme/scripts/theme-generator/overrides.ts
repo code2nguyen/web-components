@@ -390,4 +390,37 @@ export const overrides: Record<string, Override> = {
   '--c2-flow__edge--color': { token: 'color-outline' },
   '--c2-flow__success--color': { exclude: 'success status colour' },
   '--c2-flow__warning--color': { exclude: 'warning status colour' },
+  // Notepad: the paper, rules, margin and inks are mixed from the surface tokens rather than replaced by them, so the
+  // sheet stays slightly warm paper with blue rules in light mode and turns into night paper (dark sheet, light ink,
+  // dimmed rules, brighter inks) under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
+  // and the glued binding are materials with their own colour, and the handwriting face is the component's identity.
+  '--c2-notepad__sheet--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 90%, #f3ead0)',
+  },
+  '--c2-notepad__writing--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, #2f4fb0)',
+  },
+  '--c2-notepad__rule--color': { token: 'color-surface', value: 'color-mix(in srgb, #8fb0dc 50%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__margin--color': { token: 'color-surface', value: 'color-mix(in srgb, #d9534f 50%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__ink-blue--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #3b5bdb 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-red--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #e03131 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-green--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #2f9e44 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-black--color': { token: 'color-on-surface' },
+  '--c2-notepad__placeholder--color': { token: 'color-on-surface-variant' },
+  '--c2-notepad__header--color': { token: 'color-on-surface-variant' },
+  '--c2-notepad__perforation--color': { token: 'color-outline-strong' },
+  '--c2-notepad__selection--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-yellow--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-green--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-pink--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__toolbar--background': { exclude: 'washi tape keeps its own palette' },
+  '--c2-notepad__toolbar--color': { exclude: 'washi tape keeps its own palette' },
+  '--c2-notepad__toolbar__button__active--background': { exclude: 'washi tape keeps its own palette' },
+  '--c2-notepad__glue--background': { exclude: 'binding material colour' },
+  '--c2-notepad__writing--font-family': { exclude: 'the bundled handwriting face is the component identity' },
+  '--c2-notepad__sheet--border-radius': { exclude: 'paper corner, not a control radius' },
+  '--c2-notepad__sheet--box-shadow': { exclude: 'paper elevation over the desk' },
+  '--c2-notepad__sheet__focus--box-shadow': { exclude: 'paper elevation over the desk' },
 }

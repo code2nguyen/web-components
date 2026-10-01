@@ -1,0 +1,603 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-notepad,
+  $theme: (
+    sheet--background: #fdfcf7,
+    sheet--border-radius: 3px,
+    sheet--box-shadow: (
+      0 1px 2px rgba(24, 24, 27, 0.12),
+      0 10px 24px rgba(24, 24, 27, 0.1),
+    ),
+    sheet__focus--box-shadow: (
+      0 1px 2px rgba(24, 24, 27, 0.14),
+      0 16px 32px rgba(24, 24, 27, 0.16),
+    ),
+    sheet--min-height: 224px,
+    sheet--max-height: none,
+    texture--opacity: 0.5,
+    rule--spacing: 28px,
+    rule--color: #c3d3ea,
+    grid--color: transparent,
+    dot--color: transparent,
+    margin--inset: 56px,
+    margin--color: #eba6a6,
+    writing--color: #1e2a4a,
+    writing--font-family: (
+      'C2 Notepad Hand',
+      'Patrick Hand',
+      'Segoe Print',
+      'Bradley Hand',
+      'Comic Sans MS',
+      cursive,
+    ),
+    writing--font-size: 18px,
+    placeholder--color: #8a909b,
+    selection--background: rgba(255, 214, 64, 0.45),
+    header--color: #7a8494,
+    header--font-size: 12px,
+    spiral--display: block,
+    glue--display: none,
+    glue--background: #3f444b,
+    ink-blue--color: #2848b8,
+    ink-black--color: #18181b,
+    ink-red--color: #b8232b,
+    ink-green--color: #22743a,
+    highlight-yellow--background: rgba(255, 214, 64, 0.55),
+    highlight-green--background: rgba(110, 220, 120, 0.4),
+    highlight-pink--background: rgba(255, 120, 170, 0.38),
+    task__checked--opacity: 0.55,
+    toolbar--background: #efe6cc,
+    toolbar--color: #2c2a26,
+    toolbar__button__active--background: rgba(60, 50, 30, 0.14),
+    perforation--color: #b9bfc8,
+    error--color: #dc2626,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    disabled--opacity: 0.38,
+    tear--duration: 700ms,
+  )
+);
+
+:host {
+  display: block;
+  position: relative;
+  min-width: 0;
+  color-scheme: inherit;
+}
+:host([hidden]) {
+  display: none;
+}
+
+.pad {
+  position: relative;
+  // Lets the stack and the spiral draw outside the sheet without being clipped by the host.
+  padding-block-start: 12px;
+}
+:host([tearable]) .pad {
+  padding-block-end: 8px;
+}
+
+.sheet {
+  --_rule: #{css.cssVar(rule--spacing)};
+  --_size: #{css.cssVar(writing--font-size)};
+  --_inset: #{css.cssVar(margin--inset)};
+  // Where the writing rests: a little below the baseline, so the rule runs under the text and not through it.
+  --_baseline: calc((var(--_rule) + var(--_size) * 0.8) / 2);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  background: css.cssVar(sheet--background);
+  border-radius: css.cssVar(sheet--border-radius);
+  box-shadow: css.cssVar(sheet--box-shadow);
+  transition: box-shadow 160ms ease;
+
+  // Paper grain. Decorative, multiplied into whatever paper colour is set.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: css.cssVar(texture--opacity);
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+.pad:focus-within .sheet {
+  box-shadow: css.cssVar(sheet__focus--box-shadow);
+}
+
+// ---- bindings ---------------------------------------------------------------------------------------------------
+
+.spiral {
+  display: css.cssVar(spiral--display);
+  position: absolute;
+  inset: 0 14px auto;
+  height: 26px;
+  z-index: 3;
+  pointer-events: none;
+  background-image: linear-gradient(90deg, transparent 8px, #6d737b 8px, #e9ecef 11px, #8b929a 13px, #50565d 16px, transparent 16px);
+  background-size: 24px 100%;
+  background-repeat: space no-repeat;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.25));
+}
+// Punched holes under the coils, on the same spacing so each coil goes through one.
+.holes {
+  display: css.cssVar(spiral--display);
+  position: absolute;
+  inset: 0 14px auto;
+  height: 26px;
+  z-index: 2;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 12px 10px, rgba(24, 24, 27, 0.32) 0 4px, transparent 4.5px);
+  background-size: 24px 100%;
+  background-repeat: space no-repeat;
+}
+.glue {
+  display: css.cssVar(glue--display);
+  position: relative;
+  z-index: 2;
+  height: 18px;
+  margin-block-end: -3px;
+  border-radius: css.cssVar(sheet--border-radius) css.cssVar(sheet--border-radius) 0 0;
+  background: css.cssVar(glue--background);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+}
+
+// Sheets under the top one, for a pad that can be torn.
+.stack {
+  display: none;
+  position: absolute;
+  inset: 12px 0 0;
+  pointer-events: none;
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: css.cssVar(sheet--border-radius);
+    background: css.cssVar(sheet--background);
+    box-shadow: 0 1px 2px rgba(24, 24, 27, 0.12);
+  }
+  &::before {
+    transform: translate(3px, 5px) rotate(0.7deg);
+  }
+  &::after {
+    transform: translate(-2px, 3px) rotate(-0.5deg);
+  }
+}
+:host([tearable]) .stack {
+  display: block;
+}
+
+// ---- header, perforation, margin ----------------------------------------------------------------------------------
+
+.top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  min-height: 26px;
+  padding-inline: calc(var(--_inset) + 12px) 16px;
+}
+.header {
+  flex: 1;
+  min-width: 0;
+  padding-block: 8px 2px;
+  color: css.cssVar(header--color);
+  font-size: css.cssVar(header--font-size);
+  line-height: 1.4;
+  &[hidden] {
+    display: none;
+  }
+}
+.perforation {
+  position: absolute;
+  inset: 26px 0 auto;
+  height: 0;
+  border-top: 2px dotted css.cssVar(perforation--color);
+  pointer-events: none;
+}
+.tear {
+  all: unset;
+  box-sizing: border-box;
+  margin-inline-start: auto;
+  margin-block-end: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: css.cssVar(header--color);
+  font:
+    600 10px/1.4 ui-monospace,
+    'SFMono-Regular',
+    Menlo,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  &:hover {
+    background: rgba(24, 24, 27, 0.06);
+  }
+  &:focus-visible {
+    outline: css.cssVar(focus--outline);
+  }
+}
+.margin {
+  position: absolute;
+  inset: 26px auto 0 0;
+  z-index: 1;
+  width: var(--_inset);
+  pointer-events: none;
+  ::slotted(*) {
+    pointer-events: auto;
+  }
+}
+
+// ---- writing surface (the ProseMirror root) ------------------------------------------------------------------------
+
+.writing {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  box-sizing: border-box;
+  min-height: calc(#{css.cssVar(sheet--min-height)} - 26px);
+  max-height: css.cssVar(sheet--max-height);
+  overflow-y: auto;
+  margin: 0;
+  padding: 0 16px var(--_rule) calc(var(--_inset) + 12px);
+  outline: none;
+  color: css.cssVar(writing--color);
+  caret-color: currentColor;
+  font-family: css.cssVar(writing--font-family);
+  font-size: var(--_size);
+  line-height: var(--_rule);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    linear-gradient(
+      to right,
+      transparent calc(var(--_inset) - 1px),
+      #{css.cssVar(margin--color)} calc(var(--_inset) - 1px),
+      #{css.cssVar(margin--color)} var(--_inset),
+      transparent var(--_inset)
+    ),
+    radial-gradient(circle at 1px 1px, #{css.cssVar(dot--color)} 1.3px, transparent 1.6px),
+    linear-gradient(to right, #{css.cssVar(grid--color)} 1px, transparent 1px),
+    linear-gradient(
+      to bottom,
+      transparent calc(var(--_baseline) - 1px),
+      #{css.cssVar(rule--color)} calc(var(--_baseline) - 1px),
+      #{css.cssVar(rule--color)} var(--_baseline),
+      transparent var(--_baseline)
+    );
+  background-size:
+    100% 100%,
+    var(--_rule) var(--_rule),
+    var(--_rule) var(--_rule),
+    100% var(--_rule);
+  background-position:
+    0 0,
+    calc(var(--_inset) - 1px) calc(var(--_baseline) - 1px),
+    calc(var(--_inset) - 1px) 0,
+    0 0;
+  // The rules scroll with the writing.
+  background-attachment: local;
+
+  &::selection,
+  *::selection {
+    background: css.cssVar(selection--background);
+    color: inherit;
+  }
+  &:focus-visible {
+    outline: none;
+  }
+
+  p,
+  .task {
+    margin: 0;
+    min-height: var(--_rule);
+  }
+  strong {
+    font-weight: 700;
+    // Handwriting faces rarely ship a bold: press harder with the pen instead of letting the browser smear it.
+    -webkit-text-stroke: 0.035em currentColor;
+    font-synthesis: none;
+  }
+  em {
+    font-style: italic;
+  }
+  u {
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+    text-decoration-skip-ink: none;
+  }
+  s {
+    text-decoration-thickness: 1.5px;
+  }
+  span[data-ink='blue'] {
+    color: css.cssVar(ink-blue--color);
+  }
+  span[data-ink='black'] {
+    color: css.cssVar(ink-black--color);
+  }
+  span[data-ink='red'] {
+    color: css.cssVar(ink-red--color);
+  }
+  span[data-ink='green'] {
+    color: css.cssVar(ink-green--color);
+  }
+  mark {
+    color: inherit;
+    padding-inline: 1px;
+    border-radius: 2px;
+    // A marker stroke: it sits on the lower part of the letters rather than filling the whole line box.
+    background: linear-gradient(transparent 22%, var(--_highlight) 22% 88%, transparent 88%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  mark[data-color='yellow'] {
+    --_highlight: #{css.cssVar(highlight-yellow--background)};
+  }
+  mark[data-color='green'] {
+    --_highlight: #{css.cssVar(highlight-green--background)};
+  }
+  mark[data-color='pink'] {
+    --_highlight: #{css.cssVar(highlight-pink--background)};
+  }
+
+  .placeholder::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    pointer-events: none;
+    color: css.cssVar(placeholder--color);
+  }
+}
+
+// ---- checklist ----------------------------------------------------------------------------------------------------
+
+.task {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: var(--_rule);
+  cursor: pointer;
+  user-select: none;
+  svg {
+    width: 18px;
+    height: 18px;
+    overflow: visible;
+    // Seat the box on the rule like a written character.
+    translate: 0 calc(var(--_baseline) - var(--_rule) / 2 - 8px);
+  }
+  .tick {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    transition: stroke-dashoffset 260ms ease-out;
+  }
+}
+.task-text {
+  flex: 1;
+  min-width: 0;
+}
+.task[data-checked='true'] {
+  .tick {
+    stroke-dashoffset: 0;
+  }
+  .task-text {
+    opacity: css.cssVar(task__checked--opacity);
+    text-decoration-line: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+}
+
+// ---- states ---------------------------------------------------------------------------------------------------------
+
+.sheet:has(.writing:focus-visible) {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 4px;
+}
+:host([error]) .sheet {
+  --c2-notepad__margin--color: #{css.cssVar(error--color)};
+}
+.error-note {
+  position: absolute;
+  inset: auto 16px 4px auto;
+  z-index: 3;
+  max-width: calc(100% - var(--_inset) - 32px);
+  color: css.cssVar(error--color);
+  font-family: css.cssVar(writing--font-family);
+  font-size: calc(var(--_size) * 0.85);
+  line-height: 1.2;
+  rotate: -2deg;
+  text-align: end;
+}
+:host([disabled]) .pad,
+.pad.form-disabled {
+  opacity: css.cssVar(disabled--opacity);
+  filter: grayscale(0.4);
+  .writing {
+    cursor: default;
+  }
+}
+
+// ---- tear-off -------------------------------------------------------------------------------------------------------
+
+.torn {
+  position: absolute;
+  z-index: 4;
+  margin: 0;
+  pointer-events: none;
+  transform-origin: 85% 0;
+  animation: tear css.cssVar(tear--duration) cubic-bezier(0.55, 0, 0.75, 0.3) forwards;
+  // A ragged top edge where the page came off the perforation.
+  clip-path: polygon(
+    0 2px,
+    4% 0,
+    8% 3px,
+    12% 1px,
+    17% 4px,
+    22% 0,
+    27% 3px,
+    33% 1px,
+    38% 4px,
+    44% 0,
+    50% 3px,
+    55% 1px,
+    61% 4px,
+    67% 0,
+    72% 3px,
+    78% 1px,
+    84% 4px,
+    90% 0,
+    95% 3px,
+    100% 1px,
+    100% 100%,
+    0 100%
+  );
+}
+
+@keyframes tear {
+  20% {
+    transform: rotate(-3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-32px, 60%) rotate(-18deg);
+    opacity: 0;
+  }
+}
+
+// ---- selection toolbar: a strip of washi tape --------------------------------------------------------------------------
+
+.toolbar {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-width: calc(100vw - 16px);
+  padding: 5px 14px;
+  border: 0;
+  overflow: visible;
+  color: css.cssVar(toolbar--color);
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 9px, rgba(255, 255, 255, 0.28) 9px 12px),
+    #{css.cssVar(toolbar--background)};
+  clip-path: polygon(
+    0 8%,
+    3px 0,
+    6px 12%,
+    9px 2%,
+    100% 0,
+    calc(100% - 3px) 10%,
+    100% 22%,
+    calc(100% - 4px) 40%,
+    100% 58%,
+    calc(100% - 3px) 78%,
+    100% 100%,
+    7px 100%,
+    3px 90%,
+    0 100%,
+    4px 70%,
+    0 52%,
+    3px 32%
+  );
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+  rotate: -0.6deg;
+  font-family: css.cssVar(writing--font-family);
+  &:popover-open {
+    display: flex;
+  }
+  button {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    min-width: 30px;
+    height: 30px;
+    padding-inline: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 17px;
+    line-height: 1;
+    color: inherit;
+    &:hover,
+    &[aria-pressed='true'] {
+      background: css.cssVar(toolbar__button__active--background);
+    }
+    &[aria-pressed='true'] {
+      box-shadow: inset 0 -2px 0 currentColor;
+    }
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: -2px;
+    }
+    &[hidden] {
+      display: none;
+    }
+  }
+  .sep {
+    width: 1px;
+    height: 18px;
+    margin-inline: 4px;
+    background: currentColor;
+    opacity: 0.2;
+  }
+  .ink {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--_swatch);
+    box-shadow:
+      0 0 0 2px css.cssVar(toolbar--background),
+      0 0 0 3px rgba(0, 0, 0, 0.2);
+  }
+  .hi {
+    width: 18px;
+    height: 11px;
+    border-radius: 2px;
+    background: var(--_swatch);
+    transform: skewX(-18deg);
+  }
+  svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+@media (forced-colors: active) {
+  .sheet::before,
+  .spiral,
+  .holes,
+  .stack {
+    display: none;
+  }
+  .writing {
+    background-image: none;
+  }
+  .toolbar {
+    clip-path: none;
+    border: 1px solid CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .box .tick {
+    transition: none;
+  }
+}
