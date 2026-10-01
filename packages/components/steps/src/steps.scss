@@ -9,10 +9,11 @@
     padding-inline: 0px,
     overflow-y: visible,
     max-height: none,
+    horizontal--overflow-x: auto,
   )
 );
 
-// Vertical only: a step that groups sub-steps is a disclosure, and a disclosure is a thing that opens downwards.
+// Vertical by default: a step that groups sub-steps is a disclosure, and a disclosure is a thing that opens downwards.
 :host {
   display: flex;
   flex-direction: column;
@@ -28,4 +29,19 @@
 
 :host([hidden]) {
   display: none;
+}
+
+// Horizontal: one column per top-level step, sharing the width. A horizontal step draws no sub-steps, so there is
+// nothing here to open downwards.
+:host([orientation='horizontal']) {
+  flex-direction: row;
+  align-items: stretch;
+  overflow-x: css.cssVar(horizontal--overflow-x);
+}
+
+// Light-DOM steps are slotted; data-driven ones are rendered here. Both share the row equally.
+:host([orientation='horizontal']) ::slotted(c2-step),
+:host([orientation='horizontal']) c2-step {
+  flex: 1 1 0;
+  min-width: 0;
 }

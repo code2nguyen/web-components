@@ -1,0 +1,147 @@
+---
+// A task view driven by a horizontal, interactive `c2-steps`: the process step shows the task's log while it runs,
+// the result step shows what it produced once it is done, and the reader can always go back to the log. Plain tags,
+// upgraded by the script below, because the list is configured by the run rather than by the markup.
+import SiteButton from './ui/SiteButton.astro'
+---
+
+<section class="task-demo" data-task-demo>
+  <div class="controls">
+    <SiteButton variant="primary" size="sm" data-task-run>Run the task</SiteButton>
+    <SiteButton variant="ghost" size="sm" data-task-reset>Reset</SiteButton>
+  </div>
+  <c2-steps class="task-demo__steps" orientation="horizontal" interactive selected="process" aria-label="Task" data-task-steps>
+    <c2-step value="process" label="Process" detail="Not started"></c2-step>
+    <c2-step value="result" label="Result" detail="Waiting for the task" disabled></c2-step>
+  </c2-steps>
+  <div class="task-demo__panel" data-task-panel="process">
+    <c2-log-viewer class="task-demo__log" aria-label="Task log" data-task-log></c2-log-viewer>
+  </div>
+  <div class="task-demo__panel task-demo__result" data-task-panel="result" hidden>
+    <p class="task-demo__result-title">Imported 1 284 rows</p>
+    <p class="task-demo__result-note" data-task-summary></p>
+  </div>
+</section>
+
+<script>
+  import '@c2n/steps'
+  import '@c2n/log-viewer'
+  import type { Steps, StepsSelectionChangeEventDetail } from '@c2n/steps'
+  import type { Step } from '@c2n/steps/step.js'
+  import type { LogViewer } from '@c2n/log-viewer'
+
+  const LOG: [level: 'info' | 'warn', message: string][] = [
+    ['info', 'Connecting to warehouse eu-west-1'],
+    ['info', 'Reading orders.csv (2.4 MB)'],
+    ['info', 'Parsed 1 284 rows in 3 batches'],
+    ['warn', '2 rows have an empty postcode; kept with a null value'],
+    ['info', 'Writing batch 1 of 3'],
+    ['info', 'Writing batch 2 of 3'],
+    ['info', 'Writing batch 3 of 3'],
+    ['info', 'Committed transaction 8f2c1d'],
+  ]
+
+  document.querySelectorAll<HTMLElement>('[data-task-demo]').forEach((demo) => {
+    const steps = demo.querySelector<Steps>('[data-task-steps]')!
+    const process = steps.querySelector<Step>('c2-step[value="process"]')!
+    const result = steps.querySelector<Step>('c2-step[value="result"]')!
+    const log = demo.querySelector<LogViewer>('[data-task-log]')!
+    log.columns = ['level', 'message']
+    const summary = demo.querySelector<HTMLElement>('[data-task-summary]')!
+    let generation = 0
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    const wait = (ms: number) => new Promise((resolve) => (timer = setTimeout(resolve, ms)))
+    // The list owns which step is selected; the view only follows it.
+    const show = (value: string) => {
+      demo.querySelectorAll<HTMLElement>('[data-task-panel]').forEach((panel) => (panel.hidden = panel.dataset.taskPanel !== value))
+    }
+    steps.addEventListener('selection-change', (event) => show((event as CustomEvent<StepsSelectionChangeEventDetail>).detail.value))
+
+    const reset = () => {
+      if (timer) clearTimeout(timer)
+      generation += 1
+      Object.assign(process, { status: 'pending', detail: 'Not started', trailing: '' })
+      Object.assign(result, { status: 'pending', detail: 'Waiting for the task', disabled: true })
+      steps.selected = 'process'
+      show('process')
+      log.clear()
+    }
+
+    demo.querySelector('[data-task-reset]')?.addEventListener('click', reset)
+    demo.querySelector('[data-task-run]')?.addEventListener('click', async () => {
+      reset()
+      const mine = generation
+      const started = performance.now()
+      Object.assign(process, { status: 'running', detail: 'Running' })
+      for (const [level, message] of LOG) {
+        await wait(450)
+        if (generation !== mine) return
+        log.appendEntries({ level: level.toUpperCase(), message })
+      }
+      const seconds = ((performance.now() - started) / 1000).toFixed(1)
+      Object.assign(process, { status: 'warning', detail: `${LOG.length} log lines`, trailing: `${seconds} s` })
+      Object.assign(result, { status: 'success', detail: '1 284 rows', disabled: false })
+      summary.textContent = `Finished in ${seconds} s with 2 warnings. Select Process to read the log again.`
+      // Programmatic, so no `selection-change`: the view follows by hand.
+      steps.selected = 'result'
+      show('result')
+    })
+  })
+</script>
+
+<style lang="scss">
+  .task-demo {
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 12px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .task-demo__steps {
+    --c2-steps--gap: 8px;
+    --c2-step__row--border-radius: 8px;
+    --c2-step__row--padding-block: 10px;
+    --c2-step__row__hover--background: var(--site-color-surface-container-1);
+    --c2-step__row__selected--background: var(--site-color-surface-container-2);
+    --c2-step__row__selected--box-shadow: inset 0 -2px 0 var(--site-color-primary);
+    --c2-step__rail--color: var(--site-color-outline-variant);
+    --c2-step__marker--size: 18px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--color: var(--site-color-on-surface);
+    --c2-step__detail--color: var(--site-color-on-surface-variant);
+    --c2-step__detail--font-size: 12px;
+    --c2-step__trailing--color: var(--site-color-on-surface-variant);
+    --c2-step__trailing--font-size: 12px;
+    --c2-step__row--outline: 2px solid var(--site-color-primary);
+  }
+  .task-demo__log {
+    --c2-log-viewer--height: 220px;
+  }
+  .task-demo__result {
+    padding: 20px;
+    border: 1px solid var(--site-color-outline-variant);
+    border-radius: 12px;
+    background: var(--site-color-surface-container-1);
+  }
+  .task-demo__panel[hidden] {
+    display: none;
+  }
+  .task-demo__result-title {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--site-color-on-surface);
+  }
+  .task-demo__result-note {
+    margin: 0;
+    font-size: 13px;
+    color: var(--site-color-on-surface-variant);
+  }
+</style>

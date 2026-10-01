@@ -13,6 +13,11 @@
     row__hover--background: null,
     row--border-bottom: 1px solid #e4e4e7,
     row--outline: 2px solid rgb(2, 101, 220),
+    row__selected--background: #fafafa,
+    row__selected--box-shadow: null,
+    row__disabled--opacity: 0.38,
+    row__horizontal--border-bottom: none,
+    row__horizontal--min-width: 96px,
 
     toggle--size: 14px,
     toggle--gap: 4px,
@@ -33,6 +38,7 @@
     rail--width: 0px,
     rail--color: #e4e4e7,
     rail--gap: 4px,
+    rail__horizontal--width: 2px,
 
     label--color: #18181b,
     label--font-size: 13px,
@@ -44,6 +50,8 @@
       Consolas,
       monospace,
     ),
+    label__selected--color: null,
+    label__selected--font-weight: 600,
     detail--color: #71717a,
     detail--font-size: null,
     detail--font-weight: 400,
@@ -159,12 +167,20 @@ $_duration: css.cssVar(transition-duration);
   inset-inline-start: calc(#{css.cssVar(row--padding-inline)} + #{css.cssVar(toggle--size)} / 2);
   inline-size: calc(#{css.cssVar(row--indent)} * var(--level, 0));
   pointer-events: none;
-  background-image: repeating-linear-gradient(to right, #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)}, transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)});
+  background-image: repeating-linear-gradient(
+    to right,
+    #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)},
+    transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)}
+  );
 }
 
 // Gradients ignore `direction`, so the guide stack has to be mirrored explicitly.
 .c2-step__row:dir(rtl)::before {
-  background-image: repeating-linear-gradient(to left, #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)}, transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)});
+  background-image: repeating-linear-gradient(
+    to left,
+    #{css.cssVar(guide--color)} 0 #{css.cssVar(guide--width)},
+    transparent #{css.cssVar(guide--width)} #{css.cssVar(row--indent)}
+  );
 }
 
 // A list with no group anywhere has no nesting either, so it has nothing to draw.
@@ -186,6 +202,50 @@ summary.c2-step__row {
   &:focus-visible {
     outline: css.cssVar(row--outline);
     outline-offset: -2px;
+  }
+}
+
+/**
+ * A selectable row in an `interactive` list is a `<button>`: the same row, with the button's own box taken away so
+ * it looks exactly like the row it replaces. The hairline stays, which is why only the other three sides are reset.
+ */
+button.c2-step__row {
+  width: 100%;
+  margin: 0;
+  border-top: none;
+  border-inline: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  user-select: none;
+
+  &:focus-visible {
+    outline: css.cssVar(row--outline);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: css.cssVar(row__disabled--opacity);
+
+    &:hover {
+      background: css.cssVar(row--background);
+    }
+  }
+}
+
+.c2-step__row.is-selected {
+  background: css.cssVar(row__selected--background);
+  box-shadow: css.cssVar(row__selected--box-shadow);
+
+  &:hover {
+    background: css.cssVar(row__selected--background);
+  }
+
+  .c2-step__label {
+    color: css.cssVar(label__selected--color, label--color);
+    font-weight: css.cssVar(label__selected--font-weight);
   }
 }
 
@@ -493,4 +553,64 @@ summary.c2-step__row {
   .c2-step__toggle {
     transition: none;
   }
+}
+
+/**
+ * Horizontal: the step is a column. The marker sits on a rail that runs to the edge of the step, where the next
+ * step's marker picks it up, and the text sits underneath. Sub-steps are not drawn — the step still takes their
+ * status — so there is no disclosure, no indent and no guide.
+ */
+.is-horizontal {
+  min-width: css.cssVar(row__horizontal--min-width);
+}
+
+.is-horizontal .c2-step__row {
+  flex-direction: column;
+  align-items: stretch;
+  padding-inline-start: css.cssVar(row--padding-inline);
+  border-bottom: css.cssVar(row__horizontal--border-bottom);
+
+  &::before {
+    display: none;
+  }
+}
+
+.is-horizontal .c2-step__gutter {
+  flex-direction: row;
+  align-items: center;
+  align-self: stretch;
+}
+
+.is-horizontal .c2-step__marker {
+  margin-top: 0;
+}
+
+.is-horizontal .c2-step__rail {
+  width: auto;
+  height: css.cssVar(rail__horizontal--width);
+  min-width: 0;
+  border-radius: css.cssVar(rail__horizontal--width);
+}
+
+// The last step's rail would lead nowhere; it keeps its place so every step is the same width.
+:host([last]) .is-horizontal .c2-step__rail {
+  visibility: hidden;
+}
+
+// A column is narrow, so the detail goes under the label whatever `text--flex-direction` says.
+.is-horizontal .c2-step__text {
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: css.cssVar(detail--row-gap);
+}
+
+.is-horizontal .c2-step__label,
+.is-horizontal .c2-step__detail {
+  max-width: 100%;
+}
+
+.is-horizontal .c2-step__toggle,
+.is-horizontal .c2-step__children {
+  display: none;
 }
