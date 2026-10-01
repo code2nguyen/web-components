@@ -54,6 +54,7 @@ declare module 'react' {
       'c2-bar-chart': Omit<C2Props<BarChart>, 'series'> & {
         'bar-width'?: Attribute
         'bar-gap'?: Attribute
+        'value-labels'?: Attribute
         'y-min'?: Attribute
         'y-max'?: Attribute
         'x-field'?: Attribute

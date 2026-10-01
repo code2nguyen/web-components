@@ -20,8 +20,9 @@ import { Button } from '@c2n/button'
 <ChartEnergyDemo />
 
 Bars for comparing discrete things: teams, plans, weekdays, buckets. Several series are drawn side by side
-within each band, and `bar-width` and `bar-gap` decide how much of the band the group takes and how much of
-the group is air between the bars.
+within each band, or stacked into one bar with `stack`, and `bar-width` and `bar-gap` decide how much of the
+band the group takes and how much of the group is air between the bars. `orientation="horizontal"` turns the
+chart on its side, and `value-labels` prints each bar's value on the chart.
 
 A bar chart reads its x as discrete slots rather than as a continuous scale, so the axis is padded by half a
 band at each end and the cursor snaps to the band instead of landing between two points.
@@ -71,6 +72,20 @@ npm install @c2n/chart uplot
   </c2-bar-chart>
 </div>
 
+<div data-label="Stacked">
+  <c2-bar-chart class="plot" label-field="year" x-type="category" stack="normal" data='[{"year":2020,"hydro":62.52,"wind":40.05,"solar":13.09},{"year":2021,"hydro":59.54,"wind":37.12,"solar":15.28},{"year":2022,"hydro":45.56,"wind":38.2,"solar":19.34},{"year":2023,"hydro":55.9,"wind":50.48,"solar":22.59},{"year":2024,"hydro":71.12,"wind":45.43,"solar":24.87}]'>
+    <c2-chart-series field="hydro" label="Hydro"></c2-chart-series>
+    <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+    <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+  </c2-bar-chart>
+</div>
+
+<div data-label="Horizontal, value labels">
+  <c2-bar-chart class="plot" label-field="source" x-type="category" orientation="horizontal" value-labels legend="none" data='[{"source":"Nuclear","twh":380.45},{"source":"Hydro","twh":71.12},{"source":"Wind","twh":45.43},{"source":"Solar","twh":24.87}]'>
+    <c2-chart-series field="twh" label="2024 (TWh)"></c2-chart-series>
+  </c2-bar-chart>
+</div>
+
 <div data-label="Custom legend + tooltip" data-energy-custom>
   <div class="energy-linked">
     <c2-bar-chart
@@ -112,6 +127,33 @@ The values come from one France 2015–2024 extract of the public [Our World in 
 `label-field` names the key that holds each band's label, and `x-type="category"` reads the x as slots. The
 tick shows the label rather than the slot index, and the tooltip follows the band. Without a `label-field`
 the bars fall back to `x-field` (or the row index), which is what a time-bucketed histogram usually wants.
+
+## Stacking
+
+`stack="normal"` draws a band's series as one bar, each segment starting where the one before it ends. Positive
+values stack upwards from zero and negative ones downwards, each on a running total of its own, so a mixed-sign
+series never draws across the other stack. `stack="percent"` divides every band by its total, so each bar is
+100 high and the axis reads in percent: use it when the share matters more than the size. Hiding a series from
+the legend re-stacks the others. The tooltip and the value labels always show a series' own value, never the
+running total. `bar-gap` has no effect on a stacked chart, since there are no gaps between grouped bars.
+
+## Orientation
+
+`orientation="horizontal"` puts the categories down the left edge, the first at the top, and the values along
+the bottom. Use it for long category names and for rankings (sort the rows yourself: the chart keeps their
+order). The left axis grows to fit the longest name. Everything else — grouping, stacking, `bar-width`, the
+legend and the tooltip — works the same way.
+
+## Value labels
+
+`value-labels` prints each bar's value: past the end of a grouped bar, or centred inside a stacked segment,
+where a segment too small to hold its text is left unlabelled. The labels use the series' own `format`, then
+the chart's number format, and the `formatLabel` property replaces both. It is handed the series' own value,
+the series definition and the row index:
+
+```js tag=CodeBlock
+chart.formatLabel = (value) => `${value.toFixed(0)} TWh`
+```
 
 ## Bar geometry
 

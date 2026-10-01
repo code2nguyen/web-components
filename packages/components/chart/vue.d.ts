@@ -60,6 +60,7 @@ declare module 'vue' {
       C2Props<BarChart> & {
         'bar-width'?: unknown
         'bar-gap'?: unknown
+        'value-labels'?: unknown
         'y-min'?: unknown
         'y-max'?: unknown
         'x-field'?: unknown
