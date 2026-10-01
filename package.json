@@ -92,6 +92,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/gantt:build",
         "./packages/components/hover-card:build",
         "./packages/components/command:build",
         "./packages/components/marker:build",

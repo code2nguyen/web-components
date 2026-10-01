@@ -833,6 +833,25 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-gantt",
+      "slot": "duration-header",
+      "decision": "assigned-content",
+      "reason": "Consumer-owned heading text for the duration column; style the assigned node through its own class."
+    },
+    {
+      "tag": "c2-gantt",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty-state region owns the slot's component-side presentation."
+    },
+    {
+      "tag": "c2-gantt",
+      "slot": "list-header",
+      "decision": "assigned-content",
+      "reason": "Consumer-owned heading text for the task list column; style the assigned node through its own class."
+    },
+    {
       "tag": "c2-gauge-chart",
       "slot": "actions",
       "decision": "part",

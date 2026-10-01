@@ -4,6 +4,11 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  gantt: `<c2-gantt style="width:280px" hide-list today="2026-10-07" aria-label="Sprint">
+  <c2-gantt-task task-id="a" start="2026-10-05" end="2026-10-07" progress="1" tone="success">Spec</c2-gantt-task>
+  <c2-gantt-task task-id="b" start="2026-10-08" end="2026-10-14" progress="0.4" dependencies="a">Build</c2-gantt-task>
+  <c2-gantt-task task-id="c" start="2026-10-15" milestone dependencies="b">Ship</c2-gantt-task>
+</c2-gantt>`,
   'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:#71717a">Wrote the first published algorithm.</div></c2-hover-card>`,
   command: `<c2-command style="width:260px;--c2-command__field--min-height:40px;--c2-command__list--max-height:150px">
   <c2-command-group heading="Suggestions">

@@ -165,6 +165,10 @@
       "types": "./lib/details.d.ts",
       "default": "./lib/details.js"
     },
+    "./gantt": {
+      "types": "./lib/gantt.d.ts",
+      "default": "./lib/gantt.js"
+    },
     "./header": {
       "types": "./lib/header.d.ts",
       "default": "./lib/header.js"
@@ -426,6 +430,7 @@
     "@c2n/date-input": "0.0.19",
     "@c2n/date-selector": "0.0.19",
     "@c2n/details": "0.0.19",
+    "@c2n/gantt": "0.0.19",
     "@c2n/header": "0.0.19",
     "@c2n/hover-card": "0.0.19",
     "@c2n/icon-button": "0.0.19",
