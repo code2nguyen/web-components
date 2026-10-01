@@ -16,6 +16,8 @@ import './scatter-chart.js'
 import './bubble-chart.js'
 import './candlestick-chart.js'
 import './overlap-chart.js'
+import './map-chart.js'
+import './map-layer.js'
 import './chart-series.js'
 import './chart-legend.js'
 import './chart-tooltip.js'
@@ -47,6 +49,20 @@ export {
   type OverlapRegion,
   type OverlapRow,
 } from './overlap-layout.js'
+export {
+  MapChart,
+  geodesic,
+  type MapChartEventMap,
+  type MapGeometryInput,
+  type MapName,
+  type MapRegion,
+  type MapSelectionChangeEventDetail,
+  type MapUnmatchedRowsEventDetail,
+  type MapViewChangeEventDetail,
+} from './map-chart.js'
+export { MapLayer, MAP_LAYER_CHANGE_EVENT, type MapLayerConfig } from './map-layer.js'
+export { createMapScale, mixColors, type MapScale, type MapScaleOptions } from './map-scale.js'
+export type { MapFeature, MapFeatureProperties, MapProjection, MapSource } from './maps/map-source.js'
 export { ChartSeries, SERIES_CHANGE_EVENT } from './chart-series.js'
 export { ChartLegend } from './chart-legend.js'
 export { ChartTooltip } from './chart-tooltip.js'

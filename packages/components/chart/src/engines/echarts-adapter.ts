@@ -50,17 +50,30 @@ export async function createEchartsAdapter(
       instance.setOption(withData(options, data), { notMerge: true })
 
       instance.on('click', (params) => {
-        const point = params as { dataIndex?: number; seriesIndex?: number }
-        events?.click({ index: point.dataIndex ?? 0, seriesIndex: point.seriesIndex ?? 0 })
+        const point = params as { dataIndex?: number; seriesIndex?: number; name?: string; componentType?: string }
+        events?.click({ index: point.dataIndex ?? 0, seriesIndex: point.seriesIndex ?? 0, name: point.name, component: point.componentType })
       })
       instance.on('mouseover', (params) => {
-        const point = params as { dataIndex?: number; seriesIndex?: number; event?: { offsetX: number; offsetY: number } }
+        const point = params as {
+          dataIndex?: number
+          seriesIndex?: number
+          name?: string
+          componentType?: string
+          event?: { offsetX: number; offsetY: number }
+        }
         events?.hover({
           index: point.dataIndex ?? 0,
           seriesIndex: point.seriesIndex ?? 0,
           px: point.event?.offsetX ?? 0,
           py: point.event?.offsetY ?? 0,
+          name: point.name,
+          component: point.componentType,
         })
+      })
+      // A map's wheel zoom, drag and zoom buttons all end in the `geoRoam` action, which ECharts reports as this event.
+      instance.on('georoam', () => {
+        const model = instance?.getOption() as { geo?: { zoom?: number }[] } | undefined
+        events?.viewChange?.({ zoom: model?.geo?.[0]?.zoom ?? 1 })
       })
       instance.on('mouseout', () => events?.hover(null))
       instance.on('dataZoom', () => {
@@ -110,6 +123,15 @@ export async function createEchartsAdapter(
 
     resize(width, height) {
       if (width > 0 && height > 0) instance?.resize({ width, height })
+    },
+
+    dispatchAction(payload) {
+      instance?.dispatchAction(payload as Parameters<ECharts['dispatchAction']>[0])
+    },
+
+    convertToPixel(finder, value) {
+      const pixel = instance?.convertToPixel(finder as Parameters<ECharts['convertToPixel']>[0], value) as number[] | null | undefined
+      return Array.isArray(pixel) && pixel.length >= 2 && Number.isFinite(pixel[0]) && Number.isFinite(pixel[1]) ? [pixel[0], pixel[1]] : null
     },
 
     /** ECharts leaks its global resize and event handlers without an explicit dispose. */

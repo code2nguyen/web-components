@@ -66,7 +66,9 @@ export function umbrellaEntries(packages: DiscoveredPackage[]): UmbrellaEntry[] 
     .map((pkg) => {
       const exports = readJson(join(pkg.dir, 'package.json')).exports ?? {}
       const subpaths = Object.entries(exports)
-        .filter(([subpath, entry]) => subpath !== '.' && subpath.endsWith('.js') && typeof entry !== 'string' && entry.types)
+        // A wildcard subpath (`@c2n/chart/maps/*.js`) publishes data modules an element loads on demand; re-exporting
+        // them would make the barrel load every one of them up front.
+        .filter(([subpath, entry]) => subpath !== '.' && subpath.endsWith('.js') && !subpath.includes('*') && typeof entry !== 'string' && entry.types)
         .map(([subpath]) => `${pkg.name}/${subpath.slice(2)}`)
       return { pkg: pkg.name, name: pkg.name.slice('@c2n/'.length), modules: [...(exports['.'] ? [pkg.name] : []), ...subpaths.sort()] }
     })
