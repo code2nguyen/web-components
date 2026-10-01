@@ -415,9 +415,21 @@ export const overrides: Record<string, Override> = {
   '--c2-notepad__highlight-yellow--background': { exclude: 'translucent highlighter hue' },
   '--c2-notepad__highlight-green--background': { exclude: 'translucent highlighter hue' },
   '--c2-notepad__highlight-pink--background': { exclude: 'translucent highlighter hue' },
-  '--c2-notepad__toolbar--background': { exclude: 'washi tape keeps its own palette' },
-  '--c2-notepad__toolbar--color': { exclude: 'washi tape keeps its own palette' },
-  '--c2-notepad__toolbar__button__active--background': { exclude: 'washi tape keeps its own palette' },
+  // The washi tape is a little of its kraft hue on the surface: cream on light paper, dark kraft under a dark theme.
+  '--c2-notepad__toolbar--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, #c9b98f 30%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-notepad__toolbar--color': { token: 'color-on-surface' },
+  '--c2-notepad__toolbar__button__active--background': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 14%, transparent)',
+  },
+  // Paper colours are a pastel of their hue on the surface, so they darken with it and keep the theme ink readable.
+  '--c2-notepad__paper-yellow--background': { token: 'color-surface', value: 'color-mix(in srgb, #f5d547 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-green--background': { token: 'color-surface', value: 'color-mix(in srgb, #bddcb2 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-blue--background': { token: 'color-surface', value: 'color-mix(in srgb, #b8ceee 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-pink--background': { token: 'color-surface', value: 'color-mix(in srgb, #f4b8c3 35%, var(--c2-theme--color-surface, #ffffff))' },
   '--c2-notepad__glue--background': { exclude: 'binding material colour' },
   '--c2-notepad__writing--font-family': { exclude: 'the bundled handwriting face is the component identity' },
   '--c2-notepad__sheet--border-radius': { exclude: 'paper corner, not a control radius' },

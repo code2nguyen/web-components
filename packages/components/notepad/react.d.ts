@@ -28,6 +28,8 @@ declare module 'react' {
         readonly?: Attribute
         maxlength?: Attribute
         'error-text'?: Attribute
+        'paper-color'?: Attribute
+        'paper-picker'?: Attribute
       }
     }
   }

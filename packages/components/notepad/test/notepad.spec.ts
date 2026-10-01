@@ -285,6 +285,54 @@ test('a tearable pad tears its page off, unless page-tear is cancelled', async (
   await expect(host).toHaveJSProperty('page', 2)
 })
 
+test('the paper picker changes the ruling and the paper colour', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes" paper-picker value="Hello"></c2-notepad>')
+  const host = page.locator('c2-notepad')
+  const button = page.getByRole('button', { name: 'Paper' })
+  const sheet = host.locator('.sheet')
+  const plain = await sheet.evaluate((element) => getComputedStyle(element).backgroundColor)
+  await watch(host, 'paper-change')
+
+  await button.click()
+  const menu = page.getByRole('dialog', { name: 'Paper' })
+  await expect(menu).toBeVisible()
+  await expect(button).toHaveAttribute('aria-expanded', 'true')
+  await expect(menu.getByRole('radio', { name: 'Lined', exact: true })).toBeFocused()
+  await expect(menu.getByRole('radio', { name: 'Lined', exact: true })).toHaveAttribute('aria-checked', 'true')
+
+  await menu.getByRole('radio', { name: 'Grid', exact: true }).click()
+  await expect(host).toHaveAttribute('paper', 'grid')
+  await page.keyboard.press('ArrowRight')
+  await expect(host).toHaveAttribute('paper', 'dot')
+  await expect(menu.getByRole('radio', { name: 'Dot grid', exact: true })).toBeFocused()
+
+  await menu.getByRole('radio', { name: 'Yellow', exact: true }).click()
+  await expect(host).toHaveAttribute('paper-color', 'yellow')
+  await expect.poll(() => sheet.evaluate((element) => getComputedStyle(element).backgroundColor)).not.toBe(plain)
+  await expect(host).toHaveAttribute(
+    'data-events',
+    JSON.stringify([
+      { paper: 'grid', paperColor: 'default' },
+      { paper: 'dot', paperColor: 'default' },
+      { paper: 'dot', paperColor: 'yellow' },
+    ]),
+  )
+
+  await page.keyboard.press('Escape')
+  await expect(menu).toBeHidden()
+  await expect(button).toBeFocused()
+  await expect(button).toHaveAttribute('aria-expanded', 'false')
+  await accessible(page)
+})
+
+test('paper and paper-color work without the picker', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes" paper="blank" paper-color="green"></c2-notepad>')
+  await expect(page.getByRole('button', { name: 'Paper' })).toHaveCount(0)
+  const sheet = page.locator('c2-notepad .sheet')
+  await expect.poll(() => sheet.evaluate((element) => getComputedStyle(element).getPropertyValue('--_rule-c').trim())).toBe('transparent')
+  await expect(sheet).toHaveCSS('background-color', 'rgb(232, 243, 228)')
+})
+
 test('the bundled handwriting face is registered only when the page uses it', async ({ page, renderScenario }) => {
   await renderScenario('<c2-notepad label="Notes" value="Hello"></c2-notepad>')
   await expect

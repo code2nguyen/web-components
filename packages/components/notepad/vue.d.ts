@@ -24,11 +24,14 @@ declare module 'vue' {
         readonly?: unknown
         maxlength?: unknown
         'error-text'?: unknown
+        'paper-color'?: unknown
+        'paper-picker'?: unknown
         onPageTear?: (event: EventOf<Notepad, 'page-tear'>) => void
         onChange?: (event: EventOf<Notepad, 'change'>) => void
         onInput?: (event: EventOf<Notepad, 'input'>) => void
         onCheckChange?: (event: EventOf<Notepad, 'check-change'>) => void
         onFormatChange?: (event: EventOf<Notepad, 'format-change'>) => void
+        onPaperChange?: (event: EventOf<Notepad, 'paper-change'>) => void
       }
     >
   }

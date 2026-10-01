@@ -49,6 +49,19 @@ export interface NotepadPageTearEventDetail {
   page: number
 }
 
+/** Ruling of the page. */
+export type NotepadPaper = 'lined' | 'grid' | 'dot' | 'blank'
+/** Colour of the page; `default` is `--c2-notepad__sheet--background`. */
+export type NotepadPaperColor = 'default' | 'yellow' | 'green' | 'blue' | 'pink'
+export const PAPERS: readonly NotepadPaper[] = ['lined', 'grid', 'dot', 'blank']
+export const PAPER_COLORS: readonly NotepadPaperColor[] = ['default', 'yellow', 'green', 'blue', 'pink']
+
+/** Detail of `paper-change`. */
+export interface NotepadPaperChangeEventDetail {
+  paper: NotepadPaper
+  paperColor: NotepadPaperColor
+}
+
 /** Events fired by {@link Notepad}, keyed for `addEventListener`. */
 export interface NotepadEventMap {
   input: Event
@@ -56,6 +69,7 @@ export interface NotepadEventMap {
   'format-change': CustomEvent<NotepadFormat>
   'check-change': CustomEvent<NotepadCheckChangeEventDetail>
   'page-tear': CustomEvent<NotepadPageTearEventDetail>
+  'paper-change': CustomEvent<NotepadPaperChangeEventDetail>
 }
 
 export interface Notepad {
@@ -75,6 +89,16 @@ const HIGHLIGHT_SWATCHES: Record<NotepadHighlight, string> = {
   yellow: 'var(--c2-notepad__highlight-yellow--background, rgba(255, 214, 64, 0.55))',
   green: 'var(--c2-notepad__highlight-green--background, rgba(110, 220, 120, 0.4))',
   pink: 'var(--c2-notepad__highlight-pink--background, rgba(255, 120, 170, 0.38))',
+}
+
+const PAPER_LABELS: Record<NotepadPaper, string> = { lined: 'Lined', grid: 'Grid', dot: 'Dot grid', blank: 'Blank' }
+const PAPER_COLOR_LABELS: Record<NotepadPaperColor, string> = { default: 'White', yellow: 'Yellow', green: 'Green', blue: 'Blue', pink: 'Pink' }
+const PAPER_SWATCHES: Record<NotepadPaperColor, string> = {
+  default: 'var(--c2-notepad__sheet--background, #fdfcf7)',
+  yellow: 'var(--c2-notepad__paper-yellow--background, #fcf0bf)',
+  green: 'var(--c2-notepad__paper-green--background, #e8f3e4)',
+  blue: 'var(--c2-notepad__paper-blue--background, #e6eef9)',
+  pink: 'var(--c2-notepad__paper-pink--background, #fbe6ea)',
 }
 
 const BOX = `<svg viewBox="0 0 22 22" aria-hidden="true"><path d="M3.5 4.2c4.6-.6 10-.5 15 .2.6 4.5.5 9.6-.2 14.2-4.8.5-9.9.6-14.6.1-.6-4.7-.6-9.7-.2-14.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path class="tick" d="M5.5 11.5l4 4.2L19 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
@@ -174,10 +198,13 @@ class TaskView implements NodeView {
  * @event {CustomEvent<NotepadFormat>} format-change - Fired when the formatting at the selection changes. Does not bubble.
  * @event {CustomEvent<NotepadCheckChangeEventDetail>} check-change - Fired when a checklist item is ticked or unticked. Does not bubble.
  * @event {CustomEvent<NotepadPageTearEventDetail>} page-tear - Fired before a page is torn off; cancel it to keep the page. Does not bubble.
+ * @event {CustomEvent<NotepadPaperChangeEventDetail>} paper-change - Fired when the writer picks another ruling or paper colour in the paper picker. Does not bubble.
  * @csspart sheet - The paper sheet.
  * @csspart writing - The editable writing surface.
  * @csspart toolbar - The selection formatting toolbar.
  * @csspart tear-button - The "Tear off" button of a tearable pad.
+ * @csspart paper-button - The "Paper" button that opens the paper picker.
+ * @csspart paper-menu - The paper picker: rulings and paper colours.
  *
  * @cssproperty {color} [--c2-notepad__sheet--background=#fdfcf7] - Paper colour.
  * @cssproperty {border-radius} [--c2-notepad__sheet--border-radius=3px]
@@ -214,6 +241,10 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__toolbar--color=#2c2a26]
  * @cssproperty {color} [--c2-notepad__toolbar__button__active--background=rgba(60, 50, 30, 0.14)]
  * @cssproperty {color} [--c2-notepad__perforation--color=#b9bfc8] - Perforated line of a tearable pad.
+ * @cssproperty {color} [--c2-notepad__paper-yellow--background=#fcf0bf] - Sheet colour for `paper-color="yellow"`.
+ * @cssproperty {color} [--c2-notepad__paper-green--background=#e8f3e4] - Sheet colour for `paper-color="green"`.
+ * @cssproperty {color} [--c2-notepad__paper-blue--background=#e6eef9] - Sheet colour for `paper-color="blue"`.
+ * @cssproperty {color} [--c2-notepad__paper-pink--background=#fbe6ea] - Sheet colour for `paper-color="pink"`.
  * @cssproperty {color} [--c2-notepad__error--color=#dc2626] - Error note and margin of an invalid notepad.
  * @cssproperty {outline} [--c2-notepad__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {opacity} [--c2-notepad__disabled--opacity=0.38]
@@ -257,6 +288,12 @@ export class Notepad extends LitElement {
   @property({ type: Boolean, reflect: true }) tearable = false
   /** Number of the current page; it goes up by one each time a page is torn off. */
   @property({ type: Number }) page = 1
+  /** Ruling of the page: `lined`, `grid`, `dot` or `blank`. The writer changes it through the paper picker. */
+  @property({ reflect: true }) paper: NotepadPaper = 'lined'
+  /** Colour of the page: `default`, `yellow`, `green`, `blue` or `pink`. The writer changes it through the paper picker. */
+  @property({ attribute: 'paper-color', reflect: true }) paperColor: NotepadPaperColor = 'default'
+  /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the ruling and the paper colour. */
+  @property({ type: Boolean, attribute: 'paper-picker', reflect: true }) paperPicker = false
 
   @state() private format: NotepadFormat = emptyFormat()
   @state() private disabledByForm = false
@@ -270,6 +307,9 @@ export class Notepad extends LitElement {
   @query('.writing') private surface!: HTMLElement
   @query('.toolbar') private toolbarEl!: HTMLElement
   @query('.sheet') private sheet!: HTMLElement
+  @query('.paper-menu') private paperMenu?: HTMLElement
+  @query('.paper-button') private paperButton?: HTMLElement
+  @state() private paperMenuOpen = false
 
   private view?: EditorView
   private readonly slotPresence = new SlotPresenceController(this, ['header'])
@@ -881,6 +921,99 @@ export class Notepad extends LitElement {
     }
   }
 
+  // ---- paper picker ---------------------------------------------------------------------------------------------
+
+  private togglePaperMenu() {
+    const menu = this.paperMenu
+    const button = this.paperButton
+    if (!menu || !button) return
+    if (menu.matches(':popover-open')) {
+      menu.hidePopover()
+      return
+    }
+    menu.showPopover()
+    const box = button.getBoundingClientRect()
+    const x = Math.min(Math.max(8, box.right - menu.offsetWidth), innerWidth - menu.offsetWidth - 8)
+    const below = box.bottom + 6
+    const y = below + menu.offsetHeight > innerHeight - 8 ? Math.max(8, box.top - menu.offsetHeight - 6) : below
+    menu.style.left = `${Math.round(x)}px`
+    menu.style.top = `${Math.round(y)}px`
+    void this.updateComplete.then(() => menu.querySelector<HTMLElement>('[role=radio][aria-checked=true]')?.focus())
+  }
+
+  private handlePaperMenuToggle(event: ToggleEvent) {
+    this.paperMenuOpen = event.newState === 'open'
+    // Closed by Escape or a pick from the keyboard: give focus back to the button that opened it.
+    if (!this.paperMenuOpen && this.paperMenu?.contains(this.renderRoot instanceof ShadowRoot ? this.renderRoot.activeElement : null)) this.paperButton?.focus()
+  }
+
+  private choosePaper(paper: NotepadPaper, paperColor: NotepadPaperColor) {
+    if (paper === this.paper && paperColor === this.paperColor) return
+    this.paper = paper
+    this.paperColor = paperColor
+    this.dispatchEvent(new CustomEvent<NotepadPaperChangeEventDetail>('paper-change', { detail: { paper, paperColor } }))
+  }
+
+  private handlePaperMenuKeydown(event: KeyboardEvent) {
+    const radio = (event.target as Element).closest<HTMLElement>('[role=radio]')
+    if (!radio) return
+    const group = [...(radio.parentElement?.querySelectorAll<HTMLElement>('[role=radio]') ?? [])]
+    const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
+    if (!step) return
+    event.preventDefault()
+    // Radio semantics: moving to a choice selects it.
+    const next = group[(group.indexOf(radio) + step + group.length) % group.length]
+    next.click()
+    void this.updateComplete.then(() => next.focus())
+  }
+
+  private renderPaperMenu() {
+    return html`<div
+      class="paper-menu"
+      part="paper-menu"
+      popover="auto"
+      role="dialog"
+      aria-label="Paper"
+      @toggle=${this.handlePaperMenuToggle}
+      @keydown=${this.handlePaperMenuKeydown}
+    >
+      <span class="label" id="paper-lines">Lines</span>
+      <div class="row" role="radiogroup" aria-labelledby="paper-lines">
+        ${PAPERS.map(
+          (paper) =>
+            html`<button
+              type="button"
+              role="radio"
+              aria-checked=${String(this.paper === paper)}
+              aria-label=${PAPER_LABELS[paper]}
+              title=${PAPER_LABELS[paper]}
+              tabindex=${this.paper === paper ? 0 : -1}
+              @click=${() => this.choosePaper(paper, this.paperColor)}
+            >
+              <span class="thumb ${paper}"></span>
+            </button>`,
+        )}
+      </div>
+      <span class="label" id="paper-colors">Paper</span>
+      <div class="row" role="radiogroup" aria-labelledby="paper-colors">
+        ${PAPER_COLORS.map(
+          (color) =>
+            html`<button
+              type="button"
+              role="radio"
+              aria-checked=${String(this.paperColor === color)}
+              aria-label=${PAPER_COLOR_LABELS[color]}
+              title=${PAPER_COLOR_LABELS[color]}
+              tabindex=${this.paperColor === color ? 0 : -1}
+              @click=${() => this.choosePaper(this.paper, color)}
+            >
+              <span class="swatch" style=${`--_swatch: ${PAPER_SWATCHES[color]}`}></span>
+            </button>`,
+        )}
+      </div>
+    </div>`
+  }
+
   /** Stops the editing surface's own `input` / `beforeinput`: the element fires its own `input` with `value` up to date. */
   private stopNativeEditing(event: Event) {
     event.stopPropagation()
@@ -1043,6 +1176,25 @@ export class Notepad extends LitElement {
           <div class="top">
             <div class="header" ?hidden=${!this.slotPresence.has('header')}><slot name="header" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
             ${
+              this.paperPicker
+                ? html`<button
+                    class="paper-button"
+                    part="paper-button"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-expanded=${String(this.paperMenuOpen)}
+                    ?disabled=${this.disabled || this.disabledByForm}
+                    @click=${this.togglePaperMenu}
+                  >
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+                      <rect x="2" y="1" width="8" height="10" rx="1" />
+                      <path d="M4 4h4M4 6h4M4 8h3" />
+                    </svg>
+                    Paper
+                  </button>`
+                : nothing
+            }
+            ${
               this.tearable
                 ? html`<button class="tear" part="tear-button" type="button" ?disabled=${!this.editable} @click=${() => void this.tearOff()}>Tear off</button>`
                 : nothing
@@ -1070,6 +1222,7 @@ export class Notepad extends LitElement {
         ${this.renderColorGroup('ink')} ${this.renderColorGroup('highlight')}
         <slot name="toolbar"></slot>
       </div>
+      ${this.paperPicker ? this.renderPaperMenu() : nothing}
     `
   }
 }

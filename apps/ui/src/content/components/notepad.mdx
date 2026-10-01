@@ -33,7 +33,7 @@ npm install @c2n/notepad
   }
 </style>
 <div data-label="Default">
-  <c2-notepad class="note" label="Meeting notes" placeholder="Write something…" value="Thursday sync
+  <c2-notepad class="note" paper-picker label="Meeting notes" placeholder="Write something…" value="Thursday sync
 Ship the notepad **behind a flag**
 Ask about the <span data-ink=&quot;red&quot;>night paper</span>"><span slot="header">Notes · Oct 1</span></c2-notepad>
 </div>
@@ -112,6 +112,16 @@ With `tearable`, the sheet gets a perforated top edge, a "Tear off" button and a
 ```ts tag=CodeBlock
 notepad.addEventListener('page-tear', (event) => archive.push(event.detail.value))
 ```
+
+## Choosing the paper
+
+Set `paper-picker` to add a "Paper" button at the top of the sheet. It opens a small picker where the writer chooses the ruling (lined, grid, dot grid or blank) and the paper colour (white, yellow, green, blue or pink). The choice is held in two reflected properties, `paper` and `paperColor` (`paper-color`), which you can also set yourself without the picker. The picker fires `paper-change` with both values, so the app can remember each writer's choice:
+
+```ts tag=CodeBlock
+notepad.addEventListener('paper-change', (event) => savePreference(event.detail.paper, event.detail.paperColor))
+```
+
+The colours are still CSS variables: `--c2-notepad__paper-yellow--background` and the others decide what each choice looks like, and under `@c2n/theme` they darken with the surface in dark mode.
 
 ## Paper and binding
 

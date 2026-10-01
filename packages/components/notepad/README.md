@@ -18,7 +18,9 @@ import '@c2n/notepad'
 
 `value` is line-based Markdown: one line per line, `- [ ]` / `- [x]` checklist items, `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, and inline HTML for what Markdown cannot say (`<u>`, `<span data-ink="red">`, `<mark data-color="pink">`). `text` returns plain text. The element is form-associated (`name`, `required`, `maxlength`, reset, disabled fieldsets).
 
-Events: `input`, `change`, `format-change`, `check-change`, `page-tear` (cancelable). Methods: `formatSelection(mark, color?)`, `clearFormatting()`, `tearOff()`, `reset()`, `checkValidity()`, `reportValidity()`, `setCustomValidity()`.
+`paper-picker` adds a "Paper" button that lets the writer pick the ruling (`paper`: lined, grid, dot, blank) and the paper colour (`paper-color`: default, yellow, green, blue, pink).
+
+Events: `input`, `change`, `format-change`, `check-change`, `page-tear` (cancelable), `paper-change`. Methods: `formatSelection(mark, color?)`, `clearFormatting()`, `tearOff()`, `reset()`, `checkValidity()`, `reportValidity()`, `setCustomValidity()`.
 
 The paper is styled with CSS variables only: `--c2-notepad__rule--color`, `__grid--color`, `__dot--color`, `__margin--color`, `__sheet--background`, `__writing--color`, `__spiral--display`, `__glue--display` and more. See `custom-elements.json` for the full list.
 

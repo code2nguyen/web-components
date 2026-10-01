@@ -49,6 +49,10 @@
     toolbar--color: #2c2a26,
     toolbar__button__active--background: rgba(60, 50, 30, 0.14),
     perforation--color: #b9bfc8,
+    paper-yellow--background: #fcf0bf,
+    paper-green--background: #e8f3e4,
+    paper-blue--background: #e6eef9,
+    paper-pink--background: #fbe6ea,
     error--color: #dc2626,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     disabled--opacity: 0.38,
@@ -66,6 +70,38 @@
   display: none;
 }
 
+// ---- paper: the writer's choice of ruling (`paper`) and colour (`paper-color`) -------------------------------------
+// The attributes only choose which layers are drawn and which colour variable the sheet takes; every colour is still
+// one of the documented variables.
+
+:host {
+  --_paper: #{css.cssVar(sheet--background)};
+}
+:host([paper-color='yellow']) {
+  --_paper: #{css.cssVar(paper-yellow--background)};
+}
+:host([paper-color='green']) {
+  --_paper: #{css.cssVar(paper-green--background)};
+}
+:host([paper-color='blue']) {
+  --_paper: #{css.cssVar(paper-blue--background)};
+}
+:host([paper-color='pink']) {
+  --_paper: #{css.cssVar(paper-pink--background)};
+}
+:host([paper='grid']) .sheet {
+  --_grid-c: #{css.cssVar(rule--color)};
+}
+:host([paper='dot']) .sheet {
+  --_rule-c: transparent;
+  --_margin-c: transparent;
+  --_dot-c: color-mix(in srgb, #{css.cssVar(rule--color)} 50%, #{css.cssVar(writing--color)});
+}
+:host([paper='blank']) .sheet {
+  --_rule-c: transparent;
+  --_margin-c: transparent;
+}
+
 .pad {
   position: relative;
   // Lets the stack and the spiral draw outside the sheet without being clipped by the host.
@@ -81,11 +117,15 @@
   --_inset: #{css.cssVar(margin--inset)};
   // Where the writing rests: a little below the baseline, so the rule runs under the text and not through it.
   --_baseline: calc((var(--_rule) + var(--_size) * 0.8) / 2);
+  --_rule-c: #{css.cssVar(rule--color)};
+  --_grid-c: #{css.cssVar(grid--color)};
+  --_dot-c: #{css.cssVar(dot--color)};
+  --_margin-c: #{css.cssVar(margin--color)};
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  background: css.cssVar(sheet--background);
+  background: var(--_paper);
   border-radius: css.cssVar(sheet--border-radius);
   box-shadow: css.cssVar(sheet--box-shadow);
   transition: box-shadow 160ms ease;
@@ -156,7 +196,7 @@
     position: absolute;
     inset: 0;
     border-radius: css.cssVar(sheet--border-radius);
-    background: css.cssVar(sheet--background);
+    background: var(--_paper);
     box-shadow: 0 1px 2px rgba(24, 24, 27, 0.12);
   }
   &::before {
@@ -202,10 +242,13 @@
   border-top: 2px dotted css.cssVar(perforation--color);
   pointer-events: none;
 }
-.tear {
+.tear,
+.paper-button {
   all: unset;
   box-sizing: border-box;
-  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   margin-block-end: 2px;
   padding: 2px 6px;
   border-radius: 4px;
@@ -218,8 +261,20 @@
     monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  &:hover {
+  &:first-of-type {
+    margin-inline-start: auto;
+  }
+  &:hover,
+  &[aria-expanded='true'] {
     background: rgba(24, 24, 27, 0.06);
+  }
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+  svg {
+    width: 12px;
+    height: 12px;
   }
   &:focus-visible {
     outline: css.cssVar(focus--outline);
@@ -264,17 +319,16 @@
     linear-gradient(
       to right,
       transparent calc(var(--_inset) - 1px),
-      #{css.cssVar(margin--color)} calc(var(--_inset) - 1px),
-      #{css.cssVar(margin--color)} var(--_inset),
+      var(--_margin-c) calc(var(--_inset) - 1px),
+      var(--_margin-c) var(--_inset),
       transparent var(--_inset)
     ),
-    radial-gradient(circle at 1px 1px, #{css.cssVar(dot--color)} 1.3px, transparent 1.6px),
-    linear-gradient(to right, #{css.cssVar(grid--color)} 1px, transparent 1px),
+    radial-gradient(circle at 1px 1px, var(--_dot-c) 1.3px, transparent 1.6px), linear-gradient(to right, var(--_grid-c) 1px, transparent 1px),
     linear-gradient(
       to bottom,
       transparent calc(var(--_baseline) - 1px),
-      #{css.cssVar(rule--color)} calc(var(--_baseline) - 1px),
-      #{css.cssVar(rule--color)} var(--_baseline),
+      var(--_rule-c) calc(var(--_baseline) - 1px),
+      var(--_rule-c) var(--_baseline),
       transparent var(--_baseline)
     );
   background-size:
@@ -430,7 +484,7 @@
   outline-offset: 4px;
 }
 :host([error]) .sheet {
-  --c2-notepad__margin--color: #{css.cssVar(error--color)};
+  --_margin-c: #{css.cssVar(error--color)};
 }
 .error-note {
   position: absolute;
@@ -500,6 +554,35 @@
   }
 }
 
+@mixin tape {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 9px, color-mix(in srgb, #{css.cssVar(toolbar--background)} 86%, #ffffff) 9px 12px),
+    #{css.cssVar(toolbar--background)};
+  clip-path: polygon(
+    0 8%,
+    3px 0,
+    6px 12%,
+    9px 2%,
+    100% 0,
+    calc(100% - 3px) 10%,
+    100% 22%,
+    calc(100% - 4px) 40%,
+    100% 58%,
+    calc(100% - 3px) 78%,
+    100% 100%,
+    7px 100%,
+    3px 90%,
+    0 100%,
+    4px 70%,
+    0 52%,
+    3px 32%
+  );
+}
+
 // ---- selection toolbar: a strip of washi tape --------------------------------------------------------------------------
 
 .toolbar {
@@ -525,32 +608,7 @@
   // The tape is drawn behind the buttons, so its torn edges do not clip the colour flyouts.
   &::before,
   .scrap::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background:
-      repeating-linear-gradient(-45deg, transparent 0 9px, rgba(255, 255, 255, 0.28) 9px 12px),
-      #{css.cssVar(toolbar--background)};
-    clip-path: polygon(
-      0 8%,
-      3px 0,
-      6px 12%,
-      9px 2%,
-      100% 0,
-      calc(100% - 3px) 10%,
-      100% 22%,
-      calc(100% - 4px) 40%,
-      100% 58%,
-      calc(100% - 3px) 78%,
-      100% 100%,
-      7px 100%,
-      3px 90%,
-      0 100%,
-      4px 70%,
-      0 52%,
-      3px 32%
-    );
+    @include tape;
   }
   button {
     all: unset;
@@ -656,6 +714,97 @@
   rotate: 1.4deg;
 }
 
+.paper-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 10px 16px 12px;
+  border: 0;
+  overflow: visible;
+  background: none;
+  color: css.cssVar(toolbar--color);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.22));
+  rotate: 0.6deg;
+  &::before {
+    @include tape;
+  }
+  &:popover-open {
+    display: grid;
+    gap: 6px;
+  }
+  .label {
+    font:
+      600 10px/1.4 ui-monospace,
+      'SFMono-Regular',
+      Menlo,
+      monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .row {
+    display: flex;
+    gap: 6px;
+  }
+  button {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    padding: 3px;
+    border-radius: 6px;
+    cursor: pointer;
+    &:hover {
+      background: css.cssVar(toolbar__button__active--background);
+    }
+    &[aria-checked='true'] {
+      background: css.cssVar(toolbar__button__active--background);
+      box-shadow: inset 0 -2px 0 currentColor;
+    }
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: -2px;
+    }
+  }
+  // A miniature of each paper, drawn on the current paper colour.
+  .thumb {
+    width: 34px;
+    height: 26px;
+    border-radius: 2px;
+    background-color: var(--_paper);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+  }
+  .thumb.lined {
+    background-image:
+      linear-gradient(to right, transparent 7px, #{css.cssVar(margin--color)} 7px 8px, transparent 8px),
+      linear-gradient(to bottom, transparent 4px, #{css.cssVar(rule--color)} 4px 5px, transparent 5px);
+    background-size:
+      100% 100%,
+      100% 5px;
+  }
+  .thumb.grid {
+    background-image:
+      linear-gradient(to right, #{css.cssVar(rule--color)} 1px, transparent 1px), linear-gradient(to bottom, #{css.cssVar(rule--color)} 1px, transparent 1px);
+    background-size: 5px 5px;
+  }
+  .thumb.dot {
+    background-image: radial-gradient(
+      circle at 2.5px 2.5px,
+      color-mix(in srgb, #{css.cssVar(rule--color)} 50%, #{css.cssVar(writing--color)}) 0.8px,
+      transparent 1px
+    );
+    background-size: 5px 5px;
+  }
+  .swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--_swatch);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  }
+}
+
 @media (forced-colors: active) {
   .sheet::before,
   .spiral,
@@ -667,7 +816,8 @@
     background-image: none;
   }
   .toolbar::before,
-  .scrap::before {
+  .scrap::before,
+  .paper-menu::before {
     clip-path: none;
     border: 1px solid CanvasText;
   }
