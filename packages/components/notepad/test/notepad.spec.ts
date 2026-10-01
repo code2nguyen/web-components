@@ -43,12 +43,31 @@ test('selecting text opens the tape toolbar, which formats the selection', async
   await expect(host).toHaveJSProperty('value', 'pick up the dry **cleaning**')
   await expect(toolbar(page).getByRole('button', { name: 'Bold' })).toHaveAttribute('aria-pressed', 'true')
 
+  // The inks share one button: hovering it shows the colours.
+  await expect(toolbar(page).getByRole('button', { name: 'Red ink' })).toBeHidden()
+  await toolbar(page)
+    .getByRole('button', { name: /^Ink colour/ })
+    .hover()
   await toolbar(page).getByRole('button', { name: 'Red ink' }).click()
   await expect(host).toHaveJSProperty('value', 'pick up the dry <span data-ink="red">**cleaning**</span>')
-  await expect(toolbar(page).getByRole('button', { name: 'Red ink' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(toolbar(page).getByRole('button', { name: 'Ink colour: Red ink' })).toBeVisible()
+  // Picking a colour closes the flyout even though the pointer is still over it.
+  await expect(toolbar(page).getByRole('button', { name: 'Green ink' })).toBeHidden()
 
+  await toolbar(page)
+    .getByRole('button', { name: /^Highlighter/ })
+    .hover()
   await toolbar(page).getByRole('button', { name: 'Pink highlighter' }).click()
-  await toolbar(page).getByRole('button', { name: 'Clear formatting' }).click()
+  await expect(host).toHaveJSProperty('value', 'pick up the dry <span data-ink="red"><mark data-color="pink">**cleaning**</mark></span>')
+  await toolbar(page)
+    .getByRole('button', { name: /^Ink colour/ })
+    .hover()
+  await toolbar(page).getByRole('button', { name: 'Default ink', exact: true }).click()
+  await expect(host).toHaveJSProperty('value', 'pick up the dry <mark data-color="pink">**cleaning**</mark>')
+
+  // There is no clear-formatting button; the shortcut remains.
+  await expect(toolbar(page).getByRole('button', { name: 'Clear formatting' })).toHaveCount(0)
+  await page.keyboard.press('ControlOrMeta+Backslash')
   await expect(host).toHaveJSProperty('value', 'pick up the dry cleaning')
   // The page kept focus and the selection: the toolbar is still there for the next format.
   await expect(surface(page)).toBeFocused()
@@ -83,6 +102,41 @@ test('keyboard shortcuts and the toolbar are reachable without a pointer', async
   await expect(bold).toBeFocused()
   await page.keyboard.press('Escape')
   await expect(surface(page)).toBeFocused()
+})
+
+test('a colour flyout opens by tap and by keyboard', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes"></c2-notepad>')
+  const host = page.locator('c2-notepad')
+  await surface(page).click()
+  await page.keyboard.type('ink me')
+  await expect(host).toHaveJSProperty('value', 'ink me')
+  await selectBack(page, 2)
+  const inks = toolbar(page).getByRole('button', { name: /^Ink colour/ })
+  await expect(inks).toHaveAttribute('aria-expanded', 'false')
+
+  // Touch screens have no hover: a tap on the button opens the flyout.
+  await inks.dispatchEvent('click')
+  await expect(inks).toHaveAttribute('aria-expanded', 'true')
+  await expect(toolbar(page).getByRole('button', { name: 'Green ink' })).toBeVisible()
+  await inks.dispatchEvent('click')
+  await expect(inks).toHaveAttribute('aria-expanded', 'false')
+
+  await page.keyboard.press('Alt+F10')
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight')
+  await expect(inks).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(toolbar(page).getByRole('button', { name: 'Default ink', exact: true })).toBeFocused()
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight')
+  await expect(toolbar(page).getByRole('button', { name: 'Red ink' })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(host).toHaveJSProperty('value', 'ink <span data-ink="red">me</span>')
+  await expect(toolbar(page).getByRole('button', { name: 'Ink colour: Red ink' })).toBeFocused()
+  await expect(inks).toHaveAttribute('aria-expanded', 'false')
+
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Escape')
+  await expect(inks).toBeFocused()
+  await expect(inks).toHaveAttribute('aria-expanded', 'false')
 })
 
 test('checklist lines: typed, continued with Enter, ticked by pointer and keyboard', async ({ page, renderScenario }) => {
@@ -186,7 +240,8 @@ test('marks limits the toolbar, the shortcuts and pasted formatting', async ({ p
   await selectBack(page, 5)
   await expect(toolbar(page).getByRole('button', { name: 'Bold' })).toBeVisible()
   await expect(toolbar(page).getByRole('button', { name: 'Italic' })).toBeHidden()
-  await expect(toolbar(page).getByRole('button', { name: 'Red ink' })).toBeHidden()
+  await expect(toolbar(page).getByRole('button', { name: /^Ink colour/ })).toBeHidden()
+  await expect(toolbar(page).getByRole('button', { name: /^Highlighter/ })).toBeHidden()
   await page.keyboard.press('ControlOrMeta+i')
   await expect(host).toHaveJSProperty('value', 'plain')
 

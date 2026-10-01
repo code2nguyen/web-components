@@ -155,7 +155,7 @@ class TaskView implements NodeView {
 /**
  * A rich-text notepad that reads as a sheet of paper: handwriting on ruled lines, a margin, a spiral binding and
  * paper grain. Selecting text opens a formatting toolbar drawn as a strip of washi tape (bold, italic, underline,
- * strikethrough, four inks, three highlighters). Lines written as `[ ] ` become checklist items, and a tearable pad
+ * strikethrough, and one button each for the four inks and the three highlighters). Lines written as `[ ] ` become checklist items, and a tearable pad
  * can have its page torn off. The value is plain, line-based Markdown, and the element is a form control.
  *
  * The paper is presentation, so it is set entirely through CSS variables: set `--c2-notepad__grid--color` for graph
@@ -262,6 +262,10 @@ export class Notepad extends LitElement {
   @state() private disabledByForm = false
   /** Focus came from a pointer, so the keyboard focus ring stays off. */
   @state() private pointerFocus = false
+  /** Colour group whose flyout was opened by a click, a tap or the keyboard (hover opens it through CSS). */
+  @state() private openGroup: 'ink' | 'highlight' | null = null
+  /** Group whose colour was just picked by pointer: its hover flyout stays shut until the pointer leaves. */
+  @state() private pickedGroup: 'ink' | 'highlight' | null = null
 
   @query('.writing') private surface!: HTMLElement
   @query('.toolbar') private toolbarEl!: HTMLElement
@@ -728,8 +732,29 @@ export class Notepad extends LitElement {
 
   // ---- selection toolbar ----------------------------------------------------------------------------------------
 
+  /** The toolbar's own row of buttons, in roving order; the colour swatches live in their group's flyout. */
   private toolbarButtons(): HTMLElement[] {
-    return [...(this.toolbarEl?.querySelectorAll<HTMLElement>('button:not([hidden])') ?? [])]
+    return [...(this.toolbarEl?.querySelectorAll<HTMLElement>('button:not([hidden])') ?? [])].filter(
+      (button) => !button.closest('.flyout') && !button.closest('.group[hidden]'),
+    )
+  }
+
+  private flyoutButtons(group: 'ink' | 'highlight'): HTMLElement[] {
+    return [...(this.toolbarEl?.querySelectorAll<HTMLElement>(`.group[data-group='${group}'] .flyout button`) ?? [])]
+  }
+
+  private openFlyout(group: 'ink' | 'highlight') {
+    this.openGroup = group
+    void this.updateComplete.then(() => {
+      const swatches = this.flyoutButtons(group)
+      ;(swatches.find((each) => each.getAttribute('aria-pressed') === 'true') ?? swatches[0])?.focus()
+    })
+  }
+
+  private closeFlyout(focusTrigger: boolean) {
+    const group = this.openGroup
+    this.openGroup = null
+    if (focusTrigger && group) void this.updateComplete.then(() => this.toolbarEl.querySelector<HTMLElement>(`.group[data-group='${group}'] .trigger`)?.focus())
   }
 
   private updateToolbar() {
@@ -768,6 +793,7 @@ export class Notepad extends LitElement {
   }
 
   private hideToolbar() {
+    this.openGroup = null
     if (this.toolbarEl?.matches(':popover-open')) this.toolbarEl.hidePopover()
   }
 
@@ -783,10 +809,36 @@ export class Notepad extends LitElement {
   }
 
   private handleToolbarKeydown(event: KeyboardEvent) {
+    const active = (this.renderRoot instanceof ShadowRoot ? this.renderRoot.activeElement : event.target) as HTMLElement | null
+    const stop = () => {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    const flyoutGroup = active?.closest<HTMLElement>('.flyout') ? (active.closest<HTMLElement>('.group')?.dataset.group as 'ink' | 'highlight') : null
+    if (flyoutGroup) {
+      // Inside a colour flyout: the arrows move between swatches, Escape or ArrowUp goes back to its button.
+      const swatches = this.flyoutButtons(flyoutGroup)
+      const index = swatches.indexOf(active!)
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        stop()
+        swatches[(index + (event.key === 'ArrowRight' ? 1 : -1) + swatches.length) % swatches.length]?.focus()
+      } else if (event.key === 'Escape' || event.key === 'ArrowUp') {
+        stop()
+        this.closeFlyout(true)
+      }
+      return
+    }
+    const trigger = active?.classList.contains('trigger') ? (active.closest<HTMLElement>('.group')?.dataset.group as 'ink' | 'highlight') : null
+    if (trigger && (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ')) {
+      stop()
+      this.openFlyout(trigger)
+      return
+    }
     const buttons = this.toolbarButtons()
-    const index = buttons.indexOf(this.renderRoot instanceof ShadowRoot ? (this.renderRoot.activeElement as HTMLElement) : (event.target as HTMLElement))
+    const index = buttons.indexOf(active!)
     const move = (to: number) => {
       event.preventDefault()
+      this.openGroup = null
       buttons[(to + buttons.length) % buttons.length]?.focus()
     }
     if (event.key === 'ArrowRight') move(index + 1)
@@ -794,26 +846,39 @@ export class Notepad extends LitElement {
     else if (event.key === 'Home') move(0)
     else if (event.key === 'End') move(buttons.length - 1)
     else if (event.key === 'Escape') {
-      event.preventDefault()
-      event.stopPropagation()
+      stop()
       this.view?.focus()
     }
   }
 
   private handleToolbarClick(event: MouseEvent) {
-    const button = (event.target as Element).closest<HTMLButtonElement>('button[data-mark]')
+    const button = (event.target as Element).closest<HTMLButtonElement>('button')
     if (!button) return
     const fromKeyboard = event.detail === 0
-    const mark = button.dataset.mark as NotepadMark | 'clear'
-    if (mark === 'clear') this.clearFormatting()
-    else this.formatSelection(mark, button.dataset.color)
+    const group = button.closest<HTMLElement>('.group')?.dataset.group as 'ink' | 'highlight' | undefined
+    if (button.classList.contains('trigger') && group) {
+      // A tap or click opens the flyout too: touch screens have no hover.
+      this.openGroup = this.openGroup === group ? null : group
+      return
+    }
+    const mark = button.dataset.mark as NotepadMark | undefined
+    if (!mark) return
+    const color = button.dataset.color
+    this.formatSelection(mark, mark === 'ink' || mark === 'highlight' ? color || null : undefined)
+    if (group) {
+      this.openGroup = null
+      if (!fromKeyboard) this.pickedGroup = group
+    }
     // A keyboard user stays on the toolbar to apply another format; formatting refocused the page.
-    if (fromKeyboard)
+    if (fromKeyboard) {
+      const key = group ? null : button.dataset.key
       void this.updateComplete.then(() =>
-        this.toolbarButtons()
-          .find((each) => each.dataset.key === button.dataset.key)
-          ?.focus(),
+        (group
+          ? this.toolbarEl.querySelector<HTMLElement>(`.group[data-group='${group}'] .trigger`)
+          : this.toolbarButtons().find((each) => each.dataset.key === key)
+        )?.focus(),
       )
+    }
   }
 
   /** Stops the editing surface's own `input` / `beforeinput`: the element fires its own `input` with `value` up to date. */
@@ -874,6 +939,78 @@ export class Notepad extends LitElement {
     this.internals.setValidity(flags, message, this.surface)
   }
 
+  private renderColorGroup(group: 'ink' | 'highlight') {
+    const ink = group === 'ink'
+    const current = this.format[group]
+    const colors: readonly string[] = ink ? INKS : HIGHLIGHTS
+    const label = ink ? 'Ink colour' : 'Highlighter'
+    const currentLabel = current
+      ? ink
+        ? INK_LABELS[current as NotepadInk]
+        : HIGHLIGHT_LABELS[current as NotepadHighlight]
+      : ink
+        ? 'Default ink'
+        : 'No highlighter'
+    const swatch = (color: string) =>
+      ink
+        ? html`<span class="ink" style=${`--_swatch: ${INK_SWATCHES[color as NotepadInk]}`}></span>`
+        : html`<span class="hi" style=${`--_swatch: ${HIGHLIGHT_SWATCHES[color as NotepadHighlight]}`}></span>`
+    const open = this.openGroup === group
+    return html`<div
+      class="group ${open ? 'open' : ''} ${this.pickedGroup === group ? 'picked' : ''}"
+      data-group=${group}
+      ?hidden=${!this.allowedMarks.has(group)}
+      @mouseleave=${() => {
+        if (this.pickedGroup === group) this.pickedGroup = null
+      }}
+    >
+      <button
+        type="button"
+        class="trigger"
+        tabindex="-1"
+        data-key=${group}
+        aria-label=${`${label}: ${currentLabel}`}
+        aria-haspopup="true"
+        aria-expanded=${String(open)}
+        title=${label}
+      >
+        ${current ? swatch(current) : ink ? html`<span class="ink default"></span>` : html`<span class="hi none"></span>`}
+        <svg class="caret" viewBox="0 0 10 6" aria-hidden="true">
+          <path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      <div class="flyout">
+        <div class="scrap" role="group" aria-label=${ink ? 'Ink colours' : 'Highlighters'}>
+          <button
+            type="button"
+            tabindex="-1"
+            data-mark=${group}
+            data-color=""
+            aria-label=${ink ? 'Default ink' : 'No highlighter'}
+            aria-pressed=${String(!current)}
+            title=${ink ? 'Default ink' : 'No highlighter'}
+          >
+            ${ink ? html`<span class="ink default"></span>` : html`<span class="hi none"></span>`}
+          </button>
+          ${colors.map(
+            (color) =>
+              html`<button
+                type="button"
+                tabindex="-1"
+                data-mark=${group}
+                data-color=${color}
+                aria-label=${ink ? INK_LABELS[color as NotepadInk] : HIGHLIGHT_LABELS[color as NotepadHighlight]}
+                aria-pressed=${String(current === color)}
+                title=${ink ? INK_LABELS[color as NotepadInk] : HIGHLIGHT_LABELS[color as NotepadHighlight]}
+              >
+                ${swatch(color)}
+              </button>`,
+          )}
+        </div>
+      </div>
+    </div>`
+  }
+
   override render() {
     const allowed = this.allowedMarks
     const markButton = (mark: NotepadMark, label: string, glyph: unknown, shortcut: string) =>
@@ -929,47 +1066,8 @@ export class Notepad extends LitElement {
       >
         ${markButton('bold', 'Bold', html`<b>B</b>`, 'Ctrl+B')} ${markButton('italic', 'Italic', html`<i>I</i>`, 'Ctrl+I')}
         ${markButton('underline', 'Underline', html`<u>U</u>`, 'Ctrl+U')} ${markButton('strike', 'Strikethrough', html`<s>S</s>`, 'Ctrl+Shift+X')}
-        ${hasEmphasis && allowed.has('ink') ? html`<span class="sep" aria-hidden="true"></span>` : nothing}
-        ${INKS.map(
-          (ink) =>
-            html`<button
-              type="button"
-              tabindex="-1"
-              data-mark="ink"
-              data-color=${ink}
-              data-key=${`ink-${ink}`}
-              aria-label=${INK_LABELS[ink]}
-              aria-pressed=${String(this.format.ink === ink)}
-              title=${INK_LABELS[ink]}
-              ?hidden=${!allowed.has('ink')}
-            >
-              <span class="ink" style=${`--_swatch: ${INK_SWATCHES[ink]}`}></span>
-            </button>`,
-        )}
-        ${allowed.has('highlight') && (hasEmphasis || allowed.has('ink')) ? html`<span class="sep" aria-hidden="true"></span>` : nothing}
-        ${HIGHLIGHTS.map(
-          (color) =>
-            html`<button
-              type="button"
-              tabindex="-1"
-              data-mark="highlight"
-              data-color=${color}
-              data-key=${`highlight-${color}`}
-              aria-label=${HIGHLIGHT_LABELS[color]}
-              aria-pressed=${String(this.format.highlight === color)}
-              title=${HIGHLIGHT_LABELS[color]}
-              ?hidden=${!allowed.has('highlight')}
-            >
-              <span class="hi" style=${`--_swatch: ${HIGHLIGHT_SWATCHES[color]}`}></span>
-            </button>`,
-        )}
-        <span class="sep" aria-hidden="true"></span>
-        <button type="button" tabindex="-1" data-mark="clear" data-key="clear" aria-label="Clear formatting" title="Clear formatting (Ctrl+\\)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 20H9L4 15a2 2 0 0 1 0-2.8L13.2 3a2 2 0 0 1 2.8 0L21 8a2 2 0 0 1 0 2.8L12 20" />
-            <path d="M7 11l7 7" />
-          </svg>
-        </button>
+        ${hasEmphasis && (allowed.has('ink') || allowed.has('highlight')) ? html`<span class="sep" aria-hidden="true"></span>` : nothing}
+        ${this.renderColorGroup('ink')} ${this.renderColorGroup('highlight')}
         <slot name="toolbar"></slot>
       </div>
     `

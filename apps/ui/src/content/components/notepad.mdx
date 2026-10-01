@@ -8,7 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import { Notepad } from '@c2n/notepad'
 
-`c2-notepad` is a form control for notes that reads as a sheet of paper rather than an input box. The writing sits on the ruled lines, a margin runs down the left, a spiral binds the top and the page has a light grain. Select some text and a strip of washi tape appears above it with bold, italic, underline, strikethrough, four inks, three highlighters and clear formatting. Write `[ ] ` at the start of a line for a checklist item. Set `tearable` to add a perforated edge with a "Tear off" button.
+`c2-notepad` is a form control for notes that reads as a sheet of paper rather than an input box. The writing sits on the ruled lines, a margin runs down the left, a spiral binds the top and the page has a light grain. Select some text and a strip of washi tape appears above it with bold, italic, underline and strikethrough, plus one button for the four inks and one for the three highlighters. Write `[ ] ` at the start of a line for a checklist item. Set `tearable` to add a perforated edge with a "Tear off" button.
 
 The value is plain, line-based Markdown, so it reads well when you store it, search it or show it somewhere else. The handwriting face, Patrick Hand, is bundled. It is compact and easy to read, and it covers Latin and Vietnamese.
 
@@ -60,7 +60,7 @@ Landlord about the heating"></c2-notepad>
 
 ## Formatting
 
-The toolbar opens when a selection settles in the page and closes on Escape, when the selection collapses, or when focus leaves the notepad. Its buttons show the formatting of the selected text, and clicking one keeps the selection so you can apply several formats in a row. The same formats are on the keyboard:
+The toolbar opens when a selection settles in the page and closes on Escape, when the selection collapses, or when focus leaves the notepad. Its buttons show the formatting of the selected text, and clicking one keeps the selection so you can apply several formats in a row. The ink button shows the current ink: hover it, or tap it on a touch screen, to pick another ink or go back to the default. The highlighter button works the same way. The same formats are on the keyboard:
 
 | Format                  | Shortcut                  | While typing       |
 | ----------------------- | ------------------------- | ------------------ |
@@ -74,7 +74,7 @@ The toolbar opens when a selection settles in the page and closes on Escape, whe
 | Tick or untick the item | <kbd>Ctrl/⌘ Enter</kbd>   |                    |
 | Move to the toolbar     | <kbd>Alt F10</kbd>        |                    |
 
-In the toolbar, the arrow keys move between buttons and Escape goes back to the page. `toolbar="none"` keeps the shortcuts and hides the strip. `marks="bold italic"` limits what can be applied, through the toolbar, the shortcuts and pasted content. Buttons slotted into `toolbar` are added at the end of the strip.
+In the toolbar, the arrow keys move between buttons and Escape goes back to the page. On the ink or highlighter button, ArrowDown or Enter opens its colours, the arrow keys move between them, and Escape closes them. `toolbar="none"` keeps the shortcuts and hides the strip. `marks="bold italic"` limits what can be applied, through the toolbar, the shortcuts and pasted content. Buttons slotted into `toolbar` are added at the end of the strip.
 
 Nothing changes the line height, so no format can push text off the ruled lines. That is why there are no headings or font sizes. Inks and highlighters are names rather than colours: `--c2-notepad__ink-red--color` decides what red ink looks like, so the same note follows a theme or dark mode.
 
