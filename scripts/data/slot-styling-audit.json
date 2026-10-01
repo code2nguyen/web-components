@@ -274,6 +274,54 @@
       "reason": "The semantic separator region owns the separator slot's component-side presentation."
     },
     {
+      "tag": "c2-bubble-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bubble-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-bubble-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bubble-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bubble-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bubble-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-bubble-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
       "tag": "c2-button",
       "slot": "default",
       "decision": "assigned-content",
@@ -1243,6 +1291,54 @@
       "reason": "The supporting-text slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-overlap-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
+    },
+    {
       "tag": "c2-overlay",
       "slot": "",
       "decision": "assigned-content",
@@ -1321,102 +1417,6 @@
       "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
-      "tag": "c2-pyramid-chart",
-      "slot": "actions",
-      "decision": "part",
-      "parts": ["actions"],
-      "reason": "The semantic actions region owns the actions slot's component-side presentation."
-    },
-    {
-      "tag": "c2-pyramid-chart",
-      "slot": "default",
-      "decision": "assigned-content",
-      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
-    },
-    {
-      "tag": "c2-pyramid-chart",
-      "slot": "empty",
-      "decision": "part",
-      "parts": ["state"],
-      "reason": "The semantic state region owns the empty slot's component-side presentation."
-    },
-    {
-      "tag": "c2-pyramid-chart",
-      "slot": "error",
-      "decision": "part",
-      "parts": ["state"],
-      "reason": "The semantic state region owns the error slot's component-side presentation."
-    },
-    {
-      "tag": "c2-pyramid-chart",
-      "slot": "legend",
-      "decision": "part",
-      "parts": ["legend"],
-      "reason": "The semantic legend region owns the legend slot's component-side presentation."
-    },
-    {
-      "tag": "c2-pyramid-chart",
-      "slot": "loading",
-      "decision": "part",
-      "parts": ["state"],
-      "reason": "The semantic state region owns the loading slot's component-side presentation."
-    },
-    {
-      "tag": "c2-pyramid-chart",
-      "slot": "tooltip",
-      "decision": "part",
-      "parts": ["tooltip"],
-      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
-    },
-    {
-      "tag": "c2-overlap-chart",
-      "slot": "actions",
-      "decision": "part",
-      "parts": ["actions"],
-      "reason": "The semantic actions region owns the actions slot's component-side presentation."
-    },
-    {
-      "tag": "c2-overlap-chart",
-      "slot": "default",
-      "decision": "assigned-content",
-      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
-    },
-    {
-      "tag": "c2-overlap-chart",
-      "slot": "empty",
-      "decision": "part",
-      "parts": ["state"],
-      "reason": "The semantic state region owns the empty slot's component-side presentation."
-    },
-    {
-      "tag": "c2-overlap-chart",
-      "slot": "error",
-      "decision": "part",
-      "parts": ["state"],
-      "reason": "The semantic state region owns the error slot's component-side presentation."
-    },
-    {
-      "tag": "c2-overlap-chart",
-      "slot": "legend",
-      "decision": "part",
-      "parts": ["legend"],
-      "reason": "The semantic legend region owns the legend slot's component-side presentation."
-    },
-    {
-      "tag": "c2-overlap-chart",
-      "slot": "loading",
-      "decision": "part",
-      "parts": ["state"],
-      "reason": "The semantic state region owns the loading slot's component-side presentation."
-    },
-    {
-      "tag": "c2-overlap-chart",
-      "slot": "tooltip",
-      "decision": "part",
-      "parts": ["tooltip"],
-      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
-    },
-    {
       "tag": "c2-progress",
       "slot": "",
       "decision": "assigned-content",
@@ -1428,6 +1428,54 @@
       "decision": "part",
       "parts": ["value"],
       "reason": "The semantic value region owns the value slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
       "tag": "c2-qr-code",

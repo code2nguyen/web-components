@@ -4,6 +4,7 @@
 export * from '@c2n/chart'
 export * from '@c2n/chart/area-chart.js'
 export * from '@c2n/chart/bar-chart.js'
+export * from '@c2n/chart/bubble-chart.js'
 export * from '@c2n/chart/candlestick-chart.js'
 export * from '@c2n/chart/chart-adapter.js'
 export * from '@c2n/chart/chart-base.js'
