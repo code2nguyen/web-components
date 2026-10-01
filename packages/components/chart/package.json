@@ -40,6 +40,10 @@
       "types": "./types/src/pyramid-chart.d.ts",
       "default": "./dist/pyramid-chart.js"
     },
+    "./butterfly-chart.js": {
+      "types": "./types/src/butterfly-chart.d.ts",
+      "default": "./dist/butterfly-chart.js"
+    },
     "./scatter-chart.js": {
       "types": "./types/src/scatter-chart.d.ts",
       "default": "./dist/scatter-chart.js"
@@ -128,6 +132,8 @@
     "gauge chart",
     "radar chart",
     "pyramid chart",
+    "butterfly chart",
+    "population pyramid",
     "scatter plot",
     "bubble chart",
     "candlestick chart",
