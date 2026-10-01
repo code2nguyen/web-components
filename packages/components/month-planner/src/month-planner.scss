@@ -10,6 +10,9 @@
     font-family: inherit,
     font-size: 14px,
     title--font-weight: 600,
+    heading--font-size: 14px,
+    heading--font-weight: 600,
+    actions--gap: 8px,
     navigation--size: 32px,
     navigation--border-radius: 6px,
     navigation__hover--background: #f4f4f5,
@@ -92,9 +95,44 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
+}
+
+// The planner's own title, in front of the month; a long one is cut, not wrapped.
+.heading {
+  overflow: hidden;
+  min-width: 0;
+  flex: 0 1 auto;
+  margin: 0;
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+// The `actions` slot and the month navigation sit together at the end of the header.
+.trailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+
+  &[hidden] {
+    display: none;
+  }
 }
 
 .title {
