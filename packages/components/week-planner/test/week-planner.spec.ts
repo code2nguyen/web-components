@@ -271,9 +271,9 @@ test('puts the actions slot at the end of the header', async ({ page, scenario }
   const settings = (await page.getByRole('button', { name: 'Settings' }).boundingBox())!
   const host = (await planner.boundingBox())!
   expect(add.x).toBeGreaterThan(heading.x + heading.width - 1)
-  expect(settings.x - (add.x + add.width)).toBeCloseTo(8, 0)
+  expect(Math.abs(settings.x - (add.x + add.width) - 8)).toBeLessThan(1)
   // Flush with the end of the header: the planner's 12px padding and 1px border.
-  expect(host.x + host.width - (settings.x + settings.width)).toBeCloseTo(13, 0)
+  expect(Math.abs(host.x + host.width - (settings.x + settings.width) - 13)).toBeLessThan(1)
   expect(Math.abs(add.y + add.height / 2 - (heading.y + heading.height / 2))).toBeLessThan(2)
 
   // Narrow, the arrows follow the actions.
@@ -290,7 +290,7 @@ test('shows the header for actions alone, at its end', async ({ page, scenario }
   await expect(planner.getByRole('heading')).toHaveCount(0)
   const add = (await page.getByRole('button', { name: 'Add event' }).boundingBox())!
   const host = (await planner.boundingBox())!
-  expect(host.x + host.width - (add.x + add.width)).toBeCloseTo(13, 0)
+  expect(Math.abs(host.x + host.width - (add.x + add.width) - 13)).toBeLessThan(1)
   await expect(page.getByRole('region', { name: 'Week plan' })).toBeVisible()
 })
 

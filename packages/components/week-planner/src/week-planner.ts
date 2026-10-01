@@ -179,6 +179,8 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @slot heading - Title at the start of the header, in place of the `heading` text. It names the planner unless `heading` or `aria-label` is set.
  * @slot actions - Controls at the end of the header, before the previous/next day arrows, e.g. an "Add event" button.
  *
+ * @csspart heading - Heading region wrapping the `heading` slot and the `heading` text fallback; assigned content keeps its own styles.
+ * @csspart actions - Actions region wrapping the `actions` slot at the end of the header, before the previous/next day arrows; assigned controls keep their own styles.
  * @csspart event - Each event block.
  *
  * @cssproperty {color} [--c2-week-planner--background=#ffffff]
@@ -453,12 +455,12 @@ export class WeekPlanner extends LitElement {
     >
       <div class="body">
         <header class="header ${usesParity || hasHeading || hasActions ? '' : 'navigation-only'}">
-          <h2 class="title" id="heading" ?hidden=${!hasHeading}>
+          <h2 class="title" part="heading" id="heading" ?hidden=${!hasHeading}>
             <slot name="heading" @slotchange=${this.slotPresence.handleSlotChange}>${this.heading}</slot>
           </h2>
           ${usesParity ? this.renderSwitch() : nothing}
           <div class="trailing">
-            <div class="actions" ?hidden=${!hasActions}><slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
+            <div class="actions" part="actions" ?hidden=${!hasActions}><slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
             ${this.renderNavigation()}
           </div>
         </header>

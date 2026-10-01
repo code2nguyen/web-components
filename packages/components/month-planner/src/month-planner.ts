@@ -208,6 +208,8 @@ function dayDiff(from: Date, to: Date): number {
  * @slot heading - Title at the start of the header, in place of the `heading` text. It names the planner unless `heading` or `aria-label` is set.
  * @slot actions - Controls at the end of the header, before the month navigation, e.g. an "Add event" button.
  *
+ * @csspart heading - Heading region wrapping the `heading` slot and the `heading` text fallback; assigned content keeps its own styles.
+ * @csspart actions - Actions region wrapping the `actions` slot at the end of the header, before the month navigation; assigned controls keep their own styles.
  * @csspart event - Each event bar (one per week the event covers).
  * @csspart agenda-event - Each event in the compact layout's list of the selected day.
  *
@@ -654,7 +656,7 @@ export class MonthPlanner extends LitElement {
       aria-labelledby=${labelledByHeading ? 'heading' : nothing}
     >
       <header class="header">
-        <h2 class="heading" id="heading" ?hidden=${!hasHeading}>
+        <h2 class="heading" part="heading" id="heading" ?hidden=${!hasHeading}>
           <slot name="heading" @slotchange=${this.slotPresence.handleSlotChange}>${this.heading}</slot>
         </h2>
         <h2 class="title" aria-live="polite">
@@ -674,7 +676,7 @@ export class MonthPlanner extends LitElement {
           }
         </h2>
         <div class="trailing">
-          <div class="actions" ?hidden=${!this.slotPresence.has('actions')}>
+          <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
             <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
           </div>
           <div class="navigation">

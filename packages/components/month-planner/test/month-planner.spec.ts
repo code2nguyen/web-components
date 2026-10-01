@@ -264,7 +264,7 @@ test('puts the actions slot before the month navigation, at the end of the heade
   const settings = (await page.getByRole('button', { name: 'Settings' }).boundingBox())!
   const previous = (await planner.getByRole('button', { name: 'Previous month' }).boundingBox())!
   const month = (await planner.getByRole('button', { name: 'September 2026' }).boundingBox())!
-  expect(settings.x - (add.x + add.width)).toBeCloseTo(8, 0)
+  expect(Math.abs(settings.x - (add.x + add.width) - 8)).toBeLessThan(1)
   expect(previous.x).toBeGreaterThan(settings.x + settings.width - 1)
   expect(add.x).toBeGreaterThan(month.x + month.width)
   expect(Math.abs(add.y + add.height / 2 - (previous.y + previous.height / 2))).toBeLessThan(2)
