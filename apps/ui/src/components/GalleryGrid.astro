@@ -5,15 +5,20 @@
  *
  * `min` is the narrowest a card may be, in pixels, and so how many fit on a row. The default suits a single control;
  * something that is a row of its own — a navigation bar, a toolbar — needs more room to be worth looking at.
+ *
+ * `columns` fixes the number of cards per row instead (one per row on a phone), for components whose cards only read
+ * well at a known width.
  */
 interface Props {
   min?: number | string
+  columns?: number | string
 }
 
-const { min = 210 } = Astro.props
+const { min = 210, columns } = Astro.props
+const style = columns ? `--gallery-columns: ${columns}` : `--gallery-card-min: ${min}px`
 ---
 
-<div class="gallery-grid" style={`--gallery-card-min: ${min}px`}>
+<div class:list={['gallery-grid', { 'has-columns': columns }]} style={style}>
   <slot />
 </div>
 
@@ -25,6 +30,14 @@ const { min = 210 } = Astro.props
     gap: 16px;
     margin: 16px 0 24px;
     align-items: start;
+
+    &.has-columns {
+      grid-template-columns: repeat(var(--gallery-columns), minmax(0, 1fr));
+
+      @media (max-width: 640px) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
 
     > .example {
       margin: 0;
