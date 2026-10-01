@@ -10,7 +10,7 @@ import type {
 } from '../store/manifest-declaration-item.ts'
 import type { ManifestDataItem } from './types.ts'
 import { cloneDeep } from 'lodash-es'
-import { getElemenetProperty } from './dom.ts'
+import { getElemenetProperty, isDataAttribute } from './dom.ts'
 
 export function normalizeManifest(value: CustomElement): ComponentManifest {
   value.attributes = value.attributes ?? []
@@ -122,8 +122,8 @@ export function updateManifestCssValue(element: HTMLElement, cssProperties: CSSD
 
 export function updateManifestAttributes(element: HTMLElement, attributes: AttributeDeclarationItem[]) {
   attributes.forEach((attr) => {
-    const attrValue = getElemenetProperty(element, attr.name)
-    attr.value = attrValue
+    attr.value = getElemenetProperty(element, attr.name)
+    attr.data = isDataAttribute(element, attr.name)
   })
 }
 

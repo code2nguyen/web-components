@@ -61,16 +61,76 @@ export function updateDomAttribute(element: HTMLElement, manifestAttributes: Att
   })
 }
 
+interface AttributeConverterLike {
+  toAttribute?: (value: unknown) => unknown
+  fromAttribute?: (value: string | null) => unknown
+}
+
+interface PropertyDeclarationLike {
+  attribute?: boolean | string
+  converter?: AttributeConverterLike | ((value: string | null) => unknown)
+}
+
+/** The Lit declaration behind an attribute (`row-key` -> the `rowKey` declaration), read from the element class. */
+function getPropertyDeclaration(element: HTMLElement, attributeName: string): { name: string; declaration: PropertyDeclarationLike } | null {
+  const elementClass = element.constructor as { elementProperties?: Map<PropertyKey, PropertyDeclarationLike> }
+  for (const [name, declaration] of elementClass.elementProperties ?? []) {
+    if (typeof name !== 'string' || declaration.attribute === false) continue
+    const attribute = typeof declaration.attribute === 'string' ? declaration.attribute : name.toLowerCase()
+    if (attribute === attributeName) return { name, declaration }
+  }
+  return null
+}
+
+function converterOf(declaration: PropertyDeclarationLike | undefined): AttributeConverterLike | undefined {
+  const converter = declaration?.converter
+  return converter && typeof converter === 'object' ? converter : undefined
+}
+
+const DATA_PROBE = [{ id: '1', label: 'probe' }]
+
+/**
+ * Whether an attribute carries JSON data (`rows`, `items`, `nodes`, a chart's `data`…): its converter writes an array
+ * of records back as JSON, which is what `jsonPropertyConverter` does and what the list converters (`a;b`) do not.
+ * Those attributes get the inspector's Data tab instead of a one-line text field.
+ */
+export function isDataAttribute(element: HTMLElement, attributeName: string): boolean {
+  const converter = converterOf(getPropertyDeclaration(element, attributeName)?.declaration)
+  if (!converter?.toAttribute) return false
+  try {
+    return converter.toAttribute(DATA_PROBE) === JSON.stringify(DATA_PROBE)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * The current value of an attribute as the attribute string the component itself would write.
+ *
+ * Serializing goes through the property's own Lit converter: a table's `rows` is JSON, its `sort` is `name:asc`, a
+ * selection `value` is `a;b`. Joining every array with `;` (as this did before) turned an array of records into
+ * `[object Object];[object Object]`, and the inspector then wrote that back and emptied the table.
+ */
 export function getElemenetProperty(element: HTMLElement, propertyName: string): string | undefined {
+  const match = getPropertyDeclaration(element, propertyName)
   // Manifest attribute names are kebab-case (`selected-tab`); the Lit property behind them is camelCase (`selectedTab`).
-  const camelName = propertyName.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
+  const camelName = match?.name ?? propertyName.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const value = (element as any)[propertyName] ?? (element as any)[camelName]
+  const value = (element as any)[camelName] ?? (element as any)[propertyName]
 
   if (value == undefined || value == null) return undefined
   if (typeof value === 'boolean') return value ? 'true' : 'false'
   if (typeof value === 'string') return value
-  if (Array.isArray(value)) return value.join(';')
+
+  const converter = converterOf(match?.declaration)
+  if (converter?.toAttribute) {
+    const serialized = converter.toAttribute(value)
+    // `null` means the value has no attribute form (a script-only `groupBy` entry): leave the attribute absent, which
+    // the sync then never writes, so the property set from script survives.
+    return serialized === null || serialized === undefined ? undefined : String(serialized)
+  }
+  if (typeof value === 'number') return String(value)
+  if (Array.isArray(value) && value.every((entry) => typeof entry !== 'object' || entry === null)) return value.join(';')
 
   return JSON.stringify(value)
 }
@@ -78,7 +138,8 @@ export function getElemenetProperty(element: HTMLElement, propertyName: string):
 export function setElemenetAttribute(element: HTMLElement, attribute: AttributeDeclarationItem) {
   if (attribute.value == null || attribute.value == undefined || (attribute.type == 'boolean' && attribute.value === 'false')) {
     element.removeAttribute(attribute.name)
-  } else {
+  } else if (element.getAttribute(attribute.name) !== attribute.value) {
+    // Every inspector edit re-syncs every attribute; rewriting an unchanged `rows` would re-parse and re-render the data.
     element.setAttribute(attribute.name, attribute.value)
   }
 }
