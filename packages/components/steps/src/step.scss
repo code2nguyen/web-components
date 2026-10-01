@@ -14,7 +14,7 @@
     row__hover--background: null,
     row--border-bottom: 1px solid #e4e4e7,
     row--outline: 2px solid rgb(2, 101, 220),
-    row__selected--background: #fafafa,
+    row__selected--background: null,
     row__selected--box-shadow: null,
     row__disabled--opacity: 0.38,
     row__horizontal--border-bottom: none,
@@ -55,8 +55,8 @@
       Consolas,
       monospace,
     ),
-    label__selected--color: null,
-    label__selected--font-weight: 600,
+    label__selected--color: rgb(2, 101, 220),
+    label__selected--font-weight: null,
     detail--color: #71717a,
     detail--font-size: null,
     detail--font-weight: 400,
@@ -241,16 +241,17 @@ button.c2-step__row {
 }
 
 .c2-step__row.is-selected {
-  background: css.cssVar(row__selected--background);
+  // Nothing but the label's colour by default: the row keeps the look of every other row, hover included.
+  background: css.cssVar(row__selected--background, row--background);
   box-shadow: css.cssVar(row__selected--box-shadow);
 
   &:hover {
-    background: css.cssVar(row__selected--background);
+    background: css.cssVar(row__selected--background, row__hover--background, row--background);
   }
 
   .c2-step__label {
-    color: css.cssVar(label__selected--color, label--color);
-    font-weight: css.cssVar(label__selected--font-weight);
+    color: css.cssVar(label__selected--color);
+    font-weight: css.cssVar(label__selected--font-weight, label--font-weight);
   }
 }
 

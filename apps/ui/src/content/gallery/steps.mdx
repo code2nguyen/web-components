@@ -12,7 +12,7 @@ a table of rows. Every step is a row and every row is on screen: a sub-step is i
 its parent's label, which is all the nesting needs. `--c2-step__guide--width: 1px` adds file-tree rules on top of
 that, and the `toggle` slot adds a chevron — both off by default.
 
-<GalleryGrid>
+<GalleryGrid columns="2">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-steps aria-label="Pipeline">
@@ -225,8 +225,7 @@ that, and the `toggle` slot adds a chevron — both off by default.
     --c2-step__row--border-radius: 6px;
     --c2-step__row--padding-block: 10px;
     --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
-    --c2-step__row__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
-    --c2-step__row__selected--box-shadow: inset 0 -2px 0 var(--c2-theme--color-primary, #0265dc);
+    --c2-step__label__selected--color: var(--c2-theme--color-primary, #0265dc);
     --c2-step__marker--size: 18px;
     --c2-step__label--font-family: inherit;
     --c2-step__label--font-size: 14px;

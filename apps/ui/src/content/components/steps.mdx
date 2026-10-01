@@ -142,12 +142,12 @@ npm install @c2n/steps
     --c2-step__current--color: var(--c2-theme--color-primary, #0265dc);
     --c2-step__success--color: #16a34a;
   }
-  /* A horizontal stepper: the body font, and the selected step underlined in the accent colour. */
+  /* A horizontal stepper: the body font, and the selected step's label in the accent colour. */
   .stepper {
     --c2-steps--gap: 4px;
     --c2-step__row--border-radius: 6px;
     --c2-step__row--padding-block: 10px;
-    --c2-step__row__selected--box-shadow: inset 0 -2px 0 var(--c2-theme--color-primary, #0265dc);
+    --c2-step__label__selected--color: var(--c2-theme--color-primary, #0265dc);
     --c2-step__marker--size: 20px;
     --c2-step__marker--font-size: 11px;
     --c2-step__label--font-family: inherit;
@@ -331,8 +331,10 @@ any time. `interactive` is that:
 
 - Every row that is not a disclosure becomes a `<button>`. A group's row in a vertical list stays its disclosure.
 - The list keeps one selected step in `selected`, named by the step's `value` (a data node's `id`) or, when it has
-  none, by its dotted path (`2`, `1.3`). The selected row draws `--c2-step__row__selected--background`, an optional
-  `--c2-step__row__selected--box-shadow` indicator and a bolder label, and is announced with `aria-current`.
+  none, by its dotted path (`2`, `1.3`). The selected row only changes its label colour
+  (`--c2-step__label__selected--color`); `--c2-step__row__selected--background`,
+  `--c2-step__row__selected--box-shadow` and `--c2-step__label__selected--font-weight` add more when a design wants
+  it. It is announced with `aria-current`.
 - Pressing a step selects it and fires `selection-change` with `{ value, path }`. Setting `selected` (or calling
   `select(value)`) moves the selection from code; only `select()` fires the event.
 - `disabled` keeps a step from being selected — a result that does not exist yet.

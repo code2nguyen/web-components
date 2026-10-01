@@ -101,7 +101,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {color} --c2-step__row__hover--background - Set it to make the rows respond to the pointer.
  * @cssproperty {border} [--c2-step__row--border-bottom=1px solid #e4e4e7] - The hairline under each row.
  * @cssproperty {border} [--c2-step__row--outline=2px solid rgb(2, 101, 220)] - Focus ring of a row that is a button: a group's, and every selectable one.
- * @cssproperty {color} [--c2-step__row__selected--background=#fafafa] - Background of the selected row in an `interactive` list.
+ * @cssproperty {color} --c2-step__row__selected--background - Background of the selected row in an `interactive` list. None by default: the label colour alone marks the selection.
  * @cssproperty {box-shadow} --c2-step__row__selected--box-shadow - An indicator for the selected row — `inset 0 -2px 0 currentColor` underlines it.
  * @cssproperty {opacity} [--c2-step__row__disabled--opacity=0.38] - A `disabled` step in an `interactive` list.
  * @cssproperty {border} [--c2-step__row__horizontal--border-bottom=none] - The hairline under each step of a horizontal list, which has none by default.
@@ -135,8 +135,8 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {font-size} [--c2-step__label--font-size=13px]
  * @cssproperty {font-weight} [--c2-step__label--font-weight=500]
  * @cssproperty {font-family} [--c2-step__label--font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace]
- * @cssproperty {color} --c2-step__label__selected--color - Label colour of the selected row. Falls back to the label colour.
- * @cssproperty {font-weight} [--c2-step__label__selected--font-weight=600]
+ * @cssproperty {color} [--c2-step__label__selected--color=rgb(2, 101, 220)] - Label colour of the selected row: what marks the selection by default.
+ * @cssproperty {font-weight} --c2-step__label__selected--font-weight - Label weight of the selected row. Falls back to the label weight.
  * @cssproperty {color} [--c2-step__detail--color=#71717a]
  * @cssproperty {font-size} --c2-step__detail--font-size - Falls back to the label size.
  * @cssproperty {font-weight} [--c2-step__detail--font-weight=400]
