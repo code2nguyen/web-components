@@ -98,7 +98,14 @@ export class StatusPanel extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    if (!isServer) this.syncSlotState()
+    // A server-rendered panel cannot know its slotted children, so its shadow DOM arrives with the header hidden.
+    // Hydration takes the first render's values as already in the DOM, so state set before it would never reach
+    // the DOM; such a panel reads its slots in `firstUpdated` instead, which renders again after hydrating.
+    if (!isServer && !this.shadowRoot?.hasChildNodes()) this.syncSlotState()
+  }
+
+  override firstUpdated() {
+    this.syncSlotState()
   }
 
   private syncSlotState() {
