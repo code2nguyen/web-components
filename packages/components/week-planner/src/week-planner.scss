@@ -17,6 +17,7 @@
     hour-label--width: 48px,
     hour-label--color: #71717a,
     hour-label--font-size: 11px,
+    actions--gap: 8px,
     navigation--size: 28px,
     navigation--border-radius: 6px,
     navigation__hover--background: #f4f4f5,
@@ -91,10 +92,32 @@
   white-space: nowrap;
 }
 
+// The `actions` slot and the arrows sit together at the end of the header.
+.trailing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: css.cssVar(actions--gap);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.title[hidden] {
+  display: none;
+}
+
 .navigation {
   display: none;
   gap: 2px;
-  margin-left: auto;
 }
 
 .nav {
