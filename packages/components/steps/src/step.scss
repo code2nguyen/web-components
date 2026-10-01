@@ -1,3 +1,4 @@
+@use 'sass:string';
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-step,
@@ -18,7 +19,11 @@
     row__disabled--opacity: 0.38,
     row__horizontal--border-bottom: none,
     row__horizontal--min-width: 96px,
-
+    row__horizontal--row-gap: 8px,
+    row__horizontal--align-content: start,
+    // Quoted rows of a `grid-template-areas`: the cells are `marker`, `rail`, `text` and `trailing`, over three
+    // columns sized `auto auto 1fr`. The rail always takes the last column.
+    row__horizontal--grid-template-areas: string.unquote('"marker rail rail" "text text text" "trailing trailing trailing"'),
     toggle--size: 14px,
     toggle--gap: 4px,
     toggle--color: #a1a1aa,
@@ -556,11 +561,14 @@ button.c2-step__row {
 }
 
 /**
- * Horizontal: the step is a column. The marker sits on a rail that runs to the edge of the step, where the next
- * step's marker picks it up, and the text sits underneath. Sub-steps are not drawn — the step still takes their
- * status — so there is no disclosure, no indent and no guide.
+ * Horizontal: the step is a column, laid out on a grid whose areas say where the text goes around the marker —
+ * under it by default, over it, or beside it on either side (`--c2-step__row__horizontal--grid-template-areas`).
+ * The tracks are fixed at `auto auto 1fr`, and the rail always takes the last one, so whatever the placement the rail
+ * starts right after this step's marker (or its label, when the label sits after it) and runs on through the gap to
+ * the next step, ending where that one starts: the steps are always linked.
+ *
+ * Sub-steps are not drawn — the step still takes their status — so there is no disclosure, no indent and no guide.
  */
-// A column, so every step of the list is as tall as the tallest: a selected row's indicator lines up across them.
 .c2-step__frame.is-horizontal {
   display: flex;
   flex-direction: column;
@@ -568,9 +576,17 @@ button.c2-step__row {
 }
 
 .is-horizontal .c2-step__row {
+  display: grid;
   flex: 1 1 auto;
-  flex-direction: column;
-  align-items: stretch;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-areas: css.cssVar(row__horizontal--grid-template-areas);
+  align-content: css.cssVar(row__horizontal--align-content);
+  // Everything hangs from one line — the marker's centre — so the rails line up from step to step whatever the
+  // text under, over or beside each marker is.
+  align-items: start;
+  --_line: max(#{css.cssVar(label--font-size)} * 1.5, #{css.cssVar(marker--size)});
+  column-gap: css.cssVar(rail--gap);
+  row-gap: css.cssVar(row__horizontal--row-gap);
   padding-inline-start: css.cssVar(row--padding-inline);
   border-bottom: css.cssVar(row__horizontal--border-bottom);
 
@@ -579,34 +595,53 @@ button.c2-step__row {
   }
 }
 
+// The marker and the rail are cells of the row's grid, not a column of their own.
 .is-horizontal .c2-step__gutter {
-  flex-direction: row;
-  align-items: center;
-  align-self: stretch;
+  display: contents;
 }
 
 .is-horizontal .c2-step__marker {
-  margin-top: 0;
+  grid-area: marker;
+  margin-top: calc((var(--_line) - #{css.cssVar(marker--size)}) / 2);
 }
 
+/**
+ * The rail fills its cell, then carries on past the end of the row — through the row's own padding, the list's gap
+ * and the next row's padding — to stop one rail gap short of the next step. Above the rows, so a selected or hovered
+ * neighbour's background does not cut it.
+ */
 .is-horizontal .c2-step__rail {
+  grid-area: rail;
+  position: relative;
+  z-index: 1;
   width: auto;
   height: css.cssVar(rail__horizontal--width);
   min-width: 0;
+  margin-top: calc((var(--_line) - #{css.cssVar(rail__horizontal--width)}) / 2);
+  margin-inline-end: calc(#{css.cssVar(rail--gap)} - 2 * #{css.cssVar(row--padding-inline)} - var(--c2-steps--gap, 0px));
   border-radius: css.cssVar(rail__horizontal--width);
 }
 
-// The last step's rail would lead nowhere; it keeps its place so every step is the same width.
+// The last step's rail would lead nowhere; it keeps its cell so every step is the same width, but stops at the end
+// of the row, or the list would scroll by the length of a rail nobody can see.
 :host([last]) .is-horizontal .c2-step__rail {
   visibility: hidden;
+  margin-inline-end: 0;
 }
 
 // A column is narrow, so the detail goes under the label whatever `text--flex-direction` says.
 .is-horizontal .c2-step__text {
-  flex: none;
+  grid-area: text;
+  // Beside the marker, the label's first line is the one centred on it.
+  margin-top: calc((var(--_line) - #{css.cssVar(label--font-size)} * 1.5) / 2);
   flex-direction: column;
   align-items: flex-start;
   gap: css.cssVar(detail--row-gap);
+}
+
+.is-horizontal .c2-step__trailing {
+  grid-area: trailing;
+  justify-self: start;
 }
 
 .is-horizontal .c2-step__label,

@@ -151,3 +151,50 @@ test('data-driven: a node is selected by its id, and `disabled` carries over', a
   await expect(subject).toHaveJSProperty('selected', 'result')
   await expect(result).toHaveAttribute('aria-current', 'true')
 })
+
+test('the rail links every step to the next, wherever the text sits around the marker', async ({ page, scenario }) => {
+  await scenario('placements')
+  for (const placement of ['below', 'above', 'end', 'start']) {
+    const gaps = await page.locator(`c2-steps.${placement}`).evaluate((list) => {
+      const steps = [...list.querySelectorAll('c2-step')]
+      const box = (step: Element, part: string) => step.shadowRoot!.querySelector(`[part="${part}"]`)!.getBoundingClientRect()
+      return steps.slice(0, -1).map((step, index) => {
+        const next = steps[index + 1]
+        // The next step starts with its marker, or with its label when the label comes first.
+        const nextStart = Math.min(box(next, 'marker').left, box(next, 'label').left)
+        const rail = box(step, 'rail')
+        const marker = box(step, 'marker')
+        return { lead: nextStart - rail.right, width: rail.width, onMarkerLine: Math.abs(rail.top + rail.height / 2 - (marker.top + marker.height / 2)) }
+      })
+    })
+    for (const { lead, width, onMarkerLine } of gaps) {
+      // One rail gap (4px) short of the next step, never short of it by a whole padding or a list gap.
+      expect(lead, placement).toBeCloseTo(4, 0)
+      expect(width, placement).toBeGreaterThan(8)
+      expect(onMarkerLine, placement).toBeLessThan(1)
+    }
+    // Every marker of the list on one line, so the rails form one line too.
+    const tops = await page
+      .locator(`c2-steps.${placement}`)
+      .evaluate((list) => [...list.querySelectorAll('c2-step')].map((step) => step.shadowRoot!.querySelector('[part="marker"]')!.getBoundingClientRect().top))
+    expect(new Set(tops).size, placement).toBe(1)
+  }
+})
+
+test('the text goes under, over, after or before the marker', async ({ page, scenario }) => {
+  await scenario('placements')
+  const where = async (placement: string) =>
+    page
+      .locator(`c2-steps.${placement} c2-step`)
+      .first()
+      .evaluate((step) => {
+        const box = (part: string) => step.shadowRoot!.querySelector(`[part="${part}"]`)!.getBoundingClientRect()
+        const marker = box('marker')
+        const label = box('label')
+        return { below: label.top >= marker.bottom, above: label.bottom <= marker.top, after: label.left >= marker.right, before: label.right <= marker.left }
+      })
+  expect(await where('below')).toMatchObject({ below: true, after: false })
+  expect(await where('above')).toMatchObject({ above: true, after: false })
+  expect(await where('end')).toMatchObject({ after: true, below: false, above: false })
+  expect(await where('start')).toMatchObject({ before: true, below: false, above: false })
+})

@@ -122,6 +122,32 @@ const markup: Record<string, string> = {
     </c2-step>
     <c2-step status="pending" label="Publish"></c2-step>
   </c2-steps>`,
+  // Every placement of the text around the marker, one list each; the rail must link every step whatever it is.
+  placements: `
+    <c2-steps id="subject" class="below" orientation="horizontal" style="width:640px;--c2-steps--gap:16px" aria-label="Below">
+    <c2-step status="success" label="Account" detail="Signed in" trailing="1 s"></c2-step>
+    <c2-step status="current" label="Plan" detail="Team"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+    </c2-steps>
+    <c2-steps class="above" orientation="horizontal" style="width:640px;--c2-step__row__horizontal--grid-template-areas:'text text text' 'trailing trailing trailing' 'marker rail rail';--c2-step__row__horizontal--align-content:end" aria-label="Above">
+    <c2-step status="success" label="Account" detail="Signed in" trailing="1 s"></c2-step>
+    <c2-step status="current" label="Plan" detail="Team"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+    </c2-steps>
+    <c2-steps class="end" orientation="horizontal" style="width:640px;--c2-step__row__horizontal--grid-template-areas:'marker text rail' '. trailing .'" aria-label="Beside">
+    <c2-step status="success" label="Account" detail="Signed in" trailing="1 s"></c2-step>
+    <c2-step status="current" label="Plan" detail="Team"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+    </c2-steps>
+    <c2-steps class="start" orientation="horizontal" style="width:640px;--c2-step__row__horizontal--grid-template-areas:'text marker rail' 'trailing . .'" aria-label="Before">
+    <c2-step status="success" label="Account" detail="Signed in" trailing="1 s"></c2-step>
+    <c2-step status="current" label="Plan" detail="Team"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+    </c2-steps>`,
   // The task view: the process step shows the log, the result step shows the result once there is one.
   interactive: `<c2-steps id="subject" orientation="horizontal" interactive selected="process" aria-label="Task">
     <c2-step value="process" status="running" label="Process" detail="Running"></c2-step>

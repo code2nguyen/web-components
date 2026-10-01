@@ -240,4 +240,24 @@ that, and the `toggle` slot adds a chevron — both off by default.
 </c2-steps>
 ```
 
+```html tag=MdxCodeBlock,label=Labels beside
+<style>
+  .labels-beside {
+    --c2-step__row__horizontal--grid-template-areas: 'marker text rail' '. trailing .';
+    --c2-step__rail--gap: 10px;
+    --c2-step__rail--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-step__marker--size: 20px;
+    --c2-step__label--font-family: inherit;
+    --c2-step__label--font-size: 14px;
+    --c2-step__label--font-weight: 600;
+    --c2-step__current--color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-steps class="labels-beside" orientation="horizontal" current="1" aria-label="Onboarding">
+  <c2-step label="Profile"></c2-step>
+  <c2-step label="Team"></c2-step>
+  <c2-step label="Billing"></c2-step>
+</c2-steps>
+```
+
 </GalleryGrid>

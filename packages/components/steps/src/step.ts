@@ -106,6 +106,9 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {opacity} [--c2-step__row__disabled--opacity=0.38] - A `disabled` step in an `interactive` list.
  * @cssproperty {border} [--c2-step__row__horizontal--border-bottom=none] - The hairline under each step of a horizontal list, which has none by default.
  * @cssproperty {pixel} [--c2-step__row__horizontal--min-width=96px] - The narrowest a step of a horizontal list gets before the list scrolls.
+ * @cssproperty {grid-template-areas} [--c2-step__row__horizontal--grid-template-areas="marker rail rail" "text text text" "trailing trailing trailing"] - Where the text sits around the marker in a horizontal list. The cells are `marker`, `rail`, `text` and `trailing`, over three columns sized `auto auto 1fr`; the rail always takes the last one and runs on to the next step. Text over the marker: `"text text text" "trailing trailing trailing" "marker rail rail"`, with `--c2-step__row__horizontal--align-content: end`. Beside it: `"marker text rail" ". trailing ."`. Before it: `"text marker rail" "trailing . ."`.
+ * @cssproperty {align-content} [--c2-step__row__horizontal--align-content=start] - Which end of a horizontal step its rows pack to when a neighbour is taller. `end` with the text over the marker keeps every marker on one line.
+ * @cssproperty {pixel} [--c2-step__row__horizontal--row-gap=8px] - Space between the marker's line and the text above or below it in a horizontal list.
  *
  * @cssproperty {pixel} [--c2-step__toggle--size=14px] - Width of the `toggle` slot's column, when it is filled.
  * @cssproperty {pixel} [--c2-step__toggle--gap=4px] - Space between that column and the marker.
@@ -126,7 +129,7 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  * @cssproperty {pixel} [--c2-step__rail--width=0px] - Width of the connector. `0px` is the trace look; `2px` gives a stepper its rail.
  * @cssproperty {color} [--c2-step__rail--color=#e4e4e7]
  * @cssproperty {pixel} [--c2-step__rail--gap=4px] - Space between the marker and the rail.
- * @cssproperty {pixel} [--c2-step__rail__horizontal--width=2px] - Thickness of the connector in a horizontal list, where a stepper wants one by default. `0px` turns it off.
+ * @cssproperty {pixel} [--c2-step__rail__horizontal--width=2px] - Thickness of the connector in a horizontal list, which always links one step to the next: it runs from this step's marker (or its label, when the label comes after the marker) through the gap to where the next step starts, one `--c2-step__rail--gap` short of it at each end.
  *
  * @cssproperty {color} [--c2-step__label--color=#18181b]
  * @cssproperty {font-size} [--c2-step__label--font-size=13px]

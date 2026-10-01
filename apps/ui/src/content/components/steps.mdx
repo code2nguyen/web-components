@@ -54,9 +54,23 @@ stepper gets its rail. Numbering follows the tree: `marker="number"` draws a dot
 third step reads `3.1` rather than a second `1`.
 
 **Horizontal.** `orientation="horizontal"` lays the top-level steps out side by side, each a column with its marker
-on a connector rail and its text underneath. The rail is on by default there (`--c2-step__rail__horizontal--width`,
-`2px`), because a stepper across a view wants one. Sub-steps are not drawn in a horizontal list, but a group still
-takes their status, so a stage reads as running or failed.
+on a connector rail and its text underneath. **The rail always links one step to the next**: it starts right after a
+step's marker and runs through the gap to where the next step begins, whatever the widths and paddings
+(`--c2-step__rail__horizontal--width`, `2px`, sets its thickness). Sub-steps are not drawn in a horizontal list, but a
+group still takes their status, so a stage reads as running or failed.
+
+**The text can sit anywhere around the marker** — under it, over it, after it or before it. That is one variable,
+`--c2-step__row__horizontal--grid-template-areas`, naming where the `marker`, `rail`, `text` and `trailing` cells go
+on a three-column grid (`auto auto 1fr`). The rail always takes the last column, so it still links the steps:
+
+| Text                | `--c2-step__row__horizontal--grid-template-areas`                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| under (the default) | `"marker rail rail" "text text text" "trailing trailing trailing"`                                                        |
+| over                | `"text text text" "trailing trailing trailing" "marker rail rail"`, with `--c2-step__row__horizontal--align-content: end` |
+| after the marker    | `"marker text rail" ". trailing ."`                                                                                       |
+| before the marker   | `"text marker rail" "trailing . ."`                                                                                       |
+
+Every marker of a list hangs from the same line, so the rails line up from step to step whatever text each one has.
 
 **Interactive.** `interactive` turns every row that is not a disclosure into a button, and the list keeps one
 selected step — see [Selecting a step](#selecting-a-step).
@@ -140,6 +154,14 @@ npm install @c2n/steps
     --c2-step__label--font-size: 14px;
     --c2-step__detail--font-size: 12px;
     --c2-step__current--color: var(--c2-theme--color-primary, #0265dc);
+  }
+  .above {
+    --c2-step__row__horizontal--grid-template-areas: 'text text text' 'trailing trailing trailing' 'marker rail rail';
+    --c2-step__row__horizontal--align-content: end;
+  }
+  .beside {
+    --c2-step__row__horizontal--grid-template-areas: 'marker text rail' '. trailing .';
+    --c2-step__rail--gap: 8px;
   }
 </style>
 
@@ -259,6 +281,24 @@ npm install @c2n/steps
     <c2-step label="Account" detail="ada@example.com"></c2-step>
     <c2-step label="Plan" detail="Team, yearly"></c2-step>
     <c2-step label="Payment" detail="Card or invoice"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="Horizontal, text over the marker">
+  <c2-steps class="stepper above" orientation="horizontal" marker="number" current="1" aria-label="Checkout, text over">
+    <c2-step label="Account" detail="ada@example.com"></c2-step>
+    <c2-step label="Plan" detail="Team, yearly"></c2-step>
+    <c2-step label="Payment"></c2-step>
+    <c2-step label="Confirm"></c2-step>
+  </c2-steps>
+</div>
+
+<div data-label="Horizontal, text beside the marker — the rail runs on after the label">
+  <c2-steps class="stepper beside" orientation="horizontal" current="1" aria-label="Checkout, text beside">
+    <c2-step label="Account"></c2-step>
+    <c2-step label="Plan"></c2-step>
+    <c2-step label="Payment"></c2-step>
     <c2-step label="Confirm"></c2-step>
   </c2-steps>
 </div>
