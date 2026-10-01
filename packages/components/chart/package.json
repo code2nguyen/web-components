@@ -36,6 +36,10 @@
       "types": "./types/src/radar-chart.d.ts",
       "default": "./dist/radar-chart.js"
     },
+    "./pyramid-chart.js": {
+      "types": "./types/src/pyramid-chart.d.ts",
+      "default": "./dist/pyramid-chart.js"
+    },
     "./scatter-chart.js": {
       "types": "./types/src/scatter-chart.d.ts",
       "default": "./dist/scatter-chart.js"
@@ -123,6 +127,7 @@
     "line chart",
     "gauge chart",
     "radar chart",
+    "pyramid chart",
     "scatter plot",
     "bubble chart",
     "candlestick chart",

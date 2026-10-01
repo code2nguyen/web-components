@@ -10,7 +10,7 @@ interface Case {
   attributes: string
   series: string
   data: unknown
-  /** The two legend keys, in order: series fields, a pie's slice labels, an overlap chart's set keys. */
+  /** The two legend keys, in order: series fields, a pie's slice labels or a pyramid's levels, an overlap chart's set keys. */
   keys: string[]
   /** The engine hover that shows the tooltip. */
   hover: { index: number; seriesIndex: number }
@@ -104,6 +104,21 @@ const cases: Case[] = [
   {
     tag: 'c2-pie-chart',
     attributes: 'label-field="t"',
+    series: '<c2-chart-series field="s0"></c2-chart-series>',
+    data: [
+      { t: 'North', s0: 10 },
+      { t: 'South', s0: 6 },
+    ],
+    keys: ['North', 'South'],
+    hover: { index: 0, seriesIndex: 0 },
+    clickKey: 'South',
+    click: { index: 1, seriesIndex: 0 },
+    dim: 'pie',
+  },
+  {
+    tag: 'c2-pyramid-chart',
+    // Data order from the apex, so the engine's datum order is the rows' and the dimmed levels read like slices.
+    attributes: 'label-field="t" sort="none"',
     series: '<c2-chart-series field="s0"></c2-chart-series>',
     data: [
       { t: 'North', s0: 10 },
