@@ -1,7 +1,10 @@
 ---
 // A task view driven by a horizontal, interactive `c2-steps`: the process step shows the task's log while it runs,
-// the result step shows what it produced once it is done, and the reader can always go back to the log. Plain tags,
-// upgraded by the script below, because the list is configured by the run rather than by the markup.
+// the result step shows what it produced once it is done, and the reader can always go back to the log.
+//
+// The list is created by the script rather than written here. Server-rendered, it would hydrate against markup that
+// knows nothing of the run: a `c2-step` tag here is assigned its props and left deferred, and an island configured
+// before it hydrates fails Lit's hydration check.
 import SiteButton from './ui/SiteButton.astro'
 ---
 
@@ -10,10 +13,7 @@ import SiteButton from './ui/SiteButton.astro'
     <SiteButton variant="primary" size="sm" data-task-run>Run the task</SiteButton>
     <SiteButton variant="ghost" size="sm" data-task-reset>Reset</SiteButton>
   </div>
-  <c2-steps class="task-demo__steps" orientation="horizontal" interactive selected="process" aria-label="Task" data-task-steps>
-    <c2-step value="process" label="Process" detail="Not started"></c2-step>
-    <c2-step value="result" label="Result" detail="Waiting for the task" disabled></c2-step>
-  </c2-steps>
+  <div class="task-demo__steps-slot" data-task-steps-slot></div>
   <div class="task-demo__panel" data-task-panel="process">
     <c2-log-viewer class="task-demo__log" aria-label="Task log" data-task-log></c2-log-viewer>
   </div>
@@ -26,8 +26,7 @@ import SiteButton from './ui/SiteButton.astro'
 <script>
   import '@c2n/steps'
   import '@c2n/log-viewer'
-  import type { Steps, StepsSelectionChangeEventDetail } from '@c2n/steps'
-  import type { Step } from '@c2n/steps/step.js'
+  import type { StepNode, StepsSelectionChangeEventDetail } from '@c2n/steps'
   import type { LogViewer } from '@c2n/log-viewer'
 
   const LOG: [level: 'info' | 'warn', message: string][] = [
@@ -42,9 +41,11 @@ import SiteButton from './ui/SiteButton.astro'
   ]
 
   document.querySelectorAll<HTMLElement>('[data-task-demo]').forEach((demo) => {
-    const steps = demo.querySelector<Steps>('[data-task-steps]')!
-    const process = steps.querySelector<Step>('c2-step[value="process"]')!
-    const result = steps.querySelector<Step>('c2-step[value="result"]')!
+    const steps = Object.assign(document.createElement('c2-steps'), { orientation: 'horizontal', interactive: true })
+    steps.className = 'task-demo__steps'
+    steps.setAttribute('aria-label', 'Task')
+    demo.querySelector('[data-task-steps-slot]')!.replaceWith(steps)
+    const update = (id: string, patch: Partial<StepNode>) => steps.updateStep(id, patch)
     const log = demo.querySelector<LogViewer>('[data-task-log]')!
     log.columns = ['level', 'message']
     const summary = demo.querySelector<HTMLElement>('[data-task-summary]')!
@@ -61,27 +62,30 @@ import SiteButton from './ui/SiteButton.astro'
     const reset = () => {
       if (timer) clearTimeout(timer)
       generation += 1
-      Object.assign(process, { status: 'pending', detail: 'Not started', trailing: '' })
-      Object.assign(result, { status: 'pending', detail: 'Waiting for the task', disabled: true })
+      steps.steps = [
+        { id: 'process', label: 'Process', detail: 'Not started' },
+        { id: 'result', label: 'Result', detail: 'Waiting for the task', disabled: true },
+      ]
       steps.selected = 'process'
       show('process')
       log.clear()
     }
 
+    reset()
     demo.querySelector('[data-task-reset]')?.addEventListener('click', reset)
     demo.querySelector('[data-task-run]')?.addEventListener('click', async () => {
       reset()
       const mine = generation
       const started = performance.now()
-      Object.assign(process, { status: 'running', detail: 'Running' })
+      update('process', { status: 'running', detail: 'Running' })
       for (const [level, message] of LOG) {
         await wait(450)
         if (generation !== mine) return
         log.appendEntries({ level: level.toUpperCase(), message })
       }
       const seconds = ((performance.now() - started) / 1000).toFixed(1)
-      Object.assign(process, { status: 'warning', detail: `${LOG.length} log lines`, trailing: `${seconds} s` })
-      Object.assign(result, { status: 'success', detail: '1 284 rows', disabled: false })
+      update('process', { status: 'warning', detail: `${LOG.length} log lines`, trailing: `${seconds} s` })
+      update('result', { status: 'success', detail: '1 284 rows', disabled: false })
       summary.textContent = `Finished in ${seconds} s with 2 warnings. Select Process to read the log again.`
       // Programmatic, so no `selection-change`: the view follows by hand.
       steps.selected = 'result'
@@ -103,7 +107,12 @@ import SiteButton from './ui/SiteButton.astro'
     flex-wrap: wrap;
     gap: 8px;
   }
-  .task-demo__steps {
+  .task-demo__steps-slot {
+    // Holds the place of the list until the script creates it, so the panel does not jump.
+    min-height: 58px;
+  }
+  // Created by the script, so outside Astro's scoping.
+  :global(.task-demo__steps) {
     --c2-steps--gap: 8px;
     --c2-step__row--border-radius: 8px;
     --c2-step__row--padding-block: 10px;

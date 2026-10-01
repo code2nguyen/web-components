@@ -560,11 +560,15 @@ button.c2-step__row {
  * step's marker picks it up, and the text sits underneath. Sub-steps are not drawn — the step still takes their
  * status — so there is no disclosure, no indent and no guide.
  */
-.is-horizontal {
+// A column, so every step of the list is as tall as the tallest: a selected row's indicator lines up across them.
+.c2-step__frame.is-horizontal {
+  display: flex;
+  flex-direction: column;
   min-width: css.cssVar(row__horizontal--min-width);
 }
 
 .is-horizontal .c2-step__row {
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: stretch;
   padding-inline-start: css.cssVar(row--padding-inline);

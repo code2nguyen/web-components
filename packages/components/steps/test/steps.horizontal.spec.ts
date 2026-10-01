@@ -33,6 +33,18 @@ test('a horizontal list draws a rail between its markers by default, and none af
   await expect(page.locator('c2-step[label="Publish"] [part="rail"]')).toHaveCSS('visibility', 'hidden')
 })
 
+test('every step of a horizontal list is as tall as the tallest, so a selected row lines up with the rest', async ({ page, scenario }) => {
+  await scenario('interactive')
+  await page.locator('c2-step[value="process"]').evaluate(async (step) => {
+    step.setAttribute('trailing', '3.6 s')
+    await (step as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete
+  })
+  const process = await page.locator('c2-step[value="process"] [part="row"]').boundingBox()
+  const result = await page.locator('c2-step[value="result"] [part="row"]').boundingBox()
+  if (!process || !result) throw new Error('Rows have no bounds')
+  expect(result.height).toBe(process.height)
+})
+
 test('a list is not interactive by default: no row is a button', async ({ page, scenario }) => {
   await scenario('horizontal')
   await expect(page.locator('c2-step button')).toHaveCount(0)
