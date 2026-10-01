@@ -10,6 +10,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 import { ButtonGroup } from '@c2n/button-group'
 import { Button } from '@c2n/button'
 import { IconButton } from '@c2n/icon-button'
+import { Select } from '@c2n/select'
 import { FeatherAlignLeftIcon as FeatherAlignLeft } from '@c2n/feather-icons/icons/align-left.js'
 import { FeatherAlignCenterIcon as FeatherAlignCenter } from '@c2n/feather-icons/icons/align-center.js'
 import { FeatherAlignRightIcon as FeatherAlignRight } from '@c2n/feather-icons/icons/align-right.js'
@@ -134,6 +135,18 @@ Importing `@c2n/button-group` also registers `c2-button` and `c2-icon-button`.
     </c2-icon-button>
   </c2-button-group>
 </div>
+<div data-label="Toolbar">
+  <c2-button-group client:load class="outlined" toolbar selection="multiple" value="bold" style="--c2-button-group--gap: 6px" aria-label="Formatting">
+    <c2-icon-button value="bold" aria-label="Bold"><c2-feather-bold></c2-feather-bold></c2-icon-button>
+    <c2-icon-button value="italic" aria-label="Italic"><c2-feather-italic></c2-feather-italic></c2-icon-button>
+    <c2-icon-button value="underline" aria-label="Underline"><c2-feather-underline></c2-feather-underline></c2-icon-button>
+    <c2-select client:only="lit" aria-label="Text size" value="body" style="width: 120px">
+      <c2-list-item value="body">Body</c2-list-item>
+      <c2-list-item value="heading">Heading</c2-list-item>
+      <c2-list-item value="caption">Caption</c2-list-item>
+    </c2-select>
+  </c2-button-group>
+</div>
 <div data-label="Full width and disabled">
   <c2-button-group client:only="lit" class="full" appearance="segmented" stretched value="no" aria-label="Answer">
     <c2-button value="yes">Yes</c2-button>
@@ -147,6 +160,25 @@ Importing `@c2n/button-group` also registers `c2-button` and `c2-icon-button`.
 </div>
 ```
 
-Items identify themselves with a `value` attribute (their index otherwise). In `single` mode the group's `value` is the pressed item's value and clicking the pressed item keeps it pressed; in `multiple` mode `value` is a comma-separated list and each click toggles one entry. Set `value` from code to change the selection silently; `change` fires for pointer and keyboard selection with the new value in `detail.value`. The group marks its items `toggle` in selection modes so unpressed buttons still announce `aria-pressed="false"`, and `disabled` on the group disables every item without touching the ones you disabled yourself.
+Items identify themselves with a `value` attribute (their index otherwise). In `single` mode the group's `value` is the pressed item's value and clicking the pressed item keeps it pressed; in `multiple` mode `value` is a comma-separated list and each click toggles one entry. Set `value` from code to change the selection silently; `input` and then `change` fire for pointer and keyboard selection, with the new value in `change`'s `detail.value`. The group marks its items `toggle` in selection modes so unpressed buttons still announce `aria-pressed="false"`, and `disabled` on the group disables every item without touching the ones you disabled yourself.
 
 The group owns the frame of its items through the button variables: `--c2-button-group--border` applies one border to every item (an outlined group), `--c2-button-group--border-radius` rounds the outside corners, and attached items overlap by `--c2-button-group__divider--width` so shared borders are drawn once. In segmented appearance, `size="s|m|l"` controls the item dimensions and `stretched` makes all items share the available width. The track, item and animated indicator each have dedicated `--c2-button-group__segmented-*` and `--c2-button-group__indicator-*` theme variables.
+
+### Keyboard and toolbars
+
+A single-selection group (including every segmented one) is one Tab stop, like a radio group: Tab lands on the pressed item, and the arrow keys move the selection, Home and End jump to the ends, and disabled items are skipped. A plain or `multiple` group keeps one Tab stop per item.
+
+Add `toolbar` for a row of controls that belongs together: a formatting bar, a table's actions. The group takes the `toolbar` role and stays one Tab stop, remembering the item focused last, and the arrow keys, Home and End move focus across every focusable child — `c2-button`, `c2-icon-button`, `c2-select`, `c2-text-field`, links — without changing the selection, which Space and Enter still do. A key the focused control uses itself is left to it: Up and Down open a `c2-select`, and inside a text field the arrows and Home/End move the caret, so put a text field last in its toolbar. `toolbar` combines with any `selection` and either `orientation`.
+
+### In a form
+
+With a `name`, the group is a form control: it submits its pressed values under that name (one entry per value with `selection="multiple"`, nothing when none is pressed), goes back to its initial `value` when the form resets, and is disabled by a disabled `<fieldset>`. It fires `input` just before `change`, so `v-model` and Angular's `ngModel` bind to it like any other control.
+
+```html tag=CodeBlock
+<form>
+  <c2-button-group name="view" appearance="segmented" value="list" aria-label="View">
+    <c2-button value="list">List</c2-button>
+    <c2-button value="board">Board</c2-button>
+  </c2-button-group>
+</form>
+```
