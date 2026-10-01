@@ -16,6 +16,7 @@ import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
 import type { BarChart } from '@c2n/chart/bar-chart.js'
 import type { BubbleChart } from '@c2n/chart/bubble-chart.js'
+import type { ButterflyChart } from '@c2n/chart/butterfly-chart.js'
 import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
@@ -85,6 +86,16 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: BubbleChart['series'] | string
+      }
+      'c2-butterfly-chart': Omit<C2Props<ButterflyChart>, 'series'> & {
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        series?: ButterflyChart['series'] | string
       }
       'c2-candlestick-chart': Omit<C2Props<CandlestickChart>, 'series'> & {
         'open-field'?: Attribute

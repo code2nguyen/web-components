@@ -1,0 +1,84 @@
+---
+title: 'Butterfly chart'
+description: 'Two series back to back on a shared category axis, the categories named between them. The population pyramid is the classic case.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-butterfly-chart'
+apiTags: ['c2-butterfly-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { ButterflyChart } from '@c2n/chart/butterfly-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+import { ChartLegend } from '@c2n/chart/chart-legend.js'
+
+A butterfly chart compares two series category by category. `label-field` names each row, and the two
+`c2-chart-series` grow away from each other from a gutter in the middle, where the categories are written: the
+first towards the start, the second towards the end. A population pyramid (age bands, men against women) is the
+classic case; before and after, or two products' scores on the same questions, read just as well.
+
+Both sides share one scale, rounded to even steps, so equal values draw equal lengths. The start side's axis is
+mirrored rather than negated: every value, tick and tooltip reads as the number it is. The tooltip lists both
+sides of a row, and the legend highlights a side (or, with `legend-action="toggle"`, switches it off).
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .butterfly-plot {
+    width: 100%;
+    --c2-chart--height: 300px;
+  }
+  .butterfly-scores {
+    width: 100%;
+    --c2-chart--height: 240px;
+    --c2-chart__gutter--width: 96px;
+    --c2-chart__bar--border-radius: 0.5;
+    --c2-chart__bar--thickness: 0.56;
+    --c2-chart__series-1--color: #94a3b8;
+    --c2-chart__series-2--color: #0f766e;
+  }
+</style>
+
+<div data-label="Population pyramid">
+  <c2-butterfly-chart
+    class="butterfly-plot"
+    label-field="age"
+    data='[{"age":"80+","men":520,"women":890},{"age":"70–79","men":1210,"women":1480},{"age":"60–69","men":1960,"women":2120},{"age":"50–59","men":2480,"women":2530},{"age":"40–49","men":2710,"women":2690},{"age":"30–39","men":2950,"women":2880},{"age":"20–29","men":2780,"women":2690},{"age":"10–19","men":2520,"women":2390},{"age":"0–9","men":2410,"women":2295}]'
+  >
+    <c2-chart-series field="men" label="Men (thousands)"></c2-chart-series>
+    <c2-chart-series field="women" label="Women (thousands)"></c2-chart-series>
+  </c2-butterfly-chart>
+</div>
+
+<div data-label="Before and after">
+  <c2-butterfly-chart
+    class="butterfly-scores"
+    label-field="question"
+    data='[{"question":"Onboarding","before":54,"after":81},{"question":"Search","before":62,"after":74},{"question":"Checkout","before":71,"after":88},{"question":"Support","before":48,"after":69}]'
+  >
+    <c2-chart-series field="before" label="Before redesign"></c2-chart-series>
+    <c2-chart-series field="after" label="After redesign"></c2-chart-series>
+  </c2-butterfly-chart>
+</div>
+```
+
+### Data and order
+
+Rows are drawn top to bottom in data order: a population pyramid lists its oldest band first. Exactly two series
+are drawn; with one, the chart says it needs two, and any after the second are left out with a console warning.
+
+### Styling
+
+`--c2-chart__gutter--width` (`56px` by default) is the space between the sides, where the categories are written:
+widen it for longer names. `--c2-chart__bar--thickness` (`0.72`) is the share of each row a bar fills, and the
+shared `--c2-chart__bar--border-radius` (`0` to `0.5`) rounds each bar's value end, away from the gutter. The two
+sides take `--c2-chart__series-1--color` and `--c2-chart__series-2--color`.
