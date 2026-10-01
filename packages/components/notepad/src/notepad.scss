@@ -290,10 +290,28 @@
   // The rules scroll with the writing.
   background-attachment: local;
 
+  // Selected text keeps its ink. `color: inherit` would not: a highlight pseudo-element inherits from the parent's
+  // highlight, so a page that styles ::selection would recolour every ink inside the notepad.
   &::selection,
   *::selection {
     background: css.cssVar(selection--background);
-    color: inherit;
+    color: css.cssVar(writing--color);
+  }
+  span[data-ink='blue']::selection,
+  span[data-ink='blue'] ::selection {
+    color: css.cssVar(ink-blue--color);
+  }
+  span[data-ink='black']::selection,
+  span[data-ink='black'] ::selection {
+    color: css.cssVar(ink-black--color);
+  }
+  span[data-ink='red']::selection,
+  span[data-ink='red'] ::selection {
+    color: css.cssVar(ink-red--color);
+  }
+  span[data-ink='green']::selection,
+  span[data-ink='green'] ::selection {
+    color: css.cssVar(ink-green--color);
   }
   &:focus-visible {
     outline: none;
