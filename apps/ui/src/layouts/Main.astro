@@ -21,16 +21,17 @@ interface Props {
   /** Render the mobile "open navigation" button (docs pages). */
   withSidebar?: boolean
   /** Which top-level nav item is active. */
-  section?: 'components' | 'icons' | 'guides' | 'examples'
+  section?: 'overview' | 'getting-started' | 'components' | 'icons' | 'guides' | 'examples'
 }
 const { title, description = 'A library of small, themable Lit web components published as individual npm packages.', withSidebar, section } = Astro.props
 const repoUrl = 'https://github.com/code2nguyen/web-components'
 const mobileNavItems = [
+  { value: 'overview', label: 'Overview', href: `${base}/`, current: section === 'overview' },
+  { value: 'getting-started', label: 'Getting started', href: `${base}/getting-started/`, current: section === 'getting-started' },
   { value: 'components', label: 'Components', href: `${base}/components/`, current: section === 'components' },
   { value: 'icons', label: 'Icons', href: `${base}/icons/`, current: section === 'icons' },
   { value: 'guides', label: 'Guides', href: `${base}/guides/`, current: section === 'guides' },
   { value: 'examples', label: 'Examples', href: `${base}/examples/`, current: section === 'examples' },
-  { value: 'getting-started', label: 'Getting started', href: `${base}/#getting-started`, current: false },
 ]
   .map(({ value, label, href, current }) => rawElement('c2-navigation-menu-item', { value, href, current }, label))
   .join('')
@@ -79,11 +80,14 @@ const mobileNavItems = [
       </div>
 
       <div class="site-header__nav">
+        <LinkButton client:load class="site-header__nav-link" href={`${base}/`} selected={section === 'overview'}>Overview</LinkButton>
+        <LinkButton client:load class="site-header__nav-link" href={`${base}/getting-started/`} selected={section === 'getting-started'}
+          >Getting started</LinkButton
+        >
         <LinkButton client:load class="site-header__nav-link" href={`${base}/components/`} selected={section === 'components'}>Components</LinkButton>
         <LinkButton client:load class="site-header__nav-link" href={`${base}/icons/`} selected={section === 'icons'}>Icons</LinkButton>
         <LinkButton client:load class="site-header__nav-link" href={`${base}/guides/`} selected={section === 'guides'}>Guides</LinkButton>
         <LinkButton client:load class="site-header__nav-link" href={`${base}/examples/`} selected={section === 'examples'}>Examples</LinkButton>
-        <LinkButton client:load class="site-header__nav-link" href={`${base}/#getting-started`}>Getting started</LinkButton>
       </div>
 
       <div slot="actions" class="site-header__actions">

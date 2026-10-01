@@ -14,11 +14,13 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 
 - **Area chart** — `c2-area-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart with the region under each line filled — every line-chart attribute, plus a fill opacity. Children: `c2-chart-series`.
 - **Bar chart** — `c2-bar-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — Bars over categories or time buckets, with several series drawn side by side within each band. Children: `c2-chart-series`.
+- **Bubble chart** — `c2-bubble-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts scatter plot with a third measure encoded as bubble area, for comparing how two measures relate while showing how much each point weighs. Children: `c2-chart-series`.
 - **Candlestick chart** — `c2-candlestick-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts OHLC chart for market sessions and other open-close ranges, with semantic positive and negative colours. Children: `c2-chart-series`.
 - **Gauge chart** — `c2-gauge-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A focused radial KPI gauge drawn by ECharts, with a configurable scale, progress arc and pointer. Children: `c2-chart-series`.
 - **Line chart** — `c2-line-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A line chart over a time or numeric x axis, drawn on canvas by uPlot, with series declared as children. Children: `c2-chart-series`.
 - **Overlap chart** — `c2-overlap-chart, c2-chart-series` · `@c2n/chart` — A Venn diagram of two or three sets, where each circle is a set and each shared area counts the members of exactly that combination. Children: `c2-chart-series`.
 - **Pie chart** — `c2-pie-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A pie or donut chart drawn by ECharts, where one row is one slice and label-field names it. Children: `c2-chart-series`.
+- **Pyramid chart** — `c2-pyramid-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — Ranked levels of a whole, stacked from a narrow apex to a wide base, where one row is one level. Children: `c2-chart-series`.
 - **Radar chart** — `c2-radar-chart, c2-chart-series, c2-chart-legend` · `@c2n/chart` — Compare several profiles across the same set of normalized indicators. Children: `c2-chart-series`.
 - **Scatter chart** — `c2-scatter-chart, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — An ECharts scatter plot for finding relationships, clusters and outliers across two numeric measures. Children: `c2-chart-series`.
 - **Sparkline** — `c2-sparkline, c2-chart-series, c2-chart-legend, c2-chart-tooltip` · `@c2n/chart` — A chromeless trend line sized for a table cell, a list row or the trend slot of a c2-stat. Children: `c2-chart-series`.
@@ -124,3 +126,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Pagination** — `c2-pagination` · `@c2n/pagination` — Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page.
 - **Side Nav** — `c2-side-nav` · `@c2n/side-nav` — Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones.
 - **Tabs** — `c2-tabs, c2-tab` · `@c2n/tabs` — Tab strip that shows one content panel at a time. Children: `c2-tab`.
+
+## Planning
+
+- **Month Planner** — `c2-month-planner` · `@c2n/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
+- **Week Planner** — `c2-week-planner` · `@c2n/week-planner` — Typical-week schedule with time blocks, and optional odd and even weeks.

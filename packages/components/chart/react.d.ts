@@ -15,6 +15,7 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
 import type { BarChart } from '@c2n/chart/bar-chart.js'
+import type { BubbleChart } from '@c2n/chart/bubble-chart.js'
 import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
@@ -23,6 +24,7 @@ import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
 import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
+import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
@@ -61,6 +63,27 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: BarChart['series'] | string
+      }
+      'c2-bubble-chart': Omit<C2Props<BubbleChart>, 'series'> & {
+        'y-field'?: Attribute
+        'size-field'?: Attribute
+        'series-field'?: Attribute
+        'x-scale'?: Attribute
+        'y-scale'?: Attribute
+        'size-max'?: Attribute
+        'bubble-labels'?: Attribute
+        'size-legend'?: Attribute
+        'size-label'?: Attribute
+        'x-label'?: Attribute
+        'y-label'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        series?: BubbleChart['series'] | string
       }
       'c2-candlestick-chart': Omit<C2Props<CandlestickChart>, 'series'> & {
         'open-field'?: Attribute
@@ -136,6 +159,17 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: PieChart['series'] | string
+      }
+      'c2-pyramid-chart': Omit<C2Props<PyramidChart>, 'series'> & {
+        'label-content'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        series?: PyramidChart['series'] | string
       }
       'c2-radar-chart': Omit<C2Props<RadarChart>, 'series'> & {
         'start-angle'?: Attribute
