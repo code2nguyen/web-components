@@ -45,4 +45,29 @@ two value colours do most of the work; height, radius and the gap between segmen
 <c2-comparison-bar class="solid-block" start-value="64" end-value="36" precision="0" start-label="Team A" end-label="Team B" show-value></c2-comparison-bar>
 ```
 
+```html tag=MdxCodeBlock,label=Win draw loss
+<style>
+  .win-draw-loss {
+    width: 280px;
+    --c2-comparison-bar--height: 8px;
+    --c2-comparison-bar__track--gap: 2px;
+    --c2-comparison-bar__start-segment--background-color: #16a34a;
+    --c2-comparison-bar__start-value--color: #15803d;
+    --c2-comparison-bar__end-segment--background-color: #dc2626;
+    --c2-comparison-bar__end-value--color: #b91c1c;
+  }
+</style>
+<c2-comparison-bar
+  class="win-draw-loss"
+  start-value="18"
+  middle-value="7"
+  end-value="11"
+  precision="0"
+  start-label="Win"
+  middle-label="Draw"
+  end-label="Loss"
+  show-value
+></c2-comparison-bar>
+```
+
 </GalleryGrid>

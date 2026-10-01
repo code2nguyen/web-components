@@ -25,8 +25,10 @@ declare module 'react' {
     interface IntrinsicElements {
       'c2-comparison-bar': C2Props<ComparisonBar> & {
         'start-value'?: Attribute
+        'middle-value'?: Attribute
         'end-value'?: Attribute
         'start-label'?: Attribute
+        'middle-label'?: Attribute
         'end-label'?: Attribute
         'show-value'?: Attribute
       }

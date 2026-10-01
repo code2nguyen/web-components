@@ -5,11 +5,14 @@
     height: 6px,
     gap: 12px,
     track--gap: 4px,
+    middle-value--margin-top: 4px,
     border-radius: 999px,
     transition-duration: 0.3s,
     start-segment--background-color: #0265dc,
+    middle-segment--background-color: #a1a1aa,
     end-segment--background-color: #dc2626,
     start-value--color: #0265dc,
+    middle-value--color: #71717a,
     end-value--color: #dc2626,
     value--font-size: 14px,
     value--font-weight: 500,
@@ -25,10 +28,12 @@
   display: none;
 }
 
+// Grid so the edge percentages centre on the track alone, with the middle legend in a second row underneath.
+// The gap is a margin on each edge value rather than a column gap, so a hidden value leaves no empty gutter.
 .c2-comparison-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: css.cssVar(gap);
 }
 
 .c2-comparison-bar-value {
@@ -40,10 +45,14 @@
   white-space: nowrap;
 
   &.is-start {
+    grid-area: 1 / 1;
+    margin-inline-end: css.cssVar(gap);
     color: css.cssVar(start-value--color);
   }
 
   &.is-end {
+    grid-area: 1 / 3;
+    margin-inline-start: css.cssVar(gap);
     color: css.cssVar(end-value--color);
   }
 
@@ -53,36 +62,62 @@
 }
 
 .c2-comparison-bar-track {
+  grid-area: 1 / 2;
   display: flex;
-  flex: 1 1 auto;
-  min-width: 0;
   gap: css.cssVar(track--gap);
+
+  &[hidden] {
+    display: none;
+  }
 }
 
-.c2-comparison-bar-segment {
-  // Grow from zero so the two flex-grow factors split the width exactly by share; a 0% side collapses to nothing.
+// The legend row mirrors the segments' flex-grow factors, so the middle text sits centred under its segment.
+// Text wider than a narrow middle segment overflows it symmetrically rather than wrapping.
+.c2-comparison-bar-legend {
+  grid-area: 2 / 2;
+  margin-top: css.cssVar(middle-value--margin-top);
+}
+
+.c2-comparison-bar-segment,
+.c2-comparison-bar-cell,
+.c2-comparison-bar-value.is-middle {
+  // Grow from zero so the flex-grow factors split the width exactly by share; a 0% segment collapses to nothing.
   flex-basis: 0;
   min-width: 0;
-  height: css.cssVar(height);
-  border-radius: css.cssVar(border-radius);
   transition: flex-grow css.cssVar(transition-duration) cubic-bezier(0.2, 0, 0, 1);
 
-  &.is-start {
-    background-color: css.cssVar(start-segment--background-color);
-  }
-
-  &.is-end {
-    background-color: css.cssVar(end-segment--background-color);
-  }
-
-  // A side with no share leaves no sliver and no gap beside the other one.
   &.is-empty {
     display: none;
   }
 }
 
+.c2-comparison-bar-value.is-middle {
+  display: flex;
+  justify-content: center;
+  color: css.cssVar(middle-value--color);
+}
+
+.c2-comparison-bar-segment {
+  height: css.cssVar(height);
+  border-radius: css.cssVar(border-radius);
+
+  &.is-start {
+    background-color: css.cssVar(start-segment--background-color);
+  }
+
+  &.is-middle {
+    background-color: css.cssVar(middle-segment--background-color);
+  }
+
+  &.is-end {
+    background-color: css.cssVar(end-segment--background-color);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .c2-comparison-bar-segment {
+  .c2-comparison-bar-segment,
+  .c2-comparison-bar-cell,
+  .c2-comparison-bar-value.is-middle {
     transition: none;
   }
 }

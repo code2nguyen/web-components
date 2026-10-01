@@ -18,8 +18,10 @@ declare module 'vue' {
     'c2-comparison-bar': DefineComponent<
       C2Props<ComparisonBar> & {
         'start-value'?: unknown
+        'middle-value'?: unknown
         'end-value'?: unknown
         'start-label'?: unknown
+        'middle-label'?: unknown
         'end-label'?: unknown
         'show-value'?: unknown
       }

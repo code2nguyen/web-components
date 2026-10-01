@@ -1,6 +1,6 @@
 ---
 title: 'Comparison Bar'
-description: 'Two-segment ratio bar comparing two quantities, such as the bid/ask balance of an order book.'
+description: 'Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.'
 category: 'Data display'
 ---
 
@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { ComparisonBar } from '@c2n/comparison-bar'
 
-`c2-comparison-bar` splits its width between two amounts: `start-value` on the start side and `end-value` on the end side, in any unit. The bar computes each side's share, and `show-value` prints it as a percentage at that end; the two shares always add up to 100. `precision` sets the fraction digits (2 by default) and `locale` the number format. `start-label` and `end-label` name the sides for assistive technology, which reads the whole bar as one image ("Bid 22.43%, Ask 77.57%"), and the `start` and `end` slots replace the printed text when you want counts instead of percentages.
+`c2-comparison-bar` splits its width between two or three amounts in any unit: `start-value` on the start side, `end-value` on the end side and, optionally, `middle-value` between them. The bar computes each segment's share, and `show-value` prints it as a percentage: the start and end shares at their edges, the middle share centred under its segment. The printed shares always add up to 100. `precision` sets the fraction digits (2 by default) and `locale` the number format. `start-label`, `middle-label` and `end-label` name the segments for assistive technology, which reads the whole bar as one image ("Bid 22.43%, Ask 77.57%"), and the `start`, `middle` and `end` slots replace the printed text when you want counts instead of percentages.
 
 ## Installation
 
@@ -50,6 +50,12 @@ npm install @c2n/comparison-bar
     <c2-comparison-bar start-value="2243" end-value="7757" start-label="Bid" end-label="Ask" show-value></c2-comparison-bar>
   </div>
 </div>
+<div data-label="Three values">
+  <div class="stack">
+    <c2-comparison-bar start-value="45" middle-value="20" end-value="35" start-label="Win" middle-label="Draw" end-label="Loss" show-value></c2-comparison-bar>
+    <c2-comparison-bar start-value="1" middle-value="1" end-value="1" show-value></c2-comparison-bar>
+  </div>
+</div>
 <div data-label="Precision and locale">
   <div class="stack">
     <c2-comparison-bar start-value="3" end-value="1" precision="0" show-value></c2-comparison-bar>
@@ -71,6 +77,6 @@ npm install @c2n/comparison-bar
 </div>
 ```
 
-Update `start-value` and `end-value` as the amounts change and the segments animate to their new widths. Negative or missing amounts count as zero; a side with no share collapses entirely, and while neither side has an amount the bar splits evenly. The printed percentages are hidden from screen readers because the bar's accessible name already carries them.
+Update `start-value` and `end-value` as the amounts change and the segments animate to their new widths. Leave `middle-value` unset for a two-segment bar. Negative or missing amounts count as zero; a segment with no share collapses entirely, and while none has an amount the bar splits evenly. Shares are rounded by largest remainder, so three equal thirds print as 33.34%, 33.33% and 33.33%. The printed percentages are hidden from screen readers because the bar's accessible name already carries them.
 
-`--c2-comparison-bar__start-segment--background-color` and `--c2-comparison-bar__end-segment--background-color` colour the two segments, with matching `__start-value--color` / `__end-value--color` for the text. `--c2-comparison-bar--height`, `--c2-comparison-bar--border-radius` and `--c2-comparison-bar__track--gap` shape the bar itself.
+`--c2-comparison-bar__start-segment--background-color`, `__middle-segment--background-color` and `__end-segment--background-color` colour the segments, with matching `__start-value--color` / `__middle-value--color` / `__end-value--color` for the text. `--c2-comparison-bar--height`, `--c2-comparison-bar--border-radius` and `--c2-comparison-bar__track--gap` shape the bar itself.

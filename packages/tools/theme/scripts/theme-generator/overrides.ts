@@ -195,6 +195,8 @@ export const overrides: Record<string, Override> = {
   // falling-direction colour so a brand recolours the pair together with the charts.
   '--c2-comparison-bar__end-segment--background-color': { token: 'chart-negative' },
   '--c2-comparison-bar__end-value--color': { token: 'chart-negative' },
+  // The neutral middle share (draws, abstentions) reads as a strong outline grey in either theme.
+  '--c2-comparison-bar__middle-segment--background-color': { token: 'color-outline-strong' },
   // Handed to the engine to draw marker and slice borders against the card, so it follows the surface
   // rather than reading as white text, which is how the colour rule would otherwise classify it.
   '--c2-chart__surface--color': { token: 'color-surface' },
