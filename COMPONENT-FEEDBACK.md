@@ -36,20 +36,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Smallest fix:** document the "fill the container" recipe, or give the host a `--c2-command--max-height`
   (default `none`) so one variable caps the whole palette and the list takes what is left.
 
-### Status panel needs three variables to host an illustration
-
-- **Severity:** papercut
-- **Hit while:** documenting `@c2n/symbols` in `c2-status-panel`'s `media` slot (symbols page and the status-panel
-  gallery's "Symbol media" card), 2026-09-29.
-- **Expected:** slotting a 128px illustration into `media` shows it at its own size.
-- **What happens:** the media region is a fixed 64px tinted disc with `overflow: hidden`, and `::slotted([slot=media])`
-  forces the slotted element to `--c2-status-panel__media-icon--size` (32px). An illustration needs
-  `--c2-status-panel__media--size`, `--c2-status-panel__media-icon--size` and the (per-status)
-  `--c2-status-panel__media…--background-color: transparent` all set together, or it renders clipped or tiny on a
-  coloured disc.
-- **Smallest fix:** a behaviour attribute such as `media="illustration"` (or detecting a slotted `c2-symbol-*`) that
-  drops the disc and sizes the region to its content, with one `--c2-status-panel__illustration--size` variable.
-
 ### Astro SSR consumes navigation-menu item links in site chrome
 
 - **Severity:** docs
@@ -105,15 +91,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   this: the Lit renderer no longer means a hand-pinned `lit` in the application.)
 - **Where the fix belongs:** `packages/components/table` — key slot names by **visible index** rather than row key,
   so a framework renders only the window. Breaking change to the documented `cell:{rowKey}:{field}` contract.
-
-### `c2-status-panel` always renders its media box
-
-- **Severity:** papercut
-- **Hit while:** the same migration, 2026-09-19 (external report).
-- **What happens:** the template always emits the media element, so suppressing it took zeroing the media size and
-  background for all five tones plus collapsing the container gap — six variables to hide one box.
-- **Where the fix belongs:** `packages/components/status-panel` — a `no-media` attribute, or skip the media box
-  when its slot is empty and a flag asks for no default icon.
 
 ### `@c2n/seperator` and `c2-seperator` are misspelled
 
@@ -318,6 +295,8 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-pie-chart`                  | `--c2-chart__slice--border` was documented via `@cssproperty` but `seriesOption()` hardcoded the border, so setting it did nothing.                                                                                                                                                                                             | 2026-09-14, the variable is read and parsed.                                                                                                                                  |
 | charts                          | `legend="start"` / `legend="end"` named the inline edges but the frame was always a column, so they sat above or below the plot exactly like `top`/`bottom` — only stacking their own entries. A pie with a four-entry legend squashed the plot to a third of its height.                                                       | 2026-09-14, the frame runs as a row for those two positions.                                                                                                                  |
 | charts                          | A time axis always formatted month + day, so an hour of samples labelled every tick "Jan 1".                                                                                                                                                                                                                                    | 2026-09-14, the format is chosen from the visible span; tested on 75 minutes of data.                                                                                         |
+| `c2-status-panel`               | Hosting an illustration took three variables set together (`media--size`, `media-icon--size` and a transparent per-status disc background), or the artwork rendered clipped or tiny on a coloured disc.                                                                                                                         | 2026-10-01, `media="illustration"` + `--c2-status-panel__illustration--size`; docs, gallery and the 404 page converted; tested.                                               |
+| `c2-status-panel`               | The media box was always rendered, so hiding it took six variables.                                                                                                                                                                                                                                                             | 2026-10-01, `media="none"` renders no media region; tested.                                                                                                                   |
 
 ## Won't fix
 
