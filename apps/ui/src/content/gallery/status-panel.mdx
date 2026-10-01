@@ -43,10 +43,7 @@ Classes style assigned media, text, and buttons directly. The same-named public 
     --c2-status-panel__container--gap: 20px;
     --c2-status-panel__container--border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-status-panel__container--background-color: var(--c2-theme--color-surface, #ffffff);
-    --c2-status-panel__media--size: 150px;
-    --c2-status-panel__media-icon--size: 150px;
-    --c2-status-panel__media__error--background-color: transparent;
-    --c2-status-panel__media--border-radius: 0px;
+    --c2-status-panel__illustration--size: 150px;
     --c2-status-panel__title--font-size: 20px;
     --c2-status-panel__title--line-height: 28px;
     --c2-status-panel__content--background-color: transparent;
@@ -89,7 +86,7 @@ Classes style assigned media, text, and buttons directly. The same-named public 
     --c2-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
   }
 </style>
-<c2-status-panel client:load class="recovery" status="error">
+<c2-status-panel client:load class="recovery" media="illustration" status="error">
   <img slot="media" src="/web-components/status-panel-recovery.svg" alt="" />
   <span slot="title">Your import needs attention</span>
   <span slot="description">One invalid email stopped the import. The rows already processed are safely saved.</span>
@@ -163,16 +160,13 @@ Classes style assigned media, text, and buttons directly. The same-named public 
   .illustrated-empty {
     --c2-status-panel__container--min-height: 0px;
     --c2-status-panel__container--padding: 28px 24px;
-    --c2-status-panel__media--size: 160px;
-    --c2-status-panel__media-icon--size: 160px;
-    --c2-status-panel__media--background-color: transparent;
-    --c2-status-panel__media--border-radius: 0px;
+    --c2-status-panel__illustration--size: 160px;
   }
   .illustrated-empty > img[slot='media'] {
     object-fit: contain;
   }
 </style>
-<c2-status-panel client:load class="illustrated-empty" heading="No matching projects" description="Try a broader search or clear the active filters.">
+<c2-status-panel client:load class="illustrated-empty" media="illustration" heading="No matching projects" description="Try a broader search or clear the active filters.">
   <img slot="media" src="/web-components/status-panel-search.svg" alt="" />
   <c2-button slot="actions">Clear filters</c2-button>
 </c2-status-panel>
@@ -184,16 +178,13 @@ Classes style assigned media, text, and buttons directly. The same-named public 
     --c2-status-panel__container--min-height: 0px;
     --c2-status-panel__container--padding: 28px 24px;
     --c2-status-panel__container--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
-    --c2-status-panel__media--size: 160px;
-    --c2-status-panel__media-icon--size: 160px;
-    --c2-status-panel__media__success--background-color: transparent;
-    --c2-status-panel__media--border-radius: 0px;
+    --c2-status-panel__illustration--size: 160px;
   }
   .illustrated-success > img[slot='media'] {
     object-fit: contain;
   }
 </style>
-<c2-status-panel client:load class="illustrated-success" status="success" heading="Your launch is live" description="The new experience is now available to everyone.">
+<c2-status-panel client:load class="illustrated-success" media="illustration" status="success" heading="Your launch is live" description="The new experience is now available to everyone.">
   <img slot="media" src="/web-components/status-panel-launch.svg" alt="" />
   <c2-button slot="actions">View release</c2-button>
 </c2-status-panel>
@@ -204,12 +195,10 @@ Classes style assigned media, text, and buttons directly. The same-named public 
   .symbol-media {
     --c2-status-panel__container--min-height: 0px;
     --c2-status-panel__container--padding: 28px 24px;
-    --c2-status-panel__media--size: 128px;
-    --c2-status-panel__media-icon--size: 128px;
-    --c2-status-panel__media__error--background-color: transparent;
+    --c2-status-panel__illustration--size: 128px;
   }
 </style>
-<c2-status-panel client:load class="symbol-media" status="error" heading="You are offline" description="Check your connection. Changes are saved and will sync when you are back online.">
+<c2-status-panel client:load class="symbol-media" media="illustration" status="error" heading="You are offline" description="Check your connection. Changes are saved and will sync when you are back online.">
   <c2-symbol-offline slot="media"></c2-symbol-offline>
   <c2-button slot="actions">Try again</c2-button>
 </c2-status-panel>
