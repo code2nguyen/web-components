@@ -110,6 +110,22 @@ test('checklist lines: typed, continued with Enter, ticked by pointer and keyboa
   await expect(host).toHaveJSProperty('value', '- [x] milk\n- [x] eggs\ndone')
 })
 
+test('a key pressed before selectionchange arrives acts at the real caret', async ({ page, renderScenario }) => {
+  // The browser reports a moved caret (a click, Ctrl+End) through an asynchronous selectionchange, and a fast key
+  // can arrive first. Moving the caret and pressing Enter in one task reproduces that race deterministically.
+  await renderScenario('<c2-notepad label="Notes" value="October goals&#10;- [ ] run"></c2-notepad>')
+  const host = page.locator('c2-notepad')
+  await surface(page).evaluate((element) => {
+    const root = element.getRootNode() as ShadowRoot & { getSelection?: () => Selection | null }
+    const selection = root.getSelection?.() ?? document.getSelection()!
+    const last = element.querySelector('.task-text')!.firstChild!
+    selection.collapse(last, last.textContent!.length)
+    element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true }))
+  })
+  await page.keyboard.type('stretch')
+  await expect(host).toHaveJSProperty('value', 'October goals\n- [ ] run\n- [ ] stretch')
+})
+
 test('a value set from outside renders, and writing it back keeps the caret and the ink', async ({ page, renderScenario }) => {
   await renderScenario('<c2-notepad label="Notes" value="- [x] **eggs**&#10;==call== mum"></c2-notepad>')
   const host = page.locator('c2-notepad')

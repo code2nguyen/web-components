@@ -175,16 +175,19 @@
 .top {
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  min-height: 26px;
+  min-height: 28px;
+  // Clear of the spiral coils and the punched holes, which cover the top 18px of the sheet.
+  padding-block-start: 20px;
   padding-inline: calc(var(--_inset) + 12px) 16px;
 }
 .header {
   flex: 1;
   min-width: 0;
-  padding-block: 8px 2px;
+  padding-block: 2px;
   color: css.cssVar(header--color);
   font-size: css.cssVar(header--font-size);
   line-height: 1.4;
@@ -194,7 +197,7 @@
 }
 .perforation {
   position: absolute;
-  inset: 26px 0 auto;
+  inset: 17px 0 auto;
   height: 0;
   border-top: 2px dotted css.cssVar(perforation--color);
   pointer-events: none;
@@ -203,7 +206,7 @@
   all: unset;
   box-sizing: border-box;
   margin-inline-start: auto;
-  margin-block-end: 4px;
+  margin-block-end: 2px;
   padding: 2px 6px;
   border-radius: 4px;
   cursor: pointer;
@@ -402,7 +405,9 @@
 
 // ---- states ---------------------------------------------------------------------------------------------------------
 
-.sheet:has(.writing:focus-visible) {
+// The lifted sheet and the caret show focus. The ring is for keyboard focus only: a contenteditable matches
+// :focus-visible on a click too, and a ring drawn round the page on every click turns it back into an input box.
+.pad:not(.pointer-focus) .sheet:has(.writing:focus-visible) {
   outline: css.cssVar(focus--outline);
   outline-offset: 4px;
 }

@@ -260,6 +260,8 @@ export class Notepad extends LitElement {
 
   @state() private format: NotepadFormat = emptyFormat()
   @state() private disabledByForm = false
+  /** Focus came from a pointer, so the keyboard focus ring stays off. */
+  @state() private pointerFocus = false
 
   @query('.writing') private surface!: HTMLElement
   @query('.toolbar') private toolbarEl!: HTMLElement
@@ -431,6 +433,10 @@ export class Notepad extends LitElement {
         nodeViews: { task: (node, _view, getPos) => new TaskView(node, getPos, (pos) => this.toggleTask(pos)) },
         dispatchTransaction: (tr) => this.handleTransaction(tr),
         handleDOMEvents: {
+          keydown: (view, event) => {
+            if (!event.isComposing) this.syncSelectionFromDom(view)
+            return false
+          },
           focus: () => {
             this.changedSinceFocus = false
             this.updateToolbar()
@@ -654,6 +660,25 @@ export class Notepad extends LitElement {
     return new Slice(content, open(content.firstChild), open(content.lastChild))
   }
 
+  /**
+   * ProseMirror learns where a click put the caret from `selectionchange`, which the browser fires asynchronously. A
+   * key pressed before it arrives (Enter, a shortcut) would run against the old selection, so read the real one first.
+   */
+  private syncSelectionFromDom(view: EditorView) {
+    const root = this.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
+    const dom = root.getSelection?.() ?? document.getSelection()
+    if (!dom?.anchorNode || !dom.focusNode || !view.dom.contains(dom.anchorNode) || !view.dom.contains(dom.focusNode)) return
+    try {
+      const anchor = view.posAtDOM(dom.anchorNode, dom.anchorOffset)
+      const head = view.posAtDOM(dom.focusNode, dom.focusOffset)
+      const { selection } = view.state
+      if (selection.anchor === anchor && selection.head === head) return
+      view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, anchor, head)))
+    } catch {
+      // A position inside a checkbox or between nodes has no text selection; keep ProseMirror's own.
+    }
+  }
+
   /** Drops the formats `marks` does not allow from pasted content. */
   private filterSlice(slice: Slice): Slice {
     const allowed = this.allowedMarks
@@ -749,6 +774,7 @@ export class Notepad extends LitElement {
   private handleFocusOut(event: FocusEvent) {
     const next = event.relatedTarget as Node | null
     if (next && this.renderRoot.contains(next)) return
+    this.pointerFocus = false
     this.hideToolbar()
     if (this.changedSinceFocus) {
       this.changedSinceFocus = false
@@ -866,7 +892,11 @@ export class Notepad extends LitElement {
     const hasEmphasis = ['bold', 'italic', 'underline', 'strike'].some((mark) => allowed.has(mark as NotepadMark))
     const showError = this.error && !!this.errorText
     return html`
-      <div class="pad ${this.disabledByForm ? 'form-disabled' : ''}" @focusout=${this.handleFocusOut}>
+      <div
+        class="pad ${this.disabledByForm ? 'form-disabled' : ''} ${this.pointerFocus ? 'pointer-focus' : ''}"
+        @pointerdown=${() => (this.pointerFocus = true)}
+        @focusout=${this.handleFocusOut}
+      >
         <div class="stack" aria-hidden="true"></div>
         <div class="spiral" aria-hidden="true"></div>
         <div class="glue" aria-hidden="true"></div>
