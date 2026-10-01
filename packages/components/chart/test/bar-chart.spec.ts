@@ -129,6 +129,13 @@ test('horizontal bars run rightwards from the left, first category at the top', 
     expect(Math.abs(red.runs[band].low - (blue.runs[band].high + 1))).toBeLessThanOrEqual(2)
     expect(blue.runs[band].high - blue.runs[band].low).toBeGreaterThan(blue.runs[band].end - blue.runs[band].start)
   }
+  // The value axis starts at zero, so a bar's length is proportional to its total: Q1 is 100, Q3 is 85. A scale
+  // auto-ranged like an x axis would start mid-way and exaggerate the difference.
+  const baseline = blue.runs[0].low
+  const ratio = (red.runs[2].high - baseline) / (red.runs[0].high - baseline)
+  expect(ratio).toBeGreaterThan(0.82)
+  expect(ratio).toBeLessThan(0.88)
+
   // Q3 (15 + 70) is the shortest, Q2 (25 + 90) the longest; Q1 comes first, at the top.
   const lengths = red.runs.map((run) => run.high)
   expect(lengths[1]).toBeGreaterThan(lengths[0])
@@ -207,4 +214,27 @@ test('value labels print each bar value, inside a stacked segment and past a gro
     ;(element as unknown as { formatLabel: (value: number) => string }).formatLabel = (value) => `${value} pts`
   })
   await expect.poll(() => page.evaluate(() => (window as unknown as { drawn: string[] }).drawn)).toEqual(expect.arrayContaining(['90 pts']))
+})
+
+test('names every band on the category axis', async ({ page, scenario }) => {
+  await scenario('stacked-bars')
+  const chart = page.locator('c2-bar-chart')
+  await ready(chart)
+  // The tick labels are canvas text: watch what the chart hands uPlot for them.
+  const labels = await chart.evaluate(async (element) => {
+    const chartEl = element as unknown as { formatAxisX(value: number): string; barWidth: number; updateComplete: Promise<boolean> }
+    const seen: unknown[] = []
+    const original = chartEl.formatAxisX.bind(chartEl)
+    chartEl.formatAxisX = (value) => {
+      const label = original(value)
+      seen.push(label)
+      return label
+    }
+    chartEl.barWidth = 0.5
+    await chartEl.updateComplete
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    return seen
+  })
+  expect(labels).toEqual(expect.arrayContaining(['Q1', 'Q2', 'Q3']))
+  expect(labels).not.toContain('')
 })

@@ -120,16 +120,24 @@ export class BarChart extends UplotChartBase {
 
     // uPlot auto-ranges a scale on the raw values, which for a stack is the height of one segment, not the bar.
     // An explicit `y-min`/`y-max` still wins.
-    if (stacked && !scales.y?.range) {
+    // A bar's length is its value, so the value axis always reaches zero. uPlot only does that by default for a
+    // vertical scale; a horizontal one is auto-ranged like an x axis, which would start the bars mid-way.
+    if (!scales.y?.range) {
       scales.y = {
         ...scales.y,
-        range: (self) => {
-          const [low, high] = stackRange(self, this.stack)
+        range: (self, min, max) => {
+          const [low, high] = stacked ? stackRange(self, this.stack) : [Math.min(0, min ?? 0), Math.max(0, max ?? 0)]
           if (this.stack === 'percent') return [low < 0 ? -100 : 0, high > 0 || low >= 0 ? 100 : 0]
           const nice = loadedUplot()?.rangeNum(low, high, 0.1, true) ?? [low, high]
           return [Math.min(0, nice[0] ?? low), Math.max(0, nice[1] ?? high)]
         },
       }
+    }
+
+    // One tick per named band. uPlot spaces ticks by pixels and would label every other band once they are narrow;
+    // only when even the labels would collide does it thin out, to every second or third band.
+    if (this.frame?.labels && axes[0]) {
+      axes[0] = { ...axes[0], splits: (self) => this.#categorySplits(self, context) }
     }
 
     if (horizontal) {
@@ -180,6 +188,26 @@ export class BarChart extends UplotChartBase {
     if (offset < 0 || offset > band) return undefined
     const slot = Math.min(count - 1, Math.floor(offset / (band / count)))
     return self.series[slot + 1]?.show === false ? undefined : slot
+  }
+
+  #categorySplits(self: uPlot, context: ChartBuildContext): number[] {
+    // A plain array: the column is a Float64Array, and uPlot maps the splits to labels with the array's own `map`,
+    // which on a typed array coerces every label string back to a number (NaN).
+    const xs = Array.from((self.data[0] as unknown as ArrayLike<number>) ?? [])
+    if (xs.length < 2) return xs
+    const band = Math.abs(self.valToPos(xs[1], 'x') - self.valToPos(xs[0], 'x'))
+    let need = context.theme.axisFontSize * 1.6
+    if (this.orientation !== 'horizontal') {
+      // Vertical bands sit side by side, so the widest name has to fit across one.
+      const ctx = self.ctx
+      ctx.save()
+      ctx.font = this.#font(context, context.theme.axisFontSize)
+      const labels = this.frame?.labels ?? []
+      need = Math.max(...labels.map((label) => ctx.measureText(label).width / devicePixelRatio)) + 8
+      ctx.restore()
+    }
+    const step = band > 0 ? Math.max(1, Math.ceil(need / band)) : 1
+    return xs.filter((_, index) => index % step === 0)
   }
 
   /** Room on the left for the longest category name, measured with the axis font, plus the tick and a gap. */
@@ -268,7 +296,7 @@ export class BarChart extends UplotChartBase {
             ? length >= width + offset * 2 && thickness >= fontSize + offset
             : length >= fontSize + offset && thickness >= width + offset * 2
           if (!fits) continue
-          ctx.fillStyle = context.theme.surface
+          ctx.fillStyle = readableOn(this.colorOf(series, seriesIndex - 1, context.theme))
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
           const middle = (from + to) / 2
@@ -293,6 +321,27 @@ export class BarChart extends UplotChartBase {
     }
     ctx.restore()
   }
+}
+
+/** White or near-black, whichever reads better on `color`: the inside labels sit on the bar, not on the page. */
+function readableOn(color: string): string {
+  const match = /^rgba?\(([^)]+)\)$/.exec(color.trim())
+  const hex = /^#([0-9a-f]{6})$/i.exec(color.trim())
+  let channels: number[]
+  if (match)
+    channels = match[1]
+      .split(/[\s,/]+/)
+      .slice(0, 3)
+      .map(Number)
+  else if (hex) channels = [0, 2, 4].map((offset) => parseInt(hex[1].slice(offset, offset + 2), 16))
+  else return '#ffffff'
+  const [r, g, b] = channels.map((channel) => {
+    const value = channel / 255
+    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  })
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  // Contrast against white is 1.05 / (L + 0.05), against #18181b (L ≈ 0.009) is (L + 0.05) / 0.059.
+  return 1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.059 ? '#ffffff' : '#18181b'
 }
 
 declare global {
