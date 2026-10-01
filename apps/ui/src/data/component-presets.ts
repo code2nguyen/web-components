@@ -522,12 +522,13 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
     html: `<c2-kbd>⌘ + K</c2-kbd>`,
     presets: [
       {
-        name: 'Flat',
-        description: 'No shadow, hairline border — an inline tag rather than a key',
+        name: 'Raised',
+        description: 'A keycap with a bottom edge, darker fill and border',
         css: {
-          '--c2-kbd--background-color': 'transparent',
+          '--c2-kbd--background-color': '#f4f4f5',
+          '--c2-kbd--color': '#52525b',
           '--c2-kbd--border': '1px solid #d4d4d8',
-          '--c2-kbd--box-shadow': 'none',
+          '--c2-kbd--box-shadow': '0 1px 0 #a1a1aa',
         },
       },
       {
