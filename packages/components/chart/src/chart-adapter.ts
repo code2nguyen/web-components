@@ -67,6 +67,12 @@ export interface ChartAdapter<TOptions = unknown, TData = unknown> {
    */
   setDatumVisibility?(name: string, visible: boolean): void
 
+  /**
+   * Repaints from the current options and data, recomputing every mark. Optional: for a chart whose marks depend on
+   * which series are shown (a stacked bar chart), which a visibility toggle alone would leave stale.
+   */
+  redraw?(): void
+
   resize(width: number, height: number): void
 
   /** Runs an engine action, such as ECharts' `geoRoam` for a map's zoom buttons. Only ECharts implements it. */

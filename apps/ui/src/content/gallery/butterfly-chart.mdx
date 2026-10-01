@@ -1,0 +1,51 @@
+---
+title: 'Butterfly chart gallery'
+description: 'Population pyramids, before-and-after comparisons and two-sided survey results.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { ButterflyChart } from '@c2n/chart/butterfly-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-butterfly-chart label-field="age" data='[{"age":"60+","men":1960,"women":2610},{"age":"40–59","men":2480,"women":2530},{"age":"20–39","men":2950,"women":2880},{"age":"0–19","men":2410,"women":2295}]'>
+  <c2-chart-series field="men" label="Men"></c2-chart-series>
+  <c2-chart-series field="women" label="Women"></c2-chart-series>
+</c2-butterfly-chart>
+```
+
+```html tag=MdxCodeBlock,label=Population pyramid
+<style>
+  .population-butterfly { width: 100%; --c2-chart--height: 320px; --c2-chart__bar--thickness: 0.86; --c2-chart__series-1--color: #2563eb; --c2-chart__series-2--color: #db2777; }
+</style>
+<c2-butterfly-chart class="population-butterfly" label-field="age" data='[{"age":"80+","men":520,"women":890},{"age":"70–79","men":1210,"women":1480},{"age":"60–69","men":1960,"women":2120},{"age":"50–59","men":2480,"women":2530},{"age":"40–49","men":2710,"women":2690},{"age":"30–39","men":2950,"women":2880},{"age":"20–29","men":2780,"women":2690},{"age":"10–19","men":2520,"women":2390},{"age":"0–9","men":2410,"women":2295}]'>
+  <c2-chart-series field="men" label="Men (thousands)"></c2-chart-series>
+  <c2-chart-series field="women" label="Women (thousands)"></c2-chart-series>
+</c2-butterfly-chart>
+```
+
+```html tag=MdxCodeBlock,label=Before and after
+<style>
+  .redesign-butterfly { width: 100%; --c2-chart--height: 240px; --c2-chart__gutter--width: 96px; --c2-chart__bar--border-radius: 0.5; --c2-chart__bar--thickness: 0.56; --c2-chart__series-1--color: #94a3b8; --c2-chart__series-2--color: #0f766e; }
+</style>
+<c2-butterfly-chart class="redesign-butterfly" label-field="question" data='[{"question":"Onboarding","before":54,"after":81},{"question":"Search","before":62,"after":74},{"question":"Checkout","before":71,"after":88},{"question":"Support","before":48,"after":69}]'>
+  <c2-chart-series field="before" label="Before redesign"></c2-chart-series>
+  <c2-chart-series field="after" label="After redesign"></c2-chart-series>
+</c2-butterfly-chart>
+```
+
+```html tag=MdxCodeBlock,label=Agree and disagree
+<style>
+  .survey-butterfly { width: 100%; --c2-chart--height: 260px; --c2-chart__gutter--width: 120px; --c2-chart__bar--border-radius: 0.2; --c2-chart__series-1--color: #ea580c; --c2-chart__series-2--color: #0265dc; }
+</style>
+<c2-butterfly-chart class="survey-butterfly" label-field="statement" legend="top" data='[{"statement":"Easy to learn","disagree":12,"agree":71},{"statement":"Fast enough","disagree":24,"agree":58},{"statement":"Well documented","disagree":31,"agree":49},{"statement":"Worth the price","disagree":38,"agree":40}]'>
+  <c2-chart-series field="disagree" label="Disagree %"></c2-chart-series>
+  <c2-chart-series field="agree" label="Agree %"></c2-chart-series>
+</c2-butterfly-chart>
+```
+
+</GalleryGrid>

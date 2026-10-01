@@ -1,4 +1,5 @@
 import { test, expect } from './fixture'
+import { niceScale } from '../src/chart-scale'
 import { layoutPyramid, pyramidShapes, readableTextOn, roundedPolygonPath, spreadLabels } from '../src/pyramid-layout'
 
 test('the chart family resolves first-paint theme probes without scheduling a second Lit update', async ({ page, scenario }) => {
@@ -321,6 +322,7 @@ for (const [scenarioName, tag] of [
   ['gauge', 'c2-gauge-chart'],
   ['radar', 'c2-radar-chart'],
   ['pyramid', 'c2-pyramid-chart'],
+  ['butterfly', 'c2-butterfly-chart'],
   ['scatter', 'c2-scatter-chart'],
   ['candlestick', 'c2-candlestick-chart'],
 ] as const) {
@@ -933,6 +935,149 @@ test('with legend-action="toggle", hiding a pyramid level lays the rest out agai
   expect(drawn.names).toEqual(['Enterprise', 'Business', 'Team'])
   // Team is the new base, as wide as the pyramid can be, so the three remaining levels still fill the triangle.
   expect(drawn.baseWidth).toBeGreaterThan(drawn.plotWidth * 0.3)
+})
+
+test("rounds a butterfly chart's shared scale to whole, even steps", () => {
+  expect(niceScale(2950)).toEqual({ max: 3000, step: 1000 })
+  expect(niceScale(3100)).toEqual({ max: 4000, step: 2000 })
+  expect(niceScale(1100)).toEqual({ max: 1500, step: 500 })
+  expect(niceScale(71)).toEqual({ max: 75, step: 25 })
+  expect(niceScale(88)).toEqual({ max: 100, step: 50 })
+  expect(niceScale(3000)).toEqual({ max: 3000, step: 1000 })
+  expect(niceScale(0)).toEqual({ max: 1, step: 0.5 })
+})
+
+test('draws a butterfly chart as two mirrored plots on one scale, with the categories in the gutter', async ({ page, scenario }) => {
+  await scenario('butterfly')
+  const chart = page.locator('c2-butterfly-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
+
+  const read = (style: string) =>
+    chart.evaluate((element, nextStyle) => {
+      type Axis = { inverse?: boolean; max: number; interval: number; gridIndex: number }
+      type Category = { data: string[]; inverse: boolean; axisLabel: { show: boolean; margin?: number } }
+      type Grid = { left: number; right: number }
+      type Series = { type: string; xAxisIndex: number; itemStyle: { borderRadius: number[] } }
+      const subject = element as unknown as {
+        themeController: { invalidate(): void }
+        buildContext(): { width: number }
+        buildOptions(context: unknown): { grid: Grid[]; xAxis: Axis[]; yAxis: Category[]; series: Series[] }
+      }
+      element.setAttribute('style', nextStyle)
+      // The bar radius is part of the cached theme, which a page's own theme signal refreshes.
+      subject.themeController.invalidate()
+      const context = subject.buildContext()
+      const options = subject.buildOptions(context)
+      return {
+        width: context.width,
+        grids: options.grid.map((grid) => [grid.left, grid.right]),
+        inverse: options.xAxis.map((axis) => axis.inverse),
+        max: options.xAxis.map((axis) => [axis.max, axis.interval]),
+        categories: options.yAxis[0].data,
+        labelled: options.yAxis.map((axis) => axis.axisLabel.show),
+        margin: options.yAxis.find((axis) => axis.axisLabel.show)?.axisLabel.margin,
+        series: options.series.map((series) => [series.type, series.xAxisIndex]),
+        radius: options.series.map((series) => series.itemStyle.borderRadius.map((corner) => corner > 0)),
+      }
+    }, style)
+
+  const ltr = await read('--c2-chart__bar--border-radius: 0.5')
+  // The first series is the start side: on the left, its axis mirrored so it grows from the gutter outwards.
+  expect(ltr.inverse).toEqual([true, false])
+  expect(ltr.grids[0][0]).toBeLessThan(ltr.grids[1][0])
+  // Both sides share one scale, rounded to even steps: the largest value is 2,950.
+  expect(ltr.max).toEqual([
+    [3000, 1000],
+    [3000, 1000],
+  ])
+  expect(ltr.categories).toEqual(['60+', '40–59', '20–39', '0–19'])
+  // Only the left plot's category axis is labelled, from its inner edge into the middle of the 56px gutter.
+  expect(ltr.labelled).toEqual([true, false])
+  expect(ltr.margin).toBe(28)
+  expect(ltr.series).toEqual([
+    ['bar', 0],
+    ['bar', 1],
+  ])
+  // Each bar rounds its value end, away from the gutter.
+  expect(ltr.radius).toEqual([
+    [true, false, false, true],
+    [false, true, true, false],
+  ])
+
+  // In a right-to-left page the start side is on the right.
+  const rtl = await read('direction: rtl; --c2-chart__bar--border-radius: 0.5; --c2-chart__gutter--width: 80px')
+  expect(rtl.inverse).toEqual([false, true])
+  expect(rtl.grids[0][0]).toBeGreaterThan(rtl.grids[1][0])
+  expect(rtl.labelled).toEqual([false, true])
+  expect(rtl.margin).toBe(40)
+  expect(rtl.radius[0]).toEqual([false, true, true, false])
+})
+
+test('rescales both sides of a butterfly chart when only the data changes', async ({ page, scenario }) => {
+  await scenario('butterfly')
+  const chart = page.locator('c2-butterfly-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const update = (rows: unknown[]) =>
+    chart.evaluate(async (element, next) => {
+      const subject = element as unknown as { updateData(rows: unknown[]): void; updateComplete: Promise<boolean> }
+      subject.updateData(next)
+      await subject.updateComplete
+    }, rows)
+  const rebuilds = () => page.evaluate(() => window.chartScenario.counts().setOptions)
+  const before = await rebuilds()
+  // The data path skips the option rebuild: a change within the scale must not ask for one, a change of scale must.
+  await update([
+    { age: 'young', men: 2400, women: 2900 },
+    { age: 'old', men: 1200, women: 1900 },
+  ])
+  expect(await rebuilds()).toBe(before)
+  await update([
+    { age: 'young', men: 12, women: 9100 },
+    { age: 'old', men: 40, women: 30 },
+  ])
+  await expect.poll(rebuilds).toBe(before + 1)
+  const max = await chart.evaluate((element) => {
+    const subject = element as unknown as { buildContext(): unknown; buildOptions(context: unknown): { xAxis: { max: number }[] } }
+    return subject.buildOptions(subject.buildContext()).xAxis.map((axis) => axis.max)
+  })
+  expect(max).toEqual([10000, 10000])
+})
+
+test('a butterfly chart asks for two series, and draws only the first two of more', async ({ page, scenario }) => {
+  await scenario('empty')
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('c2-butterfly-chart')) warnings.push(message.text())
+  })
+  await page.evaluate(() => {
+    const main = document.querySelector('main') as HTMLElement
+    main.innerHTML = `
+      <c2-butterfly-chart id="one" label-field="t"><c2-chart-series field="a"></c2-chart-series></c2-butterfly-chart>
+      <c2-butterfly-chart id="three" label-field="t">
+        <c2-chart-series field="a"></c2-chart-series><c2-chart-series field="b"></c2-chart-series><c2-chart-series field="c"></c2-chart-series>
+      </c2-butterfly-chart>`
+    for (const element of main.querySelectorAll<HTMLElement & { data: unknown }>('c2-butterfly-chart')) {
+      element.data = [
+        { t: 'x', a: 1, b: 2, c: 3 },
+        { t: 'y', a: 4, b: 5, c: 6 },
+      ]
+    }
+  })
+  const one = page.locator('#one')
+  await expect
+    .poll(() => one.evaluate((element) => element.shadowRoot?.querySelector('.state')?.textContent?.trim()))
+    .toBe('A butterfly chart needs two series, one for each side.')
+  await expect(one).not.toHaveAttribute('data-chart-ready', 'true')
+
+  const three = page.locator('#three')
+  await expect(three).toHaveAttribute('data-chart-ready', 'true')
+  const drawn = await three.evaluate((element) => {
+    const subject = element as unknown as { buildContext(): unknown; buildOptions(context: unknown): { series: unknown[] }; getLegendItems(): unknown[] }
+    return { series: subject.buildOptions(subject.buildContext()).series.length, legend: subject.getLegendItems().length }
+  })
+  expect(drawn).toEqual({ series: 2, legend: 2 })
+  expect(warnings).toHaveLength(1)
 })
 
 test('drives the grid from markup in both directions', async ({ page, scenario }) => {

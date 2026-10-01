@@ -470,3 +470,52 @@ c2-details.block--details {
   --c2-textarea__container--min-height: 62px;
   --c2-textarea__container--border: 1px solid var(--site-color-outline-variant);
 }
+
+// ---------------------------------------------------------------------------
+// Data tab
+// ---------------------------------------------------------------------------
+
+.data {
+  display: flex;
+  flex-direction: column;
+
+  &__intro {
+    padding: 12px 12px 0;
+  }
+
+  &__name {
+    font-family: var(--site-font-mono);
+    font-size: 11.5px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  &__dot {
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--site-color-primary);
+  }
+
+  &__summary {
+    margin-left: auto;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--site-color-on-surface-muted);
+  }
+
+  &__actions {
+    flex-wrap: wrap;
+  }
+}
+
+.data-field {
+  --c2-textarea__container--font-family: var(--site-font-mono);
+  --c2-textarea__container--font-size: 11px;
+  --c2-textarea__container--line-height: 1.5;
+  --c2-textarea__container--background: var(--site-color-surface-container-1);
+  --c2-textarea__container--min-height: 180px;
+  --c2-textarea__container--border: 1px solid var(--site-color-outline-variant);
+}

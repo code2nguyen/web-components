@@ -16,6 +16,7 @@ import '../src/pie-chart'
 import '../src/gauge-chart'
 import '../src/radar-chart'
 import '../src/pyramid-chart'
+import '../src/butterfly-chart'
 import '../src/scatter-chart'
 import '../src/bubble-chart'
 import '../src/candlestick-chart'
@@ -153,6 +154,27 @@ function build(): void {
           <c2-chart-series field="large" label="Large" color="#ff0000"></c2-chart-series>
         </c2-bar-chart>`
       break
+    case 'stacked-bars':
+    case 'percent-bars':
+    case 'horizontal-bars':
+    case 'horizontal-grouped-bars':
+    case 'labelled-bars':
+    case 'labelled-stacked-bars': {
+      const attributes = {
+        'stacked-bars': 'stack="normal"',
+        'percent-bars': 'stack="percent"',
+        'horizontal-bars': 'stack="normal" orientation="horizontal"',
+        'horizontal-grouped-bars': 'orientation="horizontal"',
+        'labelled-bars': 'value-labels',
+        'labelled-stacked-bars': 'stack="normal" value-labels',
+      }[scenario]
+      main.innerHTML = `
+        <c2-bar-chart id="chart" label-field="quarter" x-type="category" legend="none" animation="none" ${attributes}>
+          <c2-chart-series field="small" label="Small" color="#0000ff"></c2-chart-series>
+          <c2-chart-series field="large" label="Large" color="#ff0000"></c2-chart-series>
+        </c2-bar-chart>`
+      break
+    }
     case 'dual-axis':
       // Two quantities three orders of magnitude apart: on one scale the small one is a flat line.
       main.innerHTML = `
@@ -182,6 +204,13 @@ function build(): void {
           <c2-chart-series field="current" label="Current"></c2-chart-series>
           <c2-chart-series field="target" label="Target"></c2-chart-series>
         </c2-radar-chart>`
+      break
+    case 'butterfly':
+      main.innerHTML = `
+        <c2-butterfly-chart id="chart" label-field="age">
+          <c2-chart-series field="men" label="Men"></c2-chart-series>
+          <c2-chart-series field="women" label="Women"></c2-chart-series>
+        </c2-butterfly-chart>`
       break
     case 'pyramid':
       main.innerHTML = `
@@ -290,7 +319,7 @@ function build(): void {
   }
 
   const chart = main.querySelector(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
   ) as ChartBase | null
   if (!chart) return
   instrument(chart as unknown as ChartBase)
@@ -319,6 +348,13 @@ function build(): void {
     ]
   } else if (scenario === 'gauge') {
     chart.data = [{ metric: 'Target', value: 78 }]
+  } else if (scenario === 'butterfly') {
+    chart.data = [
+      { age: '60+', men: 1960, women: 2610 },
+      { age: '40–59', men: 2480, women: 2530 },
+      { age: '20–39', men: 2950, women: 2880 },
+      { age: '0–19', men: 2410, women: 2295 },
+    ]
   } else if (scenario === 'pyramid') {
     chart.data = [
       { plan: 'Starter', accounts: 4870 },
@@ -357,7 +393,7 @@ function build(): void {
   } else if (scenario === 'intraday') {
     const base = Date.UTC(2024, 0, 1, 9)
     chart.data = Array.from({ length: 6 }, (_, index) => ({ at: base + index * 900_000, v: 10 + index }))
-  } else if (scenario === 'grouped-bars') {
+  } else if (scenario === 'grouped-bars' || scenario.endsWith('-bars')) {
     chart.data = [
       { quarter: 'Q1', small: 20, large: 80 },
       { quarter: 'Q2', small: 25, large: 90 },
@@ -424,7 +460,7 @@ build()
 void whenDrawn(
   Array.from(
     main.querySelectorAll(
-      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
+      'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-pyramid-chart, c2-butterfly-chart, c2-scatter-chart, c2-candlestick-chart, c2-overlap-chart',
     ),
   ),
 ).then(() => {

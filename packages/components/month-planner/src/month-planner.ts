@@ -5,6 +5,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { firstDayOfWeek, resolveLocale, type Weekday } from '@c2n/core/locale-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import styles from './month-planner.scss?inline'
 
 export type MonthPlannerWeekStart = 'monday' | 'sunday' | 'saturday'
@@ -184,7 +185,9 @@ function dayDiff(from: Date, to: Date): number {
  * A month planner that draws events as bars across the days they cover: a vacation from the 10th to the 15th reads as
  * one strip, continued on the next row when it crosses a week. Overlapping events stack in separate lanes. Pass the
  * plan through `events` (a property, or a JSON attribute) with local-calendar `YYYY-MM-DD` dates, which never shift
- * across time zones. The header moves between months; `month` picks the one shown.
+ * across time zones. The header moves between months; `month` picks the one shown. `heading` puts a title of the
+ * planner's own in front of the month (the `heading` slot takes markup instead, such as an editable field), and the
+ * `actions` slot puts buttons of your own, e.g. "Add event", before the month navigation.
  *
  * The month title opens a month picker (turn it off with `month-picker="false"`): a year stepper over the twelve
  * months, where a dot and a soft tint mark every month that has events. Arrow keys move between months, Page Up/Page Down change the year, Enter picks and Escape closes.
@@ -202,6 +205,11 @@ function dayDiff(from: Date, to: Date): number {
  * @event {CustomEvent<MonthPlannerEventClickDetail>} event-click - Fired when an event bar is activated; `detail.event` is the entry from `events`.
  * @event {CustomEvent<MonthPlannerMonthChangeDetail>} month-change - Fired when the header navigation shows another month; `detail.month` is `YYYY-MM`.
  *
+ * @slot heading - Title at the start of the header, in place of the `heading` text. It names the planner unless `heading` or `aria-label` is set.
+ * @slot actions - Controls at the end of the header, before the month navigation, e.g. an "Add event" button.
+ *
+ * @csspart heading - Heading region wrapping the `heading` slot and the `heading` text fallback; assigned content keeps its own styles.
+ * @csspart actions - Actions region wrapping the `actions` slot at the end of the header, before the month navigation; assigned controls keep their own styles.
  * @csspart event - Each event bar (one per week the event covers).
  * @csspart agenda-event - Each event in the compact layout's list of the selected day.
  *
@@ -213,6 +221,9 @@ function dayDiff(from: Date, to: Date): number {
  * @cssproperty {font-family} [--c2-month-planner--font-family=inherit]
  * @cssproperty {font-size} [--c2-month-planner--font-size=14px]
  * @cssproperty {font-weight} [--c2-month-planner__title--font-weight=600]
+ * @cssproperty {font-size} [--c2-month-planner__heading--font-size=14px] - The `heading`.
+ * @cssproperty {font-weight} [--c2-month-planner__heading--font-weight=600]
+ * @cssproperty {pixel} [--c2-month-planner__actions--gap=8px] - Space between the controls in the `actions` slot.
  * @cssproperty {pixel} [--c2-month-planner__navigation--size=32px]
  * @cssproperty {border-radius} [--c2-month-planner__navigation--border-radius=6px]
  * @cssproperty {color} [--c2-month-planner__navigation__hover--background=#f4f4f5]
@@ -275,6 +286,7 @@ export class MonthPlanner extends LitElement {
   /** Month index (0–11) holding the picker's roving tab stop. */
   @state() private pickerFocus = 0
   @queryAll('.picker-month') private readonly monthButtons!: NodeListOf<HTMLButtonElement>
+  private readonly slotPresence = new SlotPresenceController(this, ['heading', 'actions'])
 
   /** The plan: `{ id?, title, start, end?, color? }` entries with `YYYY-MM-DD` dates. Accepts a JSON string as an attribute. */
   @property({ converter: jsonPropertyConverter }) events: MonthPlannerEvent[] = []
@@ -286,7 +298,9 @@ export class MonthPlanner extends LitElement {
   @property({ attribute: 'week-start', reflect: true }) weekStart: MonthPlannerWeekStart | '' = ''
   /** Makes the month title open a year and month picker. Set `month-picker="false"` for a plain title. */
   @property({ type: Boolean, attribute: 'month-picker' }) monthPicker = true
-  /** Accessible name for the planner; defaults to the month title. */
+  /** Title shown at the start of the header, before the month, e.g. "Team holidays". It also names the planner for assistive technology. */
+  @property() heading = ''
+  /** Accessible name for the planner; defaults to `heading`, else the month title. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   protected override willUpdate(changed: PropertyValues<this>) {
@@ -632,8 +646,19 @@ export class MonthPlanner extends LitElement {
     const weeks = Math.ceil(dayDiff(first, last) / 7)
     const selected = this.shownDay
 
-    return html`<section class="c2-month-planner" aria-label=${this.ariaLabel || title}>
+    const hasHeading = Boolean(this.heading) || this.slotPresence.has('heading')
+    // Slotted heading markup names the planner through the heading itself; text set as a property names it directly.
+    const labelledByHeading = !this.ariaLabel && !this.heading && hasHeading
+
+    return html`<section
+      class="c2-month-planner"
+      aria-label=${labelledByHeading ? nothing : this.ariaLabel || this.heading || title}
+      aria-labelledby=${labelledByHeading ? 'heading' : nothing}
+    >
       <header class="header">
+        <h2 class="heading" part="heading" id="heading" ?hidden=${!hasHeading}>
+          <slot name="heading" @slotchange=${this.slotPresence.handleSlotChange}>${this.heading}</slot>
+        </h2>
         <h2 class="title" aria-live="polite">
           ${
             this.monthPicker
@@ -650,14 +675,19 @@ export class MonthPlanner extends LitElement {
               : title
           }
         </h2>
-        <div class="navigation">
-          <button class="nav" type="button" aria-label=${this.labels.previousMonth} @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, -1))}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
-          <button class="nav today-button" type="button" @click=${() => this.showMonth(beginningOfMonth(new Date()))}>${this.todayLabel()}</button>
-          <button class="nav" type="button" aria-label=${this.labels.nextMonth} @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, 1))}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-          </button>
+        <div class="trailing">
+          <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
+            <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
+          </div>
+          <div class="navigation">
+            <button class="nav" type="button" aria-label=${this.labels.previousMonth} @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, -1))}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+            <button class="nav today-button" type="button" @click=${() => this.showMonth(beginningOfMonth(new Date()))}>${this.todayLabel()}</button>
+            <button class="nav" type="button" aria-label=${this.labels.nextMonth} @click=${() => this.showMonth(beginningOfMonth(this.visibleMonth, 1))}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+            </button>
+          </div>
         </div>
         ${this.monthPicker && this.pickerOpen ? this.renderPicker(locale) : nothing}
       </header>
