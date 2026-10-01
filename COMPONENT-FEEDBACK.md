@@ -138,16 +138,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   belongs in the theme/build pipeline, or in documenting `rawElement` as the required path above a certain
   instance count.
 
-### `c2-bar-chart` cannot express common horizontal, stacked, or labelled bar variants
-
-- **Severity:** gap
-- **Hit while:** translating the bar-chart gallery reference into supported docs examples, 2026-09-16.
-- **What happens:** the component only draws vertical grouped bars. There is no orientation option, cumulative
-  stack mode, or value/data-label renderer, so three common variants in the reference could not be represented
-  without drawing a separate chart by hand. The gallery keeps only truthful grouped-bar examples.
-- **Where the fix belongs:** `packages/components/chart` — add explicit orientation and grouping/stacking APIs,
-  plus a formatter or render hook for bar labels.
-
 ### A component-level shorthand variable cannot be reached once `@c2n/theme` is loaded
 
 - **Severity:** gap (theme pipeline)
@@ -297,6 +287,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | charts                          | A time axis always formatted month + day, so an hour of samples labelled every tick "Jan 1".                                                                                                                                                                                                                                    | 2026-09-14, the format is chosen from the visible span; tested on 75 minutes of data.                                                                                         |
 | `c2-status-panel`               | Hosting an illustration took three variables set together (`media--size`, `media-icon--size` and a transparent per-status disc background), or the artwork rendered clipped or tiny on a coloured disc.                                                                                                                         | 2026-10-01, `media="illustration"` + `--c2-status-panel__illustration--size`; docs, gallery and the 404 page converted; tested.                                               |
 | `c2-status-panel`               | The media box was always rendered, so hiding it took six variables.                                                                                                                                                                                                                                                             | 2026-10-01, `media="none"` renders no media region; tested.                                                                                                                   |
+| `c2-bar-chart`                  | Only vertical grouped bars: no orientation, no stacking and no value labels, so three common variants could not be drawn.                                                                                                                                                                                                       | 2026-10-01, `orientation="horizontal"`, `stack="normal\|percent"`, `value-labels` + `formatLabel`; gallery cards and tests for each.                                          |
 
 ## Won't fix
 
