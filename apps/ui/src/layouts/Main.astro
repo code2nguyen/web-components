@@ -68,13 +68,7 @@ const mobileNavItems = [
           <Fragment set:html={logoRef} />
           <span class="site-header__wordmark">c2n<span class="site-header__wordmark-muted">/web-components</span></span>
         </a>
-        <a
-          class="site-header__version"
-          href="https://www.npmjs.com/org/c2n"
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Version ${packageVersion} packages on npm`}
-        >
+        <a class="site-header__version" href={`${base}/changelog/`} aria-label={`Version ${packageVersion}, see the changelog`}>
           v{packageVersion}
         </a>
       </div>
@@ -126,6 +120,7 @@ const mobileNavItems = [
           <span class="site-footer__links">
             <a href={repoUrl} target="_blank" rel="noreferrer">GitHub</a>
             <a href="https://www.npmjs.com/org/c2n" target="_blank" rel="noreferrer">npm</a>
+            <a href={`${base}/changelog/`}>Changelog</a>
             <a href={`${base}/llms.txt`}>llms.txt</a>
           </span>
         </div>
