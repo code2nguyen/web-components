@@ -125,3 +125,8 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Pagination** — `c2-pagination` · `@c2n/pagination` — Page navigation in three layouts: numbered pages, a simple page status, or a table-footer row with rows-per-page.
 - **Side Nav** — `c2-side-nav` · `@c2n/side-nav` — Responsive navigation drawer beside the page: pushes the content on large screens, slides over it with a backdrop on small ones.
 - **Tabs** — `c2-tabs, c2-tab` · `@c2n/tabs` — Tab strip that shows one content panel at a time. Children: `c2-tab`.
+
+## Planning
+
+- **Month Planner** — `c2-month-planner` · `@c2n/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
+- **Week Planner** — `c2-week-planner` · `@c2n/week-planner` — Typical-week schedule with time blocks, and optional odd and even weeks.

@@ -1,0 +1,43 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { WeekPlanner } from '@c2n/week-planner'
+
+## Presets
+
+The hour height sets how dense the week reads; the event and today-column variables carry the accent.
+
+<GalleryGrid min={9999}>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-week-planner
+  locale="en-US"
+  start-hour="8"
+  end-hour="13"
+  events='[{"title":"Stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Workshop","day":"tue","start":"10:00","end":"12:00"},{"title":"Stand-up","day":"thu","start":"08:30","end":"09:00"}]'
+></c2-week-planner>
+```
+
+```html tag=MdxCodeBlock,label=Compact violet
+<style>
+  .compact-violet {
+    --c2-week-planner__hour--height: 32px;
+    --c2-week-planner__event--background: #7c3aed;
+    --c2-week-planner__event--border-radius: 6px;
+    --c2-week-planner__day__today--background: rgba(124, 58, 237, 0.06);
+    --c2-week-planner__day-header__today--color: #6d28d9;
+    --c2-button-group__indicator--background-color: #7c3aed;
+    --c2-button-group__segmented-item__selected--color: #ffffff;
+  }
+</style>
+<c2-week-planner
+  class="compact-violet"
+  alternate-weeks
+  locale="en-US"
+  start-hour="9"
+  end-hour="18"
+  events='[{"title":"Gym","day":"mon","start":"12:00","end":"13:00","weeks":"odd"},{"title":"Yoga","day":"mon","start":"12:00","end":"13:00","weeks":"even"},{"title":"Office hours","day":"wed","start":"14:00","end":"17:00"},{"title":"Lunch run","day":"fri","start":"12:00","end":"13:00"}]'
+></c2-week-planner>
+```
+
+</GalleryGrid>

@@ -221,6 +221,10 @@
       "types": "./lib/modal.d.ts",
       "default": "./lib/modal.js"
     },
+    "./month-planner": {
+      "types": "./lib/month-planner.d.ts",
+      "default": "./lib/month-planner.js"
+    },
     "./navigation-menu": {
       "types": "./lib/navigation-menu.d.ts",
       "default": "./lib/navigation-menu.js"
@@ -369,6 +373,10 @@
       "types": "./lib/virtual-list.d.ts",
       "default": "./lib/virtual-list.js"
     },
+    "./week-planner": {
+      "types": "./lib/week-planner.d.ts",
+      "default": "./lib/week-planner.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -440,6 +448,7 @@
     "@c2n/mat-icon": "0.0.19",
     "@c2n/menu": "0.0.19",
     "@c2n/modal": "0.0.19",
+    "@c2n/month-planner": "0.0.19",
     "@c2n/navigation-menu": "0.0.19",
     "@c2n/number-input": "0.0.19",
     "@c2n/otp-input": "0.0.19",
@@ -477,7 +486,8 @@
     "@c2n/tooltip": "0.0.19",
     "@c2n/tree": "0.0.19",
     "@c2n/upload": "0.0.19",
-    "@c2n/virtual-list": "0.0.19"
+    "@c2n/virtual-list": "0.0.19",
+    "@c2n/week-planner": "0.0.19"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "^6.0.0",

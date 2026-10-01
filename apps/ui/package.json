@@ -17,6 +17,8 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/week-planner": "*",
+    "@c2n/month-planner": "*",
     "@c2n/hover-card": "*",
     "@c2n/command": "*",
     "@c2n/marker": "*",

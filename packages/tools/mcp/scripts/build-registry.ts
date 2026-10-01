@@ -33,7 +33,7 @@ const umbrellaPackages = new Set(
   ),
 )
 const DOCS_BASE = 'https://code2nguyen.github.io/web-components'
-const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Feedback', 'Chat', 'Icons']
+const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Planning', 'Feedback', 'Chat', 'Icons']
 const GUIDES: GuideTopic[] = ['workflow', 'theming', 'variant-components', 'frameworks']
 
 interface Manifest {
