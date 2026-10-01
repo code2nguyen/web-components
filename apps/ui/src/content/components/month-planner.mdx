@@ -1,19 +1,19 @@
 ---
-title: 'Calendar'
-description: 'Month planner that draws events and trips as bars across the days they cover.'
+title: 'Month Planner'
+description: 'Month calendar that draws events and trips as bars across the days they cover.'
 category: 'Data display'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { Calendar } from '@c2n/calendar'
+import { MonthPlanner } from '@c2n/month-planner'
 
-`c2-calendar` shows a plan on a month grid. Each entry in `events` is drawn as a bar from its `start` to its `end`
+`c2-month-planner` shows a plan on a month grid. Each entry in `events` is drawn as a bar from its `start` to its `end`
 day, so a vacation reads as one strip with a clear beginning and end, continued on the next row when it crosses a
 week. Overlapping entries stack in separate lanes. The header steps between months (and back to today); `month`
 picks the one shown. The week starts on the locale's usual day (Sunday in `en-US`, Monday in `fr` or `en-GB`,
-Saturday in `ar-EG`); `week-start` (`monday`, `sunday` or `saturday`) overrides it. The calendar's text follows `locale` (`fr`,
+Saturday in `ar-EG`); `week-start` (`monday`, `sunday` or `saturday`) overrides it. The planner's text follows `locale` (`fr`,
 `en-GB`, …) and, when it is not set, the browser's language: month and day names, Today and "this month" come from the
 browser's `Intl` data, and the navigation labels are built in for English, French, German, Spanish, Italian, Portuguese,
 Dutch and Vietnamese, falling back to English otherwise.
@@ -25,18 +25,18 @@ Enter picks and Escape closes. Set `month-picker="false"` for a plain title.
 ## Installation
 
 ```bash tag=CodeBlock
-npm install @c2n/calendar
+npm install @c2n/month-planner
 ```
 
 ## Usage
 
-```html tag=UsageBlock,package=@c2n/calendar
+```html tag=UsageBlock,package=@c2n/month-planner
 <div data-label="Vacation plan">
-  <c2-calendar
+  <c2-month-planner
     month="2026-09"
     locale="en-US"
     events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"summit","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
-  ></c2-calendar>
+  ></c2-month-planner>
 </div>
 ```
 
@@ -44,17 +44,17 @@ npm install @c2n/calendar
 
 Each entry is `{ id?, title, start, end?, color?, textColor? }`. Dates are local `YYYY-MM-DD` strings and `end` is inclusive;
 leave it out for a one-day entry. `color` is any CSS colour for that bar (its text stays white in both themes; add `textColor` for a light `color`),
-otherwise `--c2-calendar__event--background` applies. Entries without a valid `start` are skipped.
+otherwise `--c2-month-planner__event--background` applies. Entries without a valid `start` are skipped.
 
 Set `events` as a property from code, or as a JSON attribute in markup. Bars are buttons: clicking one (or pressing
 Enter on it) fires `event-click` with the entry in `event.detail.event`. The header fires `month-change` with the
 month now shown (`YYYY-MM`), which is where to load the next month's plan.
 
 ```ts tag=CodeBlock
-import '@c2n/calendar'
+import '@c2n/month-planner'
 
-const calendar = document.querySelector('c2-calendar')!
-calendar.events = [{ id: 'trip', title: 'Vacation', start: '2026-09-10', end: '2026-09-18' }]
-calendar.addEventListener('event-click', (event) => console.log(event.detail.event.id))
-calendar.addEventListener('month-change', (event) => console.log(event.detail.month))
+const planner = document.querySelector('c2-month-planner')!
+planner.events = [{ id: 'trip', title: 'Vacation', start: '2026-09-10', end: '2026-09-18' }]
+planner.addEventListener('event-click', (event) => console.log(event.detail.event.id))
+planner.addEventListener('month-change', (event) => console.log(event.detail.month))
 ```

@@ -49,7 +49,7 @@ test('navigates months and reports the change', async ({ page, scenario }) => {
   await page.getByRole('button', { name: 'Next month' }).click()
   await expect(page.getByRole('heading', { name: 'October 2026' })).toBeVisible()
   await expect(page.getByRole('status')).toHaveText('month:2026-10')
-  await expect(page.locator('c2-calendar')).toHaveJSProperty('month', '2026-10')
+  await expect(page.locator('c2-month-planner')).toHaveJSProperty('month', '2026-10')
   await page.getByRole('button', { name: 'Previous month' }).click()
   await page.getByRole('button', { name: 'Previous month' }).click()
   await expect(page.getByRole('heading', { name: 'August 2026' })).toBeVisible()
@@ -65,7 +65,7 @@ test('keeps a Sunday-first week in one row', async ({ page, scenario }) => {
   await scenario('sunday')
   // Sunday first: September 10 – 12 and 13 – 15 fall in two rows.
   await expect(page.getByRole('button', { name: /^Vacation/ })).toHaveCount(2)
-  await expect(page.locator('c2-calendar').locator('.weekdays span').first()).toHaveText('Sun')
+  await expect(page.locator('c2-month-planner').locator('.weekdays span').first()).toHaveText('Sun')
 })
 
 test('has no axe violations', async ({ page, scenario }) => {
@@ -147,7 +147,9 @@ test.describe('month picker', () => {
 test('keeps white text on an event with its own colour when the theme darkens the default text', async ({ page, scenario }) => {
   await scenario()
   // The dark theme sets the default event text to a dark colour for its lighter default bar.
-  await page.locator('c2-calendar').evaluate((element) => (element as HTMLElement).style.setProperty('--c2-calendar__event--color', 'rgb(24, 24, 27)'))
+  await page
+    .locator('c2-month-planner')
+    .evaluate((element) => (element as HTMLElement).style.setProperty('--c2-month-planner__event--color', 'rgb(24, 24, 27)'))
   await expect(page.getByRole('button', { name: /^Vacation/ }).first()).toHaveCSS('color', 'rgb(255, 255, 255)')
   await expect(page.getByRole('button', { name: /^Flight/ })).toHaveCSS('color', 'rgb(24, 24, 27)')
 })
@@ -157,7 +159,7 @@ test('speaks the language set in locale', async ({ page, scenario }) => {
   await expect(page.getByRole('heading', { name: 'septembre 2026' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Aujourd’hui' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Mois suivant' })).toBeVisible()
-  await expect(page.locator('c2-calendar').locator('.weekdays span').first()).toHaveText('lun.')
+  await expect(page.locator('c2-month-planner').locator('.weekdays span').first()).toHaveText('lun.')
   await page.getByRole('button', { name: 'septembre 2026', exact: true }).click()
   await expect(page.getByRole('dialog', { name: 'Choisir un mois' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'octobre 2026, contient des événements' })).toBeVisible()
@@ -182,13 +184,13 @@ test.describe('first day of the week', () => {
   ]) {
     test(`follows the convention of ${locale}`, async ({ page, scenario }) => {
       await scenario(`week-${locale}`)
-      await expect(page.locator('c2-calendar').locator('.weekdays span').first()).toHaveText(first)
+      await expect(page.locator('c2-month-planner').locator('.weekdays span').first()).toHaveText(first)
     })
   }
 
   test('lets week-start override the locale', async ({ page, scenario }) => {
     await scenario('week-en-US')
-    await page.locator('c2-calendar').evaluate((element) => element.setAttribute('week-start', 'monday'))
-    await expect(page.locator('c2-calendar').locator('.weekdays span').first()).toHaveText('Mon')
+    await page.locator('c2-month-planner').evaluate((element) => element.setAttribute('week-start', 'monday'))
+    await expect(page.locator('c2-month-planner').locator('.weekdays span').first()).toHaveText('Mon')
   })
 })

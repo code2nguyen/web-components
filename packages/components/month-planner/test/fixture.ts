@@ -4,7 +4,7 @@ import { test as base } from '../../../../tests/fixture'
 export const test = base.extend<{ scenario: (name?: string) => Promise<void> }>({
   scenario: async ({ page }, use) => {
     await use(async (name = 'default') => {
-      await page.goto(`/packages/components/calendar/test/scenarios.html?scenario=${encodeURIComponent(name)}`)
+      await page.goto(`/packages/components/month-planner/test/scenarios.html?scenario=${encodeURIComponent(name)}`)
       await expect(page.locator('main')).toHaveAttribute('data-ready', 'true')
     })
   },

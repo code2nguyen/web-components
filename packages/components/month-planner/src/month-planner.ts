@@ -5,19 +5,19 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { firstDayOfWeek, resolveLocale, type Weekday } from '@c2n/core/locale-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
-import styles from './calendar.scss?inline'
+import styles from './month-planner.scss?inline'
 
-export type CalendarWeekStart = 'monday' | 'sunday' | 'saturday'
+export type MonthPlannerWeekStart = 'monday' | 'sunday' | 'saturday'
 
 /** One entry in the plan: a single day, or a span from `start` to `end` (both inclusive, `YYYY-MM-DD`). */
-export interface CalendarEvent {
+export interface MonthPlannerEvent {
   /** Identifies the event in `event-click`. */
   id?: string
   title: string
   start: string
   /** Last day of the event; omit for a one-day event. */
   end?: string
-  /** Bar colour, any CSS colour. Defaults to `--c2-calendar__event--background`. */
+  /** Bar colour, any CSS colour. Defaults to `--c2-month-planner__event--background`. */
   color?: string
   /**
    * Text colour on a bar with its own `color`. Defaults to white, which suits a mid-to-dark colour in both themes;
@@ -26,28 +26,28 @@ export interface CalendarEvent {
   textColor?: string
 }
 
-export interface CalendarEventClickDetail {
-  event: CalendarEvent
+export interface MonthPlannerEventClickDetail {
+  event: MonthPlannerEvent
 }
 
-export interface CalendarMonthChangeDetail {
+export interface MonthPlannerMonthChangeDetail {
   /** The month now shown, as `YYYY-MM`. */
   month: string
 }
 
-/** Events fired by {@link Calendar}, keyed for `addEventListener`. */
-export interface CalendarEventMap {
-  'event-click': CustomEvent<CalendarEventClickDetail>
-  'month-change': CustomEvent<CalendarMonthChangeDetail>
+/** Events fired by {@link MonthPlanner}, keyed for `addEventListener`. */
+export interface MonthPlannerEventMap {
+  'event-click': CustomEvent<MonthPlannerEventClickDetail>
+  'month-change': CustomEvent<MonthPlannerMonthChangeDetail>
 }
 
-export interface Calendar {
-  addEventListener: TypedAddEventListener<Calendar, CalendarEventMap>
-  removeEventListener: TypedRemoveEventListener<Calendar, CalendarEventMap>
+export interface MonthPlanner {
+  addEventListener: TypedAddEventListener<MonthPlanner, MonthPlannerEventMap>
+  removeEventListener: TypedRemoveEventListener<MonthPlanner, MonthPlannerEventMap>
 }
 
 interface Segment {
-  event: CalendarEvent
+  event: MonthPlannerEvent
   column: number
   span: number
   lane: number
@@ -184,67 +184,67 @@ function dayDiff(from: Date, to: Date): number {
  * come from `Intl`, and the navigation labels from a built-in list (English, French, German, Spanish, Italian,
  * Portuguese, Dutch, Vietnamese; other languages fall back to English).
  *
- * @tag c2-calendar
+ * @tag c2-month-planner
  *
- * @event {CustomEvent<CalendarEventClickDetail>} event-click - Fired when an event bar is activated; `detail.event` is the entry from `events`.
- * @event {CustomEvent<CalendarMonthChangeDetail>} month-change - Fired when the header navigation shows another month; `detail.month` is `YYYY-MM`.
+ * @event {CustomEvent<MonthPlannerEventClickDetail>} event-click - Fired when an event bar is activated; `detail.event` is the entry from `events`.
+ * @event {CustomEvent<MonthPlannerMonthChangeDetail>} month-change - Fired when the header navigation shows another month; `detail.month` is `YYYY-MM`.
  *
  * @csspart event - Each event bar (one per week the event covers).
  *
- * @cssproperty {color} [--c2-calendar--background=#ffffff]
- * @cssproperty {color} [--c2-calendar--color=#18181b]
- * @cssproperty {border} [--c2-calendar--border=1px solid #e4e4e7]
- * @cssproperty {border-radius} [--c2-calendar--border-radius=8px]
- * @cssproperty {padding} [--c2-calendar--padding=12px]
- * @cssproperty {font-family} [--c2-calendar--font-family=inherit]
- * @cssproperty {font-size} [--c2-calendar--font-size=14px]
- * @cssproperty {font-weight} [--c2-calendar__title--font-weight=600]
- * @cssproperty {pixel} [--c2-calendar__navigation--size=32px]
- * @cssproperty {border-radius} [--c2-calendar__navigation--border-radius=6px]
- * @cssproperty {color} [--c2-calendar__navigation__hover--background=#f4f4f5]
- * @cssproperty {color} [--c2-calendar__weekday--color=#71717a]
- * @cssproperty {font-size} [--c2-calendar__weekday--font-size=12px]
- * @cssproperty {border} [--c2-calendar__day--border=1px solid #e4e4e7] - Grid line between days.
- * @cssproperty {pixel} [--c2-calendar__day--min-height=88px]
- * @cssproperty {font-size} [--c2-calendar__day--font-size=12px]
- * @cssproperty {color} [--c2-calendar__day__outside--background=#fafafa] - Background of the neighbouring months' days.
- * @cssproperty {color} [--c2-calendar__day__outside--color=#71717a]
- * @cssproperty {color} [--c2-calendar__day__today--background=rgba(2, 101, 220, 0.05)] - Tint of today's box; it stays inside the grid lines.
- * @cssproperty {color} [--c2-calendar__day__today--color=rgb(2, 101, 220)] - Colour of today's date number.
- * @cssproperty {font-weight} [--c2-calendar__day__today--font-weight=600]
- * @cssproperty {color} [--c2-calendar__event--background=rgb(2, 101, 220)] - Bar colour of an event without its own `color`.
- * @cssproperty {color} [--c2-calendar__event--color=#ffffff]
- * @cssproperty {pixel} [--c2-calendar__event--height=22px]
- * @cssproperty {pixel} [--c2-calendar__event--gap=2px] - Space between stacked lanes.
- * @cssproperty {border-radius} [--c2-calendar__event--border-radius=4px]
- * @cssproperty {font-size} [--c2-calendar__event--font-size=12px]
- * @cssproperty {font-weight} [--c2-calendar__event--font-weight=500]
- * @cssproperty {opacity} [--c2-calendar__event__hover--opacity=0.88]
- * @cssproperty {outline} [--c2-calendar__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
- * @cssproperty {pixel} [--c2-calendar__focus--outline-offset=2px]
- * @cssproperty {color} [--c2-calendar__title__hover--background=#f4f4f5] - Month title button, when the picker is on.
- * @cssproperty {color} [--c2-calendar__picker--background=#ffffff]
- * @cssproperty {border} [--c2-calendar__picker--border=1px solid #e4e4e7]
- * @cssproperty {border-radius} [--c2-calendar__picker--border-radius=8px]
- * @cssproperty {box-shadow} [--c2-calendar__picker--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
- * @cssproperty {padding} [--c2-calendar__picker--padding=12px]
- * @cssproperty {pixel} [--c2-calendar__picker--width=280px]
- * @cssproperty {pixel} [--c2-calendar__month--height=44px]
- * @cssproperty {border-radius} [--c2-calendar__month--border-radius=6px]
- * @cssproperty {color} [--c2-calendar__month--color=#71717a] - A month without events.
- * @cssproperty {color} [--c2-calendar__month__hover--background=#f4f4f5]
- * @cssproperty {color} [--c2-calendar__month__selected--background=rgb(2, 101, 220)] - The month shown in the calendar.
- * @cssproperty {color} [--c2-calendar__month__selected--color=#ffffff]
- * @cssproperty {outline} [--c2-calendar__month__current--outline=1px solid #a1a1aa] - Today's month.
- * @cssproperty {font-weight} [--c2-calendar__month__marked--font-weight=600] - A month that has events.
- * @cssproperty {color} [--c2-calendar__month__marked--color=#18181b]
- * @cssproperty {color} [--c2-calendar__month__marked--background=rgba(2, 101, 220, 0.1)] - Soft tint behind a month that has events.
- * @cssproperty {color} [--c2-calendar__month__marked__hover--background=rgba(2, 101, 220, 0.18)]
- * @cssproperty {color} [--c2-calendar__marker--color=rgb(2, 101, 220)] - Dot on a month that has events.
- * @cssproperty {pixel} [--c2-calendar__marker--size=6px]
+ * @cssproperty {color} [--c2-month-planner--background=#ffffff]
+ * @cssproperty {color} [--c2-month-planner--color=#18181b]
+ * @cssproperty {border} [--c2-month-planner--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-month-planner--border-radius=8px]
+ * @cssproperty {padding} [--c2-month-planner--padding=12px]
+ * @cssproperty {font-family} [--c2-month-planner--font-family=inherit]
+ * @cssproperty {font-size} [--c2-month-planner--font-size=14px]
+ * @cssproperty {font-weight} [--c2-month-planner__title--font-weight=600]
+ * @cssproperty {pixel} [--c2-month-planner__navigation--size=32px]
+ * @cssproperty {border-radius} [--c2-month-planner__navigation--border-radius=6px]
+ * @cssproperty {color} [--c2-month-planner__navigation__hover--background=#f4f4f5]
+ * @cssproperty {color} [--c2-month-planner__weekday--color=#71717a]
+ * @cssproperty {font-size} [--c2-month-planner__weekday--font-size=12px]
+ * @cssproperty {border} [--c2-month-planner__day--border=1px solid #e4e4e7] - Grid line between days.
+ * @cssproperty {pixel} [--c2-month-planner__day--min-height=88px]
+ * @cssproperty {font-size} [--c2-month-planner__day--font-size=12px]
+ * @cssproperty {color} [--c2-month-planner__day__outside--background=#fafafa] - Background of the neighbouring months' days.
+ * @cssproperty {color} [--c2-month-planner__day__outside--color=#71717a]
+ * @cssproperty {color} [--c2-month-planner__day__today--background=rgba(2, 101, 220, 0.05)] - Tint of today's box; it stays inside the grid lines.
+ * @cssproperty {color} [--c2-month-planner__day__today--color=rgb(2, 101, 220)] - Colour of today's date number.
+ * @cssproperty {font-weight} [--c2-month-planner__day__today--font-weight=600]
+ * @cssproperty {color} [--c2-month-planner__event--background=rgb(2, 101, 220)] - Bar colour of an event without its own `color`.
+ * @cssproperty {color} [--c2-month-planner__event--color=#ffffff]
+ * @cssproperty {pixel} [--c2-month-planner__event--height=22px]
+ * @cssproperty {pixel} [--c2-month-planner__event--gap=2px] - Space between stacked lanes.
+ * @cssproperty {border-radius} [--c2-month-planner__event--border-radius=4px]
+ * @cssproperty {font-size} [--c2-month-planner__event--font-size=12px]
+ * @cssproperty {font-weight} [--c2-month-planner__event--font-weight=500]
+ * @cssproperty {opacity} [--c2-month-planner__event__hover--opacity=0.88]
+ * @cssproperty {outline} [--c2-month-planner__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {pixel} [--c2-month-planner__focus--outline-offset=2px]
+ * @cssproperty {color} [--c2-month-planner__title__hover--background=#f4f4f5] - Month title button, when the picker is on.
+ * @cssproperty {color} [--c2-month-planner__picker--background=#ffffff]
+ * @cssproperty {border} [--c2-month-planner__picker--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-month-planner__picker--border-radius=8px]
+ * @cssproperty {box-shadow} [--c2-month-planner__picker--box-shadow=0 8px 24px rgba(24, 24, 27, 0.08)]
+ * @cssproperty {padding} [--c2-month-planner__picker--padding=12px]
+ * @cssproperty {pixel} [--c2-month-planner__picker--width=280px]
+ * @cssproperty {pixel} [--c2-month-planner__month--height=44px]
+ * @cssproperty {border-radius} [--c2-month-planner__month--border-radius=6px]
+ * @cssproperty {color} [--c2-month-planner__month--color=#71717a] - A month without events.
+ * @cssproperty {color} [--c2-month-planner__month__hover--background=#f4f4f5]
+ * @cssproperty {color} [--c2-month-planner__month__selected--background=rgb(2, 101, 220)] - The month shown in the planner.
+ * @cssproperty {color} [--c2-month-planner__month__selected--color=#ffffff]
+ * @cssproperty {outline} [--c2-month-planner__month__current--outline=1px solid #a1a1aa] - Today's month.
+ * @cssproperty {font-weight} [--c2-month-planner__month__marked--font-weight=600] - A month that has events.
+ * @cssproperty {color} [--c2-month-planner__month__marked--color=#18181b]
+ * @cssproperty {color} [--c2-month-planner__month__marked--background=rgba(2, 101, 220, 0.1)] - Soft tint behind a month that has events.
+ * @cssproperty {color} [--c2-month-planner__month__marked__hover--background=rgba(2, 101, 220, 0.18)]
+ * @cssproperty {color} [--c2-month-planner__marker--color=rgb(2, 101, 220)] - Dot on a month that has events.
+ * @cssproperty {pixel} [--c2-month-planner__marker--size=6px]
  */
-@customElement('c2-calendar')
-export class Calendar extends LitElement {
+@customElement('c2-month-planner')
+export class MonthPlanner extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @state() private visibleMonth = beginningOfMonth(new Date())
@@ -255,16 +255,16 @@ export class Calendar extends LitElement {
   @queryAll('.picker-month') private readonly monthButtons!: NodeListOf<HTMLButtonElement>
 
   /** The plan: `{ id?, title, start, end?, color? }` entries with `YYYY-MM-DD` dates. Accepts a JSON string as an attribute. */
-  @property({ converter: jsonPropertyConverter }) events: CalendarEvent[] = []
+  @property({ converter: jsonPropertyConverter }) events: MonthPlannerEvent[] = []
   /** Month shown, as `YYYY-MM`. Defaults to the current month; the header navigation updates it. */
   @property({ type: String }) month = ''
-  /** Language of the calendar's text, month and day names, e.g. `fr` or `en-GB`. Defaults to the browser's language. */
+  /** Language of the planner's text, month and day names, e.g. `fr` or `en-GB`. Defaults to the browser's language. */
   @property({ type: String }) locale = ''
   /** First day of the week. Defaults to the convention of `locale` (Sunday in `en-US`, Monday in `fr` or `en-GB`). */
-  @property({ attribute: 'week-start', reflect: true }) weekStart: CalendarWeekStart | '' = ''
+  @property({ attribute: 'week-start', reflect: true }) weekStart: MonthPlannerWeekStart | '' = ''
   /** Makes the month title open a year and month picker. Set `month-picker="false"` for a plain title. */
   @property({ type: Boolean, attribute: 'month-picker' }) monthPicker = true
-  /** Accessible name for the calendar; defaults to the month title. */
+  /** Accessible name for the planner; defaults to the month title. */
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   protected override willUpdate(changed: PropertyValues<this>) {
@@ -295,13 +295,13 @@ export class Calendar extends LitElement {
     return LABELS[this.effectiveLocale.toLowerCase().split('-')[0]] ?? LABELS.en
   }
 
-  /** The Today button's label: "today" in the calendar's language, capitalised. */
+  /** The Today button's label: "today" in the planner's language, capitalised. */
   private todayLabel() {
     const today = this.relative('day')
     return today.charAt(0).toLocaleUpperCase(this.effectiveLocale) + today.slice(1)
   }
 
-  /** "today", "this month" in the calendar's language. */
+  /** "today", "this month" in the planner's language. */
   private relative(unit: 'day' | 'month') {
     try {
       return new Intl.RelativeTimeFormat(this.effectiveLocale, { numeric: 'auto' }).format(0, unit)
@@ -314,11 +314,11 @@ export class Calendar extends LitElement {
     if (toMonth(month) === toMonth(this.visibleMonth)) return
     this.visibleMonth = month
     this.month = toMonth(month)
-    this.dispatchEvent(new CustomEvent<CalendarMonthChangeDetail>('month-change', { detail: { month: this.month }, bubbles: true, composed: true }))
+    this.dispatchEvent(new CustomEvent<MonthPlannerMonthChangeDetail>('month-change', { detail: { month: this.month }, bubbles: true, composed: true }))
   }
 
-  private openEvent(event: CalendarEvent) {
-    this.dispatchEvent(new CustomEvent<CalendarEventClickDetail>('event-click', { detail: { event }, bubbles: true, composed: true }))
+  private openEvent(event: MonthPlannerEvent) {
+    this.dispatchEvent(new CustomEvent<MonthPlannerEventClickDetail>('event-click', { detail: { event }, bubbles: true, composed: true }))
   }
 
   /** `YYYY-MM` of every month an event touches. */
@@ -464,7 +464,7 @@ export class Calendar extends LitElement {
     })
   }
 
-  private eventLabel(event: CalendarEvent, dateLabel: Intl.DateTimeFormat) {
+  private eventLabel(event: MonthPlannerEvent, dateLabel: Intl.DateTimeFormat) {
     const start = fromIso(event.start)!
     const end = fromIso(event.end) ?? start
     return end > start ? `${event.title}, ${dateLabel.format(start)} – ${dateLabel.format(end)}` : `${event.title}, ${dateLabel.format(start)}`
@@ -515,7 +515,7 @@ export class Calendar extends LitElement {
     const last = beginningOfMonth(this.visibleMonth, 1)
     const weeks = Math.ceil(dayDiff(first, last) / 7)
 
-    return html`<section class="c2-calendar" aria-label=${this.ariaLabel || title}>
+    return html`<section class="c2-month-planner" aria-label=${this.ariaLabel || title}>
       <header class="header">
         <h2 class="title" aria-live="polite">
           ${
@@ -552,6 +552,6 @@ export class Calendar extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'c2-calendar': Calendar
+    'c2-month-planner': MonthPlanner
   }
 }

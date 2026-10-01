@@ -1,12 +1,12 @@
 {
-  "name": "@c2n/calendar",
+  "name": "@c2n/month-planner",
   "version": "0.0.19",
   "type": "module",
-  "main": "dist/calendar.js",
+  "main": "dist/month-planner.js",
   "exports": {
     ".": {
-      "types": "./types/src/calendar.d.ts",
-      "default": "./dist/calendar.js"
+      "types": "./types/src/month-planner.d.ts",
+      "default": "./dist/month-planner.js"
     },
     "./react": {
       "types": "./react.d.ts",
@@ -28,7 +28,10 @@
     "vue.js"
   ],
   "keywords": [
+    "month planner",
     "calendar",
+    "planner",
+    "schedule",
     "web component",
     "lit"
   ],

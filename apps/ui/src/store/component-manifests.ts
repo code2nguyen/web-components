@@ -1,6 +1,6 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
-import calendar from '@c2n/calendar/custom-elements.json'
+import monthPlanner from '@c2n/month-planner/custom-elements.json'
 import hoverCard from '@c2n/hover-card/custom-elements.json'
 import command from '@c2n/command/custom-elements.json'
 import marker from '@c2n/marker/custom-elements.json'
@@ -93,7 +93,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     weekPlanner,
-    calendar,
+    monthPlanner,
     hoverCard,
     command,
     marker,

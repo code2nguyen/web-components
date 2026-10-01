@@ -55,7 +55,7 @@
       "dependencies": [
         "type-check",
         "../../components/week-planner:build",
-        "../../components/calendar:build",
+        "../../components/month-planner:build",
         "../../components/hover-card:build",
         "../../components/command:build",
         "../../components/marker:build",

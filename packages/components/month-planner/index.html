@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>c2-calendar</title>
-    <script type="module" src="/src/calendar.ts"></script>
+    <title>c2-month-planner</title>
+    <script type="module" src="/src/month-planner.ts"></script>
     <style>
       body {
         display: grid;
@@ -20,10 +20,10 @@
         font-weight: 500;
       }
       .soft {
-        --c2-calendar--border: 0px solid transparent;
-        --c2-calendar__day--min-height: 64px;
-        --c2-calendar__event--border-radius: 999px;
-        --c2-calendar__event--background: #7c3aed;
+        --c2-month-planner--border: 0px solid transparent;
+        --c2-month-planner__day--min-height: 64px;
+        --c2-month-planner__event--border-radius: 999px;
+        --c2-month-planner__event--background: #7c3aed;
       }
     </style>
   </head>
@@ -31,7 +31,7 @@
   <body>
     <section>
       <h3>Vacation plan</h3>
-      <c2-calendar
+      <c2-month-planner
         id="plan"
         month="2026-09"
         events='[
@@ -45,17 +45,17 @@
           {"title":"Christmas with family","start":"2026-12-23","end":"2026-12-27"},
           {"title":"Ski week","start":"2027-02-13","end":"2027-02-20"}
         ]'
-      ></c2-calendar>
+      ></c2-month-planner>
       <p id="log" style="color: #71717a; font-size: 13px">Click an event.</p>
     </section>
     <section>
       <h3>Sunday first, themed</h3>
-      <c2-calendar
+      <c2-month-planner
         class="soft"
         month="2026-10"
         week-start="sunday"
         events='[{"title":"Team offsite","start":"2026-10-12","end":"2026-10-14"},{"title":"Half term","start":"2026-10-19","end":"2026-10-23","color":"#0369a1"}]'
-      ></c2-calendar>
+      ></c2-month-planner>
     </section>
     <script type="module">
       const log = document.querySelector('#log')

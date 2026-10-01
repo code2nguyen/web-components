@@ -1,13 +1,13 @@
-import '../src/calendar'
+import '../src/month-planner'
 
 const scenario = new URLSearchParams(location.search).get('scenario') ?? 'default'
 const main = document.querySelector('main')!
 main.innerHTML = `
-  <c2-calendar id="subject" locale="en-US" week-start="monday" month="2026-09" style="width: 720px"></c2-calendar>
+  <c2-month-planner id="subject" locale="en-US" week-start="monday" month="2026-09" style="width: 720px"></c2-month-planner>
   <output aria-label="Last event"></output>
 `
 
-const subject = document.querySelector('c2-calendar')!
+const subject = document.querySelector('c2-month-planner')!
 const output = document.querySelector('output')!
 subject.events = [
   // September 10, 2026 is a Thursday, so with Monday first this vacation covers two week rows.

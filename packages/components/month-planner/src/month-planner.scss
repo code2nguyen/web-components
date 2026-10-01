@@ -1,6 +1,6 @@
 @use '@c2n/sass/animation';
 @use '@c2n/sass/css-variable' as css with (
-  $prefix: c2-calendar,
+  $prefix: c2-month-planner,
   $theme: (
     background: #ffffff,
     color: #18181b,
@@ -64,7 +64,7 @@
   display: none;
 }
 
-.c2-calendar {
+.c2-month-planner {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;

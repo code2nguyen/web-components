@@ -61,15 +61,15 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent)',
   },
-  '--c2-calendar__day__today--background': {
+  '--c2-month-planner__day__today--background': {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
   },
-  '--c2-calendar__month__marked--background': {
+  '--c2-month-planner__month__marked--background': {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
   },
-  '--c2-calendar__month__marked__hover--background': {
+  '--c2-month-planner__month__marked__hover--background': {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 18%, transparent)',
   },
@@ -173,7 +173,7 @@ export const overrides: Record<string, Override> = {
   // A date selector is commonly used as a floating booking panel, so its surface follows the shared popover shadow.
   '--c2-date-selector--box-shadow': { token: 'shadow-md' },
   // The calendar's month picker floats over the grid like any popover.
-  '--c2-calendar__picker--box-shadow': { token: 'shadow-md' },
+  '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },
