@@ -36,6 +36,12 @@ if (scenario === 'browser-locale') subject.removeAttribute('locale')
 if (scenario === 'compact') subject.style.width = '360px'
 if (scenario === 'sunday') subject.weekStart = 'sunday'
 if (scenario === 'no-picker') subject.setAttribute('month-picker', 'false')
+if (scenario === 'heading' || scenario === 'actions' || scenario === 'actions-compact') subject.heading = 'Team holidays'
+if (scenario === 'actions' || scenario === 'actions-compact') {
+  subject.insertAdjacentHTML('beforeend', '<button slot="actions" type="button">Add event</button><button slot="actions" type="button">Settings</button>')
+}
+if (scenario === 'actions-compact') subject.style.width = '360px'
+if (scenario === 'heading-slot') subject.insertAdjacentHTML('beforeend', '<span slot="heading">Team <em>holidays</em></span>')
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))
 subject.addEventListener('month-change', (event) => (output.value = `month:${event.detail.month}`))
 
