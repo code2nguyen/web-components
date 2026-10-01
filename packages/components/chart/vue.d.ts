@@ -12,6 +12,7 @@ import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
 import type { BarChart } from '@c2n/chart/bar-chart.js'
 import type { BubbleChart } from '@c2n/chart/bubble-chart.js'
+import type { ButterflyChart } from '@c2n/chart/butterfly-chart.js'
 import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
@@ -108,6 +109,26 @@ declare module 'vue' {
         onChartError?: (event: EventOf<BubbleChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<BubbleChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<BubbleChart, 'point-click'>) => void
+      }
+    >
+    'c2-butterfly-chart': DefineComponent<
+      C2Props<ButterflyChart> & {
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<ButterflyChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<ButterflyChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<ButterflyChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<ButterflyChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<ButterflyChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<ButterflyChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<ButterflyChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<ButterflyChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<ButterflyChart, 'point-click'>) => void
       }
     >
     'c2-candlestick-chart': DefineComponent<
