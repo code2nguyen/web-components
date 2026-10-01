@@ -21,6 +21,10 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-kanban': DefineComponent<
       C2Props<Kanban> & {
+        'item-key'?: unknown
+        'column-field'?: unknown
+        'label-field'?: unknown
+        'description-field'?: unknown
         onCardMove?: (event: EventOf<Kanban, 'card-move'>) => void
       }
     >

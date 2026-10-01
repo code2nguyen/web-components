@@ -989,15 +989,8 @@
     {
       "tag": "c2-kanban",
       "slot": "",
-      "decision": "part",
-      "parts": ["card"],
-      "reason": "The repeated card wrapper owns placement, focus and drag feedback for each direct-child card, while the private projection slots and the assigned cards stay consumer-owned."
-    },
-    {
-      "tag": "c2-kanban-column",
-      "slot": "actions",
       "decision": "assigned-content",
-      "reason": "The actions slot projects consumer-owned header controls; style the assigned node through its own class or public contract."
+      "reason": "The default slot projects the consumer's c2-kanban-column elements; each column is styled through its own variables and parts."
     },
     {
       "tag": "c2-kanban-column",
@@ -1005,6 +998,20 @@
       "decision": "part",
       "parts": ["empty"],
       "reason": "The empty region owns the empty slot's component-side presentation: border, padding and colours of the hint."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the footer slot's placement below the cards; the assigned controls stay consumer-owned."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "header",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The header region owns the header slot's placement and padding, around either the assigned content or the default label and count."
     },
     {
       "tag": "c2-kbd",

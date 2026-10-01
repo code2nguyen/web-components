@@ -1,31 +1,9 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-kanban,
   $theme: (
-    board--gap: 12px,
-    board--padding: 4px,
-    board--scroll-snap-type: none,
-    column--width: 272px,
-    column--max-height: none,
-    column--padding: 8px,
-    column--gap: 8px,
-    column--background-color: #f4f4f5,
-    column--border: 1px solid transparent,
-    column--border-radius: 8px,
-    column__target--border-color: rgb(2, 101, 220),
-    column__target--background-color: #edf1fe,
-    column__over--border-color: #dc2626,
-    cards--gap: 8px,
-    cards--min-height: 40px,
-    cards--overflow-y: visible,
-    card--border-radius: 6px,
-    card__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
-    card__focus--outline-offset: 2px,
-    card__picked--outline: 2px solid rgb(2, 101, 220),
-    card__picked--box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24),
-    card__dragging--transform: rotate(2deg),
-    card__dragging--opacity: 0.94,
-    placeholder--border: 2px dashed rgb(2, 101, 220),
-    placeholder--background-color: rgba(2, 101, 220, 0.08),
+    gap: 12px,
+    padding: 4px,
+    scroll-snap-type: none,
   )
 );
 
@@ -37,98 +15,11 @@
 .board {
   display: flex;
   align-items: stretch;
-  gap: css.cssVar(board--gap);
-  padding: css.cssVar(board--padding);
+  gap: css.cssVar(gap);
+  padding: css.cssVar(padding);
   overflow-x: auto;
-  scroll-snap-type: css.cssVar(board--scroll-snap-type);
+  scroll-snap-type: css.cssVar(scroll-snap-type);
   box-sizing: border-box;
-}
-
-.column {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  gap: css.cssVar(column--gap);
-  box-sizing: border-box;
-  width: css.cssVar(column--width);
-  max-height: css.cssVar(column--max-height);
-  padding: css.cssVar(column--padding);
-  background-color: css.cssVar(column--background-color);
-  border: css.cssVar(column--border);
-  border-radius: css.cssVar(column--border-radius);
-  scroll-snap-align: start;
-  transition:
-    border-color 120ms ease,
-    background-color 120ms ease;
-
-  &.column--over {
-    border-color: css.cssVar(column__over--border-color);
-  }
-
-  &.column--target {
-    border-color: css.cssVar(column__target--border-color);
-    background-color: css.cssVar(column__target--background-color);
-  }
-}
-
-.cards {
-  display: flex;
-  flex-direction: column;
-  gap: css.cssVar(cards--gap);
-  flex: 1 1 auto;
-  min-height: css.cssVar(cards--min-height);
-  overflow-y: css.cssVar(cards--overflow-y);
-}
-
-.card {
-  position: relative;
-  box-sizing: border-box;
-  border-radius: css.cssVar(card--border-radius);
-
-  &:focus-visible {
-    outline: css.cssVar(card__focus--outline);
-    outline-offset: css.cssVar(card__focus--outline-offset);
-  }
-
-  ::slotted(*) {
-    display: block;
-  }
-}
-
-.card--movable {
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.card--picked {
-  outline: css.cssVar(card__picked--outline);
-  outline-offset: css.cssVar(card__focus--outline-offset);
-  box-shadow: css.cssVar(card__picked--box-shadow);
-
-  &:focus-visible {
-    outline: css.cssVar(card__picked--outline);
-  }
-}
-
-.card--dragging {
-  position: fixed;
-  z-index: 100000;
-  pointer-events: none;
-  cursor: grabbing;
-  opacity: css.cssVar(card__dragging--opacity);
-  transform: css.cssVar(card__dragging--transform);
-  box-shadow: css.cssVar(card__picked--box-shadow);
-}
-
-.placeholder {
-  box-sizing: border-box;
-  min-height: 40px;
-  border: css.cssVar(placeholder--border);
-  border-radius: css.cssVar(card--border-radius);
-  background-color: css.cssVar(placeholder--background-color);
 }
 
 .visually-hidden {
@@ -141,14 +32,4 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .column {
-    transition: none;
-  }
-
-  .card--dragging {
-    transform: none;
-  }
 }

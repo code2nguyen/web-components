@@ -1,10 +1,18 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-kanban-column,
   $theme: (
+    width: 272px,
+    max-height: none,
+    padding: 8px,
+    gap: 8px,
+    background-color: #f4f4f5,
+    border: 1px solid transparent,
+    border-radius: 8px,
+    target--border-color: rgb(2, 101, 220),
+    target--background-color: #edf1fe,
+    over--border-color: #dc2626,
     header--padding: 4px 6px,
     header--gap: 8px,
-    dot--size: 8px,
-    dot--background-color: #a1a1aa,
     label--color: #18181b,
     label--font-size: 14px,
     label--font-weight: 600,
@@ -15,10 +23,30 @@
     count--padding: 0 7px,
     count__over--color: #dc2626,
     count__over--background-color: #fef2f2,
+    cards--gap: 8px,
+    cards--overflow-y: visible,
+    card--background-color: #ffffff,
+    card--border: 1px solid #e4e4e7,
+    card--border-radius: 6px,
+    card--padding: 10px 12px,
+    card--box-shadow: none,
+    card--color: #18181b,
+    card--font-size: 14px,
+    card__hover--border-color: #a1a1aa,
+    card__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    card__focus--outline-offset: 2px,
+    card__picked--outline: 2px solid rgb(2, 101, 220),
+    card__picked--box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24),
+    card__dragging--transform: rotate(2deg),
+    card__dragging--opacity: 0.94,
+    title--font-weight: 500,
+    description--color: #71717a,
+    description--font-size: 12px,
+    placeholder--border: 2px dashed rgb(2, 101, 220),
+    placeholder--background-color: rgba(2, 101, 220, 0.08),
     empty--border: 1px dashed #bcbcc6,
     empty--border-radius: 6px,
     empty--padding: 16px 8px,
-    empty--margin-top: 8px,
     empty--color: #71717a,
     empty--background-color: #ffffff,
     empty--font-size: 14px,
@@ -27,7 +55,35 @@
 
 :host {
   display: block;
+  flex: none;
   box-sizing: border-box;
+  width: css.cssVar(width);
+  scroll-snap-align: start;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(gap);
+  box-sizing: border-box;
+  height: 100%;
+  max-height: css.cssVar(max-height);
+  padding: css.cssVar(padding);
+  background-color: css.cssVar(background-color);
+  border: css.cssVar(border);
+  border-radius: css.cssVar(border-radius);
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+
+  &.column--over {
+    border-color: css.cssVar(over--border-color);
+  }
+
+  &.column--target {
+    border-color: css.cssVar(target--border-color);
+    background-color: css.cssVar(target--background-color);
+  }
 }
 
 .header {
@@ -36,14 +92,10 @@
   gap: css.cssVar(header--gap);
   padding: css.cssVar(header--padding);
   min-height: 24px;
-}
 
-.dot {
-  flex: none;
-  width: css.cssVar(dot--size);
-  height: css.cssVar(dot--size);
-  border-radius: 50%;
-  background-color: css.cssVar(dot--background-color);
+  slot {
+    display: contents;
+  }
 }
 
 .label {
@@ -72,12 +124,87 @@
   }
 }
 
-.spacer {
-  flex: 1;
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(cards--gap);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: css.cssVar(cards--overflow-y);
+
+  &:empty {
+    display: none;
+  }
+}
+
+.card {
+  position: relative;
+  box-sizing: border-box;
+  background-color: css.cssVar(card--background-color);
+  border: css.cssVar(card--border);
+  border-radius: css.cssVar(card--border-radius);
+  padding: css.cssVar(card--padding);
+  box-shadow: css.cssVar(card--box-shadow);
+  color: css.cssVar(card--color);
+  font-size: css.cssVar(card--font-size);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+
+  &:focus-visible {
+    outline: css.cssVar(card__focus--outline);
+    outline-offset: css.cssVar(card__focus--outline-offset);
+  }
+}
+
+.card--movable {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    border-color: css.cssVar(card__hover--border-color);
+  }
+}
+
+.card--picked,
+.card--picked:focus-visible {
+  outline: css.cssVar(card__picked--outline);
+  outline-offset: css.cssVar(card__focus--outline-offset);
+  box-shadow: css.cssVar(card__picked--box-shadow);
+}
+
+.card--dragging {
+  position: fixed;
+  z-index: 100000;
+  pointer-events: none;
+  cursor: grabbing;
+  opacity: css.cssVar(card__dragging--opacity);
+  transform: css.cssVar(card__dragging--transform);
+  box-shadow: css.cssVar(card__picked--box-shadow);
+}
+
+.card__title {
+  font-weight: css.cssVar(title--font-weight);
+}
+
+.card__description {
+  margin-top: 4px;
+  color: css.cssVar(description--color);
+  font-size: css.cssVar(description--font-size);
+}
+
+.placeholder {
+  box-sizing: border-box;
+  min-height: 40px;
+  flex: none;
+  border: css.cssVar(placeholder--border);
+  border-radius: css.cssVar(card--border-radius);
+  background-color: css.cssVar(placeholder--background-color);
 }
 
 .empty {
-  margin-top: css.cssVar(empty--margin-top);
   border: css.cssVar(empty--border);
   border-radius: css.cssVar(empty--border-radius);
   padding: css.cssVar(empty--padding);
@@ -85,8 +212,31 @@
   background-color: css.cssVar(empty--background-color);
   font-size: css.cssVar(empty--font-size);
   text-align: center;
+}
 
-  &[hidden] {
-    display: none;
+.empty[hidden],
+.footer[hidden] {
+  display: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .column {
+    transition: none;
+  }
+
+  .card--dragging {
+    transform: none;
   }
 }

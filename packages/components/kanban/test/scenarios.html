@@ -11,17 +11,11 @@
         color: #18181b;
         background: white;
       }
-      .task {
-        background: white;
-        border: 1px solid #e4e4e7;
-        border-radius: 6px;
-        padding: 10px 12px;
-        height: 40px;
-        box-sizing: border-box;
-      }
     </style>
     <script type="module">
+      import { html } from 'lit'
       import '../src/kanban.ts'
+      window.kanbanHtml = html
       document.documentElement.dataset.modulesReady = 'true'
     </script>
   </head>

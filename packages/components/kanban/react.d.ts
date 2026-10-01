@@ -24,7 +24,13 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-kanban': C2Props<Kanban>
+      'c2-kanban': Omit<C2Props<Kanban>, 'items'> & {
+        'item-key'?: Attribute
+        'column-field'?: Attribute
+        'label-field'?: Attribute
+        'description-field'?: Attribute
+        items?: Kanban['items'] | string
+      }
       'c2-kanban-column': C2Props<KanbanColumn> & {
         'column-id'?: Attribute
       }

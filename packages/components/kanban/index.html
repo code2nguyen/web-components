@@ -15,25 +15,9 @@
         display: grid;
         gap: 32px;
       }
-      .task {
-        padding: 10px 12px;
-        border: 1px solid #e4e4e7;
-        border-radius: 6px;
-        background: #ffffff;
-      }
-      .task small {
-        display: block;
-        color: #71717a;
-      }
-      .doing {
-        --c2-kanban-column__dot--background-color: #0265dc;
-      }
-      .done {
-        --c2-kanban-column__dot--background-color: #15803d;
-      }
       .scrolling {
-        --c2-kanban__column--max-height: 220px;
-        --c2-kanban__cards--overflow-y: auto;
+        --c2-kanban-column--max-height: 220px;
+        --c2-kanban-column__cards--overflow-y: auto;
       }
       pre {
         background: #fafafa;
@@ -44,39 +28,50 @@
   </head>
 
   <body>
-    <h2>Editable, with a soft limit</h2>
+    <h2>Editable, default cards, footer and limit</h2>
     <c2-kanban id="board" editable aria-label="Sprint 42">
       <c2-kanban-column column-id="todo" label="To do">
-        <button slot="actions" type="button" aria-label="Add a card to To do">+</button>
+        <button slot="footer" type="button">+ Add card</button>
       </c2-kanban-column>
-      <c2-kanban-column class="doing" column-id="doing" label="In progress" limit="2"></c2-kanban-column>
+      <c2-kanban-column column-id="doing" label="In progress" limit="2"></c2-kanban-column>
       <c2-kanban-column column-id="review" label="In review"></c2-kanban-column>
-      <c2-kanban-column class="done" column-id="done" label="Done"><span slot="empty">Nothing shipped yet</span></c2-kanban-column>
-      <div class="task" data-column="todo" data-kanban-key="C2-118">Empty state for search<small>C2-118</small></div>
-      <div class="task" data-column="todo" data-kanban-key="C2-121">Date input loses focus <a href="#">open</a><small>C2-121</small></div>
-      <div class="task" data-column="doing" data-kanban-key="C2-109">Tree drag handles<small>C2-109</small></div>
-      <div class="task" data-column="doing" data-kanban-key="C2-104">Toast stacking order<small>C2-104</small></div>
-      <div class="task" data-column="doing" data-kanban-key="C2-112">Chart tooltip on focus<small>C2-112</small></div>
+      <c2-kanban-column column-id="done" label="Done"><span slot="empty">Nothing shipped yet</span></c2-kanban-column>
     </c2-kanban>
     <pre id="log"></pre>
 
-    <h2>Read-only, scrolling columns</h2>
-    <c2-kanban class="scrolling" aria-label="Backlog">
-      <c2-kanban-column column-id="backlog" label="Backlog"></c2-kanban-column>
-      <div class="task" data-column="backlog">One</div>
-      <div class="task" data-column="backlog">Two</div>
-      <div class="task" data-column="backlog">Three</div>
-      <div class="task" data-column="backlog">Four</div>
-      <div class="task" data-column="backlog">Five</div>
+    <h2>renderItem, header slot, scrolling columns</h2>
+    <c2-kanban id="custom" class="scrolling" editable aria-label="Backlog">
+      <c2-kanban-column column-id="backlog" label="Backlog"><strong slot="header">Backlog · this quarter</strong></c2-kanban-column>
+      <c2-kanban-column column-id="next" label="Next"></c2-kanban-column>
     </c2-kanban>
 
     <script type="module">
-      const log = document.getElementById('log')
-      document.getElementById('board').addEventListener('card-move', (event) => {
-        const { card, ...detail } = event.detail
-        card.dataset.column = detail.toColumn
-        log.textContent = JSON.stringify(detail)
+      import { html } from 'lit'
+
+      const board = document.getElementById('board')
+      board.items = [
+        { id: 'C2-118', column: 'todo', title: 'Empty state for search', description: 'C2-118' },
+        { id: 'C2-121', column: 'todo', title: 'Date input loses focus', description: 'C2-121' },
+        { id: 'C2-109', column: 'doing', title: 'Tree drag handles' },
+        { id: 'C2-104', column: 'doing', title: 'Toast stacking order' },
+        { id: 'C2-112', column: 'doing', title: 'Chart tooltip on focus' },
+      ]
+      board.addEventListener('card-move', (event) => {
+        const { items, item, ...detail } = event.detail
+        document.getElementById('log').textContent = JSON.stringify(detail)
       })
+
+      const custom = document.getElementById('custom')
+      custom.items = Array.from({ length: 8 }, (_, index) => ({
+        id: String(index),
+        column: index < 6 ? 'backlog' : 'next',
+        title: `Task ${index + 1}`,
+        points: (index % 3) + 1,
+      }))
+      custom.renderItem = ({ item, index }) =>
+        html`<div style="display:flex;justify-content:space-between">
+          <span>${item.title}</span><span style="opacity:0.6">#${index + 1} · ${item.points} pt <a href="#">open</a></span>
+        </div>`
     </script>
   </body>
 </html>

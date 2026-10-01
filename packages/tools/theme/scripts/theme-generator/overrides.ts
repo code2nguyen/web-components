@@ -39,15 +39,19 @@ export const overrides: Record<string, Override> = {
   '--c2-log-viewer__copy--border-radius': { exclude: 'terminal copy control shape' },
   '--c2-log-viewer__copy__hover--background': { exclude: 'terminal copy control contrast' },
   '--c2-log-viewer__copy__focus--outline': { exclude: 'terminal copy focus contrast' },
-  // Kanban: the drag feedback is the accent, the over-limit pill is a light error tint, the dot a neutral marker.
-  '--c2-kanban__card__picked--outline': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, rgb(2, 101, 220))' },
-  '--c2-kanban__card__picked--box-shadow': { token: 'shadow-md' },
-  '--c2-kanban__placeholder--border': { token: 'color-primary', value: '2px dashed var(--c2-theme--color-primary, rgb(2, 101, 220))' },
-  '--c2-kanban__placeholder--background-color': {
+  // Kanban: the drag feedback is the accent and the over-limit pill a light error tint.
+  '--c2-kanban-column__card__picked--outline': { token: 'color-primary', value: '2px solid var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  '--c2-kanban-column__card__picked--box-shadow': { token: 'shadow-md' },
+  '--c2-kanban-column__card--border': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-kanban-column__card__hover--border-color': { token: 'color-outline-strong' },
+  '--c2-kanban-column__placeholder--border': { token: 'color-primary', value: '2px dashed var(--c2-theme--color-primary, rgb(2, 101, 220))' },
+  '--c2-kanban-column__placeholder--background-color': {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 8%, transparent)',
   },
-  '--c2-kanban-column__dot--background-color': { token: 'color-outline-strong' },
   '--c2-kanban-column__count__over--background-color': {
     token: 'color-error',
     value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 10%, var(--c2-theme--color-surface, #ffffff))',
