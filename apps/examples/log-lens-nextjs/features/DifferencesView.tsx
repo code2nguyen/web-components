@@ -1,15 +1,46 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { registerEchartsElements } from '@/components/c2n/C2Registry'
+import { useElementProperties } from '@/components/c2n/element-bindings'
 import { LiftList } from '@/components/ui/LiftList'
 import { Segmented } from '@/components/ui/Segmented'
-import { attributeLift, isProblem, journeyLift, type Analysis } from '@/lib/analysis'
+import { attributeLift, isProblem, journeyLift, type Analysis, type AttributeLift } from '@/lib/analysis'
 import { isEmptyFocus, matchesFocus, type Focus } from '@/lib/focus'
-import { formatNumber, formatPercent } from '@/lib/format'
+import { formatNumber, formatPercent, shorten } from '@/lib/format'
 import type { LogRecord } from '@/lib/otlp'
 import type { LensActions } from './types'
 
 type Target = 'lens' | 'errors' | 'trouble' | 'requests'
+
+/** Inside share against outside share, back to back on one scale: the gap between the two sides is the finding. */
+function Comparison({ lifts, inside, outside }: Readonly<{ lifts: readonly AttributeLift[]; inside: string; outside: string }>) {
+  const ref = useRef<HTMLElementTagNameMap['c2-butterfly-chart']>(null)
+  const data = useMemo(
+    () =>
+      lifts.slice(0, 8).map((lift) => ({
+        attribute: shorten(`${lift.key}=${lift.value}`, 34),
+        inside: Math.round(lift.targetShare * 1000) / 10,
+        outside: Math.round(lift.restShare * 1000) / 10,
+      })),
+    [lifts],
+  )
+  useEffect(() => void registerEchartsElements(), [])
+  useElementProperties(ref, 'c2-butterfly-chart', { data }, [data])
+  return (
+    <c2-butterfly-chart
+      ref={ref}
+      className="ll-butterfly"
+      label-field="attribute"
+      legend="top"
+      tooltip="axis"
+      aria-label={`Share of ${inside} and of ${outside} carrying each attribute, in percent`}
+    >
+      <c2-chart-series field="inside" label={`% of ${inside}`} />
+      <c2-chart-series field="outside" label={`% of ${outside}`} />
+    </c2-butterfly-chart>
+  )
+}
 
 export function DifferencesView({
   analysis,
@@ -82,13 +113,14 @@ export function DifferencesView({
         <c2-card className="ll-panel">
           {top && (
             <p slot="header" className="ll-headline">
-              <strong>
+              <c2-marker variant="underline" className="ll-mark">
                 {top.key} = {top.value}
-              </strong>{' '}
+              </c2-marker>{' '}
               is on {formatPercent(top.targetShare)} of {inside} but only {formatPercent(top.restShare)} of {outside}
               {top.lift < 100 ? ` — ${top.lift.toFixed(1)}× more likely.` : '.'}
             </p>
           )}
+          <Comparison lifts={lifts} inside={inside} outside={outside} />
           <LiftList lifts={lifts} inside={inside} outside={outside} onPick={(lift) => actions.setLens({ attribute: { key: lift.key, value: lift.value } })} />
         </c2-card>
       )}

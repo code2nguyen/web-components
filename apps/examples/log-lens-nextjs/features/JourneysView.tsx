@@ -1,15 +1,15 @@
 'use client'
 
 import type { TableColumnConfig } from '@c2n/table/table-types.js'
-import type { StepNode } from '@c2n/steps/step-types.js'
 import { useMemo, useRef, useState } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
 import { useCustomEvent } from '@/components/c2n/useCustomEvent'
 import { LiftList } from '@/components/ui/LiftList'
 import { PatternText } from '@/components/ui/PatternText'
 import { Segmented } from '@/components/ui/Segmented'
-import { isProblem, journeyLift, type Analysis, type DivergenceSignature } from '@/lib/analysis'
-import { formatClock, formatDuration, formatNumber, formatPercent, shorten } from '@/lib/format'
+import { journeyLift, type Analysis } from '@/lib/analysis'
+import { divergenceGraph, serviceMap, type Graph, type GraphNode } from '@/lib/graphs'
+import { formatClock, formatDuration, formatNumber, shorten } from '@/lib/format'
 import type { LogRecord } from '@/lib/otlp'
 import type { LensActions } from './types'
 
@@ -44,28 +44,12 @@ const COLUMNS: TableColumnConfig[] = [
   { field: 'duration', header: 'Duration', width: '110px', align: 'end', sortable: true, renderCell: ({ value }) => formatDuration(Number(value)) },
 ]
 
-function stepOf(patternById: Analysis['patternById'], signature: DivergenceSignature, side: 'failed' | 'ok'): StepNode {
-  const pattern = patternById.get(signature.patternId)
-  const primary = side === 'failed' ? signature.failedShare : signature.okShare
-  const other = side === 'failed' ? signature.okShare : signature.failedShare
-  return {
-    id: `${side}-${signature.patternId}`,
-    label: shorten(pattern?.template ?? signature.patternId, 64),
-    detail: pattern?.services.join(', '),
-    trailing: `${formatPercent(primary)} vs ${formatPercent(other)}`,
-    status: side === 'ok' ? 'success' : pattern && isProblem(pattern.severity) ? 'error' : 'warning',
-  }
-}
-
-function Branch({ label, steps, tone }: Readonly<{ label: string; steps: StepNode[]; tone: 'danger' | 'success' | 'neutral' }>) {
-  const ref = useRef<HTMLElementTagNameMap['c2-steps']>(null)
-  useElementProperties(ref, 'c2-steps', { steps }, [steps])
-  return (
-    <div className={`ll-branch ll-branch--${tone}`}>
-      <p className="ll-branch__label">{label}</p>
-      <c2-steps ref={ref} marker="icon" aria-label={label} />
-    </div>
-  )
+/** A read-only c2-flow over a derived graph; clicking a node hands its payload back. */
+function FlowGraph({ graph, label, className, onNode }: Readonly<{ graph: Graph; label: string; className: string; onNode: (node: GraphNode) => void }>) {
+  const ref = useRef<HTMLElementTagNameMap['c2-flow']>(null)
+  useElementProperties(ref, 'c2-flow', { nodes: graph.nodes, edges: graph.edges }, [graph])
+  useCustomEvent(ref, 'node-click', (event) => onNode(event.detail.node as GraphNode))
+  return <c2-flow ref={ref} className={`ll-flow ${className}`} direction="LR" edge-type="bezier" no-context-menu aria-label={label} />
 }
 
 export function JourneysView({ analysis, records, actions }: Readonly<{ analysis: Analysis; records: LogRecord[]; actions: LensActions }>) {
@@ -76,18 +60,12 @@ export function JourneysView({ analysis, records, actions }: Readonly<{ analysis
 
   const lifts = useMemo(() => journeyLift(analysis.records, analysis.journeys, divergence.entry, 6), [analysis, divergence.entry])
 
-  const shared = useMemo<StepNode[]>(
-    () =>
-      divergence.sharedPath.map((id) => ({
-        id: `shared-${id}`,
-        label: shorten(patternById.get(id)?.template ?? id, 64),
-        detail: patternById.get(id)?.services.join(', '),
-        status: 'success',
-      })),
-    [divergence, patternById],
-  )
-  const failing = useMemo(() => divergence.signatures.map((signature) => stepOf(patternById, signature, 'failed')), [divergence, patternById])
-  const healthy = useMemo(() => divergence.missing.map((signature) => stepOf(patternById, signature, 'ok')), [divergence, patternById])
+  const fork = useMemo(() => divergenceGraph(analysis), [analysis])
+  const services = useMemo(() => serviceMap(analysis), [analysis])
+  const openNode = (node: GraphNode) => {
+    if (node.data?.patternId) actions.openPattern(node.data.patternId)
+    else if (node.data?.service) actions.setLens({ services: [node.data.service] })
+  }
 
   const inLens = useMemo(() => new Set(records.map((record) => record.traceId).filter(Boolean)), [records])
   const rows = useMemo<Row[]>(() => {
@@ -133,7 +111,7 @@ export function JourneysView({ analysis, records, actions }: Readonly<{ analysis
           </div>
           <p className="ll-fork__lead">
             Comparing every request that starts with <PatternText className="ll-pattern--inline" template={entry.template} />.
-            {shared.length > 0 && ` Failed and successful ones share the first ${shared.length} steps.`}
+            {divergence.sharedPath.length > 0 && ` Failed and successful ones share the first ${divergence.sharedPath.length} steps.`}
             {firstFork && (
               <>
                 {' '}
@@ -147,13 +125,11 @@ export function JourneysView({ analysis, records, actions }: Readonly<{ analysis
             )}
             .
           </p>
-          <div className="ll-fork__diagram">
-            {shared.length > 0 && <Branch label="Common path" steps={shared} tone="neutral" />}
-            <div className="ll-fork__split">
-              <Branch label="Only in failed requests (share of failed vs successful)" steps={failing} tone="danger" />
-              <Branch label="Only in successful requests (share of successful vs failed)" steps={healthy} tone="success" />
-            </div>
-          </div>
+          <FlowGraph graph={fork} label="Common path, then the failing and the healthy branch" className="ll-flow--fork" onNode={openNode} />
+          <p className="ll-muted ll-flow__legend">
+            Green: steps of healthy requests · amber and red: steps only failing requests reach · percentages are the share of that branch&apos;s requests.
+            Click a step to open its pattern.
+          </p>
           {lifts.length > 0 && (
             <>
               <h3 className="ll-fork__subtitle">What the failed requests have in common</h3>
@@ -182,6 +158,21 @@ export function JourneysView({ analysis, records, actions }: Readonly<{ analysis
           heading="No request failed"
           description={`All ${formatNumber(analysis.journeys.length)} requests ended without an error record.`}
         />
+      )}
+
+      {services.nodes.length > 1 && (
+        <c2-card className="ll-panel">
+          <div slot="header" className="ll-panel__head">
+            <div>
+              <p className="ll-eyebrow">Reconstructed from trace ids</p>
+              <h2>Service map</h2>
+            </div>
+            <span className="ll-muted">
+              An arrow is a request moving from one service&apos;s log lines to the next. Red services logged errors. Click one to put it in the lens.
+            </span>
+          </div>
+          <FlowGraph graph={services} label="Services and the hops between them" className="ll-flow--services" onNode={openNode} />
+        </c2-card>
       )}
 
       <div className="ll-section-head">

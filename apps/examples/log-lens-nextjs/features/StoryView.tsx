@@ -6,7 +6,7 @@ import { useCustomEvent } from '@/components/c2n/useCustomEvent'
 import { StoryText } from '@/components/ui/PatternText'
 import type { Analysis, Chapter } from '@/lib/analysis'
 import type { Focus } from '@/lib/focus'
-import { formatClock, formatDuration, formatNumber, shorten } from '@/lib/format'
+import { formatClock, formatDuration, formatNumber } from '@/lib/format'
 import { quickAnswers } from '@/lib/insights'
 import type { LensActions } from './types'
 
@@ -55,13 +55,20 @@ function chapterId(chapter: Chapter): string {
 }
 
 function Rhythm({ analysis, actions }: Readonly<{ analysis: Analysis; actions: LensActions }>) {
-  const chartRef = useRef<HTMLElementTagNameMap['c2-area-chart']>(null)
+  const chartRef = useRef<HTMLElementTagNameMap['c2-bar-chart']>(null)
   const { timeline } = analysis
+  // One stacked bar per bucket on a single axis: the share of trouble reads directly, with no second scale to decode.
   const data = useMemo(
-    () => timeline.buckets.map((bucket) => ({ time: bucket.start, total: bucket.total, warnings: bucket.warnings, errors: bucket.problems })),
+    () =>
+      timeline.buckets.map((bucket) => ({
+        time: bucket.start,
+        errors: bucket.problems,
+        warnings: bucket.warnings,
+        other: bucket.total - bucket.problems - bucket.warnings,
+      })),
     [timeline],
   )
-  useElementProperties(chartRef, 'c2-area-chart', { data }, [data])
+  useElementProperties(chartRef, 'c2-bar-chart', { data }, [data])
   useCustomEvent(chartRef, 'point-click', (event) => {
     const bucket = timeline.buckets[event.detail.index]
     if (bucket)
@@ -83,25 +90,25 @@ function Rhythm({ analysis, actions }: Readonly<{ analysis: Analysis; actions: L
           <p className="ll-eyebrow">The file&apos;s rhythm</p>
           <h2>Volume and trouble over time</h2>
         </div>
-        <span className="ll-muted">Drag across the chart to put a time window in the lens · one point = {formatDuration(timeline.bucketMs)}</span>
+        <span className="ll-muted">Click a bar or drag across the chart to put that time in the lens · one bar = {formatDuration(timeline.bucketMs)}</span>
       </div>
-      <c2-area-chart
+      <c2-bar-chart
         ref={chartRef}
         className="ll-rhythm__chart"
         x-field="time"
         x-type="time"
+        stack="normal"
         axes="both"
         grid="y"
         legend="bottom"
         tooltip="axis"
-        curve="smooth"
         zoom
-        aria-label={`Records per ${formatDuration(timeline.bucketMs)}. Errors peak at ${peak?.problems ?? 0} around ${peak ? formatClock(peak.start) : ''}.`}
+        aria-label={`Records per ${formatDuration(timeline.bucketMs)}, stacked by level. Errors peak at ${peak?.problems ?? 0} around ${peak ? formatClock(peak.start) : ''}.`}
       >
-        <c2-chart-series field="total" label="All records" />
-        <c2-chart-series field="warnings" label="Warnings (right axis)" axis="right" />
-        <c2-chart-series field="errors" label="Errors (right axis)" axis="right" />
-      </c2-area-chart>
+        <c2-chart-series field="errors" label="Errors" />
+        <c2-chart-series field="warnings" label="Warnings" />
+        <c2-chart-series field="other" label="Everything else" />
+      </c2-bar-chart>
       <div className="ll-chapter-strip" aria-label="Chapters on the timeline">
         <span className="ll-chapter-strip__time">{formatClock(analysis.start)}</span>
         <div className="ll-chapter-strip__track">
@@ -126,27 +133,42 @@ function Rhythm({ analysis, actions }: Readonly<{ analysis: Analysis; actions: L
   )
 }
 
-function ChapterCard({ chapter, analysis, actions }: Readonly<{ chapter: Chapter; analysis: Analysis; actions: LensActions }>) {
+const TIMELINE_TONE: Record<Chapter['tone'], 'neutral' | 'primary' | 'success' | 'warning' | 'danger'> = {
+  neutral: 'neutral',
+  info: 'primary',
+  warning: 'warning',
+  danger: 'danger',
+  success: 'success',
+}
+
+function ChapterEntry({ chapter, analysis, actions }: Readonly<{ chapter: Chapter; analysis: Analysis; actions: LensActions }>) {
   const moment =
-    chapter.kind === 'opening' || chapter.kind === 'closing'
-      ? ''
-      : chapter.end > chapter.start
-        ? `${formatClock(chapter.start)} → ${formatClock(chapter.end)}`
-        : formatClock(chapter.start)
+    chapter.kind === 'opening'
+      ? 'Start of file'
+      : chapter.kind === 'closing'
+        ? 'End of file'
+        : chapter.end > chapter.start
+          ? `${formatClock(chapter.start)} → ${formatClock(chapter.end)}`
+          : formatClock(chapter.start)
   const patterns = chapter.patternIds.map((id) => analysis.patternById.get(id)).filter((pattern) => pattern !== undefined)
   return (
-    <li className={`ll-chapter ll-chapter--${chapter.tone}`} id={chapterId(chapter)}>
-      <span className="ll-chapter__dot" aria-hidden="true">
+    <c2-timeline-item
+      id={chapterId(chapter)}
+      className={`ll-chapter ll-chapter--${chapter.tone}`}
+      tone={TIMELINE_TONE[chapter.tone]}
+      timestamp={moment}
+      datetime={new Date(chapter.start).toISOString()}
+    >
+      <span slot="marker" className="ll-chapter__marker" aria-hidden="true">
         <ChapterIcon kind={chapter.kind} />
       </span>
+      <span slot="label" className="ll-chapter__label">
+        <c2-badge tone={TONE_BADGE[chapter.tone]}>{KIND_LABEL[chapter.kind]}</c2-badge>
+        <span className="ll-chapter__title">{chapter.title}</span>
+      </span>
       <c2-card className="ll-chapter__card">
-        <div slot="header" className="ll-chapter__head">
-          <c2-badge tone={TONE_BADGE[chapter.tone]}>{KIND_LABEL[chapter.kind]}</c2-badge>
-          <h3>{chapter.title}</h3>
-          {moment && <span className="ll-chapter__time">{moment}</span>}
-        </div>
         <p className="ll-chapter__text">
-          <StoryText text={chapter.text} />
+          <StoryText text={chapter.text} resolve={(id) => analysis.patternById.get(id)} onOpen={actions.openPattern} />
         </p>
         {chapter.facts.length > 0 && (
           <div className="ll-facts">
@@ -170,21 +192,16 @@ function ChapterCard({ chapter, analysis, actions }: Readonly<{ chapter: Chapter
                 </c2-button>
               </>
             )}
-            {patterns.slice(0, 4).map((pattern) => (
-              <c2-button
-                key={pattern.id}
-                className="ll-button--quiet ll-pattern-chip"
-                onClick={() => actions.openPattern(pattern.id)}
-                aria-label={`Open pattern ${pattern.id}`}
-              >
+            {chapter.kind === 'opening' && (
+              <c2-button className="ll-button--quiet" onClick={() => actions.goTo('patterns')}>
                 <c2-feather-layers slot="prefix-icon" />
-                {pattern.id} · {shorten(pattern.template, 28)}
+                See all {analysis.patterns.length} patterns
               </c2-button>
-            ))}
+            )}
           </div>
         )}
       </c2-card>
-    </li>
+    </c2-timeline-item>
   )
 }
 
@@ -282,11 +299,11 @@ export function StoryView({ analysis, lens, actions }: Readonly<Props>) {
                 : `${analysis.chapters.length} chapters, written from the records`}
             </span>
           </div>
-          <ol className="ll-chapters">
+          <c2-timeline className="ll-chapters" aria-label="Story chapters in order">
             {chapters.map((chapter) => (
-              <ChapterCard key={chapter.id} chapter={chapter} analysis={analysis} actions={actions} />
+              <ChapterEntry key={chapter.id} chapter={chapter} analysis={analysis} actions={actions} />
             ))}
-          </ol>
+          </c2-timeline>
         </section>
       </div>
       <aside className="ll-story__aside" aria-label="Answers and sources">

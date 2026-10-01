@@ -9,13 +9,13 @@ import { formatNumber } from '@/lib/format'
 import { LogParseError, parseOtlpLogs } from '@/lib/otlp'
 import { createSampleJsonl } from '@/lib/sample'
 import { AppHeader } from './AppHeader'
+import { BINDINGS, CommandPalette, VIEW_ORDER } from './CommandPalette'
 import { DifferencesView } from './DifferencesView'
 import { ExploreView } from './ExploreView'
 import { JourneysView } from './JourneysView'
 import { JourneySheet } from './JourneySheet'
 import { Landing } from './Landing'
 import { LensBar } from './LensBar'
-import { PatternSheet } from './PatternSheet'
 import { PatternsView } from './PatternsView'
 import { StoryView } from './StoryView'
 import { SummaryStrip } from './SummaryStrip'
@@ -30,13 +30,7 @@ interface Source {
 
 type Status = { kind: 'empty' } | { kind: 'loading'; name: string } | { kind: 'error'; message: string; name: string } | { kind: 'ready' }
 
-const VIEWS: Array<{ id: View; label: string }> = [
-  { id: 'story', label: 'Story' },
-  { id: 'patterns', label: 'Patterns' },
-  { id: 'journeys', label: 'Journeys' },
-  { id: 'differences', label: 'Differences' },
-  { id: 'explore', label: 'Raw logs' },
-]
+const VIEWS = VIEW_ORDER
 
 export function LogLens() {
   const [status, setStatus] = useState<Status>({ kind: 'empty' })
@@ -46,6 +40,9 @@ export function LogLens() {
   const [view, setView] = useState<View>('story')
   const [patternId, setPatternId] = useState('')
   const [traceId, setTraceId] = useState('')
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [warnings, setWarnings] = useState<string[]>([])
+  const shortcutRef = useRef<HTMLElementTagNameMap['c2-shortcut']>(null)
   const toastRef = useRef<HTMLElementTagNameMap['c2-toast-region']>(null)
   const tabsRef = useRef<HTMLElementTagNameMap['c2-tabs']>(null)
 
@@ -76,7 +73,7 @@ export function LogLens() {
           `${formatNumber(result.patterns.length)} patterns and ${formatNumber(result.chapters.length)} story chapters in ${Math.round(parseMs)} ms.`,
           'success',
         )
-        if (parsed.warnings.length) notify(`${parsed.warnings.length} lines skipped`, parsed.warnings[0], 'warning')
+        setWarnings(parsed.warnings)
       } catch (error) {
         const message = error instanceof LogParseError ? error.message : `The file could not be read: ${error instanceof Error ? error.message : String(error)}`
         setStatus({ kind: 'error', message, name })
@@ -96,6 +93,8 @@ export function LogLens() {
     setAnalysis(null)
     setSource(null)
     setLensState({})
+    setWarnings([])
+    setPaletteOpen(false)
   }, [])
 
   const actions = useMemo<LensActions>(
@@ -115,12 +114,24 @@ export function LogLens() {
           delete next[key]
           return next
         }),
-      openPattern: setPatternId,
+      // A pattern opens in the Patterns view, beside the list, so the next one is one click away.
+      openPattern: (id) => {
+        setPatternId(id)
+        setView('patterns')
+      },
       openTrace: setTraceId,
       goTo: setView,
     }),
     [],
   )
+
+  useElementProperties(shortcutRef, 'c2-shortcut', { bindings: BINDINGS }, [status.kind])
+  useCustomEvent(shortcutRef, 'shortcut', (event) => {
+    const action = event.detail.action ?? ''
+    if (action === 'palette') setPaletteOpen((open) => !open)
+    else if (action === 'clear') actions.clearLens()
+    else if (action.startsWith('view:')) setView(action.slice(5) as View)
+  })
 
   useElementProperties(tabsRef, 'c2-tabs', { selectedTab: view }, [view, status.kind])
   useCustomEvent(tabsRef, 'selection-change', (event) => {
@@ -133,7 +144,7 @@ export function LogLens() {
 
   return (
     <div className="ll-app">
-      <AppHeader fileName={ready ? source.name : undefined} onReset={reset} onSample={openSample} />
+      <AppHeader fileName={ready ? source.name : undefined} onReset={reset} onSample={openSample} onSearch={ready ? () => setPaletteOpen(true) : undefined} />
       <c2-toast-region ref={toastRef} position="bottom-right" label="Notifications" />
 
       {!ready ? (
@@ -146,6 +157,15 @@ export function LogLens() {
         />
       ) : (
         <main className="ll-main" id="main">
+          {warnings.length > 0 && (
+            <c2-banner
+              className="ll-banner"
+              variant="warning"
+              heading={`${formatNumber(warnings.length)} ${warnings.length === 1 ? 'line was' : 'lines were'} skipped`}
+              message={`${warnings.slice(0, 3).join(' · ')}${warnings.length > 3 ? ' …' : ''} The rest of the file was analyzed.`}
+              dismissible
+            />
+          )}
           <SummaryStrip analysis={analysis} source={source} />
           <nav className="ll-nav" aria-label="Analysis views">
             <c2-tabs ref={tabsRef} selected-tab={view} aria-label="Analysis views">
@@ -162,12 +182,13 @@ export function LogLens() {
           <LensBar analysis={analysis} lens={lens} matching={lensRecords.length} actions={actions} />
           <section className="ll-view" aria-label={VIEWS.find((item) => item.id === view)?.label}>
             {view === 'story' && <StoryView analysis={analysis} lens={lens} actions={actions} />}
-            {view === 'patterns' && <PatternsView analysis={analysis} records={lensRecords} lens={lens} actions={actions} />}
+            {view === 'patterns' && <PatternsView analysis={analysis} records={lensRecords} lens={lens} selectedId={patternId} actions={actions} />}
             {view === 'journeys' && <JourneysView analysis={analysis} records={lensRecords} actions={actions} />}
             {view === 'differences' && <DifferencesView analysis={analysis} records={lensRecords} lens={lens} actions={actions} />}
             {view === 'explore' && <ExploreView analysis={analysis} records={lensRecords} lens={lens} actions={actions} />}
           </section>
-          <PatternSheet analysis={analysis} patternId={patternId} actions={actions} onClose={() => setPatternId('')} />
+          <CommandPalette analysis={analysis} open={paletteOpen} actions={actions} onClose={() => setPaletteOpen(false)} onOpenFile={reset} />
+          <c2-shortcut ref={shortcutRef} />
           <JourneySheet analysis={analysis} traceId={traceId} actions={actions} onClose={() => setTraceId('')} />
         </main>
       )}

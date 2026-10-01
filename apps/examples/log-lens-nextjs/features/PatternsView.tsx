@@ -12,6 +12,7 @@ import { formatClock, formatNumber, formatPercent } from '@/lib/format'
 import { patternHistograms } from '@/lib/insights'
 import type { LogRecord } from '@/lib/otlp'
 import { severityRank, type Pattern } from '@/lib/patterns'
+import { PatternDetail } from './PatternDetail'
 import type { LensActions } from './types'
 
 type Order = 'common' | 'rare' | 'new' | 'trouble'
@@ -39,7 +40,13 @@ function Trend({ id, data, label }: Readonly<{ id: string; data: number[]; label
   return <c2-sparkline ref={ref} slot={`cell:${id}:trend`} className="ll-trend" type="area" tone="neutral" aria-label={label} />
 }
 
-export function PatternsView({ analysis, records, lens, actions }: Readonly<{ analysis: Analysis; records: LogRecord[]; lens: Focus; actions: LensActions }>) {
+export function PatternsView({
+  analysis,
+  records,
+  lens,
+  selectedId,
+  actions,
+}: Readonly<{ analysis: Analysis; records: LogRecord[]; lens: Focus; selectedId: string; actions: LensActions }>) {
   const [order, setOrder] = useState<Order>('common')
   const tableRef = useRef<HTMLElementTagNameMap['c2-table']>(null)
   const filtered = !isEmptyFocus(lens)
@@ -72,7 +79,10 @@ export function PatternsView({ analysis, records, lens, actions }: Readonly<{ an
       })),
     [visible, counts, records.length],
   )
-  useElementProperties(tableRef, 'c2-table', { rows, rowKey: 'id' }, [rows])
+  // With nothing chosen, the detail pane shows the first row rather than an empty panel.
+  const shownId = visible.some((pattern) => pattern.id === selectedId) ? selectedId : (visible[0]?.id ?? '')
+  const selection = useMemo(() => (shownId ? [shownId] : []), [shownId])
+  useElementProperties(tableRef, 'c2-table', { rows, rowKey: 'id', value: selection }, [rows, selection])
   useCustomEvent(tableRef, 'row-click', (event) => actions.openPattern(String((event.detail.row as Row).id)))
 
   const covered = visible.slice(0, 5).reduce((sum, pattern) => sum + (counts.get(pattern.id) ?? 0), 0)
@@ -97,24 +107,27 @@ export function PatternsView({ analysis, records, lens, actions }: Readonly<{ an
         <Segmented label="Order patterns" value={order} options={ORDERS} onChange={setOrder} />
       </div>
       {rows.length ? (
-        <c2-table ref={tableRef} className="ll-table ll-table--patterns" aria-label="Message patterns" row-key="id" stripe>
-          <c2-table-column field="severity" header="Level" width="92px" cell-slot />
-          <c2-table-column field="template" header="Pattern" width="minmax(280px, 3fr)" cell-slot />
-          <c2-table-column field="count" header="Count" width="90px" align="end" format="number" />
-          <c2-table-column field="share" header="Share" width="80px" align="end" />
-          <c2-table-column field="trend" header="Over time" width="150px" cell-slot />
-          <c2-table-column field="services" header="Services" width="minmax(120px, 1fr)" />
-          <c2-table-column field="first" header="First seen" width="100px" />
-          {visible.map((pattern) => (
-            <SeverityBadge key={`${pattern.id}-severity`} slot={`cell:${pattern.id}:severity`} severity={pattern.severity} />
-          ))}
-          {visible.map((pattern) => (
-            <PatternText key={`${pattern.id}-template`} slot={`cell:${pattern.id}:template`} template={pattern.template} />
-          ))}
-          {visible.map((pattern) => (
-            <Trend key={`${pattern.id}-trend`} id={pattern.id} data={histograms.get(pattern.id) ?? []} label={`Occurrences of ${pattern.id} over time`} />
-          ))}
-        </c2-table>
+        <c2-split-panel className="ll-split" position={58} min={35} max={75} label="Resize the pattern list and its detail">
+          <c2-table ref={tableRef} slot="start" className="ll-table ll-table--patterns" aria-label="Message patterns" row-key="id" selection="single" stripe>
+            <c2-table-column field="severity" header="Level" width="84px" cell-slot />
+            <c2-table-column field="template" header="Pattern" width="minmax(240px, 3fr)" cell-slot />
+            <c2-table-column field="count" header="Count" width="80px" align="end" format="number" />
+            <c2-table-column field="trend" header="Over time" width="140px" cell-slot />
+            <c2-table-column field="first" header="First seen" width="96px" />
+            {visible.map((pattern) => (
+              <SeverityBadge key={`${pattern.id}-severity`} slot={`cell:${pattern.id}:severity`} severity={pattern.severity} />
+            ))}
+            {visible.map((pattern) => (
+              <PatternText key={`${pattern.id}-template`} slot={`cell:${pattern.id}:template`} template={pattern.template} />
+            ))}
+            {visible.map((pattern) => (
+              <Trend key={`${pattern.id}-trend`} id={pattern.id} data={histograms.get(pattern.id) ?? []} label={`Occurrences of ${pattern.id} over time`} />
+            ))}
+          </c2-table>
+          <div slot="end" className="ll-split__detail">
+            <PatternDetail analysis={analysis} patternId={shownId} actions={actions} />
+          </div>
+        </c2-split-panel>
       ) : (
         <c2-status-panel
           status="empty"

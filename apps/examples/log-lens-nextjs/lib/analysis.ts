@@ -325,8 +325,16 @@ export interface Analysis {
   warnings: number
 }
 
+/**
+ * Story text markup, rendered by the UI: `` `P07:template` `` is a pattern reference (the id lets the view link it),
+ * `**text**` a fact worth highlighting.
+ */
 function quote(pattern: Pattern | undefined): string {
-  return pattern ? `\`${shorten(pattern.template, 90)}\`` : 'an unknown message'
+  return pattern ? `\`${pattern.id}:${shorten(pattern.template, 90)}\`` : 'an unknown message'
+}
+
+function mark(text: string): string {
+  return `**${text}**`
 }
 
 function describeWindow(start: number, end: number, precise: boolean): string {
@@ -412,17 +420,17 @@ export function writeStory(analysis: Omit<Analysis, 'chapters'>): Chapter[] {
       (pattern) => pattern.first >= lookback && pattern.first <= windowEnd && pattern.id !== precursor?.id && pattern.first > start + span * 0.05,
     )
 
-    let text = `Errors jump to ${formatNumber(peak)} per ${per} between ${describeWindow(windowStart, windowEnd, precise)}, where there are usually ${usually}. `
+    let text = `Errors jump to ${mark(`${formatNumber(peak)} per ${per}`)} between ${describeWindow(windowStart, windowEnd, precise)}, where there are usually ${usually}. `
     text += leadPattern
       ? `Most of them are ${leadPattern.services.join(', ')} saying ${quote(leadPattern)} (${formatNumber(lead[1])}×)`
       : 'Errors are spread over several messages'
     if (rest.length) text += `, echoed by ${rest.map(([id, count]) => `${quote(patternById.get(id))} (${formatNumber(count)}×)`).join(' and ')}`
     text += '. '
-    if (precursor) text += `Shortly before, ${precursor.services[0]} logged ${quote(precursor)} for the first time — the likely trigger. `
+    if (precursor) text += `Shortly before, ${precursor.services[0]} logged ${quote(precursor)} for the first time — ${mark('the likely trigger')}. `
     const quietNewcomers = newcomers.filter((pattern) => !isProblem(pattern.severity))
     if (quietNewcomers.length)
       text += `The surge also brings ${plural(quietNewcomers.length, 'message')} never seen before, such as ${quote(quietNewcomers.sort((a, b) => b.count - a.count)[0])}. `
-    if (traces.size) text += `${plural(traces.size, 'request')} failed.`
+    if (traces.size) text += `${mark(`${plural(traces.size, 'request')} failed`)}.`
 
     const patternIds = [
       ...new Set([lead?.[0], ...rest.map(([id]) => id), precursor?.id, ...newcomers.map((pattern) => pattern.id)].filter((id): id is string => !!id)),
@@ -461,7 +469,7 @@ export function writeStory(analysis: Omit<Analysis, 'chapters'>): Chapter[] {
         end: calmStart,
         title: 'Back to normal',
         text:
-          `By ${formatClock(calmStart, precise)} errors are back to ${usually} per ${per}, ${formatDuration(calmStart - windowStart)} after the surge began.` +
+          `By ${formatClock(calmStart, precise)} errors are back to ${usually} per ${per}, ${mark(`${formatDuration(calmStart - windowStart)} after the surge began`)}.` +
           (fix
             ? ` The turn coincides with ${fix.services[0]} logging ${quote(fix)}${sameAsTrigger ? ' again — the same kind of message that preceded the surge' : ''}.`
             : ''),
@@ -503,8 +511,8 @@ export function writeStory(analysis: Omit<Analysis, 'chapters'>): Chapter[] {
     const telling = (pattern: Pattern | undefined) => pattern && pattern.count <= 3
     let text = `${service} normally logs every ${formatDuration(usual)}, `
     text += comeback
-      ? `but is silent for ${formatDuration(length)} from ${formatClock(widest.from, precise)}. `
-      : `but nothing arrives after ${formatClock(widest.from, precise)} — the last ${formatDuration(length)} of the file. `
+      ? `but is ${mark(`silent for ${formatDuration(length)}`)} from ${formatClock(widest.from, precise)}. `
+      : `but ${mark(`nothing arrives after ${formatClock(widest.from, precise)}`)} — the last ${formatDuration(length)} of the file. `
     if (telling(lastPattern)) text += `Its last words were ${quote(lastPattern)}. `
     if (comeback && telling(comebackPattern)) text += `It comes back with ${quote(comebackPattern)}, which reads like a restart. `
     else if (comeback) text += 'A pause like this usually means a restart, a stall or lost connectivity. '
@@ -547,7 +555,7 @@ export function writeStory(analysis: Omit<Analysis, 'chapters'>): Chapter[] {
       text:
         `From ${formatClock(lead.first, precise)}, ${lead.services.join(', ')} logs ${quote(lead)} — absent from the first ${formatDuration(lead.first - start)} of the file, ` +
         `${plural(lead.count, 'time')} since` +
-        (during ? `, starting just as ${during.service} went silent. It is probably reacting to that` : '') +
+        (during ? `, starting just as ${mark(`${during.service} went silent`)}. It is probably reacting to that` : '') +
         '.' +
         (others.length ? ` ${plural(others.length, 'other new pattern')} appeared at the same moment.` : ''),
       facts: [lead.severity.toUpperCase(), `${formatNumber(lead.count)}×`, `first at ${formatClock(lead.first, precise)}`],

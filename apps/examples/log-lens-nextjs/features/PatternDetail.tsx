@@ -2,7 +2,6 @@
 
 import { useMemo, useRef } from 'react'
 import { useElementProperties } from '@/components/c2n/element-bindings'
-import { useCustomEvent } from '@/components/c2n/useCustomEvent'
 import { PatternText } from '@/components/ui/PatternText'
 import { SeverityBadge } from '@/components/ui/SeverityBadge'
 import type { Analysis } from '@/lib/analysis'
@@ -15,15 +14,14 @@ interface Props {
   analysis: Analysis
   patternId: string
   actions: LensActions
-  onClose: () => void
 }
 
 function formatValue(value: number, unit: string): string {
   return `${Number.isInteger(value) ? formatNumber(value) : value.toFixed(value < 10 ? 2 : 1)}${unit}`
 }
 
-export function PatternSheet({ analysis, patternId, actions, onClose }: Readonly<Props>) {
-  const sheetRef = useRef<HTMLElementTagNameMap['c2-sheet']>(null)
+/** Everything about one pattern: when it is logged, what varies inside it, examples, and where to go next. */
+export function PatternDetail({ analysis, patternId, actions }: Readonly<Props>) {
   const chartRef = useRef<HTMLElementTagNameMap['c2-bar-chart']>(null)
   const pattern = patternId ? analysis.patternById.get(patternId) : undefined
 
@@ -44,19 +42,25 @@ export function PatternSheet({ analysis, patternId, actions, onClose }: Readonly
     return { total: ids.size, failed }
   }, [analysis, pattern])
 
-  useElementProperties(sheetRef, 'c2-sheet', { open: Boolean(pattern) }, [pattern])
   useElementProperties(chartRef, 'c2-bar-chart', { data }, [data])
-  useCustomEvent(sheetRef, 'close', onClose)
 
   const examples = pattern
     ? [...new Set([pattern.records[0], pattern.records[Math.floor(pattern.records.length / 2)], pattern.records[pattern.records.length - 1]])]
     : []
 
   return (
-    <c2-sheet ref={sheetRef} side="right" className="ll-sheet" label={pattern ? `Pattern ${pattern.id}` : 'Pattern'}>
-      <span slot="title">{pattern ? `Pattern ${pattern.id}` : 'Pattern'}</span>
+    <section className="ll-detail" aria-label={pattern ? `Pattern ${pattern.id}` : 'Pattern'}>
+      {!pattern && (
+        <c2-status-panel
+          status="empty"
+          media="none"
+          heading="Pick a pattern"
+          description="Select a row to see when it is logged, what varies inside it and real examples."
+        />
+      )}
+      {pattern && <h2 className="ll-detail__title">Pattern {pattern.id}</h2>}
       {pattern && (
-        <div className="ll-sheet__body">
+        <div className="ll-detail__body">
           <PatternText className="ll-pattern--block" template={pattern.template} />
           <div className="ll-facts">
             {SEVERITY_BANDS.filter((band) => pattern.severities[band]).map((band) => (
@@ -76,7 +80,7 @@ export function PatternSheet({ analysis, patternId, actions, onClose }: Readonly
           <h3>When it is logged</h3>
           <c2-bar-chart
             ref={chartRef}
-            className="ll-sheet__chart"
+            className="ll-detail__chart"
             x-field="time"
             x-type="time"
             axes="x"
@@ -149,12 +153,11 @@ export function PatternSheet({ analysis, patternId, actions, onClose }: Readonly
         </div>
       )}
       {pattern && (
-        <div slot="footer" className="ll-sheet__footer">
+        <div className="ll-detail__actions">
           <c2-button
             className="ll-button--primary"
             onClick={() => {
               actions.replaceLens({ patternId: pattern.id }, 'explore')
-              onClose()
             }}
           >
             Read all {formatNumber(pattern.count)} records
@@ -163,7 +166,6 @@ export function PatternSheet({ analysis, patternId, actions, onClose }: Readonly
             className="ll-button--quiet"
             onClick={() => {
               actions.setLens({ patternId: pattern.id })
-              onClose()
             }}
           >
             Add to lens
@@ -173,7 +175,6 @@ export function PatternSheet({ analysis, patternId, actions, onClose }: Readonly
               className="ll-button--quiet"
               onClick={() => {
                 actions.replaceLens({ patternId: pattern.id }, 'journeys')
-                onClose()
               }}
             >
               Its requests
@@ -181,6 +182,6 @@ export function PatternSheet({ analysis, patternId, actions, onClose }: Readonly
           )}
         </div>
       )}
-    </c2-sheet>
+    </section>
   )
 }
