@@ -1,0 +1,208 @@
+---
+description: 'Task, support and hiring boards built from cards you style yourself.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Kanban } from '@c2n/kanban'
+
+## Presets
+
+The cards are your own markup, so most of a board's look lives in their CSS. The board's variables set the column
+box (`--c2-kanban__column--*`), the drop gap and the drag lift; the column's set the header dot, count and empty hint.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-kanban client:only="lit" editable aria-label="Tasks">
+  <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+  <c2-kanban-column column-id="done" label="Done"></c2-kanban-column>
+  <div data-column="todo">Write the release notes</div>
+  <div data-column="todo">Update the screenshots</div>
+  <div data-column="done">Fix the build</div>
+</c2-kanban>
+```
+
+```html tag=MdxCodeBlock,label=Sprint board
+<style>
+  .sprint-board {
+    --c2-kanban__column--width: 210px;
+    --c2-kanban__board--gap: 10px;
+  }
+  .sprint-board .doing {
+    --c2-kanban-column__dot--background-color: #0265dc;
+  }
+  .sprint-board .review {
+    --c2-kanban-column__dot--background-color: #b45309;
+  }
+  .sprint-task {
+    display: grid;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 6px;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .sprint-task footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sprint-task .key {
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font: 12px ui-monospace, monospace;
+  }
+  .sprint-task .tag {
+    padding: 0 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 18px;
+    font-weight: 500;
+  }
+  .sprint-task .bug {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  .sprint-task .feature {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  .sprint-task .who {
+    margin-left: auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #7c3aed;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 600;
+  }
+</style>
+<c2-kanban client:only="lit" class="sprint-board" editable aria-label="Sprint 42">
+  <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+  <c2-kanban-column class="doing" column-id="doing" label="In progress" limit="1"></c2-kanban-column>
+  <c2-kanban-column class="review" column-id="review" label="In review"></c2-kanban-column>
+  <article class="sprint-task" data-column="todo" data-kanban-key="C2-118">
+    Empty state for search
+    <footer><span class="key">C2-118</span><span class="tag feature">feature</span><span class="who">VN</span></footer>
+  </article>
+  <article class="sprint-task" data-column="doing" data-kanban-key="C2-109">
+    Tree drag handles
+    <footer><span class="key">C2-109</span><span class="tag feature">feature</span><span class="who">AL</span></footer>
+  </article>
+  <article class="sprint-task" data-column="doing" data-kanban-key="C2-104">
+    Toast stacking order
+    <footer><span class="key">C2-104</span><span class="tag bug">bug</span><span class="who">MK</span></footer>
+  </article>
+</c2-kanban>
+```
+
+```html tag=MdxCodeBlock,label=Support triage
+<style>
+  .triage-board {
+    --c2-kanban__column--width: 190px;
+    --c2-kanban__column--background-color: transparent;
+    --c2-kanban__column--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 12%, var(--c2-theme--color-surface, #ffffff));
+    --c2-kanban__column--border-radius: 14px;
+    --c2-kanban__cards--gap: 6px;
+    --c2-kanban__card--border-radius: 4px;
+    --c2-kanban__placeholder--border: 2px dashed #0f766e;
+    --c2-kanban__placeholder--background-color: rgba(15, 118, 110, 0.08);
+    --c2-kanban__column__target--border-color: #0f766e;
+    --c2-kanban__column__target--background-color: rgba(15, 118, 110, 0.06);
+    --c2-kanban__card__dragging--transform: none;
+    --c2-kanban-column__dot--size: 0px;
+    --c2-kanban-column__header--gap: 6px;
+  }
+  .ticket {
+    padding: 8px 10px;
+    border-left: 3px solid #a1a1aa;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    color: var(--c2-theme--color-on-surface, #18181b);
+    font-size: 13px;
+  }
+  .ticket.urgent {
+    border-left-color: #dc2626;
+  }
+  .ticket.high {
+    border-left-color: #d97706;
+  }
+  .ticket span {
+    display: block;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
+<c2-kanban client:only="lit" class="triage-board" editable aria-label="Support inbox">
+  <c2-kanban-column column-id="new" label="New" limit="2"></c2-kanban-column>
+  <c2-kanban-column column-id="waiting" label="Waiting on customer"></c2-kanban-column>
+  <c2-kanban-column column-id="solved" label="Solved"><span slot="empty">Solve a ticket to see it here</span></c2-kanban-column>
+  <div class="ticket urgent" data-column="new">Checkout returns 500<span>Acme · 4 min</span></div>
+  <div class="ticket high" data-column="new">Invoice missing VAT<span>Globex · 1 h</span></div>
+  <div class="ticket" data-column="new">Change billing email<span>Initech · 3 h</span></div>
+  <div class="ticket" data-column="waiting">Export to CSV<span>Umbrella · 1 d</span></div>
+</c2-kanban>
+```
+
+```html tag=MdxCodeBlock,label=Hiring pipeline
+<style>
+  .hiring-board {
+    --c2-kanban__column--width: 180px;
+    --c2-kanban__column--max-height: 260px;
+    --c2-kanban__cards--overflow-y: auto;
+    --c2-kanban__board--scroll-snap-type: x mandatory;
+    --c2-kanban__column--background-color: #f5f3ff;
+    --c2-kanban__column__target--border-color: #7c3aed;
+    --c2-kanban__column__target--background-color: #ede9fe;
+    --c2-kanban__placeholder--border: 2px dashed #7c3aed;
+    --c2-kanban__placeholder--background-color: rgba(124, 58, 237, 0.08);
+    --c2-kanban__card__focus--outline: 2px solid rgba(124, 58, 237, 0.5);
+    --c2-kanban-column__dot--background-color: #7c3aed;
+    --c2-kanban-column__label--color: #4c1d95;
+    --c2-kanban-column__count--color: #5b21b6;
+  }
+  .candidate {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #2e1065;
+    font-size: 13px;
+    box-shadow: 0 1px 2px rgba(76, 29, 149, 0.12);
+  }
+  .candidate b {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex: none;
+    background: #ddd6fe;
+    color: #4c1d95;
+    font-size: 11px;
+  }
+</style>
+<c2-kanban client:only="lit" class="hiring-board" editable aria-label="Frontend engineer pipeline">
+  <c2-kanban-column column-id="applied" label="Applied"></c2-kanban-column>
+  <c2-kanban-column column-id="interview" label="Interview"></c2-kanban-column>
+  <c2-kanban-column column-id="offer" label="Offer"></c2-kanban-column>
+  <div class="candidate" data-column="applied"><b>AK</b>Amara Kofi</div>
+  <div class="candidate" data-column="applied"><b>JL</b>Jonas Lind</div>
+  <div class="candidate" data-column="applied"><b>PS</b>Priya Shah</div>
+  <div class="candidate" data-column="applied"><b>TM</b>Tomás Mora</div>
+  <div class="candidate" data-column="applied"><b>YT</b>Yuki Tanaka</div>
+  <div class="candidate" data-column="interview"><b>LB</b>Léa Bernard</div>
+  <div class="candidate" data-column="offer"><b>OW</b>Owen Walsh</div>
+</c2-kanban>
+```
+
+</GalleryGrid>

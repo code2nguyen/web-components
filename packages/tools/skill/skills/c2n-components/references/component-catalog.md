@@ -112,6 +112,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Dashboard** — `c2-dashboard, c2-dash-card` · `@c2n/dashboard` — Grid of resizable panes, dragged by the edges they share. Children: `c2-dash-card`.
 - **Details** — `c2-details` · `@c2n/details` — Collapsible disclosure built on native details and summary.
 - **Header** — `c2-header` · `@c2n/header` — Arranges brand, navigation, actions and a mobile trigger in a reusable site shell.
+- **Kanban** — `c2-kanban, c2-kanban-column` · `@c2n/kanban` — Columns of cards that people move by dragging or with the keyboard, while the application keeps the data. Children: `c2-kanban-column`.
 - **Masonry** — `c2-masonry, c2-masonry-item` · `@c2n/masonry` — Automatically pack differently sized dashboard tiles, then move or resize them in edit mode. Children: `c2-masonry-item`.
 - **Seperator** — `c2-seperator` · `@c2n/seperator` — Horizontal or vertical rule with an optional label, for dividing content and toolbars.
 - **Split Panel** — `c2-split-panel` · `@c2n/split-panel` — Two panels separated by a divider the user drags, or moves with the keyboard, to resize them.

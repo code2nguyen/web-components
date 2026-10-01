@@ -1,0 +1,108 @@
+---
+title: 'Kanban'
+description: 'Columns of cards that people move by dragging or with the keyboard, while the application keeps the data.'
+category: 'Layout'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Kanban } from '@c2n/kanban'
+
+Use `c2-kanban` for a board of `c2-kanban-column` columns whose cards move between and within columns. Cards are any
+elements you render, placed as direct children of the board and assigned to a column with `data-column`. The board
+shows a move immediately and reports it in `card-move`; it never moves an element you rendered, so React, Vue and
+Angular keep owning their nodes.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/kanban
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/kanban
+<div data-label="Sprint board">
+  <style>
+    .usage-task {
+      padding: 10px 12px;
+      border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+      border-radius: 6px;
+      background: var(--c2-theme--color-surface, #ffffff);
+      color: var(--c2-theme--color-on-surface, #18181b);
+      font-size: 14px;
+    }
+    .usage-task small {
+      display: block;
+      margin-top: 4px;
+      color: var(--c2-theme--color-on-surface-variant, #71717a);
+      font-size: 12px;
+    }
+    .usage-board {
+      --c2-kanban__column--width: 220px;
+    }
+    .usage-doing {
+      --c2-kanban-column__dot--background-color: #0265dc;
+    }
+    .usage-done {
+      --c2-kanban-column__dot--background-color: #15803d;
+    }
+  </style>
+  <c2-kanban client:only="lit" class="usage-board" editable aria-label="Sprint 42">
+    <c2-kanban-column column-id="todo" label="To do"></c2-kanban-column>
+    <c2-kanban-column class="usage-doing" column-id="doing" label="In progress" limit="2"></c2-kanban-column>
+    <c2-kanban-column class="usage-done" column-id="done" label="Done"></c2-kanban-column>
+    <div class="usage-task" data-column="todo" data-kanban-key="C2-118">Empty state for search<small>C2-118</small></div>
+    <div class="usage-task" data-column="todo" data-kanban-key="C2-121">Date input loses focus<small>C2-121</small></div>
+    <div class="usage-task" data-column="doing" data-kanban-key="C2-109">Tree drag handles<small>C2-109</small></div>
+    <div class="usage-task" data-column="doing" data-kanban-key="C2-104">Toast stacking order<small>C2-104</small></div>
+    <div class="usage-task" data-column="doing" data-kanban-key="C2-112">Chart tooltip on focus<small>C2-112</small></div>
+  </c2-kanban>
+</div>
+<div data-label="Read-only">
+  <c2-kanban client:only="lit" class="usage-board" aria-label="Released">
+    <c2-kanban-column column-id="shipped" label="Shipped"></c2-kanban-column>
+    <c2-kanban-column column-id="blocked" label="Blocked"><span slot="empty">Nothing is blocked</span></c2-kanban-column>
+    <div class="usage-task" data-column="shipped">Masonry layout<small>C2-087</small></div>
+  </c2-kanban>
+</div>
+```
+
+Each `c2-kanban-column` needs a unique `column-id`, which is what its cards carry in `data-column` and what
+`card-move` reports; `label` is its visible name and the accessible name of its card list. A card whose
+`data-column` matches no column is not shown. `limit` sets a soft work-in-progress limit: over it the count reads
+`3 / 2` in the over colour and the column takes the over border, but cards can still be dropped. Put an add button or a
+menu in the column's `actions` slot, and replace the "No cards" hint through its `empty` slot.
+
+Moving needs `editable`. A pointer press on a card, then a drag past a few pixels, lifts the card; a dashed gap marks
+where it lands and the board scrolls sideways near its edges. Releasing far outside the board, or pressing Escape,
+cancels. Presses on buttons, links and inputs inside a card keep their own behaviour.
+
+With the keyboard, the board is one tab stop. The arrow keys move focus between cards, Space picks the focused card
+up, the arrow keys, Home and End move it (Left and Right change column), Space drops it and Escape returns it. Each
+step is announced through a live region. Give the board a name with `aria-label` or `aria-labelledby`.
+
+Save moves from the event:
+
+```js tag=CodeBlock
+const board = document.querySelector('c2-kanban')
+
+board.addEventListener('card-move', (event) => {
+  const { card, key, toColumn, toIndex } = event.detail
+  card.dataset.column = toColumn
+  saveTask(key, { status: toColumn, position: toIndex })
+})
+```
+
+`card-move` fires once per real move, with the card element, its `data-kanban-key`, the `fromColumn`/`toColumn` ids,
+the `fromIndex`/`toIndex` within those columns and the input method (`mouse`, `touch`, `pen` or `keyboard`). A
+cancelled or no-op move fires nothing. The board keeps the user's order inside a column for as long as that column
+holds the same cards, so updating `data-column` as above is enough. When the cards of a column change in any other way
+(a card is added, removed or reassigned), that column follows DOM order again, which is what an app re-rendering
+sorted data produces anyway.
+
+Style the cards themselves with your own CSS. The board's columns, gaps, drop gap, focus ring and drag lift are set
+through `--c2-kanban__*` variables, and each column's header and empty hint through `--c2-kanban-column__*`. For
+columns that scroll, set `--c2-kanban__column--max-height` with `--c2-kanban__cards--overflow-y: auto`; for a phone
+layout that snaps to columns, set `--c2-kanban__board--scroll-snap-type: x mandatory`.

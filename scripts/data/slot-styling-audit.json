@@ -987,6 +987,26 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-kanban",
+      "slot": "",
+      "decision": "part",
+      "parts": ["card"],
+      "reason": "The repeated card wrapper owns placement, focus and drag feedback for each direct-child card, while the private projection slots and the assigned cards stay consumer-owned."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned header controls; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty region owns the empty slot's component-side presentation: border, padding and colours of the hint."
+    },
+    {
       "tag": "c2-kbd",
       "slot": "",
       "decision": "assigned-content",

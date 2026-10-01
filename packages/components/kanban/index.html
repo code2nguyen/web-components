@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-kanban</title>
+    <script type="module" src="/src/kanban.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font:
+          14px system-ui,
+          sans-serif;
+        color: #18181b;
+        display: grid;
+        gap: 32px;
+      }
+      .task {
+        padding: 10px 12px;
+        border: 1px solid #e4e4e7;
+        border-radius: 6px;
+        background: #ffffff;
+      }
+      .task small {
+        display: block;
+        color: #71717a;
+      }
+      .doing {
+        --c2-kanban-column__dot--background-color: #0265dc;
+      }
+      .done {
+        --c2-kanban-column__dot--background-color: #15803d;
+      }
+      .scrolling {
+        --c2-kanban__column--max-height: 220px;
+        --c2-kanban__cards--overflow-y: auto;
+      }
+      pre {
+        background: #fafafa;
+        padding: 12px;
+        min-height: 40px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Editable, with a soft limit</h2>
+    <c2-kanban id="board" editable aria-label="Sprint 42">
+      <c2-kanban-column column-id="todo" label="To do">
+        <button slot="actions" type="button" aria-label="Add a card to To do">+</button>
+      </c2-kanban-column>
+      <c2-kanban-column class="doing" column-id="doing" label="In progress" limit="2"></c2-kanban-column>
+      <c2-kanban-column column-id="review" label="In review"></c2-kanban-column>
+      <c2-kanban-column class="done" column-id="done" label="Done"><span slot="empty">Nothing shipped yet</span></c2-kanban-column>
+      <div class="task" data-column="todo" data-kanban-key="C2-118">Empty state for search<small>C2-118</small></div>
+      <div class="task" data-column="todo" data-kanban-key="C2-121">Date input loses focus <a href="#">open</a><small>C2-121</small></div>
+      <div class="task" data-column="doing" data-kanban-key="C2-109">Tree drag handles<small>C2-109</small></div>
+      <div class="task" data-column="doing" data-kanban-key="C2-104">Toast stacking order<small>C2-104</small></div>
+      <div class="task" data-column="doing" data-kanban-key="C2-112">Chart tooltip on focus<small>C2-112</small></div>
+    </c2-kanban>
+    <pre id="log"></pre>
+
+    <h2>Read-only, scrolling columns</h2>
+    <c2-kanban class="scrolling" aria-label="Backlog">
+      <c2-kanban-column column-id="backlog" label="Backlog"></c2-kanban-column>
+      <div class="task" data-column="backlog">One</div>
+      <div class="task" data-column="backlog">Two</div>
+      <div class="task" data-column="backlog">Three</div>
+      <div class="task" data-column="backlog">Four</div>
+      <div class="task" data-column="backlog">Five</div>
+    </c2-kanban>
+
+    <script type="module">
+      const log = document.getElementById('log')
+      document.getElementById('board').addEventListener('card-move', (event) => {
+        const { card, ...detail } = event.detail
+        card.dataset.column = detail.toColumn
+        log.textContent = JSON.stringify(detail)
+      })
+    </script>
+  </body>
+</html>

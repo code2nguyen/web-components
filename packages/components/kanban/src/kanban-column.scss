@@ -1,0 +1,92 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-kanban-column,
+  $theme: (
+    header--padding: 4px 6px,
+    header--gap: 8px,
+    dot--size: 8px,
+    dot--background-color: #a1a1aa,
+    label--color: #18181b,
+    label--font-size: 14px,
+    label--font-weight: 600,
+    count--color: #71717a,
+    count--background-color: #ffffff,
+    count--font-size: 12px,
+    count--border-radius: 999px,
+    count--padding: 0 7px,
+    count__over--color: #dc2626,
+    count__over--background-color: #fef2f2,
+    empty--border: 1px dashed #bcbcc6,
+    empty--border-radius: 6px,
+    empty--padding: 16px 8px,
+    empty--margin-top: 8px,
+    empty--color: #71717a,
+    empty--background-color: #ffffff,
+    empty--font-size: 14px,
+  )
+);
+
+:host {
+  display: block;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: css.cssVar(header--gap);
+  padding: css.cssVar(header--padding);
+  min-height: 24px;
+}
+
+.dot {
+  flex: none;
+  width: css.cssVar(dot--size);
+  height: css.cssVar(dot--size);
+  border-radius: 50%;
+  background-color: css.cssVar(dot--background-color);
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: css.cssVar(label--color);
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+}
+
+.count {
+  flex: none;
+  color: css.cssVar(count--color);
+  background-color: css.cssVar(count--background-color);
+  font-size: css.cssVar(count--font-size);
+  border-radius: css.cssVar(count--border-radius);
+  padding: css.cssVar(count--padding);
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+
+  &.count--over {
+    color: css.cssVar(count__over--color);
+    background-color: css.cssVar(count__over--background-color);
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.empty {
+  margin-top: css.cssVar(empty--margin-top);
+  border: css.cssVar(empty--border);
+  border-radius: css.cssVar(empty--border-radius);
+  padding: css.cssVar(empty--padding);
+  color: css.cssVar(empty--color);
+  background-color: css.cssVar(empty--background-color);
+  font-size: css.cssVar(empty--font-size);
+  text-align: center;
+
+  &[hidden] {
+    display: none;
+  }
+}
