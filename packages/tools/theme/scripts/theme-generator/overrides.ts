@@ -191,6 +191,12 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__negative--color': { token: 'chart-negative' },
   '--c2-chart__tone-positive--color': { token: 'chart-positive' },
   '--c2-chart__tone-negative--color': { token: 'chart-negative' },
+  // The comparison bar's end side is the opposing quantity (asks, sellers), not an error: it follows the
+  // falling-direction colour so a brand recolours the pair together with the charts.
+  '--c2-comparison-bar__end-segment--background-color': { token: 'chart-negative' },
+  '--c2-comparison-bar__end-value--color': { token: 'chart-negative' },
+  // The neutral middle share (draws, abstentions) reads as a strong outline grey in either theme.
+  '--c2-comparison-bar__middle-segment--background-color': { token: 'color-outline-strong' },
   // Handed to the engine to draw marker and slice borders against the card, so it follows the surface
   // rather than reading as white text, which is how the colour rule would otherwise classify it.
   '--c2-chart__surface--color': { token: 'color-surface' },
