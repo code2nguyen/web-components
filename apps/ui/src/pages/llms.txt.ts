@@ -66,9 +66,11 @@ Use this file as a map of the documentation. Component pages contain installatio
 ## Start here
 
 - [Documentation home](${link('/')})
+- [Getting started](${link('/getting-started/')})
 - [Component index](${link('/components/')})
 - [Icon index](${link('/icons/')})
 - [Example applications](${link('/examples/')})
+- [Changelog](${link('/changelog/')})
 - [GitHub repository](https://github.com/code2nguyen/web-components)
 
 ## For coding agents

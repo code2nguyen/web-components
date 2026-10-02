@@ -138,4 +138,67 @@ Curated looks for `c2-progress`. Open any card in the studio to start from it. T
 </div>
 ```
 
+```html tag=MdxCodeBlock,label=Ring
+<style>
+  .ring {
+    --c2-progress--size: 112px;
+    --c2-progress--height: 14px;
+    --c2-progress__indicator--background-color: #0057e7;
+    --c2-progress__ring-value--font-size: 30px;
+    --c2-progress__value--font-weight: 700;
+    --c2-progress__label--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-progress__label--font-weight: 600;
+    --c2-progress--gap: 12px;
+  }
+</style>
+<c2-progress class="ring" variant="circular" value="67" show-value>Readiness</c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Ring set
+<style>
+  .rings {
+    display: flex;
+    gap: 20px;
+    --c2-progress--size: 56px;
+    --c2-progress--height: 6px;
+    --c2-progress__label--font-size: 12px;
+  }
+  .rings .done {
+    --c2-progress__indicator--background-color: #16a34a;
+  }
+  .rings .low {
+    --c2-progress__indicator--background-color: #dc2626;
+  }
+</style>
+<div class="rings">
+  <c2-progress class="done" variant="circular" value="100" show-value>Tests</c2-progress>
+  <c2-progress variant="circular" value="58" show-value>Coverage</c2-progress>
+  <c2-progress class="low" variant="circular" value="21" show-value>Budget</c2-progress>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Ring spinner
+<style>
+  .ring-spinner {
+    --c2-progress--size: 40px;
+    --c2-progress--height: 4px;
+  }
+</style>
+<c2-progress class="ring-spinner" variant="circular" label="Loading"></c2-progress>
+```
+
+```html tag=MdxCodeBlock,label=Ring square ends
+<style>
+  .ring-square {
+    --c2-progress--size: 72px;
+    --c2-progress--height: 10px;
+    --c2-progress__indicator--stroke-linecap: butt;
+    --c2-progress__track--background-color: var(--c2-theme--color-surface-container, #f4f4f5);
+  }
+</style>
+<c2-progress class="ring-square" variant="circular" value="3" max="4" show-value>
+  <span slot="value">3/4</span>
+</c2-progress>
+```
+
 </GalleryGrid>

@@ -11,7 +11,7 @@ import { ReorderList } from '@c2n/reorder-list'
 
 Use `c2-reorder-list` for one vertical queue whose ordinary direct children need pointer and keyboard reordering. The component keeps the committed visual order immediately; listen for `reorder` and persist `event.detail.order` in application state. It never physically moves application-owned light DOM.
 
-Choose another pattern for grids, transfer between lists, nesting, copying, deletion, or undo history.
+Add `swipeable` and each row also slides sideways to reveal actions behind it, a red **Delete** by default. Choose another pattern for grids, transfer between lists, nesting, copying, or undo history.
 
 ## Installation
 
@@ -29,10 +29,10 @@ npm install @c2n/reorder-list
     }
     .release-task {
       padding: 12px;
-      border: 1px solid #d4d4d8;
+      border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
       border-radius: 8px;
       background: white;
-      color: #18181b;
+      color: var(--c2-theme--color-on-surface, #18181b);
     }
   </style>
   <c2-reorder-list client:only="lit" class="release-queue" editable aria-label="Deployment queue">
@@ -42,6 +42,31 @@ npm install @c2n/reorder-list
     <div class="release-task" data-reorder-key="build">Build packages</div>
     <div class="release-task" data-reorder-key="publish">Publish packages</div>
     <div class="release-task" data-reorder-key="verify">Verify deployment</div>
+  </c2-reorder-list>
+</div><div data-label="Swipe actions">
+  <style>
+    .inbox {
+      --c2-reorder-list--container-gap: 6px;
+      --c2-reorder-list--container-border-radius: 8px;
+    }
+    .inbox-row {
+      padding: 12px;
+      border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
+      border-radius: 8px;
+      color: var(--c2-theme--color-on-surface, #18181b);
+    }
+  </style>
+  <c2-reorder-list
+    client:only="lit"
+    class="inbox"
+    editable
+    swipeable
+    aria-label="Inbox"
+    swipe-actions='[{"id":"archive","label":"Archive","tone":"warning","key":"e"},{"id":"delete","label":"Delete","tone":"danger","key":"Delete"},{"id":"flag","label":"Flag","side":"start","tone":"accent"}]'
+  >
+    <div class="inbox-row" data-reorder-key="invoice" data-reorder-label="Invoice from ACME">Invoice from ACME</div>
+    <div class="inbox-row" data-reorder-key="standup" data-reorder-label="Standup notes">Standup notes</div>
+    <div class="inbox-row" data-reorder-key="offsite" data-reorder-label="Offsite plan">Offsite plan</div>
   </c2-reorder-list>
 </div>
 ```
@@ -67,4 +92,35 @@ queue.addEventListener('reorder', (event) => {
 
 The deprecated `change` event still accompanies a successful reorder with its legacy numeric permutation. Migrate persistence code to `reorder` before the next explicitly breaking release.
 
-Style consumer-owned rows directly. Use `container`, `item`, `placeholder`, and `dragging-item` parts for component-owned boundaries; documented CSS variables cover spacing, dividers, feedback, focus, active opacity, shadow, and motion. Reduced-motion mode removes decorative interpolation while preserving the interaction.
+## Swipe actions
+
+`swipeable` lets each item slide sideways. A horizontal drag swipes and a vertical one still reorders, so the two work in
+the same list. Swiping reveals the actions of that side, set with `swipe-actions` (a JSON array in the attribute, or
+the `swipeActions` property):
+
+```js tag=CodeBlock
+queue.swipeActions = [
+  { id: 'archive', label: 'Archive', tone: 'warning', key: 'e' }, // end side, the outermost
+  { id: 'delete', label: 'Delete', tone: 'danger', key: 'Delete' },
+  { id: 'done', label: 'Done', side: 'start', tone: 'success', icon: 'check' },
+]
+queue.addEventListener('swipe-action', (event) => {
+  const { action, item } = event.detail
+  if (action.id === 'archive') archive(item.key)
+})
+```
+
+An action takes an `id`, a `label`, an optional `side` (`end`, revealed by swiping towards the start edge, is the
+default; `start` is revealed by swiping the other way), a `tone` (`danger`, `warning`, `success`, `accent` or `neutral`),
+a built-in `icon` (`delete`, `archive`, `check`, `flag`, `pin`, or `none`) and a `key` that runs it on a focused item.
+The first action of a side is its outermost one: swipe past half the row and let go to run it without tapping.
+
+Every action fires `swipe-action` with the item, the action, and whether it came from its button, a full swipe or its
+key. Only `delete` does something by itself: it removes the item element. Call `event.preventDefault()` to keep the
+item and delete it from your own data instead, which is what a framework that renders the rows should do.
+
+A revealed item closes again when it is tapped, swiped back, when anything else is tapped, or on Escape, so nothing
+happens unless an action is chosen. Keyboard users reach the same actions through their keys, which the list announces
+on each item; the revealed buttons are focusable too. `data-swipe="false"` keeps an item from swiping.
+
+Style consumer-owned rows directly. Use `container`, `item`, `placeholder`, `dragging-item`, `swipe-content`, `swipe-actions` and `swipe-action` parts for component-owned boundaries; documented CSS variables cover spacing, dividers, feedback, focus, active opacity, shadow, and motion. Reduced-motion mode removes decorative interpolation while preserving the interaction.

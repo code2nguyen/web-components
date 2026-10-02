@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@c2n/task-icons</title>
+    <script type="module" src="/src/index.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+        color: #1f2937;
+      }
+      .demo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .tile {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        color: #0f766e;
+        background: #0f766e1c;
+      }
+      .large {
+        --c2-task-icon--size: 40px;
+        --c2-task-icon--stroke-width: 1.5;
+      }
+      .outline {
+        --c2-task-icon__tone--opacity: 0;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        gap: 8px;
+        color: #0265dc;
+      }
+      .grid figure {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 12px 4px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        --c2-task-icon--size: 28px;
+      }
+      .grid figcaption {
+        font-size: 11px;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>In a tile</h2>
+    <div class="demo">
+      <span class="tile"><c2-task-icon-mail></c2-task-icon-mail></span>
+      <span class="tile"><c2-task-icon-meeting></c2-task-icon-meeting></span>
+      <span class="tile"><c2-task-icon-call></c2-task-icon-call></span>
+      <span class="tile"><c2-task-icon-run></c2-task-icon-run></span>
+      <span class="tile"><c2-task-icon-open-book></c2-task-icon-open-book></span>
+      <span class="tile"><c2-task-icon-meditate></c2-task-icon-meditate></span>
+    </div>
+    <h2>Sized and outline only</h2>
+    <div class="demo">
+      <c2-task-icon-rocket class="large"></c2-task-icon-rocket>
+      <c2-task-icon-rocket class="large outline"></c2-task-icon-rocket>
+      <c2-task-icon-cart label="Groceries"></c2-task-icon-cart>
+    </div>
+    <h2>Suggested from a label</h2>
+    <p><input id="text" value="Book the dentist" /> → <span id="suggestion"></span></p>
+    <h2>All icons</h2>
+    <div class="grid" id="grid"></div>
+    <script type="module">
+      import { taskIconCatalog, taskIconTag, suggestTaskIcon } from '/src/index.ts'
+      const grid = document.getElementById('grid')
+      for (const icon of taskIconCatalog) {
+        const figure = document.createElement('figure')
+        figure.title = icon.keywords.join(', ')
+        figure.append(document.createElement(taskIconTag(icon.name)))
+        const caption = document.createElement('figcaption')
+        caption.textContent = icon.name
+        figure.append(caption)
+        grid.append(figure)
+      }
+      const input = document.getElementById('text')
+      const output = document.getElementById('suggestion')
+      const suggest = () => (output.textContent = suggestTaskIcon(input.value) ?? '(none)')
+      input.addEventListener('input', suggest)
+      suggest()
+    </script>
+  </body>
+</html>

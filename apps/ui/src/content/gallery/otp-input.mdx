@@ -1,0 +1,63 @@
+---
+description: 'Verification code fields with default, grouped, pill and large PIN treatments.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { OtpInput } from '@c2n/otp-input'
+
+## Presets
+
+The cell size, border and active-state variables do most of the work; `group` and the separator variables shape the rhythm.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-otp-input aria-label="Verification code"></c2-otp-input>
+```
+
+```html tag=MdxCodeBlock,label=Grouped
+<style>
+  .grouped {
+    --c2-otp-input--gap: 6px;
+    --c2-otp-input__cell--width: 36px;
+    --c2-otp-input__cell--border-radius: 8px;
+    --c2-otp-input__separator--width: 6px;
+    --c2-otp-input__separator--height: 6px;
+    --c2-otp-input__separator--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 40%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<c2-otp-input class="grouped" aria-label="Verification code" group="3" value="71"></c2-otp-input>
+```
+
+```html tag=MdxCodeBlock,label=Pill
+<style>
+  .pill {
+    --c2-otp-input--gap: 6px;
+    --c2-otp-input__cell--width: 44px;
+    --c2-otp-input__cell--border-radius: 999px;
+    --c2-otp-input__cell--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-otp-input__cell__focus--border: 1px solid #7c3aed;
+    --c2-otp-input__cell__focus--outline: 3px solid rgba(124, 58, 237, 0.25);
+    --c2-otp-input__caret--color: #7c3aed;
+  }
+</style>
+<c2-otp-input class="pill" aria-label="Verification code" length="4" placeholder="·"></c2-otp-input>
+```
+
+```html tag=MdxCodeBlock,label=Large PIN
+<style>
+  .pin {
+    --c2-otp-input--gap: 14px;
+    --c2-otp-input__cell--width: 56px;
+    --c2-otp-input__cell--height: 64px;
+    --c2-otp-input__cell--border-radius: 14px;
+    --c2-otp-input__cell--font-size: 28px;
+    --c2-otp-input__caret--height: 28px;
+  }
+</style>
+<c2-otp-input class="pin" aria-label="PIN" length="4" masked value="31"></c2-otp-input>
+```
+
+</GalleryGrid>

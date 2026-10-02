@@ -125,6 +125,16 @@
       </c2-steps>
     </section>
 
+    <section>
+      <h2>Horizontal and interactive — a task's process and result</h2>
+      <c2-steps id="task" orientation="horizontal" interactive selected="process" aria-label="Task">
+        <c2-step value="process" status="running" label="Process" detail="Running"></c2-step>
+        <c2-step value="result" label="Result" detail="Waiting" disabled></c2-step>
+      </c2-steps>
+      <p id="task-view">Showing: process</p>
+      <button id="finish">Finish the task</button>
+    </section>
+
     <script type="module">
       const run = document.querySelector('#run')
 
@@ -168,6 +178,17 @@
             if (label === FAILS) return
           }
         }
+      })
+
+      const task = document.querySelector('#task')
+      const view = document.querySelector('#task-view')
+      task.addEventListener('selection-change', (event) => (view.textContent = `Showing: ${event.detail.value}`))
+      document.querySelector('#finish').addEventListener('click', () => {
+        const [processStep, resultStep] = task.querySelectorAll('c2-step')
+        Object.assign(processStep, { status: 'success', detail: 'Done' })
+        Object.assign(resultStep, { status: 'success', detail: 'Ready', disabled: false })
+        task.selected = 'result'
+        view.textContent = 'Showing: result'
       })
 
       run.addEventListener('step-toggle', (event) => console.log('step-toggle', event.target.id ?? event.detail.path, event.detail.collapsed))

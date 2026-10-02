@@ -20,7 +20,11 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-slider': DefineComponent<
       C2Props<Slider> & {
+        'value-start'?: unknown
+        'value-end'?: unknown
         'show-value'?: unknown
+        'start-label'?: unknown
+        'end-label'?: unknown
         'aria-label'?: unknown
         'aria-labelledby'?: unknown
         onInput?: (event: EventOf<Slider, 'input'>) => void

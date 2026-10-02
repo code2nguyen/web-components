@@ -116,6 +116,9 @@ export class TableColumn extends LitElement implements TableColumnConfig {
   /** Client-side sort comparator for this column's values. Property only. */
   @property({ attribute: false }) comparator?: (a: unknown, b: unknown) => number
 
+  /** Puts the group tree (chevron, group label and count, indentation) in this column while the table is grouped. Defaults to the first column. */
+  @property({ type: Boolean, attribute: 'group-column' }) groupColumn = false
+
   override connectedCallback() {
     super.connectedCallback()
     this.#notify()

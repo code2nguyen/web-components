@@ -17,7 +17,8 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
     <p>
       Icon sets are packaged separately from UI components. Each icon set wraps an upstream icon library as web components that inherit
       <code>currentColor</code> and are sized through CSS custom properties, so they drop into any component slot. <a href={`${base}/icons/symbols`}>Symbols</a> are
-      larger spot illustrations for empty states and status panels, themed through colour roles.
+      larger spot illustrations for empty states and status panels, themed through colour roles, and <a href={`${base}/icons/task-icons`}>task icons</a> are duotone
+      icons for to-do items, drawn for <code>c2-todo-list</code>.
     </p>
     <AllIconSearch />
     <ul class="icon-sets">
@@ -107,6 +108,10 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
   import '@c2n/symbols/symbols/celebration.js'
   import '@c2n/symbols/symbols/no-results.js'
   import '@c2n/symbols/symbols/payment-success.js'
+  import '@c2n/task-icons/icons/mail.js'
+  import '@c2n/task-icons/icons/run.js'
+  import '@c2n/task-icons/icons/cook.js'
+  import '@c2n/task-icons/icons/meditate.js'
   import '@c2n/mat-icon'
   import '@fontsource/material-icons'
 </script>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-context-menu</title>
+    <script type="module" src="/src/context-menu.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        padding: 24px;
+        font: 14px system-ui;
+        color: #18181b;
+      }
+      .area {
+        display: grid;
+        place-items: center;
+        width: 320px;
+        height: 140px;
+        border: 1px dashed #a1a1aa;
+        border-radius: 8px;
+        color: #71717a;
+      }
+      .dark {
+        --c2-menu--background: #18181b;
+        --c2-menu--border-top: 1px solid #3f3f46;
+        --c2-menu--border-right: 1px solid #3f3f46;
+        --c2-menu--border-bottom: 1px solid #3f3f46;
+        --c2-menu--border-left: 1px solid #3f3f46;
+        --c2-menu-item--color: #f4f4f5;
+        --c2-menu-item__hover--background: #27272a;
+      }
+      li {
+        padding: 4px 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h3>Static: a slotted c2-menu</h3>
+    <c2-context-menu>
+      <div class="area">Right-click, long-press or Shift+F10</div>
+      <c2-menu slot="menu" aria-label="Canvas">
+        <c2-menu-item value="zoom-in">Zoom in</c2-menu-item>
+        <c2-menu-item value="zoom-out">Zoom out</c2-menu-item>
+        <hr />
+        <c2-menu-item value="reset">Reset view</c2-menu-item>
+      </c2-menu>
+    </c2-context-menu>
+
+    <h3>Dynamic: renderContextMenu per clicked file</h3>
+    <c2-context-menu id="files" menu-label="File actions">
+      <ul class="area" style="place-items: start; margin: 0">
+        <li data-file="report.pdf" tabindex="0">report.pdf</li>
+        <li data-file="notes.txt" tabindex="0">notes.txt</li>
+        <li data-file="photo.png" tabindex="0">photo.png</li>
+      </ul>
+    </c2-context-menu>
+
+    <h3>Themed surface</h3>
+    <c2-context-menu class="dark">
+      <div class="area">Dark menu</div>
+      <c2-menu slot="menu" aria-label="Dark">
+        <c2-menu-item value="copy">Copy</c2-menu-item>
+        <c2-menu-item value="paste">Paste</c2-menu-item>
+      </c2-menu>
+    </c2-context-menu>
+
+    <output id="log"></output>
+
+    <script type="module">
+      import { html } from 'lit'
+      const log = document.querySelector('#log')
+      const files = document.querySelector('#files')
+      files.renderContextMenu = ({ target }) => {
+        const file = target.closest('[data-file]')?.dataset.file
+        if (!file) return null
+        return html`<h6>${file}</h6>
+          <c2-menu-item value="open">Open</c2-menu-item>
+          <c2-menu-item value="rename">Rename</c2-menu-item>
+          <hr />
+          <c2-menu-item value="delete" destructive>Delete</c2-menu-item>`
+      }
+      document.addEventListener('context-menu-select', ({ detail }) => (log.textContent = `${detail.value} (${detail.context.trigger})`), true)
+    </script>
+  </body>
+</html>

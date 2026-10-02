@@ -1,4 +1,6 @@
 import { test, expect } from './fixture'
+import { niceScale } from '../src/chart-scale'
+import { layoutPyramid, pyramidShapes, readableTextOn, roundedPolygonPath, spreadLabels } from '../src/pyramid-layout'
 
 test('the chart family resolves first-paint theme probes without scheduling a second Lit update', async ({ page, scenario }) => {
   const warnings: string[] = []
@@ -8,9 +10,9 @@ test('the chart family resolves first-paint theme probes without scheduling a se
 
   await scenario('family')
   const charts = page.locator(
-    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-scatter-chart, c2-candlestick-chart',
+    'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-scatter-chart, c2-candlestick-chart',
   )
-  await expect(charts).toHaveCount(9)
+  await expect(charts).toHaveCount(10)
   await expect.poll(() => charts.evaluateAll((elements) => elements.every((element) => element.hasAttribute('data-chart-ready')))).toBe(true)
   expect(warnings.filter((warning) => warning.includes('c2-') && warning.includes('chart'))).toEqual([])
 
@@ -194,6 +196,8 @@ test('legend toggles a series and fires series-toggle without bubbling', async (
   await expect(chart).toHaveAttribute('data-chart-ready', 'true')
 
   const result = await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
     let onElement = 0
     let onDocument = 0
     element.addEventListener('series-toggle', () => (onElement += 1))
@@ -221,6 +225,10 @@ test('links independently positioned legend and tooltip elements by id', async (
   const labels = await legend.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.item') ?? [])].map((item) => item.textContent?.trim()))
   expect(labels).toEqual(['First', 'Second'])
 
+  await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
   await legend.evaluate((element) => (element.shadowRoot?.querySelector('.item') as HTMLButtonElement).click())
   await expect.poll(() => legend.evaluate((element) => element.shadowRoot?.querySelector('.item')?.getAttribute('aria-pressed'))).toBe('false')
 
@@ -313,6 +321,8 @@ test('draws a donut through the ECharts engine', async ({ page, scenario }) => {
 for (const [scenarioName, tag] of [
   ['gauge', 'c2-gauge-chart'],
   ['radar', 'c2-radar-chart'],
+  ['pyramid', 'c2-pyramid-chart'],
+  ['butterfly', 'c2-butterfly-chart'],
   ['scatter', 'c2-scatter-chart'],
   ['candlestick', 'c2-candlestick-chart'],
 ] as const) {
@@ -323,6 +333,27 @@ for (const [scenarioName, tag] of [
     expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBeGreaterThan(0)
   })
 }
+
+test('fits the scatter axes to the data and themes the vertical grid lines', async ({ page, scenario }) => {
+  await scenario('scatter')
+  const scatter = page.locator('c2-scatter-chart')
+  await expect(scatter).toHaveAttribute('data-chart-ready', 'true')
+  const result = await scatter.evaluate(async (element) => {
+    const chart = element as unknown as {
+      style: CSSStyleDeclaration
+      updateComplete: Promise<boolean>
+      buildContext(): { theme: { gridColor: string } }
+      buildOptions(context: unknown): Record<'xAxis' | 'yAxis', { scale?: boolean; splitLine?: { lineStyle?: { color?: string } } }>
+    }
+    chart.style.setProperty('--c2-chart__grid--color', 'rgb(1, 2, 3)')
+    window.dispatchEvent(new Event('c2n-theme-change'))
+    await chart.updateComplete
+    const context = chart.buildContext()
+    const { xAxis, yAxis } = chart.buildOptions(context)
+    return { grid: context.theme.gridColor, x: [xAxis.scale, xAxis.splitLine?.lineStyle?.color], y: [yAxis.scale, yAxis.splitLine?.lineStyle?.color] }
+  })
+  expect(result).toEqual({ grid: 'rgb(1, 2, 3)', x: [true, 'rgb(1, 2, 3)'], y: [true, 'rgb(1, 2, 3)'] })
+})
 
 test('builds radar indicators and one profile per declared series', async ({ page, scenario }) => {
   await scenario('radar')
@@ -551,6 +582,10 @@ test("lists a pie chart's slices in the legend, and toggles one", async ({ page,
   const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
   expect(labels.length).toBeGreaterThan(1)
 
+  await chart.evaluate(async (element) => {
+    element.setAttribute('legend-action', 'toggle')
+    await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
+  })
   await chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.click())
   await expect
     .poll(() => chart.evaluate((element) => (element.shadowRoot?.querySelector('.legend-item') as HTMLElement | null)?.getAttribute('aria-pressed')))
@@ -574,6 +609,475 @@ test('configures pie label content from markup', async ({ page, scenario }) => {
   })
 
   expect(label).toMatchObject({ labels: 'outside', content: 'percent', show: true, position: 'outside', formatter: '{d}%' })
+})
+
+test('lays pyramid levels out by area, height, width or rank', () => {
+  const values = [4870, 42, 1260, 318]
+  const area = layoutPyramid(values, { sizing: 'area', sort: 'ascending' })
+  // Smallest at the apex, and each level's share of the triangle's area is its share of the total.
+  expect(area.map((level) => level.index)).toEqual([1, 3, 2, 0])
+  const total = values.reduce((sum, value) => sum + value, 0)
+  let cumulative = 0
+  for (const level of area) {
+    cumulative += level.value
+    expect(level.depth).toBeCloseTo(level === area[area.length - 1] ? 1 : Math.sqrt(cumulative / total), 10)
+  }
+  expect(area.reduce((sum, level) => sum + (level.height ?? 0), 0)).toBeCloseTo(1, 10)
+
+  const height = layoutPyramid(values, { sizing: 'height', sort: 'descending' })
+  expect(height.map((level) => level.index)).toEqual([0, 2, 3, 1])
+  expect(height[0].height).toBeCloseTo(4870 / total, 10)
+
+  expect(layoutPyramid(values, { sizing: 'equal', sort: 'none' }).map((level) => [level.index, level.depth])).toEqual([
+    [0, 0.25],
+    [1, 0.5],
+    [2, 0.75],
+    [3, 1],
+  ])
+
+  // A width-sized pyramid is always ordered by value, so the sort is not honoured, and every level is one height.
+  const width = layoutPyramid(values, { sizing: 'width', sort: 'descending' })
+  expect(width.map((level) => level.index)).toEqual([1, 3, 2, 0])
+  expect(width.every((level) => level.height === undefined)).toBe(true)
+  expect(width[3].depth).toBe(1)
+
+  // A flat top: with the apex as wide as the base, area and height are the same thing.
+  const flat = layoutPyramid([1, 3], { sizing: 'area', sort: 'none', apexRatio: 1 })
+  expect(flat[0].depth).toBeCloseTo(0.25, 10)
+
+  // Empty, zero, negative and excluded rows are not drawn.
+  expect(layoutPyramid([5, 0, -2, null, 3], { sizing: 'area', sort: 'none', exclude: new Set([4]) }).map((level) => level.index)).toEqual([0])
+  expect(layoutPyramid([], { sizing: 'area', sort: 'ascending' })).toEqual([])
+})
+
+test('spreads pyramid labels apart and keeps them inside the plot', () => {
+  // Three labels wanted almost on top of each other near the start, one far down: the first three are pushed apart.
+  expect(spreadLabels([10, 12, 14, 200], [16, 16, 16, 16], 0, 240)).toEqual([10, 26, 42, 200])
+  // Input order is kept, whatever order the centres come in.
+  expect(spreadLabels([200, 12, 10], [16, 16, 16], 0, 240)).toEqual([200, 26, 10])
+  // A crowd at the end is pulled back inside, dragging its neighbours along.
+  expect(spreadLabels([230, 235, 238], [16, 16, 16], 0, 240)).toEqual([200, 216, 232])
+})
+
+test('picks a readable inside label colour against each level', () => {
+  expect(readableTextOn('rgb(94, 234, 212)')).toBe('#18181b')
+  expect(readableTextOn('rgb(15, 118, 110)')).toBe('#ffffff')
+  expect(readableTextOn('#0265dc')).toBe('#ffffff')
+  expect(readableTextOn('not a colour')).toBe('#ffffff')
+})
+
+test('outlines pyramid levels in pixels, for every apex, alignment and width', () => {
+  const levels = layoutPyramid([1, 3], { sizing: 'area', sort: 'none' })
+  const box = { x: 0, y: 0, width: 200, height: 100 }
+  const top = pyramidShapes(levels, box, { apex: 'top', align: 'center', gap: 0, minSize: 0, maxSize: 200 })
+  // The first level is a triangle at the top (its apex-side edge has no width), the second the trapezoid below it.
+  expect(top[0].points).toEqual([
+    [100, 0],
+    [100, 0],
+    [150, 50],
+    [50, 50],
+  ])
+  expect(top[1].points).toEqual([
+    [50, 50],
+    [150, 50],
+    [200, 100],
+    [0, 100],
+  ])
+  expect(top[1]).toMatchObject({ centre: [100, 75], thickness: 50, width: 150, sides: [25, 175] })
+
+  // Upside down, aligned to the end, with a gap: the point is at the bottom right and the levels are 10px apart.
+  const bottom = pyramidShapes(levels, box, { apex: 'bottom', align: 'end', gap: 10, minSize: 0, maxSize: 200 })
+  expect(bottom[0].points[0]).toEqual([200, 100])
+  expect(bottom[1].points[0][1] - bottom[0].points[2][1]).toBe(-10)
+
+  // On its side, pointing left, with a flat 40px apex.
+  const left = pyramidShapes(levels, { x: 0, y: 0, width: 100, height: 200 }, { apex: 'left', align: 'center', gap: 0, minSize: 40, maxSize: 200 })
+  expect(left[0].points.slice(0, 2)).toEqual([
+    [0, 80],
+    [0, 120],
+  ])
+  expect(left[1].points[2]).toEqual([100, 200])
+})
+
+test('rounds every corner of a level, and merges the corners of a point', () => {
+  const square: [number, number][] = [
+    [0, 0],
+    [10, 0],
+    [10, 10],
+    [0, 10],
+  ]
+  expect(roundedPolygonPath(square, 0)).toBe('M0 0L10 0L10 10L0 10Z')
+  expect(roundedPolygonPath(square, 2)).toBe('M0 2Q0 0 2 0L8 0Q10 0 10 2L10 8Q10 10 8 10L2 10Q0 10 0 8Z')
+  // A radius longer than half a side is cut back to half of it.
+  expect(roundedPolygonPath(square, 50)).toBe('M0 5Q0 0 5 0L5 0Q10 0 10 5L10 5Q10 10 5 10L5 10Q0 10 0 5Z')
+  // An apex level's two top corners coincide: it is drawn as a rounded triangle, with three curves.
+  const triangle = roundedPolygonPath(
+    [
+      [5, 0],
+      [5, 0],
+      [10, 10],
+      [0, 10],
+    ],
+    2,
+  )
+  expect(triangle.match(/Q/g)).toHaveLength(3)
+  expect(roundedPolygonPath([[0, 0]], 2)).toBe('')
+})
+
+test('draws pyramid levels as rounded paths in the layout order', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
+
+  const read = (style: string) =>
+    chart.evaluate((element, nextStyle) => {
+      type Item = { children: { type: string; shape?: { pathData?: string }; style: { fill?: string } }[] } | null
+      const pyramid = element as unknown as {
+        frame: unknown
+        buildContext(): { width: number; height: number }
+        buildOptions(context: unknown): { series: { type: string; renderItem(params: { dataIndex: number }, api: object): Item }[] }
+        projectData(frame: unknown, context: unknown): { name: string }[][]
+        levelGeometry(width: number, height: number): { radius: number; shapes: { points: [number, number][] }[] }
+      }
+      element.setAttribute('style', nextStyle)
+      const context = pyramid.buildContext()
+      const [data] = pyramid.projectData(pyramid.frame, context)
+      const series = pyramid.buildOptions(context).series
+      const api = { getWidth: () => context.width, getHeight: () => context.height }
+      const item = series[0].renderItem({ dataIndex: 3 }, api)
+      const geometry = pyramid.levelGeometry(context.width, context.height)
+      return {
+        names: data.map((datum) => datum.name),
+        types: series.map((entry) => entry.type),
+        path: item?.children[0].shape?.pathData ?? '',
+        radius: geometry.radius,
+        // Each level's apex-side edge is the base-side edge of the level before it.
+        stacked: geometry.shapes.every((shape, index) => index === 0 || shape.points[0][1] === geometry.shapes[index - 1].points[3][1]),
+      }
+    }, style)
+
+  const rounded = await read('')
+  expect(rounded.names).toEqual(['Enterprise', 'Business', 'Team', 'Starter'])
+  expect(rounded.types).toEqual(['custom', 'custom'])
+  expect(rounded.radius).toBe(4)
+  expect(rounded.path).toMatch(/^M[\d. ]+Q/)
+  expect(rounded.stacked).toBe(true)
+
+  const sharp = await read('--c2-chart__level--border-radius: 0')
+  expect(sharp.radius).toBe(0)
+  expect(sharp.path).not.toContain('Q')
+})
+
+test('draws outside pyramid labels with their own series, spread clear of each other', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const result = await chart.evaluate((element) => {
+    type Item = { children: { type: string; style: { text?: string; y?: number } }[] } | null
+    const pyramid = element as unknown as {
+      frame: unknown
+      labels: string
+      buildContext(): { width: number; height: number }
+      buildOptions(context: unknown): { series: { type: string; renderItem(params: { dataIndex: number }, api: object): Item }[] }
+      projectData(frame: unknown, context: unknown): unknown[][]
+    }
+    const read = () => {
+      const context = pyramid.buildContext()
+      const api = { getWidth: () => context.width, getHeight: () => context.height }
+      const projected = pyramid.projectData(pyramid.frame, context)
+      const series = pyramid.buildOptions(context).series
+      const outside = series[1] ? projected[1].map((_, index) => series[1].renderItem({ dataIndex: index }, api)?.children[1].style) : []
+      const inside = projected[0].map((_, index) => series[0].renderItem({ dataIndex: index }, api)?.children[1]?.style.text)
+      return { series: series.length, outside, inside }
+    }
+    const outside = read()
+    pyramid.labels = 'inside'
+    const inside = read()
+    return { outside, inside }
+  })
+
+  expect(result.outside.series).toBe(2)
+  expect(result.outside.outside.map((label) => label?.text)).toEqual(['Enterprise · 42', 'Business · 318', 'Team · 1,260', 'Starter · 4,870'])
+  const ys = result.outside.outside.map((label) => label?.y ?? 0)
+  for (let index = 1; index < ys.length; index += 1) expect(ys[index] - ys[index - 1]).toBeGreaterThanOrEqual(12 * 1.35 - 0.001)
+  expect(result.outside.inside).toEqual([undefined, undefined, undefined, undefined])
+  // Inside, the apex level is too small to hold its text, so it is left to the tooltip.
+  expect(result.inside.series).toBe(1)
+  expect(result.inside.inside[0]).toBeUndefined()
+  expect(result.inside.inside[3]).toBe('Starter · 4,870')
+})
+
+test('lays a pyramid on its side or upside down, and moves it across its axis', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const apexAt = (apex: string, style: string) =>
+    chart.evaluate(
+      (element, [nextApex, nextStyle]) => {
+        const pyramid = element as unknown as {
+          apex: string
+          frame: unknown
+          buildContext(): { width: number; height: number }
+          projectData(frame: unknown, context: unknown): unknown
+          levelGeometry(width: number, height: number): { shapes: { points: [number, number][] }[] }
+        }
+        pyramid.apex = nextApex
+        element.setAttribute('style', nextStyle)
+        const context = pyramid.buildContext()
+        pyramid.projectData(pyramid.frame, context)
+        const [x, y] = pyramid.levelGeometry(context.width, context.height).shapes[0].points[0]
+        return { x: x / context.width, y: y / context.height }
+      },
+      [apex, style],
+    )
+
+  const round = (point: { x: number; y: number }) => ({ x: Math.round(point.x * 10) / 10, y: Math.round(point.y * 10) / 10 })
+  // Labels sit to the right, so a centred upright pyramid's point is left of the middle, at the top.
+  const top = round(await apexAt('top', ''))
+  expect(top.y).toBe(0)
+  expect(top.x).toBeLessThan(0.5)
+  expect(round(await apexAt('bottom', '')).y).toBe(1)
+  expect(round(await apexAt('start', '')).x).toBe(0)
+  expect(round(await apexAt('end', '')).x).toBe(1)
+  expect(round(await apexAt('start', 'direction: rtl')).x).toBe(1)
+  // Aligned to the end, the labels move to the start side and the pyramid's right edge meets the plot's.
+  expect((await apexAt('top', '--c2-chart__level--align: end')).x).toBeGreaterThan(0.9)
+})
+
+test('reports the clicked pyramid level by its data row', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  // The base level is the widest and the easiest to hit: aim for its middle.
+  const target = await chart.evaluate((element) => {
+    const pyramid = element as unknown as {
+      getPlotBounds(): DOMRect
+      buildContext(): { width: number; height: number }
+      levelGeometry(width: number, height: number): { shapes: { centre: [number, number] }[] }
+    }
+    const bounds = pyramid.getPlotBounds()
+    const context = pyramid.buildContext()
+    const shapes = pyramid.levelGeometry(context.width, context.height).shapes
+    const [x, y] = shapes[shapes.length - 1].centre
+    return { x: bounds.left + x, y: bounds.top + y }
+  })
+  await chart.evaluate((element) => {
+    const events: unknown[] = []
+    ;(element as unknown as { pointEvents: unknown[] }).pointEvents = events
+    for (const type of ['point-hover', 'point-click']) element.addEventListener(type, (event) => events.push([type, (event as CustomEvent).detail]))
+  })
+  const events = () => chart.evaluate((element) => (element as unknown as { pointEvents: [string, unknown][] }).pointEvents)
+  // The entry animation is still growing the levels, so hover until the base answers before clicking it.
+  await expect
+    .poll(async () => {
+      await page.mouse.move(target.x, target.y)
+      return (await events()).some(([type]) => type === 'point-hover')
+    })
+    .toBe(true)
+  await page.mouse.click(target.x, target.y)
+  // Starter is drawn last, at index 3; the events name its row, which is the first.
+  await expect.poll(async () => (await events()).find(([type]) => type === 'point-click')?.[1]).toMatchObject({ index: 0, label: 'Starter', y: 4870 })
+  expect((await events()).find(([type]) => type === 'point-hover')?.[1]).toMatchObject({ index: 0, label: 'Starter' })
+  // A click on a level highlights it, as a click on a pie slice does.
+  await expect.poll(() => chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBe('Starter')
+})
+
+test("lists a pyramid's levels in the legend, and highlights one by default", async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+
+  const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
+  expect(labels).toEqual(['Starter', 'Enterprise', 'Team', 'Business'])
+
+  await chart.locator('.legend-item').first().click()
+  await expect.poll(() => chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBe('Starter')
+
+  const opacities = await chart.evaluate((element) => {
+    const pyramid = element as unknown as {
+      frame: unknown
+      buildContext(): unknown
+      projectData(frame: unknown, context: unknown): { name: string; itemStyle: { opacity?: number } }[][]
+    }
+    const [data] = pyramid.projectData(pyramid.frame, pyramid.buildContext())
+    return Object.fromEntries(data.map((datum) => [datum.name, datum.itemStyle.opacity ?? 1]))
+  })
+  // Every level is still drawn; only the others fade back.
+  expect(opacities).toEqual({ Enterprise: 0.25, Business: 0.25, Team: 0.25, Starter: 1 })
+})
+
+test('with legend-action="toggle", hiding a pyramid level lays the rest out again', async ({ page, scenario }) => {
+  await scenario('pyramid')
+  const chart = page.locator('c2-pyramid-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await chart.evaluate((element) => element.setAttribute('legend-action', 'toggle'))
+
+  await chart.locator('.legend-item').first().click()
+  await expect(chart.locator('.legend-item').first()).toHaveAttribute('aria-pressed', 'false')
+
+  const drawn = await chart.evaluate((element) => {
+    const pyramid = element as unknown as {
+      frame: unknown
+      buildContext(): { width: number; height: number }
+      projectData(frame: unknown, context: unknown): { name: string }[][]
+      levelGeometry(width: number, height: number): { shapes: { points: [number, number][] }[] }
+    }
+    const context = pyramid.buildContext()
+    const [data] = pyramid.projectData(pyramid.frame, context)
+    const shapes = pyramid.levelGeometry(context.width, context.height).shapes
+    const base = shapes[shapes.length - 1].points
+    return { names: data.map((datum) => datum.name), baseWidth: base[2][0] - base[3][0], plotWidth: context.width }
+  })
+  expect(drawn.names).toEqual(['Enterprise', 'Business', 'Team'])
+  // Team is the new base, as wide as the pyramid can be, so the three remaining levels still fill the triangle.
+  expect(drawn.baseWidth).toBeGreaterThan(drawn.plotWidth * 0.3)
+})
+
+test("rounds a butterfly chart's shared scale to whole, even steps", () => {
+  expect(niceScale(2950)).toEqual({ max: 3000, step: 1000 })
+  expect(niceScale(3100)).toEqual({ max: 4000, step: 2000 })
+  expect(niceScale(1100)).toEqual({ max: 1500, step: 500 })
+  expect(niceScale(71)).toEqual({ max: 75, step: 25 })
+  expect(niceScale(88)).toEqual({ max: 100, step: 50 })
+  expect(niceScale(3000)).toEqual({ max: 3000, step: 1000 })
+  expect(niceScale(0)).toEqual({ max: 1, step: 0.5 })
+})
+
+test('draws a butterfly chart as two mirrored plots on one scale, with the categories in the gutter', async ({ page, scenario }) => {
+  await scenario('butterfly')
+  const chart = page.locator('c2-butterfly-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
+
+  const read = (style: string) =>
+    chart.evaluate((element, nextStyle) => {
+      type Axis = { inverse?: boolean; max: number; interval: number; gridIndex: number }
+      type Category = { data: string[]; inverse: boolean; axisLabel: { show: boolean; margin?: number } }
+      type Grid = { left: number; right: number }
+      type Series = { type: string; xAxisIndex: number; itemStyle: { borderRadius: number[] } }
+      const subject = element as unknown as {
+        themeController: { invalidate(): void }
+        buildContext(): { width: number }
+        buildOptions(context: unknown): { grid: Grid[]; xAxis: Axis[]; yAxis: Category[]; series: Series[] }
+      }
+      element.setAttribute('style', nextStyle)
+      // The bar radius is part of the cached theme, which a page's own theme signal refreshes.
+      subject.themeController.invalidate()
+      const context = subject.buildContext()
+      const options = subject.buildOptions(context)
+      return {
+        width: context.width,
+        grids: options.grid.map((grid) => [grid.left, grid.right]),
+        inverse: options.xAxis.map((axis) => axis.inverse),
+        max: options.xAxis.map((axis) => [axis.max, axis.interval]),
+        categories: options.yAxis[0].data,
+        labelled: options.yAxis.map((axis) => axis.axisLabel.show),
+        margin: options.yAxis.find((axis) => axis.axisLabel.show)?.axisLabel.margin,
+        series: options.series.map((series) => [series.type, series.xAxisIndex]),
+        radius: options.series.map((series) => series.itemStyle.borderRadius.map((corner) => corner > 0)),
+      }
+    }, style)
+
+  const ltr = await read('--c2-chart__bar--border-radius: 0.5')
+  // The first series is the start side: on the left, its axis mirrored so it grows from the gutter outwards.
+  expect(ltr.inverse).toEqual([true, false])
+  expect(ltr.grids[0][0]).toBeLessThan(ltr.grids[1][0])
+  // Both sides share one scale, rounded to even steps: the largest value is 2,950.
+  expect(ltr.max).toEqual([
+    [3000, 1000],
+    [3000, 1000],
+  ])
+  expect(ltr.categories).toEqual(['60+', '40–59', '20–39', '0–19'])
+  // Only the left plot's category axis is labelled, from its inner edge into the middle of the 56px gutter.
+  expect(ltr.labelled).toEqual([true, false])
+  expect(ltr.margin).toBe(28)
+  expect(ltr.series).toEqual([
+    ['bar', 0],
+    ['bar', 1],
+  ])
+  // Each bar rounds its value end, away from the gutter.
+  expect(ltr.radius).toEqual([
+    [true, false, false, true],
+    [false, true, true, false],
+  ])
+
+  // In a right-to-left page the start side is on the right.
+  const rtl = await read('direction: rtl; --c2-chart__bar--border-radius: 0.5; --c2-chart__gutter--width: 80px')
+  expect(rtl.inverse).toEqual([false, true])
+  expect(rtl.grids[0][0]).toBeGreaterThan(rtl.grids[1][0])
+  expect(rtl.labelled).toEqual([false, true])
+  expect(rtl.margin).toBe(40)
+  expect(rtl.radius[0]).toEqual([false, true, true, false])
+})
+
+test('rescales both sides of a butterfly chart when only the data changes', async ({ page, scenario }) => {
+  await scenario('butterfly')
+  const chart = page.locator('c2-butterfly-chart')
+  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  const update = (rows: unknown[]) =>
+    chart.evaluate(async (element, next) => {
+      const subject = element as unknown as { updateData(rows: unknown[]): void; updateComplete: Promise<boolean> }
+      subject.updateData(next)
+      await subject.updateComplete
+    }, rows)
+  const rebuilds = () => page.evaluate(() => window.chartScenario.counts().setOptions)
+  const before = await rebuilds()
+  // The data path skips the option rebuild: a change within the scale must not ask for one, a change of scale must.
+  await update([
+    { age: 'young', men: 2400, women: 2900 },
+    { age: 'old', men: 1200, women: 1900 },
+  ])
+  expect(await rebuilds()).toBe(before)
+  await update([
+    { age: 'young', men: 12, women: 9100 },
+    { age: 'old', men: 40, women: 30 },
+  ])
+  await expect.poll(rebuilds).toBe(before + 1)
+  const max = await chart.evaluate((element) => {
+    const subject = element as unknown as { buildContext(): unknown; buildOptions(context: unknown): { xAxis: { max: number }[] } }
+    return subject.buildOptions(subject.buildContext()).xAxis.map((axis) => axis.max)
+  })
+  expect(max).toEqual([10000, 10000])
+})
+
+test('a butterfly chart asks for two series, and draws only the first two of more', async ({ page, scenario }) => {
+  await scenario('empty')
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning' && message.text().includes('c2-butterfly-chart')) warnings.push(message.text())
+  })
+  await page.evaluate(() => {
+    const main = document.querySelector('main') as HTMLElement
+    main.innerHTML = `
+      <c2-butterfly-chart id="one" label-field="t"><c2-chart-series field="a"></c2-chart-series></c2-butterfly-chart>
+      <c2-butterfly-chart id="three" label-field="t">
+        <c2-chart-series field="a"></c2-chart-series><c2-chart-series field="b"></c2-chart-series><c2-chart-series field="c"></c2-chart-series>
+      </c2-butterfly-chart>`
+    for (const element of main.querySelectorAll<HTMLElement & { data: unknown }>('c2-butterfly-chart')) {
+      element.data = [
+        { t: 'x', a: 1, b: 2, c: 3 },
+        { t: 'y', a: 4, b: 5, c: 6 },
+      ]
+    }
+  })
+  const one = page.locator('#one')
+  await expect
+    .poll(() => one.evaluate((element) => element.shadowRoot?.querySelector('.state')?.textContent?.trim()))
+    .toBe('A butterfly chart needs two series, one for each side.')
+  await expect(one).not.toHaveAttribute('data-chart-ready', 'true')
+
+  const three = page.locator('#three')
+  await expect(three).toHaveAttribute('data-chart-ready', 'true')
+  const drawn = await three.evaluate((element) => {
+    const subject = element as unknown as { buildContext(): unknown; buildOptions(context: unknown): { series: unknown[] }; getLegendItems(): unknown[] }
+    return { series: subject.buildOptions(subject.buildContext()).series.length, legend: subject.getLegendItems().length }
+  })
+  expect(drawn).toEqual({ series: 2, legend: 2 })
+  expect(warnings).toHaveLength(1)
 })
 
 test('drives the grid from markup in both directions', async ({ page, scenario }) => {
@@ -702,4 +1206,18 @@ test('shows a legend by default, and the sparkline does not', async ({ page, sce
   await expect(spark).toHaveAttribute('data-chart-ready', 'true')
   // A sparkline is defined by what it leaves out.
   expect(await spark.evaluate((element) => element.shadowRoot?.querySelectorAll('.legend-item').length)).toBe(0)
+})
+
+test('reads declared series on the first update, before any slotchange', async ({ page, scenario }) => {
+  await scenario('default')
+  const labels = await page.evaluate(async () => {
+    const chart = document.createElement('c2-line-chart') as HTMLElement & { resolvedSeries: { label?: string }[]; updateComplete: Promise<boolean> }
+    chart.innerHTML = '<c2-chart-series field="s0" label="Declared"></c2-chart-series>'
+    ;(chart as unknown as { data: unknown }).data = [{ t: 0, s0: 1, s1: 2 }]
+    document.querySelector('main')?.append(chart)
+    await chart.updateComplete
+    // Read synchronously after the first update: a slotchange would only arrive in a later task.
+    return chart.resolvedSeries.map((series) => series.label)
+  })
+  expect(labels).toEqual(['Declared'])
 })

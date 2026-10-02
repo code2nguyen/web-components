@@ -11,6 +11,7 @@ const markup: Record<string, string> = {
   dismissible: `<button type="button">Before</button><c2-banner dismissible close-label="Dismiss notice" message="Dashboards can now be shared."></c2-banner><button type="button">After</button><output>0</output>`,
   prevented: `<c2-banner dismissible close-label="Dismiss notice" message="Accept the terms to continue."></c2-banner><output>0</output>`,
   actions: `<c2-banner variant="warning" heading="Trial ending">Your trial ends in 3 days.<button slot="actions" type="button">Upgrade</button></c2-banner>`,
+  narrow: `<c2-banner variant="info" heading="New" message="Dashboards can be shared." dismissible style="width:300px"></c2-banner>`,
   'no-icon': `<c2-banner no-icon message="No icon here."></c2-banner>`,
   positions: `<c2-banner id="top" position="top" variant="info" message="Pinned to the top."></c2-banner>
     <div style="height:2000px"></div>

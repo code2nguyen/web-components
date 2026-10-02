@@ -1,0 +1,107 @@
+---
+description: 'Ready-made looks for c2-command: the default palette, a floating ⌘K surface, a compact inline picker and a dark palette.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Command } from '@c2n/command'
+import { Kbd } from '@c2n/kbd'
+
+## Presets
+
+`--c2-command--*` is the surface (background, a border per side, a radius per corner, shadow), `--c2-command__field--*` the search row and `--c2-command__list--*` the scrolling list. The rows are themed through `--c2-command-item--*`, most visibly `--c2-command-item__active--background` for the highlight.
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-command class="default" client:only="lit"><c2-command-group heading="Suggestions"><c2-command-item value="calendar">Calendar</c2-command-item><c2-command-item value="emoji">Search emoji</c2-command-item></c2-command-group><c2-command-separator></c2-command-separator><c2-command-group heading="Settings"><c2-command-item value="profile">Profile</c2-command-item><c2-command-item value="billing">Billing</c2-command-item></c2-command-group></c2-command>
+```
+
+```html tag=MdxCodeBlock,label=Floating palette
+<style>
+  .floating {
+    width: 100%;
+    --c2-command--border-top: 1px solid transparent;
+    --c2-command--border-right: 1px solid transparent;
+    --c2-command--border-bottom: 1px solid transparent;
+    --c2-command--border-left: 1px solid transparent;
+    --c2-command--border-top-left-radius: 14px;
+    --c2-command--border-top-right-radius: 14px;
+    --c2-command--border-bottom-left-radius: 14px;
+    --c2-command--border-bottom-right-radius: 14px;
+    --c2-command--box-shadow: 0 16px 40px rgba(24, 24, 27, 0.16);
+    --c2-command__field--min-height: 56px;
+    --c2-command__field--font-size: 16px;
+    --c2-command__list--padding-top: 8px;
+    --c2-command__list--padding-right: 8px;
+    --c2-command__list--padding-bottom: 8px;
+    --c2-command__list--padding-left: 8px;
+    --c2-command-item--border-top-left-radius: 10px;
+    --c2-command-item--border-top-right-radius: 10px;
+    --c2-command-item--border-bottom-left-radius: 10px;
+    --c2-command-item--border-bottom-right-radius: 10px;
+    --c2-command-item__active--background: #eef4fd;
+    --c2-command-item__active--color: rgb(2, 101, 220);
+  }
+</style>
+<c2-command class="floating" placeholder="Search or jump to…" client:only="lit"><c2-command-item value="new">New document<c2-kbd slot="shortcut">⌘N</c2-kbd></c2-command-item><c2-command-item value="open">Open recent<c2-kbd slot="shortcut">⌘O</c2-kbd></c2-command-item><c2-command-item value="share">Share<c2-kbd slot="shortcut">⌘⇧S</c2-kbd></c2-command-item><span slot="footer">↑↓ navigate · ↵ select · esc close</span></c2-command>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .compact {
+    width: 240px;
+    --c2-command--border-top-left-radius: 6px;
+    --c2-command--border-top-right-radius: 6px;
+    --c2-command--border-bottom-left-radius: 6px;
+    --c2-command--border-bottom-right-radius: 6px;
+    --c2-command__field--min-height: 36px;
+    --c2-command__field--padding-left: 8px;
+    --c2-command__field--padding-right: 8px;
+    --c2-command__field--font-size: 12px;
+    --c2-command__icon--size: 14px;
+    --c2-command__list--max-height: 160px;
+    --c2-command__list--padding-top: 2px;
+    --c2-command__list--padding-right: 2px;
+    --c2-command__list--padding-bottom: 2px;
+    --c2-command__list--padding-left: 2px;
+    --c2-command__empty--font-size: 12px;
+    --c2-command-item--min-height: 28px;
+    --c2-command-item--padding-top: 4px;
+    --c2-command-item--padding-bottom: 4px;
+    --c2-command-item--font-size: 12px;
+    --c2-command-item--line-height: 16px;
+    --c2-command-item--border-top-left-radius: 4px;
+    --c2-command-item--border-top-right-radius: 4px;
+    --c2-command-item--border-bottom-left-radius: 4px;
+    --c2-command-item--border-bottom-right-radius: 4px;
+  }
+</style>
+<c2-command class="compact" placeholder="Assign to…" client:only="lit"><c2-command-item value="ada">Ada Lovelace</c2-command-item><c2-command-item value="alan">Alan Turing</c2-command-item><c2-command-item value="grace">Grace Hopper</c2-command-item><c2-command-item value="linus">Linus Torvalds</c2-command-item><c2-command-item value="margaret">Margaret Hamilton</c2-command-item></c2-command>
+```
+
+```html tag=MdxCodeBlock,label=Midnight
+<style>
+  .midnight {
+    width: 100%;
+    --c2-command--background: #18181b;
+    --c2-command--color: #fafafa;
+    --c2-command--border-top: 1px solid #3f3f46;
+    --c2-command--border-right: 1px solid #3f3f46;
+    --c2-command--border-bottom: 1px solid #3f3f46;
+    --c2-command--border-left: 1px solid #3f3f46;
+    --c2-command__field--border-bottom: 1px solid #3f3f46;
+    --c2-command__placeholder--color: #a1a1aa;
+    --c2-command__icon--color: #a1a1aa;
+    --c2-command-group__heading--color: #a1a1aa;
+    --c2-command-separator--color: #3f3f46;
+    --c2-command-item--color: #fafafa;
+    --c2-command-item__active--background: #27272a;
+    --c2-command-item__icon--color: #a1a1aa;
+  }
+</style>
+<c2-command class="midnight" client:only="lit"><c2-command-group heading="Project"><c2-command-item value="deploy">Deploy to production</c2-command-item><c2-command-item value="logs">View logs</c2-command-item></c2-command-group><c2-command-separator></c2-command-separator><c2-command-group heading="Account"><c2-command-item value="tokens">API tokens</c2-command-item><c2-command-item value="signout">Sign out</c2-command-item></c2-command-group></c2-command>
+```
+
+</GalleryGrid>

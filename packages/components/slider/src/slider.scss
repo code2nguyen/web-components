@@ -41,6 +41,9 @@
 // its own (invisible) thumb, so pointer positions and our drawing agree.
 $_thumb: css.cssVar(thumb--size);
 $_offset: calc(#{$_thumb} / 2 + var(--_p) * (100% - #{$_thumb}));
+// Range mode: the fill runs between the two thumb centres.
+$_range-offset: calc(#{$_thumb} / 2 + var(--_start) * (100% - #{$_thumb}));
+$_range-length: calc((var(--_end) - var(--_start)) * (100% - #{$_thumb}));
 
 :host {
   display: block;
@@ -106,6 +109,18 @@ $_offset: calc(#{$_thumb} / 2 + var(--_p) * (100% - #{$_thumb}));
   inset: auto 0 0 0;
   width: auto;
   height: $_offset;
+}
+
+// Range mode: the fill spans the selected interval.
+.c2-slider.is-range .c2-slider-fill {
+  inset-inline-start: $_range-offset;
+  width: $_range-length;
+}
+
+:host([orientation='vertical']) .c2-slider.is-range .c2-slider-fill {
+  inset: auto 0 $_range-offset 0;
+  width: auto;
+  height: $_range-length;
 }
 
 .c2-slider-ticks {
@@ -233,23 +248,77 @@ $_offset: calc(#{$_thumb} / 2 + var(--_p) * (100% - #{$_thumb}));
 }
 
 // The input follows the track in DOM order, so state lives on the input and the track is styled through :has().
-.c2-slider:has(.c2-slider-input:enabled:hover) .c2-slider-thumb {
+.c2-slider:not(.is-range):has(.c2-slider-input:enabled:hover) .c2-slider-thumb {
   box-shadow: css.cssVar(thumb__hover--box-shadow);
 }
 
-.c2-slider:has(.c2-slider-input:enabled:active) .c2-slider-thumb {
+.c2-slider:not(.is-range):has(.c2-slider-input:enabled:active) .c2-slider-thumb {
   box-shadow: css.cssVar(thumb__active--box-shadow);
 }
 
-.c2-slider:has(.c2-slider-input:focus-visible) .c2-slider-thumb {
+.c2-slider:not(.is-range):has(.c2-slider-input:focus-visible) .c2-slider-thumb {
   outline: css.cssVar(thumb__focus--outline);
   outline-offset: css.cssVar(thumb__focus--outline-offset);
 }
 
-.c2-slider:has(.c2-slider-input:enabled:hover) .c2-slider-value,
-.c2-slider:has(.c2-slider-input:enabled:active) .c2-slider-value,
-.c2-slider:has(.c2-slider-input:focus-visible) .c2-slider-value {
+.c2-slider:not(.is-range):has(.c2-slider-input:enabled:hover) .c2-slider-value,
+.c2-slider:not(.is-range):has(.c2-slider-input:enabled:active) .c2-slider-value,
+.c2-slider:not(.is-range):has(.c2-slider-input:focus-visible) .c2-slider-value {
   opacity: 1;
+}
+
+// Range mode: two inputs overlap, so each takes presses on its own thumb only (a press on the track is handled by the
+// component), and each state styles the matching thumb. The upper thumb sits on top unless the lower one is past
+// the middle, so where they meet the thumb that can still move is the one under the pointer.
+.c2-slider.is-range {
+  cursor: pointer;
+
+  .c2-slider-input {
+    pointer-events: none;
+
+    &::-webkit-slider-thumb {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    &::-moz-range-thumb {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    &.is-end {
+      z-index: 2;
+    }
+  }
+
+  &.is-start-on-top .c2-slider-input.is-start {
+    z-index: 3;
+  }
+}
+
+:host([disabled]) .c2-slider.is-range {
+  cursor: default;
+}
+
+@each $thumb in start, end {
+  .c2-slider.is-range:has(.c2-slider-input.is-#{$thumb}:enabled:hover) .c2-slider-thumb.is-#{$thumb} {
+    box-shadow: css.cssVar(thumb__hover--box-shadow);
+  }
+
+  .c2-slider.is-range:has(.c2-slider-input.is-#{$thumb}:enabled:active) .c2-slider-thumb.is-#{$thumb} {
+    box-shadow: css.cssVar(thumb__active--box-shadow);
+  }
+
+  .c2-slider.is-range:has(.c2-slider-input.is-#{$thumb}:focus-visible) .c2-slider-thumb.is-#{$thumb} {
+    outline: css.cssVar(thumb__focus--outline);
+    outline-offset: css.cssVar(thumb__focus--outline-offset);
+  }
+
+  .c2-slider.is-range:has(.c2-slider-input.is-#{$thumb}:enabled:hover) .c2-slider-thumb.is-#{$thumb} .c2-slider-value,
+  .c2-slider.is-range:has(.c2-slider-input.is-#{$thumb}:enabled:active) .c2-slider-thumb.is-#{$thumb} .c2-slider-value,
+  .c2-slider.is-range:has(.c2-slider-input.is-#{$thumb}:focus) .c2-slider-thumb.is-#{$thumb} .c2-slider-value {
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

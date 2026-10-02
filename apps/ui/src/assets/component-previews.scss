@@ -1,0 +1,33 @@
+// Helpers used by the preview markup in src/data/component-previews.ts, shared by every page that renders it
+// (the component gallery, the changelog).
+.preview-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.preview-button {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: var(--site-radius-sm);
+  border: 1px solid var(--site-color-outline);
+  background: var(--site-color-surface);
+  color: var(--site-color-on-surface);
+  cursor: pointer;
+  position: relative;
+  &:hover {
+    background: var(--site-color-surface-container-2);
+  }
+}
+.preview-popover {
+  padding: 12px 16px;
+  font-size: 13px;
+  border-radius: var(--site-radius-md);
+  border: 1px solid var(--site-color-outline-variant);
+  background: var(--site-color-surface);
+  color: var(--site-color-on-surface);
+  box-shadow: var(--site-elevation-2);
+}

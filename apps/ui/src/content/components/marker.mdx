@@ -1,0 +1,60 @@
+---
+title: 'Marker'
+description: 'An inline marker that highlights, underlines, strikes through, boxes or circles a run of text.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Marker } from '@c2n/marker'
+
+`c2-marker` draws attention to a few words inside running text the way a pen would. `variant` picks the mark: `highlight` (the default) paints a translucent stroke behind the text, `underline` and `strike-through` draw a line under or through it, and `box` and `circle` draw an outline around it. The highlight and the lines follow the text when it wraps; the box and circle keep their text on one line. Add `animated` and the mark is drawn the first time it scrolls into view, or appears at once when the reader prefers reduced motion. Colours, stroke width, padding and timing are CSS variables. The element is announced as a mark (a deletion for `strike-through`), and the drawn outline is decorative.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/marker
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/marker
+<style>
+  .marker-copy {
+    max-width: 440px;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .marker-red {
+    --c2-marker__stroke--color: #dc2626;
+  }
+  .marker-mint {
+    --c2-marker__mark--background-color: rgba(16, 185, 129, 0.3);
+    --c2-marker__mark--border-radius: 999px;
+    --c2-marker__mark--padding: 0 6px;
+  }
+  .marker-slow {
+    --c2-marker__mark--transition-duration: 1.2s;
+  }
+</style>
+<div data-label="Highlight">
+  <p class="marker-copy">Deploys are <c2-marker>fully automated</c2-marker> from the moment a pull request is merged.</p>
+</div>
+<div data-label="Variants">
+  <p class="marker-copy">
+    <c2-marker variant="underline">Reviewed</c2-marker>, <c2-marker variant="box">tested</c2-marker> and
+    <c2-marker variant="circle">reversible</c2-marker>. The <c2-marker variant="strike-through">manual checklist</c2-marker> is gone.
+  </p>
+</div>
+<div data-label="Animated">
+  <p class="marker-copy">
+    Onboarding is now <c2-marker animated class="marker-slow">twice as fast</c2-marker> and
+    <c2-marker animated variant="circle" class="marker-red marker-slow">free</c2-marker>.
+  </p>
+</div>
+<div data-label="Themed">
+  <p class="marker-copy"><c2-marker class="marker-mint">Shipped</c2-marker> the release, <c2-marker variant="underline" class="marker-red">three days early</c2-marker>.</p>
+</div>
+```

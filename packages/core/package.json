@@ -1,6 +1,6 @@
 {
   "name": "@c2n/core",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
     "build": "tsc -p tsconfig.json"
@@ -23,6 +23,10 @@
     "./event-helper.js": {
       "types": "./dist/event-helper.d.ts",
       "default": "./dist/event-helper.js"
+    },
+    "./context-menu-helper.js": {
+      "types": "./dist/context-menu-helper.d.ts",
+      "default": "./dist/context-menu-helper.js"
     },
     "./data-helper.js": {
       "types": "./dist/data-helper.d.ts",
@@ -51,6 +55,10 @@
     "./controllers/virtual-scroll.js": {
       "types": "./dist/controllers/virtual-scroll.d.ts",
       "default": "./dist/controllers/virtual-scroll.js"
+    },
+    "./locale-helper.js": {
+      "types": "./dist/locale-helper.d.ts",
+      "default": "./dist/locale-helper.js"
     }
   },
   "files": [

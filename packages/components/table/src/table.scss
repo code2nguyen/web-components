@@ -60,6 +60,22 @@
     summary--font-size: 14px,
     summary--font-weight: 600,
     summary--box-shadow: 0 -1px 0 0 #e4e4e7,
+    group-row--background: #fafafa,
+    group-row--color: #18181b,
+    group-row--font-weight: 600,
+    group-row__hover--background: #f4f4f5,
+    group-row__echo--box-shadow: 0 1px 0 0 #e4e4e7,
+    group-band--background: #f4f4f5,
+    group--indent: 24px,
+    group-toggle--size: 16px,
+    group-toggle--color: #71717a,
+    group-toggle--transition-duration: 150ms,
+    group-count--background: #f4f4f5,
+    group-count--color: #52525b,
+    group-count--font-size: 12px,
+    group-count--font-weight: 600,
+    group-count--padding: 1px 7px,
+    group-count--border-radius: 999px,
     cell--padding: 0 12px,
     cell--gap: 8px,
     cell--font-size: 14px,
@@ -510,4 +526,109 @@
 
 .cell--state-error {
   color: css.cssVar(state__error--color);
+}
+
+// Grouping. A group row is a row of the same grid as the data rows, so its aggregate cells sit in their columns'
+// tracks and pinned cells stay pinned; it keeps the row height, which the virtualizer relies on.
+.row--group {
+  cursor: pointer;
+  background: css.cssVar(group-row--background);
+  user-select: none;
+}
+
+.row--group .cell {
+  color: css.cssVar(group-row--color);
+  font-weight: css.cssVar(group-row--font-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+:host .row--group:hover {
+  background: css.cssVar(group-row__hover--background);
+}
+
+.row--band {
+  background: css.cssVar(group-band--background);
+}
+
+.group-toggle {
+  margin-inline-start: calc(var(--_group-level, 0) * #{css.cssVar(group--indent)});
+}
+
+// Data rows line their text up with the label of the group above them, past its chevron.
+.cell-content--indented {
+  margin-inline-start: calc(var(--_group-level, 0) * #{css.cssVar(group--indent)});
+}
+
+.group-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: css.cssVar(group-toggle--size);
+  height: css.cssVar(group-toggle--size);
+  color: css.cssVar(group-toggle--color);
+  transition: transform css.cssVar(group-toggle--transition-duration) ease;
+}
+
+.group-toggle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.row--group-collapsed .group-toggle {
+  transform: rotate(-90deg);
+}
+
+.group-label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.group-count {
+  flex: 0 0 auto;
+  padding: css.cssVar(group-count--padding);
+  border-radius: css.cssVar(group-count--border-radius);
+  background: css.cssVar(group-count--background);
+  color: css.cssVar(group-count--color);
+  font-size: css.cssVar(group-count--font-size);
+  font-weight: css.cssVar(group-count--font-weight);
+}
+
+// A band is one cell across the grid; its content sticks to the start edge so it stays in view on a sideways scroll.
+.cell--band {
+  grid-column: 1 / -1;
+  padding: 0;
+  overflow: visible;
+}
+
+// The padding is on the content, not the cell, so the label sits at the same place before and after it sticks.
+.band-content {
+  position: sticky;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(cell--gap);
+  min-width: 0;
+  padding: css.cssVar(cell--padding);
+}
+
+// Copies of the groups whose own row has scrolled away, kept under the header. The container takes no height, so
+// the body does not move; its rows overlay the lines they stand in front of, as sticky rows would.
+.group-echoes {
+  position: sticky;
+  z-index: 3;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  height: 0;
+}
+
+.row--group-echo {
+  box-shadow: css.cssVar(group-row__echo--box-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group-toggle {
+    transition: none;
+  }
 }

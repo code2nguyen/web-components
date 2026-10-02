@@ -1,0 +1,20 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-command-separator,
+  $theme: (
+    color: #e4e4e7,
+    margin: 4px -4px,
+  )
+);
+
+:host {
+  display: block;
+  flex: none;
+  height: 0;
+  border-top: 1px solid css.cssVar(color);
+  margin: css.cssVar(margin);
+}
+
+:host([hidden]),
+:host(:state(filtered)) {
+  display: none;
+}

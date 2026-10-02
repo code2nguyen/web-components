@@ -21,6 +21,7 @@
     value--font-size: 24px,
     value--font-weight: 600,
     value--line-height: 32px,
+    placeholder--opacity: 0.4,
     label--font-size: 14px,
     label--color: #71717a,
     description--font-size: 12px,
@@ -82,6 +83,9 @@
   font-size: css.cssVar(value--font-size);
   font-weight: css.cssVar(value--font-weight);
   line-height: css.cssVar(value--line-height);
+}
+.placeholder {
+  opacity: css.cssVar(placeholder--opacity);
 }
 .label {
   color: css.cssVar(label--color);

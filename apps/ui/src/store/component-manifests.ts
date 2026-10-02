@@ -1,4 +1,15 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import notepad from '@c2n/notepad/custom-elements.json'
+import todoList from '@c2n/todo-list/custom-elements.json'
+import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
+import flow from '@c2n/flow/custom-elements.json'
+import weekPlanner from '@c2n/week-planner/custom-elements.json'
+import monthPlanner from '@c2n/month-planner/custom-elements.json'
+import hoverCard from '@c2n/hover-card/custom-elements.json'
+import command from '@c2n/command/custom-elements.json'
+import marker from '@c2n/marker/custom-elements.json'
+import contextMenu from '@c2n/context-menu/custom-elements.json'
+import otpInput from '@c2n/otp-input/custom-elements.json'
 import chatMessageList from '@c2n/chat-message-list/custom-elements.json'
 import shortcut from '@c2n/shortcut/custom-elements.json'
 import carousel from '@c2n/carousel/custom-elements.json'
@@ -79,12 +90,24 @@ import tooltip from '@c2n/tooltip/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
 import symbols from '@c2n/symbols/custom-elements.json'
+import taskIcons from '@c2n/task-icons/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    notepad,
+    todoList,
+    comparisonBar,
+    flow,
+    weekPlanner,
+    monthPlanner,
+    hoverCard,
+    command,
+    marker,
+    contextMenu,
+    otpInput,
     chatMessageList,
     shortcut,
     carousel,
@@ -165,6 +188,7 @@ export const componentManifests = (function () {
     featherIcons,
     phosphorIcons,
     symbols,
+    taskIcons,
   ].reduce((result, item) => {
     const pkg = item as Package
     const tags: string[] = []

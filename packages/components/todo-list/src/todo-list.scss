@@ -1,0 +1,1687 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-todo-list,
+  $theme: (
+    container--background-color: #ffffff,
+    container--color: #18181b,
+    container--border: 1px solid #e4e4e7,
+    container--border-radius: 14px,
+    container--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    container--padding: 20px,
+    container--gap: 16px,
+    heading--font-size: 18px,
+    heading--font-weight: 600,
+    meta--color: #71717a,
+    meta--font-size: 12px,
+    accent--color: #0265dc,
+    on-accent--color: #ffffff,
+    track--color: #e4e4e7,
+    ring--size: 44px,
+    ring--stroke-width: 4.5,
+    hero-ring--size: 120px,
+    hero-ring--stroke-width: 7,
+    bar--height: 8px,
+    chip--background-color: #f4f4f5,
+    row--padding: 9px 8px,
+    row--gap: 8px,
+    row--border-radius: 8px,
+    row__divider--color: #f4f4f5,
+    row__hover--background-color: #fafafa,
+    mark--size: 28px,
+    mark--color: #a1a1aa,
+    mark--stroke-width: 2.6,
+    dropped--color: #dc2626,
+    label--font-size: 14px,
+    label__done--color: #71717a,
+    icon--size: 20px,
+    add--border-color: #d4d4d8,
+    panel--background-color: #fafafa,
+    panel--border-radius: 8px,
+    toast--background-color: #18181b,
+    toast--color: #fafafa,
+    focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    transition-duration: 200ms,
+    pen-blue--color: #0265dc,
+    pen-red--color: #dc2626,
+    pen-green--color: #0f766e,
+    pen-violet--color: #7c3aed,
+    pen-graphite--color: #71717a,
+    highlight-yellow--color: #facc15,
+    highlight-green--color: #22c55e,
+    highlight-blue--color: #3b82f6,
+    highlight-pink--color: #ec4899,
+    highlight-orange--color: #f97316,
+    highlight-violet--color: #8b5cf6,
+  )
+);
+
+$duration: css.cssVar(transition-duration);
+$accent: css.cssVar(accent--color);
+$muted: css.cssVar(meta--color);
+$surface: css.cssVar(container--background-color);
+$ink: css.cssVar(container--color);
+// Text on a chip: the ink colour softened, so it keeps its contrast on the tinted chip of every background.
+$chip-text: color-mix(in srgb, #{$ink} 76%, transparent);
+$pens: blue, red, green, violet, graphite;
+$highlights: yellow, green, blue, pink, orange, violet;
+// How much highlighter ink is mixed into the background: light enough for any pen to stay readable on it.
+// A palette sets its own strength (lighter mixes on dark backgrounds, stronger ones for pale pastels).
+$highlight-strength: var(--_highlight-strength, 22%);
+$menu-item-height: 36px;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+:is(button, input, textarea):focus-visible {
+  outline: css.cssVar(focus--outline);
+  outline-offset: 2px;
+}
+
+svg {
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(container--gap);
+  padding: css.cssVar(container--padding);
+  color: $ink;
+  background-color: $surface;
+  border: css.cssVar(container--border);
+  border-radius: css.cssVar(container--border-radius);
+  box-shadow: css.cssVar(container--box-shadow);
+  container-type: inline-size;
+  transition:
+    background-color $duration ease,
+    color $duration ease;
+}
+
+// Header -----------------------------------------------------------------------------------------------------------
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.heading {
+  margin: 0;
+  font-size: css.cssVar(heading--font-size);
+  font-weight: css.cssVar(heading--font-weight);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0;
+  font-size: css.cssVar(meta--font-size);
+  color: $muted;
+}
+
+.list-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: $accent;
+  background-color: color-mix(in srgb, #{$accent} 12%, transparent);
+
+  .icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.customize {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: $muted;
+  transition:
+    background-color $duration ease,
+    color $duration ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.75;
+  }
+
+  .dot {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  &:hover,
+  &[aria-expanded='true'] {
+    color: $ink;
+    background-color: css.cssVar(chip--background-color);
+  }
+}
+
+.ring {
+  position: relative;
+  flex-shrink: 0;
+  width: css.cssVar(ring--size);
+  height: css.cssVar(ring--size);
+
+  > svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    stroke-width: css.cssVar(ring--stroke-width);
+  }
+}
+
+.ring-track {
+  stroke: css.cssVar(track--color);
+}
+
+.ring-fill {
+  stroke: $accent;
+  transition: stroke-dasharray calc($duration * 2.5) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ring-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ring-value.with-icon {
+  color: $accent;
+
+  .icon {
+    width: 46%;
+    height: 46%;
+  }
+}
+
+.ring-check {
+  width: 50%;
+  height: 50%;
+  stroke: $accent;
+  stroke-width: 3;
+  animation: pop calc($duration * 2) cubic-bezier(0.2, 0.8, 0.2, 1.4);
+}
+
+// A large ring above the heading: the progress is the headline.
+.progress-hero {
+  .header {
+    position: relative;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .ring {
+    order: -2;
+    flex-basis: 100%;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: css.cssVar(hero-ring--size);
+
+    > svg {
+      width: css.cssVar(hero-ring--size);
+      stroke-width: css.cssVar(hero-ring--stroke-width);
+    }
+  }
+
+  .ring-value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+
+    small {
+      font-size: 0.55em;
+      font-weight: 600;
+      margin-left: 1px;
+    }
+  }
+
+  .titles {
+    flex: 0 1 auto;
+    align-items: center;
+  }
+
+  .actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
+
+// The bar is a `c2-progress`, drawn with the list's track and accent.
+.bar {
+  --c2-progress--height: #{css.cssVar(bar--height)};
+  --c2-progress__track--background-color: #{css.cssVar(track--color)};
+  --c2-progress__indicator--background-color: #{$accent};
+}
+
+// Filters and segmented controls -----------------------------------------------------------------------------------
+
+// The filter is a `c2-tabs` strip, styled as a segmented control: a tinted track, and the strip's indicator drawn as a
+// full-height chip behind the labels, so it slides from tab to tab.
+.filters {
+  --c2-tabs--box-shadow: none;
+  --c2-tabs--background-color: #{css.cssVar(chip--background-color)};
+  --c2-tabs--border-radius: 10px;
+  --c2-tabs--gap: 4px;
+  --c2-tabs--padding-top: 4px;
+  --c2-tabs--padding-right: 4px;
+  --c2-tabs--padding-bottom: 4px;
+  --c2-tabs--padding-left: 4px;
+  --c2-tabs__indicator--height: calc(100% - 8px);
+  --c2-tabs__indicator--bottom: 4px;
+  --c2-tabs__indicator--border-radius: 7px;
+  --c2-tabs__indicator--color: #{$surface};
+  --c2-tabs__tab--flex: 1;
+  --c2-tabs__tab--gap: 6px;
+  --c2-tabs__tab--font-size: 12px;
+  --c2-tabs__tab--font-weight: 500;
+  --c2-tabs__tab--padding-top: 7px;
+  --c2-tabs__tab--padding-right: 10px;
+  --c2-tabs__tab--padding-bottom: 7px;
+  --c2-tabs__tab--padding-left: 10px;
+  --c2-tabs__tab--color: #{$chip-text};
+  --c2-tabs__tab__hover--color: #{$ink};
+  --c2-tabs__tab__selected--color: #{$ink};
+  --c2-tabs__tab--border-top-left-radius: 7px;
+  --c2-tabs__tab--border-top-right-radius: 7px;
+  --c2-tabs__tab--border-bottom-left-radius: 7px;
+  --c2-tabs__tab--border-bottom-right-radius: 7px;
+  --c2-tabs__tab__focus--outline: #{css.cssVar(focus--outline)};
+}
+
+// The list sits below the strip, as far from it as the container spaces its own blocks.
+.filter-panel {
+  display: block;
+  margin-top: css.cssVar(container--gap);
+}
+
+.segment {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $chip-text;
+  white-space: nowrap;
+  transition:
+    background-color $duration ease,
+    color $duration ease,
+    box-shadow $duration ease;
+
+  &:hover {
+    color: $ink;
+  }
+
+  &[aria-pressed='true'],
+  &[aria-checked='true'] {
+    color: $ink;
+    background-color: $surface;
+    box-shadow:
+      0 1px 2px rgba(24, 24, 27, 0.08),
+      0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke: $accent;
+    stroke-width: 2.6;
+  }
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+// Tasks ------------------------------------------------------------------------------------------------------------
+
+.tasks {
+  display: block;
+  margin: 0 -8px;
+  --c2-reorder-list--container-border-width: 0px;
+  --c2-reorder-list--container-border-radius: 0px;
+  --c2-reorder-list--item-background: transparent;
+  --c2-reorder-list--placeholder-background: color-mix(in srgb, #{$accent} 8%, transparent);
+  --c2-reorder-list__placeholder--border-color: #{$accent};
+  --c2-reorder-list__placeholder--border-width: 1.5px;
+  // The drop slot and the row under the pointer take a task row's corners; the preview is a card in the list's surface.
+  --c2-reorder-list__placeholder--border-radius: #{css.cssVar(row--border-radius)};
+  --c2-reorder-list__dragging-item--border-radius: #{css.cssVar(row--border-radius)};
+  --c2-reorder-list--dragging-item-background: #{$surface};
+  --c2-reorder-list__dragging-item--padding: #{css.cssVar(row--padding)};
+  --c2-reorder-list__item__focus--outline-color: #{$accent};
+  --c2-reorder-list__item__focus--outline-offset: -2px;
+  // The inner list draws the swipe actions; their colours are its own `--c2-reorder-list__swipe-action__*`
+  // variables, which a page can set on this list since custom properties inherit into it.
+  --c2-reorder-list__swipe-content--background-color: #{$surface};
+  --c2-reorder-list--item-padding: 0px;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: css.cssVar(container--gap);
+  min-width: 0;
+}
+
+.task-slot {
+  position: relative;
+  display: block;
+}
+
+.task {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: css.cssVar(row--gap);
+  min-width: 0;
+  padding: css.cssVar(row--padding);
+  border-radius: css.cssVar(row--border-radius);
+  // The row covers the swipe actions behind it, so it always paints a background of its own.
+  background-color: $surface;
+  transition: background-color $duration ease;
+
+  &:hover,
+  &.active {
+    background-color: css.cssVar(row__hover--background-color);
+  }
+
+  // A hairline between rows, inset so it does not run into the rounded corners.
+  &::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 0;
+    height: 1px;
+    background-color: css.cssVar(row__divider--color);
+    pointer-events: none;
+  }
+
+  &:hover::after,
+  &[class*='highlight-']::after {
+    opacity: 0;
+  }
+}
+
+.grip {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 14px;
+  height: css.cssVar(mark--size);
+  margin-right: -4px;
+  color: $muted;
+  opacity: 0;
+  cursor: grab;
+  transition: opacity $duration ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .task:hover &,
+  .task:focus-within & {
+    opacity: 0.8;
+  }
+
+  @media (hover: none) {
+    opacity: 0.5;
+  }
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: css.cssVar(mark--size);
+  height: css.cssVar(mark--size);
+  border-radius: 999px;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .open {
+    stroke: css.cssVar(mark--color);
+    stroke-width: 1.5;
+    transition: stroke $duration ease;
+  }
+
+  &:hover:not(:disabled) .open {
+    stroke: $accent;
+  }
+
+  .stroke {
+    stroke: $accent;
+    stroke-width: css.cssVar(mark--stroke-width);
+    stroke-dasharray: 40;
+    animation: draw calc($duration * 1.8) ease-out both;
+  }
+
+  .dropped {
+    stroke: css.cssVar(dropped--color);
+  }
+}
+
+.task-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: calc(#{css.cssVar(icon--size)} + 8px);
+  height: css.cssVar(mark--size);
+  margin: 0 -4px;
+  border-radius: 8px;
+  color: var(--_ink, #{$accent});
+  transition:
+    opacity $duration ease,
+    background-color $duration ease;
+
+  &:is(button):hover,
+  &[aria-expanded='true'] {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+  }
+
+  .icon {
+    width: css.cssVar(icon--size);
+    height: css.cssVar(icon--size);
+  }
+}
+
+.task.closed .task-icon {
+  opacity: 0.45;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+}
+
+.label {
+  display: block;
+  max-width: 100%;
+  // The row's own cursor shows through: grab where the row can be dragged, the default arrow where it cannot.
+  cursor: inherit;
+  min-height: css.cssVar(mark--size);
+  padding: 4px 0;
+  text-align: left;
+  font-size: css.cssVar(label--font-size);
+  line-height: 1.45;
+  color: var(--_ink, #{$ink});
+  overflow-wrap: anywhere;
+  transition: color $duration ease;
+}
+
+.label-text {
+  position: relative;
+}
+
+.task.closed .label {
+  color: css.cssVar(label__done--color);
+}
+
+.strike {
+  position: absolute;
+  left: -3px;
+  top: 50%;
+  width: calc(100% + 6px);
+  height: 10px;
+  margin-top: -4px;
+  overflow: visible;
+  pointer-events: none;
+
+  path {
+    stroke: $accent;
+    stroke-width: 1.8;
+    opacity: 0.8;
+    stroke-dasharray: 400;
+    animation: draw-long calc($duration * 2.2) ease-out calc($duration / 2) both;
+  }
+}
+
+.note {
+  cursor: inherit;
+  margin: -2px 0 2px;
+  font-size: css.cssVar(meta--font-size);
+  line-height: 1.4;
+  color: $muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note.full {
+  white-space: normal;
+
+  .note-text {
+    white-space: pre-line;
+  }
+}
+
+.editor {
+  // Drawn inside the draggable row: not its grab cursor.
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: calc(100% + 8px);
+  margin-inline-start: -8px;
+  padding-bottom: 4px;
+}
+
+.label-input {
+  display: block;
+  width: 100%;
+  min-height: css.cssVar(mark--size);
+  margin: 0;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 6px;
+  font-size: css.cssVar(label--font-size);
+  line-height: 1.45;
+  color: var(--_ink, #{$ink});
+  background-color: css.cssVar(chip--background-color);
+}
+
+.note-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  resize: vertical;
+  font-size: 13px;
+  line-height: 1.5;
+  background-color: css.cssVar(chip--background-color);
+
+  &::placeholder {
+    color: $muted;
+  }
+}
+
+// Only the field that has the focus is ringed, in the accent; the shared outline would draw a second ring.
+.editor :is(.label-input, .note-input) {
+  transition: box-shadow $duration ease;
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 1.5px $accent;
+  }
+}
+
+.due {
+  flex-shrink: 0;
+  padding-top: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $muted;
+
+  &.urgent {
+    font-weight: 600;
+    color: css.cssVar(pen-red--color);
+  }
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: css.cssVar(mark--size);
+  border-radius: 8px;
+  color: $muted;
+  opacity: 0;
+  transition:
+    opacity $duration ease,
+    background-color $duration ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    stroke: none;
+  }
+
+  &:hover,
+  &.open {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+  }
+
+  .task:hover &,
+  &:focus-visible,
+  &.open {
+    opacity: 1;
+  }
+
+  // Touch screens have no hover to reveal it; the swipe covers the common actions.
+  @media (hover: none) {
+    opacity: 0.6;
+  }
+}
+
+.menu {
+  // Drawn inside the draggable row: not its grab cursor.
+  cursor: default;
+  position: absolute;
+  z-index: 3;
+  top: calc(100% - 4px);
+  right: 4px;
+  display: flex;
+  flex-direction: column;
+  min-width: 210px;
+  padding: 6px;
+  border-radius: css.cssVar(panel--border-radius);
+  color: $ink;
+  background-color: $surface;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+  animation: reveal calc($duration * 0.8) ease-out;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: left;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.75;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: css.cssVar(chip--background-color);
+  }
+
+  &.separated {
+    margin-top: 5px;
+    box-shadow: 0 -3px 0 -2px color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  &.danger {
+    color: css.cssVar(pen-red--color);
+  }
+
+  kbd {
+    font-family: inherit;
+    font-size: 11px;
+    color: $muted;
+  }
+}
+
+.menu-label {
+  flex: 1;
+}
+
+.menu-item {
+  height: $menu-item-height;
+  padding-top: 0;
+  padding-bottom: 0;
+
+  &.has-submenu.open {
+    background-color: css.cssVar(chip--background-color);
+  }
+
+  .chevron {
+    width: 12px;
+    height: 12px;
+    color: $muted;
+  }
+}
+
+.menu-item .menu-swatch {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  box-shadow: none;
+
+  &.pen-swatch {
+    border-radius: 999px;
+  }
+
+  &.none {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 30%, transparent);
+  }
+}
+
+// A submenu opens beside the menu, level with the item that opened it.
+.submenu {
+  position: absolute;
+  right: calc(100% + 6px);
+  display: grid;
+  grid-template-columns: repeat(4, 30px);
+  gap: 6px;
+  padding: 8px;
+  border-radius: css.cssVar(panel--border-radius);
+  background-color: $surface;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+  animation: reveal calc($duration * 0.8) ease-out;
+
+  .highlight-swatch {
+    width: 30px;
+    height: 26px;
+    font-size: 11px;
+  }
+
+  .pen-swatch {
+    width: 26px;
+    height: 26px;
+    margin: 0 2px;
+  }
+
+  [role='menuitemradio'][aria-checked='true'] {
+    box-shadow:
+      0 0 0 2px #{$surface},
+      0 0 0 4px #{$accent};
+  }
+}
+
+.submenu-highlight {
+  top: calc(6px + #{$menu-item-height} * 2);
+}
+
+.submenu-ink {
+  top: calc(6px + #{$menu-item-height} * 3);
+}
+
+.icon-popover {
+  // Drawn inside the draggable row: not its grab cursor.
+  cursor: default;
+  position: absolute;
+  z-index: 3;
+  top: calc(100% - 4px);
+  left: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 360px;
+  padding: 10px;
+  border-radius: css.cssVar(panel--border-radius);
+  color: $ink;
+  background-color: $surface;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+  animation: reveal calc($duration * 0.8) ease-out;
+
+  .icon-picker {
+    max-height: 240px;
+  }
+}
+
+.empty {
+  margin: 0;
+  padding: 20px 8px;
+  text-align: center;
+  font-size: css.cssVar(label--font-size);
+  color: $muted;
+}
+
+// Add field --------------------------------------------------------------------------------------------------------
+
+.add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 12px;
+  border: 1px dashed css.cssVar(add--border-color);
+  border-radius: 12px;
+  transition: border-color $duration ease;
+
+  &:focus-within {
+    border-color: $accent;
+  }
+}
+
+.add-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  stroke: $accent;
+  stroke-width: 2;
+}
+
+.add-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  font-size: css.cssVar(label--font-size);
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: $muted;
+  }
+}
+
+.add-button {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: css.cssVar(on-accent--color);
+  background-color: $accent;
+  transition: opacity $duration ease;
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+// Archive and undo -------------------------------------------------------------------------------------------------
+
+.archive {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: -6px;
+}
+
+.archive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 4px 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $muted;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.75;
+  }
+
+  .chevron {
+    width: 12px;
+    height: 12px;
+    transition: transform $duration ease;
+  }
+
+  &[aria-expanded='true'] .chevron {
+    transform: rotate(90deg);
+  }
+}
+
+.archived {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.archived-task {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px 4px 22px;
+  font-size: 13px;
+  color: $muted;
+}
+
+.archived-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-button {
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $accent;
+
+  &.danger {
+    color: css.cssVar(pen-red--color);
+  }
+
+  &:hover {
+    background-color: css.cssVar(chip--background-color);
+  }
+}
+
+.toast {
+  position: sticky;
+  bottom: 8px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: -4px;
+  padding: 10px 10px 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: css.cssVar(toast--color);
+  background-color: css.cssVar(toast--background-color);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  animation: reveal-up calc($duration * 1.2) ease-out;
+}
+
+.toast-message {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toast-undo {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: css.cssVar(toast--color);
+}
+
+// Customize panel --------------------------------------------------------------------------------------------------
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border-radius: css.cssVar(panel--border-radius);
+  background-color: css.cssVar(panel--background-color);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 6%, transparent);
+  animation: panel-in calc($duration * 1.4) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.view {
+  animation: view-in calc($duration * 1.4) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.done-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: css.cssVar(on-accent--color);
+  background-color: $accent;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+  }
+}
+
+.panel-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.reset {
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $chip-text;
+  background-color: $surface;
+
+  &:disabled {
+    opacity: 0.38;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+
+  @container (max-width: 360px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub-label {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $chip-text;
+}
+
+.editing {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+  color: $ink;
+}
+
+.task-editor {
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+:is(.background-swatch, .pen-swatch, .highlight-swatch) {
+  transition: box-shadow $duration ease;
+
+  &[aria-checked='true'] {
+    box-shadow:
+      0 0 0 2px css.cssVar(panel--background-color),
+      0 0 0 4px $accent;
+  }
+}
+
+.background-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--_swatch-ink, #{$ink});
+  background-color: var(--_swatch, #{$surface});
+
+  &:not([aria-checked='true']) {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent);
+  }
+}
+
+.pen-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+
+  &.default {
+    background-color: $ink;
+  }
+}
+
+.highlight-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $ink;
+
+  &.none {
+    background: linear-gradient(
+      135deg,
+      transparent calc(50% - 1px),
+      color-mix(in srgb, currentColor 30%, transparent) calc(50% - 1px),
+      color-mix(in srgb, currentColor 30%, transparent) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 20%, transparent);
+  }
+}
+
+// On a highlighted row the grey text and the red pen are pulled towards the ink, so they keep their contrast on the
+// tint of every background.
+.task[class*='highlight-'] {
+  :is(.note, .due) {
+    color: $chip-text;
+  }
+
+  .due.urgent {
+    color: color-mix(in srgb, #{css.cssVar(pen-red--color)} 70%, #{$ink});
+  }
+
+  &.closed .label {
+    color: $chip-text;
+  }
+}
+
+// Every pen and highlighter paints its swatch directly, so each documented variable has a real consumer; a task or
+// the icon picker takes the same colour as a private `--_ink`, a highlighted task as its row background.
+@each $pen in $pens {
+  .pen-swatch.pen-#{$pen} {
+    background-color: css.cssVar(pen-#{$pen}--color);
+  }
+
+  .ink-#{$pen} {
+    --_ink: #{css.cssVar(pen-#{$pen}--color)};
+  }
+}
+
+@each $highlight in $highlights {
+  .highlight-swatch.highlight-#{$highlight},
+  .task.highlight-#{$highlight} {
+    background-color: color-mix(in srgb, #{css.cssVar(highlight-#{$highlight}--color)} #{$highlight-strength}, #{$surface});
+  }
+}
+
+.palette-preview {
+  --_preview-accent-color: var(--_preview-accent, #{$accent});
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding-left: 4px;
+}
+
+.preview-ring {
+  width: 18px;
+  height: 18px;
+  transform: rotate(-90deg);
+
+  circle {
+    stroke-width: 3;
+  }
+
+  .preview-track {
+    stroke: color-mix(in srgb, currentColor 14%, transparent);
+  }
+
+  .preview-fill {
+    stroke: var(--_preview-accent-color);
+    stroke-dasharray: 66 100;
+  }
+}
+
+.preview-tick {
+  width: 16px;
+  height: 16px;
+  color: var(--_preview-accent-color);
+  stroke-width: 2.6;
+}
+
+// Task rows under three of the palette's highlighters, at the strength the palette lays them on: its mood.
+.preview-rows {
+  display: flex;
+  gap: 3px;
+}
+
+.preview-row {
+  width: 20px;
+  height: 14px;
+  border-radius: 4px;
+  background-color: color-mix(in srgb, var(--_preview-highlight) var(--_preview-strength, #{$highlight-strength}), #{$surface});
+}
+
+.icon-tools {
+  display: flex;
+  gap: 8px;
+}
+
+// An icon button: a dashed, struck-through box for “no icon”.
+.no-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: $chip-text;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.6;
+  }
+
+  .no-icon-box {
+    stroke-dasharray: 3 2.4;
+  }
+
+  &:hover {
+    color: $ink;
+  }
+
+  background-color: $surface;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 14%, transparent);
+
+  &[aria-pressed='true'] {
+    color: $accent;
+    box-shadow: inset 0 0 0 1.5px $accent;
+  }
+}
+
+.list-icon-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  color: $accent;
+  background-color: color-mix(in srgb, #{$accent} 10%, transparent);
+}
+
+// The empty icon: a dashed outline where the icon would be.
+.list-icon-preview.empty,
+.list-icon-option:not(:has(.icon)) .list-icon-art {
+  background-color: transparent;
+  border: 1.5px dashed color-mix(in srgb, currentColor 35%, transparent);
+}
+
+.list-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 2px;
+  margin: -2px;
+  scrollbar-width: thin;
+}
+
+.list-icon-option {
+  flex-direction: column;
+  gap: 4px;
+  aspect-ratio: auto;
+  padding: 8px 4px 6px;
+  font-size: 11px;
+  font-weight: 500;
+
+  .icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  // The accent marks the icon and the ring; the label keeps the text colour, which reads on the accent's tint.
+  &[aria-pressed='true'] .list-icon-label {
+    color: $ink;
+    font-weight: 600;
+  }
+}
+
+.list-icon-art {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.list-icon-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: left;
+  color: $ink;
+  background-color: $surface;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 14%, transparent);
+
+  &[aria-expanded='true'] {
+    box-shadow: inset 0 0 0 1.5px $accent;
+
+    .dropdown-chevron {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.dropdown-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.dropdown-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: $muted;
+  transition: transform $duration ease;
+}
+
+// Floats over the fields below, like a native select's list.
+.dropdown-popup {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border-radius: css.cssVar(panel--border-radius);
+  color: $ink;
+  background-color: $surface;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.16),
+    0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+  animation: reveal calc($duration * 0.8) ease-out;
+}
+
+.palette-list {
+  gap: 2px;
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-align: left;
+
+  &:hover,
+  &:focus-visible {
+    background-color: color-mix(in srgb, currentColor 7%, transparent);
+  }
+
+  .dropdown-check {
+    width: 16px;
+    height: 16px;
+    color: $accent;
+    visibility: hidden;
+  }
+
+  &[aria-selected='true'] .dropdown-check {
+    visibility: visible;
+  }
+}
+
+.panel-icons {
+  padding: 8px;
+}
+
+.icon-search {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent);
+  background-color: $surface;
+  font-size: 12px;
+
+  &::placeholder {
+    color: $muted;
+  }
+}
+
+.icon-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 232px;
+  overflow-y: auto;
+  padding: 2px;
+  margin: -2px;
+  scrollbar-width: thin;
+}
+
+.icon-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.icon-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: $muted;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.icon-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 32px;
+  border-radius: 8px;
+  color: $chip-text;
+  transition:
+    background-color $duration ease,
+    color $duration ease;
+
+  .icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    color: var(--_ink, #{$accent});
+    background-color: color-mix(in srgb, var(--_ink, #{$accent}) 10%, transparent);
+  }
+
+  &[aria-pressed='true'] {
+    color: var(--_ink, #{$accent});
+    background-color: color-mix(in srgb, var(--_ink, #{$accent}) 16%, transparent);
+    box-shadow: inset 0 0 0 1.5px var(--_ink, #{$accent});
+  }
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  color: $muted;
+}
+
+// Motion -----------------------------------------------------------------------------------------------------------
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes draw-long {
+  from {
+    stroke-dashoffset: 400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}

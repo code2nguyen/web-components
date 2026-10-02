@@ -31,10 +31,10 @@ The frames below are fixed-height containers; in an app the side nav usually fil
     position: relative;
     width: 100%;
     height: 240px;
-    border: 1px solid #e4e4e7;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     border-radius: 10px;
     overflow: hidden;
-    background: #ffffff;
+    background: var(--c2-theme--color-surface, #ffffff);
     font-size: 14px;
   }
   .frame c2-side-nav {
@@ -61,21 +61,21 @@ The frames below are fixed-height containers; in an app the side nav usually fil
     justify-content: center;
     width: 30px;
     height: 30px;
-    border: 1px solid #d4d4d8;
+    border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     border-radius: 6px;
-    background: #ffffff;
-    color: #18181b;
+    background: var(--c2-theme--color-surface, #ffffff);
+    color: var(--c2-theme--color-on-surface, #18181b);
     cursor: pointer;
   }
   .menu:hover {
-    background: #f4f4f5;
+    background: var(--c2-theme--color-surface-container, #f4f4f5);
   }
   .menu svg {
     width: 16px;
     height: 16px;
   }
   .muted {
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     font-size: 13px;
     line-height: 1.5;
     margin: 0;
@@ -89,7 +89,7 @@ The frames below are fixed-height containers; in an app the side nav usually fil
     --c2-list--padding-bottom: 0px;
     --c2-list-item--padding-left: 10px;
     --c2-list-item--padding-right: 10px;
-    --c2-list-item__hover--background: #eeeef0;
+    --c2-list-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 7%, var(--c2-theme--color-surface, #ffffff));
   }
   .brand {
     display: block;
@@ -125,8 +125,8 @@ The frames below are fixed-height containers; in an app the side nav usually fil
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: #18181b;
-    color: #ffffff;
+    background: var(--c2-theme--color-inverse-surface, #18181b);
+    color: var(--c2-theme--color-on-primary, #ffffff);
     font-size: 13px;
     font-weight: 700;
   }
@@ -148,12 +148,12 @@ The frames below are fixed-height containers; in an app the side nav usually fil
     border: none;
     border-radius: 6px;
     background: transparent;
-    color: #71717a;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
     cursor: pointer;
   }
   .icon-rail .collapse:hover {
-    background: #eeeef0;
-    color: #18181b;
+    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 7%, var(--c2-theme--color-surface, #ffffff));
+    color: var(--c2-theme--color-on-surface, #18181b);
   }
   .icon-rail .collapse svg {
     width: 16px;

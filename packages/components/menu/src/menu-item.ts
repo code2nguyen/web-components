@@ -94,7 +94,7 @@ export interface MenuItem {
  * @cssproperty {color} [--c2-menu-item__destructive--color=#dc2626] - Label and icon colour of a `destructive` row.
  * @cssproperty {color} [--c2-menu-item__destructive__hover--background=#fef2f2]
  *
- * @cssproperty {outline} [--c2-menu-item__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
+ * @cssproperty {outline} [--c2-menu-item__focus--outline=none] - A ring around the keyboard-focused row, drawn on top of its highlight.
  * @cssproperty {pixel} [--c2-menu-item__focus--outline-offset=-2px]
  *
  * @cssproperty {opacity} [--c2-menu-item__disabled--opacity=0.38]

@@ -32,6 +32,41 @@ export function describeComponentPreset(preset: ComponentPreset): string {
 }
 
 export const componentPresets: Record<string, ComponentPresetGroup> = {
+  'c2-marker': {
+    html: `<p style="max-width:320px;margin:0;font-size:16px;line-height:1.7">Deploys are <c2-marker>fully automated</c2-marker> from merge to production.</p>`,
+    presets: [
+      {
+        name: 'Soft pill',
+        description: 'A rounded violet wash with room around the words, for tags inside prose.',
+        css: {
+          '--c2-marker__mark--background-color': 'rgba(139, 92, 246, 0.22)',
+          '--c2-marker__mark--border-radius': '999px',
+          '--c2-marker__mark--padding': '1px 8px',
+        },
+      },
+      {
+        name: 'Red pen circle',
+        description: 'A loose red circle drawn around the words when they scroll into view.',
+        css: {
+          '--c2-marker__stroke--color': '#dc2626',
+          '--c2-marker__stroke--width': '3px',
+          '--c2-marker__stroke--offset': '6px',
+          '--c2-marker__mark--transition-duration': '1s',
+        },
+        attributes: { variant: 'circle', animated: '' },
+      },
+      {
+        name: 'Thick underline',
+        description: 'A heavy primary underline that sweeps in from the left.',
+        css: {
+          '--c2-marker__stroke--width': '4px',
+          '--c2-marker__mark--padding': '0',
+          '--c2-marker__mark--transition-duration': '800ms',
+        },
+        attributes: { variant: 'underline', animated: '' },
+      },
+    ],
+  },
   'c2-carousel': {
     html: `<c2-carousel label="Carousel" style="width:320px"><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 1</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 2</div><div style="display:grid;place-items:center;height:140px;background:#f4f4f5">Slide 3</div></c2-carousel>`,
     presets: [
@@ -228,6 +263,30 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-overlap-chart': {
+    html: `<c2-overlap-chart style="width:420px;height:300px" data='[{"sets":["web"],"size":18420},{"sets":["mobile"],"size":12960},{"sets":["api"],"size":4310},{"sets":["web","mobile"],"size":6880},{"sets":["web","api"],"size":2150},{"sets":["mobile","api"],"size":1020},{"sets":["web","mobile","api"],"size":740}]'><c2-chart-series field="web" label="Web app"></c2-chart-series><c2-chart-series field="mobile" label="Mobile app"></c2-chart-series><c2-chart-series field="api" label="Public API"></c2-chart-series></c2-overlap-chart>`,
+    presets: [
+      { name: 'Equal circles', description: 'Same-sized circles, so every region has room for its label.', attributes: { layout: 'uniform' } },
+      { name: 'Shares', description: 'Each region as a share of all members, without a legend.', attributes: { labels: 'percent', legend: 'none' } },
+      {
+        name: 'Focus view',
+        description: 'One set highlighted, the others hatched in grey.',
+        attributes: { highlighted: 'api' },
+        css: { '--c2-chart__set__dimmed--color': '#a1a1aa', '--c2-chart__set__dimmed--fill-style': 'hatch' },
+      },
+      {
+        name: 'Soft fills',
+        description: 'Stronger tinted fills with no outlines, in a violet, pink and cyan palette.',
+        css: {
+          '--c2-chart__series-1--color': '#7c3aed',
+          '--c2-chart__series-2--color': '#db2777',
+          '--c2-chart__series-3--color': '#0891b2',
+          '--c2-chart__set--fill-opacity': '0.24',
+          '--c2-chart__set--stroke-width': '0',
+        },
+      },
+    ],
+  },
   'c2-autocomplete': {
     html: `<c2-autocomplete style="width:240px" aria-label="Search" placeholder="Search…" item-key="value" label-field="label" description-field="description" suggestions='[{"value":"ada","label":"Ada Lovelace","description":"Platform engineering"},{"value":"api","label":"Autocomplete API notes","description":"Updated yesterday"}]'></c2-autocomplete>`,
     presets: [
@@ -342,6 +401,62 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-button__container__hover--background-color': 'rgba(37, 99, 235, 0.08)',
           '--c2-button__container__active--background-color': 'rgba(37, 99, 235, 0.16)',
           '--c2-button__container--font-weight': '600',
+        },
+      },
+    ],
+  },
+  'c2-notepad': {
+    html: `<c2-notepad label="Notes" style="width:320px" value="Thursday sync&#10;Ship it **behind a flag**&#10;- [ ] Ask about night paper"></c2-notepad>`,
+    presets: [
+      {
+        name: 'Legal pad',
+        description: 'Canary paper, wide blue rules, a red margin and a glued top instead of the spiral.',
+        css: {
+          '--c2-notepad__sheet--background': '#fbf1a6',
+          '--c2-notepad__rule--color': '#8fb2d6',
+          '--c2-notepad__rule--spacing': '30px',
+          '--c2-notepad__margin--color': '#e07a6e',
+          '--c2-notepad__writing--color': '#1b2433',
+          '--c2-notepad__spiral--display': 'none',
+          '--c2-notepad__glue--display': 'block',
+        },
+      },
+      {
+        name: 'Dot grid',
+        description: 'Warm stock with a 5 mm dot grid and no rules or margin.',
+        css: {
+          '--c2-notepad__sheet--background': '#f7f4ec',
+          '--c2-notepad__rule--color': 'transparent',
+          '--c2-notepad__dot--color': '#b5b0a3',
+          '--c2-notepad__margin--color': 'transparent',
+          '--c2-notepad__margin--inset': '8px',
+          '--c2-notepad__spiral--display': 'none',
+        },
+      },
+      {
+        name: 'Graph paper',
+        description: 'Green engineering grid with a tighter 24px ruling.',
+        css: {
+          '--c2-notepad__sheet--background': '#f0f5ee',
+          '--c2-notepad__rule--color': '#b7d3bd',
+          '--c2-notepad__grid--color': '#b7d3bd',
+          '--c2-notepad__rule--spacing': '24px',
+          '--c2-notepad__writing--font-size': '16px',
+          '--c2-notepad__margin--color': 'transparent',
+          '--c2-notepad__margin--inset': '8px',
+        },
+      },
+      {
+        name: 'Night paper',
+        description: 'Dark slate paper with light ink and brighter inks for dark interfaces.',
+        css: {
+          '--c2-notepad__sheet--background': '#232a33',
+          '--c2-notepad__rule--color': '#3b4654',
+          '--c2-notepad__margin--color': '#6a4651',
+          '--c2-notepad__writing--color': '#e9e4d4',
+          '--c2-notepad__ink-blue--color': '#9fb6ff',
+          '--c2-notepad__ink-red--color': '#ff8f8f',
+          '--c2-notepad__texture--opacity': '0',
         },
       },
     ],
@@ -463,12 +578,13 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
     html: `<c2-kbd>⌘ + K</c2-kbd>`,
     presets: [
       {
-        name: 'Flat',
-        description: 'No shadow, hairline border — an inline tag rather than a key',
+        name: 'Raised',
+        description: 'A keycap with a bottom edge, darker fill and border',
         css: {
-          '--c2-kbd--background-color': 'transparent',
+          '--c2-kbd--background-color': '#f4f4f5',
+          '--c2-kbd--color': '#52525b',
           '--c2-kbd--border': '1px solid #d4d4d8',
-          '--c2-kbd--box-shadow': 'none',
+          '--c2-kbd--box-shadow': '0 1px 0 #a1a1aa',
         },
       },
       {
@@ -2161,6 +2277,42 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
           '--c2-modal__close__hover--background': '#27272a',
           '--c2-modal__close__hover--color': '#fafafa',
           '--c2-modal__backdrop--background': 'rgba(0, 0, 0, 0.7)',
+        },
+      },
+    ],
+  },
+  'c2-hover-card': {
+    html: `<c2-hover-card open-delay="200"><a slot="trigger" href="#">@ada</a>Ada Lovelace wrote the first published algorithm.</c2-hover-card>`,
+    presets: [
+      {
+        name: 'Dark',
+        description: 'Dark surface with a subtle outline and deeper shadow.',
+        css: {
+          '--c2-hover-card--background-color': '#18181b',
+          '--c2-hover-card--color': '#fafafa',
+          '--c2-hover-card--border': '1px solid #3f3f46',
+          '--c2-hover-card--box-shadow': '0 12px 32px rgba(0, 0, 0, 0.35)',
+        },
+      },
+      {
+        name: 'Compact',
+        css: {
+          '--c2-hover-card--width': '200px',
+          '--c2-hover-card--font-size': '12px',
+          '--c2-hover-card--padding-top': '8px',
+          '--c2-hover-card--padding-right': '10px',
+          '--c2-hover-card--padding-bottom': '8px',
+          '--c2-hover-card--padding-left': '10px',
+          '--c2-hover-card--border-radius': '6px',
+        },
+        attributes: { 'open-delay': '0' },
+      },
+      {
+        name: 'Rounded',
+        css: {
+          '--c2-hover-card--border-radius': '14px',
+          '--c2-hover-card--width': '280px',
+          '--c2-hover-card--box-shadow': '0 24px 60px rgba(0, 0, 0, 0.18)',
         },
       },
     ],

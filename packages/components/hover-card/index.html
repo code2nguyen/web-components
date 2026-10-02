@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-hover-card</title>
+    <script type="module" src="/src/hover-card.ts"></script>
+    <style>
+      body {
+        padding: 24px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        color: #18181b;
+      }
+      section {
+        margin-bottom: 32px;
+      }
+      a {
+        color: rgb(2, 101, 220);
+      }
+      .profile {
+        display: flex;
+        gap: 12px;
+      }
+      .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: #e4e4e7;
+        flex: none;
+      }
+      .muted {
+        color: #71717a;
+        margin: 0;
+      }
+      .dark {
+        --c2-hover-card--background-color: #18181b;
+        --c2-hover-card--color: #fafafa;
+        --c2-hover-card--border: 1px solid #3f3f46;
+        --c2-hover-card--width: 240px;
+      }
+      .clip {
+        overflow: hidden;
+        width: 200px;
+        height: 48px;
+        border: 1px dashed #a1a1aa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section>
+      <h3>Profile preview</h3>
+      <p>
+        Reviewed by
+        <c2-hover-card>
+          <a slot="trigger" href="#ada">@ada</a>
+          <div class="profile">
+            <div class="avatar"></div>
+            <div>
+              <strong>Ada Lovelace</strong>
+              <p class="muted">Wrote the first published algorithm. Joined March 1843.</p>
+              <a href="#follow">Follow</a>
+            </div>
+          </div>
+        </c2-hover-card>
+        yesterday.
+      </p>
+    </section>
+
+    <section>
+      <h3>Placements</h3>
+      <c2-hover-card placement="top" open-delay="0"><a slot="trigger" href="#">top</a>Above the trigger.</c2-hover-card>
+      <c2-hover-card placement="right" open-delay="0"><a slot="trigger" href="#">right</a>To the right.</c2-hover-card>
+      <c2-hover-card placement="left" open-delay="0"><a slot="trigger" href="#">left</a>To the left.</c2-hover-card>
+    </section>
+
+    <section>
+      <h3>Themed and never clipped</h3>
+      <div class="clip">
+        <c2-hover-card class="dark" open-delay="200"><a slot="trigger" href="#">Hover me</a>Escapes the overflow: hidden box.</c2-hover-card>
+      </div>
+    </section>
+
+    <section>
+      <h3>Disabled</h3>
+      <c2-hover-card disabled><a slot="trigger" href="#">No preview</a>Never shown.</c2-hover-card>
+    </section>
+  </body>
+</html>
