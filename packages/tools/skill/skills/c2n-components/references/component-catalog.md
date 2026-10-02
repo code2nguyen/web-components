@@ -61,7 +61,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Hover Card** — `c2-hover-card` · `@c2n/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.
 - **Modal** — `c2-modal` · `@c2n/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
 - **Overlay** — `c2-overlay` · `@c2n/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
-- **Progress** — `c2-progress` · `@c2n/progress` — Linear progress bar, indeterminate or filling to a value, with an optional label and count.
+- **Progress** — `c2-progress` · `@c2n/progress` — Progress bar or ring, indeterminate or filling to a value, with an optional label and count.
 - **Sheet** — `c2-sheet` · `@c2n/sheet` — Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.
 - **Skeleton** — `c2-skeleton` · `@c2n/skeleton` — Placeholder block standing in for content that has not arrived, in three shapes and three animations.
 - **Spinner** — `c2-spinner` · `@c2n/spinner` — Circular progress indicator, indeterminate or showing a value, with optional text.
