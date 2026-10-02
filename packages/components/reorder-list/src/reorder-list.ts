@@ -1003,10 +1003,20 @@ export class ReorderList extends LitElement {
     const point = session?.latestPoint
     const offset = session?.pickupOffset
     if (!session || session.phase !== 'dragging-pointer' || !preview || !point || !offset) return
-    preview.style.left = `${Math.round(point.x - offset.x)}px`
-    preview.style.top = `${Math.round(point.y - offset.y)}px`
+    const x = Math.round(point.x - offset.x)
+    const y = Math.round(point.y - offset.y)
+    preview.style.left = `${x}px`
+    preview.style.top = `${y}px`
     preview.style.width = this.placeholderSize.width
     preview.style.height = this.placeholderSize.height
+    // `position: fixed` is only viewport-relative while no ancestor contains it: a `transform`, `filter` or `contain`
+    // ancestor (and, in Safari, a size container) moves the preview by its own offset. Measure and shift it back.
+    const rect = preview.getBoundingClientRect()
+    if (rect.width <= 0 && rect.height <= 0) return
+    const driftX = Math.round(rect.left - x)
+    const driftY = Math.round(rect.top - y)
+    if (driftX) preview.style.left = `${x - driftX}px`
+    if (driftY) preview.style.top = `${y - driftY}px`
   }
 
   private findScrollContainer(): HTMLElement | null {
