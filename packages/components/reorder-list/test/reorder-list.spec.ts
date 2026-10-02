@@ -1040,7 +1040,13 @@ test('coalesces 100-item destination renders and keeps one auto-scroll frame pen
 async function swipeItem(page: import('@playwright/test').Page, selector: string, distance: number): Promise<void> {
   const box = await page.locator(selector).boundingBox()
   if (!box) throw new Error('Missing swipe geometry')
-  const x = box.x + box.width / 2
+  const viewport = page.viewportSize()!
+  // Start in the middle, or at the far edge when a long swipe from the middle would leave the window, and keep the end
+  // inside it: Firefox stops reporting the pointer at the window's edge and never delivers the release, so a swipe that
+  // leaves the window falls short and never ends. A narrow (touch) window shortens it to the room there is.
+  const middle = box.x + box.width / 2
+  const x = middle + distance < 1 ? box.x + box.width - 8 : middle + distance > viewport.width - 1 ? box.x + 8 : middle
+  distance = Math.max(1 - x, Math.min(viewport.width - 1 - x, distance))
   const y = box.y + box.height / 2
   await page.mouse.move(x, y)
   await page.mouse.down()
