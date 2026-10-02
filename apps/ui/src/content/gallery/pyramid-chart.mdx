@@ -1,0 +1,65 @@
+---
+title: 'Pyramid chart gallery'
+description: 'Customer tiers, test suites, headcount and hiring pipelines drawn as pyramids.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { PyramidChart } from '@c2n/chart/pyramid-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+<GalleryGrid min="340">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-pyramid-chart label-field="plan" data='[{"plan":"Enterprise","accounts":42},{"plan":"Business","accounts":318},{"plan":"Team","accounts":1260},{"plan":"Starter","accounts":4870}]'>
+  <c2-chart-series field="accounts" label="Accounts"></c2-chart-series>
+</c2-pyramid-chart>
+```
+
+```html tag=MdxCodeBlock,label=Test pyramid
+<style>
+  .test-pyramid { width: 100%; --c2-chart--height: 260px; --c2-chart__series-1--color: #0f766e; --c2-chart__series-2--color: #14b8a6; --c2-chart__series-3--color: #5eead4; }
+</style>
+<c2-pyramid-chart class="test-pyramid" label-field="kind" sizing="equal" labels="inside" legend="none" data='[{"kind":"E2E","tests":40},{"kind":"Integration","tests":180},{"kind":"Unit","tests":1200}]'>
+  <c2-chart-series field="tests" label="Tests"></c2-chart-series>
+</c2-pyramid-chart>
+```
+
+```html tag=MdxCodeBlock,label=Headcount by level
+<style>
+  .org-pyramid { width: 100%; --c2-chart--height: 260px; --c2-chart__level--gap: 4px; --c2-chart__level--align: start; --c2-chart__slice--border: none; }
+</style>
+<c2-pyramid-chart class="org-pyramid" label-field="level" label-content="name-percent" legend="none" data='[{"level":"Executive","people":6},{"level":"Director","people":18},{"level":"Manager","people":41},{"level":"Individual contributor","people":149}]'>
+  <c2-chart-series field="people" label="People"></c2-chart-series>
+</c2-pyramid-chart>
+```
+
+```html tag=MdxCodeBlock,label=Hiring pipeline
+<style>
+  .hiring-pyramid { width: 100%; --c2-chart--height: 280px; --c2-chart__series-1--color: #7c3aed; --c2-chart__series-2--color: #8b5cf6; --c2-chart__series-3--color: #a78bfa; --c2-chart__series-4--color: #c4b5fd; --c2-chart__series-5--color: #ddd6fe; }
+</style>
+<c2-pyramid-chart class="hiring-pyramid" label-field="stage" apex="bottom" legend="none" data='[{"stage":"Applied","candidates":1840},{"stage":"Screened","candidates":612},{"stage":"Interviewed","candidates":148},{"stage":"Offer","candidates":31},{"stage":"Hired","candidates":24}]'>
+  <c2-chart-series field="candidates" label="Candidates"></c2-chart-series>
+</c2-pyramid-chart>
+```
+
+```html tag=MdxCodeBlock,label=On its side
+<style>
+  .side-pyramid { width: 100%; --c2-chart--height: 220px; --c2-chart__level--min-width: 18%; }
+</style>
+<c2-pyramid-chart class="side-pyramid" label-field="tier" apex="end" label-content="name" legend="none" data='[{"tier":"Free","users":8200},{"tier":"Pro","users":2100},{"tier":"Team","users":640},{"tier":"Enterprise","users":90}]'>
+  <c2-chart-series field="users" label="Users"></c2-chart-series>
+</c2-pyramid-chart>
+```
+
+```html tag=MdxCodeBlock,label=Flat top
+<style>
+  .flat-pyramid { width: 100%; --c2-chart--height: 260px; --c2-chart__level--min-width: 24%; --c2-chart__level--gap: 4px; --c2-chart__level--border-radius: 10px; --c2-chart__slice--border: none; }
+</style>
+<c2-pyramid-chart class="flat-pyramid" label-field="need" sort="none" labels="inside" label-content="name" legend="none" data='[{"need":"Growth","score":12},{"need":"Esteem","score":18},{"need":"Belonging","score":22},{"need":"Safety","score":24},{"need":"Basics","score":24}]'>
+  <c2-chart-series field="score" label="Score"></c2-chart-series>
+</c2-pyramid-chart>
+```
+
+</GalleryGrid>

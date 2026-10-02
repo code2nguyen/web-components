@@ -1,0 +1,117 @@
+---
+title: 'Month Planner'
+description: 'Month calendar that draws events and trips as bars across the days they cover.'
+category: 'Planning'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { MonthPlanner } from '@c2n/month-planner'
+import { Button } from '@c2n/button'
+
+`c2-month-planner` shows a plan on a month grid. Each entry in `events` is drawn as a bar from its `start` to its `end`
+day, so a vacation reads as one strip with a clear beginning and end, continued on the next row when it crosses a
+week. Overlapping entries stack in separate lanes. The header steps between months (and back to today); `month`
+picks the one shown. The week starts on the locale's usual day (Sunday in `en-US`, Monday in `fr` or `en-GB`,
+Saturday in `ar-EG`); `week-start` (`monday`, `sunday` or `saturday`) overrides it. The planner's text follows `locale` (`fr`,
+`en-GB`, …) and, when it is not set, the browser's language: month and day names, Today and "this month" come from the
+browser's `Intl` data, and the navigation labels are built in for English, French, German, Spanish, Italian, Portuguese,
+Dutch and Vietnamese, falling back to English otherwise.
+
+To jump further, click the month title: a picker shows the twelve months of a year with a year stepper above them. A
+dot and a soft tint mark every month that has events, so a plan months away is two or three clicks. Arrow keys move between months, Page Up and Page Down change the year,
+Enter picks and Escape closes. Set `month-picker="false"` for a plain title.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/month-planner
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/month-planner
+<div data-label="Vacation plan">
+  <c2-month-planner
+    month="2026-09"
+    locale="en-US"
+    events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"summit","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
+  ></c2-month-planner>
+</div>
+<div data-label="Heading and actions">
+  <c2-month-planner
+    heading="Team holidays"
+    month="2026-09"
+    locale="en-US"
+    events='[{"id":"ana","title":"Ana: vacation","start":"2026-09-07","end":"2026-09-11","color":"#0f766e"},{"id":"leo","title":"Leo: parental leave","start":"2026-09-14","end":"2026-09-25","color":"#be185d"}]'
+  >
+    <c2-button slot="actions">Add event</c2-button>
+  </c2-month-planner>
+</div>
+```
+
+## Heading and actions
+
+`heading` puts a title of the planner's own in front of the month (`--c2-month-planner__heading--font-size`,
+`--c2-month-planner__heading--font-weight`) and becomes the planner's accessible name, unless `aria-label` is set;
+without it, the month names the planner. For more than plain text, put your own markup in the `heading` slot, such as
+a field that renames the planner. It replaces the `heading` text and names the planner unless `heading` or
+`aria-label` is set.
+
+The `actions` slot puts controls of your own at the end of the header, before the month navigation, e.g. an "Add
+event" button or a settings menu, spaced by `--c2-month-planner__actions--gap`. On a narrow planner the header wraps
+instead of overflowing. The planner leaves what they do to you.
+
+```html tag=CodeBlock
+<c2-month-planner heading="Team holidays">
+  <c2-button slot="actions">Add event</c2-button>
+  <c2-icon-button slot="actions" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
+</c2-month-planner>
+```
+
+## Events
+
+Each entry is `{ id?, title, start, end?, color?, textColor? }`. Dates are local `YYYY-MM-DD` strings and `end` is inclusive;
+leave it out for a one-day entry. `color` is any CSS colour for that bar (its text stays white in both themes; add `textColor` for a light `color`),
+otherwise `--c2-month-planner__event--background` applies. Entries without a valid `start` are skipped.
+
+Set `events` as a property from code, or as a JSON attribute in markup. Bars are buttons: clicking one (or pressing
+Enter on it) fires `event-click` with the entry in `event.detail.event`. The header fires `month-change` with the
+month now shown (`YYYY-MM`), which is where to load the next month's plan.
+
+```ts tag=CodeBlock
+import '@c2n/month-planner'
+
+const planner = document.querySelector('c2-month-planner')!
+planner.events = [{ id: 'trip', title: 'Vacation', start: '2026-09-10', end: '2026-09-18' }]
+planner.addEventListener('event-click', (event) => console.log(event.detail.event.id))
+planner.addEventListener('month-change', (event) => console.log(event.detail.month))
+```
+
+## Narrow screens
+
+Below 480px of width the planner turns compact, the way a phone calendar does: each day is its date over one dot per
+event (three at most), a tap picks a day, and that day's events are listed under the month as buttons that fire the
+same `event-click`. Arrow keys move between days, crossing into the next or previous month. It opens on today, or on
+the 1st when another month is shown. The breakpoint follows the planner's own width, not the viewport's.
+
+```html tag=UsageBlock,package=@c2n/month-planner
+<style>
+  .phone {
+    width: 360px;
+    max-width: 100%;
+  }
+</style>
+<div data-label="Compact">
+  <c2-month-planner
+    class="phone"
+    month="2026-09"
+    locale="en-US"
+    events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"summit","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
+  ></c2-month-planner>
+</div>
+```
+
+In a layout that sizes it from its content, such as a centred flex column, the planner takes 720px or the space
+available, whichever is smaller; give it a `width` to choose another.

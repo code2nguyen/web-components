@@ -36,9 +36,21 @@
       "types": "./types/src/radar-chart.d.ts",
       "default": "./dist/radar-chart.js"
     },
+    "./pyramid-chart.js": {
+      "types": "./types/src/pyramid-chart.d.ts",
+      "default": "./dist/pyramid-chart.js"
+    },
+    "./butterfly-chart.js": {
+      "types": "./types/src/butterfly-chart.d.ts",
+      "default": "./dist/butterfly-chart.js"
+    },
     "./scatter-chart.js": {
       "types": "./types/src/scatter-chart.d.ts",
       "default": "./dist/scatter-chart.js"
+    },
+    "./bubble-chart.js": {
+      "types": "./types/src/bubble-chart.d.ts",
+      "default": "./dist/bubble-chart.js"
     },
     "./candlestick-chart.js": {
       "types": "./types/src/candlestick-chart.d.ts",
@@ -51,6 +63,22 @@
     "./overlap-layout.js": {
       "types": "./types/src/overlap-layout.d.ts",
       "default": "./dist/overlap-layout.js"
+    },
+    "./map-chart.js": {
+      "types": "./types/src/map-chart.d.ts",
+      "default": "./dist/map-chart.js"
+    },
+    "./map-layer.js": {
+      "types": "./types/src/map-layer.d.ts",
+      "default": "./dist/map-layer.js"
+    },
+    "./map-scale.js": {
+      "types": "./types/src/map-scale.d.ts",
+      "default": "./dist/map-scale.js"
+    },
+    "./maps/*.js": {
+      "types": "./types/src/maps/*.d.ts",
+      "default": "./dist/maps/*.js"
     },
     "./chart-series.js": {
       "types": "./types/src/chart-series.d.ts",
@@ -119,10 +147,17 @@
     "line chart",
     "gauge chart",
     "radar chart",
+    "pyramid chart",
+    "butterfly chart",
+    "population pyramid",
     "scatter plot",
+    "bubble chart",
     "candlestick chart",
     "venn diagram",
     "overlap chart",
+    "map chart",
+    "choropleth",
+    "geo map",
     "sparkline",
     "uplot",
     "echarts",
@@ -161,13 +196,21 @@
   },
   "dependencies": {
     "@c2n/core": "0.0.19",
+    "@types/geojson": "7946.0.16",
+    "@types/topojson-specification": "1.0.5",
     "@upsetjs/venn.js": "2.0.0",
-    "lit": "3.3.3"
+    "d3-geo": "3.1.1",
+    "lit": "3.3.3",
+    "topojson-client": "3.1.0"
   },
   "devDependencies": {
     "@c2n/config": "*",
+    "@types/d3-geo": "3.1.0",
+    "@types/topojson-client": "3.1.5",
     "echarts": "^6.1.0",
-    "uplot": "^1.6.32"
+    "uplot": "^1.6.32",
+    "us-atlas": "3.0.1",
+    "world-atlas": "2.0.2"
   },
   "customElements": "custom-elements.json",
   "peerDependencies": {

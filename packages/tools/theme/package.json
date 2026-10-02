@@ -55,6 +55,9 @@
       "dependencies": [
         "type-check",
         "../../components/gantt:build",
+        "../../components/flow:build",
+        "../../components/week-planner:build",
+        "../../components/month-planner:build",
         "../../components/hover-card:build",
         "../../components/command:build",
         "../../components/marker:build",

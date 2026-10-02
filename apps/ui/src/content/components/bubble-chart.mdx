@@ -1,0 +1,61 @@
+---
+title: 'Bubble chart'
+description: 'An ECharts scatter plot with a third measure encoded as bubble area, for comparing how two measures relate while showing how much each point weighs.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-bubble-chart'
+apiTags: ['c2-bubble-chart', 'c2-chart-series', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { BubbleChart } from '@c2n/chart/bubble-chart.js'
+import { ChartSeries } from '@c2n/chart/chart-series.js'
+
+The default example plots approximate, rounded 2023 figures after the World Bank's [World Development Indicators](https://databank.worldbank.org/source/world-development-indicators) (GDP per capita in current US$, life expectancy at birth, population in millions); check the source before reusing them. The product-portfolio example (a growth–share matrix: each business unit is a column holding its products' market growth) is illustrative.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .bubble-usage {
+    --c2-chart--height: 380px;
+  }
+</style>
+
+<div data-label="One row per point">
+  <c2-bubble-chart class="bubble-usage" x-field="gdp" y-field="life" size-field="pop" size-label="Population (M)" label-field="country" series-field="region" x-scale="log" size-legend x-label="GDP per capita (US$, log scale)" y-label="Life expectancy (years)" data='[{"country":"Nigeria","region":"Africa","gdp":1620,"life":53.6,"pop":224},{"country":"Ethiopia","region":"Africa","gdp":1290,"life":65.6,"pop":127},{"country":"Egypt","region":"Africa","gdp":3510,"life":70.2,"pop":113},{"country":"South Africa","region":"Africa","gdp":6020,"life":62.3,"pop":60},{"country":"Kenya","region":"Africa","gdp":1950,"life":62.7,"pop":55},{"country":"United States","region":"Americas","gdp":81700,"life":78.4,"pop":335},{"country":"Brazil","region":"Americas","gdp":10040,"life":75.8,"pop":216},{"country":"Mexico","region":"Americas","gdp":13930,"life":75.0,"pop":129},{"country":"Canada","region":"Americas","gdp":53430,"life":81.7,"pop":40},{"country":"Colombia","region":"Americas","gdp":6980,"life":77.7,"pop":52},{"country":"China","region":"Asia","gdp":12610,"life":78.6,"pop":1410},{"country":"India","region":"Asia","gdp":2480,"life":72.0,"pop":1429},{"country":"Indonesia","region":"Asia","gdp":4880,"life":71.2,"pop":278},{"country":"Japan","region":"Asia","gdp":33830,"life":84.7,"pop":124},{"country":"Pakistan","region":"Asia","gdp":1370,"life":67.6,"pop":240},{"country":"Bangladesh","region":"Asia","gdp":2530,"life":72.4,"pop":173},{"country":"Vietnam","region":"Asia","gdp":4350,"life":74.6,"pop":99},{"country":"Germany","region":"Europe","gdp":52750,"life":81.0,"pop":84},{"country":"France","region":"Europe","gdp":44460,"life":82.8,"pop":68},{"country":"United Kingdom","region":"Europe","gdp":48870,"life":81.1,"pop":68},{"country":"Italy","region":"Europe","gdp":38370,"life":83.7,"pop":59},{"country":"Poland","region":"Europe","gdp":22110,"life":78.6,"pop":37},{"country":"Russia","region":"Europe","gdp":13820,"life":73.2,"pop":144}]'></c2-bubble-chart>
+</div>
+
+<div data-label="One column per series">
+  <c2-bubble-chart class="bubble-usage" x-field="share" size-field="revenue" size-label="Revenue ($M)" label-field="product" x-label="Relative market share" y-label="Market growth (%)" data='[{"product":"Compute","share":1.2,"infrastructure":22,"revenue":610},{"product":"Storage","share":1.9,"infrastructure":14,"revenue":420},{"product":"CDN","share":0.4,"infrastructure":18,"revenue":90},{"product":"CRM","share":2.3,"applications":4,"revenue":780},{"product":"Email","share":1.6,"applications":3,"revenue":240},{"product":"Analytics","share":0.7,"applications":20,"revenue":160},{"product":"Consulting","share":0.5,"services":5,"revenue":130},{"product":"Security","share":0.3,"services":24,"revenue":55},{"product":"Training","share":0.9,"services":8,"revenue":70}]'>
+    <c2-chart-series field="infrastructure" label="Infrastructure"></c2-chart-series>
+    <c2-chart-series field="applications" label="Applications"></c2-chart-series>
+    <c2-chart-series field="services" label="Services"></c2-chart-series>
+  </c2-bubble-chart>
+</div>
+```
+
+`x-field` and `y-field` place a bubble, `size-field` sizes it and `label-field` names it in the tooltip and inside the bubble. The rows can take either shape:
+
+- **One row per point.** `series-field` names the field that says which series a row belongs to, and `y-field` holds the value. The series are that field's distinct values, in the order they first appear. A `c2-chart-series` whose `field` is one of those values relabels or recolours it, and declaring any of them limits the chart to the ones declared.
+- **One column per series.** Each `c2-chart-series` reads its own `field` as the y value, as on the [scatter chart](../scatter-chart), and every series shares the one size column. A row may carry only one series' field.
+
+Size is encoded as **area**: the diameter grows with the square root of the value, between `--c2-chart__bubble--min-size` and `--c2-chart__bubble--max-size`, so a value twice as large looks twice as large. The largest size in the data draws at the maximum; set `size-max` to pin that value when several charts must be compared. Within each series the larger bubbles are drawn first, so the small ones stay on top and hoverable.
+
+Each axis is widened past the data until every bubble fits inside the plot, and its ends are rounded to ticks: a smallest x of 16 with a large bubble on it starts the axis at 14, not at 16 with half the bubble over the axis. A log axis widens to whole decades.
+
+`x-scale="log"` and `y-scale="log"` suit a measure that spans orders of magnitude; rows at or below zero are skipped on a log axis. `bubble-labels` is `auto` (label the bubbles whose text fits inside), `all` or `none`. `size-legend` ends the built-in legend with a key to the sizes, titled by `size-label`, as in the first example; it is off by default. The key is part of the built-in legend, so `legend="none"` or a linked `c2-chart-legend` hides it too.
+
+`point-hover`, `point-click` and `tooltip-change` report the row, not its draw position, and carry its `size` (and `label`); `formatSize` formats the size in the tooltip and the key.
+
+## Styling
+
+Every visual detail of the bubbles is a CSS custom property: fill opacity (`--c2-chart__bubble--opacity`, and `__hover--opacity` for the hovered bubble), outline width, the minimum and maximum diameters, the bubble label's colour and size, and the size key's colour. Series colours come from `--c2-chart__series-1…8--color` as on every chart.

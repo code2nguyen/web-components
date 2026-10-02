@@ -372,9 +372,44 @@ export abstract class ChartBase extends LitElement {
     return ''
   }
 
+  /**
+   * Whether the chart has something to draw before it has data: a map draws its geometry, and a region picker may
+   * never be given rows at all. Such a chart skips the empty state and creates its engine without a frame row.
+   */
+  protected get rendersWithoutData(): boolean {
+    return false
+  }
+
+  /**
+   * Whether everything the engine needs besides data has arrived. A map waits for its geometry to load; until then
+   * the chart neither creates its engine nor shows the empty state.
+   */
+  protected get readyToDraw(): boolean {
+    return true
+  }
+
+  /**
+   * Whether a change must replace the engine options rather than merge them. Merging keeps keys a new option object
+   * leaves out, which is wrong when a change removes them (a map's projection or extent box). A changed series list
+   * always replaces.
+   */
+  protected replacesOptions(_changed: PropertyValues): boolean {
+    return false
+  }
+
   /** Whether changing chart data can change the legend model. Pie charts use row labels as entries. */
   protected get legendDependsOnData(): boolean {
     return false
+  }
+
+  /**
+   * Whether a change reshapes the frame, so the rows must be read again. `x-field`, `label-field` and `x-type`
+   * always do, and so does the series list: definitions that arrive after `data` would otherwise leave the frame
+   * holding the columns inferred from the first row. A chart with more row fields (the bubble chart's size) adds
+   * its own. The builder's signature cache makes a change that reads the same fields free.
+   */
+  protected reshapesFrame(changed: PropertyValues): boolean {
+    return changed.has('series') || changed.has('seriesElements')
   }
 
   // ------------------------------------------------------------ lifecycle ---
@@ -451,7 +486,14 @@ export abstract class ChartBase extends LitElement {
     if (!this.hasUpdated && !isServer) this.#collectSeries(true)
     // The fields that shape the frame count as data: a chart switched to another x or label field at runtime must
     // re-read its rows, which the builder's signature cache would otherwise hand back unchanged.
-    if (changed.has('data') || changed.has('revision') || changed.has('xField') || changed.has('labelField') || changed.has('xType')) {
+    if (
+      changed.has('data') ||
+      changed.has('revision') ||
+      changed.has('xField') ||
+      changed.has('labelField') ||
+      changed.has('xType') ||
+      this.reshapesFrame(changed)
+    ) {
       this.frame = this.frameBuilder.build(this.data, this.normalizeContext())
       this.#dataDirty = true
     }
@@ -465,7 +507,7 @@ export abstract class ChartBase extends LitElement {
       }
     }
     // A shrinking series set cannot be merged into ECharts: the removed series would stay on screen.
-    if (changed.has('series') || changed.has('seriesElements')) this.#optionsMode = 'replace'
+    if (changed.has('series') || changed.has('seriesElements') || this.replacesOptions(changed)) this.#optionsMode = 'replace'
   }
 
   protected override updated(changed: PropertyValues): void {
@@ -660,8 +702,8 @@ export abstract class ChartBase extends LitElement {
 
   /** True once there is something to draw and somewhere to draw it. */
   #canRender(): boolean {
-    if (!this.#visible || this.engineFailed || this.error || this.validationError() || this.loading) return false
-    if (!this.plotElement || !this.frame || this.frame.length === 0) return false
+    if (!this.#visible || this.engineFailed || this.error || this.validationError() || this.loading || !this.readyToDraw) return false
+    if (!this.plotElement || !this.frame || (this.frame.length === 0 && !this.rendersWithoutData)) return false
     const { width, height } = this.buildContext()
     return width > 0 && height > 0
   }
@@ -701,6 +743,7 @@ export abstract class ChartBase extends LitElement {
         hover: (detail) => this.handleEngineHover(detail),
         click: (detail) => this.handleEngineClick(detail),
         rangeChange: (detail) => this.dispatchEvent(new CustomEvent<ChartRangeEventDetail>('range-change', { detail })),
+        viewChange: (detail) => this.handleEngineViewChange(detail),
       })
       this.adapter = adapter
       this.#optionsDirty = false
@@ -809,8 +852,11 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
+  /** The engine reports a zoom or pan of the view. Only the map chart has one. */
+  protected handleEngineViewChange(_detail: { zoom: number }): void {}
+
   /** The engine reports a hovered datum, or `null` when the pointer leaves. A chart with its own events extends this. */
-  protected handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
+  protected handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string } | null): void {
     if (!detail || !this.frame) {
       this.#tooltipContext = null
       this.#setHover(null)
@@ -946,7 +992,7 @@ export abstract class ChartBase extends LitElement {
    * The engine reports a clicked datum: `point-click` fires, and unless a listener cancels it the clicked series is
    * highlighted, or the highlight cleared when it already was. A chart with its own events extends this.
    */
-  protected handleEngineClick(detail: { index: number; seriesIndex: number }): void {
+  protected handleEngineClick(detail: { index: number; seriesIndex: number; name?: string; component?: string }): void {
     const point = this.pointAt(detail.index, detail.seriesIndex)
     if (!point) return
     const event = new CustomEvent<ChartPointEventDetail>('point-click', { detail: point, cancelable: true })
@@ -1006,7 +1052,7 @@ export abstract class ChartBase extends LitElement {
           <div class="plot" part="plot"></div>
           <div class="overlay" part="overlay">
             <div class="tooltip" part="tooltip" role="tooltip" popover="manual">${this.renderTooltipBody()}</div>
-            <div class="actions" part="actions"><slot name="actions"></slot></div>
+            <div class="actions" part="actions">${this.renderActionsExtras()}<slot name="actions"></slot></div>
           </div>
           ${this.renderState()}
         </div>
@@ -1043,7 +1089,7 @@ export abstract class ChartBase extends LitElement {
     const error = this.error || this.validationError()
     if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
     if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
-    if (!this.frame || this.frame.length === 0) {
+    if ((!this.frame || this.frame.length === 0) && !this.rendersWithoutData) {
       return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage}</slot></div>`
     }
     return nothing
@@ -1075,8 +1121,19 @@ export abstract class ChartBase extends LitElement {
     return html`
       <div class="legend legend--${this.legend}" part="legend">
         <slot name="legend"></slot>
+        ${this.renderLegendExtras()}
       </div>
     `
+  }
+
+  /** Controls drawn before the `actions` slot, such as the map chart's zoom buttons. */
+  protected renderActionsExtras(): unknown {
+    return nothing
+  }
+
+  /** Content drawn after the series entries in the built-in legend, such as the bubble chart's size key. */
+  protected renderLegendExtras(): unknown {
+    return nothing
   }
 
   #renderLegendEntries(): void {

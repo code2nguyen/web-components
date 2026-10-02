@@ -165,6 +165,10 @@
       "types": "./lib/details.d.ts",
       "default": "./lib/details.js"
     },
+    "./flow": {
+      "types": "./lib/flow.d.ts",
+      "default": "./lib/flow.js"
+    },
     "./gantt": {
       "types": "./lib/gantt.d.ts",
       "default": "./lib/gantt.js"
@@ -224,6 +228,10 @@
     "./modal": {
       "types": "./lib/modal.d.ts",
       "default": "./lib/modal.js"
+    },
+    "./month-planner": {
+      "types": "./lib/month-planner.d.ts",
+      "default": "./lib/month-planner.js"
     },
     "./navigation-menu": {
       "types": "./lib/navigation-menu.d.ts",
@@ -373,6 +381,10 @@
       "types": "./lib/virtual-list.d.ts",
       "default": "./lib/virtual-list.js"
     },
+    "./week-planner": {
+      "types": "./lib/week-planner.d.ts",
+      "default": "./lib/week-planner.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -430,6 +442,7 @@
     "@c2n/date-input": "0.0.19",
     "@c2n/date-selector": "0.0.19",
     "@c2n/details": "0.0.19",
+    "@c2n/flow": "0.0.19",
     "@c2n/gantt": "0.0.19",
     "@c2n/header": "0.0.19",
     "@c2n/hover-card": "0.0.19",
@@ -445,6 +458,7 @@
     "@c2n/mat-icon": "0.0.19",
     "@c2n/menu": "0.0.19",
     "@c2n/modal": "0.0.19",
+    "@c2n/month-planner": "0.0.19",
     "@c2n/navigation-menu": "0.0.19",
     "@c2n/number-input": "0.0.19",
     "@c2n/otp-input": "0.0.19",
@@ -482,7 +496,8 @@
     "@c2n/tooltip": "0.0.19",
     "@c2n/tree": "0.0.19",
     "@c2n/upload": "0.0.19",
-    "@c2n/virtual-list": "0.0.19"
+    "@c2n/virtual-list": "0.0.19",
+    "@c2n/week-planner": "0.0.19"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "^6.0.0",

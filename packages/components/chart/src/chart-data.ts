@@ -21,6 +21,15 @@ export interface NormalizeContext {
   labelField: string
   /** The series, in draw order; only their `field` is read here. */
   series: ChartSeriesConfig[]
+  /**
+   * Long-format rows: the row field whose value names the series a row belongs to. Each series' `field` is then a
+   * value of this field rather than a field of its own, and the plotted value is read from `valueField`.
+   */
+  seriesField?: string
+  /** The row field holding the plotted value when `seriesField` groups the rows. */
+  valueField?: string
+  /** Per-row measures read alongside the series into `frame.extras` (the bubble chart's size). */
+  extraFields?: string[]
   /** Changing this forces a re-read of the same input array. */
   signature: string
 }
@@ -180,14 +189,28 @@ export class ChartFrameBuilder {
     for (let index = 0; index < length; index += 1) if (xValues[index] === null) xValues[index] = index
 
     const fields = context.series.length > 0 ? context.series.map((series) => series.field) : inferFields(rows, context)
+    const { seriesField, valueField } = context
     const columns = fields.map((field) => {
       const values: (number | null)[] = new Array(length)
-      for (let index = 0; index < length; index += 1) values[index] = toNumber(getFieldValue(rows[index], field))
+      for (let index = 0; index < length; index += 1) {
+        const row = rows[index]
+        // Long format: a row belongs to the one series its group value names and is a gap in every other.
+        if (seriesField) values[index] = String(getFieldValue(row, seriesField)) === field && valueField ? toNumber(getFieldValue(row, valueField)) : null
+        else values[index] = toNumber(getFieldValue(row, field))
+      }
       return packColumn(values, capacity)
     })
 
     const frame: ChartFrame = { x: packColumn(xValues, capacity), columns, length, capacity, revision: 0 }
     if (hasLabels) frame.labels = labels
+    if (context.extraFields && context.extraFields.length > 0) {
+      frame.extras = {}
+      for (const field of context.extraFields) {
+        const values: (number | null)[] = new Array(length)
+        for (let index = 0; index < length; index += 1) values[index] = toNumber(getFieldValue(rows[index], field))
+        frame.extras[field] = packColumn(values, capacity)
+      }
+    }
     return frame
   }
 
@@ -203,6 +226,7 @@ export class ChartFrameBuilder {
       const capacity = capacityFor(frame.length + 1)
       frame.x = growColumn(frame.x, capacity)
       frame.columns = frame.columns.map((column) => growColumn(column, capacity))
+      if (frame.extras) for (const key of Object.keys(frame.extras)) frame.extras[key] = growColumn(frame.extras[key], capacity)
       frame.capacity = capacity
     }
 
@@ -212,6 +236,14 @@ export class ChartFrameBuilder {
       const value = values[index] ?? null
       if (value === null) frame.columns[index] = widenColumn(frame.columns[index], at)
       frame.columns[index][at] = value as number
+    }
+    // An appended point carries no extra measures: record it as a gap so the columns stay aligned with `x`.
+    if (frame.extras) {
+      for (const key of Object.keys(frame.extras)) {
+        const column = widenColumn(frame.extras[key], at)
+        column[at] = null
+        frame.extras[key] = column
+      }
     }
     frame.length += 1
 
@@ -224,6 +256,7 @@ export class ChartFrameBuilder {
     const remaining = frame.length - count
     shiftLeft(frame.x, count, remaining)
     for (const column of frame.columns) shiftLeft(column, count, remaining)
+    if (frame.extras) for (const column of Object.values(frame.extras)) shiftLeft(column, count, remaining)
     if (frame.labels) frame.labels.splice(0, count)
     frame.length = remaining
   }
@@ -296,5 +329,6 @@ function sliceColumn(column: ChartColumn, length: number): ChartColumn {
  */
 function inferFields(rows: ChartRow[], context: NormalizeContext): string[] {
   const row = rows[0] ?? {}
-  return Object.keys(row).filter((key) => typeof row[key] === 'number' && key !== context.xField && key !== context.labelField)
+  const reserved = new Set([context.xField, context.labelField, context.seriesField, context.valueField, ...(context.extraFields ?? [])])
+  return Object.keys(row).filter((key) => typeof row[key] === 'number' && !reserved.has(key))
 }

@@ -39,6 +39,7 @@
     "gallery:audit": "node apps/ui/scripts/gallery-shots.mjs --audit",
     "mcp:smoke": "npm run smoke -w packages/tools/mcp",
     "docs:check": "node scripts/check-component-docs.mjs",
+    "changelog": "node scripts/generate-changelog.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
@@ -93,6 +94,9 @@
     "build": {
       "dependencies": [
         "./packages/components/gantt:build",
+        "./packages/components/flow:build",
+        "./packages/components/week-planner:build",
+        "./packages/components/month-planner:build",
         "./packages/components/hover-card:build",
         "./packages/components/command:build",
         "./packages/components/marker:build",

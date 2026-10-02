@@ -6,6 +6,7 @@ import styles from './status-panel.scss?inline'
 
 export type StatusPanelStatus = 'neutral' | 'loading' | 'empty' | 'info' | 'success' | 'warning' | 'error'
 export type StatusPanelAlign = 'center' | 'start'
+export type StatusPanelMedia = 'icon' | 'illustration' | 'none'
 
 /**
  * Presents a meaningful application state with optional media, supporting copy, actions and additional content. Use it
@@ -14,13 +15,14 @@ export type StatusPanelAlign = 'center' | 'start'
  *
  * @tag c2-status-panel
  *
- * @slot media - Illustration, icon, avatar or other visual. A status icon is shown by default.
+ * @slot media - Illustration, icon, avatar or other visual. A status icon is shown by default. Set `media="illustration"`
+ * for artwork such as a `c2-symbol-*`, or `media="none"` to render no media region at all.
  * @slot title - Short heading. Falls back to the `heading` attribute.
  * @slot description - Supporting explanation. Falls back to the `description` attribute.
  * @slot actions - Primary and secondary actions.
  * @slot content - Additional details, lists or controls below the actions.
  *
- * @csspart media - Container for the `media` slot and its status-icon fallback; always present.
+ * @csspart media - Container for the `media` slot and its status-icon fallback; not rendered when `media="none"`.
  * @csspart title - Heading region for the `title` slot or `heading` fallback; hidden when both are empty.
  * @csspart description - Supporting-copy region for the `description` slot or attribute fallback; hidden when both are empty.
  * @csspart content - Additional-details region around the `content` slot; hidden while the slot is empty.
@@ -39,6 +41,7 @@ export type StatusPanelAlign = 'center' | 'start'
  * @cssproperty {color} [--c2-status-panel__media--background-color=#f4f4f5] - Neutral media background.
  * @cssproperty {color} [--c2-status-panel__media--color=#71717a] - Neutral media colour.
  * @cssproperty {length} [--c2-status-panel__media-icon--size=32px] - Default and slotted icon size.
+ * @cssproperty {length} [--c2-status-panel__illustration--size=128px] - Width and height of the media region and its slotted artwork when `media="illustration"`.
  * @cssproperty {color} [--c2-status-panel__media__info--background-color=#edf1fe] - Information media background.
  * @cssproperty {color} [--c2-status-panel__media__info--color=rgb(2, 101, 220)] - Information media colour.
  * @cssproperty {color} [--c2-status-panel__media__success--background-color=#ecfdf3] - Success media background.
@@ -72,6 +75,13 @@ export class StatusPanel extends LitElement {
   /** Centers the composition or aligns it to the inline start. */
   @property({ reflect: true }) align: StatusPanelAlign = 'center'
 
+  /**
+   * How the media region is presented. `icon` is a tinted status disc holding the default or slotted icon;
+   * `illustration` drops the disc and shows the slotted artwork at `--c2-status-panel__illustration--size`;
+   * `none` renders no media region.
+   */
+  @property({ reflect: true }) media: StatusPanelMedia = 'icon'
+
   /** Plain-text title fallback. Use the `title` slot for rich content. */
   @property() heading = ''
 
@@ -88,7 +98,14 @@ export class StatusPanel extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback()
-    if (!isServer) this.syncSlotState()
+    // A server-rendered panel cannot know its slotted children, so its shadow DOM arrives with the header hidden.
+    // Hydration takes the first render's values as already in the DOM, so state set before it would never reach
+    // the DOM; such a panel reads its slots in `firstUpdated` instead, which renders again after hydrating.
+    if (!isServer && !this.shadowRoot?.hasChildNodes()) this.syncSlotState()
+  }
+
+  override firstUpdated() {
+    this.syncSlotState()
   }
 
   private syncSlotState() {
@@ -151,7 +168,7 @@ export class StatusPanel extends LitElement {
         aria-busy=${this.status === 'loading' ? 'true' : nothing}
       >
         <div class="message">
-          <div part="media" class="media"><slot name="media" @slotchange=${this.handleSlotChange}>${this.renderDefaultMedia()}</slot></div>
+          ${this.media === 'none' ? nothing : html`<div part="media" class="media"><slot name="media">${this.renderDefaultMedia()}</slot></div>`}
           <div class="header" ?hidden=${!hasTitle && !hasDescription}>
             <div part="title" class="title" role="heading" aria-level=${this.headingLevel} ?hidden=${!hasTitle}>
               <slot name="title" @slotchange=${this.handleSlotChange}>${this.heading}</slot>

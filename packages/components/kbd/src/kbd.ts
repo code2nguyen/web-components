@@ -19,11 +19,11 @@ import styles from './kbd.scss?inline'
  * @cssproperty {padding} [--c2-kbd--padding-left=6px]
  * @cssproperty {padding} [--c2-kbd--padding-right=6px]
  * @cssproperty {pixel} [--c2-kbd--gap=4px] - Space between multiple slotted nodes.
- * @cssproperty {color} [--c2-kbd--background-color=#f4f4f5]
- * @cssproperty {color} [--c2-kbd--color=#52525b]
- * @cssproperty {border} [--c2-kbd--border=1px solid #d4d4d8]
+ * @cssproperty {color} [--c2-kbd--background-color=#fafafa]
+ * @cssproperty {color} [--c2-kbd--color=#71717a]
+ * @cssproperty {border} [--c2-kbd--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-kbd--border-radius=5px]
- * @cssproperty {box-shadow} [--c2-kbd--box-shadow=0 1px 0 #a1a1aa]
+ * @cssproperty {box-shadow} [--c2-kbd--box-shadow=none] - Flat by default; `0 1px 0 #a1a1aa` gives the key a raised edge.
  * @cssproperty {font-family} [--c2-kbd--font-family=ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace]
  * @cssproperty {font-size} [--c2-kbd--font-size=12px]
  * @cssproperty {font-weight} [--c2-kbd--font-weight=500]

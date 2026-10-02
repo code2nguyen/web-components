@@ -38,6 +38,8 @@ import '@c2n/feather-icons/icons/copy.js'
 import '@c2n/feather-icons/icons/check.js'
 import '@c2n/feather-icons/icons/download.js'
 import '@c2n/feather-icons/icons/chevron-right.js'
+import '@c2n/feather-icons/icons/plus.js'
+import '@c2n/feather-icons/icons/align-left.js'
 
 import type { AttributeDeclarationItem, CSSDeclarationItem, GroupedCssVariables } from '../../store/manifest-declaration-item.ts'
 import { flatGroupCssProperties, groupCssProperties } from '../../utils/manifest-utils.ts'
@@ -103,6 +105,10 @@ export class ComponentConfigurationPanel extends LitElement {
   @state() private copied = false
   private loadedPresetsFor = ''
 
+  // --- Data tab state ----------------------------------------------------------
+  /** Text being edited per data attribute; kept apart from the store so a half-typed JSON value is never applied. */
+  @state() private dataDrafts: Record<string, { text: string; base: string | undefined; error: string }> = {}
+
   private renderedUid = ''
 
   /** Transient view state must not leak from one example to the next. */
@@ -119,6 +125,7 @@ export class ComponentConfigurationPanel extends LitElement {
       this.importError = ''
       this.copied = false
       this.loadedPresetsFor = ''
+      this.dataDrafts = {}
     }
   }
 
@@ -259,6 +266,7 @@ export class ComponentConfigurationPanel extends LitElement {
 
   private handleReset = () => {
     if (this.uid) resetExample(this.uid)
+    this.dataDrafts = {}
   }
 
   private handleSelectComponentChange(event: CustomEvent<SelectionChangeEventDetail> & { target: Select }) {
@@ -269,7 +277,9 @@ export class ComponentConfigurationPanel extends LitElement {
   override render() {
     if (!this.uid || !this.configStore.value.showConfig) return nothing
     const changeCount = this.changeCount
-    const activeTab = this.configStore.value.activeTab ?? 'design'
+    const hasData = !!this.componentConfig?.attributes.some((attr) => attr.data)
+    const requestedTab = this.configStore.value.activeTab ?? 'design'
+    const activeTab = requestedTab === 'data' && !hasData ? 'design' : requestedTab
     return html`<div class="inspector">
       <header class="inspector__header">
         <div class="inspector__heading">
@@ -295,10 +305,12 @@ export class ComponentConfigurationPanel extends LitElement {
       <c2-tabs class="inspector__tabs" selected-tab=${activeTab} @selection-change=${this.handleTabChange}>
         <c2-tab label="Design" for="design"></c2-tab>
         <c2-tab label="Props" for="props"></c2-tab>
+        ${hasData ? html`<c2-tab label="Data" for="data"></c2-tab>` : nothing}
         <c2-tab label="Collection" for="presets"></c2-tab>
         <c2-tab label="Code" for="code"></c2-tab>
         <div id="design" class="tab-panel">${this.renderDesign()}</div>
         <div id="props" class="tab-panel">${this.renderProps()}</div>
+        ${hasData ? html`<div id="data" class="tab-panel">${this.renderData()}</div>` : nothing}
         <div id="presets" class="tab-panel">${this.renderCollection()}</div>
         <div id="code" class="tab-panel">${this.renderCode()}</div>
       </c2-tabs>
@@ -534,12 +546,115 @@ export class ComponentConfigurationPanel extends LitElement {
   }
 
   private renderProps() {
-    const config = this.componentConfig
-    if (!config || config.attributes.length === 0) {
+    const attributes = this.componentConfig?.attributes.filter((attr) => !attr.data) ?? []
+    if (attributes.length === 0) {
       return html`<p class="empty">This component takes no attributes.</p>`
     }
     const initialAttributes = this.initialAttributes
-    return html`<div class="props">${config.attributes.map((attr) => this.renderAttributeRow(attr, initialAttributes))}</div>`
+    return html`<div class="props">${attributes.map((attr) => this.renderAttributeRow(attr, initialAttributes))}</div>`
+  }
+
+  // ---------------------------------------------------------------------------
+  // Data tab: the JSON a data-driven component renders (a table's rows, a tree's items, a chart's data)
+  // ---------------------------------------------------------------------------
+
+  private renderData() {
+    const attributes = this.componentConfig?.attributes.filter((attr) => attr.data) ?? []
+    const initialAttributes = this.initialAttributes
+    return html`<div class="data">
+      <p class="block__hint data__intro">
+        Edit the data as JSON; the example updates as soon as it parses. Data set from script (a <code>dataSource</code>, a <code>renderCell</code>) is not
+        shown here.
+      </p>
+      ${attributes.map((attr) => this.renderDataBlock(attr, initialAttributes))}
+    </div>`
+  }
+
+  private renderDataBlock(attr: AttributeDeclarationItem, initialAttributes: Record<string, string>) {
+    const stored = attr.value
+    // A draft made against an older value (reset, preset applied, another tab) is stale: show the store again.
+    const draft = this.dataDrafts[attr.name]?.base === stored ? this.dataDrafts[attr.name] : undefined
+    const text = draft?.text ?? formatJson(stored)
+    const parsed = draft ? parseJson(draft.text) : parseJson(stored ?? '')
+    const changed = this.isAttributeChanged(attr, initialAttributes)
+    const records = Array.isArray(parsed.value) ? parsed.value : null
+    const canAdd = !!records && (records.length === 0 || isRecord(records[records.length - 1]))
+
+    return html`<section class="block data__block">
+      <h4 class="block__title">
+        <code class="data__name">${attr.name}</code>
+        ${changed ? html`<span class="data__dot" aria-label="Changed"></span>` : nothing}
+        <span class="data__summary">${summarizeJson(parsed.value, stored)}</span>
+      </h4>
+      ${attr.description ? html`<p class="block__hint">${attr.description}</p>` : nothing}
+      <c2-textarea
+        class="data-field"
+        rows="12"
+        resize="vertical"
+        wrap="off"
+        spellcheck="false"
+        placeholder=${attr.type}
+        aria-label="${attr.name} as JSON"
+        ?error=${!!draft?.error}
+        error-text=${draft?.error ?? ''}
+        .value=${text}
+        @input=${(event: Event) => this.handleDataInput(attr.name, stored, (event.target as Textarea).value)}
+      ></c2-textarea>
+      <div class="block__row data__actions">
+        <c2-button class="inspector-btn" ?disabled=${!canAdd} @click=${() => this.handleAddRecord(attr.name, records ?? [])}>
+          <c2-feather-plus slot="prefix-icon"></c2-feather-plus>
+          Add item
+        </c2-button>
+        <c2-button class="inspector-btn" ?disabled=${parsed.error !== ''} @click=${() => this.handleFormatData(attr.name, stored, parsed.value)}>
+          <c2-feather-align-left slot="prefix-icon"></c2-feather-align-left>
+          Format
+        </c2-button>
+        <c2-button class="inspector-btn" ?disabled=${!changed} @click=${() => this.handleResetData(attr.name)}>
+          <c2-feather-rotate-ccw slot="prefix-icon"></c2-feather-rotate-ccw>
+          Reset
+        </c2-button>
+      </div>
+    </section>`
+  }
+
+  /** Applies the text once it is valid JSON; until then only the draft (and its error) changes. */
+  private handleDataInput(name: string, base: string | undefined, text: string) {
+    const parsed = parseJson(text)
+    if (parsed.error) {
+      this.dataDrafts = { ...this.dataDrafts, [name]: { text, base, error: parsed.error } }
+      return
+    }
+    const next = text.trim() ? JSON.stringify(parsed.value) : ''
+    // The draft is rebased on the value it commits, so it stays on screen (cursor and formatting intact).
+    this.dataDrafts = { ...this.dataDrafts, [name]: { text, base: next, error: '' } }
+    this.applyChangeDetail({ [name]: next })
+  }
+
+  private handleFormatData(name: string, base: string | undefined, value: unknown) {
+    this.dataDrafts = { ...this.dataDrafts, [name]: { text: value === undefined ? '' : JSON.stringify(value, null, 2), base, error: '' } }
+  }
+
+  /** Appends a copy of the last record with fresh identifiers, so a new row is one click and one edit away. */
+  private handleAddRecord(name: string, records: unknown[]) {
+    const last = records[records.length - 1]
+    const record: Record<string, unknown> = isRecord(last) ? { ...last } : { id: '1' }
+    for (const key of ['id', 'key', 'value']) {
+      if (key in record) record[key] = nextIdentifier(records, key)
+    }
+    const next = JSON.stringify([...records, record])
+    this.withoutDraft(name)
+    this.applyChangeDetail({ [name]: next })
+  }
+
+  private withoutDraft(name: string) {
+    const drafts = { ...this.dataDrafts }
+    delete drafts[name]
+    this.dataDrafts = drafts
+  }
+
+  private handleResetData(name: string) {
+    this.withoutDraft(name)
+    resetAttribute(this.uid, name)
   }
 
   private renderAttributeRow(attr: AttributeDeclarationItem, initialAttributes: Record<string, string>) {
@@ -807,6 +922,42 @@ export class ComponentConfigurationPanel extends LitElement {
   private renderCode() {
     return html`<demo-generate-code-block .componentUID=${this.uid}></demo-generate-code-block>`
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+}
+
+function parseJson(text: string): { value: unknown; error: string } {
+  if (!text.trim()) return { value: undefined, error: '' }
+  try {
+    return { value: JSON.parse(text), error: '' }
+  } catch (error) {
+    return { value: undefined, error: error instanceof Error ? error.message : 'Invalid JSON' }
+  }
+}
+
+function formatJson(value: string | undefined): string {
+  if (!value) return ''
+  const parsed = parseJson(value)
+  return parsed.error ? value : JSON.stringify(parsed.value, null, 2)
+}
+
+function summarizeJson(value: unknown, stored: string | undefined): string {
+  if (Array.isArray(value)) return `${value.length} ${value.length === 1 ? 'item' : 'items'}`
+  if (isRecord(value)) {
+    const count = Object.keys(value).length
+    return `${count} ${count === 1 ? 'key' : 'keys'}`
+  }
+  return stored ? '' : 'not set'
+}
+
+/** The next free identifier for `key`: one past the largest numeric one, as the same type the records use. */
+function nextIdentifier(records: unknown[], key: string): unknown {
+  const values = records.filter(isRecord).map((record) => record[key])
+  const numbers = values.map((value) => Number(value)).filter((value) => Number.isFinite(value))
+  const next = numbers.length > 0 ? Math.max(...numbers) + 1 : values.length + 1
+  return values.some((value) => typeof value === 'number') ? next : String(next)
 }
 
 declare global {

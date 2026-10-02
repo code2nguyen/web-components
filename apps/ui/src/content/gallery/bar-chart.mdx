@@ -17,13 +17,45 @@ import { Card } from '@c2n/card'
 <ExampleModules />
 <ChartFinancialGallery />
 
-Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm). The component currently draws vertical, grouped bars; horizontal orientation, cumulative stacking and on-bar labels are not yet part of its public API.
+Figures are USD billions from Apple's fiscal 2021–2025 statements in the public [SEC company-facts dataset](https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json) and [2025 Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
 
 <GalleryGrid min="340">
 
 ```html tag=MdxCodeBlock,label=Default
 <c2-bar-chart label-field="month" data='[{"month":"Jan","visitors":186},{"month":"Feb","visitors":305},{"month":"Mar","visitors":237},{"month":"Apr","visitors":73},{"month":"May","visitors":209},{"month":"Jun","visitors":214}]'>
   <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+</c2-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Stacked
+<c2-bar-chart label-field="month" stack="normal" data='[{"month":"Jan","desktop":186,"mobile":80},{"month":"Feb","desktop":305,"mobile":200},{"month":"Mar","desktop":237,"mobile":120},{"month":"Apr","desktop":73,"mobile":190},{"month":"May","desktop":209,"mobile":130},{"month":"Jun","desktop":214,"mobile":140}]'>
+  <c2-chart-series field="desktop" label="Desktop"></c2-chart-series>
+  <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
+</c2-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Percent share
+<c2-bar-chart label-field="month" stack="percent" data='[{"month":"Jan","desktop":186,"mobile":80},{"month":"Feb","desktop":305,"mobile":200},{"month":"Mar","desktop":237,"mobile":120},{"month":"Apr","desktop":73,"mobile":190},{"month":"May","desktop":209,"mobile":130},{"month":"Jun","desktop":214,"mobile":140}]'>
+  <c2-chart-series field="desktop" label="Desktop"></c2-chart-series>
+  <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
+</c2-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Horizontal ranking
+<c2-bar-chart label-field="browser" orientation="horizontal" value-labels legend="none" data='[{"browser":"Chrome","visitors":275},{"browser":"Safari","visitors":200},{"browser":"Firefox","visitors":187},{"browser":"Edge","visitors":173},{"browser":"Other","visitors":90}]'>
+  <c2-chart-series field="visitors" label="Visitors"></c2-chart-series>
+</c2-bar-chart>
+```
+
+```html tag=MdxCodeBlock,label=Labelled stack
+<style>
+  .bar-labelled {
+    --c2-chart__bar--border-radius: 0.15;
+  }
+</style>
+<c2-bar-chart class="bar-labelled" label-field="month" stack="normal" value-labels bar-width="0.7" data='[{"month":"Jan","desktop":186,"mobile":80},{"month":"Feb","desktop":305,"mobile":200},{"month":"Mar","desktop":237,"mobile":120},{"month":"Apr","desktop":73,"mobile":190}]'>
+  <c2-chart-series field="desktop" label="Desktop"></c2-chart-series>
+  <c2-chart-series field="mobile" label="Mobile"></c2-chart-series>
 </c2-bar-chart>
 ```
 

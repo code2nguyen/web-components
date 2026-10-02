@@ -51,6 +51,28 @@ export const overrides: Record<string, Override> = {
     value: '2px dashed var(--c2-theme--color-primary, #2563eb)',
   },
   '--c2-masonry-item__dragging--box-shadow': { token: 'shadow-md' },
+  // Planner tints are the accent at a low strength, so they follow the brand colour and read on a dark surface.
+  '--c2-week-planner__day__today--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
+  },
+  // Translucent text colour rather than an opaque grey, so the line still shows over today's tinted column.
+  '--c2-week-planner__hour--border': {
+    token: 'color-on-surface',
+    value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent)',
+  },
+  '--c2-month-planner__day__today--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',
+  },
+  '--c2-month-planner__month__marked--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
+  '--c2-month-planner__month__marked__hover--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 18%, transparent)',
+  },
   // Border Beam geometry and timing belong to the decorative effect. Its principal colour and radius follow the
   // active theme while the second gradient stop remains an intentionally coordinated accent.
   '--c2-border-beam--outset': { exclude: 'container border alignment geometry' },
@@ -74,6 +96,7 @@ export const overrides: Record<string, Override> = {
   '--c2-status-panel__container--border': { exclude: 'transparent opt-in panel frame' },
   '--c2-status-panel__media--size': { exclude: 'status media geometry' },
   '--c2-status-panel__media-icon--size': { exclude: 'status icon geometry' },
+  '--c2-status-panel__illustration--size': { exclude: 'status illustration geometry' },
   '--c2-status-panel__media__success--background-color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__warning--background-color': { exclude: 'semantic warning colour' },
@@ -150,6 +173,8 @@ export const overrides: Record<string, Override> = {
   '--c2-questionnaire__primary-action--color': onPrimary,
   // A date selector is commonly used as a floating booking panel, so its surface follows the shared popover shadow.
   '--c2-date-selector--box-shadow': { token: 'shadow-md' },
+  // The calendar's month picker floats over the grid like any popover.
+  '--c2-month-planner__picker--box-shadow': { token: 'shadow-md' },
   // The chart's categorical palette is one coordinated set. Series 1 would otherwise follow `color-primary`
   // on its own, so re-tinting a brand would recolour exactly one series out of eight and break the set.
   '--c2-chart__series-1--color': { token: 'chart-series-1' },
@@ -183,6 +208,25 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__surface--color': { token: 'color-surface' },
   // The tooltip is an inverse surface, so its text follows the inverse pair rather than the body colour.
   '--c2-chart__tooltip--color': { token: 'color-on-inverse-surface' },
+  // Map regions are drawn on the card, so the borders between them are the surface colour, not white ink.
+  '--c2-chart__region--border-color': { token: 'color-surface' },
+  // A selected region with no data takes the soft accent surface, as a selected list item does.
+  '--c2-chart__region__selected--background-color': { token: 'color-primary-container' },
+  // The sequential ramp runs from a whisper of the first series colour on the surface to the series colour pulled
+  // toward the text colour: dark navy on a light card, bright blue on a dark one, so "more" always reads as stronger.
+  '--c2-chart__scale-start--color': {
+    token: 'chart-series-1',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-series-1, #0265dc) 15%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-chart__scale-end--color': {
+    token: 'chart-series-1',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-series-1, #0265dc) 70%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  // The diverging scale's negative pole is the second series colour, deepened the same way as the positive end.
+  '--c2-chart__scale-negative--color': {
+    token: 'chart-series-2',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-series-2, #ea580c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
   '--c2-attachment__status__complete--color': { exclude: 'success status colour' },
   '--c2-attachment__progress--background': { token: 'color-outline-variant' },
@@ -267,6 +311,9 @@ export const overrides: Record<string, Override> = {
   '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
   '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
   '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
+  // Month planner, compact layout: the selected day is an inverse-surface circle, today's a primary one.
+  '--c2-month-planner__date__selected--color': { token: 'color-on-inverse-surface' },
+  '--c2-month-planner__date__today__selected--color': onPrimary,
   // Code viewer: monospace font and theme-neutral translucent greys / status colours that work on any syntax theme.
   '--c2-code-viewer--font-family': { exclude: 'monospace font, not the UI font' },
   '--c2-code-viewer__header--background': { exclude: 'translucent grey works on light and dark syntax themes' },
@@ -368,4 +415,11 @@ export const overrides: Record<string, Override> = {
   // The split panel divider is a line drawn as a background: the hairline at rest, the hover border colour under the pointer.
   '--c2-split-panel__divider--background': { token: 'color-outline-variant' },
   '--c2-split-panel__divider__hover--background': { token: 'color-outline-strong' },
+  // Flow: the edges of steps that have not run are drawn lines, the resting outline grey; the dot grid is that grey at
+  // 40% strength, so it stays a backdrop on any canvas colour in either mode. The success and warning colours are
+  // semantic status colours, as on c2-steps.
+  '--c2-flow__dot--color': { token: 'color-outline', value: 'color-mix(in srgb, var(--c2-theme--color-outline, #d4d4d8) 40%, transparent)' },
+  '--c2-flow__edge--color': { token: 'color-outline' },
+  '--c2-flow__success--color': { exclude: 'success status colour' },
+  '--c2-flow__warning--color': { exclude: 'warning status colour' },
 }

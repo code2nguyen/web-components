@@ -8,7 +8,8 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 // Resolve sibling component imports to source so tests never depend on stale dist files.
 const components = ['packages/components', 'packages/icons', 'open-packages'].flatMap((directory) =>
   readdirSync(resolve(root, directory), { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
+    // A directory left with only build output after a branch switch has no package.json; it is not a package.
+    .filter((entry) => entry.isDirectory() && existsSync(resolve(root, directory, entry.name, 'package.json')))
     .flatMap((entry) => {
       const packageRoot = resolve(root, directory, entry.name)
       const manifest = JSON.parse(readFileSync(resolve(packageRoot, 'package.json'), 'utf8')) as {

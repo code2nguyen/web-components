@@ -11,14 +11,19 @@ import type { DefineComponent, HTMLAttributes } from 'vue'
 import type { EventMapOf } from '@c2n/core/event-helper.js'
 import type { AreaChart } from '@c2n/chart/area-chart.js'
 import type { BarChart } from '@c2n/chart/bar-chart.js'
+import type { BubbleChart } from '@c2n/chart/bubble-chart.js'
+import type { ButterflyChart } from '@c2n/chart/butterfly-chart.js'
 import type { CandlestickChart } from '@c2n/chart/candlestick-chart.js'
 import type { ChartLegend } from '@c2n/chart/chart-legend.js'
 import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
+import type { MapChart } from '@c2n/chart/map-chart.js'
+import type { MapLayer } from '@c2n/chart/map-layer.js'
 import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
+import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
 import type { RadarChart } from '@c2n/chart/radar-chart.js'
 import type { ScatterChart } from '@c2n/chart/scatter-chart.js'
 import type { Sparkline } from '@c2n/chart/sparkline.js'
@@ -57,6 +62,7 @@ declare module 'vue' {
       C2Props<BarChart> & {
         'bar-width'?: unknown
         'bar-gap'?: unknown
+        'value-labels'?: unknown
         'y-min'?: unknown
         'y-max'?: unknown
         'x-field'?: unknown
@@ -75,6 +81,57 @@ declare module 'vue' {
         onChartError?: (event: EventOf<BarChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<BarChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<BarChart, 'point-click'>) => void
+      }
+    >
+    'c2-bubble-chart': DefineComponent<
+      C2Props<BubbleChart> & {
+        'y-field'?: unknown
+        'size-field'?: unknown
+        'series-field'?: unknown
+        'x-scale'?: unknown
+        'y-scale'?: unknown
+        'size-max'?: unknown
+        'bubble-labels'?: unknown
+        'size-legend'?: unknown
+        'size-label'?: unknown
+        'x-label'?: unknown
+        'y-label'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<BubbleChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<BubbleChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<BubbleChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<BubbleChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<BubbleChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<BubbleChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<BubbleChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<BubbleChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<BubbleChart, 'point-click'>) => void
+      }
+    >
+    'c2-butterfly-chart': DefineComponent<
+      C2Props<ButterflyChart> & {
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<ButterflyChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<ButterflyChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<ButterflyChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<ButterflyChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<ButterflyChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<ButterflyChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<ButterflyChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<ButterflyChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<ButterflyChart, 'point-click'>) => void
       }
     >
     'c2-candlestick-chart': DefineComponent<
@@ -155,6 +212,52 @@ declare module 'vue' {
         onPointClick?: (event: EventOf<LineChart, 'point-click'>) => void
       }
     >
+    'c2-map-chart': DefineComponent<
+      C2Props<MapChart> & {
+        'region-key'?: unknown
+        'region-field'?: unknown
+        'value-field'?: unknown
+        'value-label'?: unknown
+        'scale-colors'?: unknown
+        'scale-labels'?: unknown
+        'max-zoom'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onUnmatchedRows?: (event: EventOf<MapChart, 'unmatched-rows'>) => void
+        onViewChange?: (event: EventOf<MapChart, 'view-change'>) => void
+        onSelectionChange?: (event: EventOf<MapChart, 'selection-change'>) => void
+        onInput?: (event: EventOf<MapChart, 'input'>) => void
+        onChange?: (event: EventOf<MapChart, 'change'>) => void
+        onTooltipChange?: (event: EventOf<MapChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<MapChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<MapChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<MapChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<MapChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<MapChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<MapChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<MapChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<MapChart, 'point-click'>) => void
+      }
+    >
+    'c2-map-layer': DefineComponent<
+      C2Props<MapLayer> & {
+        'lon-field'?: unknown
+        'lat-field'?: unknown
+        'region-field'?: unknown
+        'size-field'?: unknown
+        'size-label'?: unknown
+        'label-field'?: unknown
+        'from-field'?: unknown
+        'to-field'?: unknown
+        'width-field'?: unknown
+        'width-label'?: unknown
+      }
+    >
     'c2-overlap-chart': DefineComponent<
       C2Props<OverlapChart> & {
         'sets-field'?: unknown
@@ -206,6 +309,27 @@ declare module 'vue' {
         onChartError?: (event: EventOf<PieChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<PieChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<PieChart, 'point-click'>) => void
+      }
+    >
+    'c2-pyramid-chart': DefineComponent<
+      C2Props<PyramidChart> & {
+        'label-content'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onTooltipChange?: (event: EventOf<PyramidChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<PyramidChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<PyramidChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<PyramidChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<PyramidChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<PyramidChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<PyramidChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<PyramidChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<PyramidChart, 'point-click'>) => void
       }
     >
     'c2-radar-chart': DefineComponent<
