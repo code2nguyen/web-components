@@ -801,9 +801,8 @@ export class Notepad extends LitElement {
    * key pressed before it arrives (Enter, a shortcut) would run against the old selection, so read the real one first.
    */
   private syncSelectionFromDom(view: EditorView) {
-    const root = this.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
-    const dom = root.getSelection?.() ?? document.getSelection()
-    if (!dom?.anchorNode || !dom.focusNode || !view.dom.contains(dom.anchorNode) || !view.dom.contains(dom.focusNode)) return
+    const dom = this.domSelection()
+    if (!dom || !view.dom.contains(dom.anchorNode) || !view.dom.contains(dom.focusNode)) return
     try {
       const anchor = view.posAtDOM(dom.anchorNode, dom.anchorOffset)
       const head = view.posAtDOM(dom.focusNode, dom.focusOffset)
@@ -813,6 +812,26 @@ export class Notepad extends LitElement {
     } catch {
       // A position inside a checkbox or between nodes has no text selection; keep ProseMirror's own.
     }
+  }
+
+  /**
+   * The caret and selection inside the shadow root. The standard way is `getComposedRanges` with this shadow root
+   * (Chromium, WebKit, Firefox), whose `direction` tells the anchor from the focus. WebKit's `shadowRoot.getSelection()`
+   * can lag behind a selection set from script, so it is only the fallback for browsers without composed ranges.
+   */
+  private domSelection(): { anchorNode: Node; anchorOffset: number; focusNode: Node; focusOffset: number } | null {
+    const root = this.renderRoot as ShadowRoot & { getSelection?: () => Selection | null }
+    const selection = document.getSelection() as (Selection & { direction?: string }) | null
+    if (selection && typeof selection.getComposedRanges === 'function' && root instanceof ShadowRoot) {
+      if (!selection.rangeCount) return null
+      const range = selection.getComposedRanges({ shadowRoots: [root] })[0]
+      if (!range) return null
+      return selection.direction === 'backward'
+        ? { anchorNode: range.endContainer, anchorOffset: range.endOffset, focusNode: range.startContainer, focusOffset: range.startOffset }
+        : { anchorNode: range.startContainer, anchorOffset: range.startOffset, focusNode: range.endContainer, focusOffset: range.endOffset }
+    }
+    const fallback = root.getSelection?.() ?? selection
+    return fallback?.anchorNode && fallback.focusNode ? (fallback as Selection & { anchorNode: Node; focusNode: Node }) : null
   }
 
   /** Drops the formats `marks` does not allow from pasted content. */
