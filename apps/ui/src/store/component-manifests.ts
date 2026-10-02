@@ -1,5 +1,7 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import notepad from '@c2n/notepad/custom-elements.json'
+import todoList from '@c2n/todo-list/custom-elements.json'
+import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
@@ -88,6 +90,7 @@ import tooltip from '@c2n/tooltip/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
 import symbols from '@c2n/symbols/custom-elements.json'
+import taskIcons from '@c2n/task-icons/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
@@ -95,6 +98,8 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     notepad,
+    todoList,
+    comparisonBar,
     flow,
     weekPlanner,
     monthPlanner,
@@ -183,6 +188,7 @@ export const componentManifests = (function () {
     featherIcons,
     phosphorIcons,
     symbols,
+    taskIcons,
   ].reduce((result, item) => {
     const pkg = item as Package
     const tags: string[] = []

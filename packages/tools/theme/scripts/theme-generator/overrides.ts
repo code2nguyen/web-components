@@ -191,6 +191,12 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__negative--color': { token: 'chart-negative' },
   '--c2-chart__tone-positive--color': { token: 'chart-positive' },
   '--c2-chart__tone-negative--color': { token: 'chart-negative' },
+  // The comparison bar's end side is the opposing quantity (asks, sellers), not an error: it follows the
+  // falling-direction colour so a brand recolours the pair together with the charts.
+  '--c2-comparison-bar__end-segment--background-color': { token: 'chart-negative' },
+  '--c2-comparison-bar__end-value--color': { token: 'chart-negative' },
+  // The neutral middle share (draws, abstentions) reads as a strong outline grey in either theme.
+  '--c2-comparison-bar__middle-segment--background-color': { token: 'color-outline-strong' },
   // Handed to the engine to draw marker and slice borders against the card, so it follows the surface
   // rather than reading as white text, which is how the colour rule would otherwise classify it.
   '--c2-chart__surface--color': { token: 'color-surface' },
@@ -391,6 +397,35 @@ export const overrides: Record<string, Override> = {
   '--c2-symbol__accent--color': { exclude: 'decorative golden highlight' },
   '--c2-symbol__success--color': { exclude: 'semantic success colour' },
   '--c2-symbol__warning--color': { exclude: 'semantic warning colour' },
+  // Reorder list swipe actions are semantic colours, like the todo list's: they stay put in every theme.
+  '--c2-reorder-list__swipe-action__danger--background-color': { token: 'color-error' },
+  '--c2-reorder-list__swipe-action__warning--background-color': { exclude: 'semantic warning action' },
+  '--c2-reorder-list__swipe-action__success--background-color': { exclude: 'semantic success action' },
+  '--c2-reorder-list__swipe-action__neutral--background-color': { exclude: 'neutral action fill under white text' },
+  '--c2-reorder-list__swipe-action--color': { exclude: 'white text on the coloured actions' },
+  // Todo list: the pens follow the chart palette and the error colour, so a brand theme and dark mode recolour the
+  // ink as they recolour a chart; the highlighters are hues mixed into whatever background the list has, and the
+  // swipe actions are semantic colours that stay put.
+  '--c2-todo-list__container--box-shadow': { token: 'shadow-md' },
+  '--c2-todo-list__on-accent--color': { token: 'color-on-primary' },
+  '--c2-todo-list__add--border-color': { token: 'color-outline' },
+  '--c2-todo-list__row__divider--color': { token: 'color-surface-container' },
+  '--c2-todo-list__mark--color': { token: 'color-outline-strong' },
+  '--c2-todo-list__dropped--color': { token: 'color-error' },
+  '--c2-todo-list__pen-blue--color': { token: 'chart-series-1' },
+  '--c2-todo-list__pen-red--color': { token: 'color-error' },
+  '--c2-todo-list__pen-green--color': { token: 'chart-series-3' },
+  '--c2-todo-list__pen-violet--color': { token: 'chart-series-6' },
+  '--c2-todo-list__pen-graphite--color': { token: 'color-on-surface-variant' },
+  '--c2-todo-list__toast--background-color': { token: 'color-inverse-surface' },
+  '--c2-todo-list__toast--color': { token: 'color-on-inverse-surface' },
+  '--c2-todo-list__highlight-yellow--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-green--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-blue--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-pink--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-orange--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__highlight-violet--color': { exclude: 'highlighter hue, mixed into the list background' },
+  '--c2-todo-list__heading--font-size': { exclude: 'list heading, one step above body text' },
   // Carousel indicator dots are small fills, not surfaces: they take the strong outline and the muted text colour.
   '--c2-carousel__indicator--background-color': { token: 'color-outline-strong' },
   '--c2-carousel__indicator__hover--background-color': { token: 'color-on-surface-variant' },

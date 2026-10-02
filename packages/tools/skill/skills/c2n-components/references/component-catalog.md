@@ -39,6 +39,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Avatar** — `c2-avatar, c2-avatar-group` · `@c2n/avatar` — Image, initials or icon for a person, with status dot and badge. Children: `c2-avatar`.
 - **Badge** — `c2-badge` · `@c2n/badge` — Tinted pill for status text, counts and dots, optionally pinned to a corner of another element.
 - **Code Viewer** — `c2-code-viewer` · `@c2n/code-viewer` — Syntax-highlighted code with line numbers, copy button and dark mode, powered by shiki.
+- **Comparison Bar** — `c2-comparison-bar` · `@c2n/comparison-bar` — Segmented ratio bar comparing two or three quantities, such as the bid/ask balance of an order book.
 - **Flow** — `c2-flow` · `@c2n/flow` — A pipeline or dependency graph on a pannable canvas: steps with a status, smooth edges, auto layout, draggable nodes saved to localStorage, a hover card and a context menu.
 - **Kbd** — `c2-kbd` · `@c2n/kbd` — Keyboard key label for shortcuts and command hints, with the semantics of the native kbd element.
 - **List** — `c2-list` · `@c2n/list` — Vertical list container with single or multiple selection. Children: `c2-list-item`.
@@ -60,7 +61,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Hover Card** — `c2-hover-card` · `@c2n/hover-card` — Interactive preview card shown when a link or mention is hovered or focused, rendered in the top layer.
 - **Modal** — `c2-modal` · `@c2n/modal` — Dialog built on the native dialog element: focus trap, backdrop, Escape, title, body and footer.
 - **Overlay** — `c2-overlay` · `@c2n/overlay` — Anchored popup built on the browser Popover API, positioned with floating-ui.
-- **Progress** — `c2-progress` · `@c2n/progress` — Linear progress bar, indeterminate or filling to a value, with an optional label and count.
+- **Progress** — `c2-progress` · `@c2n/progress` — Progress bar or ring, indeterminate or filling to a value, with an optional label and count.
 - **Sheet** — `c2-sheet` · `@c2n/sheet` — Dialog pinned to an edge of the screen, for content that complements the page rather than interrupting it.
 - **Skeleton** — `c2-skeleton` · `@c2n/skeleton` — Placeholder block standing in for content that has not arrived, in three shapes and three animations.
 - **Spinner** — `c2-spinner` · `@c2n/spinner` — Circular progress indicator, indeterminate or showing a value, with optional text.
@@ -74,6 +75,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Mat Icon** — `c2-mat-icon` · `@c2n/mat-icon` — 2,234 Material Icons ligatures rendered through a single element.
 - **Phosphor Icons** — `c2-phosphor-{name}` · `@c2n/phosphor-icons` — 1,512 flexible icons in six weights, one web component each.
 - **Symbols** — `c2-symbol-{name}` · `@c2n/symbols` — 157 themeable spot illustrations for empty states, status panels, onboarding and error pages.
+- **Task icons** — `c2-task-icon-{name}` · `@c2n/task-icons` — 191 duotone icons for to-do items: work, home, health, sport, learning, food, money, travel and more.
 
 ## Inputs
 
@@ -133,4 +135,5 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Planning
 
 - **Month Planner** — `c2-month-planner` · `@c2n/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
+- **Todo List** — `c2-todo-list` · `@c2n/todo-list` — A to-do list with the feel of paper: hand-drawn ticks, notes, highlighters, swipe and drag, and a remembered look.
 - **Week Planner** — `c2-week-planner` · `@c2n/week-planner` — Typical-week schedule with time blocks, and optional odd and even weeks.

@@ -23,9 +23,11 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-reorder-list': C2Props<ReorderList> & {
+      'c2-reorder-list': Omit<C2Props<ReorderList>, 'swipeActions'> & {
         dragstartthreshold?: Attribute
         autoscrolldisabled?: Attribute
+        'swipe-actions'?: Attribute
+        swipeActions?: ReorderList['swipeActions'] | string
       }
     }
   }

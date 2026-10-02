@@ -4,6 +4,8 @@
  * hydrating each element as an Astro island.
  */
 import '@c2n/notepad'
+import '@c2n/todo-list'
+import '@c2n/comparison-bar'
 import '@c2n/flow'
 import './flow-examples'
 import '@c2n/week-planner'

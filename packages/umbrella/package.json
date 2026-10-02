@@ -141,6 +141,10 @@
       "types": "./lib/command.d.ts",
       "default": "./lib/command.js"
     },
+    "./comparison-bar": {
+      "types": "./lib/comparison-bar.d.ts",
+      "default": "./lib/comparison-bar.js"
+    },
     "./context-menu": {
       "types": "./lib/context-menu.d.ts",
       "default": "./lib/context-menu.js"
@@ -365,6 +369,10 @@
       "types": "./lib/toast.d.ts",
       "default": "./lib/toast.js"
     },
+    "./todo-list": {
+      "types": "./lib/todo-list.d.ts",
+      "default": "./lib/todo-list.js"
+    },
     "./tooltip": {
       "types": "./lib/tooltip.d.ts",
       "default": "./lib/tooltip.js"
@@ -436,6 +444,7 @@
     "@c2n/color-select": "0.0.19",
     "@c2n/color-slider": "0.0.19",
     "@c2n/command": "0.0.19",
+    "@c2n/comparison-bar": "0.0.19",
     "@c2n/context-menu": "0.0.19",
     "@c2n/copy-button": "0.0.19",
     "@c2n/dashboard": "0.0.19",
@@ -493,6 +502,7 @@
     "@c2n/time-input": "0.0.19",
     "@c2n/timeline": "0.0.19",
     "@c2n/toast": "0.0.19",
+    "@c2n/todo-list": "0.0.19",
     "@c2n/tooltip": "0.0.19",
     "@c2n/tree": "0.0.19",
     "@c2n/upload": "0.0.19",

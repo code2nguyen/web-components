@@ -94,6 +94,8 @@
     "build": {
       "dependencies": [
         "./packages/components/notepad:build",
+        "./packages/components/todo-list:build",
+        "./packages/components/comparison-bar:build",
         "./packages/components/flow:build",
         "./packages/components/week-planner:build",
         "./packages/components/month-planner:build",
@@ -158,6 +160,7 @@
         "./packages/icons/feather-icons:build",
         "./packages/icons/phosphor-icons:build",
         "./packages/icons/symbols:build",
+        "./packages/icons/task-icons:build",
         "./open-packages/chatbot:build",
         "./packages/components/chat-input:build",
         "./packages/components/chat-message:build",

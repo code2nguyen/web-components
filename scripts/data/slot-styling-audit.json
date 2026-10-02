@@ -648,6 +648,27 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-comparison-bar",
+      "slot": "start",
+      "decision": "part",
+      "parts": ["start-value"],
+      "reason": "The start value region owns the start slot's component-side presentation."
+    },
+    {
+      "tag": "c2-comparison-bar",
+      "slot": "end",
+      "decision": "part",
+      "parts": ["end-value"],
+      "reason": "The end value region owns the end slot's component-side presentation."
+    },
+    {
+      "tag": "c2-comparison-bar",
+      "slot": "middle",
+      "decision": "part",
+      "parts": ["middle-value"],
+      "reason": "The middle value region owns the middle slot's component-side presentation."
+    },
+    {
       "tag": "c2-command",
       "slot": "default",
       "decision": "assigned-content",
@@ -2384,6 +2405,18 @@
       "decision": "part",
       "parts": ["icon"],
       "reason": "The semantic icon region owns the icon slot's component-side presentation."
+    },
+    {
+      "tag": "c2-todo-list",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned header controls; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-todo-list",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned empty-state content; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-tooltip",
