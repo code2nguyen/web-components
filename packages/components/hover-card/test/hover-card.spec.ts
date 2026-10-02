@@ -115,3 +115,15 @@ test('closed and open cards have no axe violations', async ({ page, renderScenar
   await expect(panel(page)).toBeVisible()
   await accessible(page)
 })
+
+test('the open card follows its trigger when the page scrolls', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="height:300px"></div>${card()}<div style="height:2000px"></div>`)
+  const trigger = page.getByRole('link', { name: '@ada' })
+  await trigger.focus()
+  await expect(panel(page)).toBeVisible()
+  const gap = async () => (await panel(page).boundingBox())!.y - (await trigger.boundingBox())!.y
+  const before = await gap()
+  await page.evaluate(() => window.scrollBy(0, 150))
+  await expect.poll(gap).toBeCloseTo(before, -1)
+  await expect(panel(page)).toBeVisible()
+})

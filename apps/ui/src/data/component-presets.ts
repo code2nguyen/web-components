@@ -405,6 +405,62 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
+  'c2-notepad': {
+    html: `<c2-notepad label="Notes" style="width:320px" value="Thursday sync&#10;Ship it **behind a flag**&#10;- [ ] Ask about night paper"></c2-notepad>`,
+    presets: [
+      {
+        name: 'Legal pad',
+        description: 'Canary paper, wide blue rules, a red margin and a glued top instead of the spiral.',
+        css: {
+          '--c2-notepad__sheet--background': '#fbf1a6',
+          '--c2-notepad__rule--color': '#8fb2d6',
+          '--c2-notepad__rule--spacing': '30px',
+          '--c2-notepad__margin--color': '#e07a6e',
+          '--c2-notepad__writing--color': '#1b2433',
+          '--c2-notepad__spiral--display': 'none',
+          '--c2-notepad__glue--display': 'block',
+        },
+      },
+      {
+        name: 'Dot grid',
+        description: 'Warm stock with a 5 mm dot grid and no rules or margin.',
+        css: {
+          '--c2-notepad__sheet--background': '#f7f4ec',
+          '--c2-notepad__rule--color': 'transparent',
+          '--c2-notepad__dot--color': '#b5b0a3',
+          '--c2-notepad__margin--color': 'transparent',
+          '--c2-notepad__margin--inset': '8px',
+          '--c2-notepad__spiral--display': 'none',
+        },
+      },
+      {
+        name: 'Graph paper',
+        description: 'Green engineering grid with a tighter 24px ruling.',
+        css: {
+          '--c2-notepad__sheet--background': '#f0f5ee',
+          '--c2-notepad__rule--color': '#b7d3bd',
+          '--c2-notepad__grid--color': '#b7d3bd',
+          '--c2-notepad__rule--spacing': '24px',
+          '--c2-notepad__writing--font-size': '16px',
+          '--c2-notepad__margin--color': 'transparent',
+          '--c2-notepad__margin--inset': '8px',
+        },
+      },
+      {
+        name: 'Night paper',
+        description: 'Dark slate paper with light ink and brighter inks for dark interfaces.',
+        css: {
+          '--c2-notepad__sheet--background': '#232a33',
+          '--c2-notepad__rule--color': '#3b4654',
+          '--c2-notepad__margin--color': '#6a4651',
+          '--c2-notepad__writing--color': '#e9e4d4',
+          '--c2-notepad__ink-blue--color': '#9fb6ff',
+          '--c2-notepad__ink-red--color': '#ff8f8f',
+          '--c2-notepad__texture--opacity': '0',
+        },
+      },
+    ],
+  },
   'c2-checkbox': {
     html: `<c2-checkbox checked></c2-checkbox>`,
     presets: [

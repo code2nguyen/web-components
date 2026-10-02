@@ -445,4 +445,63 @@ export const overrides: Record<string, Override> = {
   '--c2-flow__edge--color': { token: 'color-outline' },
   '--c2-flow__success--color': { exclude: 'success status colour' },
   '--c2-flow__warning--color': { exclude: 'warning status colour' },
+  // Notepad: the paper, rules, margin and inks are mixed from the surface tokens rather than replaced by them, so the
+  // sheet stays slightly warm paper with blue rules in light mode and turns into night paper (dark sheet, light ink,
+  // dimmed rules, brighter inks) under a dark theme. Highlighters are translucent on purpose, the washi-tape toolbar
+  // and the glued binding are materials with their own colour, and the handwriting face is the component's identity.
+  '--c2-notepad__sheet--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 90%, #f3ead0)',
+  },
+  '--c2-notepad__writing--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 80%, #2f4fb0)',
+  },
+  '--c2-notepad__rule--color': { token: 'color-surface', value: 'color-mix(in srgb, #8fb0dc 50%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__margin--color': { token: 'color-surface', value: 'color-mix(in srgb, #d9534f 50%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__ink-blue--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #3b5bdb 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-red--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #e03131 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-green--color': { token: 'color-on-surface', value: 'color-mix(in srgb, #2f9e44 70%, var(--c2-theme--color-on-surface, #18181b))' },
+  '--c2-notepad__ink-black--color': { token: 'color-on-surface' },
+  '--c2-notepad__placeholder--color': { token: 'color-on-surface-variant' },
+  '--c2-notepad__header--color': { token: 'color-on-surface-variant' },
+  '--c2-notepad__perforation--color': { token: 'color-outline-strong' },
+  '--c2-notepad__selection--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-yellow--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-green--background': { exclude: 'translucent highlighter hue' },
+  '--c2-notepad__highlight-pink--background': { exclude: 'translucent highlighter hue' },
+  // The washi tape is a little of its kraft hue on the surface: cream on light paper, dark kraft under a dark theme.
+  '--c2-notepad__toolbar--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, #c9b98f 30%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-notepad__toolbar--color': { token: 'color-on-surface' },
+  '--c2-notepad__toolbar__button__active--background': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 14%, transparent)',
+  },
+  // Paper colours are a pastel of their hue on the surface, so they darken with it and keep the theme ink readable.
+  '--c2-notepad__paper-yellow--background': { token: 'color-surface', value: 'color-mix(in srgb, #f5d547 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-green--background': { token: 'color-surface', value: 'color-mix(in srgb, #bddcb2 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-blue--background': { token: 'color-surface', value: 'color-mix(in srgb, #b8ceee 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__paper-pink--background': { token: 'color-surface', value: 'color-mix(in srgb, #f4b8c3 35%, var(--c2-theme--color-surface, #ffffff))' },
+  // Each paper's ink is the theme text colour with a touch of the paper's hue, so it follows light and dark mode.
+  '--c2-notepad__paper-yellow--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #966800)' },
+  '--c2-notepad__paper-green--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #39cc57)' },
+  '--c2-notepad__paper-blue--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #3390ff)' },
+  '--c2-notepad__paper-pink--color': { token: 'color-on-surface', value: 'color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 85%, #ff4786)' },
+  // Night paper is a dark sheet with light ink in either mode.
+  '--c2-notepad__paper-night--background': { exclude: 'night paper is dark in both modes' },
+  '--c2-notepad__paper-night--color': { exclude: 'night paper is dark in both modes' },
+  '--c2-notepad__glue--background': { exclude: 'binding material colour' },
+  // Each pad's own sheet colour is mixed into the surface like the pastel papers, so a legal pad or a sticky note
+  // darkens with a dark theme instead of glowing on it.
+  '--c2-notepad__pad-legal--background': { token: 'color-surface', value: 'color-mix(in srgb, #f5d547 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__pad-sticky--background': { token: 'color-surface', value: 'color-mix(in srgb, #ffd23f 40%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__pad-index-card--background': { token: 'color-surface', value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 94%, #9ec1e8)' },
+  '--c2-notepad__headline--color': { exclude: 'transparent unless a pad draws it' },
+  '--c2-notepad__writing--font-family': { exclude: 'the bundled handwriting face is the component identity' },
+  '--c2-notepad__sheet--border-radius': { exclude: 'paper corner, not a control radius' },
+  '--c2-notepad__sheet--box-shadow': { exclude: 'paper elevation over the desk' },
+  '--c2-notepad__sheet__focus--box-shadow': { exclude: 'paper elevation over the desk' },
 }
