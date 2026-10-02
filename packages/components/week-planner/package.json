@@ -1,6 +1,6 @@
 {
   "name": "@c2n/week-planner",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "type": "module",
   "main": "dist/week-planner.js",
   "exports": {
@@ -66,10 +66,10 @@
     }
   },
   "dependencies": {
-    "@c2n/badge": "0.0.19",
-    "@c2n/button": "0.0.19",
-    "@c2n/button-group": "0.0.19",
-    "@c2n/core": "0.0.19",
+    "@c2n/badge": "0.0.20",
+    "@c2n/button": "0.0.20",
+    "@c2n/button-group": "0.0.20",
+    "@c2n/core": "0.0.20",
     "lit": "3.3.3"
   },
   "devDependencies": {

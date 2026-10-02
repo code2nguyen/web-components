@@ -1,6 +1,6 @@
 {
   "name": "@c2n/tag-input",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "type": "module",
   "main": "dist/tag-input.js",
   "exports": {
@@ -63,7 +63,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.19",
+    "@c2n/core": "0.0.20",
     "lit": "3.3.3"
   },
   "devDependencies": {
