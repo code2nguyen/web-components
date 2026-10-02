@@ -168,7 +168,8 @@ themeToggle.addEventListener('change', () => (list.pens = isDark() ? pens.dark :
 ```
 
 Keep the same length and order in every theme. A highlighter is mixed into the list's background, so give its full
-colour rather than a pale tint. A position the current list does not have shows as no colour. `defaultTodoPens` and
+colour rather than a pale tint. A position the current list does not have shows as no colour. As with every list you
+give, the colours are used exactly as given: their contrast on your backgrounds is yours to check. `defaultTodoPens` and
 `defaultTodoHighlights` are exported to start from.
 
 The customize panel's choices are lists too. `backgrounds` are `{ value, color, name }`: `value` is the list's
@@ -190,8 +191,8 @@ list.palettes = [
 ]
 ```
 
-Choose colours that read on each other: the default backgrounds and palettes were checked for contrast, yours are used
-as given. `defaultTodoBackgrounds` and `defaultTodoPalettes` are exported to start from.
+The default backgrounds and palettes were checked for contrast. A list you give replaces them and is used exactly as
+given: choosing colours that read on each other, in every theme, is up to you. `defaultTodoBackgrounds` and `defaultTodoPalettes` are exported to start from.
 
 ## Customization and storage
 

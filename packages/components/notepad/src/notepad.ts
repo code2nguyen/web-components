@@ -363,7 +363,8 @@ export class Notepad extends LitElement {
    * The inks of the toolbar: each entry a CSS colour (`var()` included), or `{ value, name }` to give its swatch a
    * friendly name (`{ "value": "#b91c1c", "name": "Alert" }`); without one it is called `Ink 2`. The page stores an ink
    * by its 1-based position in this list (`<span data-ink="2">`), so give a dark theme a list of the same length and
-   * order and the whole page recolours. Unset, the four documented `--c2-notepad__ink-*` inks.
+   * order and the whole page recolours. Unset, the four documented `--c2-notepad__ink-*` inks. A list you give is used
+   * as given: its contrast on the paper is yours to choose.
    */
   @property({ converter: jsonPropertyConverter }) inks?: NotepadColor[]
   /** The highlighters of the toolbar, as colours or `{ value, name }` entries, stored by position like `inks`. `==text==` is the first one. Unset, the three documented `--c2-notepad__highlight-*` highlighters. */

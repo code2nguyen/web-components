@@ -651,7 +651,8 @@ export class TodoList extends LitElement {
    * The pens a task's text can take: each entry a CSS colour (`var()` included), or `{ value, name }` to give its
    * swatch a friendly name (`{ "value": "#4f46e5", "name": "Brand" }`); without one it is called `Pen 2`. A task stores
    * its pen by 1-based position (`ink: 2`), so give a dark theme a list of the same length and order and every task
-   * recolours. Unset, the five documented `--c2-todo-list__pen-*` pens, which the palettes recolour.
+   * recolours. Unset, the five documented `--c2-todo-list__pen-*` pens, which the palettes recolour. A list you give is
+   * used as given: its contrast is yours to choose.
    */
   @property({ converter: jsonPropertyConverter }) pens?: TodoColor[]
 
@@ -661,14 +662,16 @@ export class TodoList extends LitElement {
   /**
    * The backgrounds the customize panel offers, after its default one (position 0, which follows the theme), as
    * `{ value, color, name }` entries: `value` the surface, `color` the text. The look stores the viewer's choice by
-   * position, so a dark theme can hand over a list of the same length and order. Unset, the six default backgrounds.
+   * position, so a dark theme can hand over a list of the same length and order. Unset, the six default backgrounds,
+   * which were checked for contrast; a list you give is used as given, and its contrast is yours to choose.
    */
   @property({ converter: jsonPropertyConverter }) backgrounds?: TodoBackgroundOption[]
 
   /**
    * The palettes the customize panel offers, as `{ name, accent, pens, highlights, strength, dark }` entries: the
    * accent, and pen and highlighter values by position, with optional `dark` overrides used on a dark background.
-   * Stored by position like `backgrounds`. Unset, the four default palettes.
+   * Stored by position like `backgrounds`. Unset, the four default palettes, which were checked for contrast against
+   * the default backgrounds; a list you give is used as given.
    */
   @property({ converter: jsonPropertyConverter }) palettes?: TodoPaletteOption[]
 

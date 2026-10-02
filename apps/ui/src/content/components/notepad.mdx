@@ -97,7 +97,7 @@ notepad.highlights = [{ name: 'Marker', value: 'rgba(250, 204, 21, 0.5)' }]
 themeToggle.addEventListener('change', () => (notepad.inks = isDark() ? dark : light))
 ```
 
-Keep the same length and order across themes: position 2 should mean the same thing in both. A list whose colours are `var(--app-token)` follows the theme with no reassigning at all. A position the current list does not have is drawn in the page's own ink. Pages written with the default colours' names (`data-ink="red"`) still open, as their position. `DEFAULT_INKS` and `DEFAULT_HIGHLIGHTS` are exported to start from.
+Keep the same length and order across themes: position 2 should mean the same thing in both. A list whose colours are `var(--app-token)` follows the theme with no reassigning at all. A position the current list does not have is drawn in the page's own ink. The defaults were checked for contrast; a list you give replaces them and is used exactly as given, so choosing colours that read on each other, on every paper colour and in every theme, is up to you. Pages written with the default colours' names (`data-ink="red"`) still open, as their position. `DEFAULT_INKS` and `DEFAULT_HIGHLIGHTS` are exported to start from.
 
 Call `formatSelection(mark, color?)` (`color` is the 1-based position, e.g. `formatSelection('ink', 3)`) and `clearFormatting()` to drive the formatting from your own controls. Listen for `format-change` to keep them in sync with the selection.
 
