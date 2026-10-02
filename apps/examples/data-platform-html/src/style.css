@@ -2113,6 +2113,6 @@ c2-badge[tone='warning'] {
   line-height: 1.7;
 }
 
-c2-seperator {
-  --c2-seperator--color: rgba(255, 255, 255, 0.08);
+c2-separator {
+  --c2-separator--color: rgba(255, 255, 255, 0.08);
 }

@@ -1891,7 +1891,7 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
-      "tag": "c2-seperator",
+      "tag": "c2-separator",
       "slot": "",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."

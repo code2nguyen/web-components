@@ -27,10 +27,26 @@ test('summarises progress in the ring and the heading', async ({ page, scenario 
 
   await expect(list.getByRole('heading', { name: 'This week' })).toBeVisible()
   await expect(list.locator('.meta')).toHaveText('2 of 6 done · 1 urgent')
-  await expect(list.getByRole('img', { name: '33% complete, 2 of 6 tasks done' })).toBeVisible()
+  await expect(list.getByRole('progressbar', { name: '2 of 6 tasks done' })).toHaveAttribute('aria-valuenow', '33')
   // The heading suggests the list icon, drawn inside the ring; archived tasks are not counted.
   await expect(list.locator('.ring-value c2-task-icon-calendar')).toBeAttached()
   await expect(list.locator('.task')).toHaveCount(6)
+})
+
+test('draws the ring and the hero ring as a circular c2-progress, stroked in units of a 48px canvas', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  const ring = list.locator('c2-progress.ring')
+  const indicator = ring.locator('[part="indicator"]')
+
+  await expect(ring).toHaveAttribute('variant', 'circular')
+  await expect(ring.locator('[part="track"]')).toHaveCSS('width', '44px')
+  await expect(indicator).toHaveCSS('stroke-width', '4.125px')
+
+  await list.evaluate((element: TodoList) => (element.look = { progress: 'hero' }))
+  await expect(ring.locator('[part="track"]')).toHaveCSS('width', '120px')
+  await expect(indicator).toHaveCSS('stroke-width', '17.5px')
+  await expect(ring.locator('.ring-value')).toHaveText('33%')
 })
 
 test('checks a task with a hand-drawn tick, by pointer and by keyboard', async ({ page, scenario }) => {
@@ -383,7 +399,7 @@ test('a background sets the text colour and the pens it offers', async ({ page, 
   // Night takes the classic palette's dark pens and accent. The panel has no pen field: the palette owns the accent.
   await expect.poll(() => cssVar(list, '--c2-todo-list__pen-green--color')).toBe('#2dd4bf')
   await expect(list.getByRole('radiogroup', { name: 'Pen' })).toHaveCount(0)
-  await expect(list.locator('.ring-fill')).toHaveCSS('stroke', 'rgb(103, 171, 255)')
+  await expect(list.locator('.ring [part="indicator"]')).toHaveCSS('stroke', 'rgb(103, 171, 255)')
 
   await list.getByRole('radio', { name: 'Cross' }).click()
   await list.getByRole('radio', { name: 'Bar' }).click()
@@ -460,7 +476,7 @@ test('choosing a palette recolours the progress, even over a pen stored earlier'
   await page.evaluate(() => localStorage.setItem('c2-todo-list:spec', JSON.stringify({ look: { pen: 'green' } })))
   await scenario('persist')
   const list = page.locator('c2-todo-list')
-  const ring = list.locator('.ring-fill')
+  const ring = list.locator('.ring [part="indicator"]')
   await expect(ring).toHaveCSS('stroke', 'rgb(15, 118, 110)')
 
   await list.getByRole('button', { name: 'Customize look' }).click()

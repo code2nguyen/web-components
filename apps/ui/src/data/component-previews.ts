@@ -299,10 +299,10 @@ greet('world')"></c2-code-editor>`,
   <c2-radio value="pro" label="Pro"></c2-radio>
   <c2-radio value="team" label="Team" disabled></c2-radio>
 </c2-radio-group>`,
-  seperator: `<div style="display:grid;gap:14px;width:200px;font-size:12px;color:#71717a">
-  <c2-seperator></c2-seperator>
-  <c2-seperator>or</c2-seperator>
-  <c2-seperator style="--c2-seperator--style: dashed"></c2-seperator>
+  separator: `<div style="display:grid;gap:14px;width:200px;font-size:12px;color:#71717a">
+  <c2-separator></c2-separator>
+  <c2-separator>or</c2-separator>
+  <c2-separator style="--c2-separator--style: dashed"></c2-separator>
 </div>`,
   select: `<c2-select value="FR" placeholder="Select a country" style="width:190px">
   <c2-list-item value="US">United States</c2-list-item>

@@ -285,9 +285,9 @@
       "types": "./lib/select.d.ts",
       "default": "./lib/select.js"
     },
-    "./seperator": {
-      "types": "./lib/seperator.d.ts",
-      "default": "./lib/seperator.js"
+    "./separator": {
+      "types": "./lib/separator.d.ts",
+      "default": "./lib/separator.js"
     },
     "./sheet": {
       "types": "./lib/sheet.d.ts",
@@ -480,7 +480,7 @@
     "@c2n/rate": "0.0.20",
     "@c2n/reorder-list": "0.0.20",
     "@c2n/select": "0.0.20",
-    "@c2n/seperator": "0.0.20",
+    "@c2n/separator": "0.0.20",
     "@c2n/sheet": "0.0.20",
     "@c2n/shortcut": "0.0.20",
     "@c2n/side-nav": "0.0.20",

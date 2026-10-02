@@ -1425,24 +1425,24 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
       },
     ],
   },
-  'c2-seperator': {
-    html: `<c2-seperator style="width: 240px">or</c2-seperator>`,
+  'c2-separator': {
+    html: `<c2-separator style="width: 240px">or</c2-separator>`,
     presets: [
-      { name: 'Dashed', css: { '--c2-seperator--style': 'dashed', '--c2-seperator--color': '#d4d4d8' } },
-      { name: 'Accent', css: { '--c2-seperator--thickness': '3px', '--c2-seperator--color': '#0265dc' } },
+      { name: 'Dashed', css: { '--c2-separator--style': 'dashed', '--c2-separator--color': '#d4d4d8' } },
+      { name: 'Accent', css: { '--c2-separator--thickness': '3px', '--c2-separator--color': '#0265dc' } },
       {
         name: 'Section heading',
         css: {
-          '--c2-seperator__line-start--flex': '0 0 0px',
-          '--c2-seperator__label--gap': '0px',
-          '--c2-seperator__label--color': '#18181b',
-          '--c2-seperator__label--font-weight': '600',
-          '--c2-seperator__label--font-size': '11px',
-          '--c2-seperator__label--text-transform': 'uppercase',
-          '--c2-seperator__label--letter-spacing': '0.06em',
+          '--c2-separator__line-start--flex': '0 0 0px',
+          '--c2-separator__label--gap': '0px',
+          '--c2-separator__label--color': '#18181b',
+          '--c2-separator__label--font-weight': '600',
+          '--c2-separator__label--font-size': '11px',
+          '--c2-separator__label--text-transform': 'uppercase',
+          '--c2-separator__label--letter-spacing': '0.06em',
         },
       },
-      { name: 'Leading label', css: { '--c2-seperator__line-start--flex': '0 0 24px', '--c2-seperator__label--font-size': '13px' } },
+      { name: 'Leading label', css: { '--c2-separator__line-start--flex': '0 0 24px', '--c2-separator__label--font-size': '13px' } },
     ],
   },
   'c2-skeleton': {
