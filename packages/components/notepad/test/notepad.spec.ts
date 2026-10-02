@@ -420,9 +420,9 @@ test('a sticky note leans by a random angle, picked again each time it becomes o
   const first = page.locator('c2-notepad').first()
   const angles = new Set<string>()
   for (let i = 0; i < 20; i++) {
-    await first.evaluate((element) => (element.pad = 'notebook'))
+    await props(first, { pad: 'notebook' })
     await expect.poll(() => rotate(0)).toMatch(/^(none|0deg)$/)
-    await first.evaluate((element) => (element.pad = 'sticky'))
+    await props(first, { pad: 'sticky' })
     await expect.poll(() => rotate(0)).not.toMatch(/^(none|0deg)$/)
     const angle = parseFloat(await rotate(0))
     expect(Math.abs(angle)).toBeGreaterThanOrEqual(1)
