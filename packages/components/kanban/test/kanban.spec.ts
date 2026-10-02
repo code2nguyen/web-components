@@ -234,3 +234,23 @@ test('follows a new items array from the application', async ({ page, renderScen
   await expect.poll(() => layout(page)).toEqual({ todo: ['Delta'], doing: [], done: ['Charlie'] })
   await expect(column(page, 'doing').locator('[part="empty"]')).toBeVisible()
 })
+
+test('the dragged card stays under the pointer inside a transformed ancestor', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="transform: translateX(0); margin: 40px 0 0 120px">${board()}</div>`)
+  const source = await card(page, 'Alpha').boundingBox()
+  const done = await column(page, 'done').boundingBox()
+  const grab = { x: source!.x + 20, y: source!.y + 15 }
+  await page.mouse.move(grab.x, grab.y)
+  await page.mouse.down()
+  const to = { x: done!.x + 60, y: done!.y + 90 }
+  await page.mouse.move(to.x, to.y, { steps: 10 })
+  const dragged = page.locator('c2-kanban-column [part="card"].card--dragging')
+  // The card keeps the grab offset, give or take its 2° tilt.
+  await expect
+    .poll(async () => {
+      const box = await dragged.boundingBox()
+      return box ? Math.abs(box.x + 20 - to.x) < 8 && Math.abs(box.y + 15 - to.y) < 8 : false
+    })
+    .toBe(true)
+  await page.mouse.up()
+})

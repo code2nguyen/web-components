@@ -74,6 +74,8 @@ interface MoveSession {
   latest?: Point
   offset?: Point
   size?: { width: number; height: number }
+  /** Viewport position of `left: 0; top: 0` for the dragged card, which an ancestor's transform, filter or containment moves. */
+  fixedOrigin?: Point
 }
 
 const INTERACTIVE_SELECTOR = 'a[href],button,input,select,textarea,summary,[contenteditable]:not([contenteditable="false"]),[draggable="true"]'
@@ -454,7 +456,8 @@ export class Kanban extends LitElement {
         return
       }
       session.phase = 'dragging'
-      session.offset = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+      // Measured from the press, not from where the pointer crossed the threshold, so the card stays where it was grabbed.
+      session.offset = { x: session.origin.x - rect.left, y: session.origin.y - rect.top }
       session.size = { width: rect.width, height: rect.height }
       this.releasingCapture = false
       this.boardElement?.setPointerCapture(event.pointerId)
@@ -537,8 +540,17 @@ export class Kanban extends LitElement {
     const session = this.session
     const element = this.columns.find((column) => column.columnId === session?.from.column)?.draggedElement
     if (!session?.latest || !session.offset || !session.size || !element) return
-    element.style.left = `${Math.round(session.latest.x - session.offset.x)}px`
-    element.style.top = `${Math.round(session.latest.y - session.offset.y)}px`
+    if (!session.fixedOrigin) {
+      // `position: fixed` is relative to the viewport only while no ancestor creates a containing block.
+      element.style.left = '0px'
+      element.style.top = '0px'
+      element.style.transform = 'none'
+      const origin = element.getBoundingClientRect()
+      element.style.removeProperty('transform')
+      session.fixedOrigin = { x: origin.left, y: origin.top }
+    }
+    element.style.left = `${Math.round(session.latest.x - session.offset.x - session.fixedOrigin.x)}px`
+    element.style.top = `${Math.round(session.latest.y - session.offset.y - session.fixedOrigin.y)}px`
     element.style.width = `${session.size.width}px`
   }
 
