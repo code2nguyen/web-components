@@ -20,6 +20,8 @@
     dot--color: transparent,
     margin--inset: 56px,
     margin--color: #eba6a6,
+    margin--gap: 0px,
+    headline--color: transparent,
     writing--color: #1e2a4a,
     writing--font-family: (
       'C2 Notepad Hand',
@@ -37,6 +39,8 @@
     spiral--display: block,
     glue--display: none,
     glue--background: #3f444b,
+    sheet--rotate: 0deg,
+    top--padding-top: 20px,
     ink-blue--color: #2848b8,
     ink-black--color: #18181b,
     ink-red--color: #b8232b,
@@ -59,6 +63,9 @@
     paper-pink--color: #3d1f2b,
     paper-night--background: #232a33,
     paper-night--color: #e9e4d4,
+    pad-legal--background: #fbf1a6,
+    pad-sticky--background: #ffe680,
+    pad-index-card--background: #ffffff,
     error--color: #dc2626,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     disabled--opacity: 0.38,
@@ -76,12 +83,65 @@
   display: none;
 }
 
+// ---- pad: a preset of the paper's own variables -------------------------------------------------------------------
+// Each pad sets documented variables on the host, so a value set on the element (or a class on it) still wins. Colours
+// go through a variable per pad, which the theme maps for dark mode; the shapes are plain values.
+
+:host {
+  --_pad-paper: #{css.cssVar(sheet--background)};
+}
+:host([pad='legal']) {
+  --_pad-paper: #{css.cssVar(pad-legal--background)};
+  --c2-notepad__spiral--display: none;
+  --c2-notepad__glue--display: block;
+  --c2-notepad__top--padding-top: 10px;
+  --c2-notepad__rule--spacing: 30px;
+  --c2-notepad__margin--inset: 60px;
+  --c2-notepad__margin--gap: 4px;
+  --c2-notepad__sheet--border-radius: 0 0 3px 3px;
+}
+:host([pad='sticky']) {
+  --_pad-paper: #{css.cssVar(pad-sticky--background)};
+  --c2-notepad__spiral--display: none;
+  --c2-notepad__top--padding-top: 8px;
+  --c2-notepad__margin--inset: 4px;
+  --c2-notepad__rule--spacing: 30px;
+  --c2-notepad__writing--font-size: 20px;
+  --c2-notepad__texture--opacity: 0.3;
+  --c2-notepad__sheet--border-radius: 0 0 2px 18px;
+  // Lifted at the bottom: the note is stuck on by its top edge only.
+  --c2-notepad__sheet--box-shadow: 0 1px 1px rgba(24, 24, 27, 0.08), 0 14px 14px -10px rgba(24, 24, 27, 0.3);
+  --c2-notepad__sheet__focus--box-shadow: 0 1px 1px rgba(24, 24, 27, 0.1), 0 18px 18px -10px rgba(24, 24, 27, 0.34);
+}
+:host([pad='index-card']) {
+  --_pad-paper: #{css.cssVar(pad-index-card--background)};
+  --c2-notepad__spiral--display: none;
+  --c2-notepad__top--padding-top: 10px;
+  --c2-notepad__margin--inset: 4px;
+  --c2-notepad__rule--spacing: 26px;
+  --c2-notepad__writing--font-size: 17px;
+  --c2-notepad__texture--opacity: 0.2;
+  --c2-notepad__sheet--border-radius: 2px;
+  --c2-notepad__sheet--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.14), 0 4px 10px rgba(24, 24, 27, 0.08);
+  --c2-notepad__headline--color: #{css.cssVar(margin--color)};
+}
+// The index card's red headline replaces the margin, and a sticky note has none.
+:host([pad='sticky']) .sheet,
+:host([pad='index-card']) .sheet {
+  --_margin-c: transparent;
+}
+// Stuck on by hand: a sticky note leans by an angle the element picks each time it becomes one (`--_tilt`, set on the
+// pad inside the shadow root). A rotation set through the variable, 0deg included, replaces it.
+:host([pad='sticky']) .sheet {
+  rotate: var(--c2-notepad__sheet--rotate, var(--_tilt, 0deg));
+}
+
 // ---- paper: the writer's choice of ruling (`paper`) and colour (`paper-color`) -------------------------------------
 // The attributes only choose which layers are drawn and which colour variable the sheet takes; every colour is still
 // one of the documented variables.
 
 :host {
-  --_paper: #{css.cssVar(sheet--background)};
+  --_paper: var(--_pad-paper);
   --_ink: #{css.cssVar(writing--color)};
 }
 :host([paper-color='yellow']) {
@@ -150,6 +210,7 @@
   --_rule: #{css.cssVar(rule--spacing)};
   --_size: #{css.cssVar(writing--font-size)};
   --_inset: #{css.cssVar(margin--inset)};
+  --_gap: #{css.cssVar(margin--gap)};
   // Where the writing rests: a little below the baseline, so the rule runs under the text and not through it.
   --_baseline: calc((var(--_rule) + var(--_size) * 0.8) / 2);
   --_rule-c: #{css.cssVar(rule--color)};
@@ -161,6 +222,7 @@
   display: flex;
   flex-direction: column;
   background: var(--_paper);
+  rotate: css.cssVar(sheet--rotate);
   border-radius: css.cssVar(sheet--border-radius);
   box-shadow: css.cssVar(sheet--box-shadow);
   transition: box-shadow 160ms ease;
@@ -256,7 +318,9 @@
   gap: 12px;
   min-height: 28px;
   // Clear of the spiral coils and the punched holes, which cover the top 18px of the sheet.
-  padding-block-start: 20px;
+  padding-block-start: css.cssVar(top--padding-top);
+  // The headline of an index card, across the whole sheet under the header row.
+  background: linear-gradient(to top, #{css.cssVar(headline--color)} 0 1.5px, transparent 1.5px);
   padding-inline: calc(var(--_inset) + 12px) 16px;
 }
 .header {
@@ -358,6 +422,13 @@
       var(--_margin-c) var(--_inset),
       transparent var(--_inset)
     ),
+    linear-gradient(
+      to right,
+      transparent calc(var(--_inset) - var(--_gap) - 1px),
+      var(--_margin-c) calc(var(--_inset) - var(--_gap) - 1px),
+      var(--_margin-c) calc(var(--_inset) - var(--_gap)),
+      transparent calc(var(--_inset) - var(--_gap))
+    ),
     radial-gradient(circle at 1px 1px, var(--_dot-c) 1.3px, transparent 1.6px), linear-gradient(to right, var(--_grid-c) 1px, transparent 1px),
     linear-gradient(
       to bottom,
@@ -368,10 +439,12 @@
     );
   background-size:
     100% 100%,
+    100% 100%,
     var(--_rule) var(--_rule),
     var(--_rule) var(--_rule),
     100% var(--_rule);
   background-position:
+    0 0,
     0 0,
     calc(var(--_inset) - 1px) calc(var(--_baseline) - 1px),
     calc(var(--_inset) - 1px) 0,
@@ -810,12 +883,12 @@
     border-radius: 6px;
     cursor: pointer;
     // The choice itself shows the state: a ring round the selected one, a fainter ring under the pointer.
-    &:hover > span {
+    &:hover > span:first-child {
       box-shadow:
         0 0 0 2px #{css.cssVar(toolbar--background)},
         0 0 0 3.5px color-mix(in srgb, currentColor 45%, transparent);
     }
-    &[aria-checked='true'] > span {
+    &[aria-checked='true'] > span:first-child {
       box-shadow:
         0 0 0 2px #{css.cssVar(toolbar--background)},
         0 0 0 3.5px currentColor;
@@ -850,10 +923,92 @@
     background-image: radial-gradient(circle at 2.5px 2.5px, color-mix(in srgb, #{css.cssVar(rule--color)} 50%, var(--_ink)) 0.8px, transparent 1px);
     background-size: 5px 5px;
   }
-  .colors {
+  .grid3 {
     display: grid;
     grid-template-columns: repeat(3, auto);
     justify-content: start;
+  }
+  // Each pad as a miniature of itself, on its own colour, with its name under it.
+  .pads button {
+    gap: 8px;
+    padding-block-end: 2px;
+  }
+  .name {
+    font-size: 10px;
+    line-height: 1.2;
+    opacity: 0.8;
+  }
+  .pad-thumb {
+    position: relative;
+    width: 44px;
+    height: 32px;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+    background-color: #{css.cssVar(sheet--background)};
+    background-image:
+      linear-gradient(to right, transparent 9px, #{css.cssVar(margin--color)} 9px 10px, transparent 10px),
+      linear-gradient(to bottom, transparent 4px, #{css.cssVar(rule--color)} 4px 5px, transparent 5px);
+    background-size:
+      100% 100%,
+      100% 5px;
+    background-position:
+      0 0,
+      0 6px;
+    background-repeat: no-repeat, repeat-y;
+  }
+  // Spiral coils along the top of the notebook.
+  .pad-thumb.notebook::before {
+    content: '';
+    position: absolute;
+    inset: -2px 3px auto;
+    height: 5px;
+    background: radial-gradient(circle, #6d737b 0 1.4px, transparent 1.8px) 0 0 / 6px 5px space no-repeat;
+  }
+  .pad-thumb.legal {
+    background-color: #{css.cssVar(pad-legal--background)};
+    background-image:
+      linear-gradient(#{css.cssVar(glue--background)} 0 5px, transparent 5px),
+      linear-gradient(
+        to right,
+        transparent 8px,
+        #{css.cssVar(margin--color)} 8px 9px,
+        transparent 9px 10px,
+        #{css.cssVar(margin--color)} 10px 11px,
+        transparent 11px
+      ),
+      linear-gradient(to bottom, transparent 4px, #{css.cssVar(rule--color)} 4px 5px, transparent 5px);
+    background-size:
+      100% 100%,
+      100% 100%,
+      100% 5px;
+    background-position:
+      0 0,
+      0 0,
+      0 6px;
+    background-repeat: no-repeat, no-repeat, repeat-y;
+  }
+  .pad-thumb.sticky {
+    width: 32px;
+    rotate: -4deg;
+    border-radius: 0 0 1px 8px;
+    background-color: #{css.cssVar(pad-sticky--background)};
+    background-image: none;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.12),
+      0 4px 4px -2px rgba(0, 0, 0, 0.3);
+  }
+  .pad-thumb.index-card {
+    background-color: #{css.cssVar(pad-index-card--background)};
+    background-image:
+      linear-gradient(transparent 7px, #{css.cssVar(margin--color)} 7px 8px, transparent 8px),
+      linear-gradient(to bottom, transparent 4px, #{css.cssVar(rule--color)} 4px 5px, transparent 5px);
+    background-size:
+      100% 100%,
+      100% 5px;
+    background-position:
+      0 0,
+      0 9px;
+    background-repeat: no-repeat, repeat-y;
   }
   // A scrap of each paper with a word in its ink.
   .swatch {

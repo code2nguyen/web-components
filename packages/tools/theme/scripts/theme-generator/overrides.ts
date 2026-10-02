@@ -494,6 +494,12 @@ export const overrides: Record<string, Override> = {
   '--c2-notepad__paper-night--background': { exclude: 'night paper is dark in both modes' },
   '--c2-notepad__paper-night--color': { exclude: 'night paper is dark in both modes' },
   '--c2-notepad__glue--background': { exclude: 'binding material colour' },
+  // Each pad's own sheet colour is mixed into the surface like the pastel papers, so a legal pad or a sticky note
+  // darkens with a dark theme instead of glowing on it.
+  '--c2-notepad__pad-legal--background': { token: 'color-surface', value: 'color-mix(in srgb, #f5d547 35%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__pad-sticky--background': { token: 'color-surface', value: 'color-mix(in srgb, #ffd23f 40%, var(--c2-theme--color-surface, #ffffff))' },
+  '--c2-notepad__pad-index-card--background': { token: 'color-surface', value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 94%, #9ec1e8)' },
+  '--c2-notepad__headline--color': { exclude: 'transparent unless a pad draws it' },
   '--c2-notepad__writing--font-family': { exclude: 'the bundled handwriting face is the component identity' },
   '--c2-notepad__sheet--border-radius': { exclude: 'paper corner, not a control radius' },
   '--c2-notepad__sheet--box-shadow': { exclude: 'paper elevation over the desk' },

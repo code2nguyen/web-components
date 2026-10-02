@@ -49,15 +49,19 @@ export interface NotepadPageTearEventDetail {
   page: number
 }
 
+/** Kind of pad: each one is a preset of the binding, corners, shadow, spacing and paper colour variables. */
+export type NotepadPad = 'notebook' | 'legal' | 'sticky' | 'index-card'
 /** Ruling of the page. */
 export type NotepadPaper = 'lined' | 'grid' | 'dot' | 'blank'
 /** Colour of the page; `default` is `--c2-notepad__sheet--background`. */
 export type NotepadPaperColor = 'default' | 'yellow' | 'green' | 'blue' | 'pink' | 'night'
+export const PADS: readonly NotepadPad[] = ['notebook', 'legal', 'sticky', 'index-card']
 export const PAPERS: readonly NotepadPaper[] = ['lined', 'grid', 'dot', 'blank']
 export const PAPER_COLORS: readonly NotepadPaperColor[] = ['default', 'yellow', 'green', 'blue', 'pink', 'night']
 
 /** Detail of `paper-change`. */
 export interface NotepadPaperChangeEventDetail {
+  pad: NotepadPad
   paper: NotepadPaper
   paperColor: NotepadPaperColor
 }
@@ -91,9 +95,21 @@ const HIGHLIGHT_SWATCHES: Record<NotepadHighlight, string> = {
   pink: 'var(--c2-notepad__highlight-pink--background, rgba(255, 120, 170, 0.38))',
 }
 
+const PAD_LABELS: Record<NotepadPad, string> = {
+  notebook: 'Notebook',
+  legal: 'Legal pad',
+  sticky: 'Sticky note',
+  'index-card': 'Index card',
+}
+/** Name of the `default` paper colour, which is the pad's own colour. */
+const PAD_COLOR_LABELS: Record<NotepadPad, string> = {
+  notebook: 'White',
+  legal: 'Canary',
+  sticky: 'Lemon',
+  'index-card': 'Card',
+}
 const PAPER_LABELS: Record<NotepadPaper, string> = { lined: 'Lined', grid: 'Grid', dot: 'Dot grid', blank: 'Blank' }
-const PAPER_COLOR_LABELS: Record<NotepadPaperColor, string> = {
-  default: 'White',
+const PAPER_COLOR_LABELS: Record<Exclude<NotepadPaperColor, 'default'>, string> = {
   yellow: 'Yellow',
   green: 'Green',
   blue: 'Blue',
@@ -102,7 +118,7 @@ const PAPER_COLOR_LABELS: Record<NotepadPaperColor, string> = {
 }
 /** Each paper colour is a pair: the sheet and the ink written on it. */
 const PAPER_SWATCHES: Record<NotepadPaperColor, string> = {
-  default: '--_swatch: var(--c2-notepad__sheet--background, #fdfcf7); --_swatch-ink: var(--c2-notepad__writing--color, #1e2a4a)',
+  default: '--_swatch: var(--_pad-paper); --_swatch-ink: var(--c2-notepad__writing--color, #1e2a4a)',
   yellow: '--_swatch: var(--c2-notepad__paper-yellow--background, #fcf0bf); --_swatch-ink: var(--c2-notepad__paper-yellow--color, #2b2410)',
   green: '--_swatch: var(--c2-notepad__paper-green--background, #e8f3e4); --_swatch-ink: var(--c2-notepad__paper-green--color, #1d3324)',
   blue: '--_swatch: var(--c2-notepad__paper-blue--background, #e6eef9); --_swatch-ink: var(--c2-notepad__paper-blue--color, #1c2a4a)',
@@ -110,6 +126,9 @@ const PAPER_SWATCHES: Record<NotepadPaperColor, string> = {
   night: '--_swatch: var(--c2-notepad__paper-night--background, #232a33); --_swatch-ink: var(--c2-notepad__paper-night--color, #e9e4d4)',
 }
 /** Hover-card timing: a short delay before opening so passing over the button does not flash the card. */
+/** Range of the random tilt of a sticky note, in degrees either way. */
+const STICKY_TILT_MIN = 1
+const STICKY_TILT_MAX = 4
 const HOVER_OPEN_DELAY = 150
 const HOVER_CLOSE_DELAY = 250
 
@@ -196,7 +215,9 @@ class TaskView implements NodeView {
  *
  * The paper is presentation, so it is set entirely through CSS variables: set `--c2-notepad__grid--color` for graph
  * paper, `--c2-notepad__dot--color` (with `--c2-notepad__rule--color: transparent`) for a dot grid, and swap
- * `--c2-notepad__spiral--display` / `--c2-notepad__glue--display` for a glued legal pad.
+ * `--c2-notepad__spiral--display` / `--c2-notepad__glue--display` for a glued legal pad. `pad` picks a ready-made
+ * preset of those variables (notebook, legal pad, sticky note, index card); a variable set on the element
+ * still wins over the preset.
  *
  * The handwriting face is Patrick Hand (SIL Open Font License 1.1), bundled and registered with `document.fonts`
  * only when the writing surface uses it.
@@ -210,13 +231,13 @@ class TaskView implements NodeView {
  * @event {CustomEvent<NotepadFormat>} format-change - Fired when the formatting at the selection changes. Does not bubble.
  * @event {CustomEvent<NotepadCheckChangeEventDetail>} check-change - Fired when a checklist item is ticked or unticked. Does not bubble.
  * @event {CustomEvent<NotepadPageTearEventDetail>} page-tear - Fired before a page is torn off; cancel it to keep the page. Does not bubble.
- * @event {CustomEvent<NotepadPaperChangeEventDetail>} paper-change - Fired when the writer picks another ruling or paper colour in the paper picker. Does not bubble.
+ * @event {CustomEvent<NotepadPaperChangeEventDetail>} paper-change - Fired when the writer picks another pad, ruling or paper colour in the paper picker. Does not bubble.
  * @csspart sheet - The paper sheet.
  * @csspart writing - The editable writing surface.
  * @csspart toolbar - The selection formatting toolbar.
  * @csspart tear-button - The "Tear off" button of a tearable pad.
  * @csspart paper-button - The "Paper" button that opens the paper picker.
- * @csspart paper-menu - The paper picker: rulings and paper colours.
+ * @csspart paper-menu - The paper picker: pads, rulings and paper colours.
  *
  * @cssproperty {color} [--c2-notepad__sheet--background=#fdfcf7] - Paper colour.
  * @cssproperty {border-radius} [--c2-notepad__sheet--border-radius=3px]
@@ -231,6 +252,8 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__dot--color=transparent] - Dot grid; set it for dotted paper.
  * @cssproperty {pixel} [--c2-notepad__margin--inset=56px] - Distance of the margin line from the left edge.
  * @cssproperty {color} [--c2-notepad__margin--color=#eba6a6] - Margin line; transparent to remove it.
+ * @cssproperty {pixel} [--c2-notepad__margin--gap=0px] - Distance of a second margin line inside the first, as on a legal pad; 0 draws one line.
+ * @cssproperty {color} [--c2-notepad__headline--color=transparent] - Rule under the top of the sheet, as on an index card.
  * @cssproperty {color} [--c2-notepad__writing--color=#1e2a4a] - Default ink.
  * @cssproperty {font-family} [--c2-notepad__writing--font-family='C2 Notepad Hand', 'Patrick Hand', 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive]
  * @cssproperty {font-size} [--c2-notepad__writing--font-size=18px]
@@ -241,6 +264,8 @@ class TaskView implements NodeView {
  * @cssproperty {display} [--c2-notepad__spiral--display=block] - Spiral binding; none to remove it.
  * @cssproperty {display} [--c2-notepad__glue--display=none] - Glued top binding of a legal pad; block to show it.
  * @cssproperty {color} [--c2-notepad__glue--background=#3f444b]
+ * @cssproperty {angle} [--c2-notepad__sheet--rotate=0deg] - Tilt of the sheet. A sticky note leans by a random angle (1°–4° either way, picked again each time the pad becomes a sticky note) unless this is set; 0deg keeps it straight.
+ * @cssproperty {pixel} [--c2-notepad__top--padding-top=20px] - Space above the header row, which clears the spiral binding.
  * @cssproperty {color} [--c2-notepad__ink-blue--color=#2848b8]
  * @cssproperty {color} [--c2-notepad__ink-black--color=#18181b]
  * @cssproperty {color} [--c2-notepad__ink-red--color=#b8232b]
@@ -263,6 +288,9 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__paper-pink--color=#3d1f2b] - Ink colour for `paper-color="pink"`.
  * @cssproperty {color} [--c2-notepad__paper-night--background=#232a33] - Sheet colour for `paper-color="night"`.
  * @cssproperty {color} [--c2-notepad__paper-night--color=#e9e4d4] - Ink colour for `paper-color="night"`.
+ * @cssproperty {color} [--c2-notepad__pad-legal--background=#fbf1a6] - Sheet colour of `pad="legal"`.
+ * @cssproperty {color} [--c2-notepad__pad-sticky--background=#ffe680] - Sheet colour of `pad="sticky"`.
+ * @cssproperty {color} [--c2-notepad__pad-index-card--background=#ffffff] - Sheet colour of `pad="index-card"`.
  * @cssproperty {color} [--c2-notepad__error--color=#dc2626] - Error note and margin of an invalid notepad.
  * @cssproperty {outline} [--c2-notepad__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {opacity} [--c2-notepad__disabled--opacity=0.38]
@@ -306,11 +334,13 @@ export class Notepad extends LitElement {
   @property({ type: Boolean, reflect: true }) tearable = false
   /** Number of the current page; it goes up by one each time a page is torn off. */
   @property({ type: Number }) page = 1
+  /** Kind of pad: `notebook`, `legal`, `sticky` or `index-card`. Each is a preset of the paper's CSS variables. The writer changes it through the paper picker. */
+  @property({ reflect: true }) pad: NotepadPad = 'notebook'
   /** Ruling of the page: `lined`, `grid`, `dot` or `blank`. The writer changes it through the paper picker. */
   @property({ reflect: true }) paper: NotepadPaper = 'lined'
   /** Colour of the page and its ink: `default`, `yellow`, `green`, `blue`, `pink` or `night`. The writer changes it through the paper picker. */
   @property({ attribute: 'paper-color', reflect: true }) paperColor: NotepadPaperColor = 'default'
-  /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the ruling and the paper colour. */
+  /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the pad, the ruling and the paper colour. */
   @property({ type: Boolean, attribute: 'paper-picker', reflect: true }) paperPicker = false
 
   @state() private format: NotepadFormat = emptyFormat()
@@ -568,6 +598,12 @@ export class Notepad extends LitElement {
   }
 
   protected override updated(changed: PropertyValues<this>) {
+    // Each time the pad becomes a sticky note it is stuck on again, at a new angle: 1°–4° either way, never quite
+    // straight. The angle is set inside the shadow root, not on the host, and only applies under pad="sticky".
+    if (changed.has('pad') && this.pad === 'sticky') {
+      const tilt = (STICKY_TILT_MIN + Math.random() * (STICKY_TILT_MAX - STICKY_TILT_MIN)) * (Math.random() < 0.5 ? -1 : 1)
+      this.renderRoot.querySelector<HTMLElement>('.pad')?.style.setProperty('--_tilt', `${tilt.toFixed(1)}deg`)
+    }
     const view = this.view
     if (!view) return
     if (changed.has('value') && this.value !== this.serialized) {
@@ -1043,19 +1079,21 @@ export class Notepad extends LitElement {
     if (!this.paperMenuOpen && this.paperMenu?.contains(this.renderRoot instanceof ShadowRoot ? this.renderRoot.activeElement : null)) this.paperButton?.focus()
   }
 
-  private choosePaper(paper: NotepadPaper, paperColor: NotepadPaperColor) {
-    if (paper === this.paper && paperColor === this.paperColor) return
+  private choosePaper(choice: Partial<NotepadPaperChangeEventDetail>) {
+    const { pad = this.pad, paper = this.paper, paperColor = this.paperColor } = choice
+    if (pad === this.pad && paper === this.paper && paperColor === this.paperColor) return
+    this.pad = pad
     this.paper = paper
     this.paperColor = paperColor
-    this.dispatchEvent(new CustomEvent<NotepadPaperChangeEventDetail>('paper-change', { detail: { paper, paperColor } }))
+    this.dispatchEvent(new CustomEvent<NotepadPaperChangeEventDetail>('paper-change', { detail: { pad, paper, paperColor } }))
   }
 
   private handlePaperMenuKeydown(event: KeyboardEvent) {
     const radio = (event.target as Element).closest<HTMLElement>('[role=radio]')
     if (!radio) return
     const group = [...(radio.parentElement?.querySelectorAll<HTMLElement>('[role=radio]') ?? [])]
-    // The colours sit in rows of three: up and down move a whole row.
-    const columns = radio.parentElement?.classList.contains('colors') ? 3 : 1
+    // The pads and the colours sit in rows of three: up and down move a whole row.
+    const columns = radio.parentElement?.classList.contains('grid3') ? 3 : 1
     const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowDown' ? columns : event.key === 'ArrowUp' ? -columns : 0
     if (!step) return
     event.preventDefault()
@@ -1077,6 +1115,24 @@ export class Notepad extends LitElement {
       @pointerenter=${this.handlePaperHover}
       @pointerleave=${this.handlePaperHover}
     >
+      <span class="label" id="paper-pads">Pad</span>
+      <div class="row grid3 pads" role="radiogroup" aria-labelledby="paper-pads">
+        ${PADS.map(
+          (pad) =>
+            html`<button
+              type="button"
+              role="radio"
+              aria-checked=${String(this.pad === pad)}
+              aria-label=${PAD_LABELS[pad]}
+              title=${PAD_LABELS[pad]}
+              tabindex=${this.pad === pad ? 0 : -1}
+              @click=${() => this.choosePaper({ pad })}
+            >
+              <span class="pad-thumb ${pad}"></span>
+              <span class="name">${PAD_LABELS[pad]}</span>
+            </button>`,
+        )}
+      </div>
       <span class="label" id="paper-lines">Lines</span>
       <div class="row" role="radiogroup" aria-labelledby="paper-lines">
         ${PAPERS.map(
@@ -1088,28 +1144,28 @@ export class Notepad extends LitElement {
               aria-label=${PAPER_LABELS[paper]}
               title=${PAPER_LABELS[paper]}
               tabindex=${this.paper === paper ? 0 : -1}
-              @click=${() => this.choosePaper(paper, this.paperColor)}
+              @click=${() => this.choosePaper({ paper })}
             >
               <span class="thumb ${paper}"></span>
             </button>`,
         )}
       </div>
       <span class="label" id="paper-colors">Paper</span>
-      <div class="row colors" role="radiogroup" aria-labelledby="paper-colors">
-        ${PAPER_COLORS.map(
-          (color) =>
-            html`<button
-              type="button"
-              role="radio"
-              aria-checked=${String(this.paperColor === color)}
-              aria-label=${PAPER_COLOR_LABELS[color]}
-              title=${PAPER_COLOR_LABELS[color]}
-              tabindex=${this.paperColor === color ? 0 : -1}
-              @click=${() => this.choosePaper(this.paper, color)}
-            >
-              <span class="swatch" style=${PAPER_SWATCHES[color]}>Aa</span>
-            </button>`,
-        )}
+      <div class="row grid3 colors" role="radiogroup" aria-labelledby="paper-colors">
+        ${PAPER_COLORS.map((color) => {
+          const name = color === 'default' ? PAD_COLOR_LABELS[this.pad] : PAPER_COLOR_LABELS[color]
+          return html`<button
+            type="button"
+            role="radio"
+            aria-checked=${String(this.paperColor === color)}
+            aria-label=${name}
+            title=${name}
+            tabindex=${this.paperColor === color ? 0 : -1}
+            @click=${() => this.choosePaper({ paperColor: color })}
+          >
+            <span class="swatch" style=${PAPER_SWATCHES[color]}>Aa</span>
+          </button>`
+        })}
       </div>
     </div>`
   }

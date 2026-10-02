@@ -23,14 +23,7 @@ npm install @c2n/notepad
 ```html tag=UsageBlock,package=@c2n/notepad
 <style>
   .note { width: 360px; max-width: 100%; }
-  .legal {
-    --c2-notepad__sheet--background: #fbf1a6;
-    --c2-notepad__rule--color: #8fb2d6;
-    --c2-notepad__margin--color: #e07a6e;
-    --c2-notepad__writing--color: #1b2433;
-    --c2-notepad__spiral--display: none;
-    --c2-notepad__glue--display: block;
-  }
+  .small { width: 240px; max-width: 100%; }
 </style>
 <div data-label="Default">
   <c2-notepad class="note" paper-picker label="Meeting notes" placeholder="Write something…" value="Thursday sync
@@ -43,9 +36,13 @@ Ask about the <span data-ink=&quot;red&quot;>night paper</span>"><span slot="hea
 - [ ] Lemons ×3
 remember the ==blue== bag"></c2-notepad>
 </div>
-<div data-label="Legal pad">
-  <c2-notepad class="note legal" label="Deposition prep" value="1. Timeline of the March emails
+<div data-label="Pads">
+  <c2-notepad class="small" pad="legal" label="Deposition prep" value="1. Timeline of the March emails
 2. Who signed the ~~first~~ second draft?"></c2-notepad>
+  <c2-notepad class="small" pad="sticky" label="Reminder" value="Dentist Tue 9:30
+bring the **insurance card**!"></c2-notepad>
+  <c2-notepad class="small" pad="index-card" label="Recipe" value="2 cans San Marzano, 5 garlic
+olive oil, basil, slow 40 min"><span slot="header">Nonna's tomato sauce</span></c2-notepad>
 </div>
 <div data-label="Tear-off pad">
   <c2-notepad class="note" label="To call" tearable value="Plumber: Thu after 4
@@ -115,19 +112,27 @@ notepad.addEventListener('page-tear', (event) => archive.push(event.detail.value
 
 ## Choosing the paper
 
-Set `paper-picker` to add a "Paper" button at the top of the sheet. It behaves like a hover card: point at it and a small card opens under it, with an arrow pointing at the button. Click or tap the button to keep the card open; from the keyboard, Enter opens it with the focus on the current choice. The card has the rulings (lined, grid, dot grid, blank) and six paper colours in two rows. Each colour sets the sheet and its ink together: white, yellow, green, blue, pink and night, a dark sheet with light ink. The arrow keys move between choices and pick as they go (up and down move a whole row of colours), and Escape closes the card.
+Set `paper-picker` to add a "Paper" button at the top of the sheet. It behaves like a hover card: point at it and a small card opens under it, with an arrow pointing at the button. Click or tap the button to keep the card open; from the keyboard, Enter opens it with the focus on the current choice. The card has three groups:
 
-The choice is held in two reflected properties, `paper` and `paperColor` (`paper-color`), which you can also set yourself without the picker. The picker fires `paper-change` with both values, so the app can remember each writer's choice:
+- **Pad**: notebook (spiral binding, red margin), legal pad (canary paper, glued top, double margin, wide rules), sticky note (no binding, curled corner, larger writing, and a random tilt) and index card (white card, red headline, tight rules).
+- **Lines**: lined, grid, dot grid and blank.
+- **Paper**: six colours, each of which sets the sheet and its ink together. The first is the pad's own colour (white, canary, lemon, card or cream); the others are yellow, green, blue, pink and night, a dark sheet with light ink.
+
+The three groups combine, so an index card can have a grid or a sticky note can be pink. The arrow keys move between choices and pick as they go (up and down move a whole row), and Escape closes the card.
+
+The choice is held in three reflected properties, `pad`, `paper` and `paperColor` (`paper-color`), which you can also set yourself without the picker. The picker fires `paper-change` with all three, so the app can remember each writer's choice:
 
 ```ts tag=CodeBlock
-notepad.addEventListener('paper-change', (event) => savePreference(event.detail.paper, event.detail.paperColor))
+notepad.addEventListener('paper-change', (event) => savePreference(event.detail.pad, event.detail.paper, event.detail.paperColor))
 ```
+
+A pad is only a preset of the paper's CSS variables: binding, corners, shadow, line spacing, margin and the size of the writing. A variable you set on the element, or on a class on it, still wins over the preset, so you can tune a pad without leaving it. A sticky note leans as if stuck on by hand, at a random angle between 1° and 4° either way, picked again each time the pad is switched to a sticky note; set `--c2-notepad__sheet--rotate` to choose the angle, or `0deg` to keep it straight. Each pad's colour has its own variable (`--c2-notepad__pad-legal--background`, `--c2-notepad__pad-sticky--background`, `--c2-notepad__pad-index-card--background`); the notebook uses `--c2-notepad__sheet--background`. Under `@c2n/theme` these darken with the surface in dark mode.
 
 The colours are still CSS variables: `--c2-notepad__paper-yellow--background` and `--c2-notepad__paper-yellow--color` (and the same pair for each colour) decide what each choice looks like. Under `@c2n/theme` the pastel papers darken with the surface in dark mode and their inks lighten.
 
 ## Paper and binding
 
-The paper is styled through CSS variables only. Graph paper sets `--c2-notepad__grid--color`. A dot grid sets `--c2-notepad__dot--color` and makes the rules transparent. A blank page makes the rules and the margin transparent. `--c2-notepad__rule--spacing` is also the line height: the default 28px is college ruling. `--c2-notepad__spiral--display` and `--c2-notepad__glue--display` switch between a spiral and the glued top of a legal pad. Under `@c2n/theme` the paper, rules, margin and inks are mixed from the surface tokens, so a dark theme gives night paper. The Gallery tab has a legal pad, a dot-grid journal, an engineering pad, a sticky note and an index card.
+The paper is styled through CSS variables only. Graph paper sets `--c2-notepad__grid--color`. A dot grid sets `--c2-notepad__dot--color` and makes the rules transparent. A blank page makes the rules and the margin transparent. `--c2-notepad__rule--spacing` is also the line height: the default 28px is college ruling. `--c2-notepad__spiral--display` and `--c2-notepad__glue--display` switch between a spiral and the glued top of a legal pad, `--c2-notepad__margin--gap` adds a second margin line, `--c2-notepad__headline--color` draws the red headline of an index card, and `--c2-notepad__sheet--rotate` tilts the sheet. Under `@c2n/theme` the paper, rules, margin and inks are mixed from the surface tokens, so a dark theme gives night paper. The Gallery tab has a legal pad, a dot-grid journal, an engineering pad, a sticky note and an index card.
 
 ## The handwriting face
 

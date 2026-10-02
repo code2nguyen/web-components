@@ -299,7 +299,7 @@ test('the paper picker changes the ruling and the paper colour', async ({ page, 
   const menu = page.getByRole('dialog', { name: 'Paper' })
   await expect(menu).toBeVisible()
   await expect(button).toHaveAttribute('aria-expanded', 'true')
-  await expect(menu.getByRole('radio', { name: 'Lined', exact: true })).toBeFocused()
+  await expect(menu.getByRole('radio', { name: 'Notebook', exact: true })).toBeFocused()
   await expect(menu.getByRole('radio', { name: 'Lined', exact: true })).toHaveAttribute('aria-checked', 'true')
 
   await menu.getByRole('radio', { name: 'Grid', exact: true }).click()
@@ -320,11 +320,11 @@ test('the paper picker changes the ruling and the paper colour', async ({ page, 
   await expect(host).toHaveAttribute(
     'data-events',
     JSON.stringify([
-      { paper: 'grid', paperColor: 'default' },
-      { paper: 'dot', paperColor: 'default' },
-      { paper: 'dot', paperColor: 'yellow' },
-      { paper: 'dot', paperColor: 'pink' },
-      { paper: 'dot', paperColor: 'yellow' },
+      { pad: 'notebook', paper: 'grid', paperColor: 'default' },
+      { pad: 'notebook', paper: 'dot', paperColor: 'default' },
+      { pad: 'notebook', paper: 'dot', paperColor: 'yellow' },
+      { pad: 'notebook', paper: 'dot', paperColor: 'pink' },
+      { pad: 'notebook', paper: 'dot', paperColor: 'yellow' },
     ]),
   )
 
@@ -342,7 +342,7 @@ test('the paper picker opens on hover like a hover card, with an arrow at the bu
   await button.hover()
   await expect(menu).toBeVisible()
   // Hover does not take the focus away from wherever the writer was.
-  await expect(menu.getByRole('radio', { name: 'Lined', exact: true })).not.toBeFocused()
+  await expect(menu.getByRole('radio', { name: 'Notebook', exact: true })).not.toBeFocused()
   // The arrow sits under the middle of the button.
   const arrow = await menu.evaluate((element) => parseFloat(getComputedStyle(element).getPropertyValue('--_arrow-x')) + element.getBoundingClientRect().left)
   const box = (await button.boundingBox())!
@@ -361,6 +361,85 @@ test('the paper picker opens on hover like a hover card, with an arrow at the bu
   await expect(menu).toBeVisible()
   await button.click()
   await expect(menu).toBeHidden()
+})
+
+test('the paper picker switches the pad, a preset of the paper variables', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes" paper-picker value="Hello"></c2-notepad>')
+  const host = page.locator('c2-notepad')
+  const sheet = host.locator('.sheet')
+  await watch(host, 'paper-change')
+  await page.getByRole('button', { name: 'Paper' }).click()
+  const menu = page.getByRole('dialog', { name: 'Paper' })
+  await expect(menu.getByRole('radio', { name: 'Notebook', exact: true })).toHaveAttribute('aria-checked', 'true')
+  await expect(menu.getByRole('radio', { name: 'White', exact: true })).toHaveAttribute('aria-checked', 'true')
+
+  await menu.getByRole('radio', { name: 'Legal pad', exact: true }).click()
+  await expect(host).toHaveAttribute('pad', 'legal')
+  await expect(sheet).toHaveCSS('background-color', 'rgb(251, 241, 166)')
+  await expect(host.locator('.glue')).toBeVisible()
+  await expect(host.locator('.spiral')).toBeHidden()
+  // The default colour is named after the pad's own colour.
+  await expect(menu.getByRole('radio', { name: 'Canary', exact: true })).toHaveAttribute('aria-checked', 'true')
+
+  // Pads sit in rows of three: ArrowDown from Notebook lands on Index card.
+  await menu.getByRole('radio', { name: 'Notebook', exact: true }).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(host).toHaveAttribute('pad', 'index-card')
+
+  // A paper colour still applies over the pad.
+  await menu.getByRole('radio', { name: 'Pink', exact: true }).click()
+  await expect(sheet).toHaveCSS('background-color', 'rgb(251, 230, 234)')
+  await expect(host).toHaveAttribute(
+    'data-events',
+    JSON.stringify([
+      { pad: 'legal', paper: 'lined', paperColor: 'default' },
+      { pad: 'index-card', paper: 'lined', paperColor: 'default' },
+      { pad: 'index-card', paper: 'lined', paperColor: 'pink' },
+    ]),
+  )
+  await accessible(page)
+})
+
+test('a sticky note leans by a random angle, picked again each time it becomes one, unless the rotation is set', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-notepad label="A" pad="sticky"></c2-notepad><c2-notepad label="B" pad="sticky" style="--c2-notepad__sheet--rotate: 0deg"></c2-notepad><c2-notepad label="C"></c2-notepad>',
+  )
+  const rotate = (index: number) =>
+    page
+      .locator('c2-notepad .sheet')
+      .nth(index)
+      .evaluate((element) => getComputedStyle(element).rotate)
+  await expect.poll(async () => Math.abs(parseFloat(await rotate(0)))).toBeGreaterThanOrEqual(1)
+  expect(Math.abs(parseFloat(await rotate(0)))).toBeLessThanOrEqual(4)
+  expect(await rotate(1)).toMatch(/^(none|0deg)$/)
+  expect(await rotate(2)).toMatch(/^(none|0deg)$/)
+  // The angle lives inside the shadow root: the host carries no attribute or style it was not given.
+  await expect(page.locator('c2-notepad').first()).not.toHaveAttribute('style')
+
+  // Switching to another pad and back picks a new angle (twenty switches never all land on the same one).
+  const first = page.locator('c2-notepad').first()
+  const angles = new Set<string>()
+  for (let i = 0; i < 20; i++) {
+    await first.evaluate((element) => (element.pad = 'notebook'))
+    await expect.poll(() => rotate(0)).toMatch(/^(none|0deg)$/)
+    await first.evaluate((element) => (element.pad = 'sticky'))
+    await expect.poll(() => rotate(0)).not.toMatch(/^(none|0deg)$/)
+    const angle = parseFloat(await rotate(0))
+    expect(Math.abs(angle)).toBeGreaterThanOrEqual(1)
+    expect(Math.abs(angle)).toBeLessThanOrEqual(4)
+    angles.add(String(angle))
+  }
+  expect(angles.size).toBeGreaterThan(1)
+})
+
+test('a variable set on the element wins over the pad preset', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<c2-notepad label="Notes" pad="sticky" style="--c2-notepad__pad-sticky--background: #ccffcc; --c2-notepad__writing--font-size: 14px"></c2-notepad>',
+  )
+  const sheet = page.locator('c2-notepad .sheet')
+  await expect(sheet).toHaveCSS('background-color', 'rgb(204, 255, 204)')
+  await expect(page.locator('c2-notepad .writing')).toHaveCSS('font-size', '14px')
+  await expect(page.locator('c2-notepad .spiral')).toBeHidden()
 })
 
 test('the toolbar and the paper card follow the page when it scrolls', async ({ page, renderScenario }) => {
