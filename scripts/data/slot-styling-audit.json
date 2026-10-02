@@ -987,6 +987,33 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
+      "tag": "c2-kanban",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's c2-kanban-column elements; each column is styled through its own variables and parts."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty region owns the empty slot's component-side presentation: border, padding and colours of the hint."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the footer slot's placement below the cards; the assigned controls stay consumer-owned."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "header",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The header region owns the header slot's placement and padding, around either the assigned content or the default label and count."
+    },
+    {
       "tag": "c2-kbd",
       "slot": "",
       "decision": "assigned-content",

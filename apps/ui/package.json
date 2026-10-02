@@ -17,6 +17,7 @@
     "debug": "node --inspect-brk ../../node_modules/astro/astro.js build"
   },
   "dependencies": {
+    "@c2n/kanban": "*",
     "@c2n/flow": "*",
     "@c2n/week-planner": "*",
     "@c2n/month-planner": "*",
