@@ -96,6 +96,7 @@ export const overrides: Record<string, Override> = {
   '--c2-status-panel__container--border': { exclude: 'transparent opt-in panel frame' },
   '--c2-status-panel__media--size': { exclude: 'status media geometry' },
   '--c2-status-panel__media-icon--size': { exclude: 'status icon geometry' },
+  '--c2-status-panel__illustration--size': { exclude: 'status illustration geometry' },
   '--c2-status-panel__media__success--background-color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__success--color': { exclude: 'semantic success colour' },
   '--c2-status-panel__media__warning--background-color': { exclude: 'semantic warning colour' },
@@ -190,11 +191,36 @@ export const overrides: Record<string, Override> = {
   '--c2-chart__negative--color': { token: 'chart-negative' },
   '--c2-chart__tone-positive--color': { token: 'chart-positive' },
   '--c2-chart__tone-negative--color': { token: 'chart-negative' },
+  // The comparison bar's end side is the opposing quantity (asks, sellers), not an error: it follows the
+  // falling-direction colour so a brand recolours the pair together with the charts.
+  '--c2-comparison-bar__end-segment--background-color': { token: 'chart-negative' },
+  '--c2-comparison-bar__end-value--color': { token: 'chart-negative' },
+  // The neutral middle share (draws, abstentions) reads as a strong outline grey in either theme.
+  '--c2-comparison-bar__middle-segment--background-color': { token: 'color-outline-strong' },
   // Handed to the engine to draw marker and slice borders against the card, so it follows the surface
   // rather than reading as white text, which is how the colour rule would otherwise classify it.
   '--c2-chart__surface--color': { token: 'color-surface' },
   // The tooltip is an inverse surface, so its text follows the inverse pair rather than the body colour.
   '--c2-chart__tooltip--color': { token: 'color-on-inverse-surface' },
+  // Map regions are drawn on the card, so the borders between them are the surface colour, not white ink.
+  '--c2-chart__region--border-color': { token: 'color-surface' },
+  // A selected region with no data takes the soft accent surface, as a selected list item does.
+  '--c2-chart__region__selected--background-color': { token: 'color-primary-container' },
+  // The sequential ramp runs from a whisper of the first series colour on the surface to the series colour pulled
+  // toward the text colour: dark navy on a light card, bright blue on a dark one, so "more" always reads as stronger.
+  '--c2-chart__scale-start--color': {
+    token: 'chart-series-1',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-series-1, #0265dc) 15%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-chart__scale-end--color': {
+    token: 'chart-series-1',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-series-1, #0265dc) 70%, var(--c2-theme--color-on-surface, #18181b))',
+  },
+  // The diverging scale's negative pole is the second series colour, deepened the same way as the positive end.
+  '--c2-chart__scale-negative--color': {
+    token: 'chart-series-2',
+    value: 'color-mix(in srgb, var(--c2-theme--chart-series-2, #ea580c) 80%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
   '--c2-attachment__status__complete--color': { exclude: 'success status colour' },
   '--c2-attachment__progress--background': { token: 'color-outline-variant' },

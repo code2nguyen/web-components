@@ -236,3 +236,42 @@ test('has no automatically detectable accessibility violations when compact', as
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('names the planner after its heading, shown in front of the month', async ({ page, scenario }) => {
+  await scenario('heading')
+  const planner = page.locator('c2-month-planner')
+  const heading = (await planner.getByRole('heading', { name: 'Team holidays' }).boundingBox())!
+  const month = (await planner.getByRole('button', { name: 'September 2026' }).boundingBox())!
+  expect(month.x).toBeGreaterThan(heading.x + heading.width - 1)
+  await expect(page.getByRole('region', { name: 'Team holidays' })).toBeVisible()
+
+  // Without one, the month names the planner and no heading box is left in the header.
+  await scenario()
+  await expect(page.getByRole('region', { name: 'September 2026' })).toBeVisible()
+  await expect(planner.locator('.heading')).toBeHidden()
+})
+
+test('replaces the heading text with the heading slot, which then names the planner', async ({ page, scenario }) => {
+  await scenario('heading-slot')
+  await expect(page.locator('c2-month-planner').getByRole('heading', { name: 'Team holidays' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Team holidays' })).toBeVisible()
+})
+
+test('puts the actions slot before the month navigation, at the end of the header', async ({ page, scenario }) => {
+  await scenario('actions')
+  const planner = page.locator('c2-month-planner')
+  const add = (await page.getByRole('button', { name: 'Add event' }).boundingBox())!
+  const settings = (await page.getByRole('button', { name: 'Settings' }).boundingBox())!
+  const previous = (await planner.getByRole('button', { name: 'Previous month' }).boundingBox())!
+  const month = (await planner.getByRole('button', { name: 'September 2026' }).boundingBox())!
+  expect(Math.abs(settings.x - (add.x + add.width) - 8)).toBeLessThan(1)
+  expect(previous.x).toBeGreaterThan(settings.x + settings.width - 1)
+  expect(add.x).toBeGreaterThan(month.x + month.width)
+  expect(Math.abs(add.y + add.height / 2 - (previous.y + previous.height / 2))).toBeLessThan(2)
+
+  // A compact planner wraps the header instead of overflowing it.
+  await scenario('actions-compact')
+  const host = (await planner.boundingBox())!
+  const next = (await planner.getByRole('button', { name: 'Next month' }).boundingBox())!
+  expect(next.x + next.width).toBeLessThanOrEqual(host.x + host.width)
+})

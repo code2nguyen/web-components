@@ -256,6 +256,44 @@ test('shows a heading that also names the planner', async ({ page, scenario }) =
   expect(Math.abs(evenWeek!.y + evenWeek!.height / 2 - (heading!.y + heading!.height / 2))).toBeLessThan(2)
 })
 
+test('replaces the heading text with the heading slot, which then names the planner', async ({ page, scenario }) => {
+  await scenario('heading-slot')
+  const planner = page.locator('c2-week-planner')
+  await expect(planner.getByRole('heading', { name: 'Kids’ schedule', level: 2 })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Kids’ schedule' })).toBeVisible()
+})
+
+test('puts the actions slot at the end of the header', async ({ page, scenario }) => {
+  await scenario('actions')
+  const planner = page.locator('c2-week-planner')
+  const heading = (await planner.getByRole('heading', { name: 'Team schedule' }).boundingBox())!
+  const add = (await page.getByRole('button', { name: 'Add event' }).boundingBox())!
+  const settings = (await page.getByRole('button', { name: 'Settings' }).boundingBox())!
+  const host = (await planner.boundingBox())!
+  expect(add.x).toBeGreaterThan(heading.x + heading.width - 1)
+  expect(Math.abs(settings.x - (add.x + add.width) - 8)).toBeLessThan(1)
+  // Flush with the end of the header: the planner's 12px padding and 1px border.
+  expect(Math.abs(host.x + host.width - (settings.x + settings.width) - 13)).toBeLessThan(1)
+  expect(Math.abs(add.y + add.height / 2 - (heading.y + heading.height / 2))).toBeLessThan(2)
+
+  // Narrow, the arrows follow the actions.
+  await scenario('actions-narrow')
+  const next = (await planner.getByRole('button', { name: 'Next days' }).boundingBox())!
+  const narrowSettings = (await page.getByRole('button', { name: 'Settings' }).boundingBox())!
+  expect(next.x).toBeGreaterThan(narrowSettings.x + narrowSettings.width - 1)
+})
+
+test('shows the header for actions alone, at its end', async ({ page, scenario }) => {
+  await scenario('actions-only')
+  const planner = page.locator('c2-week-planner')
+  await expect(planner.locator('.header')).toBeVisible()
+  await expect(planner.getByRole('heading')).toHaveCount(0)
+  const add = (await page.getByRole('button', { name: 'Add event' }).boundingBox())!
+  const host = (await planner.boundingBox())!
+  expect(Math.abs(host.x + host.width - (add.x + add.width) - 13)).toBeLessThan(1)
+  await expect(page.getByRole('region', { name: 'Week plan' })).toBeVisible()
+})
+
 test('has no header without a heading or the switch on a wide planner', async ({ page, scenario }) => {
   await scenario()
   await expect(page.locator('c2-week-planner').locator('.header')).toBeHidden()

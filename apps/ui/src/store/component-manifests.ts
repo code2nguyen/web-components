@@ -1,5 +1,6 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import todoList from '@c2n/todo-list/custom-elements.json'
+import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
@@ -96,6 +97,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     todoList,
+    comparisonBar,
     flow,
     weekPlanner,
     monthPlanner,

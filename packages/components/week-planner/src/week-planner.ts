@@ -5,6 +5,7 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { firstDayOfWeek, resolveLocale, type Weekday } from '@c2n/core/locale-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 // Registers `c2-button-group` and `c2-button`, the odd/even week switch, and `c2-badge`, the current week's number.
 import '@c2n/button-group'
 import '@c2n/badge'
@@ -158,7 +159,8 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * `alternate-weeks` to honour `weeks` and show an Odd week | Even week switch (a segmented `c2-button-group`, themed
  * through its own `--c2-button-group__*` variables) above the grid, opening on the kind of the current week. Without
  * it every event shows each week. The current week's number sits in a badge on its button. `heading` puts a title at
- * the start of the header.
+ * the start of the header; the `heading` slot replaces it with markup of your own (an icon, a link, an editable
+ * field). The `actions` slot puts buttons of your own at the end of the header, e.g. "Add event" or a settings menu.
  *
  * Text follows `locale`, or the browser's language when it is not set: day names and "today"/"this week" come from
  * `Intl`, and the switch labels from a built-in list (English, French, German, Spanish, Italian, Portuguese, Dutch,
@@ -174,6 +176,11 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @event {CustomEvent<WeekPlannerEventClickDetail>} event-click - Fired when an event block is activated; `detail.event` is the entry from `events`.
  * @event {CustomEvent<WeekPlannerParityChangeDetail>} parity-change - Fired when the switch shows the other kind of week; `detail.parity` is `odd` or `even`.
  *
+ * @slot heading - Title at the start of the header, in place of the `heading` text. It names the planner unless `heading` or `aria-label` is set.
+ * @slot actions - Controls at the end of the header, before the previous/next day arrows, e.g. an "Add event" button.
+ *
+ * @csspart heading - Heading region wrapping the `heading` slot and the `heading` text fallback; assigned content keeps its own styles.
+ * @csspart actions - Actions region wrapping the `actions` slot at the end of the header, before the previous/next day arrows; assigned controls keep their own styles.
  * @csspart event - Each event block.
  *
  * @cssproperty {color} [--c2-week-planner--background=#ffffff]
@@ -191,6 +198,7 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  * @cssproperty {pixel} [--c2-week-planner__hour-label--width=48px]
  * @cssproperty {color} [--c2-week-planner__hour-label--color=#71717a]
  * @cssproperty {font-size} [--c2-week-planner__hour-label--font-size=11px]
+ * @cssproperty {pixel} [--c2-week-planner__actions--gap=8px] - Space between the controls in the `actions` slot.
  * @cssproperty {pixel} [--c2-week-planner__navigation--size=28px] - Previous/next day arrows, shown when the planner is too narrow for seven days.
  * @cssproperty {border-radius} [--c2-week-planner__navigation--border-radius=6px]
  * @cssproperty {color} [--c2-week-planner__navigation__hover--background=#f4f4f5]
@@ -218,6 +226,7 @@ export class WeekPlanner extends LitElement {
   @state() private atStart = true
   @state() private atEnd = true
   @query('.scroller') private scroller?: HTMLElement
+  private readonly slotPresence = new SlotPresenceController(this, ['heading', 'actions'])
   private clock?: ReturnType<typeof setInterval>
   private resizeObserver?: ResizeObserver
   private overflowing = false
@@ -434,10 +443,26 @@ export class WeekPlanner extends LitElement {
     const nowMinutes = this.now.getHours() * 60 + this.now.getMinutes()
     const nowOffset = nowMinutes / 60 - firstHour
 
-    return html`<section class="c2-week-planner" aria-label=${this.ariaLabel || this.heading || this.labels.plan}>
+    const hasHeading = Boolean(this.heading) || this.slotPresence.has('heading')
+    const hasActions = this.slotPresence.has('actions')
+    // Slotted heading markup names the planner through the heading itself; text set as a property names it directly.
+    const labelledByHeading = !this.ariaLabel && !this.heading && hasHeading
+
+    return html`<section
+      class="c2-week-planner"
+      aria-label=${labelledByHeading ? nothing : this.ariaLabel || this.heading || this.labels.plan}
+      aria-labelledby=${labelledByHeading ? 'heading' : nothing}
+    >
       <div class="body">
-        <header class="header ${usesParity || this.heading ? '' : 'navigation-only'}">
-          ${this.heading ? html`<h2 class="title">${this.heading}</h2>` : nothing} ${usesParity ? this.renderSwitch() : nothing}${this.renderNavigation()}
+        <header class="header ${usesParity || hasHeading || hasActions ? '' : 'navigation-only'}">
+          <h2 class="title" part="heading" id="heading" ?hidden=${!hasHeading}>
+            <slot name="heading" @slotchange=${this.slotPresence.handleSlotChange}>${this.heading}</slot>
+          </h2>
+          ${usesParity ? this.renderSwitch() : nothing}
+          <div class="trailing">
+            <div class="actions" part="actions" ?hidden=${!hasActions}><slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
+            ${this.renderNavigation()}
+          </div>
         </header>
         <div class="frame">
           <div class="gutter" aria-hidden="true">

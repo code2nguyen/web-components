@@ -18,7 +18,14 @@ import type { ChartAdapter, ChartAdapterEvents } from '../chart-adapter.js'
  */
 export type UplotHitMode = 'nearest' | 'band'
 
-export async function createUplotAdapter(hitMode: UplotHitMode = 'nearest'): Promise<ChartAdapter<Options, AlignedData>> {
+/**
+ * A chart's own hit test: the series (0-based) under the cursor at row `index`, or `undefined` to keep the
+ * {@link UplotHitMode} result. Bars use it, because which bar the pointer is on is a question of the bar's
+ * rectangle — its slot in a group, its segment in a stack, a horizontal layout — not of the nearest value.
+ */
+export type UplotPick = (self: uPlot, index: number) => number | undefined
+
+export async function createUplotAdapter(hitMode: UplotHitMode = 'nearest', pick?: UplotPick): Promise<ChartAdapter<Options, AlignedData>> {
   const UPlot = await loadUplot()
 
   let instance: uPlot | undefined
@@ -69,6 +76,8 @@ export async function createUplotAdapter(hitMode: UplotHitMode = 'nearest'): Pro
             }
           }
           if (hitMode === 'band' && bandSeriesIndex >= 0) nearestSeriesIndex = bandSeriesIndex
+          const picked = pick?.(self, index)
+          if (picked !== undefined && picked >= 0) nearestSeriesIndex = picked
           const pointer = self.cursor.event
           const bounds = container?.getBoundingClientRect()
           hovered = { index, seriesIndex: nearestSeriesIndex }
@@ -151,6 +160,11 @@ export async function createUplotAdapter(hitMode: UplotHitMode = 'nearest'): Pro
     setSeriesVisibility(index, visible) {
       // Series 0 is the x values, so a caller's series index is offset by one.
       instance?.setSeries(index + 1, { show: visible })
+    },
+
+    redraw() {
+      // `true` rebuilds every series' paths: a stacked series' segments depend on which of the others are shown.
+      instance?.redraw(true)
     },
 
     resize(width, height) {

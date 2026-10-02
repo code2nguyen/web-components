@@ -104,6 +104,9 @@ test('hosts a c2-symbol illustration as media, decorative unless labelled', asyn
   await expect(symbol.locator('svg')).toHaveAttribute('aria-hidden', 'true')
   await expect(symbol).toHaveCSS('width', '96px')
   await expect(symbol).toHaveCSS('height', '96px')
+  await expect(host.locator('.media')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(host.locator('.media')).toHaveCSS('border-radius', '0px')
+  await expect(host.locator('.media')).toHaveCSS('overflow', 'visible')
 
   await symbol.evaluate(async (element) => {
     element.setAttribute('label', 'No connection')
@@ -111,4 +114,19 @@ test('hosts a c2-symbol illustration as media, decorative unless labelled', asyn
   })
   await expect(host.getByRole('img', { name: 'No connection' })).toBeVisible()
   await accessible(page)
+})
+
+test('media="none" renders no media region, and switching back restores the status icon', async ({ page, scenario }) => {
+  await scenario('no-media')
+  const host = page.locator('c2-status-panel')
+
+  await expect(host.getByRole('heading', { name: 'Nothing scheduled' })).toBeVisible()
+  await expect(host.locator('.media')).toHaveCount(0)
+
+  await host.evaluate(async (element) => {
+    element.removeAttribute('media')
+    await (element as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete
+  })
+  await expect(host.locator('.media svg')).toBeVisible()
+  await expect(host.locator('.media')).toHaveCSS('width', '64px')
 })

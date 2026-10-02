@@ -333,6 +333,17 @@ function cssDeclarations(css: Record<string, string>, indent = '  ') {
     .join('\n')
 }
 
+/** A JSON value (`rows='[{"id":"1"}]'`) is single-quoted, the way the examples author it; anything else double-quoted. */
+function quoteAttribute(value: string) {
+  if (!value.includes('"')) return `"${value}"`
+  return value.includes("'") ? `"${value.replace(/"/g, '&quot;')}"` : `'${value}'`
+}
+
+/** A single-quoted JS string literal, escaped so JSON data (or any quote) cannot end it early. */
+function jsString(value: string) {
+  return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
+}
+
 /** Rewrites the opening tag of the example root: adds a class and applies attribute changes. */
 function rewriteRootTag(html: string, tag: string, className: string, attributes: Record<string, string> = {}) {
   const open = new RegExp(`<${tag}(\\s[^>]*)?>`, 'i')
@@ -341,7 +352,7 @@ function rewriteRootTag(html: string, tag: string, className: string, attributes
     for (const [name, value] of Object.entries(attributes)) {
       rest = rest.replace(new RegExp(`\\s${name}(=("[^"]*"|'[^']*'|[^\\s>]+))?`, 'i'), '')
       if (value === 'true') rest += ` ${name}`
-      else if (value !== 'false' && value !== '') rest += ` ${name}="${value}"`
+      else if (value !== 'false' && value !== '') rest += ` ${name}=${quoteAttribute(value)}`
     }
     if (/\sclass=/.test(rest)) {
       rest = rest.replace(/\sclass=(["'])([^"']*)\1/, (_m, quote: string, classes: string) => ` class=${quote}${classes.trim()} ${className}${quote}`)
@@ -367,7 +378,7 @@ export function generateCode(format: CodeFormat, input: CodeInput): string {
       const className = toPascalCase(name)
       const pkg = `@c2n/${tag.replace(/^c2-/, '')}`
       const attributeLines = Object.entries(changes.attributes ?? {})
-        .map(([attr, value]) => `    this.setAttribute('${attr}', '${value === 'true' ? '' : value}')`)
+        .map(([attr, value]) => `    this.setAttribute('${attr}', ${jsString(value === 'true' ? '' : value)})`)
         .join('\n')
       return [
         `import { css } from 'lit'`,

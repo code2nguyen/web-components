@@ -5,7 +5,7 @@ export interface ExtraComponentConfigState extends ComponentManifest {
     [key: string]: string
   }
 }
-export type InspectorTab = 'design' | 'props' | 'presets' | 'code'
+export type InspectorTab = 'design' | 'props' | 'data' | 'presets' | 'code'
 
 export interface ComponentConfigState {
   uid?: string

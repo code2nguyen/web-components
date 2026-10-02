@@ -8,6 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { MonthPlanner } from '@c2n/month-planner'
+import { Button } from '@c2n/button'
 
 `c2-month-planner` shows a plan on a month grid. Each entry in `events` is drawn as a bar from its `start` to its `end`
 day, so a vacation reads as one strip with a clear beginning and end, continued on the next row when it crosses a
@@ -38,6 +39,35 @@ npm install @c2n/month-planner
     events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"flight","title":"Flight TP 1235","start":"2026-09-10","color":"#b45309"},{"id":"summit","title":"Web Summit","start":"2026-09-01","end":"2026-09-03"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
   ></c2-month-planner>
 </div>
+<div data-label="Heading and actions">
+  <c2-month-planner
+    heading="Team holidays"
+    month="2026-09"
+    locale="en-US"
+    events='[{"id":"ana","title":"Ana: vacation","start":"2026-09-07","end":"2026-09-11","color":"#0f766e"},{"id":"leo","title":"Leo: parental leave","start":"2026-09-14","end":"2026-09-25","color":"#be185d"}]'
+  >
+    <c2-button slot="actions">Add event</c2-button>
+  </c2-month-planner>
+</div>
+```
+
+## Heading and actions
+
+`heading` puts a title of the planner's own in front of the month (`--c2-month-planner__heading--font-size`,
+`--c2-month-planner__heading--font-weight`) and becomes the planner's accessible name, unless `aria-label` is set;
+without it, the month names the planner. For more than plain text, put your own markup in the `heading` slot, such as
+a field that renames the planner. It replaces the `heading` text and names the planner unless `heading` or
+`aria-label` is set.
+
+The `actions` slot puts controls of your own at the end of the header, before the month navigation, e.g. an "Add
+event" button or a settings menu, spaced by `--c2-month-planner__actions--gap`. On a narrow planner the header wraps
+instead of overflowing. The planner leaves what they do to you.
+
+```html tag=CodeBlock
+<c2-month-planner heading="Team holidays">
+  <c2-button slot="actions">Add event</c2-button>
+  <c2-icon-button slot="actions" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
+</c2-month-planner>
 ```
 
 ## Events
