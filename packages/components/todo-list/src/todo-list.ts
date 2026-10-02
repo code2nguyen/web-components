@@ -8,6 +8,8 @@ import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import '@c2n/reorder-list'
+import '@c2n/tabs'
+import '@c2n/progress'
 import type { ReorderEventDetail, ReorderSwipeAction, ReorderSwipeActionEventDetail } from '@c2n/reorder-list'
 import '@c2n/task-icons'
 import { isTaskIconName, taskIconCatalog, taskIconCategories, taskIconTag, type TaskIconName, type TaskIconCategory } from '@c2n/task-icons/task-icon-names.js'
@@ -56,8 +58,41 @@ export interface TodoTask {
 }
 
 /** Colour palettes: each sets the six highlighters and the five pens, in a light and a dark variant. */
-export const todoPalettes = ['classic', 'pastel', 'vivid', 'earth', 'ocean', 'retro'] as const
+export const todoPalettes = ['classic', 'soft', 'earth', 'ocean'] as const
 export type TodoPalette = (typeof todoPalettes)[number]
+
+/** The list icons, named for what a list is for (`icon="groceries"`); each is drawn by a `@c2n/task-icons` icon. */
+export const todoListIcons = [
+  { name: 'work', label: 'Work', icon: 'briefcase' },
+  { name: 'personal', label: 'Personal', icon: 'person' },
+  { name: 'groceries', label: 'Groceries', icon: 'cart' },
+  { name: 'shopping', label: 'Shopping', icon: 'bag' },
+  { name: 'home', label: 'Home', icon: 'home' },
+  { name: 'chores', label: 'Chores', icon: 'clean' },
+  { name: 'health', label: 'Health', icon: 'health' },
+  { name: 'fitness', label: 'Fitness', icon: 'gym' },
+  { name: 'travel', label: 'Travel', icon: 'flight' },
+  { name: 'study', label: 'Study', icon: 'graduation' },
+  { name: 'reading', label: 'Reading', icon: 'books' },
+  { name: 'ideas', label: 'Ideas', icon: 'idea' },
+  { name: 'projects', label: 'Projects', icon: 'rocket' },
+  { name: 'finance', label: 'Finance', icon: 'wallet' },
+  { name: 'family', label: 'Family', icon: 'family' },
+  { name: 'events', label: 'Events', icon: 'birthday' },
+  { name: 'meals', label: 'Meals', icon: 'cook' },
+  { name: 'errands', label: 'Errands', icon: 'car' },
+  { name: 'schedule', label: 'Schedule', icon: 'calendar' },
+  { name: 'goals', label: 'Goals', icon: 'target' },
+] as const satisfies readonly { name: string; label: string; icon: TaskIconName }[]
+export type TodoListIcon = (typeof todoListIcons)[number]['name']
+
+/**
+ * The menu, icon picker and editor are drawn inside a task's row, which `c2-reorder-list` drags and swipes from any
+ * spot that is not a control: a press on their padding stops here, so it never picks the row up.
+ */
+const keepFromRow = (event: PointerEvent) => event.stopPropagation()
+
+const listIconOf = (name: unknown) => todoListIcons.find((entry) => entry.name === name)
 
 /** What the customize panel changes. Every key is optional: a missing key keeps the authored look. */
 export interface TodoListLook {
@@ -67,6 +102,8 @@ export interface TodoListLook {
   doneMark?: TodoDoneMark
   progress?: TodoProgress
   density?: TodoDensity
+  /** The list's icon, one of `todoListIcons` or `none` for an empty one; wins over the `icon` attribute. */
+  icon?: TodoListIcon | 'none'
 }
 
 export interface TodoTaskEventDetail {
@@ -106,11 +143,12 @@ export interface TodoList {
 }
 
 type TaskEventFactory = (detail: TodoTaskEventDetail) => CustomEvent<TodoTaskEventDetail>
-type MenuAction = 'note' | 'icon' | 'drop' | 'archive' | 'delete'
+type MenuAction = 'edit' | 'icon' | 'drop' | 'archive' | 'delete'
 type Submenu = 'highlight' | 'ink'
 
 const STORAGE_PREFIX = 'c2-todo-list:'
 const ICON_COLUMNS = 8
+const LIST_ICON_COLUMNS = 4
 const TOAST_MS = 5000
 // Swiping a row left reveals Archive and Delete, swiping it right checks it. The list cancels the inner list's own
 // delete and applies each action to its data.
@@ -213,11 +251,16 @@ interface Palette {
   highlights: Record<TodoHighlight, string>
   light: Record<TodoPen, string>
   dark: Record<TodoPen, string>
+  /** The palette's signature colour (ticks, progress, Add), light and dark: what makes one palette look unlike another. */
+  accent: { light: string; dark: string }
 }
 
 // Every palette is checked by script: each pen, and each background's text colour, reads at 4.5:1 or better on every
-// background preset, plain and under each of the palette's highlighters, in the matching light or dark variant.
+// background preset, plain and under each of the palette's highlighters, in the matching light or dark variant. Each
+// accent reads at 4.5:1 or better on every light preset (its dark variant on night), and so does the Add button's text
+// on it: white on the light accent, near-black on the dark one.
 const PALETTES: Record<TodoPalette, Palette> = {
+  // Bright and clear: the default pens and highlighters, a blue accent.
   classic: {
     label: 'Classic',
     strength: 22,
@@ -225,23 +268,19 @@ const PALETTES: Record<TodoPalette, Palette> = {
     highlights: { yellow: '#facc15', green: '#22c55e', blue: '#3b82f6', pink: '#ec4899', orange: '#f97316', violet: '#8b5cf6' },
     light: { blue: '#0255bb', red: '#ad1f1f', green: '#0c645e', violet: '#6d34d2', graphite: '#585860' },
     dark: { blue: '#67abff', red: '#f88686', green: '#2dd4bf', violet: '#b198fa', graphite: '#a5a5ad' },
+    accent: { light: '#0255bb', dark: '#67abff' },
   },
-  pastel: {
-    label: 'Pastel',
-    strength: 50,
-    darkStrength: 18,
-    highlights: { yellow: '#fde68a', green: '#a7f3d0', blue: '#bfdbfe', pink: '#fbcfe8', orange: '#fed7aa', violet: '#ddd6fe' },
+  // Light and airy: pale highlighters laid on thick, soft pens, a lavender accent.
+  soft: {
+    label: 'Soft',
+    strength: 55,
+    darkStrength: 16,
+    highlights: { yellow: '#fde9a8', green: '#bdecd6', blue: '#cfe2fb', pink: '#f9d3e4', orange: '#fddcc0', violet: '#e2dcfb' },
     light: { blue: '#3552a0', red: '#a8334a', green: '#2c6656', violet: '#62469a', graphite: '#4f5460' },
     dark: { blue: '#a3bdf7', red: '#f5a8b3', green: '#95dcc4', violet: '#cdbbf4', graphite: '#cfd3da' },
+    accent: { light: '#6a4bb0', dark: '#cdbbf4' },
   },
-  vivid: {
-    label: 'Vivid',
-    strength: 30,
-    darkStrength: 18,
-    highlights: { yellow: '#facc15', green: '#22c55e', blue: '#0ea5e9', pink: '#f43f5e', orange: '#f97316', violet: '#a855f7' },
-    light: { blue: '#1b48c7', red: '#a31919', green: '#116032', violet: '#7420be', graphite: '#3f3f46' },
-    dark: { blue: '#6aaefc', red: '#fb8484', green: '#4ade80', violet: '#c996fd', graphite: '#d4d4d8' },
-  },
+  // Warm and muted: mustard, sage and clay highlighters, a sienna accent.
   earth: {
     label: 'Earth',
     strength: 30,
@@ -249,29 +288,25 @@ const PALETTES: Record<TodoPalette, Palette> = {
     highlights: { yellow: '#d4a017', green: '#8fae7e', blue: '#7d98b3', pink: '#c98a8a', orange: '#d2764a', violet: '#9c7aa6' },
     light: { blue: '#34507a', red: '#923926', green: '#465f33', violet: '#664673', graphite: '#554b44' },
     dark: { blue: '#aec0da', red: '#eba993', green: '#bdd3a2', violet: '#d1b7dc', graphite: '#dad1c8' },
+    accent: { light: '#9a4a26', dark: '#eba993' },
   },
+  // Cool: sand, seafoam, coral and periwinkle highlighters, a teal accent.
   ocean: {
     label: 'Ocean',
-    strength: 34,
+    strength: 36,
     darkStrength: 18,
-    highlights: { yellow: '#f6d98b', green: '#7dd3c0', blue: '#7cc4f5', pink: '#f7a1a1', orange: '#fbbf8a', violet: '#b8b3f0' },
+    highlights: { yellow: '#e8d9a8', green: '#86d6c5', blue: '#86c8f2', pink: '#f3a493', orange: '#f6b98f', violet: '#aab6f2' },
     light: { blue: '#0b4a82', red: '#a83341', green: '#0c615d', violet: '#5344a6', graphite: '#434f60' },
     dark: { blue: '#93c8ff', red: '#ffa8b2', green: '#84e3d9', violet: '#bdb5ff', graphite: '#cfd8e3' },
-  },
-  retro: {
-    label: 'Retro',
-    strength: 28,
-    darkStrength: 18,
-    highlights: { yellow: '#e0b83a', green: '#9bb34a', blue: '#2fa4a0', pink: '#d6456f', orange: '#f08a3c', violet: '#8e5bb5' },
-    light: { blue: '#1d4972', red: '#953421', green: '#385f1d', violet: '#643687', graphite: '#473d35' },
-    dark: { blue: '#94bcea', red: '#f4a592', green: '#bade90', violet: '#d4aeef', graphite: '#dcd3ca' },
+    accent: { light: '#0b6b64', dark: '#5eead4' },
   },
 }
 
 function paletteVars(palette: Palette, dark: boolean): Record<string, string> {
   const pens = dark ? palette.dark : palette.light
   const vars: Record<string, string> = {
-    [v('accent--color')]: pens.blue,
+    [v('accent--color')]: dark ? palette.accent.dark : palette.accent.light,
+    [v('on-accent--color')]: dark ? '#0b1220' : '#ffffff',
     [v('dropped--color')]: pens.red,
     '--_highlight-strength': `${dark ? palette.darkStrength : palette.strength}%`,
   }
@@ -374,6 +409,7 @@ function sanitizeLook(value: unknown): TodoListLook {
   if (value.doneMark === 'tick' || value.doneMark === 'cross') look.doneMark = value.doneMark
   if (PROGRESS_OPTIONS.some(([option]) => option === value.progress)) look.progress = value.progress as TodoProgress
   if (value.density === 'cozy' || value.density === 'compact') look.density = value.density
+  if (value.icon === 'none' || listIconOf(value.icon)) look.icon = value.icon as TodoListIcon | 'none'
   return look
 }
 
@@ -415,13 +451,16 @@ interface Toast {
 /**
  * A to-do list with the feel of a paper one: tasks are plain text, checked off with a hand-drawn tick (or cross) and
  * a pen stroke through the text. Progress shows as a ring beside the heading, a bar, or a large hero ring. Click a
- * task to add a note, drag a row to reorder it, and swipe it left to archive or delete it or right to check it (the
- * swipe and the reordering come from `c2-reorder-list`). The row's ⋯ menu (also a right-click, and the keys N, I, X,
+ * task to read its whole note, drag a row to reorder it, and swipe it left to archive or delete it or right to check it (the
+ * swipe and the reordering come from `c2-reorder-list`). The row's ⋯ menu (also a right-click, and the keys F2, I, X,
  * E and Delete) holds the same actions plus the task's icon, highlighter and text colour, each changed in place.
+ * Edit task (or F2) turns its name and note into fields; they are saved on Enter or as soon as the focus leaves them,
+ * and Escape cancels. Clicking a task only shows its whole note.
  * Archived tasks collect in a section at the bottom, and every removal can be undone.
  *
- * With `customizable`, a palette button swaps the tasks for a panel that styles the whole list: the background
- * (whose text colour and pens follow from it), the pen, the done mark, the density and the progress style. With
+ * With `customizable`, a palette button swaps the tasks for a panel that styles the whole list: the list's icon, the
+ * background (whose text colour and pens follow from it), the palette (its accent, pens and highlighters), the done
+ * mark, the density and the progress style. `look.pen` still sets the accent from script. With
  * `storage-key` those choices are remembered in `localStorage`.
  *
  * The swipe actions are drawn by the inner `c2-reorder-list`: recolour them with its
@@ -437,7 +476,7 @@ interface Toast {
  * @event {CustomEvent<TodoTaskEventDetail>} task-remove - A task was deleted. `detail.task` is the removed task.
  * @event {CustomEvent<TodoTaskEventDetail>} task-archive - A task was moved to the archive.
  * @event {CustomEvent<TodoTaskEventDetail>} task-restore - An archived task was restored, or an archive was undone.
- * @event {CustomEvent<TodoTaskEventDetail>} task-change - A task's note, icon, highlight, pen or won't-do state changed.
+ * @event {CustomEvent<TodoTaskEventDetail>} task-change - A task's label, note, icon, highlight, pen or won't-do state changed.
  * @event {CustomEvent<TodoTaskReorderEventDetail>} task-reorder - A task was dragged, or moved with the keyboard, to a new position.
  * @event {CustomEvent<TodoTasksChangeEventDetail>} tasks-change - Fired after every change to the tasks with the new list, for two-way binding.
  * @event {CustomEvent<TodoLookChangeEventDetail>} look-change - The viewer changed the look in the customize panel, or reset it.
@@ -503,7 +542,10 @@ export class TodoList extends LitElement {
   /** Heading level (1-6) the title is announced with. */
   @property({ type: Number, attribute: 'heading-level' }) headingLevel = 2
 
-  /** Icon beside the heading, a `@c2n/task-icons` name. Suggested from the heading when missing; `none` shows no icon. */
+  /**
+   * Icon beside the heading: a list icon (`work`, `groceries`, `travel`… see `todoListIcons`), or any `@c2n/task-icons`
+   * name. Suggested from the heading when missing; `none` leaves it empty.
+   */
   @property() icon = ''
 
   /** The tasks. Accepts a JSON array in the attribute. The list updates it as the user works. */
@@ -535,7 +577,10 @@ export class TodoList extends LitElement {
 
   @state() private filter: TodoFilter = 'all'
   @state() private panelOpen = false
+  /** The task whose whole note is shown, where the row shows only its first line. */
   @state() private expandedId: string | undefined
+  /** The task being edited: its name and note become fields. */
+  @state() private editingId: string | undefined
   @state() private menuId: string | undefined
   @state() private submenu: Submenu | undefined
   @state() private iconPickerId: string | undefined
@@ -543,6 +588,10 @@ export class TodoList extends LitElement {
   @state() private showArchived = false
   @state() private draft = ''
   @state() private iconQuery = ''
+  /** Whether the customize panel shows the picker for the list's icon. */
+  @state() private panelIconOpen = false
+  /** Whether the customize panel lists every palette, rather than only the current one. */
+  @state() private panelPaletteOpen = false
   /** Whether the default background turned out dark (a dark theme), which picks a palette's dark variant. */
   @state() private darkSurface = false
 
@@ -550,7 +599,12 @@ export class TodoList extends LitElement {
   private pendingFocus: (() => void) | undefined
   private toastTimer: ReturnType<typeof setTimeout> | undefined
 
+  /** Hydrating server-rendered markup, which was drawn without what `localStorage` holds. */
+  private hydrating = false
+
   override connectedCallback(): void {
+    // Read before `super`, which attaches the shadow root of a client-rendered element.
+    this.hydrating = !!this.shadowRoot && !this.hasUpdated
     super.connectedCallback()
     document.addEventListener('pointerdown', this.handleOutsidePointer, true)
     document.addEventListener('keydown', this.handleDocumentEscape)
@@ -564,13 +618,19 @@ export class TodoList extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>): void {
-    if (changed.has('storageKey') || changed.has('persistTasks')) this.restore()
+    // The stored look and tasks wait for the first render when hydrating: applied before it, the browser would draw
+    // something other than the server did, and Lit throws a hydration mismatch.
+    if ((changed.has('storageKey') || changed.has('persistTasks')) && !(this.hydrating && !this.hasUpdated)) this.restore()
     if (changed.has('tasks')) {
       const tasks = Array.isArray(this.tasks) ? this.tasks : []
       if (tasks !== this.tasks || tasks.some((task) => !task.id)) {
         this.tasks = tasks.map((task) => (task.id ? task : { ...task, id: newTaskId() }))
       }
     }
+  }
+
+  protected override firstUpdated(): void {
+    if (this.hydrating) this.restore()
   }
 
   protected override updated(): void {
@@ -763,6 +823,7 @@ export class TodoList extends LitElement {
     if (this.menuId === task.id) this.closeMenus()
     if (this.iconPickerId === task.id) this.iconPickerId = undefined
     if (this.expandedId === task.id) this.expandedId = undefined
+    if (this.editingId === task.id) this.editingId = undefined
   }
 
   private closeMenus(): void {
@@ -771,11 +832,13 @@ export class TodoList extends LitElement {
   }
 
   private readonly handleOutsidePointer = (event: PointerEvent): void => {
-    if (!this.menuId && !this.iconPickerId) return
+    if (!this.menuId && !this.iconPickerId && !this.panelIconOpen && !this.panelPaletteOpen) return
     const path = event.composedPath()
     const within = (...classes: string[]) => path.some((node) => node instanceof HTMLElement && classes.some((name) => node.classList.contains(name)))
     if (this.menuId && !within('menu', 'more')) this.closeMenus()
     if (this.iconPickerId && !within('icon-popover', 'task-icon')) this.iconPickerId = undefined
+    if (this.panelIconOpen && !within('icon-dropdown')) this.panelIconOpen = false
+    if (this.panelPaletteOpen && !within('palette-dropdown')) this.panelPaletteOpen = false
   }
 
   /** Escape closes an open menu or icon picker wherever focus is, e.g. after a menu opened on hover. */
@@ -861,7 +924,7 @@ export class TodoList extends LitElement {
 
   private runMenu(task: TodoTask, action: MenuAction): void {
     this.closeMenus()
-    if (action === 'note') this.openNote(task)
+    if (action === 'edit') this.startEdit(task)
     if (action === 'icon') this.openIconPicker(task, '.more')
     if (action === 'drop') this.toggleDropped(task)
     if (action === 'archive') this.archiveTask(task)
@@ -894,19 +957,71 @@ export class TodoList extends LitElement {
     this.focusRowButton(task, selector)
   }
 
-  private openNote(task: TodoTask): void {
+  /** A click on the task's text never edits it (that is Edit task, in the menu): it shows or hides the whole note. */
+  private toggleNote(task: TodoTask): void {
+    if (!task.note) return
     this.expandedId = this.expandedId === task.id ? undefined : task.id
-    if (this.expandedId && !this.readonly) this.pendingFocus = () => this.renderRoot.querySelector<HTMLTextAreaElement>('.note-input')?.focus()
+  }
+
+  private startEdit(task: TodoTask): void {
+    if (this.readonly || this.editingId === task.id) return
+    this.closeMenus()
+    this.iconPickerId = undefined
+    this.editingId = task.id
+    this.pendingFocus = () => {
+      const input = this.renderRoot.querySelector<HTMLInputElement>('.editor .label-input')
+      input?.focus()
+      input?.select()
+    }
+  }
+
+  /** Focus left the editor (a click outside the list, on another row or a menu, Tab away): save and read again. */
+  private handleEditorFocusOut(event: FocusEvent, task: TodoTask): void {
+    const editor = event.currentTarget as HTMLElement
+    if (event.relatedTarget instanceof Node && editor.contains(event.relatedTarget)) return
+    this.finishEdit(task, editor)
+  }
+
+  /** Saves the name and note in one change and returns to read mode. An empty name keeps the old one. */
+  private finishEdit(task: TodoTask, editor: HTMLElement): void {
+    if (this.editingId !== task.id) return
+    this.editingId = undefined
+    const current = this.tasks.find((item) => item.id === task.id)
+    if (!current) return
+    const label = editor.querySelector<HTMLInputElement>('.label-input')?.value.trim() || current.label
+    const note = editor.querySelector<HTMLTextAreaElement>('.note-input')?.value.trim() ?? ''
+    const previous = { label: current.label, note: current.note }
+    if (label === previous.label && note === (previous.note ?? '')) return
+    const edited = this.replaceTask(current, { label, note: note || undefined }, (detail) => new CustomEvent('task-change', { detail }))
+    this.showToast(`Edited “${previous.label}”`, () => {
+      const latest = this.tasks.find((item) => item.id === edited.id)
+      if (latest) this.patchTask(latest, previous)
+    })
+  }
+
+  private handleEditorKey(event: KeyboardEvent, task: TodoTask): void {
+    const inNote = (event.target as HTMLElement).classList.contains('note-input')
+    if (event.key === 'Enter' && (!inNote || event.metaKey || event.ctrlKey)) {
+      event.preventDefault()
+      this.finishEdit(task, event.currentTarget as HTMLElement)
+      this.focusRowButton(task, '.mark')
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      // Cleared before the fields leave the DOM, so the focusout that removal can fire saves nothing.
+      this.editingId = undefined
+      this.focusRowButton(task, '.mark')
+    }
   }
 
   private handleRowKey(event: KeyboardEvent, task: TodoTask): void {
     const target = event.target as HTMLElement
     if (target.closest('textarea, input, .menu, .icon-popover') || event.metaKey || event.ctrlKey || event.altKey || this.readonly) return
     const key = event.key.toLowerCase()
-    if (key === 'e') this.archiveTask(task)
+    if (key === 'f2') this.startEdit(task)
+    else if (key === 'e') this.archiveTask(task)
     else if (key === 'delete' || key === 'backspace') this.removeTask(task)
     else if (key === 'x') this.toggleDropped(task)
-    else if (key === 'n') this.openNote(task)
     else if (key === 'i') this.openIconPicker(task, '.more')
     else if (key === 'contextmenu' || (event.shiftKey && key === 'f10')) this.openMenu(task, true)
     else return
@@ -935,20 +1050,22 @@ export class TodoList extends LitElement {
 
   private closePanel(): void {
     this.panelOpen = false
+    this.panelIconOpen = false
+    this.panelPaletteOpen = false
     this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.customize')?.focus()
   }
 
-  private moveIconFocus(event: KeyboardEvent, task: TodoTask): void {
+  private moveIconFocus(event: KeyboardEvent, close: () => void, columns = ICON_COLUMNS): void {
     if (event.key === 'Escape') {
       event.preventDefault()
       event.stopPropagation()
-      this.closeIconPicker(task)
+      close()
       return
     }
-    const buttons = [...this.renderRoot.querySelectorAll<HTMLElement>('.icon-option')]
+    const buttons = [...(event.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('.icon-option')]
     const index = buttons.indexOf(event.target as HTMLElement)
     if (index < 0) return
-    const steps: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: ICON_COLUMNS, ArrowUp: -ICON_COLUMNS }
+    const steps: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: columns, ArrowUp: -columns }
     let next: number | undefined
     if (event.key in steps) next = index + steps[event.key]
     if (event.key === 'Home') next = 0
@@ -970,8 +1087,11 @@ export class TodoList extends LitElement {
   }
 
   private get headerIcon(): TaskIconName | undefined {
-    if (this.icon === 'none') return undefined
-    if (this.icon && isTaskIconName(this.icon)) return this.icon
+    const icon = this.look.icon ?? this.icon
+    if (icon === 'none') return undefined
+    const listIcon = listIconOf(icon)
+    if (listIcon) return listIcon.icon
+    if (icon && isTaskIconName(icon)) return icon
     return this.heading ? suggestTaskIcon(this.heading) : undefined
   }
 
@@ -1009,12 +1129,12 @@ export class TodoList extends LitElement {
     return html`
       <section class=${classMap(classes)} style=${styleMap(containerStyle)}>
         ${this.renderHeader(progress, percent, closed, total, meta)}
-        ${progress === 'bar' ? html`<div class="bar" aria-hidden="true"><span class="bar-fill" style=${styleMap({ width: `${percent}%` })}></span></div>` : nothing}
+        ${progress === 'bar' ? html`<c2-progress class="bar" value=${percent} label=${`${closed} of ${total} tasks done`}></c2-progress>` : nothing}
         ${
           panel
             ? this.renderPanel()
             : html`<div class="view">
-                ${total > 0 ? this.renderFilters(total, closed) : nothing} ${this.renderTasks(active)} ${this.readonly ? nothing : this.renderAdd()}
+                ${total > 0 ? this.renderFilteredTasks(active, total, closed) : this.renderTasks(active)} ${this.readonly ? nothing : this.renderAdd()}
                 ${this.renderArchive()}
               </div>`
         }
@@ -1091,18 +1211,31 @@ export class TodoList extends LitElement {
     `
   }
 
-  private renderFilters(total: number, closed: number) {
+  /**
+   * The filter is a `c2-tabs` strip over the list. Each filter has its own panel and only the selected one holds the
+   * tasks: `c2-tabs` shows a panel as soon as its tab is clicked, before this element renders again. The slots are
+   * written here as well so server-rendered markup shows the strip and the list before `c2-tabs` hydrates.
+   */
+  private renderFilteredTasks(active: TodoTask[], total: number, closed: number) {
     const counts: Record<TodoFilter, number> = { all: total, active: total - closed, done: closed }
     return html`
-      <div class="filters" role="group" aria-label="Show">
+      <c2-tabs
+        class="filters"
+        aria-label="Show"
+        selected-tab=${`filter-${this.filter}`}
+        @selection-change=${(event: CustomEvent<{ value: string }>) => {
+          event.stopPropagation()
+          this.filter = event.detail.value.replace('filter-', '') as TodoFilter
+        }}
+      >
+        ${FILTERS.map(([filter, label]) => html`<c2-tab slot="tab" for=${`filter-${filter}`}>${label}<span class="count">${counts[filter]}</span></c2-tab>`)}
         ${FILTERS.map(
-          ([filter, label]) => html`
-            <button class="filter" type="button" aria-pressed=${this.filter === filter ? 'true' : 'false'} @click=${() => (this.filter = filter)}>
-              ${label}<span class="count">${counts[filter]}</span>
-            </button>
-          `,
+          ([filter]) =>
+            html`<div class="filter-panel" id=${`filter-${filter}`} slot=${this.filter === filter ? 'tab-content' : nothing}>
+              ${this.filter === filter ? this.renderTasks(active) : nothing}
+            </div>`,
         )}
-      </div>
+      </c2-tabs>
     `
   }
 
@@ -1212,36 +1345,41 @@ export class TodoList extends LitElement {
               : nothing
           }
           <div class="body">
-            <span class="label" @click=${() => this.openNote(task)}
-              ><span class="label-text"
-                >${task.label}${
-                  task.done
-                    ? html`<svg class="strike" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
-                        <path d=${STRIKE} vector-effect="non-scaling-stroke"></path>
-                      </svg>`
-                    : nothing
-                }</span
-              ></span
-            >
-            ${task.note && !expanded ? html`<p class="note" @click=${() => this.openNote(task)}>${task.note.split('\n')[0]}</p>` : nothing}
             ${
-              expanded
-                ? html`<textarea
-                    class="note-input"
-                    aria-label=${`Note for ${task.label}`}
-                    rows=${Math.max(2, (task.note ?? '').split('\n').length)}
-                    placeholder="Add a note: a quantity, an address, a link…"
-                    .value=${task.note ?? ''}
-                    ?readonly=${this.readonly}
-                    @change=${(event: Event) => this.patchTask(task, { note: (event.target as HTMLTextAreaElement).value })}
-                    @keydown=${(event: KeyboardEvent) => {
-                      if (event.key !== 'Escape') return
-                      event.stopPropagation()
-                      ;(event.target as HTMLTextAreaElement).blur()
-                      this.expandedId = undefined
-                    }}
-                  ></textarea>`
-                : nothing
+              this.editingId === id
+                ? html`<div
+                    class="editor"
+                    @pointerdown=${keepFromRow}
+                    @focusout=${(event: FocusEvent) => this.handleEditorFocusOut(event, task)}
+                    @keydown=${(event: KeyboardEvent) => this.handleEditorKey(event, task)}
+                  >
+                    <input class="label-input" type="text" aria-label=${`Name of ${task.label}`} .value=${task.label} />
+                    <textarea
+                      class="note-input"
+                      aria-label=${`Note for ${task.label}`}
+                      rows=${Math.max(2, (task.note ?? '').split('\n').length)}
+                      placeholder="Add a note: a quantity, an address, a link…"
+                      .value=${task.note ?? ''}
+                    ></textarea>
+                  </div>`
+                : html`<span class="label" @click=${() => this.toggleNote(task)}
+                      ><span class="label-text"
+                        >${task.label}${
+                          task.done
+                            ? html`<svg class="strike" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+                                <path d=${STRIKE} vector-effect="non-scaling-stroke"></path>
+                              </svg>`
+                            : nothing
+                        }</span
+                      ></span
+                    >
+                    ${
+                      task.note
+                        ? html`<p class=${classMap({ note: true, full: expanded })} @click=${() => this.toggleNote(task)}>
+                            <span class="note-text">${expanded ? task.note : task.note.split('\n')[0]}</span>
+                          </p>`
+                        : nothing
+                    }`
             }
           </div>
           ${task.due ? html`<span class=${classMap({ due: true, urgent: !!task.urgent && !closed })}>${task.due}</span>` : nothing}
@@ -1305,8 +1443,14 @@ export class TodoList extends LitElement {
       </button>
     `
     return html`
-      <div class="menu" role="menu" aria-label=${`Actions for ${task.label}`} @keydown=${(event: KeyboardEvent) => this.handleMenuKey(event, task)}>
-        ${item('note', task.note ? 'Edit note' : 'Add a note', 'N', 'M4 5h16v11H9l-5 4z')}
+      <div
+        class="menu"
+        role="menu"
+        aria-label=${`Actions for ${task.label}`}
+        @pointerdown=${keepFromRow}
+        @keydown=${(event: KeyboardEvent) => this.handleMenuKey(event, task)}
+      >
+        ${item('edit', 'Edit task', 'F2', 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4')}
         ${item('icon', this.iconOf(task) ? 'Change icon' : 'Add an icon', 'I', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z')}
         ${trigger('highlight', 'Highlight', task.highlight ? `highlight-swatch highlight-${task.highlight}` : 'highlight-swatch none')}
         ${trigger('ink', 'Text colour', task.ink ? `pen-swatch pen-${task.ink}` : 'pen-swatch default')}
@@ -1387,60 +1531,287 @@ export class TodoList extends LitElement {
   }
 
   private renderIconPopover(task: TodoTask) {
+    const pick = (icon: TaskIconName | undefined) => {
+      this.patchTask(task, { icon })
+      this.closeIconPicker({ ...task, icon })
+    }
     const current = this.iconOf(task)
+    return html`
+      <div
+        class=${classMap({ 'icon-popover': true, [`ink-${task.ink}`]: !!task.ink })}
+        role="dialog"
+        aria-label=${`Icon for ${task.label}`}
+        @pointerdown=${keepFromRow}
+        @keydown=${(event: KeyboardEvent) => this.moveIconFocus(event, () => this.closeIconPicker(task))}
+      >
+        ${this.renderIconChooser(
+          current,
+          pick,
+          html`<button
+            class="no-icon"
+            type="button"
+            aria-label="No icon"
+            title="No icon"
+            aria-pressed=${current ? 'false' : 'true'}
+            @click=${() => pick(undefined)}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect class="no-icon-box" x="4" y="4" width="16" height="16" rx="4"></rect>
+              <path d="M7 17L17 7"></path>
+            </svg>
+          </button>`,
+        )}
+      </div>
+    `
+  }
+
+  /** The searchable, grouped icon grid shared by a task's icon popover and the customize panel. */
+  private renderIconChooser(current: TaskIconName | undefined, pick: (icon: TaskIconName) => void, extras: TemplateResult) {
     const query = this.iconQuery.trim().toLowerCase()
     const matches = (icon: (typeof taskIconCatalog)[number]) =>
       !query || icon.name.includes(query) || icon.title.toLowerCase().includes(query) || icon.keywords.some((keyword) => keyword.startsWith(query))
     const groups = iconGroups.map((group) => ({ ...group, icons: group.icons.filter(matches) })).filter((group) => group.icons.length > 0)
     const names = groups.flatMap((group) => group.icons.map((icon) => icon.name))
     const focusable = current && names.includes(current) ? current : names[0]
-    const pick = (icon: TaskIconName | undefined) => {
-      this.patchTask(task, { icon })
-      this.closeIconPicker({ ...task, icon })
-    }
     return html`
-      <div
-        class=${classMap({ 'icon-popover': true, [`ink-${task.ink}`]: !!task.ink })}
-        role="dialog"
-        aria-label=${`Icon for ${task.label}`}
-        @keydown=${(event: KeyboardEvent) => this.moveIconFocus(event, task)}
-      >
-        <div class="icon-tools">
-          <input
-            class="icon-search"
-            type="search"
-            aria-label="Search icons"
-            placeholder=${`Search ${taskIconCatalog.length} icons`}
-            .value=${this.iconQuery}
-            @input=${(event: Event) => (this.iconQuery = (event.target as HTMLInputElement).value)}
-          />
-          <button class="no-icon" type="button" aria-pressed=${current ? 'false' : 'true'} @click=${() => pick(undefined)}>No icon</button>
-        </div>
-        <div class="icon-picker">
-          ${groups.map(
-            (group) => html`
-              <div class="icon-group" role="group" aria-label=${group.label}>
-                <span class="icon-group-label" aria-hidden="true">${group.label}</span>
-                <div class="icon-grid">
-                  ${group.icons.map(
-                    ({ name, title }) =>
+      <div class="icon-tools">
+        <input
+          class="icon-search"
+          type="search"
+          aria-label="Search icons"
+          placeholder=${`Search ${taskIconCatalog.length} icons`}
+          .value=${this.iconQuery}
+          @input=${(event: Event) => (this.iconQuery = (event.target as HTMLInputElement).value)}
+        />
+        ${extras}
+      </div>
+      <div class="icon-picker">
+        ${groups.map(
+          (group) => html`
+            <div class="icon-group" role="group" aria-label=${group.label}>
+              <span class="icon-group-label" aria-hidden="true">${group.label}</span>
+              <div class="icon-grid">
+                ${group.icons.map(
+                  ({ name, title }) =>
+                    html`<button
+                      class="icon-option"
+                      type="button"
+                      aria-label=${title}
+                      title=${title}
+                      aria-pressed=${name === current ? 'true' : 'false'}
+                      tabindex=${name === focusable ? 0 : -1}
+                      @click=${() => pick(name)}
+                    >
+                      ${renderTaskIcon(name)}
+                    </button>`,
+                )}
+              </div>
+            </div>
+          `,
+        )}
+        ${groups.length === 0 ? html`<p class="hint">No icon matches “${this.iconQuery}”.</p>` : nothing}
+      </div>
+    `
+  }
+
+  private toggleListIconPicker(): void {
+    this.panelPaletteOpen = false
+    this.panelIconOpen = !this.panelIconOpen
+    if (!this.panelIconOpen) return
+    this.pendingFocus = () => {
+      const grid = this.renderRoot.querySelector<HTMLElement>('.list-icon-grid')
+      ;(grid?.querySelector<HTMLElement>('[aria-pressed="true"]') ?? grid?.querySelector<HTMLElement>('.list-icon-option'))?.focus()
+    }
+  }
+
+  private setListIcon(icon: TodoListIcon | 'none' | undefined): void {
+    this.setLook({ icon })
+    this.closeListIconPicker()
+  }
+
+  private closeListIconPicker(): void {
+    this.panelIconOpen = false
+    this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.icon-dropdown .dropdown-trigger')?.focus()
+  }
+
+  private togglePalettes(): void {
+    this.panelIconOpen = false
+    this.panelPaletteOpen = !this.panelPaletteOpen
+    if (!this.panelPaletteOpen) return
+    this.pendingFocus = () => {
+      const list = this.renderRoot.querySelector<HTMLElement>('.palette-list')
+      ;(list?.querySelector<HTMLElement>('[aria-selected="true"]') ?? list?.querySelector<HTMLElement>('[role="option"]'))?.focus()
+    }
+  }
+
+  private closePalettes(): void {
+    this.panelPaletteOpen = false
+    this.pendingFocus = () => this.renderRoot.querySelector<HTMLElement>('.palette-dropdown .dropdown-trigger')?.focus()
+  }
+
+  private handlePaletteListKey(event: KeyboardEvent): void {
+    const options = [...(event.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('[role="option"]')]
+    const index = options.indexOf(event.target as HTMLElement)
+    let next: number | undefined
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      this.closePalettes()
+    } else if (event.key === 'Tab') {
+      this.panelPaletteOpen = false
+    } else if (event.key === 'ArrowDown') next = Math.min(index + 1, options.length - 1)
+    else if (event.key === 'ArrowUp') next = Math.max(index - 1, 0)
+    else if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = options.length - 1
+    if (next === undefined) return
+    event.preventDefault()
+    options[next]?.focus()
+  }
+
+  private renderChevron() {
+    return html`<svg class="dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>`
+  }
+
+  /** A tiny list in the palette: a progress ring and a tick in its accent, and three rows under its highlighters. */
+  private renderPalettePreview(palette: TodoPalette | undefined) {
+    const preset = this.look.background && this.look.background !== 'default' ? PRESETS[this.look.background] : undefined
+    const dark = preset ? !!preset.dark : this.darkSurface
+    const choice = palette ? PALETTES[palette] : undefined
+    const style = choice
+      ? { '--_preview-accent': choice.accent[dark ? 'dark' : 'light'], '--_preview-strength': `${dark ? choice.darkStrength : choice.strength}%` }
+      : {}
+    const rows = (['pink', 'green', 'blue'] as const).map(
+      (highlight) =>
+        html`<span
+          class="preview-row"
+          style=${styleMap({ '--_preview-highlight': choice ? choice.highlights[highlight] : `var(${v(`highlight-${highlight}--color`)}, ${PALETTES.classic.highlights[highlight]})` })}
+        ></span>`,
+    )
+    return html`<span class="palette-preview" aria-hidden="true" style=${styleMap(style)}>
+      <svg class="preview-ring" viewBox="0 0 20 20">
+        <circle class="preview-track" cx="10" cy="10" r="7.5"></circle>
+        <circle class="preview-fill" cx="10" cy="10" r="7.5" pathLength="100"></circle>
+      </svg>
+      <svg class="preview-tick" viewBox="0 0 24 24"><path d=${TICK}></path></svg>
+      <span class="preview-rows">${rows}</span>
+    </span>`
+  }
+
+  /** A dropdown: the current palette on the trigger, every palette in the list it opens. */
+  private renderPaletteField() {
+    const look = this.look
+    const selected = look.palette ?? (look.background && look.background !== 'default' ? 'classic' : undefined)
+    const open = this.panelPaletteOpen
+    return html`
+      <div class="field">
+        <span class="field-label" id="palette-label">Palette</span>
+        <div class="dropdown palette-dropdown">
+          <button
+            class="dropdown-trigger"
+            type="button"
+            aria-labelledby="palette-label"
+            aria-describedby="palette-current"
+            aria-haspopup="listbox"
+            aria-expanded=${open ? 'true' : 'false'}
+            aria-controls="palette-options"
+            @click=${this.togglePalettes}
+          >
+            ${this.renderPalettePreview(selected)}
+            <span class="dropdown-value" id="palette-current">${selected ? PALETTES[selected].label : 'From the theme'}</span>
+            ${this.renderChevron()}
+          </button>
+          ${
+            open
+              ? html`<div
+                  class="dropdown-popup palette-list"
+                  id="palette-options"
+                  role="listbox"
+                  aria-labelledby="palette-label"
+                  @keydown=${this.handlePaletteListKey}
+                >
+                  ${todoPalettes.map(
+                    (option) =>
                       html`<button
-                        class="icon-option"
+                        class="dropdown-option"
                         type="button"
-                        aria-label=${title}
-                        title=${title}
-                        aria-pressed=${name === current ? 'true' : 'false'}
-                        tabindex=${name === focusable ? 0 : -1}
-                        @click=${() => pick(name)}
+                        role="option"
+                        aria-selected=${selected === option ? 'true' : 'false'}
+                        tabindex=${selected === option || (!selected && option === todoPalettes[0]) ? 0 : -1}
+                        @click=${() => {
+                          // The palette owns the accent: a pen left in the look from script, or stored before the panel
+                          // dropped its pen field, would keep the ring and ticks in that pen's colour.
+                          this.setLook({ palette: option, pen: undefined })
+                          this.closePalettes()
+                        }}
                       >
-                        ${renderTaskIcon(name)}
+                        ${this.renderPalettePreview(option)}
+                        <span class="dropdown-value">${PALETTES[option].label}</span>
+                        <svg class="dropdown-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
                       </button>`,
                   )}
-                </div>
-              </div>
-            `,
-          )}
-          ${groups.length === 0 ? html`<p class="hint">No icon matches “${this.iconQuery}”.</p>` : nothing}
+                </div>`
+              : nothing
+          }
+        </div>
+      </div>
+    `
+  }
+
+  /** A dropdown: the current icon on the trigger, the named list icons in the popup it opens. */
+  private renderListIconField() {
+    const icon = this.headerIcon
+    const chosen = this.look.icon
+    const suggested = this.heading ? suggestTaskIcon(this.heading) : undefined
+    const nameOf = (taskIcon: TaskIconName | undefined) =>
+      taskIcon ? (todoListIcons.find((entry) => entry.icon === taskIcon)?.label ?? taskIconCatalog.find((entry) => entry.name === taskIcon)?.title) : undefined
+    const description = !icon ? 'Empty' : chosen ? nameOf(icon) : this.icon ? nameOf(icon) : `${nameOf(icon)} · from the heading`
+    const open = this.panelIconOpen
+    // One tile in the tab order, the current one; the arrow keys move between the others.
+    const current = !chosen && suggested ? 'Automatic' : chosen === 'none' ? 'Empty' : (listIconOf(chosen)?.label ?? 'Empty')
+    const tile = (label: string, pressed: boolean, onPick: () => void, content: unknown) =>
+      html`<button
+        class="icon-option list-icon-option"
+        type="button"
+        aria-pressed=${pressed ? 'true' : 'false'}
+        tabindex=${label === current ? 0 : -1}
+        @click=${onPick}
+      >
+        <span class="list-icon-art" aria-hidden="true">${content}</span>
+        <span class="list-icon-label">${label}</span>
+      </button>`
+    return html`
+      <div class="field">
+        <span class="field-label" id="icon-label">Icon</span>
+        <div class="dropdown icon-dropdown">
+          <button
+            class="dropdown-trigger"
+            type="button"
+            aria-labelledby="icon-label"
+            aria-describedby="icon-current"
+            aria-haspopup="dialog"
+            aria-expanded=${open ? 'true' : 'false'}
+            @click=${this.toggleListIconPicker}
+          >
+            <span class=${classMap({ 'list-icon-preview': true, empty: !icon })} aria-hidden="true">${icon ? renderTaskIcon(icon) : nothing}</span>
+            <span class="dropdown-value" id="icon-current">${description}</span>
+            ${this.renderChevron()}
+          </button>
+          ${
+            open
+              ? html`<div
+                  class="dropdown-popup panel-icons"
+                  role="dialog"
+                  aria-label="Icon of the list"
+                  @keydown=${(event: KeyboardEvent) => this.moveIconFocus(event, () => this.closeListIconPicker(), LIST_ICON_COLUMNS)}
+                >
+                  <div class="list-icon-grid">
+                    ${suggested ? tile('Automatic', !chosen, () => this.setListIcon(undefined), renderTaskIcon(suggested)) : nothing}
+                    ${tile('Empty', chosen === 'none', () => this.setListIcon('none'), nothing)}
+                    ${todoListIcons.map((entry) => tile(entry.label, chosen === entry.name, () => this.setListIcon(entry.name), renderTaskIcon(entry.icon)))}
+                  </div>
+                </div>`
+              : nothing
+          }
         </div>
       </div>
     `
@@ -1520,6 +1891,8 @@ export class TodoList extends LitElement {
         </div>
         <p class="hint">Applies to the whole list. Style one task from its ⋯ menu, or click its icon.</p>
 
+        ${this.renderListIconField()}
+
         <div class="field">
           <span class="field-label" id="background-label">Background</span>
           <div class="swatches" role="radiogroup" aria-labelledby="background-label">
@@ -1541,45 +1914,7 @@ export class TodoList extends LitElement {
           </div>
         </div>
 
-        <div class="field">
-          <span class="field-label" id="palette-label">Palette</span>
-          <div class="palettes" role="radiogroup" aria-labelledby="palette-label">
-            ${todoPalettes.map((option) => {
-              const choice = PALETTES[option]
-              const selected = (look.palette ?? (look.background && look.background !== 'default' ? 'classic' : undefined)) === option
-              return html`<button
-                class="palette-swatch"
-                type="button"
-                role="radio"
-                aria-checked=${radio(selected)}
-                @click=${() => this.setLook({ palette: option })}
-              >
-                <span class="palette-chips" aria-hidden="true">
-                  ${todoHighlights.map((highlight) => html`<span class="palette-chip" style=${styleMap({ background: choice.highlights[highlight] })}></span>`)}
-                </span>
-                <span class="palette-name">${choice.label}</span>
-              </button>`
-            })}
-          </div>
-        </div>
-
-        <div class="field">
-          <span class="field-label" id="pen-label">Pen</span>
-          <div class="swatches" role="radiogroup" aria-labelledby="pen-label">
-            ${todoPens.map(
-              (pen) =>
-                html`<button
-                  class="pen-swatch pen-${pen}"
-                  type="button"
-                  role="radio"
-                  aria-checked=${radio(look.pen === pen)}
-                  aria-label=${PEN_LABELS[pen]}
-                  title=${PEN_LABELS[pen]}
-                  @click=${() => this.setLook({ pen })}
-                ></button>`,
-            )}
-          </div>
-        </div>
+        ${this.renderPaletteField()}
 
         <div class="field-row">
           <div class="field">
@@ -1638,7 +1973,6 @@ export class TodoList extends LitElement {
         </div>
 
         <div class="panel-foot">
-          ${this.storageKey ? html`<span class="saved">Saved in this browser</span>` : html`<span></span>`}
           <button class="done-button" type="button" @click=${this.closePanel}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
             Back to the list

@@ -1,33 +1,40 @@
 ---
 title: 'Todo List'
 description: 'A to-do list with the feel of paper: hand-drawn ticks, notes, highlighters, swipe and drag, and a remembered look.'
-category: 'Data display'
+category: 'Planning'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
-import { TodoList } from '@c2n/todo-list'
+import { TodoList, todoListIcons } from '@c2n/todo-list'
 
 `c2-todo-list` is a task list that feels like a paper one. Tasks are plain text. Checking one draws an ink tick (or a
 cross) and a pen stroke through the text, and a task you drop gets a red ✗. A progress ring beside the heading fills
-as tasks are crossed off; set `progress` to `bar`, `hero` or `none` to draw it differently. The heading suggests the
-list's icon (Groceries gets a cart), and any task can carry its own icon from
+as tasks are crossed off; set `progress` to `bar`, `hero` or `none` to draw it differently. The list's icon is one of
+twenty named [list icons](#list-icons) (or suggested from the heading: Groceries gets a cart), and any task can carry its own icon from
 [`@c2n/task-icons`](../../icons/task-icons), a highlighter for what matters, or a pen colour for its text.
 
-Click a task to write a note under it, or type one after a dash in the add field (“Oat milk - 2 L barista”). Drag a
+Type a note after a dash in the add field (“Oat milk - 2 L barista”). Drag a
 row up or down to reorder it. Swipe it left for **Archive** and **Delete**, or right for **Done** (both come from
 [`c2-reorder-list`](../reorder-list)); tap the row, swipe it back or press Escape to close it without doing anything.
 On a desktop the same actions are in the row's ⋯ menu (or a right-click) and on the keys **E**, **Delete**, **X**
-(won't do), **N** (note) and **I** (icon). The menu also changes the task's **Highlight** and **Text colour** from a
+(won't do), **F2** (edit) and **I** (icon). The menu also changes the task's **Highlight** and **Text colour** from a
 swatch submenu, and clicking a task's icon opens the icon picker, so one task is styled in place without a panel.
 Archived tasks collect at the bottom, and every archive or delete can be undone.
 
-Add `customizable` for a palette button. It swaps the tasks for a panel that styles the whole list: the background
-(the text colour follows from it), a colour **palette** (Classic, Pastel, Vivid, Earth, Ocean or Retro: its six
-highlighters and five pens, in a light and a dark variant), the pen, the done mark, the density and the progress style;
-**Back to the list** (or Escape) returns to the tasks. With a `storage-key` those choices are remembered in `localStorage`; `persist-tasks` remembers the
-tasks too.
+To change a task, choose **Edit task** in its menu (or press **F2**): its name and its note become two fields in
+place, and you can move between them freely. Enter in the name (or ⌘/Ctrl+Enter in the note), or anything that takes
+the focus away (a click outside the list, on another row or a menu), saves both and returns to the list. Escape
+cancels, an empty name keeps the old one, and an edit can be undone like the rest. Clicking a task never edits it: it
+shows the whole note, where the row shows only its first line.
+
+Add `customizable` for a palette button. It swaps the tasks for a panel that styles the whole list: the list's
+**icon** (a dropdown with every task icon, the one suggested by the heading, or none), the background (the text colour follows
+from it), a colour **palette** (a dropdown of Classic, Soft, Earth and Ocean, each with six
+highlighters and five pens in a light and a dark variant), the done mark, the density
+and the progress style; **Back to the list** (or Escape) returns to the tasks. With a `storage-key` those choices are
+remembered in `localStorage`; `persist-tasks` remembers the tasks too.
 
 ## Installation
 
@@ -83,6 +90,25 @@ npm install @c2n/todo-list
 </div>
 ```
 
+## List icons
+
+Set the list's icon by what the list is for, with `icon="groceries"`. Without one, the heading suggests it; `icon="none"`
+leaves the ring empty, and any [`@c2n/task-icons`](../../icons/task-icons) name works too. The viewer picks from the
+same set in the customize panel. The names are exported as `todoListIcons`:
+
+<p>
+  {todoListIcons.map((entry, index) => (
+    <>
+      {index ? ', ' : ''}
+      <code>{entry.name}</code>
+    </>
+  ))}
+</p>
+
+```html tag=CodeBlock
+<c2-todo-list heading="Lisbon trip" icon="travel"></c2-todo-list>
+```
+
 ## Tasks
 
 `tasks` is an array of objects; only `label` is required. It can be set as a property or as a JSON attribute, and the
@@ -116,8 +142,13 @@ Every change fires its own event (`task-toggle`, `task-add`, `task-remove`, `tas
 
 ## Customization and storage
 
-The viewer's choices are a small object, `{ background, palette, pen, doneMark, progress, density }`, readable and writable
-as the `look` property and announced by `look-change`. Each background sets its text colour, and each palette's pens and highlighters were checked
+The viewer's choices are a small object, `{ icon, background, palette, pen, doneMark, progress, density }`, readable and
+writable as the `look` property and announced by `look-change`. A **palette** is a colour scheme for the whole list: its
+accent colours the ticks, the progress and the Add button, and its highlighters set the mood: **Classic** (bright,
+blue), **Soft** (pale and airy, lavender), **Earth** (warm and muted, sienna) and **Ocean** (cool sand, seafoam and coral,
+teal). It brings its own six highlighters and five pens for the tasks. The panel has no pen
+choice, but `look.pen` set from script still replaces the palette's accent with one of the pens. Each background sets its
+text colour, and each palette's accent, pens and highlighters were checked
 against every background, plain and under every highlighter, in a light and a dark variant (a palette on the default
 background follows a dark theme too), so any combination stays legible at 4.5:1 or better. The look is applied inside the component, so it wins over the CSS variables the page sets, and
 **Reset** (or `resetLook()`) hands it back to the page and the theme. With `storage-key="this-week"` the look is

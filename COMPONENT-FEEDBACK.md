@@ -22,6 +22,19 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
+### `c2-progress` has no circular variant
+
+- **Severity:** gap
+- **Hit while:** moving `c2-todo-list`'s progress onto library components, 2026-10-02. Its `bar` style is now a
+  `c2-progress`; its `ring` and `hero` styles stay a hand-drawn SVG ring.
+- **Expected:** a circular progress (a ring that fills, with an optional centred label or slot) next to the linear bar,
+  as most kits ship.
+- **What happens:** `c2-progress` is linear only, so any ring — a todo list's header, a dashboard KPI, an upload
+  avatar — is drawn by hand with its own track and indicator variables and its own `role="progressbar"` semantics.
+- **Smallest fix:** a `c2-progress-ring` (or a `shape="ring"` on `c2-progress`) with `--…__track--color`,
+  `--…__indicator--color`, `--…--size`, `--…--thickness` and a default slot for the centre, so `c2-todo-list` can drop
+  its SVG.
+
 ### `c2-command` cannot fill a height-capped container
 
 - **Severity:** papercut

@@ -9,8 +9,8 @@ swatch submenu. Click a task's icon to change it. Archived tasks collect at the 
 
 Tasks can carry an optional icon from `@c2n/task-icons`, a highlighter background and a pen colour for their text.
 With `customizable`, a palette button swaps the tasks for a panel that styles the whole list: the background (whose
-text colour follows from it), a colour palette for the highlighters and pens (Classic, Pastel, Vivid, Earth, Ocean,
-Retro), the pen, the done mark, the density and the progress style; with `storage-key` those choices are remembered in
+text colour follows from it), a colour palette (Classic, Soft, Earth or Ocean: its accent, highlighters and pens),
+the list's icon, the done mark, the density and the progress style; with `storage-key` those choices are remembered in
 `localStorage`.
 
 ```bash
