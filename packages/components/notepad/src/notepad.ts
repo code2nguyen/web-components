@@ -331,6 +331,9 @@ export class Notepad extends LitElement {
   /** Opened by a click, a tap or the keyboard, so it stays open when the pointer leaves. */
   private paperMenuPinned = false
   private hoverTimer?: ReturnType<typeof setTimeout>
+  /** Pending frame of a scroll or resize while a popover is open. */
+  private viewportFrame = 0
+  private followingViewport = false
 
   private view?: EditorView
   private readonly slotPresence = new SlotPresenceController(this, ['header'])
@@ -385,6 +388,38 @@ export class Notepad extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback()
     this.hideToolbar()
+    this.followViewport(false)
+  }
+
+  // ---- popovers follow their anchor ----------------------------------------------------------------------------
+  // The toolbar and the paper card are fixed-position popovers in the top layer, placed in viewport coordinates.
+  // While one is open, a scroll anywhere (the page, a scrolling ancestor, a sheet with a max height) or a resize
+  // moves its anchor, so it is placed again on the next frame.
+
+  private readonly handleViewportChange = () => {
+    if (this.viewportFrame) return
+    this.viewportFrame = requestAnimationFrame(() => {
+      this.viewportFrame = 0
+      if (this.toolbarEl?.matches(':popover-open')) this.updateToolbar()
+      if (this.paperMenu?.matches(':popover-open')) this.placePaperMenu()
+    })
+  }
+
+  private followViewport(follow: boolean) {
+    if (follow === this.followingViewport) return
+    this.followingViewport = follow
+    const method = follow ? 'addEventListener' : 'removeEventListener'
+    // Capture: scroll does not bubble, and the scrolling element may be any ancestor or the sheet itself.
+    window[method]('scroll', this.handleViewportChange, { capture: true, passive: true } as AddEventListenerOptions)
+    window[method]('resize', this.handleViewportChange)
+    if (!follow && this.viewportFrame) {
+      cancelAnimationFrame(this.viewportFrame)
+      this.viewportFrame = 0
+    }
+  }
+
+  private handlePopoverToggle() {
+    this.followViewport(Boolean(this.toolbarEl?.matches(':popover-open') || this.paperMenu?.matches(':popover-open')))
   }
 
   /** Focuses the writing surface. */
@@ -952,18 +987,26 @@ export class Notepad extends LitElement {
     clearTimeout(this.hoverTimer)
     if (!menu.matches(':popover-open')) {
       menu.showPopover()
-      const box = button.getBoundingClientRect()
-      const x = Math.min(Math.max(8, box.left + box.width / 2 - menu.offsetWidth / 2), innerWidth - menu.offsetWidth - 8)
-      // Room for the arrow between the button and the card.
-      const below = box.bottom + 10
-      const above = below + menu.offsetHeight > innerHeight - 8
-      const y = above ? Math.max(8, box.top - menu.offsetHeight - 10) : below
-      menu.style.left = `${Math.round(x)}px`
-      menu.style.top = `${Math.round(y)}px`
-      menu.dataset.side = above ? 'top' : 'bottom'
-      menu.style.setProperty('--_arrow-x', `${Math.round(box.left + box.width / 2 - x)}px`)
+      this.placePaperMenu()
     }
     if (focus) void this.updateComplete.then(() => menu.querySelector<HTMLElement>('[role=radio][aria-checked=true]')?.focus())
+  }
+
+  /** Places the card under the Paper button, or above it when there is no room below. */
+  private placePaperMenu() {
+    const menu = this.paperMenu
+    const button = this.paperButton
+    if (!menu || !button) return
+    const box = button.getBoundingClientRect()
+    const x = Math.min(Math.max(8, box.left + box.width / 2 - menu.offsetWidth / 2), innerWidth - menu.offsetWidth - 8)
+    // Room for the arrow between the button and the card.
+    const below = box.bottom + 10
+    const above = below + menu.offsetHeight > innerHeight - 8 && box.top - menu.offsetHeight - 10 >= 8
+    const y = above ? box.top - menu.offsetHeight - 10 : below
+    menu.style.left = `${Math.round(x)}px`
+    menu.style.top = `${Math.round(y)}px`
+    menu.dataset.side = above ? 'top' : 'bottom'
+    menu.style.setProperty('--_arrow-x', `${Math.round(box.left + box.width / 2 - x)}px`)
   }
 
   private closePaperMenu() {
@@ -993,6 +1036,7 @@ export class Notepad extends LitElement {
   }
 
   private handlePaperMenuToggle(event: ToggleEvent) {
+    this.handlePopoverToggle()
     this.paperMenuOpen = event.newState === 'open'
     if (!this.paperMenuOpen) this.paperMenuPinned = false
     // Closed by Escape or a pick from the keyboard: give focus back to the button that opened it.
@@ -1269,6 +1313,7 @@ export class Notepad extends LitElement {
         popover="manual"
         role="toolbar"
         aria-label="Formatting"
+        @toggle=${this.handlePopoverToggle}
         @mousedown=${(event: Event) => event.preventDefault()}
         @click=${this.handleToolbarClick}
         @keydown=${this.handleToolbarKeydown}

@@ -363,6 +363,27 @@ test('the paper picker opens on hover like a hover card, with an arrow at the bu
   await expect(menu).toBeHidden()
 })
 
+test('the toolbar and the paper card follow the page when it scrolls', async ({ page, renderScenario }) => {
+  await renderScenario('<div style="height:300px"></div><c2-notepad label="Notes" paper-picker></c2-notepad><div style="height:2000px"></div>')
+  await surface(page).click()
+  await page.keyboard.type('scroll me')
+  await expect(page.locator('c2-notepad')).toHaveJSProperty('value', 'scroll me')
+  await selectBack(page, 2)
+  await expect(toolbar(page)).toBeVisible()
+  const sheet = page.locator('c2-notepad .sheet')
+  const gap = async (popover: import('@playwright/test').Locator) => (await popover.boundingBox())!.y - (await sheet.boundingBox())!.y
+  const toolbarGap = await gap(toolbar(page))
+  await page.evaluate(() => window.scrollBy(0, 120))
+  await expect.poll(() => gap(toolbar(page))).toBeCloseTo(toolbarGap, -1)
+
+  await page.getByRole('button', { name: 'Paper' }).click()
+  const menu = page.getByRole('dialog', { name: 'Paper' })
+  await expect(menu).toBeVisible()
+  const menuGap = await gap(menu)
+  await page.evaluate(() => window.scrollBy(0, 60))
+  await expect.poll(() => gap(menu)).toBeCloseTo(menuGap, -1)
+})
+
 test('paper and paper-color work without the picker', async ({ page, renderScenario }) => {
   await renderScenario('<c2-notepad label="Notes" paper="blank" paper-color="green"></c2-notepad>')
   await expect(page.getByRole('button', { name: 'Paper' })).toHaveCount(0)
