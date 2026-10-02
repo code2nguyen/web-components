@@ -1,0 +1,165 @@
+---
+description: 'Todo lists on paper, mint and night backgrounds, with highlighters, hero rings and compact rows.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { TodoList } from '@c2n/todo-list'
+
+## Looks
+
+The background, the pen and the density come from CSS variables, so each look below is a class you can copy. The
+customize panel applies the same kinds of values for the viewer.
+
+<GalleryGrid columns={2}>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .todo-default {
+    width: 100%;
+    max-width: 400px;
+  }
+</style>
+<c2-todo-list
+  class="todo-default"
+  heading="This week"
+  customizable
+  tasks='[{"label":"Send the Q3 report","icon":"mail","done":true},{"label":"Dentist appointment","note":"Tue 9:30, Dr. Martin"},{"label":"Renew passport","highlight":"yellow","due":"Today","urgent":true},{"label":"Call the plumber","dropped":true}]'
+></c2-todo-list>
+```
+
+```html tag=MdxCodeBlock,label=Paper groceries
+<style>
+  .todo-paper {
+    width: 100%;
+    max-width: 400px;
+    --c2-todo-list__container--background-color: #fbf8f1;
+    --c2-todo-list__container--color: #2a2622;
+    --c2-todo-list__container--border: 1px solid #e6dfd2;
+    --c2-todo-list__meta--color: #6f665b;
+    --c2-todo-list__label__done--color: #6f665b;
+    --c2-todo-list__mark--color: #6f665b;
+    --c2-todo-list__track--color: #e6dfd2;
+    --c2-todo-list__chip--background-color: #f3eee3;
+    --c2-todo-list__row__divider--color: #e6dfd2;
+    --c2-todo-list__row__hover--background-color: #f3eee3;
+    --c2-todo-list__add--border-color: #e6dfd2;
+    --c2-todo-list__accent--color: #2b59c3;
+    --c2-todo-list__pen-blue--color: #2b59c3;
+    --c2-todo-list__pen-red--color: #b8322a;
+    --c2-todo-list__dropped--color: #b8322a;
+  }
+</style>
+<c2-todo-list
+  class="todo-paper"
+  heading="Groceries"
+  tasks='[{"label":"Tomatoes","icon":"vegetables","note":"6, on the vine","done":true},{"label":"Green lentils","icon":"legumes","note":"500 g"},{"label":"Spinach","icon":"salad","dropped":true},{"label":"Oat milk","icon":"milk","note":"2 L · barista","done":true},{"label":"Comté","icon":"cheese","highlight":"orange"},{"label":"Salmon fillets","icon":"fish"},{"label":"Sourdough loaf","icon":"bread","done":true}]'
+></c2-todo-list>
+```
+
+```html tag=MdxCodeBlock,label=Highlighted priorities
+<style>
+  .todo-priorities {
+    width: 100%;
+    max-width: 400px;
+    --c2-todo-list__container--border: 0;
+    --c2-todo-list__container--border-radius: 20px;
+    --c2-todo-list__container--box-shadow: 0 24px 48px -18px rgba(76, 29, 149, 0.3);
+    --c2-todo-list__accent--color: #7c3aed;
+  }
+</style>
+<c2-todo-list
+  class="todo-priorities"
+  heading="Launch"
+  icon="rocket"
+  tasks='[{"label":"Ship the v2.0 build","highlight":"pink","due":"Today","urgent":true},{"label":"Press release","highlight":"yellow","due":"Wed"},{"label":"Update the pricing page","done":true},{"label":"Thank the beta testers","ink":"violet"},{"label":"Plan the retro","ink":"green"}]'
+></c2-todo-list>
+```
+
+```html tag=MdxCodeBlock,label=Night sprint
+<style>
+  .todo-night {
+    width: 100%;
+    max-width: 400px;
+    --c2-todo-list__container--background-color: #1a1a1f;
+    --c2-todo-list__container--color: #f1f0ee;
+    --c2-todo-list__container--border: 1px solid #2e2e35;
+    --c2-todo-list__container--box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    --c2-todo-list__meta--color: #a3a0a8;
+    --c2-todo-list__label__done--color: #a3a0a8;
+    --c2-todo-list__mark--color: #a3a0a8;
+    --c2-todo-list__track--color: #2e2e35;
+    --c2-todo-list__chip--background-color: #26262c;
+    --c2-todo-list__row__divider--color: #2e2e35;
+    --c2-todo-list__row__hover--background-color: #26262c;
+    --c2-todo-list__add--border-color: #2e2e35;
+    --c2-todo-list__accent--color: #6ee7b7;
+    --c2-todo-list__on-accent--color: #0b1220;
+    --c2-todo-list__dropped--color: #ff8a80;
+    --c2-todo-list__pen-red--color: #ff8a80;
+    --c2-todo-list__pen-blue--color: #7fb0ff;
+    --c2-todo-list__pen-violet--color: #c4b5fd;
+  }
+</style>
+<c2-todo-list
+  class="todo-night"
+  heading="Sprint 14"
+  icon="code"
+  tasks='[{"label":"Auth token refresh","done":true},{"label":"Flaky upload test","icon":"bug","done":true},{"label":"Release notes","icon":"news","due":"Thu"},{"label":"Retro agenda","ink":"violet","due":"Fri"},{"label":"Migrate the old cron jobs","dropped":true}]'
+></c2-todo-list>
+```
+
+```html tag=MdxCodeBlock,label=Mint hero ring
+<style>
+  .todo-mint {
+    width: 100%;
+    max-width: 400px;
+    --c2-todo-list__container--background-color: #f1faf5;
+    --c2-todo-list__container--color: #10281f;
+    --c2-todo-list__container--border: 1px solid #cfe6da;
+    --c2-todo-list__meta--color: #43645a;
+    --c2-todo-list__label__done--color: #43645a;
+    --c2-todo-list__mark--color: #43645a;
+    --c2-todo-list__track--color: #cfe6da;
+    --c2-todo-list__chip--background-color: #e2f3ea;
+    --c2-todo-list__row__divider--color: #cfe6da;
+    --c2-todo-list__add--border-color: #cfe6da;
+    --c2-todo-list__accent--color: #0f6b63;
+    --c2-todo-list__hero-ring--size: 132px;
+  }
+</style>
+<c2-todo-list
+  class="todo-mint"
+  heading="Morning routine"
+  progress="hero"
+  tasks='[{"label":"Glass of water","icon":"water","done":true},{"label":"Ten minutes of meditation","icon":"meditate","done":true},{"label":"Stretch","icon":"gym"},{"label":"Journal","icon":"notebook"}]'
+></c2-todo-list>
+```
+
+```html tag=MdxCodeBlock,label=Compact and flat
+<style>
+  .todo-flat {
+    width: 100%;
+    max-width: 400px;
+    --c2-todo-list__container--border: 0;
+    --c2-todo-list__container--box-shadow: none;
+    --c2-todo-list__container--padding: 12px;
+    --c2-todo-list__container--gap: 10px;
+    --c2-todo-list__heading--font-size: 15px;
+    --c2-todo-list__ring--size: 34px;
+    --c2-todo-list__ring--stroke-width: 6;
+    --c2-todo-list__row--padding: 4px 8px;
+    --c2-todo-list__mark--size: 22px;
+    --c2-todo-list__label--font-size: 13px;
+  }
+</style>
+<c2-todo-list
+  class="todo-flat"
+  heading="Errands"
+  icon="none"
+  tasks='[{"label":"Post office","done":true},{"label":"Pick up the dry cleaning"},{"label":"Pharmacy","note":"Vitamin D"},{"label":"Return the library books","done":true},{"label":"Car wash","dropped":true}]'
+></c2-todo-list>
+```
+
+</GalleryGrid>

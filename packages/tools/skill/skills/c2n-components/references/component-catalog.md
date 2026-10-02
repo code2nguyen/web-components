@@ -75,6 +75,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Mat Icon** — `c2-mat-icon` · `@c2n/mat-icon` — 2,234 Material Icons ligatures rendered through a single element.
 - **Phosphor Icons** — `c2-phosphor-{name}` · `@c2n/phosphor-icons` — 1,512 flexible icons in six weights, one web component each.
 - **Symbols** — `c2-symbol-{name}` · `@c2n/symbols` — 157 themeable spot illustrations for empty states, status panels, onboarding and error pages.
+- **Task icons** — `c2-task-icon-{name}` · `@c2n/task-icons` — 191 duotone icons for to-do items: work, home, health, sport, learning, food, money, travel and more.
 
 ## Inputs
 
@@ -133,4 +134,5 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 ## Planning
 
 - **Month Planner** — `c2-month-planner` · `@c2n/month-planner` — Month calendar that draws events and trips as bars across the days they cover.
+- **Todo List** — `c2-todo-list` · `@c2n/todo-list` — A to-do list with the feel of paper: hand-drawn ticks, notes, highlighters, swipe and drag, and a remembered look.
 - **Week Planner** — `c2-week-planner` · `@c2n/week-planner` — Typical-week schedule with time blocks, and optional odd and even weeks.

@@ -2388,6 +2388,18 @@
       "reason": "The semantic icon region owns the icon slot's component-side presentation."
     },
     {
+      "tag": "c2-todo-list",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned header controls; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-todo-list",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned empty-state content; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-tooltip",
       "slot": "",
       "decision": "assigned-content",

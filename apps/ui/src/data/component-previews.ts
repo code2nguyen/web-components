@@ -4,6 +4,7 @@
  * upgraded client-side by the gallery's script, which imports every component package.
  */
 export const componentPreviews: Record<string, string> = {
+  'todo-list': `<c2-todo-list heading="This week" readonly style="width:280px;--c2-todo-list__container--padding:14px;--c2-todo-list__container--gap:10px;--c2-todo-list__row--padding:3px 6px;--c2-todo-list__mark--size:22px;--c2-todo-list__ring--size:36px;--c2-todo-list__heading--font-size:15px;--c2-todo-list__label--font-size:13px" tasks='[{"label":"Send the invoice","done":true},{"label":"Renew passport","highlight":"yellow"},{"label":"Call the plumber","dropped":true}]'></c2-todo-list>`,
   'comparison-bar': `<c2-comparison-bar start-value="22.43" end-value="77.57" start-label="Bid" end-label="Ask" show-value style="width:240px"></c2-comparison-bar>`,
   flow: `<c2-flow aria-label="Pipeline" style="width:320px;--c2-flow--height:150px;--c2-flow__node--width:96px;--c2-flow__rank--gap:28px" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>`,
   'week-planner': `<c2-week-planner locale="en-US" start-hour="8" end-hour="14" style="width:720px;max-width:none;zoom:0.34;--c2-week-planner--padding:16px;--c2-week-planner__hour--height:36px;--c2-week-planner__hour-label--font-size:16px;--c2-week-planner__day-header--font-size:18px;--c2-week-planner__event--font-size:16px" events='[{"title":"Stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},{"title":"Kids","day":"wed","start":"11:00","end":"14:00","color":"#0f766e"},{"title":"Stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Football","day":"sat","start":"09:00","end":"12:00","color":"#0f766e"}]'></c2-week-planner>`,
@@ -202,6 +203,12 @@ greet('world')"></c2-code-editor>`,
   <c2-phosphor-camera></c2-phosphor-camera>
   <c2-phosphor-gear weight="duotone"></c2-phosphor-gear>
   <c2-phosphor-arrow-right weight="bold"></c2-phosphor-arrow-right>
+</div>`,
+  'task-icons': `<div class="preview-row" style="gap:18px;--c2-task-icon--size:28px;color:#0265dc">
+  <c2-task-icon-mail></c2-task-icon-mail>
+  <c2-task-icon-run style="color:#ea580c"></c2-task-icon-run>
+  <c2-task-icon-cook style="color:#0f766e"></c2-task-icon-cook>
+  <c2-task-icon-meditate style="color:#7c3aed"></c2-task-icon-meditate>
 </div>`,
   symbols: `<div class="preview-row" style="gap:10px;--c2-symbol--size:84px">
   <c2-symbol-celebration></c2-symbol-celebration>

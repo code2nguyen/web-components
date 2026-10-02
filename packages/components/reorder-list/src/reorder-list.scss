@@ -20,10 +20,22 @@
     placeholder--border-width: 2px,
     placeholder--border-style: dashed,
     placeholder--border-color: #2563eb,
+    placeholder--border-radius: 0px,
     dragging-item--opacity: 0.92,
     dragging-item--box-shadow: 0 12px 28px rgb(15 23 42 / 24%),
+    dragging-item--border-radius: 0px,
+    dragging-item--padding: var(--c2-reorder-list--item-padding, 0px),
     motion--duration: 160ms,
     motion--timing-function: ease,
+    swipe-action--width: 76px,
+    swipe-action--color: #ffffff,
+    swipe-action--font-size: 12px,
+    swipe-action__danger--background-color: #dc2626,
+    swipe-action__warning--background-color: #a16207,
+    swipe-action__success--background-color: #15803d,
+    swipe-action__accent--background-color: #0265dc,
+    swipe-action__neutral--background-color: #52525b,
+    swipe-content--background-color: #ffffff,
   )
 );
 
@@ -92,10 +104,125 @@
   opacity: css.cssVar(item__active--opacity);
 }
 
+.list-item--swipeable {
+  // Vertical scrolling stays with the page; the list owns horizontal movement.
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Swipe ------------------------------------------------------------------------------------------------------------
+
+.swipe-actions {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  overflow: hidden;
+  border-radius: inherit;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.swipe-side {
+  display: flex;
+  overflow: hidden;
+}
+
+.swipe-side--end {
+  justify-content: flex-end;
+  margin-inline-start: auto;
+}
+
+.swipe-action {
+  display: flex;
+  flex: 0 0 css.cssVar(swipe-action--width);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 0 6px;
+  border: 0;
+  margin: 0;
+  font: inherit;
+  font-size: css.cssVar(swipe-action--font-size);
+  font-weight: 600;
+  color: css.cssVar(swipe-action--color);
+  cursor: pointer;
+  transition: flex-grow css.cssVar(motion--duration) css.cssVar(motion--timing-function);
+
+  &:focus-visible {
+    outline: css.cssVar(item__focus--outline-width) solid css.cssVar(swipe-action--color);
+    outline-offset: -4px;
+  }
+}
+
+// Past the reveal width the outermost action grows to fill the gap, which is the cue that releasing runs it.
+.swipe-action--outermost {
+  flex-grow: 1;
+}
+
+.swipe-action--danger {
+  background-color: css.cssVar(swipe-action__danger--background-color);
+}
+
+.swipe-action--warning {
+  background-color: css.cssVar(swipe-action__warning--background-color);
+}
+
+.swipe-action--success {
+  background-color: css.cssVar(swipe-action__success--background-color);
+}
+
+.swipe-action--accent {
+  background-color: css.cssVar(swipe-action__accent--background-color);
+}
+
+.swipe-action--neutral {
+  background-color: css.cssVar(swipe-action__neutral--background-color);
+}
+
+.swipe-action__icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.swipe-action__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.swipe-content {
+  position: relative;
+  border-radius: inherit;
+  background: css.cssVar(swipe-content--background-color);
+  transition: transform calc(#{css.cssVar(motion--duration)} * 1.4) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+// Above the revealed actions, but only while they show: a permanent stacking context would trap popovers the item
+// content opens under the items after it.
+.swipe-actions:not([hidden]) + .swipe-content {
+  z-index: 1;
+}
+
+.swipe-content--dragging {
+  transition: none;
+  user-select: none;
+}
+
 .placeholder {
   min-height: 1.5rem;
   overflow: hidden;
-  border-radius: inherit;
+  border-radius: css.cssVar(placeholder--border-radius);
   border-width: css.cssVar(placeholder--border-width);
   border-style: css.cssVar(placeholder--border-style);
   border-color: css.cssVar(placeholder--border-color);
@@ -128,6 +255,7 @@
   background: css.cssVar(dragging-item-background);
   opacity: css.cssVar(dragging-item--opacity);
   box-shadow: css.cssVar(dragging-item--box-shadow);
+  border-radius: css.cssVar(dragging-item--border-radius);
   cursor: grabbing;
   pointer-events: none;
   z-index: 100000;
@@ -145,7 +273,7 @@
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: css.cssVar(item-padding);
+  padding: css.cssVar(dragging-item--padding);
   background: css.cssVar(item-background);
   box-sizing: border-box;
 }
@@ -168,7 +296,9 @@
   }
 
   .list-item,
-  .dragging-item {
+  .dragging-item,
+  .swipe-content,
+  .swipe-action {
     transition: none;
   }
 }
