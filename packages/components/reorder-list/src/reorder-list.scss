@@ -20,8 +20,11 @@
     placeholder--border-width: 2px,
     placeholder--border-style: dashed,
     placeholder--border-color: #2563eb,
+    placeholder--border-radius: 0px,
     dragging-item--opacity: 0.92,
     dragging-item--box-shadow: 0 12px 28px rgb(15 23 42 / 24%),
+    dragging-item--border-radius: 0px,
+    dragging-item--padding: var(--c2-reorder-list--item-padding, 0px),
     motion--duration: 160ms,
     motion--timing-function: ease,
     swipe-action--width: 76px,
@@ -219,7 +222,7 @@
 .placeholder {
   min-height: 1.5rem;
   overflow: hidden;
-  border-radius: inherit;
+  border-radius: css.cssVar(placeholder--border-radius);
   border-width: css.cssVar(placeholder--border-width);
   border-style: css.cssVar(placeholder--border-style);
   border-color: css.cssVar(placeholder--border-color);
@@ -252,6 +255,7 @@
   background: css.cssVar(dragging-item-background);
   opacity: css.cssVar(dragging-item--opacity);
   box-shadow: css.cssVar(dragging-item--box-shadow);
+  border-radius: css.cssVar(dragging-item--border-radius);
   cursor: grabbing;
   pointer-events: none;
   z-index: 100000;
@@ -269,7 +273,7 @@
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: css.cssVar(item-padding);
+  padding: css.cssVar(dragging-item--padding);
   background: css.cssVar(item-background);
   box-sizing: border-box;
 }

@@ -183,8 +183,11 @@ function parseMotionDuration(value: string): number {
  * @cssproperty {length} [--c2-reorder-list__placeholder--border-width=2px] - Destination border width.
  * @cssproperty {string} [--c2-reorder-list__placeholder--border-style=dashed] - Destination border style.
  * @cssproperty {color} [--c2-reorder-list__placeholder--border-color=#2563eb] - Destination border color.
+ * @cssproperty {length} [--c2-reorder-list__placeholder--border-radius=0px] - Destination corner radius.
  * @cssproperty {number} [--c2-reorder-list__dragging-item--opacity=0.92] - Pointer-preview opacity.
  * @cssproperty {box-shadow} [--c2-reorder-list__dragging-item--box-shadow=0 12px 28px rgb(15 23 42 / 24%)] - Pointer-preview shadow.
+ * @cssproperty {length} [--c2-reorder-list__dragging-item--border-radius=0px] - Pointer-preview corner radius.
+ * @cssproperty {length} [--c2-reorder-list__dragging-item--padding=var(--c2-reorder-list--item-padding, 0px)] - Padding of the pointer preview's fallback label; follows the item padding by default.
  * @cssproperty {time} [--c2-reorder-list__motion--duration=160ms] - Decorative transition duration; zero under reduced motion.
  * @cssproperty {easing-function} [--c2-reorder-list__motion--timing-function=ease] - Decorative transition easing.
  * @cssproperty {length} [--c2-reorder-list__swipe-action--width=76px] - Width of each revealed swipe action.
@@ -246,8 +249,13 @@ export class ReorderList extends LitElement {
   private lastInputMethod: ReorderInputMethod = 'mouse'
 
   override connectedCallback(): void {
+    // A declarative shadow root was rendered on the server, which cannot see the light DOM, so it holds no items:
+    // hydrate that empty list first, or Lit finds more items than markers and throws, and only then pick them up.
+    // Read before `super`, which attaches the shadow root of a client-rendered element.
+    const hydrating = !!this.shadowRoot && !this.hasUpdated
     super.connectedCallback()
-    this.reconcileAuthoredOrder()
+    if (hydrating) void this.updateComplete.then(() => this.reconcileAuthoredOrder())
+    else this.reconcileAuthoredOrder()
     this.observeChildren()
   }
 
