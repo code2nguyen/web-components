@@ -8,7 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Switch } from '@c2n/switch'
-import { Seperator } from '@c2n/seperator'
+import { Separator } from '@c2n/separator'
 
 `c2-switch` toggles a setting on or off. It wraps a native `<input type="checkbox" role="switch">`, so Space toggles it, the form receives `name` and `value` while on, and assistive technology announces a switch. The thumb can be clicked or dragged: it follows the pointer and settles on the side it is released. The whole row is the label: text in the default slot and an optional `description` sit beside the track and clicking them toggles it too. Small icons can ride inside the thumb for either state, and every part of the track, thumb and text is a variable. Use it for settings that apply immediately; use `c2-checkbox` for choices that are submitted later.
 
@@ -84,9 +84,9 @@ npm install @c2n/switch
 <div data-label="Settings list">
   <div class="settings">
     <c2-switch checked>Push notifications</c2-switch>
-    <c2-seperator decorative></c2-seperator>
+    <c2-separator decorative></c2-separator>
     <c2-switch>Sounds<span slot="description">Play a sound for new messages.</span></c2-switch>
-    <c2-seperator decorative></c2-seperator>
+    <c2-separator decorative></c2-separator>
     <c2-switch checked>Show previews</c2-switch>
   </div>
 </div>

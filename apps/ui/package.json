@@ -89,7 +89,7 @@
     "@c2n/radio": "*",
     "@c2n/rate": "*",
     "@c2n/select": "*",
-    "@c2n/seperator": "*",
+    "@c2n/separator": "*",
     "@c2n/sheet": "*",
     "@c2n/side-nav": "*",
     "@c2n/skeleton": "*",

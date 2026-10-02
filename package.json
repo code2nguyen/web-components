@@ -148,7 +148,7 @@
         "./packages/components/switch:build",
         "./packages/components/spinner:build",
         "./packages/components/slider:build",
-        "./packages/components/seperator:build",
+        "./packages/components/separator:build",
         "./packages/components/breadcrumb:build",
         "./packages/components/badge:build",
         "./packages/components/toast:build",

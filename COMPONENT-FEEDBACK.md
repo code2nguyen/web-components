@@ -105,15 +105,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/table` — key slot names by **visible index** rather than row key,
   so a framework renders only the window. Breaking change to the documented `cell:{rowKey}:{field}` contract.
 
-### `@c2n/seperator` and `c2-seperator` are misspelled
-
-- **Severity:** papercut (public API)
-- **Hit while:** the same migration, 2026-09-19 (external report).
-- **What happens:** the package, the element and the documentation all spell it "seperator". Every consumer has to
-  reproduce the typo.
-- **Where the fix belongs:** ship `@c2n/separator` / `c2-separator` and keep the old spelling as a deprecated alias
-  package and tag. Breaking without the alias, so it needs a deliberate release.
-
 ### `reorder-list` exposes two properties whose real attributes are unreadable
 
 - **Severity:** papercut
@@ -301,6 +292,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-status-panel`               | Hosting an illustration took three variables set together (`media--size`, `media-icon--size` and a transparent per-status disc background), or the artwork rendered clipped or tiny on a coloured disc.                                                                                                                         | 2026-10-01, `media="illustration"` + `--c2-status-panel__illustration--size`; docs, gallery and the 404 page converted; tested.                                               |
 | `c2-status-panel`               | The media box was always rendered, so hiding it took six variables.                                                                                                                                                                                                                                                             | 2026-10-01, `media="none"` renders no media region; tested.                                                                                                                   |
 | `c2-bar-chart`                  | Only vertical grouped bars: no orientation, no stacking and no value labels, so three common variants could not be drawn.                                                                                                                                                                                                       | 2026-10-01, `orientation="horizontal"`, `stack="normal\|percent"`, `value-labels` + `formatLabel`; gallery cards and tests for each.                                          |
+| `c2-separator`                  | The package, element, class and variables were spelled "seperator", so every consumer reproduced the typo.                                                                                                                                                                                                                      | 2026-10-02, renamed to `@c2n/separator` / `c2-separator` / `--c2-separator*`. Hard rename with no alias package (pre-1.0, deliberate breaking change).                        |
 
 ## Won't fix
 

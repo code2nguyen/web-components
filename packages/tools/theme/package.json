@@ -109,7 +109,7 @@
         "../../components/switch:build",
         "../../components/spinner:build",
         "../../components/slider:build",
-        "../../components/seperator:build",
+        "../../components/separator:build",
         "../../components/breadcrumb:build",
         "../../components/badge:build",
         "../../components/toast:build",

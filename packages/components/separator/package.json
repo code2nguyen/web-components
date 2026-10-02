@@ -1,12 +1,12 @@
 {
-  "name": "@c2n/seperator",
+  "name": "@c2n/separator",
   "version": "0.0.20",
   "type": "module",
-  "main": "dist/seperator.js",
+  "main": "dist/separator.js",
   "exports": {
     ".": {
-      "types": "./types/src/seperator.d.ts",
-      "default": "./dist/seperator.js"
+      "types": "./types/src/separator.d.ts",
+      "default": "./dist/separator.js"
     },
     "./react": {
       "types": "./react.d.ts",
@@ -28,7 +28,7 @@
     "vue.js"
   ],
   "keywords": [
-    "seperator",
+    "separator",
     "web component",
     "lit"
   ],
