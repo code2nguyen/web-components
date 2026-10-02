@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues } from 'lit'
 import { query, state } from 'lit/decorators.js'
-import { property } from '@c2n/core/lit-helper.js'
+import { styleMap } from 'lit/directives/style-map.js'
+import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
@@ -12,24 +13,13 @@ import { baseKeymap, chainCommands, setBlockType, splitBlockAs, toggleMark } fro
 import { history, redo, undo } from 'prosemirror-history'
 import { InputRule, inputRules, textblockTypeInputRule, undoInputRule } from 'prosemirror-inputrules'
 import { fromMarkdown, toMarkdown } from './markdown'
-import {
-  HIGHLIGHTS,
-  INKS,
-  MARK_NAMES,
-  emptyFormat,
-  formatOf,
-  schema,
-  type NotepadFormat,
-  type NotepadHighlight,
-  type NotepadInk,
-  type NotepadMark,
-} from './schema'
+import { HIGHLIGHTS, INKS, MARK_NAMES, colorIndex, emptyFormat, formatOf, schema, type NotepadColor, type NotepadFormat, type NotepadMark } from './schema'
 import { NOTEPAD_FONT_FAMILY, loadNotepadFont } from './font'
 import styles from './notepad.scss?inline'
 
 export { fromMarkdown, toMarkdown } from './markdown'
-export { INKS, HIGHLIGHTS, MARK_NAMES } from './schema'
-export type { NotepadFormat, NotepadHighlight, NotepadInk, NotepadMark } from './schema'
+export { INKS, HIGHLIGHTS, MARK_NAMES, colorIndex } from './schema'
+export type { NotepadColor, NotepadFormat, NotepadHighlight, NotepadInk, NotepadMark } from './schema'
 export { NOTEPAD_FONT_FAMILY, loadNotepadFont } from './font'
 
 /** Detail of `check-change`. */
@@ -81,18 +71,30 @@ export interface Notepad {
   removeEventListener: TypedRemoveEventListener<Notepad, NotepadEventMap>
 }
 
-const INK_LABELS: Record<NotepadInk, string> = { blue: 'Blue ink', black: 'Black ink', red: 'Red ink', green: 'Green ink' }
-const HIGHLIGHT_LABELS: Record<NotepadHighlight, string> = { yellow: 'Yellow highlighter', green: 'Green highlighter', pink: 'Pink highlighter' }
-const INK_SWATCHES: Record<NotepadInk, string> = {
-  blue: 'var(--c2-notepad__ink-blue--color, #2848b8)',
-  black: 'var(--c2-notepad__ink-black--color, #18181b)',
-  red: 'var(--c2-notepad__ink-red--color, #b8232b)',
-  green: 'var(--c2-notepad__ink-green--color, #22743a)',
-}
-const HIGHLIGHT_SWATCHES: Record<NotepadHighlight, string> = {
-  yellow: 'var(--c2-notepad__highlight-yellow--background, rgba(255, 214, 64, 0.55))',
-  green: 'var(--c2-notepad__highlight-green--background, rgba(110, 220, 120, 0.4))',
-  pink: 'var(--c2-notepad__highlight-pink--background, rgba(255, 120, 170, 0.38))',
+/**
+ * The lists used while `inks` / `highlights` are unset, in the order a page stores them (`data-ink="3"` is red): the
+ * documented `--c2-notepad__ink-*` and `--c2-notepad__highlight-*` variables. Spread them to extend the defaults.
+ */
+export const DEFAULT_INKS: readonly NotepadColor[] = [
+  { label: 'Blue ink', color: 'var(--c2-notepad__ink-blue--color, #2848b8)' },
+  { label: 'Black ink', color: 'var(--c2-notepad__ink-black--color, #18181b)' },
+  { label: 'Red ink', color: 'var(--c2-notepad__ink-red--color, #b8232b)' },
+  { label: 'Green ink', color: 'var(--c2-notepad__ink-green--color, #22743a)' },
+]
+export const DEFAULT_HIGHLIGHTS: readonly NotepadColor[] = [
+  { label: 'Yellow highlighter', color: 'var(--c2-notepad__highlight-yellow--background, rgba(255, 214, 64, 0.55))' },
+  { label: 'Green highlighter', color: 'var(--c2-notepad__highlight-green--background, rgba(110, 220, 120, 0.4))' },
+  { label: 'Pink highlighter', color: 'var(--c2-notepad__highlight-pink--background, rgba(255, 120, 170, 0.38))' },
+]
+/** Position of the default black ink, which on night paper becomes the paper's own ink rather than a lifted grey. */
+const DEFAULT_BLACK_INK = 2
+
+const isColor = (entry: unknown): entry is NotepadColor =>
+  typeof entry === 'object' && entry !== null && typeof (entry as NotepadColor).label === 'string' && typeof (entry as NotepadColor).color === 'string'
+/** A usable list, or the defaults: a malformed attribute must not leave the writer without colours. */
+const colorList = (value: unknown, defaults: readonly NotepadColor[]): readonly NotepadColor[] => {
+  const list = Array.isArray(value) ? value.filter(isColor) : []
+  return list.length ? list : defaults
 }
 
 const PAD_LABELS: Record<NotepadPad, string> = {
@@ -340,6 +342,14 @@ export class Notepad extends LitElement {
   @property({ reflect: true }) paper: NotepadPaper = 'lined'
   /** Colour of the page and its ink: `default`, `yellow`, `green`, `blue`, `pink` or `night`. The writer changes it through the paper picker. */
   @property({ attribute: 'paper-color', reflect: true }) paperColor: NotepadPaperColor = 'default'
+  /**
+   * The inks of the toolbar, as `{ label, color }` entries; any CSS colour, `var()` included. The page stores an ink
+   * by its 1-based position in this list (`<span data-ink="2">`), so give a dark theme a list of the same length and
+   * order and the whole page recolours. Unset, the four documented `--c2-notepad__ink-*` inks.
+   */
+  @property({ converter: jsonPropertyConverter }) inks?: NotepadColor[]
+  /** The highlighters of the toolbar, as `{ label, color }` entries, stored by position like `inks`. `==text==` is the first one. Unset, the three documented `--c2-notepad__highlight-*` highlighters. */
+  @property({ converter: jsonPropertyConverter }) highlights?: NotepadColor[]
   /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the pad, the ruling and the paper colour. */
   @property({ type: Boolean, attribute: 'paper-picker', reflect: true }) paperPicker = false
 
@@ -493,10 +503,11 @@ export class Notepad extends LitElement {
 
   /**
    * Applies a format to the selection, or to what is typed next when nothing is selected. Bold, italic, underline
-   * and strike toggle. For `ink` and `highlight`, pass a colour name to apply it or `null` to remove it; with no
-   * colour the default (blue ink, yellow highlighter) is toggled. Returns whether anything was applied.
+   * and strike toggle. For `ink` and `highlight`, pass the colour's 1-based position in `inks` / `highlights` (a
+   * default colour's name such as `red` also works) to apply it, or `null` to remove it; with no colour the first one
+   * is toggled. Returns whether anything was applied.
    */
-  formatSelection(mark: NotepadMark, color?: string | null): boolean {
+  formatSelection(mark: NotepadMark, color?: number | string | null): boolean {
     const view = this.view
     if (!view || !this.editable || !this.allowedMarks.has(mark)) return false
     const type = schema.marks[mark]
@@ -505,13 +516,15 @@ export class Notepad extends LitElement {
       view.focus()
       return applied
     }
-    const palette: readonly string[] = mark === 'ink' ? INKS : HIGHLIGHTS
     const current = this.format[mark]
-    let next: string | null
-    if (color === undefined) next = current ? null : palette[0]
+    let next: number | null
+    if (color === undefined) next = current ? null : 1
     else if (color === null) next = null
-    else if (palette.includes(color)) next = color === current ? null : color
-    else return false
+    else {
+      const index = colorIndex(color, mark === 'ink' ? INKS : HIGHLIGHTS)
+      if (!index || index > this.colorsOf(mark).length) return false
+      next = index === current ? null : index
+    }
     this.applyColorMark(view, type, next)
     view.focus()
     return true
@@ -672,7 +685,7 @@ export class Notepad extends LitElement {
       markRule(/()\*\*([^*\s](?:[^*]*[^*\s])?)\*\*$/, 2, () => schema.marks.bold.create(), enabled('bold')),
       markRule(/(^|[^*])\*([^*\s](?:[^*]*[^*\s])?)\*$/, 1, () => schema.marks.italic.create(), enabled('italic')),
       markRule(/()~~([^~\s](?:[^~]*[^~\s])?)~~$/, 2, () => schema.marks.strike.create(), enabled('strike')),
-      markRule(/()==([^=\s](?:[^=]*[^=\s])?)==$/, 2, () => schema.marks.highlight.create({ color: 'yellow' }), enabled('highlight')),
+      markRule(/()==([^=\s](?:[^=]*[^=\s])?)==$/, 2, () => schema.marks.highlight.create({ color: 1 }), enabled('highlight')),
     ]
 
     const placeholder = new Plugin({
@@ -759,7 +772,7 @@ export class Notepad extends LitElement {
     this.updateToolbar()
   }
 
-  private applyColorMark(view: EditorView, type: MarkType, color: string | null) {
+  private applyColorMark(view: EditorView, type: MarkType, color: number | null) {
     const { from, to, empty } = view.state.selection
     const tr = view.state.tr
     if (empty) {
@@ -1014,8 +1027,8 @@ export class Notepad extends LitElement {
     }
     const mark = button.dataset.mark as NotepadMark | undefined
     if (!mark) return
-    const color = button.dataset.color
-    this.formatSelection(mark, mark === 'ink' || mark === 'highlight' ? color || null : undefined)
+    const color = Number(button.dataset.color) || null
+    this.formatSelection(mark, mark === 'ink' || mark === 'highlight' ? color : undefined)
     if (group) {
       this.openGroup = null
       if (!fromKeyboard) this.pickedGroup = group
@@ -1247,22 +1260,36 @@ export class Notepad extends LitElement {
     this.internals.setValidity(flags, message, this.surface)
   }
 
+  private colorsOf(group: 'ink' | 'highlight'): readonly NotepadColor[] {
+    return group === 'ink' ? colorList(this.inks, DEFAULT_INKS) : colorList(this.highlights, DEFAULT_HIGHLIGHTS)
+  }
+
+  /**
+   * `--_ink-<n>`, `--_ink-<n>-night` and `--_highlight-<n>` for every colour of the lists: the marks on the page and
+   * the swatches read them, so a new list recolours both in place, and a position the list does not have stays unset
+   * (its marks fall back to the page's ink). On night paper an ink is lifted towards white so it stays readable.
+   */
+  private colorVars(): Record<string, string> {
+    const vars: Record<string, string> = {}
+    const inks = this.colorsOf('ink')
+    inks.forEach(({ color }, position) => {
+      const index = position + 1
+      vars[`--_ink-${index}`] = color
+      vars[`--_ink-${index}-night`] = inks === DEFAULT_INKS && index === DEFAULT_BLACK_INK ? 'var(--_ink)' : `color-mix(in srgb, ${color} 55%, #ffffff)`
+    })
+    this.colorsOf('highlight').forEach(({ color }, position) => (vars[`--_highlight-${position + 1}`] = color))
+    return vars
+  }
+
   private renderColorGroup(group: 'ink' | 'highlight') {
     const ink = group === 'ink'
-    const current = this.format[group]
-    const colors: readonly string[] = ink ? INKS : HIGHLIGHTS
+    const colors = this.colorsOf(group)
+    // A page may hold a position the current list does not have: it shows as no colour rather than a wrong one.
+    const picked = this.format[group]
+    const current = picked && picked <= colors.length ? picked : null
     const label = ink ? 'Ink colour' : 'Highlighter'
-    const currentLabel = current
-      ? ink
-        ? INK_LABELS[current as NotepadInk]
-        : HIGHLIGHT_LABELS[current as NotepadHighlight]
-      : ink
-        ? 'Default ink'
-        : 'No highlighter'
-    const swatch = (color: string) =>
-      ink
-        ? html`<span class="ink" style=${`--_swatch: ${INK_SWATCHES[color as NotepadInk]}`}></span>`
-        : html`<span class="hi" style=${`--_swatch: ${HIGHLIGHT_SWATCHES[color as NotepadHighlight]}`}></span>`
+    const currentLabel = current ? colors[current - 1].label : ink ? 'Default ink' : 'No highlighter'
+    const swatch = (index: number) => html`<span class=${ink ? 'ink' : 'hi'} style=${styleMap({ '--_swatch': `var(--_${group}-${index})` })}></span>`
     const open = this.openGroup === group
     return html`<div
       class="group ${open ? 'open' : ''} ${this.pickedGroup === group ? 'picked' : ''}"
@@ -1300,20 +1327,20 @@ export class Notepad extends LitElement {
           >
             ${ink ? html`<span class="ink default"></span>` : html`<span class="hi none"></span>`}
           </button>
-          ${colors.map(
-            (color) =>
-              html`<button
-                type="button"
-                tabindex="-1"
-                data-mark=${group}
-                data-color=${color}
-                aria-label=${ink ? INK_LABELS[color as NotepadInk] : HIGHLIGHT_LABELS[color as NotepadHighlight]}
-                aria-pressed=${String(current === color)}
-                title=${ink ? INK_LABELS[color as NotepadInk] : HIGHLIGHT_LABELS[color as NotepadHighlight]}
-              >
-                ${swatch(color)}
-              </button>`,
-          )}
+          ${colors.map((color, position) => {
+            const index = position + 1
+            return html`<button
+              type="button"
+              tabindex="-1"
+              data-mark=${group}
+              data-color=${index}
+              aria-label=${color.label}
+              aria-pressed=${String(current === index)}
+              title=${color.label}
+            >
+              ${swatch(index)}
+            </button>`
+          })}
         </div>
       </div>
     </div>`
@@ -1336,9 +1363,11 @@ export class Notepad extends LitElement {
       </button>`
     const hasEmphasis = ['bold', 'italic', 'underline', 'strike'].some((mark) => allowed.has(mark as NotepadMark))
     const showError = this.error && !!this.errorText
+    const colorVars = this.colorVars()
     return html`
       <div
         class="pad ${this.disabledByForm ? 'form-disabled' : ''} ${this.pointerFocus ? 'pointer-focus' : ''}"
+        style=${styleMap(colorVars)}
         @pointerdown=${() => (this.pointerFocus = true)}
         @focusout=${this.handleFocusOut}
       >
@@ -1388,6 +1417,7 @@ export class Notepad extends LitElement {
         popover="manual"
         role="toolbar"
         aria-label="Formatting"
+        style=${styleMap(colorVars)}
         @toggle=${this.handlePopoverToggle}
         @mousedown=${(event: Event) => event.preventDefault()}
         @click=${this.handleToolbarClick}

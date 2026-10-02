@@ -16,13 +16,37 @@ import { isTaskIconName, taskIconCatalog, taskIconCategories, taskIconTag, type 
 import { suggestTaskIcon } from '@c2n/task-icons/suggest-task-icon.js'
 import styles from './todo-list.scss?inline'
 
-/** Pen colours: the tick, the strike line, icons and a task's text. Each background maps them to readable inks. */
+/**
+ * The default pens, in order: pen `1` is blue, `2` red and so on. A task stores its pen by position (`ink: 2`); these
+ * names are only read from older data (`ink: 'red'`) and mapped to their position. Each background maps them to
+ * readable inks.
+ */
 export const todoPens = ['blue', 'red', 'green', 'violet', 'graphite'] as const
 export type TodoPen = (typeof todoPens)[number]
 
-/** Highlighter colours for a task's background, mixed into the list's own background so they suit every theme. */
+/** The default highlighters, in order, mixed into the list's own background so they suit every theme. Stored by position like the pens. */
 export const todoHighlights = ['yellow', 'green', 'blue', 'pink', 'orange', 'violet'] as const
 export type TodoHighlight = (typeof todoHighlights)[number]
+
+/** One colour of the `pens` or `highlights` list. */
+export interface TodoColor {
+  /** Accessible name of its swatch, e.g. `Red ink`. */
+  label: string
+  /** Any CSS colour, including a `var()`: a list that follows the theme needs no reassigning. */
+  color: string
+}
+
+/**
+ * The 1-based position of a colour from what a task holds: a number, or a default colour's name (`red` → 2), which is
+ * how tasks saved before positions were stored keep their colour.
+ */
+export function todoColorIndex(value: unknown, names: readonly string[]): number | undefined {
+  if (typeof value === 'number') return Number.isInteger(value) && value >= 1 ? value : undefined
+  if (typeof value !== 'string') return undefined
+  if (/^[1-9]\d*$/.test(value)) return Number(value)
+  const named = names.indexOf(value)
+  return named >= 0 ? named + 1 : undefined
+}
 
 /** Background presets of the customize panel. `default` follows the component's CSS variables and the theme. */
 export const todoBackgrounds = ['default', 'paper', 'mint', 'sky', 'blush', 'sand', 'night'] as const
@@ -47,10 +71,10 @@ export interface TodoTask {
   archived?: boolean
   /** An optional `@c2n/task-icons` name (`mail`, `milk`, `run`…). */
   icon?: string
-  /** Highlighter background, e.g. for an important task. */
-  highlight?: TodoHighlight
-  /** Pen colour of the task's text. */
-  ink?: TodoPen
+  /** Highlighter background, e.g. for an important task: the 1-based position in `highlights`. A default highlighter's name is read as its position. */
+  highlight?: number | TodoHighlight
+  /** Pen colour of the task's text: the 1-based position in `pens`. A default pen's name is read as its position. */
+  ink?: number | TodoPen
   /** Short due text shown after the task: `Today`, `Fri`, `9:30`. */
   due?: string
   /** Draws the due text in the red pen and counts the task in the summary. */
@@ -324,15 +348,51 @@ const COMPACT_VARS: Record<string, string> = {
 
 // The pens' defaults, as in the stylesheet's `$theme` map, for the one place a pen is referenced from script.
 const PEN_DEFAULTS: Record<TodoPen, string> = { blue: '#0265dc', red: '#dc2626', green: '#0f766e', violet: '#7c3aed', graphite: '#71717a' }
-const PEN_LABELS: Record<TodoPen, string> = { blue: 'Blue ink', red: 'Red ink', green: 'Green ink', violet: 'Violet ink', graphite: 'Graphite' }
-const HIGHLIGHT_LABELS: Record<TodoHighlight, string> = {
-  yellow: 'Yellow highlighter',
-  green: 'Green highlighter',
-  blue: 'Blue highlighter',
-  pink: 'Pink highlighter',
-  orange: 'Orange highlighter',
-  violet: 'Violet highlighter',
+/**
+ * The lists used while `pens` / `highlights` are unset, in the order a task stores them (`ink: 2` is red): the
+ * documented `--c2-todo-list__pen-*` and `--c2-todo-list__highlight-*` variables, which the palettes and backgrounds
+ * recolour. Spread them to extend the defaults.
+ */
+export const defaultTodoPens: readonly TodoColor[] = [
+  { label: 'Blue ink', color: 'var(--c2-todo-list__pen-blue--color, #0265dc)' },
+  { label: 'Red ink', color: 'var(--c2-todo-list__pen-red--color, #dc2626)' },
+  { label: 'Green ink', color: 'var(--c2-todo-list__pen-green--color, #0f766e)' },
+  { label: 'Violet ink', color: 'var(--c2-todo-list__pen-violet--color, #7c3aed)' },
+  { label: 'Graphite', color: 'var(--c2-todo-list__pen-graphite--color, #71717a)' },
+]
+export const defaultTodoHighlights: readonly TodoColor[] = [
+  { label: 'Yellow highlighter', color: 'var(--c2-todo-list__highlight-yellow--color, #facc15)' },
+  { label: 'Green highlighter', color: 'var(--c2-todo-list__highlight-green--color, #22c55e)' },
+  { label: 'Blue highlighter', color: 'var(--c2-todo-list__highlight-blue--color, #3b82f6)' },
+  { label: 'Pink highlighter', color: 'var(--c2-todo-list__highlight-pink--color, #ec4899)' },
+  { label: 'Orange highlighter', color: 'var(--c2-todo-list__highlight-orange--color, #f97316)' },
+  { label: 'Violet highlighter', color: 'var(--c2-todo-list__highlight-violet--color, #8b5cf6)' },
+]
+
+const isTodoColor = (entry: unknown): entry is TodoColor =>
+  typeof entry === 'object' && entry !== null && typeof (entry as TodoColor).label === 'string' && typeof (entry as TodoColor).color === 'string'
+const customColors = (value: unknown): TodoColor[] | undefined => {
+  const list = Array.isArray(value) ? value.filter(isTodoColor) : []
+  return list.length ? list : undefined
 }
+
+/** A task with its pen and highlighter as positions, so the list and its events only ever carry numbers. */
+function normalizeColors(task: TodoTask): TodoTask {
+  if (typeof task.ink !== 'string' && typeof task.highlight !== 'string') return task
+  const { ink, highlight, ...rest } = task
+  const inkIndex = todoColorIndex(ink, todoPens)
+  const highlightIndex = todoColorIndex(highlight, todoHighlights)
+  return { ...rest, ...(inkIndex ? { ink: inkIndex } : {}), ...(highlightIndex ? { highlight: highlightIndex } : {}) }
+}
+
+/** Points an element's private pen and highlighter at the colours of the given positions. */
+function colorStyle(ink: number | undefined, highlight: number | undefined): Record<string, string> {
+  return {
+    ...(ink ? { '--_task-ink': `var(--_pen-${ink})` } : {}),
+    ...(highlight ? { '--_task-highlight': `var(--_highlight-${highlight})` } : {}),
+  }
+}
+
 const CATEGORY_LABELS: Record<TaskIconCategory, string> = {
   work: 'Work',
   communication: 'Communication',
@@ -551,6 +611,16 @@ export class TodoList extends LitElement {
   /** The tasks. Accepts a JSON array in the attribute. The list updates it as the user works. */
   @property({ converter: jsonPropertyConverter }) tasks: TodoTask[] = []
 
+  /**
+   * The pens a task's text can take, as `{ label, color }` entries; any CSS colour, `var()` included. A task stores
+   * its pen by 1-based position (`ink: 2`), so give a dark theme a list of the same length and order and every task
+   * recolours. Unset, the five documented `--c2-todo-list__pen-*` pens, which the palettes recolour.
+   */
+  @property({ converter: jsonPropertyConverter }) pens?: TodoColor[]
+
+  /** The highlighters behind a task, as `{ label, color }` entries mixed into the background, stored by position like `pens`. Unset, the six documented `--c2-todo-list__highlight-*` highlighters. */
+  @property({ converter: jsonPropertyConverter }) highlights?: TodoColor[]
+
   /** How progress is drawn: a ring beside the heading, a bar under it, a large ring above it, or not at all. The viewer's choice in the customize panel wins. */
   @property() progress: TodoProgress = 'ring'
 
@@ -623,8 +693,8 @@ export class TodoList extends LitElement {
     if ((changed.has('storageKey') || changed.has('persistTasks')) && !(this.hydrating && !this.hasUpdated)) this.restore()
     if (changed.has('tasks')) {
       const tasks = Array.isArray(this.tasks) ? this.tasks : []
-      if (tasks !== this.tasks || tasks.some((task) => !task.id)) {
-        this.tasks = tasks.map((task) => (task.id ? task : { ...task, id: newTaskId() }))
+      if (tasks !== this.tasks || tasks.some((task) => !task.id || typeof task.ink === 'string' || typeof task.highlight === 'string')) {
+        this.tasks = tasks.map((task) => normalizeColors(task.id ? task : { ...task, id: newTaskId() }))
       }
     }
   }
@@ -1111,6 +1181,7 @@ export class TodoList extends LitElement {
       ...(palette ? paletteVars(palette, dark) : {}),
       ...(this.look.density === 'compact' ? COMPACT_VARS : {}),
       ...(this.look.pen ? { [v('accent--color')]: `var(${v(`pen-${this.look.pen}--color`)}, ${PEN_DEFAULTS[this.look.pen]})` } : {}),
+      ...this.colorVars(),
     }
     const allDone = total > 0 && closed === total
     const urgent = active.filter((task) => task.urgent && !task.done && !task.dropped).length
@@ -1278,8 +1349,8 @@ export class TodoList extends LitElement {
     const icon = this.iconOf(task)
     const closed = !!task.done || !!task.dropped
     const expanded = this.expandedId === id
-    const ink = task.ink && includes(todoPens, task.ink) ? task.ink : undefined
-    const highlight = task.highlight && includes(todoHighlights, task.highlight) ? task.highlight : undefined
+    const ink = this.colorOf('ink', task.ink)
+    const highlight = this.colorOf('highlight', task.highlight)
     const status = task.dropped ? `${task.label}, won’t do` : task.label
     return html`
       <div class="task-slot" data-reorder-key=${id} data-reorder-label=${task.label}>
@@ -1290,9 +1361,10 @@ export class TodoList extends LitElement {
             dropped: !!task.dropped,
             closed,
             active: this.menuId === id || this.iconPickerId === id,
-            [`ink-${ink}`]: !!ink,
-            [`highlight-${highlight}`]: !!highlight,
+            inked: !!ink,
+            highlighted: !!highlight,
           })}
+          style=${styleMap(colorStyle(ink, highlight))}
           @keydown=${(event: KeyboardEvent) => this.handleRowKey(event, task)}
           @contextmenu=${(event: MouseEvent) => {
             if (this.readonly) return
@@ -1422,7 +1494,7 @@ export class TodoList extends LitElement {
         ${key ? html`<kbd>${key}</kbd>` : nothing}
       </button>
     `
-    const trigger = (name: Submenu, label: string, swatch: string) => html`
+    const trigger = (name: Submenu, label: string, index: number | undefined) => html`
       <button
         class=${classMap({ 'menu-item': true, 'has-submenu': true, open: this.submenu === name })}
         type="button"
@@ -1433,7 +1505,19 @@ export class TodoList extends LitElement {
         @mouseenter=${() => this.openSubmenu(name, false)}
         @click=${() => this.openSubmenu(name, true)}
       >
-        <span class=${`menu-swatch ${swatch}`} aria-hidden="true"></span>
+        <span
+          class=${classMap({
+            'menu-swatch': true,
+            'highlight-swatch': name === 'highlight',
+            'pen-swatch': name === 'ink',
+            highlighted: name === 'highlight' && !!index,
+            inked: name === 'ink' && !!index,
+            none: name === 'highlight' && !index,
+            default: name === 'ink' && !index,
+          })}
+          style=${styleMap(name === 'ink' ? colorStyle(index, undefined) : colorStyle(undefined, index))}
+          aria-hidden="true"
+        ></span>
         <span class="menu-label">${label}</span>
         <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
       </button>
@@ -1448,8 +1532,7 @@ export class TodoList extends LitElement {
       >
         ${item('edit', 'Edit task', 'F2', 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4')}
         ${item('icon', this.iconOf(task) ? 'Change icon' : 'Add an icon', 'I', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z')}
-        ${trigger('highlight', 'Highlight', task.highlight ? `highlight-swatch highlight-${task.highlight}` : 'highlight-swatch none')}
-        ${trigger('ink', 'Text colour', task.ink ? `pen-swatch pen-${task.ink}` : 'pen-swatch default')}
+        ${trigger('highlight', 'Highlight', this.colorOf('highlight', task.highlight))} ${trigger('ink', 'Text colour', this.colorOf('ink', task.ink))}
         ${item('drop', task.dropped ? 'Undo won’t do' : 'Won’t do', 'X', 'M6.5 6.5l11 11M17.5 6.5l-11 11')}
         ${item('archive', 'Archive', 'E', 'M3.5 4.5h17v4h-17zM5 8.5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10M10 12.5h4', { separated: true })}
         ${item('delete', 'Delete', 'Del', 'M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5.5 6.5l1 13A1.5 1.5 0 0 0 8 21h8a1.5 1.5 0 0 0 1.5-1.5l1-13', {
@@ -1465,6 +1548,8 @@ export class TodoList extends LitElement {
       this.patchTask(task, patch)
     }
     const radio = (checked: boolean) => (checked ? 'true' : 'false')
+    const currentHighlight = this.colorOf('highlight', task.highlight)
+    const currentInk = this.colorOf('ink', task.ink)
     const swatches =
       name === 'highlight'
         ? [
@@ -1472,21 +1557,22 @@ export class TodoList extends LitElement {
               class="highlight-swatch none"
               type="button"
               role="menuitemradio"
-              aria-checked=${radio(!task.highlight)}
+              aria-checked=${radio(!currentHighlight)}
               aria-label="No highlight"
               title="None"
               @click=${() => choose({ highlight: undefined })}
             ></button>`,
-            ...todoHighlights.map(
-              (highlight) =>
+            ...this.colorsOf('highlight').map(
+              ({ label }, position) =>
                 html`<button
-                  class="highlight-swatch highlight-${highlight}"
+                  class="highlight-swatch highlighted"
+                  style=${styleMap(colorStyle(undefined, position + 1))}
                   type="button"
                   role="menuitemradio"
-                  aria-checked=${radio(task.highlight === highlight)}
-                  aria-label=${HIGHLIGHT_LABELS[highlight]}
-                  title=${HIGHLIGHT_LABELS[highlight]}
-                  @click=${() => choose({ highlight })}
+                  aria-checked=${radio(currentHighlight === position + 1)}
+                  aria-label=${label}
+                  title=${label}
+                  @click=${() => choose({ highlight: position + 1 })}
                 >
                   <span aria-hidden="true">Aa</span>
                 </button>`,
@@ -1497,21 +1583,22 @@ export class TodoList extends LitElement {
               class="pen-swatch default"
               type="button"
               role="menuitemradio"
-              aria-checked=${radio(!task.ink)}
+              aria-checked=${radio(!currentInk)}
               aria-label="Default text colour"
               title="Default"
               @click=${() => choose({ ink: undefined })}
             ></button>`,
-            ...todoPens.map(
-              (pen) =>
+            ...this.colorsOf('ink').map(
+              ({ label }, position) =>
                 html`<button
-                  class="pen-swatch pen-${pen}"
+                  class="pen-swatch inked"
+                  style=${styleMap(colorStyle(position + 1, undefined))}
                   type="button"
                   role="menuitemradio"
-                  aria-checked=${radio(task.ink === pen)}
-                  aria-label=${`${PEN_LABELS[pen]} text`}
-                  title=${PEN_LABELS[pen]}
-                  @click=${() => choose({ ink: pen })}
+                  aria-checked=${radio(currentInk === position + 1)}
+                  aria-label=${`${label} text`}
+                  title=${label}
+                  @click=${() => choose({ ink: position + 1 })}
                 ></button>`,
             ),
           ]
@@ -1534,7 +1621,8 @@ export class TodoList extends LitElement {
     const current = this.iconOf(task)
     return html`
       <div
-        class=${classMap({ 'icon-popover': true, [`ink-${task.ink}`]: !!task.ink })}
+        class=${classMap({ 'icon-popover': true, inked: !!this.colorOf('ink', task.ink) })}
+        style=${styleMap(colorStyle(this.colorOf('ink', task.ink), undefined))}
         role="dialog"
         aria-label=${`Icon for ${task.label}`}
         @pointerdown=${keepFromRow}
@@ -1662,6 +1750,28 @@ export class TodoList extends LitElement {
     if (next === undefined) return
     event.preventDefault()
     options[next]?.focus()
+  }
+
+  private colorsOf(group: Submenu): readonly TodoColor[] {
+    return group === 'ink' ? (customColors(this.pens) ?? defaultTodoPens) : (customColors(this.highlights) ?? defaultTodoHighlights)
+  }
+
+  /** A task's pen or highlighter position, or `undefined` when it has none or the current list is shorter. */
+  private colorOf(group: Submenu, value: unknown): number | undefined {
+    const index = todoColorIndex(value, group === 'ink' ? todoPens : todoHighlights)
+    return index && index <= this.colorsOf(group).length ? index : undefined
+  }
+
+  /**
+   * `--_pen-<n>` and `--_highlight-<n>` for every colour of the lists, set on the container next to the palette's
+   * variables, so a new list (or a palette) recolours every task in place. A position the list does not have stays
+   * unset.
+   */
+  private colorVars(): Record<string, string> {
+    const vars: Record<string, string> = {}
+    this.colorsOf('ink').forEach(({ color }, position) => (vars[`--_pen-${position + 1}`] = color))
+    this.colorsOf('highlight').forEach(({ color }, position) => (vars[`--_highlight-${position + 1}`] = color))
+    return vars
   }
 
   private renderChevron() {

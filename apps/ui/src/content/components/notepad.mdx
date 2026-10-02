@@ -65,7 +65,7 @@ The toolbar opens when a selection settles in the page and closes on Escape, whe
 | Italic                  | <kbd>Ctrl/⌘ I</kbd>       | `*italic*`         |
 | Underline               | <kbd>Ctrl/⌘ U</kbd>       |                    |
 | Strikethrough           | <kbd>Ctrl/⌘ Shift X</kbd> | `~~strike~~`       |
-| Yellow highlighter      | <kbd>Ctrl/⌘ Shift H</kbd> | `==highlight==`    |
+| First highlighter       | <kbd>Ctrl/⌘ Shift H</kbd> | `==highlight==`    |
 | Clear formatting        | <kbd>Ctrl/⌘ \\</kbd>      |                    |
 | Checklist item          | <kbd>Ctrl/⌘ Shift L</kbd> | `[ ] ` or `- [ ] ` |
 | Tick or untick the item | <kbd>Ctrl/⌘ Enter</kbd>   |                    |
@@ -73,9 +73,33 @@ The toolbar opens when a selection settles in the page and closes on Escape, whe
 
 In the toolbar, the arrow keys move between buttons and Escape goes back to the page. On the ink or highlighter button, ArrowDown or Enter opens its colours, the arrow keys move between them, and Escape closes them. `toolbar="none"` keeps the shortcuts and hides the strip. `marks="bold italic"` limits what can be applied, through the toolbar, the shortcuts and pasted content. Buttons slotted into `toolbar` are added at the end of the strip.
 
-Nothing changes the line height, so no format can push text off the ruled lines. That is why there are no headings or font sizes. Inks and highlighters are names rather than colours: `--c2-notepad__ink-red--color` decides what red ink looks like, so the same note follows a theme or dark mode.
+Nothing changes the line height, so no format can push text off the ruled lines. That is why there are no headings or font sizes.
 
-Call `formatSelection(mark, color?)` and `clearFormatting()` to drive the formatting from your own controls. Listen for `format-change` to keep them in sync with the selection.
+## Your own colours
+
+A page stores an ink or a highlighter by its **position** in a list, never as a colour: `<span data-ink="3">` is the third ink. By default the lists are the four inks (blue, black, red, green) and three highlighters (yellow, green, pink), drawn from the `--c2-notepad__ink-*` and `--c2-notepad__highlight-*` variables. Set `inks` and `highlights` to give the toolbar your own, as `{ label, color }` entries; `color` is any CSS colour, `var()` included:
+
+```ts tag=CodeBlock
+const light = [
+  { label: 'Ink', color: '#1f2937' },
+  { label: 'Brand', color: '#4f46e5' },
+  { label: 'Alert', color: '#b91c1c' },
+]
+const dark = [
+  { label: 'Ink', color: '#e5e7eb' },
+  { label: 'Brand', color: '#a5b4fc' },
+  { label: 'Alert', color: '#fca5a5' },
+]
+notepad.inks = light
+notepad.highlights = [{ label: 'Marker', color: 'rgba(250, 204, 21, 0.5)' }]
+
+// The page keeps its positions, so switching theme recolours every mark in place.
+themeToggle.addEventListener('change', () => (notepad.inks = isDark() ? dark : light))
+```
+
+Keep the same length and order across themes: position 2 should mean the same thing in both. A list whose colours are `var(--app-token)` follows the theme with no reassigning at all. A position the current list does not have is drawn in the page's own ink. Pages written with the default colours' names (`data-ink="red"`) still open, as their position. `DEFAULT_INKS` and `DEFAULT_HIGHLIGHTS` are exported to start from.
+
+Call `formatSelection(mark, color?)` (`color` is the 1-based position, e.g. `formatSelection('ink', 3)`) and `clearFormatting()` to drive the formatting from your own controls. Listen for `format-change` to keep them in sync with the selection.
 
 ## The value
 
@@ -86,7 +110,7 @@ Thursday sync
 - [ ] Ship the notepad **behind a flag**
 - [x] Ask about the night paper
 *italic*, ~~strike~~, ==yellow highlight==, <u>underline</u>
-<span data-ink="red">red ink</span> and <mark data-color="pink">pink highlighter</mark>
+<span data-ink="3">third ink</span> and <mark data-color="3">third highlighter</mark>
 ```
 
 Formats Markdown has no syntax for are written as inline HTML, which every Markdown renderer passes through. Anything else is kept as text. `text` gives the same page as plain text, without formatting or checklist markers. Pasted plain text is read as this dialect, and copied text is written in it.

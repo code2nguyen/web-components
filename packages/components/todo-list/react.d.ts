@@ -23,11 +23,13 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-todo-list': Omit<C2Props<TodoList>, 'tasks'> & {
+      'c2-todo-list': Omit<C2Props<TodoList>, 'tasks' | 'pens' | 'highlights'> & {
         'heading-level'?: Attribute
         'storage-key'?: Attribute
         'persist-tasks'?: Attribute
         tasks?: TodoList['tasks'] | string
+        pens?: TodoList['pens'] | string
+        highlights?: TodoList['highlights'] | string
       }
     }
   }

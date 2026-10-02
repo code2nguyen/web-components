@@ -23,13 +23,15 @@ type Attribute = string | number | boolean
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'c2-notepad': C2Props<Notepad> & {
+      'c2-notepad': Omit<C2Props<Notepad>, 'inks' | 'highlights'> & {
         'aria-label'?: Attribute
         readonly?: Attribute
         maxlength?: Attribute
         'error-text'?: Attribute
         'paper-color'?: Attribute
         'paper-picker'?: Attribute
+        inks?: Notepad['inks'] | string
+        highlights?: Notepad['highlights'] | string
       }
     }
   }

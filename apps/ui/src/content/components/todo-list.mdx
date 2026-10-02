@@ -117,28 +117,59 @@ list updates it as the viewer works.
 ```typescript tag=CodeBlock
 list.tasks = [
   { id: '1', label: 'Oat milk', note: '2 L barista', icon: 'milk' },
-  { id: '2', label: 'Renew passport', highlight: 'yellow', due: 'Today', urgent: true },
+  { id: '2', label: 'Renew passport', highlight: 1, due: 'Today', urgent: true },
   { id: '3', label: 'Gym session', done: true },
 ]
 list.addEventListener('tasks-change', (event) => save(event.detail.tasks))
 ```
 
-| Field       | Description                                                                             |
-| ----------- | --------------------------------------------------------------------------------------- |
-| `id`        | Stable identity. Generated when missing.                                                |
-| `label`     | The task, as plain text.                                                                |
-| `note`      | More information, shown as a second line: a quantity, an address, a link.               |
-| `done`      | Checked off with a tick.                                                                |
-| `dropped`   | Crossed off without being done (“won't do”). Counts as closed in the progress.          |
-| `archived`  | In the archive section at the bottom: out of the list and the progress, restorable.     |
-| `icon`      | An optional `@c2n/task-icons` name. Tasks have no icon unless you give them one.        |
-| `highlight` | `yellow`, `green`, `blue`, `pink`, `orange` or `violet`: a highlighter behind the task. |
-| `ink`       | `blue`, `red`, `green`, `violet` or `graphite`: the pen colour of the task's text.      |
-| `due`       | Short text after the task: `Today`, `Fri`, `9:30`.                                      |
-| `urgent`    | Draws the due text in the red pen and counts the task in the summary.                   |
+| Field       | Description                                                                                                                             |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`        | Stable identity. Generated when missing.                                                                                                |
+| `label`     | The task, as plain text.                                                                                                                |
+| `note`      | More information, shown as a second line: a quantity, an address, a link.                                                               |
+| `done`      | Checked off with a tick.                                                                                                                |
+| `dropped`   | Crossed off without being done (“won't do”). Counts as closed in the progress.                                                          |
+| `archived`  | In the archive section at the bottom: out of the list and the progress, restorable.                                                     |
+| `icon`      | An optional `@c2n/task-icons` name. Tasks have no icon unless you give them one.                                                        |
+| `highlight` | A highlighter behind the task: its 1-based position in `highlights` (by default 1 yellow, 2 green, 3 blue, 4 pink, 5 orange, 6 violet). |
+| `ink`       | The pen colour of the task's text: its 1-based position in `pens` (by default 1 blue, 2 red, 3 green, 4 violet, 5 graphite).            |
+| `due`       | Short text after the task: `Today`, `Fri`, `9:30`.                                                                                      |
+| `urgent`    | Draws the due text in the red pen and counts the task in the summary.                                                                   |
+
+Tasks saved with the default colours' names (`highlight: 'yellow'`, `ink: 'violet'`) are read as their position, and
+the list writes positions back from then on.
 
 Every change fires its own event (`task-toggle`, `task-add`, `task-remove`, `task-archive`, `task-restore`,
 `task-change`, `task-reorder`) followed by `tasks-change` with the whole new list.
+
+## Your own colours
+
+Because a task stores a position rather than a colour, the colours themselves are yours to supply. Set `pens` and
+`highlights` to `{ label, color }` lists (any CSS colour, `var()` included) and the task menu offers those instead:
+
+```typescript tag=CodeBlock
+const pens = {
+  light: [
+    { label: 'Ink', color: '#1f2937' },
+    { label: 'Brand', color: '#4f46e5' },
+  ],
+  dark: [
+    { label: 'Ink', color: '#e5e7eb' },
+    { label: 'Brand', color: '#a5b4fc' },
+  ],
+}
+list.pens = pens.light
+list.highlights = [{ label: 'Important', color: '#f59e0b' }]
+
+// The tasks keep their positions, so a new list recolours every task in place.
+themeToggle.addEventListener('change', () => (list.pens = isDark() ? pens.dark : pens.light))
+```
+
+Keep the same length and order in every theme. A highlighter is mixed into the list's background, so give its full
+colour rather than a pale tint. A position the current list does not have shows as no colour. The palettes recolour
+only the default lists: once you give your own, its colours are used as given. `defaultTodoPens` and
+`defaultTodoHighlights` are exported to start from.
 
 ## Customization and storage
 

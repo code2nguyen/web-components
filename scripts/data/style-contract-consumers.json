@@ -10,6 +10,150 @@
       "sink": "style.backgroundColor"
     },
     {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__highlight-green--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing mark background-image and the highlighter swatches",
+      "sink": "styleMap --_highlight-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__highlight-pink--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing mark background-image and the highlighter swatches",
+      "sink": "styleMap --_highlight-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__highlight-yellow--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing mark background-image and the highlighter swatches",
+      "sink": "styleMap --_highlight-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__ink-black--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing span[data-ink] color and the ink swatches",
+      "sink": "styleMap --_ink-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__ink-blue--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing span[data-ink] color and the ink swatches",
+      "sink": "styleMap --_ink-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__ink-green--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing span[data-ink] color and the ink swatches",
+      "sink": "styleMap --_ink-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__ink-red--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing span[data-ink] color and the ink swatches",
+      "sink": "styleMap --_ink-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-blue--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-green--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-orange--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-pink--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-violet--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-yellow--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-blue--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-graphite--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-green--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-red--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-violet--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
       "tag": "c2-tooltip",
       "name": "--c2-tooltip--offset",
       "mode": "programmatic",

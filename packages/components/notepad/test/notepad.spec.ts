@@ -34,7 +34,7 @@ test('typing writes Markdown into value and fires input, then change on blur', a
   await expect(host).toHaveJSProperty('value', 'Call the bank\nabout **late fees** and ~~nothing~~ ==now==')
   await expect(host).toHaveJSProperty('text', 'Call the bank\nabout late fees and nothing now')
   await expect(surface(page).locator('strong')).toHaveText('late fees')
-  await expect(surface(page).locator('mark[data-color="yellow"]')).toHaveText('now')
+  await expect(surface(page).locator('mark[data-color="1"]')).toHaveText('now')
   const inputs = JSON.parse((await host.getAttribute('data-events')) ?? '[]') as unknown[]
   expect(inputs.length).toBeGreaterThan(10)
 
@@ -63,7 +63,7 @@ test('selecting text opens the tape toolbar, which formats the selection', async
     .getByRole('button', { name: /^Ink colour/ })
     .hover()
   await toolbar(page).getByRole('button', { name: 'Red ink' }).click()
-  await expect(host).toHaveJSProperty('value', 'pick up the dry <span data-ink="red">**cleaning**</span>')
+  await expect(host).toHaveJSProperty('value', 'pick up the dry <span data-ink="3">**cleaning**</span>')
   await expect(toolbar(page).getByRole('button', { name: 'Ink colour: Red ink' })).toBeVisible()
   // Picking a colour closes the flyout even though the pointer is still over it.
   await expect(toolbar(page).getByRole('button', { name: 'Green ink' })).toBeHidden()
@@ -72,12 +72,12 @@ test('selecting text opens the tape toolbar, which formats the selection', async
     .getByRole('button', { name: /^Highlighter/ })
     .hover()
   await toolbar(page).getByRole('button', { name: 'Pink highlighter' }).click()
-  await expect(host).toHaveJSProperty('value', 'pick up the dry <span data-ink="red"><mark data-color="pink">**cleaning**</mark></span>')
+  await expect(host).toHaveJSProperty('value', 'pick up the dry <span data-ink="3"><mark data-color="3">**cleaning**</mark></span>')
   await toolbar(page)
     .getByRole('button', { name: /^Ink colour/ })
     .hover()
   await toolbar(page).getByRole('button', { name: 'Default ink', exact: true }).click()
-  await expect(host).toHaveJSProperty('value', 'pick up the dry <mark data-color="pink">**cleaning**</mark>')
+  await expect(host).toHaveJSProperty('value', 'pick up the dry <mark data-color="3">**cleaning**</mark>')
 
   // There is no clear-formatting button; the shortcut remains.
   await expect(toolbar(page).getByRole('button', { name: 'Clear formatting' })).toHaveCount(0)
@@ -143,7 +143,7 @@ test('a colour flyout opens by tap and by keyboard', async ({ page, renderScenar
   for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight')
   await expect(toolbar(page).getByRole('button', { name: 'Red ink' })).toBeFocused()
   await page.keyboard.press('Enter')
-  await expect(host).toHaveJSProperty('value', 'ink <span data-ink="red">me</span>')
+  await expect(host).toHaveJSProperty('value', 'ink <span data-ink="3">me</span>')
   await expect(toolbar(page).getByRole('button', { name: 'Ink colour: Red ink' })).toBeFocused()
   await expect(inks).toHaveAttribute('aria-expanded', 'false')
 
@@ -200,7 +200,8 @@ test('a value set from outside renders, and writing it back keeps the caret and 
   await expect(surface(page).getByRole('checkbox')).toHaveAttribute('aria-checked', 'true')
   await expect(surface(page).locator('strong')).toHaveText('eggs')
   await props(host, { value: 'Fresh <span data-ink="green">start</span>' })
-  await expect(surface(page).locator('[data-ink="green"]')).toHaveText('start')
+  // A default colour's name, written before inks were stored by position, reads as its position.
+  await expect(surface(page).locator('[data-ink="4"]')).toHaveText('start')
 
   // A framework binding writes the emitted value straight back (v-model); that must not reset the page.
   await host.evaluate((element) =>
@@ -210,7 +211,46 @@ test('a value set from outside renders, and writing it back keeps the caret and 
   await page.keyboard.press('End')
   await page.keyboard.type(' now')
   // The pen keeps its ink: text typed right after inked text continues in that ink.
-  await expect(host).toHaveJSProperty('value', 'Fresh <span data-ink="green">start now</span>')
+  await expect(host).toHaveJSProperty('value', 'Fresh <span data-ink="4">start now</span>')
+})
+
+test('a custom ink and highlighter list stores positions, and a new list recolours the page in place', async ({ page, renderScenario }) => {
+  await renderScenario(
+    `<c2-notepad label="Notes" value="<span data-ink=&quot;2&quot;>due</span> <mark data-color=&quot;1&quot;>today</mark>"
+      inks='[{"label":"Plum","color":"rgb(110, 40, 120)"},{"label":"Teal","color":"rgb(0, 110, 110)"}]'
+      highlights='[{"label":"Mint","color":"rgb(180, 240, 200)"}]'></c2-notepad>`,
+  )
+  const host = page.locator('c2-notepad')
+  const ink = surface(page).locator('[data-ink="2"]')
+  const mark = surface(page).locator('mark[data-color="1"]')
+  await expect(ink).toHaveCSS('color', 'rgb(0, 110, 110)')
+  await expect(mark).toHaveCSS('background-image', /rgb\(180, 240, 200\)/)
+
+  // Switching theme is a new list of the same length: the document is untouched, only the colours change.
+  await props(host, {
+    inks: [
+      { label: 'Plum', color: 'rgb(230, 180, 240)' },
+      { label: 'Teal', color: 'rgb(120, 230, 230)' },
+    ],
+    highlights: [{ label: 'Mint', color: 'rgb(20, 90, 50)' }],
+  })
+  await expect(ink).toHaveCSS('color', 'rgb(120, 230, 230)')
+  await expect(mark).toHaveCSS('background-image', /rgb\(20, 90, 50\)/)
+  await expect(host).toHaveJSProperty('value', '<span data-ink="2">due</span> <mark data-color="1">today</mark>')
+
+  // The toolbar offers the list's colours under their labels and applies them by position.
+  await surface(page).click()
+  await page.keyboard.press('End')
+  await selectBack(page, 5)
+  await toolbar(page)
+    .getByRole('button', { name: /^Ink colour/ })
+    .hover()
+  await toolbar(page).getByRole('button', { name: 'Plum' }).click()
+  await expect(host).toHaveJSProperty('value', '<span data-ink="2">due</span> <span data-ink="1">==today==</span>')
+  await expect(toolbar(page).getByRole('button', { name: 'Ink colour: Plum' })).toBeVisible()
+  expect(await host.evaluate((element) => (element as HTMLElement & { formatSelection(mark: string, color: number): boolean }).formatSelection('ink', 3))).toBe(
+    false,
+  )
 })
 
 test('participates in forms: FormData, required, maxlength and reset', async ({ page, renderScenario }) => {
