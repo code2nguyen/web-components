@@ -1369,6 +1369,12 @@
       "reason": "Extra toolbar buttons are consumer-owned light DOM appended after the built-in buttons; style them through their own class or public contract."
     },
     {
+      "tag": "c2-page-editor",
+      "slot": "header",
+      "decision": "assigned-content",
+      "reason": "The header slot only places consumer-owned light DOM above the page; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-number-input",
       "slot": "decrement-icon",
       "decision": "assigned-content",
