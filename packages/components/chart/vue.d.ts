@@ -19,6 +19,8 @@ import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
+import type { MapChart } from '@c2n/chart/map-chart.js'
+import type { MapLayer } from '@c2n/chart/map-layer.js'
 import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
@@ -208,6 +210,52 @@ declare module 'vue' {
         onChartError?: (event: EventOf<LineChart, 'chart-error'>) => void
         onPointHover?: (event: EventOf<LineChart, 'point-hover'>) => void
         onPointClick?: (event: EventOf<LineChart, 'point-click'>) => void
+      }
+    >
+    'c2-map-chart': DefineComponent<
+      C2Props<MapChart> & {
+        'region-key'?: unknown
+        'region-field'?: unknown
+        'value-field'?: unknown
+        'value-label'?: unknown
+        'scale-colors'?: unknown
+        'scale-labels'?: unknown
+        'max-zoom'?: unknown
+        'x-field'?: unknown
+        'label-field'?: unknown
+        'x-type'?: unknown
+        'legend-action'?: unknown
+        'empty-message'?: unknown
+        'max-points'?: unknown
+        'lazy-render'?: unknown
+        onUnmatchedRows?: (event: EventOf<MapChart, 'unmatched-rows'>) => void
+        onViewChange?: (event: EventOf<MapChart, 'view-change'>) => void
+        onSelectionChange?: (event: EventOf<MapChart, 'selection-change'>) => void
+        onInput?: (event: EventOf<MapChart, 'input'>) => void
+        onChange?: (event: EventOf<MapChart, 'change'>) => void
+        onTooltipChange?: (event: EventOf<MapChart, 'tooltip-change'>) => void
+        onSeriesToggle?: (event: EventOf<MapChart, 'series-toggle'>) => void
+        onSeriesHighlight?: (event: EventOf<MapChart, 'series-highlight'>) => void
+        onLegendChange?: (event: EventOf<MapChart, 'legend-change'>) => void
+        onRangeChange?: (event: EventOf<MapChart, 'range-change'>) => void
+        onChartReady?: (event: EventOf<MapChart, 'chart-ready'>) => void
+        onChartError?: (event: EventOf<MapChart, 'chart-error'>) => void
+        onPointHover?: (event: EventOf<MapChart, 'point-hover'>) => void
+        onPointClick?: (event: EventOf<MapChart, 'point-click'>) => void
+      }
+    >
+    'c2-map-layer': DefineComponent<
+      C2Props<MapLayer> & {
+        'lon-field'?: unknown
+        'lat-field'?: unknown
+        'region-field'?: unknown
+        'size-field'?: unknown
+        'size-label'?: unknown
+        'label-field'?: unknown
+        'from-field'?: unknown
+        'to-field'?: unknown
+        'width-field'?: unknown
+        'width-label'?: unknown
       }
     >
     'c2-overlap-chart': DefineComponent<

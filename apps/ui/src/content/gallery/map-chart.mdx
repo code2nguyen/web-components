@@ -1,0 +1,97 @@
+---
+title: 'Map chart gallery'
+description: 'World and US choropleths, sized points, shipping routes, an SVG floor plan and a region picker.'
+---
+
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+import { MapChart } from '@c2n/chart/map-chart.js'
+import { MapLayer } from '@c2n/chart/map-layer.js'
+
+<ExampleModules />
+
+The figures are illustrative. The data hall card draws an SVG floor plan whose racks are its element ids.
+
+<GalleryGrid min="440">
+
+```html tag=MdxCodeBlock,label=Default
+<c2-map-chart region-field="country" value-field="revenue" value-label="Revenue ($M)" data='[{"country":"USA","revenue":4820},{"country":"CAN","revenue":910},{"country":"MEX","revenue":640},{"country":"BRA","revenue":1270},{"country":"ARG","revenue":310},{"country":"CHL","revenue":220},{"country":"COL","revenue":260},{"country":"PER","revenue":140},{"country":"GBR","revenue":1730},{"country":"FRA","revenue":1390},{"country":"DEU","revenue":2210},{"country":"ESP","revenue":780},{"country":"ITA","revenue":870},{"country":"NLD","revenue":690},{"country":"SWE","revenue":420},{"country":"NOR","revenue":360},{"country":"POL","revenue":450},{"country":"IRL","revenue":380},{"country":"PRT","revenue":190},{"country":"CHE","revenue":520},{"country":"AUT","revenue":280},{"country":"BEL","revenue":330},{"country":"DNK","revenue":300},{"country":"FIN","revenue":210},{"country":"TUR","revenue":340},{"country":"ZAF","revenue":290},{"country":"NGA","revenue":120},{"country":"EGY","revenue":160},{"country":"KEN","revenue":70},{"country":"MAR","revenue":90},{"country":"SAU","revenue":610},{"country":"ARE","revenue":540},{"country":"ISR","revenue":330},{"country":"IND","revenue":1460},{"country":"CHN","revenue":2950},{"country":"JPN","revenue":1880},{"country":"KOR","revenue":960},{"country":"IDN","revenue":410},{"country":"VNM","revenue":230},{"country":"THA","revenue":270},{"country":"PHL","revenue":150},{"country":"MYS","revenue":200},{"country":"AUS","revenue":1120},{"country":"NZL","revenue":180}]'></c2-map-chart>
+```
+
+```html tag=MdxCodeBlock,label=Night
+<style>
+  .map-night {
+    --c2-chart--background: #0f172a;
+    --c2-chart--color: #e2e8f0;
+    --c2-chart__legend--color: #94a3b8;
+    --c2-chart__region--background-color: #1e293b;
+    --c2-chart__region--border-color: #0f172a;
+    --c2-chart__region__hover--border-color: #f8fafc;
+    --c2-chart__scale-start--color: #1e3a5f;
+    --c2-chart__scale-end--color: #7dd3fc;
+    --c2-chart--border-top: 0;
+    --c2-chart--border-right: 0;
+    --c2-chart--border-bottom: 0;
+    --c2-chart--border-left: 0;
+  }
+</style>
+<c2-map-chart class="map-night" projection="natural-earth" region-field="country" value-field="revenue" value-label="Revenue ($M)" data='[{"country":"USA","revenue":4820},{"country":"CAN","revenue":910},{"country":"MEX","revenue":640},{"country":"BRA","revenue":1270},{"country":"ARG","revenue":310},{"country":"CHL","revenue":220},{"country":"COL","revenue":260},{"country":"PER","revenue":140},{"country":"GBR","revenue":1730},{"country":"FRA","revenue":1390},{"country":"DEU","revenue":2210},{"country":"ESP","revenue":780},{"country":"ITA","revenue":870},{"country":"NLD","revenue":690},{"country":"SWE","revenue":420},{"country":"NOR","revenue":360},{"country":"POL","revenue":450},{"country":"IRL","revenue":380},{"country":"PRT","revenue":190},{"country":"CHE","revenue":520},{"country":"AUT","revenue":280},{"country":"BEL","revenue":330},{"country":"DNK","revenue":300},{"country":"FIN","revenue":210},{"country":"TUR","revenue":340},{"country":"ZAF","revenue":290},{"country":"NGA","revenue":120},{"country":"EGY","revenue":160},{"country":"KEN","revenue":70},{"country":"MAR","revenue":90},{"country":"SAU","revenue":610},{"country":"ARE","revenue":540},{"country":"ISR","revenue":330},{"country":"IND","revenue":1460},{"country":"CHN","revenue":2950},{"country":"JPN","revenue":1880},{"country":"KOR","revenue":960},{"country":"IDN","revenue":410},{"country":"VNM","revenue":230},{"country":"THA","revenue":270},{"country":"PHL","revenue":150},{"country":"MYS","revenue":200},{"country":"AUS","revenue":1120},{"country":"NZL","revenue":180}]'></c2-map-chart>
+```
+
+```html tag=MdxCodeBlock,label=Diverging classes
+<c2-map-chart map="us-states" region-field="state" value-field="yoy" value-label="Sales, year over year" unit="%" scale="diverging" thresholds="[-10, -5, -2, 2, 5, 10]" data='[{"state":"AL","yoy":-2.9},{"state":"AK","yoy":-7.8},{"state":"AZ","yoy":11.3},{"state":"AR","yoy":-10.0},{"state":"CA","yoy":8.4},{"state":"CO","yoy":-1.8},{"state":"CT","yoy":-10.4},{"state":"DE","yoy":2.2},{"state":"DC","yoy":-11.0},{"state":"FL","yoy":15.2},{"state":"GA","yoy":-10.0},{"state":"HI","yoy":-9.5},{"state":"ID","yoy":-0.1},{"state":"IL","yoy":-4.8},{"state":"IN","yoy":-8.5},{"state":"IA","yoy":-5.7},{"state":"KS","yoy":5.6},{"state":"KY","yoy":14.5},{"state":"LA","yoy":4.2},{"state":"ME","yoy":-0.9},{"state":"MD","yoy":15.3},{"state":"MA","yoy":-10.7},{"state":"MI","yoy":-9.7},{"state":"MN","yoy":-3.9},{"state":"MS","yoy":-8.0},{"state":"MO","yoy":-8.7},{"state":"MT","yoy":-3.4},{"state":"NE","yoy":10.9},{"state":"NV","yoy":-6.9},{"state":"NH","yoy":4.3},{"state":"NJ","yoy":5.9},{"state":"NM","yoy":-1.6},{"state":"NY","yoy":3.1},{"state":"NC","yoy":-10.2},{"state":"ND","yoy":-10.3},{"state":"OH","yoy":-6.2},{"state":"OK","yoy":7.1},{"state":"OR","yoy":-0.0},{"state":"PA","yoy":-1.2},{"state":"RI","yoy":4.4},{"state":"SC","yoy":0.7},{"state":"SD","yoy":-3.6},{"state":"TN","yoy":10.2},{"state":"TX","yoy":12.6},{"state":"UT","yoy":-5.2},{"state":"VT","yoy":4.1},{"state":"VA","yoy":2.7},{"state":"WA","yoy":6.9},{"state":"WV","yoy":8.4},{"state":"WI","yoy":-3.9},{"state":"WY","yoy":15.4}]'></c2-map-chart>
+```
+
+```html tag=MdxCodeBlock,label=Users by city
+<style>
+  .map-points {
+    --c2-chart__marker--max-size: 34px;
+    --c2-chart__marker--opacity: 0.4;
+  }
+</style>
+<c2-map-chart class="map-points" legend="none">
+  <c2-map-layer type="points" label="Active users (k)" size-field="users" size-label="Active users (k)" label-field="city" data='[{"city":"New York","lon":-74,"lat":40.7,"users":412},{"city":"San Francisco","lon":-122.4,"lat":37.8,"users":268},{"city":"Chicago","lon":-87.6,"lat":41.9,"users":121},{"city":"Toronto","lon":-79.4,"lat":43.7,"users":138},{"city":"Mexico City","lon":-99.1,"lat":19.4,"users":96},{"city":"São Paulo","lon":-46.6,"lat":-23.5,"users":184},{"city":"Buenos Aires","lon":-58.4,"lat":-34.6,"users":61},{"city":"Bogotá","lon":-74.1,"lat":4.7,"users":44},{"city":"London","lon":-0.1,"lat":51.5,"users":356},{"city":"Paris","lon":2.35,"lat":48.86,"users":201},{"city":"Berlin","lon":13.4,"lat":52.5,"users":176},{"city":"Madrid","lon":-3.7,"lat":40.4,"users":88},{"city":"Stockholm","lon":18.07,"lat":59.33,"users":52},{"city":"Warsaw","lon":21,"lat":52.2,"users":47},{"city":"Istanbul","lon":29,"lat":41,"users":73},{"city":"Lagos","lon":3.4,"lat":6.5,"users":39},{"city":"Nairobi","lon":36.8,"lat":-1.3,"users":28},{"city":"Cape Town","lon":18.4,"lat":-33.9,"users":31},{"city":"Dubai","lon":55.3,"lat":25.2,"users":94},{"city":"Mumbai","lon":72.9,"lat":19.1,"users":163},{"city":"Bengaluru","lon":77.6,"lat":13,"users":221},{"city":"Singapore","lon":103.8,"lat":1.35,"users":142},{"city":"Jakarta","lon":106.8,"lat":-6.2,"users":77},{"city":"Tokyo","lon":139.7,"lat":35.7,"users":298},{"city":"Seoul","lon":127,"lat":37.6,"users":131},{"city":"Sydney","lon":151.2,"lat":-33.9,"users":118}]'></c2-map-layer>
+</c2-map-chart>
+```
+
+```html tag=MdxCodeBlock,label=Shipping routes
+<style>
+  .map-routes {
+    --c2-chart__region--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 8%, var(--c2-theme--color-surface, #ffffff));
+    --c2-chart__flow--opacity: 0.8;
+    --c2-chart__marker--min-size: 10px;
+    --c2-chart__marker--opacity: 1;
+  }
+</style>
+<c2-map-chart class="map-routes">
+  <c2-map-layer type="lines" label="Weekly TEU (k)" width-field="teu" width-label="Weekly TEU (k)" label-field="route" data='[{"route":"Rotterdam → New York","from":[4.48,51.92],"to":[-74,40.7],"teu":38},{"route":"Rotterdam → Santos","from":[4.48,51.92],"to":[-46.3,-23.96],"teu":21},{"route":"Rotterdam → Mumbai","from":[4.48,51.92],"to":[72.9,19.1],"teu":26},{"route":"Singapore → Sydney","from":[103.82,1.35],"to":[151.2,-33.9],"teu":24},{"route":"Singapore → Busan","from":[103.82,1.35],"to":[129,35.1],"teu":31},{"route":"Singapore → Jebel Ali","from":[103.82,1.35],"to":[55.1,25],"teu":29},{"route":"Los Angeles → Yokohama","from":[-118.24,33.74],"to":[139.6,35.4],"teu":27},{"route":"Los Angeles → Callao","from":[-118.24,33.74],"to":[-77.1,-12.05],"teu":10}]'></c2-map-layer>
+  <c2-map-layer type="points" label="Hub" label-field="port" labels data='[{"port":"Rotterdam","lon":4.48,"lat":51.92},{"port":"Singapore","lon":103.82,"lat":1.35},{"port":"Los Angeles","lon":-118.24,"lat":33.74}]'></c2-map-layer>
+</c2-map-chart>
+```
+
+```html tag=MdxCodeBlock,label=Data hall
+<style>
+  .map-hall {
+    --c2-chart--height: 300px;
+  }
+</style>
+<c2-map-chart class="map-hall" src="/web-components/maps/data-hall.svg" region-field="rack" value-field="inlet" value-label="Inlet" unit=" °C" thresholds="[27, 32]" scale-colors='["#16a34a", "#d97706", "#dc2626"]' scale-labels='["OK, under 27 °C", "Warm", "Hot, 32 °C and over"]' data='[{"rack":"A01","inlet":21.7},{"rack":"A02","inlet":23.5},{"rack":"A03","inlet":25.5},{"rack":"A04","inlet":21.9},{"rack":"A05","inlet":23.9},{"rack":"A06","inlet":21.2},{"rack":"A07","inlet":25.0},{"rack":"A08","inlet":25.6},{"rack":"A09","inlet":24.4},{"rack":"A10","inlet":26.3},{"rack":"B01","inlet":22.9},{"rack":"B02","inlet":25.2},{"rack":"B03","inlet":24.6},{"rack":"B04","inlet":24.5},{"rack":"B05","inlet":23.7},{"rack":"B06","inlet":26.0},{"rack":"B07","inlet":26.7},{"rack":"B08","inlet":23.8},{"rack":"B09","inlet":25.0},{"rack":"B10","inlet":21.4},{"rack":"C01","inlet":25.2},{"rack":"C02","inlet":24.9},{"rack":"C03","inlet":27.0},{"rack":"C04","inlet":25.9},{"rack":"C05","inlet":22.7},{"rack":"C06","inlet":23.3},{"rack":"C07","inlet":25.0},{"rack":"C08","inlet":27.1},{"rack":"C09","inlet":29.8},{"rack":"C10","inlet":28.0},{"rack":"D01","inlet":21.7},{"rack":"D02","inlet":21.4},{"rack":"D03","inlet":25.6},{"rack":"D04","inlet":21.8},{"rack":"D05","inlet":22.5},{"rack":"D06","inlet":23.3},{"rack":"D07","inlet":26.2},{"rack":"D08","inlet":27.5},{"rack":"D09","inlet":29.7},{"rack":"D10","inlet":30.3},{"rack":"E01","inlet":26.3},{"rack":"E02","inlet":25.9},{"rack":"E03","inlet":26.2},{"rack":"E04","inlet":22.7},{"rack":"E05","inlet":23.5},{"rack":"E06","inlet":23.2},{"rack":"E07","inlet":26.3},{"rack":"E08","inlet":26.7},{"rack":"E09","inlet":21.9},{"rack":"E10","inlet":22.1},{"rack":"F01","inlet":33.4},{"rack":"F02","inlet":31.4},{"rack":"F03","inlet":23.9},{"rack":"F04","inlet":24.5},{"rack":"F05","inlet":22.6},{"rack":"F06","inlet":21.0},{"rack":"F07","inlet":23.5},{"rack":"F08","inlet":23.2},{"rack":"F09","inlet":24.4},{"rack":"F10","inlet":26.7}]'></c2-map-chart>
+```
+
+```html tag=MdxCodeBlock,label=Region picker
+<c2-map-chart extent="europe" selection="multiple" name="shipTo" value="DEU;FRA;NLD;POL" legend="none" roam="zoom"></c2-map-chart>
+```
+
+```html tag=MdxCodeBlock,label=Compact
+<style>
+  .map-compact {
+    --c2-chart--height: 180px;
+    --c2-chart--padding: 8px;
+  }
+</style>
+<c2-map-chart class="map-compact" legend="none" region-field="country" value-field="revenue" value-label="Revenue ($M)" data='[{"country":"USA","revenue":4820},{"country":"CAN","revenue":910},{"country":"MEX","revenue":640},{"country":"BRA","revenue":1270},{"country":"ARG","revenue":310},{"country":"CHL","revenue":220},{"country":"COL","revenue":260},{"country":"PER","revenue":140},{"country":"GBR","revenue":1730},{"country":"FRA","revenue":1390},{"country":"DEU","revenue":2210},{"country":"ESP","revenue":780},{"country":"ITA","revenue":870},{"country":"NLD","revenue":690},{"country":"SWE","revenue":420},{"country":"NOR","revenue":360},{"country":"POL","revenue":450},{"country":"IRL","revenue":380},{"country":"PRT","revenue":190},{"country":"CHE","revenue":520},{"country":"AUT","revenue":280},{"country":"BEL","revenue":330},{"country":"DNK","revenue":300},{"country":"FIN","revenue":210},{"country":"TUR","revenue":340},{"country":"ZAF","revenue":290},{"country":"NGA","revenue":120},{"country":"EGY","revenue":160},{"country":"KEN","revenue":70},{"country":"MAR","revenue":90},{"country":"SAU","revenue":610},{"country":"ARE","revenue":540},{"country":"ISR","revenue":330},{"country":"IND","revenue":1460},{"country":"CHN","revenue":2950},{"country":"JPN","revenue":1880},{"country":"KOR","revenue":960},{"country":"IDN","revenue":410},{"country":"VNM","revenue":230},{"country":"THA","revenue":270},{"country":"PHL","revenue":150},{"country":"MYS","revenue":200},{"country":"AUS","revenue":1120},{"country":"NZL","revenue":180}]'></c2-map-chart>
+```
+
+</GalleryGrid>
