@@ -278,9 +278,12 @@ greet('world')"></c2-code-editor>`,
     <div class="preview-popover">Anchored overlay content</div>
   </c2-overlay>
 </div>`,
-  progress: `<div style="display:grid;gap:12px;width:220px">
-  <c2-progress value="72" show-value>Uploading files</c2-progress>
-  <c2-progress style="--c2-progress--height:4px"></c2-progress>
+  progress: `<div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;width:240px">
+  <div style="display:grid;gap:12px">
+    <c2-progress value="72" show-value>Uploading</c2-progress>
+    <c2-progress style="--c2-progress--height:4px"></c2-progress>
+  </div>
+  <c2-progress variant="circular" value="67" show-value label="Readiness" style="--c2-progress--size:56px;--c2-progress--height:6px"></c2-progress>
 </div>`,
   radio: `<c2-radio-group value="pro" style="width:200px">
   <c2-radio value="free" label="Free"></c2-radio>
