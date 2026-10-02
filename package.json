@@ -93,6 +93,7 @@
     },
     "build": {
       "dependencies": [
+        "./packages/components/gantt:build",
         "./packages/components/flow:build",
         "./packages/components/week-planner:build",
         "./packages/components/month-planner:build",
