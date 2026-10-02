@@ -12,13 +12,11 @@ export const HIGHLIGHTS = ['yellow', 'green', 'pink'] as const
 export type NotepadInk = (typeof INKS)[number]
 export type NotepadHighlight = (typeof HIGHLIGHTS)[number]
 
-/** One colour of the `inks` or `highlights` list. */
-export interface NotepadColor {
-  /** Accessible name of its swatch, e.g. `Red ink`. */
-  label: string
-  /** Any CSS colour, including a `var()`: a list that follows the theme needs no reassigning. */
-  color: string
-}
+/**
+ * One colour of the `inks` or `highlights` list: its value, or the value with a name. A bare string is a value with
+ * no name.
+ */
+export type NotepadColor = string | { value: string; name?: string }
 
 /**
  * The 1-based position of a colour from what a page or a caller wrote: a number (`2`, `"2"`), or a default colour's

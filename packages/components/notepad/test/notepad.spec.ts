@@ -217,8 +217,8 @@ test('a value set from outside renders, and writing it back keeps the caret and 
 test('a custom ink and highlighter list stores positions, and a new list recolours the page in place', async ({ page, renderScenario }) => {
   await renderScenario(
     `<c2-notepad label="Notes" value="<span data-ink=&quot;2&quot;>due</span> <mark data-color=&quot;1&quot;>today</mark>"
-      inks='[{"label":"Plum","color":"rgb(110, 40, 120)"},{"label":"Teal","color":"rgb(0, 110, 110)"}]'
-      highlights='[{"label":"Mint","color":"rgb(180, 240, 200)"}]'></c2-notepad>`,
+      inks='[{"name":"Plum","value":"rgb(110, 40, 120)"},"rgb(0, 110, 110)"]'
+      highlights='[{"name":"Mint","value":"rgb(180, 240, 200)"}]'></c2-notepad>`,
   )
   const host = page.locator('c2-notepad')
   const ink = surface(page).locator('[data-ink="2"]')
@@ -228,11 +228,8 @@ test('a custom ink and highlighter list stores positions, and a new list recolou
 
   // Switching theme is a new list of the same length: the document is untouched, only the colours change.
   await props(host, {
-    inks: [
-      { label: 'Plum', color: 'rgb(230, 180, 240)' },
-      { label: 'Teal', color: 'rgb(120, 230, 230)' },
-    ],
-    highlights: [{ label: 'Mint', color: 'rgb(20, 90, 50)' }],
+    inks: [{ name: 'Plum', value: 'rgb(230, 180, 240)' }, 'rgb(120, 230, 230)'],
+    highlights: [{ name: 'Mint', value: 'rgb(20, 90, 50)' }],
   })
   await expect(ink).toHaveCSS('color', 'rgb(120, 230, 230)')
   await expect(mark).toHaveCSS('background-image', /rgb\(20, 90, 50\)/)
@@ -245,6 +242,8 @@ test('a custom ink and highlighter list stores positions, and a new list recolou
   await toolbar(page)
     .getByRole('button', { name: /^Ink colour/ })
     .hover()
+  // A colour given without a name is called by its position.
+  await expect(toolbar(page).getByRole('button', { name: 'Ink 2', exact: true })).toBeVisible()
   await toolbar(page).getByRole('button', { name: 'Plum' }).click()
   await expect(host).toHaveJSProperty('value', '<span data-ink="2">due</span> <span data-ink="1">==today==</span>')
   await expect(toolbar(page).getByRole('button', { name: 'Ink colour: Plum' })).toBeVisible()

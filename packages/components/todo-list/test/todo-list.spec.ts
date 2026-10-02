@@ -540,12 +540,12 @@ test('a custom pen and highlighter list stores positions, and a new list recolou
 
   const light = {
     pens: [
-      { label: 'Plum', color: 'rgb(110, 40, 120)' },
-      { label: 'Teal', color: 'rgb(0, 110, 110)' },
-      { label: 'Rust', color: 'rgb(150, 60, 20)' },
-      { label: 'Moss', color: 'rgb(60, 100, 30)' },
+      { name: 'Plum', value: 'rgb(110, 40, 120)' },
+      { name: 'Teal', value: 'rgb(0, 110, 110)' },
+      'rgb(150, 60, 20)',
+      { name: 'Moss', value: 'rgb(60, 100, 30)' },
     ],
-    highlights: [{ label: 'Lemon', color: 'rgb(250, 230, 100)' }],
+    highlights: [{ name: 'Lemon', value: 'rgb(250, 230, 100)' }],
   }
   await props(list, light)
   const passport = list.locator('[data-reorder-key="c"] .task')
@@ -554,7 +554,10 @@ test('a custom pen and highlighter list stores positions, and a new list recolou
   const lightBackground = await passport.evaluate((element) => getComputedStyle(element).backgroundColor)
 
   // A dark theme hands over a list of the same length: the tasks keep their positions and take the new colours.
-  await props(list, { pens: light.pens.map((pen) => ({ ...pen, color: 'rgb(200, 230, 170)' })), highlights: [{ label: 'Lemon', color: 'rgb(90, 80, 10)' }] })
+  await props(list, {
+    pens: light.pens.map((pen) => (typeof pen === 'string' ? 'rgb(200, 230, 170)' : { ...pen, value: 'rgb(200, 230, 170)' })),
+    highlights: [{ name: 'Lemon', value: 'rgb(90, 80, 10)' }],
+  })
   await expect(anna).toHaveCSS('color', 'rgb(200, 230, 170)')
   await expect(passport).not.toHaveCSS('background-color', lightBackground)
 
@@ -564,6 +567,8 @@ test('a custom pen and highlighter list stores positions, and a new list recolou
   // The default swatch and the list's four pens, nothing from the built-in list.
   await expect(list.getByRole('menuitemradio')).toHaveCount(5)
   await expect(list.getByRole('menuitemradio', { name: 'Violet ink text' })).toHaveCount(0)
+  // A colour given without a name is called by its position.
+  await expect(list.getByRole('menuitemradio', { name: 'Pen 3 text' })).toBeVisible()
   await list.getByRole('menuitemradio', { name: 'Teal text' }).click()
   await expect.poll(() => list.evaluate((element: TodoList) => element.tasks.find((task) => task.id === 'b')?.ink)).toBe(2)
 })

@@ -76,25 +76,42 @@ export interface Notepad {
  * documented `--c2-notepad__ink-*` and `--c2-notepad__highlight-*` variables. Spread them to extend the defaults.
  */
 export const DEFAULT_INKS: readonly NotepadColor[] = [
-  { label: 'Blue ink', color: 'var(--c2-notepad__ink-blue--color, #2848b8)' },
-  { label: 'Black ink', color: 'var(--c2-notepad__ink-black--color, #18181b)' },
-  { label: 'Red ink', color: 'var(--c2-notepad__ink-red--color, #b8232b)' },
-  { label: 'Green ink', color: 'var(--c2-notepad__ink-green--color, #22743a)' },
+  { name: 'Blue ink', value: 'var(--c2-notepad__ink-blue--color, #2848b8)' },
+  { name: 'Black ink', value: 'var(--c2-notepad__ink-black--color, #18181b)' },
+  { name: 'Red ink', value: 'var(--c2-notepad__ink-red--color, #b8232b)' },
+  { name: 'Green ink', value: 'var(--c2-notepad__ink-green--color, #22743a)' },
 ]
 export const DEFAULT_HIGHLIGHTS: readonly NotepadColor[] = [
-  { label: 'Yellow highlighter', color: 'var(--c2-notepad__highlight-yellow--background, rgba(255, 214, 64, 0.55))' },
-  { label: 'Green highlighter', color: 'var(--c2-notepad__highlight-green--background, rgba(110, 220, 120, 0.4))' },
-  { label: 'Pink highlighter', color: 'var(--c2-notepad__highlight-pink--background, rgba(255, 120, 170, 0.38))' },
+  { name: 'Yellow highlighter', value: 'var(--c2-notepad__highlight-yellow--background, rgba(255, 214, 64, 0.55))' },
+  { name: 'Green highlighter', value: 'var(--c2-notepad__highlight-green--background, rgba(110, 220, 120, 0.4))' },
+  { name: 'Pink highlighter', value: 'var(--c2-notepad__highlight-pink--background, rgba(255, 120, 170, 0.38))' },
 ]
 /** Position of the default black ink, which on night paper becomes the paper's own ink rather than a lifted grey. */
 const DEFAULT_BLACK_INK = 2
 
+/** A colour of a list as the toolbar uses it: a value, and the name its swatch is announced and titled with. */
+interface NamedColor {
+  name: string
+  value: string
+}
+
 const isColor = (entry: unknown): entry is NotepadColor =>
-  typeof entry === 'object' && entry !== null && typeof (entry as NotepadColor).label === 'string' && typeof (entry as NotepadColor).color === 'string'
-/** A usable list, or the defaults: a malformed attribute must not leave the writer without colours. */
-const colorList = (value: unknown, defaults: readonly NotepadColor[]): readonly NotepadColor[] => {
-  const list = Array.isArray(value) ? value.filter(isColor) : []
-  return list.length ? list : defaults
+  (typeof entry === 'string' && entry.trim() !== '') ||
+  (typeof entry === 'object' && entry !== null && typeof (entry as { value?: unknown }).value === 'string')
+
+/**
+ * A usable list, or the defaults: a malformed attribute must not leave the writer without colours. An entry with no
+ * name is called by its kind and position (`Ink 2`), so a swatch always has an accessible name.
+ */
+const colorList = (value: unknown, defaults: readonly NotepadColor[], kind: string): readonly NamedColor[] => {
+  const list = Array.isArray(value) && value.some(isColor) ? (value as unknown[]) : defaults
+  return list
+    .filter(isColor)
+    .map((entry, position) =>
+      typeof entry === 'string'
+        ? { name: `${kind} ${position + 1}`, value: entry }
+        : { name: entry.name?.trim() || `${kind} ${position + 1}`, value: entry.value },
+    )
 }
 
 const PAD_LABELS: Record<NotepadPad, string> = {
@@ -343,12 +360,13 @@ export class Notepad extends LitElement {
   /** Colour of the page and its ink: `default`, `yellow`, `green`, `blue`, `pink` or `night`. The writer changes it through the paper picker. */
   @property({ attribute: 'paper-color', reflect: true }) paperColor: NotepadPaperColor = 'default'
   /**
-   * The inks of the toolbar, as `{ label, color }` entries; any CSS colour, `var()` included. The page stores an ink
+   * The inks of the toolbar: each entry a CSS colour (`var()` included), or `{ value, name }` to give its swatch a
+   * friendly name (`{ "value": "#b91c1c", "name": "Alert" }`); without one it is called `Ink 2`. The page stores an ink
    * by its 1-based position in this list (`<span data-ink="2">`), so give a dark theme a list of the same length and
    * order and the whole page recolours. Unset, the four documented `--c2-notepad__ink-*` inks.
    */
   @property({ converter: jsonPropertyConverter }) inks?: NotepadColor[]
-  /** The highlighters of the toolbar, as `{ label, color }` entries, stored by position like `inks`. `==text==` is the first one. Unset, the three documented `--c2-notepad__highlight-*` highlighters. */
+  /** The highlighters of the toolbar, as colours or `{ value, name }` entries, stored by position like `inks`. `==text==` is the first one. Unset, the three documented `--c2-notepad__highlight-*` highlighters. */
   @property({ converter: jsonPropertyConverter }) highlights?: NotepadColor[]
   /** Adds a "Paper" button to the top of the sheet, which lets the writer choose the pad, the ruling and the paper colour. */
   @property({ type: Boolean, attribute: 'paper-picker', reflect: true }) paperPicker = false
@@ -1260,8 +1278,8 @@ export class Notepad extends LitElement {
     this.internals.setValidity(flags, message, this.surface)
   }
 
-  private colorsOf(group: 'ink' | 'highlight'): readonly NotepadColor[] {
-    return group === 'ink' ? colorList(this.inks, DEFAULT_INKS) : colorList(this.highlights, DEFAULT_HIGHLIGHTS)
+  private colorsOf(group: 'ink' | 'highlight'): readonly NamedColor[] {
+    return group === 'ink' ? colorList(this.inks, DEFAULT_INKS, 'Ink') : colorList(this.highlights, DEFAULT_HIGHLIGHTS, 'Highlighter')
   }
 
   /**
@@ -1271,13 +1289,13 @@ export class Notepad extends LitElement {
    */
   private colorVars(): Record<string, string> {
     const vars: Record<string, string> = {}
-    const inks = this.colorsOf('ink')
-    inks.forEach(({ color }, position) => {
+    const custom = Array.isArray(this.inks) && this.inks.some(isColor)
+    this.colorsOf('ink').forEach(({ value }, position) => {
       const index = position + 1
-      vars[`--_ink-${index}`] = color
-      vars[`--_ink-${index}-night`] = inks === DEFAULT_INKS && index === DEFAULT_BLACK_INK ? 'var(--_ink)' : `color-mix(in srgb, ${color} 55%, #ffffff)`
+      vars[`--_ink-${index}`] = value
+      vars[`--_ink-${index}-night`] = !custom && index === DEFAULT_BLACK_INK ? 'var(--_ink)' : `color-mix(in srgb, ${value} 55%, #ffffff)`
     })
-    this.colorsOf('highlight').forEach(({ color }, position) => (vars[`--_highlight-${position + 1}`] = color))
+    this.colorsOf('highlight').forEach(({ value }, position) => (vars[`--_highlight-${position + 1}`] = value))
     return vars
   }
 
@@ -1288,7 +1306,7 @@ export class Notepad extends LitElement {
     const picked = this.format[group]
     const current = picked && picked <= colors.length ? picked : null
     const label = ink ? 'Ink colour' : 'Highlighter'
-    const currentLabel = current ? colors[current - 1].label : ink ? 'Default ink' : 'No highlighter'
+    const currentLabel = current ? colors[current - 1].name : ink ? 'Default ink' : 'No highlighter'
     const swatch = (index: number) => html`<span class=${ink ? 'ink' : 'hi'} style=${styleMap({ '--_swatch': `var(--_${group}-${index})` })}></span>`
     const open = this.openGroup === group
     return html`<div
@@ -1334,9 +1352,9 @@ export class Notepad extends LitElement {
               tabindex="-1"
               data-mark=${group}
               data-color=${index}
-              aria-label=${color.label}
+              aria-label=${color.name}
               aria-pressed=${String(current === index)}
-              title=${color.label}
+              title=${color.name}
             >
               ${swatch(index)}
             </button>`

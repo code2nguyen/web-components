@@ -77,21 +77,21 @@ Nothing changes the line height, so no format can push text off the ruled lines.
 
 ## Your own colours
 
-A page stores an ink or a highlighter by its **position** in a list, never as a colour: `<span data-ink="3">` is the third ink. By default the lists are the four inks (blue, black, red, green) and three highlighters (yellow, green, pink), drawn from the `--c2-notepad__ink-*` and `--c2-notepad__highlight-*` variables. Set `inks` and `highlights` to give the toolbar your own, as `{ label, color }` entries; `color` is any CSS colour, `var()` included:
+A page stores an ink or a highlighter by its **position** in a list, never as a colour: `<span data-ink="3">` is the third ink. By default the lists are the four inks (blue, black, red, green) and three highlighters (yellow, green, pink), drawn from the `--c2-notepad__ink-*` and `--c2-notepad__highlight-*` variables. Set `inks` and `highlights` to give the toolbar your own, as a list of colours. Each entry is `{ value, name }`: `value` is any CSS colour, `var()` included, and `name` is what the writer sees on the swatch's tooltip and hears from a screen reader. The name is optional, and so is the object: a bare `'#4f46e5'` is called `Ink 2` by its position.
 
 ```ts tag=CodeBlock
 const light = [
-  { label: 'Ink', color: '#1f2937' },
-  { label: 'Brand', color: '#4f46e5' },
-  { label: 'Alert', color: '#b91c1c' },
+  { name: 'Ink', value: '#1f2937' },
+  { name: 'Brand', value: '#4f46e5' },
+  { name: 'Alert', value: '#b91c1c' },
 ]
 const dark = [
-  { label: 'Ink', color: '#e5e7eb' },
-  { label: 'Brand', color: '#a5b4fc' },
-  { label: 'Alert', color: '#fca5a5' },
+  { name: 'Ink', value: '#e5e7eb' },
+  { name: 'Brand', value: '#a5b4fc' },
+  { name: 'Alert', value: '#fca5a5' },
 ]
 notepad.inks = light
-notepad.highlights = [{ label: 'Marker', color: 'rgba(250, 204, 21, 0.5)' }]
+notepad.highlights = [{ name: 'Marker', value: 'rgba(250, 204, 21, 0.5)' }]
 
 // The page keeps its positions, so switching theme recolours every mark in place.
 themeToggle.addEventListener('change', () => (notepad.inks = isDark() ? dark : light))

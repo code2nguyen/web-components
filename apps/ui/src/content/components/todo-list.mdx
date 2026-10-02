@@ -146,21 +146,22 @@ Every change fires its own event (`task-toggle`, `task-add`, `task-remove`, `tas
 ## Your own colours
 
 Because a task stores a position rather than a colour, the colours themselves are yours to supply. Set `pens` and
-`highlights` to `{ label, color }` lists (any CSS colour, `var()` included) and the task menu offers those instead:
+`highlights` to lists of `{ value, name }` (`value` any CSS colour, `var()` included; `name` the friendly name on the
+swatch, optional, falling back to `Pen 2`; a bare colour string works too) and the task menu offers those instead:
 
 ```typescript tag=CodeBlock
 const pens = {
   light: [
-    { label: 'Ink', color: '#1f2937' },
-    { label: 'Brand', color: '#4f46e5' },
+    { name: 'Ink', value: '#1f2937' },
+    { name: 'Brand', value: '#4f46e5' },
   ],
   dark: [
-    { label: 'Ink', color: '#e5e7eb' },
-    { label: 'Brand', color: '#a5b4fc' },
+    { name: 'Ink', value: '#e5e7eb' },
+    { name: 'Brand', value: '#a5b4fc' },
   ],
 }
 list.pens = pens.light
-list.highlights = [{ label: 'Important', color: '#f59e0b' }]
+list.highlights = [{ name: 'Important', value: '#f59e0b' }]
 
 // The tasks keep their positions, so a new list recolours every task in place.
 themeToggle.addEventListener('change', () => (list.pens = isDark() ? pens.dark : pens.light))
