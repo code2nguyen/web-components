@@ -102,6 +102,17 @@ const cases: Case[] = [
     dim: 'echarts',
   },
   {
+    tag: 'c2-butterfly-chart',
+    attributes: 'label-field="t"',
+    series: two,
+    data: rows,
+    keys: ['s0', 's1'],
+    hover: { index: 0, seriesIndex: 0 },
+    clickKey: 's1',
+    click: { index: 1, seriesIndex: 1 },
+    dim: 'echarts',
+  },
+  {
     tag: 'c2-pie-chart',
     attributes: 'label-field="t"',
     series: '<c2-chart-series field="s0"></c2-chart-series>',

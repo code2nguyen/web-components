@@ -89,18 +89,16 @@ Size a symbol with `--c2-symbol--size` and recolour it through its roles. Settin
 
 ### In a status panel
 
-Slot a symbol into the panel's `media` slot, then let the media region grow to the symbol's size and drop its tinted
-disc — the symbol brings its own backdrop.
+Slot a symbol into the panel's `media` slot and set `media="illustration"`: the panel drops its tinted status disc (the
+symbol brings its own backdrop) and sizes the artwork with `--c2-status-panel__illustration--size`.
 
 ```html tag=MdxCodeBlock
 <style>
   .illustrated {
-    --c2-status-panel__media--size: 128px;
-    --c2-status-panel__media-icon--size: 128px;
-    --c2-status-panel__media--background-color: transparent;
+    --c2-status-panel__illustration--size: 128px;
   }
 </style>
-<c2-status-panel class="illustrated" heading="No results" description="Try a different keyword or clear the filters.">
+<c2-status-panel class="illustrated" media="illustration" heading="No results" description="Try a different keyword or clear the filters.">
   <c2-symbol-no-results slot="media"></c2-symbol-no-results>
   <c2-button slot="actions">Clear filters</c2-button>
 </c2-status-panel>
@@ -111,12 +109,10 @@ A success state reads the same way:
 ```html tag=MdxCodeBlock
 <style>
   .illustrated-success {
-    --c2-status-panel__media--size: 128px;
-    --c2-status-panel__media-icon--size: 128px;
-    --c2-status-panel__media__success--background-color: transparent;
+    --c2-status-panel__illustration--size: 128px;
   }
 </style>
-<c2-status-panel class="illustrated-success" status="success" heading="Payment received" description="Your Pro plan is active. A receipt is on its way to your inbox.">
+<c2-status-panel class="illustrated-success" media="illustration" status="success" heading="Payment received" description="Your Pro plan is active. A receipt is on its way to your inbox.">
   <c2-symbol-payment-success slot="media"></c2-symbol-payment-success>
   <c2-button slot="actions">Go to dashboard</c2-button>
 </c2-status-panel>

@@ -35,6 +35,13 @@ if (scenario === 'narrow') subject.style.width = '360px'
 if (scenario === 'medium') subject.style.width = '560px'
 if (scenario === 'heading' || scenario === 'heading-alternate') subject.heading = 'Team schedule'
 if (scenario === 'heading-alternate') subject.alternateWeeks = true
+if (scenario === 'actions' || scenario === 'actions-narrow') {
+  subject.heading = 'Team schedule'
+  subject.insertAdjacentHTML('beforeend', '<button slot="actions" type="button">Add event</button><button slot="actions" type="button">Settings</button>')
+}
+if (scenario === 'actions-narrow') subject.style.width = '360px'
+if (scenario === 'actions-only') subject.insertAdjacentHTML('beforeend', '<button slot="actions" type="button">Add event</button>')
+if (scenario === 'heading-slot') subject.insertAdjacentHTML('beforeend', '<span slot="heading">Kids’ <em>schedule</em></span>')
 if (scenario === 'early') subject.events = [{ title: 'Early run', day: 'fri', start: '06:00', end: '07:00' }]
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))
 subject.addEventListener('parity-change', (event) => (output.value = `parity:${event.detail.parity}`))

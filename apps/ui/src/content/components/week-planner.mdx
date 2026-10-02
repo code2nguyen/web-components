@@ -8,6 +8,7 @@ import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 
 import { WeekPlanner } from '@c2n/week-planner'
+import { Button } from '@c2n/button'
 
 `c2-week-planner` shows a typical week: seven day columns on an hour scale, each event a block from its start to its end
 time. It has no dates and no navigation. An event names the weekday it happens on and repeats every week, or, with
@@ -43,6 +44,17 @@ npm install @c2n/week-planner
     end-hour="19"
     events='[{"title":"Kids: school pick-up","day":"wed","start":"13:30","end":"17:00","weeks":"even","color":"#0f766e"},{"title":"Kids: football","day":"sat","start":"09:00","end":"12:00","weeks":"even","color":"#0f766e"},{"title":"Gym","day":"wed","start":"18:00","end":"19:00","weeks":"odd","color":"#52525b"},{"title":"Piano lesson","day":"sat","start":"10:00","end":"11:00","weeks":"odd","color":"#0369a1"},{"title":"Swimming","day":"mon","start":"17:00","end":"18:00"}]'
   ></c2-week-planner>
+</div><div data-label="Heading and actions">
+  <c2-week-planner
+    heading="Team week"
+    locale="en-US"
+    start-hour="9"
+    end-hour="13"
+    events='[{"title":"Planning","day":"mon","start":"09:00","end":"10:00"},{"title":"Client workshop","day":"wed","start":"10:00","end":"12:00","color":"#b45309"}]'
+  >
+    <c2-button slot="actions">Add event</c2-button>
+    <c2-button slot="actions">Settings</c2-button>
+  </c2-week-planner>
 </div>
 ```
 
@@ -59,6 +71,29 @@ is any CSS colour for that block (its text stays white in both themes; add `text
 `--c2-week-planner__title--font-weight`) and becomes the planner's accessible name, unless `aria-label` is set. It is
 called `heading` rather than `title` because `title` is the browser's tooltip attribute, which would hover over the
 whole planner.
+
+For more than plain text, put your own markup in the `heading` slot: an icon next to the name, a link, or a field
+that renames the planner. It replaces the `heading` text inside the same `h2`, and names the planner unless `heading`
+or `aria-label` is set.
+
+```html tag=CodeBlock
+<c2-week-planner aria-label="Team week">
+  <c2-text-field slot="heading" value="Team week" aria-label="Planner name"></c2-text-field>
+</c2-week-planner>
+```
+
+## Actions
+
+The `actions` slot puts controls of your own at the end of the header, e.g. an "Add event" button or a settings menu,
+spaced by `--c2-week-planner__actions--gap`. They sit before the previous/next day arrows on a narrow planner, and
+the header shows for them even without a heading or the week switch. The planner leaves what they do to you.
+
+```html tag=CodeBlock
+<c2-week-planner heading="Team week">
+  <c2-button slot="actions">Add event</c2-button>
+  <c2-icon-button slot="actions" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
+</c2-week-planner>
+```
 
 ## Odd and even weeks
 
