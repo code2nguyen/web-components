@@ -856,8 +856,14 @@
   &::before {
     @include tape;
   }
+  // A column of content-sized rows, the card sized to them. As a grid with `auto` tracks, WebKit (iOS Safari) gave the
+  // card a height far past its content and spread it between the rows.
+  width: max-content;
+  height: max-content;
   &:popover-open {
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 6px;
   }
   .label {
@@ -925,8 +931,8 @@
   }
   .grid3 {
     display: grid;
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
+    grid-template-columns: repeat(3, max-content);
+    align-items: start;
   }
   // Each pad as a miniature of itself, on its own colour, with its name under it.
   .pads button {
@@ -934,6 +940,7 @@
     padding-block-end: 2px;
   }
   .name {
+    white-space: nowrap;
     font-size: 10px;
     line-height: 1.2;
     opacity: 0.8;
