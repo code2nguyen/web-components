@@ -168,14 +168,36 @@ themeToggle.addEventListener('change', () => (list.pens = isDark() ? pens.dark :
 ```
 
 Keep the same length and order in every theme. A highlighter is mixed into the list's background, so give its full
-colour rather than a pale tint. A position the current list does not have shows as no colour. The palettes recolour
-only the default lists: once you give your own, its colours are used as given. `defaultTodoPens` and
+colour rather than a pale tint. A position the current list does not have shows as no colour. `defaultTodoPens` and
 `defaultTodoHighlights` are exported to start from.
+
+The customize panel's choices are lists too. `backgrounds` are `{ value, color, name }`: `value` is the list's
+surface and `color` its text; the softer surfaces, lines and grey text are mixed from the two unless you give `muted`,
+`line` and `soft`, and `dark` (worked out from a hex or `rgb()` value when missing) picks each palette's dark variant.
+The default background, which follows your CSS variables and the theme, is always offered first. `palettes` are
+`{ name, accent, pens, highlights, strength, dark }`: the accent of the ticks, progress and Add button, and pen and
+highlighter values by position, which recolour the matching position of `pens` and `highlights` while the palette is
+chosen. `dark` overrides any of them on a dark background:
+
+```typescript tag=CodeBlock
+list.backgrounds = [
+  { name: 'Cream', value: '#fffaeb', color: '#281e14' },
+  { name: 'Midnight', value: '#101828', color: '#f0f0fa' },
+]
+list.palettes = [
+  { name: 'Brand', accent: '#4f46e5', pens: ['#1f2937', '#4f46e5'], dark: { accent: '#a5b4fc', pens: ['#e5e7eb', '#a5b4fc'] } },
+  { name: 'Forest', accent: '#15803d', highlights: ['#86efac'], strength: 30 },
+]
+```
+
+Choose colours that read on each other: the default backgrounds and palettes were checked for contrast, yours are used
+as given. `defaultTodoBackgrounds` and `defaultTodoPalettes` are exported to start from.
 
 ## Customization and storage
 
 The viewer's choices are a small object, `{ icon, background, palette, pen, doneMark, progress, density }`, readable and
-writable as the `look` property and announced by `look-change`. A **palette** is a colour scheme for the whole list: its
+writable as the `look` property and announced by `look-change`. `background` and `palette` are positions in
+`backgrounds` and `palettes` (`0` is the default background); the default names (`'night'`, `'earth'`) are still read. A **palette** is a colour scheme for the whole list: its
 accent colours the ticks, the progress and the Add button, and its highlighters set the mood: **Classic** (bright,
 blue), **Soft** (pale and airy, lavender), **Earth** (warm and muted, sienna) and **Ocean** (cool sand, seafoam and coral,
 teal). It brings its own six highlighters and five pens for the tasks. The panel has no pen
