@@ -1157,12 +1157,8 @@ export class TodoList extends LitElement {
       <header class="header">
         ${
           ring
-            ? html`<div class="ring" role="img" aria-label=${`${percent}% complete, ${closed} of ${total} tasks done`}>
-                <svg viewBox="0 0 48 48" aria-hidden="true">
-                  <circle class="ring-track" cx="24" cy="24" r="20" pathLength="100"></circle>
-                  <circle class="ring-fill" cx="24" cy="24" r="20" pathLength="100" style=${styleMap({ strokeDasharray: `${percent} 100` })}></circle>
-                </svg>
-                <span class=${classMap({ 'ring-value': true, 'with-icon': !!icon && progress === 'ring' })} aria-hidden="true">
+            ? html`<c2-progress class="ring" variant="circular" value=${percent} label=${`${closed} of ${total} tasks done`}>
+                <span slot="value" class=${classMap({ 'ring-value': true, 'with-icon': !!icon && progress === 'ring' })} aria-hidden="true">
                   ${
                     total > 0 && closed === total
                       ? html`<svg class="ring-check pen" viewBox="0 0 24 24"><path d=${TICK}></path></svg>`
@@ -1173,7 +1169,7 @@ export class TodoList extends LitElement {
                           : percent
                   }
                 </span>
-              </div>`
+              </c2-progress>`
             : nothing
         }
         ${icon && !ring ? html`<span class="list-icon" aria-hidden="true">${renderTaskIcon(icon)}</span>` : nothing}

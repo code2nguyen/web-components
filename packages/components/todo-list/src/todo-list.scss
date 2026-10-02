@@ -217,32 +217,22 @@ svg {
   }
 }
 
+// The ring is a circular `c2-progress`, drawn with the list's track and accent. Stroke widths stay in units of a
+// 48×48 canvas, as when the ring was a hand-drawn SVG, so they scale with the ring's size.
 .ring {
-  position: relative;
+  --_ring-size: #{css.cssVar(ring--size)};
+  --_ring-stroke: #{css.cssVar(ring--stroke-width)};
+  --c2-progress--size: var(--_ring-size);
+  --c2-progress--height: calc(var(--_ring-size) * var(--_ring-stroke) / 48);
+  --c2-progress__track--background-color: #{css.cssVar(track--color)};
+  --c2-progress__indicator--background-color: #{$accent};
+  --c2-progress__value--color: #{$ink};
+  --c2-progress--animation-duration: calc(#{$duration} * 5);
+
   flex-shrink: 0;
-  width: css.cssVar(ring--size);
-  height: css.cssVar(ring--size);
-
-  > svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-    stroke-width: css.cssVar(ring--stroke-width);
-  }
-}
-
-.ring-track {
-  stroke: css.cssVar(track--color);
-}
-
-.ring-fill {
-  stroke: $accent;
-  transition: stroke-dasharray calc($duration * 2.5) cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .ring-value {
-  position: absolute;
-  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -278,17 +268,13 @@ svg {
   }
 
   .ring {
+    --_ring-size: #{css.cssVar(hero-ring--size)};
+    --_ring-stroke: #{css.cssVar(hero-ring--stroke-width)};
+
     order: -2;
     flex-basis: 100%;
     display: flex;
     justify-content: center;
-    width: 100%;
-    height: css.cssVar(hero-ring--size);
-
-    > svg {
-      width: css.cssVar(hero-ring--size);
-      stroke-width: css.cssVar(hero-ring--stroke-width);
-    }
   }
 
   .ring-value {
