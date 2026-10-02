@@ -21,7 +21,7 @@ test('resizes when a value changes', async ({ page, scenario }) => {
   await scenario()
   await props(page.locator('c2-comparison-bar'), { startValue: 3, endValue: 1 })
   await expect(page.locator('[part="start-value"]')).toHaveText('75.00%')
-  await expect.poll(segmentShare(page)).toBe(74)
+  await expect.poll(segmentShare(page)).toBe(75)
 })
 
 test('percentages are hidden unless show-value is set, but still announced', async ({ page, scenario }) => {
@@ -106,4 +106,13 @@ test('slotted middle text shows without show-value', async ({ page, scenario }) 
   await expect(page.locator('[part="start-value"]')).toBeHidden()
   await expect(page.getByRole('img', { name: '50.00%, 20.00%, 30.00%' })).toBeVisible()
   await accessible(page)
+})
+
+test('segments touch by default, with no gap between them', async ({ page, scenario }) => {
+  await scenario('three')
+  const start = await widthOf(page, 'start-segment')
+  const middle = await widthOf(page, 'middle-segment')
+  const end = await widthOf(page, 'end-segment')
+  expect(Math.abs(middle.x - (start.x + start.width))).toBeLessThan(0.5)
+  expect(Math.abs(end.x - (middle.x + middle.width))).toBeLessThan(0.5)
 })

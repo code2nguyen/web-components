@@ -39,9 +39,10 @@ export interface ComparisonBarShares {
  * @cssproperty {pixel} [--c2-comparison-bar--width=100%] - Width of the whole component; the host is a block by default.
  * @cssproperty {pixel} [--c2-comparison-bar--height=6px] - Thickness of the segments.
  * @cssproperty {pixel} [--c2-comparison-bar--gap=12px] - Space between the edge percentages and the track.
- * @cssproperty {pixel} [--c2-comparison-bar__track--gap=4px] - Space between two segments.
+ * @cssproperty {pixel} [--c2-comparison-bar__track--gap=0px] - Space between two segments; `0` makes them one continuous bar.
  * @cssproperty {pixel} [--c2-comparison-bar__middle-value--margin-top=4px] - Space between the track and the middle percentage.
- * @cssproperty {border-radius} [--c2-comparison-bar--border-radius=999px] - Rounding of each segment.
+ * @cssproperty {border-radius} [--c2-comparison-bar--border-radius=999px] - Rounding of the bar's two outer ends.
+ * @cssproperty {border-radius} [--c2-comparison-bar__segment--border-radius=0px] - Rounding of each segment's own ends; raise it with a track gap for separate pills.
  * @cssproperty {time} [--c2-comparison-bar--transition-duration=0.3s] - How long a segment takes to resize when a value changes.
  * @cssproperty {color} [--c2-comparison-bar__start-segment--background-color=#0265dc] - Colour of the start segment.
  * @cssproperty {color} [--c2-comparison-bar__middle-segment--background-color=#a1a1aa] - Colour of the middle segment.

@@ -38,10 +38,13 @@ npm install @c2n/comparison-bar
     --c2-comparison-bar__end-segment--background-color: #f6465d;
     --c2-comparison-bar__end-value--color: #f6465d;
   }
+  .pills {
+    --c2-comparison-bar__track--gap: 4px;
+    --c2-comparison-bar__segment--border-radius: 999px;
+  }
   .thick {
     --c2-comparison-bar--height: 12px;
     --c2-comparison-bar--border-radius: 4px;
-    --c2-comparison-bar__track--gap: 2px;
   }
 </style>
 <div data-label="Default">
@@ -54,6 +57,11 @@ npm install @c2n/comparison-bar
   <div class="stack">
     <c2-comparison-bar start-value="45" middle-value="20" end-value="35" start-label="Win" middle-label="Draw" end-label="Loss" show-value></c2-comparison-bar>
     <c2-comparison-bar start-value="1" middle-value="1" end-value="1" show-value></c2-comparison-bar>
+  </div>
+</div>
+<div data-label="Separated segments">
+  <div class="stack">
+    <c2-comparison-bar class="pills" start-value="22.43" end-value="77.57" show-value></c2-comparison-bar>
   </div>
 </div>
 <div data-label="Precision and locale">
@@ -79,4 +87,4 @@ npm install @c2n/comparison-bar
 
 Update `start-value` and `end-value` as the amounts change and the segments animate to their new widths. Leave `middle-value` unset for a two-segment bar. Negative or missing amounts count as zero; a segment with no share collapses entirely, and while none has an amount the bar splits evenly. Shares are rounded by largest remainder, so three equal thirds print as 33.34%, 33.33% and 33.33%. The printed percentages are hidden from screen readers because the bar's accessible name already carries them.
 
-`--c2-comparison-bar__start-segment--background-color`, `__middle-segment--background-color` and `__end-segment--background-color` colour the segments, with matching `__start-value--color` / `__middle-value--color` / `__end-value--color` for the text. `--c2-comparison-bar--height`, `--c2-comparison-bar--border-radius` and `--c2-comparison-bar__track--gap` shape the bar itself.
+`--c2-comparison-bar__start-segment--background-color`, `__middle-segment--background-color` and `__end-segment--background-color` colour the segments, with matching `__start-value--color` / `__middle-value--color` / `__end-value--color` for the text. `--c2-comparison-bar--height` sets the thickness and `--c2-comparison-bar--border-radius` rounds the bar's outer ends. By default the segments touch; set `--c2-comparison-bar__track--gap` to separate them, and `--c2-comparison-bar__segment--border-radius` to round each segment into its own pill.
