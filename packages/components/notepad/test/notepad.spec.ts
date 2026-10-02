@@ -4,6 +4,20 @@ import type { Page } from '@playwright/test'
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Notes' })
 const toolbar = (page: Page) => page.getByRole('toolbar', { name: 'Formatting' })
 
+/**
+ * Pastes `data` into the writing surface. The clipboard data is defined on the event rather than passed to the
+ * constructor: Firefox empties a `clipboardData` given to an untrusted `ClipboardEvent`.
+ */
+async function paste(page: Page, data: Record<string, string>) {
+  await surface(page).evaluate((element, entries) => {
+    const transfer = new DataTransfer()
+    for (const [type, value] of Object.entries(entries)) transfer.setData(type, value)
+    const event = new ClipboardEvent('paste', { bubbles: true, cancelable: true })
+    Object.defineProperty(event, 'clipboardData', { value: transfer })
+    element.dispatchEvent(event)
+  }, data)
+}
+
 /** Selects the last `count` characters before the caret with real keyboard input. Wait for the typed value first. */
 async function selectBack(page: Page, count: number) {
   for (let i = 0; i < count; i++) await page.keyboard.press('Shift+ArrowLeft')
@@ -245,13 +259,11 @@ test('marks limits the toolbar, the shortcuts and pasted formatting', async ({ p
   await page.keyboard.press('ControlOrMeta+i')
   await expect(host).toHaveJSProperty('value', 'plain')
 
-  await page.keyboard.press('End')
-  await surface(page).evaluate((element) => {
-    const data = new DataTransfer()
-    data.setData('text/html', '<p><em>it</em> <strong>bold</strong></p>')
-    data.setData('text/plain', 'it bold')
-    element.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
-  })
+  // ArrowRight collapses the selection to its end on every platform (End scrolls the page on macOS).
+  await page.keyboard.press('ArrowRight')
+  // The collapsed caret reaches the editor through an asynchronous selectionchange; the toolbar closing shows it has.
+  await expect(toolbar(page)).toBeHidden()
+  await paste(page, { 'text/html': '<p><em>it</em> <strong>bold</strong></p>', 'text/plain': 'it bold' })
   await expect(host).toHaveJSProperty('value', 'plainit **bold**')
 })
 
@@ -259,11 +271,7 @@ test('pasted plain text is read as notepad Markdown', async ({ page, renderScena
   await renderScenario('<c2-notepad label="Notes"></c2-notepad>')
   const host = page.locator('c2-notepad')
   await surface(page).click()
-  await surface(page).evaluate((element) => {
-    const data = new DataTransfer()
-    data.setData('text/plain', '- [ ] buy **milk**\n- [x] call')
-    element.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
-  })
+  await paste(page, { 'text/plain': '- [ ] buy **milk**\n- [x] call' })
   await expect(host).toHaveJSProperty('value', '- [ ] buy **milk**\n- [x] call')
   await expect(surface(page).getByRole('checkbox')).toHaveCount(2)
 })
