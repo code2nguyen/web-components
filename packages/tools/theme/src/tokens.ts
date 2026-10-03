@@ -55,6 +55,14 @@ export const tokens: TokenDef[] = [
   token('color-on-dark-surface', 'color', '#fafafa', 'Text and icons on the dark surface.'),
   token('color-on-dark-surface-variant', 'color', '#a1a1aa', 'Secondary text on the dark surface: metadata, timestamps, muted labels.'),
   token('color-dark-outline', 'color', '#3f3f46', 'Borders and dividers inside a dark block.'),
+  // Text on a saturated fill that is not the primary: a danger or success button, a coloured event, a brand badge.
+  // `color-on-primary` cannot stand in, since it pairs with the primary and turns dark where the primary lightens.
+  token(
+    'color-on-fill',
+    'color',
+    '#ffffff',
+    'Text and icons on a saturated colour fill other than the primary: status buttons, coloured events, brand badges.',
+  ),
   // Typography
   token('font-family', 'font', null, 'Font family of every component. Unset by default so components inherit the page font.'),
   token('font-size-sm', 'font', '12px', 'Small text: supporting text, tooltips, descriptions, timestamps.'),
