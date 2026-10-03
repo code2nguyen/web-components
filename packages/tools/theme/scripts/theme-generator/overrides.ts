@@ -236,7 +236,11 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--chart-series-2, #ea580c) 80%, var(--c2-theme--color-on-surface, #18181b))',
   },
   // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
-  '--c2-attachment__status__complete--color': { exclude: 'success status colour' },
+  // The success green has no token, but a fixed green fails on a dark surface; pulled towards the ink it reads on both.
+  '--c2-attachment__status__complete--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, rgb(0, 122, 77) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-attachment__progress--background': { token: 'color-outline-variant' },
   // Marks drawn on the accent background of a selected checkbox.
   '--c2-checkbox__checkmark--color': onPrimary,
@@ -307,7 +311,15 @@ export const overrides: Record<string, Override> = {
   '--c2-badge__warning--background': { exclude: 'status colour' },
   '--c2-badge__warning--color': { exclude: 'status colour' },
   '--c2-badge__info--background': { exclude: 'status colour' },
-  '--c2-badge__danger--background': { exclude: 'status colour (the text maps to color-error)' },
+  // The danger pair is themed together: a fixed pink under an error text that lightens in a dark theme read 2.3:1.
+  '--c2-badge__danger--background': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 14%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-badge__danger--color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-badge__info--color': { exclude: 'status colour' },
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
@@ -389,10 +401,32 @@ export const overrides: Record<string, Override> = {
     token: 'color-surface-container',
     value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
   },
-  // Code editor: the foreground and the code font size belong to the syntax palette, which is themed as one unit
-  // through `--c2-code-editor__theme--token-*` (the `theme` part is excluded wholesale, as it is for the viewer).
-  // Splitting the foreground off would leave a theme-aware body colour over a fixed token palette.
-  '--c2-code-editor--color': { exclude: 'code foreground; the syntax palette is themed as a unit' },
+  // Code editor: the foreground and the syntax palette are themed as one unit. Its surface follows the theme, so a
+  // fixed light palette went unreadable on a dark one: the body text takes the ink, and each token hue is pulled
+  // towards it, darker on a light surface and lighter on a dark one, at the strength that keeps every token at 4.5:1
+  // on both the surface and the low container.
+  '--c2-code-editor--color': { token: 'color-on-surface' },
+  '--c2-code-editor__theme--token-variable': { token: 'color-on-surface' },
+  '--c2-code-editor__theme--token-punctuation': { token: 'color-on-surface' },
+  ...Object.fromEntries(
+    (
+      [
+        ['keyword', '#cf222e', 77],
+        ['invalid', '#cf222e', 77],
+        ['string', '#0969da', 83],
+        ['link', '#0969da', 83],
+        ['comment', '#636c76', 85],
+        ['constant', '#0550ae', 69],
+        ['property', '#0550ae', 69],
+        ['function', '#6f42c1', 75],
+        ['type', '#953800', 70],
+        ['tag', '#116329', 72],
+      ] as const
+    ).map(([name, hue, strength]) => [
+      `--c2-code-editor__theme--token-${name}`,
+      { token: 'color-on-surface', value: `color-mix(in srgb, ${hue} ${strength}%, var(--c2-theme--color-on-surface, #18181b))` },
+    ]),
+  ),
   '--c2-code-editor--font-size': { exclude: 'code font size, off the 12/14 text scale' },
   // The editor's three accent tints are alpha blends the colour ramp has no entries for, but they should still
   // follow the app's accent — `color-mix` expresses that without a token per opacity step.
