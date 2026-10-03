@@ -1,5 +1,5 @@
 import type { Mark, Node as ProseNode } from 'prosemirror-model'
-import { schema, isHighlight, isInk } from './schema'
+import { schema, highlightIndex, inkIndex } from './schema'
 
 /**
  * The value is a small, line-based Markdown dialect, chosen so it reads well as plain text and in any Markdown
@@ -7,9 +7,11 @@ import { schema, isHighlight, isInk } from './schema'
  *
  * - one line of the page is one line of the value, so a blank line is a blank ruled line;
  * - `- [ ] task` / `- [x] done` are checklist lines;
- * - `**bold**`, `*italic*`, `~~strike~~` and `==highlight==` (yellow) are the usual delimiters;
+ * - `**bold**`, `*italic*`, `~~strike~~` and `==highlight==` (the first highlighter) are the usual delimiters;
  * - what Markdown has no syntax for is written as inline HTML, which Markdown passes through:
- *   `<u>underline</u>`, `<span data-ink="red">ink</span>`, `<mark data-color="pink">highlight</mark>`.
+ *   `<u>underline</u>`, `<span data-ink="3">ink</span>`, `<mark data-color="2">highlight</mark>`. An ink or a
+ *   highlighter is the 1-based position of its colour in the component's list; the default colours' names
+ *   (`data-ink="red"`) are still read, as their position.
  *
  * Anything else is text. Parsing never throws: an unclosed delimiter or an unknown tag stays literal.
  */
@@ -21,15 +23,14 @@ const PUNCTUATION = /[!-/:-@[-`{-~]/
 const byRank = (a: Mark, b: Mark) => RANK.indexOf(a.type.name) - RANK.indexOf(b.type.name)
 
 /** Marks spelled as an HTML tag do not care about the whitespace around them; delimiter marks do. */
-const isTagMark = (mark: Mark) =>
-  mark.type.name === 'ink' || mark.type.name === 'underline' || (mark.type.name === 'highlight' && mark.attrs.color !== 'yellow')
+const isTagMark = (mark: Mark) => mark.type.name === 'ink' || mark.type.name === 'underline' || (mark.type.name === 'highlight' && mark.attrs.color !== 1)
 
 function openMark(mark: Mark): string {
   switch (mark.type.name) {
     case 'ink':
       return `<span data-ink="${mark.attrs.color}">`
     case 'highlight':
-      return mark.attrs.color === 'yellow' ? '==' : `<mark data-color="${mark.attrs.color}">`
+      return mark.attrs.color === 1 ? '==' : `<mark data-color="${mark.attrs.color}">`
     case 'bold':
       return '**'
     case 'italic':
@@ -46,7 +47,7 @@ function closeMark(mark: Mark): string {
     case 'ink':
       return '</span>'
     case 'highlight':
-      return mark.attrs.color === 'yellow' ? '==' : '</mark>'
+      return mark.attrs.color === 1 ? '==' : '</mark>'
     case 'underline':
       return '</u>'
     default:
@@ -128,7 +129,7 @@ export function toMarkdown(doc: ProseNode): string {
 const DELIMITERS = [
   { token: '**', mark: () => schema.marks.bold.create() },
   { token: '~~', mark: () => schema.marks.strike.create() },
-  { token: '==', mark: () => schema.marks.highlight.create({ color: 'yellow' }) },
+  { token: '==', mark: () => schema.marks.highlight.create({ color: 1 }) },
   { token: '*', mark: () => schema.marks.italic.create() },
 ]
 
@@ -150,12 +151,11 @@ function tagMark(name: string, attributes: string): Mark | null {
     case 'em':
       return schema.marks.italic.create()
     case 'mark': {
-      const color = attr('data-color') ?? 'yellow'
-      return schema.marks.highlight.create({ color: isHighlight(color) ? color : 'yellow' })
+      return schema.marks.highlight.create({ color: highlightIndex(attr('data-color')) ?? 1 })
     }
     default: {
-      const color = attr('data-ink')
-      return isInk(color) ? schema.marks.ink.create({ color }) : null
+      const color = inkIndex(attr('data-ink'))
+      return color ? schema.marks.ink.create({ color }) : null
     }
   }
 }
@@ -193,7 +193,7 @@ function parseInline(source: string): ProseNode[] {
     for (const delimiter of DELIMITERS) {
       if (!source.startsWith(delimiter.token, i)) continue
       const mark = delimiter.mark()
-      const open = marks.some((active) => active.type === mark.type && (mark.type.name !== 'highlight' || active.attrs.color === 'yellow'))
+      const open = marks.some((active) => active.type === mark.type && (mark.type.name !== 'highlight' || active.attrs.color === 1))
       const after = source[i + delimiter.token.length] ?? ''
       if (open) {
         flush()

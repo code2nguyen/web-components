@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test'
-import { accessible, expect as hostExpect } from '../../../../tests/component-fixture'
+import { accessible, props, expect as hostExpect } from '../../../../tests/component-fixture'
 import type { TodoList } from '../src/todo-list'
 import { test, expect } from './fixture'
 
@@ -230,7 +230,8 @@ test('opens the menu with the keyboard and closes it with Escape', async ({ page
   await page.keyboard.press('ArrowRight')
   await expect(list.getByRole('menuitemradio', { name: 'Yellow highlighter' })).toBeFocused()
   await page.keyboard.press('Enter')
-  await expect(list.locator('[data-reorder-key="b"] .task')).toHaveClass(/highlight-yellow/)
+  await expect(list.locator('[data-reorder-key="b"] .task')).toHaveClass(/highlighted/)
+  await expect.poll(() => list.evaluate((element: TodoList) => element.tasks.find((task) => task.id === 'b')?.highlight)).toBe(1)
   await page.keyboard.press('Escape')
   await expect(highlight).toBeFocused()
   await page.keyboard.press('Escape')
@@ -407,7 +408,7 @@ test('a background sets the text colour and the pens it offers', async ({ page, 
   await list.getByRole('button', { name: 'Back to the list' }).click()
   await expect(list.getByRole('button', { name: 'Customize look' })).toBeFocused()
   await expect(list.locator('[data-reorder-key="a"] .mark path')).toHaveAttribute('d', /^M6\.5 6\.8/)
-  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ background: 'night', doneMark: 'cross', progress: 'bar' })
+  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ background: 6, doneMark: 'cross', progress: 'bar' })
 
   await list.getByRole('button', { name: 'Customize look' }).click()
   await list.getByRole('button', { name: 'Reset' }).click()
@@ -457,7 +458,7 @@ test('a palette recolours the highlighters and pens, in a light or dark variant'
 
   await list.getByRole('radio', { name: 'Night' }).click()
   await expect.poll(() => cssVar(list, '--c2-todo-list__pen-violet--color')).toBe('#d1b7dc')
-  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ palette: 'earth', background: 'night' })
+  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ palette: 3, background: 6 })
 
   await list.getByRole('button', { name: 'Back to the list' }).click()
   await expect(passport).not.toHaveCSS('background-color', before)
@@ -485,7 +486,7 @@ test('choosing a palette recolours the progress, even over a pen stored earlier'
   await list.getByRole('button', { name: 'Back to the list' }).click()
   // Earth's sienna accent, light variant.
   await expect(ring).toHaveCSS('stroke', 'rgb(154, 74, 38)')
-  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ palette: 'earth' })
+  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ palette: 3 })
 
   await list.evaluate((element: TodoList) => (element.look = { palette: 'earth', progress: 'bar' }))
   await expect(list.locator('c2-progress.bar')).toHaveCSS('--c2-progress__indicator--background-color', '#9a4a26')
@@ -510,7 +511,7 @@ test('changes a task’s highlighter and text colour from its menu, in place', a
   await list.getByRole('button', { name: 'Actions for Dentist appointment' }).click()
   await list.getByRole('menuitem', { name: 'Highlight' }).hover()
   await list.getByRole('menuitemradio', { name: 'Pink highlighter' }).click()
-  await expect(row).toHaveClass(/highlight-pink/)
+  await expect(row).toHaveClass(/highlighted/)
   await expect(row).not.toHaveCSS('background-color', 'rgb(255, 255, 255)')
 
   await list.getByRole('menuitem', { name: 'Text colour' }).hover()
@@ -519,9 +520,94 @@ test('changes a task’s highlighter and text colour from its menu, in place', a
   // The panel never opened: per-task styling happens in the list.
   await expect(list.getByRole('region', { name: 'Customize the list' })).toHaveCount(0)
 
+  await expect.poll(() => list.evaluate((element: TodoList) => element.tasks.find((task) => task.id === 'b'))).toMatchObject({ highlight: 4, ink: 4 })
+})
+
+test('a custom pen and highlighter list stores positions, and a new list recolours the tasks in place', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  // The scenario's tasks were written with the default colours' names: they are read as positions.
   await expect
-    .poll(() => list.evaluate((element: TodoList) => element.tasks.find((task) => task.id === 'b')))
-    .toMatchObject({ highlight: 'pink', ink: 'violet' })
+    .poll(() =>
+      list.evaluate((element: TodoList) =>
+        element.tasks.filter((task) => task.ink || task.highlight).map(({ id, ink, highlight }) => ({ id, ink, highlight })),
+      ),
+    )
+    .toEqual([
+      { id: 'c', ink: undefined, highlight: 1 },
+      { id: 'f', ink: 4, highlight: undefined },
+    ])
+
+  const light = {
+    pens: [
+      { name: 'Plum', value: 'rgb(110, 40, 120)' },
+      { name: 'Teal', value: 'rgb(0, 110, 110)' },
+      'rgb(150, 60, 20)',
+      { name: 'Moss', value: 'rgb(60, 100, 30)' },
+    ],
+    highlights: [{ name: 'Lemon', value: 'rgb(250, 230, 100)' }],
+  }
+  await props(list, light)
+  const passport = list.locator('[data-reorder-key="c"] .task')
+  const anna = list.locator('[data-reorder-key="f"] .label')
+  await expect(anna).toHaveCSS('color', 'rgb(60, 100, 30)')
+  const lightBackground = await passport.evaluate((element) => getComputedStyle(element).backgroundColor)
+
+  // A dark theme hands over a list of the same length: the tasks keep their positions and take the new colours.
+  await props(list, {
+    pens: light.pens.map((pen) => (typeof pen === 'string' ? 'rgb(200, 230, 170)' : { ...pen, value: 'rgb(200, 230, 170)' })),
+    highlights: [{ name: 'Lemon', value: 'rgb(90, 80, 10)' }],
+  })
+  await expect(anna).toHaveCSS('color', 'rgb(200, 230, 170)')
+  await expect(passport).not.toHaveCSS('background-color', lightBackground)
+
+  // The menu offers the list's colours under their labels and stores the chosen position.
+  await list.getByRole('button', { name: 'Actions for Dentist appointment' }).click()
+  await list.getByRole('menuitem', { name: 'Text colour' }).hover()
+  // The default swatch and the list's four pens, nothing from the built-in list.
+  await expect(list.getByRole('menuitemradio')).toHaveCount(5)
+  await expect(list.getByRole('menuitemradio', { name: 'Violet ink text' })).toHaveCount(0)
+  // A colour given without a name is called by its position.
+  await expect(list.getByRole('menuitemradio', { name: 'Pen 3 text' })).toBeVisible()
+  await list.getByRole('menuitemradio', { name: 'Teal text' }).click()
+  await expect.poll(() => list.evaluate((element: TodoList) => element.tasks.find((task) => task.id === 'b')?.ink)).toBe(2)
+})
+
+test('custom backgrounds and palettes fill the panel and are stored by position', async ({ page, scenario }) => {
+  await scenario()
+  const list = page.locator('c2-todo-list')
+  await props(list, {
+    backgrounds: [
+      { name: 'Cream', value: 'rgb(255, 250, 235)', color: 'rgb(40, 30, 20)' },
+      { name: 'Ink', value: '#101828', color: 'rgb(240, 240, 250)' },
+    ],
+    palettes: [
+      { name: 'Brand', accent: 'rgb(79, 70, 229)', pens: ['rgb(20, 20, 120)'], dark: { accent: 'rgb(165, 180, 252)', pens: ['rgb(200, 210, 255)'] } },
+      { name: 'Forest', accent: 'rgb(21, 128, 61)' },
+    ],
+  })
+  await list.getByRole('button', { name: 'Customize look' }).click()
+  const backgrounds = list.getByRole('radiogroup', { name: 'Background' }).getByRole('radio')
+  await expect(backgrounds).toHaveCount(3)
+  await list.getByRole('radio', { name: 'Cream' }).click()
+  await expect.poll(() => cssVar(list, '--c2-todo-list__container--background-color')).toBe('rgb(255, 250, 235)')
+  await expect.poll(() => cssVar(list, '--c2-todo-list__accent--color')).toBe('rgb(79, 70, 229)')
+
+  const trigger = list.getByRole('button', { name: 'Palette' })
+  await expect(trigger).toHaveAccessibleDescription('Brand')
+  await trigger.click()
+  await expect(list.getByRole('listbox', { name: 'Palette' }).getByRole('option')).toHaveText(['Brand', 'Forest'])
+  await list.getByRole('option', { name: 'Forest' }).click()
+  await expect.poll(() => cssVar(list, '--c2-todo-list__accent--color')).toBe('rgb(21, 128, 61)')
+  await expect.poll(() => list.evaluate((element: TodoList) => element.look)).toEqual({ background: 1, palette: 2 })
+
+  // A dark background takes the palette's dark variant, worked out from the background's colour.
+  await trigger.click()
+  await list.getByRole('option', { name: 'Brand' }).click()
+  await list.getByRole('radio', { name: 'Ink' }).click()
+  await expect.poll(() => cssVar(list, '--c2-todo-list__accent--color')).toBe('rgb(165, 180, 252)')
+  await list.getByRole('button', { name: 'Back to the list' }).click()
+  await expect(list.locator('[data-reorder-key="b"] .label')).toHaveCSS('color', 'rgb(240, 240, 250)')
 })
 
 test('clicking a task’s icon opens the icon picker; the menu adds one to a task without', async ({ page, scenario }) => {
@@ -572,7 +658,7 @@ test('remembers the look and the tasks in localStorage', async ({ page, scenario
   await list.getByRole('checkbox', { name: 'Renew passport' }).click()
 
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('c2-todo-list:spec') ?? 'null'))
-  expect(stored.look).toEqual({ background: 'sand', progress: 'hero' })
+  expect(stored.look).toEqual({ background: 5, progress: 'hero' })
   expect(stored.tasks.find((task: { id: string }) => task.id === 'c').done).toBe(true)
 
   await scenario('persist')
