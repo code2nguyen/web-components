@@ -641,5 +641,5 @@ export const overrides: Record<string, Override> = {
     value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
   },
   // The resize grip sits on the event bar's own colour, not on the surface.
-  '--c2-month-planner__handle--color': { exclude: 'grip on the event colour' },
+  '--c2-month-planner__handle--color': { token: 'color-on-fill' },
 }

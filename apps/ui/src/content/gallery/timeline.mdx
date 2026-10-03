@@ -185,13 +185,13 @@ headings, lists and code, styled by the page's own CSS.
     margin: 10px 0 0;
     padding: 10px 44px 10px 12px;
     border-radius: 6px;
-    background: #18181b;
-    color: #e4e4e7;
+    background: var(--c2-theme--color-dark-surface, #18181b);
+    color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
     font-size: 12px;
     line-height: 1.7;
     overflow-x: auto;
-    --c2-copy-button__container--color: #e4e4e7;
-    --c2-copy-button__container__hover--background-color: #3f3f46;
+    --c2-copy-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-copy-button__container__hover--background-color: var(--c2-theme--color-dark-outline, #3f3f46);
   }
   .release-timeline .migration .del { color: #fca5a5; }
   .release-timeline .migration .add { color: #86efac; }

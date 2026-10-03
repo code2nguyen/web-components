@@ -202,7 +202,7 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     width: 200px;
     padding: 6px;
     border-radius: 10px;
-    background: #18181b;
+    background: var(--c2-theme--color-dark-surface, #18181b);
   }
   .dark-sidebar-item {
     --c2-link-button__container--padding-left: 10px;
@@ -211,12 +211,12 @@ Padded items with a hover fill and a `selected` state; the underline is turned o
     --c2-link-button__container--padding-bottom: 7px;
     --c2-link-button__container--gap: 10px;
     --c2-link-button__container--border-radius: 6px;
-    --c2-link-button__container--color: #a1a1aa;
-    --c2-link-button__container__hover--color: #fafafa;
-    --c2-link-button__container__hover--background-color: #28282b;
+    --c2-link-button__container--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-link-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-link-button__container__hover--text-decoration: none;
-    --c2-link-button__container__selected--color: #fafafa;
-    --c2-link-button__container__selected--background-color: #424244;
+    --c2-link-button__container__selected--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-link-button__container__selected--background-color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-link-button__container__selected--font-weight: 500;
   }
   .dark-sidebar-item::part(link) {

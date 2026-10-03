@@ -201,17 +201,17 @@ markup inside the panes. The cards below move that surface onto the component it
     --c2-dashboard--padding: 6px;
     --c2-dashboard--background: #09090b;
     --c2-dashboard--border-radius: 6px;
-    --c2-dash-card--background: #18181b;
-    --c2-dash-card--border: 1px solid #27272a;
+    --c2-dash-card--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-dash-card--border: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
     --c2-dash-card--border-radius: 4px;
-    --c2-dash-card__expanded--background: #18181b;
-    --c2-dash-card__header--color: #a1a1aa;
+    --c2-dash-card__expanded--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-dash-card__header--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
     --c2-dash-card__header--font-size: 12px;
     --c2-dash-card__header--min-height: 28px;
-    --c2-dash-card__header--border-bottom: 1px solid #27272a;
-    --c2-dash-card__control--color: #71717a;
-    --c2-dash-card__control__hover--background: #27272a;
-    --c2-dash-card__control__hover--color: #fafafa;
+    --c2-dash-card__header--border-bottom: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-dash-card__control--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-dash-card__control__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-dash-card__control__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-dash-card__handle__hover--background: #22c55e;
     --c2-dash-card__handle__active--background: #4ade80;
   }

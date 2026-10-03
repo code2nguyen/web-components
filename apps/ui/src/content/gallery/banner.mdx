@@ -28,7 +28,7 @@ import { LinkButton } from '@c2n/link-button'
     width: 100%;
     max-width: 720px;
     --c2-banner__container--background: linear-gradient(100deg, #4f46e5, #9333ea 55%, #db2777);
-    --c2-banner__container--color: #ffffff;
+    --c2-banner__container--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-banner__container--border: none;
     --c2-banner__container--border-radius: 12px;
     --c2-banner__container--padding: 12px 12px 12px 20px;
@@ -162,7 +162,7 @@ import { LinkButton } from '@c2n/link-button'
     --c2-banner__icon__error--color: var(--c2-theme--color-error, #dc2626);
   }
   .pill-banner::part(icon) {
-    color: #ffffff;
+    color: var(--c2-theme--color-on-fill, #ffffff);
     background: #dc2626;
   }
   .pill-banner c2-link-button {

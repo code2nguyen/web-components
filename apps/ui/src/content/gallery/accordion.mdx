@@ -83,9 +83,9 @@ One connected surface by default, with shared dividers and animated panels. The 
     --c2-details--background: #eff6ff;
     --c2-accordion--border-color: #93c5fd;
     --c2-details__header--background: #2563eb;
-    --c2-details__header--color: #ffffff;
+    --c2-details__header--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-details__header__hover--background: #1d4ed8;
-    --c2-details__header__icon--color: #ffffff;
+    --c2-details__header__icon--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-details__content--color: #1e3a8a;
     --c2-details__content--padding-top: 12px;
   }
@@ -304,15 +304,15 @@ One connected surface by default, with shared dividers and animated panels. The 
     width: 280px;
     max-width: 100%;
     --c2-accordion--gap: 0px;
-    --c2-accordion--border-color: #3f3f46;
+    --c2-accordion--border-color: var(--c2-theme--color-dark-outline, #3f3f46);
     --c2-accordion--border-radius: 10px;
-    --c2-details--background: #18181b;
-    --c2-details__header--color: #fafafa;
-    --c2-details__header__hover--background: #27272a;
-    --c2-details__header__open--background: #27272a;
-    --c2-details__header__icon--color: #a1a1aa;
+    --c2-details--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-details__header--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-details__header__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-details__header__open--background: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-details__header__icon--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
     --c2-details__header__focus--outline: 2px solid rgba(96, 165, 250, 0.6);
-    --c2-details__content--color: #a1a1aa;
+    --c2-details__content--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
     --c2-details__content--padding-top: 12px;
   }
   .dark p {

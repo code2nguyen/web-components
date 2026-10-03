@@ -73,7 +73,7 @@ Curated looks for `c2-button-group`. Open any card in the studio to start from i
     --c2-button__container__hover--background-color: #f4f4f5;
     --c2-button__container__hover--color: #18181b;
     --c2-button__container__selected--background-color: #0265dc;
-    --c2-button__container__selected--color: #ffffff;
+    --c2-button__container__selected--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-button__container__selected--border: 1px solid #0265dc;
   }
 </style>
@@ -204,14 +204,14 @@ Curated looks for `c2-button-group`. Open any card in the studio to start from i
   .dark {
     padding: 16px;
     border-radius: 12px;
-    background: #18181b;
+    background: var(--c2-theme--color-dark-surface, #18181b);
     display: inline-flex;
-    --c2-button-group--border: 1px solid #3f3f46;
-    --c2-button-group__divider--color: #3f3f46;
-    --c2-button__container--background-color: #27272a;
-    --c2-button__container--color: #d4d4d8;
-    --c2-button__container__hover--background-color: #3f3f46;
-    --c2-button__container__hover--color: #fafafa;
+    --c2-button-group--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-button-group__divider--color: var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-button__container--background-color: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-button__container--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 83%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-button__container__hover--background-color: var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-button__container__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-button__container__selected--background-color: #5aa3ff;
     --c2-button__container__selected--color: #032a5c;
     --c2-button__container__selected--border: 1px solid #5aa3ff;

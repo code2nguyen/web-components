@@ -167,24 +167,24 @@ that, and the `toggle` slot adds a chevron — both off by default.
 ```html tag=MdxCodeBlock,label=Dark panel
 <style>
   .dark-steps {
-    --c2-steps--background: #18181b;
-    --c2-steps--border: 1px solid #28282b;
+    --c2-steps--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-steps--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-steps--border-radius: 8px;
     --c2-steps--padding-block: 4px;
-    --c2-step__row--border-bottom: 1px solid #28282b;
-    --c2-step__row__hover--background: #242426;
+    --c2-step__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 7%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-step__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 5%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-step__marker--size: 13px;
-    --c2-step__marker--border: 1px solid #545456;
-    --c2-step__label--color: #e4e4e7;
+    --c2-step__marker--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 27%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-step__label--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-step__label--font-weight: 400;
-    --c2-step__detail--color: #a1a1aa;
-    --c2-step__trailing--color: #a1a1aa;
-    --c2-step__guide--color: #424244;
+    --c2-step__detail--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-step__trailing--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-step__guide--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-step__guide--width: 1px;
     --c2-step__success--color: #4ade80;
     --c2-step__error--color: #f87171;
     --c2-step__running--color: #60a5fa;
-    --c2-step__skipped--color: #a1a1aa;
+    --c2-step__skipped--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
   }
 </style>
 <c2-steps class="dark-steps" aria-label="Run trace">
