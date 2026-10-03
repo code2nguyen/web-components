@@ -48,6 +48,13 @@ export const tokens: TokenDef[] = [
   token('color-scrim', 'color', 'rgba(9, 9, 11, 0.45)', 'Backdrop behind dialogs and drawers.', 'rgba(0, 0, 0, 0.6)'),
   token('color-inverse-surface', 'color', '#18181b', 'High-contrast surface, e.g. tooltips.', '#f4f4f5'),
   token('color-on-inverse-surface', 'color', '#fafafa', 'Text drawn on the inverse surface.', '#18181b'),
+  // A dark block that stays dark in both themes (a terminal, a dark sidebar, an outgoing chat bubble): unlike the
+  // inverse surface it does not flip, so it carries no dark value; a brand recolours it once for both themes.
+  token('color-dark-surface', 'color', '#18181b', 'Surface of a block that is dark in both themes: terminals, dark sidebars, dark bubbles.'),
+  token('color-dark-surface-container', 'color', '#27272a', 'Raised surface inside a dark block: a hovered or selected row, a header strip.'),
+  token('color-on-dark-surface', 'color', '#fafafa', 'Text and icons on the dark surface.'),
+  token('color-on-dark-surface-variant', 'color', '#a1a1aa', 'Secondary text on the dark surface: metadata, timestamps, muted labels.'),
+  token('color-dark-outline', 'color', '#3f3f46', 'Borders and dividers inside a dark block.'),
   // Typography
   token('font-family', 'font', null, 'Font family of every component. Unset by default so components inherit the page font.'),
   token('font-size-sm', 'font', '12px', 'Small text: supporting text, tooltips, descriptions, timestamps.'),
