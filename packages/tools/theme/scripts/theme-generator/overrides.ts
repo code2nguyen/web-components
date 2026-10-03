@@ -310,6 +310,9 @@ export const overrides: Record<string, Override> = {
   '--c2-avatar__editor__focus--outline-offset': { exclude: 'avatar editor focus geometry' },
   '--c2-avatar__editor-icon--size': { exclude: 'avatar editor icon size' },
   '--c2-avatar__remove--size': { exclude: 'avatar remove action geometry' },
+  // The accordion's frame and dividers are the same grey as c2-details' borders (rgb(213, 213, 213)), written as hex,
+  // so they take the same outline token.
+  '--c2-accordion--border-color': { token: 'color-outline' },
   '--c2-avatar__remove--box-shadow': { token: 'shadow-sm' },
   // Avatar-group width, overlap and item measurements are responsive composition controls. The overflow badge uses
   // the inverse surface pair so it remains legible in both light and dark themes.
