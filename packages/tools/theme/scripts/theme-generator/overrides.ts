@@ -321,6 +321,8 @@ export const overrides: Record<string, Override> = {
     value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
   },
   '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
+  // A selected questionnaire indicator is filled with the inverse surface; its dot and tick take the matching ink.
+  '--c2-questionnaire__control__selected--color': { token: 'color-on-inverse-surface' },
   '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
   '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
   // Month planner, compact layout: the selected day is an inverse-surface circle, today's a primary one.
