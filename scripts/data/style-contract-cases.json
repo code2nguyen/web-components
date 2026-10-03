@@ -20,12 +20,7 @@
       "fixture": "<c2-avatar-group><c2-avatar name=\"Ada Lovelace\"></c2-avatar><c2-avatar name=\"Grace Hopper\"></c2-avatar></c2-avatar-group>",
       "settledWhen": "c2-avatar-group c2-avatar:first-of-type .c2-avatar"
     },
-    {
-      "id": "button-default",
-      "tag": "c2-button",
-      "fixture": "<c2-button>Save</c2-button>",
-      "settledWhen": "c2-button .c2-button"
-    },
+    { "id": "button-default", "tag": "c2-button", "fixture": "<c2-button>Save</c2-button>", "settledWhen": "c2-button .c2-button" },
     {
       "id": "chart-linked-tooltip-visible",
       "tag": "c2-chart-tooltip",
@@ -47,24 +42,14 @@
       "fixture": "<c2-feather-activity></c2-feather-activity>",
       "settledWhen": "c2-feather-activity svg"
     },
-    {
-      "id": "phosphor-icon-shared",
-      "tag": "c2-phosphor-acorn",
-      "fixture": "<c2-phosphor-acorn></c2-phosphor-acorn>",
-      "settledWhen": "c2-phosphor-acorn svg"
-    },
+    { "id": "phosphor-icon-shared", "tag": "c2-phosphor-acorn", "fixture": "<c2-phosphor-acorn></c2-phosphor-acorn>", "settledWhen": "c2-phosphor-acorn svg" },
     {
       "id": "color-slider-default",
       "tag": "c2-color-slider",
       "fixture": "<c2-color-slider aria-label=\"Hue\"></c2-color-slider>",
       "settledWhen": "c2-color-slider .gradient"
     },
-    {
-      "id": "kbd-default",
-      "tag": "c2-kbd",
-      "fixture": "<c2-kbd>Ctrl K</c2-kbd>",
-      "settledWhen": "c2-kbd .c2-kbd"
-    },
+    { "id": "kbd-default", "tag": "c2-kbd", "fixture": "<c2-kbd>Ctrl K</c2-kbd>", "settledWhen": "c2-kbd .c2-kbd" },
     {
       "id": "label-linked",
       "tag": "c2-label",
@@ -78,18 +63,8 @@
       "settledWhen": "c2-label .c2-label",
       "hoverTarget": "c2-label .c2-label"
     },
-    {
-      "id": "label-required",
-      "tag": "c2-label",
-      "fixture": "<c2-label required>Display name</c2-label>",
-      "settledWhen": "c2-label .c2-label__required"
-    },
-    {
-      "id": "mat-icon-ligature",
-      "tag": "c2-mat-icon",
-      "fixture": "<c2-mat-icon>home</c2-mat-icon>",
-      "settledWhen": "c2-mat-icon"
-    },
+    { "id": "label-required", "tag": "c2-label", "fixture": "<c2-label required>Display name</c2-label>", "settledWhen": "c2-label .c2-label__required" },
+    { "id": "mat-icon-ligature", "tag": "c2-mat-icon", "fixture": "<c2-mat-icon>home</c2-mat-icon>", "settledWhen": "c2-mat-icon" },
     {
       "id": "skeleton-wave",
       "tag": "c2-skeleton",
@@ -105,24 +80,14 @@
       "settledWhen": "c2-tooltip .c2-tooltip",
       "stateSetup": [{ "target": "c2-tooltip", "attribute": "open", "value": "" }]
     },
-    {
-      "id": "symbol-success-shared",
-      "tag": "c2-symbol-success",
-      "fixture": "<c2-symbol-success></c2-symbol-success>",
-      "settledWhen": "c2-symbol-success svg"
-    },
+    { "id": "symbol-success-shared", "tag": "c2-symbol-success", "fixture": "<c2-symbol-success></c2-symbol-success>", "settledWhen": "c2-symbol-success svg" },
     {
       "id": "symbol-server-error-shared",
       "tag": "c2-symbol-server-error",
       "fixture": "<c2-symbol-server-error></c2-symbol-server-error>",
       "settledWhen": "c2-symbol-server-error svg"
     },
-    {
-      "id": "symbol-expired-shared",
-      "tag": "c2-symbol-expired",
-      "fixture": "<c2-symbol-expired></c2-symbol-expired>",
-      "settledWhen": "c2-symbol-expired svg"
-    },
+    { "id": "symbol-expired-shared", "tag": "c2-symbol-expired", "fixture": "<c2-symbol-expired></c2-symbol-expired>", "settledWhen": "c2-symbol-expired svg" },
     {
       "id": "symbol-empty-inbox-shared",
       "tag": "c2-symbol-empty-inbox",
