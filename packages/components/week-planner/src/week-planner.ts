@@ -364,7 +364,8 @@ function placeDay(items: { event: WeekPlannerEvent; from: number; to: number }[]
  *
  * Below 640px of width the planner shows three days, and below 420px one, of a strip that scrolls sideways and snaps
  * to a day: swiped on a touch screen, paged with the previous/next arrows that then appear in its header. It opens on
- * today, and the hour labels stay in place.
+ * today, and the hour labels stay in place. A dated planner keeps one pair of arrows: they page through the days and,
+ * at the edge of the strip, step into the previous or next week, opening it on the days next to the ones left.
  *
  * @tag c2-week-planner
  *
@@ -440,7 +441,10 @@ export class WeekPlanner extends LitElement {
   private readonly slotPresence = new SlotPresenceController(this, ['heading', 'actions'])
   private clock?: ReturnType<typeof setInterval>
   private resizeObserver?: ResizeObserver
-  private overflowing = false
+  /** The strip shows fewer than seven days; a dated planner's arrows then page through days, not whole weeks. */
+  @state() private overflowing = false
+  /** Where the strip opens on the next week change: the arrows land on the side of the week they came from. */
+  private landing?: 'start' | 'end'
   /** Index of the leftmost day the strip shows, restored when a resize would leave it between two days. */
   private firstShownDay = 0
   /** First day of the dated week last rendered, to bring the strip back to its start when the week changes. */
@@ -511,12 +515,19 @@ export class WeekPlanner extends LitElement {
     const start = this.weekStartDate
     const week = start ? toIso(start) : ''
     if (week !== this.renderedWeek) {
-      // Another week: a narrow strip opens on today when the week holds it, else on its first day.
+      // Another week: a narrow strip paged across the edge opens on the days next to the ones it left; otherwise it
+      // opens on today when the week holds it, else on its first day.
       if (this.renderedWeek && this.overflowing && this.scroller) {
-        const target = this.scroller.querySelector<HTMLElement>('.day-header.today') ?? this.scroller.querySelector<HTMLElement>('.day-header')
-        if (target) this.scroller.scrollLeft = target.offsetLeft
+        const scroller = this.scroller
+        if (this.landing === 'end') scroller.scrollLeft = scroller.scrollWidth - scroller.clientWidth
+        else if (this.landing === 'start') scroller.scrollLeft = 0
+        else {
+          const target = scroller.querySelector<HTMLElement>('.day-header.today') ?? scroller.querySelector<HTMLElement>('.day-header')
+          if (target) scroller.scrollLeft = target.offsetLeft
+        }
         this.updateEdges()
       }
+      this.landing = undefined
       this.renderedWeek = week
     }
     if (changed.has('events') && this.refocus) {
@@ -630,6 +641,20 @@ export class WeekPlanner extends LitElement {
     if (parity === this.shownParity) return
     this.parity = parity
     this.dispatchEvent(new CustomEvent<WeekPlannerParityChangeDetail>('parity-change', { detail: { parity }, bubbles: true, composed: true }))
+  }
+
+  /**
+   * The arrows of a dated planner. Seven days wide they step a week; on a narrow strip they page through its days and
+   * step into the previous or next week at its edge, so one pair of arrows does both.
+   */
+  private page(direction: 1 | -1) {
+    if (this.overflowing && !(direction < 0 ? this.atStart : this.atEnd)) {
+      this.scrollDays(direction)
+      return
+    }
+    if (this.overflowing) this.landing = direction < 0 ? 'end' : 'start'
+    const start = this.weekStartDate
+    if (start) this.showWeek(addDays(fromIso(this.date) ?? start, direction * 7))
   }
 
   /** Shows the week holding `date`; fires `week-change` when that is another week. */
@@ -838,15 +863,17 @@ export class WeekPlanner extends LitElement {
     </div>`
   }
 
-  private renderWeekNavigation(start: Date) {
+  private renderWeekNavigation() {
     const labels = this.labels
-    const step = (days: number) => this.showWeek(addDays(fromIso(this.date) ?? start, days))
+    // On a narrow strip the arrow moves by days until it reaches the edge of the week.
+    const previous = this.overflowing && !this.atStart ? labels.previous : labels.previousWeek
+    const next = this.overflowing && !this.atEnd ? labels.next : labels.nextWeek
     return html`<div class="week-navigation">
-      <button class="nav" type="button" aria-label=${labels.previousWeek} @click=${() => step(-7)}>
+      <button class="nav" type="button" aria-label=${previous} @click=${() => this.page(-1)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
       </button>
       <button class="nav today-button" type="button" @click=${() => this.showWeek(new Date())}>${this.todayLabel()}</button>
-      <button class="nav" type="button" aria-label=${labels.nextWeek} @click=${() => step(7)}>
+      <button class="nav" type="button" aria-label=${next} @click=${() => this.page(1)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
       </button>
     </div>`
@@ -1000,7 +1027,7 @@ export class WeekPlanner extends LitElement {
           ${usesParity && !dated ? this.renderSwitch() : nothing}
           <div class="trailing">
             <div class="actions" part="actions" ?hidden=${!hasActions}><slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
-            ${this.renderNavigation()} ${weekStart ? this.renderWeekNavigation(weekStart) : nothing}
+            ${weekStart ? this.renderWeekNavigation() : this.renderNavigation()}
           </div>
         </header>
         <div class="frame">
