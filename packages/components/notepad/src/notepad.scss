@@ -345,12 +345,6 @@
 .controls.open {
   opacity: 1;
 }
-// No hover on a touch screen: the controls stay in view.
-@media (hover: none) {
-  .controls {
-    opacity: 1;
-  }
-}
 .actions {
   display: flex;
   align-items: center;

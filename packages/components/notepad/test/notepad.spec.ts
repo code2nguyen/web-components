@@ -585,3 +585,17 @@ test('controls stay visible by default', async ({ page, renderScenario }) => {
   await page.getByText('Elsewhere').hover()
   await expect.poll(() => page.locator('c2-notepad .controls').evaluate((element) => getComputedStyle(element).opacity)).toBe('1')
 })
+
+test.describe('on a touch screen', () => {
+  test.use({ hasTouch: true })
+
+  test('hidden controls show once the page is tapped', async ({ page, renderScenario }) => {
+    await renderScenario(
+      '<p>Elsewhere</p><c2-notepad label="Notes" paper-picker style="--c2-notepad__controls--opacity: 0"><button slot="actions">Delete</button></c2-notepad>',
+    )
+    const opacity = () => page.locator('c2-notepad .controls').evaluate((element) => getComputedStyle(element).opacity)
+    await expect.poll(opacity).toBe('0')
+    await surface(page).tap()
+    await expect.poll(opacity).toBe('1')
+  })
+})

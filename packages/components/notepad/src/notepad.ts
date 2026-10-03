@@ -287,7 +287,7 @@ class TaskView implements NodeView {
  * @cssproperty {color} [--c2-notepad__glue--background=#3f444b]
  * @cssproperty {angle} [--c2-notepad__sheet--rotate=0deg] - Tilt of the sheet. A sticky note leans by a random angle (1°–4° either way, picked again each time the pad becomes a sticky note) unless this is set; 0deg keeps it straight.
  * @cssproperty {pixel} [--c2-notepad__top--padding-top=20px] - Space above the header row, which clears the spiral binding.
- * @cssproperty {opacity} [--c2-notepad__controls--opacity=1] - Opacity of the "Paper" button, the "Tear off" button and the `actions` slot while the notepad is neither hovered nor focused. Set it to 0 to show them only on the note being used (they always show on touch screens and while the paper picker is open).
+ * @cssproperty {opacity} [--c2-notepad__controls--opacity=1] - Opacity of the "Paper" button, the "Tear off" button and the `actions` slot while the notepad is neither hovered nor focused. Set it to 0 to show them only on the note being pointed at or written in (on a touch screen, once the writer taps into it), and while the paper picker is open.
  * @cssproperty {color} [--c2-notepad__ink-blue--color=#2848b8]
  * @cssproperty {color} [--c2-notepad__ink-black--color=#18181b]
  * @cssproperty {color} [--c2-notepad__ink-red--color=#b8232b]

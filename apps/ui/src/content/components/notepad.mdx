@@ -158,7 +158,7 @@ The colours are still CSS variables: `--c2-notepad__paper-yellow--background` an
 
 Buttons slotted into `actions` sit at the top right of the sheet, after the "Paper" button: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). They keep their own styles and events.
 
-On a board of many notes, set `--c2-notepad__controls--opacity: 0` to show the "Paper" button, the "Tear off" button and the actions only on the note being pointed at or written in. Touch screens have no hover, so there they always show, and they stay while the paper picker is open.
+On a board of many notes, set `--c2-notepad__controls--opacity: 0` to show the "Paper" button, the "Tear off" button and the actions only on the note being pointed at or written in. A touch screen has no hover: there they show once the writer taps into the page. They stay while the paper picker is open.
 
 ```html tag=CodeBlock
 <c2-notepad label="Groceries" paper-picker style="--c2-notepad__controls--opacity: 0">
