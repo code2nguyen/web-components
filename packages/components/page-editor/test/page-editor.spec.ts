@@ -312,3 +312,24 @@ test('is accessible with its menus open', async ({ page, renderScenario }) => {
   await expect(slashMenu(page)).toBeVisible()
   await accessible(page)
 })
+
+test('code tokens take their colour from the --c2-page-editor__syntax-*--color variables', async ({ page, renderScenario }) => {
+  // With the code ink set to the same colour, the 80/20 mix leaves the syntax colour itself.
+  await renderScenario(
+    `<c2-page-editor label="Notes" style="--c2-page-editor__syntax-keyword--color: rgb(255, 0, 0); --c2-page-editor__code-block--color: rgb(255, 0, 0)"></c2-page-editor>`,
+  )
+  await host(page).evaluate((element: HTMLElement & { value: string }) => (element.value = '```js\nif (ok) {}\n```'))
+  const keyword = page$(page).locator('pre span[style*="--_tok-token-keyword"]').first()
+  await expect(keyword).toHaveText('if')
+  // A browser serializes a mixed colour its own way: compare with the same mix computed in the page.
+  const red = await page.evaluate(() => {
+    const probe = document.body.appendChild(document.createElement('span'))
+    probe.style.color = 'color-mix(in srgb, rgb(255, 0, 0) 80%, rgb(255, 0, 0))'
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
+  })
+  await expect(keyword).toHaveCSS('color', red)
+  await host(page).evaluate((element) => element.style.setProperty('--c2-page-editor__syntax-keyword--color', 'rgb(0, 0, 255)'))
+  await expect(keyword).not.toHaveCSS('color', red)
+})

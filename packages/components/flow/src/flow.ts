@@ -559,8 +559,8 @@ export class Flow extends LitElement {
 
   private layoutOptions(): LayoutOptions {
     const tb = this.direction === 'TB'
-    const rankGap = this.readPixels('--_rank-gap', 72)
-    const nodeGap = this.readPixels('--_node-gap', 20)
+    const rankGap = this.readPixels('--c2-flow__rank--gap', 72)
+    const nodeGap = this.readPixels('--c2-flow__node--gap', 20)
     // Rows are shorter than columns are wide, so a top-to-bottom flow packs its ranks tighter.
     return { direction: this.direction, rankGap: tb ? rankGap * 0.7 : rankGap, nodeGap }
   }
@@ -1358,7 +1358,7 @@ export class Flow extends LitElement {
     } catch {
       return
     }
-    const gap = this.readPixels('--_card-offset', 8)
+    const gap = this.readPixels('--c2-flow__card--offset', 8)
     const placement = this.direction === 'LR' ? 'bottom' : 'right'
     this.cleanupCard = autoUpdate(anchor, card, async () => {
       const { x, y } = await computePosition(anchor, card, {
