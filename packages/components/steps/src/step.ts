@@ -232,13 +232,17 @@ export class Step extends LitElement {
   private readonly slotPresence = new SlotPresenceController(this, ['detail', 'trailing', 'toggle'])
 
   override connectedCallback() {
+    // A server-rendered step arrives with its shadow root already attached. The server cannot see the light DOM, so
+    // it drew the step as a leaf; the first client render must match that, and the sub-steps are picked up after.
+    const serverRendered = this.shadowRoot !== null && !this.hasUpdated
     super.connectedCallback()
     this.internals.role = 'listitem'
     // The arrival animation runs on the host, the settling one on the marker inside the shadow root — and an
     // animation event from in there does not cross the boundary, so both ends need a listener.
     this.addEventListener('animationend', this.handleAnimationEnd)
     this.renderRoot.addEventListener('animationend', this.handleAnimationEnd)
-    this.syncHasChildren()
+    if (serverRendered) void this.updateComplete.then(() => this.syncHasChildren())
+    else this.syncHasChildren()
   }
 
   override disconnectedCallback() {
