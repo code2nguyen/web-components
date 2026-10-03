@@ -1351,6 +1351,13 @@
     },
     {
       "tag": "c2-notepad",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-notepad",
       "slot": "header",
       "decision": "variables",
       "variables": ["--c2-notepad__header--color", "--c2-notepad__header--font-size"],
