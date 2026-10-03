@@ -929,3 +929,71 @@ test('a selected row paints its text with the selected colour, over a custom cel
       .evaluate((element) => [...element.shadowRoot!.querySelectorAll('.row--body')].map((row) => getComputedStyle(row.querySelector('.cell-content')!).color))
   expect(await colors()).toEqual(['rgb(200, 200, 200)', 'rgb(255, 255, 255)', 'rgb(200, 200, 200)'])
 })
+
+test('the grid takes its accessible name from the host aria-label and aria-labelledby, and follows changes', async ({ page, renderScenario }) => {
+  await renderScenario(`<h2 id="people-heading">Team members</h2>${table('aria-label="People"')}`)
+  const host = page.locator('c2-table')
+  await expect(page.getByRole('grid', { name: 'People' })).toBeVisible()
+
+  await host.evaluate((element) => element.setAttribute('aria-label', 'Staff'))
+  await expect(page.getByRole('grid', { name: 'Staff' })).toBeVisible()
+
+  // A light-DOM id cannot be resolved from the shadow root: the referenced text names the grid, and wins over aria-label.
+  await host.evaluate((element) => element.setAttribute('aria-labelledby', 'people-heading'))
+  await expect(page.getByRole('grid', { name: 'Team members' })).toBeVisible()
+
+  await host.evaluate((element) => {
+    element.removeAttribute('aria-labelledby')
+    element.removeAttribute('aria-label')
+  })
+  await expect(page.getByRole('grid')).toHaveAccessibleName('')
+  await accessible(page)
+})
+
+test('row-activate fires for a click and for Enter on a focused cell, not for controls inside a cell', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="none"'))
+  const host = page.locator('c2-table')
+  await host.evaluate((element) => {
+    const events: unknown[] = []
+    element.setAttribute('data-events', '[]')
+    element.addEventListener('row-activate', (event) => {
+      events.push({ ...(event as CustomEvent).detail, bubbles: event.bubbles })
+      element.setAttribute('data-events', JSON.stringify(events))
+    })
+    // A button rendered in a cell keeps its click and its Enter.
+    const column = element.querySelector('c2-table-column[field="team"]') as HTMLElement & { renderCell?: unknown }
+    column.renderCell = ({ value }: { value: unknown }) => {
+      const button = document.createElement('button')
+      button.textContent = String(value)
+      return button
+    }
+  })
+  const events = async () => JSON.parse((await host.getAttribute('data-events')) ?? '[]') as Array<{ key: string; rowIndex: number; bubbles: boolean }>
+
+  await page.getByRole('gridcell', { name: 'Grace Hopper' }).click()
+  await expect.poll(async () => (await events()).map((event) => event.key)).toEqual(['2'])
+  expect((await events())[0]).toMatchObject({ rowIndex: 1, bubbles: false })
+
+  // The click focused that cell: arrow down to the next row and open it with Enter.
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await expect.poll(async () => (await events()).map((event) => event.key)).toEqual(['2', '3'])
+
+  // Space does not activate; a control inside a cell keeps its click and Enter.
+  await page.keyboard.press(' ')
+  const button = page.getByRole('button', { name: 'Compilers' })
+  await button.click()
+  await button.press('Enter')
+  expect((await events()).map((event) => event.key)).toEqual(['2', '3'])
+})
+
+test('in a selectable table, a click and Enter still fire row-activate as well as selecting', async ({ page, renderScenario }) => {
+  await renderScenario(table('selection="single"'))
+  const host = page.locator('c2-table')
+  await watch(host, 'row-activate')
+  await page.getByRole('gridcell', { name: 'Ada Lovelace' }).click()
+  await expect(host).toHaveJSProperty('value', ['1'])
+  await page.keyboard.press('Enter')
+  await expect.poll(async () => JSON.parse((await host.getAttribute('data-events')) ?? '[]').length).toBe(2)
+  await expect(host).toHaveJSProperty('value', [])
+})

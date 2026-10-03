@@ -22,8 +22,19 @@ test('pointer journey follows the degraded service into a trace and correlated l
 
 test('keyboard user can enter a service and unknown ids recover', async ({ page }) => {
   await page.goto('./services/')
-  await page.keyboard.press('Tab')
+  const grid = page.getByRole('grid', { name: 'Services' })
+  await expect(grid).toBeVisible()
+  // The grid has one tab stop, a roving cell that starts on the header. Focus it, step down to the first service, and
+  // open it with Enter: c2-table fires row-activate for the keyboard as it does for a click.
+  await grid.locator('[role="columnheader"][tabindex="0"]').focus()
+  await page.keyboard.press('ArrowDown')
+  const cell = grid.locator('[role="gridcell"][tabindex="0"]')
+  await expect(cell).toBeFocused()
+  const name = (await grid.getByRole('row').nth(1).getByRole('gridcell').first().textContent())!.trim()
   await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/\/services\/[^/?]+\/?(\?|$)/)
+  await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
+
   await page.goto('./services/not-a-service/')
   await expect(page.getByRole('heading', { name: /not found/i })).toBeVisible()
   await page.goto('./traces/not-a-trace/')
@@ -65,7 +76,7 @@ test('service, trace, and log drill-downs preserve scope and explicit return con
   await expect(serviceLink).toHaveAttribute('href', /range=30m/)
   await expect(serviceLink).toHaveAttribute('href', /return=/)
   const serviceName = await serviceLink.locator('strong').textContent()
-  // With JavaScript the table row is the control: its row-click navigates.
+  // With JavaScript the table row is the control: its row-activate navigates.
   await page.locator('c2-table').getByRole('row').filter({ hasText: serviceName! }).first().click()
   await expect(page).toHaveURL(/\/services\/staging-[^/?]+\/?\?(?=.*env=staging)(?=.*range=30m)(?=.*return=)/)
 

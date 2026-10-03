@@ -70,7 +70,7 @@ export function TraceResults() {
     { page: projection.page, pageSize: projection.pageSize, totalItems: projection.total, pageSizeOptions: [25, 50, 100] },
     [projection.page, projection.pageSize, projection.total],
   )
-  useCustomEvent(tableRef, 'row-click', (event) => router.push(traceDetailHref(String((event.detail.row as { id: string }).id), state)))
+  useCustomEvent(tableRef, 'row-activate', (event) => router.push(traceDetailHref(String((event.detail.row as { id: string }).id), state)))
   useCustomEvent(tableRef, 'sort-change', (event) => {
     const sort = event.detail.sort[0]
     if (!sort) return

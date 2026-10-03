@@ -76,8 +76,8 @@ export function LogResults() {
     if (projection.page !== state.page) router.replace(updateQuery(search, { page: String(projection.page) }), { scroll: false })
   }, [projection.page, router, search, state.page])
 
-  // The open record is the table's single selection, so a keyboard user opens it with Enter on a row (c2-table fires
-  // `row-click` for pointer clicks only) and the open record stays marked in the list.
+  // The open record is the table's single selection, so a click or Enter on a row opens it and the open record stays
+  // marked in the list.
   const selectedRows = useMemo(() => (selectedId ? [selectedId] : []), [selectedId])
   useElementProperties(tableRef, 'c2-table', { rows, rowKey: 'id', sortModel, value: selectedRows }, [rows, sortModel, selectedRows])
   useElementProperties(

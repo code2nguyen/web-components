@@ -263,6 +263,7 @@ export interface TableEventMap {
   'selection-change': CustomEvent<TableSelectionChangeEventDetail>
   'sort-change': CustomEvent<TableSortChangeEventDetail>
   'row-click': CustomEvent<TableRowEventDetail>
+  'row-activate': CustomEvent<TableRowEventDetail>
   'cell-click': CustomEvent<TableCellEventDetail>
   'column-resize': CustomEvent<TableColumnResizeEventDetail>
   'page-change': CustomEvent<TablePageChangeEventDetail>
@@ -392,6 +393,7 @@ export interface Table {
  * @event {CustomEvent<TableSelectionChangeEventDetail>} selection-change - Fired after the user changes the selection. `detail.value` is the array of selected row keys, `detail.rows` the matching rows. Does not bubble: several components fire `selection-change`, so a listener belongs on the element itself rather than on an ancestor.
  * @event {CustomEvent<TableSortChangeEventDetail>} sort-change - Fired after the user clicks a sortable header. `detail.sort` is the new sort model, in priority order.
  * @event {CustomEvent<TableRowEventDetail>} row-click - Fired when a row is clicked, before the selection is applied.
+ * @event {CustomEvent<TableRowEventDetail>} row-activate - Fired when the user opens a row: a pointer click on it, or Enter on one of its focused cells — so one listener serves a table used for navigation from the mouse and the keyboard alike. Not fired by a click or Enter that belongs to a control inside a cell (a button, link or input), and fired before the selection is applied. Does not bubble: a table nested in another table's cell would otherwise open the outer row too, so the listener belongs on the element itself.
  * @event {CustomEvent<TableCellEventDetail>} cell-click - Fired when a cell is clicked; adds `detail.column` and `detail.value`.
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
  * @event {CustomEvent<TableGroupToggleEventDetail>} group-toggle - Fired after the user opens or closes a group, with its `key`, whether it is now `expanded`, and the `group` itself (its rows and aggregates). `expandedGroups` already holds the new state. Does not bubble.
@@ -538,6 +540,18 @@ export class Table extends LitElement {
   static override styles = unsafeCSS(styles)
 
   @query('.viewport') private viewport!: HTMLElement | null
+
+  /**
+   * The host's `aria-label`, observed so the grid inside the shadow root is named after it: the host is not the
+   * grid, so a name set on it would otherwise name nothing.
+   */
+  @property({ attribute: 'aria-label' }) private hostAriaLabel: string | null = null
+
+  /**
+   * The host's `aria-labelledby`. ARIA cannot resolve a light-DOM id from inside the shadow root, so the referenced
+   * elements' text is copied onto the grid instead, and `aria-labelledby` wins over `aria-label` as ARIA ranks them.
+   */
+  @property({ attribute: 'aria-labelledby' }) private hostAriaLabelledBy: string | null = null
 
   /** The rows to display. An array in the property, JSON in the attribute. */
   @property({ converter: jsonPropertyConverter }) rows: TableRow[] = []
@@ -1135,6 +1149,7 @@ export class Table extends LitElement {
           part="grid"
           aria-rowcount=${this.#lineCount + (summary ? 2 : 1)}
           aria-colcount=${columns.length}
+          aria-label=${this.gridLabel || nothing}
           aria-busy=${this.loading || this.#isBootstrapping ? 'true' : 'false'}
           style=${styleMap({ '--_grid-template': this.#gridTemplate(columns) })}
           @keydown=${this.#handleKeyDown}
@@ -2350,14 +2365,37 @@ export class Table extends LitElement {
     this.dispatchEvent(new CustomEvent<TableSortChangeEventDetail>('sort-change', { detail: { sort: this.sortModel }, bubbles: true, composed: true }))
   }
 
+  /**
+   * The grid's accessible name: the host's `aria-labelledby` (the text of the elements it names, looked up in the
+   * host's own tree) first, as ARIA ranks it, then the host's `aria-label`.
+   */
+  private get gridLabel(): string {
+    const ids = (this.hostAriaLabelledBy ?? '').split(/\s+/).filter(Boolean)
+    if (ids.length) {
+      const root = this.getRootNode() as Document | ShadowRoot
+      const text = ids
+        .map((id) => root.getElementById?.(id)?.textContent?.replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .join(' ')
+      if (text) return text
+    }
+    return this.hostAriaLabel?.trim() ?? ''
+  }
+
   #handleRowClick(event: MouseEvent, line: number) {
     const index = this.#rowIndexAt(line)
     const row = this.#rowAt(index)
     if (!row) return
     const key = this.#keyAt(index, row)
     this.dispatchEvent(new CustomEvent<TableRowEventDetail>('row-click', { detail: { row, rowIndex: index, key }, bubbles: true, composed: true }))
+    if (!this.#isFromCellControl(event)) this.#activateRow(index, row, key)
     if (this.selection === 'none') return
     this.#applySelection(line, { toggle: event.metaKey || event.ctrlKey, range: event.shiftKey })
+  }
+
+  /** Fires `row-activate`. Not bubbling, like `selection-change`: a table nested in a cell must not open the outer row. */
+  #activateRow(rowIndex: number, row: TableRow, key: string) {
+    this.dispatchEvent(new CustomEvent<TableRowEventDetail>('row-activate', { detail: { row, rowIndex, key }, bubbles: false, composed: false }))
   }
 
   #handleCellClick(line: number, columnIndex: number, column: TableColumnConfig, value: unknown) {
@@ -2552,8 +2590,16 @@ export class Table extends LitElement {
       case ' ': {
         event.preventDefault()
         if (row === SUMMARY_ROW) return
-        if (row === HEADER_ROW) this.#toggleSort(columns[column], event.shiftKey)
-        else if (this.selection !== 'none') this.#applySelection(row, { toggle: event.key === ' ' || event.ctrlKey || event.metaKey, range: event.shiftKey })
+        if (row === HEADER_ROW) {
+          this.#toggleSort(columns[column], event.shiftKey)
+          return
+        }
+        if (event.key === 'Enter') {
+          const index = this.#rowIndexAt(row)
+          const data = this.#rowAt(index)
+          if (data) this.#activateRow(index, data, this.#keyAt(index, data))
+        }
+        if (this.selection !== 'none') this.#applySelection(row, { toggle: event.key === ' ' || event.ctrlKey || event.metaKey, range: event.shiftKey })
         return
       }
       default:
@@ -2571,7 +2617,21 @@ export class Table extends LitElement {
    * rather than from the cell itself. Enter and Space belong to that control (cancelling them here used to stop a
    * slotted button from ever activating from the keyboard), and so does every key while it edits text.
    */
-  #isFromCellControl(event: KeyboardEvent): boolean {
+  #isFromCellControl(event: KeyboardEvent | MouseEvent): boolean {
+    if (event instanceof MouseEvent) {
+      // A click belongs to a control when one sits between the target and the cell, in any shadow root on the way.
+      for (const node of event.composedPath()) {
+        if (!(node instanceof Element)) continue
+        if (node.matches('.cell, .row')) return false
+        if (
+          node.matches(
+            'a[href], button, input, select, textarea, label, summary, [contenteditable=""], [contenteditable="true"], [role="button"], [role="link"]',
+          )
+        )
+          return true
+      }
+      return false
+    }
     const origin = event.composedPath()[0]
     if (!(origin instanceof Element) || origin.matches('.cell')) return false
     if (event.key === 'Enter' || event.key === ' ') return true

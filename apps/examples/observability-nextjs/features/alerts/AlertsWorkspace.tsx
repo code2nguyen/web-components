@@ -181,11 +181,11 @@ export function AlertsWorkspace({ dataset }: Readonly<{ dataset: TelemetryDatase
     },
     [incidentRows],
   )
-  useCustomEvent(rulesTableRef, 'row-click', (event) => {
+  useCustomEvent(rulesTableRef, 'row-activate', (event) => {
     const id = String((event.detail.row as { id: string }).id)
     router.push(ruleHref(id))
   })
-  useCustomEvent(incidentsTableRef, 'row-click', (event) => {
+  useCustomEvent(incidentsTableRef, 'row-activate', (event) => {
     router.push(incidentHref(String((event.detail.row as { id: string }).id)))
   })
 

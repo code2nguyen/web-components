@@ -163,6 +163,34 @@ A click selects a row on its own, and clicking the row that is already the whole
 … — so a sort, a filter or a new `rows` array hands the selection to whichever rows now sit there. The table warns
 about it once in the console. `selectRows()` and `deselectRows()` fire `selection-change`, like `selectAll()`.
 
+### Opening a row: row-activate
+
+A table used for navigation — each row leads to a detail page — listens for `row-activate`. It fires for a pointer
+click on a row and for Enter on a focused body cell, so one listener serves the mouse and the keyboard alike; `row-click`
+stays pointer-only. Its detail is the `row-click` one (`row`, `rowIndex`, `key`). A click or Enter that belongs to a
+control inside a cell (a button, link or input) does not activate the row, and Space never does. In a selectable table
+it fires before the selection is applied, so a click or Enter both selects and activates.
+
+`row-activate` does not bubble: a table nested in another table's cell would otherwise open the outer row as well.
+Put the listener on the table itself.
+
+```typescript tag=CodeBlock
+table.addEventListener('row-activate', (event) => {
+  location.href = `/services/${event.detail.key}`
+})
+```
+
+### Naming the table
+
+Name the table the way you would any grid: `aria-label`, or `aria-labelledby` pointing at a heading. Both are read
+from the host and handed to the grid inside the shadow root, and follow later changes. An id cannot be resolved across
+the shadow boundary, so with `aria-labelledby` the grid is named after the referenced elements' text.
+
+```html tag=CodeBlock
+<h2 id="services-heading">Services</h2>
+<c2-table aria-labelledby="services-heading" row-key="id"></c2-table>
+```
+
 ### Totals: the summary row
 
 A column with a `summary` gets a figure in a totals row below the body: `sum`, `avg`, `min`, `max`, `count` (the

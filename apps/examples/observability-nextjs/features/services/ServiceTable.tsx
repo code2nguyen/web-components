@@ -43,7 +43,7 @@ export function ServiceTable({ services, state }: Readonly<{ services: readonly 
     [],
   )
   useElementProperties(tableRef, 'c2-table', { rows, columns, rowKey: 'id' }, [rows, columns])
-  useCustomEvent(tableRef, 'row-click', (event) => router.push(serviceDetailHref(String((event.detail.row as { id: string }).id), state)))
+  useCustomEvent(tableRef, 'row-activate', (event) => router.push(serviceDetailHref(String((event.detail.row as { id: string }).id), state)))
   // `cell-slot` children go to the lines the table rendered (`cell:<line>:<field>`), each looked up by its row key.
   const rendered = useRenderedRows(tableRef)
   const servicesById = useMemo(() => new Map(services.map((service) => [service.id, service])), [services])

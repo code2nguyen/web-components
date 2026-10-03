@@ -25,6 +25,8 @@ declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       'c2-table': Omit<C2Props<Table>, 'rows' | 'columns' | 'value' | 'sortModel' | 'summaryValues' | 'groupBy' | 'expandedGroups'> & {
+        'aria-label'?: Attribute
+        'aria-labelledby'?: Attribute
         'row-key'?: Attribute
         'checkbox-selection'?: Attribute
         sort?: Attribute
