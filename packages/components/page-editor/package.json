@@ -1,0 +1,85 @@
+{
+  "name": "@c2n/page-editor",
+  "version": "0.0.20",
+  "type": "module",
+  "main": "dist/page-editor.js",
+  "exports": {
+    ".": {
+      "types": "./types/src/page-editor.d.ts",
+      "default": "./dist/page-editor.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "default": "./react.js"
+    },
+    "./vue": {
+      "types": "./vue.d.ts",
+      "default": "./vue.js"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "types",
+    "custom-elements.json",
+    "react.d.ts",
+    "react.js",
+    "vue.d.ts",
+    "vue.js"
+  ],
+  "keywords": [
+    "page-editor",
+    "rich text",
+    "editor",
+    "markdown",
+    "web component",
+    "lit"
+  ],
+  "license": "MIT",
+  "author": "code2nguyen@gmail.com",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/code2nguyen/web-components.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "wireit",
+    "build:only": "vite build",
+    "type-check": "wireit"
+  },
+  "wireit": {
+    "type-check": {
+      "dependencies": [
+        "../../core:build"
+      ],
+      "command": "tsc -p tsconfig.lib.json --composite false"
+    },
+    "build": {
+      "dependencies": [
+        "type-check"
+      ],
+      "command": "vite build"
+    }
+  },
+  "dependencies": {
+    "@c2n/core": "0.0.20",
+    "lit": "3.3.3",
+    "prosemirror-commands": "^1.7.2",
+    "prosemirror-history": "^1.5.1",
+    "prosemirror-inputrules": "^1.5.1",
+    "prosemirror-keymap": "^1.2.3",
+    "prosemirror-model": "^1.25.12",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-transform": "^1.12.2",
+    "prosemirror-view": "^1.42.6",
+    "shiki": "4.4.3"
+  },
+  "devDependencies": {
+    "@c2n/config": "*"
+  },
+  "customElements": "custom-elements.json"
+}

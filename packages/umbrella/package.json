@@ -253,6 +253,10 @@
       "types": "./lib/overlay.d.ts",
       "default": "./lib/overlay.js"
     },
+    "./page-editor": {
+      "types": "./lib/page-editor.d.ts",
+      "default": "./lib/page-editor.js"
+    },
     "./pagination": {
       "types": "./lib/pagination.d.ts",
       "default": "./lib/pagination.js"
@@ -472,6 +476,7 @@
     "@c2n/number-input": "0.0.20",
     "@c2n/otp-input": "0.0.20",
     "@c2n/overlay": "0.0.20",
+    "@c2n/page-editor": "0.0.20",
     "@c2n/pagination": "0.0.20",
     "@c2n/progress": "0.0.20",
     "@c2n/qr-code": "0.0.20",
