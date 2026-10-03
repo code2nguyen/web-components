@@ -58,7 +58,6 @@ export type TableRowStyler = (context: TableRowContext) => TableRowStyle | undef
  */
 export type TableRowPartResolver = (context: TableRowContext) => string | readonly string[] | null | undefined
 
-/** Detail of `range-change`: the body rows the table has rendered, which is the window while it virtualizes. */
 /** One data row of the rendered window, as `range-change` reports it. */
 export interface TableRenderedRow {
   /**
@@ -72,6 +71,7 @@ export interface TableRenderedRow {
   row: TableRow
 }
 
+/** Detail of `range-change`: the body rows the table has rendered, which is the window while it virtualizes. */
 export interface TableRangeChangeEventDetail {
   /** Display line of the first rendered body row, counted across the whole dataset (page offset included). */
   start: number

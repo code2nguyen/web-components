@@ -2,5 +2,6 @@
 // Every module of @c2n/table. Importing this registers each of its elements.
 
 export * from '@c2n/table'
+export * from '@c2n/table/rendered-rows.js'
 export * from '@c2n/table/table-column.js'
 export * from '@c2n/table/table-types.js'

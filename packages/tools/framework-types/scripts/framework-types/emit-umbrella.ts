@@ -23,6 +23,13 @@ const EXCLUDED = new Set(['@c2n/feather-icons', '@c2n/phosphor-icons', '@c2n/sym
 const THEME = '@c2n/theme'
 const THEME_STYLESHEETS = ['theme.css', 'base.css', 'tokens.css']
 
+/**
+ * A package's framework bindings (`@c2n/table/react-hooks.js`, `@c2n/table/vue-composables.js`) import React or Vue,
+ * which the package declares as optional peers. They stay out of the package's entry, or `import '@c2n/components'`
+ * would load both frameworks, and each gets an umbrella subpath of its own: `@c2n/components/table/react-hooks.js`.
+ */
+const FRAMEWORK_BINDING = /^\.\/(react|vue)-[\w-]+\.js$/
+
 /** Keys of the umbrella's `package.json` that the generator owns; everything else is hand-written. */
 const GENERATED_KEYS = ['exports', 'files', 'dependencies', 'peerDependencies', 'peerDependenciesMeta']
 
@@ -42,6 +49,8 @@ export interface UmbrellaEntry {
   name: string
   /** Every JavaScript module of the package, e.g. `@c2n/table`, `@c2n/table/table-column.js`. */
   modules: string[]
+  /** Framework bindings, re-exported one by one rather than by the entry, e.g. `react-hooks.js`. */
+  bindings: string[]
 }
 
 export interface UmbrellaFile {
@@ -65,12 +74,19 @@ export function umbrellaEntries(packages: DiscoveredPackage[]): UmbrellaEntry[] 
     .filter((pkg) => !EXCLUDED.has(pkg.name))
     .map((pkg) => {
       const exports = readJson(join(pkg.dir, 'package.json')).exports ?? {}
-      const subpaths = Object.entries(exports)
+      const javascript = Object.entries(exports)
         // A wildcard subpath (`@c2n/chart/maps/*.js`) publishes data modules an element loads on demand; re-exporting
         // them would make the barrel load every one of them up front.
         .filter(([subpath, entry]) => subpath !== '.' && subpath.endsWith('.js') && !subpath.includes('*') && typeof entry !== 'string' && entry.types)
-        .map(([subpath]) => `${pkg.name}/${subpath.slice(2)}`)
-      return { pkg: pkg.name, name: pkg.name.slice('@c2n/'.length), modules: [...(exports['.'] ? [pkg.name] : []), ...subpaths.sort()] }
+        .map(([subpath]) => subpath)
+      const subpaths = javascript.filter((subpath) => !FRAMEWORK_BINDING.test(subpath)).map((subpath) => `${pkg.name}/${subpath.slice(2)}`)
+      const bindings = javascript.filter((subpath) => FRAMEWORK_BINDING.test(subpath)).map((subpath) => subpath.slice(2))
+      return {
+        pkg: pkg.name,
+        name: pkg.name.slice('@c2n/'.length),
+        modules: [...(exports['.'] ? [pkg.name] : []), ...subpaths.sort()],
+        bindings: bindings.sort(),
+      }
     })
 }
 
@@ -83,6 +99,18 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
     const body = [BANNER, `// Every module of ${entry.pkg}. Importing this registers each of its elements.`, ``, ...reexports(entry.modules), ``].join('\n')
     files.push({ path: `lib/${entry.name}.js`, contents: body, parser: 'typescript' })
     files.push({ path: `lib/${entry.name}.d.ts`, contents: body, parser: 'typescript' })
+    for (const binding of entry.bindings) {
+      const specifier = `${entry.pkg}/${binding}`
+      const bindingBody = [
+        BANNER,
+        `// ${specifier}, kept out of the ${entry.pkg} entry because it imports a framework.`,
+        ``,
+        ...reexports([specifier]),
+        ``,
+      ].join('\n')
+      files.push({ path: `lib/${entry.name}/${binding}`, contents: bindingBody, parser: 'typescript' })
+      files.push({ path: `lib/${entry.name}/${binding.replace(/\.js$/, '.d.ts')}`, contents: bindingBody, parser: 'typescript' })
+    }
   }
 
   const barrel = [
@@ -154,7 +182,12 @@ function emitPackageJson(entries: UmbrellaEntry[], umbrellaDir: string, scopeDir
   const handWritten = Object.fromEntries(Object.entries(current).filter(([key]) => !GENERATED_KEYS.includes(key)))
 
   const exports: Record<string, unknown> = { '.': { types: './index.d.ts', default: './index.js' } }
-  for (const entry of entries) exports[`./${entry.name}`] = { types: `./lib/${entry.name}.d.ts`, default: `./lib/${entry.name}.js` }
+  for (const entry of entries) {
+    exports[`./${entry.name}`] = { types: `./lib/${entry.name}.d.ts`, default: `./lib/${entry.name}.js` }
+    for (const binding of entry.bindings) {
+      exports[`./${entry.name}/${binding}`] = { types: `./lib/${entry.name}/${binding.replace(/\.js$/, '.d.ts')}`, default: `./lib/${entry.name}/${binding}` }
+    }
+  }
   exports['./react'] = { types: './react.d.ts', default: './react.js' }
   exports['./vue'] = { types: './vue.d.ts', default: './vue.js' }
   for (const stylesheet of THEME_STYLESHEETS) exports[`./${stylesheet}`] = `./${stylesheet}`
