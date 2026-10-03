@@ -1,6 +1,6 @@
 {
   "name": "@c2n/cascader",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "type": "module",
   "main": "dist/cascader.js",
   "exports": {
@@ -64,8 +64,8 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.21",
-    "@c2n/overlay": "0.0.21",
+    "@c2n/core": "0.0.22",
+    "@c2n/overlay": "0.0.22",
     "lit": "3.3.3"
   },
   "devDependencies": {
