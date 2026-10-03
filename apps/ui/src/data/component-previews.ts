@@ -132,7 +132,7 @@ greet('world')"></c2-code-editor>`,
   <c2-details label="Shipping" expanded>Ships in 3–5 days.</c2-details>
   <c2-details label="Returns">Free within 30 days.</c2-details>
 </c2-accordion>`,
-  avatar: `<c2-avatar-group aria-label="Project contributors" style="--c2-avatar-group--max-width:150px">
+  avatar: `<c2-avatar-group aria-label="Project contributors" style="width:170px;--c2-avatar-group--max-width:170px;--c2-avatar-group--overlap:6px;--c2-avatar-group__avatar--box-shadow:0 0 0 2px var(--c2-theme--color-surface, #ffffff);--c2-avatar__badge--border:2px solid var(--c2-theme--color-surface, #ffffff)">
   <c2-avatar name="Nguyen Thai Vinh" status="online"></c2-avatar>
   <c2-avatar auto-color name="Elisa Jasmin" initial-count="2"></c2-avatar>
   <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
