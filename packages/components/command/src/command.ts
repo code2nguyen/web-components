@@ -71,6 +71,7 @@ export interface Command {
  * @cssproperty {color} [--c2-command--color=#18181b]
  * @cssproperty {font-family} --c2-command--font-family
  * @cssproperty {pixel} --c2-command--width - Defaults to the width of the container.
+ * @cssproperty {pixel} [--c2-command--max-height=none] - Caps the height of the whole palette: the field and the footer stay in view and the list shrinks to the space left, scrolling on its own. Pair it with `--c2-command__list--max-height: none` to let the list grow past its own cap and fill that height. Keep the host's `display: flex`.
  *
  * @cssproperty {border} [--c2-command--border-top=1px solid #e4e4e7]
  * @cssproperty {border} [--c2-command--border-right=1px solid #e4e4e7]
@@ -95,7 +96,7 @@ export interface Command {
  * @cssproperty {pixel} [--c2-command__icon--size=16px]
  * @cssproperty {color} [--c2-command__icon--color=#71717a]
  *
- * @cssproperty {pixel} [--c2-command__list--max-height=320px] - The list scrolls past this height.
+ * @cssproperty {pixel} [--c2-command__list--max-height=320px] - The list scrolls past this height. Set `none` to let the list take whatever `--c2-command--max-height` leaves.
  * @cssproperty {padding} [--c2-command__list--padding-top=4px]
  * @cssproperty {padding} [--c2-command__list--padding-right=4px]
  * @cssproperty {padding} [--c2-command__list--padding-bottom=4px]

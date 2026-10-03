@@ -22,20 +22,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-### `c2-command` cannot fill a height-capped container
-
-- **Severity:** papercut
-- **Hit while:** building the docs site's ⌘K palette on `c2-command` inside a `c2-modal` (`SearchPalette.astro`),
-  2026-09-30.
-- **Expected:** a palette in a height-capped modal keeps its field and footer in view and scrolls only its list.
-- **What happens:** the list's only height control is `--c2-command__list--max-height` (320px by default), a fixed
-  length. A long list pushes the footer past the modal's `max-height`, and the modal body grows a second scrollbar
-  next to the list's. The workaround is a `max-height` on the host equal to the modal's content box, plus
-  `--c2-command__list--max-height: none` so the list flexes. Setting `display: block` on the host, as for most
-  components, also breaks it, since the host's own flex column is what lets the list shrink.
-- **Smallest fix:** document the "fill the container" recipe, or give the host a `--c2-command--max-height`
-  (default `none`) so one variable caps the whole palette and the list takes what is left.
-
 ### Astro SSR consumes navigation-menu item links in site chrome
 
 - **Severity:** docs
@@ -177,6 +163,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | tooling                         | Stale or misspelled `--c2-*` names passed every check; `npm run check:css-contracts` now validates app usage against the manifests.                                                                                                                                                                                             | 2026-09-23 (#102)                                                                                                                                                                                            |
 | `c2-dashboard`                  | Stored layouts held tracks, order and breakpoint but not named panel sizes, so apps kept a second storage model. `sizes` on the grid, `size` on a card and `setPanelSize()` now persist, validate on restore and reset with the layout.                                                                                         | 2026-10-03                                                                                                                                                                                                   |
 | `@c2n/theme`                    | `base.css` set every per-side variable, so a component shorthand behind them (`--c2-details--border`) was never read. The generator now leaves out a side that falls back to its shorthand with the same mapped value; `c2-details` ships `--c2-details--border`.                                                               | 2026-10-03                                                                                                                                                                                                   |
+| `c2-command`                    | The only height control was the list's fixed `--c2-command__list--max-height`, so a palette in a capped modal pushed its footer out. `--c2-command--max-height` now caps the whole palette and the list flexes into what is left.                                                                                               | 2026-10-03                                                                                                                                                                                                   |
 
 ## Won't fix
 
