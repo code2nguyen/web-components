@@ -2,6 +2,60 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "0.0.24",
+      "date": "2026-10-03",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["theme"],
+              "text": "Add color-on-fill for text on a saturated fill",
+              "hash": "d015383"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Add dark-block colour roles that stay dark in both themes",
+              "hash": "b6295ad"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["week-planner"],
+              "text": "Hydrate with the server's clock",
+              "hash": "388ec4f"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Regenerate the React and Vue declarations for actions-placement",
+              "hash": "534f4ca"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Gallery text on coloured fills takes color-on-fill",
+              "hash": "95c76f0"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Dark gallery cards take their colours from the dark-block tokens",
+              "hash": "b37d26e"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.0.23",
       "date": "2026-10-03",
       "sections": [
