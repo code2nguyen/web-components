@@ -1,6 +1,6 @@
 {
   "name": "@c2n/notepad",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "type": "module",
   "main": "dist/notepad.js",
   "exports": {
@@ -68,7 +68,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.23",
+    "@c2n/core": "0.0.24",
     "lit": "3.3.3",
     "prosemirror-commands": "^1.7.2",
     "prosemirror-history": "^1.5.1",

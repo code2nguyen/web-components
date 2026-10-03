@@ -3,6 +3,23 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [0.0.24](https://github.com/code2nguyen/web-components/releases/tag/v0.0.24) — 2026-10-03
+
+### Features
+
+- **theme:** Add color-on-fill for text on a saturated fill ([d015383](https://github.com/code2nguyen/web-components/commit/d015383))
+- **theme:** Add dark-block colour roles that stay dark in both themes ([b6295ad](https://github.com/code2nguyen/web-components/commit/b6295ad))
+
+### Fixes
+
+- **week-planner:** Hydrate with the server's clock ([388ec4f](https://github.com/code2nguyen/web-components/commit/388ec4f))
+- **flow:** Regenerate the React and Vue declarations for actions-placement ([534f4ca](https://github.com/code2nguyen/web-components/commit/534f4ca))
+
+### Docs site & examples
+
+- **ui:** Gallery text on coloured fills takes color-on-fill ([95c76f0](https://github.com/code2nguyen/web-components/commit/95c76f0))
+- **ui:** Dark gallery cards take their colours from the dark-block tokens ([b37d26e](https://github.com/code2nguyen/web-components/commit/b37d26e))
+
 ## [0.0.23](https://github.com/code2nguyen/web-components/releases/tag/v0.0.23) — 2026-10-03
 
 ### Features

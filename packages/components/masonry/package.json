@@ -1,6 +1,6 @@
 {
   "name": "@c2n/masonry",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "type": "module",
   "main": "dist/masonry.js",
   "exports": {
@@ -67,7 +67,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.23",
+    "@c2n/core": "0.0.24",
     "lit": "3.3.3"
   },
   "devDependencies": {
