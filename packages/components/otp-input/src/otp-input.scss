@@ -39,6 +39,8 @@
 :host {
   display: inline-flex;
   flex-direction: column;
+  // Never wider than the column it sits in: the cells shrink below --c2-otp-input__cell--width instead.
+  max-width: 100%;
   gap: css.cssVar(supporting-text--gap);
   vertical-align: middle;
 }
@@ -50,6 +52,7 @@
 .field {
   position: relative;
   display: inline-flex;
+  max-width: 100%;
   font-family: css.cssVar(font-family);
 
   &.disabled {
@@ -60,6 +63,7 @@
 
 .cells {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: css.cssVar(gap);
 }
@@ -68,7 +72,8 @@
   position: relative;
   display: grid;
   box-sizing: border-box;
-  flex: none;
+  flex: 0 1 auto;
+  min-width: 0;
   width: css.cssVar(cell--width);
   height: css.cssVar(cell--height);
   place-items: center;
