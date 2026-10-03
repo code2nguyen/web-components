@@ -60,6 +60,11 @@ export interface FlowNode<T = unknown> {
 export interface FlowEdge {
   source: string
   target: string
+  /**
+   * Short text drawn halfway along the edge, such as the "yes" and "no" of a decision's branches. It is read out with
+   * the relations of both nodes. In an `editable` flow the user edits it in place (`edge-edit`).
+   */
+  label?: string
 }
 
 /** Positions keyed by node id, in canvas pixels (the top-left corner of each node). */
@@ -84,8 +89,8 @@ export interface FlowContextMenuContext<T = unknown> {
   edge: FlowEdge | null
   /**
    * The built-in rows for that spot: the view controls on the canvas (preceded by **Add node** in an `editable`
-   * flow), **Rename** and **Delete** on a node and **Delete** on an edge of an `editable` flow, `nothing` on a node
-   * of a read-only one.
+   * flow), **Rename** and **Delete** on a node and **Edit label** and **Delete** on an edge of an `editable` flow,
+   * `nothing` on a node of a read-only one.
    */
   defaultItems: unknown
   /** Viewport coordinates the menu opens at. */
@@ -163,4 +168,15 @@ export interface FlowNodeDeleteDetail {
 export interface FlowEdgeEventDetail {
   source: string
   target: string
+}
+
+/**
+ * `edge-edit`: the user changed the label of the edge from `source` to `target` with the inline editor. Set the
+ * edge's `label`, or remove it when `label` is empty.
+ */
+export interface FlowEdgeEditDetail {
+  source: string
+  target: string
+  /** The new label, trimmed. Empty when the user cleared it; never the current label. */
+  label: string
 }

@@ -5,6 +5,9 @@ title: 'Notepad gallery'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import { Notepad } from '@c2n/notepad'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
+import { FeatherBookmarkIcon as FeatherBookmark } from '@c2n/feather-icons/icons/bookmark.js'
 
 <GalleryGrid>
 
@@ -150,6 +153,46 @@ follow up with DBA at standup"><span slot="header">Night shift</span></c2-notepa
 <c2-notepad class="tear-pad" label="To call" tearable value="Plumber: Thu after 4
 Landlord about the heating
 Pick up the dry cleaning"></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Board of notes
+<style>
+  .board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .board-note {
+    width: 200px;
+    max-width: 100%;
+    --c2-notepad__controls--opacity: 0;
+  }
+</style>
+<div class="board">
+  <c2-notepad class="board-note" pad="sticky" paper-picker label="Reminder" value="Dentist Tue 9:30">
+    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+  <c2-notepad class="board-note" pad="index-card" paper-picker label="Idea" value="Night paper for the **dark theme**">
+    <c2-icon-button slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
+    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Brand inks
+<style>
+  .brand-inks { width: 320px; max-width: 100%; }
+</style>
+<c2-notepad
+  class="brand-inks"
+  label="Brand notes"
+  inks='[{"name":"Ink","value":"#1f2937"},{"name":"Brand","value":"#4f46e5"},{"name":"Alert","value":"#b91c1c"}]'
+  highlights='[{"name":"Marker","value":"rgba(250, 204, 21, 0.5)"},{"name":"Mint","value":"rgba(52, 211, 153, 0.35)"}]'
+  value="Launch checklist
+<span data-ink=&quot;2&quot;>Brand colour</span> on the hero
+<span data-ink=&quot;3&quot;>Legal</span> must sign off ==by Friday==
+<mark data-color=&quot;2&quot;>Ship it</mark>"
+></c2-notepad>
 ```
 
 </GalleryGrid>
