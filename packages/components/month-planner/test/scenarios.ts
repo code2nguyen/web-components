@@ -42,6 +42,16 @@ if (scenario === 'actions' || scenario === 'actions-compact') {
 }
 if (scenario === 'actions-compact') subject.style.width = '360px'
 if (scenario === 'heading-slot') subject.insertAdjacentHTML('beforeend', '<span slot="heading">Team <em>holidays</em></span>')
+if (scenario === 'editable' || scenario === 'editable-compact') subject.editable = true
+if (scenario === 'editable-compact') subject.style.width = '360px'
+// Reports what the planner fired; the editable scenarios also apply each change, as an app would.
+subject.addEventListener('day-click', (event) => (output.value = `day:${event.detail.date}`))
+subject.addEventListener('range-select', (event) => (output.value = `range:${event.detail.start}..${event.detail.end}`))
+subject.addEventListener('event-change', (event) => {
+  const { event: entry, changes } = event.detail
+  output.value = `change:${entry.id}:${changes.start}..${changes.end}`
+  if (subject.editable) subject.events = subject.events.map((item) => (item === entry ? { ...item, ...changes } : item))
+})
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))
 subject.addEventListener('month-change', (event) => (output.value = `month:${event.detail.month}`))
 
