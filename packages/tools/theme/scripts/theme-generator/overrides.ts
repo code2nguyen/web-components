@@ -568,4 +568,38 @@ export const overrides: Record<string, Override> = {
   '--c2-page-editor__syntax-comment--color': { exclude: 'syntax colours are not themed' },
   '--c2-page-editor__syntax-parameter--color': { exclude: 'syntax colours are not themed' },
   '--c2-page-editor__syntax-link--color': { exclude: 'syntax colours are not themed' },
+  // Neutral literals off the ramp the classifier knows, which stayed light on a dark surface.
+  '--c2-color-select__popover--background-color': { token: 'color-surface' },
+  '--c2-color-slider--border-top': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  '--c2-color-slider--border-right': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  '--c2-color-slider--border-bottom': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  // The frosted header keeps its translucency over whatever the surface is.
+  '--c2-header__blurred--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 82%, transparent)',
+  },
+  '--c2-table__summary--box-shadow': {
+    token: 'color-outline-variant',
+    value: '0 -1px 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-table__group-row__echo--box-shadow': {
+    token: 'color-outline-variant',
+    value: '0 1px 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-time-input__picker-separator--color': { token: 'color-outline' },
+  '--c2-qr-code__placeholder--border': {
+    token: 'color-outline',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
+  },
+  // The resize grip sits on the event bar's own colour, not on the surface.
+  '--c2-month-planner__handle--color': { exclude: 'grip on the event colour' },
 }
