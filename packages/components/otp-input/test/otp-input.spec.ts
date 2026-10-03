@@ -119,6 +119,11 @@ test('in a column narrower than its cells, the cells shrink instead of overflowi
   const column = (await page.locator('div[style]').first().boundingBox())!
   const last = (await cells.last().boundingBox())!
   expect(last.x + last.width).toBeLessThanOrEqual(column.x + column.width + 0.5)
+  // The same inside a centring flex container, where an item keeps its content's width as its minimum.
+  await renderScenario('<div style="display: flex; justify-content: center; width: 200px"><c2-otp-input aria-label="Code"></c2-otp-input></div>')
+  const flexColumn = (await page.locator('div[style]').first().boundingBox())!
+  const flexLast = (await page.locator('c2-otp-input .cell').last().boundingBox())!
+  expect(flexLast.x + flexLast.width).toBeLessThanOrEqual(flexColumn.x + flexColumn.width + 0.5)
   // With room to spare, a cell keeps its own width.
   await renderScenario('<div style="width: 400px"><c2-otp-input aria-label="Code"></c2-otp-input></div>')
   expect((await page.locator('c2-otp-input .cell').first().boundingBox())!.width).toBeCloseTo(40, 0)

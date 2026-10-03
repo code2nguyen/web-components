@@ -39,7 +39,9 @@
 :host {
   display: inline-flex;
   flex-direction: column;
-  // Never wider than the column it sits in: the cells shrink below --c2-otp-input__cell--width instead.
+  // Never wider than the column it sits in: the cells shrink below --c2-otp-input__cell--width instead. `min-width`
+  // lets a flex or grid parent squeeze the field, which would otherwise keep the cells' widths as its minimum.
+  min-width: 0;
   max-width: 100%;
   gap: css.cssVar(supporting-text--gap);
   vertical-align: middle;
