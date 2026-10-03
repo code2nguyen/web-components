@@ -42,7 +42,8 @@ test('reviewed keyword controls cover justify-content and font-style', async ({ 
       font-style: var(--c2-keyword-probe--font-style, normal) }</style>`)
   for (const [name, value, controlValue, declaration] of [
     ['--c2-keyword-probe--justify-content', 'center', 'flex-end', 'justify-content'],
-    ['--c2-keyword-probe--font-style', 'italic', 'oblique', 'font-style'],
+    // Chromium computes a bare `oblique` as `italic`; an angle keeps the control value distinct.
+    ['--c2-keyword-probe--font-style', 'italic', 'oblique 20deg', 'font-style'],
   ] as const) {
     const result = await checkObservableEffect(page, {
       host: 'c2-keyword-probe',
