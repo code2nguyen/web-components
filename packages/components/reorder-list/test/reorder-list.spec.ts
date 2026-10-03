@@ -327,6 +327,27 @@ test('cancels pointer reorder on Escape and clears transient feedback', async ({
   expect(await visualIds(host)).toEqual(['first', 'second', 'third'])
 })
 
+test('keeps the drag preview under the pointer inside an ancestor that contains fixed elements', async ({ page, renderScenario }) => {
+  // A transformed ancestor becomes the containing block of the fixed preview, as a size container does in Safari.
+  await renderScenario(
+    `<div style="margin:120px 0 0 80px;transform:translateZ(0)"><c2-reorder-list editable aria-label="Tasks">${rows}</c2-reorder-list></div>`,
+  )
+  const host = page.locator('c2-reorder-list')
+  const first = await page.locator('#first').boundingBox()
+  if (!first) throw new Error('Missing row')
+  await page.mouse.move(first.x + 20, first.y + 20)
+  await page.mouse.down()
+  await page.mouse.move(first.x + 30, first.y + 70, { steps: 4 })
+  const preview = await host.locator('[part="dragging-item"]').boundingBox()
+  await page.mouse.up()
+  expect(preview).not.toBeNull()
+  // The pointer stays over the preview, at the point where it picked the row up.
+  expect(preview!.x).toBeLessThanOrEqual(first.x + 30)
+  expect(preview!.x + preview!.width).toBeGreaterThanOrEqual(first.x + 30)
+  expect(preview!.y).toBeLessThanOrEqual(first.y + 70)
+  expect(preview!.y + preview!.height).toBeGreaterThanOrEqual(first.y + 70)
+})
+
 test('supports keyboard pickup, movement, commit, focus retention, and cancellation', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-reorder-list editable aria-label="Tasks">${rows}</c2-reorder-list>`)
   const host = page.locator('c2-reorder-list')

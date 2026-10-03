@@ -16,15 +16,41 @@ import { isTaskIconName, taskIconCatalog, taskIconCategories, taskIconTag, type 
 import { suggestTaskIcon } from '@c2n/task-icons/suggest-task-icon.js'
 import styles from './todo-list.scss?inline'
 
-/** Pen colours: the tick, the strike line, icons and a task's text. Each background maps them to readable inks. */
+/**
+ * The default pens, in order: pen `1` is blue, `2` red and so on. A task stores its pen by position (`ink: 2`); these
+ * names are only read from older data (`ink: 'red'`) and mapped to their position. Each background maps them to
+ * readable inks.
+ */
 export const todoPens = ['blue', 'red', 'green', 'violet', 'graphite'] as const
 export type TodoPen = (typeof todoPens)[number]
 
-/** Highlighter colours for a task's background, mixed into the list's own background so they suit every theme. */
+/** The default highlighters, in order, mixed into the list's own background so they suit every theme. Stored by position like the pens. */
 export const todoHighlights = ['yellow', 'green', 'blue', 'pink', 'orange', 'violet'] as const
 export type TodoHighlight = (typeof todoHighlights)[number]
 
-/** Background presets of the customize panel. `default` follows the component's CSS variables and the theme. */
+/**
+ * One colour of the `pens` or `highlights` list: its value, or the value with a name. A bare string is a value with no
+ * name.
+ */
+export type TodoColor = string | { value: string; name?: string }
+
+/**
+ * The 1-based position of a colour from what a task holds: a number, or a default colour's name (`red` → 2), which is
+ * how tasks saved before positions were stored keep their colour.
+ */
+export function todoColorIndex(value: unknown, names: readonly string[]): number | undefined {
+  if (typeof value === 'number') return Number.isInteger(value) && value >= 1 ? value : undefined
+  if (typeof value !== 'string') return undefined
+  if (/^[1-9]\d*$/.test(value)) return Number(value)
+  const named = names.indexOf(value)
+  return named >= 0 ? named + 1 : undefined
+}
+
+/**
+ * The default backgrounds of the customize panel, in order: `default` (position 0) follows the component's CSS
+ * variables and the theme, then background 1 is paper, 2 mint and so on. The look stores a background by position;
+ * these names are only read from older looks.
+ */
 export const todoBackgrounds = ['default', 'paper', 'mint', 'sky', 'blush', 'sand', 'night'] as const
 export type TodoBackground = (typeof todoBackgrounds)[number]
 
@@ -47,19 +73,53 @@ export interface TodoTask {
   archived?: boolean
   /** An optional `@c2n/task-icons` name (`mail`, `milk`, `run`…). */
   icon?: string
-  /** Highlighter background, e.g. for an important task. */
-  highlight?: TodoHighlight
-  /** Pen colour of the task's text. */
-  ink?: TodoPen
+  /** Highlighter background, e.g. for an important task: the 1-based position in `highlights`. A default highlighter's name is read as its position. */
+  highlight?: number | TodoHighlight
+  /** Pen colour of the task's text: the 1-based position in `pens`. A default pen's name is read as its position. */
+  ink?: number | TodoPen
   /** Short due text shown after the task: `Today`, `Fri`, `9:30`. */
   due?: string
   /** Draws the due text in the red pen and counts the task in the summary. */
   urgent?: boolean
 }
 
-/** Colour palettes: each sets the six highlighters and the five pens, in a light and a dark variant. */
+/** The default palettes, in order (palette 1 is classic): each sets the accent, the pens and the highlighters, in a light and a dark variant. */
 export const todoPalettes = ['classic', 'soft', 'earth', 'ocean'] as const
 export type TodoPalette = (typeof todoPalettes)[number]
+
+/**
+ * A background of the customize panel. `value` is the list's surface and `color` its text; the softer surfaces and
+ * lines are mixed from the two unless given. `dark` picks the palettes' dark variant, and is worked out from a hex or
+ * `rgb()` `value` when missing.
+ */
+export interface TodoBackgroundOption {
+  name?: string
+  value: string
+  color?: string
+  /** Secondary text: the progress summary, notes, a checked task. */
+  muted?: string
+  /** Borders, dividers and the progress track. */
+  line?: string
+  /** Chips, a hovered row and the panels. */
+  soft?: string
+  dark?: boolean
+}
+
+/** What a palette paints, in one variant. `pens` and `highlights` are values by position, like the lists they recolour. */
+export interface TodoPaletteColors {
+  /** The ticks, the progress and the Add button. */
+  accent: string
+  pens?: string[]
+  highlights?: string[]
+  /** How much of a highlighter is mixed into the background, in percent. */
+  strength?: number
+}
+
+/** A palette of the customize panel: its light colours, and optionally the ones it takes on a dark background. */
+export interface TodoPaletteOption extends TodoPaletteColors {
+  name?: string
+  dark?: Partial<TodoPaletteColors>
+}
 
 /** The list icons, named for what a list is for (`icon="groceries"`); each is drawn by a `@c2n/task-icons` icon. */
 export const todoListIcons = [
@@ -96,8 +156,10 @@ const listIconOf = (name: unknown) => todoListIcons.find((entry) => entry.name =
 
 /** What the customize panel changes. Every key is optional: a missing key keeps the authored look. */
 export interface TodoListLook {
-  background?: TodoBackground
-  palette?: TodoPalette
+  /** Position in `backgrounds`; `0` is the default background. A default background's name is read as its position. */
+  background?: number | TodoBackground
+  /** Position in `palettes`. A default palette's name is read as its position. */
+  palette?: number | TodoPalette
   pen?: TodoPen
   doneMark?: TodoDoneMark
   progress?: TodoProgress
@@ -159,68 +221,36 @@ const SWIPE_ACTIONS: ReorderSwipeAction[] = [
 ]
 const v = (name: string) => `--c2-todo-list__${name}`
 
+/**
+ * The backgrounds used while `backgrounds` is unset (position 0, the default background, is not in the list). Each sets
+ * its surfaces and its text colour; the pens and highlighters on it come from a palette. The values are set inline on
+ * an element inside the shadow root, so a viewer's choice wins over the variables an application sets on the host;
+ * `Reset` removes them and hands the look back.
+ */
+export const defaultTodoBackgrounds: readonly TodoBackgroundOption[] = [
+  { name: 'Paper', value: '#fbf8f1', color: '#2a2622', muted: '#6f665b', line: '#e6dfd2', soft: '#f3eee3' },
+  { name: 'Mint', value: '#f1faf5', color: '#10281f', muted: '#43645a', line: '#cfe6da', soft: '#e2f3ea' },
+  { name: 'Sky', value: '#f2f7fe', color: '#0f1f35', muted: '#475b76', line: '#d3e1f4', soft: '#e4eefb' },
+  { name: 'Blush', value: '#fdf3f5', color: '#2d1520', muted: '#744857', line: '#f1d6de', soft: '#f9e5ea' },
+  { name: 'Sand', value: '#f8f1e4', color: '#2b2014', muted: '#6d5a41', line: '#e8dcc6', soft: '#f0e6d3' },
+  { name: 'Night', value: '#1a1a1f', color: '#f1f0ee', muted: '#a3a0a8', line: '#2e2e35', soft: '#26262c', dark: true },
+]
+
 interface Preset {
-  label: string
   surface: string
   ink: string
   muted: string
   line: string
   soft: string
-  dark?: boolean
+  dark: boolean
 }
 
-// Each background sets its surfaces and its text colour; the pens and highlighters on it come from a palette. The values are set inline on an element inside the shadow root, so a viewer's choice
-// wins over the variables an application sets on the host; `Reset` removes them and hands the look back.
-const PRESETS: Record<Exclude<TodoBackground, 'default'>, Preset> = {
-  paper: {
-    label: 'Paper',
-    surface: '#fbf8f1',
-    ink: '#2a2622',
-    muted: '#6f665b',
-    line: '#e6dfd2',
-    soft: '#f3eee3',
-  },
-  mint: {
-    label: 'Mint',
-    surface: '#f1faf5',
-    ink: '#10281f',
-    muted: '#43645a',
-    line: '#cfe6da',
-    soft: '#e2f3ea',
-  },
-  sky: {
-    label: 'Sky',
-    surface: '#f2f7fe',
-    ink: '#0f1f35',
-    muted: '#475b76',
-    line: '#d3e1f4',
-    soft: '#e4eefb',
-  },
-  blush: {
-    label: 'Blush',
-    surface: '#fdf3f5',
-    ink: '#2d1520',
-    muted: '#744857',
-    line: '#f1d6de',
-    soft: '#f9e5ea',
-  },
-  sand: {
-    label: 'Sand',
-    surface: '#f8f1e4',
-    ink: '#2b2014',
-    muted: '#6d5a41',
-    line: '#e8dcc6',
-    soft: '#f0e6d3',
-  },
-  night: {
-    label: 'Night',
-    surface: '#1a1a1f',
-    ink: '#f1f0ee',
-    muted: '#a3a0a8',
-    line: '#2e2e35',
-    soft: '#26262c',
-    dark: true,
-  },
+/** A background as the list paints it: the missing surfaces mixed from its surface and text. */
+function presetOf(option: TodoBackgroundOption): Preset {
+  const dark = option.dark ?? isDark(option.value)
+  const ink = option.color ?? (dark ? '#f4f4f5' : '#18181b')
+  const mix = (percent: number) => `color-mix(in srgb, ${ink} ${percent}%, ${option.value})`
+  return { surface: option.value, ink, muted: option.muted ?? mix(62), line: option.line ?? mix(14), soft: option.soft ?? mix(6), dark }
 }
 
 function presetVars(preset: Preset): Record<string, string> {
@@ -243,76 +273,86 @@ function presetVars(preset: Preset): Record<string, string> {
   return vars
 }
 
-interface Palette {
-  label: string
-  /** How much highlighter ink is mixed into a light background, in percent; dark backgrounds take `darkStrength`. */
-  strength: number
-  darkStrength: number
-  highlights: Record<TodoHighlight, string>
-  light: Record<TodoPen, string>
-  dark: Record<TodoPen, string>
-  /** The palette's signature colour (ticks, progress, Add), light and dark: what makes one palette look unlike another. */
-  accent: { light: string; dark: string }
-}
-
-// Every palette is checked by script: each pen, and each background's text colour, reads at 4.5:1 or better on every
-// background preset, plain and under each of the palette's highlighters, in the matching light or dark variant. Each
-// accent reads at 4.5:1 or better on every light preset (its dark variant on night), and so does the Add button's text
-// on it: white on the light accent, near-black on the dark one.
-const PALETTES: Record<TodoPalette, Palette> = {
+/**
+ * The palettes used while `palettes` is unset. Every one is checked by script: each pen, and each background's text
+ * colour, reads at 4.5:1 or better on every default background, plain and under each of the palette's highlighters,
+ * in the matching light or dark variant. Each accent reads at 4.5:1 or better on every light background (its dark
+ * variant on night), and so does the Add button's text on it: white on the light accent, near-black on the dark one.
+ */
+export const defaultTodoPalettes: readonly TodoPaletteOption[] = [
   // Bright and clear: the default pens and highlighters, a blue accent.
-  classic: {
-    label: 'Classic',
+  {
+    name: 'Classic',
+    accent: '#0255bb',
+    pens: ['#0255bb', '#ad1f1f', '#0c645e', '#6d34d2', '#585860'],
+    highlights: ['#facc15', '#22c55e', '#3b82f6', '#ec4899', '#f97316', '#8b5cf6'],
     strength: 22,
-    darkStrength: 18,
-    highlights: { yellow: '#facc15', green: '#22c55e', blue: '#3b82f6', pink: '#ec4899', orange: '#f97316', violet: '#8b5cf6' },
-    light: { blue: '#0255bb', red: '#ad1f1f', green: '#0c645e', violet: '#6d34d2', graphite: '#585860' },
-    dark: { blue: '#67abff', red: '#f88686', green: '#2dd4bf', violet: '#b198fa', graphite: '#a5a5ad' },
-    accent: { light: '#0255bb', dark: '#67abff' },
+    dark: { accent: '#67abff', pens: ['#67abff', '#f88686', '#2dd4bf', '#b198fa', '#a5a5ad'], strength: 18 },
   },
   // Light and airy: pale highlighters laid on thick, soft pens, a lavender accent.
-  soft: {
-    label: 'Soft',
+  {
+    name: 'Soft',
+    accent: '#6a4bb0',
+    pens: ['#3552a0', '#a8334a', '#2c6656', '#62469a', '#4f5460'],
+    highlights: ['#fde9a8', '#bdecd6', '#cfe2fb', '#f9d3e4', '#fddcc0', '#e2dcfb'],
     strength: 55,
-    darkStrength: 16,
-    highlights: { yellow: '#fde9a8', green: '#bdecd6', blue: '#cfe2fb', pink: '#f9d3e4', orange: '#fddcc0', violet: '#e2dcfb' },
-    light: { blue: '#3552a0', red: '#a8334a', green: '#2c6656', violet: '#62469a', graphite: '#4f5460' },
-    dark: { blue: '#a3bdf7', red: '#f5a8b3', green: '#95dcc4', violet: '#cdbbf4', graphite: '#cfd3da' },
-    accent: { light: '#6a4bb0', dark: '#cdbbf4' },
+    dark: { accent: '#cdbbf4', pens: ['#a3bdf7', '#f5a8b3', '#95dcc4', '#cdbbf4', '#cfd3da'], strength: 16 },
   },
   // Warm and muted: mustard, sage and clay highlighters, a sienna accent.
-  earth: {
-    label: 'Earth',
+  {
+    name: 'Earth',
+    accent: '#9a4a26',
+    pens: ['#34507a', '#923926', '#465f33', '#664673', '#554b44'],
+    highlights: ['#d4a017', '#8fae7e', '#7d98b3', '#c98a8a', '#d2764a', '#9c7aa6'],
     strength: 30,
-    darkStrength: 18,
-    highlights: { yellow: '#d4a017', green: '#8fae7e', blue: '#7d98b3', pink: '#c98a8a', orange: '#d2764a', violet: '#9c7aa6' },
-    light: { blue: '#34507a', red: '#923926', green: '#465f33', violet: '#664673', graphite: '#554b44' },
-    dark: { blue: '#aec0da', red: '#eba993', green: '#bdd3a2', violet: '#d1b7dc', graphite: '#dad1c8' },
-    accent: { light: '#9a4a26', dark: '#eba993' },
+    dark: { accent: '#eba993', pens: ['#aec0da', '#eba993', '#bdd3a2', '#d1b7dc', '#dad1c8'], strength: 18 },
   },
   // Cool: sand, seafoam, coral and periwinkle highlighters, a teal accent.
-  ocean: {
-    label: 'Ocean',
+  {
+    name: 'Ocean',
+    accent: '#0b6b64',
+    pens: ['#0b4a82', '#a83341', '#0c615d', '#5344a6', '#434f60'],
+    highlights: ['#e8d9a8', '#86d6c5', '#86c8f2', '#f3a493', '#f6b98f', '#aab6f2'],
     strength: 36,
-    darkStrength: 18,
-    highlights: { yellow: '#e8d9a8', green: '#86d6c5', blue: '#86c8f2', pink: '#f3a493', orange: '#f6b98f', violet: '#aab6f2' },
-    light: { blue: '#0b4a82', red: '#a83341', green: '#0c615d', violet: '#5344a6', graphite: '#434f60' },
-    dark: { blue: '#93c8ff', red: '#ffa8b2', green: '#84e3d9', violet: '#bdb5ff', graphite: '#cfd8e3' },
-    accent: { light: '#0b6b64', dark: '#5eead4' },
+    dark: { accent: '#5eead4', pens: ['#93c8ff', '#ffa8b2', '#84e3d9', '#bdb5ff', '#cfd8e3'], strength: 18 },
   },
+]
+
+/**
+ * A palette's variables. Over the default pen and highlighter lists it sets the documented `--c2-todo-list__pen-*` /
+ * `--c2-todo-list__highlight-*` variables (so the urgent and won't-do red follow it too); over a list the application
+ * gave, it sets that list's positions directly.
+ */
+function paletteVars(palette: TodoPaletteOption, dark: boolean, customPens: boolean, customHighlights: boolean): Record<string, string> {
+  const colors: TodoPaletteColors = dark ? { ...palette, ...palette.dark } : palette
+  const strength = colors.strength ?? (dark ? 18 : 22)
+  const vars: Record<string, string> = {
+    [v('accent--color')]: colors.accent,
+    [v('on-accent--color')]: dark ? '#0b1220' : '#ffffff',
+    '--_highlight-strength': `${strength}%`,
+  }
+  colors.pens?.forEach((value, position) => {
+    if (customPens) vars[`--_pen-${position + 1}`] = value
+    else if (position < todoPens.length) vars[v(`pen-${todoPens[position]}--color`)] = value
+  })
+  if (!customPens && colors.pens?.[1]) vars[v('dropped--color')] = colors.pens[1]
+  colors.highlights?.forEach((value, position) => {
+    if (customHighlights) vars[`--_highlight-${position + 1}`] = value
+    else if (position < todoHighlights.length) vars[v(`highlight-${todoHighlights[position]}--color`)] = value
+  })
+  return vars
 }
 
-function paletteVars(palette: Palette, dark: boolean): Record<string, string> {
-  const pens = dark ? palette.dark : palette.light
-  const vars: Record<string, string> = {
-    [v('accent--color')]: dark ? palette.accent.dark : palette.accent.light,
-    [v('on-accent--color')]: dark ? '#0b1220' : '#ffffff',
-    [v('dropped--color')]: pens.red,
-    '--_highlight-strength': `${dark ? palette.darkStrength : palette.strength}%`,
-  }
-  for (const pen of todoPens) vars[v(`pen-${pen}--color`)] = pens[pen]
-  for (const highlight of todoHighlights) vars[v(`highlight-${highlight}--color`)] = palette.highlights[highlight]
-  return vars
+const isBackgroundOption = (entry: unknown): entry is TodoBackgroundOption => isRecord(entry) && typeof entry.value === 'string'
+const isPaletteOption = (entry: unknown): entry is TodoPaletteOption => isRecord(entry) && typeof entry.accent === 'string'
+
+/** The look with its background and palette as positions, so the list, its storage and `look-change` carry numbers. */
+function normalizeLook(look: TodoListLook): TodoListLook {
+  if (typeof look.background !== 'string' && typeof look.palette !== 'string') return look
+  const { background, palette, ...rest } = look
+  const backgroundIndex = background === 'default' || background === 0 ? 0 : todoColorIndex(background, todoBackgrounds.slice(1))
+  const paletteIndex = todoColorIndex(palette, todoPalettes)
+  return { ...rest, ...(backgroundIndex !== undefined ? { background: backgroundIndex } : {}), ...(paletteIndex ? { palette: paletteIndex } : {}) }
 }
 
 const COMPACT_VARS: Record<string, string> = {
@@ -324,15 +364,69 @@ const COMPACT_VARS: Record<string, string> = {
 
 // The pens' defaults, as in the stylesheet's `$theme` map, for the one place a pen is referenced from script.
 const PEN_DEFAULTS: Record<TodoPen, string> = { blue: '#0265dc', red: '#dc2626', green: '#0f766e', violet: '#7c3aed', graphite: '#71717a' }
-const PEN_LABELS: Record<TodoPen, string> = { blue: 'Blue ink', red: 'Red ink', green: 'Green ink', violet: 'Violet ink', graphite: 'Graphite' }
-const HIGHLIGHT_LABELS: Record<TodoHighlight, string> = {
-  yellow: 'Yellow highlighter',
-  green: 'Green highlighter',
-  blue: 'Blue highlighter',
-  pink: 'Pink highlighter',
-  orange: 'Orange highlighter',
-  violet: 'Violet highlighter',
+/**
+ * The lists used while `pens` / `highlights` are unset, in the order a task stores them (`ink: 2` is red): the
+ * documented `--c2-todo-list__pen-*` and `--c2-todo-list__highlight-*` variables, which the palettes and backgrounds
+ * recolour. Spread them to extend the defaults.
+ */
+export const defaultTodoPens: readonly TodoColor[] = [
+  { name: 'Blue ink', value: 'var(--c2-todo-list__pen-blue--color, #0265dc)' },
+  { name: 'Red ink', value: 'var(--c2-todo-list__pen-red--color, #dc2626)' },
+  { name: 'Green ink', value: 'var(--c2-todo-list__pen-green--color, #0f766e)' },
+  { name: 'Violet ink', value: 'var(--c2-todo-list__pen-violet--color, #7c3aed)' },
+  { name: 'Graphite', value: 'var(--c2-todo-list__pen-graphite--color, #71717a)' },
+]
+export const defaultTodoHighlights: readonly TodoColor[] = [
+  { name: 'Yellow highlighter', value: 'var(--c2-todo-list__highlight-yellow--color, #facc15)' },
+  { name: 'Green highlighter', value: 'var(--c2-todo-list__highlight-green--color, #22c55e)' },
+  { name: 'Blue highlighter', value: 'var(--c2-todo-list__highlight-blue--color, #3b82f6)' },
+  { name: 'Pink highlighter', value: 'var(--c2-todo-list__highlight-pink--color, #ec4899)' },
+  { name: 'Orange highlighter', value: 'var(--c2-todo-list__highlight-orange--color, #f97316)' },
+  { name: 'Violet highlighter', value: 'var(--c2-todo-list__highlight-violet--color, #8b5cf6)' },
+]
+
+/** A colour of a list as the menu uses it: a value, and the name its swatch is announced and titled with. */
+interface NamedColor {
+  name: string
+  value: string
 }
+
+const isTodoColor = (entry: unknown): entry is TodoColor =>
+  (typeof entry === 'string' && entry.trim() !== '') ||
+  (typeof entry === 'object' && entry !== null && typeof (entry as { value?: unknown }).value === 'string')
+
+/** Whether the application gave a list of its own, rather than leaving the defaults. */
+const hasColors = (value: unknown) => Array.isArray(value) && value.some(isTodoColor)
+
+/** The usable list, or the defaults. An entry with no name is called by its kind and position (`Pen 2`), so a swatch always has an accessible name. */
+const colorList = (value: unknown, defaults: readonly TodoColor[], kind: string): readonly NamedColor[] => {
+  const list = Array.isArray(value) && value.some(isTodoColor) ? (value as unknown[]) : defaults
+  return list
+    .filter(isTodoColor)
+    .map((entry, position) =>
+      typeof entry === 'string'
+        ? { name: `${kind} ${position + 1}`, value: entry }
+        : { name: entry.name?.trim() || `${kind} ${position + 1}`, value: entry.value },
+    )
+}
+
+/** A task with its pen and highlighter as positions, so the list and its events only ever carry numbers. */
+function normalizeColors(task: TodoTask): TodoTask {
+  if (typeof task.ink !== 'string' && typeof task.highlight !== 'string') return task
+  const { ink, highlight, ...rest } = task
+  const inkIndex = todoColorIndex(ink, todoPens)
+  const highlightIndex = todoColorIndex(highlight, todoHighlights)
+  return { ...rest, ...(inkIndex ? { ink: inkIndex } : {}), ...(highlightIndex ? { highlight: highlightIndex } : {}) }
+}
+
+/** Points an element's private pen and highlighter at the colours of the given positions. */
+function colorStyle(ink: number | undefined, highlight: number | undefined): Record<string, string> {
+  return {
+    ...(ink ? { '--_task-ink': `var(--_pen-${ink})` } : {}),
+    ...(highlight ? { '--_task-highlight': `var(--_highlight-${highlight})` } : {}),
+  }
+}
+
 const CATEGORY_LABELS: Record<TaskIconCategory, string> = {
   work: 'Work',
   communication: 'Communication',
@@ -403,8 +497,10 @@ function includes<T extends string>(list: readonly T[], value: unknown): value i
 function sanitizeLook(value: unknown): TodoListLook {
   if (!isRecord(value)) return {}
   const look: TodoListLook = {}
-  if (includes(todoBackgrounds, value.background)) look.background = value.background
-  if (includes(todoPalettes, value.palette)) look.palette = value.palette
+  const background = value.background === 'default' || value.background === 0 ? 0 : todoColorIndex(value.background, todoBackgrounds.slice(1))
+  if (background !== undefined) look.background = background
+  const palette = todoColorIndex(value.palette, todoPalettes)
+  if (palette) look.palette = palette
   if (includes(todoPens, value.pen)) look.pen = value.pen
   if (value.doneMark === 'tick' || value.doneMark === 'cross') look.doneMark = value.doneMark
   if (PROGRESS_OPTIONS.some(([option]) => option === value.progress)) look.progress = value.progress as TodoProgress
@@ -551,6 +647,34 @@ export class TodoList extends LitElement {
   /** The tasks. Accepts a JSON array in the attribute. The list updates it as the user works. */
   @property({ converter: jsonPropertyConverter }) tasks: TodoTask[] = []
 
+  /**
+   * The pens a task's text can take: each entry a CSS colour (`var()` included), or `{ value, name }` to give its
+   * swatch a friendly name (`{ "value": "#4f46e5", "name": "Brand" }`); without one it is called `Pen 2`. A task stores
+   * its pen by 1-based position (`ink: 2`), so give a dark theme a list of the same length and order and every task
+   * recolours. Unset, the five documented `--c2-todo-list__pen-*` pens, which the palettes recolour. A list you give is
+   * used as given: its contrast is yours to choose.
+   */
+  @property({ converter: jsonPropertyConverter }) pens?: TodoColor[]
+
+  /** The highlighters behind a task, as colours or `{ value, name }` entries mixed into the background, stored by position like `pens`. Unset, the six documented `--c2-todo-list__highlight-*` highlighters. */
+  @property({ converter: jsonPropertyConverter }) highlights?: TodoColor[]
+
+  /**
+   * The backgrounds the customize panel offers, after its default one (position 0, which follows the theme), as
+   * `{ value, color, name }` entries: `value` the surface, `color` the text. The look stores the viewer's choice by
+   * position, so a dark theme can hand over a list of the same length and order. Unset, the six default backgrounds,
+   * which were checked for contrast; a list you give is used as given, and its contrast is yours to choose.
+   */
+  @property({ converter: jsonPropertyConverter }) backgrounds?: TodoBackgroundOption[]
+
+  /**
+   * The palettes the customize panel offers, as `{ name, accent, pens, highlights, strength, dark }` entries: the
+   * accent, and pen and highlighter values by position, with optional `dark` overrides used on a dark background.
+   * Stored by position like `backgrounds`. Unset, the four default palettes, which were checked for contrast against
+   * the default backgrounds; a list you give is used as given.
+   */
+  @property({ converter: jsonPropertyConverter }) palettes?: TodoPaletteOption[]
+
   /** How progress is drawn: a ring beside the heading, a bar under it, a large ring above it, or not at all. The viewer's choice in the customize panel wins. */
   @property() progress: TodoProgress = 'ring'
 
@@ -621,10 +745,13 @@ export class TodoList extends LitElement {
     // The stored look and tasks wait for the first render when hydrating: applied before it, the browser would draw
     // something other than the server did, and Lit throws a hydration mismatch.
     if ((changed.has('storageKey') || changed.has('persistTasks')) && !(this.hydrating && !this.hasUpdated)) this.restore()
+    if (changed.has('look') && this.look && (typeof this.look.background === 'string' || typeof this.look.palette === 'string')) {
+      this.look = normalizeLook(this.look)
+    }
     if (changed.has('tasks')) {
       const tasks = Array.isArray(this.tasks) ? this.tasks : []
-      if (tasks !== this.tasks || tasks.some((task) => !task.id)) {
-        this.tasks = tasks.map((task) => (task.id ? task : { ...task, id: newTaskId() }))
+      if (tasks !== this.tasks || tasks.some((task) => !task.id || typeof task.ink === 'string' || typeof task.highlight === 'string')) {
+        this.tasks = tasks.map((task) => normalizeColors(task.id ? task : { ...task, id: newTaskId() }))
       }
     }
   }
@@ -634,7 +761,7 @@ export class TodoList extends LitElement {
   }
 
   protected override updated(): void {
-    if (this.look.palette && (!this.look.background || this.look.background === 'default')) {
+    if (this.paletteOf(this.look.palette) && !this.backgroundOf(this.look.background)) {
       // The resolved variable, not the painted colour, which is mid-transition right after a change.
       const surface = getComputedStyle(this).getPropertyValue(v('container--background-color')).trim()
       const dark = isDark(surface || '#ffffff')
@@ -1101,14 +1228,16 @@ export class TodoList extends LitElement {
     const closed = active.filter((task) => task.done || task.dropped).length
     const percent = total ? Math.round((closed / total) * 100) : 0
     const progress = this.look.progress ?? this.progress
-    const preset = this.look.background && this.look.background !== 'default' ? PRESETS[this.look.background] : undefined
+    const preset = this.backgroundOf(this.look.background)
     // A background preset or a chosen palette brings the palette's checked pens and highlighters; with neither, the
     // list keeps the application's variables and the theme.
-    const palette = preset || this.look.palette ? PALETTES[this.look.palette ?? 'classic'] : undefined
-    const dark = preset ? !!preset.dark : this.darkSurface
+    const palette = this.activePalette()
+    const dark = preset ? preset.dark : this.darkSurface
     const containerStyle: Record<string, string> = {
+      // The lists first: a palette the viewer chose recolours their positions.
+      ...this.colorVars(),
       ...(preset ? presetVars(preset) : {}),
-      ...(palette ? paletteVars(palette, dark) : {}),
+      ...(palette ? paletteVars(palette, dark, hasColors(this.pens), hasColors(this.highlights)) : {}),
       ...(this.look.density === 'compact' ? COMPACT_VARS : {}),
       ...(this.look.pen ? { [v('accent--color')]: `var(${v(`pen-${this.look.pen}--color`)}, ${PEN_DEFAULTS[this.look.pen]})` } : {}),
     }
@@ -1120,7 +1249,7 @@ export class TodoList extends LitElement {
     const classes = {
       container: true,
       [`progress-${progress}`]: true,
-      [`background-${this.look.background ?? 'default'}`]: true,
+      [`background-${preset ? this.look.background : 0}`]: true,
       'all-done': allDone,
       readonly: this.readonly,
       customizing: panel,
@@ -1157,12 +1286,8 @@ export class TodoList extends LitElement {
       <header class="header">
         ${
           ring
-            ? html`<div class="ring" role="img" aria-label=${`${percent}% complete, ${closed} of ${total} tasks done`}>
-                <svg viewBox="0 0 48 48" aria-hidden="true">
-                  <circle class="ring-track" cx="24" cy="24" r="20" pathLength="100"></circle>
-                  <circle class="ring-fill" cx="24" cy="24" r="20" pathLength="100" style=${styleMap({ strokeDasharray: `${percent} 100` })}></circle>
-                </svg>
-                <span class=${classMap({ 'ring-value': true, 'with-icon': !!icon && progress === 'ring' })} aria-hidden="true">
+            ? html`<c2-progress class="ring" variant="circular" value=${percent} label=${`${closed} of ${total} tasks done`}>
+                <span slot="value" class=${classMap({ 'ring-value': true, 'with-icon': !!icon && progress === 'ring' })} aria-hidden="true">
                   ${
                     total > 0 && closed === total
                       ? html`<svg class="ring-check pen" viewBox="0 0 24 24"><path d=${TICK}></path></svg>`
@@ -1173,7 +1298,7 @@ export class TodoList extends LitElement {
                           : percent
                   }
                 </span>
-              </div>`
+              </c2-progress>`
             : nothing
         }
         ${icon && !ring ? html`<span class="list-icon" aria-hidden="true">${renderTaskIcon(icon)}</span>` : nothing}
@@ -1282,8 +1407,8 @@ export class TodoList extends LitElement {
     const icon = this.iconOf(task)
     const closed = !!task.done || !!task.dropped
     const expanded = this.expandedId === id
-    const ink = task.ink && includes(todoPens, task.ink) ? task.ink : undefined
-    const highlight = task.highlight && includes(todoHighlights, task.highlight) ? task.highlight : undefined
+    const ink = this.colorOf('ink', task.ink)
+    const highlight = this.colorOf('highlight', task.highlight)
     const status = task.dropped ? `${task.label}, won’t do` : task.label
     return html`
       <div class="task-slot" data-reorder-key=${id} data-reorder-label=${task.label}>
@@ -1294,9 +1419,10 @@ export class TodoList extends LitElement {
             dropped: !!task.dropped,
             closed,
             active: this.menuId === id || this.iconPickerId === id,
-            [`ink-${ink}`]: !!ink,
-            [`highlight-${highlight}`]: !!highlight,
+            inked: !!ink,
+            highlighted: !!highlight,
           })}
+          style=${styleMap(colorStyle(ink, highlight))}
           @keydown=${(event: KeyboardEvent) => this.handleRowKey(event, task)}
           @contextmenu=${(event: MouseEvent) => {
             if (this.readonly) return
@@ -1426,7 +1552,7 @@ export class TodoList extends LitElement {
         ${key ? html`<kbd>${key}</kbd>` : nothing}
       </button>
     `
-    const trigger = (name: Submenu, label: string, swatch: string) => html`
+    const trigger = (name: Submenu, label: string, index: number | undefined) => html`
       <button
         class=${classMap({ 'menu-item': true, 'has-submenu': true, open: this.submenu === name })}
         type="button"
@@ -1437,7 +1563,19 @@ export class TodoList extends LitElement {
         @mouseenter=${() => this.openSubmenu(name, false)}
         @click=${() => this.openSubmenu(name, true)}
       >
-        <span class=${`menu-swatch ${swatch}`} aria-hidden="true"></span>
+        <span
+          class=${classMap({
+            'menu-swatch': true,
+            'highlight-swatch': name === 'highlight',
+            'pen-swatch': name === 'ink',
+            highlighted: name === 'highlight' && !!index,
+            inked: name === 'ink' && !!index,
+            none: name === 'highlight' && !index,
+            default: name === 'ink' && !index,
+          })}
+          style=${styleMap(name === 'ink' ? colorStyle(index, undefined) : colorStyle(undefined, index))}
+          aria-hidden="true"
+        ></span>
         <span class="menu-label">${label}</span>
         <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
       </button>
@@ -1452,8 +1590,7 @@ export class TodoList extends LitElement {
       >
         ${item('edit', 'Edit task', 'F2', 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4')}
         ${item('icon', this.iconOf(task) ? 'Change icon' : 'Add an icon', 'I', 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z')}
-        ${trigger('highlight', 'Highlight', task.highlight ? `highlight-swatch highlight-${task.highlight}` : 'highlight-swatch none')}
-        ${trigger('ink', 'Text colour', task.ink ? `pen-swatch pen-${task.ink}` : 'pen-swatch default')}
+        ${trigger('highlight', 'Highlight', this.colorOf('highlight', task.highlight))} ${trigger('ink', 'Text colour', this.colorOf('ink', task.ink))}
         ${item('drop', task.dropped ? 'Undo won’t do' : 'Won’t do', 'X', 'M6.5 6.5l11 11M17.5 6.5l-11 11')}
         ${item('archive', 'Archive', 'E', 'M3.5 4.5h17v4h-17zM5 8.5v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-10M10 12.5h4', { separated: true })}
         ${item('delete', 'Delete', 'Del', 'M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M5.5 6.5l1 13A1.5 1.5 0 0 0 8 21h8a1.5 1.5 0 0 0 1.5-1.5l1-13', {
@@ -1469,6 +1606,8 @@ export class TodoList extends LitElement {
       this.patchTask(task, patch)
     }
     const radio = (checked: boolean) => (checked ? 'true' : 'false')
+    const currentHighlight = this.colorOf('highlight', task.highlight)
+    const currentInk = this.colorOf('ink', task.ink)
     const swatches =
       name === 'highlight'
         ? [
@@ -1476,21 +1615,22 @@ export class TodoList extends LitElement {
               class="highlight-swatch none"
               type="button"
               role="menuitemradio"
-              aria-checked=${radio(!task.highlight)}
+              aria-checked=${radio(!currentHighlight)}
               aria-label="No highlight"
               title="None"
               @click=${() => choose({ highlight: undefined })}
             ></button>`,
-            ...todoHighlights.map(
-              (highlight) =>
+            ...this.colorsOf('highlight').map(
+              ({ name }, position) =>
                 html`<button
-                  class="highlight-swatch highlight-${highlight}"
+                  class="highlight-swatch highlighted"
+                  style=${styleMap(colorStyle(undefined, position + 1))}
                   type="button"
                   role="menuitemradio"
-                  aria-checked=${radio(task.highlight === highlight)}
-                  aria-label=${HIGHLIGHT_LABELS[highlight]}
-                  title=${HIGHLIGHT_LABELS[highlight]}
-                  @click=${() => choose({ highlight })}
+                  aria-checked=${radio(currentHighlight === position + 1)}
+                  aria-label=${name}
+                  title=${name}
+                  @click=${() => choose({ highlight: position + 1 })}
                 >
                   <span aria-hidden="true">Aa</span>
                 </button>`,
@@ -1501,21 +1641,22 @@ export class TodoList extends LitElement {
               class="pen-swatch default"
               type="button"
               role="menuitemradio"
-              aria-checked=${radio(!task.ink)}
+              aria-checked=${radio(!currentInk)}
               aria-label="Default text colour"
               title="Default"
               @click=${() => choose({ ink: undefined })}
             ></button>`,
-            ...todoPens.map(
-              (pen) =>
+            ...this.colorsOf('ink').map(
+              ({ name }, position) =>
                 html`<button
-                  class="pen-swatch pen-${pen}"
+                  class="pen-swatch inked"
+                  style=${styleMap(colorStyle(position + 1, undefined))}
                   type="button"
                   role="menuitemradio"
-                  aria-checked=${radio(task.ink === pen)}
-                  aria-label=${`${PEN_LABELS[pen]} text`}
-                  title=${PEN_LABELS[pen]}
-                  @click=${() => choose({ ink: pen })}
+                  aria-checked=${radio(currentInk === position + 1)}
+                  aria-label=${`${name} text`}
+                  title=${name}
+                  @click=${() => choose({ ink: position + 1 })}
                 ></button>`,
             ),
           ]
@@ -1538,7 +1679,8 @@ export class TodoList extends LitElement {
     const current = this.iconOf(task)
     return html`
       <div
-        class=${classMap({ 'icon-popover': true, [`ink-${task.ink}`]: !!task.ink })}
+        class=${classMap({ 'icon-popover': true, inked: !!this.colorOf('ink', task.ink) })}
+        style=${styleMap(colorStyle(this.colorOf('ink', task.ink), undefined))}
         role="dialog"
         aria-label=${`Icon for ${task.label}`}
         @pointerdown=${keepFromRow}
@@ -1668,23 +1810,73 @@ export class TodoList extends LitElement {
     options[next]?.focus()
   }
 
+  private backgroundList(): readonly TodoBackgroundOption[] {
+    const list = Array.isArray(this.backgrounds) ? this.backgrounds.filter(isBackgroundOption) : []
+    return list.length ? list : defaultTodoBackgrounds
+  }
+
+  private paletteList(): readonly TodoPaletteOption[] {
+    const list = Array.isArray(this.palettes) ? this.palettes.filter(isPaletteOption) : []
+    return list.length ? list : defaultTodoPalettes
+  }
+
+  /** The background at a look's position, or `undefined` for the default background and a position the list does not have. */
+  private backgroundOf(value: unknown): Preset | undefined {
+    const index = value === 'default' ? 0 : todoColorIndex(value, todoBackgrounds.slice(1))
+    const option = index ? this.backgroundList()[index - 1] : undefined
+    return option ? presetOf(option) : undefined
+  }
+
+  private paletteOf(value: unknown): TodoPaletteOption | undefined {
+    const index = todoColorIndex(value, todoPalettes)
+    return index ? this.paletteList()[index - 1] : undefined
+  }
+
+  /** The chosen palette; a chosen background without one brings the first palette, whose colours were checked against it. */
+  private activePalette(): TodoPaletteOption | undefined {
+    return this.paletteOf(this.look.palette) ?? (this.backgroundOf(this.look.background) ? this.paletteList()[0] : undefined)
+  }
+
+  private colorsOf(group: Submenu): readonly NamedColor[] {
+    return group === 'ink' ? colorList(this.pens, defaultTodoPens, 'Pen') : colorList(this.highlights, defaultTodoHighlights, 'Highlighter')
+  }
+
+  /** A task's pen or highlighter position, or `undefined` when it has none or the current list is shorter. */
+  private colorOf(group: Submenu, value: unknown): number | undefined {
+    const index = todoColorIndex(value, group === 'ink' ? todoPens : todoHighlights)
+    return index && index <= this.colorsOf(group).length ? index : undefined
+  }
+
+  /**
+   * `--_pen-<n>` and `--_highlight-<n>` for every colour of the lists, set on the container next to the palette's
+   * variables, so a new list (or a palette) recolours every task in place. A position the list does not have stays
+   * unset.
+   */
+  private colorVars(): Record<string, string> {
+    const vars: Record<string, string> = {}
+    this.colorsOf('ink').forEach(({ value }, position) => (vars[`--_pen-${position + 1}`] = value))
+    this.colorsOf('highlight').forEach(({ value }, position) => (vars[`--_highlight-${position + 1}`] = value))
+    return vars
+  }
+
   private renderChevron() {
     return html`<svg class="dropdown-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>`
   }
 
   /** A tiny list in the palette: a progress ring and a tick in its accent, and three rows under its highlighters. */
-  private renderPalettePreview(palette: TodoPalette | undefined) {
-    const preset = this.look.background && this.look.background !== 'default' ? PRESETS[this.look.background] : undefined
-    const dark = preset ? !!preset.dark : this.darkSurface
-    const choice = palette ? PALETTES[palette] : undefined
-    const style = choice
-      ? { '--_preview-accent': choice.accent[dark ? 'dark' : 'light'], '--_preview-strength': `${dark ? choice.darkStrength : choice.strength}%` }
-      : {}
-    const rows = (['pink', 'green', 'blue'] as const).map(
-      (highlight) =>
+  private renderPalettePreview(palette: TodoPaletteOption | undefined) {
+    const preset = this.backgroundOf(this.look.background)
+    const dark = preset ? preset.dark : this.darkSurface
+    const colors: TodoPaletteColors | undefined = palette && dark ? { ...palette, ...palette.dark } : palette
+    const style = colors ? { '--_preview-accent': colors.accent, '--_preview-strength': `${colors.strength ?? (dark ? 18 : 22)}%` } : {}
+    // Three highlighters: pink, green and blue in the default order, the first three of a shorter list.
+    const count = this.colorsOf('highlight').length
+    const positions = count >= 4 ? [4, 2, 3] : [1, 2, 3].slice(0, count)
+    const rows = positions.map(
+      (position) =>
         html`<span
           class="preview-row"
-          style=${styleMap({ '--_preview-highlight': choice ? choice.highlights[highlight] : `var(${v(`highlight-${highlight}--color`)}, ${PALETTES.classic.highlights[highlight]})` })}
+          style=${styleMap({ '--_preview-highlight': colors?.highlights?.[position - 1] ?? `var(--_highlight-${position})` })}
         ></span>`,
     )
     return html`<span class="palette-preview" aria-hidden="true" style=${styleMap(style)}>
@@ -1700,7 +1892,11 @@ export class TodoList extends LitElement {
   /** A dropdown: the current palette on the trigger, every palette in the list it opens. */
   private renderPaletteField() {
     const look = this.look
-    const selected = look.palette ?? (look.background && look.background !== 'default' ? 'classic' : undefined)
+    const palettes = this.paletteList()
+    const chosen = this.paletteOf(look.palette)
+    // The position of the palette in use: the chosen one, or the first one a chosen background brings.
+    const selected = chosen ? todoColorIndex(look.palette, todoPalettes) : this.backgroundOf(look.background) ? 1 : undefined
+    const nameOf = (position: number) => palettes[position - 1]?.name?.trim() || `Palette ${position}`
     const open = this.panelPaletteOpen
     return html`
       <div class="field">
@@ -1716,8 +1912,8 @@ export class TodoList extends LitElement {
             aria-controls="palette-options"
             @click=${this.togglePalettes}
           >
-            ${this.renderPalettePreview(selected)}
-            <span class="dropdown-value" id="palette-current">${selected ? PALETTES[selected].label : 'From the theme'}</span>
+            ${this.renderPalettePreview(selected ? palettes[selected - 1] : undefined)}
+            <span class="dropdown-value" id="palette-current">${selected ? nameOf(selected) : 'From the theme'}</span>
             ${this.renderChevron()}
           </button>
           ${
@@ -1729,26 +1925,26 @@ export class TodoList extends LitElement {
                   aria-labelledby="palette-label"
                   @keydown=${this.handlePaletteListKey}
                 >
-                  ${todoPalettes.map(
-                    (option) =>
-                      html`<button
-                        class="dropdown-option"
-                        type="button"
-                        role="option"
-                        aria-selected=${selected === option ? 'true' : 'false'}
-                        tabindex=${selected === option || (!selected && option === todoPalettes[0]) ? 0 : -1}
-                        @click=${() => {
-                          // The palette owns the accent: a pen left in the look from script, or stored before the panel
-                          // dropped its pen field, would keep the ring and ticks in that pen's colour.
-                          this.setLook({ palette: option, pen: undefined })
-                          this.closePalettes()
-                        }}
-                      >
-                        ${this.renderPalettePreview(option)}
-                        <span class="dropdown-value">${PALETTES[option].label}</span>
-                        <svg class="dropdown-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
-                      </button>`,
-                  )}
+                  ${palettes.map((option, index) => {
+                    const position = index + 1
+                    return html`<button
+                      class="dropdown-option"
+                      type="button"
+                      role="option"
+                      aria-selected=${selected === position ? 'true' : 'false'}
+                      tabindex=${selected === position || (!selected && position === 1) ? 0 : -1}
+                      @click=${() => {
+                        // The palette owns the accent: a pen left in the look from script, or stored before the panel
+                        // dropped its pen field, would keep the ring and ticks in that pen's colour.
+                        this.setLook({ palette: position, pen: undefined })
+                        this.closePalettes()
+                      }}
+                    >
+                      ${this.renderPalettePreview(option)}
+                      <span class="dropdown-value">${nameOf(position)}</span>
+                      <svg class="dropdown-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+                    </button>`
+                  })}
                 </div>`
               : nothing
           }
@@ -1878,7 +2074,8 @@ export class TodoList extends LitElement {
 
   private renderPanel() {
     const look = this.look
-    const background = look.background ?? 'default'
+    // The position of the background in use; 0 is the default one, as is a position the list no longer has.
+    const background = this.backgroundOf(look.background) ? todoColorIndex(look.background, todoBackgrounds.slice(1)) : 0
     const progress = look.progress ?? this.progress
     const density = look.density ?? 'cozy'
     const doneMark = look.doneMark ?? 'tick'
@@ -1896,17 +2093,18 @@ export class TodoList extends LitElement {
         <div class="field">
           <span class="field-label" id="background-label">Background</span>
           <div class="swatches" role="radiogroup" aria-labelledby="background-label">
-            ${todoBackgrounds.map((option) => {
-              const preset = option === 'default' ? undefined : PRESETS[option]
+            ${[undefined, ...this.backgroundList()].map((option, position) => {
+              const preset = option ? presetOf(option) : undefined
+              const name = option ? option.name?.trim() || `Background ${position}` : 'Default'
               return html`<button
                 class="background-swatch"
                 type="button"
                 role="radio"
-                aria-checked=${radio(background === option)}
-                aria-label=${preset?.label ?? 'Default'}
-                title=${preset?.label ?? 'Default'}
+                aria-checked=${radio(background === position)}
+                aria-label=${name}
+                title=${name}
                 style=${styleMap(preset ? { '--_swatch': preset.surface, '--_swatch-ink': preset.ink } : {})}
-                @click=${() => this.setLook({ background: option })}
+                @click=${() => this.setLook({ background: position })}
               >
                 <span aria-hidden="true">Aa</span>
               </button>`

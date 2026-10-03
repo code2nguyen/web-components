@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import pageEditor from '@c2n/page-editor/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
 import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
@@ -54,7 +55,7 @@ import textarea from '@c2n/textarea/custom-elements.json'
 import switchManifest from '@c2n/switch/custom-elements.json'
 import spinner from '@c2n/spinner/custom-elements.json'
 import slider from '@c2n/slider/custom-elements.json'
-import seperator from '@c2n/seperator/custom-elements.json'
+import separator from '@c2n/separator/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
@@ -97,6 +98,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    pageEditor,
     notepad,
     todoList,
     comparisonBar,
@@ -152,7 +154,7 @@ export const componentManifests = (function () {
     switchManifest,
     spinner,
     slider,
-    seperator,
+    separator,
     breadcrumb,
     badge,
     toast,

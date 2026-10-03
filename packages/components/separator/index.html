@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>c2-seperator</title>
-    <script type="module" src="/src/seperator.ts"></script>
+    <title>c2-separator</title>
+    <script type="module" src="/src/separator.ts"></script>
     <style>
       body {
         padding: 24px;
@@ -49,13 +49,13 @@
         background: #e4e4e7;
       }
       .heading {
-        --c2-seperator__line-start--flex: 0 0 0px;
-        --c2-seperator__label--gap: 0px;
-        --c2-seperator__label--color: #18181b;
-        --c2-seperator__label--font-weight: 600;
-        --c2-seperator__label--text-transform: uppercase;
-        --c2-seperator__label--letter-spacing: 0.06em;
-        --c2-seperator__label--font-size: 11px;
+        --c2-separator__line-start--flex: 0 0 0px;
+        --c2-separator__label--gap: 0px;
+        --c2-separator__label--color: #18181b;
+        --c2-separator__label--font-weight: 600;
+        --c2-separator__label--text-transform: uppercase;
+        --c2-separator__label--letter-spacing: 0.06em;
+        --c2-separator__label--font-size: 11px;
       }
       .heading::part(line) {
         margin-left: 12px;
@@ -66,19 +66,19 @@
     <section>
       <h2>Default, spacing, dashed, dotted, thick accent</h2>
       <p>Above</p>
-      <c2-seperator></c2-seperator>
+      <c2-separator></c2-separator>
       <p>Below</p>
-      <c2-seperator style="--c2-seperator--spacing: 12px"></c2-seperator>
-      <c2-seperator style="--c2-seperator--style: dashed; --c2-seperator--spacing: 8px"></c2-seperator>
-      <c2-seperator style="--c2-seperator--style: dotted; --c2-seperator--thickness: 2px; --c2-seperator--spacing: 8px"></c2-seperator>
-      <c2-seperator style="--c2-seperator--thickness: 3px; --c2-seperator--color: #0265dc; --c2-seperator--spacing: 8px"></c2-seperator>
+      <c2-separator style="--c2-separator--spacing: 12px"></c2-separator>
+      <c2-separator style="--c2-separator--style: dashed; --c2-separator--spacing: 8px"></c2-separator>
+      <c2-separator style="--c2-separator--style: dotted; --c2-separator--thickness: 2px; --c2-separator--spacing: 8px"></c2-separator>
+      <c2-separator style="--c2-separator--thickness: 3px; --c2-separator--color: #0265dc; --c2-separator--spacing: 8px"></c2-separator>
     </section>
 
     <section>
       <h2>Label: centred, near the start, as a section heading</h2>
-      <c2-seperator>or</c2-seperator>
-      <c2-seperator style="--c2-seperator__line-start--flex: 0 0 24px; --c2-seperator--spacing: 12px">Continue with</c2-seperator>
-      <c2-seperator class="heading" style="--c2-seperator--spacing: 12px">Recent</c2-seperator>
+      <c2-separator>or</c2-separator>
+      <c2-separator style="--c2-separator__line-start--flex: 0 0 24px; --c2-separator--spacing: 12px">Continue with</c2-separator>
+      <c2-separator class="heading" style="--c2-separator--spacing: 12px">Recent</c2-separator>
     </section>
 
     <section>
@@ -86,15 +86,15 @@
       <div class="toolbar">
         <span>Bold</span>
         <span>Italic</span>
-        <c2-seperator orientation="vertical"></c2-seperator>
+        <c2-separator orientation="vertical"></c2-separator>
         <span>Left</span>
         <span>Center</span>
-        <c2-seperator orientation="vertical" style="--c2-seperator--spacing: 4px"></c2-seperator>
+        <c2-separator orientation="vertical" style="--c2-separator--spacing: 4px"></c2-separator>
         <span>Link</span>
       </div>
       <div class="toolbar" style="height: 96px">
         <span>Sign in</span>
-        <c2-seperator orientation="vertical">or</c2-seperator>
+        <c2-separator orientation="vertical">or</c2-separator>
         <span>Create account</span>
       </div>
     </section>
@@ -103,9 +103,9 @@
       <h2>Inset list dividers (decorative)</h2>
       <div class="list">
         <div class="list-item"><span class="dot"></span>Ada Lovelace</div>
-        <c2-seperator decorative style="--c2-seperator--inset-start: 48px"></c2-seperator>
+        <c2-separator decorative style="--c2-separator--inset-start: 48px"></c2-separator>
         <div class="list-item"><span class="dot"></span>Grace Hopper</div>
-        <c2-seperator decorative style="--c2-seperator--inset-start: 48px"></c2-seperator>
+        <c2-separator decorative style="--c2-separator--inset-start: 48px"></c2-separator>
         <div class="list-item"><span class="dot"></span>Alan Turing</div>
       </div>
     </section>

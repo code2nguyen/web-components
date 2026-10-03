@@ -164,20 +164,10 @@
   --_paper: #{css.cssVar(paper-night--background)};
   --_ink: #{css.cssVar(paper-night--color)};
 }
-// On night paper the inks would be dark on dark: lift each one towards white, and black ink becomes the paper's ink.
-:host([paper-color='night']) .writing {
-  span[data-ink='blue'] {
-    color: color-mix(in srgb, #{css.cssVar(ink-blue--color)} 55%, #ffffff);
-  }
-  span[data-ink='red'] {
-    color: color-mix(in srgb, #{css.cssVar(ink-red--color)} 55%, #ffffff);
-  }
-  span[data-ink='green'] {
-    color: color-mix(in srgb, #{css.cssVar(ink-green--color)} 55%, #ffffff);
-  }
-  span[data-ink='black'] {
-    color: var(--_ink);
-  }
+// On night paper the inks would be dark on dark: each mark takes its night variant, lifted towards white (the default
+// black ink becomes the paper's ink).
+:host([paper-color='night']) .writing span[data-ink] {
+  --_mark-ink: var(--_mark-night);
 }
 // Night paper is dark: the rules and the margin are dimmed into it rather than drawn at full strength.
 :host([paper-color='night']) .sheet {
@@ -459,21 +449,9 @@
     background: css.cssVar(selection--background);
     color: var(--_ink);
   }
-  span[data-ink='blue']::selection,
-  span[data-ink='blue'] ::selection {
-    color: css.cssVar(ink-blue--color);
-  }
-  span[data-ink='black']::selection,
-  span[data-ink='black'] ::selection {
-    color: css.cssVar(ink-black--color);
-  }
-  span[data-ink='red']::selection,
-  span[data-ink='red'] ::selection {
-    color: css.cssVar(ink-red--color);
-  }
-  span[data-ink='green']::selection,
-  span[data-ink='green'] ::selection {
-    color: css.cssVar(ink-green--color);
+  span[data-ink]::selection,
+  span[data-ink] ::selection {
+    color: var(--_mark-ink, var(--_ink));
   }
   &:focus-visible {
     outline: none;
@@ -501,17 +479,11 @@
   s {
     text-decoration-thickness: 1.5px;
   }
-  span[data-ink='blue'] {
-    color: css.cssVar(ink-blue--color);
-  }
-  span[data-ink='black'] {
-    color: css.cssVar(ink-black--color);
-  }
-  span[data-ink='red'] {
-    color: css.cssVar(ink-red--color);
-  }
-  span[data-ink='green'] {
-    color: css.cssVar(ink-green--color);
+  // Each mark names its colour by position (`--_ink-<n>`, set by the component from its list); a position the
+  // list does not have falls back to the page's ink.
+  span[data-ink] {
+    --_mark-ink: var(--_mark-day);
+    color: var(--_mark-ink, var(--_ink));
   }
   mark {
     color: inherit;
@@ -521,15 +493,6 @@
     background: linear-gradient(transparent 22%, var(--_highlight) 22% 88%, transparent 88%);
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
-  }
-  mark[data-color='yellow'] {
-    --_highlight: #{css.cssVar(highlight-yellow--background)};
-  }
-  mark[data-color='green'] {
-    --_highlight: #{css.cssVar(highlight-green--background)};
-  }
-  mark[data-color='pink'] {
-    --_highlight: #{css.cssVar(highlight-pink--background)};
   }
 
   .placeholder::before {
@@ -856,8 +819,14 @@
   &::before {
     @include tape;
   }
+  // A column of content-sized rows, the card sized to them. As a grid with `auto` tracks, WebKit (iOS Safari) gave the
+  // card a height far past its content and spread it between the rows.
+  width: max-content;
+  height: max-content;
   &:popover-open {
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 6px;
   }
   .label {
@@ -925,8 +894,8 @@
   }
   .grid3 {
     display: grid;
-    grid-template-columns: repeat(3, auto);
-    justify-content: start;
+    grid-template-columns: repeat(3, max-content);
+    align-items: start;
   }
   // Each pad as a miniature of itself, on its own colour, with its name under it.
   .pads button {
@@ -934,6 +903,7 @@
     padding-block-end: 2px;
   }
   .name {
+    white-space: nowrap;
     font-size: 10px;
     line-height: 1.2;
     opacity: 0.8;

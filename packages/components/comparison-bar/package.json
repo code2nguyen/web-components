@@ -1,6 +1,6 @@
 {
   "name": "@c2n/comparison-bar",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "type": "module",
   "main": "dist/comparison-bar.js",
   "exports": {
@@ -63,7 +63,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.20",
+    "@c2n/core": "0.0.21",
     "lit": "3.3.3"
   },
   "devDependencies": {

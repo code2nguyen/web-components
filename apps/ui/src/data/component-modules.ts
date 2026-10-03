@@ -3,6 +3,7 @@
  * Used by pages that render component markup as plain HTML (gallery cards) instead of
  * hydrating each element as an Astro island.
  */
+import '@c2n/page-editor'
 import '@c2n/notepad'
 import '@c2n/todo-list'
 import '@c2n/comparison-bar'
@@ -94,7 +95,7 @@ import '@c2n/overlay'
 import '@c2n/progress'
 import '@c2n/radio'
 import '@c2n/select'
-import '@c2n/seperator'
+import '@c2n/separator'
 import '@c2n/sheet'
 import '@c2n/side-nav'
 import '@c2n/skeleton'

@@ -80,3 +80,12 @@ test('reconciles saved order with added and removed authored tiles', () => {
   expect(result.items.map((item) => item.rows)).toEqual([5, 5, 3])
   expect(saved.items.map((item) => item.id)).toEqual(['b', 'a', 'removed'])
 })
+
+test('places a newly-authored tile before the next tile authored after it', () => {
+  const columns = { xs: 1, sm: 2, md: 3, lg: 4 }
+  const snapshot = (ids: string[]) => ({ version: 1 as const, items: ids.map((id) => ({ id, rows: 3, columns })) })
+  // Prepended in the DOM, as a "new item first" list renders it: placed first, in authored order.
+  expect(reconcileSnapshot(snapshot(['n1', 'n2', 'a', 'b']), snapshot(['a', 'b'])).items.map((item) => item.id)).toEqual(['n1', 'n2', 'a', 'b'])
+  // Inserted in the middle of a user-arranged order: kept before its authored successor.
+  expect(reconcileSnapshot(snapshot(['a', 'new', 'b']), snapshot(['b', 'a'])).items.map((item) => item.id)).toEqual(['new', 'b', 'a'])
+})

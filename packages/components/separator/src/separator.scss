@@ -1,5 +1,5 @@
 @use '@c2n/sass/css-variable' as css with (
-  $prefix: c2-seperator,
+  $prefix: c2-separator,
   $theme: (
     thickness: 1px,
     color: #e4e4e7,
@@ -49,45 +49,45 @@
   padding-bottom: css.cssVar(inset-end);
 }
 
-.c2-seperator {
+.c2-separator {
   display: flex;
   flex: 1;
   align-items: center;
   min-width: 0;
 }
 
-:host([orientation='vertical']) .c2-seperator {
+:host([orientation='vertical']) .c2-separator {
   flex-direction: column;
   justify-content: center;
 }
 
-// The line is a border so `--c2-seperator--style` can make it dashed or dotted.
-.c2-seperator-line {
+// The line is a border so `--c2-separator--style` can make it dashed or dotted.
+.c2-separator-line {
   flex: css.cssVar(line-start--flex);
   align-self: center;
   border: 0 css.cssVar(style) css.cssVar(color);
   border-top-width: css.cssVar(thickness);
 }
 
-.c2-seperator-line--end {
+.c2-separator-line--end {
   flex: css.cssVar(line-end--flex);
 }
 
-:host([orientation='vertical']) .c2-seperator-line {
+:host([orientation='vertical']) .c2-separator-line {
   border-top-width: 0;
   border-left-width: css.cssVar(thickness);
   align-self: center;
 }
 
 // Without a label only the first segment is drawn, spanning the full length.
-.c2-seperator:not(.has-label) {
-  .c2-seperator-label,
-  .c2-seperator-line--end {
+.c2-separator:not(.has-label) {
+  .c2-separator-label,
+  .c2-separator-line--end {
     display: none;
   }
 }
 
-.c2-seperator-label {
+.c2-separator-label {
   flex: none;
   padding-left: css.cssVar(label--gap);
   padding-right: css.cssVar(label--gap);
@@ -100,7 +100,7 @@
   white-space: nowrap;
 }
 
-:host([orientation='vertical']) .c2-seperator-label {
+:host([orientation='vertical']) .c2-separator-label {
   padding-left: 0;
   padding-right: 0;
   padding-top: css.cssVar(label--gap);

@@ -2,6 +2,80 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "0.0.21",
+      "date": "2026-10-03",
+      "sections": [
+        {
+          "type": "breaking",
+          "title": "Breaking changes",
+          "items": [
+            {
+              "scopes": ["todo-list"],
+              "text": "Take custom backgrounds and palettes, stored by position",
+              "hash": "76eefa9"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Take custom ink and highlighter lists, stored by position",
+              "hash": "5011b91"
+            },
+            {
+              "scopes": ["separator"],
+              "text": "Rename @c2n/seperator to @c2n/separator",
+              "hash": "37674f3"
+            }
+          ]
+        },
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["page-editor"],
+              "text": "Add c2-page-editor, a Notion-style editor for long text",
+              "hash": "f1d3857"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Name list colours `{ value, name }`, with an optional name",
+              "hash": "bfd8efd"
+            },
+            {
+              "scopes": ["todo-list"],
+              "text": "Draw the ring and hero progress as a circular c2-progress",
+              "hash": "7056c63"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["masonry"],
+              "text": "Place a newly added tile before its authored successor",
+              "hash": "04883b3"
+            },
+            {
+              "scopes": ["code-editor"],
+              "text": "Apply value and options set while the engine loads",
+              "hash": "aa3745d"
+            },
+            {
+              "scopes": ["reorder-list"],
+              "text": "Keep the drag preview under the pointer inside a containing ancestor",
+              "hash": "ba20843"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Size the paper menu to its content on iOS Safari",
+              "hash": "164b69d"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.0.20",
       "date": "2026-10-02",
       "sections": [

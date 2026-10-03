@@ -16,7 +16,7 @@ import '@c2n/notepad'
 </c2-notepad>
 ```
 
-`value` is line-based Markdown: one line per line, `- [ ]` / `- [x]` checklist items, `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, and inline HTML for what Markdown cannot say (`<u>`, `<span data-ink="red">`, `<mark data-color="pink">`). `text` returns plain text. The element is form-associated (`name`, `required`, `maxlength`, reset, disabled fieldsets).
+`value` is line-based Markdown: one line per line, `- [ ]` / `- [x]` checklist items, `**bold**`, `*italic*`, `~~strike~~`, `==highlight==`, and inline HTML for what Markdown cannot say (`<u>`, `<span data-ink="3">`, `<mark data-color="2">`). Inks and highlighters are stored by their 1-based position in the `inks` / `highlights` lists, which you can replace with your own `{ value, name }` entries (one list per theme, same order); the default colours' names (`data-ink="red"`) are still read. `text` returns plain text. The element is form-associated (`name`, `required`, `maxlength`, reset, disabled fieldsets).
 
 `paper-picker` adds a "Paper" button that lets the writer pick the ruling (`paper`: lined, grid, dot, blank) and the paper colour with its ink (`paper-color`: default, yellow, green, blue, pink, night). It opens on hover, like a hover card.
 

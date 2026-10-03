@@ -1,18 +1,18 @@
 import { test, expect, props, accessible, slotPresenceMatrix } from '../../../../tests/component-fixture'
 
 test('label presence follows assignment, text, insertion, removal and reassignment', async ({ page, renderScenario }) => {
-  const label = page.locator('c2-seperator').locator('[part="label"]')
+  const label = page.locator('c2-separator').locator('[part="label"]')
   await slotPresenceMatrix(page, renderScenario, {
-    markup: '<c2-seperator><span data-slot-presence-probe>Section</span></c2-seperator>',
-    host: 'c2-seperator',
+    markup: '<c2-separator><span data-slot-presence-probe>Section</span></c2-separator>',
+    host: 'c2-separator',
     text: true,
     assertPresent: async (present) => (present ? expect(label).toBeVisible() : expect(label).toBeHidden()),
   })
 })
 
 test('semantic separators expose orientation and a slotted label', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-seperator>Or continue</c2-seperator>')
-  const host = page.locator('c2-seperator')
+  await renderScenario('<c2-separator>Or continue</c2-separator>')
+  const host = page.locator('c2-separator')
   await expect(host).toHaveHostAria('role', 'separator')
   await expect(host).toHaveHostAria('aria-orientation', 'horizontal')
   await expect(page.getByText('Or continue')).toBeVisible()
@@ -21,8 +21,8 @@ test('semantic separators expose orientation and a slotted label', async ({ page
   await accessible(page)
 })
 test('decorative mode removes separator semantics', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-seperator decorative></c2-seperator>')
-  const host = page.locator('c2-seperator')
+  await renderScenario('<c2-separator decorative></c2-separator>')
+  const host = page.locator('c2-separator')
   await expect(host).toHaveHostAria('role', 'none')
   await expect(host).toHaveHostAria('aria-orientation', null)
   // Nothing inside the shadow root re-introduces the role either.
@@ -32,8 +32,8 @@ test('decorative mode removes separator semantics', async ({ page, renderScenari
 // React hydrates server markup against what the element looks like after it upgrades, and reports every attribute
 // the element wrote on itself as a mismatch. The role and orientation therefore live on ElementInternals.
 test('states its semantics without writing host attributes, so server-rendered markup hydrates unchanged', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-seperator>Or continue</c2-seperator>')
-  const host = page.locator('c2-seperator')
+  await renderScenario('<c2-separator>Or continue</c2-separator>')
+  const host = page.locator('c2-separator')
   const hostSemantics = () => host.evaluate((element) => element.getAttributeNames().filter((name) => name === 'role' || name.startsWith('aria-')))
 
   await expect(host).toHaveHostAria('role', 'separator')

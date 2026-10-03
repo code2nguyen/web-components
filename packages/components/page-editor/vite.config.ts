@@ -6,17 +6,18 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/seperator.ts'],
+      entry: ['src/page-editor.ts'],
       formats: ['es'],
     },
     minify: false,
     rollupOptions: {
-      external: /^lit|@c2n/,
+      // ProseMirror and shiki are regular dependencies, shared with an app (or a c2-notepad) that ships them too.
+      external: /^(lit|@c2n|prosemirror-|shiki)/,
     },
   },
   plugins: [
     VitePluginCustomElementsManifest({
-      files: ['src/seperator.ts'],
+      files: ['src/page-editor.ts'],
       lit: true,
       output: '../custom-elements.json',
       plugins: [customLitCemPlugin()],

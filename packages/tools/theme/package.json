@@ -1,6 +1,6 @@
 {
   "name": "@c2n/theme",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Design tokens (--c2-theme--*) and a generated base theme that maps every @c2n component CSS variable onto them",
   "type": "module",
   "main": "dist/tokens.js",
@@ -54,6 +54,7 @@
     "build": {
       "dependencies": [
         "type-check",
+        "../../components/page-editor:build",
         "../../components/notepad:build",
         "../../components/todo-list:build",
         "../../components/comparison-bar:build",
@@ -109,7 +110,7 @@
         "../../components/switch:build",
         "../../components/spinner:build",
         "../../components/slider:build",
-        "../../components/seperator:build",
+        "../../components/separator:build",
         "../../components/breadcrumb:build",
         "../../components/badge:build",
         "../../components/toast:build",
