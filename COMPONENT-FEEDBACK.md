@@ -141,16 +141,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/tools/theme` — either have the generator emit the shorthand when a
   component declares one, or stop `base.css` writing all four sides when they carry the same token.
 
-### Dashboard persistence cannot represent ordered panels and named sizes
-
-- **Severity:** gap
-- **Hit while:** building versioned desktop/tablet layouts for the Next.js observability example, 2026-09-21.
-- **What happens:** `c2-dashboard`'s `storage-key` persists only track rows and columns. A consumer that needs an
-  ordered panel-ID permutation plus named whole-panel sizes must own a second storage model and packing layer.
-- **Where the fix belongs:** `packages/components/dashboard` — expose a versioned layout value/event contract
-  containing stable card IDs, order, breakpoint, and named sizes, with validation and reset semantics.
-- **Partially addressed 2026-09-23:** stored layouts and events include version, stable order, and breakpoint. Named sizes still require app-owned metadata through serializer hooks; the component does not validate or reset those sizes itself.
-
 ### Property-driven table cell action slots are not reliably actionable during upgrade
 
 - **Severity:** bug
@@ -197,6 +187,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | docs                            | Relative `c2-link-button` hrefs skip Next's `basePath`; the framework guide now has an idempotent base-path adapter.                                                                                                                                                                                                            | 2026-09-23 (#102)                                                                                                                                                                                            |
 | `c2-button-group`               | App-wide `--c2-button__*` rules beat the group's `::slotted` item variables, so segmented children kept standalone fills.                                                                                                                                                                                                       | 2026-09-23 (#102)                                                                                                                                                                                            |
 | tooling                         | Stale or misspelled `--c2-*` names passed every check; `npm run check:css-contracts` now validates app usage against the manifests.                                                                                                                                                                                             | 2026-09-23 (#102)                                                                                                                                                                                            |
+| `c2-dashboard`                  | Stored layouts held tracks, order and breakpoint but not named panel sizes, so apps kept a second storage model. `sizes` on the grid, `size` on a card and `setPanelSize()` now persist, validate on restore and reset with the layout.                                                                                         | 2026-10-03                                                                                                                                                                                                   |
 
 ## Won't fix
 

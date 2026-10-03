@@ -17,6 +17,18 @@ export interface DashCardPlacement {
   visible?: boolean
 }
 
+/**
+ * One named whole-panel size, declared on the grid's `sizes` record and chosen by a card's `size`. Each field is
+ * the number of tracks the card spans while the size is in force; a field left out keeps the card's own
+ * `col-span`/`row-span`.
+ */
+export interface DashboardPanelSize {
+  /** Number of columns a card of this size occupies. */
+  colSpan?: number
+  /** Number of rows a card of this size occupies. */
+  rowSpan?: number
+}
+
 /** What one card contributes to the minimum size of the tracks it covers, read during a drag. */
 export interface DashCardConstraint {
   col: number
@@ -44,12 +56,16 @@ export interface DashboardHost extends HTMLElement {
   /** Where the splitter after `index` sits, as a percentage of the tracks' total — the handles' `aria-valuenow`. */
   splitterValue(axis: 'column' | 'row', index: number): number
   placementOf(cardId: string | undefined): DashCardPlacement | undefined
+  /** Spans of the named size in force for this card, or `undefined` when it has none the grid knows. */
+  panelSizeOf(card: DashboardCard): DashboardPanelSize | undefined
 }
 
 /** The part of `c2-dash-card` the grid reads back. */
 export interface DashboardCard extends HTMLElement {
   /** Stable persistence identity supplied by the card's `card-id`. */
   readonly cardId?: string
+  /** Authored named size, a key of the grid's `sizes`. */
+  readonly size?: string
   /** `undefined` while the card is hidden, so a hidden card constrains nothing. */
   readonly constraint: DashCardConstraint | undefined
   /** The grid changed shape: re-render the placement and the handles. */
