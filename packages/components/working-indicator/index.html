@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-working-indicator</title>
+    <script type="module" src="/src/working-indicator.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 16px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .agent {
+        --c2-working-indicator__indicator--color: #d97757;
+        --c2-working-indicator__label--color: #d97757;
+        --c2-working-indicator__label--highlight-color: #f4b59b;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-working-indicator class="agent" messages='["Scheming","Pondering","Brewing"]' elapsed><span slot="meta">esc to interrupt</span></c2-working-indicator>
+    <c2-working-indicator indicator="dots" effect="wave" ellipsis="bounce" label="Generating"></c2-working-indicator>
+    <c2-working-indicator indicator="ring" effect="fill" ellipsis="none" label="Uploading" value="40"></c2-working-indicator>
+    <c2-working-indicator indicator="pulse" effect="pulse" label="Listening"></c2-working-indicator>
+    <c2-working-indicator indicator="orbit" ellipsis="static" label="Indexing"></c2-working-indicator>
+    <c2-working-indicator id="toggle" label="Building" done-label="Built in 3s" elapsed></c2-working-indicator>
+    <c2-working-indicator state="error" done-label="Build failed"></c2-working-indicator>
+    <script type="module">
+      const toggle = document.getElementById('toggle')
+      setTimeout(() => (toggle.state = 'done'), 3000)
+    </script>
+  </body>
+</html>

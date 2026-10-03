@@ -1,4 +1,5 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
+import workingIndicator from '@c2n/working-indicator/custom-elements.json'
 import pageEditor from '@c2n/page-editor/custom-elements.json'
 import notepad from '@c2n/notepad/custom-elements.json'
 import todoList from '@c2n/todo-list/custom-elements.json'
@@ -98,6 +99,7 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
+    workingIndicator,
     pageEditor,
     notepad,
     todoList,

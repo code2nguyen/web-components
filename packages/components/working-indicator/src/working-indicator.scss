@@ -1,0 +1,472 @@
+@use '@c2n/sass/css-variable' as css with (
+  $prefix: c2-working-indicator,
+  $theme: (
+    gap: 8px,
+    font-size: 14px,
+    font-weight: 500,
+    indicator--color: #0265dc,
+    indicator--size: 16px,
+    indicator--animation-duration: 1.2s,
+    label--color: #71717a,
+    label--highlight-color: #18181b,
+    label--animation-duration: 2s,
+    label--stagger: 0.06s,
+    label--rotate-duration: 3s,
+    ellipsis--animation-duration: 1.4s,
+    meta--color: #71717a,
+    meta--font-size: 12px,
+    done--color: #16a34a,
+    error--color: #dc2626,
+  )
+);
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+.c2-working-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: css.cssVar(gap);
+  min-width: 0;
+  font-size: css.cssVar(font-size);
+  font-weight: css.cssVar(font-weight);
+  line-height: 1.4;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// ---------------------------------------------------------------------------------------------------- indicator
+
+.indicator {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: css.cssVar(indicator--size);
+  height: css.cssVar(indicator--size);
+  color: css.cssVar(indicator--color);
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.is-done .indicator {
+  color: css.cssVar(done--color);
+}
+
+.is-error .indicator {
+  color: css.cssVar(error--color);
+}
+
+::slotted([slot='indicator']),
+::slotted([slot='done-icon']),
+::slotted([slot='error-icon']) {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+// Glyph: a column of characters behind a one-glyph window, moved one row per step.
+.glyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.glyph-strip {
+  display: flex;
+  flex-direction: column;
+  height: 1000%;
+  animation: c2-working-indicator-glyph css.cssVar(indicator--animation-duration) steps(10) infinite;
+
+  > span {
+    display: grid;
+    place-items: center;
+    flex: 1 1 0;
+    font-size: calc(#{css.cssVar(indicator--size)} * 0.9);
+    line-height: 1;
+  }
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+
+  i {
+    width: 22%;
+    aspect-ratio: 1;
+    border-radius: 999px;
+    background: currentColor;
+    animation: c2-working-indicator-dot css.cssVar(indicator--animation-duration) ease-in-out infinite;
+
+    &:nth-child(2) {
+      animation-delay: calc(#{css.cssVar(indicator--animation-duration)} / 6);
+    }
+    &:nth-child(3) {
+      animation-delay: calc(#{css.cssVar(indicator--animation-duration)} / 3);
+    }
+  }
+}
+
+.ring {
+  box-sizing: border-box;
+  width: 85%;
+  height: 85%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  animation: c2-working-indicator-spin css.cssVar(indicator--animation-duration) linear infinite;
+}
+
+.pulse {
+  position: relative;
+  width: 50%;
+  height: 50%;
+  border-radius: 999px;
+  background: currentColor;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    animation: c2-working-indicator-pulse css.cssVar(indicator--animation-duration) ease-out infinite;
+  }
+}
+
+.orbit {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: c2-working-indicator-spin css.cssVar(indicator--animation-duration) linear infinite;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 30%;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.35;
+  }
+
+  i {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 25%;
+    aspect-ratio: 1;
+    margin-left: -12.5%;
+    border-radius: 999px;
+    background: currentColor;
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------- label
+
+.label {
+  display: inline-flex;
+  align-items: baseline;
+  min-width: 0;
+  color: css.cssVar(label--color);
+}
+
+.text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.is-rotating .label {
+  animation: c2-working-indicator-rotate css.cssVar(label--rotate-duration) ease-in-out infinite;
+}
+
+// Shimmer: a highlight band travels across the glyphs.
+.effect-shimmer .text {
+  background: linear-gradient(
+      90deg,
+      css.cssVar(label--color) 0%,
+      css.cssVar(label--color) 40%,
+      css.cssVar(label--highlight-color) 50%,
+      css.cssVar(label--color) 60%,
+      css.cssVar(label--color) 100%
+    )
+    0 0 / 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: c2-working-indicator-shimmer css.cssVar(label--animation-duration) linear infinite;
+}
+
+.effect-wave .text {
+  // Room for the letters to rise inside the clipping box.
+  padding-block: 0.25em;
+  margin-block: -0.25em;
+}
+
+.effect-wave .char {
+  display: inline-block;
+  white-space: pre;
+  animation: c2-working-indicator-wave css.cssVar(label--animation-duration) ease-in-out infinite;
+  animation-delay: calc(var(--c2-working-indicator-index, 0) * #{css.cssVar(label--stagger)});
+}
+
+.effect-pulse .text {
+  animation: c2-working-indicator-fade css.cssVar(label--animation-duration) ease-in-out infinite;
+}
+
+// Fill: a hard colour stop sweeps left to right; with a value it rests at that fraction.
+.effect-fill .text {
+  background: linear-gradient(90deg, css.cssVar(label--highlight-color) 50%, css.cssVar(label--color) 50%) 100% 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: c2-working-indicator-fill css.cssVar(label--animation-duration) ease-in-out infinite;
+}
+
+.effect-fill.is-determinate .text {
+  animation: none;
+  background-position-x: var(--c2-working-indicator-fill, 100%);
+  transition: background-position-x 0.3s ease-out;
+}
+
+.is-done .label,
+.is-error .label {
+  color: css.cssVar(label--highlight-color);
+}
+
+// ---------------------------------------------------------------------------------------------------- ellipsis
+
+.ellipsis {
+  display: inline-flex;
+  white-space: pre;
+
+  i {
+    font-style: normal;
+  }
+}
+
+.ellipsis-fade .ellipsis i {
+  animation: c2-working-indicator-ellipsis-fade css.cssVar(ellipsis--animation-duration) steps(1, end) infinite;
+
+  &:nth-child(2) {
+    animation-name: c2-working-indicator-ellipsis-fade-2;
+  }
+  &:nth-child(3) {
+    animation-name: c2-working-indicator-ellipsis-fade-3;
+  }
+}
+
+.ellipsis-bounce .ellipsis i {
+  display: inline-block;
+  animation: c2-working-indicator-hop css.cssVar(ellipsis--animation-duration) ease-in-out infinite;
+
+  &:nth-child(2) {
+    animation-delay: calc(#{css.cssVar(ellipsis--animation-duration)} / 8);
+  }
+  &:nth-child(3) {
+    animation-delay: calc(#{css.cssVar(ellipsis--animation-duration)} / 4);
+  }
+}
+
+// Finished: no trailing dots, only the record.
+.is-done .ellipsis,
+.is-error .ellipsis {
+  display: none;
+}
+
+// ---------------------------------------------------------------------------------------------------- meta
+
+.meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+  flex: none;
+  color: css.cssVar(meta--color);
+  font-size: css.cssVar(meta--font-size);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.has-separator .meta-text::before {
+  content: '·';
+  margin-right: 0.5em;
+}
+
+// ---------------------------------------------------------------------------------------------------- states
+
+.is-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .c2-working-indicator * {
+    animation: none !important;
+  }
+
+  // Messages still rotate, without the fade: the iteration event drives them.
+  .is-rotating .label {
+    animation: c2-working-indicator-hold css.cssVar(label--rotate-duration) linear infinite !important;
+  }
+
+  .glyph-strip {
+    transform: translateY(-40%);
+  }
+
+  .effect-shimmer .text {
+    color: css.cssVar(label--highlight-color);
+    background: none;
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------- keyframes
+
+@keyframes c2-working-indicator-glyph {
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes c2-working-indicator-dot {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes c2-working-indicator-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes c2-working-indicator-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes c2-working-indicator-rotate {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes c2-working-indicator-hold {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes c2-working-indicator-shimmer {
+  from {
+    background-position-x: 100%;
+  }
+  to {
+    background-position-x: 0%;
+  }
+}
+
+@keyframes c2-working-indicator-wave {
+  0%,
+  40%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateY(-0.2em);
+    color: css.cssVar(label--highlight-color);
+  }
+}
+
+@keyframes c2-working-indicator-fade {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes c2-working-indicator-fill {
+  from {
+    background-position-x: 100%;
+  }
+  to {
+    background-position-x: 0%;
+  }
+}
+
+@keyframes c2-working-indicator-ellipsis-fade {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+}
+
+@keyframes c2-working-indicator-ellipsis-fade-2 {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes c2-working-indicator-ellipsis-fade-3 {
+  0% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+}
+
+@keyframes c2-working-indicator-hop {
+  0%,
+  60%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-0.25em);
+  }
+}

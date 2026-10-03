@@ -397,6 +397,10 @@
       "types": "./lib/week-planner.d.ts",
       "default": "./lib/week-planner.js"
     },
+    "./working-indicator": {
+      "types": "./lib/working-indicator.d.ts",
+      "default": "./lib/working-indicator.js"
+    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"
@@ -512,7 +516,8 @@
     "@c2n/tree": "0.0.24",
     "@c2n/upload": "0.0.24",
     "@c2n/virtual-list": "0.0.24",
-    "@c2n/week-planner": "0.0.24"
+    "@c2n/week-planner": "0.0.24",
+    "@c2n/working-indicator": "0.0.24"
   },
   "peerDependencies": {
     "@codemirror/autocomplete": "^6.0.0",

@@ -68,6 +68,7 @@ Use this compact index only to discover a likely component when the c2n MCP serv
 - **Status Panel** — `c2-status-panel` · `@c2n/status-panel` — Communicate empty states, operation outcomes and recoverable errors with clear next steps.
 - **Toast** — `c2-toast, c2-toast-region` · `@c2n/toast` — Notification cards and a manager for stacked, queued notifications with independent lifetimes.
 - **Tooltip** — `c2-tooltip` · `@c2n/tooltip` — Contextual hint shown when its target is hovered or focused, rendered in the top layer.
+- **Working Indicator** — `c2-working-indicator` · `@c2n/working-indicator` — A live "work in progress" line: animated mark, shimmering label, trailing dots and elapsed time.
 
 ## Icons
 
