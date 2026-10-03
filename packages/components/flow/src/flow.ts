@@ -10,12 +10,13 @@ import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/
 import type { ContextMenuContext, ContextMenuSelectEventDetail } from '@c2n/context-menu'
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
 import { avoidOverlap, buildGraph, layoutGraph, mergeLayout, type Graph, type LayoutOptions } from './flow-layout.js'
-import { edgePath } from './flow-geometry.js'
+import { edgeRoute } from './flow-geometry.js'
 import { MENU_ICONS, STATUS_ICONS, STATUS_LABELS } from './flow-icons.js'
 import type {
   FlowContextMenuRenderer,
   FlowDirection,
   FlowEdge,
+  FlowEdgeEditDetail,
   FlowEdgeEventDetail,
   FlowEdgeType,
   FlowLayout,
@@ -54,6 +55,7 @@ export interface FlowEventMap {
   'node-delete': CustomEvent<FlowNodeDeleteDetail>
   'edge-add': CustomEvent<FlowEdgeEventDetail>
   'edge-delete': CustomEvent<FlowEdgeEventDetail>
+  'edge-edit': CustomEvent<FlowEdgeEditDetail>
 }
 
 export interface Flow {
@@ -128,7 +130,12 @@ interface Connection {
  * React Flow but controlled in its topology: the graph comes from the `nodes` and `edges` properties (an `editable`
  * flow lets the user ask for changes, which the application applies), each node carries a {@link FlowStatus}, and
  * edges take their style from the statuses at both ends (an edge into a running step animates, one out of a failed
- * step turns red, one touching a skipped step is dotted).
+ * step turns red, one touching a skipped step is dotted). Every edge ends in an arrowhead at its target, in the edge's
+ * own colour; `--c2-flow__arrow--display: none` turns them off. An edge with a `label` shows it halfway along, as a
+ * small pill (the "yes" and "no" of a decision), and screen readers hear it with the relations of both nodes.
+ *
+ * **Status marker.** The default node body starts with a marker for its status. A plain diagram, where the status
+ * means nothing, hides it with `--c2-flow__marker--display: none`; the label then starts flush with the padding.
  *
  * **Layout.** Nodes are placed by a built-in layered layout: one column (`direction="LR"`) or row (`"TB"`) per
  * dependency depth, siblings ordered to reduce crossings. Cycles are allowed; the edges that close them are routed
@@ -170,6 +177,9 @@ interface Connection {
  *   self-loop or a duplicate); released on empty canvas it fires `node-add` with `source`, for a connected new node.
  *   From the keyboard, `C` on the focused node starts a connection, the arrow keys or Tab choose the target, Enter
  *   connects and Escape cancels.
+ * - *Label an edge*: double-click an edge or its label, press Enter or F2 on the selected edge, or choose **Edit
+ *   label** in its menu: the same inline field opens halfway along the edge. Enter or leaving the field commits
+ *   (`edge-edit`, with an empty `label` when the user cleared it), Escape cancels. `editEdgeLabel()` opens it from script.
  * - *Delete*: Delete or Backspace on the focused node fires `node-delete`. An edge is selected by a click, or by `E`
  *   on a focused node (repeat to step through its edges); Delete then fires `edge-delete`. The node and edge
  *   context menus have a **Delete** row.
@@ -191,6 +201,7 @@ interface Connection {
  * @event {CustomEvent<FlowNodeDeleteDetail>} node-delete - `editable` only: the user asked to delete node `detail.id`. Does not bubble.
  * @event {CustomEvent<FlowEdgeEventDetail>} edge-add - `editable` only: the user connected `detail.source` to `detail.target`. Never a self-loop or an existing edge. Does not bubble.
  * @event {CustomEvent<FlowEdgeEventDetail>} edge-delete - `editable` only: the user asked to delete the edge from `detail.source` to `detail.target`. Does not bubble.
+ * @event {CustomEvent<FlowEdgeEditDetail>} edge-edit - `editable` only: the user changed the label of the edge from `detail.source` to `detail.target` to `detail.label` with the inline editor; an empty `label` removes it. Does not bubble.
  *
  * @internalcomponent c2-context-menu
  * @internalcomponent c2-kbd
@@ -237,6 +248,16 @@ interface Connection {
  * @cssproperty {color} [--c2-flow__edge__failed--color=#dc2626] - Edge out of a failed step.
  * @cssproperty {pixel} [--c2-flow__edge__highlighted--width=2.5px] - Edges of the hovered or selected node.
  * @cssproperty {time} [--c2-flow__edge--animation-duration=600ms] - One cycle of the active edge's dash animation.
+ * @cssproperty {pixel} [--c2-flow__arrow--size=8px] - Length and width of the arrowhead at the target end of every edge. It takes the edge's colour.
+ * @cssproperty {display} [--c2-flow__arrow--display=block] - `none` draws the edges without arrowheads.
+ * @cssproperty {color} [--c2-flow__edge-label--background-color=#ffffff] - Background of the pill an edge's `label` is drawn in, so it stays readable over the line and the dot grid.
+ * @cssproperty {color} [--c2-flow__edge-label--color=#71717a]
+ * @cssproperty {font-size} [--c2-flow__edge-label--font-size=12px]
+ * @cssproperty {font-weight} [--c2-flow__edge-label--font-weight=500]
+ * @cssproperty {padding} [--c2-flow__edge-label--padding=1px 8px]
+ * @cssproperty {border} [--c2-flow__edge-label--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-flow__edge-label--border-radius=999px]
+ * @cssproperty {display} [--c2-flow__marker--display=inline-flex] - The status marker of the default node body. `none` hides it and the label sits flush with the padding.
  * @cssproperty {color} [--c2-flow__success--color=#16a34a]
  * @cssproperty {color} [--c2-flow__error--color=#dc2626]
  * @cssproperty {color} [--c2-flow__warning--color=#d97706]
@@ -333,6 +354,8 @@ export class Flow extends LitElement {
   @state() private panning = false
   @state() private custom = false
   @state() private editingId: string | null = null
+  /** Key of the edge whose label is being edited. */
+  @state() private editingEdge: string | null = null
   @state() private selectedEdge: string | null = null
   @state() private connection: Connection | null = null
   @state() private announcement = ''
@@ -350,6 +373,8 @@ export class Flow extends LitElement {
   /** Positions the user chose (or that were restored): the input of the merge on every re-layout. */
   private pinned: FlowLayout = {}
   private byId = new Map<string, FlowNode>()
+  /** The trimmed `label` of every labelled edge, by edge key. */
+  private edgeLabels = new Map<string, string>()
   private topologyKey = ''
   private layoutDirection: FlowDirection | null = null
   private storageLoaded = false
@@ -464,9 +489,27 @@ export class Flow extends LitElement {
     this.hideCard(true)
     this.cancelConnection()
     this.focusId = id
+    this.editingEdge = null
     this.editingId = id
     await this.updateComplete
     const input = this.renderRoot.querySelector<HTMLInputElement>('.label-editor')
+    input?.focus()
+    input?.select()
+  }
+
+  /**
+   * Opens the inline label editor on the edge from `source` to `target`, as a double-click would; for example on the
+   * branch an application has just added to a decision. Does nothing unless the flow is `editable` and the edge exists.
+   */
+  async editEdgeLabel(source: string, target: string): Promise<void> {
+    const key = edgeKey(source, target)
+    if (!this.editable || !this.edgeByKey(key) || !this.positions.has(source) || !this.positions.has(target)) return
+    this.hideCard(true)
+    this.cancelConnection()
+    this.editingId = null
+    this.editingEdge = key
+    await this.updateComplete
+    const input = this.renderRoot.querySelector<HTMLInputElement>('.label-editor--edge')
     input?.focus()
     input?.select()
   }
@@ -682,8 +725,10 @@ export class Flow extends LitElement {
     return null
   }
 
+  /** The edge under the event: its hit band or its label. */
   private edgeKeyFromEvent(event: Event): string | null {
-    return (this.fromPart(event, 'edge-hit') as SVGElement | null)?.dataset.edgeKey ?? null
+    const part = (this.fromPart(event, 'edge-hit') ?? this.fromPart(event, 'edge-label')) as HTMLElement | SVGElement | null
+    return part?.dataset.edgeKey ?? null
   }
 
   /** Viewport coordinates to canvas pixels. */
@@ -795,7 +840,8 @@ export class Flow extends LitElement {
       if (!moved && released) {
         if (edge) {
           this.selectEdge(edge)
-          this.lastTap = null
+          const selected = this.edgeByKey(edge)
+          if (selected && this.isDoubleTap(`edge:${edge}`, event)) void this.editEdgeLabel(selected.source, selected.target)
         } else {
           this.select(null)
           if (this.editable && this.isDoubleTap('canvas', event)) this.requestNode(this.centred(this.toCanvas(event.clientX, event.clientY)))
@@ -958,7 +1004,8 @@ export class Flow extends LitElement {
     this.select(null)
     this.selectedEdge = key
     this.hideCard(true)
-    this.announce(`Edge from ${this.labelOf(edge.source)} to ${this.labelOf(edge.target)}${position} selected. Delete removes it.`)
+    const label = edge.label?.trim() ? `, labelled ${edge.label.trim()}` : ''
+    this.announce(`Edge from ${this.labelOf(edge.source)} to ${this.labelOf(edge.target)}${label}${position} selected. Delete removes it, F2 edits its label.`)
   }
 
   /** `E` on a node: selects its edges one after the other. */
@@ -985,7 +1032,26 @@ export class Flow extends LitElement {
     this.dispatchEvent(new CustomEvent<FlowEdgeEventDetail>('edge-delete', { detail: { source: edge.source, target: edge.target } }))
   }
 
+  private commitEdgeEdit(refocus: boolean) {
+    const key = this.editingEdge
+    if (key === null) return
+    const label = this.renderRoot.querySelector<HTMLInputElement>('.label-editor--edge')?.value.trim() ?? ''
+    this.editingEdge = null
+    const edge = this.edgeByKey(key)
+    if (edge && label !== (edge.label ?? '').trim()) {
+      this.dispatchEvent(new CustomEvent<FlowEdgeEditDetail>('edge-edit', { detail: { source: edge.source, target: edge.target, label } }))
+    }
+    if (refocus) this.refocusAfterEdgeEdit()
+  }
+
+  /** Back to the node keyboard focus was on, or to the canvas. */
+  private refocusAfterEdgeEdit() {
+    if (this.focusId !== null && this.byId.has(this.focusId)) void this.focusNode(this.focusId)
+    else void this.updateComplete.then(() => this.stage?.focus())
+  }
+
   private commitEdit(refocus: boolean) {
+    if (this.editingEdge !== null) return this.commitEdgeEdit(refocus)
     const id = this.editingId
     if (id === null) return
     const label = this.renderRoot.querySelector<HTMLInputElement>('.label-editor')?.value.trim() ?? ''
@@ -1003,6 +1069,11 @@ export class Flow extends LitElement {
     } else if (event.key === 'Escape') {
       event.preventDefault()
       event.stopPropagation()
+      if (this.editingEdge !== null) {
+        this.editingEdge = null
+        this.refocusAfterEdgeEdit()
+        return
+      }
       const id = this.editingId
       this.editingId = null
       if (id !== null) void this.focusNode(id)
@@ -1019,6 +1090,12 @@ export class Flow extends LitElement {
       else if (id !== null) this.deleteNode(id, true)
       else return false
       event.preventDefault()
+      return true
+    }
+    const selectedEdge = this.edgeByKey(this.selectedEdge)
+    if (selectedEdge && (event.key === 'F2' || (event.key === 'Enter' && !event.shiftKey))) {
+      event.preventDefault()
+      void this.editEdgeLabel(selectedEdge.source, selectedEdge.target)
       return true
     }
     if (plainKey(event, 'n')) {
@@ -1173,7 +1250,7 @@ export class Flow extends LitElement {
   private scheduleCard(id: string) {
     clearTimeout(this.closeTimer)
     this.closeTimer = undefined
-    if (this.noCard || this.draggingId || this.editingId !== null || this.connection) return
+    if (this.noCard || this.draggingId || this.editingId !== null || this.editingEdge !== null || this.connection) return
     if (this.cardId === id) return
     clearTimeout(this.openTimer)
     // Moving from one node's card to the next node's opens it at once, like a menu bar.
@@ -1292,6 +1369,13 @@ export class Flow extends LitElement {
             >`
           : nothing
       }
+      ${
+        node
+          ? nothing
+          : html`<c2-menu-item value="flow:edit-label" aria-keyshortcuts="F2"
+              >${this.menuIcon(MENU_ICONS.rename)}Edit label<c2-kbd slot="shortcut">F2</c2-kbd></c2-menu-item
+            >`
+      }
       <c2-menu-item value="flow:delete" aria-keyshortcuts="Delete">${this.menuIcon(MENU_ICONS.remove)}Delete<c2-kbd slot="shortcut">Del</c2-kbd></c2-menu-item>
     `
   }
@@ -1355,6 +1439,9 @@ export class Flow extends LitElement {
       case 'flow:rename':
         // After the menu has closed and handed focus back, or the editor would lose it at once and commit.
         if (node) setTimeout(() => void this.editLabel(node.id))
+        return
+      case 'flow:edit-label':
+        if (edge) setTimeout(() => void this.editEdgeLabel(edge.source, edge.target))
         return
       case 'flow:delete':
         if (!this.editable) return
@@ -1423,8 +1510,16 @@ export class Flow extends LitElement {
       const connection = this.connection
       if (connection && (!this.byId.has(connection.source) || (connection.target !== null && !this.byId.has(connection.target)))) this.cancelConnection()
     }
-    if (changed.has('edges') && !Array.isArray(this.edges)) this.edges = []
+    if (changed.has('edges')) {
+      if (!Array.isArray(this.edges)) this.edges = []
+      this.edgeLabels = new Map()
+      for (const edge of this.edges) {
+        const key = edgeKey(edge.source, edge.target)
+        if (!this.edgeLabels.has(key) && edge.label?.trim()) this.edgeLabels.set(key, edge.label.trim())
+      }
+    }
     if (this.selectedEdge !== null && !this.edgeByKey(this.selectedEdge)) this.selectedEdge = null
+    if (this.editingEdge !== null && !this.edgeByKey(this.editingEdge)) this.editingEdge = null
     const ids = this.nodes.map((node) => node.id).join('\u0000')
     const key = `${ids}\u0001${this.edges.map((edge) => `${edge.source}\u0000${edge.target}`).join('\u0001')}`
     if (this.layoutDirection !== null && this.direction !== this.layoutDirection && !changed.has('storageKey')) {
@@ -1563,45 +1658,102 @@ export class Flow extends LitElement {
     </div>`
   }
 
+  /** An arrowhead at the end of an edge, pointing along the main axis into the target. */
+  private arrow(classes: string, end: FlowPoint) {
+    const angle = this.direction === 'TB' ? 90 : 0
+    return html`<span
+      class=${`arrow ${classes}`}
+      style=${`transform: translate(${end.x}px, ${end.y}px) rotate(${angle}deg) translate(var(--_arrow-offset), -50%)`}
+    ></span>`
+  }
+
   private renderEdges() {
     const highlight = this.highlightId ?? this.selected
-    const paths = this.edges.map((edge, index) => {
+    const paths: unknown[] = []
+    const marks: unknown[] = []
+    let editor: unknown = nothing
+    this.edges.forEach((edge, index) => {
       const a = this.positions.get(edge.source)
       const b = this.positions.get(edge.target)
-      if (!a || !b) return nothing
+      if (!a || !b) return
       const sa = this.sizeOf(edge.source)
       const sb = this.sizeOf(edge.target)
       const back = this.graph.backEdges.has(index)
-      const d = edgePath({ ...a, ...sa }, { ...b, ...sb }, this.direction, this.edgeType, back)
+      const route = edgeRoute({ ...a, ...sa }, { ...b, ...sb }, this.direction, this.edgeType, back)
       const edgeClass = edgeState(statusOf(this.byId.get(edge.source)!), statusOf(this.byId.get(edge.target)!))
       const on = highlight !== null && (edge.source === highlight || edge.target === highlight)
       const key = edgeKey(edge.source, edge.target)
       const selected = key === this.selectedEdge
-      const path = svg`<path class="edge edge--${edgeClass}${back ? ' edge--back' : ''}${on ? ' is-highlighted' : ''}${selected ? ' is-selected' : ''}" d=${d}></path>`
-      if (!this.editable) return path
+      const states = `${on ? ' is-highlighted' : ''}${selected ? ' is-selected' : ''}`
+      paths.push(svg`<path class=${`edge edge--${edgeClass}${back ? ' edge--back' : ''}${states}`} d=${route.d}></path>`)
       // A wide transparent stroke over the edge, so a click or a right-click does not need to hit a 1.5px line.
-      return svg`${path}<path
-        class="edge-hit"
-        data-edge-key=${key}
-        d=${d}
-        @c2-context-menu-request=${(event: Event) => provideContextMenuData(event, this, { edge })}
-      ></path>`
+      if (this.editable) {
+        paths.push(svg`<path
+          class="edge-hit"
+          data-edge-key=${key}
+          d=${route.d}
+          @c2-context-menu-request=${(event: Event) => provideContextMenuData(event, this, { edge })}
+        ></path>`)
+      }
+      // The arrowhead and the label take the edge's colour from a `mark--<state>` class of their own.
+      const classes = `mark--${edgeClass}${states}`
+      marks.push(this.arrow(classes, route.end))
+      const label = edge.label?.trim()
+      if (key === this.editingEdge) editor = this.edgeLabelEditor(edge, route.mid)
+      else if (label) {
+        marks.push(
+          html`<span
+            class=${`edge-label ${classes}`}
+            data-edge-key=${this.editable ? key : nothing}
+            style=${`transform: translate(${route.mid.x}px, ${route.mid.y}px) translate(-50%, -50%)`}
+            @c2-context-menu-request=${this.editable ? (event: Event) => provideContextMenuData(event, this, { edge }) : nothing}
+            >${label}</span
+          >`,
+        )
+      }
     })
+    const draft = this.draftRoute()
+    if (draft) {
+      paths.push(svg`<path class="edge edge--draft" d=${draft.d}></path>`)
+      marks.push(this.arrow('mark--draft', draft.end))
+    }
     const dim = highlight !== null && this.byId.has(highlight)
-    return html`<svg class="edges${dim ? ' has-highlight' : ''}" aria-hidden="true">${paths}${this.renderDraftEdge()}</svg>`
+    return html`<svg class="edges${dim ? ' has-highlight' : ''}" aria-hidden="true">${paths}</svg>
+      <div class="edge-marks${dim ? ' has-highlight' : ''}" aria-hidden="true">${marks}</div>
+      ${editor}`
   }
 
-  /** The edge following the pointer, or pointing at the keyboard's candidate, while a connection is made. */
-  private renderDraftEdge() {
+  private edgeLabelEditor(edge: FlowEdge, mid: FlowPoint) {
+    return html`<input
+      class="label-editor label-editor--edge"
+      style=${`transform: translate(${mid.x}px, ${mid.y}px) translate(-50%, -50%)`}
+      .value=${edge.label ?? ''}
+      aria-label=${`Label of the edge from ${this.labelOf(edge.source)} to ${this.labelOf(edge.target)}`}
+      autocomplete="off"
+      enterkeyhint="done"
+      @keydown=${this.handleEditorKeydown}
+      @blur=${this.handleEditorBlur}
+    />`
+  }
+
+  /** The route of the edge following the pointer, or pointing at the keyboard's candidate, while a connection is made. */
+  private draftRoute() {
     const connection = this.connection
     const a = connection && this.positions.get(connection.source)
-    if (!connection || !a) return nothing
+    if (!connection || !a) return null
     const target = this.canConnect(connection.source, connection.target) ? connection.target : null
     const b = target === null ? null : this.positions.get(target)
     const end = b ? { ...b, ...this.sizeOf(target!) } : connection.point ? { ...connection.point, width: 0, height: 0 } : null
-    if (!end) return nothing
-    const d = edgePath({ ...a, ...this.sizeOf(connection.source) }, end, this.direction, this.edgeType, false)
-    return svg`<path class="edge edge--draft" d=${d}></path>`
+    if (!end) return null
+    return edgeRoute({ ...a, ...this.sizeOf(connection.source) }, end, this.direction, this.edgeType, false)
+  }
+
+  /** "After Idea." or, when an edge has a label, "Before Book the night bus, yes; Walk home, no." */
+  private relation(word: string, ids: string[], keyOf: (id: string) => string) {
+    if (!ids.length) return ''
+    const labels = ids.map((id) => this.edgeLabels.get(keyOf(id)))
+    const parts = ids.map((id, i) => (labels[i] ? `${this.labelOf(id)}, ${labels[i]}` : this.labelOf(id)))
+    return `${word} ${parts.join(labels.some(Boolean) ? '; ' : ', ')}.`
   }
 
   private renderNodeElement(node: FlowNode, index: number) {
@@ -1609,8 +1761,7 @@ export class Flow extends LitElement {
     const p = this.positions.get(node.id) ?? { x: 0, y: 0 }
     const before = this.graph.predecessors.get(node.id) ?? []
     const after = this.graph.successors.get(node.id) ?? []
-    const labelOf = (id: string) => this.byId.get(id)?.label ?? id
-    const relations = [before.length ? `After ${before.map(labelOf).join(', ')}.` : '', after.length ? `Before ${after.map(labelOf).join(', ')}.` : '']
+    const relations = [this.relation('After', before, (id) => edgeKey(id, node.id)), this.relation('Before', after, (id) => edgeKey(node.id, id))]
       .filter(Boolean)
       .join(' ')
     const context = this.context(node)

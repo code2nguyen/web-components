@@ -27,6 +27,15 @@ function flow({ nodes = NODES, edges = EDGES, attributes = 'editable' }: { nodes
 const host = (page: Page) => page.locator('c2-flow')
 const node = (page: Page, id: string) => page.locator(`c2-flow .node[data-node-id="${id}"]`)
 const editor = (page: Page) => page.locator('c2-flow .label-editor')
+const edgeEditor = (page: Page) => page.locator('c2-flow .label-editor--edge')
+const edgeLabel = (page: Page) => page.locator('c2-flow .edge-label')
+
+/** The middle of the straight edge between two nodes of the single row the fitted view draws. */
+async function between(page: Page, source: string, target: string) {
+  const a = (await node(page, source).boundingBox())!
+  const b = (await node(page, target).boundingBox())!
+  return { x: (a.x + a.width + b.x) / 2, y: (a.y + a.height / 2 + b.y + b.height / 2) / 2 }
+}
 const item = (page: Page, value: string) => page.locator(`c2-menu-item[value="${value}"]`)
 const layout = (page: Page) => host(page).evaluate((element: Flow) => element.getLayout())
 const recorded = (page: Page, type?: string) =>
@@ -41,7 +50,7 @@ async function wire(page: Page, controlled = true) {
     const recorded: Recorded[] = []
     ;(element as unknown as { recorded: Recorded[] }).recorded = recorded
     let count = 0
-    for (const type of ['node-add', 'node-edit', 'node-delete', 'edge-add', 'edge-delete', 'layout-change', 'selection-change']) {
+    for (const type of ['node-add', 'node-edit', 'node-delete', 'edge-add', 'edge-delete', 'edge-edit', 'layout-change', 'selection-change']) {
       element.addEventListener(type, (event) => {
         const detail = (event as CustomEvent).detail
         recorded.push({ type, detail: JSON.parse(JSON.stringify(detail)) })
@@ -59,6 +68,13 @@ async function wire(page: Page, controlled = true) {
           element.edges = [...element.edges, { source: detail.source, target: detail.target }]
         } else if (type === 'edge-delete') {
           element.edges = element.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)
+        } else if (type === 'edge-edit') {
+          element.edges = element.edges.map((edge) => {
+            if (edge.source !== detail.source || edge.target !== detail.target) return edge
+            const next: FlowEdge = { ...edge, label: detail.label }
+            if (!detail.label) delete next.label
+            return next
+          })
         }
       })
     }
@@ -114,6 +130,23 @@ test.describe('without editable', () => {
     const point = await center(node(page, 'review'))
     await page.mouse.click(point.x, point.y, { button: 'right' })
     await expect(item(page, 'flow:delete')).toHaveCount(0)
+  })
+
+  test('a read-only flow never edits an edge label', async ({ page, renderScenario }) => {
+    const edges = EDGES.map((edge) => (edge.target === 'review' ? { ...edge, label: 'done' } : edge))
+    await renderScenario(flow({ edges, attributes: '' }))
+    await wire(page, false)
+    const point = await between(page, 'idea', 'draft')
+    await page.mouse.dblclick(point.x, point.y)
+    const label = await center(edgeLabel(page))
+    await page.mouse.dblclick(label.x, label.y)
+    await expect(page.locator('c2-flow .edge.is-selected')).toHaveCount(0)
+    await node(page, 'draft').focus()
+    for (const key of ['e', 'F2', 'Enter']) await page.keyboard.press(key)
+    await expect(edgeEditor(page)).toHaveCount(0)
+    await host(page).evaluate((element: Flow) => element.editEdgeLabel('draft', 'review'))
+    await expect(edgeEditor(page)).toHaveCount(0)
+    expect(await recorded(page, 'edge-edit')).toEqual([])
   })
 })
 
@@ -426,6 +459,134 @@ test.describe('editable', () => {
     await item(page, 'flow:delete').click()
     expect((await recorded(page, 'edge-delete')).map((r) => r.detail)).toEqual([{ source: 'idea', target: 'draft' }])
     expect((await recorded(page, 'node-delete')).map((r) => r.detail)).toEqual([{ id: 'publish' }])
+  })
+
+  test('double-clicking an edge opens the label editor at its middle; Enter commits edge-edit and the label shows', async ({ page, renderScenario }) => {
+    await renderScenario(flow())
+    await wire(page)
+    const point = await between(page, 'draft', 'review')
+    await page.mouse.dblclick(point.x, point.y)
+    await expect(edgeEditor(page)).toBeFocused()
+    await expect(edgeEditor(page)).toHaveValue('')
+    await expect(edgeEditor(page)).toHaveAccessibleName('Label of the edge from Draft to Review')
+    const field = await center(edgeEditor(page))
+    expect(Math.abs(field.x - point.x)).toBeLessThan(2)
+    expect(Math.abs(field.y - point.y)).toBeLessThan(2)
+    await accessible(page)
+    await page.keyboard.type(' approved ')
+    await page.keyboard.press('Enter')
+    await expect(edgeEditor(page)).toHaveCount(0)
+    expect((await recorded(page, 'edge-edit')).map((r) => r.detail)).toEqual([{ source: 'draft', target: 'review', label: 'approved' }])
+    await expect(edgeLabel(page)).toHaveText('approved')
+    await expect(node(page, 'draft')).toHaveAccessibleDescription('After Idea. Before Review, approved.')
+    // Nothing moved, and the flow never changed `edges` itself: the label came from the application.
+    expect(await recorded(page, 'node-edit')).toEqual([])
+
+    // Double-clicking the label edits it; clearing it removes it.
+    const label = await center(edgeLabel(page))
+    await page.mouse.dblclick(label.x, label.y)
+    await expect(edgeEditor(page)).toHaveValue('approved')
+    await page.keyboard.press('ControlOrMeta+a')
+    await page.keyboard.press('Backspace')
+    await page.keyboard.press('Enter')
+    expect((await recorded(page, 'edge-edit')).map((r) => r.detail.label)).toEqual(['approved', ''])
+    await expect(edgeLabel(page)).toHaveCount(0)
+
+    // An unchanged label fires nothing, and leaving the field commits.
+    await page.mouse.dblclick(point.x, point.y)
+    await page.keyboard.press('Enter')
+    await page.mouse.dblclick(point.x, point.y)
+    await page.keyboard.type('maybe')
+    const { x, y } = await emptyCanvas(page)
+    await page.mouse.click(x, y)
+    await expect(edgeEditor(page)).toHaveCount(0)
+    expect((await recorded(page, 'edge-edit')).map((r) => r.detail.label)).toEqual(['approved', '', 'maybe'])
+    await expect(edgeLabel(page)).toHaveText('maybe')
+  })
+
+  test('keyboard: Enter or F2 on the selected edge edits its label, Escape cancels', async ({ page, renderScenario }) => {
+    const edges = EDGES.map((edge) => (edge.target === 'draft' ? { ...edge, label: 'yes' } : edge))
+    await renderScenario(flow({ edges }))
+    await wire(page)
+    await node(page, 'draft').focus()
+    await page.keyboard.press('e')
+    await expect(page.locator('c2-flow [role="status"]')).toContainText('Edge from Idea to Draft, labelled yes, 1 of 2, selected')
+    await page.keyboard.press('Enter')
+    await expect(edgeEditor(page)).toBeFocused()
+    await expect(edgeEditor(page)).toHaveValue('yes')
+    await page.keyboard.type('no')
+    await page.keyboard.press('Escape')
+    await expect(edgeEditor(page)).toHaveCount(0)
+    await expect(node(page, 'draft')).toBeFocused()
+    // Escape in the editor leaves the edge selected and the label as it was.
+    await expect(page.locator('c2-flow .edge.is-selected')).toHaveCount(1)
+    await expect(edgeLabel(page)).toHaveText('yes')
+    expect(await recorded(page, 'edge-edit')).toEqual([])
+
+    await page.keyboard.press('F2')
+    await expect(edgeEditor(page)).toBeFocused()
+    await page.keyboard.press('ControlOrMeta+a')
+    await page.keyboard.type('always')
+    await page.keyboard.press('Enter')
+    expect((await recorded(page, 'edge-edit')).map((r) => r.detail)).toEqual([{ source: 'idea', target: 'draft', label: 'always' }])
+    await expect(edgeLabel(page)).toHaveText('always')
+    await expect(node(page, 'draft')).toBeFocused()
+    // No node was renamed or deleted on the way.
+    expect(await recorded(page, 'node-edit')).toEqual([])
+    expect(await recorded(page, 'node-delete')).toEqual([])
+  })
+
+  test('Edit label in the edge context menu opens the editor; editLabel on a node still renames it', async ({ page, renderScenario }) => {
+    await renderScenario(flow())
+    await wire(page)
+    const point = await between(page, 'review', 'publish')
+    await page.mouse.click(point.x, point.y, { button: 'right' })
+    await expect(item(page, 'flow:rename')).toHaveCount(0)
+    await expect(item(page, 'flow:edit-label')).toBeVisible()
+    await item(page, 'flow:edit-label').click()
+    await expect(edgeEditor(page)).toBeFocused()
+    await page.keyboard.type('ship it')
+    await page.keyboard.press('Enter')
+    expect((await recorded(page, 'edge-edit')).map((r) => r.detail)).toEqual([{ source: 'review', target: 'publish', label: 'ship it' }])
+
+    // The label is part of its edge: a right-click on it opens the same menu.
+    const label = await center(edgeLabel(page))
+    await page.mouse.click(label.x, label.y, { button: 'right' })
+    await expect(item(page, 'flow:edit-label')).toBeVisible()
+    await item(page, 'flow:delete').click()
+    expect((await recorded(page, 'edge-delete')).map((r) => r.detail)).toEqual([{ source: 'review', target: 'publish' }])
+  })
+
+  test('the selected edge, its arrowhead and its label take the selection colour; the live edge has an arrowhead too', async ({ page, renderScenario }) => {
+    const edges = EDGES.map((edge) => (edge.target === 'review' ? { ...edge, label: 'ok' } : edge))
+    await renderScenario(flow({ edges }))
+    await edgeLabel(page).click()
+    await expect(page.locator('c2-flow .edge.is-selected')).toHaveCount(1)
+    const colours = () =>
+      host(page).evaluate((element) => {
+        const root = element.shadowRoot!
+        return [
+          getComputedStyle(root.querySelector('path.edge.is-selected')!).stroke,
+          getComputedStyle(root.querySelector('.arrow.is-selected')!).backgroundColor,
+          getComputedStyle(root.querySelector('.edge-label.is-selected')!).borderTopColor,
+        ]
+      })
+    // The colours ease in.
+    await expect.poll(colours).toEqual(['rgb(2, 101, 220)', 'rgb(2, 101, 220)', 'rgb(2, 101, 220)'])
+
+    await connect(page, 'idea', await center(node(page, 'publish')), false)
+    const draft = () =>
+      host(page).evaluate((element) => {
+        const root = element.shadowRoot!
+        return [getComputedStyle(root.querySelector('path.edge--draft')!).stroke, getComputedStyle(root.querySelector('.arrow.mark--draft')!).backgroundColor]
+      })
+    await expect.poll(draft).toEqual(['rgb(2, 101, 220)', 'rgb(2, 101, 220)'])
+    const tip = (await page.locator('c2-flow .arrow.mark--draft').boundingBox())!
+    const target = (await node(page, 'publish').boundingBox())!
+    expect(tip.x + tip.width).toBeLessThan(target.x)
+    expect(tip.x + tip.width).toBeGreaterThan(target.x - 8)
+    await page.mouse.up()
+    await expect(page.locator('c2-flow .arrow.mark--draft')).toHaveCount(0)
   })
 
   test('connection handles show on hover and selection, on the side the flow runs to', async ({ page, renderScenario }) => {

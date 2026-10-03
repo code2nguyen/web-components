@@ -33,6 +33,7 @@ declare module 'vue' {
         onEdgeAdd?: (event: EventOf<Flow, 'edge-add'>) => void
         onNodeDelete?: (event: EventOf<Flow, 'node-delete'>) => void
         onEdgeDelete?: (event: EventOf<Flow, 'edge-delete'>) => void
+        onEdgeEdit?: (event: EventOf<Flow, 'edge-edit'>) => void
         onNodeEdit?: (event: EventOf<Flow, 'node-edit'>) => void
         onFlowMenuSelect?: (event: EventOf<Flow, 'flow-menu-select'>) => void
       }

@@ -50,6 +50,16 @@
     edge__failed--color: #dc2626,
     edge__highlighted--width: 2.5px,
     edge--animation-duration: 600ms,
+    arrow--size: 8px,
+    arrow--display: block,
+    edge-label--background-color: #ffffff,
+    edge-label--color: #71717a,
+    edge-label--font-size: 12px,
+    edge-label--font-weight: 500,
+    edge-label--padding: 1px 8px,
+    edge-label--border: 1px solid #e4e4e7,
+    edge-label--border-radius: 999px,
+    marker--display: inline-flex,
 
     success--color: #16a34a,
     error--color: #dc2626,
@@ -150,32 +160,45 @@
 
 .edge {
   fill: none;
-  stroke: css.cssVar(edge--color);
+  stroke: var(--_edge-color);
   stroke-width: css.cssVar(edge--width);
   transition:
     stroke 200ms,
     opacity 200ms;
 }
 
-.edge--done {
-  stroke: css.cssVar(edge__done--color);
+// The colour of an edge, shared by its line, its arrowhead and the border of its label.
+.edge,
+.arrow,
+.edge-label {
+  --_edge-color: #{css.cssVar(edge--color)};
 }
 
-.edge--active {
-  stroke: css.cssVar(edge__active--color);
+.edge--done,
+.mark--done {
+  --_edge-color: #{css.cssVar(edge__done--color)};
+}
+
+.edge--active,
+.mark--active {
+  --_edge-color: #{css.cssVar(edge__active--color)};
+}
+
+.edge--failed,
+.mark--failed {
+  --_edge-color: #{css.cssVar(edge__failed--color)};
+}
+
+.edge.edge--active {
   stroke-dasharray: 6 5;
   animation: c2-flow-dash css.cssVar(edge--animation-duration) linear infinite;
 }
 
-.edge--failed {
-  stroke: css.cssVar(edge__failed--color);
-}
-
-.edge--blocked {
+.edge.edge--blocked {
   stroke-dasharray: 2 4;
 }
 
-.edge--back:not(.edge--active) {
+.edge.edge--back:not(.edge--active) {
   stroke-dasharray: 5 4;
 }
 
@@ -183,8 +206,56 @@
   stroke-width: css.cssVar(edge__highlighted--width);
 }
 
-.edges.has-highlight .edge:not(.is-highlighted) {
+.edges.has-highlight .edge:not(.is-highlighted),
+.edge-marks.has-highlight > :not(.is-highlighted) {
   opacity: 0.35;
+}
+
+// Arrowheads and labels: HTML in the scaled viewport, above the edges and below the nodes.
+.edge-marks {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.arrow {
+  display: css.cssVar(arrow--display);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: css.cssVar(arrow--size);
+  height: css.cssVar(arrow--size);
+  transform-origin: 0 0;
+  // Read by the inline transform: the tip touches the incoming handle of the target rather than hiding under it.
+  --_arrow-offset: calc(-100% - #{css.cssVar(handle--size)} / 2);
+  background-color: var(--_edge-color);
+  clip-path: polygon(0 0, 100% 50%, 0 100%, 22% 50%);
+  transition:
+    background-color 200ms,
+    opacity 200ms;
+}
+
+.edge-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: css.cssVar(edge-label--padding);
+  background-color: css.cssVar(edge-label--background-color);
+  color: css.cssVar(edge-label--color);
+  border: css.cssVar(edge-label--border);
+  border-radius: css.cssVar(edge-label--border-radius);
+  font-size: css.cssVar(edge-label--font-size);
+  font-weight: css.cssVar(edge-label--font-weight);
+  line-height: 1.35;
+  transition: opacity 200ms;
 }
 
 @keyframes c2-flow-dash {
@@ -336,6 +407,10 @@
   margin-top: 1px;
 }
 
+.body > .status {
+  display: css.cssVar(marker--display);
+}
+
 .status svg {
   width: 100%;
   height: 100%;
@@ -479,18 +554,45 @@
 }
 
 .edge.is-selected,
+.arrow.is-selected,
+.edge-label.is-selected {
+  --_edge-color: #{css.cssVar(edge__selected--color)};
+}
+
+.edge.is-selected,
 .edges.has-highlight .edge.is-selected {
-  stroke: css.cssVar(edge__selected--color);
   stroke-width: css.cssVar(edge__selected--width);
   opacity: 1;
 }
 
+.edge-marks.has-highlight > .is-selected {
+  opacity: 1;
+}
+
+.edge-label.is-selected {
+  border-color: var(--_edge-color);
+}
+
 .edge--draft,
+.mark--draft {
+  --_edge-color: #{css.cssVar(edge__draft--color)};
+}
+
+.edge.edge--draft,
 .edges.has-highlight .edge--draft {
   opacity: 1;
-  stroke: css.cssVar(edge__draft--color);
   stroke-width: css.cssVar(edge__highlighted--width);
   stroke-dasharray: 6 5;
+}
+
+.edge-marks.has-highlight > .mark--draft {
+  opacity: 1;
+}
+
+// In an editable flow a label is part of its edge: a click selects the edge, a double-click edits the label.
+.stage.is-editable .edge-label {
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .edge-hit {
@@ -583,6 +685,20 @@
   outline-offset: 0;
 }
 
+// The editor of an edge's label, halfway along the edge.
+.label-editor--edge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 140px;
+  margin: 0;
+  padding: 1px 8px;
+  text-align: center;
+  font-size: css.cssVar(edge-label--font-size);
+  font-weight: css.cssVar(edge-label--font-weight);
+}
+
 // Over a node drawn by the application, the editor covers the whole body.
 .label-editor--overlay {
   position: absolute;
@@ -605,7 +721,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .spin,
-  .edge--active {
+  .edge.edge--active {
     animation: none;
   }
   .card {
