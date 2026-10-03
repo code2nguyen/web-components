@@ -598,7 +598,7 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
     padding: 2px 8px;
     border-radius: 999px;
     background: rgb(21, 128, 61);
-    color: #ffffff;
+    color: var(--c2-theme--color-on-fill, #ffffff);
   }
 </style>
 <c2-table client:only="lit" class="ledger" row-key="id" rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"rate":95,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"rate":110,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"rate":120,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"rate":80,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"rate":95,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"rate":80,"amount":240},{"id":"7","task":"Performance budget","team":"Engineering","hours":11,"rate":120,"amount":1320},{"id":"8","task":"Onboarding flow","team":"Design","hours":16,"rate":95,"amount":1520},{"id":"9","task":"Docs migration","team":"Content","hours":10,"rate":80,"amount":800},{"id":"10","task":"QA sweep","team":"Engineering","hours":8,"rate":110,"amount":880}]'>
