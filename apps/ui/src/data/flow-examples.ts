@@ -1,5 +1,5 @@
 import { html } from 'lit'
-import type { Flow, FlowNode } from '@c2n/flow'
+import type { Flow, FlowEdge, FlowNode } from '@c2n/flow'
 
 /**
  * Makes the flow examples live. `[data-flow-demo="events"]` reports clicks and layout changes into the `output` next
@@ -57,6 +57,15 @@ function wireEditable(flow: Flow, say: (text: string) => void) {
   flow.addEventListener('edge-delete', ({ detail }) => {
     flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)
     say(`edge-delete: ${detail.source} → ${detail.target}`)
+  })
+  flow.addEventListener('edge-edit', ({ detail }) => {
+    flow.edges = flow.edges.map((edge) => {
+      if (edge.source !== detail.source || edge.target !== detail.target) return edge
+      const next: FlowEdge = { ...edge, label: detail.label }
+      if (!detail.label) delete next.label
+      return next
+    })
+    say(`edge-edit: ${detail.source} → ${detail.target}${detail.label ? `, "${detail.label}"` : ', label removed'}`)
   })
 }
 
