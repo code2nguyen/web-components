@@ -22,17 +22,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-### Astro SSR consumes navigation-menu item links in site chrome
-
-- **Severity:** docs
-- **Hit while:** restoring top-level navigation in the UI app mobile header, 2026-09-23.
-- **What happens:** rendering `c2-navigation-menu-item` directly inside an Astro `NavigationMenu` island lets
-  `@astrojs/lit` server-render each child as a deferred custom element. Its non-reflected `href` property is then
-  absent from the static HTML, and the non-island children have no independent hydration step. The app must emit
-  plain item tags through `rawElement` to preserve navigable links until the parent registers them.
-- **Where the fix belongs:** Astro framework guidance for `c2-navigation-menu` — document the raw-child pattern
-  (or provide a wrapper that emits plain items) and include a static-output check for item `href` values.
-
 ### Renderer output is unreachable from a page stylesheet
 
 - **Severity:** papercut
@@ -77,32 +66,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   this: the Lit renderer no longer means a hand-pinned `lit` in the application.)
 - **Where the fix belongs:** `packages/components/table` — key slot names by **visible index** rather than row key,
   so a framework renders only the window. Breaking change to the documented `cell:{rowKey}:{field}` contract.
-
-### A many-row component cannot be SSR'd chrome: declarative shadow DOM duplicates its stylesheet per instance
-
-- **Severity:** gap (rendering strategy, not a component defect)
-- **Hit while:** converting the docs sidebar from eight `c2-details` + `<ul><li><a>` to one `c2-tree`, 2026-09-17.
-- **What happens:** a plain `<c2-tree>` tag in an `.astro` file is picked up by `@astrojs/lit` and
-  server-rendered as declarative shadow DOM. Each of the 138 `c2-tree-item` rows (69 pages × the desktop
-  sidebar and the drawer) inlines the whole `tree-item` stylesheet into its own `<template shadowrootmode>`,
-  taking a component page from **606 KB to 2193 KB of HTML** — on all 220 pages. The rows also arrive inert:
-  `@astrojs/lit` stamps `defer-hydration`, and a plain tag has no island script to remove it, so the
-  server-rendered `is-leaf` toggle state sticks and nothing expands.
-- **Neither escape hatch is free.** `utils/raw-element.ts` (the `hydrate="defined"` path the site uses for
-  repeated chrome) skips SSR and fixes both problems, but then the nav paints nothing until JS runs and the
-  static HTML carries no `<a href>` at all — on a documentation site that is the internal link graph a crawler
-  follows. Keeping SSR keeps the links, inside shadow roots, at +1.6 MB per page.
-- **Outcome:** shipped, on the second attempt. The tree is emitted through `rawElement` (no SSR, so no
-  duplicated stylesheets and no `defer-hydration`) and each row's link is slotted into `label` rather than set
-  as the item's `href`, keeping the anchors in the light DOM. A component page went from **606 KB to 403 KB**
-  of HTML — smaller than the `c2-details` version it replaced, because 69 `<ul><li><a>` rows and eight
-  disclosure shadow roots collapse into one tree. 68 crawlable anchors, arrow-key navigation, and one tab stop
-  instead of 69.
-- **Still open:** the underlying gap. Any component with more than a handful of instances has to go through
-  `rawElement` and give up server rendering, because declarative shadow DOM has no way to share one adopted
-  stylesheet across instances. `c2-table` and `c2-virtual-list` will hit the same wall as chrome. The fix
-  belongs in the theme/build pipeline, or in documenting `rawElement` as the required path above a certain
-  instance count.
 
 ### Property-driven table cell action slots are not reliably actionable during upgrade
 
@@ -154,6 +117,8 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `@c2n/theme`                    | `base.css` set every per-side variable, so a component shorthand behind them (`--c2-details--border`) was never read. The generator now leaves out a side that falls back to its shorthand with the same mapped value; `c2-details` ships `--c2-details--border`.                                                               | 2026-10-03                                                                                                                                                                                                   |
 | `c2-command`                    | The only height control was the list's fixed `--c2-command__list--max-height`, so a palette in a capped modal pushed its footer out. `--c2-command--max-height` now caps the whole palette and the list flexes into what is left.                                                                                               | 2026-10-03                                                                                                                                                                                                   |
 | `c2-reorder-list`               | `dragStartThreshold` and `autoScrollDisabled` were observed as `dragstartthreshold`/`autoscrolldisabled`. They are now `drag-start-threshold` and `auto-scroll-disabled`; the old spelling in markup is forwarded with a warning.                                                                                               | 2026-10-03                                                                                                                                                                                                   |
+| docs                            | Item tags inside a `c2-navigation-menu` island were server-rendered and lost `href`. The navigation-menu page and the skill's Astro notes now show passing items through `set:html`, with a static-output check.                                                                                                                | 2026-10-03                                                                                                                                                                                                   |
+| docs                            | Declarative shadow DOM inlines a stylesheet per instance, so many-instance chrome bloats the HTML (606 KB → 2.2 MB). A platform limit; the skill's Astro notes now say to emit such markup through `set:html` and keep links in the light DOM.                                                                                  | 2026-10-03                                                                                                                                                                                                   |
 
 ## Won't fix
 
