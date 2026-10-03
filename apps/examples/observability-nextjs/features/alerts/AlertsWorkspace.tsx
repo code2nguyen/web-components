@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useElementProperties } from '../../components/c2n/element-bindings'
 import { useCustomEvent } from '../../components/c2n/useCustomEvent'
 import { useDemoState } from '../../providers/DemoStateProvider'
@@ -55,9 +55,13 @@ export function AlertsWorkspace({ dataset }: Readonly<{ dataset: TelemetryDatase
     return `/incidents/${id}/?${params}`
   }
 
-  useEffect(() => {
+  // Hide the no-JavaScript baseline in the same commit that renders the workspace, so the page never exposes two h1s.
+  useLayoutEffect(() => {
     const baseline = document.getElementById('alerts-server-baseline')
     if (baseline) baseline.hidden = true
+  }, [])
+
+  useEffect(() => {
     const synchronize = () => setSearchString(window.location.search.slice(1))
     synchronize()
     window.addEventListener('popstate', synchronize)
@@ -188,7 +192,7 @@ export function AlertsWorkspace({ dataset }: Readonly<{ dataset: TelemetryDatase
   const shownCount = view === 'rules' ? filteredRules.length : filteredIncidents.length
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} data-alerts-workspace>
       <header className={styles.headingRow}>
         <div>
           <p className={styles.eyebrow}>Operational response</p>

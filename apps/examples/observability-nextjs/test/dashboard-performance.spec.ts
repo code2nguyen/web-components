@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 
 test('replay performs one coherent data update without remounting chart hosts', async ({ page }) => {
+  // The replay advances one tick per 15-second data step (REPLAY_STEP_MS); a fake clock reaches tick 1 without waiting for it.
+  await page.clock.install()
   await page.goto('./dashboards/')
   await expect(page.locator('c2-line-chart[data-chart-ready]')).toBeVisible()
   await page.locator('c2-line-chart').evaluate((chart) => {
@@ -16,9 +18,10 @@ test('replay performs one coherent data update without remounting chart hosts', 
     }
   })
 
-  await page.getByRole('button', { name: 'Play' }).click()
-  await expect(page.getByText(/Playing · tick 1/)).toBeVisible({ timeout: 7_000 })
-  await page.getByRole('button', { name: 'Pause' }).click()
+  await page.getByRole('button', { name: 'Play', exact: true }).click()
+  await page.clock.runFor(15_000)
+  await expect(page.getByText(/Playing · tick 1/)).toBeVisible()
+  await page.getByRole('button', { name: 'Pause', exact: true }).click()
   const sameHost = await page.locator('c2-line-chart').evaluate((chart) => Boolean((chart as HTMLElement & { dashboardIdentity?: symbol }).dashboardIdentity))
   expect(sameHost).toBe(true)
   const maximumUpdates = await page.evaluate(() => Math.max(0, ...((window as Window & { dashboardUpdateCounts?: number[] }).dashboardUpdateCounts ?? [])))

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useRef } from 'react'
 import { useElementProperties } from '../../components/c2n/element-bindings'
 import { useCustomEvent } from '../../components/c2n/useCustomEvent'
-import { useRenderedRows } from '../../components/c2n/useRenderedRows'
+import { useRenderedRows } from '@c2n/table/react-hooks.js'
 import { telemetryDataset } from '../../lib/data/dataset'
 import { buildDatasetIndexes } from '../../lib/data/indexes'
 import { parseNavigationState, type PageSize } from '../../lib/query/navigation-state'
@@ -76,16 +76,33 @@ export function LogResults() {
     if (projection.page !== state.page) router.replace(updateQuery(search, { page: String(projection.page) }), { scroll: false })
   }, [projection.page, router, search, state.page])
 
-  useElementProperties(tableRef, 'c2-table', { rows, rowKey: 'id', sortModel }, [rows, sortModel])
+  // The open record is the table's single selection, so a keyboard user opens it with Enter on a row (c2-table fires
+  // `row-click` for pointer clicks only) and the open record stays marked in the list.
+  const selectedRows = useMemo(() => (selectedId ? [selectedId] : []), [selectedId])
+  useElementProperties(tableRef, 'c2-table', { rows, rowKey: 'id', sortModel, value: selectedRows }, [rows, sortModel, selectedRows])
   useElementProperties(
     pagerRef,
     'c2-pagination',
     { page: projection.page, pageSize: projection.pageSize, totalItems: projection.total, pageSizeOptions: [25, 50, 100] },
     [projection.page, projection.pageSize, projection.total],
   )
-  useCustomEvent(tableRef, 'row-click', (event) => {
+  // Opening and closing a record are history entries, so Back and Forward step through them (research.md: URL state
+  // supports back/forward); filters, sorting and paging keep replacing the current entry. The record is client state
+  // on an already loaded page, so the entry is a native pushState, which Next.js syncs into useSearchParams: a router
+  // push would drop the exported route's trailing slash and request the missing `logs.txt` payload (a 404 and a full reload).
+  const pushRecord = (log: string) => {
+    const query = updateQuery(search, { log })
+    const pathname = window.location.pathname.endsWith('/') ? window.location.pathname : `${window.location.pathname}/`
+    window.history.pushState(null, '', `${pathname}${query.startsWith('?') ? query : ''}`)
+  }
+  useCustomEvent(tableRef, 'selection-change', (event) => {
+    const id = event.detail.value[0]
+    if (!id) {
+      pushRecord('')
+      return
+    }
     returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : tableRef.current
-    router.replace(updateQuery(search, { log: String((event.detail.row as { id: string }).id) }), { scroll: false })
+    pushRecord(String(id))
   })
   useCustomEvent(tableRef, 'sort-change', (event) => {
     const sort = event.detail.sort[0]
@@ -97,7 +114,8 @@ export function LogResults() {
     router.replace(updateQuery(search, { pageSize: String(event.detail.pageSize as PageSize), page: '1', log: '' }), { scroll: false }),
   )
   const closeDetail = () => {
-    router.replace(updateQuery(search, { log: '' }), { scroll: false })
+    // The sheet also reports `close` when Back/Forward already removed the record from the URL: add no entry then.
+    if (new URLSearchParams(window.location.search).has('log')) pushRecord('')
     queueMicrotask(() => returnFocusRef.current?.focus())
   }
   const services = telemetryDataset.services.filter(({ environmentId }) => environmentId === state.environmentId)
@@ -119,8 +137,8 @@ export function LogResults() {
         {demoState === 'normal' ? `${projection.total} logs. Page ${projection.page} of ${projection.pageCount}.` : `Log results: ${demoState}.`}
       </p>
       {demoState === 'loading' ? (
-        <div className="skeleton-grid" aria-label="Loading logs">
-          <c2-skeleton />
+        <div className="skeleton-grid" aria-busy="true">
+          <c2-skeleton label="Loading logs" />
           <c2-skeleton />
           <c2-skeleton />
         </div>
@@ -149,7 +167,7 @@ export function LogResults() {
       ) : (
         <>
           <div className="table-scroll table-frame">
-            <c2-table ref={tableRef} aria-label="Log search results" stripe sortable empty-message="No matching logs">
+            <c2-table ref={tableRef} aria-label="Log search results" selection="single" stripe sortable empty-message="No matching logs">
               <c2-table-column field="timestamp" header="Timestamp" width="190px" />
               <c2-table-column field="severity" header="Severity" width="100px" sortable cell-slot />
               <c2-table-column field="service" header="Service" width="minmax(150px, 1fr)" sortable />

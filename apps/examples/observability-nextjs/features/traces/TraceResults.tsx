@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef } from 'react'
 import { useElementProperties } from '../../components/c2n/element-bindings'
 import { useCustomEvent } from '../../components/c2n/useCustomEvent'
-import { useRenderedRows } from '../../components/c2n/useRenderedRows'
+import { useRenderedRows } from '@c2n/table/react-hooks.js'
 import { telemetryDataset } from '../../lib/data/dataset'
 import { buildDatasetIndexes } from '../../lib/data/indexes'
 import { parseNavigationState, type PageSize } from '../../lib/query/navigation-state'
@@ -96,8 +96,8 @@ export function TraceResults() {
         {demoState === 'normal' ? `${projection.total} traces. Page ${projection.page} of ${projection.pageCount}.` : `Trace results: ${demoState}.`}
       </p>
       {demoState === 'loading' ? (
-        <div className="skeleton-grid" aria-label="Loading traces">
-          <c2-skeleton />
+        <div className="skeleton-grid" aria-busy="true">
+          <c2-skeleton label="Loading traces" />
           <c2-skeleton />
           <c2-skeleton />
         </div>
