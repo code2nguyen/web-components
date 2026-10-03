@@ -2,6 +2,54 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "0.0.22",
+      "date": "2026-10-03",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["notepad"],
+              "text": "Actions slot, and controls that can show only on the note in use",
+              "hash": "87c3390"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Editable mode — add, connect, rename and delete nodes",
+              "hash": "80190a0"
+            },
+            {
+              "scopes": ["week-planner"],
+              "text": "Dated weeks, click to add and drag to reschedule",
+              "hash": "72879d3"
+            },
+            {
+              "scopes": ["month-planner"],
+              "text": "Click a day to add, drag to reschedule",
+              "hash": "24d8d2a"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["notepad"],
+              "text": "Add the actions slot to the slot styling audit",
+              "hash": "1a383a2"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "On a touch screen, hidden controls show once the page is tapped",
+              "hash": "4ebb9e8"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.0.21",
       "date": "2026-10-03",
       "sections": [

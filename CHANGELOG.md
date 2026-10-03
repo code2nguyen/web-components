@@ -3,6 +3,20 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [0.0.22](https://github.com/code2nguyen/web-components/releases/tag/v0.0.22) — 2026-10-03
+
+### Features
+
+- **notepad:** Actions slot, and controls that can show only on the note in use ([87c3390](https://github.com/code2nguyen/web-components/commit/87c3390))
+- **flow:** Editable mode — add, connect, rename and delete nodes ([80190a0](https://github.com/code2nguyen/web-components/commit/80190a0))
+- **week-planner:** Dated weeks, click to add and drag to reschedule ([72879d3](https://github.com/code2nguyen/web-components/commit/72879d3))
+- **month-planner:** Click a day to add, drag to reschedule ([24d8d2a](https://github.com/code2nguyen/web-components/commit/24d8d2a))
+
+### Fixes
+
+- **notepad:** Add the actions slot to the slot styling audit ([1a383a2](https://github.com/code2nguyen/web-components/commit/1a383a2))
+- **notepad:** On a touch screen, hidden controls show once the page is tapped ([4ebb9e8](https://github.com/code2nguyen/web-components/commit/4ebb9e8))
+
 ## [0.0.21](https://github.com/code2nguyen/web-components/releases/tag/v0.0.21) — 2026-10-03
 
 ### Breaking changes

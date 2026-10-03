@@ -1,6 +1,6 @@
 {
   "name": "@c2n/flow",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "type": "module",
   "main": "dist/flow.js",
   "exports": {
@@ -70,9 +70,9 @@
     }
   },
   "dependencies": {
-    "@c2n/context-menu": "0.0.21",
-    "@c2n/core": "0.0.21",
-    "@c2n/kbd": "0.0.21",
+    "@c2n/context-menu": "0.0.22",
+    "@c2n/core": "0.0.22",
+    "@c2n/kbd": "0.0.22",
     "@floating-ui/dom": "1.8.0",
     "lit": "3.3.3"
   },
