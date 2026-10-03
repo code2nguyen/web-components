@@ -26,6 +26,7 @@ declare module 'react' {
       'c2-flow': Omit<C2Props<Flow>, 'nodes' | 'edges'> & {
         'edge-type'?: Attribute
         'storage-key'?: Attribute
+        'no-double-click-add'?: Attribute
         'actions-placement'?: Attribute
         'no-card'?: Attribute
         'no-context-menu'?: Attribute

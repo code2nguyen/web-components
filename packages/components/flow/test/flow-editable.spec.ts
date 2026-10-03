@@ -186,7 +186,7 @@ test.describe('editable', () => {
     expect(await recorded(page, 'node-add')).toEqual([])
   })
 
-  test('N adds a node in the middle of the view, or one connected after the selected node, and focuses it', async ({ page, renderScenario }) => {
+  test('N adds a node beside the focused node, or one connected after the selected node, and focuses it', async ({ page, renderScenario }) => {
     await renderScenario(flow())
     await wire(page)
     await node(page, 'idea').focus()
@@ -195,9 +195,11 @@ test.describe('editable', () => {
     expect(add.detail.source).toBeUndefined()
     await expect(node(page, 'new-1')).toBeFocused()
     await expect(host(page)).toHaveJSProperty('selected', 'new-1')
-    // The keyboard picks a free spot: the new node covers no other.
+    // The keyboard picks a free spot beside the focused node, across the layout's axis: the new node covers no other.
     const positions = await layout(page)
     const a = positions['new-1']
+    expect(a.x).toBe(positions.idea.x)
+    expect(a.y).toBeGreaterThan(positions.idea.y)
     for (const id of ['idea', 'draft', 'review', 'publish']) {
       const b = positions[id]
       expect(Math.abs(a.x - b.x) >= 200 || Math.abs(a.y - b.y) >= 40).toBe(true)
@@ -680,6 +682,90 @@ test.describe('actions', () => {
     const [add] = await recorded(page, 'node-add')
     expect(add.detail.position).toEqual(expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }))
     await expect(node(page, 'new-1')).toBeVisible()
+  })
+
+  test('addNode() with a node selected connects the new one after it, so repeated adds make a chain', async ({ page, renderScenario }) => {
+    await renderScenario(withActions('editable'))
+    await wire(page)
+    await host(page).evaluate((element: Flow) => {
+      element.querySelector('button')!.addEventListener('click', () => element.addNode())
+    })
+    await node(page, 'publish').click()
+    const add = page.getByRole('button', { name: 'Add node' })
+    await add.click()
+    await add.click()
+    expect((await recorded(page, 'node-add')).map((r) => r.detail.source)).toEqual(['publish', 'new-1'])
+    const positions = await layout(page)
+    expect(positions['new-1'].x).toBeGreaterThan(positions.publish.x)
+    expect(positions['new-2'].x).toBeGreaterThan(positions['new-1'].x)
+    await expect(host(page)).toHaveJSProperty('selected', 'new-2')
+  })
+
+  test('a node added out of sight is brought into view; nothing selected, it goes in the middle of the view', async ({ page, renderScenario }) => {
+    await renderScenario(withActions('editable'))
+    await wire(page)
+    await host(page).evaluate((element: Flow) => {
+      element.querySelector('button')!.addEventListener('click', () => element.addNode())
+    })
+    const stage = page.locator('c2-flow .stage')
+    /** Fully in sight, clear of the edges by `margin` pixels. */
+    const inView = async (id: string, margin = 0) => {
+      const view = (await stage.boundingBox())!
+      const box = (await node(page, id).boundingBox())!
+      return (
+        box.x >= view.x + margin &&
+        box.y >= view.y + margin &&
+        box.x + box.width <= view.x + view.width - margin &&
+        box.y + box.height <= view.y + view.height - margin
+      )
+    }
+
+    // Nothing selected: the middle of the view.
+    await page.getByRole('button', { name: 'Add node' }).click()
+    expect((await recorded(page, 'node-add'))[0].detail.source).toBeUndefined()
+    const view = (await stage.boundingBox())!
+    const added = await center(node(page, 'new-1'))
+    expect(Math.abs(added.x - (view.x + view.width / 2))).toBeLessThan(view.width / 4)
+    expect(await inView('new-1')).toBe(true)
+
+    // Pan until the selected node sits at the right edge: the next node, after it, would land off the canvas.
+    await node(page, 'publish').click()
+    const publish = await center(node(page, 'publish'))
+    const from = await emptyCanvas(page)
+    await page.mouse.move(from.x, from.y)
+    await page.mouse.down()
+    await page.mouse.move(from.x + (view.x + view.width - 30 - publish.x), from.y, { steps: 6 })
+    await page.mouse.up()
+    // A click on a node cut by the edge brings it in by panning, not by scrolling the clipped stage.
+    const scroll = () => stage.evaluate((element) => [element.scrollLeft, element.scrollTop])
+    await node(page, 'publish').click()
+    await expect.poll(scroll).toEqual([0, 0])
+    await page.getByRole('button', { name: 'Add node' }).click()
+    await expect(node(page, 'new-2')).toBeVisible()
+    // Panned in with room to spare, not left flush against the edge where the toolbar may sit.
+    await expect.poll(() => inView('new-2', 20)).toBe(true)
+    await expect.poll(scroll).toEqual([0, 0])
+    expect((await recorded(page, 'node-add'))[1].detail.source).toBe('publish')
+  })
+
+  test('no-double-click-add: double-clicking empty canvas adds nothing, N and addNode() still do', async ({ page, renderScenario }) => {
+    await renderScenario(withActions('editable no-double-click-add'))
+    await wire(page)
+    await host(page).evaluate((element: Flow) => {
+      element.querySelector('button')!.addEventListener('click', () => element.addNode())
+    })
+    const { x, y } = await emptyCanvas(page)
+    await page.mouse.dblclick(x, y)
+    expect(await recorded(page, 'node-add')).toEqual([])
+    await expect(host(page)).toHaveJSProperty('selected', null)
+    // A node still opens its editor on a double-click.
+    await node(page, 'draft').dblclick()
+    await expect(editor(page)).toBeVisible()
+    await page.keyboard.press('Escape')
+    await page.getByRole('button', { name: 'Add node' }).click()
+    await expect(node(page, 'new-1')).toBeVisible()
+    await page.keyboard.press('n')
+    await expect(node(page, 'new-2')).toBeFocused()
   })
 
   test('without slotted actions there is no toolbar', async ({ page, renderScenario }) => {
