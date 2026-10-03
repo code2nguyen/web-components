@@ -5,6 +5,7 @@ import { repeat } from 'lit/directives/repeat.js'
 import { property, jsonPropertyConverter } from '@c2n/core/lit-helper.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { provideContextMenuData } from '@c2n/core/context-menu-helper.js'
+import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import { ariaKeyShortcuts, isApplePlatform, matchesStroke, parseShortcut } from '@c2n/core/shortcut-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { ContextMenuContext, ContextMenuSelectEventDetail } from '@c2n/context-menu'
@@ -13,6 +14,7 @@ import { avoidOverlap, buildGraph, layoutGraph, mergeLayout, type Graph, type La
 import { edgeRoute } from './flow-geometry.js'
 import { MENU_ICONS, STATUS_ICONS, STATUS_LABELS } from './flow-icons.js'
 import type {
+  FlowActionsPlacement,
   FlowContextMenuRenderer,
   FlowDirection,
   FlowEdge,
@@ -82,6 +84,8 @@ const ESTIMATED_SIZE: FlowSize = { width: 200, height: 56 }
 /** Two presses this close in time (ms) and space (px) on the same thing are a double click, or a double tap. */
 const DOUBLE_TAP_TIME = 500
 const DOUBLE_TAP_DISTANCE = 8
+
+const ACTIONS_PLACEMENTS: readonly FlowActionsPlacement[] = ['top', 'right', 'bottom', 'left']
 
 /** The zoom shortcuts every canvas app uses: ⌘ on Apple platforms, Ctrl elsewhere. `=` is the unshifted `+` key. */
 const ZOOM_IN_KEYS = 'mod+plus, mod+='
@@ -187,10 +191,16 @@ interface Connection {
  * In an editable flow a change to the graph never moves the nodes already on the canvas: the current positions are
  * pinned as a custom layout (`layout-change` with reason `edit`) and the view keeps its pan and zoom.
  *
+ * **Actions.** Buttons slotted into `actions` sit in a toolbar over the canvas, at the top by default;
+ * `actions-placement` moves it to the `right`, `bottom` or `left` edge, where it stacks vertically. Wire them to the
+ * public methods: `addNode()` asks for a node as `N` does, `resetLayout()` goes back to the auto layout, `fitView()`,
+ * `zoomIn()` and `zoomOut()` move the view. The toolbar's look and its alignment along the edge are CSS variables.
+ *
  * @tag c2-flow
  *
  * @slot node:{id} - Body of the node whose `id` is `{id}`, e.g. `slot="node:build"`. Replaces `renderNode` and the default body for that node.
  * @slot card:{id} - Content of the hover card of node `{id}`. Replaces `renderCard` and the default card for that node.
+ * @slot actions - Buttons drawn over the canvas, along the edge `actions-placement` names, e.g. add node, auto layout (`resetLayout()`) or fit view (`fitView()`). They form a toolbar: the arrow keys move between them.
  *
  * @event {CustomEvent<FlowNodeEventDetail>} node-click - A node was clicked, activated with Enter or Space, or chosen with a `flow:details` context-menu row. Does not bubble.
  * @event {CustomEvent<FlowSelectionChangeDetail>} selection-change - The selected node changed through the user. `detail.selected` is its id, or `null`. Does not bubble.
@@ -203,10 +213,20 @@ interface Connection {
  * @event {CustomEvent<FlowEdgeEventDetail>} edge-delete - `editable` only: the user asked to delete the edge from `detail.source` to `detail.target`. Does not bubble.
  * @event {CustomEvent<FlowEdgeEditDetail>} edge-edit - `editable` only: the user changed the label of the edge from `detail.source` to `detail.target` to `detail.label` with the inline editor; an empty `label` removes it. Does not bubble.
  *
+ * @csspart actions - The toolbar around the `actions` slot.
+ *
  * @internalcomponent c2-context-menu
  * @internalcomponent c2-kbd
  *
  * @cssproperty {pixel} [--c2-flow--height=480px] - Height of the canvas.
+ * @cssproperty {justify-content} [--c2-flow__actions--align=flex-start] - Where the actions toolbar sits along its edge: `flex-start`, `center` or `flex-end`.
+ * @cssproperty {pixel} [--c2-flow__actions--offset=12px] - Distance between the actions toolbar and the edge of the canvas.
+ * @cssproperty {pixel} [--c2-flow__actions--gap=4px] - Space between two action buttons.
+ * @cssproperty {padding} [--c2-flow__actions--padding=4px]
+ * @cssproperty {color} [--c2-flow__actions--background-color=#ffffff]
+ * @cssproperty {border} [--c2-flow__actions--border=1px solid #e4e4e7]
+ * @cssproperty {border-radius} [--c2-flow__actions--border-radius=8px]
+ * @cssproperty {box-shadow} [--c2-flow__actions--box-shadow=0 1px 2px rgba(24, 24, 27, 0.06)]
  * @cssproperty {color} [--c2-flow--background-color=#fafafa] - Canvas background.
  * @cssproperty {border} [--c2-flow--border=1px solid #e4e4e7]
  * @cssproperty {border-radius} [--c2-flow--border-radius=8px]
@@ -317,6 +337,9 @@ export class Flow extends LitElement {
    */
   @property({ type: Boolean }) editable = false
 
+  /** Edge of the canvas the `actions` toolbar sits on: `top` or `bottom` lay the buttons out in a row, `left` or `right` in a column (and the arrow keys follow). */
+  @property({ attribute: 'actions-placement' }) actionsPlacement: FlowActionsPlacement = 'top'
+
   /** Turns off moving nodes; panning, zooming, selection and the hover card still work. */
   @property({ type: Boolean }) locked = false
 
@@ -398,6 +421,7 @@ export class Flow extends LitElement {
   private editedLayout = false
   /** A keyboard `N`: focus the node the application adds in answer. */
   private focusAdded: Set<string> | null = null
+  private readonly slotPresence = new SlotPresenceController(this, ['actions'])
   /** A keyboard delete: where focus goes once the application has removed the node. */
   private refocus: { removed: string; next: string | null } | null = null
   private openTimer: ReturnType<typeof setTimeout> | undefined
@@ -445,6 +469,16 @@ export class Flow extends LitElement {
     this.ty = view.ty
     this.zoom = view.zoom
     this.fitted = true
+  }
+
+  /**
+   * Asks for a new node as `N` does: connected after the selected node, or else in the middle of the view, in a spot no
+   * node covers. Fires `node-add`, and focus moves to the node once the application has added it. Does nothing unless
+   * the flow is `editable`.
+   */
+  addNode(): void {
+    if (!this.editable) return
+    this.requestNodeFromKeyboard(this.selected !== null && this.byId.has(this.selected) ? this.selected : null)
   }
 
   zoomIn(): void {
@@ -1806,6 +1840,50 @@ export class Flow extends LitElement {
     return html`<slot name=${`card:${node.id}`}>${body}</slot>`
   }
 
+  private renderActions() {
+    const placement = ACTIONS_PLACEMENTS.includes(this.actionsPlacement) ? this.actionsPlacement : 'top'
+    const vertical = placement === 'left' || placement === 'right'
+    return html`<div
+      class=${`actions actions--${placement}`}
+      part="actions"
+      role="toolbar"
+      aria-label="Flow actions"
+      aria-orientation=${vertical ? 'vertical' : 'horizontal'}
+      ?hidden=${!this.slotPresence.has('actions')}
+      @keydown=${this.handleActionsKeydown}
+    >
+      <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
+    </div>`
+  }
+
+  /** Arrow keys (along the toolbar's orientation), Home and End move focus between the enabled action buttons. */
+  private handleActionsKeydown = (event: KeyboardEvent) => {
+    const vertical = this.actionsPlacement === 'left' || this.actionsPlacement === 'right'
+    const [prev, next] = vertical ? ['ArrowUp', 'ArrowDown'] : ['ArrowLeft', 'ArrowRight']
+    if (![prev, next, 'Home', 'End'].includes(event.key)) return
+    const slot = this.renderRoot.querySelector<HTMLSlotElement>('slot[name="actions"]')
+    const items = (slot?.assignedElements({ flatten: true }) ?? []).filter(
+      (el): el is HTMLElement => el instanceof HTMLElement && !el.hasAttribute('disabled') && !el.hidden,
+    )
+    if (!items.length) return
+    const current = items.findIndex((el) => el === event.target || el.contains(event.target as Node))
+    const last = items.length - 1
+    const index =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? last
+          : event.key === next
+            ? current < 0 || current === last
+              ? 0
+              : current + 1
+            : current <= 0
+              ? last
+              : current - 1
+    event.preventDefault()
+    items[index].focus()
+  }
+
   override render() {
     const direction = this.direction === 'TB' ? 'tb' : 'lr'
     const stageClasses = [
@@ -1853,7 +1931,7 @@ export class Flow extends LitElement {
           ${emptyCanvas ? html`<span id="empty-hint" class="visually-hidden">Press N or Enter to add a node.</span>` : nothing}
         </div>
       </c2-context-menu>
-      ${this.editable ? html`<div class="visually-hidden" role="status">${this.announcement}</div>` : nothing}
+      ${this.renderActions()} ${this.editable ? html`<div class="visually-hidden" role="status">${this.announcement}</div>` : nothing}
       <div class="card" popover="manual" @pointerenter=${this.handleCardEnter} @pointerleave=${this.handleCardLeave} @keydown=${this.handleCardKeydown}>
         ${this.renderCardContent()}
       </div>

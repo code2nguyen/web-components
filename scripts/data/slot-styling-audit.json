@@ -903,6 +903,22 @@
     },
     {
       "tag": "c2-flow",
+      "slot": "actions",
+      "decision": "variables",
+      "variables": [
+        "--c2-flow__actions--align",
+        "--c2-flow__actions--offset",
+        "--c2-flow__actions--gap",
+        "--c2-flow__actions--padding",
+        "--c2-flow__actions--background-color",
+        "--c2-flow__actions--border",
+        "--c2-flow__actions--border-radius",
+        "--c2-flow__actions--box-shadow"
+      ],
+      "reason": "The toolbar panel around the actions slot is drawn, spaced and placed along its edge through the actions variables; the slotted buttons keep their own styles."
+    },
+    {
+      "tag": "c2-flow",
       "slot": "card:{id}",
       "decision": "assigned-content",
       "reason": "The card:{id} slot projects consumer-owned light DOM into the node's hover card; style the assigned node through its own class or public contract."

@@ -626,3 +626,64 @@ test.describe('node positions', () => {
     expect((await layout(page)).aside).toEqual({ x: 0, y: 300 })
   })
 })
+
+test.describe('actions', () => {
+  const withActions = (attributes: string) =>
+    flow({ attributes }).replace(
+      '></c2-flow>',
+      '><button slot="actions" type="button">Add node</button><button slot="actions" type="button">Auto layout</button><button slot="actions" type="button">Fit</button></c2-flow>',
+    )
+
+  test('the toolbar sits along the edge actions-placement names, in a row or a column', async ({ page, renderScenario }) => {
+    for (const placement of ['top', 'right', 'bottom', 'left'] as const) {
+      await renderScenario(withActions(`editable actions-placement="${placement}"`))
+      const box = (await host(page).boundingBox())!
+      const toolbar = page.getByRole('toolbar', { name: 'Flow actions' })
+      await expect(toolbar).toHaveAttribute('aria-orientation', placement === 'left' || placement === 'right' ? 'vertical' : 'horizontal')
+      const add = (await page.getByRole('button', { name: 'Add node' }).boundingBox())!
+      const fit = (await page.getByRole('button', { name: 'Fit' }).boundingBox())!
+      if (placement === 'top') expect(add.y - box.y).toBeLessThan(32)
+      if (placement === 'bottom') expect(box.y + box.height - (add.y + add.height)).toBeLessThan(32)
+      if (placement === 'left') expect(add.x - box.x).toBeLessThan(32)
+      if (placement === 'right') expect(box.x + box.width - (add.x + add.width)).toBeLessThan(32)
+      if (placement === 'top' || placement === 'bottom') {
+        expect(fit.x).toBeGreaterThan(add.x)
+        expect(Math.abs(fit.y - add.y)).toBeLessThan(1)
+      } else {
+        expect(fit.y).toBeGreaterThan(add.y)
+      }
+    }
+  })
+
+  test('the arrow keys move along the toolbar and wrap', async ({ page, renderScenario }) => {
+    await renderScenario(withActions('editable actions-placement="left"'))
+    await page.getByRole('button', { name: 'Add node' }).focus()
+    await page.keyboard.press('ArrowDown')
+    await expect(page.getByRole('button', { name: 'Auto layout' })).toBeFocused()
+    await page.keyboard.press('End')
+    await expect(page.getByRole('button', { name: 'Fit' })).toBeFocused()
+    await page.keyboard.press('ArrowDown')
+    await expect(page.getByRole('button', { name: 'Add node' })).toBeFocused()
+    await page.keyboard.press('ArrowUp')
+    await expect(page.getByRole('button', { name: 'Fit' })).toBeFocused()
+  })
+
+  test('a click on an action does not pan the canvas, and addNode() asks for a node like N', async ({ page, renderScenario }) => {
+    await renderScenario(withActions('editable'))
+    await wire(page)
+    await host(page).evaluate((element: Flow) => {
+      element.querySelector('button')!.addEventListener('click', () => element.addNode())
+    })
+    const before = await node(page, 'idea').boundingBox()
+    await page.getByRole('button', { name: 'Add node' }).click()
+    expect(await node(page, 'idea').boundingBox()).toEqual(before)
+    const [add] = await recorded(page, 'node-add')
+    expect(add.detail.position).toEqual(expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }))
+    await expect(node(page, 'new-1')).toBeVisible()
+  })
+
+  test('without slotted actions there is no toolbar', async ({ page, renderScenario }) => {
+    await renderScenario(flow())
+    await expect(page.getByRole('toolbar')).toHaveCount(0)
+  })
+})

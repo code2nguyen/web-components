@@ -325,6 +325,11 @@
     display: none;
   }
 }
+:host([tearable]) .top {
+  // The perforation runs 17-19px down the sheet: a pad with a small top padding (a sticky note) still keeps its
+  // controls below it.
+  padding-block-start: max(#{css.cssVar(top--padding-top)}, 22px);
+}
 .perforation {
   position: absolute;
   inset: 17px 0 auto;
@@ -334,8 +339,11 @@
 }
 .controls {
   display: flex;
-  align-items: flex-end;
-  gap: 12px;
+  align-items: center;
+  // The "Paper" and "Tear off" buttons and the slotted icon buttons carry their own padding: a small gap keeps the
+  // space between two controls the same as the space between two icons.
+  gap: 4px;
+  margin-block-end: 2px;
   margin-inline-start: auto;
   opacity: css.cssVar(controls--opacity);
   transition: opacity 150ms ease;
@@ -352,6 +360,15 @@
   &[hidden] {
     display: none;
   }
+  // The 24px icon buttons overhang the 18px row of the "Paper" and "Tear off" labels by 3px each way rather than
+  // making it taller, which would lift the labels onto the perforation of a tearable pad.
+  margin-block: -3px;
+  // Icon buttons share the row of the small "Paper" and "Tear off" labels. A variable set on the button itself wins.
+  ::slotted(c2-icon-button) {
+    --c2-icon-button__state-layer--size: 24px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+  }
 }
 .tear,
 .paper-button {
@@ -360,7 +377,6 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-block-end: 2px;
   padding: 2px 6px;
   border-radius: 4px;
   cursor: pointer;

@@ -191,7 +191,7 @@ The colours are still CSS variables: `--c2-notepad__paper-yellow--background` an
 
 ## Actions on the note
 
-Buttons slotted into `actions` sit at the top right of the sheet, after the "Paper" button: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). They keep their own styles and events.
+Buttons slotted into `actions` sit in the row of the "Paper" and "Tear off" buttons, on their left: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). A `c2-icon-button` there is shrunk to a 24px button with a 14px icon to match that row; set its own `--c2-icon-button__state-layer--size` and `--c2-icon-button__icon--width`/`--height` to change that. The buttons keep their own events.
 
 On a board of many notes, set `--c2-notepad__controls--opacity: 0` to show the "Paper" button, the "Tear off" button and the actions only on the note being pointed at or written in. A touch screen has no hover: there they show once the writer taps into the page. They stay while the paper picker is open.
 
@@ -205,20 +205,30 @@ Hover the notes of the second row, or tab into one, to see its controls.
     max-width: 100%;
     --c2-notepad__controls--opacity: 0;
   }
+  .note-action {
+    --c2-icon-button__state-layer--size: 24px;
+    --c2-icon-button--border-radius: 4px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
 </style>
 <div data-label="Actions">
   <c2-notepad class="note-with-actions" paper-picker label="Groceries" value="- [ ] Oat milk
 - [ ] Sourdough">
-    <c2-icon-button slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
-    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
   </c2-notepad>
 </div>
 <div data-label="Controls on hover">
   <c2-notepad class="board-note" pad="sticky" paper-picker label="Reminder" value="Dentist Tue 9:30">
-    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
   </c2-notepad>
   <c2-notepad class="board-note" pad="sticky" paper-picker tearable label="To call" value="Plumber: Thu after 4">
-    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
   </c2-notepad>
 </div>
 ```

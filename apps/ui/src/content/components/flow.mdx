@@ -28,7 +28,7 @@ npm install @c2n/flow
 
 ## Usage
 
-Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the last one is `editable`: double-click the canvas to add a note, drag a node's handle to connect it, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected.
+Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the fifth is a plain decision diagram, with labelled branches and the status marker hidden; the last one is `editable`, with an action toolbar on its left edge (add node, auto layout, fit view): double-click the canvas or use **+** to add a note, drag a node's handle to connect it, double-click a node or an edge to rename it or label it, and press Delete to remove what you selected.
 
 ```html tag=UsageBlock,package=@c2n/flow
 <style>
@@ -44,6 +44,16 @@ Drag the steps, hover them, and right-click the canvas. The fourth row draws its
   }
   .demo .diagram {
     --c2-flow__marker--display: none;
+  }
+  .flow-action {
+    --c2-icon-button__state-layer--size: 28px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
   }
   .result {
     display: block;
@@ -81,7 +91,11 @@ Drag the steps, hover them, and right-click the canvas. The fourth row draws its
 </div>
 <div data-label="Editable">
   <div class="demo">
-    <c2-flow client:only="lit" data-flow-demo="editable" editable class="short" aria-label="Flow note" nodes='[{"id":"idea","label":"Idea"},{"id":"outline","label":"Outline"},{"id":"draft","label":"First draft"}]' edges='[{"source":"idea","target":"outline","label":"worth it"},{"source":"outline","target":"draft"}]'></c2-flow>
+    <c2-flow client:only="lit" data-flow-demo="editable" editable actions-placement="left" class="short" aria-label="Flow note" nodes='[{"id":"idea","label":"Idea"},{"id":"outline","label":"Outline"},{"id":"draft","label":"First draft"}]' edges='[{"source":"idea","target":"outline","label":"worth it"},{"source":"outline","target":"draft"}]'>
+      <c2-icon-button class="flow-action" slot="actions" data-flow-action="add" tooltip="Add node" aria-label="Add node"><c2-feather-plus></c2-feather-plus></c2-icon-button>
+      <c2-icon-button class="flow-action" slot="actions" data-flow-action="layout" tooltip="Auto layout" aria-label="Auto layout"><c2-feather-layout></c2-feather-layout></c2-icon-button>
+      <c2-icon-button class="flow-action" slot="actions" data-flow-action="fit" tooltip="Fit view" aria-label="Fit view"><c2-feather-maximize></c2-feather-maximize></c2-icon-button>
+    </c2-flow>
     <output class="result"></output>
   </div>
 </div>
@@ -141,6 +155,25 @@ flow.addEventListener('edge-edit', ({ detail }) => {
     return next
   })
 })
+```
+
+## Actions on the canvas
+
+Buttons slotted into `actions` form a toolbar over the canvas: the place for the commands a diagram editor keeps at hand, such as add node, auto layout or fit view. It sits at the top by default; `actions-placement="right"`, `"bottom"` or `"left"` moves it to that edge, where the buttons stack in a column. It is a `toolbar` for assistive technology, and the arrow keys (along its orientation), Home and End move between its buttons. Clicks on it never pan the canvas or open the context menu.
+
+Wire the buttons to the flow's methods: `addNode()` asks for a node exactly as `N` does (after the selected node, or in a free spot in the middle of the view) through the usual `node-add` event, `resetLayout()` animates back to the auto layout, and `fitView()`, `zoomIn()` and `zoomOut()` move the view. The panel is styled by `--c2-flow__actions--background-color`, `--border`, `--border-radius`, `--box-shadow`, `--padding` and `--gap`; `--c2-flow__actions--align` (`flex-start`, `center`, `flex-end`) slides it along its edge and `--c2-flow__actions--offset` sets its distance from the edge.
+
+```html tag=CodeBlock
+<c2-flow editable actions-placement="left">
+  <c2-icon-button slot="actions" data-action="add" tooltip="Add node" aria-label="Add node"><c2-feather-plus></c2-feather-plus></c2-icon-button>
+  <c2-icon-button slot="actions" data-action="layout" tooltip="Auto layout" aria-label="Auto layout"><c2-feather-layout></c2-feather-layout></c2-icon-button>
+  <c2-icon-button slot="actions" data-action="fit" tooltip="Fit view" aria-label="Fit view"><c2-feather-maximize></c2-feather-maximize></c2-icon-button>
+</c2-flow>
+<script type="module">
+  const flow = document.querySelector('c2-flow')
+  const run = { add: () => flow.addNode(), layout: () => flow.resetLayout(), fit: () => flow.fitView() }
+  flow.addEventListener('click', (event) => run[event.target.closest('[data-action]')?.dataset.action]?.())
+</script>
 ```
 
 ## Arrowheads, labels and the status marker

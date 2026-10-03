@@ -167,14 +167,24 @@ Pick up the dry cleaning"></c2-notepad>
     max-width: 100%;
     --c2-notepad__controls--opacity: 0;
   }
+  .note-action {
+    --c2-icon-button__state-layer--size: 24px;
+    --c2-icon-button--border-radius: 4px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
 </style>
 <div class="board">
   <c2-notepad class="board-note" pad="sticky" paper-picker label="Reminder" value="Dentist Tue 9:30">
-    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
   </c2-notepad>
   <c2-notepad class="board-note" pad="index-card" paper-picker label="Idea" value="Night paper for the **dark theme**">
-    <c2-icon-button slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
-    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
   </c2-notepad>
 </div>
 ```
