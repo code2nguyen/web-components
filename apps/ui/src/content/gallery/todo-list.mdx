@@ -162,4 +162,23 @@ customize panel applies the same kinds of values for the viewer.
 ></c2-todo-list>
 ```
 
+```html tag=MdxCodeBlock,label=Own colours and looks
+<style>
+  .todo-brand {
+    width: 100%;
+    max-width: 400px;
+  }
+</style>
+<c2-todo-list
+  class="todo-brand"
+  heading="Launch week"
+  customizable
+  pens='[{"name":"Ink","value":"#1f2937"},{"name":"Brand","value":"#4f46e5"},{"name":"Alert","value":"#b91c1c"}]'
+  highlights='[{"name":"Important","value":"#f59e0b"},{"name":"Done soon","value":"#10b981"}]'
+  backgrounds='[{"name":"Cream","value":"#fffaeb","color":"#281e14"},{"name":"Midnight","value":"#101828","color":"#f0f0fa"}]'
+  palettes='[{"name":"Brand","accent":"#4f46e5","pens":["#1f2937","#4f46e5","#b91c1c"],"dark":{"accent":"#a5b4fc","pens":["#e5e7eb","#a5b4fc","#fca5a5"]}},{"name":"Forest","accent":"#15803d","highlights":["#86efac"],"strength":30}]'
+  tasks='[{"label":"Hero copy","ink":2,"done":true},{"label":"Legal sign-off","highlight":1,"due":"Thu"},{"label":"Fix the pricing typo","ink":3,"urgent":true,"due":"Today"},{"label":"Press kit","highlight":2}]'
+></c2-todo-list>
+```
+
 </GalleryGrid>

@@ -6,9 +6,12 @@ category: 'Planning'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
 
 import { MonthPlanner } from '@c2n/month-planner'
 import { Button } from '@c2n/button'
+
+<ExampleModules />
 
 `c2-month-planner` shows a plan on a month grid. Each entry in `events` is drawn as a bar from its `start` to its `end`
 day, so a vacation reads as one strip with a clear beginning and end, continued on the next row when it crosses a
@@ -32,6 +35,19 @@ npm install @c2n/month-planner
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/month-planner
+<style>
+  .planner-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .planner-result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
 <div data-label="Vacation plan">
   <c2-month-planner
     month="2026-09"
@@ -50,12 +66,16 @@ npm install @c2n/month-planner
   </c2-month-planner>
 </div>
 <div data-label="Editable">
-  <c2-month-planner
-    editable
-    month="2026-09"
-    locale="en-US"
-    events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
-  ></c2-month-planner>
+  <div class="planner-demo">
+    <c2-month-planner
+      editable
+      data-planner-demo="editable"
+      month="2026-09"
+      locale="en-US"
+      events='[{"id":"vacation","title":"Vacation in Lisbon","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"id":"review","title":"Quarterly review","start":"2026-09-24"}]'
+    ></c2-month-planner>
+    <output class="planner-result">Click a day, drag across days, or drag a bar.</output>
+  </div>
 </div>
 ```
 
