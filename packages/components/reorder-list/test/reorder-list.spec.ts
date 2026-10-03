@@ -464,7 +464,7 @@ test('maps touch and pen pointer contracts to canonical input methods', async ({
   }
 })
 
-test('auto-scrolls the nearest eligible ancestor and honors autoscrolldisabled', async ({ page, renderScenario }) => {
+test('auto-scrolls the nearest eligible ancestor and honors auto-scroll-disabled', async ({ page, renderScenario }) => {
   await renderScenario(`
     <div id="scroller" style="height:150px;overflow-y:auto;margin-top:80px">
       <c2-reorder-list editable aria-label="Tasks">
@@ -484,7 +484,7 @@ test('auto-scrolls the nearest eligible ancestor and honors autoscrolldisabled',
   await page.mouse.up()
 
   await scroller.evaluate((element) => (element.scrollTop = 0))
-  await page.locator('c2-reorder-list').evaluate((element) => element.setAttribute('autoscrolldisabled', ''))
+  await page.locator('c2-reorder-list').evaluate((element) => element.setAttribute('auto-scroll-disabled', ''))
   const resetFirst = await page.locator('#row-0').boundingBox()
   if (!resetFirst) throw new Error('Missing reset row')
   await page.mouse.move(resetFirst.x + 10, resetFirst.y + 10)
@@ -615,6 +615,31 @@ test('has no representative WCAG A/AA violations and preserves nested controls',
   expect(await visualIds(page.locator('c2-reorder-list'))).toEqual(['', ''])
 })
 
+test('reads drag-start-threshold and auto-scroll-disabled, and forwards the lowercase spellings with a warning', async ({ page, renderScenario }) => {
+  const read = () =>
+    page.locator('c2-reorder-list').evaluate((element) => {
+      const host = element as HTMLElement & { dragStartThreshold: number; autoScrollDisabled: boolean }
+      return { threshold: host.dragStartThreshold, disabled: host.autoScrollDisabled }
+    })
+
+  await renderScenario(`<c2-reorder-list editable drag-start-threshold="24" auto-scroll-disabled aria-label="Tasks">${rows}</c2-reorder-list>`)
+  expect(await read()).toEqual({ threshold: 24, disabled: true })
+  await page.locator('c2-reorder-list').evaluate((element) => {
+    element.setAttribute('drag-start-threshold', '4')
+    element.removeAttribute('auto-scroll-disabled')
+  })
+  await expect.poll(read).toEqual({ threshold: 4, disabled: false })
+
+  const warnings: string[] = []
+  page.on('console', (message) => {
+    if (message.type() === 'warning') warnings.push(message.text())
+  })
+  await renderScenario(`<c2-reorder-list editable dragstartthreshold="18" autoscrolldisabled aria-label="Tasks">${rows}</c2-reorder-list>`)
+  expect(await read()).toEqual({ threshold: 18, disabled: true })
+  await expect.poll(() => warnings.join('\n')).toContain('"drag-start-threshold"')
+  expect(warnings.join('\n')).toContain('"auto-scroll-disabled"')
+})
+
 test('keeps generated manifest property and attribute defaults literal and synchronized', () => {
   const manifest = JSON.parse(readFileSync(new URL('../custom-elements.json', import.meta.url), 'utf8')) as {
     modules: Array<{
@@ -627,7 +652,10 @@ test('keeps generated manifest property and attribute defaults literal and synch
   }
   const declaration = manifest.modules.flatMap((module) => module.declarations).find((candidate) => candidate.tagName === 'c2-reorder-list')
   expect(declaration?.members?.find((member) => member.name === 'dragStartThreshold')?.default).toBe('10')
-  expect(declaration?.attributes?.find((attribute) => attribute.name === 'dragstartthreshold')?.default).toBe('10')
+  expect(declaration?.attributes?.find((attribute) => attribute.name === 'drag-start-threshold')?.default).toBe('10')
+  expect(declaration?.attributes?.find((attribute) => attribute.name === 'auto-scroll-disabled')?.default).toBe('false')
+  expect(declaration?.attributes?.map((attribute) => attribute.name)).not.toContain('dragstartthreshold')
+  expect(declaration?.attributes?.map((attribute) => attribute.name)).not.toContain('autoscrolldisabled')
 })
 
 test('keeps interactive custom feedback inert and outside the focus order', async ({ page, renderScenario }) => {
@@ -970,7 +998,7 @@ test('stops auto-scroll at a boundary and leaves no work after cancellation', as
 test('coalesces 100-item destination renders and keeps one auto-scroll frame pending', async ({ page, renderScenario }) => {
   await renderScenario(`
     <div id="performance-scroller" style="height:220px;overflow-y:auto">
-      <c2-reorder-list editable autoscrolldisabled aria-label="One hundred tasks">
+      <c2-reorder-list editable auto-scroll-disabled aria-label="One hundred tasks">
         ${Array.from({ length: 100 }, (_, index) => `<div id="performance-${index}" style="height:32px">Row ${index}</div>`).join('')}
       </c2-reorder-list>
     </div>

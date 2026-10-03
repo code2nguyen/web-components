@@ -78,17 +78,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 - **Where the fix belongs:** `packages/components/table` — key slot names by **visible index** rather than row key,
   so a framework renders only the window. Breaking change to the documented `cell:{rowKey}:{field}` contract.
 
-### `reorder-list` exposes two properties whose real attributes are unreadable
-
-- **Severity:** papercut
-- **Hit while:** correcting the manifest's derived attribute names, 2026-09-19.
-- **What happens:** `dragStartThreshold` and `autoScrollDisabled` declare no `attribute`, so Lit observes them as
-  `dragstartthreshold` and `autoscrolldisabled` — now that the manifest reports the real name instead of the
-  property spelling, that is what the API table, the IDE metadata and any generated markup advertise.
-- **Where the fix belongs:** `packages/components/reorder-list` — declare `attribute: 'drag-start-threshold'` and
-  `attribute: 'auto-scroll-disabled'`. Backwards compatible: `element-helper` forwards the lowercase spelling to
-  the kebab-case attribute with a warning.
-
 ### A many-row component cannot be SSR'd chrome: declarative shadow DOM duplicates its stylesheet per instance
 
 - **Severity:** gap (rendering strategy, not a component defect)
@@ -164,6 +153,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-dashboard`                  | Stored layouts held tracks, order and breakpoint but not named panel sizes, so apps kept a second storage model. `sizes` on the grid, `size` on a card and `setPanelSize()` now persist, validate on restore and reset with the layout.                                                                                         | 2026-10-03                                                                                                                                                                                                   |
 | `@c2n/theme`                    | `base.css` set every per-side variable, so a component shorthand behind them (`--c2-details--border`) was never read. The generator now leaves out a side that falls back to its shorthand with the same mapped value; `c2-details` ships `--c2-details--border`.                                                               | 2026-10-03                                                                                                                                                                                                   |
 | `c2-command`                    | The only height control was the list's fixed `--c2-command__list--max-height`, so a palette in a capped modal pushed its footer out. `--c2-command--max-height` now caps the whole palette and the list flexes into what is left.                                                                                               | 2026-10-03                                                                                                                                                                                                   |
+| `c2-reorder-list`               | `dragStartThreshold` and `autoScrollDisabled` were observed as `dragstartthreshold`/`autoscrolldisabled`. They are now `drag-start-threshold` and `auto-scroll-disabled`; the old spelling in markup is forwarded with a warning.                                                                                               | 2026-10-03                                                                                                                                                                                                   |
 
 ## Won't fix
 
