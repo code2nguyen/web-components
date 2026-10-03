@@ -11,7 +11,7 @@ built-in auto layout, draggable nodes saved to `localStorage`, a hover card and 
 ></c2-flow>
 ```
 
-- **Data:** `nodes` (`id`, `label`, `status`, `description`, `meta`, `details`, `data`) and `edges` (`source`,
+- **Data:** `nodes` (`id`, `label`, `status`, `description`, `meta`, `details`, `position`, `data`) and `edges` (`source`,
   `target`), as properties or JSON attributes. Statuses: `pending`, `current`, `running`, `success`, `warning`,
   `error`, `skipped`. Edges take their style from the statuses at both ends.
 - **Layout:** layered auto layout along `direction` (`LR` or `TB`); cycles are allowed and drawn as back edges.
@@ -24,7 +24,16 @@ built-in auto layout, draggable nodes saved to `localStorage`, a hover card and 
 - **Hover card:** status, description and `details` of the hovered or focused node, after `open-delay`. `renderCard` or a
   `card:<id>` slot replaces it; `no-card` turns it off.
 - **Custom nodes:** `renderNode(context)` returns a Lit template, a node or a string; or render into the `node:<id>` slot.
-- **Events:** `node-click`, `selection-change`, `layout-change`, `flow-menu-select` (none bubble).
+- **Editing:** `editable` lets the user draw the diagram, and the app applies each change (the flow never edits
+  `nodes`/`edges` itself). Double-click empty canvas or press `N` → `node-add { position, source? }`; double-click a
+  node, F2, or Enter on the selected node → inline editor → `node-edit { id, label }`; drag a node's handle onto
+  another node → `edge-add { source, target }` (no self-loops, no duplicates), onto empty canvas → `node-add` with
+  `source`; `C` then arrows/Tab and Enter connects from the keyboard; Delete/Backspace → `node-delete { id }`, or
+  `edge-delete { source, target }` for an edge selected by a click or `E`. Give the new node `position` to put it
+  where the user asked; in an editable flow the other nodes never move when the graph changes. `editLabel(id)`
+  opens the editor from script.
+- **Events:** `node-click`, `selection-change`, `layout-change`, `flow-menu-select`, and in editable mode `node-add`,
+  `node-edit`, `node-delete`, `edge-add`, `edge-delete` (none bubble).
 - **Keyboard:** arrows follow edges, Enter selects, Alt+arrow moves, Ctrl/⌘ + `+` / `-` zoom and Ctrl/⌘ + `0` fits while focus is in the flow. Ctrl/⌘ + wheel zooms.
 - Theme it with the `--c2-flow--*` variables: canvas, dot grid, rank and node gaps, node box, edges, status colours and
   card.

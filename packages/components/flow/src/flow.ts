@@ -9,19 +9,23 @@ import { ariaKeyShortcuts, isApplePlatform, matchesStroke, parseShortcut } from 
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
 import type { ContextMenuContext, ContextMenuSelectEventDetail } from '@c2n/context-menu'
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom'
-import { buildGraph, layoutGraph, mergeLayout, type Graph, type LayoutOptions } from './flow-layout.js'
+import { avoidOverlap, buildGraph, layoutGraph, mergeLayout, type Graph, type LayoutOptions } from './flow-layout.js'
 import { edgePath } from './flow-geometry.js'
 import { MENU_ICONS, STATUS_ICONS, STATUS_LABELS } from './flow-icons.js'
 import type {
   FlowContextMenuRenderer,
   FlowDirection,
   FlowEdge,
+  FlowEdgeEventDetail,
   FlowEdgeType,
   FlowLayout,
   FlowLayoutChangeDetail,
   FlowLayoutChangeReason,
   FlowMenuSelectDetail,
   FlowNode,
+  FlowNodeAddDetail,
+  FlowNodeDeleteDetail,
+  FlowNodeEditDetail,
   FlowNodeEventDetail,
   FlowPoint,
   FlowRenderContext,
@@ -45,6 +49,11 @@ export interface FlowEventMap {
   'selection-change': CustomEvent<FlowSelectionChangeDetail>
   'layout-change': CustomEvent<FlowLayoutChangeDetail>
   'flow-menu-select': CustomEvent<FlowMenuSelectDetail>
+  'node-add': CustomEvent<FlowNodeAddDetail>
+  'node-edit': CustomEvent<FlowNodeEditDetail>
+  'node-delete': CustomEvent<FlowNodeDeleteDetail>
+  'edge-add': CustomEvent<FlowEdgeEventDetail>
+  'edge-delete': CustomEvent<FlowEdgeEventDetail>
 }
 
 export interface Flow {
@@ -68,6 +77,9 @@ const NUDGE = 8
 const NUDGE_LARGE = 24
 const TWEEN_DURATION = 320
 const ESTIMATED_SIZE: FlowSize = { width: 200, height: 56 }
+/** Two presses this close in time (ms) and space (px) on the same thing are a double click, or a double tap. */
+const DOUBLE_TAP_TIME = 500
+const DOUBLE_TAP_DISTANCE = 8
 
 /** The zoom shortcuts every canvas app uses: ⌘ on Apple platforms, Ctrl elsewhere. `=` is the unshifted `+` key. */
 const ZOOM_IN_KEYS = 'mod+plus, mod+='
@@ -96,11 +108,27 @@ function detailRows(details: FlowNode['details']): [string, string][] {
 
 const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in STATUS_LABELS ? node.status : 'pending')
 
+const edgeKey = (source: string, target: string) => `${source}\u0000${target}`
+
+/** A key press without Ctrl, ⌘ or Alt: the single-letter editing shortcuts must not shadow browser or app chords. */
+const plainKey = (event: KeyboardEvent, key: string) => !event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === key
+
+/** A connection being drawn from `source`: by the pointer (`point` follows it) or by the keyboard (`target` is chosen). */
+interface Connection {
+  source: string
+  /** Pointer position in canvas pixels; `null` while the keyboard chooses. */
+  point: FlowPoint | null
+  /** The node under the pointer, or the keyboard's candidate. */
+  target: string | null
+  keyboard: boolean
+}
+
 /**
  * A pipeline or dependency graph drawn as nodes and smooth edges on a pannable, zoomable canvas, in the spirit of
- * React Flow but read-only in its topology: the graph comes from the `nodes` and `edges` properties, each node carries
- * a {@link FlowStatus}, and edges take their style from the statuses at both ends (an edge into a running step
- * animates, one out of a failed step turns red, one touching a skipped step is dotted).
+ * React Flow but controlled in its topology: the graph comes from the `nodes` and `edges` properties (an `editable`
+ * flow lets the user ask for changes, which the application applies), each node carries a {@link FlowStatus}, and
+ * edges take their style from the statuses at both ends (an edge into a running step animates, one out of a failed
+ * step turns red, one touching a skipped step is dotted).
  *
  * **Layout.** Nodes are placed by a built-in layered layout: one column (`direction="LR"`) or row (`"TB"`) per
  * dependency depth, siblings ordered to reduce crossings. Cycles are allowed; the edges that close them are routed
@@ -128,6 +156,27 @@ const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in 
  * Shift), Ctrl/⌘ + `+` and Ctrl/⌘ + `-` zoom and Ctrl/⌘ + `0` fits the view, while focus is in the flow (the
  * browser's page zoom keeps those keys everywhere else). Ctrl/⌘ + wheel zooms; a plain wheel keeps scrolling the page.
  *
+ * **Editing.** `editable` lets the user draw the diagram. The flow stays controlled: it never changes `nodes` or
+ * `edges` itself, it fires an event and the application updates the properties.
+ *
+ * - *Add a node*: double-click (or double-tap) empty canvas, choose **Add node** in the canvas menu, or press `N`
+ *   (in the centre of the view; on the selected node, a node connected after it) or Enter on the empty canvas:
+ *   `node-add` with the `position` to give the new node.
+ * - *Rename*: double-click a node, press Enter on the selected node or F2 on the focused one, or choose **Rename**:
+ *   an inline field opens over the label. Enter or leaving the field commits (`node-edit`), Escape cancels. A node
+ *   drawn by `renderNode` or a `node:<id>` slot gets the field over its whole body and the same event, but must
+ *   render `label` itself to show the change. `editLabel(id)` opens the field from script, e.g. on a new node.
+ * - *Connect*: drag the handle on a node's outgoing side. Released on another node it fires `edge-add` (never a
+ *   self-loop or a duplicate); released on empty canvas it fires `node-add` with `source`, for a connected new node.
+ *   From the keyboard, `C` on the focused node starts a connection, the arrow keys or Tab choose the target, Enter
+ *   connects and Escape cancels.
+ * - *Delete*: Delete or Backspace on the focused node fires `node-delete`. An edge is selected by a click, or by `E`
+ *   on a focused node (repeat to step through its edges); Delete then fires `edge-delete`. The node and edge
+ *   context menus have a **Delete** row.
+ *
+ * In an editable flow a change to the graph never moves the nodes already on the canvas: the current positions are
+ * pinned as a custom layout (`layout-change` with reason `edit`) and the view keeps its pan and zoom.
+ *
  * @tag c2-flow
  *
  * @slot node:{id} - Body of the node whose `id` is `{id}`, e.g. `slot="node:build"`. Replaces `renderNode` and the default body for that node.
@@ -137,6 +186,11 @@ const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in 
  * @event {CustomEvent<FlowSelectionChangeDetail>} selection-change - The selected node changed through the user. `detail.selected` is its id, or `null`. Does not bubble.
  * @event {CustomEvent<FlowLayoutChangeDetail>} layout-change - The user moved a node, switched direction or went back to auto layout, or `setLayout()` was called. Does not bubble.
  * @event {CustomEvent<FlowMenuSelectDetail>} flow-menu-select - A context-menu row added by `renderContextMenu` was activated, with the node it was opened on. Does not bubble.
+ * @event {CustomEvent<FlowNodeAddDetail>} node-add - `editable` only: the user asked for a node at `detail.position` (canvas pixels, the node's top-left corner), connected from `detail.source` when it came from a connection dropped on empty canvas. Append it to `nodes`. Does not bubble.
+ * @event {CustomEvent<FlowNodeEditDetail>} node-edit - `editable` only: the user renamed node `detail.id` to `detail.label` with the inline editor. Does not bubble.
+ * @event {CustomEvent<FlowNodeDeleteDetail>} node-delete - `editable` only: the user asked to delete node `detail.id`. Does not bubble.
+ * @event {CustomEvent<FlowEdgeEventDetail>} edge-add - `editable` only: the user connected `detail.source` to `detail.target`. Never a self-loop or an existing edge. Does not bubble.
+ * @event {CustomEvent<FlowEdgeEventDetail>} edge-delete - `editable` only: the user asked to delete the edge from `detail.source` to `detail.target`. Does not bubble.
  *
  * @internalcomponent c2-context-menu
  * @internalcomponent c2-kbd
@@ -201,6 +255,21 @@ const statusOf = (node: FlowNode): FlowStatus => (node.status && node.status in 
  * @cssproperty {pixel} [--c2-flow__card--offset=8px] - Distance between the node and its hover card.
  * @cssproperty {color} [--c2-flow__card__term--color=#71717a] - Labels of the card's detail rows.
  * @cssproperty {time} [--c2-flow__card--transition-duration=150ms]
+ * @cssproperty {outline} [--c2-flow__canvas__focus--outline=2px solid rgba(2, 101, 220, 0.4)] - Focus ring of the empty canvas of an `editable` flow, the one place that takes focus when there is no node.
+ * @cssproperty {pixel} [--c2-flow__connector--size=12px] - Diameter of the connection handle an `editable` flow shows on a hovered, focused or selected node.
+ * @cssproperty {color} [--c2-flow__connector--background-color=rgb(2, 101, 220)]
+ * @cssproperty {color} [--c2-flow__connector--border-color=#ffffff]
+ * @cssproperty {color} [--c2-flow__node__connect-target--border-color=rgb(2, 101, 220)] - Border of the node a connection would be made to.
+ * @cssproperty {box-shadow} [--c2-flow__node__connect-target--box-shadow=0 0 0 3px rgba(2, 101, 220, 0.2)]
+ * @cssproperty {color} [--c2-flow__edge__draft--color=rgb(2, 101, 220)] - The edge drawn while a connection is being made.
+ * @cssproperty {color} [--c2-flow__edge__selected--color=rgb(2, 101, 220)] - Selected edge of an `editable` flow.
+ * @cssproperty {pixel} [--c2-flow__edge__selected--width=2.5px]
+ * @cssproperty {pixel} [--c2-flow__edge-hit--width=12px] - Width of the invisible band round an edge that a click selects it by.
+ * @cssproperty {color} [--c2-flow__editor--background-color=#ffffff] - Inline label editor.
+ * @cssproperty {color} [--c2-flow__editor--color=#18181b]
+ * @cssproperty {border} [--c2-flow__editor--border=1px solid #bcbcc6]
+ * @cssproperty {border-radius} [--c2-flow__editor--border-radius=4px]
+ * @cssproperty {outline} [--c2-flow__editor__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  */
 @customElement('c2-flow')
 export class Flow extends LitElement {
@@ -220,6 +289,12 @@ export class Flow extends LitElement {
 
   /** `localStorage` key the custom layout and direction are saved under. Empty disables persistence. */
   @property({ attribute: 'storage-key' }) storageKey = ''
+
+  /**
+   * Lets the user add, rename, connect and delete nodes and delete edges. The flow fires `node-add`, `node-edit`,
+   * `node-delete`, `edge-add` and `edge-delete` and the application updates `nodes` and `edges`.
+   */
+  @property({ type: Boolean }) editable = false
 
   /** Turns off moving nodes; panning, zooming, selection and the hover card still work. */
   @property({ type: Boolean }) locked = false
@@ -257,6 +332,10 @@ export class Flow extends LitElement {
   @state() private draggingId: string | null = null
   @state() private panning = false
   @state() private custom = false
+  @state() private editingId: string | null = null
+  @state() private selectedEdge: string | null = null
+  @state() private connection: Connection | null = null
+  @state() private announcement = ''
 
   @query('.stage') private stage?: HTMLElement
   @query('.card') private card?: HTMLElement
@@ -279,9 +358,23 @@ export class Flow extends LitElement {
   private fitted = false
 
   private drag: { id: string; startX: number; startY: number; origin: FlowPoint; moved: boolean; pointerId: number } | null = null
-  private pan: { startX: number; startY: number; tx: number; ty: number; moved: boolean; pointerId: number } | null = null
+  /** A press on empty canvas, or on an edge of an editable flow (`edge`), until it moves far enough to pan. */
+  private pan: { startX: number; startY: number; tx: number; ty: number; moved: boolean; pointerId: number; edge: string | null } | null = null
   private tween = 0
   private menuNode: FlowNode | null = null
+  private menuEdge: FlowEdge | null = null
+  private menuPoint: FlowPoint | null = null
+  /** A press on a node's connection handle, until it moves far enough to become a connection. */
+  private connectDrag: { source: string; startX: number; startY: number; moved: boolean; pointerId: number } | null = null
+  private lastTap: { target: string; time: number; x: number; y: number } | null = null
+  /** The position each node's own `position` field was last applied with, so an unchanged value does not undo a drag. */
+  private appliedPositions = new Map<string, string>()
+  /** The graph changed in an editable flow: save and report the pinned layout once rendered. */
+  private editedLayout = false
+  /** A keyboard `N`: focus the node the application adds in answer. */
+  private focusAdded: Set<string> | null = null
+  /** A keyboard delete: where focus goes once the application has removed the node. */
+  private refocus: { removed: string; next: string | null } | null = null
   private openTimer: ReturnType<typeof setTimeout> | undefined
   private closeTimer: ReturnType<typeof setTimeout> | undefined
   private cleanupCard: (() => void) | null = null
@@ -362,6 +455,22 @@ export class Flow extends LitElement {
     this.emitLayout('reset')
   }
 
+  /**
+   * Opens the inline label editor on node `id`, as a double-click would; for example on the node an application has
+   * just added for `node-add`. Does nothing unless the flow is `editable` and the node is rendered.
+   */
+  async editLabel(id: string): Promise<void> {
+    if (!this.editable || !this.byId.has(id)) return
+    this.hideCard(true)
+    this.cancelConnection()
+    this.focusId = id
+    this.editingId = id
+    await this.updateComplete
+    const input = this.renderRoot.querySelector<HTMLInputElement>('.label-editor')
+    input?.focus()
+    input?.select()
+  }
+
   // ---------------------------------------------------------------------------------------------------------------
   // Layout
 
@@ -396,6 +505,7 @@ export class Flow extends LitElement {
 
   private loadStorage() {
     this.storageLoaded = true
+    this.appliedPositions.clear()
     const stored = this.readStorage()
     this.pinned = stored?.positions ?? {}
     this.custom = Object.keys(this.pinned).length > 0
@@ -543,6 +653,7 @@ export class Flow extends LitElement {
   // Selection
 
   private select(id: string | null, click = false) {
+    this.selectedEdge = null
     const node = id ? (this.byId.get(id) ?? null) : null
     if (id !== this.selected) {
       this.selected = id
@@ -562,20 +673,74 @@ export class Flow extends LitElement {
     return null
   }
 
+  /** Whether the event comes from (or through) an element of the shadow root carrying `className`. */
+  private fromPart(event: Event, className: string) {
+    for (const target of event.composedPath()) {
+      if (target === this) break
+      if (target instanceof Element && target.classList.contains(className)) return target
+    }
+    return null
+  }
+
+  private edgeKeyFromEvent(event: Event): string | null {
+    return (this.fromPart(event, 'edge-hit') as SVGElement | null)?.dataset.edgeKey ?? null
+  }
+
+  /** Viewport coordinates to canvas pixels. */
+  private toCanvas(clientX: number, clientY: number): FlowPoint {
+    const stage = this.stage
+    if (!stage) return { x: 0, y: 0 }
+    const rect = stage.getBoundingClientRect()
+    return { x: (clientX - rect.left - stage.clientLeft - this.tx) / this.zoom, y: (clientY - rect.top - stage.clientTop - this.ty) / this.zoom }
+  }
+
+  /** The topmost node under a point in canvas pixels. */
+  private nodeAt(point: FlowPoint): string | null {
+    for (let i = this.nodes.length - 1; i >= 0; i--) {
+      const id = this.nodes[i].id
+      const p = this.positions.get(id)
+      const size = this.sizeOf(id)
+      if (p && point.x >= p.x && point.x <= p.x + size.width && point.y >= p.y && point.y <= p.y + size.height) return id
+    }
+    return null
+  }
+
+  /** A second press on the same thing, soon after and close to the first: a double click, or a double tap. */
+  private isDoubleTap(target: string, event: PointerEvent) {
+    const last = this.lastTap
+    const tap = { target, time: event.timeStamp, x: event.clientX, y: event.clientY }
+    const double =
+      !!last && last.target === target && tap.time - last.time < DOUBLE_TAP_TIME && Math.hypot(tap.x - last.x, tap.y - last.y) < DOUBLE_TAP_DISTANCE
+    this.lastTap = double ? null : tap
+    return double
+  }
+
   private handlePointerDown = (event: PointerEvent) => {
-    if (event.button !== 0 || !this.stage) return
+    if (event.button !== 0 || !this.stage || this.fromPart(event, 'label-editor')) return
     const id = this.nodeIdFromEvent(event)
-    // A locked flow still tracks the press on a node, so it can tell a click from a pan.
-    if (id) {
+    if (this.editable && id && this.fromPart(event, 'connector')) {
+      this.connectDrag = { source: id, startX: event.clientX, startY: event.clientY, moved: false, pointerId: event.pointerId }
+    } else if (id) {
+      // A locked flow still tracks the press on a node, so it can tell a click from a pan.
       this.drag = { id, startX: event.clientX, startY: event.clientY, origin: { ...this.positions.get(id)! }, moved: false, pointerId: event.pointerId }
     } else {
-      this.pan = { startX: event.clientX, startY: event.clientY, tx: this.tx, ty: this.ty, moved: false, pointerId: event.pointerId }
+      const edge = this.editable ? this.edgeKeyFromEvent(event) : null
+      this.pan = { startX: event.clientX, startY: event.clientY, tx: this.tx, ty: this.ty, moved: false, pointerId: event.pointerId, edge }
     }
     this.stage.setPointerCapture(event.pointerId)
   }
 
   private handlePointerMove = (event: PointerEvent) => {
-    if (this.drag && event.pointerId === this.drag.pointerId) {
+    if (this.connectDrag && event.pointerId === this.connectDrag.pointerId) {
+      const { source, startX, startY } = this.connectDrag
+      if (!this.connectDrag.moved && Math.hypot(event.clientX - startX, event.clientY - startY) < DRAG_THRESHOLD) return
+      if (!this.connectDrag.moved) {
+        this.connectDrag.moved = true
+        this.hideCard(true)
+      }
+      const point = this.toCanvas(event.clientX, event.clientY)
+      this.connection = { source, point, target: this.nodeAt(point), keyboard: false }
+    } else if (this.drag && event.pointerId === this.drag.pointerId) {
       const dx = event.clientX - this.drag.startX
       const dy = event.clientY - this.drag.startY
       if (!this.drag.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return
@@ -603,18 +768,39 @@ export class Flow extends LitElement {
   }
 
   private handlePointerUp = (event: PointerEvent) => {
+    const released = event.type === 'pointerup'
+    if (this.connectDrag && event.pointerId === this.connectDrag.pointerId) {
+      const { source, moved } = this.connectDrag
+      const connection = this.connection
+      this.connectDrag = null
+      this.connection = null
+      if (!moved) {
+        if (released) this.select(source, true)
+      } else if (released && connection?.point) this.finishConnection(source, connection.target, connection.point)
+    }
     if (this.drag && event.pointerId === this.drag.pointerId) {
       const { id, moved } = this.drag
       this.drag = null
       this.draggingId = null
       if (moved) this.commitCustomLayout()
-      else if (event.type === 'pointerup') this.select(id, true)
+      else if (released) {
+        this.select(id, true)
+        if (this.editable && this.isDoubleTap(`node:${id}`, event)) void this.editLabel(id)
+      }
     }
     if (this.pan && event.pointerId === this.pan.pointerId) {
-      const moved = this.pan.moved
+      const { moved, edge } = this.pan
       this.pan = null
       this.panning = false
-      if (!moved && event.type === 'pointerup') this.select(null)
+      if (!moved && released) {
+        if (edge) {
+          this.selectEdge(edge)
+          this.lastTap = null
+        } else {
+          this.select(null)
+          if (this.editable && this.isDoubleTap('canvas', event)) this.requestNode(this.centred(this.toCanvas(event.clientX, event.clientY)))
+        }
+      }
     }
   }
 
@@ -634,13 +820,257 @@ export class Flow extends LitElement {
   }
 
   // ---------------------------------------------------------------------------------------------------------------
+  // Editing
+
+  private labelOf = (id: string) => this.byId.get(id)?.label ?? id
+
+  private hasEdge(source: string, target: string) {
+    return this.edges.some((edge) => edge.source === source && edge.target === target)
+  }
+
+  /** Whether connecting `source` to `target` would make a new edge: no self-loop, no duplicate. */
+  private canConnect(source: string, target: string | null): target is string {
+    return target !== null && target !== source && this.byId.has(target) && !this.hasEdge(source, target)
+  }
+
+  private edgeByKey(key: string | null): FlowEdge | null {
+    return key === null ? null : (this.edges.find((edge) => edgeKey(edge.source, edge.target) === key) ?? null)
+  }
+
+  private announce(text: string) {
+    this.announcement = text
+  }
+
+  /** The size a new node is expected to take: that of a measured node, or the estimate. */
+  private typicalSize(): FlowSize {
+    return this.sizes.values().next().value ?? ESTIMATED_SIZE
+  }
+
+  /** Top-left corner that centres a typical node on `point`. */
+  private centred(point: FlowPoint): FlowPoint {
+    const size = this.typicalSize()
+    return { x: point.x - size.width / 2, y: point.y - size.height / 2 }
+  }
+
+  /** Top-left corner for a node dropped at `point` at the end of a connection: its incoming side on the point. */
+  private incomingAt(point: FlowPoint): FlowPoint {
+    const size = this.typicalSize()
+    return this.direction === 'LR' ? { x: point.x, y: point.y - size.height / 2 } : { x: point.x - size.width / 2, y: point.y }
+  }
+
+  /** A spot near `start` that no node covers, for the nodes the keyboard asks for. */
+  private freeSpot(start: FlowPoint): FlowPoint {
+    const id = '\u0000new'
+    const size = this.typicalSize()
+    return avoidOverlap(id, start, [...this.positions.keys()], this.positions, (key) => (key === id ? size : this.sizeOf(key)), this.layoutOptions())
+  }
+
+  private requestNode(position: FlowPoint, source?: string, fromKeyboard = false) {
+    if (fromKeyboard) this.focusAdded = new Set(this.byId.keys())
+    const detail: FlowNodeAddDetail = { position: { x: Math.round(position.x), y: Math.round(position.y) } }
+    if (source !== undefined) detail.source = source
+    this.dispatchEvent(new CustomEvent<FlowNodeAddDetail>('node-add', { detail }))
+  }
+
+  /** `N`: a node connected after the selected node, or else one in the middle of the view. */
+  private requestNodeFromKeyboard(id: string | null) {
+    if (id !== null && id === this.selected) {
+      const p = this.positions.get(id)!
+      const size = this.sizeOf(id)
+      const { rankGap } = this.layoutOptions()
+      const start = this.direction === 'LR' ? { x: p.x + size.width + rankGap, y: p.y } : { x: p.x, y: p.y + size.height + rankGap }
+      this.requestNode(this.freeSpot(start), id, true)
+      return
+    }
+    const stage = this.stage
+    if (!stage) return
+    const rect = stage.getBoundingClientRect()
+    this.requestNode(this.freeSpot(this.centred(this.toCanvas(rect.left + rect.width / 2, rect.top + rect.height / 2))), undefined, true)
+  }
+
+  /** Ends a connection: an edge to `target`, or a new connected node at `point` when there is no target. */
+  private finishConnection(source: string, target: string | null, point: FlowPoint | null) {
+    if (target === null) {
+      if (point) this.requestNode(this.incomingAt(point), source)
+      return
+    }
+    if (!this.canConnect(source, target)) return
+    this.dispatchEvent(new CustomEvent<FlowEdgeEventDetail>('edge-add', { detail: { source, target } }))
+  }
+
+  private cancelConnection() {
+    this.connection = null
+    this.connectDrag = null
+  }
+
+  /** The nodes a connection from `source` can go to, in reading order: along the layout's main axis, then across. */
+  private connectionTargets(source: string) {
+    const [main, cross] = this.direction === 'LR' ? (['x', 'y'] as const) : (['y', 'x'] as const)
+    const at = (id: string) => this.positions.get(id) ?? { x: 0, y: 0 }
+    return this.nodes
+      .map((node) => node.id)
+      .filter((id) => this.canConnect(source, id))
+      .sort((a, b) => at(a)[main] - at(b)[main] || at(a)[cross] - at(b)[cross])
+  }
+
+  private startKeyboardConnection(source: string) {
+    const targets = this.connectionTargets(source)
+    if (!targets.length) {
+      this.announce(`${this.labelOf(source)} is already connected to every other node.`)
+      return
+    }
+    this.hideCard(true)
+    const main = this.direction === 'LR' ? 'x' : 'y'
+    const from = this.positions.get(source)![main]
+    const target = targets.find((id) => this.positions.get(id)![main] > from) ?? targets[0]
+    this.connection = { source, point: null, target, keyboard: true }
+    this.announce(`Connect ${this.labelOf(source)} to ${this.labelOf(target)}. Arrow keys or Tab choose another node, Enter connects, Escape cancels.`)
+  }
+
+  private handleConnectionKey(event: KeyboardEvent, connection: Connection) {
+    const step = ({ ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1, Tab: event.shiftKey ? -1 : 1 } as Record<string, number>)[event.key]
+    if (step) {
+      event.preventDefault()
+      const targets = this.connectionTargets(connection.source)
+      if (!targets.length) return
+      const index = targets.indexOf(connection.target ?? '')
+      const next = index < 0 ? 0 : (index + step + targets.length) % targets.length
+      this.connection = { ...connection, target: targets[next] }
+      this.announce(`${this.labelOf(targets[next])}, ${next + 1} of ${targets.length}`)
+    } else if (event.key === 'Enter') {
+      event.preventDefault()
+      this.connection = null
+      if (this.canConnect(connection.source, connection.target)) {
+        this.finishConnection(connection.source, connection.target, null)
+        this.announce(`Connected ${this.labelOf(connection.source)} to ${this.labelOf(connection.target)}.`)
+      }
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      this.cancelConnection()
+      this.announce('Connection cancelled.')
+    }
+  }
+
+  private selectEdge(key: string, position = '') {
+    const edge = this.edgeByKey(key)
+    if (!edge) return
+    this.select(null)
+    this.selectedEdge = key
+    this.hideCard(true)
+    this.announce(`Edge from ${this.labelOf(edge.source)} to ${this.labelOf(edge.target)}${position} selected. Delete removes it.`)
+  }
+
+  /** `E` on a node: selects its edges one after the other. */
+  private stepEdges(id: string) {
+    const keys = [...new Set(this.edges.filter((edge) => edge.source === id || edge.target === id).map((edge) => edgeKey(edge.source, edge.target)))]
+    if (!keys.length) {
+      this.announce(`${this.labelOf(id)} has no edges.`)
+      return
+    }
+    const index = (keys.indexOf(this.selectedEdge ?? '') + 1) % keys.length
+    this.selectEdge(keys[index], keys.length > 1 ? `, ${index + 1} of ${keys.length},` : '')
+  }
+
+  private deleteNode(id: string, fromKeyboard = false) {
+    if (fromKeyboard) {
+      const index = this.nodes.findIndex((node) => node.id === id)
+      const next = this.graph.predecessors.get(id)?.[0] ?? this.graph.successors.get(id)?.[0] ?? this.nodes[index + 1]?.id ?? this.nodes[index - 1]?.id ?? null
+      this.refocus = { removed: id, next }
+    }
+    this.dispatchEvent(new CustomEvent<FlowNodeDeleteDetail>('node-delete', { detail: { id } }))
+  }
+
+  private deleteEdge(edge: FlowEdge) {
+    this.dispatchEvent(new CustomEvent<FlowEdgeEventDetail>('edge-delete', { detail: { source: edge.source, target: edge.target } }))
+  }
+
+  private commitEdit(refocus: boolean) {
+    const id = this.editingId
+    if (id === null) return
+    const label = this.renderRoot.querySelector<HTMLInputElement>('.label-editor')?.value.trim() ?? ''
+    this.editingId = null
+    const node = this.byId.get(id)
+    if (node && label && label !== node.label) this.dispatchEvent(new CustomEvent<FlowNodeEditDetail>('node-edit', { detail: { id, label } }))
+    if (refocus) void this.focusNode(id)
+  }
+
+  private handleEditorKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.isComposing) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.commitEdit(true)
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      const id = this.editingId
+      this.editingId = null
+      if (id !== null) void this.focusNode(id)
+    }
+  }
+
+  private handleEditorBlur = () => this.commitEdit(false)
+
+  /** The editing shortcuts. Returns whether the key was one of them. */
+  private handleEditKey(event: KeyboardEvent, id: string | null): boolean {
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      const edge = this.edgeByKey(this.selectedEdge)
+      if (edge) this.deleteEdge(edge)
+      else if (id !== null) this.deleteNode(id, true)
+      else return false
+      event.preventDefault()
+      return true
+    }
+    if (plainKey(event, 'n')) {
+      event.preventDefault()
+      this.requestNodeFromKeyboard(id)
+      return true
+    }
+    if (id === null) {
+      // The empty canvas, the only place that takes focus when there is no node.
+      if (event.key !== 'Enter' || this.nodes.length) return false
+      event.preventDefault()
+      this.requestNodeFromKeyboard(null)
+      return true
+    }
+    if (event.key === 'F2' || (event.key === 'Enter' && id === this.selected && !event.shiftKey)) {
+      event.preventDefault()
+      this.select(id)
+      void this.editLabel(id)
+      return true
+    }
+    if (plainKey(event, 'c')) {
+      event.preventDefault()
+      this.startKeyboardConnection(id)
+      return true
+    }
+    if (plainKey(event, 'e')) {
+      event.preventDefault()
+      this.stepEdges(id)
+      return true
+    }
+    return false
+  }
+
+  // ---------------------------------------------------------------------------------------------------------------
   // Keyboard
 
   private handleKeydown = (event: KeyboardEvent) => {
+    // The label editor handles its own keys.
+    if (this.fromPart(event, 'label-editor')) return
+    if (this.connection?.keyboard) return this.handleConnectionKey(event, this.connection)
+    if (this.connection && event.key === 'Escape') {
+      event.stopPropagation()
+      this.cancelConnection()
+      return
+    }
     const id = this.nodeIdFromEvent(event)
     if (event.key === 'Escape') {
       if (this.cardId) {
         this.hideCard(true)
+        event.stopPropagation()
+      } else if (this.selectedEdge) {
+        this.selectedEdge = null
         event.stopPropagation()
       } else if (this.selected) this.select(null)
       return
@@ -653,6 +1083,7 @@ export class Flow extends LitElement {
       this.fitView()
       return
     }
+    if (this.editable && this.handleEditKey(event, id)) return
     if (!id) return
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
@@ -683,7 +1114,10 @@ export class Flow extends LitElement {
       layer.sort((a, b) => this.positions.get(a)![axis] - this.positions.get(b)![axis])
       next = layer[layer.indexOf(id) + across]
     }
-    if (next) this.focusNode(next)
+    if (next) {
+      this.selectedEdge = null
+      void this.focusNode(next)
+    }
   }
 
   /** Of `candidates`, the one closest to `id` on the cross axis: arrowing forward goes straight ahead first. */
@@ -714,6 +1148,8 @@ export class Flow extends LitElement {
 
   private handleFocusOut = (event: FocusEvent) => {
     const next = event.relatedTarget as Node | null
+    // A keyboard connection lasts while focus stays in the flow.
+    if (this.connection?.keyboard && !(next && this.renderRoot.contains(next))) this.cancelConnection()
     if (next && (this.card?.contains(next) || this.contains(next))) return
     this.highlightId = null
     this.scheduleCardClose()
@@ -737,7 +1173,7 @@ export class Flow extends LitElement {
   private scheduleCard(id: string) {
     clearTimeout(this.closeTimer)
     this.closeTimer = undefined
-    if (this.noCard || this.draggingId) return
+    if (this.noCard || this.draggingId || this.editingId !== null || this.connection) return
     if (this.cardId === id) return
     clearTimeout(this.openTimer)
     // Moving from one node's card to the next node's opens it at once, like a menu bar.
@@ -828,17 +1264,36 @@ export class Flow extends LitElement {
   // Context menu
 
   private buildMenu = (context: ContextMenuContext) => {
-    const node = (context.data as { node?: FlowNode } | undefined)?.node ?? null
-    // The view controls belong to the canvas: a node has no built-in rows, so it opens a menu only when
-    // `renderContextMenu` gives it one.
-    const defaultItems = node ? nothing : this.defaultMenuItems()
-    const custom = this.renderContextMenu?.({ node, defaultItems, x: context.x, y: context.y })
-    const rows = custom === undefined ? (node ? null : defaultItems) : custom
+    const data = context.data as { node?: FlowNode; edge?: FlowEdge } | undefined
+    const node = data?.node ?? null
+    const edge = data?.edge ?? null
+    // The view controls belong to the canvas: a node has no built-in rows unless the flow is editable, so it opens a
+    // menu only when `renderContextMenu` gives it one.
+    const defaultItems = node || edge ? (this.editable ? this.editMenuItems(node) : nothing) : this.defaultMenuItems()
+    const custom = this.renderContextMenu?.({ node, edge, defaultItems, x: context.x, y: context.y })
+    const rows = custom === undefined ? (defaultItems === nothing ? null : defaultItems) : custom
     if (rows !== null && rows !== undefined && rows !== nothing && rows !== false) {
       this.menuNode = node
+      this.menuEdge = edge
+      this.menuPoint = this.toCanvas(context.x, context.y)
       this.hideCard(true)
+      this.cancelConnection()
     }
     return rows
+  }
+
+  /** The rows of a node or an edge in an editable flow. */
+  private editMenuItems(node: FlowNode | null) {
+    return html`
+      ${
+        node
+          ? html`<c2-menu-item value="flow:rename" aria-keyshortcuts="F2"
+              >${this.menuIcon(MENU_ICONS.rename)}Rename<c2-kbd slot="shortcut">F2</c2-kbd></c2-menu-item
+            >`
+          : nothing
+      }
+      <c2-menu-item value="flow:delete" aria-keyshortcuts="Delete">${this.menuIcon(MENU_ICONS.remove)}Delete<c2-kbd slot="shortcut">Del</c2-kbd></c2-menu-item>
+    `
   }
 
   private menuIcon(icon: unknown) {
@@ -863,6 +1318,14 @@ export class Flow extends LitElement {
     // Written the way each platform's own menus do: ⌘+ on Apple platforms, Ctrl + + elsewhere.
     const mod = isApplePlatform() ? '⌘' : 'Ctrl '
     return html`
+      ${
+        this.editable
+          ? html`<c2-menu-item value="flow:add-node" aria-keyshortcuts="N"
+                >${this.menuIcon(MENU_ICONS.add)}Add node<c2-kbd slot="shortcut">N</c2-kbd></c2-menu-item
+              >
+              <hr />`
+          : nothing
+      }
       <c2-menu-item value="flow:zoom-in" keep-open aria-keyshortcuts=${ariaKeyShortcuts(ZOOM_IN_KEYS)}
         >${this.menuIcon(MENU_ICONS.zoomIn)}Zoom in<c2-kbd slot="shortcut">${mod}+</c2-kbd></c2-menu-item
       >
@@ -884,7 +1347,20 @@ export class Flow extends LitElement {
   private handleMenuSelect = (event: CustomEvent<ContextMenuSelectEventDetail>) => {
     const { value, checked, data } = event.detail
     const node = this.menuNode
+    const edge = this.menuEdge
     switch (value) {
+      case 'flow:add-node':
+        if (this.editable) this.requestNode(this.centred(this.menuPoint ?? { x: 0, y: 0 }))
+        return
+      case 'flow:rename':
+        // After the menu has closed and handed focus back, or the editor would lose it at once and commit.
+        if (node) setTimeout(() => void this.editLabel(node.id))
+        return
+      case 'flow:delete':
+        if (!this.editable) return
+        if (node) this.deleteNode(node.id)
+        else if (edge) this.deleteEdge(edge)
+        return
       case 'flow:details':
         if (node) this.select(node.id, true)
         return
@@ -905,7 +1381,7 @@ export class Flow extends LitElement {
         this.locked = checked
         return
     }
-    this.dispatchEvent(new CustomEvent<FlowMenuSelectDetail>('flow-menu-select', { detail: { value, checked, data, node } }))
+    this.dispatchEvent(new CustomEvent<FlowMenuSelectDetail>('flow-menu-select', { detail: { value, checked, data, node, edge } }))
   }
 
   /** The rows' own `menu-select` bubbles out of the menu; the flow reports it as `flow-menu-select` instead. */
@@ -914,34 +1390,113 @@ export class Flow extends LitElement {
   // ---------------------------------------------------------------------------------------------------------------
   // Lifecycle
 
+  /**
+   * Pins the `position` a node arrived with, or changed to. A node's first position does not override a saved one,
+   * and a value seen before is not applied again, so it never undoes the user's drag. Returns the ids it pinned.
+   */
+  private applyNodePositions(nodes: FlowNode[]) {
+    const applied = new Set<string>()
+    for (const node of nodes) {
+      const p = node.position
+      if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) continue
+      const signature = `${p.x},${p.y}`
+      const previous = this.appliedPositions.get(node.id)
+      if (previous === signature) continue
+      this.appliedPositions.set(node.id, signature)
+      if (previous === undefined && this.pinned[node.id]) continue
+      this.pinned[node.id] = { x: p.x, y: p.y }
+      this.custom = true
+      applied.add(node.id)
+    }
+    return applied
+  }
+
   override willUpdate(changed: PropertyValues<this>) {
     if (!isServer && (!this.storageLoaded || (changed.has('storageKey') && this.hasUpdated))) this.loadStorage()
+    let applied = new Set<string>()
     if (changed.has('nodes')) {
       const nodes = Array.isArray(this.nodes) ? this.nodes : []
       if (nodes !== this.nodes) this.nodes = nodes
       this.byId = new Map(nodes.map((node) => [node.id, node]))
+      applied = this.applyNodePositions(nodes)
+      if (this.editingId !== null && !this.byId.has(this.editingId)) this.editingId = null
+      const connection = this.connection
+      if (connection && (!this.byId.has(connection.source) || (connection.target !== null && !this.byId.has(connection.target)))) this.cancelConnection()
     }
     if (changed.has('edges') && !Array.isArray(this.edges)) this.edges = []
-    const key = `${this.nodes.map((node) => node.id).join('\u0000')}\u0001${this.edges.map((edge) => `${edge.source}\u0000${edge.target}`).join('\u0001')}`
+    if (this.selectedEdge !== null && !this.edgeByKey(this.selectedEdge)) this.selectedEdge = null
+    const ids = this.nodes.map((node) => node.id).join('\u0000')
+    const key = `${ids}\u0001${this.edges.map((edge) => `${edge.source}\u0000${edge.target}`).join('\u0001')}`
     if (this.layoutDirection !== null && this.direction !== this.layoutDirection && !changed.has('storageKey')) {
       // The direction was set from outside: a custom layout drawn for the other axis no longer applies.
       this.pinned = {}
       this.custom = false
     }
-    if (key !== this.topologyKey || this.direction !== this.layoutDirection || changed.has('storageKey')) {
+    const topologyChanged = key !== this.topologyKey
+    if (topologyChanged || this.direction !== this.layoutDirection || changed.has('storageKey')) {
+      // In an editable flow the user is drawing: a node or edge added or removed must not move the others.
+      const edit = this.editable && this.hasUpdated && this.positions.size > 0 && this.direction === this.layoutDirection && !changed.has('storageKey')
+      const idsChanged = ids !== this.topologyKey.slice(0, this.topologyKey.indexOf('\u0001'))
+      const wasCustom = this.custom
+      if (edit) this.pinCurrentLayout(applied)
       this.topologyKey = key
       this.relayout()
-      this.fitted = false
+      if (edit) {
+        for (const [id, p] of this.positions) this.pinned[id] ??= { x: Math.round(p.x), y: Math.round(p.y) }
+        this.editedLayout ||= idsChanged || !wasCustom
+        // Keep the user's pan and zoom: refitting would move the canvas under the pointer.
+        this.viewTouched = true
+      } else this.fitted = false
+    } else if (applied.size) this.relayout()
+  }
+
+  /** Pins every node at the position it is drawn at, except those whose `position` was just applied. */
+  private pinCurrentLayout(applied: Set<string>) {
+    const pinned: FlowLayout = {}
+    for (const node of this.nodes) {
+      const p = applied.has(node.id) ? this.pinned[node.id] : (this.positions.get(node.id) ?? this.pinned[node.id])
+      if (p) pinned[node.id] = { x: Math.round(p.x), y: Math.round(p.y) }
     }
+    this.pinned = pinned
+    this.custom = true
   }
 
   override firstUpdated() {
     this.observe()
   }
 
+  /** After the application answered an edit: focus the node the keyboard added, or a neighbour of the one it deleted. */
+  private followNodeChanges(previous: FlowNode[] | undefined) {
+    const added = this.focusAdded
+    const refocus = this.refocus
+    this.focusAdded = null
+    this.refocus = null
+    if (added) {
+      const fresh = this.nodes.filter((node) => !added.has(node.id))
+      if (fresh.length === 1) {
+        this.select(fresh[0].id)
+        void this.focusNode(fresh[0].id)
+      }
+    }
+    if (refocus && !this.byId.has(refocus.removed)) {
+      const next = refocus.next !== null && this.byId.has(refocus.next) ? refocus.next : (this.nodes[0]?.id ?? null)
+      if (next !== null) void this.focusNode(next)
+      else void this.updateComplete.then(() => this.stage?.focus())
+    }
+    if (this.selected !== null && !this.byId.has(this.selected) && previous?.some((node) => node.id === this.selected)) this.select(null)
+  }
+
   override updated(changed: PropertyValues<this>) {
     if (isServer) return
-    if (changed.has('nodes')) this.observe()
+    if (changed.has('nodes')) {
+      this.observe()
+      this.followNodeChanges(changed.get('nodes') as FlowNode[] | undefined)
+    }
+    if (this.editedLayout) {
+      this.editedLayout = false
+      this.save()
+      this.emitLayout('edit')
+    }
     this.measure()
     if (!this.fitted && !this.viewTouched) this.fitView()
     if ((changed as Map<PropertyKey, unknown>).has('cardId') || changed.has('nodes') || changed.has('direction')) this.syncCard()
@@ -958,12 +1513,24 @@ export class Flow extends LitElement {
     return html`<span class="status status--${status}" aria-hidden="true"><svg viewBox="0 0 16 16">${STATUS_ICONS[status]}</svg></span>`
   }
 
+  private labelEditor(node: FlowNode, overlay: boolean) {
+    return html`<input
+      class=${overlay ? 'label-editor label-editor--overlay' : 'label-editor'}
+      .value=${node.label}
+      aria-label=${`Rename ${node.label}`}
+      autocomplete="off"
+      enterkeyhint="done"
+      @keydown=${this.handleEditorKeydown}
+      @blur=${this.handleEditorBlur}
+    />`
+  }
+
   private defaultNode(node: FlowNode) {
     const status = statusOf(node)
     return html`<div class="body">
       ${this.icon(status)}
       <span class="text">
-        <span class="label">${node.label}</span>
+        ${node.id === this.editingId ? this.labelEditor(node, false) : html`<span class="label">${node.label}</span>`}
         ${node.description ? html`<span class="description">${node.description}</span>` : nothing}
       </span>
       ${node.meta ? html`<span class="meta">${node.meta}</span>` : nothing}
@@ -1008,10 +1575,33 @@ export class Flow extends LitElement {
       const d = edgePath({ ...a, ...sa }, { ...b, ...sb }, this.direction, this.edgeType, back)
       const edgeClass = edgeState(statusOf(this.byId.get(edge.source)!), statusOf(this.byId.get(edge.target)!))
       const on = highlight !== null && (edge.source === highlight || edge.target === highlight)
-      return svg`<path class="edge edge--${edgeClass}${back ? ' edge--back' : ''}${on ? ' is-highlighted' : ''}" d=${d}></path>`
+      const key = edgeKey(edge.source, edge.target)
+      const selected = key === this.selectedEdge
+      const path = svg`<path class="edge edge--${edgeClass}${back ? ' edge--back' : ''}${on ? ' is-highlighted' : ''}${selected ? ' is-selected' : ''}" d=${d}></path>`
+      if (!this.editable) return path
+      // A wide transparent stroke over the edge, so a click or a right-click does not need to hit a 1.5px line.
+      return svg`${path}<path
+        class="edge-hit"
+        data-edge-key=${key}
+        d=${d}
+        @c2-context-menu-request=${(event: Event) => provideContextMenuData(event, this, { edge })}
+      ></path>`
     })
     const dim = highlight !== null && this.byId.has(highlight)
-    return html`<svg class="edges${dim ? ' has-highlight' : ''}" aria-hidden="true">${paths}</svg>`
+    return html`<svg class="edges${dim ? ' has-highlight' : ''}" aria-hidden="true">${paths}${this.renderDraftEdge()}</svg>`
+  }
+
+  /** The edge following the pointer, or pointing at the keyboard's candidate, while a connection is made. */
+  private renderDraftEdge() {
+    const connection = this.connection
+    const a = connection && this.positions.get(connection.source)
+    if (!connection || !a) return nothing
+    const target = this.canConnect(connection.source, connection.target) ? connection.target : null
+    const b = target === null ? null : this.positions.get(target)
+    const end = b ? { ...b, ...this.sizeOf(target!) } : connection.point ? { ...connection.point, width: 0, height: 0 } : null
+    if (!end) return nothing
+    const d = edgePath({ ...a, ...this.sizeOf(connection.source) }, end, this.direction, this.edgeType, false)
+    return svg`<path class="edge edge--draft" d=${d}></path>`
   }
 
   private renderNodeElement(node: FlowNode, index: number) {
@@ -1025,13 +1615,24 @@ export class Flow extends LitElement {
       .join(' ')
     const context = this.context(node)
     const body = this.renderNode ? this.renderNode(context) : this.defaultNode(node)
-    const classes = ['node', `status--${status}`, node.id === this.selected ? 'is-selected' : '', node.id === this.draggingId ? 'is-dragging' : '']
+    const connection = this.connection
+    const editing = node.id === this.editingId
+    const classes = [
+      'node',
+      `status--${status}`,
+      node.id === this.selected ? 'is-selected' : '',
+      node.id === this.draggingId ? 'is-dragging' : '',
+      connection?.source === node.id ? 'is-connect-source' : '',
+      connection && connection.target === node.id && this.canConnect(connection.source, node.id) ? 'is-connect-target' : '',
+    ]
     const hasIn = this.edges.some((edge) => edge.target === node.id)
     const hasOut = this.edges.some((edge) => edge.source === node.id)
+    // A node drawn by the application has no label of ours to swap: the editor covers its whole body instead.
+    const custom = !!this.renderNode || !!this.querySelector(`:scope > [slot="node:${CSS.escape(node.id)}"]`)
     return html`<div
       class=${classes.filter(Boolean).join(' ')}
       data-node-id=${node.id}
-      role="button"
+      role=${editing ? 'group' : 'button'}
       tabindex=${node.id === this.focusId ? 0 : -1}
       aria-label=${`${node.label}, ${STATUS_LABELS[status].toLowerCase()}${node.meta ? `, ${node.meta}` : ''}`}
       aria-describedby=${relations ? `relations-${index}` : nothing}
@@ -1041,7 +1642,8 @@ export class Flow extends LitElement {
       @c2-context-menu-request=${(event: Event) => provideContextMenuData(event, this, { node })}
     >
       <slot name=${`node:${node.id}`}>${body}</slot>
-      ${hasIn ? html`<span class="handle handle--in"></span>` : nothing} ${hasOut ? html`<span class="handle handle--out"></span>` : nothing}
+      ${editing && custom ? this.labelEditor(node, true) : nothing} ${hasIn ? html`<span class="handle handle--in"></span>` : nothing}
+      ${this.editable ? html`<span class="connector" title="Drag to connect"></span>` : hasOut ? html`<span class="handle handle--out"></span>` : nothing}
       ${relations ? html`<span id=${`relations-${index}`} class="visually-hidden">${relations}</span>` : nothing}
     </div>`
   }
@@ -1055,7 +1657,16 @@ export class Flow extends LitElement {
 
   override render() {
     const direction = this.direction === 'TB' ? 'tb' : 'lr'
-    const stageClasses = ['stage', `direction--${direction}`, this.panning ? 'is-panning' : '', this.locked ? 'is-locked' : '']
+    const stageClasses = [
+      'stage',
+      `direction--${direction}`,
+      this.panning ? 'is-panning' : '',
+      this.locked ? 'is-locked' : '',
+      this.editable ? 'is-editable' : '',
+      this.connection && !this.connection.keyboard ? 'is-connecting' : '',
+    ]
+    // With no node to focus, the empty canvas of an editable flow takes focus, so `N` and Enter can add the first one.
+    const emptyCanvas = this.editable && !this.nodes.length
     return html`
       <c2-context-menu
         menu-label="Flow"
@@ -1067,6 +1678,10 @@ export class Flow extends LitElement {
         <div
           class=${stageClasses.filter(Boolean).join(' ')}
           style=${`--_zoom: ${this.zoom}; background-position: ${this.tx}px ${this.ty}px`}
+          tabindex=${emptyCanvas ? 0 : nothing}
+          role=${emptyCanvas ? 'group' : nothing}
+          aria-label=${emptyCanvas ? 'Empty flow' : nothing}
+          aria-describedby=${emptyCanvas ? 'empty-hint' : nothing}
           @pointerdown=${this.handlePointerDown}
           @pointermove=${this.handlePointerMove}
           @pointerup=${this.handlePointerUp}
@@ -1084,8 +1699,10 @@ export class Flow extends LitElement {
               (node, index) => this.renderNodeElement(node, index),
             )}
           </div>
+          ${emptyCanvas ? html`<span id="empty-hint" class="visually-hidden">Press N or Enter to add a node.</span>` : nothing}
         </div>
       </c2-context-menu>
+      ${this.editable ? html`<div class="visually-hidden" role="status">${this.announcement}</div>` : nothing}
       <div class="card" popover="manual" @pointerenter=${this.handleCardEnter} @pointerleave=${this.handleCardLeave} @keydown=${this.handleCardKeydown}>
         ${this.renderCardContent()}
       </div>
