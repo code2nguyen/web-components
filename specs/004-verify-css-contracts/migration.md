@@ -23,3 +23,14 @@ No chart variable was renamed or removed. Six mark variables are no longer docum
 | `--c2-chart__series__dimmed--opacity` | every chart except the two below                                                                                                                                        | `c2-candlestick-chart`, `c2-overlap-chart` (which has `--c2-chart__set__dimmed--opacity`) |
 
 Previously documented but inert, now applied: `--c2-chart__grid--width` (it was hard-coded to 1px in both engines), `--c2-chart__axis-line--color` (the uPlot charts' axis ticks, which used `--c2-chart__grid--color`; both default to `#e4e4e7`), `--c2-chart__tone-positive--color` / `--c2-chart__tone-negative--color` (the sparkline used `--c2-chart__positive--color` / `--c2-chart__negative--color`, which remain the fallback) and `--c2-chart__area--opacity` on an area sparkline (its fill was a fixed `0.18`, now the variable's default).
+
+## `c2-text-field` host state classes
+
+No variable changed. The host no longer carries the `.focus-within`, `.error`, `.read-only` and `.disabled` classes the component used to toggle on it (writing `class` on the host made server-rendered markup differ from the hydrated element). They are custom states now:
+
+| Old selector                 | Replacement                                                           |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `c2-text-field.focus-within` | `c2-text-field:state(focus-within)` (or `c2-text-field:focus-within`) |
+| `c2-text-field.error`        | `c2-text-field:state(error)`                                          |
+| `c2-text-field.read-only`    | `c2-text-field:state(read-only)`                                      |
+| `c2-text-field.disabled`     | `c2-text-field:state(disabled)`                                       |

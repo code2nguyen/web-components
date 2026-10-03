@@ -190,3 +190,11 @@ c2-text-field.soft {
   --c2-text-field__focus--outline: 3px solid rgba(24, 24, 27, 0.1);
 }
 ```
+
+To style the surroundings by the field's state, select the host's custom states: `c2-text-field:state(focus-within)`, `:state(error)`, `:state(read-only)` and `:state(disabled)`. The host never carries state classes, so server-rendered markup matches the hydrated element. Earlier releases toggled `.focus-within`, `.error`, `.read-only` and `.disabled` classes on the host; replace `c2-text-field.focus-within` with `c2-text-field:state(focus-within)` (or plain `:focus-within`), and likewise for the others.
+
+```css tag=CodeBlock
+c2-text-field:state(focus-within) + .hint {
+  color: #476ef9;
+}
+```
