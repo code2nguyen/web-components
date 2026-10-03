@@ -33,6 +33,12 @@ function renderTrainingNode({ node, status }: { node: FlowNode; status: string }
 /** What an application does with an editable flow: apply each edit, then let the user name a new node. */
 function wireEditable(flow: Flow, say: (text: string) => void) {
   let next = 1
+  // The toolbar slotted into `actions`: each button names the flow method it runs.
+  const actions: Record<string, () => void> = { add: () => flow.addNode(), layout: () => flow.resetLayout(), fit: () => flow.fitView() }
+  flow.addEventListener('click', (event) => {
+    const action = (event.target as Element).closest<HTMLElement>('[data-flow-action]')?.dataset.flowAction
+    if (action) actions[action]?.()
+  })
   flow.addEventListener('node-add', async ({ detail }) => {
     const id = `note-${next++}`
     flow.nodes = [...flow.nodes, { id, label: 'New note', position: detail.position }]

@@ -18,6 +18,9 @@ export type FlowStatus =
 /** Main axis of the layout: columns from left to right, or rows from top to bottom. */
 export type FlowDirection = 'LR' | 'TB'
 
+/** Edge of the canvas the `actions` toolbar sits on. */
+export type FlowActionsPlacement = 'top' | 'right' | 'bottom' | 'left'
+
 /** How an edge is drawn: a smooth curve, or orthogonal segments with rounded corners. */
 export type FlowEdgeType = 'bezier' | 'step'
 
