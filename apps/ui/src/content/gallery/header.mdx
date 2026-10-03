@@ -75,13 +75,13 @@ Each example gets a full gallery row so the complete brand, navigation and actio
 <style>
   .trading-header {
     width: 100%;
-    --c2-header--background: #18181b;
-    --c2-header--color: #fafafa;
+    --c2-header--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-header--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-header--border-bottom: 1px solid rgba(34, 211, 238, 0.22);
     --c2-header--box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
   }
   .trading-brand {
-    --c2-link-button__container--color: #fafafa;
+    --c2-link-button__container--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-link-button__container--font-weight: 750;
     --c2-link-button__container__hover--color: #67e8f9;
     --c2-link-button__container__hover--text-decoration: none;
@@ -96,7 +96,7 @@ Each example gets a full gallery row so the complete brand, navigation and actio
   }
   .desk-link {
     --c2-link-button__container--color: #94a3b8;
-    --c2-link-button__container__hover--color: #fafafa;
+    --c2-link-button__container__hover--color: var(--c2-theme--color-on-dark-surface, #fafafa);
   }
   .desk-search {
     --c2-icon-button--background-color: #111827;

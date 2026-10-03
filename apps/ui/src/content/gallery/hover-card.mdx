@@ -86,9 +86,9 @@ Curated looks for `c2-hover-card`. Hover the trigger in a card to see it. The ca
 ```html tag=MdxCodeBlock,label=Dark
 <style>
   .dark-card {
-    --c2-hover-card--background-color: #18181b;
-    --c2-hover-card--color: #fafafa;
-    --c2-hover-card--border: 1px solid #3f3f46;
+    --c2-hover-card--background-color: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-hover-card--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-hover-card--border: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
     --c2-hover-card--box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     --c2-hover-card--width: 240px;
   }

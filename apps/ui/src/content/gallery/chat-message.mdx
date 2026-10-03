@@ -70,7 +70,7 @@ Each card treats the message as part of a believable conversation. The examples 
   }
   .answer-avatar {
     --c2-avatar--size: 36px;
-    --c2-avatar--background: #18181b;
+    --c2-avatar--background: var(--c2-theme--color-dark-surface, #18181b);
   }
   .answer-copy {
     display: grid;
@@ -143,10 +143,10 @@ Each card treats the message as part of a believable conversation. The examples 
     --c2-chat-message__message--border-top-right-radius: 5px;
     --c2-chat-message__message--border-bottom-left-radius: 18px;
     --c2-chat-message__message--border-bottom-right-radius: 18px;
-    --c2-chat-message__message--background: #18181b;
-    --c2-chat-message__message--color: #fafafa;
-    --c2-chat-message__header__title--color: #d4d4d8;
-    --c2-chat-message__time--color: #a1a1aa;
+    --c2-chat-message__message--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-chat-message__message--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-chat-message__header__title--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 83%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-chat-message__time--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
   }
   .outgoing-message p {
     margin: 0;
@@ -235,10 +235,10 @@ Each card treats the message as part of a believable conversation. The examples 
     box-sizing: border-box;
     width: min(100%, 720px);
     padding: 28px;
-    border: 1px solid #27272a;
+    border: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
     border-radius: 20px;
-    background: #18181b;
-    color: #e4e4e7;
+    background: var(--c2-theme--color-dark-surface, #18181b);
+    color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   .agent-message {
@@ -255,14 +255,14 @@ Each card treats the message as part of a believable conversation. The examples 
     --c2-chat-message__message--border-top-right-radius: 10px;
     --c2-chat-message__message--border-bottom-left-radius: 10px;
     --c2-chat-message__message--border-bottom-right-radius: 10px;
-    --c2-chat-message__message--border-top: 1px solid #3f3f46;
-    --c2-chat-message__message--border-right: 1px solid #3f3f46;
-    --c2-chat-message__message--border-bottom: 1px solid #3f3f46;
-    --c2-chat-message__message--border-left: 1px solid #3f3f46;
-    --c2-chat-message__message--background: #18181b;
-    --c2-chat-message__message--color: #e4e4e7;
-    --c2-chat-message__header__title--color: #f4f4f5;
-    --c2-chat-message__time--color: #a1a1aa;
+    --c2-chat-message__message--border-top: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-chat-message__message--border-right: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-chat-message__message--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-chat-message__message--border-left: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-chat-message__message--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-chat-message__message--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-chat-message__header__title--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 97%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-chat-message__time--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
   }
   .agent-status {
     box-sizing: border-box;

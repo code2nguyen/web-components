@@ -186,8 +186,8 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 ```html tag=MdxCodeBlock,label=Terminal
 <style>
   .terminal {
-    --c2-tabs--background-color: #18181b;
-    --c2-tabs--box-shadow: inset 0px -1px 0px 0px #27272a;
+    --c2-tabs--background-color: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px var(--c2-theme--color-dark-surface-container, #27272a);
     --c2-tabs--border-radius: 8px 8px 0 0;
     --c2-tabs--padding-left: 6px;
     --c2-tabs--padding-right: 6px;
@@ -199,10 +199,10 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--padding-bottom: 10px;
     --c2-tabs__tab--padding-left: 8px;
     --c2-tabs__tab--padding-right: 8px;
-    --c2-tabs__tab--color: #a1a1aa;
-    --c2-tabs__tab__hover--color: #e4e4e7;
-    --c2-tabs__tab__hover--background-color: #27272a;
-    --c2-tabs__tab__selected--color: #fafafa;
+    --c2-tabs__tab--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-tabs__tab__hover--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-tabs__tab__hover--background-color: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-tabs__tab__selected--background-color: transparent;
     --c2-tabs__tab__focus--outline: 2px solid rgba(34, 197, 94, 0.5);
   }

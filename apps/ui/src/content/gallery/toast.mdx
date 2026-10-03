@@ -176,9 +176,9 @@ Set `no-icon` to remove the leading icon and its spacing. Managed notifications 
 <style>
   .snackbar {
     width: 320px;
-    --c2-toast__container--background: #18181b;
-    --c2-toast__container--color: #fafafa;
-    --c2-toast__container--border: 1px solid #27272a;
+    --c2-toast__container--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-toast__container--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-toast__container--border: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
     --c2-toast__container--border-radius: 6px;
     --c2-toast__action--color: #93c5fd;
   }
