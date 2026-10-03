@@ -19,9 +19,9 @@ two value colours do most of the work; height and radius set the shape, and a tr
   .order-book {
     width: 280px;
     --c2-comparison-bar__start-segment--background-color: #2ebd85;
-    --c2-comparison-bar__start-value--color: #2ebd85;
+    --c2-comparison-bar__start-value--color: color-mix(in srgb, #2ebd85 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-comparison-bar__end-segment--background-color: #f6465d;
-    --c2-comparison-bar__end-value--color: #f6465d;
+    --c2-comparison-bar__end-value--color: color-mix(in srgb, #f6465d 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-comparison-bar__value--font-size: 13px;
   }
 </style>
@@ -35,9 +35,9 @@ two value colours do most of the work; height and radius set the shape, and a tr
     --c2-comparison-bar--height: 14px;
     --c2-comparison-bar--border-radius: 0;
     --c2-comparison-bar__start-segment--background-color: #7c3aed;
-    --c2-comparison-bar__start-value--color: #7c3aed;
+    --c2-comparison-bar__start-value--color: color-mix(in srgb, #7c3aed 75%, var(--c2-theme--color-on-surface, #18181b));
     --c2-comparison-bar__end-segment--background-color: #f59e0b;
-    --c2-comparison-bar__end-value--color: #b45309;
+    --c2-comparison-bar__end-value--color: color-mix(in srgb, #b45309 75%, var(--c2-theme--color-on-surface, #18181b));
     --c2-comparison-bar__value--font-weight: 600;
   }
 </style>
@@ -52,9 +52,9 @@ two value colours do most of the work; height and radius set the shape, and a tr
     --c2-comparison-bar__track--gap: 3px;
     --c2-comparison-bar__segment--border-radius: 999px;
     --c2-comparison-bar__start-segment--background-color: #16a34a;
-    --c2-comparison-bar__start-value--color: #15803d;
+    --c2-comparison-bar__start-value--color: color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b));
     --c2-comparison-bar__end-segment--background-color: #dc2626;
-    --c2-comparison-bar__end-value--color: #b91c1c;
+    --c2-comparison-bar__end-value--color: color-mix(in srgb, #b91c1c 75%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-comparison-bar

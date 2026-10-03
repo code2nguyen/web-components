@@ -26,11 +26,12 @@ The hour height sets how dense the week reads; the event and today-column variab
   .compact-violet {
     --c2-week-planner__hour--height: 32px;
     --c2-week-planner__event--background: #7c3aed;
+    --c2-week-planner__event--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-week-planner__event--border-radius: 6px;
     --c2-week-planner__day__today--background: rgba(124, 58, 237, 0.06);
-    --c2-week-planner__day-header__today--color: #6d28d9;
+    --c2-week-planner__day-header__today--color: color-mix(in srgb, #6d28d9 65%, var(--c2-theme--color-on-surface, #18181b));
     --c2-button-group__indicator--background-color: #7c3aed;
-    --c2-button-group__segmented-item__selected--color: #ffffff;
+    --c2-button-group__segmented-item__selected--color: var(--c2-theme--color-on-fill, #ffffff);
   }
 </style>
 <c2-week-planner
@@ -47,6 +48,7 @@ The hour height sets how dense the week reads; the event and today-column variab
 <style>
   .dated-teal {
     --c2-week-planner__event--background: #0f766e;
+    --c2-week-planner__event--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-week-planner__day-header__today--color: #0f766e;
     --c2-week-planner__day__today--background: rgba(15, 118, 110, 0.06);
   }
@@ -67,7 +69,8 @@ The hour height sets how dense the week reads; the event and today-column variab
 <style>
   .editable-violet {
     --c2-week-planner__event--background: #6d28d9;
-    --c2-week-planner__day-header__today--color: #6d28d9;
+    --c2-week-planner__event--color: var(--c2-theme--color-on-fill, #ffffff);
+    --c2-week-planner__day-header__today--color: color-mix(in srgb, #6d28d9 65%, var(--c2-theme--color-on-surface, #18181b));
     --c2-week-planner__slot__hover--background: rgba(109, 40, 217, 0.08);
     --c2-week-planner__preview--border: 2px dashed #6d28d9;
     --c2-week-planner__preview--background: rgba(109, 40, 217, 0.1);

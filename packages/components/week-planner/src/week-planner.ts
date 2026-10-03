@@ -486,8 +486,13 @@ export class WeekPlanner extends LitElement {
   @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
 
   override connectedCallback() {
+    // A server-rendered planner drew today's column, the current week and the time line from the server's clock.
+    // Hydrate with that same instant, read back from the markup, so the first client render matches it (a build
+    // before the hour and a visit after it otherwise disagree on the time line), then move to the real clock.
+    const renderedAt = this.hasUpdated ? NaN : Number(this.shadowRoot?.querySelector<HTMLElement>('[data-rendered-at]')?.dataset.renderedAt)
     super.connectedCallback()
-    this.now = new Date()
+    this.now = Number.isFinite(renderedAt) ? new Date(renderedAt) : new Date()
+    if (Number.isFinite(renderedAt)) void this.updateComplete.then(() => (this.now = new Date()))
     this.clock = setInterval(() => (this.now = new Date()), 60_000)
   }
 
@@ -1015,6 +1020,7 @@ export class WeekPlanner extends LitElement {
 
     return html`<section
       class="c2-week-planner"
+      data-rendered-at=${this.now.getTime()}
       aria-label=${labelledByHeading ? nothing : this.ariaLabel || this.heading || this.labels.plan}
       aria-labelledby=${labelledByHeading ? 'heading' : nothing}
     >

@@ -11,7 +11,7 @@ export const componentPreviews: Record<string, string> = {
   flow: `<c2-flow aria-label="Pipeline" style="width:320px;--c2-flow--height:150px;--c2-flow__node--width:96px;--c2-flow__rank--gap:28px" nodes='[{"id":"build","label":"Build","status":"success","meta":"2m"},{"id":"test","label":"Test","status":"running"},{"id":"deploy","label":"Deploy","status":"pending"}]' edges='[{"source":"build","target":"test"},{"source":"test","target":"deploy"}]'></c2-flow>`,
   'week-planner': `<c2-week-planner locale="en-US" start-hour="8" end-hour="14" style="width:720px;max-width:none;zoom:0.34;--c2-week-planner--padding:16px;--c2-week-planner__hour--height:36px;--c2-week-planner__hour-label--font-size:16px;--c2-week-planner__day-header--font-size:18px;--c2-week-planner__event--font-size:16px" events='[{"title":"Stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Workshop","day":"tue","start":"10:00","end":"12:00","color":"#b45309"},{"title":"Kids","day":"wed","start":"11:00","end":"14:00","color":"#0f766e"},{"title":"Stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Football","day":"sat","start":"09:00","end":"12:00","color":"#0f766e"}]'></c2-week-planner>`,
   'month-planner': `<c2-month-planner month="2026-09" locale="en-US" style="width:540px;max-width:none;zoom:0.44;--c2-month-planner--padding:13px;--c2-month-planner--font-size:20px;--c2-month-planner__day--min-height:60px;--c2-month-planner__day--font-size:16px;--c2-month-planner__event--height:23px;--c2-month-planner__event--font-size:16px;--c2-month-planner__navigation--size:40px" events='[{"title":"Vacation","start":"2026-09-10","end":"2026-09-18","color":"#0f766e"},{"title":"Review","start":"2026-09-24"}]'></c2-month-planner>`,
-  'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:#71717a">Wrote the first published algorithm.</div></c2-hover-card>`,
+  'hover-card': `<c2-hover-card open-delay="200"><a slot="trigger" href="#" onclick="return false">@ada</a><strong>Ada Lovelace</strong><div style="color:var(--c2-theme--color-on-surface-variant, #71717a)">Wrote the first published algorithm.</div></c2-hover-card>`,
   command: `<c2-command style="width:260px;--c2-command__field--min-height:40px;--c2-command__list--max-height:150px">
   <c2-command-group heading="Suggestions">
     <c2-command-item value="calendar">Calendar</c2-command-item>
@@ -23,7 +23,7 @@ export const componentPreviews: Record<string, string> = {
 </c2-command>`,
   marker: `<p style="max-width:240px;margin:0;font-size:15px;line-height:1.8;text-align:center">Deploys are <c2-marker>fully automated</c2-marker>, <c2-marker variant="underline">reviewed</c2-marker> and <c2-marker variant="circle">reversible</c2-marker>.</p>`,
   'context-menu': `<c2-context-menu>
-  <div style="display:grid;place-items:center;width:200px;height:96px;border:1px dashed #a1a1aa;border-radius:8px;color:#71717a;font-size:13px">Right-click me</div>
+  <div style="display:grid;place-items:center;width:200px;height:96px;border:1px dashed var(--c2-theme--color-outline, #a1a1aa);border-radius:8px;color:var(--c2-theme--color-on-surface-variant, #71717a);font-size:13px">Right-click me</div>
   <c2-menu slot="menu" aria-label="Canvas">
     <c2-menu-item value="zoom-in">Zoom in</c2-menu-item>
     <c2-menu-item value="zoom-out">Zoom out</c2-menu-item>
@@ -48,14 +48,14 @@ export const componentPreviews: Record<string, string> = {
 </c2-carousel>`,
   'tag-input': `<c2-tag-input aria-label="Recipients" placeholder="Add recipients" value="ann@example.com;bob@example.com" style="width:260px"></c2-tag-input>`,
   timeline: `<c2-timeline aria-label="Order history" style="width:240px"><c2-timeline-item label="Order placed" timestamp="Sep 12, 09:14" tone="success"></c2-timeline-item><c2-timeline-item label="Shipped" timestamp="Sep 13, 16:02" tone="primary"></c2-timeline-item><c2-timeline-item label="Out for delivery" timestamp="Expected Sep 15"></c2-timeline-item></c2-timeline>`,
-  'split-panel': `<c2-split-panel position="35" style="width:260px;height:130px;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;font-size:12px">
+  'split-panel': `<c2-split-panel position="35" style="width:260px;--c2-split-panel__divider--opacity:1;height:130px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:8px;overflow:hidden;font-size:12px">
   <div slot="start" style="padding:8px">Inbox</div>
-  <div slot="end" style="padding:8px;color:#71717a">Message</div>
+  <div slot="end" style="padding:8px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Message</div>
 </c2-split-panel>`,
   banner: `<c2-banner variant="info" heading="New" message="Dashboards can be shared." dismissible style="width:300px"></c2-banner>`,
   'time-input': `<c2-time-input value="09:30" aria-label="Meeting time" style="width:160px"></c2-time-input>`,
   'log-viewer': `<c2-log-viewer data-log-viewer-demo="preview" wrap aria-label="Store server log" style="height:180px;width:300px"></c2-log-viewer>`,
-  masonry: `<c2-masonry style="width:260px;--c2-masonry--gap:6px;--c2-masonry--row-height:9px;--c2-masonry--padding:6px;--c2-masonry--background:#f4f4f5;--c2-masonry--border-radius:8px;--c2-masonry-item--background:#fff;--c2-masonry-item--border:1px solid #e4e4e7;--c2-masonry-item--border-radius:6px;--c2-masonry-item__content--padding:8px">
+  masonry: `<c2-masonry style="width:260px;color:var(--c2-theme--color-on-surface, #18181b);font-size:12px;--c2-masonry--gap:6px;--c2-masonry--row-height:9px;--c2-masonry--padding:6px;--c2-masonry--background:var(--c2-theme--color-surface-container, #f4f4f5);--c2-masonry--border-radius:8px;--c2-masonry-item--background:var(--c2-theme--color-surface, #ffffff);--c2-masonry-item--border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);--c2-masonry-item--border-radius:6px;--c2-masonry-item__content--padding:8px">
   <c2-masonry-item item-id="traffic" label="Traffic" rows="5" cols="3">Traffic · 18.4k</c2-masonry-item>
   <c2-masonry-item item-id="orders" label="Orders" rows="5" cols="2">Orders · 142</c2-masonry-item>
 </c2-masonry>`,
@@ -77,7 +77,7 @@ export const componentPreviews: Record<string, string> = {
 
 // editable, highlighted
 greet('world')"></c2-code-editor>`,
-  'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid #bcbcc6;--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:#f4f4f5"></c2-theme-select></div>`,
+  'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid var(--c2-theme--color-outline, #bcbcc6);--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:var(--c2-theme--color-surface-container, #f4f4f5)"></c2-theme-select></div>`,
   tree: `<c2-tree style="width:200px" aria-label="Files" expanded-items="src" value="app">
   <c2-tree-item value="src" label="src">
     <c2-tree-item value="app" label="app.ts"></c2-tree-item>
@@ -85,7 +85,7 @@ greet('world')"></c2-code-editor>`,
   </c2-tree-item>
   <c2-tree-item value="readme" label="README.md"></c2-tree-item>
 </c2-tree>`,
-  'border-beam': `<div style="position:relative;box-sizing:border-box;width:270px;overflow:hidden;padding:20px;border:1px solid #e4e4e7;border-radius:12px;background:#fff"><strong style="display:block;margin-bottom:7px;font-size:14px">Workspace overview</strong><span style="color:#71717a;font-size:12px;line-height:1.45">Review task status and deployment health.</span><c2-border-beam></c2-border-beam></div>`,
+  'border-beam': `<div style="position:relative;box-sizing:border-box;width:270px;overflow:hidden;padding:20px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:12px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b)"><strong style="display:block;margin-bottom:7px;font-size:14px">Workspace overview</strong><span style="color:var(--c2-theme--color-on-surface-variant, #71717a);font-size:12px;line-height:1.45">Review task status and deployment health.</span><c2-border-beam style="--c2-border-beam__beam--width:2px;--c2-border-beam__beam--size:140px;--c2-border-beam__beam--color-from:#3b82f6;--c2-border-beam__beam--color-to:#a5b4fc;--c2-border-beam__beam--opacity:1;--c2-border-beam__beam--filter:drop-shadow(0 0 6px rgba(59, 130, 246, 0.75));--c2-border-beam__beam--duration:4s"></c2-border-beam></div>`,
   'status-panel': `<c2-status-panel status="success" heading="Workspace ready" description="Everything is set up and ready to use." style="--c2-status-panel__container--min-height:170px;--c2-status-panel__container--padding:20px;--c2-status-panel__container--gap:14px;--c2-status-panel__media--size:48px;--c2-status-panel__media-icon--size:24px;--c2-status-panel__title--font-size:16px;--c2-status-panel__title--line-height:22px"></c2-status-panel>`,
   'reorder-list': `<c2-reorder-list editable aria-label="Release queue" style="width:240px;--c2-reorder-list--container-gap:6px">
   <div data-reorder-key="scope" style="padding:8px 12px;border:1px solid var(--c2-theme--color-outline-variant, #e4e4e7);border-radius:6px;background:var(--c2-theme--color-surface, #ffffff);color:var(--c2-theme--color-on-surface, #18181b);font-size:13px">Confirm scope</div>
@@ -97,7 +97,7 @@ greet('world')"></c2-code-editor>`,
   upload: `<c2-upload style="--c2-upload--width:270px;--c2-upload__dropzone--padding:18px 14px" multiple max-files="5" aria-label="Upload files"><span slot="prompt">Drop files or <strong>browse</strong></span><span slot="hint">Up to 5 files</span></c2-upload>`,
   rate: `<div class="preview-row"><c2-rate aria-label="Rating" value="3"></c2-rate><c2-rate aria-label="Precise rating" value="4.5" allow-half></c2-rate></div>`,
   cascader: `<c2-cascader aria-label="Choose a location" placeholder="Choose a district" options='[{"value":"zhejiang","label":"Zhejiang","children":[{"value":"hangzhou","label":"Hangzhou","children":[{"value":"west-lake","label":"West Lake"},{"value":"xiaoshan","label":"Xiaoshan"}]}]},{"value":"jiangsu","label":"Jiangsu","children":[{"value":"nanjing","label":"Nanjing"}]}]'></c2-cascader>`,
-  questionnaire: `<c2-questionnaire questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","options":[{"value":"timeline","label":"Tool call timeline"},{"value":"approvals","label":"Approval checkpoints"},{"value":"handoffs","label":"Sub-agent handoffs"}]},{"id":"updates","title":"What should every progress update include?","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"}]},{"id":"timing","title":"When should work begin?","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"}]}]'></c2-questionnaire>`,
+  questionnaire: `<c2-questionnaire style="zoom:0.5;width:448px" questions='[{"id":"direction","title":"What should the agent build next?","description":"Choose a direction or describe another task.","options":[{"value":"timeline","label":"Tool call timeline"},{"value":"approvals","label":"Approval checkpoints"},{"value":"handoffs","label":"Sub-agent handoffs"}]},{"id":"updates","title":"What should every progress update include?","type":"multiple","skippable":true,"options":[{"value":"progress","label":"Progress"},{"value":"decisions","label":"Decisions"},{"value":"risks","label":"Risks"}]},{"id":"timing","title":"When should work begin?","options":[{"value":"now","label":"Start now"},{"value":"cycle","label":"Next development cycle"}]}]'></c2-questionnaire>`,
   'number-input': `<c2-number-input value="4" min="0" max="12" aria-label="Quantity" style="width:190px"><span slot="suffix">items</span></c2-number-input>`,
   'otp-input': `<c2-otp-input value="4827" group="3" aria-label="Verification code" style="--c2-otp-input__cell--width:32px;--c2-otp-input__cell--height:38px;--c2-otp-input__cell--font-size:16px;--c2-otp-input--gap:6px"></c2-otp-input>`,
   'date-input': `<c2-date-input value="2026-09-15" aria-label="Due date" style="width:220px"></c2-date-input>`,
@@ -132,7 +132,7 @@ greet('world')"></c2-code-editor>`,
   <c2-details label="Shipping" expanded>Ships in 3–5 days.</c2-details>
   <c2-details label="Returns">Free within 30 days.</c2-details>
 </c2-accordion>`,
-  avatar: `<c2-avatar-group aria-label="Project contributors" style="--c2-avatar-group--max-width:150px">
+  avatar: `<c2-avatar-group aria-label="Project contributors" style="width:170px;--c2-avatar-group--max-width:170px;--c2-avatar-group--overlap:6px">
   <c2-avatar name="Nguyen Thai Vinh" status="online"></c2-avatar>
   <c2-avatar auto-color name="Elisa Jasmin" initial-count="2"></c2-avatar>
   <c2-avatar auto-color name="Ada Lovelace" initial-count="2"></c2-avatar>
@@ -163,7 +163,7 @@ greet('world')"></c2-code-editor>`,
 </div>`,
   card: `<c2-card style="width:220px">
   <div slot="header" style="font-size:14px;font-weight:600">Card title</div>
-  <div style="font-size:12px;line-height:1.5;color:#71717a">Supporting text that describes what this card is about.</div>
+  <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #71717a)">Supporting text that describes what this card is about.</div>
 </c2-card>`,
   'chat-input': `<c2-chat-input style="width:240px" aria-label="Message" placeholder="Ask anything…" value="Can you summarize this?"></c2-chat-input>`,
   'chat-message': `<c2-chat-message style="width:240px;--c2-chat-message__message--max-width:190px">
@@ -189,10 +189,10 @@ greet('world')"></c2-code-editor>`,
   'color-slider': `<c2-color-slider value="200" style="width:220px"></c2-color-slider>`,
   'copy-button': `<div class="preview-row">
   <c2-copy-button reveal="always" value="npx -y @c2n/mcp"></c2-copy-button>
-  <c2-copy-button reveal="always" value="14 Rue de Rivoli, 75001 Paris" style="--c2-copy-button__container--border: 1px solid #bcbcc6; --c2-copy-button__container__hover--background-color: #f4f4f5">Copy</c2-copy-button>
+  <c2-copy-button reveal="always" value="14 Rue de Rivoli, 75001 Paris" style="--c2-copy-button__container--border: 1px solid var(--c2-theme--color-outline, #bcbcc6); --c2-copy-button__container__hover--background-color: var(--c2-theme--color-surface-container, #f4f4f5)">Copy</c2-copy-button>
 </div>`,
   details: `<c2-details expanded style="width:240px" label="Shipping">
-  <div style="font-size:12px;line-height:1.5;color:#52525b">Delivered in 3–5 business days. Free over $50.</div>
+  <div style="font-size:12px;line-height:1.5;color:var(--c2-theme--color-on-surface-variant, #52525b)">Delivered in 3–5 business days. Free over $50.</div>
 </c2-details>`,
   'feather-icons': `<div class="preview-row" style="gap:18px;--c2-feather-icon--size:26px">
   <c2-feather-heart></c2-feather-heart>
@@ -267,7 +267,7 @@ greet('world')"></c2-code-editor>`,
   <c2-button onclick="this.nextElementSibling.show()">Open modal</c2-button>
   <c2-modal>
     <span slot="title">Invite your team</span>
-    <div style="font-size:13px;color:#71717a">Share the link with your teammates.</div>
+    <div style="font-size:13px;color:var(--c2-theme--color-on-surface-variant, #71717a)">Share the link with your teammates.</div>
     <c2-button slot="footer" onclick="this.closest('c2-modal').close()">Done</c2-button>
   </c2-modal>
 </div>`,
@@ -300,7 +300,7 @@ greet('world')"></c2-code-editor>`,
   <c2-radio value="pro" label="Pro"></c2-radio>
   <c2-radio value="team" label="Team" disabled></c2-radio>
 </c2-radio-group>`,
-  separator: `<div style="display:grid;gap:14px;width:200px;font-size:12px;color:#71717a">
+  separator: `<div style="display:grid;gap:14px;width:200px;font-size:12px;color:var(--c2-theme--color-on-surface-variant, #71717a)">
   <c2-separator></c2-separator>
   <c2-separator>or</c2-separator>
   <c2-separator style="--c2-separator--style: dashed"></c2-separator>
@@ -315,7 +315,7 @@ greet('world')"></c2-code-editor>`,
   <c2-button onclick="this.nextElementSibling.show()">Open sheet</c2-button>
   <c2-sheet>
     <span slot="title">Filters</span>
-    <div style="font-size:13px;color:#71717a">A panel pinned to the edge of the screen.</div>
+    <div style="font-size:13px;color:var(--c2-theme--color-on-surface-variant, #71717a)">A panel pinned to the edge of the screen.</div>
     <c2-button slot="footer" onclick="this.closest('c2-sheet').close()">Apply</c2-button>
   </c2-sheet>
 </div>`,

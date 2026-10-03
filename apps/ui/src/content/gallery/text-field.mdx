@@ -350,7 +350,7 @@ Height follows `--c2-text-field--min-height`, the paddings and the font size; ic
     --c2-text-field__focus--border-left: 1px solid #16a34a;
     --c2-text-field__focus--outline: 3px solid rgba(22, 163, 74, 0.2);
     --c2-text-field__icon--color: #16a34a;
-    --c2-text-field__supporting-text--color: #15803d;
+    --c2-text-field__supporting-text--color: color-mix(in srgb, #15803d 75%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-text-field value="ada" help="Username is available." class="success"><c2-feather-check-circle slot="suffix-icon"></c2-feather-check-circle></c2-text-field>
@@ -437,7 +437,7 @@ Icons, adornment text, the clear button, helper text, the counter and a `c2-labe
   }
   .url .adornment {
     font-size: 13px;
-    color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
 </style>
 <c2-text-field placeholder="your-site" class="url"><span slot="prefix-icon" class="adornment">https://</span><span slot="suffix-icon" class="adornment">.com</span></c2-text-field>

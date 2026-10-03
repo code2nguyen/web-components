@@ -245,7 +245,7 @@ class TaskView implements NodeView {
  * @slot header - Printed heading at the top of the sheet, e.g. a title or a date.
  * @slot margin - Content placed in the left margin column, such as a badge or a doodle.
  * @slot toolbar - Extra buttons appended to the selection toolbar.
- * @slot actions - Buttons at the top right of the sheet, after the "Paper" button, e.g. a delete or a share button for the note.
+ * @slot actions - Buttons at the top of the sheet, in the row of the "Paper" and "Tear off" buttons and before them, e.g. a delete or a share button for the note. A slotted `c2-icon-button` is shrunk to the height of that row.
  * @event {Event} input - Fired on each edit, after `value` is updated.
  * @event {Event} change - Fired when the notepad loses focus after its value changed, and after a page is torn off.
  * @event {CustomEvent<NotepadFormat>} format-change - Fired when the formatting at the selection changes. Does not bubble.
@@ -1402,6 +1402,9 @@ export class Notepad extends LitElement {
           <div class="top">
             <div class="header" ?hidden=${!this.slotPresence.has('header')}><slot name="header" @slotchange=${this.slotPresence.handleSlotChange}></slot></div>
             <div class="controls ${this.paperMenuOpen ? 'open' : ''}">
+              <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
+                <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
+              </div>
               ${
                 this.paperPicker
                   ? html`<button
@@ -1430,9 +1433,6 @@ export class Notepad extends LitElement {
                     </button>`
                   : nothing
               }
-              <div class="actions" part="actions" ?hidden=${!this.slotPresence.has('actions')}>
-                <slot name="actions" @slotchange=${this.slotPresence.handleSlotChange}></slot>
-              </div>
             </div>
           </div>
           <div class="margin"><slot name="margin"></slot></div>

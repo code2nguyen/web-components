@@ -93,7 +93,7 @@ Curated looks for `c2-progress`. Open any card in the studio to start from it. T
     --c2-progress--height: 10px;
     --c2-progress__indicator--background-color: #dc2626;
     --c2-progress__track--background-color: #fee2e2;
-    --c2-progress__value--color: #dc2626;
+    --c2-progress__value--color: color-mix(in srgb, #dc2626 75%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-progress class="danger" value="92" show-value>Storage used</c2-progress>
@@ -105,11 +105,11 @@ Curated looks for `c2-progress`. Open any card in the studio to start from it. T
     width: 100%;
     padding: 20px;
     border-radius: 12px;
-    background: #18181b;
+    background: var(--c2-theme--color-dark-surface, #18181b);
     --c2-progress__indicator--background-color: #5aa3ff;
-    --c2-progress__track--background-color: #3f3f46;
-    --c2-progress__label--color: #a1a1aa;
-    --c2-progress__value--color: #fafafa;
+    --c2-progress__track--background-color: var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-progress__label--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-progress__value--color: var(--c2-theme--color-on-dark-surface, #fafafa);
   }
 </style>
 <div class="dark"><c2-progress value="72" show-value>Syncing workspace</c2-progress></div>

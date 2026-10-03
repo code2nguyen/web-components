@@ -23,7 +23,7 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
   }
 </style>
 <c2-tabs selected-tab="t2" class="default-tabs" client:only="lit"
-  ><c2-tab label="Overview" for="t1"></c2-tab><c2-tab label="Activity" for="t2"></c2-tab><c2-tab label="Settings" for="t3"></c2-tab>
+  ><c2-tab label="Profile" for="t1"></c2-tab><c2-tab label="Activity" for="t2"></c2-tab><c2-tab label="Billing" for="t3"></c2-tab>
   <div id="t1"></div>
   <div id="t2"></div>
   <div id="t3"></div
@@ -33,11 +33,13 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 ```html tag=MdxCodeBlock,label=Brand indicator
 <style>
   .brand-indicator {
-    --c2-tabs__indicator--color: #2563eb;
+    --c2-tabs__indicator--color: var(--c2-theme--color-primary, #2563eb);
     --c2-tabs__indicator--height: 3px;
     --c2-tabs__indicator--border-radius: 3px 3px 0 0;
-    --c2-tabs__tab__selected--color: #2563eb;
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-primary, #2563eb);
     --c2-tabs__tab--font-weight: 500;
+    --c2-tabs__tab--padding-left: 12px;
+    --c2-tabs__tab--padding-right: 12px;
   }
 </style>
 <c2-tabs selected-tab="t2" style="width: 260px" class="brand-indicator" client:only="lit"
@@ -168,7 +170,7 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 78%, var(--c2-theme--color-surface, #ffffff));
     --c2-tabs__tab__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 98%, var(--c2-theme--color-surface, #ffffff));
     --c2-tabs__tab__hover--background-color: rgba(103, 80, 164, 0.08);
-    --c2-tabs__tab__selected--color: #6750a4;
+    --c2-tabs__tab__selected--color: color-mix(in srgb, #6750a4 70%, var(--c2-theme--color-on-surface, #18181b));
     --c2-tabs__tab__selected--background-color: transparent;
     --c2-tabs__tab__focus--outline: 2px solid rgba(103, 80, 164, 0.5);
   }
@@ -184,8 +186,8 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
 ```html tag=MdxCodeBlock,label=Terminal
 <style>
   .terminal {
-    --c2-tabs--background-color: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-tabs--box-shadow: inset 0px -1px 0px 0px color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-tabs--background-color: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-tabs--box-shadow: inset 0px -1px 0px 0px var(--c2-theme--color-dark-surface-container, #27272a);
     --c2-tabs--border-radius: 8px 8px 0 0;
     --c2-tabs--padding-left: 6px;
     --c2-tabs--padding-right: 6px;
@@ -197,10 +199,10 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--padding-bottom: 10px;
     --c2-tabs__tab--padding-left: 8px;
     --c2-tabs__tab--padding-right: 8px;
-    --c2-tabs__tab--color: var(--c2-theme--color-on-surface-variant, #71717a);
-    --c2-tabs__tab__hover--color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-tabs__tab__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-tabs__tab--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-tabs__tab__hover--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-tabs__tab__hover--background-color: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-tabs__tab__selected--background-color: transparent;
     --c2-tabs__tab__focus--outline: 2px solid rgba(34, 197, 94, 0.5);
   }
@@ -241,6 +243,8 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab__hover--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-tabs__tab__selected--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-tabs__tab--font-weight: 500;
+    --c2-tabs__tab--padding-left: 12px;
+    --c2-tabs__tab--padding-right: 12px;
   }
 </style>
 <c2-tabs selected-tab="t2" style="width: 260px" class="full-width" client:only="lit"
@@ -263,9 +267,9 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--font-size: 13px;
     --c2-tabs__tab--font-weight: 500;
     --c2-tabs__tab--color: var(--c2-theme--color-on-surface-variant, #71717a);
-    --c2-tabs__tab__hover--color: #134e4a;
+    --c2-tabs__tab__hover--color: color-mix(in srgb, #0f766e 50%, var(--c2-theme--color-on-surface, #18181b));
     --c2-tabs__tab__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
-    --c2-tabs__tab__selected--color: #0f766e;
+    --c2-tabs__tab__selected--color: color-mix(in srgb, #0f766e 70%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-tabs selected-tab="t1" style="width: 260px" class="icon-label" client:load>
@@ -305,7 +309,7 @@ Curated looks for `c2-tabs`. Open any card in the studio to start from it. Every
     --c2-tabs__tab--border-bottom-right-radius: 999px;
     --c2-tabs__tab--color: #b45309;
     --c2-tabs__tab__hover--color: #78350f;
-    --c2-tabs__tab__selected--color: #ffffff;
+    --c2-tabs__tab__selected--color: var(--c2-theme--color-on-fill, #ffffff);
   }
 </style>
 <c2-tabs selected-tab="t2" style="width: 260px" class="icon-pills" client:load>

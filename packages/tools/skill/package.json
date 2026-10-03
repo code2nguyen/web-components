@@ -1,6 +1,6 @@
 {
   "name": "@c2n/skill",
-  "version": "0.0.22",
+  "version": "0.0.24",
   "description": "Portable agent skill and MCP tooling for building applications with c2n web components",
   "type": "module",
   "bin": {
@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@c2n/config": "*",
-    "@c2n/mcp": "0.0.22",
+    "@c2n/mcp": "0.0.24",
     "prettier": "3.9.6"
   }
 }

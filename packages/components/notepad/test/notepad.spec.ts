@@ -541,16 +541,20 @@ test('representative states pass an accessibility scan', async ({ page, renderSc
   await accessible(page)
 })
 
-test('the actions slot puts buttons at the top right of the sheet, after the Paper button', async ({ page, renderScenario }) => {
-  await renderScenario('<c2-notepad label="Notes" paper-picker><button slot="actions" aria-label="Delete note">×</button></c2-notepad>')
+test('the actions slot puts buttons in the row of the Paper and Tear off buttons, on their left', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes" paper-picker tearable><button slot="actions" aria-label="Delete note">×</button></c2-notepad>')
   const host = page.locator('c2-notepad')
   const actions = host.locator('[part="actions"]')
   await expect(actions).toBeVisible()
-  const paper = await host.locator('[part="paper-button"]').boundingBox()
-  const slotted = await page.getByRole('button', { name: 'Delete note' }).boundingBox()
-  const sheet = await host.locator('[part="sheet"]').boundingBox()
-  expect(slotted!.x).toBeGreaterThan(paper!.x + paper!.width - 1)
-  expect(slotted!.y).toBeLessThan(sheet!.y + 48)
+  const paper = (await host.locator('[part="paper-button"]').boundingBox())!
+  const tear = (await host.locator('[part="tear-button"]').boundingBox())!
+  const slotted = (await page.getByRole('button', { name: 'Delete note' }).boundingBox())!
+  expect(slotted.x + slotted.width).toBeLessThan(paper.x + 1)
+  expect(paper.x + paper.width).toBeLessThan(tear.x + 1)
+  // One row: the buttons share a vertical centre.
+  const middle = (box: { y: number; height: number }) => box.y + box.height / 2
+  expect(Math.abs(middle(slotted) - middle(paper))).toBeLessThan(1.5)
+  expect(Math.abs(middle(tear) - middle(paper))).toBeLessThan(1.5)
   // A slotted button is reachable with the keyboard and keeps its own click handler.
   await page.getByRole('button', { name: 'Delete note' }).evaluate((button) => button.addEventListener('click', () => button.setAttribute('data-clicked', '')))
   await page.getByRole('button', { name: 'Delete note' }).focus()

@@ -1339,7 +1339,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         css: {
           '--c2-avatar--size': '44px',
           '--c2-avatar--background': '#2563eb',
-          '--c2-avatar--box-shadow': '0 0 0 2px #ffffff, 0 0 0 4px #2563eb',
+          '--c2-avatar--box-shadow': '0 0 0 2px var(--c2-theme--color-surface, #ffffff), 0 0 0 4px #2563eb',
         },
       },
     ],

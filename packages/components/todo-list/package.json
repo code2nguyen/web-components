@@ -1,6 +1,6 @@
 {
   "name": "@c2n/todo-list",
-  "version": "0.0.22",
+  "version": "0.0.24",
   "type": "module",
   "main": "dist/todo-list.js",
   "exports": {
@@ -70,11 +70,11 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.22",
-    "@c2n/progress": "0.0.22",
-    "@c2n/reorder-list": "0.0.22",
-    "@c2n/tabs": "0.0.22",
-    "@c2n/task-icons": "0.0.22",
+    "@c2n/core": "0.0.24",
+    "@c2n/progress": "0.0.24",
+    "@c2n/reorder-list": "0.0.24",
+    "@c2n/tabs": "0.0.24",
+    "@c2n/task-icons": "0.0.24",
     "lit": "3.3.3"
   },
   "devDependencies": {

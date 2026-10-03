@@ -82,7 +82,7 @@ export interface Avatar {
  * @cssproperty {letter-spacing} [--c2-avatar--letter-spacing=0.02em]
  *
  * @cssproperty {saturation} [--c2-avatar__auto-color--saturation=55%] - Saturation of the hue derived from the name.
- * @cssproperty {lightness} [--c2-avatar__auto-color--lightness=42%] - Lightness of the hue derived from the name.
+ * @cssproperty {lightness} [--c2-avatar__auto-color--lightness=30%] - Lightness of the hue derived from the name. At the default saturation every hue keeps white initials at 4.5:1 or better.
  *
  * @cssproperty {object-fit} [--c2-avatar__image--object-fit=cover]
  * @cssproperty {color} [--c2-avatar__editor--background=rgba(0, 0, 0, 0.5)]

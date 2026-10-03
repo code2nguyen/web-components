@@ -85,20 +85,20 @@ import { Kbd } from '@c2n/kbd'
 <style>
   .midnight {
     width: 100%;
-    --c2-command--background: #18181b;
-    --c2-command--color: #fafafa;
-    --c2-command--border-top: 1px solid #3f3f46;
-    --c2-command--border-right: 1px solid #3f3f46;
-    --c2-command--border-bottom: 1px solid #3f3f46;
-    --c2-command--border-left: 1px solid #3f3f46;
-    --c2-command__field--border-bottom: 1px solid #3f3f46;
-    --c2-command__placeholder--color: #a1a1aa;
-    --c2-command__icon--color: #a1a1aa;
-    --c2-command-group__heading--color: #a1a1aa;
-    --c2-command-separator--color: #3f3f46;
-    --c2-command-item--color: #fafafa;
-    --c2-command-item__active--background: #27272a;
-    --c2-command-item__icon--color: #a1a1aa;
+    --c2-command--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-command--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-command--border-top: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-command--border-right: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-command--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-command--border-left: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-command__field--border-bottom: 1px solid var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-command__placeholder--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-command__icon--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-command-group__heading--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    --c2-command-separator--color: var(--c2-theme--color-dark-outline, #3f3f46);
+    --c2-command-item--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-command-item__active--background: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-command-item__icon--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
   }
 </style>
 <c2-command class="midnight" client:only="lit"><c2-command-group heading="Project"><c2-command-item value="deploy">Deploy to production</c2-command-item><c2-command-item value="logs">View logs</c2-command-item></c2-command-group><c2-command-separator></c2-command-separator><c2-command-group heading="Account"><c2-command-item value="tokens">API tokens</c2-command-item><c2-command-item value="signout">Sign out</c2-command-item></c2-command-group></c2-command>
