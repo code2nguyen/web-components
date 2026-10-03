@@ -191,7 +191,7 @@ The colours are still CSS variables: `--c2-notepad__paper-yellow--background` an
 
 ## Actions on the note
 
-Buttons slotted into `actions` sit at the top right of the sheet, after the "Paper" button: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). They keep their own styles and events.
+Buttons slotted into `actions` sit in the row of the "Paper" and "Tear off" buttons, on their left: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). A `c2-icon-button` there is shrunk to a 24px button with a 14px icon to match that row; set its own `--c2-icon-button__state-layer--size` and `--c2-icon-button__icon--width`/`--height` to change that. The buttons keep their own events.
 
 On a board of many notes, set `--c2-notepad__controls--opacity: 0` to show the "Paper" button, the "Tear off" button and the actions only on the note being pointed at or written in. A touch screen has no hover: there they show once the writer taps into the page. They stay while the paper picker is open.
 

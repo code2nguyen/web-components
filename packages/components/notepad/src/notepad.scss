@@ -334,8 +334,9 @@
 }
 .controls {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 12px;
+  margin-block-end: 2px;
   margin-inline-start: auto;
   opacity: css.cssVar(controls--opacity);
   transition: opacity 150ms ease;
@@ -352,6 +353,12 @@
   &[hidden] {
     display: none;
   }
+  // Icon buttons share the row of the small "Paper" and "Tear off" labels. A variable set on the button itself wins.
+  ::slotted(c2-icon-button) {
+    --c2-icon-button__state-layer--size: 24px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+  }
 }
 .tear,
 .paper-button {
@@ -360,7 +367,6 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-block-end: 2px;
   padding: 2px 6px;
   border-radius: 4px;
   cursor: pointer;
