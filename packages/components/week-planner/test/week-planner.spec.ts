@@ -1,4 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
+import type { Page } from '@playwright/test'
 import { test, expect } from './fixture'
 
 // Wednesday of ISO week 40 (an even week), 10:24.
@@ -298,4 +299,233 @@ test('has no header without a heading or the switch on a wide planner', async ({
   await scenario()
   await expect(page.locator('c2-week-planner').locator('.header')).toBeHidden()
   await expect(page.locator('c2-week-planner').getByRole('heading')).toHaveCount(0)
+})
+
+test.describe('dated week', () => {
+  test('shows the dates of the week holding date, and today only in that week', async ({ page, scenario }) => {
+    await scenario('dated')
+    const planner = page.locator('c2-week-planner')
+    await expect(planner.locator('.day-header').first()).toHaveText('Mon 28')
+    await expect(planner.locator('.day-header').last()).toHaveText('Sun 4')
+    await expect(planner.locator('.week-title')).toHaveText('Sep 28 – Oct 4, 2026')
+    await expect(planner.getByRole('group', { name: 'Wednesday, September 30, today' })).toBeVisible()
+    await expect(planner.locator('.day-header.today')).toHaveText('Wed 30')
+    // A dated event shows in its own week only; weekday events repeat.
+    await expect(page.getByRole('button', { name: 'Dentist, Thursday, October 1 14:00–15:00' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Trip/ })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Stand-up, Monday, September 28 08:30–09:00' })).toBeVisible()
+  })
+
+  test('pages through weeks and fires a non-bubbling week-change', async ({ page, scenario }) => {
+    await scenario('dated')
+    const planner = page.locator('c2-week-planner')
+    const status = page.getByRole('status')
+    await planner.getByRole('button', { name: 'Next week' }).click()
+    await expect(status).toHaveText('week:2026-10-05..2026-10-11')
+    await expect(status).toHaveAttribute('data-bubbles', 'false')
+    await expect(planner).toHaveJSProperty('date', '2026-10-07')
+    await expect(planner.locator('.week-title')).toHaveText('Oct 5 – 11, 2026')
+    await expect(page.getByRole('button', { name: /^Trip/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Dentist/ })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /^Stand-up/ })).toBeVisible()
+    await expect(planner.locator('.day.today')).toHaveCount(0)
+    await expect(planner.locator('.now')).toHaveCount(0)
+
+    await planner.getByRole('button', { name: 'Previous week' }).click()
+    await planner.getByRole('button', { name: 'Previous week' }).click()
+    await expect(status).toHaveText('week:2026-09-21..2026-09-27')
+
+    await planner.getByRole('button', { name: 'Today' }).click()
+    await expect(status).toHaveText('week:2026-09-28..2026-10-04')
+    await expect(planner.locator('.day.today')).toHaveCount(1)
+    // Already on this week: no event.
+    await page.evaluate(() => (document.querySelector('output')!.value = ''))
+    await planner.getByRole('button', { name: 'Today' }).click()
+    await expect(status).toHaveText('')
+  })
+
+  test('starts the week on week-start', async ({ page, scenario }) => {
+    await scenario('dated-sunday')
+    const planner = page.locator('c2-week-planner')
+    await expect(planner.locator('.day-header').first()).toHaveText('Sun 27')
+    await planner.getByRole('button', { name: 'Next week' }).click()
+    await expect(page.getByRole('status')).toHaveText('week:2026-10-04..2026-10-10')
+  })
+
+  test('speaks the language set in locale', async ({ page, scenario }) => {
+    await scenario('dated-french')
+    const planner = page.locator('c2-week-planner')
+    await expect(planner.locator('.day-header').first()).toHaveText('lun. 28')
+    await expect(planner.getByRole('button', { name: 'Semaine suivante' })).toBeVisible()
+    await expect(planner.getByRole('button', { name: 'Aujourd’hui' })).toBeVisible()
+  })
+
+  test('opens a narrow strip on today', async ({ page, scenario }) => {
+    await scenario('dated-narrow')
+    await expect(page.locator('c2-week-planner').getByRole('group', { name: 'Wednesday, September 30, today' })).toBeInViewport({ ratio: 1 })
+  })
+
+  test('has no axe violations', async ({ page, scenario }) => {
+    await scenario('editable-dated')
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+    expect(results.violations).toEqual([])
+  })
+})
+
+test('keeps the typical week without dates, and leaves dated events out of it', async ({ page, scenario }) => {
+  await scenario('dateless-with-dates')
+  const planner = page.locator('c2-week-planner')
+  await expect(planner.locator('.day-header').first()).toHaveText('Mon')
+  await expect(planner.getByRole('button', { name: 'Next week' })).toHaveCount(0)
+  await expect(planner.locator('.week-title')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Dentist/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Stand-up, Monday 08:30–09:00' })).toBeVisible()
+  // Not editable: no add buttons, and a click on the grid does nothing.
+  await expect(planner.locator('.add')).toHaveCount(0)
+  await planner.getByRole('group', { name: 'Monday' }).click({ position: { x: 40, y: 200 } })
+  await expect(page.getByRole('status')).toHaveText('')
+})
+
+test.describe('editable', () => {
+  /** A point in a day column, `minutes` after midnight; the scale starts at 8:00, 48px an hour. */
+  async function pointAt(page: Page, day: string, minutes: number) {
+    const box = (await page.locator('c2-week-planner').getByRole('group', { name: day, exact: true }).boundingBox())!
+    return { x: box.x + box.width / 2, y: box.y + ((minutes - 8 * 60) / 60) * 48 }
+  }
+
+  test('fires slot-click for an empty spot, snapped down', async ({ page, scenario }) => {
+    await scenario('editable-dated')
+    const point = await pointAt(page, 'Monday, September 28', 13 * 60 + 25)
+    await page.mouse.click(point.x, point.y)
+    await expect(page.getByRole('status')).toHaveText('slot:mon|2026-09-28|13:00-14:00')
+    // A click on an event still opens it.
+    await page.getByRole('button', { name: /^Workshop/ }).click()
+    await expect(page.getByRole('status')).toHaveText('click:workshop')
+  })
+
+  test('snaps to snap-minutes, and leaves the date out in a typical week', async ({ page, scenario }) => {
+    await scenario('editable-snap')
+    const point = await pointAt(page, 'Monday, September 28', 13 * 60 + 25)
+    await page.mouse.click(point.x, point.y)
+    await expect(page.getByRole('status')).toHaveText('slot:mon|2026-09-28|13:15-14:15')
+
+    await scenario('editable-dateless')
+    const dateless = await pointAt(page, 'Friday', 17 * 60 + 40)
+    await page.mouse.click(dateless.x, dateless.y)
+    await expect(page.getByRole('status')).toHaveText('slot:fri||17:30-18:30')
+  })
+
+  test('adds from the keyboard at the first free hour of a day', async ({ page, scenario }) => {
+    await scenario('editable-dated')
+    // Stand-up takes 8:30–9:00, so Monday's first free hour starts at 9:00.
+    const add = page.getByRole('button', { name: 'New event, Monday, September 28 09:00–10:00' })
+    await expect(add).toHaveCSS('opacity', '0')
+    await add.focus()
+    await expect(add).toHaveCSS('opacity', '1')
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('status')).toHaveText('slot:mon|2026-09-28|09:00-10:00')
+    await expect(page.getByRole('button', { name: 'New event, Tuesday, September 29 08:00–09:00' })).toHaveCount(1)
+  })
+
+  test('drags an event to another day and time', async ({ page, scenario }) => {
+    await scenario('editable-dated')
+    const workshop = page.getByRole('button', { name: /^Workshop/ })
+    const box = (await workshop.boundingBox())!
+    const wednesday = (await page.locator('c2-week-planner').getByRole('group', { name: 'Wednesday, September 30, today' }).boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + 10)
+    await page.mouse.down()
+    // An hour and a half down, one day to the right.
+    await page.mouse.move(wednesday.x + wednesday.width / 2, box.y + 10 + 1.5 * 48, { steps: 6 })
+    const preview = page.locator('c2-week-planner').locator('.preview')
+    await expect(preview).toHaveCount(1)
+    await expect(preview).toContainText('11:30–13:30')
+    await expect(workshop).toHaveCSS('opacity', '0.4')
+    await page.mouse.up()
+    await expect(page.getByRole('status')).toHaveText('change:workshop:{"start":"11:30","end":"13:30","day":"wed"}')
+    await expect(preview).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Workshop, Wednesday, September 30 11:30–13:30' })).toBeVisible()
+  })
+
+  test('drags a dated event to another date', async ({ page, scenario }) => {
+    await scenario('editable-dated')
+    const box = (await page.getByRole('button', { name: /^Dentist/ }).boundingBox())!
+    const friday = (await page.locator('c2-week-planner').getByRole('group', { name: 'Friday, October 2' }).boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + 10)
+    await page.mouse.down()
+    await page.mouse.move(friday.x + friday.width / 2, box.y + 10 - 48, { steps: 6 })
+    await page.mouse.up()
+    await expect(page.getByRole('status')).toHaveText('change:dentist:{"start":"13:00","end":"14:00","date":"2026-10-02"}')
+  })
+
+  test('resizes an event from its bottom edge', async ({ page, scenario }) => {
+    await scenario('editable-dated')
+    const box = (await page.getByRole('button', { name: /^Workshop/ }).boundingBox())!
+    // Left of Review, which overlaps Workshop's end and steps in by a quarter of the column.
+    const edge = { x: box.x + 8, y: box.y + box.height - 2 }
+    await page.mouse.move(edge.x, edge.y)
+    await page.mouse.down()
+    await page.mouse.move(edge.x + 120, edge.y + 48, { steps: 6 })
+    await expect(page.locator('c2-week-planner').locator('.preview')).toContainText('10:00–13:00')
+    await page.mouse.up()
+    // The day stays: only the end moves.
+    await expect(page.getByRole('status')).toHaveText('change:workshop:{"start":"10:00","end":"13:00","day":"tue"}')
+  })
+
+  test('cancels a drag with Escape, and a press that does not move is a click', async ({ page, scenario }) => {
+    await scenario('editable-dated')
+    const workshop = page.getByRole('button', { name: /^Workshop/ })
+    const box = (await workshop.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + 10)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2, box.y + 10 + 96, { steps: 4 })
+    await expect(page.locator('c2-week-planner').locator('.preview')).toHaveCount(1)
+    await page.keyboard.press('Escape')
+    await expect(page.locator('c2-week-planner').locator('.preview')).toHaveCount(0)
+    await page.mouse.up()
+    await expect(page.getByRole('status')).toHaveText('')
+    await expect(page.getByRole('button', { name: 'Workshop, Tuesday, September 29 10:00–12:00' })).toBeVisible()
+
+    // Under the threshold: a click.
+    await page.mouse.move(box.x + box.width / 2, box.y + 10)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2 + 2, box.y + 11)
+    await page.mouse.up()
+    await expect(page.getByRole('status')).toHaveText('click:workshop')
+  })
+
+  test('moves and resizes the focused event from the keyboard', async ({ page, scenario }) => {
+    await scenario('editable-dated')
+    const status = page.getByRole('status')
+    await page.getByRole('button', { name: /^Workshop/ }).focus()
+    await page.keyboard.press('Alt+ArrowDown')
+    await expect(status).toHaveText('change:workshop:{"start":"10:30","end":"12:30","day":"tue"}')
+    // The block keeps focus once the page has applied the change.
+    await expect(page.getByRole('button', { name: 'Workshop, Tuesday, September 29 10:30–12:30' })).toBeFocused()
+    await page.keyboard.press('Alt+ArrowRight')
+    await expect(status).toHaveText('change:workshop:{"start":"10:30","end":"12:30","day":"wed"}')
+    await expect(page.getByRole('button', { name: /^Workshop, Wednesday/ })).toBeFocused()
+    await page.keyboard.press('Alt+Shift+ArrowUp')
+    await expect(status).toHaveText('change:workshop:{"start":"10:30","end":"12:00","day":"wed"}')
+    await page.keyboard.press('Alt+Shift+ArrowDown')
+    await expect(status).toHaveText('change:workshop:{"start":"10:30","end":"12:30","day":"wed"}')
+
+    await page.getByRole('button', { name: /^Dentist/ }).focus()
+    await page.keyboard.press('Alt+ArrowLeft')
+    await expect(status).toHaveText('change:dentist:{"start":"14:00","end":"15:00","date":"2026-09-30"}')
+    await expect(page.getByRole('button', { name: /^Dentist, Wednesday/ })).toBeFocused()
+  })
+
+  test('wraps a weekday event around the week from the keyboard', async ({ page, scenario }) => {
+    await scenario('editable-dateless')
+    await page.getByRole('button', { name: /^Stand-up/ }).focus()
+    await page.keyboard.press('Alt+ArrowLeft')
+    await expect(page.getByRole('status')).toHaveText('change:standup:{"start":"08:30","end":"09:00","day":"sun"}')
+  })
+
+  test('ignores the edit keys without editable', async ({ page, scenario }) => {
+    await scenario('dated')
+    await page.getByRole('button', { name: /^Workshop/ }).focus()
+    await page.keyboard.press('Alt+ArrowDown')
+    await expect(page.getByRole('status')).toHaveText('')
+  })
 })

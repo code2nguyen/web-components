@@ -41,6 +41,7 @@
     glue--background: #3f444b,
     sheet--rotate: 0deg,
     top--padding-top: 20px,
+    controls--opacity: 1,
     ink-blue--color: #2848b8,
     ink-black--color: #18181b,
     ink-red--color: #b8232b,
@@ -331,6 +332,27 @@
   border-top: 2px dotted css.cssVar(perforation--color);
   pointer-events: none;
 }
+.controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-inline-start: auto;
+  opacity: css.cssVar(controls--opacity);
+  transition: opacity 150ms ease;
+}
+:host(:hover) .controls,
+:host(:focus-within) .controls,
+.controls.open {
+  opacity: 1;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  &[hidden] {
+    display: none;
+  }
+}
 .tear,
 .paper-button {
   all: unset;
@@ -350,9 +372,6 @@
     monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  &:first-of-type {
-    margin-inline-start: auto;
-  }
   &:hover,
   &[aria-expanded='true'] {
     background: rgba(24, 24, 27, 0.06);

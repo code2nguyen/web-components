@@ -3,7 +3,8 @@ import type { Flow, FlowNode } from '@c2n/flow'
 
 /**
  * Makes the flow examples live. `[data-flow-demo="events"]` reports clicks and layout changes into the `output` next
- * to it; `[data-flow-demo="custom"]` draws its nodes with `renderNode` (a kind, the step's metric and a progress bar).
+ * to it; `[data-flow-demo="custom"]` draws its nodes with `renderNode` (a kind, the step's metric and a progress bar);
+ * `[data-flow-demo="editable"]` plays the application of an editable flow, applying every edit to `nodes` and `edges`.
  */
 
 interface TrainingStep {
@@ -29,6 +30,36 @@ function renderTrainingNode({ node, status }: { node: FlowNode; status: string }
   </div>`
 }
 
+/** What an application does with an editable flow: apply each edit, then let the user name a new node. */
+function wireEditable(flow: Flow, say: (text: string) => void) {
+  let next = 1
+  flow.addEventListener('node-add', async ({ detail }) => {
+    const id = `note-${next++}`
+    flow.nodes = [...flow.nodes, { id, label: 'New note', position: detail.position }]
+    if (detail.source) flow.edges = [...flow.edges, { source: detail.source, target: id }]
+    say(`node-add${detail.source ? ` after ${detail.source}` : ''} at ${detail.position.x}, ${detail.position.y}`)
+    await flow.updateComplete
+    void flow.editLabel(id)
+  })
+  flow.addEventListener('node-edit', ({ detail }) => {
+    flow.nodes = flow.nodes.map((node) => (node.id === detail.id ? { ...node, label: detail.label } : node))
+    say(`node-edit: ${detail.label}`)
+  })
+  flow.addEventListener('node-delete', ({ detail }) => {
+    flow.nodes = flow.nodes.filter((node) => node.id !== detail.id)
+    flow.edges = flow.edges.filter((edge) => edge.source !== detail.id && edge.target !== detail.id)
+    say(`node-delete: ${detail.id}`)
+  })
+  flow.addEventListener('edge-add', ({ detail }) => {
+    flow.edges = [...flow.edges, { source: detail.source, target: detail.target }]
+    say(`edge-add: ${detail.source} → ${detail.target}`)
+  })
+  flow.addEventListener('edge-delete', ({ detail }) => {
+    flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)
+    say(`edge-delete: ${detail.source} → ${detail.target}`)
+  })
+}
+
 function seedExamples(): void {
   document.querySelectorAll<Flow>('c2-flow[data-flow-demo]').forEach((flow) => {
     if (seeded.has(flow)) return
@@ -39,6 +70,10 @@ function seedExamples(): void {
     }
     if (flow.dataset.flowDemo === 'custom') {
       flow.renderNode = renderTrainingNode
+      return
+    }
+    if (flow.dataset.flowDemo === 'editable') {
+      wireEditable(flow, say)
       return
     }
     flow.addEventListener('node-click', ({ detail }) => say(`node-click: ${detail.node.label}`))
