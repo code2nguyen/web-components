@@ -315,7 +315,11 @@ export const overrides: Record<string, Override> = {
   // the inverse surface pair so it remains legible in both light and dark themes.
   '--c2-avatar-group--max-width': { exclude: 'responsive avatar-group width' },
   '--c2-avatar-group--overlap': { exclude: 'avatar stacking geometry' },
-  '--c2-avatar-group__avatar--box-shadow': { exclude: 'overlap separation ring' },
+  // The ring cuts each avatar out of the one under it, so it is drawn in the surface colour, like the badge's border.
+  '--c2-avatar-group__avatar--box-shadow': {
+    token: 'color-surface',
+    value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
+  },
   '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
   '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
   '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
