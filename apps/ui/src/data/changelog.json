@@ -2,6 +2,170 @@
   "repository": "https://github.com/code2nguyen/web-components",
   "releases": [
     {
+      "version": "0.0.23",
+      "date": "2026-10-03",
+      "sections": [
+        {
+          "type": "feat",
+          "title": "Features",
+          "items": [
+            {
+              "scopes": ["flow"],
+              "text": "Add an actions toolbar over the canvas, placeable on any edge",
+              "hash": "bbf0111"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Arrowheads, edge labels and a variable to hide the status marker",
+              "hash": "da4bb53"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "title": "Fixes",
+          "items": [
+            {
+              "scopes": ["theme"],
+              "text": "Theme the code editor's syntax palette, the danger badge and the attachment status",
+              "hash": "7057036"
+            },
+            {
+              "scopes": ["otp-input"],
+              "text": "Shrink inside flex and grid parents too",
+              "hash": "fece866"
+            },
+            {
+              "scopes": ["avatar"],
+              "text": "Auto-color backgrounds keep white initials readable",
+              "hash": "4c5ac36"
+            },
+            {
+              "scopes": ["code-editor"],
+              "text": "Let --c2-code-editor__active-line--background win over CodeMirror",
+              "hash": "0bcf2c3"
+            },
+            {
+              "scopes": ["steps"],
+              "text": "Hydrate a server-rendered step as the leaf the server drew",
+              "hash": "facba45"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Deepen the primary badge's text so it reads on its container",
+              "hash": "8bdd18a"
+            },
+            {
+              "scopes": ["otp-input"],
+              "text": "Shrink the cells instead of overflowing a narrow column",
+              "hash": "7f7e8c5"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Map the remaining neutral component colours to theme tokens",
+              "hash": "bf0f962"
+            },
+            {
+              "scopes": ["qr-code"],
+              "text": "Expose the placeholder border as --c2-qr-code__placeholder--border",
+              "hash": "d690092"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Map the accordion's frame colour to the outline token",
+              "hash": "53bd233"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Theme select's pressed trigger and its landing preview follow the theme",
+              "hash": "4f5b8e7"
+            },
+            {
+              "scopes": ["questionnaire"],
+              "text": "Expose the indicator, shortcut and other-field colours so the theme reaches them",
+              "hash": "5765b41"
+            },
+            {
+              "scopes": ["theme"],
+              "text": "Draw the avatar group's separation ring in the surface colour",
+              "hash": "64f5f3a"
+            },
+            {
+              "scopes": ["flow"],
+              "text": "Record the actions slot in the slot styling audit",
+              "hash": "7b1e849"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Tighten the controls row and keep it below the perforation",
+              "hash": "4ad238c"
+            },
+            {
+              "scopes": ["notepad"],
+              "text": "Put the actions slot left of the Paper and Tear off buttons, on their row",
+              "hash": "90973f8"
+            }
+          ]
+        },
+        {
+          "type": "site",
+          "title": "Docs site & examples",
+          "items": [
+            {
+              "scopes": ["ui"],
+              "text": "Every gallery card passes the audit in both themes",
+              "hash": "f3c68e2"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Primary text reads on the site's primary container",
+              "hash": "1898b70"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Gallery cards pass the contrast audit in both themes",
+              "hash": "ff9ca10"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Readable muted text and the dark chart palette on the docs site",
+              "hash": "673f88c"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Theme the copy button and details previews",
+              "hash": "982c74f"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Fit the questionnaire preview in its card",
+              "hash": "12148ec"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Give the avatar preview room and theme its rings",
+              "hash": "3bfb28d"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Keep the split panel preview's divider visible",
+              "hash": "893ee45"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Theme the masonry preview and the neutral greys of the other landing previews",
+              "hash": "e713cb8"
+            },
+            {
+              "scopes": ["ui"],
+              "text": "Theme the border beam preview card and make its beam easier to see",
+              "hash": "68e8c8d"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.0.22",
       "date": "2026-10-03",
       "sections": [

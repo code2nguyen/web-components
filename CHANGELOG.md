@@ -3,6 +3,45 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [0.0.23](https://github.com/code2nguyen/web-components/releases/tag/v0.0.23) — 2026-10-03
+
+### Features
+
+- **flow:** Add an actions toolbar over the canvas, placeable on any edge ([bbf0111](https://github.com/code2nguyen/web-components/commit/bbf0111))
+- **flow:** Arrowheads, edge labels and a variable to hide the status marker ([da4bb53](https://github.com/code2nguyen/web-components/commit/da4bb53))
+
+### Fixes
+
+- **theme:** Theme the code editor's syntax palette, the danger badge and the attachment status ([7057036](https://github.com/code2nguyen/web-components/commit/7057036))
+- **otp-input:** Shrink inside flex and grid parents too ([fece866](https://github.com/code2nguyen/web-components/commit/fece866))
+- **avatar:** Auto-color backgrounds keep white initials readable ([4c5ac36](https://github.com/code2nguyen/web-components/commit/4c5ac36))
+- **code-editor:** Let --c2-code-editor__active-line--background win over CodeMirror ([0bcf2c3](https://github.com/code2nguyen/web-components/commit/0bcf2c3))
+- **steps:** Hydrate a server-rendered step as the leaf the server drew ([facba45](https://github.com/code2nguyen/web-components/commit/facba45))
+- **theme:** Deepen the primary badge's text so it reads on its container ([8bdd18a](https://github.com/code2nguyen/web-components/commit/8bdd18a))
+- **otp-input:** Shrink the cells instead of overflowing a narrow column ([7f7e8c5](https://github.com/code2nguyen/web-components/commit/7f7e8c5))
+- **theme:** Map the remaining neutral component colours to theme tokens ([bf0f962](https://github.com/code2nguyen/web-components/commit/bf0f962))
+- **qr-code:** Expose the placeholder border as --c2-qr-code__placeholder--border ([d690092](https://github.com/code2nguyen/web-components/commit/d690092))
+- **theme:** Map the accordion's frame colour to the outline token ([53bd233](https://github.com/code2nguyen/web-components/commit/53bd233))
+- **theme:** Theme select's pressed trigger and its landing preview follow the theme ([4f5b8e7](https://github.com/code2nguyen/web-components/commit/4f5b8e7))
+- **questionnaire:** Expose the indicator, shortcut and other-field colours so the theme reaches them ([5765b41](https://github.com/code2nguyen/web-components/commit/5765b41))
+- **theme:** Draw the avatar group's separation ring in the surface colour ([64f5f3a](https://github.com/code2nguyen/web-components/commit/64f5f3a))
+- **flow:** Record the actions slot in the slot styling audit ([7b1e849](https://github.com/code2nguyen/web-components/commit/7b1e849))
+- **notepad:** Tighten the controls row and keep it below the perforation ([4ad238c](https://github.com/code2nguyen/web-components/commit/4ad238c))
+- **notepad:** Put the actions slot left of the Paper and Tear off buttons, on their row ([90973f8](https://github.com/code2nguyen/web-components/commit/90973f8))
+
+### Docs site & examples
+
+- **ui:** Every gallery card passes the audit in both themes ([f3c68e2](https://github.com/code2nguyen/web-components/commit/f3c68e2))
+- **ui:** Primary text reads on the site's primary container ([1898b70](https://github.com/code2nguyen/web-components/commit/1898b70))
+- **ui:** Gallery cards pass the contrast audit in both themes ([ff9ca10](https://github.com/code2nguyen/web-components/commit/ff9ca10))
+- **ui:** Readable muted text and the dark chart palette on the docs site ([673f88c](https://github.com/code2nguyen/web-components/commit/673f88c))
+- **ui:** Theme the copy button and details previews ([982c74f](https://github.com/code2nguyen/web-components/commit/982c74f))
+- **ui:** Fit the questionnaire preview in its card ([12148ec](https://github.com/code2nguyen/web-components/commit/12148ec))
+- **ui:** Give the avatar preview room and theme its rings ([3bfb28d](https://github.com/code2nguyen/web-components/commit/3bfb28d))
+- **ui:** Keep the split panel preview's divider visible ([893ee45](https://github.com/code2nguyen/web-components/commit/893ee45))
+- **ui:** Theme the masonry preview and the neutral greys of the other landing previews ([e713cb8](https://github.com/code2nguyen/web-components/commit/e713cb8))
+- **ui:** Theme the border beam preview card and make its beam easier to see ([68e8c8d](https://github.com/code2nguyen/web-components/commit/68e8c8d))
+
 ## [0.0.22](https://github.com/code2nguyen/web-components/releases/tag/v0.0.22) — 2026-10-03
 
 ### Features
