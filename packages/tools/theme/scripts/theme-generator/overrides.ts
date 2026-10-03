@@ -296,6 +296,12 @@ export const overrides: Record<string, Override> = {
   },
   '--c2-copy-button__container__copied--color': { exclude: 'status colour' },
   // Badge status tones are semantic colours with no theme token; the neutral/primary/danger pairs map on their own.
+  // The primary text sits on the primary container, where the bare accent falls short of 4.5:1; pulling it a quarter
+  // towards the ink deepens it in a light theme and lifts it in a dark one.
+  '--c2-badge__primary--color': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-badge__success--background': { exclude: 'status colour' },
   '--c2-badge__success--color': { exclude: 'status colour' },
   '--c2-badge__warning--background': { exclude: 'status colour' },
