@@ -68,8 +68,8 @@ Import what you render at the top of the component module (`import '@c2n/text-fi
 
 - Islands (`@astrojs/lit`): `import { Button } from '@c2n/button'` in the frontmatter, `<Button client:load>` in the template. SSR'd with declarative shadow DOM, hydrated on load. Pass **kebab-case attributes** only (a prop whose name matches an element property is set as a property and forces `defer-hydration`). A `client:only` island must not contain islands: its children end up in a `<template>` and nothing hydrates; the parent module registers the children instead.
 - Plain tags + client script: `<c2-button>` in the template and `import '@c2n/button'` inside a `<script>`. Cheaper for repeated markup (no shadow-DOM copy per instance); guard the flash with `c2-button:not(:defined) { visibility: hidden }`.
-- Many instances on one page (tree rows, list items, nav entries — more than a handful): do **not** server-render them. Declarative shadow DOM cannot share a stylesheet, so every instance inlines the component's whole stylesheet into its own `<template shadowrootmode>` (138 `c2-tree-item` rows took a page from 606 KB to 2.2 MB of HTML). Note that a plain tag is still claimed by `@astrojs/lit` once anything imports the package on the server (an island elsewhere on the page counts), so emit the markup as a string, `<Fragment set:html={html} />`, and register the element in a client `<script>`. Keep crawlable content such as links in the light DOM (slot an `<a href>` into the item rather than setting the item's `href`), since nothing inside an unrendered shadow root reaches the static HTML.
-- Children of an island that the island's package also registers (`c2-navigation-menu-item` and `c2-navigation-menu-link` inside `<NavigationMenu client:load>`) are server-rendered as well, lose unreflected properties such as `href` from the HTML and keep a `defer-hydration` nothing removes. Pass such children as a serialized string, `<Fragment set:html={itemsHtml} />`, so they ship as plain tags and upgrade with the parent; check the built HTML still carries each item's `href`.
+- Many instances on one page (tree rows, list items, nav entries — more than a handful): do **not** server-render them. Declarative shadow DOM cannot share a stylesheet, so every instance inlines the component's whole stylesheet into its own `<template shadowrootmode>` (138 `c2-tree-item` rows took a page from 606 KB to 2.2 MB of HTML). Note that a plain tag is still claimed by `@astrojs/lit` once anything imports the package on the server (an island elsewhere on the page counts), so emit the markup as a string built with `rawElement` from `@c2n/core/raw-html.js` (see [Many instances without server rendering](#many-instances-without-server-rendering)), `<Fragment set:html={html} />`, and register the element in a client `<script>`. Keep crawlable content such as links in the light DOM (slot an `<a href>` into the item rather than setting the item's `href`), since nothing inside an unrendered shadow root reaches the static HTML.
+- Children of an island that the island's package also registers (`c2-navigation-menu-item` and `c2-navigation-menu-link` inside `<NavigationMenu client:load>`) are server-rendered as well, lose unreflected properties such as `href` from the HTML and keep a `defer-hydration` nothing removes. Pass such children as a serialized string (`rawElement`), `<Fragment set:html={itemsHtml} />`, so they ship as plain tags and upgrade with the parent; check the built HTML still carries each item's `href`.
 - Scoped `<style>` does not reach elements rendered by child components; use `is:global` (or `:global()`) for variant classes.
 
 ## React 19
@@ -155,9 +155,75 @@ from `@c2n/core/lit-helper.js` rather than adding `lit` to the application: it i
 components render with, so there is no version to pin by hand and no second copy of Lit in the bundle.
 Mark the column `cell-slot` and render light-DOM children into `slot="cell:<line>:<field>"`, where `line` is the display line (after sort, filter and grouping, page offset included). Render them only for the lines `range-change` reports: `detail.rows` is one `{ line, key, row }` per rendered data row; a child whose line is outside the window is left unassigned, and after a sort, filter or page change the same line holds another row, so re-render from the next `range-change`. The children stay in the document, so ordinary CSS reaches them; `renderCell`/the column format is the fallback.
 
+Do not hand-write that subscription: `@c2n/table` ships it as `useRenderedRows`. React: `useRenderedRows(ref)` from
+`@c2n/table/react-hooks.js` returns `TableRenderedRow[]`. Vue 3: `useRenderedRows(templateRefOrGetter)` from
+`@c2n/table/vue-composables.js` returns `Ref<TableRenderedRow[]>`. Through the umbrella they are
+`@c2n/components/table/react-hooks.js` and `…/vue-composables.js`. Both seed from `table.renderedRange`, re-subscribe
+when the element changes, return `[]` on the server and before the element upgrades, and clean up on unmount; React
+and Vue are optional peers of the package. Other frameworks wrap `subscribeRenderedRows(table, (rows) => …)` from
+`@c2n/table/rendered-rows.js`, which returns the unsubscribe function.
+
 ## Editor support outside TypeScript
 
 `@c2n/framework-types` ships `dist/html-custom-data.json` (point `html.customData` at it for VS Code / Volar) and `dist/web-types.json` (picked up automatically by the JetBrains IDEs). Both are generated from the custom-elements manifests, and cover plain HTML, Angular templates and Vue SFCs.
+
+## Many instances without server rendering
+
+Declarative shadow DOM cannot share a stylesheet, so a server renderer inlines a component's whole stylesheet into every instance (138 server-rendered `c2-tree-item` rows: 606 KB → 2.2 MB of HTML). For repeated elements, render plain tags as a string on the server and register the element on the client. `@c2n/core/raw-html.js` builds that string; it has no dependencies and no DOM, so it runs in any server runtime.
+
+- `rawElement(tag, attributes?, innerHtml?)` → `<tag …>innerHtml</tag>`. `innerHtml` is inserted as is: build it from nested `rawElement` calls and pass text through `escapeHtml`.
+- `serializeAttributes(attributes)`: `true` writes a bare attribute, `false`/`null`/`undefined` omit it, an object or array is written as JSON (what the components' JSON attributes such as `rows` and `items` parse), anything else as its escaped string. An attribute or tag name that would break out of the tag throws.
+- `escapeHtml(text)` escapes `& < > "` for text content and attribute values.
+
+Write attributes by their markup name (`has-children`, `row-key`): nothing sets properties on these elements before they upgrade. Keep crawlable content (links) in the light DOM. Hide the tags until they upgrade (`c2-tree:not(:defined) { visibility: hidden }`).
+
+Astro (a plain tag would still be server-rendered once anything imports the package on the server):
+
+```astro
+---
+import { escapeHtml, rawElement } from '@c2n/core/raw-html.js'
+const rows = files
+  .map((file) => rawElement('c2-tree-item', { value: file.id }, `<a slot="label" href="${escapeHtml(file.url)}">${escapeHtml(file.name)}</a>`))
+  .join('')
+---
+
+<Fragment set:html={rawElement('c2-tree', { 'aria-label': 'Files' }, rows)} />
+<script>
+  import '@c2n/tree'
+</script>
+```
+
+Next.js App Router / React Server Components: build the string in the server component, inject it with `dangerouslySetInnerHTML` on a wrapper element (React does not reconcile its children, so client upgrades cause no hydration mismatch), and register the package in a client component:
+
+```tsx
+// app/files/page.tsx (server component)
+import { escapeHtml, rawElement } from '@c2n/core/raw-html.js'
+import { RegisterTree } from './register-tree'
+
+export default async function FilesPage() {
+  const files = await getFiles()
+  const rows = files.map((file) => rawElement('c2-tree-item', { value: file.id }, escapeHtml(file.name))).join('')
+  return (
+    <>
+      <RegisterTree />
+      <div dangerouslySetInnerHTML={{ __html: rawElement('c2-tree', { 'aria-label': 'Files' }, rows) }} />
+    </>
+  )
+}
+```
+
+```tsx
+// app/files/register-tree.tsx
+'use client'
+import { useEffect } from 'react'
+
+export function RegisterTree() {
+  useEffect(() => void import('@c2n/tree'), [])
+  return null
+}
+```
+
+Listen for their events from a client component on the element itself, found through a ref on the wrapper (`wrapperRef.current?.querySelector('c2-tree')`): `selection-change` does not bubble, so a listener on the wrapper misses it.
 
 ## Server-side rendering and static HTML
 

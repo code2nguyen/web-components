@@ -6,21 +6,15 @@
  * `tooltip`…) are set as properties and vanish from the HTML, and the element gets `defer-hydration`, which nothing
  * removes for a non-island. Emitting the markup as a raw string through `set:html` bypasses the renderer, so the
  * element ships as plain HTML and upgrades normally once `data/chrome-modules.ts` registers it.
+ *
+ * The string building is the published `@c2n/core/raw-html.js`; what stays here is the site-specific part: the inner
+ * HTML usually comes from `Astro.slots.render()`, which the Lit renderer has already server-rendered.
  */
+import { escapeHtml, rawElement as rawHtmlElement, serializeAttributes, type RawAttributes, type RawAttributeValue } from '@c2n/core/raw-html.js'
 
-export type AttributeValue = string | number | boolean | null | undefined
+export { escapeHtml, serializeAttributes }
 
-export function escapeHtml(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-/** Serialises attributes: `true` → bare attribute, `false` / `null` / `undefined` → omitted, everything else quoted. */
-export function serializeAttributes(attributes: Record<string, AttributeValue>): string {
-  return Object.entries(attributes)
-    .filter(([, value]) => value !== false && value !== null && value !== undefined)
-    .map(([name, value]) => (value === true ? ` ${name}` : ` ${name}="${escapeHtml(String(value))}"`))
-    .join('')
-}
+export type AttributeValue = RawAttributeValue
 
 /**
  * Removes what the Lit renderer added to slotted content (declarative shadow roots, hydration markers,
@@ -34,6 +28,6 @@ export function stripServerRendering(html: string): string {
 }
 
 /** `<tag …attributes>inner</tag>` as a raw string, with the inner HTML cleaned of server rendering. */
-export function rawElement(tag: string, attributes: Record<string, AttributeValue>, innerHtml = ''): string {
-  return `<${tag}${serializeAttributes(attributes)}>${stripServerRendering(innerHtml)}</${tag}>`
+export function rawElement(tag: string, attributes: RawAttributes, innerHtml = ''): string {
+  return rawHtmlElement(tag, attributes, stripServerRendering(innerHtml))
 }

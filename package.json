@@ -6,7 +6,7 @@
   "scripts": {
     "test": "node scripts/run-changed-component-tests.mjs --project=chromium",
     "test:changed": "node scripts/run-changed-component-tests.mjs",
-    "test:changed:unit": "node --test scripts/*.test.mjs apps/ui/src/utils/*.test.ts",
+    "test:changed:unit": "node --test scripts/*.test.mjs packages/core/test/*.test.mjs apps/ui/src/utils/*.test.ts",
     "test:button": "playwright test packages/components/button/test --project=chromium",
     "test:all": "playwright test",
     "test:serve": "vite --config tests/vite.config.ts",
@@ -42,6 +42,7 @@
     "changelog": "node scripts/generate-changelog.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
+    "check:css-contracts": "node scripts/check-css-contracts.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
     "test:style-contracts": "playwright test tests/style-contracts",
     "verify:style-contracts": "node scripts/verify-style-contracts.mjs"
