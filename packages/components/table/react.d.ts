@@ -71,4 +71,5 @@ declare module 'react' {
   }
 }
 
-export {}
+// The package's own React hooks (src/react.ts).
+export * from './types/src/react.js'

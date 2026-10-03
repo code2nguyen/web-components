@@ -1,5 +1,6 @@
 /**
- * Framework-agnostic core of `useRenderedRows` (`@c2n/table/react-hooks.js`, `@c2n/table/vue-composables.js`).
+ * Framework-agnostic core of `useRenderedRows` (`@c2n/table/react`, `@c2n/table/vue`), exported from the `@c2n/table`
+ * entry for every other framework.
  *
  * A `cell-slot` column takes its cells from light-DOM children named `cell:{line}:{field}`, and the table renders only
  * a window of lines, so an application renders children for exactly the rows `range-change` reports. This module

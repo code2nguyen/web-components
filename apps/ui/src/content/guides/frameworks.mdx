@@ -96,7 +96,7 @@ import '@c2n/table/react'
 import '@c2n/select/react'
 ```
 
-With `@c2n/components` installed, `import '@c2n/components/react'` declares every tag in one line.
+With `@c2n/components` installed, `import '@c2n/components/react'` declares every tag in one line. A package that also ships React hooks exports them from the same entry: `import { useRenderedRows } from '@c2n/table/react'` is the hook and the JSX types in one import.
 
 ```tsx tag=CodeBlock
 // src/main.tsx — registration must happen before the first render
@@ -146,11 +146,29 @@ useEffect(() => {
 
 Declarative shadow DOM cannot share a stylesheet, so a server renderer copies a component's whole stylesheet into every instance it renders. For a handful of elements that is fine; for a tree with 138 rows it took one page of this site from 606 KB to 2.2 MB of HTML. Repeated elements — tree items, list rows, navigation entries — should reach the browser as plain tags and upgrade there once the package is registered.
 
-`@c2n/core/raw-html.js` builds those tags as a string. It has no dependencies and touches no DOM, so it runs in any server runtime:
+Build those tags as a string with a small helper of your own. It needs no dependency and touches no DOM, so it runs in any server runtime:
 
-- `rawElement(tag, attributes?, innerHtml?)` returns `<tag …>innerHtml</tag>`. The inner HTML is inserted as is: build it from nested `rawElement` calls and pass text through `escapeHtml`.
-- `serializeAttributes(attributes)` writes `true` as a bare attribute, omits `false`, `null` and `undefined`, writes an object or array as JSON (what JSON attributes such as a table's `rows` or a tree's `items` parse) and anything else as its escaped string. A tag or attribute name that would break out of the tag throws.
-- `escapeHtml(text)` escapes `&`, `<`, `>` and `"`.
+```ts tag=CodeBlock
+// lib/raw-element.ts
+type AttributeValue = string | number | boolean | null | undefined | object
+
+export const escapeHtml = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+/** `<tag …>innerHtml</tag>`. `innerHtml` is inserted as is: escape text with `escapeHtml`. */
+export function rawElement(tag: string, attributes: Record<string, AttributeValue> = {}, innerHtml = ''): string {
+  if (!/^[a-z][a-z0-9._]*-[a-z0-9._-]*$/.test(tag)) throw new TypeError(`Invalid tag name: ${tag}`)
+  let html = `<${tag}`
+  for (const [name, value] of Object.entries(attributes)) {
+    if (value === false || value === null || value === undefined) continue
+    if (!/^[^\s"'>/=\x00-\x1f\x7f]+$/.test(name)) throw new TypeError(`Invalid attribute name: ${name}`)
+    // An object or array becomes JSON, which the JSON attributes (`rows`, `items`) parse back.
+    html += value === true ? ` ${name}` : ` ${name}="${escapeHtml(typeof value === 'object' ? JSON.stringify(value) : String(value))}"`
+  }
+  return `${html}>${innerHtml}</${tag}>`
+}
+```
+
+`true` writes a bare attribute; `false`, `null` and `undefined` omit it; an object or array is written as JSON (what JSON attributes such as a table's `rows` or a tree's `items` parse) and anything else as its escaped string. A tag or attribute name that would break out of the tag throws. Build the inner HTML from nested `rawElement` calls and pass text through `escapeHtml`.
 
 Nothing sets properties on these elements before they upgrade, so write each attribute by its markup name (`has-children`, `row-key`). Keep content a crawler should see, such as links, in the light DOM, and hide the tags until they are defined (`c2-tree:not(:defined) { visibility: hidden }`).
 
@@ -158,7 +176,7 @@ Nothing sets properties on these elements before they upgrade, so write each att
 
 ```astro tag=CodeBlock
 ---
-import { escapeHtml, rawElement } from '@c2n/core/raw-html.js'
+import { escapeHtml, rawElement } from '../lib/raw-element'
 
 const rows = files.map((file) => rawElement('c2-tree-item', { value: file.id }, `<a slot="label" href="${escapeHtml(file.url)}">${escapeHtml(file.name)}</a>`)).join('')
 ---
@@ -174,7 +192,7 @@ const rows = files.map((file) => rawElement('c2-tree-item', { value: file.id }, 
 
 ```tsx tag=CodeBlock
 // app/files/page.tsx — a server component
-import { escapeHtml, rawElement } from '@c2n/core/raw-html.js'
+import { escapeHtml, rawElement } from '@/lib/raw-element'
 import { RegisterTree } from './register-tree'
 
 export default async function FilesPage() {
@@ -206,10 +224,10 @@ Listen for their events from a client component on the element itself, found thr
 
 `renderCell` is handed to Lit, so it cannot return JSX, an Angular template or a Vue node — only a string, a DOM node, or a Lit template. For anything the framework should own, mark the column `cell-slot`: the table puts a `<slot name="cell:<line>:<field>">` in each cell of that column, `line` being the cell's display line (after sort, filter and grouping, page offset included), and the app renders one child per line the table reports through `range-change` into its light DOM.
 
-`@c2n/table` ships that subscription as `useRenderedRows`: a React hook in `@c2n/table/react-hooks.js` and a Vue 3 composable in `@c2n/table/vue-composables.js` (also `@c2n/components/table/react-hooks.js` and `…/vue-composables.js` through the umbrella). React and Vue are optional peer dependencies of the package, so only the app that imports the binding needs its framework.
+`@c2n/table` ships that subscription as `useRenderedRows`: a React hook in `@c2n/table/react` and a Vue 3 composable in `@c2n/table/vue`, the same entries that declare the tags' JSX and template types, so one import gives both (through the umbrella, `@c2n/components/react` and `@c2n/components/vue`). React and Vue are optional peer dependencies of the package and `@c2n/table` itself never imports them, so only the app that imports the binding needs its framework.
 
 ```tsx tag=CodeBlock
-import { useRenderedRows } from '@c2n/table/react-hooks.js'
+import { useRenderedRows } from '@c2n/table/react'
 
 const tableRef = useRef<Table>(null)
 const rendered = useRenderedRows(tableRef) // TableRenderedRow[]
@@ -231,7 +249,7 @@ The hook seeds itself from `table.renderedRange` (the table may have rendered be
 ```vue tag=CodeBlock
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useRenderedRows } from '@c2n/table/vue-composables.js'
+import { useRenderedRows } from '@c2n/table/vue'
 
 const rendered = useRenderedRows(useTemplateRef<HTMLElementTagNameMap['c2-table']>('table'))
 </script>
@@ -244,7 +262,7 @@ const rendered = useRenderedRows(useTemplateRef<HTMLElementTagNameMap['c2-table'
 </template>
 ```
 
-Svelte, Angular or plain DOM code wraps the same core: `subscribeRenderedRows(table, (rows) => …)` from `@c2n/table/rendered-rows.js` reports the rows already rendered, then every `range-change`, and returns the function that unsubscribes.
+Svelte, Angular or plain DOM code wraps the same core: `subscribeRenderedRows(table, (rows) => …)` from `@c2n/table` reports the rows already rendered, then every `range-change`, and returns the function that unsubscribes.
 
 If the cell is better built as a Lit template, take `html` from `@c2n/core/lit-helper.js` rather than adding `lit` to the application — it is the same instance the components render with, so there is no version to pin by hand and no second copy of Lit in the bundle.
 

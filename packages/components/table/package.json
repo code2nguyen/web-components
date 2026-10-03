@@ -16,18 +16,6 @@
       "types": "./types/src/table-types.d.ts",
       "default": "./dist/table-types.js"
     },
-    "./rendered-rows.js": {
-      "types": "./types/src/rendered-rows.d.ts",
-      "default": "./dist/rendered-rows.js"
-    },
-    "./react-hooks.js": {
-      "types": "./types/src/react-hooks.d.ts",
-      "default": "./dist/react-hooks.js"
-    },
-    "./vue-composables.js": {
-      "types": "./types/src/vue-composables.d.ts",
-      "default": "./dist/vue-composables.js"
-    },
     "./react": {
       "types": "./react.d.ts",
       "default": "./react.js"

@@ -77,4 +77,5 @@ declare module '@vue/runtime-dom' {
   }
 }
 
-export {}
+// The package's own Vue composables (src/vue.ts).
+export * from './types/src/vue.js'

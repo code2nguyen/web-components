@@ -1,5 +1,6 @@
-// `subscribeRenderedRows` is the framework-agnostic core that `useRenderedRows` in `@c2n/table/react-hooks.js` and
-// `@c2n/table/vue-composables.js` both wrap, so its seeding, updates, disposal and upgrade tolerance are tested here.
+// `subscribeRenderedRows` (exported from `@c2n/table`) is the framework-agnostic core that `useRenderedRows` in
+// `@c2n/table/react` and `@c2n/table/vue` both wrap, so its seeding, updates, disposal and upgrade tolerance are tested
+// here. The tests load its own module, which registers nothing, so they can also subscribe before `c2-table` upgrades.
 import { test, expect } from '../../../../tests/component-fixture'
 
 const PEOPLE = [

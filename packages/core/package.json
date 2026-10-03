@@ -3,8 +3,7 @@
   "version": "0.0.24",
   "scripts": {
     "dev": "tsc -p tsconfig.json -w",
-    "build": "tsc -p tsconfig.json",
-    "test": "node --test test/*.test.mjs"
+    "build": "tsc -p tsconfig.json"
   },
   "author": "code2nguyen@gmail.com",
   "type": "module",
@@ -60,10 +59,6 @@
     "./locale-helper.js": {
       "types": "./dist/locale-helper.d.ts",
       "default": "./dist/locale-helper.js"
-    },
-    "./raw-html.js": {
-      "types": "./dist/raw-html.d.ts",
-      "default": "./dist/raw-html.js"
     }
   },
   "files": [

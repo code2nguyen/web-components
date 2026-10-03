@@ -341,14 +341,6 @@
       "types": "./lib/table.d.ts",
       "default": "./lib/table.js"
     },
-    "./table/react-hooks.js": {
-      "types": "./lib/table/react-hooks.d.ts",
-      "default": "./lib/table/react-hooks.js"
-    },
-    "./table/vue-composables.js": {
-      "types": "./lib/table/vue-composables.d.ts",
-      "default": "./lib/table/vue-composables.js"
-    },
     "./tabs": {
       "types": "./lib/tabs.d.ts",
       "default": "./lib/tabs.js"

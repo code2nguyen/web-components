@@ -1,9 +1,11 @@
 /**
- * React bindings for `c2-table`. `react` is an optional peer dependency of `@c2n/table`: only an application that
- * imports this module needs it, and the component itself never loads it.
+ * React bindings for `c2-table`, published as `@c2n/table/react` together with the generated JSX types (the
+ * framework-types binding convention: `src/react.ts` → `dist/react.js`, re-exported by the package's `react.js`).
+ * `react` is an optional peer dependency of `@c2n/table`: only an application that imports this module needs it, and
+ * the component itself never loads it.
  *
  * ```tsx
- * import { useRenderedRows } from '@c2n/table/react-hooks.js'
+ * import { useRenderedRows } from '@c2n/table/react'
  *
  * const tableRef = useRef<Table>(null)
  * const rendered = useRenderedRows(tableRef)
