@@ -9,6 +9,8 @@ test('header-content presence follows assignment, insertion, removal and reassig
     assertPresent: async (present) => (present ? expect(region).toBeVisible() : expect(region).toBeHidden()),
   })
 })
+import { existsSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import type { Details } from '../src/details'
 
 test('click and keyboard expand and collapse content', async ({ page, renderScenario }) => {
@@ -55,4 +57,37 @@ test('opens on the first activation while restored state is waiting to render', 
   })
   await expect(page.getByText('Arrives tomorrow')).toBeVisible()
   await expect(page.locator('c2-details')).toHaveJSProperty('expanded', true)
+})
+
+// The generated theme must leave the per-side border variables unset so they fall through to the shorthand.
+const THEME_CSS = fileURLToPath(new URL('../../../tools/theme/dist/theme.css', import.meta.url))
+
+test('the border shorthand reaches every side, with and without @c2n/theme, and a per-side variable still wins', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-details label="Frame">Body</c2-details>')
+  const host = page.locator('c2-details')
+  const frame = host.locator('.c2-details')
+  const expectSides = async (sides: Record<'top' | 'right' | 'bottom' | 'left', string>) => {
+    for (const [side, value] of Object.entries(sides)) {
+      const [width, ...color] = value.split(' ')
+      await expect(frame).toHaveCSS(`border-${side}-width`, width)
+      await expect(frame).toHaveCSS(`border-${side}-color`, color.join(' '))
+    }
+  }
+  const shorthand = '3px rgb(1, 2, 3)'
+
+  await host.evaluate((element) => element.style.setProperty('--c2-details--border', '3px solid rgb(1, 2, 3)'))
+  await expectSides({ top: shorthand, right: shorthand, bottom: shorthand, left: shorthand })
+
+  test.skip(!existsSync(THEME_CSS), 'build @c2n/theme first (npm run build -w packages/tools/theme)')
+  await page.addStyleTag({ path: THEME_CSS })
+  await expectSides({ top: shorthand, right: shorthand, bottom: shorthand, left: shorthand })
+
+  await host.evaluate((element) => element.style.setProperty('--c2-details--border-left', '5px solid rgb(4, 5, 6)'))
+  await expectSides({ top: shorthand, right: shorthand, bottom: shorthand, left: '5px rgb(4, 5, 6)' })
+
+  // Unset, the shorthand follows the theme token.
+  await host.evaluate((element) => element.removeAttribute('style'))
+  await page.addStyleTag({ content: ':root { --c2-theme--border: 2px solid rgb(7, 8, 9) }' })
+  const themed = '2px rgb(7, 8, 9)'
+  await expectSides({ top: themed, right: themed, bottom: themed, left: themed })
 })

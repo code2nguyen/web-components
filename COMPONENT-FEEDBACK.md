@@ -129,18 +129,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
   belongs in the theme/build pipeline, or in documenting `rawElement` as the required path above a certain
   instance count.
 
-### A component-level shorthand variable cannot be reached once `@c2n/theme` is loaded
-
-- **Severity:** gap (theme pipeline)
-- **Hit while:** trying to flatten `c2-details` for the docs sidebar in two declarations instead of eight, 2026-09-14.
-- **What happens:** adding `--c2-details--border` as a fallback behind the four per-side variables
-  (`css.cssVar(border-top, border)`) looks right and does nothing: `base.css` assigns
-  `--c2-details--border-top: var(--c2-theme--border, …)` and the other three at `:root`/`:host`, so the
-  per-side variable is always set and the shorthand is never consulted. The attempt was reverted rather than
-  shipped, because a variable that silently does nothing under the project's own theme is worse than none.
-- **Where the fix belongs:** `packages/tools/theme` — either have the generator emit the shorthand when a
-  component declares one, or stop `base.css` writing all four sides when they carry the same token.
-
 ### Property-driven table cell action slots are not reliably actionable during upgrade
 
 - **Severity:** bug
@@ -188,6 +176,7 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-button-group`               | App-wide `--c2-button__*` rules beat the group's `::slotted` item variables, so segmented children kept standalone fills.                                                                                                                                                                                                       | 2026-09-23 (#102)                                                                                                                                                                                            |
 | tooling                         | Stale or misspelled `--c2-*` names passed every check; `npm run check:css-contracts` now validates app usage against the manifests.                                                                                                                                                                                             | 2026-09-23 (#102)                                                                                                                                                                                            |
 | `c2-dashboard`                  | Stored layouts held tracks, order and breakpoint but not named panel sizes, so apps kept a second storage model. `sizes` on the grid, `size` on a card and `setPanelSize()` now persist, validate on restore and reset with the layout.                                                                                         | 2026-10-03                                                                                                                                                                                                   |
+| `@c2n/theme`                    | `base.css` set every per-side variable, so a component shorthand behind them (`--c2-details--border`) was never read. The generator now leaves out a side that falls back to its shorthand with the same mapped value; `c2-details` ships `--c2-details--border`.                                                               | 2026-10-03                                                                                                                                                                                                   |
 
 ## Won't fix
 
