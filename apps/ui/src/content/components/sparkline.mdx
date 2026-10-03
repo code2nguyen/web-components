@@ -116,8 +116,8 @@ The values are a France 2015–2024 extract from the public [Our World in Data E
 ## Tone
 
 `tone="auto"` compares the last value with the first and paints the line with the positive or negative tone
-— `--c2-chart__tone-positive--color` and `--c2-chart__tone-negative--color`. `positive` and `negative` force
-one of them, and `neutral` (the default) keeps the series' palette colour, which is what you want when the
+— `--c2-chart__tone-positive--color` and `--c2-chart__tone-negative--color`, which fall back to the chart-wide
+`--c2-chart__positive--color` and `--c2-chart__negative--color` when unset. `positive` and `negative` force one of them, and `neutral` (the default) keeps the series' palette colour, which is what you want when the
 sparkline sits next to other charts that share it.
 
 A flat series, a series with fewer than two points, or a non-numeric end falls back to the palette colour

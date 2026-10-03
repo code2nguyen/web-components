@@ -41,6 +41,9 @@ const INSET = { top: 8, side: 22, bottom: 24 }
  *
  * @cssproperty {pixel} [--c2-chart__gutter--width=56px] - Width of the gutter between the two sides, where the category labels are drawn.
  * @cssproperty {number} [--c2-chart__bar--thickness=0.72] - Share of each category's row a bar fills, from 0 to 1.
+ * @cssproperty {number} [--c2-chart__bar--border-radius=0] - Roundedness of a bar's value end, from 0 (square) to 0.5 (fully rounded).
+ * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the grid lines.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 @customElement('c2-butterfly-chart')
 export class ButterflyChart extends EchartsChartBase {
@@ -142,7 +145,7 @@ export class ButterflyChart extends EchartsChartBase {
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { color: theme.axisColor, fontSize: theme.axisFontSize, formatter: (value: number) => this.#format(index, value) },
-      splitLine: { lineStyle: { color: theme.gridColor } },
+      splitLine: { lineStyle: { color: theme.gridColor, width: theme.gridWidth } },
     })
     const categoryAxis = (index: number, left: boolean) => ({
       type: 'category',

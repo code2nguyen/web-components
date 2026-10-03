@@ -269,6 +269,7 @@ let mapCounter = 0
  * @cssproperty {color} [--c2-chart__zoom-control--color=#18181b] - Icon colour of a zoom button.
  * @cssproperty {border} [--c2-chart__zoom-control--border=1px solid #e4e4e7] - Border of a zoom button.
  * @cssproperty {border-radius} [--c2-chart__zoom-control--border-radius=6px] - Corner radius of a zoom button.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 @customElement('c2-map-chart')
 export class MapChart extends EchartsChartBase {

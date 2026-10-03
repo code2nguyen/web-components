@@ -27,6 +27,8 @@ export interface AreaChart {
  * @tag c2-area-chart
  *
  * @slotcomponent c2-chart-series
+ *
+ * @cssproperty {opacity} [--c2-chart__area--opacity=0.15] - Opacity of the fill under each line, unless `fill-opacity` is set.
  */
 @customElement('c2-area-chart')
 export class AreaChart extends LineChart {
