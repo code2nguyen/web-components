@@ -51,7 +51,13 @@ Curated looks for `c2-badge`. Open any card in the studio to start from it. The 
 ```
 
 ```html tag=MdxCodeBlock,label=Counter
-<c2-badge tone="danger" count="120"></c2-badge>
+<style>
+  .danger-counter {
+    --c2-badge__danger--background: #fee2e2;
+    --c2-badge__danger--color: #b91c1c;
+  }
+</style>
+<c2-badge class="danger-counter" tone="danger" count="120"></c2-badge>
 ```
 
 ```html tag=MdxCodeBlock,label=Dark counter

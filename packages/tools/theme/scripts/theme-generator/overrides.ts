@@ -236,7 +236,11 @@ export const overrides: Record<string, Override> = {
     value: 'color-mix(in srgb, var(--c2-theme--chart-series-2, #ea580c) 80%, var(--c2-theme--color-on-surface, #18181b))',
   },
   // Attachment upload completion is a semantic status colour; its progress groove is the standard hairline surface.
-  '--c2-attachment__status__complete--color': { exclude: 'success status colour' },
+  // The success green has no token, but a fixed green fails on a dark surface; pulled towards the ink it reads on both.
+  '--c2-attachment__status__complete--color': {
+    token: 'color-on-surface',
+    value: 'color-mix(in srgb, rgb(0, 122, 77) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-attachment__progress--background': { token: 'color-outline-variant' },
   // Marks drawn on the accent background of a selected checkbox.
   '--c2-checkbox__checkmark--color': onPrimary,
@@ -296,12 +300,26 @@ export const overrides: Record<string, Override> = {
   },
   '--c2-copy-button__container__copied--color': { exclude: 'status colour' },
   // Badge status tones are semantic colours with no theme token; the neutral/primary/danger pairs map on their own.
+  // The primary text sits on the primary container, where the bare accent falls short of 4.5:1; pulling it a quarter
+  // towards the ink deepens it in a light theme and lifts it in a dark one.
+  '--c2-badge__primary--color': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, #0265dc) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-badge__success--background': { exclude: 'status colour' },
   '--c2-badge__success--color': { exclude: 'status colour' },
   '--c2-badge__warning--background': { exclude: 'status colour' },
   '--c2-badge__warning--color': { exclude: 'status colour' },
   '--c2-badge__info--background': { exclude: 'status colour' },
-  '--c2-badge__danger--background': { exclude: 'status colour (the text maps to color-error)' },
+  // The danger pair is themed together: a fixed pink under an error text that lightens in a dark theme read 2.3:1.
+  '--c2-badge__danger--background': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 14%, var(--c2-theme--color-surface, #ffffff))',
+  },
+  '--c2-badge__danger--color': {
+    token: 'color-error',
+    value: 'color-mix(in srgb, var(--c2-theme--color-error, #dc2626) 75%, var(--c2-theme--color-on-surface, #18181b))',
+  },
   '--c2-badge__info--color': { exclude: 'status colour' },
   // Avatar fallback colours identify a person; leave them alone.
   '--c2-avatar--background': { exclude: 'identity colour' },
@@ -310,13 +328,22 @@ export const overrides: Record<string, Override> = {
   '--c2-avatar__editor__focus--outline-offset': { exclude: 'avatar editor focus geometry' },
   '--c2-avatar__editor-icon--size': { exclude: 'avatar editor icon size' },
   '--c2-avatar__remove--size': { exclude: 'avatar remove action geometry' },
+  // The accordion's frame and dividers are the same grey as c2-details' borders (rgb(213, 213, 213)), written as hex,
+  // so they take the same outline token.
+  '--c2-accordion--border-color': { token: 'color-outline' },
   '--c2-avatar__remove--box-shadow': { token: 'shadow-sm' },
   // Avatar-group width, overlap and item measurements are responsive composition controls. The overflow badge uses
   // the inverse surface pair so it remains legible in both light and dark themes.
   '--c2-avatar-group--max-width': { exclude: 'responsive avatar-group width' },
   '--c2-avatar-group--overlap': { exclude: 'avatar stacking geometry' },
-  '--c2-avatar-group__avatar--box-shadow': { exclude: 'overlap separation ring' },
+  // The ring cuts each avatar out of the one under it, so it is drawn in the surface colour, like the badge's border.
+  '--c2-avatar-group__avatar--box-shadow': {
+    token: 'color-surface',
+    value: '0 0 0 2px var(--c2-theme--color-surface, #ffffff)',
+  },
   '--c2-avatar-group__overflow--size': { exclude: 'overflow badge geometry' },
+  // A selected questionnaire indicator is filled with the inverse surface; its dot and tick take the matching ink.
+  '--c2-questionnaire__control__selected--color': { token: 'color-on-inverse-surface' },
   '--c2-avatar-group__overflow--background': { token: 'color-inverse-surface' },
   '--c2-avatar-group__overflow--color': { token: 'color-on-inverse-surface' },
   // Month planner, compact layout: the selected day is an inverse-surface circle, today's a primary one.
@@ -368,12 +395,38 @@ export const overrides: Record<string, Override> = {
     token: 'color-outline-variant',
     value: '-1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
   },
-  // The pressed trigger sits one step darker than the hover surface; the ramp has no token for that step.
-  '--c2-theme-select__trigger__active--background': { exclude: 'pressed tint one step below color-surface-container' },
-  // Code editor: the foreground and the code font size belong to the syntax palette, which is themed as one unit
-  // through `--c2-code-editor__theme--token-*` (the `theme` part is excluded wholesale, as it is for the viewer).
-  // Splitting the foreground off would leave a theme-aware body colour over a fixed token palette.
-  '--c2-code-editor--color': { exclude: 'code foreground; the syntax palette is themed as a unit' },
+  // The pressed trigger sits one step past the hover surface; the ramp has no token for that step, so it is the hover
+  // surface tinted towards the ink, like the copy button's pressed state.
+  '--c2-theme-select__trigger__active--background': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
+  // Code editor: the foreground and the syntax palette are themed as one unit. Its surface follows the theme, so a
+  // fixed light palette went unreadable on a dark one: the body text takes the ink, and each token hue is pulled
+  // towards it, darker on a light surface and lighter on a dark one, at the strength that keeps every token at 4.5:1
+  // on both the surface and the low container.
+  '--c2-code-editor--color': { token: 'color-on-surface' },
+  '--c2-code-editor__theme--token-variable': { token: 'color-on-surface' },
+  '--c2-code-editor__theme--token-punctuation': { token: 'color-on-surface' },
+  ...Object.fromEntries(
+    (
+      [
+        ['keyword', '#cf222e', 77],
+        ['invalid', '#cf222e', 77],
+        ['string', '#0969da', 83],
+        ['link', '#0969da', 83],
+        ['comment', '#636c76', 85],
+        ['constant', '#0550ae', 69],
+        ['property', '#0550ae', 69],
+        ['function', '#6f42c1', 75],
+        ['type', '#953800', 70],
+        ['tag', '#116329', 72],
+      ] as const
+    ).map(([name, hue, strength]) => [
+      `--c2-code-editor__theme--token-${name}`,
+      { token: 'color-on-surface', value: `color-mix(in srgb, ${hue} ${strength}%, var(--c2-theme--color-on-surface, #18181b))` },
+    ]),
+  ),
   '--c2-code-editor--font-size': { exclude: 'code font size, off the 12/14 text scale' },
   // The editor's three accent tints are alpha blends the colour ramp has no entries for, but they should still
   // follow the app's accent — `color-mix` expresses that without a token per opacity step.
@@ -555,4 +608,38 @@ export const overrides: Record<string, Override> = {
   '--c2-page-editor__syntax-comment--color': { exclude: 'syntax colours are not themed' },
   '--c2-page-editor__syntax-parameter--color': { exclude: 'syntax colours are not themed' },
   '--c2-page-editor__syntax-link--color': { exclude: 'syntax colours are not themed' },
+  // Neutral literals off the ramp the classifier knows, which stayed light on a dark surface.
+  '--c2-color-select__popover--background-color': { token: 'color-surface' },
+  '--c2-color-slider--border-top': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  '--c2-color-slider--border-right': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  '--c2-color-slider--border-bottom': {
+    token: 'color-outline-variant',
+    value: 'var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline-variant, rgb(248, 248, 248))',
+  },
+  // The frosted header keeps its translucency over whatever the surface is.
+  '--c2-header__blurred--background': {
+    token: 'color-surface',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 82%, transparent)',
+  },
+  '--c2-table__summary--box-shadow': {
+    token: 'color-outline-variant',
+    value: '0 -1px 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-table__group-row__echo--box-shadow': {
+    token: 'color-outline-variant',
+    value: '0 1px 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
+  },
+  '--c2-time-input__picker-separator--color': { token: 'color-outline' },
+  '--c2-qr-code__placeholder--border': {
+    token: 'color-outline',
+    value: 'var(--c2-theme--border-width, 1px) dashed var(--c2-theme--color-outline, #bcbcc6)',
+  },
+  // The resize grip sits on the event bar's own colour, not on the surface.
+  '--c2-month-planner__handle--color': { exclude: 'grip on the event colour' },
 }

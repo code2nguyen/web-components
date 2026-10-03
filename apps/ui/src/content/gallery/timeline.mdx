@@ -56,7 +56,7 @@ headings, lists and code, styled by the page's own CSS.
     --c2-timeline-item--padding-bottom: 48px;
     --c2-timeline-item__timestamp__split--width: 112px;
     --c2-timeline-item__marker--size: 12px;
-    --c2-timeline-item__marker--border: 2px solid #d4d4d8;
+    --c2-timeline-item__marker--border: 2px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-timeline-item__marker__primary--border-color: #0265dc;
     --c2-timeline-item__marker__primary--background: #0265dc;
     --c2-timeline-item__marker__danger--border-color: #dc2626;
@@ -64,15 +64,15 @@ headings, lists and code, styled by the page's own CSS.
     --c2-timeline-item__label--line-height: 28px;
     --c2-timeline-item__timestamp--font-size: 13px;
     --c2-timeline-item__content--margin-top: 6px;
-    --c2-timeline-item__content--color: #3f3f46;
-    --c2-accordion--border-color: #e4e4e7;
+    --c2-timeline-item__content--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    --c2-accordion--border-color: var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-details__header--padding-top: 10px;
     --c2-details__header--padding-bottom: 10px;
     --c2-details__header--padding-left: 14px;
     --c2-details__header--padding-right: 14px;
-    --c2-details__header--color: #18181b;
+    --c2-details__header--color: var(--c2-theme--color-on-surface, #18181b);
     --c2-details__header--font-size: 13px;
-    --c2-details__header__hover--background: #fafafa;
+    --c2-details__header__hover--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-details__header__icon--width: 16px;
     --c2-details__header__icon--height: 16px;
     --c2-details__content--padding-left: 14px;
@@ -80,6 +80,8 @@ headings, lists and code, styled by the page's own CSS.
     --c2-details__content--padding-bottom: 12px;
     --c2-badge--height: 18px;
     --c2-badge--font-size: 11px;
+    --c2-badge__danger--background: color-mix(in srgb, #dc2626 14%, var(--c2-theme--color-surface, #ffffff));
+    --c2-badge__danger--color: color-mix(in srgb, #dc2626 70%, var(--c2-theme--color-on-surface, #18181b));
   }
   .release-timeline .release-version {
     display: inline-flex;
@@ -100,6 +102,7 @@ headings, lists and code, styled by the page's own CSS.
   }
   .release-timeline p {
     margin: 0 0 16px;
+    color: inherit;
     font-size: 14px;
     line-height: 1.65;
   }
@@ -182,13 +185,13 @@ headings, lists and code, styled by the page's own CSS.
     margin: 10px 0 0;
     padding: 10px 44px 10px 12px;
     border-radius: 6px;
-    background: var(--c2-theme--color-inverse-surface, #18181b);
-    color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    background: #18181b;
+    color: #e4e4e7;
     font-size: 12px;
     line-height: 1.7;
     overflow-x: auto;
-    --c2-copy-button__container--color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-copy-button__container__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-copy-button__container--color: #e4e4e7;
+    --c2-copy-button__container__hover--background-color: #3f3f46;
   }
   .release-timeline .migration .del { color: #fca5a5; }
   .release-timeline .migration .add { color: #86efac; }
@@ -387,7 +390,7 @@ tabs.addEventListener('selection-change', onTab)"></c2-copy-button></pre>
     --c2-timeline-item__marker__primary--border-color: #7c3aed;
     --c2-timeline-item__marker__success--border-color: #7c3aed;
     --c2-timeline-item__connector--background: repeating-linear-gradient(to bottom, var(--c2-theme--color-outline, #d4d4d8) 0 4px, transparent 4px 8px);
-    --c2-timeline-item__timestamp--color: #7c3aed;
+    --c2-timeline-item__timestamp--color: color-mix(in srgb, #7c3aed 75%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-timeline class="roadmap-timeline" aria-label="Roadmap">

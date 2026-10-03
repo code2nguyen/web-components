@@ -70,7 +70,7 @@ Each card treats the message as part of a believable conversation. The examples 
   }
   .answer-avatar {
     --c2-avatar--size: 36px;
-    --c2-avatar--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-avatar--background: #18181b;
   }
   .answer-copy {
     display: grid;
@@ -143,13 +143,14 @@ Each card treats the message as part of a believable conversation. The examples 
     --c2-chat-message__message--border-top-right-radius: 5px;
     --c2-chat-message__message--border-bottom-left-radius: 18px;
     --c2-chat-message__message--border-bottom-right-radius: 18px;
-    --c2-chat-message__message--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-chat-message__message--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-chat-message__header__title--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-message__time--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-chat-message__message--background: #18181b;
+    --c2-chat-message__message--color: #fafafa;
+    --c2-chat-message__header__title--color: #d4d4d8;
+    --c2-chat-message__time--color: #a1a1aa;
   }
   .outgoing-message p {
     margin: 0;
+    color: inherit;
   }
 </style>
 
@@ -182,7 +183,7 @@ Each card treats the message as part of a believable conversation. The examples 
     --c2-chat-message--font-size: 15px;
     --c2-chat-message--line-height: 1.7;
     --c2-chat-message__header__title--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 92%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-message__time--color: #8a7d6b;
+    --c2-chat-message__time--color: color-mix(in srgb, #8a7d6b 75%, var(--c2-theme--color-on-surface, #18181b));
   }
   .research-message-avatar {
     --c2-avatar--size: 36px;
@@ -202,10 +203,10 @@ Each card treats the message as part of a believable conversation. The examples 
   }
   .research-source {
     padding: 5px 9px;
-    border: 1px solid #ded4c4;
+    border: 1px solid color-mix(in srgb, #7c5c3e 25%, var(--c2-theme--color-surface, #ffffff));
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.58);
-    color: #6d5f4d;
+    background: color-mix(in srgb, var(--c2-theme--color-surface, #ffffff) 58%, transparent);
+    color: color-mix(in srgb, #7c5c3e 70%, var(--c2-theme--color-on-surface, #18181b));
     font: 600 11px/1.2 Inter, system-ui, sans-serif;
     text-decoration: none;
   }
@@ -234,10 +235,10 @@ Each card treats the message as part of a believable conversation. The examples 
     box-sizing: border-box;
     width: min(100%, 720px);
     padding: 28px;
-    border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    border: 1px solid #27272a;
     border-radius: 20px;
-    background: var(--c2-theme--color-on-surface, #18181b);
-    color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    background: #18181b;
+    color: #e4e4e7;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   .agent-message {
@@ -254,14 +255,14 @@ Each card treats the message as part of a believable conversation. The examples 
     --c2-chat-message__message--border-top-right-radius: 10px;
     --c2-chat-message__message--border-bottom-left-radius: 10px;
     --c2-chat-message__message--border-bottom-right-radius: 10px;
-    --c2-chat-message__message--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-message__message--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-message__message--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-message__message--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-message__message--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-chat-message__message--color: var(--c2-theme--color-outline-variant, #e4e4e7);
-    --c2-chat-message__header__title--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 5%, var(--c2-theme--color-surface, #ffffff));
-    --c2-chat-message__time--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-chat-message__message--border-top: 1px solid #3f3f46;
+    --c2-chat-message__message--border-right: 1px solid #3f3f46;
+    --c2-chat-message__message--border-bottom: 1px solid #3f3f46;
+    --c2-chat-message__message--border-left: 1px solid #3f3f46;
+    --c2-chat-message__message--background: #18181b;
+    --c2-chat-message__message--color: #e4e4e7;
+    --c2-chat-message__header__title--color: #f4f4f5;
+    --c2-chat-message__time--color: #a1a1aa;
   }
   .agent-status {
     box-sizing: border-box;
@@ -281,8 +282,9 @@ Each card treats the message as part of a believable conversation. The examples 
   }
   .agent-copy p {
     margin: 0;
+    color: inherit;
   }
-  .agent-command {
+  .agent-copy .agent-command {
     color: #86efac;
   }
 </style>

@@ -142,12 +142,12 @@ Curated looks for `c2-list`. Open any card in the studio to start from it. The c
     --c2-list-item--border-right: 1px solid transparent;
     --c2-list-item--border-bottom: 1px solid transparent;
     --c2-list-item--border-left: 1px solid transparent;
-    --c2-list-item__selected--border-top: 1px solid #2563eb;
-    --c2-list-item__selected--border-right: 1px solid #2563eb;
-    --c2-list-item__selected--border-bottom: 1px solid #2563eb;
-    --c2-list-item__selected--border-left: 1px solid #2563eb;
+    --c2-list-item__selected--border-top: 1px solid var(--c2-theme--color-primary, #2563eb);
+    --c2-list-item__selected--border-right: 1px solid var(--c2-theme--color-primary, #2563eb);
+    --c2-list-item__selected--border-bottom: 1px solid var(--c2-theme--color-primary, #2563eb);
+    --c2-list-item__selected--border-left: 1px solid var(--c2-theme--color-primary, #2563eb);
     --c2-list-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
-    --c2-list-item__selected--color: #1e3a8a;
+    --c2-list-item__selected--color: color-mix(in srgb, var(--c2-theme--color-primary, #2563eb) 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-list-item--font-weight: 600;
   }
 </style>
@@ -162,7 +162,7 @@ Curated looks for `c2-list`. Open any card in the studio to start from it. The c
 <style>
   .palette {
     width: 220px;
-    --c2-list--background: var(--c2-theme--color-inverse-surface, #18181b);
+    --c2-list--background: #18181b;
     --c2-list--padding-top: 6px;
     --c2-list--padding-bottom: 6px;
     --c2-list--padding-left: 6px;
@@ -172,21 +172,25 @@ Curated looks for `c2-list`. Open any card in the studio to start from it. The c
     --c2-list--border-bottom-left-radius: 12px;
     --c2-list--border-bottom-right-radius: 12px;
     --c2-list--box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-    --c2-list__heading--color: var(--c2-theme--color-on-surface-variant, #71717a);
-    --c2-list__divider--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-list-item--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-list__heading--color: #a1a1aa;
+    --c2-list__divider--color: #28282b;
+    --c2-list-item--color: #e4e4e7;
     --c2-list-item--font-size: 13px;
-    --c2-list-item__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-list-item__selected--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-list-item__selected--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-list-item__selected__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-list-item__description--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-list-item__hover--background: #28282b;
+    --c2-list-item__selected--background: #424244;
+    --c2-list-item__selected--color: #fafafa;
+    --c2-list-item__selected__hover--background: #545456;
+    --c2-list-item__description--color: #a1a1aa;
+  }
+  .palette .shortcut {
+    font-size: 11px;
+    color: #b4b4b8;
   }
 </style>
 <c2-list class="palette" value="new" client:only="lit">
   <h6>Actions</h6>
-  <c2-list-item value="new">New file<span slot="suffix-icon" style="font-size: 11px; color: #71717a">⌘N</span></c2-list-item>
-  <c2-list-item value="open">Open…<span slot="suffix-icon" style="font-size: 11px; color: #71717a">⌘O</span></c2-list-item>
+  <c2-list-item value="new">New file<span slot="suffix-icon" class="shortcut">⌘N</span></c2-list-item>
+  <c2-list-item value="open">Open…<span slot="suffix-icon" class="shortcut">⌘O</span></c2-list-item>
   <hr />
   <h6>Recent</h6>
   <c2-list-item value="tabs">tabs.ts</c2-list-item>

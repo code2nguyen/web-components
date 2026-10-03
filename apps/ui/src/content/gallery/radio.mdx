@@ -40,14 +40,14 @@ Curated looks for `c2-radio` and `c2-radio-group`. Open any card in the studio t
     width: 260px;
     max-width: 100%;
     --c2-radio-group--align-items: stretch;
-    --c2-radio__container--border: 1px solid #d4d4d8;
+    --c2-radio__container--border: 1px solid var(--c2-theme--color-outline, #d4d4d8);
     --c2-radio__container--padding-top: 10px;
     --c2-radio__container--padding-right: 14px;
     --c2-radio__container--padding-bottom: 10px;
     --c2-radio__container--padding-left: 8px;
-    --c2-radio__container__hover--background: #fafafa;
+    --c2-radio__container__hover--background: var(--c2-theme--color-surface-container-low, #fafafa);
     --c2-radio__container__checked--border: 1px solid #0265dc;
-    --c2-radio__container__checked--background: #edf1fe;
+    --c2-radio__container__checked--background: color-mix(in srgb, #0265dc 10%, var(--c2-theme--color-surface, #ffffff));
     --c2-radio__state-layer--size: 24px;
     --c2-radio__label--font-weight: 500;
   }
@@ -116,7 +116,7 @@ Curated looks for `c2-radio` and `c2-radio-group`. Open any card in the studio t
     --c2-radio__control__checked__hover--background-color: #15803d;
     --c2-radio__control__focus--outline: 2px solid rgba(22, 163, 74, 0.4);
     --c2-radio__state-layer__hover--color: #16a34a;
-    --c2-radio__label__checked--color: #166534;
+    --c2-radio__label__checked--color: color-mix(in srgb, #166534 65%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-radio-group client:only="lit" class="success" value="yes" orientation="horizontal" style="--c2-radio-group--gap: 16px">

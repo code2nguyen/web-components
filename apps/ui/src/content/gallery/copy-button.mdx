@@ -90,8 +90,11 @@ The shape it was built for: a block with the button pinned in its corner, copyin
     background: var(--c2-theme--color-inverse-surface, #18181b);
     color: var(--c2-theme--color-outline-variant, #e4e4e7);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    box-sizing: border-box;
+    max-width: 100%;
     font-size: 12.5px;
-    white-space: pre;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
   .dark-block c2-copy-button {
     --c2-copy-button__container--color: var(--c2-theme--color-outline-strong, #a1a1aa);
