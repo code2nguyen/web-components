@@ -57,11 +57,36 @@
         events='[{"title":"Office hours","day":"mon","start":"09:00","end":"12:00"},{"title":"Office hours","day":"thu","start":"13:00","end":"16:00"}]'
       ></c2-week-planner>
     </section>
+    <section>
+      <h3>Dated and editable: click to add, drag to move or resize</h3>
+      <c2-week-planner id="dated" editable heading="My week" week-start="monday"></c2-week-planner>
+      <p id="dated-log" style="color: #71717a; font-size: 13px">Click an empty spot, drag a block, or Alt+Arrow on a focused one.</p>
+    </section>
     <script type="module">
       const log = document.querySelector('#log')
       const plan = document.querySelector('#plan')
       plan.addEventListener('event-click', (event) => (log.textContent = `Clicked: ${event.detail.event.title}`))
       plan.addEventListener('parity-change', (event) => (log.textContent = `Showing ${event.detail.parity} weeks`))
+
+      const dated = document.querySelector('#dated')
+      const datedLog = document.querySelector('#dated-log')
+      const iso = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      const today = new Date()
+      dated.date = iso(today)
+      dated.events = [
+        { id: 'standup', title: 'Stand-up', day: 'mon', start: '09:00', end: '09:30' },
+        { id: 'focus', title: 'Focus time', date: iso(today), start: '10:00', end: '12:00', color: '#0f766e' },
+      ]
+      let count = 0
+      dated.addEventListener('slot-click', ({ detail }) => {
+        dated.events = [...dated.events, { id: `task-${++count}`, title: `Task ${count}`, date: detail.date, start: detail.start, end: detail.end }]
+        datedLog.textContent = `Added ${detail.date} ${detail.start}–${detail.end}`
+      })
+      dated.addEventListener('event-change', ({ detail }) => {
+        dated.events = dated.events.map((event) => (event === detail.event ? { ...event, ...detail.changes } : event))
+        datedLog.textContent = `Moved ${detail.event.title}: ${JSON.stringify(detail.changes)}`
+      })
+      dated.addEventListener('week-change', ({ detail }) => (datedLog.textContent = `Showing ${detail.start} – ${detail.end}`))
     </script>
   </body>
 </html>
