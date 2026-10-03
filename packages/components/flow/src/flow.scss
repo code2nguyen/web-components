@@ -95,6 +95,8 @@
     connector--background-color: rgb(2, 101, 220),
     connector--border-color: #ffffff,
     node__connect-target--border-color: rgb(2, 101, 220),
+    ghost--border: 1.5px dashed rgb(2, 101, 220),
+    ghost--background-color: rgba(2, 101, 220, 0.06),
     node__connect-target--box-shadow: '0 0 0 3px rgba(2, 101, 220, 0.2)',
     edge__draft--color: rgb(2, 101, 220),
     edge__selected--color: rgb(2, 101, 220),
@@ -784,4 +786,16 @@
   .card {
     transition: none;
   }
+}
+
+// The node `dragNewNode()` drags in: where it will land, under the pointer.
+.ghost {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  border: css.cssVar(ghost--border);
+  border-radius: css.cssVar(node--border-radius);
+  background-color: css.cssVar(ghost--background-color);
+  pointer-events: none;
 }

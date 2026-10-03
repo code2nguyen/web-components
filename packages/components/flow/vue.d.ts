@@ -22,6 +22,7 @@ declare module 'vue' {
       C2Props<Flow> & {
         'edge-type'?: unknown
         'storage-key'?: unknown
+        'no-double-click-add'?: unknown
         'actions-placement'?: unknown
         'no-card'?: unknown
         'no-context-menu'?: unknown
