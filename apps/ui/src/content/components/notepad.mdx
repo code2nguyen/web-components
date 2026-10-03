@@ -7,6 +7,9 @@ category: 'Planning'
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
 import { Notepad } from '@c2n/notepad'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
+import { FeatherBookmarkIcon as FeatherBookmark } from '@c2n/feather-icons/icons/bookmark.js'
 
 `c2-notepad` is a form control for notes that reads as a sheet of paper rather than an input box. The writing sits on the ruled lines, a margin runs down the left, a spiral binds the top and the page has a light grain. Select some text and a strip of washi tape appears above it with bold, italic, underline and strikethrough, plus one button for the four inks and one for the three highlighters. Write `[ ] ` at the start of a line for a checklist item. Set `tearable` to add a perforated edge with a "Tear off" button.
 
@@ -160,12 +163,32 @@ Buttons slotted into `actions` sit at the top right of the sheet, after the "Pap
 
 On a board of many notes, set `--c2-notepad__controls--opacity: 0` to show the "Paper" button, the "Tear off" button and the actions only on the note being pointed at or written in. A touch screen has no hover: there they show once the writer taps into the page. They stay while the paper picker is open.
 
-```html tag=CodeBlock
-<c2-notepad label="Groceries" paper-picker style="--c2-notepad__controls--opacity: 0">
-  <c2-icon-button slot="actions" aria-label="Delete note">
-    <c2-feather-trash-2></c2-feather-trash-2>
-  </c2-icon-button>
-</c2-notepad>
+Hover the notes of the second row, or tab into one, to see its controls.
+
+```html tag=UsageBlock,package=@c2n/notepad
+<style>
+  .note-with-actions { width: 320px; max-width: 100%; }
+  .board-note {
+    width: 240px;
+    max-width: 100%;
+    --c2-notepad__controls--opacity: 0;
+  }
+</style>
+<div data-label="Actions">
+  <c2-notepad class="note-with-actions" paper-picker label="Groceries" value="- [ ] Oat milk
+- [ ] Sourdough">
+    <c2-icon-button slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
+    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+</div>
+<div data-label="Controls on hover">
+  <c2-notepad class="board-note" pad="sticky" paper-picker label="Reminder" value="Dentist Tue 9:30">
+    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+  <c2-notepad class="board-note" pad="sticky" paper-picker tearable label="To call" value="Plumber: Thu after 4">
+    <c2-icon-button slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+</div>
 ```
 
 ## Paper and binding

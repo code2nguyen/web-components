@@ -2,6 +2,9 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { MonthPlanner } from '@c2n/month-planner'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+<ExampleModules />
 
 ## Presets
 
@@ -53,6 +56,28 @@ month reads.
   month="2026-12"
   locale="en-US"
   events='[{"title":"Ana — leave","start":"2026-12-21","end":"2027-01-01"},{"title":"Ben — leave","start":"2026-12-24","end":"2026-12-28","color":"#be185d"},{"title":"Office closed","start":"2026-12-25","color":"#52525b"}]'
+></c2-month-planner>
+```
+
+```html tag=MdxCodeBlock,label=Editable trip planner
+<style>
+  .trip-planner {
+    --c2-month-planner__event--background: #0f766e;
+    --c2-month-planner__event--border-radius: 999px;
+    --c2-month-planner__day__range--background: rgba(15, 118, 110, 0.12);
+    --c2-month-planner__day__hover--background: rgba(15, 118, 110, 0.06);
+    --c2-month-planner__event__dragging--box-shadow: 0 8px 24px rgba(15, 118, 110, 0.25);
+    --c2-month-planner__handle--width: 8px;
+  }
+</style>
+<c2-month-planner
+  class="trip-planner"
+  editable
+  data-planner-demo="editable"
+  heading="Summer trips"
+  month="2026-07"
+  locale="en-US"
+  events='[{"id":"lisbon","title":"Lisbon","start":"2026-07-06","end":"2026-07-10"},{"id":"porto","title":"Porto","start":"2026-07-20","end":"2026-07-23","color":"#b45309"}]'
 ></c2-month-planner>
 ```
 

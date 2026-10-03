@@ -2,6 +2,9 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { Flow } from '@c2n/flow'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+<ExampleModules />
 
 ## Presets
 
@@ -80,6 +83,24 @@ Looks for `c2-flow`. The node variables (`--c2-flow__node--*`) and the edge colo
   }
 </style>
 <c2-flow client:only="lit" class="flow-blueprint" aria-label="Batch with retries" nodes='[{"id":"fetch","label":"Fetch","status":"success"},{"id":"process","label":"Process batch","status":"running","description":"attempt 3"},{"id":"check","label":"Check result","status":"pending"},{"id":"publish","label":"Publish","status":"pending"}]' edges='[{"source":"fetch","target":"process"},{"source":"process","target":"check"},{"source":"check","target":"process"},{"source":"check","target":"publish"}]'></c2-flow>
+```
+
+```html tag=MdxCodeBlock,label=Editable mind map
+<style>
+  .flow-mindmap {
+    width: 100%;
+    --c2-flow--height: 300px;
+    --c2-flow__node--border-radius: 999px;
+    --c2-flow__connector--background-color: #db2777;
+    --c2-flow__node__connect-target--border-color: #db2777;
+    --c2-flow__node__connect-target--box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.2);
+    --c2-flow__edge__draft--color: #db2777;
+    --c2-flow__edge__selected--color: #db2777;
+    --c2-flow__editor--border-radius: 999px;
+    --c2-flow__editor__focus--outline: 2px solid rgba(219, 39, 119, 0.4);
+  }
+</style>
+<c2-flow client:only="lit" class="flow-mindmap" data-flow-demo="editable" editable aria-label="Mind map" nodes='[{"id":"trip","label":"Weekend trip"},{"id":"where","label":"Where?"},{"id":"budget","label":"Budget"}]' edges='[{"source":"trip","target":"where"},{"source":"trip","target":"budget"}]'></c2-flow>
 ```
 
 </GalleryGrid>

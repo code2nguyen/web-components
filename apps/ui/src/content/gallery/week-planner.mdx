@@ -2,6 +2,9 @@ import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
 import GalleryGrid from '../../components/GalleryGrid.astro'
 
 import { WeekPlanner } from '@c2n/week-planner'
+import ExampleModules from '../../components/ExampleModules.astro'
+
+<ExampleModules />
 
 ## Presets
 
@@ -57,6 +60,33 @@ The hour height sets how dense the week reads; the event and today-column variab
   start-hour="8"
   end-hour="13"
   events='[{"title":"Inbox zero","day":"mon","start":"08:30","end":"09:00"},{"title":"Dentist","date":"2026-10-06","start":"10:00","end":"11:00","color":"#b45309"},{"title":"Write report","date":"2026-10-08","start":"09:00","end":"12:00"},{"title":"Inbox zero","day":"fri","start":"08:30","end":"09:00"}]'
+></c2-week-planner>
+```
+
+```html tag=MdxCodeBlock,label=Editable week
+<style>
+  .editable-violet {
+    --c2-week-planner__event--background: #6d28d9;
+    --c2-week-planner__day-header__today--color: #6d28d9;
+    --c2-week-planner__slot__hover--background: rgba(109, 40, 217, 0.08);
+    --c2-week-planner__preview--border: 2px dashed #6d28d9;
+    --c2-week-planner__preview--background: rgba(109, 40, 217, 0.1);
+    --c2-week-planner__preview--color: #6d28d9;
+    --c2-week-planner__resize-handle--height: 8px;
+  }
+</style>
+<c2-week-planner
+  class="editable-violet"
+  editable
+  data-planner-demo="editable"
+  date="2026-10-07"
+  week-start="monday"
+  heading="Drag to reschedule"
+  locale="en-US"
+  start-hour="8"
+  end-hour="13"
+  snap-minutes="15"
+  events='[{"id":"sync","title":"Sync","day":"mon","start":"09:00","end":"09:30"},{"id":"workshop","title":"Workshop","date":"2026-10-07","start":"10:00","end":"12:00"},{"id":"lunch","title":"Lunch with Ana","date":"2026-10-09","start":"12:00","end":"13:00","color":"#b45309"}]'
 ></c2-week-planner>
 ```
 

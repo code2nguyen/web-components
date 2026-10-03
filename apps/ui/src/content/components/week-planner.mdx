@@ -6,9 +6,12 @@ category: 'Planning'
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
 
 import { WeekPlanner } from '@c2n/week-planner'
 import { Button } from '@c2n/button'
+
+<ExampleModules />
 
 `c2-week-planner` shows a week: seven day columns on an hour scale, each event a block from its start to its end
 time. By default it is a typical week, with no dates: an event names the weekday it happens on and repeats every week,
@@ -29,6 +32,19 @@ npm install @c2n/week-planner
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/week-planner
+<style>
+  .planner-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .planner-result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+</style>
 <div data-label="Every week">
   <c2-week-planner
     locale="en-US"
@@ -67,6 +83,21 @@ npm install @c2n/week-planner
     end-hour="13"
     events='[{"title":"Team stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Team stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Dentist","date":"2026-10-06","start":"10:00","end":"11:00","color":"#0f766e"},{"title":"Quarterly review","date":"2026-10-08","start":"10:30","end":"12:30","color":"#be185d"}]'
   ></c2-week-planner>
+</div>
+<div data-label="Editable">
+  <div class="planner-demo">
+    <c2-week-planner
+      editable
+      data-planner-demo="editable"
+      date="2026-10-07"
+      week-start="monday"
+      locale="en-US"
+      start-hour="8"
+      end-hour="13"
+      events='[{"id":"standup","title":"Team stand-up","day":"mon","start":"08:30","end":"09:00"},{"id":"dentist","title":"Dentist","date":"2026-10-06","start":"10:00","end":"11:00","color":"#0f766e"},{"id":"review","title":"Quarterly review","date":"2026-10-08","start":"10:30","end":"12:30","color":"#be185d"}]'
+    ></c2-week-planner>
+    <output class="planner-result">Click an empty spot, drag a block, or drag its bottom edge.</output>
+  </div>
 </div>
 ```
 
