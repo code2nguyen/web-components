@@ -3,6 +3,27 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [0.0.21](https://github.com/code2nguyen/web-components/releases/tag/v0.0.21) — 2026-10-03
+
+### Breaking changes
+
+- **todo-list:** Take custom backgrounds and palettes, stored by position ([76eefa9](https://github.com/code2nguyen/web-components/commit/76eefa9))
+- **notepad:** Take custom ink and highlighter lists, stored by position ([5011b91](https://github.com/code2nguyen/web-components/commit/5011b91))
+- **separator:** Rename @c2n/seperator to @c2n/separator ([37674f3](https://github.com/code2nguyen/web-components/commit/37674f3))
+
+### Features
+
+- **page-editor:** Add c2-page-editor, a Notion-style editor for long text ([f1d3857](https://github.com/code2nguyen/web-components/commit/f1d3857))
+- **notepad:** Name list colours `{ value, name }`, with an optional name ([bfd8efd](https://github.com/code2nguyen/web-components/commit/bfd8efd))
+- **todo-list:** Draw the ring and hero progress as a circular c2-progress ([7056c63](https://github.com/code2nguyen/web-components/commit/7056c63))
+
+### Fixes
+
+- **masonry:** Place a newly added tile before its authored successor ([04883b3](https://github.com/code2nguyen/web-components/commit/04883b3))
+- **code-editor:** Apply value and options set while the engine loads ([aa3745d](https://github.com/code2nguyen/web-components/commit/aa3745d))
+- **reorder-list:** Keep the drag preview under the pointer inside a containing ancestor ([ba20843](https://github.com/code2nguyen/web-components/commit/ba20843))
+- **notepad:** Size the paper menu to its content on iOS Safari ([164b69d](https://github.com/code2nguyen/web-components/commit/164b69d))
+
 ## [0.0.20](https://github.com/code2nguyen/web-components/releases/tag/v0.0.20) — 2026-10-02
 
 ### Features
