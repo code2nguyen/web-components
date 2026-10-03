@@ -748,6 +748,62 @@ test.describe('actions', () => {
     expect((await recorded(page, 'node-add'))[1].detail.source).toBe('publish')
   })
 
+  test('dragNewNode(): drag the add button onto the canvas to drop a node there; elsewhere or Escape cancels', async ({ page, renderScenario }) => {
+    await renderScenario(withActions('editable no-double-click-add'))
+    await wire(page)
+    await host(page).evaluate((element: Flow) => {
+      const button = element.querySelector('button')!
+      button.addEventListener('pointerdown', (event) => element.dragNewNode(event))
+      button.addEventListener('click', () => element.addNode())
+    })
+    const ghost = page.locator('c2-flow .ghost')
+    const button = await center(page.getByRole('button', { name: 'Add node' }))
+    // Empty canvas below the row of nodes, clear of the edge (a node dropped at the very edge is panned into view).
+    const stage = (await page.locator('c2-flow .stage').boundingBox())!
+    const drop = { x: stage.x + stage.width / 2, y: stage.y + stage.height * 0.75 }
+
+    // Released outside the canvas: nothing. The placeholder shows only over the canvas.
+    await page.mouse.move(button.x, button.y)
+    await page.mouse.down()
+    await page.mouse.move(drop.x, drop.y, { steps: 8 })
+    await expect(ghost).toBeVisible()
+    const placeholder = await center(ghost)
+    expect(Math.abs(placeholder.x - drop.x)).toBeLessThan(4)
+    expect(Math.abs(placeholder.y - drop.y)).toBeLessThan(4)
+    const outside = (await host(page).boundingBox())!
+    await page.mouse.move(outside.x + outside.width / 2, outside.y + outside.height + 40, { steps: 4 })
+    await expect(ghost).toHaveCount(0)
+    await page.mouse.up()
+    expect(await recorded(page, 'node-add')).toEqual([])
+
+    // Escape cancels a drag in progress.
+    await page.mouse.move(button.x, button.y)
+    await page.mouse.down()
+    await page.mouse.move(drop.x, drop.y, { steps: 8 })
+    await page.keyboard.press('Escape')
+    await expect(ghost).toHaveCount(0)
+    await page.mouse.up()
+    expect(await recorded(page, 'node-add')).toEqual([])
+
+    // Dropped on the canvas: a node where it was released, selected and focused.
+    await page.mouse.move(button.x, button.y)
+    await page.mouse.down()
+    await page.mouse.move(drop.x, drop.y, { steps: 8 })
+    await page.mouse.up()
+    await expect(ghost).toHaveCount(0)
+    const [add] = await recorded(page, 'node-add')
+    expect(add.detail.source).toBeUndefined()
+    const added = await center(node(page, 'new-1'))
+    expect(Math.abs(added.x - drop.x)).toBeLessThan(4)
+    expect(Math.abs(added.y - drop.y)).toBeLessThan(4)
+    await expect(node(page, 'new-1')).toBeFocused()
+
+    // A plain click on the same button still adds through addNode().
+    await page.getByRole('button', { name: 'Add node' }).click()
+    await expect(node(page, 'new-2')).toBeVisible()
+    expect(await recorded(page, 'node-add')).toHaveLength(2)
+  })
+
   test('no-double-click-add: double-clicking empty canvas adds nothing, N and addNode() still do', async ({ page, renderScenario }) => {
     await renderScenario(withActions('editable no-double-click-add'))
     await wire(page)

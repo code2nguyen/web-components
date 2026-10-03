@@ -196,7 +196,8 @@ interface Connection {
  * **Actions.** Buttons slotted into `actions` sit in a toolbar over the canvas, at the top by default;
  * `actions-placement` moves it to the `right`, `bottom` or `left` edge, where it stacks vertically. Wire them to the
  * public methods: `addNode()` asks for a node as `N` does (with `no-double-click-add`, it is the way a pointer adds
- * one), `resetLayout()` goes back to the auto layout, `fitView()`,
+ * one), and `dragNewNode(event)`, called from the same button's `pointerdown`, lets the user drag the new node onto
+ * the canvas as a design tool drags a shape; `resetLayout()` goes back to the auto layout, `fitView()`,
  * `zoomIn()` and `zoomOut()` move the view. The toolbar's look and its alignment along the edge are CSS variables.
  *
  * @tag c2-flow
@@ -304,6 +305,8 @@ interface Connection {
  * @cssproperty {color} [--c2-flow__connector--background-color=rgb(2, 101, 220)]
  * @cssproperty {color} [--c2-flow__connector--border-color=#ffffff]
  * @cssproperty {color} [--c2-flow__node__connect-target--border-color=rgb(2, 101, 220)] - Border of the node a connection would be made to.
+ * @cssproperty {border} [--c2-flow__ghost--border=1.5px dashed rgb(2, 101, 220)] - Outline of the placeholder that follows the pointer while `dragNewNode()` drags a new node onto the canvas.
+ * @cssproperty {color} [--c2-flow__ghost--background-color=rgba(2, 101, 220, 0.06)]
  * @cssproperty {box-shadow} [--c2-flow__node__connect-target--box-shadow=0 0 0 3px rgba(2, 101, 220, 0.2)]
  * @cssproperty {color} [--c2-flow__edge__draft--color=rgb(2, 101, 220)] - The edge drawn while a connection is being made.
  * @cssproperty {color} [--c2-flow__edge__selected--color=rgb(2, 101, 220)] - Selected edge of an `editable` flow.
@@ -383,6 +386,8 @@ export class Flow extends LitElement {
   @state() private cardId: string | null = null
   @state() private highlightId: string | null = null
   @state() private focusId: string | null = null
+  /** Where the placeholder of a node dragged in by `dragNewNode()` is, in canvas pixels; null when not over the canvas. */
+  @state() private ghost: FlowPoint | null = null
   @state() private draggingId: string | null = null
   @state() private panning = false
   @state() private custom = false
@@ -431,6 +436,7 @@ export class Flow extends LitElement {
   private editedLayout = false
   /** A keyboard `N`: focus the node the application adds in answer. */
   private focusAdded: Set<string> | null = null
+  private newNodeDrag: { pointerId: number; startX: number; startY: number; moved: boolean } | null = null
   private readonly slotPresence = new SlotPresenceController(this, ['actions'])
   /** A keyboard delete: where focus goes once the application has removed the node. */
   private refocus: { removed: string; next: string | null } | null = null
@@ -466,6 +472,7 @@ export class Flow extends LitElement {
     cancelAnimationFrame(this.tween)
     this.clearCardTimers()
     this.stopCardPositioning()
+    this.endNewNodeDrag()
   }
 
   // ---------------------------------------------------------------------------------------------------------------
@@ -1013,6 +1020,64 @@ export class Flow extends LitElement {
     if (!stage) return
     const rect = stage.getBoundingClientRect()
     this.requestNode(this.freeSpot(this.centred(this.toCanvas(rect.left + rect.width / 2, rect.top + rect.height / 2))), undefined, true)
+  }
+
+  /**
+   * Starts dragging a new node onto the canvas from outside it, the way a design tool drags a shape from its toolbar:
+   * call it from the `pointerdown` of a button in the `actions` slot. While the pointer is over the canvas a
+   * placeholder follows it; releasing there fires `node-add` at that spot (moved aside if it would cover a node), and
+   * the node is then selected and focused like one `addNode()` asked for. Released elsewhere, or Escape, cancels. A
+   * press that does not move does nothing, so the same button can call `addNode()` on `click`. On a touch screen,
+   * give the button `touch-action: none` so the drag is not taken as a page scroll. Does nothing unless `editable`.
+   */
+  dragNewNode(event: PointerEvent): void {
+    if (!this.editable || (event.pointerType === 'mouse' && event.button !== 0)) return
+    this.endNewNodeDrag()
+    this.newNodeDrag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, moved: false }
+    window.addEventListener('pointermove', this.handleNewNodeMove)
+    window.addEventListener('pointerup', this.handleNewNodeUp)
+    window.addEventListener('pointercancel', this.endNewNodeDrag)
+    window.addEventListener('keydown', this.handleNewNodeKey, true)
+  }
+
+  /** Canvas position of a new node centred on a viewport point, or null when the point is outside the canvas. */
+  private dropPoint(clientX: number, clientY: number): FlowPoint | null {
+    const rect = this.stage?.getBoundingClientRect()
+    if (!rect || clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return null
+    return this.centred(this.toCanvas(clientX, clientY))
+  }
+
+  private handleNewNodeMove = (event: PointerEvent) => {
+    const drag = this.newNodeDrag
+    if (!drag || event.pointerId !== drag.pointerId) return
+    if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < DRAG_THRESHOLD) return
+    drag.moved = true
+    event.preventDefault()
+    this.ghost = this.dropPoint(event.clientX, event.clientY)
+  }
+
+  private handleNewNodeUp = (event: PointerEvent) => {
+    const drag = this.newNodeDrag
+    if (!drag || event.pointerId !== drag.pointerId) return
+    const point = drag.moved ? this.dropPoint(event.clientX, event.clientY) : null
+    this.endNewNodeDrag()
+    if (point) this.requestNode(this.freeSpot(point), undefined, true)
+  }
+
+  private handleNewNodeKey = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !this.newNodeDrag) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.endNewNodeDrag()
+  }
+
+  private endNewNodeDrag = () => {
+    this.newNodeDrag = null
+    this.ghost = null
+    window.removeEventListener('pointermove', this.handleNewNodeMove)
+    window.removeEventListener('pointerup', this.handleNewNodeUp)
+    window.removeEventListener('pointercancel', this.endNewNodeDrag)
+    window.removeEventListener('keydown', this.handleNewNodeKey, true)
   }
 
   /** Pans the view, if needed, so node `id` is in sight with a margin; the zoom stays as it is. */
@@ -1952,6 +2017,15 @@ export class Flow extends LitElement {
     items[index].focus()
   }
 
+  private renderGhost(at: FlowPoint) {
+    const size = this.typicalSize()
+    return html`<div
+      class="ghost"
+      aria-hidden="true"
+      style=${`transform: translate(${at.x}px, ${at.y}px); width: ${size.width}px; height: ${size.height}px`}
+    ></div>`
+  }
+
   override render() {
     const direction = this.direction === 'TB' ? 'tb' : 'lr'
     const stageClasses = [
@@ -1996,6 +2070,7 @@ export class Flow extends LitElement {
               (node) => node.id,
               (node, index) => this.renderNodeElement(node, index),
             )}
+            ${this.ghost ? this.renderGhost(this.ghost) : nothing}
           </div>
           ${emptyCanvas ? html`<span id="empty-hint" class="visually-hidden">Press N or Enter to add a node.</span>` : nothing}
         </div>
