@@ -6,15 +6,16 @@ import type { Service } from '../../lib/domain/telemetry'
 import type { TableColumnConfig } from '@c2n/table/table-types.js'
 import { useElementProperties } from '../../components/c2n/element-bindings'
 import { useCustomEvent } from '../../components/c2n/useCustomEvent'
+import { useRenderedRows } from '../../components/c2n/useRenderedRows'
 import type { InvestigationState } from '../../lib/query/navigation-state'
 import { withAppBasePath } from '../../lib/query/internal-href'
 import { serviceDetailHref } from './service-navigation'
 
-function ServiceSparkline({ service }: Readonly<{ service: Service }>) {
+function ServiceSparkline({ line, service }: Readonly<{ line: number; service: Service }>) {
   const ref = useRef<HTMLElementTagNameMap['c2-sparkline']>(null)
   const data = useMemo(() => [service.latencyP50Ms, service.latencyP95Ms * 0.72, service.latencyP50Ms * 1.1, service.latencyP95Ms], [service])
   useElementProperties(ref, 'c2-sparkline', { data }, [data])
-  return <c2-sparkline ref={ref} slot={`cell:${service.id}:trend`} tone="auto" aria-label={`Latency trend for ${service.name}`} />
+  return <c2-sparkline ref={ref} slot={`cell:${line}:trend`} tone="auto" aria-label={`Latency trend for ${service.name}`} />
 }
 
 export function ServiceTable({ services, state }: Readonly<{ services: readonly Service[]; state: InvestigationState }>) {
@@ -43,13 +44,17 @@ export function ServiceTable({ services, state }: Readonly<{ services: readonly 
   )
   useElementProperties(tableRef, 'c2-table', { rows, columns, rowKey: 'id' }, [rows, columns])
   useCustomEvent(tableRef, 'row-click', (event) => router.push(serviceDetailHref(String((event.detail.row as { id: string }).id), state)))
+  // `cell-slot` children go to the lines the table rendered (`cell:<line>:<field>`), each looked up by its row key.
+  const rendered = useRenderedRows(tableRef)
+  const servicesById = useMemo(() => new Map(services.map((service) => [service.id, service])), [services])
 
   return (
     <div className="table-frame">
       <c2-table ref={tableRef} aria-label="Services" sortable stripe empty-message="No services match these criteria">
-        {services.map((service) => (
-          <ServiceSparkline key={service.id} service={service} />
-        ))}
+        {rendered.map(({ line, key }) => {
+          const service = servicesById.get(key)
+          return service ? <ServiceSparkline key={`${line}:trend`} line={line} service={service} /> : null
+        })}
       </c2-table>
       <div className="table-fallback" aria-label="Service list">
         {services.map((service) => (

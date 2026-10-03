@@ -153,7 +153,7 @@ binding on a tag that has not upgraded yet silently falls back to an attribute.
 `renderCell` cannot return framework markup (it is handed to Lit). To build one with a Lit template, take `html`
 from `@c2n/core/lit-helper.js` rather than adding `lit` to the application: it is the same instance the
 components render with, so there is no version to pin by hand and no second copy of Lit in the bundle.
-Mark the column `cell-slot` and render one light-DOM child per row into `slot="cell:<row key>:<field>"`; the children stay in the document, so ordinary CSS reaches them. Requires `row-key`; `renderCell`/the column format is the fallback.
+Mark the column `cell-slot` and render light-DOM children into `slot="cell:<line>:<field>"`, where `line` is the display line (after sort, filter and grouping, page offset included). Render them only for the lines `range-change` reports: `detail.rows` is one `{ line, key, row }` per rendered data row; a child whose line is outside the window is left unassigned, and after a sort, filter or page change the same line holds another row, so re-render from the next `range-change`. The children stay in the document, so ordinary CSS reaches them; `renderCell`/the column format is the fallback.
 
 ## Editor support outside TypeScript
 

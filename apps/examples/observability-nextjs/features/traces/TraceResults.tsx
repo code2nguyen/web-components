@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef } from 'react'
 import { useElementProperties } from '../../components/c2n/element-bindings'
 import { useCustomEvent } from '../../components/c2n/useCustomEvent'
+import { useRenderedRows } from '../../components/c2n/useRenderedRows'
 import { telemetryDataset } from '../../lib/data/dataset'
 import { buildDatasetIndexes } from '../../lib/data/indexes'
 import { parseNavigationState, type PageSize } from '../../lib/query/navigation-state'
@@ -80,6 +81,10 @@ export function TraceResults() {
     router.replace(queryHref(search, { pageSize: String(event.detail.pageSize as PageSize), page: '1' }), { scroll: false }),
   )
 
+  // `cell-slot` children go to the lines the table rendered (`cell:<line>:<field>`), each looked up by its row key.
+  const rendered = useRenderedRows(tableRef)
+  const itemsById = useMemo(() => new Map(projection.items.map((item) => [item.trace.id, item])), [projection.items])
+
   const services = telemetryDataset.services.filter(({ environmentId }) => environmentId === state.environmentId)
   const operations = [
     ...new Set(telemetryDataset.traces.filter(({ environmentId }) => environmentId === state.environmentId).map(({ rootOperation }) => rootOperation)),
@@ -132,17 +137,22 @@ export function TraceResults() {
               <c2-table-column field="status" header="Status" width="100px" sortable cell-slot />
               <c2-table-column field="duration" header="Duration" width="110px" align="end" sortable cell-slot />
               <c2-table-column field="started" header="Started" width="150px" sortable />
-              {projection.items.flatMap(({ trace, service }) => [
-                <strong key={`${trace.id}-service`} slot={`cell:${trace.id}:service`}>
-                  {service?.name ?? trace.rootServiceId}
-                </strong>,
-                <c2-badge key={`${trace.id}-status`} slot={`cell:${trace.id}:status`} tone={trace.status === 'error' ? 'danger' : 'success'}>
-                  {trace.status}
-                </c2-badge>,
-                <span key={`${trace.id}-duration`} slot={`cell:${trace.id}:duration`} className="mono">
-                  {trace.durationMs} ms
-                </span>,
-              ])}
+              {rendered.flatMap(({ line, key }) => {
+                const item = itemsById.get(key)
+                if (!item) return []
+                const { trace, service } = item
+                return [
+                  <strong key={`${line}:service`} slot={`cell:${line}:service`}>
+                    {service?.name ?? trace.rootServiceId}
+                  </strong>,
+                  <c2-badge key={`${line}:status`} slot={`cell:${line}:status`} tone={trace.status === 'error' ? 'danger' : 'success'}>
+                    {trace.status}
+                  </c2-badge>,
+                  <span key={`${line}:duration`} slot={`cell:${line}:duration`} className="mono">
+                    {trace.durationMs} ms
+                  </span>,
+                ]
+              })}
             </c2-table>
             <div className="table-fallback" aria-label="Trace result links">
               {projection.items.map(({ trace, service }) => (

@@ -4,6 +4,7 @@ import type { Select } from '@c2n/select'
 import type { TextField } from '@c2n/text-field'
 import type { Switch } from '@c2n/switch'
 import { useCustomEvent } from './hooks/useCustomEvent'
+import { useRenderedRows } from './hooks/useRenderedRows'
 import { SECTORS, changePct, initialPositions, marketValue, tick, type Position } from './data/positions'
 
 // `TableRow` is `Record<string, unknown>`, so a row type handed to `rows` has to carry an index signature.
@@ -16,13 +17,13 @@ const percent = new Intl.NumberFormat(undefined, { style: 'percent', minimumFrac
  * A cell rendered by React rather than by the table.
  *
  * `renderCell` is handed to Lit, so it cannot return JSX — it would have to build DOM nodes by hand. A column
- * marked `cellSlot` puts a `<slot name="cell:<row key>:<field>">` in each cell instead, and anything the app
- * renders into that slot is the cell body. The element stays in this document's light DOM, so ordinary CSS
- * reaches it.
+ * marked `cellSlot` puts a `<slot name="cell:<line>:<field>">` in each rendered cell instead — `line` being the
+ * row's display line after sort and filter — and anything the app renders into that slot is the cell body. The
+ * element stays in this document's light DOM, so ordinary CSS reaches it.
  */
-function Delta({ row }: { row: Row }) {
+function Delta({ line, row }: { line: number; row: Row }) {
   return (
-    <span slot={`cell:${row.symbol}:change`} className={row.change >= 0 ? 'delta delta--up' : 'delta delta--down'}>
+    <span slot={`cell:${line}:change`} className={row.change >= 0 ? 'delta delta--up' : 'delta delta--down'}>
       {row.change >= 0 ? '▲' : '▼'} {percent.format(Math.abs(row.change))}
     </span>
   )
@@ -61,6 +62,11 @@ export function App() {
   }, [rows])
 
   const selectedRows = useMemo(() => rows.filter((row) => selected.includes(row.symbol)), [rows, selected])
+
+  // The lines the table rendered, and which row sits on each. The row is looked up in this render's `rows` by key,
+  // so a price tick shows straight away rather than one `range-change` later.
+  const rendered = useRenderedRows(tableRef)
+  const rowsBySymbol = useMemo(() => new Map(rows.map((row) => [row.symbol, row])), [rows])
 
   // Kebab-case custom events have no `on*` spelling in JSX, so they are wired through refs. `input` and `change`
   // go the same way on purpose: React's `onChange` is its own synthetic event with form-control semantics that
@@ -141,10 +147,11 @@ export function App() {
         <c2-table-column field="change" header="Day" width="120px" align="end" cellSlot />
         <c2-table-column field="value" header="Market value" width="150px" align="end" format="currency" currency="USD" />
 
-        {/* One child per row; the table slots each into the cell whose key matches and ignores the rest. */}
-        {rows.map((row) => (
-          <Delta key={row.symbol} row={row} />
-        ))}
+        {/* One child per rendered line, keyed by line and field: a sort moves rows between lines, not children. */}
+        {rendered.map(({ line, key }) => {
+          const row = rowsBySymbol.get(key)
+          return row ? <Delta key={`${line}:change`} line={line} row={row} /> : null
+        })}
       </c2-table>
 
       <footer className="app__foot">

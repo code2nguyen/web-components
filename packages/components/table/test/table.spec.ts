@@ -510,17 +510,71 @@ test('a cell-slot column takes its body from a light-DOM child and falls back to
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" rows='${rows}'>
     <c2-table-column field="name" header="Name" width="240px"></c2-table-column>
     <c2-table-column field="score" header="Score" width="240px" align="end" format="number" cell-slot></c2-table-column>
-    <b slot="cell:2:score" data-testid="slotted">record</b>
+    <b slot="cell:1:score" data-testid="slotted">record</b>
   </c2-table>`)
 
   await expect(page.getByTestId('slotted')).toHaveText('record')
-  // Row 1 has no child, so the column's own formatting still shows.
+  // A slotted child is not in its row's text, so ask which row its slot sits in: line 1 is Grace Hopper.
+  await expect.poll(() => page.getByTestId('slotted').evaluate((node) => node.assignedSlot?.closest<HTMLElement>('.row')?.dataset.rowKey)).toBe('2')
+  // Line 0 has no child, so the column's own formatting still shows.
   await expect(page.getByRole('row', { name: /Ada Lovelace/ })).toContainText('128,000')
+})
+
+// Slots are named by display line, so a sort that keeps every key in the window still moves rows between lines:
+// `range-change` fires with the new `rows` and the child named for line 0 lands in whatever row is now first.
+test('sorting re-assigns cell slots by line and reports the new rows', async ({ page, renderScenario }) => {
+  await renderScenario(
+    table(
+      '',
+      `<c2-table-column field="name" header="Name" width="200px"></c2-table-column>
+      <c2-table-column field="score" header="Score" width="200px" sortable cell-slot></c2-table-column>`,
+    ),
+  )
+  const host = page.locator('c2-table')
+  await host.evaluate((element) => {
+    type Rendered = { line: number; key: string; row: { name: string } }
+    const reports: Rendered[][] = []
+    ;(window as unknown as { reports: Rendered[][] }).reports = reports
+    const sync = (rendered: Rendered[]) => {
+      for (const child of [...element.querySelectorAll('[slot^="cell:"]')]) child.remove()
+      for (const { line, row } of rendered) {
+        const child = document.createElement('i')
+        child.slot = `cell:${line}:score`
+        child.textContent = `line ${line}: ${row.name}`
+        element.append(child)
+      }
+    }
+    element.addEventListener('range-change', (event) => {
+      const rendered = (event as CustomEvent<{ rows: Rendered[] }>).detail.rows
+      reports.push(rendered)
+      sync(rendered)
+    })
+    sync((element as HTMLElement & { renderedRange: { rows: Rendered[] } }).renderedRange.rows)
+  })
+  // The text the first displayed row shows through its slot: slotted children are not in the row's own text.
+  const firstRowSlotted = () =>
+    host.evaluate((element) => {
+      const slot = element.shadowRoot!.querySelector('.row--body')!.querySelector('slot')!
+      return slot
+        .assignedNodes()
+        .map((node) => node.textContent)
+        .join('')
+    })
+  await expect.poll(firstRowSlotted).toBe('line 0: Ada Lovelace')
+
+  await page.getByRole('columnheader', { name: 'Score' }).click()
+  await expect(host.locator('.row--body').first()).toContainText('Alan Turing')
+  await expect.poll(firstRowSlotted).toBe('line 0: Alan Turing')
+  const last = await page.evaluate(() => {
+    const reports = (window as unknown as { reports: { line: number; key: string }[][] }).reports
+    return reports[reports.length - 1].map(({ line, key }) => `${line}:${key}`)
+  })
+  expect(last).toEqual(['0:3', '1:2', '2:1'])
 })
 
 test('redistributes an interactive cell slot after property-driven rows and columns update', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id">
-    <button slot="cell:2:action">Acknowledge</button>
+    <button slot="cell:1:action">Acknowledge</button>
   </c2-table>`)
   const host = page.locator('c2-table')
   await host.evaluate(async (element, nextRows) => {
@@ -557,7 +611,7 @@ test('stable table parts style shared regions while dynamic cell slots stay cons
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id" rows='${rows}'>
     <div slot="toolbar">Toolbar</div><div slot="footer">Footer</div>
     <c2-table-column field="score" header="Score" width="240px" cell-slot></c2-table-column>
-    <b class="slot-probe" slot="cell:2:score">record</b>
+    <b class="slot-probe" slot="cell:1:score">record</b>
   </c2-table>`)
   await page.addStyleTag({
     content: 'c2-table::part(toolbar){background:rgb(1,2,3)}c2-table::part(footer){background:rgb(4,5,6)}c2-table::part(state){background:rgb(7,8,9)}',

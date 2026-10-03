@@ -139,7 +139,7 @@ which is enough to look at a response before deciding how to present it.
 ### Selecting rows: row keys
 
 Selection names a row by its **key**, and so do `value`, the `selection-change` and `row-click` details and the
-`cell:<key>:<id>` slots. The key is the row's `row-key` field as a string — with `row-key="id"`, `{ "id": 7 }` is the
+`range-change` rows. The key is the row's `row-key` field as a string — with `row-key="id"`, `{ "id": 7 }` is the
 row `"7"` — or whatever `getRowKey(row)` returns, for a key no single field holds. `value` stores strings, so
 `table.value = [7, 8]` and `value="7;8"` select the same two rows.
 
@@ -290,16 +290,19 @@ them with `page-size`.
 
 ### Rendering cells with a framework, while virtualizing
 
-A column marked `cell-slot` takes each cell's body from a light-DOM child named `cell:{rowKey}:{field}`, so React,
-Vue, Svelte or Angular can render it with their own templates. While the table virtualizes, only the rows in the
-rendered window have those slots: `range-change` reports their keys (and `renderedRange` holds the last window), so
-render children for those keys only. A child for a row outside the window is simply left unassigned, and a row that
-scrolls in before its child exists shows the column's formatted value until it arrives.
+A column marked `cell-slot` takes each cell's body from a light-DOM child named `cell:{line}:{field}`, so React,
+Vue, Svelte or Angular can render it with their own templates. `line` is the cell's display line, counted across the
+whole dataset after sort, filter and grouping with the page offset included: the first row shown is line 0 on the
+first page. Only the rendered window has those slots: `range-change` reports one `{ line, key, row }` entry per
+rendered data row in `detail.rows` (and `renderedRange` holds the last window), so render children for those lines
+only. A child whose line is outside the window is left unassigned, and a line that scrolls in before its child exists
+shows the column's formatted value until it arrives. After a sort, filter or page change the same line holds a
+different row, and `range-change` fires again with the new rows: re-render the children from it.
 
 ```js tag=CodeBlock
-const visibleKeys = ref([])
-table.addEventListener('range-change', (event) => (visibleKeys.value = event.detail.keys))
-// <button v-for="key in visibleKeys" :key="key" :slot="`cell:${key}:action`">Open</button>
+const rendered = ref([])
+table.addEventListener('range-change', (event) => (rendered.value = event.detail.rows))
+// <button v-for="{ line, row } in rendered" :key="`${line}:action`" :slot="`cell:${line}:action`">Open {{ row.name }}</button>
 ```
 
 Enter and Space on a control inside a cell — a slotted button, a `renderCell` input — belong to that control; the grid

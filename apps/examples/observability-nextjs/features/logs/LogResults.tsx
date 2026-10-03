@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useRef } from 'react'
 import { useElementProperties } from '../../components/c2n/element-bindings'
 import { useCustomEvent } from '../../components/c2n/useCustomEvent'
+import { useRenderedRows } from '../../components/c2n/useRenderedRows'
 import { telemetryDataset } from '../../lib/data/dataset'
 import { buildDatasetIndexes } from '../../lib/data/indexes'
 import { parseNavigationState, type PageSize } from '../../lib/query/navigation-state'
@@ -100,6 +101,9 @@ export function LogResults() {
     queueMicrotask(() => returnFocusRef.current?.focus())
   }
   const services = telemetryDataset.services.filter(({ environmentId }) => environmentId === state.environmentId)
+  // `cell-slot` children go to the lines the table rendered (`cell:<line>:<field>`), each looked up by its row key.
+  const rendered = useRenderedRows(tableRef)
+  const logsById = useMemo(() => new Map(projection.items.map(({ log }) => [log.id, log])), [projection.items])
 
   return (
     <div className="feature-stack">
@@ -151,21 +155,25 @@ export function LogResults() {
               <c2-table-column field="service" header="Service" width="minmax(150px, 1fr)" sortable />
               <c2-table-column field="message" header="Message" width="minmax(320px, 2.4fr)" cell-slot />
               <c2-table-column field="correlation" header="Correlation" width="170px" cell-slot />
-              {projection.items.flatMap(({ log }) => [
-                <c2-badge
-                  key={`${log.id}-severity`}
-                  slot={`cell:${log.id}:severity`}
-                  tone={log.severity === 'error' || log.severity === 'fatal' ? 'danger' : log.severity === 'warn' ? 'warning' : 'neutral'}
-                >
-                  {log.severity}
-                </c2-badge>,
-                <span key={`${log.id}-correlation`} slot={`cell:${log.id}:correlation`} className="mono">
-                  {log.traceId ?? 'Uncorrelated'}
-                </span>,
-                <span key={`${log.id}-message`} slot={`cell:${log.id}:message`} className={styles.message}>
-                  <Highlight text={log.message} query={query} />
-                </span>,
-              ])}
+              {rendered.flatMap(({ line, key }) => {
+                const log = logsById.get(key)
+                if (!log) return []
+                return [
+                  <c2-badge
+                    key={`${line}:severity`}
+                    slot={`cell:${line}:severity`}
+                    tone={log.severity === 'error' || log.severity === 'fatal' ? 'danger' : log.severity === 'warn' ? 'warning' : 'neutral'}
+                  >
+                    {log.severity}
+                  </c2-badge>,
+                  <span key={`${line}:correlation`} slot={`cell:${line}:correlation`} className="mono">
+                    {log.traceId ?? 'Uncorrelated'}
+                  </span>,
+                  <span key={`${line}:message`} slot={`cell:${line}:message`} className={styles.message}>
+                    <Highlight text={log.message} query={query} />
+                  </span>,
+                ]
+              })}
             </c2-table>
             <div className="table-fallback" aria-label="Log result links">
               {projection.items.map(({ log, service }) => (

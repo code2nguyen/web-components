@@ -32,6 +32,7 @@ import {
   type TableGroupRenderer,
   type TableGroupToggleEventDetail,
   type TableRangeChangeEventDetail,
+  type TableRenderedRow,
   type TableRow,
   type TableRowEventDetail,
   type TableRowPartResolver,
@@ -328,7 +329,7 @@ export interface Table {
  * `highlight-updates` to pulse row backgrounds, and optionally choose its numeric direction with
  * `update-highlight-field`. Only rendered rows are interpolated, and reduced-motion preferences are respected.
  *
- * **Row keys.** Selection, `value`, events and cell slots name a row by its key: the `row-key` field of the row (or
+ * **Row keys.** Selection, `value` and events name a row by its key: the `row-key` field of the row (or
  * `getRowKey(row)`) as a string, so `{ id: 7 }` is `"7"`. Without a `row-key` the key is the row's position, which
  * points at another row after a sort, so set one on any selectable table. `keyOf(row)`, `isSelected(row)`,
  * `selectRows(rows)` and `deselectRows(rows)` work from the rows themselves when the key rule is beside the point.
@@ -383,7 +384,7 @@ export interface Table {
  * @slot fallback - Meaningful server-rendered table content. It remains visible before custom-element upgrade and is
  * retained in the light DOM but hidden after the interactive grid mounts, avoiding duplicate client content.
  * @slot group:{groupKey} - Label of one group, e.g. `slot="group:region=EMEA"`, in place of its formatted value and row count. The copy of the group kept under the header while its rows scroll shows the built-in label.
- * @slot cell:{rowKey}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:AAPL:change"`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback. While the table virtualizes, only the rendered window has these slots: render children for the keys `range-change` reports (or `renderedRange.keys`) and a child for a row outside the window is simply left unassigned, so a framework never needs one child per row.
+ * @slot cell:{line}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:0:change"` for the first displayed row. `line` is the cell's display line, counted across the whole dataset after sort, filter and grouping with the page offset included — the numbering of `range-change`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback. Children are needed only for the lines `range-change` reports (map `detail.rows`, or `renderedRange.rows`, each `{ line, key, row }`); a child whose line is outside the rendered window is left unassigned. After a sort, filter or page change the same line holds a different row, so re-render the children from the next `range-change`.
  *
  * @slotcomponent c2-table-column
  * @slotcomponent c2-pagination
@@ -394,7 +395,7 @@ export interface Table {
  * @event {CustomEvent<TableCellEventDetail>} cell-click - Fired when a cell is clicked; adds `detail.column` and `detail.value`.
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
  * @event {CustomEvent<TableGroupToggleEventDetail>} group-toggle - Fired after the user opens or closes a group, with its `key`, whether it is now `expanded`, and the `group` itself (its rows and aggregates). `expandedGroups` already holds the new state. Does not bubble.
- * @event {CustomEvent<TableRangeChangeEventDetail>} range-change - Fired after the rendered body rows change — the window scrolled, or the rows, sort, page or grouping changed. `detail.start`/`detail.end` are the display lines rendered (end exclusive) and `detail.keys` the keys of their data rows, which are the only rows whose `cell:{rowKey}:{field}` slots exist. Does not bubble.
+ * @event {CustomEvent<TableRangeChangeEventDetail>} range-change - Fired after the rendered body rows change — the window scrolled, or the rows, sort, page or grouping changed. `detail.start`/`detail.end` are the display lines rendered (end exclusive), `detail.rows` one `{ line, key, row }` entry per rendered data row in display order (group rows and rows a `dataSource` has not delivered are left out) and `detail.keys` their keys. Those lines are the only ones whose `cell:{line}:{field}` slots exist. Fires again when the same keys move to other lines. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
  * @csspart toolbar - Row above the grid containing the `toolbar` slot.
@@ -718,8 +719,9 @@ export class Table extends LitElement {
   /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
   #echoSignature = ''
   /** The window `range-change` last reported, to fire only when it moves. */
-  #renderedRange: TableRangeChangeEventDetail = { start: 0, end: 0, keys: [] }
-  #rangeSignature = ''
+  #renderedRange: TableRangeChangeEventDetail = { start: 0, end: 0, keys: [], rows: [] }
+  /** Whether `range-change` has fired yet: the first update reports even an empty window. */
+  #rangeReported = false
 
   /**
    * Shared with a `c2-pagination` slotted into the `footer`. Rebuilt rather than mutated whenever the paging state
@@ -1064,19 +1066,23 @@ export class Table extends LitElement {
   }
 
   /**
-   * The body rows rendered by the last update: their display lines and the keys of their data rows. While the table
-   * virtualizes this is the window, so a framework filling `cell-slot` columns needs light-DOM children only for
-   * `keys`. `range-change` fires whenever it changes.
+   * The body rows rendered by the last update: their display lines, the keys of their data rows and `rows`, one
+   * `{ line, key, row }` entry per rendered data row. While the table virtualizes this is the window, so a framework
+   * filling `cell-slot` columns needs light-DOM children only for those lines (`slot="cell:{line}:{field}"`).
+   * `range-change` fires whenever it changes.
    */
   get renderedRange(): TableRangeChangeEventDetail {
-    return { ...this.#renderedRange, keys: [...this.#renderedRange.keys] }
+    const { start, end, keys, rows } = this.#renderedRange
+    return { start, end, keys: [...keys], rows: rows.map((entry) => ({ ...entry })) }
   }
 
   #reportRenderedRange() {
     let start = 0
     let end = 0
-    const keys: string[] = []
+    const rows: TableRenderedRow[] = []
     if (!this.error && this.rowCount > 0) {
+      // The same window `render` drew (`#renderBody` gets `offset + range.start` to `offset + range.end`, clamped the
+      // same way while grouped), so each `line` here is the one its cells' `cell:{line}:{field}` slots carry.
       const offset = this.#pageStart
       const range = this.#virtualizer.range
       const grouping = this.#grouping()
@@ -1086,14 +1092,23 @@ export class Table extends LitElement {
         const item = grouping?.items[line]
         if (item?.kind === 'group') continue
         const index = this.#rowIndexAt(line)
-        const row = this.#rowAt(index)
-        if (row) keys.push(this.#keyAt(index, row))
+        const row = this.#sourceRowAt(index)
+        if (row) rows.push({ line, key: this.#keyAt(index, row), row })
       }
     }
-    const signature = `${start}:${end}:${keys.join('\u0000')}`
-    if (signature === this.#rangeSignature) return
-    this.#rangeSignature = signature
-    this.#renderedRange = { start, end, keys }
+    // Lines are part of the comparison: a re-sort that keeps the same keys in the window moves them to other lines,
+    // and every `cell:{line}:{field}` child then belongs to a different row. The row objects are too, so a framework
+    // rendering from `detail.rows` sees replaced data (an animated update reports the target rows, once).
+    const previous = this.#renderedRange
+    const unchanged =
+      this.#rangeReported &&
+      previous.start === start &&
+      previous.end === end &&
+      previous.rows.length === rows.length &&
+      rows.every((entry, i) => entry.line === previous.rows[i].line && entry.key === previous.rows[i].key && entry.row === previous.rows[i].row)
+    if (unchanged) return
+    this.#rangeReported = true
+    this.#renderedRange = { start, end, keys: rows.map((entry) => entry.key), rows }
     this.dispatchEvent(new CustomEvent<TableRangeChangeEventDetail>('range-change', { detail: this.renderedRange }))
   }
 
@@ -1532,7 +1547,7 @@ export class Table extends LitElement {
     // formatter produced stays as the slot's fallback, so a row with no child still shows its value.
     const content = row
       ? column.cellSlot
-        ? html`<slot name=${`cell:${this.#keyAt(rowIndex, row)}:${columnKey(column)}`}>${rendered}</slot>`
+        ? html`<slot name=${`cell:${line}:${columnKey(column)}`}>${rendered}</slot>`
         : rendered
       : html`<span class="skeleton" part="skeleton"></span>`
 
@@ -1794,6 +1809,13 @@ export class Table extends LitElement {
     if (!row || this.#animationFrom.size === 0 || this.#animationProgress >= 1) return row
     const from = this.#animationFrom.get(this.#keyAt(index, row))
     return from ? (interpolateValue(from, row, this.#animationProgress) as TableRow) : row
+  }
+
+  /** The row at `index` as the application gave it: `#rowAt` without the interpolation of an animated update. */
+  #sourceRowAt(index: number): TableRow | undefined {
+    if (index < 0) return undefined
+    if (this.dataSource) return this.#rowAt(index)
+    return (this.#transitionRows ?? this.#sortedRows)[index]
   }
 
   #keyAt(index: number, row: TableRow): string {

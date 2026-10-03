@@ -11,7 +11,7 @@ type TableHost = HTMLElement & {
   columns: unknown[]
   updateComplete: Promise<boolean>
   isVirtualized: boolean
-  renderedRange: { start: number; end: number; keys: string[] }
+  renderedRange: { start: number; end: number; keys: string[]; rows: { line: number; key: string; row: unknown }[] }
 }
 
 test('a part on what renderCell returns is reachable as c2-table::part()', async ({ page, renderScenario }) => {
@@ -105,28 +105,29 @@ test('wrap lets body cells grow to their text and turns virtualization off', asy
   await expect(content).toHaveCSS('white-space', 'nowrap')
 })
 
-// A framework fills a `cell-slot` column for the rendered window only: `range-change` names the keys whose slots
-// exist, and a child for a row outside the window is simply left unassigned.
+// A framework fills a `cell-slot` column for the rendered window only: `range-change` reports the lines whose slots
+// exist (`detail.rows`), and a child for a line outside the window is simply left unassigned.
 test('cell-slot children are needed only for the window range-change reports', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-table style="height:320px;width:420px" row-key="id"></c2-table>`)
   const host = page.locator('c2-table')
   await host.evaluate(async (element) => {
     const table = element as TableHost
-    const sync = (keys: string[]) => {
-      const wanted = new Set(keys)
+    // What a framework's keyed list does: one child per reported row, identified by its line and key.
+    const sync = (rendered: { line: number; key: string }[]) => {
+      const wanted = new Map(rendered.map((entry) => [`${entry.line}:${entry.key}`, entry]))
       for (const child of [...table.querySelectorAll<HTMLElement>('[slot^="cell:"]')]) {
-        if (!wanted.has(child.dataset.key!)) child.remove()
-        else wanted.delete(child.dataset.key!)
+        if (!wanted.has(child.dataset.id!)) child.remove()
+        else wanted.delete(child.dataset.id!)
       }
-      for (const key of wanted) {
+      for (const [id, { line, key }] of wanted) {
         const button = document.createElement('button')
-        button.slot = `cell:${key}:action`
-        button.dataset.key = key
+        button.slot = `cell:${line}:action`
+        button.dataset.id = id
         button.textContent = `Act ${key}`
         table.append(button)
       }
     }
-    table.addEventListener('range-change', (event) => sync((event as CustomEvent<{ keys: string[] }>).detail.keys))
+    table.addEventListener('range-change', (event) => sync((event as CustomEvent<{ rows: { line: number; key: string }[] }>).detail.rows))
     table.columns = [
       { field: 'name', header: 'Name' },
       { field: 'action', header: 'Action', cellSlot: true },
@@ -145,7 +146,10 @@ test('cell-slot children are needed only for the window range-change reports', a
   expect(initial.total).toBeGreaterThan(0)
   expect(initial.total).toBeLessThan(60)
   expect(initial.unassigned).toBe(0)
-  expect(await host.evaluate((element) => (element as TableHost).renderedRange.keys.length)).toBe(initial.total)
+  const range = await host.evaluate((element) => (element as TableHost).renderedRange)
+  expect(range.rows.length).toBe(initial.total)
+  expect(range.keys).toEqual(range.rows.map((entry) => entry.key))
+  expect(range.rows[0]).toMatchObject({ line: 0, key: '1' })
 
   // Scroll the viewport itself, as a user would: three thousand rows down, whatever height the theme gives a row.
   await host.evaluate((element) => {
@@ -158,11 +162,11 @@ test('cell-slot children are needed only for the window range-change reports', a
   expect(scrolled.total).toBeLessThan(60)
   expect(scrolled.unassigned).toBe(0)
 
-  // A stray child for a row outside the window is unused rather than an error, and joins its cell once in view.
+  // A stray child for a line outside the window is unused rather than an error, and joins its cell once in view.
   await host.evaluate((element) => {
     const stray = document.createElement('b')
-    stray.slot = 'cell:10:action'
-    stray.dataset.key = '10'
+    stray.slot = 'cell:9:action'
+    stray.dataset.id = '9:10'
     stray.textContent = 'stray'
     element.append(stray)
   })
@@ -172,6 +176,36 @@ test('cell-slot children are needed only for the window range-change reports', a
   })
   await expect(page.getByText('stray')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Act 10', exact: true })).toHaveCount(0)
+})
+
+// A slot's line is the line `range-change` reports: the page offset is included, and group rows take lines of their
+// own without being reported.
+test('cell-slot lines match range-change with pagination and grouping', async ({ page, renderScenario }) => {
+  await renderScenario(`<c2-table style="height:320px;width:520px" row-key="id" page-size="2">
+    <c2-table-column field="name" header="Name" width="200px"></c2-table-column>
+    <c2-table-column field="note" header="Note" width="200px" cell-slot></c2-table-column>
+    <b slot="cell:2:note">paged</b>
+  </c2-table>`)
+  const host = page.locator('c2-table')
+  await props(host, { rows: PEOPLE })
+  await props(host, { page: 2 })
+  const slottedRowKey = () => page.getByText('paged').evaluate((node) => (node as HTMLElement).assignedSlot?.closest<HTMLElement>('.row')?.dataset.rowKey)
+  await expect.poll(slottedRowKey).toBe('3')
+  expect(await host.evaluate((element) => (element as TableHost).renderedRange)).toMatchObject({
+    start: 2,
+    end: 3,
+    keys: ['3'],
+    rows: [{ line: 2, key: '3' }],
+  })
+
+  await props(host, { pageSize: 0, page: 1, groupBy: ['team'] })
+  await expect(host.locator('.row--group')).toHaveCount(3)
+  const grouped = await host.evaluate((element) => (element as TableHost).renderedRange.rows.map(({ line, key }) => `${line}:${key}`))
+  expect(grouped).toEqual(['1:1', '3:2', '5:3'])
+  await host.evaluate((element) => {
+    element.querySelector('[slot="cell:2:note"]')!.slot = 'cell:3:note'
+  })
+  await expect.poll(slottedRowKey).toBe('2')
 })
 
 // Hydration order: a server-rendered (or framework-rendered) action exists in the light DOM before the element is
@@ -186,7 +220,7 @@ test('a slotted cell action works with mouse and keyboard whatever the upgrade o
     const table = inert.createElement('c2-table') as TableHost
     table.setAttribute('row-key', 'id')
     table.style.cssText = 'display:block;height:240px;width:520px'
-    table.innerHTML = '<button slot="cell:2:action" type="button">Acknowledge</button>'
+    table.innerHTML = '<button slot="cell:1:action" type="button">Acknowledge</button>'
     table.rows = rows
     table.columns = [
       { field: 'name', header: 'Name' },
@@ -209,7 +243,7 @@ test('a slotted cell action works with mouse and keyboard whatever the upgrade o
   // A child added after the rows rendered joins its cell straight away.
   await host.evaluate((element) => {
     const late = document.createElement('button')
-    late.slot = 'cell:3:action'
+    late.slot = 'cell:2:action'
     late.type = 'button'
     late.textContent = 'Open'
     late.addEventListener('click', () => (window as unknown as { clicks: string[] }).clicks.push('late'))
@@ -226,7 +260,7 @@ test('an input rendered in a cell keeps its own arrow keys', async ({ page, rend
   await renderScenario(`<c2-table style="height:240px;width:520px" row-key="id">
     <c2-table-column field="name" header="Name" width="200px"></c2-table-column>
     <c2-table-column field="note" header="Note" width="200px" cell-slot></c2-table-column>
-    <input slot="cell:1:note" aria-label="Note for Ada" value="abc" />
+    <input slot="cell:0:note" aria-label="Note for Ada" value="abc" />
   </c2-table>`)
   await props(page.locator('c2-table'), { rows: PEOPLE })
   const input = page.getByRole('textbox', { name: 'Note for Ada' })
