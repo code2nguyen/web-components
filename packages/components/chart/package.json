@@ -1,6 +1,6 @@
 {
   "name": "@c2n/chart",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "type": "module",
   "main": "dist/chart.js",
   "exports": {
@@ -195,7 +195,7 @@
     }
   },
   "dependencies": {
-    "@c2n/core": "0.0.20",
+    "@c2n/core": "0.0.21",
     "@types/geojson": "7946.0.16",
     "@types/topojson-specification": "1.0.5",
     "@upsetjs/venn.js": "2.0.0",
