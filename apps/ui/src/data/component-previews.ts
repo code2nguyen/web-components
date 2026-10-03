@@ -77,7 +77,7 @@ export const componentPreviews: Record<string, string> = {
 
 // editable, highlighted
 greet('world')"></c2-code-editor>`,
-  'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid #bcbcc6;--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:#f4f4f5"></c2-theme-select></div>`,
+  'theme-select': `<div class="preview-row"><c2-theme-select manual></c2-theme-select><c2-theme-select manual show-label style="--c2-theme-select__trigger--border:1px solid var(--c2-theme--color-outline, #bcbcc6);--c2-theme-select__trigger--border-radius:6px"></c2-theme-select><c2-theme-select manual modes="light,dark" style="--c2-theme-select__trigger--border-radius:999px;--c2-theme-select__trigger--background:var(--c2-theme--color-surface-container, #f4f4f5)"></c2-theme-select></div>`,
   tree: `<c2-tree style="width:200px" aria-label="Files" expanded-items="src" value="app">
   <c2-tree-item value="src" label="src">
     <c2-tree-item value="app" label="app.ts"></c2-tree-item>

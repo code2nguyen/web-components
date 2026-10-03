@@ -374,8 +374,12 @@ export const overrides: Record<string, Override> = {
     token: 'color-outline-variant',
     value: '-1px 0 0 0 var(--c2-theme--color-outline-variant, #e4e4e7)',
   },
-  // The pressed trigger sits one step darker than the hover surface; the ramp has no token for that step.
-  '--c2-theme-select__trigger__active--background': { exclude: 'pressed tint one step below color-surface-container' },
+  // The pressed trigger sits one step past the hover surface; the ramp has no token for that step, so it is the hover
+  // surface tinted towards the ink, like the copy button's pressed state.
+  '--c2-theme-select__trigger__active--background': {
+    token: 'color-surface-container',
+    value: 'color-mix(in srgb, var(--c2-theme--color-surface-container, #f4f4f5), var(--c2-theme--color-on-surface, #18181b) 8%)',
+  },
   // Code editor: the foreground and the code font size belong to the syntax palette, which is themed as one unit
   // through `--c2-code-editor__theme--token-*` (the `theme` part is excluded wholesale, as it is for the viewer).
   // Splitting the foreground off would leave a theme-aware body colour over a fixed token palette.
