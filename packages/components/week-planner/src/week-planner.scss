@@ -35,6 +35,15 @@
     event__hover--opacity: 0.88,
     focus--outline: 2px solid rgba(2, 101, 220, 0.4),
     focus--outline-offset: 2px,
+    week-title--color: #71717a,
+    week-title--font-size: 14px,
+    day-number--font-weight: 600,
+    slot__hover--background: rgba(2, 101, 220, 0.1),
+    preview--border: 2px dashed rgb(2, 101, 220),
+    preview--background: rgba(2, 101, 220, 0.1),
+    preview--color: rgb(2, 101, 220),
+    event__dragging--opacity: 0.4,
+    resize-handle--height: 6px,
   )
 );
 
@@ -113,6 +122,35 @@
 
 .title[hidden] {
   display: none;
+}
+
+// A dated week: the heading keeps its own width and the week's range takes the free space after it.
+.dated .title {
+  flex: 0 1 auto;
+}
+
+.week-title {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  color: css.cssVar(week-title--color);
+  font-size: css.cssVar(week-title--font-size);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.week-navigation {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav.today-button {
+  width: auto;
+  padding: 0 10px;
+  font-size: css.cssVar(day-header--font-size);
 }
 
 .navigation {
@@ -256,6 +294,11 @@
   }
 }
 
+.day-number {
+  font-variant-numeric: tabular-nums;
+  font-weight: css.cssVar(day-number--font-weight);
+}
+
 .hour-label {
   box-sizing: border-box;
   height: css.cssVar(hour--height);
@@ -321,6 +364,87 @@
 
   &:focus-visible {
     z-index: 2;
+    outline: css.cssVar(focus--outline);
+    outline-offset: css.cssVar(focus--outline-offset);
+  }
+
+  // A block the user can drag: the page must not scroll or swipe the strip under the finger instead.
+  &.editable {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  &.dragging,
+  &.dragging:hover {
+    cursor: grabbing;
+    opacity: css.cssVar(event__dragging--opacity);
+  }
+}
+
+// The strip at the bottom of an editable block that drags its end time.
+.resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: css.cssVar(resize-handle--height);
+  cursor: ns-resize;
+}
+
+// Blocks drawn on the grid like an event: the hour under the pointer, a drag's landing place, the add button.
+.slot-hover,
+.preview,
+.add {
+  position: absolute;
+  top: calc(var(--from) * #{css.cssVar(hour--height)} + 1px);
+  right: 2px;
+  left: 2px;
+  height: calc(var(--span) * #{css.cssVar(hour--height)} - 2px);
+  box-sizing: border-box;
+  border-radius: css.cssVar(event--border-radius);
+  pointer-events: none;
+}
+
+.slot-hover {
+  background: css.cssVar(slot__hover--background);
+}
+
+.day.editable {
+  cursor: pointer;
+}
+
+// Where a dragged block would land, drawn over every other block.
+.preview {
+  z-index: 4;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2px 5px;
+  border: css.cssVar(preview--border);
+  background: css.cssVar(preview--background);
+  color: css.cssVar(preview--color);
+  font-size: css.cssVar(event--font-size);
+  line-height: 1.3;
+}
+
+// The keyboard's way to add: invisible to the pointer, shown at the column's first free hour while it has focus.
+.add {
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding: 2px 5px;
+  border: css.cssVar(preview--border);
+  background: css.cssVar(preview--background);
+  color: css.cssVar(preview--color);
+  font: inherit;
+  font-size: css.cssVar(event--font-size);
+  font-weight: css.cssVar(event--font-weight);
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
     outline: css.cssVar(focus--outline);
     outline-offset: css.cssVar(focus--outline-offset);
   }

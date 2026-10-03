@@ -61,6 +61,20 @@ export const overrides: Record<string, Override> = {
     token: 'color-on-surface',
     value: 'var(--c2-theme--border-width, 1px) solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent)',
   },
+  // The editable planner's ghost blocks: the hour under the pointer and where a dragged event lands.
+  '--c2-week-planner__slot__hover--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
+  '--c2-week-planner__preview--background': {
+    token: 'color-primary',
+    value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 10%, transparent)',
+  },
+  '--c2-week-planner__preview--border': {
+    token: 'color-primary',
+    value: '2px dashed var(--c2-theme--color-primary, rgb(2, 101, 220))',
+  },
+  '--c2-week-planner__event__dragging--opacity': { exclude: 'drag feedback, not a disabled state' },
   '--c2-month-planner__day__today--background': {
     token: 'color-primary',
     value: 'color-mix(in srgb, var(--c2-theme--color-primary, rgb(2, 101, 220)) 5%, transparent)',

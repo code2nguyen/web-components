@@ -40,4 +40,24 @@ The hour height sets how dense the week reads; the event and today-column variab
 ></c2-week-planner>
 ```
 
+```html tag=MdxCodeBlock,label=Dated week
+<style>
+  .dated-teal {
+    --c2-week-planner__event--background: #0f766e;
+    --c2-week-planner__day-header__today--color: #0f766e;
+    --c2-week-planner__day__today--background: rgba(15, 118, 110, 0.06);
+  }
+</style>
+<c2-week-planner
+  class="dated-teal"
+  date="2026-10-07"
+  week-start="monday"
+  heading="My week"
+  locale="en-US"
+  start-hour="8"
+  end-hour="13"
+  events='[{"title":"Inbox zero","day":"mon","start":"08:30","end":"09:00"},{"title":"Dentist","date":"2026-10-06","start":"10:00","end":"11:00","color":"#b45309"},{"title":"Write report","date":"2026-10-08","start":"09:00","end":"12:00"},{"title":"Inbox zero","day":"fri","start":"08:30","end":"09:00"}]'
+></c2-week-planner>
+```
+
 </GalleryGrid>
