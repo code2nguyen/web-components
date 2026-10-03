@@ -108,6 +108,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
 <style>
   .g p {
     margin: 0;
+    color: inherit;
     font-size: 12px;
     line-height: 1.5;
   }
@@ -139,23 +140,24 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
 <style>
   .g p {
     margin: 0;
+    color: inherit;
     font-size: 12px;
     line-height: 1.5;
   }
   .dark {
-    --c2-details--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-details--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-details--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-details--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-details--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-details--background: #18181b;
+    --c2-details--border-top: 1px solid #27272a;
+    --c2-details--border-right: 1px solid #27272a;
+    --c2-details--border-bottom: 1px solid #27272a;
+    --c2-details--border-left: 1px solid #27272a;
     --c2-details--border-top-left-radius: 10px;
     --c2-details--border-top-right-radius: 10px;
     --c2-details--border-bottom-left-radius: 10px;
     --c2-details--border-bottom-right-radius: 10px;
-    --c2-details__header--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-details__header__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-details__header__icon--color: var(--c2-theme--color-on-surface-variant, #71717a);
-    --c2-details__content--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-details__header--color: #fafafa;
+    --c2-details__header__hover--background: #27272a;
+    --c2-details__header__icon--color: #a1a1aa;
+    --c2-details__content--color: #a1a1aa;
   }
 </style>
 <c2-details style="width: 240px" class="g dark" expanded>
@@ -237,7 +239,7 @@ Curated looks for `c2-details`. Open any card in the studio to start from it. Th
     --c2-details--border-bottom-left-radius: 10px;
     --c2-details--border-bottom-right-radius: 10px;
     --c2-details__header__open--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
-    --c2-details__header__open--color: #166534;
+    --c2-details__header__open--color: color-mix(in srgb, #16a34a 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-details__header__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-details__header__icon--color: #16a34a;
     --c2-details__content--border-top: 1px solid #dcfce7;

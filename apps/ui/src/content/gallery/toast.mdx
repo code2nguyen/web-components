@@ -28,7 +28,7 @@ import { FeatherXIcon as FeatherX } from '@c2n/feather-icons/icons/x.js'
   .success {
     width: 320px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
-    --c2-toast__container--color: #14532d;
+    --c2-toast__container--color: color-mix(in srgb, #16a34a 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-toast__container--border: 1px solid #bbf7d0;
   }
 </style>
@@ -76,7 +76,7 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
     width: 340px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 2%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--border: 1px solid #e9d5ff;
-    --c2-toast__container--color: #581c87;
+    --c2-toast__container--color: color-mix(in srgb, #9333ea 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-toast__icon--color: #9333ea;
     --c2-toast__icon--size: 26px;
   }
@@ -107,10 +107,10 @@ Use the `icon` slot for an inline SVG or an icon component. `--c2-toast__icon--s
     width: 340px;
     --c2-toast__container--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-toast__container--border: 1px solid #bfdbfe;
-    --c2-toast__container--color: #1e3a8a;
+    --c2-toast__container--color: color-mix(in srgb, #2563eb 60%, var(--c2-theme--color-on-surface, #18181b));
     --c2-toast__icon--color: #2563eb;
     --c2-toast__icon--size: 28px;
-    --c2-toast__action--color: #1d4ed8;
+    --c2-toast__action--color: color-mix(in srgb, #2563eb 75%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-toast class="download" heading="Export is ready" message="Your report has been prepared." action-label="Download report">
@@ -176,9 +176,9 @@ Set `no-icon` to remove the leading icon and its spacing. Managed notifications 
 <style>
   .snackbar {
     width: 320px;
-    --c2-toast__container--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-toast__container--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-toast__container--border: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-toast__container--background: #18181b;
+    --c2-toast__container--color: #fafafa;
+    --c2-toast__container--border: 1px solid #27272a;
     --c2-toast__container--border-radius: 6px;
     --c2-toast__action--color: #93c5fd;
   }

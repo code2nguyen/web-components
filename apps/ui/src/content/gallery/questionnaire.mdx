@@ -25,15 +25,16 @@ Each example gets a full row so the question, options and navigation can breathe
 <style>
   .superpower-quiz {
     --c2-questionnaire--max-width: 620px;
-    --c2-questionnaire--color: #3b0764;
+    --c2-questionnaire--color: color-mix(in srgb, #6b21a8 55%, var(--c2-theme--color-on-surface, #18181b));
     --c2-questionnaire__option--border: 1px solid #e9d5ff;
     --c2-questionnaire__option--border-radius: 18px;
-    --c2-questionnaire__option--background-color: #fdfaff;
+    --c2-questionnaire__option--background-color: color-mix(in srgb, #9333ea 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-questionnaire__option__hover--border: 1px solid #c084fc;
     --c2-questionnaire__option__selected--border: 1px solid #9333ea;
-    --c2-questionnaire__option__selected--background-color: #f3e8ff;
+    --c2-questionnaire__option__selected--background-color: color-mix(in srgb, #9333ea 10%, var(--c2-theme--color-surface, #ffffff));
     --c2-questionnaire__control__selected--background-color: #9333ea;
     --c2-questionnaire__primary-action--background-color: #7e22ce;
+    --c2-questionnaire__primary-action--color: #ffffff;
   }
 </style>
 <c2-questionnaire
@@ -53,12 +54,13 @@ Each example gets a full row so the question, options and navigation can breathe
     --c2-questionnaire__option--padding: 14px 16px;
     --c2-questionnaire__option--border: 1px solid #fed7aa;
     --c2-questionnaire__option--border-radius: 14px;
-    --c2-questionnaire__option--background-color: #fffaf5;
+    --c2-questionnaire__option--background-color: color-mix(in srgb, #ea580c 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-questionnaire__option__hover--border: 1px solid #fb923c;
     --c2-questionnaire__option__selected--border: 1px solid #ea580c;
-    --c2-questionnaire__option__selected--background-color: #fff7ed;
+    --c2-questionnaire__option__selected--background-color: color-mix(in srgb, #ea580c 10%, var(--c2-theme--color-surface, #ffffff));
     --c2-questionnaire__control__selected--background-color: #ea580c;
     --c2-questionnaire__primary-action--background-color: #c2410c;
+    --c2-questionnaire__primary-action--color: #ffffff;
   }
 </style>
 <c2-questionnaire
@@ -76,17 +78,18 @@ Each example gets a full row so the question, options and navigation can breathe
   .adventure-summary {
     --c2-questionnaire--max-width: 620px;
     --c2-questionnaire__primary-action--background-color: #0f766e;
+    --c2-questionnaire__primary-action--color: #ffffff;
   }
   .trip-ticket {
     border: 1px dashed #0f766e;
     border-radius: 18px;
     padding: 24px;
-    color: #134e4a;
+    color: color-mix(in srgb, #0f766e 65%, var(--c2-theme--color-on-surface, #18181b));
     background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 3%, var(--c2-theme--color-surface, #ffffff));
   }
   .trip-ticket p {
     margin: 8px 0 0;
-    color: #115e59;
+    color: color-mix(in srgb, #0f766e 75%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-questionnaire

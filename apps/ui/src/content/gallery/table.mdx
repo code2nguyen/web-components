@@ -199,7 +199,7 @@ Every card is a `rows` array plus a set of `c2-table-column` children: `width` t
   .sorted {
     height: 296px;
     width: 100%;
-    --c2-table__header-cell__sorted--color: rgb(2, 101, 220);
+    --c2-table__header-cell__sorted--color: var(--c2-theme--color-primary, #0265dc);
     --c2-table__sort-icon__active--color: rgb(2, 101, 220);
   }
 </style>
@@ -597,7 +597,8 @@ A column with `summary="sum"` (or `avg`, `min`, `max`, `count`) adds a totals ro
   .ledger::part(summary-content-amount) {
     padding: 2px 8px;
     border-radius: 999px;
-    background: rgb(22, 163, 74);
+    background: rgb(21, 128, 61);
+    color: #ffffff;
   }
 </style>
 <c2-table client:only="lit" class="ledger" row-key="id" rows='[{"id":"1","task":"Design review","team":"Design","hours":12,"rate":95,"amount":1140},{"id":"2","task":"Component audit","team":"Engineering","hours":18,"rate":110,"amount":1980},{"id":"3","task":"Accessibility pass","team":"Engineering","hours":9,"rate":120,"amount":1080},{"id":"4","task":"Copywriting","team":"Content","hours":6,"rate":80,"amount":480},{"id":"5","task":"Icon set","team":"Design","hours":14,"rate":95,"amount":1330},{"id":"6","task":"Release notes","team":"Content","hours":3,"rate":80,"amount":240},{"id":"7","task":"Performance budget","team":"Engineering","hours":11,"rate":120,"amount":1320},{"id":"8","task":"Onboarding flow","team":"Design","hours":16,"rate":95,"amount":1520},{"id":"9","task":"Docs migration","team":"Content","hours":10,"rate":80,"amount":800},{"id":"10","task":"QA sweep","team":"Engineering","hours":8,"rate":110,"amount":880}]'>
@@ -935,20 +936,21 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
   .console {
     height: 296px;
     width: 100%;
-    --c2-table--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-table--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-table--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table__header--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table__header--color: var(--c2-theme--color-outline-strong, #a1a1aa);
-    --c2-table__header--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table__cell--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-table__sort-icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table__sort-icon__active--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-table--background: #18181b;
+    --c2-table--color: #fafafa;
+    --c2-table--border-top: 1px solid #3f3f46;
+    --c2-table--border-right: 1px solid #3f3f46;
+    --c2-table--border-bottom: 1px solid #3f3f46;
+    --c2-table--border-left: 1px solid #3f3f46;
+    --c2-table__header--background: #27272a;
+    --c2-table__header--color: #a1a1aa;
+    --c2-table__header--border-bottom: 1px solid #3f3f46;
+    --c2-table__resizer--color: #52525b;
+    --c2-table__row--border-bottom: 1px solid #27272a;
+    --c2-table__row__hover--background: #27272a;
+    --c2-table__cell--color: #fafafa;
+    --c2-table__sort-icon--color: #71717a;
+    --c2-table__sort-icon__active--color: #a1a1aa;
   }
 </style>
 <c2-table client:only="lit" class="console" sortable row-key="id" rows='[{"id":"1","service":"api-gateway","region":"eu-west-1","tier":"Edge","uptime":0.9998,"p95":124,"requests":1284000,"state":"Healthy"},{"id":"2","service":"auth","region":"eu-west-1","tier":"Core","uptime":0.9991,"p95":86,"requests":642000,"state":"Healthy"},{"id":"3","service":"billing","region":"us-east-1","tier":"Core","uptime":0.9912,"p95":412,"requests":98400,"state":"Degraded"},{"id":"4","service":"search","region":"us-east-1","tier":"Edge","uptime":0.9975,"p95":238,"requests":874000,"state":"Healthy"},{"id":"5","service":"notifications","region":"ap-south-1","tier":"Async","uptime":0.9834,"p95":1840,"requests":41200,"state":"Down"},{"id":"6","service":"reports","region":"eu-west-1","tier":"Async","uptime":0.9989,"p95":690,"requests":18600,"state":"Healthy"}]'>
@@ -1050,18 +1052,18 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
     height: 296px;
     width: 100%;
     --c2-table--font-size: 13px;
-    --c2-table__header--background: #ffffff;
-    --c2-table__header--border-bottom: 1px solid #e4e4e7;
+    --c2-table__header--background: var(--c2-theme--color-surface, #ffffff);
+    --c2-table__header--border-bottom: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
     --c2-table__row--height: 36px;
-    --c2-table__row--border-bottom: 1px solid #f4f4f5;
-    --c2-table__row__selected--background: #fffbeb;
+    --c2-table__row--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__row__selected--background: color-mix(in srgb, #f59e0b 10%, var(--c2-theme--color-surface, #ffffff));
     --c2-table__cell--font-size: 13px;
   }
   .financial::part(cell-last), .financial::part(cell-change), .financial::part(cell-pct), .financial::part(cell-volume), .financial::part(cell-cap) {
     font-variant-numeric: tabular-nums;
   }
   .financial::part(cell-change), .financial::part(cell-pct) {
-    color: #15803d;
+    color: color-mix(in srgb, #16a34a 70%, var(--c2-theme--color-on-surface, #18181b));
     font-weight: 600;
   }
   .financial::part(row-selected) {
@@ -1084,30 +1086,31 @@ Same data, different surface. The table is one CSS grid, so a look is only varia
   .terminal {
     height: 296px;
     width: 100%;
-    --c2-table--background: var(--c2-theme--color-on-surface, #18181b);
-    --c2-table--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table--background: #18181b;
+    --c2-table--color: #e4e4e7;
     --c2-table--font-size: 12px;
-    --c2-table--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table__header--background: var(--c2-theme--color-on-surface, #18181b);
-    --c2-table__header--color: var(--c2-theme--color-on-surface-variant, #71717a);
+    --c2-table--border-top: 1px solid #27272a;
+    --c2-table--border-right: 1px solid #27272a;
+    --c2-table--border-bottom: 1px solid #27272a;
+    --c2-table--border-left: 1px solid #27272a;
+    --c2-table__header--background: #18181b;
+    --c2-table__header--color: #a1a1aa;
     --c2-table__header--height: 30px;
     --c2-table__header--letter-spacing: 0.08em;
-    --c2-table__header--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__header--border-bottom: 1px solid #27272a;
+    --c2-table__resizer--color: #3f3f46;
     --c2-table__row--height: 30px;
     --c2-table__row--border-bottom: none;
-    --c2-table__row__odd--background: var(--c2-theme--color-on-surface, #18181b);
-    --c2-table__row__hover--background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 98%, var(--c2-theme--color-surface, #ffffff));
-    --c2-table__cell--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-table__row__odd--background: #18181b;
+    --c2-table__row__hover--background: #1f1f23;
+    --c2-table__cell--color: #e4e4e7;
     --c2-table__cell--font-size: 12px;
-    --c2-table__sort-icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-table__sort-icon--color: #52525b;
     --c2-table__sort-icon__active--color: #22c55e;
   }
   .terminal::part(cell-symbol) {
     font-weight: 600;
-    color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    color: #fafafa;
   }
   .terminal::part(cell-last), .terminal::part(cell-change), .terminal::part(cell-pct), .terminal::part(cell-volume) {
     font-variant-numeric: tabular-nums;

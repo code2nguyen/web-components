@@ -136,13 +136,13 @@ Curated looks for `c2-tree`. Open any card in the studio to start from it. The c
   .sidebar {
     width: 100%;
     --c2-tree--background: transparent;
-    --c2-tree-item--color: #52525b;
+    --c2-tree-item--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
     --c2-tree-item__row--min-height: 30px;
     --c2-tree-item__row--border-radius: 6px;
     --c2-tree-item__row--indent: 12px;
-    --c2-tree-item__guide--color: #e4e4e7;
-    --c2-tree-item__selected--background: #edf1fe;
-    --c2-tree-item__selected--color: #2f56e6;
+    --c2-tree-item__guide--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-tree-item__selected--background: var(--c2-theme--color-primary-container, #edf1fe);
+    --c2-tree-item__selected--color: color-mix(in srgb, var(--c2-theme--color-primary, #2f56e6) 80%, var(--c2-theme--color-on-surface, #18181b));
     --c2-tree-item__toggle--size: 14px;
   }
 </style>
