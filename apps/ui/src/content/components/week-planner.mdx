@@ -10,6 +10,9 @@ import ExampleModules from '../../components/ExampleModules.astro'
 
 import { WeekPlanner } from '@c2n/week-planner'
 import { Button } from '@c2n/button'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherPlusIcon as FeatherPlus } from '@c2n/feather-icons/icons/plus.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
 
 <ExampleModules />
 
@@ -44,6 +47,24 @@ npm install @c2n/week-planner
     color: var(--c2-theme--color-on-surface-variant, #71717a);
     font-size: 12px;
   }
+  .planner-add {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--gap: 6px;
+    --c2-button__container--font-size: 13px;
+    --c2-feather-icon--size: 16px;
+  }
+  .planner-icon-action {
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
 </style>
 <div data-label="Every week">
   <c2-week-planner
@@ -70,8 +91,8 @@ npm install @c2n/week-planner
     end-hour="13"
     events='[{"title":"Planning","day":"mon","start":"09:00","end":"10:00"},{"title":"Client workshop","day":"wed","start":"10:00","end":"12:00","color":"#b45309"}]'
   >
-    <c2-button slot="actions">Add event</c2-button>
-    <c2-button slot="actions">Settings</c2-button>
+    <c2-button class="planner-add" slot="actions"><c2-feather-plus slot="prefix-icon"></c2-feather-plus>Add event</c2-button>
+    <c2-icon-button class="planner-icon-action" slot="actions" tooltip="Settings" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
   </c2-week-planner>
 </div>
 <div data-label="Dated week">
@@ -135,8 +156,8 @@ the header shows for them even without a heading or the week switch. The planner
 
 ```html tag=CodeBlock
 <c2-week-planner heading="Team week">
-  <c2-button slot="actions">Add event</c2-button>
-  <c2-icon-button slot="actions" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
+  <c2-button class="planner-add" slot="actions"><c2-feather-plus slot="prefix-icon"></c2-feather-plus>Add event</c2-button>
+  <c2-icon-button class="planner-icon-action" slot="actions" tooltip="Settings" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
 </c2-week-planner>
 ```
 

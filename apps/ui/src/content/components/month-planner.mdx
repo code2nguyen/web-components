@@ -10,6 +10,9 @@ import ExampleModules from '../../components/ExampleModules.astro'
 
 import { MonthPlanner } from '@c2n/month-planner'
 import { Button } from '@c2n/button'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherPlusIcon as FeatherPlus } from '@c2n/feather-icons/icons/plus.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
 
 <ExampleModules />
 
@@ -47,6 +50,24 @@ npm install @c2n/month-planner
     color: var(--c2-theme--color-on-surface-variant, #71717a);
     font-size: 12px;
   }
+  .planner-add {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--gap: 6px;
+    --c2-button__container--font-size: 13px;
+    --c2-feather-icon--size: 16px;
+  }
+  .planner-icon-action {
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
 </style>
 <div data-label="Vacation plan">
   <c2-month-planner
@@ -62,7 +83,8 @@ npm install @c2n/month-planner
     locale="en-US"
     events='[{"id":"ana","title":"Ana: vacation","start":"2026-09-07","end":"2026-09-11","color":"#0f766e"},{"id":"leo","title":"Leo: parental leave","start":"2026-09-14","end":"2026-09-25","color":"#be185d"}]'
   >
-    <c2-button slot="actions">Add event</c2-button>
+    <c2-button class="planner-add" slot="actions"><c2-feather-plus slot="prefix-icon"></c2-feather-plus>Add event</c2-button>
+    <c2-icon-button class="planner-icon-action" slot="actions" tooltip="Settings" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
   </c2-month-planner>
 </div>
 <div data-label="Editable">
@@ -93,8 +115,8 @@ instead of overflowing. The planner leaves what they do to you.
 
 ```html tag=CodeBlock
 <c2-month-planner heading="Team holidays">
-  <c2-button slot="actions">Add event</c2-button>
-  <c2-icon-button slot="actions" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
+  <c2-button class="planner-add" slot="actions"><c2-feather-plus slot="prefix-icon"></c2-feather-plus>Add event</c2-button>
+  <c2-icon-button class="planner-icon-action" slot="actions" tooltip="Settings" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
 </c2-month-planner>
 ```
 
