@@ -28,7 +28,7 @@ npm install @c2n/flow
 
 ## Usage
 
-Drag the steps, hover them, and right-click the canvas. The last row draws its nodes with `renderNode`.
+Drag the steps, hover them, and right-click the canvas. The fourth row draws its nodes with `renderNode`; the last one is `editable`: double-click the canvas to add a note, drag a node's handle to connect it, double-click a node to rename it, and press Delete to remove what you selected.
 
 ```html tag=UsageBlock,package=@c2n/flow
 <style>
@@ -71,6 +71,55 @@ Drag the steps, hover them, and right-click the canvas. The last row draws its n
     <c2-flow client:only="lit" data-flow-demo="custom" class="short" aria-label="Model training" nodes='[{"id":"data","label":"Load features","status":"success","data":{"kind":"dataset","progress":100,"metric":"1.2M rows"}},{"id":"split","label":"Train / test split","status":"success","data":{"kind":"transform","progress":100,"metric":"80 / 20"}},{"id":"xgb","label":"XGBoost","status":"running","data":{"kind":"train","progress":64,"metric":"AUC 0.871"}},{"id":"lgbm","label":"LightGBM","status":"success","data":{"kind":"train","progress":100,"metric":"AUC 0.864"}},{"id":"eval","label":"Evaluate","status":"pending","data":{"kind":"evaluate","progress":0,"metric":"best of 2"}}]' edges='[{"source":"data","target":"split"},{"source":"split","target":"xgb"},{"source":"split","target":"lgbm"},{"source":"xgb","target":"eval"},{"source":"lgbm","target":"eval"}]'></c2-flow>
   </div>
 </div>
+<div data-label="Editable">
+  <div class="demo">
+    <c2-flow client:only="lit" data-flow-demo="editable" editable class="short" aria-label="Flow note" nodes='[{"id":"idea","label":"Idea"},{"id":"outline","label":"Outline"},{"id":"draft","label":"First draft"}]' edges='[{"source":"idea","target":"outline"},{"source":"outline","target":"draft"}]'></c2-flow>
+    <output class="result"></output>
+  </div>
+</div>
+```
+
+## Editing
+
+With `editable` the user draws the diagram. The flow stays controlled, like a form field with a `value`: it never changes `nodes` or `edges` itself, it fires an event and your application applies the change (and can refuse it, or save it first). None of the events bubble.
+
+| Gesture                                                       | Keyboard                                                                      | Event                              |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------- |
+| Double-click empty canvas, or **Add node** in the canvas menu | `N` (in the middle of the view), or Enter on the canvas of an empty flow      | `node-add` `{ position }`          |
+| Drag a node's handle and release on empty canvas              | `N` on the selected node                                                      | `node-add` `{ position, source }`  |
+| Drag a node's handle onto another node                        | `C`, then the arrow keys or Tab to choose, Enter to connect, Escape to cancel | `edge-add` `{ source, target }`    |
+| Double-click a node, or **Rename** in its menu                | F2, or Enter on the selected node; Enter commits, Escape cancels              | `node-edit` `{ id, label }`        |
+| **Delete** in a node's menu                                   | Delete or Backspace on the focused node                                       | `node-delete` `{ id }`             |
+| Click an edge, then Delete; or **Delete** in its menu         | `E` on a node selects its edges in turn, then Delete                          | `edge-delete` `{ source, target }` |
+
+`edge-add` never names a self-loop or an edge that already exists. `position` is in canvas pixels, the top-left corner of the new node: give it to the node as its `position` and the flow puts it there. While the flow is editable, a change to the graph never moves the nodes that are already on the canvas: their positions are pinned as a custom layout, saved under `storage-key` and reported by `layout-change` with the reason `edit`.
+
+The inline editor replaces the label of a node drawn by the flow. A node drawn by `renderNode` or a `node:<id>` slot gets the editor over its whole body and the same `node-edit` event, but must render `node.label` itself for the new name to show.
+
+```ts tag=CodeBlock
+const flow = document.querySelector('c2-flow')!
+let next = 1
+
+flow.addEventListener('node-add', async ({ detail }) => {
+  const id = `note-${next++}`
+  flow.nodes = [...flow.nodes, { id, label: 'New note', position: detail.position }]
+  if (detail.source) flow.edges = [...flow.edges, { source: detail.source, target: id }]
+  await flow.updateComplete
+  flow.editLabel(id) // let the user name it straight away
+})
+flow.addEventListener('node-edit', ({ detail }) => {
+  flow.nodes = flow.nodes.map((node) => (node.id === detail.id ? { ...node, label: detail.label } : node))
+})
+flow.addEventListener('node-delete', ({ detail }) => {
+  flow.nodes = flow.nodes.filter((node) => node.id !== detail.id)
+  flow.edges = flow.edges.filter((edge) => edge.source !== detail.id && edge.target !== detail.id)
+})
+flow.addEventListener('edge-add', ({ detail }) => {
+  flow.edges = [...flow.edges, detail]
+})
+flow.addEventListener('edge-delete', ({ detail }) => {
+  flow.edges = flow.edges.filter((edge) => edge.source !== detail.source || edge.target !== detail.target)
+})
 ```
 
 ## Custom nodes and cards
@@ -92,7 +141,7 @@ flow.addEventListener('node-click', ({ detail }) => openDetails(detail.node))
 
 ## Context menu
 
-`renderContextMenu` receives the node that was right-clicked (or `null` for the canvas) and the built-in rows. The view controls (zoom, fit, layout) belong to the canvas: a node has no built-in rows, so right-clicking one opens a menu only when you return rows for it. Return your own rows next to `defaultItems` to extend the canvas menu; they fire `flow-menu-select` with the node. A row with `value="flow:details"` selects the node and fires `node-click`. Return `undefined` to keep the built-in rows, or `null` to let the browser show its own menu.
+`renderContextMenu` receives the node that was right-clicked (or `null` for the canvas), the edge in an `editable` flow, and the built-in rows (in an editable flow, **Add node** on the canvas and **Rename** and **Delete** on a node or an edge). The view controls (zoom, fit, layout) belong to the canvas: a node has no built-in rows, so right-clicking one opens a menu only when you return rows for it. Return your own rows next to `defaultItems` to extend the canvas menu; they fire `flow-menu-select` with the node. A row with `value="flow:details"` selects the node and fires `node-click`. Return `undefined` to keep the built-in rows, or `null` to let the browser show its own menu.
 
 ```ts tag=CodeBlock
 flow.renderContextMenu = ({ node }) =>
@@ -110,3 +159,5 @@ flow.addEventListener('flow-menu-select', ({ detail }) => {
 ## Layout
 
 The saved layout is a plain object of positions keyed by node id. `getLayout()` returns the current one and `setLayout()` applies one (merged like a restored layout), so it can live on a server instead of in `localStorage`; `layout-change` fires whenever the user changes it. `resetLayout()` goes back to the auto layout, and `fitView()`, `zoomIn()` and `zoomOut()` drive the view from your own controls.
+
+A node can also carry its own `position`. The flow places it there instead of where the auto layout would, unless the user has already moved it (a saved or dragged position wins over the one the node first arrived with); changing the value later moves the node. Nodes without one still follow the auto layout, placed next to their neighbours.
