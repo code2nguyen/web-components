@@ -154,6 +154,20 @@ A pad is only a preset of the paper's CSS variables: binding, corners, shadow, l
 
 The colours are still CSS variables: `--c2-notepad__paper-yellow--background` and `--c2-notepad__paper-yellow--color` (and the same pair for each colour) decide what each choice looks like. Under `@c2n/theme` the pastel papers darken with the surface in dark mode and their inks lighten.
 
+## Actions on the note
+
+Buttons slotted into `actions` sit at the top right of the sheet, after the "Paper" button: the place for a delete, pin or share button that belongs to the note rather than to the selected text (that is the `toolbar` slot). They keep their own styles and events.
+
+On a board of many notes, set `--c2-notepad__controls--opacity: 0` to show the "Paper" button, the "Tear off" button and the actions only on the note being pointed at or written in. A touch screen has no hover: there they show once the writer taps into the page. They stay while the paper picker is open.
+
+```html tag=CodeBlock
+<c2-notepad label="Groceries" paper-picker style="--c2-notepad__controls--opacity: 0">
+  <c2-icon-button slot="actions" aria-label="Delete note">
+    <c2-feather-trash-2></c2-feather-trash-2>
+  </c2-icon-button>
+</c2-notepad>
+```
+
 ## Paper and binding
 
 The paper is styled through CSS variables only. Graph paper sets `--c2-notepad__grid--color`. A dot grid sets `--c2-notepad__dot--color` and makes the rules transparent. A blank page makes the rules and the margin transparent. `--c2-notepad__rule--spacing` is also the line height: the default 28px is college ruling. `--c2-notepad__spiral--display` and `--c2-notepad__glue--display` switch between a spiral and the glued top of a legal pad, `--c2-notepad__margin--gap` adds a second margin line, `--c2-notepad__headline--color` draws the red headline of an index card, and `--c2-notepad__sheet--rotate` tilts the sheet. Under `@c2n/theme` the paper, rules, margin and inks are mixed from the surface tokens, so a dark theme gives night paper. The Gallery tab has a legal pad, a dot-grid journal, an engineering pad, a sticky note and an index card.

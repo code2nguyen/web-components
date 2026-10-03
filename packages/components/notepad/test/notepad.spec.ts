@@ -540,3 +540,62 @@ test('representative states pass an accessibility scan', async ({ page, renderSc
   await expect(toolbar(page)).toBeVisible()
   await accessible(page)
 })
+
+test('the actions slot puts buttons at the top right of the sheet, after the Paper button', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes" paper-picker><button slot="actions" aria-label="Delete note">×</button></c2-notepad>')
+  const host = page.locator('c2-notepad')
+  const actions = host.locator('[part="actions"]')
+  await expect(actions).toBeVisible()
+  const paper = await host.locator('[part="paper-button"]').boundingBox()
+  const slotted = await page.getByRole('button', { name: 'Delete note' }).boundingBox()
+  const sheet = await host.locator('[part="sheet"]').boundingBox()
+  expect(slotted!.x).toBeGreaterThan(paper!.x + paper!.width - 1)
+  expect(slotted!.y).toBeLessThan(sheet!.y + 48)
+  // A slotted button is reachable with the keyboard and keeps its own click handler.
+  await page.getByRole('button', { name: 'Delete note' }).evaluate((button) => button.addEventListener('click', () => button.setAttribute('data-clicked', '')))
+  await page.getByRole('button', { name: 'Delete note' }).focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'Delete note' })).toHaveAttribute('data-clicked', '')
+})
+
+test('without slotted actions the actions region takes no room', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-notepad label="Notes" paper-picker></c2-notepad>')
+  await expect(page.locator('c2-notepad [part="actions"]')).toBeHidden()
+})
+
+test('controls--opacity hides the controls until the notepad is hovered or focused', async ({ page, renderScenario }) => {
+  await renderScenario(
+    '<p>Elsewhere</p><c2-notepad label="Notes" paper-picker style="--c2-notepad__controls--opacity: 0"><button slot="actions">Delete</button></c2-notepad>',
+  )
+  const host = page.locator('c2-notepad')
+  const controls = host.locator('.controls')
+  const opacity = () => controls.evaluate((element) => getComputedStyle(element).opacity)
+  await expect.poll(opacity).toBe('0')
+  await host.locator('[part="sheet"]').hover()
+  await expect.poll(opacity).toBe('1')
+  await page.getByText('Elsewhere').hover()
+  await expect.poll(opacity).toBe('0')
+  // Keyboard users see them as soon as focus is inside.
+  await surface(page).focus()
+  await expect.poll(opacity).toBe('1')
+})
+
+test('controls stay visible by default', async ({ page, renderScenario }) => {
+  await renderScenario('<p>Elsewhere</p><c2-notepad label="Notes" paper-picker></c2-notepad>')
+  await page.getByText('Elsewhere').hover()
+  await expect.poll(() => page.locator('c2-notepad .controls').evaluate((element) => getComputedStyle(element).opacity)).toBe('1')
+})
+
+test.describe('on a touch screen', () => {
+  test.use({ hasTouch: true })
+
+  test('hidden controls show once the page is tapped', async ({ page, renderScenario }) => {
+    await renderScenario(
+      '<p>Elsewhere</p><c2-notepad label="Notes" paper-picker style="--c2-notepad__controls--opacity: 0"><button slot="actions">Delete</button></c2-notepad>',
+    )
+    const opacity = () => page.locator('c2-notepad .controls').evaluate((element) => getComputedStyle(element).opacity)
+    await expect.poll(opacity).toBe('0')
+    await surface(page).tap()
+    await expect.poll(opacity).toBe('1')
+  })
+})
