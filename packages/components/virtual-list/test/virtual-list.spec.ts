@@ -355,3 +355,27 @@ test('a selected run stays joined across the edge of the rendered window', async
   expect(rendered.length).toBeGreaterThan(0)
   expect(rendered.every((row) => row.before && row.after)).toBe(true)
 })
+
+test('a part on what renderItem returns is reachable as c2-virtual-list::part()', async ({ page, renderScenario }) => {
+  await renderScenario(list())
+  const host = page.locator('c2-virtual-list')
+  await host.evaluate(async (element) => {
+    const virtualList = element as HTMLElement & {
+      renderItem: (context: { item: { name: string; team: string } }) => unknown
+      updateComplete: Promise<boolean>
+    }
+    virtualList.renderItem = ({ item }) => {
+      const badge = document.createElement('span')
+      badge.setAttribute('part', `team team-${item.team.toLowerCase()}`)
+      badge.textContent = item.name
+      return badge
+    }
+    await virtualList.updateComplete
+  })
+  await page.addStyleTag({ content: 'c2-virtual-list::part(team){border:1px solid rgb(1, 2, 3)}c2-virtual-list::part(team-flight){color:rgb(200, 0, 0)}' })
+  const badges = host.locator('[part~="team"]')
+  await expect(badges).toHaveCount(4)
+  await expect(badges.first()).toHaveCSS('border-top-color', 'rgb(1, 2, 3)')
+  await expect(badges.last()).toHaveCSS('color', 'rgb(200, 0, 0)')
+  await expect(badges.first()).not.toHaveCSS('color', 'rgb(200, 0, 0)')
+})

@@ -22,63 +22,6 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 
 ## Open
 
-### Renderer output is unreachable from a page stylesheet
-
-- **Severity:** papercut
-- **Hit while:** migrating a nine-route SvelteKit tool onto 35 packages at 0.0.13, 2026-09-19 (external report).
-- **What happens:** `renderCell` (`c2-table`) and `renderItem` (`c2-virtual-list`, `c2-list`) return nodes that
-  land in the shadow root, where no page stylesheet reaches them. Every element in the app's row template had to
-  carry an inline `style` constant for that reason alone, including the two declarations that turn a filled badge
-  into an outlined one. `::part(cell-content-<field>)` covers a column's text but not the structure inside a
-  renderer.
-- **Where the fix belongs:** `packages/components/table`, `virtual-list`, `list` — give rendered content a `part`,
-  or honour a `part`/class the renderer's returned element already carries.
-
-### No per-row styling hook that CSS can reach
-
-- **Severity:** gap
-- **Hit while:** the same migration, 2026-09-19 (external report).
-- **What happens:** `rowStyle` is a function returning inline styles; there is no `rowClass`, and `::part(row)`
-  cannot be conditioned on row data. Every per-row tint in the app — a revised record, the currently running job —
-  became a badge in a cell instead.
-- **Where the fix belongs:** `packages/components/table` — a `rowClass` callback returning a string, or chosen
-  fields emitted as data attributes on the row so `::part(row)[data-status='failed']` works from a stylesheet.
-
-### Wrapping a table cell takes a three-part override every consumer rewrites
-
-- **Severity:** papercut
-- **Hit while:** the same migration, 2026-09-19 (external report). The identical override was written twice, on
-  two different screens.
-- **What happens:** cells clip by design, which is right for a windowed grid. Opting out means turning
-  virtualization off and then resetting `align-items` and `overflow` through two parts:
-  `--c2-table__row--height: auto`, `::part(cell) { align-items: flex-start; overflow: visible }`,
-  `::part(cell-content) { white-space: normal; overflow: visible }`.
-- **Where the fix belongs:** `packages/components/table` — a `wrap` attribute that does those three things and
-  documents that windowing turns off, or measured variable row heights.
-
-### `cell-slot` defeats virtualization, so rich cells and windowing are mutually exclusive without Lit
-
-- **Severity:** gap
-- **Hit while:** the same migration, 2026-09-19 (external report).
-- **What happens:** a `cell-slot` column needs one light-DOM child per row per field, keyed by row key. On a
-  5,000-row grid that is 5,000 children — exactly the cost windowing exists to avoid. A framework that will not
-  take a Lit dependency therefore cannot have both. (`html` re-exported from `@c2n/core/lit-helper.js` softens
-  this: the Lit renderer no longer means a hand-pinned `lit` in the application.)
-- **Where the fix belongs:** `packages/components/table` — key slot names by **visible index** rather than row key,
-  so a framework renders only the window. Breaking change to the documented `cell:{rowKey}:{field}` contract.
-
-### Property-driven table cell action slots are not reliably actionable during upgrade
-
-- **Severity:** bug
-- **Hit while:** adding Edit/Open actions to alert rule and incident rows in the Next.js observability example, 2026-09-21.
-- **What happens:** when `rows` and `columns` are assigned after `customElements.whenDefined`, light-DOM controls named
-  for `cell:{rowKey}:{field}` did not consistently attach to the expected rendered cell soon enough to provide a
-  stable keyboard/click target. The dense data stays in `c2-table`, while row actions had to move to an adjacent
-  c2 control region.
-- **Where the fix belongs:** `packages/components/table` — make cell-slot redistribution deterministic after
-  property-driven row/column updates and add a framework/upgrade regression test for interactive slotted cells.
-- **Partially addressed 2026-09-23:** a property-driven update regression verifies pointer/focus use of an interactive light-DOM cell. The original Next.js hydration race has no confirmed runtime fix and remains open.
-
 ## Fixed
 
 | Component                       | Finding                                                                                                                                                                                                                                                                                                                         | Fixed in                                                                                                                                                                                                     |
@@ -119,6 +62,11 @@ Severity: **bug** (wrong behaviour), **gap** (documented or implied but not impl
 | `c2-reorder-list`               | `dragStartThreshold` and `autoScrollDisabled` were observed as `dragstartthreshold`/`autoscrolldisabled`. They are now `drag-start-threshold` and `auto-scroll-disabled`; the old spelling in markup is forwarded with a warning.                                                                                               | 2026-10-03                                                                                                                                                                                                   |
 | docs                            | Item tags inside a `c2-navigation-menu` island were server-rendered and lost `href`. The navigation-menu page and the skill's Astro notes now show passing items through `set:html`, with a static-output check.                                                                                                                | 2026-10-03                                                                                                                                                                                                   |
 | docs                            | Declarative shadow DOM inlines a stylesheet per instance, so many-instance chrome bloats the HTML (606 KB → 2.2 MB). A platform limit; the skill's Astro notes now say to emit such markup through `set:html` and keep links in the light DOM.                                                                                  | 2026-10-03                                                                                                                                                                                                   |
+| docs                            | A `part` on what `renderCell`/`renderItem` return was already reachable as `c2-table::part(x)`/`c2-virtual-list::part(x)` (no nested shadow root in between), but undocumented; now documented and tested. `c2-list` has no renderer; its rows are light DOM.                                                                   | 2026-10-03                                                                                                                                                                                                   |
+| `c2-table`                      | Only `rowStyle` (inline styles); `::part(row)` cannot be conditioned on data. `rowPart` returns extra part names per row, so `c2-table::part(row-failed)` works from a stylesheet.                                                                                                                                              | 2026-10-03                                                                                                                                                                                                   |
+| `c2-table`                      | Wrapping took a row-height variable and two `::part` overrides. The `wrap` attribute does it in one, turns windowing off, and pads top-aligned text with `--c2-table__cell__wrap--padding`.                                                                                                                                     | 2026-10-03                                                                                                                                                                                                   |
+| `c2-table`                      | A `cell-slot` column needed a child per row. `range-change` (and `renderedRange`) report the rendered window with its row keys, so a framework renders children only for the window; the `cell:{rowKey}:{field}` contract is unchanged.                                                                                         | 2026-10-03                                                                                                                                                                                                   |
+| `c2-table`                      | The grid's keydown handler cancelled Enter/Space on any control inside a cell, so slotted buttons could not be pressed from the keyboard, and it stole arrow keys from text inputs. Controls now own those keys. No upgrade-order race reproduced (pre-upgrade properties, children before and after rows).                     | 2026-10-03                                                                                                                                                                                                   |
 
 ## Won't fix
 

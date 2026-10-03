@@ -51,6 +51,27 @@ export type TableSummaryRenderer = (context: TableSummaryRenderContext) => unkno
 export type TableRowStyle = Record<string, string | number | null | undefined>
 export type TableRowStyler = (context: TableRowContext) => TableRowStyle | undefined
 
+/**
+ * Returns extra part names for a row, added beside `row`: `'row-failed'` (or `['row-failed', 'row-revised']`) makes
+ * the row reachable as `c2-table::part(row-failed)`. Whitespace-separated names in one string work too; `undefined`,
+ * `null` or an empty string adds none.
+ */
+export type TableRowPartResolver = (context: TableRowContext) => string | readonly string[] | null | undefined
+
+/** Detail of `range-change`: the body rows the table has rendered, which is the window while it virtualizes. */
+export interface TableRangeChangeEventDetail {
+  /** Display line of the first rendered body row, counted across the whole dataset (page offset included). */
+  start: number
+  /** Display line after the last rendered body row. */
+  end: number
+  /**
+   * Keys of the data rows rendered in that window, in display order — the rows whose `cell:{rowKey}:{field}` slots
+   * are in the shadow DOM right now. Group rows and rows a `dataSource` has not delivered yet have no key and are
+   * left out.
+   */
+  keys: string[]
+}
+
 /** Returns anything Lit can render: a `TemplateResult`, a string, a number, a node. */
 export type TableCellRenderer = (context: TableCellContext) => unknown
 export type TableHeaderRenderer = (context: TableHeaderContext) => unknown

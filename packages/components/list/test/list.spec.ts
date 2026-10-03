@@ -10,6 +10,12 @@ test('consumer-owned list rows remain directly styleable', async ({ page, render
   await page.locator('.slot-probe').evaluate((node) => ((node as HTMLElement).style.color = 'rgb(1, 2, 3)'))
   await expect(page.locator('.slot-probe')).toHaveCSS('color', 'rgb(1, 2, 3)')
 })
+// c2-list has no renderer: its rows are the author's own light DOM, so a page stylesheet reaches their content as is.
+test('a page stylesheet reaches the content of a row', async ({ page, renderScenario }) => {
+  await renderScenario('<c2-list><c2-list-item value="a"><span class="status status-failed">Failed</span></c2-list-item></c2-list>')
+  await page.addStyleTag({ content: '.status-failed{color:rgb(200, 0, 0)}' })
+  await expect(page.locator('.status')).toHaveCSS('color', 'rgb(200, 0, 0)')
+})
 test('selection updates options and emits consumer data', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-list aria-label="Fruit">${rows}</c2-list>`)
   const host = page.locator('c2-list')

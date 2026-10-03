@@ -42,6 +42,7 @@ declare module 'vue' {
         'groups-collapsed'?: unknown
         'empty-group-label'?: unknown
         onPageChange?: (event: EventOf<Table, 'page-change'>) => void
+        onRangeChange?: (event: EventOf<Table, 'range-change'>) => void
         onGroupToggle?: (event: EventOf<Table, 'group-toggle'>) => void
         onSortChange?: (event: EventOf<Table, 'sort-change'>) => void
         onRowClick?: (event: EventOf<Table, 'row-click'>) => void

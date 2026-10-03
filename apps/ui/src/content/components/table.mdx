@@ -254,6 +254,57 @@ const status = table.querySelector<HTMLElement & { renderCell?: unknown }>('c2-t
 status.renderCell = ({ value }) => html`<c2-badge tone=${value === 'active' ? 'success' : 'warning'}>${value}</c2-badge>`
 ```
 
+What `renderCell` returns lives in the table's shadow root, where a page stylesheet does not reach. Give it a `part`
+and the table exposes it as is, so `c2-table::part(<name>)` styles it. `::part()` takes no attribute or class
+selector, so put the variant in the part name:
+
+```typescript tag=CodeBlock
+status.renderCell = ({ value }) => html`<span part="status status-${value}">${value}</span>`
+```
+
+```css tag=CodeBlock
+c2-table::part(status) {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 8px;
+}
+c2-table::part(status-failed) {
+  color: #b91c1c;
+}
+```
+
+### Wrapping long text
+
+Cells clip to one line by default, which is what a windowed grid of uniform rows needs. Add `wrap` and body cells
+grow instead: text wraps, cells are top-aligned with `--c2-table__cell__wrap--padding`, and each row takes the height
+of its tallest cell (at least `--c2-table__row--height`). Rows of different heights cannot be windowed, so **`wrap`
+turns virtualization off** whatever `virtual` says — every row is rendered. Keep it for a few hundred rows, or page
+them with `page-size`.
+
+```html tag=CodeBlock
+<c2-table row-key="id" wrap>
+  <c2-table-column field="title" header="Title" width="200px"></c2-table-column>
+  <c2-table-column field="notes" header="Notes" width="2fr"></c2-table-column>
+</c2-table>
+```
+
+### Rendering cells with a framework, while virtualizing
+
+A column marked `cell-slot` takes each cell's body from a light-DOM child named `cell:{rowKey}:{field}`, so React,
+Vue, Svelte or Angular can render it with their own templates. While the table virtualizes, only the rows in the
+rendered window have those slots: `range-change` reports their keys (and `renderedRange` holds the last window), so
+render children for those keys only. A child for a row outside the window is simply left unassigned, and a row that
+scrolls in before its child exists shows the column's formatted value until it arrives.
+
+```js tag=CodeBlock
+const visibleKeys = ref([])
+table.addEventListener('range-change', (event) => (visibleKeys.value = event.detail.keys))
+// <button v-for="key in visibleKeys" :key="key" :slot="`cell:${key}:action`">Open</button>
+```
+
+Enter and Space on a control inside a cell — a slotted button, a `renderCell` input — belong to that control; the grid
+only handles them when the cell itself has the focus.
+
 ### Animating realtime row updates
 
 Add `animate-updates` when `rows` represents successive snapshots from a realtime feed. The table matches rows using
@@ -298,6 +349,19 @@ table.rowStyle = ({ row }) => {
 
 Use `highlight-updates` for a short acknowledgement pulse; use `rowStyle` when color encodes a state that should
 remain until the underlying data crosses another threshold.
+
+To style rows by state from a stylesheet instead, set `rowPart`: the part names it returns are added to the row beside
+`row`, since `::part(row)` cannot be filtered by the row's data.
+
+```js tag=CodeBlock
+table.rowPart = ({ row }) => (row.status === 'failed' ? 'row-failed' : undefined)
+```
+
+```css tag=CodeBlock
+c2-table::part(row-failed) {
+  background: #fef2f2;
+}
+```
 
 ### Loading rows lazily
 

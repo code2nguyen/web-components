@@ -31,8 +31,10 @@ import {
   type TableGroupDisplay,
   type TableGroupRenderer,
   type TableGroupToggleEventDetail,
+  type TableRangeChangeEventDetail,
   type TableRow,
   type TableRowEventDetail,
+  type TableRowPartResolver,
   type TableRowStyler,
   type TableSelectionChangeEventDetail,
   type TableSortChangeEventDetail,
@@ -264,6 +266,7 @@ export interface TableEventMap {
   'column-resize': CustomEvent<TableColumnResizeEventDetail>
   'page-change': CustomEvent<TablePageChangeEventDetail>
   'group-toggle': CustomEvent<TableGroupToggleEventDetail>
+  'range-change': CustomEvent<TableRangeChangeEventDetail>
 }
 
 export interface Table {
@@ -296,10 +299,27 @@ export interface Table {
  * shape from outside: `::part(cell-content-status) { border-radius: 999px; background: #f4f4f5 }`. Rows are
  * `::part(row)` and `::part(row-selected)`.
  *
+ * **Styling renderer output.** What `renderCell` (or `renderGroup`) returns is placed in the table's own shadow root,
+ * so a page stylesheet cannot select it — but a `part` it carries is exposed as-is: return
+ * `` html`<span part="badge badge-${row.status}">…</span>` `` (or a node with that attribute) and style it with
+ * `c2-table::part(badge)`. A part cannot be combined with an attribute or class selector, so encode the variant in the
+ * part name itself. Content slotted through a `cell-slot` column stays in the light DOM and takes page styles directly.
+ *
+ * **Styling one row.** `::part(row)` cannot be conditioned on row data (`::part()` takes no attribute selector), so
+ * `rowPart` adds part names of your own to a row from its data: `` table.rowPart = ({ row }) => row.failed ?
+ * 'row-failed' : undefined `` makes `c2-table::part(row-failed) { background: #fef2f2 }` work. `rowStyle` sets inline
+ * styles from the same context instead.
+ *
  * **Virtualization** windows the rows to the visible range plus an overscan margin. It needs a uniform row height, which
  * it measures from the first rendered row, so theme the height with `--c2-table__row--height` (`row-height` is only the
  * estimate used for the first paint). It turns on automatically past `virtual-threshold` rows; `virtual="always"` and
- * `virtual="never"` force it.
+ * `virtual="never"` force it. `range-change` reports the rows in the window and `renderedRange` holds the last one.
+ *
+ * **Wrapping cells.** Cells clip their text to one line by default, which is what a windowed grid of uniform rows needs.
+ * `wrap` lets body cells grow instead: text wraps, rows take the height of their tallest cell (at least
+ * `--c2-table__row--height`), cell content is top-aligned with `--c2-table__cell__wrap--padding` and no longer
+ * clipped. Variable row heights cannot be windowed, so **`wrap` turns virtualization off** whatever `virtual` says and
+ * every row is rendered — keep it for tables of a few hundred rows, or page them with `page-size`.
  *
  * **Realtime updates.** Add `animate-updates` when replacing `rows` with successive snapshots. Matching rows are found
  * by `row-key` (or index), and their finite numeric fields are interpolated over `update-duration`. With a stable key,
@@ -363,7 +383,7 @@ export interface Table {
  * @slot fallback - Meaningful server-rendered table content. It remains visible before custom-element upgrade and is
  * retained in the light DOM but hidden after the interactive grid mounts, avoiding duplicate client content.
  * @slot group:{groupKey} - Label of one group, e.g. `slot="group:region=EMEA"`, in place of its formatted value and row count. The copy of the group kept under the header while its rows scroll shows the built-in label.
- * @slot cell:{rowKey}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:AAPL:change"`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback.
+ * @slot cell:{rowKey}:{field} - Body of one cell of a column marked `cell-slot`, e.g. `slot="cell:AAPL:change"`. Lets a framework render a cell with its own template language instead of a `renderCell` function; the column's `renderCell` or formatted value stays as the fallback. While the table virtualizes, only the rendered window has these slots: render children for the keys `range-change` reports (or `renderedRange.keys`) and a child for a row outside the window is simply left unassigned, so a framework never needs one child per row.
  *
  * @slotcomponent c2-table-column
  * @slotcomponent c2-pagination
@@ -374,6 +394,7 @@ export interface Table {
  * @event {CustomEvent<TableCellEventDetail>} cell-click - Fired when a cell is clicked; adds `detail.column` and `detail.value`.
  * @event {CustomEvent<TableColumnResizeEventDetail>} column-resize - Fired when the user releases a column's resize handle.
  * @event {CustomEvent<TableGroupToggleEventDetail>} group-toggle - Fired after the user opens or closes a group, with its `key`, whether it is now `expanded`, and the `group` itself (its rows and aggregates). `expandedGroups` already holds the new state. Does not bubble.
+ * @event {CustomEvent<TableRangeChangeEventDetail>} range-change - Fired after the rendered body rows change — the window scrolled, or the rows, sort, page or grouping changed. `detail.start`/`detail.end` are the display lines rendered (end exclusive) and `detail.keys` the keys of their data rows, which are the only rows whose `cell:{rowKey}:{field}` slots exist. Does not bubble.
  * @event {CustomEvent<TablePageChangeEventDetail>} page-change - Fired after the shown page changes, while `paginated`. `detail.start` and `detail.count` are the slice of the whole dataset now shown — with a `dataSource`, the `getRows` request that follows. A pager slotted in the footer does not fire its own: the table speaks for it.
  *
  * @csspart toolbar - Row above the grid containing the `toolbar` slot.
@@ -390,7 +411,7 @@ export interface Table {
  * @csspart selection-cell - A body cell containing a row-selection checkbox.
  * @csspart skeleton - Placeholder displayed while a remote row is loading.
  * @csspart cell-content - The content wrapper inside a body cell.
- * @csspart row - Every rendered body row.
+ * @csspart row - Every rendered body row. Also carries the names `rowPart` returns for it, such as `row-failed`.
  * @csspart row-selected - A body row while it is selected; exposed in addition to `row`.
  * @csspart summary-row - The totals row kept at the bottom of the grid.
  * @csspart summary-cell - Every cell of the summary row. Each also carries `summary-cell-<id>`, named after its column.
@@ -462,6 +483,7 @@ export interface Table {
  * @cssproperty {font-size} [--c2-table__cell--font-size=14px]
  * @cssproperty {color} [--c2-table__cell--color=#18181b]
  * @cssproperty {border} [--c2-table__cell--border-right=none] - Vertical grid lines; applies to header cells too.
+ * @cssproperty {padding} [--c2-table__cell__wrap--padding=8px 12px] - Body cell padding with `wrap`, where content is top-aligned.
  * @cssproperty {outline} [--c2-table__cell__focus--outline=2px solid rgba(2, 101, 220, 0.4)]
  * @cssproperty {pixel} [--c2-table__cell__focus--outline-offset=-2px]
  *
@@ -576,14 +598,28 @@ export class Table extends LitElement {
   /** Returns inline styles for a row from its current data. Property only; animated updates pass the intermediate row. */
   @property({ attribute: false }) rowStyle?: TableRowStyler
 
+  /**
+   * Returns extra part names for a row from its current data, added beside `row` so a stylesheet can reach rows by
+   * state: `({ row }) => row.status === 'failed' ? 'row-failed' : undefined` and `c2-table::part(row-failed)`. A string
+   * (whitespace-separated names) or an array. Property only; animated updates pass the intermediate row.
+   */
+  @property({ attribute: false }) rowPart?: TableRowPartResolver
+
   /** Pulses changed row backgrounds: green for additions/increases, red for removals/decreases, blue otherwise. */
   @property({ type: Boolean, attribute: 'highlight-updates', reflect: true }) highlightUpdates = false
 
   /** Numeric field that determines whether a modified row highlights as increased or decreased. Defaults to its first changed number. */
   @property({ type: String, attribute: 'update-highlight-field' }) updateHighlightField = ''
 
-  /** `auto` virtualizes past `virtual-threshold` rows; `always` and `never` force it. */
+  /** `auto` virtualizes past `virtual-threshold` rows; `always` and `never` force it. `wrap` overrides it with `never`. */
   @property({ type: String }) virtual: TableVirtualMode = 'auto'
+
+  /**
+   * Wraps body cell text onto several lines: rows grow to their content (at least `--c2-table__row--height`) and cells
+   * are top-aligned and no longer clipped. Rows of different heights cannot be windowed, so this turns virtualization
+   * off — every row is rendered, whatever `virtual` says.
+   */
+  @property({ type: Boolean }) wrap = false
 
   /** Row height in pixels used before the first row has been measured. */
   @property({ type: Number, attribute: 'row-height' }) rowHeight = 36
@@ -681,6 +717,9 @@ export class Table extends LitElement {
   #headerHeightPx = 0
   /** Keys of the group rows stuck under the header at the last render, to re-render only when they change. */
   #echoSignature = ''
+  /** The window `range-change` last reported, to fire only when it moves. */
+  #renderedRange: TableRangeChangeEventDetail = { start: 0, end: 0, keys: [] }
+  #rangeSignature = ''
 
   /**
    * Shared with a `c2-pagination` slotted into the `footer`. Rebuilt rather than mutated whenever the paging state
@@ -753,7 +792,7 @@ export class Table extends LitElement {
 
   /** Whether the rows are currently windowed. */
   get isVirtualized(): boolean {
-    if (this.virtual === 'never') return false
+    if (this.wrap || this.virtual === 'never') return false
     if (this.virtual === 'always') return true
     return this.rowCount > this.virtualThreshold
   }
@@ -1021,6 +1060,41 @@ export class Table extends LitElement {
       this.renderRoot.querySelector<HTMLElement>('.cell[tabindex="0"]')?.focus()
     }
     if (this.dataSource) this.#ensureBlocks()
+    this.#reportRenderedRange()
+  }
+
+  /**
+   * The body rows rendered by the last update: their display lines and the keys of their data rows. While the table
+   * virtualizes this is the window, so a framework filling `cell-slot` columns needs light-DOM children only for
+   * `keys`. `range-change` fires whenever it changes.
+   */
+  get renderedRange(): TableRangeChangeEventDetail {
+    return { ...this.#renderedRange, keys: [...this.#renderedRange.keys] }
+  }
+
+  #reportRenderedRange() {
+    let start = 0
+    let end = 0
+    const keys: string[] = []
+    if (!this.error && this.rowCount > 0) {
+      const offset = this.#pageStart
+      const range = this.#virtualizer.range
+      const grouping = this.#grouping()
+      start = offset + range.start
+      end = grouping ? Math.min(offset + range.end, offset + this.rowCount) : offset + range.end
+      for (let line = start; line < end; line++) {
+        const item = grouping?.items[line]
+        if (item?.kind === 'group') continue
+        const index = this.#rowIndexAt(line)
+        const row = this.#rowAt(index)
+        if (row) keys.push(this.#keyAt(index, row))
+      }
+    }
+    const signature = `${start}:${end}:${keys.join('\u0000')}`
+    if (signature === this.#rangeSignature) return
+    this.#rangeSignature = signature
+    this.#renderedRange = { start, end, keys }
+    this.dispatchEvent(new CustomEvent<TableRangeChangeEventDetail>('range-change', { detail: this.renderedRange }))
   }
 
   override render() {
@@ -1041,7 +1115,7 @@ export class Table extends LitElement {
       </div>
       <div class="viewport" part="viewport" @scroll=${this.#handleViewportScroll}>
         <div
-          class="grid"
+          class=${classMap({ grid: true, 'grid--wrap': this.wrap })}
           role=${grouping ? 'treegrid' : 'grid'}
           part="grid"
           aria-rowcount=${this.#lineCount + (summary ? 2 : 1)}
@@ -1367,6 +1441,7 @@ export class Table extends LitElement {
     const selectable = this.selection !== 'none'
     const updateState = key ? this.#rowUpdateStates.get(key) : undefined
     const rowStyle = row && updateState !== 'removed' ? this.rowStyle?.({ row, rowIndex: index, key }) : undefined
+    const extraParts = row && updateState !== 'removed' ? this.rowPart?.({ row, rowIndex: index, key }) : undefined
 
     return html`
       <div
@@ -1380,7 +1455,14 @@ export class Table extends LitElement {
           [`row--${updateState}`]: Boolean(updateState),
         })}
         role="row"
-        part=${['row', selected ? 'row-selected' : '', updateState ? `row-${updateState}` : ''].filter(Boolean).join(' ')}
+        part=${[
+          'row',
+          selected ? 'row-selected' : '',
+          updateState ? `row-${updateState}` : '',
+          ...(typeof extraParts === 'string' ? extraParts.split(/\s+/) : (extraParts ?? [])),
+        ]
+          .filter(Boolean)
+          .join(' ')}
         data-row-key=${key}
         data-update-state=${ifDefined(updateState)}
         aria-rowindex=${line + 2}
@@ -1993,6 +2075,21 @@ export class Table extends LitElement {
   /** Scrolls display line `line` into view, below the header and, while grouped, below the groups stuck under it. */
   #scrollToLine(line: number) {
     const grouping = this.#grouping()
+    // Wrapped rows have their own heights, so the uniform-height arithmetic below would aim at the wrong place; every
+    // row is rendered then, so scroll to the row itself.
+    if (this.wrap) {
+      const viewport = this.viewport
+      const element = this.renderRoot.querySelector<HTMLElement>(
+        `.row--body[aria-rowindex="${line + 2}"], .row--group:not(.row--group-echo)[aria-rowindex="${line + 2}"]`,
+      )
+      if (!viewport || !element) return
+      const header = this.#headerHeight()
+      const top = element.getBoundingClientRect().top - viewport.getBoundingClientRect().top
+      const bottom = top + element.getBoundingClientRect().height
+      if (top < header) viewport.scrollTop += top - header
+      else if (bottom > viewport.clientHeight) viewport.scrollTop += bottom - viewport.clientHeight
+      return
+    }
     if (!grouping) {
       this.#virtualizer.scrollToIndex(line - this.#pageStart, this.#headerHeight())
       return
@@ -2362,6 +2459,7 @@ export class Table extends LitElement {
   #handleKeyDown = (event: KeyboardEvent) => {
     const columns = this.#renderColumns()
     if (columns.length === 0) return
+    if (this.#isFromCellControl(event)) return
     let { row, column } = this.focusedCell
     // Keyboard movement stays inside the page: rows are numbered across the whole dataset, so page 2 starts at
     // `first`, not at 0.
@@ -2444,6 +2542,20 @@ export class Table extends LitElement {
     this.focusedCell = { row, column }
     this.#pendingFocus = true
     if (row >= 0) this.#scrollToLine(row)
+  }
+
+  /**
+   * Whether a key comes from a control inside a cell — a slotted button, a `renderCell` input, the row checkbox —
+   * rather than from the cell itself. Enter and Space belong to that control (cancelling them here used to stop a
+   * slotted button from ever activating from the keyboard), and so does every key while it edits text.
+   */
+  #isFromCellControl(event: KeyboardEvent): boolean {
+    const origin = event.composedPath()[0]
+    if (!(origin instanceof Element) || origin.matches('.cell')) return false
+    if (event.key === 'Enter' || event.key === ' ') return true
+    return origin.matches(
+      'input:not([type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"]), textarea, select, [contenteditable=""], [contenteditable="true"]',
+    )
   }
 
   #headerHeight(): number {

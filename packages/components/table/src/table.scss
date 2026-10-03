@@ -77,6 +77,7 @@
     group-count--padding: 1px 7px,
     group-count--border-radius: 999px,
     cell--padding: 0 12px,
+    cell__wrap--padding: 8px 12px,
     cell--gap: 8px,
     cell--font-size: 14px,
     cell--color: #18181b,
@@ -345,6 +346,26 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+// `wrap`: body rows grow to their content, so cells top-align, stop clipping and let their text break. The table turns
+// virtualization off with it, since the window needs uniform rows.
+.grid--wrap .row--body {
+  height: auto;
+  min-height: css.cssVar(row--height);
+}
+
+.grid--wrap .row--body .cell {
+  align-items: flex-start;
+  overflow: visible;
+  padding: css.cssVar(cell__wrap--padding);
+}
+
+.grid--wrap .row--body .cell-content {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
 }
 
 .cell--align-center {
