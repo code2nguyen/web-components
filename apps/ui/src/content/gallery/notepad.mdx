@@ -179,4 +179,20 @@ Pick up the dry cleaning"></c2-notepad>
 </div>
 ```
 
+```html tag=MdxCodeBlock,label=Brand inks
+<style>
+  .brand-inks { width: 320px; max-width: 100%; }
+</style>
+<c2-notepad
+  class="brand-inks"
+  label="Brand notes"
+  inks='[{"name":"Ink","value":"#1f2937"},{"name":"Brand","value":"#4f46e5"},{"name":"Alert","value":"#b91c1c"}]'
+  highlights='[{"name":"Marker","value":"rgba(250, 204, 21, 0.5)"},{"name":"Mint","value":"rgba(52, 211, 153, 0.35)"}]'
+  value="Launch checklist
+<span data-ink=&quot;2&quot;>Brand colour</span> on the hero
+<span data-ink=&quot;3&quot;>Legal</span> must sign off ==by Friday==
+<mark data-color=&quot;2&quot;>Ship it</mark>"
+></c2-notepad>
+```
+
 </GalleryGrid>

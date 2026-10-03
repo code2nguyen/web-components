@@ -167,6 +167,35 @@ list.highlights = [{ name: 'Important', value: '#f59e0b' }]
 themeToggle.addEventListener('change', () => (list.pens = isDark() ? pens.dark : pens.light))
 ```
 
+Here the tasks keep the same positions (`"ink": 2`, `"highlight": 1`) and only the lists differ:
+
+```html tag=UsageBlock,package=@c2n/todo-list
+<style>
+  .todo-colours {
+    width: 100%;
+    max-width: 360px;
+  }
+</style>
+<div data-label="Own pens and highlighters">
+  <c2-todo-list
+    class="todo-colours"
+    heading="Launch"
+    icon="none"
+    pens='[{"name":"Ink","value":"#1f2937"},{"name":"Brand","value":"#4f46e5"}]'
+    highlights='[{"name":"Important","value":"#f59e0b"},{"name":"Done soon","value":"#10b981"}]'
+    tasks='[{"label":"Hero copy","ink":2},{"label":"Legal sign-off","highlight":1},{"label":"Press kit","highlight":2},{"label":"Tweet the launch","ink":1}]'
+  ></c2-todo-list>
+  <c2-todo-list
+    class="todo-colours"
+    heading="Launch"
+    icon="none"
+    pens='[{"name":"Ink","value":"#3f2a1d"},{"name":"Brand","value":"#c2410c"}]'
+    highlights='[{"name":"Important","value":"#e11d48"},{"name":"Done soon","value":"#0ea5e9"}]'
+    tasks='[{"label":"Hero copy","ink":2},{"label":"Legal sign-off","highlight":1},{"label":"Press kit","highlight":2},{"label":"Tweet the launch","ink":1}]'
+  ></c2-todo-list>
+</div>
+```
+
 Keep the same length and order in every theme. A highlighter is mixed into the list's background, so give its full
 colour rather than a pale tint. A position the current list does not have shows as no colour. As with every list you
 give, the colours are used exactly as given: their contrast on your backgrounds is yours to check. `defaultTodoPens` and
@@ -189,6 +218,27 @@ list.palettes = [
   { name: 'Brand', accent: '#4f46e5', pens: ['#1f2937', '#4f46e5'], dark: { accent: '#a5b4fc', pens: ['#e5e7eb', '#a5b4fc'] } },
   { name: 'Forest', accent: '#15803d', highlights: ['#86efac'], strength: 30 },
 ]
+```
+
+Open the palette button of this list to choose among its own backgrounds and palettes:
+
+```html tag=UsageBlock,package=@c2n/todo-list
+<style>
+  .todo-own-look {
+    width: 100%;
+    max-width: 400px;
+  }
+</style>
+<div data-label="Own backgrounds and palettes">
+  <c2-todo-list
+    class="todo-own-look"
+    heading="Studio week"
+    customizable
+    backgrounds='[{"name":"Cream","value":"#fffaeb","color":"#281e14"},{"name":"Midnight","value":"#101828","color":"#f0f0fa"}]'
+    palettes='[{"name":"Brand","accent":"#4f46e5","pens":["#1f2937","#4f46e5"],"dark":{"accent":"#a5b4fc","pens":["#e5e7eb","#a5b4fc"]}},{"name":"Forest","accent":"#15803d","highlights":["#86efac"],"strength":30}]'
+    tasks='[{"label":"Moodboard","done":true},{"label":"Client call","ink":2,"due":"Tue"},{"label":"Final files","highlight":1,"due":"Fri"}]'
+  ></c2-todo-list>
+</div>
 ```
 
 The default backgrounds and palettes were checked for contrast. A list you give replaces them and is used exactly as

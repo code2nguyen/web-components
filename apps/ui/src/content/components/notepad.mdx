@@ -100,6 +100,38 @@ notepad.highlights = [{ name: 'Marker', value: 'rgba(250, 204, 21, 0.5)' }]
 themeToggle.addEventListener('change', () => (notepad.inks = isDark() ? dark : light))
 ```
 
+The first note below gives its own three inks and two highlighters: select some text to see them in the toolbar. The second gets the same page with a different list of the same length, so every mark is recoloured in place.
+
+```html tag=UsageBlock,package=@c2n/notepad
+<style>
+  .colour-note { width: 300px; max-width: 100%; }
+</style>
+<div data-label="Own inks and highlighters">
+  <c2-notepad
+    class="colour-note"
+    label="Brand notes"
+    inks='[{"name":"Ink","value":"#1f2937"},{"name":"Brand","value":"#4f46e5"},{"name":"Alert","value":"#b91c1c"}]'
+    highlights='[{"name":"Marker","value":"rgba(250, 204, 21, 0.5)"},{"name":"Mint","value":"rgba(52, 211, 153, 0.35)"}]'
+    value="Launch checklist
+<span data-ink=&quot;2&quot;>Brand colour</span> on the hero
+<span data-ink=&quot;3&quot;>Legal</span> must sign off ==by Friday==
+<mark data-color=&quot;2&quot;>Ship it</mark>"
+  ></c2-notepad>
+</div>
+<div data-label="Same page, another list">
+  <c2-notepad
+    class="colour-note"
+    label="Brand notes, warm"
+    inks='[{"name":"Ink","value":"#3f2a1d"},{"name":"Brand","value":"#c2410c"},{"name":"Alert","value":"#9f1239"}]'
+    highlights='[{"name":"Marker","value":"rgba(251, 146, 60, 0.4)"},{"name":"Mint","value":"rgba(163, 230, 53, 0.4)"}]'
+    value="Launch checklist
+<span data-ink=&quot;2&quot;>Brand colour</span> on the hero
+<span data-ink=&quot;3&quot;>Legal</span> must sign off ==by Friday==
+<mark data-color=&quot;2&quot;>Ship it</mark>"
+  ></c2-notepad>
+</div>
+```
+
 Keep the same length and order across themes: position 2 should mean the same thing in both. A list whose colours are `var(--app-token)` follows the theme with no reassigning at all. A position the current list does not have is drawn in the page's own ink. The defaults were checked for contrast; a list you give replaces them and is used exactly as given, so choosing colours that read on each other, on every paper colour and in every theme, is up to you. Pages written with the default colours' names (`data-ink="red"`) still open, as their position. `DEFAULT_INKS` and `DEFAULT_HIGHLIGHTS` are exported to start from.
 
 Call `formatSelection(mark, color?)` (`color` is the 1-based position, e.g. `formatSelection('ink', 3)`) and `clearFormatting()` to drive the formatting from your own controls. Listen for `format-change` to keep them in sync with the selection.
