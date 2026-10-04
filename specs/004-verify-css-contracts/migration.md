@@ -73,3 +73,41 @@ No variable changed. `c2-menu` no longer writes `has-trigger` on its host (now a
 | `c2-menu[has-trigger]`                             | `c2-menu:state(has-trigger)`                                     |
 | `c2-menu[slot='submenu'][placement='right-start']` | `c2-menu[slot='submenu']:not([placement])`                       |
 | `c2-menu-item[reserve-indicator]`                  | none: style a checkable row by `c2-menu-item:not([type='item'])` |
+
+## `c2-step` host attributes and reflection
+
+No variable changed. `c2-step` no longer writes `entering`, `settling`, `last`, `marker`, `grouped` or `has-children` on its own host (the parent `c2-steps` wrote `entering`, the step the rest), no longer sets an inline `--level` style on the host (the indent is set inside the shadow root), and no longer reflects `status` or `collapsed`: the list rolls a status up onto a group that authored none, and a reflected value was an attribute the server never rendered. An authored `status` or `collapsed` attribute still works; read the live value from the property or the state. They are custom states now:
+
+| Old selector                                         | Replacement                                                                                           |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `c2-step[status='<status>']` (when rolled up or set) | `c2-step:state(<status>)` (`pending`, `running`, `current`, `success`, `error`, `warning`, `skipped`) |
+| `c2-step[collapsed]` (after a toggle or reopen)      | `c2-step:state(collapsed)`                                                                            |
+| `c2-step[last]`                                      | `c2-step:state(last)`                                                                                 |
+| `c2-step[grouped]`                                   | `c2-step:state(grouped)`                                                                              |
+| `c2-step[has-children]`                              | `c2-step:state(has-children)`                                                                         |
+| `c2-step[marker='icon']`                             | `c2-step:state(marker-icon)`                                                                          |
+| `c2-step[marker='number']`                           | `c2-step:state(marker-number)`                                                                        |
+| `c2-step[marker='none']`                             | `c2-step:state(marker-none)`                                                                          |
+| `c2-step[entering]`                                  | `c2-step:state(entering)`                                                                             |
+| `c2-step[settling]`                                  | `c2-step:state(settling)`                                                                             |
+
+## Chart readiness attributes and `c2-chart-tooltip` visibility
+
+No variable changed. Every `c2-*-chart` / `c2-sparkline` no longer writes `data-chart-ready` and `data-chart-engine` on its host once the engine has drawn, and `c2-chart-tooltip` no longer toggles `hidden` on itself (it did so from its constructor, so `document.createElement('c2-chart-tooltip')` threw). The `chart-ready` event is unchanged.
+
+| Old selector                                    | Replacement                          |
+| ----------------------------------------------- | ------------------------------------ |
+| `c2-line-chart[data-chart-ready]`               | `c2-line-chart:state(ready)`         |
+| `el.hasAttribute('data-chart-ready')`           | `el.matches(':state(ready)')`        |
+| `c2-line-chart[data-chart-engine='uplot']`      | `c2-line-chart:state(engine-uplot)`  |
+| `c2-pie-chart[data-chart-engine='echarts']`     | `c2-pie-chart:state(engine-echarts)` |
+| `c2-chart-tooltip:not([hidden])`                | `c2-chart-tooltip:state(open)`       |
+| `c2-chart-tooltip[hidden]` (set by the tooltip) | `c2-chart-tooltip:not(:state(open))` |
+
+## `c2-avatar-group` hidden avatars
+
+No variable changed. `c2-avatar-group` no longer writes `data-c2-avatar-group-hidden` on the slotted `c2-avatar` elements that do not fit; it sets the avatar's `groupHidden` property, which the avatar exposes as a custom state.
+
+| Old selector                             | Replacement                     |
+| ---------------------------------------- | ------------------------------- |
+| `c2-avatar[data-c2-avatar-group-hidden]` | `c2-avatar:state(group-hidden)` |

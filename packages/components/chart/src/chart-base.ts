@@ -127,6 +127,10 @@ export interface ChartBase {
  * default) rather than by its content. Give the host a height — through the variable, a CSS rule, or a
  * flex parent — or the plot area collapses.
  *
+ * **States.** The host never carries an attribute the author did not write. Once the engine has drawn, it matches the
+ * custom states `:state(ready)` and `:state(engine-uplot)` or `:state(engine-echarts)` (`c2-line-chart:state(ready)` in
+ * page CSS or a test selector); both clear again when the chart is disconnected.
+ *
  * **Mark variables.** The variables documented here apply to every chart. Those that style one kind of mark —
  * `--c2-chart__line--width`, `--c2-chart__point--radius`, `--c2-chart__area--opacity`,
  * `--c2-chart__bar--border-radius`, `--c2-chart__grid--width` and `--c2-chart__series__dimmed--opacity` — are
@@ -142,7 +146,7 @@ export interface ChartBase {
  *
  * @slotcomponent c2-chart-series
  *
- * @event {CustomEvent<{ engine: string }>} chart-ready - Fired after the engine has loaded and drawn for the first time. The host also gains `data-chart-ready`, which is what a test should wait on.
+ * @event {CustomEvent<{ engine: string }>} chart-ready - Fired after the engine has loaded and drawn for the first time. The host also matches `:state(ready)` from then on, which is what a test should wait on.
  * @event {CustomEvent<{ error: unknown }>} chart-error - Fired when the engine fails to load or to draw. `detail.error` is the underlying failure.
  * @event {CustomEvent<ChartPointEventDetail>} point-click - Fired when a datum is clicked; the chart then highlights the clicked series (a second click on it clears the highlight). Cancelable: `preventDefault()` keeps the highlight as it is. Does not bubble: several components fire point events, so a listener belongs on the element itself.
  * @event {CustomEvent<ChartPointEventDetail | null>} point-hover - Fired as the pointer moves between data points, and with a `null` detail when it leaves the plot. Does not bubble.
@@ -221,6 +225,10 @@ export interface ChartBase {
  */
 export abstract class ChartBase extends LitElement {
   static override styles: CSSResultGroup = unsafeCSS(styles)
+
+  // State is exposed as custom states, never as host attributes: an attribute written on the host after the engine
+  // loads is one the server never rendered, which a hydrating framework reports as a mismatch.
+  protected readonly internals = this.attachInternals()
 
   @query('.plot') protected plotElement!: HTMLElement | null
   @query('.tooltip') private tooltipElement!: HTMLElement | null
@@ -463,8 +471,8 @@ export abstract class ChartBase extends LitElement {
     // uPlot registers its own listeners and ECharts leaks without `dispose`, so the instance goes too.
     this.adapter?.destroy()
     this.adapter = undefined
-    this.removeAttribute('data-chart-engine')
-    this.removeAttribute('data-chart-ready')
+    this.internals.states.delete(`engine-${this.engineName}`)
+    this.internals.states.delete('ready')
   }
 
   /**
@@ -747,8 +755,8 @@ export abstract class ChartBase extends LitElement {
       this.#optionsDirty = false
       this.#dataDirty = false
       this.restoreVisibility(adapter)
-      this.setAttribute('data-chart-engine', this.engineName)
-      this.setAttribute('data-chart-ready', 'true')
+      this.internals.states.add(`engine-${this.engineName}`)
+      this.internals.states.add('ready')
       this.dispatchEvent(new CustomEvent('chart-ready', { detail: { engine: this.engineName } }))
     } catch (error) {
       this.engineFailed = true

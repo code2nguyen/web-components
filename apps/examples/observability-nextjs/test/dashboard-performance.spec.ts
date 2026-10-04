@@ -4,7 +4,7 @@ test('replay performs one coherent data update without remounting chart hosts', 
   // The replay advances one tick per 15-second data step (REPLAY_STEP_MS); a fake clock reaches tick 1 without waiting for it.
   await page.clock.install()
   await page.goto('./dashboards/')
-  await expect(page.locator('c2-line-chart[data-chart-ready]')).toBeVisible()
+  await expect(page.locator('c2-line-chart:state(ready)')).toBeVisible()
   await page.locator('c2-line-chart').evaluate((chart) => {
     ;(chart as HTMLElement & { dashboardIdentity?: symbol }).dashboardIdentity = Symbol('chart-host')
     ;(window as Window & { dashboardUpdateCounts?: number[] }).dashboardUpdateCounts = []

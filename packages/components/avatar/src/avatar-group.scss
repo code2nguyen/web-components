@@ -49,7 +49,7 @@ slot {
   --c2-avatar--box-shadow: #{css.cssVar(avatar--box-shadow)};
 }
 
-::slotted([data-c2-avatar-group-hidden]) {
+::slotted(c2-avatar:state(group-hidden)) {
   display: none;
 }
 

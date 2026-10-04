@@ -30,7 +30,7 @@ async function paint(page: Page, markup: string, target: Target): Promise<Paint>
       main.innerHTML = markup
       const chart = main.firstElementChild as HTMLElement
       await new Promise<void>((resolve) => {
-        if (chart.hasAttribute('data-chart-ready')) return resolve()
+        if (chart.matches(':state(ready)')) return resolve()
         chart.addEventListener('chart-ready', () => resolve(), { once: true })
       })
       // Both engines may draw once more after the ready signal settles the final size.

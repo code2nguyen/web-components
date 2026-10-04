@@ -279,8 +279,6 @@ export class MapChart extends EchartsChartBase {
 
   protected override readonly features: readonly EchartsFeature[] = ['geo', 'scatter', 'lines']
 
-  private readonly internals = this.attachInternals()
-
   /** A bundled map: `world-110m` (the default), `world-50m` or `us-states`. Ignored when `geo` or `src` is set. */
   @property({ type: String }) map: MapName = 'world-110m'
 
