@@ -50,24 +50,9 @@ export interface HighlightOptions {
 let corePromise: Promise<HighlighterCore> | undefined
 const pending = new Map<string, Promise<void>>()
 
-/**
- * One shared highlighter for every `c2-code-viewer`; grammars and themes are loaded on demand.
- *
- * The regex target is explicit: `auto` misreads JavaScriptCore's regex support (Safari, WebKit), and the grammars then
- * match nothing, so every token comes out in the default colour. ES2024 (the `v` flag) where the engine has it, ES2018
- * (the `u` flag) on an older one.
- */
+/** One shared highlighter for every `c2-code-viewer`; grammars and themes are loaded on demand. */
 function getCore(): Promise<HighlighterCore> {
-  return (corePromise ??= createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: true, target: regexTarget() }), langs: [], themes: [] }))
-}
-
-function regexTarget(): 'ES2024' | 'ES2018' {
-  try {
-    new RegExp('', 'v')
-    return 'ES2024'
-  } catch {
-    return 'ES2018'
-  }
+  return (corePromise ??= createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: true }), langs: [], themes: [] }))
 }
 
 /** Resolves a language id or alias to what the highlighter knows, falling back to `plaintext`. */
@@ -77,13 +62,25 @@ export function normalizeLang(lang: string | undefined): string {
   return id in bundledLanguages ? id : 'plaintext'
 }
 
+/**
+ * Tokenizes one character with no time limit, so the grammar's regular expressions are compiled before a real line is
+ * timed. Shiki gives each line 500 ms and returns the rest of a line that overruns as one uncoloured token; the first
+ * line also pays for compiling the grammar's root patterns, which on a busy WebKit can take longer than that.
+ */
+function warmUp(core: HighlighterCore, lang: string) {
+  core.getLanguage(lang).tokenizeLine('a', null, 0)
+}
+
 async function ensureLanguage(core: HighlighterCore, lang: string) {
   if (lang === 'plaintext' || core.getLoadedLanguages().includes(lang)) return
   const key = `lang:${lang}`
   if (!pending.has(key)) {
     pending.set(
       key,
-      core.loadLanguage(bundledLanguages[lang as BundledLanguage]).finally(() => pending.delete(key)),
+      core
+        .loadLanguage(bundledLanguages[lang as BundledLanguage])
+        .then(() => warmUp(core, lang))
+        .finally(() => pending.delete(key)),
     )
   }
   await pending.get(key)
