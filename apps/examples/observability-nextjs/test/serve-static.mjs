@@ -15,6 +15,13 @@ const contentTypes = new Map([
 
 createServer((request, response) => {
   const pathname = new URL(request.url ?? '/', 'http://localhost').pathname
+  // The app declares its icon (app/icon.svg), but Chromium still probes the origin root's /favicon.ico when a navigation
+  // is replaced before the document's <head> is read. The origin root belongs to the host site, not to this app.
+  if (pathname === '/favicon.ico') {
+    response.statusCode = 204
+    response.end()
+    return
+  }
   const relative = pathname.startsWith(prefix) ? pathname.slice(prefix.length) : pathname
   const decoded = decodeURIComponent(relative).replace(/^\/+/, '')
   const safe = normalize(decoded).replace(/^(\.\.(\/|\\|$))+/, '')

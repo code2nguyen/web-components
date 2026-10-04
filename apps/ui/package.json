@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@c2n/working-indicator": "*",
+    "@c2n/core": "*",
     "@c2n/page-editor": "*",
     "@c2n/notepad": "*",
     "@c2n/todo-list": "*",

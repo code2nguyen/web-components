@@ -32,8 +32,10 @@ export interface Sparkline {
  *
  * @slotcomponent c2-chart-series
  *
- * @cssproperty {color} [--c2-chart__tone-positive--color=#16a34a] - Stroke when `tone` resolves to positive.
- * @cssproperty {color} [--c2-chart__tone-negative--color=#dc2626] - Stroke when `tone` resolves to negative.
+ * @cssproperty {color} [--c2-chart__tone-positive--color=#16a34a] - Stroke when `tone` resolves to positive. Falls back to `--c2-chart__positive--color`.
+ * @cssproperty {color} [--c2-chart__tone-negative--color=#dc2626] - Stroke when `tone` resolves to negative. Falls back to `--c2-chart__negative--color`.
+ * @cssproperty {pixel} [--c2-chart__line--width=2px] - Stroke width of the line.
+ * @cssproperty {opacity} [--c2-chart__area--opacity=0.18] - Opacity of the fill under the line when `type="area"`.
  */
 @customElement('c2-sparkline')
 export class Sparkline extends UplotChartBase {
@@ -82,8 +84,27 @@ export class Sparkline extends UplotChartBase {
       width: series.lineWidth ?? context.theme.lineWidth,
       paths: linePaths('smooth'),
       points: { show: false },
-      ...(this.type === 'area' ? { fill: withAlpha(color, 0.18) } : {}),
+      ...(this.type === 'area' ? { fill: withAlpha(color, this.areaOpacity()) } : {}),
     }
+  }
+
+  /**
+   * Reads `--c2-chart__area--opacity` off the host, as `c2-area-chart` does. The sparkline's own default is a touch
+   * stronger (0.18 against 0.15), because its fill is a few pixels tall.
+   */
+  private areaOpacity(): number {
+    const raw = parseFloat(getComputedStyle(this).getPropertyValue('--c2-chart__area--opacity'))
+    return Number.isFinite(raw) ? Math.min(1, Math.max(0, raw)) : 0.18
+  }
+
+  /**
+   * The tone colours. Each falls back to the chart-wide `--c2-chart__positive--color` / `--c2-chart__negative--color`,
+   * so a sparkline follows a page that sets only those.
+   */
+  private toneColor(tone: 'positive' | 'negative', context: ChartBuildContext): string {
+    return tone === 'positive'
+      ? this.themeController.resolveColor('var(--c2-chart__tone-positive--color, var(--c2-chart__positive--color, #16a34a))', context.theme.positive)
+      : this.themeController.resolveColor('var(--c2-chart__tone-negative--color, var(--c2-chart__negative--color, #dc2626))', context.theme.negative)
   }
 
   /**
@@ -100,8 +121,8 @@ export class Sparkline extends UplotChartBase {
 
   private resolveTone(series: ChartSeriesConfig, index: number, context: ChartBuildContext): string {
     if (this.tone === 'neutral') return this.colorOf(series, index, context.theme)
-    if (this.tone === 'positive') return context.theme.positive
-    if (this.tone === 'negative') return context.theme.negative
+    if (this.tone === 'positive') return this.toneColor('positive', context)
+    if (this.tone === 'negative') return this.toneColor('negative', context)
 
     const column = this.frame?.columns[index]
     if (!column || !this.frame || this.frame.length < 2) return this.colorOf(series, index, context.theme)
@@ -110,7 +131,7 @@ export class Sparkline extends UplotChartBase {
     if (!Number.isFinite(first) || !Number.isFinite(last) || first === last) {
       return this.colorOf(series, index, context.theme)
     }
-    return last > first ? context.theme.positive : context.theme.negative
+    return this.toneColor(last > first ? 'positive' : 'negative', context)
   }
 }
 

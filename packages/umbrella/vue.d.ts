@@ -6,6 +6,8 @@
 //
 // Tell the compiler about the tags as well, or every c2-* tag is resolved as a Vue component and renders
 // nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.
+//
+// It also re-exports the composables of @c2n/table, which import Vue.
 
 import '@c2n/accordion/vue'
 import '@c2n/attachment/vue'
@@ -81,7 +83,7 @@ import '@c2n/stat/vue'
 import '@c2n/status-panel/vue'
 import '@c2n/steps/vue'
 import '@c2n/switch/vue'
-import '@c2n/table/vue'
+export * from '@c2n/table/vue'
 import '@c2n/tabs/vue'
 import '@c2n/tag-input/vue'
 import '@c2n/text-field/vue'

@@ -47,4 +47,6 @@ Set `data-theme="dark"` (or the `c2-dark` class) on `<html>` or on any subtree; 
 
 `npm run build -w packages/tools/theme` compiles `src/tokens.ts` and runs `scripts/theme-generator`, which reads every `@c2n/*/custom-elements.json`, classifies each documented CSS variable (`scripts/theme-generator/classify.ts`, exceptions in `overrides.ts`) and writes `dist/`. The build depends on every component build so the manifests are fresh; the console prints a coverage table and `dist/report.json` lists what stayed unmapped and why.
 
+A component may document a shorthand variable behind its per-side ones (`--c2-details--border` behind `--c2-details--border-top` and the other three, compiled as `var(--c2-details--border-top, var(--c2-details--border, …))`). The generator reads those fallbacks from the package's built `dist/` and, when a per-side variable maps to exactly the value its shorthand maps to, writes only the shorthand to `base.css` (`scripts/theme-generator/shorthands.ts`): writing the sides would make the shorthand unreachable under the theme. A per-side variable you set still wins; `dist/report.json` lists the omitted sides under `coveredByShorthand`. `npm test -w packages/tools/theme` runs the generator's unit tests.
+
 `npm run dev -w packages/tools/theme` opens a Vite harness (`index.html`) with themed components, a dark-mode toggle and token overrides.

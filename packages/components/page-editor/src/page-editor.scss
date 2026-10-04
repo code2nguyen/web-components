@@ -1,3 +1,4 @@
+@use 'sass:string';
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-page-editor,
   $theme: (
@@ -26,14 +27,8 @@
     checkbox--border-radius: 4px,
     todo__checked--color: #71717a,
     divider--border-top: 1px solid #e4e4e7,
-    code--font-family: (
-      ui-monospace,
-      'SF Mono',
-      SFMono-Regular,
-      Menlo,
-      Consolas,
-      monospace,
-    ),
+    // One unquoted string, so 'SF Mono' keeps its quotes when the list is interpolated into the fallback.
+    code--font-family: string.unquote("ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace"),
     inline-code--background: rgba(113, 113, 122, 0.14),
     inline-code--color: #d44c47,
     inline-code--border-radius: 4px,

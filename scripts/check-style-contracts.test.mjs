@@ -3,7 +3,11 @@ import { spawnSync } from 'node:child_process'
 import { test } from 'node:test'
 
 test('JSON mode exposes every sorted static failure, including those beyond human-output truncation', () => {
-  const command = spawnSync(process.execPath, ['scripts/check-style-contracts.mjs', '--json'], { cwd: process.cwd(), encoding: 'utf8' })
+  const command = spawnSync(process.execPath, ['scripts/check-style-contracts.mjs', '--json'], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
   assert.equal(command.status, 1)
   const report = JSON.parse(command.stdout)
   assert.equal(report.kind, 'static-readiness')
@@ -17,11 +21,19 @@ test('JSON mode exposes every sorted static failure, including those beyond huma
     assert.ok(failure.state)
     assert.ok(failure.target)
   }
-  const repeated = spawnSync(process.execPath, ['scripts/check-style-contracts.mjs', '--json'], { cwd: process.cwd(), encoding: 'utf8' })
+  const repeated = spawnSync(process.execPath, ['scripts/check-style-contracts.mjs', '--json'], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
   assert.equal(command.stdout, repeated.stdout)
 })
 
 test('unknown static-audit CLI options are input errors', () => {
-  const command = spawnSync(process.execPath, ['scripts/check-style-contracts.mjs', '--unknown'], { cwd: process.cwd(), encoding: 'utf8' })
+  const command = spawnSync(process.execPath, ['scripts/check-style-contracts.mjs', '--unknown'], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
   assert.equal(command.status, 2)
 })

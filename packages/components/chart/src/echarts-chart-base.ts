@@ -44,7 +44,7 @@ export abstract class EchartsChartBase extends ChartBase {
     const axisLine = { lineStyle: { color: theme.gridColor } }
     const axisLabel = { color: theme.axisColor, fontSize: theme.axisFontSize }
     // ECharts draws split lines on a value or time x axis by default, in its own light grey: theme them too.
-    const splitLine = { lineStyle: { color: theme.gridColor } }
+    const splitLine = { lineStyle: { color: theme.gridColor, width: theme.gridWidth } }
     return {
       grid: { left: 48, right: 16, top: 16, bottom: 32, containLabel: false },
       xAxis: { type: this.xType === 'time' ? 'time' : this.xType === 'category' ? 'category' : 'value', axisLine, axisLabel, splitLine, data: context.labels },

@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test'
 
+// Longest duration in a computed `transition-duration` list, in milliseconds. Browsers serialize the reduced-motion
+// `0.01ms` differently (Chromium writes `1e-05s`), so compare the time, not the string.
+const longestMilliseconds = (durations: string) =>
+  Math.max(...durations.split(',').map((value) => (value.trim().endsWith('ms') ? parseFloat(value) : parseFloat(value) * 1000) || 0))
+
 test('light, dark, and system theme reconcile without changing dashboard or alert keys', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('c2n-observability:v1:theme', JSON.stringify({ schemaVersion: 1, updatedAt: '2026-09-21T00:00:00Z', data: { theme: 'dark' } }))
@@ -19,5 +24,5 @@ test('reduced motion removes meaningful transition time', async ({ page }) => {
     .locator('.navigation-link')
     .first()
     .evaluate((node) => getComputedStyle(node).transitionDuration)
-  expect(duration).toBe('0.01ms')
+  expect(longestMilliseconds(duration)).toBeLessThanOrEqual(0.01)
 })

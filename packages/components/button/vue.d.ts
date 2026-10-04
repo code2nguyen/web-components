@@ -15,7 +15,11 @@ type C2Props<T> = Partial<Omit<T, keyof HTMLElement>> & HTMLAttributes
 
 declare module 'vue' {
   interface GlobalComponents {
-    'c2-button': DefineComponent<C2Props<Button>>
+    'c2-button': DefineComponent<
+      C2Props<Button> & {
+        'aria-label'?: unknown
+      }
+    >
   }
 }
 

@@ -10,9 +10,15 @@ const importCode = `import '@c2n/text-field'
 // then anywhere in your markup
 <c2-text-field placeholder="Your email"></c2-text-field>`
 const themeCode = `.newsletter c2-text-field {
-  --c2-text-field--border-radius: 12px;
+  --c2-text-field--border-top-left-radius: 12px;
+  --c2-text-field--border-top-right-radius: 12px;
+  --c2-text-field--border-bottom-left-radius: 12px;
+  --c2-text-field--border-bottom-right-radius: 12px;
   --c2-text-field--background: #f4f4f5;
-  --c2-text-field__focus--border: 1px solid #2563eb;
+  --c2-text-field__focus--border-top: 1px solid #2563eb;
+  --c2-text-field__focus--border-right: 1px solid #2563eb;
+  --c2-text-field__focus--border-bottom: 1px solid #2563eb;
+  --c2-text-field__focus--border-left: 1px solid #2563eb;
 }`
 const slotCode = `<c2-text-field placeholder="Search">
   <svg slot="prefix-icon" viewBox="0 0 24 24">…</svg>

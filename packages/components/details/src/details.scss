@@ -3,6 +3,7 @@
 @use '@c2n/sass/css-variable' as css with (
   $prefix: c2-details,
   $theme: (
+    border: 1px solid variables.$color-border-light,
     border-top: 1px solid variables.$color-border-light,
     border-right: 1px solid variables.$color-border-light,
     border-bottom: 1px solid variables.$color-border-light,
@@ -72,10 +73,10 @@
 
   background: css.cssVar(background);
   box-shadow: css.cssVar(box-shadow);
-  border-top: css.cssVar(border-top);
-  border-right: css.cssVar(border-right);
-  border-bottom: css.cssVar(border-bottom);
-  border-left: css.cssVar(border-left);
+  border-top: css.cssVar(border-top, border);
+  border-right: css.cssVar(border-right, border);
+  border-bottom: css.cssVar(border-bottom, border);
+  border-left: css.cssVar(border-left, border);
   border-top-left-radius: css.cssVar(border-top-left-radius);
   border-top-right-radius: css.cssVar(border-top-right-radius);
   border-bottom-left-radius: css.cssVar(border-bottom-left-radius);

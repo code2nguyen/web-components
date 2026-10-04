@@ -154,6 +154,8 @@ function roundNicely(value: number): number {
  * @cssproperty {color} [--c2-chart__bubble-label--color=#18181b] - Colour of the labels drawn inside bubbles. Falls back to `--c2-chart--color`, so it follows the theme.
  * @cssproperty {font-size} [--c2-chart__bubble-label--font-size=11px] - Font size of the labels drawn inside bubbles.
  * @cssproperty {color} [--c2-chart__size-legend--color=#71717a] - Colour of the size key's circles and text.
+ * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the grid lines.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 @customElement('c2-bubble-chart')
 export class BubbleChart extends EchartsChartBase {

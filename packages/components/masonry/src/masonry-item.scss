@@ -39,12 +39,17 @@
   box-shadow: css.cssVar(dragging--box-shadow);
 }
 
+// The resize edges read the public hit-zone depth directly; a coarse pointer swaps in a 16px minimum through
+// `--_resize-hit-size`.
+$_resize-hit-size: var(--_resize-hit-size, #{css.cssVar(resize-handle--size)});
+
 .controls {
   position: absolute;
   z-index: 2;
   inset: 0;
   pointer-events: none;
-  --resize-hit-size: #{css.cssVar(resize-handle--size)};
+  // Unset unless a coarse pointer widens it (below), so an ancestor's property of the same name cannot leak in.
+  --_resize-hit-size: initial;
 }
 
 .controls::before {
@@ -112,7 +117,7 @@
 .resize-edge--bottom {
   right: 0;
   left: 0;
-  height: var(--resize-hit-size);
+  height: $_resize-hit-size;
   cursor: ns-resize;
 }
 
@@ -122,8 +127,8 @@
 
 .resize-edge--right {
   top: 0;
-  bottom: var(--resize-hit-size);
-  width: var(--resize-hit-size);
+  bottom: $_resize-hit-size;
+  width: $_resize-hit-size;
   right: 0;
   cursor: ew-resize;
 }
@@ -169,7 +174,7 @@ button svg {
 
 @media (hover: none) {
   .controls {
-    --resize-hit-size: max(#{css.cssVar(resize-handle--size)}, 16px);
+    --_resize-hit-size: max(#{css.cssVar(resize-handle--size)}, 16px);
   }
 }
 

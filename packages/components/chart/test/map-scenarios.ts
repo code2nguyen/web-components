@@ -127,7 +127,7 @@ window.mapScenario = {
 }
 
 void new Promise<void>((resolve) => {
-  if (chart.hasAttribute('data-chart-ready')) return resolve()
+  if (chart.matches(':state(ready)')) return resolve()
   chart.addEventListener('chart-ready', () => resolve(), { once: true })
   // The unknown-map scenario never draws; it is still a finished scenario.
   setTimeout(resolve, 3000)

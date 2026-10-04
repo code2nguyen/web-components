@@ -20,6 +20,9 @@ export type TimelineLayout = 'stacked' | 'split'
  *
  * `datetime` gives the timestamp a machine-readable value, so it renders as a `<time datetime>` element.
  *
+ * The host exposes what its timeline told it as custom states, never as attributes: `c2-timeline-item:state(last)`
+ * on the last entry and `:state(split)` in a `layout="split"` timeline.
+ *
  * @tag c2-timeline-item
  *
  * @slot - The entry's content, below the label and timestamp.
@@ -102,9 +105,15 @@ export class TimelineItem extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues<this>) {
-    // Presentation hooks for the stylesheet only; neither is a public attribute.
-    if (changed.has('last')) this.toggleAttribute('last', this.last)
-    if (changed.has('layout')) this.toggleAttribute('split', this.layout === 'split')
+    // Presentation hooks for the stylesheet, as custom states rather than host attributes: the timeline sets both
+    // while the page upgrades, so an attribute would make a server-rendered entry differ from the hydrated one.
+    if (changed.has('last')) this.toggleState('last', this.last)
+    if (changed.has('layout')) this.toggleState('split', this.layout === 'split')
+  }
+
+  private toggleState(name: string, on: boolean) {
+    if (on) this.internals.states.add(name)
+    else this.internals.states.delete(name)
   }
 
   override render() {

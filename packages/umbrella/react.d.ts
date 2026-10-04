@@ -6,6 +6,8 @@
 //
 // The declarations are those of each package's own '@c2n/<name>/react' entry; see any of them for the
 // rules React needs followed (register before rendering, kebab-case attribute names when server-rendering).
+//
+// It also re-exports the hooks of @c2n/table, which import React.
 
 import '@c2n/accordion/react'
 import '@c2n/attachment/react'
@@ -81,7 +83,7 @@ import '@c2n/stat/react'
 import '@c2n/status-panel/react'
 import '@c2n/steps/react'
 import '@c2n/switch/react'
-import '@c2n/table/react'
+export * from '@c2n/table/react'
 import '@c2n/tabs/react'
 import '@c2n/tag-input/react'
 import '@c2n/text-field/react'
