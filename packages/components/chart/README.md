@@ -19,7 +19,7 @@ npm install @c2n/components echarts   # pie, gauge, scatter, candlestick, overla
 ```
 
 ```js
-import '@c2n/components/chart/line-chart.js' // one tag
+import '@c2n/components/chart/line-chart' // one tag
 import '@c2n/components/chart' // all of them
 ```
 

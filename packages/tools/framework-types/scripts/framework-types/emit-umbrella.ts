@@ -93,7 +93,7 @@ export function umbrellaEntries(packages: DiscoveredPackage[]): UmbrellaEntry[] 
 
 /**
  * The subpath modules of an entry that define an element (`@c2n/chart/butterfly-chart.js`), each published as
- * `./<name>/<module>.js`. Base classes and helpers (`chart-base.js`, `gantt-model.js`) stay internal: they register
+ * `./<name>/<module>` (no extension, like the package entries). Base classes and helpers (`chart-base.js`, `gantt-model.js`) stay internal: they register
  * nothing, and their exports remain reachable through the package entry.
  */
 function subpathModules(entry: UmbrellaEntry): string[] {
@@ -109,7 +109,7 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
     const body = [BANNER, `// Every module of ${entry.pkg}. Importing this registers each of its elements.`, ``, ...reexports(entry.modules), ``].join('\n')
     files.push({ path: `src/${entry.name}.js`, contents: body, parser: 'typescript' })
     files.push({ path: `src/${entry.name}.d.ts`, contents: body, parser: 'typescript' })
-    // One module of a multi-module package on its own (`@c2n/components/chart/butterfly-chart.js`), so an application
+    // One module of a multi-module package on its own (`@c2n/components/chart/butterfly-chart`), so an application
     // can register a single chart, or defer one, without loading every module the package entry gathers.
     for (const module of subpathModules(entry)) {
       const single = [BANNER, `// ${module} alone.`, ``, `export * from '${module}'`, ``].join('\n')
@@ -211,7 +211,8 @@ function emitPackageJson(entries: UmbrellaEntry[], umbrellaDir: string, scopeDir
     exports[`./${entry.name}`] = { types: `./dist/${entry.name}.d.ts`, default: `./dist/${entry.name}.js` }
     for (const module of subpathModules(entry)) {
       const file = `${entry.name}/${module.slice(entry.pkg.length + 1)}`
-      exports[`./${file}`] = { types: `./dist/${file.replace(/\.js$/, '.d.ts')}`, default: `./dist/${file}` }
+      // Exported without the extension, like the package entries: `@c2n/components/chart/line-chart`.
+      exports[`./${file.replace(/\.js$/, '')}`] = { types: `./dist/${file.replace(/\.js$/, '.d.ts')}`, default: `./dist/${file}` }
     }
   }
   exports['./react'] = { types: './dist/react.d.ts', default: './dist/react.js' }

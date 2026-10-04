@@ -63,7 +63,7 @@
       "types": "./dist/attachment.d.ts",
       "default": "./dist/attachment.js"
     },
-    "./attachment/attachment-group.js": {
+    "./attachment/attachment-group": {
       "types": "./dist/attachment/attachment-group.d.ts",
       "default": "./dist/attachment/attachment-group.js"
     },
@@ -115,75 +115,75 @@
       "types": "./dist/chart.d.ts",
       "default": "./dist/chart.js"
     },
-    "./chart/area-chart.js": {
+    "./chart/area-chart": {
       "types": "./dist/chart/area-chart.d.ts",
       "default": "./dist/chart/area-chart.js"
     },
-    "./chart/bar-chart.js": {
+    "./chart/bar-chart": {
       "types": "./dist/chart/bar-chart.d.ts",
       "default": "./dist/chart/bar-chart.js"
     },
-    "./chart/bubble-chart.js": {
+    "./chart/bubble-chart": {
       "types": "./dist/chart/bubble-chart.d.ts",
       "default": "./dist/chart/bubble-chart.js"
     },
-    "./chart/butterfly-chart.js": {
+    "./chart/butterfly-chart": {
       "types": "./dist/chart/butterfly-chart.d.ts",
       "default": "./dist/chart/butterfly-chart.js"
     },
-    "./chart/candlestick-chart.js": {
+    "./chart/candlestick-chart": {
       "types": "./dist/chart/candlestick-chart.d.ts",
       "default": "./dist/chart/candlestick-chart.js"
     },
-    "./chart/chart-legend.js": {
+    "./chart/chart-legend": {
       "types": "./dist/chart/chart-legend.d.ts",
       "default": "./dist/chart/chart-legend.js"
     },
-    "./chart/chart-series.js": {
+    "./chart/chart-series": {
       "types": "./dist/chart/chart-series.d.ts",
       "default": "./dist/chart/chart-series.js"
     },
-    "./chart/chart-tooltip.js": {
+    "./chart/chart-tooltip": {
       "types": "./dist/chart/chart-tooltip.d.ts",
       "default": "./dist/chart/chart-tooltip.js"
     },
-    "./chart/gauge-chart.js": {
+    "./chart/gauge-chart": {
       "types": "./dist/chart/gauge-chart.d.ts",
       "default": "./dist/chart/gauge-chart.js"
     },
-    "./chart/line-chart.js": {
+    "./chart/line-chart": {
       "types": "./dist/chart/line-chart.d.ts",
       "default": "./dist/chart/line-chart.js"
     },
-    "./chart/map-chart.js": {
+    "./chart/map-chart": {
       "types": "./dist/chart/map-chart.d.ts",
       "default": "./dist/chart/map-chart.js"
     },
-    "./chart/map-layer.js": {
+    "./chart/map-layer": {
       "types": "./dist/chart/map-layer.d.ts",
       "default": "./dist/chart/map-layer.js"
     },
-    "./chart/overlap-chart.js": {
+    "./chart/overlap-chart": {
       "types": "./dist/chart/overlap-chart.d.ts",
       "default": "./dist/chart/overlap-chart.js"
     },
-    "./chart/pie-chart.js": {
+    "./chart/pie-chart": {
       "types": "./dist/chart/pie-chart.d.ts",
       "default": "./dist/chart/pie-chart.js"
     },
-    "./chart/pyramid-chart.js": {
+    "./chart/pyramid-chart": {
       "types": "./dist/chart/pyramid-chart.d.ts",
       "default": "./dist/chart/pyramid-chart.js"
     },
-    "./chart/radar-chart.js": {
+    "./chart/radar-chart": {
       "types": "./dist/chart/radar-chart.d.ts",
       "default": "./dist/chart/radar-chart.js"
     },
-    "./chart/scatter-chart.js": {
+    "./chart/scatter-chart": {
       "types": "./dist/chart/scatter-chart.d.ts",
       "default": "./dist/chart/scatter-chart.js"
     },
-    "./chart/sparkline.js": {
+    "./chart/sparkline": {
       "types": "./dist/chart/sparkline.d.ts",
       "default": "./dist/chart/sparkline.js"
     },
@@ -231,15 +231,15 @@
       "types": "./dist/command.d.ts",
       "default": "./dist/command.js"
     },
-    "./command/command-group.js": {
+    "./command/command-group": {
       "types": "./dist/command/command-group.d.ts",
       "default": "./dist/command/command-group.js"
     },
-    "./command/command-item.js": {
+    "./command/command-item": {
       "types": "./dist/command/command-item.d.ts",
       "default": "./dist/command/command-item.js"
     },
-    "./command/command-separator.js": {
+    "./command/command-separator": {
       "types": "./dist/command/command-separator.d.ts",
       "default": "./dist/command/command-separator.js"
     },
@@ -259,7 +259,7 @@
       "types": "./dist/dashboard.d.ts",
       "default": "./dist/dashboard.js"
     },
-    "./dashboard/dash-card.js": {
+    "./dashboard/dash-card": {
       "types": "./dist/dashboard/dash-card.d.ts",
       "default": "./dist/dashboard/dash-card.js"
     },
@@ -283,7 +283,7 @@
       "types": "./dist/gantt.d.ts",
       "default": "./dist/gantt.js"
     },
-    "./gantt/gantt-task.js": {
+    "./gantt/gantt-task": {
       "types": "./dist/gantt/gantt-task.d.ts",
       "default": "./dist/gantt/gantt-task.js"
     },
@@ -291,15 +291,15 @@
       "types": "./dist/google-map.d.ts",
       "default": "./dist/google-map.js"
     },
-    "./google-map/google-map-marker.js": {
+    "./google-map/google-map-marker": {
       "types": "./dist/google-map/google-map-marker.d.ts",
       "default": "./dist/google-map/google-map-marker.js"
     },
-    "./google-map/google-map-route.js": {
+    "./google-map/google-map-route": {
       "types": "./dist/google-map/google-map-route.d.ts",
       "default": "./dist/google-map/google-map-route.js"
     },
-    "./google-map/google-street-view.js": {
+    "./google-map/google-street-view": {
       "types": "./dist/google-map/google-street-view.d.ts",
       "default": "./dist/google-map/google-street-view.js"
     },
@@ -319,7 +319,7 @@
       "types": "./dist/kanban.d.ts",
       "default": "./dist/kanban.js"
     },
-    "./kanban/kanban-column.js": {
+    "./kanban/kanban-column": {
       "types": "./dist/kanban/kanban-column.d.ts",
       "default": "./dist/kanban/kanban-column.js"
     },
@@ -355,7 +355,7 @@
       "types": "./dist/masonry.d.ts",
       "default": "./dist/masonry.js"
     },
-    "./masonry/masonry-item.js": {
+    "./masonry/masonry-item": {
       "types": "./dist/masonry/masonry-item.d.ts",
       "default": "./dist/masonry/masonry-item.js"
     },
@@ -367,7 +367,7 @@
       "types": "./dist/menu.d.ts",
       "default": "./dist/menu.js"
     },
-    "./menu/menu-item.js": {
+    "./menu/menu-item": {
       "types": "./dist/menu/menu-item.d.ts",
       "default": "./dist/menu/menu-item.js"
     },
@@ -383,11 +383,11 @@
       "types": "./dist/navigation-menu.d.ts",
       "default": "./dist/navigation-menu.js"
     },
-    "./navigation-menu/navigation-menu-item.js": {
+    "./navigation-menu/navigation-menu-item": {
       "types": "./dist/navigation-menu/navigation-menu-item.d.ts",
       "default": "./dist/navigation-menu/navigation-menu-item.js"
     },
-    "./navigation-menu/navigation-menu-link.js": {
+    "./navigation-menu/navigation-menu-link": {
       "types": "./dist/navigation-menu/navigation-menu-link.d.ts",
       "default": "./dist/navigation-menu/navigation-menu-link.js"
     },
@@ -431,11 +431,11 @@
       "types": "./dist/radio.d.ts",
       "default": "./dist/radio.js"
     },
-    "./radio/radio-group.js": {
+    "./radio/radio-group": {
       "types": "./dist/radio/radio-group.d.ts",
       "default": "./dist/radio/radio-group.js"
     },
-    "./radio/radio.js": {
+    "./radio/radio": {
       "types": "./dist/radio/radio.d.ts",
       "default": "./dist/radio/radio.js"
     },
@@ -495,7 +495,7 @@
       "types": "./dist/steps.d.ts",
       "default": "./dist/steps.js"
     },
-    "./steps/step.js": {
+    "./steps/step": {
       "types": "./dist/steps/step.d.ts",
       "default": "./dist/steps/step.js"
     },
@@ -507,7 +507,7 @@
       "types": "./dist/table.d.ts",
       "default": "./dist/table.js"
     },
-    "./table/table-column.js": {
+    "./table/table-column": {
       "types": "./dist/table/table-column.d.ts",
       "default": "./dist/table/table-column.js"
     },
@@ -515,7 +515,7 @@
       "types": "./dist/tabs.d.ts",
       "default": "./dist/tabs.js"
     },
-    "./tabs/tab.js": {
+    "./tabs/tab": {
       "types": "./dist/tabs/tab.d.ts",
       "default": "./dist/tabs/tab.js"
     },
@@ -527,7 +527,7 @@
       "types": "./dist/text-field.d.ts",
       "default": "./dist/text-field.js"
     },
-    "./text-field/text-field-clear.js": {
+    "./text-field/text-field-clear": {
       "types": "./dist/text-field/text-field-clear.d.ts",
       "default": "./dist/text-field/text-field-clear.js"
     },
@@ -547,7 +547,7 @@
       "types": "./dist/timeline.d.ts",
       "default": "./dist/timeline.js"
     },
-    "./timeline/timeline-item.js": {
+    "./timeline/timeline-item": {
       "types": "./dist/timeline/timeline-item.d.ts",
       "default": "./dist/timeline/timeline-item.js"
     },
@@ -567,7 +567,7 @@
       "types": "./dist/tree.d.ts",
       "default": "./dist/tree.js"
     },
-    "./tree/tree-item.js": {
+    "./tree/tree-item": {
       "types": "./dist/tree/tree-item.d.ts",
       "default": "./dist/tree/tree-item.js"
     },

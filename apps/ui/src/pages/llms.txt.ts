@@ -34,7 +34,7 @@ export const GET: APIRoute = async () => {
         // Every component ships in @c2n/components, under its package's entry; a page documenting one element of a
         // multi-element package (a chart) points at that element's own module when the package publishes it.
         const name = (entry.data.package ?? `@c2n/${entry.id}`).slice('@c2n/'.length)
-        const single = `./${name}/${entry.id}.js`
+        const single = `./${name}/${entry.id}`
         const pkg = single in umbrella.exports ? `@c2n/components${single.slice(1)}` : `@c2n/components/${name}`
         const tag = entry.data.tag ?? `c2-${entry.id}`
         const docs = link(`/components/${entry.id}/`)
