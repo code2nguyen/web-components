@@ -64,7 +64,7 @@ test('reduced motion stops every animation but keeps the messages rotating', asy
   const indicator = host(page)
   await expect(visibleText(indicator)).toHaveText('Pondering')
   const names = await indicator.evaluate((element) =>
-    element.shadowRoot!.getAnimations({ subtree: true }).map((animation) => (animation as CSSAnimation).animationName),
+    [...element.shadowRoot!.querySelectorAll('*')].flatMap((node) => node.getAnimations().map((animation) => (animation as CSSAnimation).animationName)),
   )
   expect(names).toEqual(['c2-working-indicator-hold'])
 })
