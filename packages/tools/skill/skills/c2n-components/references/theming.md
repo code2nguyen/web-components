@@ -51,7 +51,7 @@ Dark mode then follows the app's own switch because the bridged values flip.
 - Shape: `radius-sm|md|lg|xl|full`.
 - Borders: `border-width`, `border` (composite: the whole resting border shorthand; falls back to `border-width solid color-outline`).
 - Interaction: `focus-ring` (outline shorthand), `disabled-opacity`, `motion-scale` (multiplies every duration; `0` disables motion).
-- Elevation: `shadow-md`, `shadow-lg`.
+- Elevation: `shadow-sm`, `shadow-md`, `shadow-lg`.
 
 Composite tokens wrap their primitives: `var(--c2-theme--border, var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline, #bcbcc6))`, so set the shorthand or just the colour.
 

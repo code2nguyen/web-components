@@ -51,6 +51,42 @@ export type TableSummaryRenderer = (context: TableSummaryRenderContext) => unkno
 export type TableRowStyle = Record<string, string | number | null | undefined>
 export type TableRowStyler = (context: TableRowContext) => TableRowStyle | undefined
 
+/**
+ * Returns extra part names for a row, added beside `row`: `'row-failed'` (or `['row-failed', 'row-revised']`) makes
+ * the row reachable as `c2-table::part(row-failed)`. Whitespace-separated names in one string work too; `undefined`,
+ * `null` or an empty string adds none.
+ */
+export type TableRowPartResolver = (context: TableRowContext) => string | readonly string[] | null | undefined
+
+/** One data row of the rendered window, as `range-change` reports it. */
+export interface TableRenderedRow {
+  /**
+   * Display line of the row, counted across the whole dataset after sort, filter and grouping (page offset
+   * included). Its `cell-slot` cells take the children named `cell:{line}:{field}`.
+   */
+  line: number
+  /** The row's key (see `row-key`). */
+  key: string
+  /** The row itself, as the application gave it. */
+  row: TableRow
+}
+
+/** Detail of `range-change`: the body rows the table has rendered, which is the window while it virtualizes. */
+export interface TableRangeChangeEventDetail {
+  /** Display line of the first rendered body row, counted across the whole dataset (page offset included). */
+  start: number
+  /** Display line after the last rendered body row. */
+  end: number
+  /** Keys of the data rows rendered in that window, in display order: the `key` of each entry of `rows`. */
+  keys: string[]
+  /**
+   * One entry per data row rendered in that window, in display order — the lines whose `cell:{line}:{field}` slots
+   * are in the shadow DOM right now. Group rows and rows a `dataSource` has not delivered yet are left out. A
+   * framework maps this to the children of its `cell-slot` columns.
+   */
+  rows: TableRenderedRow[]
+}
+
 /** Returns anything Lit can render: a `TemplateResult`, a string, a number, a node. */
 export type TableCellRenderer = (context: TableCellContext) => unknown
 export type TableHeaderRenderer = (context: TableHeaderContext) => unknown
@@ -87,11 +123,13 @@ export interface TableColumnConfig {
   cellClass?: string
   /**
    * Renders each cell of the column from a light-DOM child instead of a function, so a framework can build the
-   * body with its own template language. The table puts a `<slot name="cell:<row key>:<field>">` in the cell;
-   * `renderCell` (or the formatted value) stays as the fallback while nothing is slotted into it.
+   * body with its own template language. The table puts a `<slot name="cell:<line>:<field>">` in the cell, `line`
+   * being the row's display line as `range-change` counts it; `renderCell` (or the formatted value) stays as the
+   * fallback while nothing is slotted into it.
    *
-   * Requires a row key (`rowKey` or `getRowKey`). Only the rows the virtualizer has rendered have a slot, so children for the rest simply
-   * wait — write one child per row and let the table pick.
+   * Children are needed only for the lines `range-change` reports (`detail.rows`); a child whose line is outside the
+   * rendered window is left unassigned. After a sort, filter or page change the same line holds a different row, so
+   * re-render the children from the next `range-change`.
    */
   cellSlot?: boolean
   renderCell?: TableCellRenderer

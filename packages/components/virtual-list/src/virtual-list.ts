@@ -80,6 +80,11 @@ export interface VirtualList {
  * to every string value of the item), and `matcher` replaces that logic outright. `highlight` wraps the matched text in
  * `<mark>`. With a `dataSource` the query is sent to the server instead and the local matcher is never used.
  *
+ * **Styling `renderItem` output.** Rendered rows live in the shadow root, so page selectors do not reach them; give
+ * the elements `renderItem` returns a `part` (`<span part="status status-${item.state}">`) and style them with
+ * `c2-virtual-list::part(status-failed)`. `::part()` takes no attribute or class selector, so put the variant in the
+ * part name.
+ *
  * Set `aria-label` on the host to name the list; it is mirrored onto the inner `role="listbox"`, which falls back to
  * `Items`.
  *
@@ -182,7 +187,11 @@ export class VirtualList extends LitElement {
   /** Field whose truthy value makes a row unselectable. */
   @property({ type: String, attribute: 'disabled-field' }) disabledField = ''
 
-  /** Renders a row's content, replacing the label/description pair. */
+  /**
+   * Renders a row's content, replacing the label/description pair. The result is placed in this list's shadow root,
+   * out of reach of a page stylesheet, but a `part` it carries is exposed: return `` html`<span part="badge">…</span>` ``
+   * and style it with `c2-virtual-list::part(badge)`.
+   */
   @property({ attribute: false }) renderItem?: VirtualListItemRenderer
 
   /** Replaces the built-in field matching while searching. */

@@ -10,11 +10,11 @@ Out of scope: horizontal/grid layout, transfer between lists, nesting, copying, 
 
 ## Host Properties and Attributes
 
-| Property             | Observed attribute   | Type      | Default | Contract                                                                                                                                                  |
-| -------------------- | -------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `editable`           | `editable`           | `boolean` | `false` | Enables pointer and keyboard reordering. False exposes no reorder affordance and intercepts no reorder input.                                             |
-| `dragStartThreshold` | `dragstartthreshold` | `number`  | `10`    | Minimum summed pointer movement in CSS pixels before an armed pointer becomes a drag. Negative and non-finite values normalize to the documented default. |
-| `autoScrollDisabled` | `autoscrolldisabled` | `boolean` | `false` | Prevents component-driven ancestor scrolling during pointer reordering.                                                                                   |
+| Property             | Observed attribute     | Type      | Default | Contract                                                                                                                                                  |
+| -------------------- | ---------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `editable`           | `editable`             | `boolean` | `false` | Enables pointer and keyboard reordering. False exposes no reorder affordance and intercepts no reorder input.                                             |
+| `dragStartThreshold` | `drag-start-threshold` | `number`  | `10`    | Minimum summed pointer movement in CSS pixels before an armed pointer becomes a drag. Negative and non-finite values normalize to the documented default. |
+| `autoScrollDisabled` | `auto-scroll-disabled` | `boolean` | `false` | Prevents component-driven ancestor scrolling during pointer reordering.                                                                                   |
 
 The existing lowercase observed attribute names remain supported for compatibility. The component uses the repository boolean converter, so literal `"false"` and `"0"` are false.
 

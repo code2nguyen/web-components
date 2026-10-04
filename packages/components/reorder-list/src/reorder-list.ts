@@ -208,10 +208,10 @@ export class ReorderList extends LitElement {
   @property({ type: Boolean, reflect: true }) editable = false
 
   /** Minimum summed pointer movement in CSS pixels before pickup. Invalid values use 10. */
-  @property({ type: Number }) dragStartThreshold: number = 10
+  @property({ type: Number, attribute: 'drag-start-threshold' }) dragStartThreshold: number = 10
 
   /** Prevents component-driven scrolling of the nearest eligible vertical ancestor. */
-  @property({ type: Boolean }) autoScrollDisabled = false
+  @property({ type: Boolean, attribute: 'auto-scroll-disabled' }) autoScrollDisabled = false
 
   /** Lets users swipe an item sideways to reveal its swipe actions. Items with `data-swipe="false"` do not swipe. */
   @property({ type: Boolean }) swipeable = false

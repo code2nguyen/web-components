@@ -73,7 +73,7 @@ npm install @c2n/reorder-list
 
 Ordinary children need no `slot`. Optional non-empty `data-reorder-key` values identify application records and must be unique. Use `data-reorder-label` for concise announcements. `data-fixed` pins a row at its absolute position; literal `data-fixed="false"` and `data-fixed="0"` remain movable.
 
-Pointer users press a movable row, cross the pickup threshold, and release at the placeholder. Whole-row touch reordering owns vertical direct manipulation; the nearest eligible scroll container moves automatically unless `autoscrolldisabled` is set. Buttons, links, inputs, and editable descendants keep their native behavior.
+Pointer users press a movable row, cross the pickup threshold, and release at the placeholder. Whole-row touch reordering owns vertical direct manipulation; the nearest eligible scroll container moves automatically unless `auto-scroll-disabled` is set. Buttons, links, inputs, and editable descendants keep their native behavior.
 
 Keyboard users focus a movable placement and press Space to pick it up. ArrowUp/ArrowDown move one permitted destination, Home/End jump, Space commits, and Escape cancels. Supply `aria-label` or `aria-labelledby` for an editable list when context does not already name it.
 

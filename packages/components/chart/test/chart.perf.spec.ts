@@ -10,7 +10,7 @@ import { test, expect } from './fixture'
 test('a hundred thousand points cost the same DOM as a hundred', async ({ page, scenario }) => {
   await scenario('perf')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const small = await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('*').length ?? 0)
 
@@ -26,7 +26,7 @@ test('a hundred thousand points cost the same DOM as a hundred', async ({ page, 
 
 test('streaming appends redraw without ever rebuilding the engine or its options', async ({ page, scenario }) => {
   await scenario('perf')
-  await expect(page.locator('c2-line-chart')).toHaveAttribute('data-chart-ready', 'true')
+  await expect(page.locator('c2-line-chart')).toHaveState('ready')
 
   const before = await page.evaluate(() => window.chartScenario.counts())
   await page.evaluate(() => window.chartScenario.append(100))
@@ -42,7 +42,7 @@ test('streaming appends redraw without ever rebuilding the engine or its options
 
 test('a data change never rebuilds options, and a presentation change does', async ({ page, scenario }) => {
   await scenario('perf')
-  await expect(page.locator('c2-line-chart')).toHaveAttribute('data-chart-ready', 'true')
+  await expect(page.locator('c2-line-chart')).toHaveState('ready')
 
   const start = await page.evaluate(() => window.chartScenario.counts())
 
@@ -63,7 +63,7 @@ test('a data change never rebuilds options, and a presentation change does', asy
 test('the tooltip is one reused node, not a node per hovered point', async ({ page, scenario }) => {
   await scenario('default')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const count = () => chart.evaluate((element) => element.shadowRoot?.querySelectorAll('*').length ?? 0)
   const box = await chart.boundingBox()
@@ -87,7 +87,7 @@ test('the tooltip is one reused node, not a node per hovered point', async ({ pa
 test('hovering never rebuilds the engine or its options', async ({ page, scenario }) => {
   await scenario('perf')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const before = await page.evaluate(() => window.chartScenario.counts())
 

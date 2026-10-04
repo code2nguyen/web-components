@@ -1,6 +1,11 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 
+// Longest duration in a computed `transition-duration` list, in milliseconds. Browsers serialize the reduced-motion
+// `0.01ms` differently (Chromium writes `1e-05s`), so compare the time, not the string.
+const longestMilliseconds = (durations: string) =>
+  Math.max(...durations.split(',').map((value) => (value.trim().endsWith('ms') ? parseFloat(value) : parseFloat(value) * 1000) || 0))
+
 for (const path of ['./', './services/', './services/production-payment-orchestrator/']) {
   test(`${path} has no detectable accessibility violations`, async ({ page }) => {
     await page.goto(path)
@@ -32,5 +37,5 @@ test('reduced motion disables non-essential transitions', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('./')
   const duration = await page.locator('[data-testid="overview-dashboard"]').evaluate((node) => getComputedStyle(node).transitionDuration)
-  expect(duration === '0s' || duration === '').toBe(true)
+  expect(longestMilliseconds(duration)).toBeLessThanOrEqual(0.01)
 })

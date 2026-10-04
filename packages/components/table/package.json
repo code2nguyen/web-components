@@ -82,7 +82,22 @@
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@c2n/config": "*"
+    "@c2n/config": "*",
+    "@types/react": "19.3.0",
+    "react": "19.3.0",
+    "vue": "3.5.42"
   },
-  "customElements": "custom-elements.json"
+  "customElements": "custom-elements.json",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "vue": "^3.3.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  }
 }

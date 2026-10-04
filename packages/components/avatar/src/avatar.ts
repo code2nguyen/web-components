@@ -141,6 +141,10 @@ export class Avatar extends LitElement {
   /** Maximum accepted image size in bytes. Zero means unlimited. */
   @property({ type: Number, attribute: 'max-size' }) maxSize = 0
 
+  // Group state lives in a custom state, never on an attribute: the parent group measures on connect, before a
+  // framework hydrates, and an attribute it wrote then would be one the server never rendered.
+  private readonly internals = this.attachInternals()
+
   @state() private imageFailed = false
   @state() private previewUrl: string | undefined = undefined
   private selectedFile: File | undefined
@@ -197,6 +201,19 @@ export class Avatar extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback()
     if (this.selectedFile && !this.previewUrl) this.previewUrl = URL.createObjectURL(this.selectedFile)
+  }
+
+  /**
+   * Whether a parent `c2-avatar-group` hid this avatar because it does not fit. Written by the group on every
+   * measure; read it in CSS as `c2-avatar:state(group-hidden)`.
+   */
+  get groupHidden(): boolean {
+    return this.internals.states.has('group-hidden')
+  }
+
+  set groupHidden(hidden: boolean) {
+    if (hidden) this.internals.states.add('group-hidden')
+    else this.internals.states.delete('group-hidden')
   }
 
   /** Locally selected image file, if the avatar was changed through its picker. */

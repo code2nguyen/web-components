@@ -127,3 +127,15 @@ test('the open card follows its trigger when the page scrolls', async ({ page, r
   await expect.poll(gap).toBeCloseTo(before, -1)
   await expect(panel(page)).toBeVisible()
 })
+
+test('an offset set on the open card moves it without a resize or scroll', async ({ page, renderScenario }) => {
+  await renderScenario(card())
+  const host = page.locator('c2-hover-card')
+  await page.getByRole('link', { name: '@ada' }).hover()
+  await expect(panel(page)).toBeVisible()
+  const gap = async () => (await panel(page).boundingBox())!.y - ((await host.boundingBox())!.y + (await host.boundingBox())!.height)
+  await expect.poll(gap).toBeCloseTo(8, 0)
+  await host.evaluate((element) => element.style.setProperty('--c2-hover-card--offset', '40px'))
+  await expect.poll(gap).toBeCloseTo(40, 0)
+  await expect(panel(page)).toBeVisible()
+})

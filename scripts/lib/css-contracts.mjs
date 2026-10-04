@@ -3,7 +3,10 @@ import { extname, join } from 'node:path'
 
 const SOURCE_EXTENSIONS = new Set(['.astro', '.css', '.html', '.md', '.mdx', '.scss', '.ts', '.tsx', '.vue'])
 const IGNORED_DIRECTORIES = new Set(['.astro', '.next', 'dist', 'node_modules', 'out', 'playwright-report', 'test-results'])
+const IGNORED_FILE = /\.(?:test|spec)\.[cm]?[jt]sx?$/
 const VARIABLE = /--c2-[a-z0-9-]+(?:__[a-z0-9-]+)*--[a-z0-9-]+/g
+/** A variable a component writes on its own host at runtime (an output for slotted content, not a theming input). */
+const WRITTEN_VARIABLE = /setProperty\(\s*['"`](--c2-[a-z0-9_-]+)['"`]/g
 
 export function documentedCssVariables(repoRoot) {
   const variables = new Set()
@@ -11,6 +14,9 @@ export function documentedCssVariables(repoRoot) {
     const directory = join(repoRoot, root)
     if (!existsSync(directory)) continue
     for (const entry of readdirSync(directory)) {
+      for (const file of sourceFiles([join(directory, entry, 'src')])) {
+        for (const match of readFileSync(file, 'utf8').matchAll(WRITTEN_VARIABLE)) variables.add(match[1])
+      }
       const manifestPath = join(directory, entry, 'custom-elements.json')
       if (!existsSync(manifestPath)) continue
       const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
@@ -25,7 +31,7 @@ export function documentedCssVariables(repoRoot) {
   const tokenPath = join(repoRoot, 'packages/tools/theme/src/tokens.ts')
   if (existsSync(tokenPath)) {
     const source = readFileSync(tokenPath, 'utf8')
-    for (const match of source.matchAll(/token\('([^']+)'/g)) variables.add(`--c2-theme--${match[1]}`)
+    for (const match of source.matchAll(/token\(\s*'([^']+)'/g)) variables.add(`--c2-theme--${match[1]}`)
   }
   return variables
 }
@@ -38,7 +44,7 @@ export function sourceFiles(paths) {
     if (stat.isDirectory()) {
       if (IGNORED_DIRECTORIES.has(path.split('/').pop())) return
       for (const entry of readdirSync(path)) visit(join(path, entry))
-    } else if (SOURCE_EXTENSIONS.has(extname(path))) files.push(path)
+    } else if (SOURCE_EXTENSIONS.has(extname(path)) && !IGNORED_FILE.test(path)) files.push(path)
   }
   for (const path of paths) visit(path)
   return files.sort()
@@ -48,6 +54,8 @@ export function unknownCssVariables(source, documented) {
   const problems = []
   for (const match of source.matchAll(VARIABLE)) {
     if (documented.has(match[0])) continue
+    // A name ending in `-` is a family prefix (`--c2-theme--chart-series-*`, `` `--c2-x--y-${n}` ``), not a variable.
+    if (match[0].endsWith('-')) continue
     const before = source.slice(0, match.index)
     problems.push({ name: match[0], line: before.split('\n').length })
   }

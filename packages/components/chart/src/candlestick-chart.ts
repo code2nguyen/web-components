@@ -29,6 +29,8 @@ export interface CandlestickChart {
  * @tag c2-candlestick-chart
  *
  * @slotcomponent c2-chart-series
+ *
+ * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the grid lines.
  */
 @customElement('c2-candlestick-chart')
 export class CandlestickChart extends EchartsChartBase {
@@ -71,7 +73,7 @@ export class CandlestickChart extends EchartsChartBase {
     return {
       grid: { left: 48, right: 16, top: 16, bottom: 32, containLabel: false },
       xAxis: { type: 'category', data: this.xLabels(), boundaryGap: true, axisLine, axisLabel },
-      yAxis: { type: 'value', scale: true, axisLine, axisLabel, splitLine: { lineStyle: { color: context.theme.gridColor } } },
+      yAxis: { type: 'value', scale: true, axisLine, axisLabel, splitLine: { lineStyle: { color: context.theme.gridColor, width: context.theme.gridWidth } } },
     }
   }
 

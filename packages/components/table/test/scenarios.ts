@@ -74,22 +74,35 @@ async function scrollTo(top: number): Promise<number> {
 }
 
 const api: TableBenchApi = {
-  async mount(count) {
+  async mount(count, options = {}) {
     // Building the array is the harness's cost, so it happens before the clock starts.
     rows = makeRows(count)
     tick = 0
     marked = []
     const start = performance.now()
     main.innerHTML = `
-      <c2-table id="subject" row-key="id" virtual="always" row-height="36">
+      <c2-table id="subject" row-key="id" ${options.wrap ? 'wrap' : 'virtual="always"'} row-height="36">
         <c2-table-column field="name" header="Name" width="2fr"></c2-table-column>
         <c2-table-column field="team" header="Team" width="1fr"></c2-table-column>
         <c2-table-column field="status" header="Status" width="120px"></c2-table-column>
-        <c2-table-column field="score" header="Score" width="110px" align="end" format="number"></c2-table-column>
+        <c2-table-column field="score" header="Score" width="110px" align="end" format="number"${options.cellSlot ? ' cell-slot' : ''}></c2-table-column>
         <c2-table-column field="joined" header="Joined" width="130px"></c2-table-column>
       </c2-table>`
     table = main.querySelector<Table>('#subject')!
+    if (options.cellSlot) {
+      const subject = table
+      subject.addEventListener('range-change', (event) => {
+        const children = event.detail.rows.map(({ line, row }) => {
+          const child = document.createElement('span')
+          child.slot = `cell:${line}:score`
+          child.textContent = String(row.score)
+          return child
+        })
+        subject.replaceChildren(...subject.querySelectorAll('c2-table-column'), ...children)
+      })
+    }
     await customElements.whenDefined('c2-table')
+    if (options.rowPart) table.rowPart = ({ rowIndex }) => (rowIndex % 3 === 0 ? 'row-flagged' : undefined)
     table.rows = rows
     await table.updateComplete
     void viewport().offsetHeight

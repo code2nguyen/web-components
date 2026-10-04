@@ -93,6 +93,9 @@ function parseDuration(value: string): number {
  * has played — fades out the same way. Cards present at load do not animate, and `prefers-reduced-motion` turns
  * both off.
  *
+ * `size` names one of the grid's `sizes` (`size="wide"`), so the spans live in one record and a user's choice of
+ * size can be stored with the layout. The grid's `layout` record still wins over it, and an expansion over both.
+ *
  * Every built-in icon is a slot whose fallback is the default drawing, so a pane can use the host application's own
  * icon set without giving up the behaviour.
  *
@@ -203,11 +206,18 @@ export class DashCard extends LitElement {
   /** 1-based row the card starts in. */
   @property({ type: Number }) row = 1
 
-  /** Number of columns the card occupies. */
+  /** Number of columns the card occupies, unless its named `size` or the grid's `layout` record sets one. */
   @property({ type: Number, attribute: 'col-span' }) colSpan = 1
 
-  /** Number of rows the card occupies. */
+  /** Number of rows the card occupies, unless its named `size` or the grid's `layout` record sets one. */
   @property({ type: Number, attribute: 'row-span' }) rowSpan = 1
+
+  /**
+   * Authored named size: a key of the parent grid's `sizes` record, whose spans then replace `col-span`/`row-span`.
+   * A name the grid does not know is ignored. A size the user picks at runtime goes through the grid's
+   * `setPanelSize()`, which wins over this one, is stored with the layout and is forgotten by `reset()`.
+   */
+  @property() size: string | undefined = undefined
 
   /** Smallest width in pixels the card accepts; it raises the minimum of every column it covers. */
   @property({ type: Number, attribute: 'min-width' }) minWidth = 0
@@ -440,8 +450,9 @@ export class DashCard extends LitElement {
 
     let col = wide ? 1 : (override?.col ?? this.col)
     let row = tall ? 1 : (override?.row ?? this.row)
-    let colSpan = wide ? Math.max(1, columnCount) : (override?.colSpan ?? this.colSpan)
-    let rowSpan = tall ? Math.max(1, rowCount) : (override?.rowSpan ?? this.rowSpan)
+    const named = this.dashboard?.panelSizeOf(this)
+    let colSpan = wide ? Math.max(1, columnCount) : (override?.colSpan ?? named?.colSpan ?? this.colSpan)
+    let rowSpan = tall ? Math.max(1, rowCount) : (override?.rowSpan ?? named?.rowSpan ?? this.rowSpan)
 
     // Outside a grid, or past its last track, a card would otherwise create implicit tracks the grid knows nothing
     // about — and could not resize.

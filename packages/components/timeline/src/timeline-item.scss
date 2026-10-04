@@ -48,7 +48,7 @@
   box-sizing: border-box;
 }
 
-:host([split]) {
+:host(:state(split)) {
   grid-template-columns: css.cssVar(timestamp__split--width) css.cssVar(marker--size) minmax(0, 1fr);
   grid-template-rows: auto auto css.cssVar(padding-bottom);
   grid-template-areas:
@@ -57,11 +57,11 @@
     '. rail .';
 }
 
-:host([last]) {
+:host(:state(last)) {
   grid-template-rows: auto auto auto 0;
 }
 
-:host([split][last]) {
+:host(:state(split):state(last)) {
   grid-template-rows: auto auto 0;
 }
 
@@ -112,7 +112,7 @@
   background: css.cssVar(connector--background);
 }
 
-:host([last]) .connector {
+:host(:state(last)) .connector {
   visibility: hidden;
 }
 
@@ -133,7 +133,7 @@
   color: css.cssVar(timestamp--color);
 }
 
-:host([split]) .timestamp {
+:host(:state(split)) .timestamp {
   text-align: end;
   // Sit on the same line box as the label beside it.
   line-height: css.cssVar(label--line-height);

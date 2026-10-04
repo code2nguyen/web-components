@@ -89,6 +89,9 @@ export class Button extends LitElement {
   /** Form field name used with `value` when the button is the control that submits the form. */
   @property({ reflect: true }) name = ''
 
+  /** Accessible name forwarded to the inner `<button>`. Set it on an icon-only button or one whose visible text is not its name. */
+  @property({ attribute: 'aria-label' }) override ariaLabel: string | null = null
+
   /** The associated form, matching the native button API. */
   get form(): HTMLFormElement | null {
     return this.internals?.form ?? null
@@ -128,6 +131,7 @@ export class Button extends LitElement {
         class="c2-button"
         part="button"
         ?disabled=${this.unavailable}
+        aria-label=${this.ariaLabel || nothing}
         aria-busy=${this.running ? 'true' : nothing}
         aria-pressed=${this.selected ? 'true' : this.toggle ? 'false' : nothing}
         type="button"

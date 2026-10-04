@@ -40,6 +40,11 @@ if (scenario === 'themed') button.className = 'themed'
 if (['icons', 'custom-running'].includes(scenario)) {
   button.innerHTML = `${icon('prefix-icon')}Save${icon('suffix-icon')}${scenario === 'custom-running' ? icon('running-icon') : ''}`
 }
+if (scenario === 'icon-only') {
+  // An icon-only button is named by the host's aria-label, which the component hands to its inner <button>.
+  button.setAttribute('aria-label', 'Save')
+  button.innerHTML = icon('prefix-icon')
+}
 button.addEventListener('click', () => {
   if (scenario === 'form') return
   output.textContent = String(++count)
