@@ -318,10 +318,21 @@ test('code tokens take their colour from the --c2-page-editor__syntax-*--color v
   await renderScenario(
     `<c2-page-editor label="Notes" style="--c2-page-editor__syntax-keyword--color: rgb(255, 0, 0); --c2-page-editor__code-block--color: rgb(255, 0, 0)"></c2-page-editor>`,
   )
+  const errors: string[] = []
+  page.on('console', (message) => message.type() === 'error' && errors.push(message.text()))
+  page.on('pageerror', (error) => errors.push(error.message))
   await host(page).evaluate((element: HTMLElement & { value: string }) => (element.value = '```js\nif (ok) {}\n```'))
-  const keyword = page$(page).locator('pre span[style*="--_tok-token-keyword"]').first()
-  // The first code block loads shiki and its grammar, which takes longer than the default wait on a cold WebKit page.
-  await expect(keyword).toHaveText('if', { timeout: 20_000 })
+  const block = page$(page).locator('pre').first()
+  await expect(page$(page).locator('.code-language')).toHaveText('JavaScript')
+  await expect(block).toContainText('if (ok)')
+  const keyword = block.locator('span[style*="--_tok-token-keyword"]').first()
+  try {
+    await expect(keyword).toHaveText('if', { timeout: 15_000 })
+  } catch (error) {
+    // Say what the block holds instead, so a failure in one engine shows whether tokens are missing or coloured otherwise.
+    const html = await block.evaluate((element) => element.outerHTML)
+    throw new Error(`${(error as Error).message}\ncode block: ${html}\npage errors: ${JSON.stringify(errors)}`, { cause: error })
+  }
   // A browser serializes a mixed colour its own way: compare with the same mix computed in the page.
   const red = await page.evaluate(() => {
     const probe = document.body.appendChild(document.createElement('span'))
