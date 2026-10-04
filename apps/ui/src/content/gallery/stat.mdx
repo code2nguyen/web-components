@@ -58,44 +58,6 @@ These presets move from restrained dashboard tiles to richer finance, glass and 
 </c2-stat>
 ```
 
-```html tag=MdxCodeBlock,label=Aurora glass
-<style>
-  .aurora-wrap {
-    display: grid;
-    padding: 28px;
-    border-radius: 22px;
-    background: radial-gradient(circle at 10% 15%, rgba(34, 211, 238, 0.52), transparent 38%), radial-gradient(circle at 90% 85%, rgba(139, 92, 246, 0.48), transparent 42%), #0f172a;
-  }
-  .aurora-stat {
-    width: 260px;
-    --c2-stat--padding: 20px;
-    --c2-stat--background: rgba(255, 255, 255, 0.1);
-    --c2-stat--color: var(--c2-theme--color-on-primary, #ffffff);
-    --c2-stat--border: 1px solid rgba(255, 255, 255, 0.2);
-    --c2-stat--border-radius: 16px;
-    --c2-stat--box-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
-    --c2-stat__icon--background: rgba(255, 255, 255, 0.14);
-    --c2-stat__icon--color: var(--c2-theme--color-on-primary, #ffffff);
-    --c2-stat__icon--border-radius: 12px;
-    --c2-stat__value--font-size: 30px;
-    --c2-stat__label--color: rgba(255, 255, 255, 0.72);
-    --c2-stat__description--color: rgba(255, 255, 255, 0.55);
-  }
-  .aurora-stat c2-badge {
-    --c2-badge--background: rgba(255, 255, 255, 0.16);
-    --c2-badge--color: var(--c2-theme--color-on-primary, #ffffff);
-    --c2-badge--border: 1px solid rgba(255, 255, 255, 0.16);
-  }
-</style>
-<div class="aurora-wrap">
-  <c2-stat class="aurora-stat" value="2.4B" label="Events processed">
-    <svg slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-    <c2-badge slot="trend">+28%</c2-badge>
-    <span slot="description">Across all realtime pipelines</span>
-  </c2-stat>
-</div>
-```
-
 ```html tag=MdxCodeBlock,label=Risk watch
 <style>
   .risk-stat {

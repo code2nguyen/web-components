@@ -18,15 +18,6 @@
     status: 'online' | 'away' | 'busy' | 'offline'
   }
 
-  interface Issue {
-    key: string
-    title: string
-    project: string
-    updated: string
-    priority: 'Low' | 'Medium' | 'High'
-    blocked?: boolean
-  }
-
   interface Product {
     sku: string
     name: string
@@ -77,33 +68,6 @@
     onSelection(field, ({ item }) => setStatus(field, `Mentioned ${(item as TeamMember).name}`))
     field.querySelector<HTMLButtonElement>('[data-invite-person]')?.addEventListener('click', () => setStatus(field, 'Invite flow opened'))
     field.querySelector<HTMLButtonElement>('[data-view-team]')?.addEventListener('click', () => setStatus(field, 'Opening the full team directory…'))
-  }
-
-  function setupIssueNavigator(field: Autocomplete) {
-    const allIssues = field.suggestions as Issue[]
-    field.renderItem = ({ item }) => {
-      const issue = item as Issue
-      return html`
-        <c2-badge slot="prefix-icon" tone=${issue.priority === 'High' ? 'danger' : issue.priority === 'Medium' ? 'warning' : 'neutral'}
-          >${issue.priority}</c2-badge
-        >
-        <span>${issue.title}</span>
-        <span slot="description">${issue.key} · ${issue.project} · ${issue.updated}</span>
-        ${issue.blocked ? html`<c2-badge slot="suffix-icon" tone="danger">Blocked</c2-badge>` : html`<c2-kbd slot="suffix-icon" aria-hidden="true">↵</c2-kbd>`}
-      `
-    }
-    field.querySelectorAll<HTMLButtonElement>('[data-issue-filter]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const filter = button.dataset.issueFilter
-        field.suggestions = filter === 'mine' ? allIssues.filter((issue) => issue.project === 'Web') : allIssues
-        field
-          .querySelectorAll<HTMLButtonElement>('[data-issue-filter]')
-          .forEach((candidate) => candidate.setAttribute('aria-pressed', String(candidate === button)))
-        field.focus()
-        void field.load()
-      })
-    })
-    onSelection(field, ({ item }) => setStatus(field, `Opening ${(item as Issue).key}…`))
   }
 
   function setupProductSearch(field: Autocomplete) {
@@ -162,9 +126,6 @@
       switch (field.dataset.autocompleteExample) {
         case 'team':
           setupTeamPicker(field)
-          break
-        case 'issues':
-          setupIssueNavigator(field)
           break
         case 'products':
           setupProductSearch(field)

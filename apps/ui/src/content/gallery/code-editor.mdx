@@ -26,48 +26,6 @@ export function debounce(fn, wait = 200) {
 ></c2-code-editor>
 ```
 
-```html tag=MdxCodeBlock,label=Terminal
-<style>
-  .terminal {
-    --c2-code-editor--background: #121212;
-    --c2-code-editor--color: #d8d8c0;
-    --c2-code-editor--border: 1px solid #2a2a2a;
-    --c2-code-editor--border-radius: 4px;
-    --c2-code-editor--font-size: 12px;
-    --c2-code-editor__gutter--color: #808078;
-    --c2-code-editor__gutter--background: #121212;
-    --c2-code-editor__gutter--border-right: 1px solid #2a2a2a;
-    --c2-code-editor__gutter__active--color: #d8d8c0;
-    --c2-code-editor__cursor--color: #8fc46b;
-    --c2-code-editor__active-line--background: rgba(143, 196, 107, 0.07);
-    --c2-code-editor__selection--background: rgba(143, 196, 107, 0.25);
-    --c2-code-editor__theme--token-keyword: #8fc46b;
-    --c2-code-editor__theme--token-string: #e6c384;
-    --c2-code-editor__theme--token-comment: #9a9a8a;
-    --c2-code-editor__theme--token-constant: #7fb4ca;
-    --c2-code-editor__theme--token-function: #e6c384;
-    --c2-code-editor__theme--token-type: #e6c384;
-    --c2-code-editor__theme--token-property: #7fb4ca;
-    --c2-code-editor__theme--token-variable: #d8d8c0;
-    --c2-code-editor__theme--token-tag: #8fc46b;
-    --c2-code-editor__theme--token-punctuation: #938f79;
-    --c2-code-editor__theme--token-link: #7fb4ca;
-    --c2-code-editor__theme--token-invalid: #e46876;
-  }
-</style>
-<c2-code-editor
-  class="terminal"
-  language="javascript"
-  line-numbers
-  value="const log = (msg) => process.stdout.write(`${msg}\n`)
-
-// Green on near-black, the way a terminal reads.
-for (const step of ['build', 'test', 'deploy']) {
-  log(`→ ${step}`)
-}"
-></c2-code-editor>
-```
-
 ```html tag=MdxCodeBlock,label=Borderless
 <style>
   .borderless {

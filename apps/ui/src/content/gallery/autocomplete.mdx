@@ -59,61 +59,6 @@ These examples exercise different capabilities instead of repeating the same dat
 </c2-autocomplete>
 ```
 
-```html tag=MdxCodeBlock,label=Jump to an issue
-<style>
-  .issue-jump {
-    width: 100%;
-    --c2-autocomplete--background: #1e1b4b;
-    --c2-autocomplete--color: #eef2ff;
-    --c2-autocomplete--border: 1px solid #312e81;
-    --c2-autocomplete__placeholder--color: #a5b4fc;
-    --c2-autocomplete__panel--background: #1e1b4b;
-    --c2-autocomplete__panel--border: 1px solid #312e81;
-    --c2-autocomplete__option__active--background: #312e81;
-    --c2-autocomplete__option__active--color: #eef2ff;
-    --c2-autocomplete__description--color: #a5b4fc;
-    --c2-autocomplete__header--color: #c7d2fe;
-    --c2-autocomplete__footer--color: #a5b4fc;
-    --c2-autocomplete__focus--border: 1px solid #818cf8;
-    --c2-autocomplete__highlight--color: #c7d2fe;
-  }
-  .issue-filters {
-    display: flex;
-    gap: 6px;
-  }
-  .issue-filters button {
-    border: 1px solid #4338ca;
-    border-radius: 999px;
-    padding: 3px 9px;
-    color: #c7d2fe;
-    background: transparent;
-    font: inherit;
-    cursor: pointer;
-  }
-  .issue-filters button[aria-pressed='true'] {
-    border-color: #818cf8;
-    color: #ffffff;
-    background: #3730a3;
-  }
-</style>
-<c2-autocomplete
-  client:only="lit"
-  class="issue-jump"
-  data-autocomplete-example="issues"
-  aria-label="Jump to an issue"
-  placeholder="Search key, title or project…"
-  item-key="key"
-  label-field="title"
-  description-field="project"
-  disabled-field="blocked"
-  search-fields="key;title;project"
-  suggestions='[{"key":"WEB-248","title":"Search panel closes on focus","project":"Web","updated":"2m ago","priority":"High"},{"key":"API-91","title":"Add cursor pagination","project":"Platform","updated":"1h ago","priority":"Medium"},{"key":"WEB-231","title":"Document custom row rendering","project":"Web","updated":"Yesterday","priority":"Low"},{"key":"OPS-44","title":"Rotate production credentials","project":"Operations","updated":"Monday","priority":"High","blocked":true}]'
->
-  <div slot="header" class="issue-filters"><button type="button" aria-pressed="true" data-issue-filter="all">All issues</button><button type="button" aria-pressed="false" data-issue-filter="mine">My project</button></div>
-  <span slot="footer" data-example-status>Blocked issues remain visible but cannot be selected</span>
-</c2-autocomplete>
-```
-
 ```html tag=MdxCodeBlock,label=Search a remote catalog
 <style>
   .catalog-search {
