@@ -25,12 +25,12 @@ const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = resolve(packageRoot, '../../..')
 const uiRoot = join(repoRoot, 'apps/ui/src')
 const outFile = join(packageRoot, 'data/registry.json')
-/** `@c2n/components`: every component package behind one install, one entry per package (`@c2n/components/table`). */
+/** `@c2n/components`: every component package in one install, one entry per package (`@c2n/components/table`). */
 const UMBRELLA = '@c2n/components'
 const umbrellaPackages = new Set(
-  Object.keys(
-    (JSON.parse(readFileSync(join(repoRoot, 'packages/umbrella/package.json'), 'utf8')) as { dependencies?: Record<string, string> }).dependencies ?? {},
-  ),
+  Object.keys((JSON.parse(readFileSync(join(repoRoot, 'packages/umbrella/package.json'), 'utf8')) as { exports?: Record<string, unknown> }).exports ?? {})
+    .filter((subpath) => /^\.\/[a-z0-9-]+$/.test(subpath))
+    .map((subpath) => `@c2n/${subpath.slice(2)}`),
 )
 const DOCS_BASE = 'https://code2nguyen.github.io/web-components'
 const CATEGORIES = ['Inputs', 'Buttons', 'Navigation', 'Layout', 'Data display', 'Chart', 'Planning', 'Feedback', 'Chat', 'Icons']

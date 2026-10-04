@@ -24,7 +24,7 @@ export function publishableComponentPackages(repoRoot) {
       const packageFile = join(absolute, directory, 'package.json')
       if (!existsSync(packageFile)) continue
       const packageJson = JSON.parse(readFileSync(packageFile, 'utf8'))
-      if (packageJson.private) continue
+      if (packageJson.c2n?.status === 'wip') continue
       const manifestName = packageJson.customElements ?? 'custom-elements.json'
       const manifestFile = join(absolute, directory, manifestName)
       if (!existsSync(manifestFile)) {

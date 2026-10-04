@@ -55,11 +55,14 @@ interface Manifest {
 interface PackageJson {
   name?: string
   exports?: Record<string, { types?: string } | string>
-  private?: boolean
+  c2n?: { status?: string }
 }
 
-/** Packages that are work in progress and deliberately outside the build graph. */
-const EXCLUDED = new Set(['@c2n/design-board', '@c2n/json-form'])
+/**
+ * Packages that are work in progress and deliberately outside the build graph, and `@c2n/components`, whose merged
+ * manifest documents the elements of the packages it bundles a second time.
+ */
+const EXCLUDED = new Set(['@c2n/design-board', '@c2n/json-form', '@c2n/components'])
 
 /** Nearest `node_modules/@c2n` above this package: the workspace symlinks, one per `@c2n` package. */
 export function scopeDir(): string {
@@ -107,7 +110,7 @@ export function readPackages(): DiscoveredPackage[] {
     if (!existsSync(manifestPath) || !existsSync(packagePath)) continue
 
     const pkg = JSON.parse(readFileSync(packagePath, 'utf8')) as PackageJson
-    if (pkg.private) continue
+    if (pkg.c2n?.status === 'wip') continue
 
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Manifest
     const elements: CustomElement[] = []

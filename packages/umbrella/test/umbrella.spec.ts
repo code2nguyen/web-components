@@ -3,21 +3,15 @@ import { createRequire } from 'node:module'
 import { test, expect } from '../../../tests/component-fixture'
 
 const require = createRequire(import.meta.url)
-const umbrella = JSON.parse(readFileSync(require.resolve('@c2n/components/package.json'), 'utf8')) as { dependencies: Record<string, string> }
+const manifest = JSON.parse(readFileSync(require.resolve('@c2n/components/custom-elements.json'), 'utf8')) as {
+  modules?: { declarations?: { tagName?: string }[] }[]
+}
 
-// Every tag documented by a package the umbrella depends on. The expectation comes from the manifests rather
+// Every tag the merged manifest documents. The expectation comes from the manifests of the bundled packages rather
 // than from the generated barrel, so a package the barrel forgets to import fails here.
-const tags = Object.keys(umbrella.dependencies).flatMap((pkg) => {
-  let manifest: { modules?: { declarations?: { tagName?: string }[] }[] }
-  try {
-    manifest = JSON.parse(readFileSync(require.resolve(`${pkg}/custom-elements.json`), 'utf8'))
-  } catch {
-    return [] // @c2n/theme ships stylesheets, not elements
-  }
-  return (manifest.modules ?? []).flatMap((module) => (module.declarations ?? []).flatMap((declaration) => declaration.tagName ?? []))
-})
+const tags = (manifest.modules ?? []).flatMap((module) => (module.declarations ?? []).flatMap((declaration) => declaration.tagName ?? []))
 
-test('the barrel registers every element of every package it depends on', async ({ page, renderScenario }) => {
+test('the barrel registers every element of every package it bundles', async ({ page, renderScenario }) => {
   expect(tags.length).toBeGreaterThan(50)
   await renderScenario('')
   const missing = await page.evaluate((names) => names.filter((name) => !customElements.get(name)), tags)

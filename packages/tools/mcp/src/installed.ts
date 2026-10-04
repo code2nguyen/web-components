@@ -7,7 +7,7 @@ import { existsSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { ElementEntry } from './registry-types.ts'
 
-/** The one-install package: depends on every component package and re-exports each one as `@c2n/components/<name>`. */
+/** The published component package: bundles every component package and exposes each one as `@c2n/components/<name>`. */
 export const UMBRELLA = '@c2n/components'
 
 export interface InstalledInfo {
@@ -36,7 +36,8 @@ export function installedPackage(name: string): InstalledInfo | null {
     const declared = declaredDependencies(root)
     const umbrella = name !== UMBRELLA && declared.has(UMBRELLA) && !declared.has(name) ? umbrellaOf(root, name) : undefined
     // Under a strict layout (pnpm) the umbrella's dependencies are not hoisted: resolve them from the umbrella itself.
-    const pkgJsonPath = findPackageJson(root, name) ?? (umbrella && findPackageJson(dirname(umbrella.path), name))
+    // Since 0.0.25 the umbrella bundles the packages instead of depending on them: its own manifest documents them.
+    const pkgJsonPath = findPackageJson(root, name) ?? (umbrella && (findPackageJson(dirname(umbrella.path), name) ?? umbrella.path))
     if (!pkgJsonPath) throw new Error(`${name} is not installed`)
     const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { version: string; customElements?: string }
     info = { version: pkg.version }
@@ -102,13 +103,17 @@ function findPackageJson(from: string, name: string): string | undefined {
   }
 }
 
-/** The installed `@c2n/components`, when it lists `name` among its dependencies. */
+/**
+ * The installed `@c2n/components`, when it carries `name`: an entry `./<name>` in its exports (0.0.25 and later,
+ * which bundle the packages) or a dependency on it (earlier versions, which re-exported them).
+ */
 function umbrellaOf(root: string, name: string): { path: string; version: string } | undefined {
   const path = findPackageJson(root, UMBRELLA)
   if (!path) return undefined
   try {
-    const pkg = JSON.parse(readFileSync(path, 'utf8')) as { version: string; dependencies?: Record<string, string> }
-    return pkg.dependencies?.[name] ? { path: realpathSync(path), version: pkg.version } : undefined
+    const pkg = JSON.parse(readFileSync(path, 'utf8')) as { version: string; dependencies?: Record<string, string>; exports?: Record<string, unknown> }
+    const carried = pkg.exports?.[`./${name.slice('@c2n/'.length)}`] !== undefined || pkg.dependencies?.[name] !== undefined
+    return carried ? { path: realpathSync(path), version: pkg.version } : undefined
   } catch {
     return undefined
   }

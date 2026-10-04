@@ -1,11 +1,13 @@
 /**
- * `@c2n/components`, the one-install package: every component package as a dependency, one entry per package,
- * a barrel that registers them all, and the JSX / Vue declarations of every tag behind a single import.
+ * `@c2n/components`, the one published component package: one entry per component package, a barrel that
+ * registers them all, and the JSX / Vue declarations of every tag behind a single import.
  *
- * The package holds no component code. Each entry re-exports the real `@c2n/<name>` package, so a program that
- * reaches a component through the umbrella and through its own package loads one module, one class and one
- * `customElements.define`. Everything here is derived from the discovered packages, so a new component joins the
- * umbrella by being built, with no list to maintain.
+ * The component packages are private workspaces; only this package reaches npm. The generator writes the bundle
+ * inputs under `src/` (each entry re-exports every module of one workspace package) and the package's
+ * `package.json`; `scripts/bundle.ts` then builds `dist/` from them, inlining the workspace packages so the
+ * published tarball depends on nothing but `@c2n/core`, the theme, the icon sets it uses and third-party libraries.
+ * Everything here is derived from the discovered packages, so a new component joins the umbrella by being built,
+ * with no list to maintain.
  */
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -24,12 +26,13 @@ const THEME = '@c2n/theme'
 const THEME_STYLESHEETS = ['theme.css', 'base.css', 'tokens.css']
 
 /** Keys of the umbrella's `package.json` that the generator owns; everything else is hand-written. */
-const GENERATED_KEYS = ['exports', 'files', 'dependencies', 'peerDependencies', 'peerDependenciesMeta']
+const GENERATED_KEYS = ['exports', 'files', 'customElements', 'dependencies', 'peerDependencies', 'peerDependenciesMeta', 'devDependencies']
 
 interface PackageJson {
   name: string
   version: string
   exports?: Record<string, { types?: string } | string>
+  dependencies?: Record<string, string>
   peerDependencies?: Record<string, string>
   peerDependenciesMeta?: Record<string, { optional?: boolean }>
   [key: string]: unknown
@@ -38,7 +41,7 @@ interface PackageJson {
 export interface UmbrellaEntry {
   /** npm package, e.g. `@c2n/table`. */
   pkg: string
-  /** Subpath of the umbrella, and the name of its file under `lib/`, e.g. `table`. */
+  /** Subpath of the umbrella, and the name of its file under `src/` and `dist/`, e.g. `table`. */
   name: string
   /** Every JavaScript module of the package, e.g. `@c2n/table`, `@c2n/table/table-column.js`. */
   modules: string[]
@@ -81,8 +84,8 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
 
   for (const entry of entries) {
     const body = [BANNER, `// Every module of ${entry.pkg}. Importing this registers each of its elements.`, ``, ...reexports(entry.modules), ``].join('\n')
-    files.push({ path: `lib/${entry.name}.js`, contents: body, parser: 'typescript' })
-    files.push({ path: `lib/${entry.name}.d.ts`, contents: body, parser: 'typescript' })
+    files.push({ path: `src/${entry.name}.js`, contents: body, parser: 'typescript' })
+    files.push({ path: `src/${entry.name}.d.ts`, contents: body, parser: 'typescript' })
   }
 
   const barrel = [
@@ -93,11 +96,11 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
     `//`,
     `//     import '@c2n/components/button'`,
     ``,
-    ...reexports(entries.map((entry) => `./lib/${entry.name}.js`)),
+    ...reexports(entries.map((entry) => `./${entry.name}.js`)),
     ``,
   ].join('\n')
-  files.push({ path: 'index.js', contents: barrel, parser: 'typescript' })
-  files.push({ path: 'index.d.ts', contents: barrel, parser: 'typescript' })
+  files.push({ path: 'src/index.js', contents: barrel, parser: 'typescript' })
+  files.push({ path: 'src/index.d.ts', contents: barrel, parser: 'typescript' })
 
   const typesEntry = (framework: 'react' | 'vue', usage: string[]) =>
     [
@@ -115,15 +118,15 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
       ``,
     ].join('\n')
   files.push({
-    path: 'react.d.ts',
+    path: 'src/react.d.ts',
     contents: typesEntry('react', [
-      `The declarations are those of each package's own '@c2n/<name>/react' entry; see any of them for the`,
-      `rules React needs followed (register before rendering, kebab-case attribute names when server-rendering).`,
+      `Register an element before React renders it, and pass kebab-case attribute names when server-rendering:`,
+      `a camelCase prop that reaches the server as an attribute is never seen by the element.`,
     ]),
     parser: 'typescript',
   })
   files.push({
-    path: 'vue.d.ts',
+    path: 'src/vue.d.ts',
     contents: typesEntry('vue', [
       `Tell the compiler about the tags as well, or every c2-* tag is resolved as a Vue component and renders`,
       `nothing: template.compilerOptions.isCustomElement = (tag) => tag.startsWith('c2-') in vite.config.ts.`,
@@ -132,8 +135,8 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
   })
   // As in each package: `import '@c2n/components/react'` from a `.ts` file must resolve to a module at runtime.
   const stub = `${BANNER}\n// Types only — see the matching .d.ts.\nexport {}\n`
-  files.push({ path: 'react.js', contents: stub, parser: 'typescript' })
-  files.push({ path: 'vue.js', contents: stub, parser: 'typescript' })
+  files.push({ path: 'src/react.js', contents: stub, parser: 'typescript' })
+  files.push({ path: 'src/vue.js', contents: stub, parser: 'typescript' })
 
   // Resolved from this file's own location, so the theme is reachable even where the package manager does not
   // hoist `@c2n/theme` next to the application (pnpm).
@@ -152,36 +155,61 @@ export function emitUmbrella(packages: DiscoveredPackage[], umbrellaDir: string,
 function emitPackageJson(entries: UmbrellaEntry[], umbrellaDir: string, scopeDir: string): string {
   const current = readJson(join(umbrellaDir, 'package.json'))
   const handWritten = Object.fromEntries(Object.entries(current).filter(([key]) => !GENERATED_KEYS.includes(key)))
+  const readPackage = (pkg: string) => readJson(join(scopeDir, pkg.slice('@c2n/'.length), 'package.json'))
 
-  const exports: Record<string, unknown> = { '.': { types: './index.d.ts', default: './index.js' } }
-  for (const entry of entries) exports[`./${entry.name}`] = { types: `./lib/${entry.name}.d.ts`, default: `./lib/${entry.name}.js` }
-  exports['./react'] = { types: './react.d.ts', default: './react.js' }
-  exports['./vue'] = { types: './vue.d.ts', default: './vue.js' }
+  const exports: Record<string, unknown> = { '.': { types: './dist/index.d.ts', default: './dist/index.js' } }
+  for (const entry of entries) exports[`./${entry.name}`] = { types: `./dist/${entry.name}.d.ts`, default: `./dist/${entry.name}.js` }
+  exports['./react'] = { types: './dist/react.d.ts', default: './dist/react.js' }
+  exports['./vue'] = { types: './dist/vue.d.ts', default: './dist/vue.js' }
   for (const stylesheet of THEME_STYLESHEETS) exports[`./${stylesheet}`] = `./${stylesheet}`
+  exports['./custom-elements.json'] = './custom-elements.json'
   exports['./package.json'] = './package.json'
 
-  // Exact pins, like every other `@c2n` dependency in the repo: `lerna version` bumps them with the rest.
+  // The bundle inlines every workspace component package, so what remains to install is what those packages
+  // import from outside the bundle: Lit, `@c2n/core`, an icon set, third-party libraries. A library two packages
+  // pin differently would be installed once, at one of the two versions, so a disagreement stops the build.
+  const bundled = new Set(entries.map((entry) => entry.pkg))
   const dependencies: Record<string, string> = {}
+  const pinnedBy: Record<string, string> = {}
   const peerDependencies: Record<string, string> = {}
   const peerDependenciesMeta: Record<string, { optional: true }> = {}
-  for (const pkg of [...entries.map((entry) => entry.pkg), THEME].sort()) {
-    const manifest = readJson(join(scopeDir, pkg.slice('@c2n/'.length), 'package.json'))
-    dependencies[pkg] = manifest.version
+  for (const entry of entries) {
+    const manifest = readPackage(entry.pkg)
+    for (const [dependency, range] of Object.entries(manifest.dependencies ?? {})) {
+      if (bundled.has(dependency)) continue
+      // Exact pins, like every other published `@c2n` dependency: `lerna version` bumps them with the rest.
+      const version = dependency.startsWith('@c2n/') ? readPackage(dependency).version : range
+      if (dependencies[dependency] !== undefined && dependencies[dependency] !== version) {
+        throw new Error(`${entry.pkg} needs ${dependency}@${version}, but ${pinnedBy[dependency]} needs ${dependencies[dependency]}`)
+      }
+      dependencies[dependency] = version
+      pinnedBy[dependency] = entry.pkg
+    }
     // A package's optional engines (uplot, echarts, CodeMirror) are the application's to install; npm does not
     // install a dependency's peers on its behalf, so they are surfaced here where the application can see them.
     for (const [peer, range] of Object.entries(manifest.peerDependencies ?? {})) {
+      if (bundled.has(peer)) continue
       peerDependencies[peer] = range
       if (manifest.peerDependenciesMeta?.[peer]?.optional) peerDependenciesMeta[peer] = { optional: true }
     }
   }
+  dependencies[THEME] = readPackage(THEME).version
+  for (const peer of Object.keys(peerDependencies)) delete dependencies[peer]
+
+  // The workspace packages the bundle is built from: devDependencies, so a consumer never installs them, and `*`,
+  // because they are private and never versioned.
+  const devDependencies: Record<string, string> = { '@c2n/config': '*' }
+  for (const entry of entries) devDependencies[entry.pkg] = '*'
 
   const sorted = <T>(record: Record<string, T>) => Object.fromEntries(Object.entries(record).sort(([a], [b]) => a.localeCompare(b)))
   const packageJson = {
     ...handWritten,
     exports,
-    files: ['index.js', 'index.d.ts', 'lib', 'react.js', 'react.d.ts', 'vue.js', 'vue.d.ts', ...THEME_STYLESHEETS],
-    dependencies,
+    files: ['dist', 'custom-elements.json', ...THEME_STYLESHEETS],
+    customElements: 'custom-elements.json',
+    dependencies: sorted(dependencies),
     ...(Object.keys(peerDependencies).length > 0 ? { peerDependencies: sorted(peerDependencies), peerDependenciesMeta: sorted(peerDependenciesMeta) } : {}),
+    devDependencies: sorted(devDependencies),
   }
   return `${JSON.stringify(packageJson, null, 2)}\n`
 }

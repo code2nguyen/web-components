@@ -27,3 +27,6 @@ apps/ui/public/demo/
 **/playwright-report/
 **/test-results/
 /packages/tools/mcp/data/registry.json
+
+# Built by packages/umbrella/scripts/bundle.ts
+packages/umbrella/custom-elements.json

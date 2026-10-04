@@ -11,7 +11,10 @@ function fixture(run) {
   const addPackage = (directory, name, tags, options = {}) => {
     const path = join(root, directory)
     mkdirSync(path, { recursive: true })
-    writeFileSync(join(path, 'package.json'), JSON.stringify({ name, private: options.private ?? false, customElements: 'custom-elements.json' }))
+    writeFileSync(
+      join(path, 'package.json'),
+      JSON.stringify({ name, ...(options.wip ? { c2n: { status: 'wip' } } : {}), customElements: 'custom-elements.json' }),
+    )
     if (!options.noManifest) {
       writeFileSync(
         join(path, 'custom-elements.json'),
@@ -31,7 +34,7 @@ test('discovers publishable component, open, and generated icon tags from worksp
     addPackage('packages/components/button', '@c2n/button', ['c2-button'])
     addPackage('open-packages/chatbot', '@c2n/chatbot', ['c2-chatbot'])
     addPackage('packages/icons/feather-icons', '@c2n/feather-icons', ['c2-feather-icon', 'c2-feather-activity'])
-    addPackage('packages/components/private', '@c2n/private', ['c2-private'], { private: true })
+    addPackage('packages/components/private', '@c2n/private', ['c2-private'], { wip: true })
     let inventory = discoverPublishableContracts(root)
     assert.deepEqual(
       inventory.tags.map(({ tag }) => tag),
