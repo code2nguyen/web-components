@@ -8,8 +8,6 @@ npm install @c2n/components
 
 The components are built in this repository as separate workspace packages, but only this package is published: it bundles all of them. Each entry is a separate module and what entries share sits in common chunks, so an application that imports three components ships those three and what they use. Its dependencies are what the bundle still imports: Lit, `@c2n/core`, `@c2n/theme`, the icon sets two components draw with, and the third-party libraries of a few components (Shiki, ProseMirror, d3-geo, …).
 
-Up to 0.0.24 every component was also published as its own `@c2n/<name>` package. Those packages are deprecated: replace `@c2n/<name>` with `@c2n/components/<name>` in your imports.
-
 ## Entries
 
 | Import                      | What it gives you                                                           |

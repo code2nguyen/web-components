@@ -35,9 +35,8 @@ export function installedPackage(name: string): InstalledInfo | null {
     // workspaces resolve `@c2n/components` too, and their packages depend on `@c2n/<name>` directly.
     const declared = declaredDependencies(root)
     const umbrella = name !== UMBRELLA && declared.has(UMBRELLA) && !declared.has(name) ? umbrellaOf(root, name) : undefined
-    // Under a strict layout (pnpm) the umbrella's dependencies are not hoisted: resolve them from the umbrella itself.
-    // Since 0.0.25 the umbrella bundles the packages instead of depending on them: its own manifest documents them.
-    const pkgJsonPath = findPackageJson(root, name) ?? (umbrella && (findPackageJson(dirname(umbrella.path), name) ?? umbrella.path))
+    // The umbrella bundles the package, so its own package.json and merged manifest stand in for the package's.
+    const pkgJsonPath = umbrella ? umbrella.path : findPackageJson(root, name)
     if (!pkgJsonPath) throw new Error(`${name} is not installed`)
     const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as { version: string; customElements?: string }
     info = { version: pkg.version }
@@ -103,17 +102,13 @@ function findPackageJson(from: string, name: string): string | undefined {
   }
 }
 
-/**
- * The installed `@c2n/components`, when it carries `name`: an entry `./<name>` in its exports (0.0.25 and later,
- * which bundle the packages) or a dependency on it (earlier versions, which re-exported them).
- */
+/** The installed `@c2n/components`, when it bundles `name`: it has an entry `./<name>` in its exports. */
 function umbrellaOf(root: string, name: string): { path: string; version: string } | undefined {
   const path = findPackageJson(root, UMBRELLA)
   if (!path) return undefined
   try {
-    const pkg = JSON.parse(readFileSync(path, 'utf8')) as { version: string; dependencies?: Record<string, string>; exports?: Record<string, unknown> }
-    const carried = pkg.exports?.[`./${name.slice('@c2n/'.length)}`] !== undefined || pkg.dependencies?.[name] !== undefined
-    return carried ? { path: realpathSync(path), version: pkg.version } : undefined
+    const pkg = JSON.parse(readFileSync(path, 'utf8')) as { version: string; exports?: Record<string, unknown> }
+    return pkg.exports?.[`./${name.slice('@c2n/'.length)}`] !== undefined ? { path: realpathSync(path), version: pkg.version } : undefined
   } catch {
     return undefined
   }

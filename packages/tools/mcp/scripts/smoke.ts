@@ -92,8 +92,8 @@ assert((componentResource.contents[0] as { text: string }).text.includes('"id": 
 
 await client.close()
 
-// A project that installed only `@c2n/components`, laid out as pnpm would: the component packages are reachable from
-// the umbrella, not from the project. The server must read their API and hand out umbrella import lines.
+// A project that installed only `@c2n/components`, which bundles every component package. The server must read
+// their API from the umbrella's merged manifest and hand out umbrella import lines.
 const project = mkdtempSync(join(tmpdir(), 'c2n-smoke-'))
 try {
   writeFileSync(join(project, 'package.json'), JSON.stringify({ name: 'app', dependencies: { '@c2n/components': '*' } }))

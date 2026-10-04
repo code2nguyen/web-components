@@ -243,14 +243,6 @@ jobs:
           fi
           npx lerna publish from-package --dist-tag ${{ inputs.dist_tag }} --git-head "$git_head" --no-private --yes
 
-      # Components ship inside @c2n/components only. The per-component packages published up to 0.0.24 point their
-      # users at the matching entry; the script skips any already carrying the message, so a rerun is a no-op.
-      - name: Deprecate the per-component packages
-        if: ${{ !inputs.dry_run }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: node scripts/deprecate-split-packages.mjs
-
       - name: Prepare version sync for an existing tag
         if: ${{ !inputs.dry_run && steps.release.outputs.checkpoint == 'tag' }}
         env:
