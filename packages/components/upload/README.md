@@ -7,7 +7,7 @@ npm install @c2n/components
 ```
 
 ```html
-<script type="module" src="/node_modules/@c2n/upload/dist/upload.js"></script>
+<script type="module" src="/node_modules/@c2n/components/dist/upload.js"></script>
 
 <c2-upload id="documents" name="documents" multiple accept=".pdf,image/*" max-files="5" max-size="10485760"></c2-upload>
 
