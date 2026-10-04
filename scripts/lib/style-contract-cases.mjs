@@ -141,6 +141,9 @@ export function validateReviewedContext(context) {
   if (!context.id || !context.tag || !context.fixture || !context.settledWhen) throw new Error(`incomplete context ${context.id ?? '(missing id)'}`)
   if (context.hoverTarget !== undefined && (!context.hoverTarget || typeof context.hoverTarget !== 'string'))
     throw new Error(`${context.id}: invalid hoverTarget`)
+  for (const field of ['focusTarget', 'pressTarget']) {
+    if (context[field] !== undefined && (!context[field] || typeof context[field] !== 'string')) throw new Error(`${context.id}: invalid ${field}`)
+  }
   if (context.stateSetup !== undefined) {
     if (!Array.isArray(context.stateSetup) || !context.stateSetup.length) throw new Error(`${context.id}: stateSetup must contain declarative actions`)
     for (const action of context.stateSetup) {
@@ -166,8 +169,8 @@ export function validateObservableCase(item, property) {
     throw new Error(`${item.id}: unknown assertion ${item.assertion}`)
   if (item.reset !== 'remove-property') throw new Error(`${item.id}: unsupported reset ${item.reset}`)
   if (!Array.isArray(item.browsers) || !item.browsers.includes('chromium')) throw new Error(`${item.id}: browsers must include chromium`)
-  if (item.assertion === 'pseudo-style' && !['::before', '::after'].includes(item.pseudo))
-    throw new Error(`${item.id}: pseudo-style requires a reviewed ::before or ::after pseudo target`)
+  if (item.assertion === 'pseudo-style' && !['::before', '::after', '::placeholder'].includes(item.pseudo))
+    throw new Error(`${item.id}: pseudo-style requires a reviewed ::before, ::after or ::placeholder pseudo target`)
   if (item.assertion !== 'pseudo-style' && item.pseudo !== undefined) throw new Error(`${item.id}: pseudo target requires pseudo-style assertion`)
   if (['geometry', 'programmatic-output'].includes(item.assertion) && !item.valueSyntax)
     throw new Error(`${item.id}: ${item.assertion} requires valueSyntax to validate the contrasting value`)

@@ -92,8 +92,8 @@ Every card is a fixed-height frame with a narrow drawer; the look is a handful o
     border-radius: 8px;
     overflow: hidden;
     --c2-side-nav__open--width: 104px;
-    --c2-side-nav--background-color: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-side-nav--color: var(--c2-theme--color-outline-variant, #e4e4e7);
+    --c2-side-nav--background-color: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-side-nav--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 90%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-side-nav__divider--width: 0px;
     --c2-side-nav__scrollbar--color: rgba(255, 255, 255, 0.25);
     --c2-side-nav--padding-top: 10px;
@@ -106,12 +106,12 @@ Every card is a fixed-height frame with a narrow drawer; the look is a handful o
     padding: 5px 8px;
     border-radius: 6px;
     font-size: 12px;
-    color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
     text-decoration: none;
   }
   .dark .row.active {
-    color: var(--c2-theme--color-on-primary, #ffffff);
-    background: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    color: var(--c2-theme--color-on-dark-surface, #ffffff);
+    background: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
   }
   .dark .page {
     padding: 10px;
@@ -198,7 +198,7 @@ Every card is a fixed-height frame with a narrow drawer; the look is a handful o
     text-decoration: none;
   }
   .brand .row.active {
-    color: var(--c2-theme--color-on-primary, #ffffff);
+    color: var(--c2-theme--color-on-fill, #ffffff);
     background: rgba(255, 255, 255, 0.14);
   }
   .brand .page {
@@ -222,7 +222,7 @@ Every card is a fixed-height frame with a narrow drawer; the look is a handful o
     --c2-side-nav__open--width: 104px;
     --c2-side-nav--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 4%, var(--c2-theme--color-surface, #ffffff));
     --c2-side-nav__divider--width: 3px;
-    --c2-side-nav__divider--color: #2563eb;
+    --c2-side-nav__divider--color: var(--c2-theme--color-primary, #2563eb);
     --c2-side-nav--padding-top: 10px;
     --c2-side-nav--padding-right: 8px;
     --c2-side-nav--padding-bottom: 10px;
@@ -233,11 +233,11 @@ Every card is a fixed-height frame with a narrow drawer; the look is a handful o
     padding: 5px 8px;
     border-radius: 6px;
     font-size: 12px;
-    color: #1e3a8a;
+    color: color-mix(in srgb, var(--c2-theme--color-primary, #2563eb) 60%, var(--c2-theme--color-on-surface, #18181b));
     text-decoration: none;
   }
   .accent .row.active {
-    background: #dbeafe;
+    background: var(--c2-theme--color-primary-container, #dbeafe);
     font-weight: 600;
   }
   .accent .page {

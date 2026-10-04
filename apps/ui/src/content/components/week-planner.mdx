@@ -1,18 +1,26 @@
 ---
 title: 'Week Planner'
-description: 'Typical-week schedule with time blocks, and optional odd and even weeks.'
+description: 'Weekly schedule with time blocks: a typical week with optional odd and even weeks, or a dated week the user edits.'
 category: 'Planning'
 ---
 
 import UsageBlock from '../../components/UsageBlock.astro'
 import CodeBlock from '../../components/CodeBlock.astro'
+import ExampleModules from '../../components/ExampleModules.astro'
 
 import { WeekPlanner } from '@c2n/week-planner'
 import { Button } from '@c2n/button'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherPlusIcon as FeatherPlus } from '@c2n/feather-icons/icons/plus.js'
+import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons/settings.js'
 
-`c2-week-planner` shows a typical week: seven day columns on an hour scale, each event a block from its start to its end
-time. It has no dates and no navigation. An event names the weekday it happens on and repeats every week, or, with
-`alternate-weeks`, only in odd or even weeks (`weeks: "odd"`), as school and shared-custody schedules do. Today's
+<ExampleModules />
+
+`c2-week-planner` shows a week: seven day columns on an hour scale, each event a block from its start to its end
+time. By default it is a typical week, with no dates: an event names the weekday it happens on and repeats every week,
+or, with `alternate-weeks`, only in odd or even weeks (`weeks: "odd"`), as school and shared-custody schedules do. Set
+`date` to show a real calendar week with week-by-week navigation instead, and `editable` to let the user add, move and
+resize events. Today's
 column is tinted (`--c2-week-planner__day__today--background`, drawn inside the grid lines) and carries a line at the
 current time. Overlapping events cascade, each stepped in from the one before and drawn over it, so the earlier one's
 title stays readable, and the hour range (`start-hour`, `end-hour`, 8 to 18 by
@@ -27,6 +35,37 @@ npm install @c2n/week-planner
 ## Usage
 
 ```html tag=UsageBlock,package=@c2n/week-planner
+<style>
+  .planner-demo {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .planner-result {
+    display: block;
+    min-height: 20px;
+    margin-top: 8px;
+    color: var(--c2-theme--color-on-surface-variant, #71717a);
+    font-size: 12px;
+  }
+  .planner-add {
+    --c2-button__container--height: 32px;
+    --c2-button__container--padding-left: 10px;
+    --c2-button__container--padding-right: 12px;
+    --c2-button__container--gap: 6px;
+    --c2-button__container--font-size: 13px;
+    --c2-feather-icon--size: 16px;
+  }
+  .planner-icon-action {
+    --c2-icon-button__state-layer--size: 32px;
+    --c2-icon-button--border-radius: 6px;
+    --c2-icon-button__icon--width: 16px;
+    --c2-icon-button__icon--height: 16px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 60%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
+</style>
 <div data-label="Every week">
   <c2-week-planner
     locale="en-US"
@@ -52,16 +91,43 @@ npm install @c2n/week-planner
     end-hour="13"
     events='[{"title":"Planning","day":"mon","start":"09:00","end":"10:00"},{"title":"Client workshop","day":"wed","start":"10:00","end":"12:00","color":"#b45309"}]'
   >
-    <c2-button slot="actions">Add event</c2-button>
-    <c2-button slot="actions">Settings</c2-button>
+    <c2-button class="planner-add" slot="actions"><c2-feather-plus slot="prefix-icon"></c2-feather-plus>Add event</c2-button>
+    <c2-icon-button class="planner-icon-action" slot="actions" tooltip="Settings" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
   </c2-week-planner>
+</div>
+<div data-label="Dated week">
+  <c2-week-planner
+    date="2026-10-07"
+    week-start="monday"
+    locale="en-US"
+    start-hour="8"
+    end-hour="13"
+    events='[{"title":"Team stand-up","day":"mon","start":"08:30","end":"09:00"},{"title":"Team stand-up","day":"thu","start":"08:30","end":"09:00"},{"title":"Dentist","date":"2026-10-06","start":"10:00","end":"11:00","color":"#0f766e"},{"title":"Quarterly review","date":"2026-10-08","start":"10:30","end":"12:30","color":"#be185d"}]'
+  ></c2-week-planner>
+</div>
+<div data-label="Editable">
+  <div class="planner-demo">
+    <c2-week-planner
+      editable
+      data-planner-demo="editable"
+      date="2026-10-07"
+      week-start="monday"
+      locale="en-US"
+      start-hour="8"
+      end-hour="13"
+      events='[{"id":"standup","title":"Team stand-up","day":"mon","start":"08:30","end":"09:00"},{"id":"dentist","title":"Dentist","date":"2026-10-06","start":"10:00","end":"11:00","color":"#0f766e"},{"id":"review","title":"Quarterly review","date":"2026-10-08","start":"10:30","end":"12:30","color":"#be185d"}]'
+    ></c2-week-planner>
+    <output class="planner-result">Click an empty spot, drag a block, or drag its bottom edge.</output>
+  </div>
 </div>
 ```
 
 ## Events
 
-Each entry is `{ id?, title, day, start, end, weeks?, color?, textColor? }`: `day` is `mon` to `sun`, `start` and `end` are 24-hour
-`HH:MM` times (`24:00` ends at midnight). Entries whose times are invalid or end before they start are skipped. `color`
+Each entry is `{ id?, title, day?, date?, start, end, weeks?, color?, textColor? }`: `day` is `mon` to `sun` and
+repeats every week, `date` (`YYYY-MM-DD`) is a single day shown only in a [dated week](#dated-weeks), and `start` and
+`end` are 24-hour `HH:MM` times (`24:00` ends at midnight). An entry needs a `day` or a `date`; `date` wins when it has
+both. Entries whose times are invalid or end before they start are skipped. `color`
 is any CSS colour for that block (its text stays white in both themes; add `textColor` for a light `color`); otherwise
 `--c2-week-planner__event--background` applies.
 
@@ -90,8 +156,8 @@ the header shows for them even without a heading or the week switch. The planner
 
 ```html tag=CodeBlock
 <c2-week-planner heading="Team week">
-  <c2-button slot="actions">Add event</c2-button>
-  <c2-icon-button slot="actions" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
+  <c2-button class="planner-add" slot="actions"><c2-feather-plus slot="prefix-icon"></c2-feather-plus>Add event</c2-button>
+  <c2-icon-button class="planner-icon-action" slot="actions" tooltip="Settings" aria-label="Settings"><c2-feather-settings></c2-feather-settings></c2-icon-button>
 </c2-week-planner>
 ```
 
@@ -106,6 +172,58 @@ entries appear in both. Set `parity="odd"` or `parity="even"` to choose the view
 now shown. Today's column is only marked while the switch shows the current kind of week.
 
 Blocks are buttons: clicking one, or pressing Enter on it, fires `event-click` with the entry in `event.detail.event`.
+
+## Dated weeks
+
+Set `date` to any day (`YYYY-MM-DD`) to show the calendar week holding it, starting on `week-start` or the language's
+first day. The day headers then carry the day of the month (`--c2-week-planner__day-number--font-weight`), the header
+shows the week's range (`--c2-week-planner__week-title--color`, `--c2-week-planner__week-title--font-size`) and
+previous week / next week arrows with a Today button, and today's column is only marked in the week that holds it.
+The navigation updates `date` and fires `week-change` with the first and last day shown, `{ start, end }` as
+`YYYY-MM-DD` — the moment to load that week's entries. It does not bubble: listen on the planner itself.
+
+Entries with a `date` show in their own week only; entries with a `day` keep repeating every week, so a dated plan
+can mix one-off appointments with a routine. With `alternate-weeks`, `weeks` follows the ISO number of the week shown
+and there is no switch. Without `date` the planner stays the dateless typical week, and entries with a `date` are left
+out of it.
+
+## Editing
+
+`editable` lets the user arrange the plan. The planner never changes `events` itself: it reports what the user asked
+for, and you update `events`.
+
+- **Add.** Clicking an empty spot fires `slot-click` with `{ day, date?, start, end }`: the time under the pointer,
+  snapped down to `snap-minutes` (30 by default), and an hour-long range, capped at `24:00`. The hour under the pointer
+  is tinted (`--c2-week-planner__slot__hover--background`). From the keyboard, each day column starts with a
+  "New event" button, invisible until it has focus, at the column's first free hour; Enter fires the same event.
+- **Move and resize.** Drag a block to another time or day, or drag its bottom edge
+  (`--c2-week-planner__resize-handle--height`) to change its end. A dashed preview (`--c2-week-planner__preview--*`)
+  shows where it lands while the block itself fades (`--c2-week-planner__event__dragging--opacity`); Escape cancels.
+  The drop fires `event-change` with `{ event, changes }`: `event` is the entry from `events` and `changes` its new
+  `start`, `end` and, for a `day` entry, `day`, or, for a `date` entry, `date`, so spreading `changes` onto the entry
+  applies it. A press that does not travel a few pixels is still a click (`event-click`).
+- **Keyboard.** On a focused block, Alt+Arrow Up/Down moves it by `snap-minutes`, Alt+Arrow Left/Right by a day (a
+  `day` entry wraps around the week), and Alt+Shift+Arrow Up/Down changes its end; each fires `event-change`, and the
+  block keeps focus once you have applied it.
+
+```ts tag=CodeBlock
+import '@c2n/week-planner'
+import type { WeekPlannerEvent } from '@c2n/week-planner'
+
+const planner = document.querySelector('c2-week-planner')!
+planner.date = '2026-10-07'
+planner.editable = true
+
+// loadWeek: your own fetch of that week's entries.
+planner.addEventListener('week-change', ({ detail }) => loadWeek(detail.start, detail.end))
+planner.addEventListener('slot-click', ({ detail }) => {
+  const entry: WeekPlannerEvent = { id: crypto.randomUUID(), title: 'New task', date: detail.date, start: detail.start, end: detail.end }
+  planner.events = [...planner.events, entry]
+})
+planner.addEventListener('event-change', ({ detail }) => {
+  planner.events = planner.events.map((entry) => (entry === detail.event ? { ...entry, ...detail.changes } : entry))
+})
+```
 
 ## Narrow screens
 
@@ -157,7 +275,7 @@ columns start on that language's usual first day (Sunday in `en-US`, Monday in `
 `ar-EG`); `week-start` (`monday`, `sunday` or `saturday`) overrides it. Day names,
 "today" and "this week" come from the browser's `Intl` data, so they exist in every language; the switch labels
 (Odd week, Even week) and the accessible names are built in for English, French, German, Spanish, Italian, Portuguese,
-Dutch and Vietnamese, and fall back to English otherwise.
+Dutch and Vietnamese, and fall back to English otherwise. A dated week formats its dates and range through `Intl` too.
 
 ```html tag=UsageBlock,package=@c2n/week-planner
 <div data-label="French">

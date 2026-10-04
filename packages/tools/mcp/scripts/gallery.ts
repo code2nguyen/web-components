@@ -8,6 +8,7 @@ import { parseCssVarName } from '../src/lib/css-var-name.ts'
 export interface ThemeColor {
   name: string
   light: string | null
+  dark?: string
 }
 
 const slugify = (text: string) =>
@@ -140,6 +141,9 @@ export function themeExampleCss(css: string, tokens: ThemeColor[]): { css: strin
   const byValue = new Map<string, string[]>()
   for (const token of tokens) {
     if (!token.light || !token.name.startsWith('--c2-theme--color-')) continue
+    // A theme-invariant colour (the dark-block roles) shares its value with a flipping role; matching a bare literal
+    // to it would freeze a colour that has to follow the theme, so only roles with a dark value are candidates.
+    if (!token.dark) continue
     const key = normalizeColor(token.light)
     byValue.set(key, [...(byValue.get(key) ?? []), token.name])
   }

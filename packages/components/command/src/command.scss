@@ -5,6 +5,7 @@
     color: #18181b,
     font-family: null,
     width: null,
+    max-height: none,
 
     border-top: 1px solid #e4e4e7,
     border-right: 1px solid #e4e4e7,
@@ -53,6 +54,9 @@
   box-sizing: border-box;
   overflow: hidden;
   width: css.cssVar(width);
+  // A cap on the whole palette: the field and the footer keep their height and the list (flex: 1, min-height: 0)
+  // shrinks into what is left, so it is the only scroller.
+  max-height: css.cssVar(max-height);
 
   background: css.cssVar(background);
   color: css.cssVar(color);

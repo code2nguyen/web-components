@@ -45,7 +45,7 @@
   display: contents;
 }
 
-:host([has-trigger]) {
+:host(:state(has-trigger)) {
   display: inline-flex;
   vertical-align: middle;
 }

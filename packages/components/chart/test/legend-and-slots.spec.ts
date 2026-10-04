@@ -189,7 +189,7 @@ async function mount(page: import('@playwright/test').Page, item: Case, extra: s
     },
     { item, extra, inner },
   )
-  await expect(page.locator('#subject')).toHaveAttribute('data-chart-ready', 'true')
+  await expect(page.locator('#subject')).toHaveState('ready')
 }
 
 for (const item of cases) {
@@ -344,7 +344,7 @@ test("a linked c2-chart-legend follows the chart's legend-action", async ({ page
     ;(main.firstElementChild as HTMLElement & { data: unknown }).data = rows
   }, rows)
   const chart = page.locator('#subject')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const legend = page.locator('c2-chart-legend')
   await legend.locator('.item').nth(1).click()
   await expect.poll(() => chart.evaluate((element) => (element as unknown as { highlighted: string | null }).highlighted)).toBe('s1')
@@ -383,7 +383,7 @@ test('on an area chart a click inside a fill picks that area, whichever band it 
     ;(main.firstElementChild as HTMLElement & { data: unknown }).data = rows
   }, rows)
   const chart = page.locator('#subject')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const over = await chart.locator('.u-over').boundingBox()
   if (!over) throw new Error('no plot overlay')
   const picked: (string | null)[] = []
@@ -412,7 +412,7 @@ test('the cursor finds the right series on an auto-ranged chart too', async ({ p
     ]
   })
   const chart = page.locator('#subject')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await chart.evaluate((element) => {
     const seen: string[] = []
     element.addEventListener('point-hover', (event) => {

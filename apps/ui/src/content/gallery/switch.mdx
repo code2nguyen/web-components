@@ -110,16 +110,16 @@ Curated looks for `c2-switch`. Open any card in the studio to start from it. Siz
     display: inline-flex;
     padding: 14px 18px;
     border-radius: 12px;
-    background: var(--c2-theme--color-inverse-surface, #18181b);
-    color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-switch__track--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
-    --c2-switch__track__hover--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 74%, var(--c2-theme--color-surface, #ffffff));
+    background: var(--c2-theme--color-dark-surface, #18181b);
+    color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-switch__track--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-switch__track__hover--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 27%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-switch__track__checked--color: #5aa3ff;
     --c2-switch__track__checked__hover--color: #7bb6ff;
-    --c2-switch__thumb--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
+    --c2-switch__thumb--color: var(--c2-theme--color-on-dark-surface, #fafafa);
     --c2-switch__thumb__checked--color: #032a5c;
     --c2-switch__track__focus--outline: 2px solid rgba(90, 163, 255, 0.5);
-    --c2-switch__description--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+    --c2-switch__description--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
   }
 </style>
 <div class="dark"><c2-switch checked>Dark mode<span slot="description">Follows the system at sunset.</span></c2-switch></div>

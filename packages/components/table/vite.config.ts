@@ -6,12 +6,12 @@ import { customLitCemPlugin } from '../../../scripts/cem-plugin-customize/index'
 export default defineConfig({
   build: {
     lib: {
-      entry: ['src/table.ts', 'src/table-column.ts', 'src/table-types.ts'],
+      entry: ['src/table.ts', 'src/table-column.ts', 'src/table-types.ts', 'src/rendered-rows.ts', 'src/react.ts', 'src/vue.ts'],
       formats: ['es'],
     },
     minify: false,
     rollupOptions: {
-      external: /^lit|@lit\/context|@c2n/,
+      external: /^lit|@lit\/context|@c2n|^react(\/|$)|^vue$/,
     },
   },
   plugins: [

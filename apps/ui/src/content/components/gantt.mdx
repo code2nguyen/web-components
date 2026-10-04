@@ -1,0 +1,69 @@
+---
+title: 'Gantt'
+description: 'A read-only project timeline: tasks, groups, milestones and dependencies on a day, week or month scale.'
+category: 'Data display'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { Gantt, GanttTask } from '@c2n/gantt'
+
+`c2-gantt` draws a plan as bars on a time axis, with a task list beside it that stays put while the timeline scrolls.
+Give it tasks in either of two ways: write `c2-gantt-task` elements inside it, nested to make groups, or set `tasks`
+to an array (or a JSON attribute) when the data comes from an API; an array wins over children. Dates are calendar
+days written `YYYY-MM-DD`, and `end` is inclusive. `progress` shades the done share of a bar, `milestone` draws a
+diamond, `dependencies` draws finish-to-start arrows, and `tone` picks a semantic colour or one of the eight chart
+palette slots. `scale` zooms between `day`, `week` and `month`. Weeks start on the locale's first day (from
+`locale`, the page's `lang` or the browser) and the locale's weekend is shaded; `week-start` and `weekend` override
+both. Below 560px of width the chart switches to a compact layout with each label above its bar, and `hide-list`
+drops the list at any width. Rows are a keyboard-navigable tree grid: ↑ and ↓ move, → and ← open and close groups,
+Enter selects.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/gantt
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/gantt
+<style>
+  .gantt-demo { width: min(760px, 100%); }
+  .gantt-narrow { width: 340px; }
+</style>
+<div data-label="Markup">
+  <c2-gantt class="gantt-demo" aria-label="Docs relaunch" today="2026-10-01" selected="vis">
+    <c2-gantt-task task-id="discovery" label="Discovery">
+      <c2-gantt-task task-id="interviews" start="2026-09-14" end="2026-09-18" progress="1">Stakeholder interviews</c2-gantt-task>
+      <c2-gantt-task task-id="audit" start="2026-09-16" end="2026-09-24" progress="1">Audit current docs</c2-gantt-task>
+      <c2-gantt-task task-id="scope" start="2026-09-25" milestone dependencies="audit">Scope signed off</c2-gantt-task>
+    </c2-gantt-task>
+    <c2-gantt-task task-id="design" label="Design">
+      <c2-gantt-task task-id="ia" start="2026-09-28" end="2026-10-02" progress="0.8" dependencies="scope">Information architecture</c2-gantt-task>
+      <c2-gantt-task task-id="vis" start="2026-10-05" end="2026-10-16" progress="0.35" dependencies="ia">Visual design</c2-gantt-task>
+      <c2-gantt-task task-id="review" start="2026-10-16" milestone dependencies="vis">Design review</c2-gantt-task>
+    </c2-gantt-task>
+    <c2-gantt-task task-id="launch" start="2026-10-23" milestone dependencies="review">Launch</c2-gantt-task>
+  </c2-gantt>
+</div>
+<div data-label="Data, month scale">
+  <c2-gantt class="gantt-demo" scale="month" aria-label="Roadmap" today="2026-10-01" tasks='[
+    {"id":"p","label":"Platform"},
+    {"id":"p1","label":"SSR hydration audit","start":"2026-10-05","end":"2026-11-13","progress":0.6,"parent":"p","tone":1},
+    {"id":"p2","label":"Svelte adapter","start":"2026-11-16","end":"2027-01-22","progress":0.1,"parent":"p","tone":1,"dependencies":["p1"]},
+    {"id":"d","label":"Design system"},
+    {"id":"d1","label":"Gantt v1","start":"2026-10-12","end":"2026-12-04","progress":0.15,"parent":"d","tone":2},
+    {"id":"d2","label":"Token audit","start":"2026-11-02","end":"2026-12-18","progress":0.3,"parent":"d","tone":6},
+    {"id":"x","label":"v1.0 release","start":"2027-01-29","milestone":true,"dependencies":["p2","d1"]}
+  ]'></c2-gantt>
+</div>
+<div data-label="Compact">
+  <c2-gantt class="gantt-narrow" aria-label="Sprint" today="2026-10-07" week-start="monday">
+    <c2-gantt-task task-id="a" start="2026-10-05" end="2026-10-07" progress="1" tone="success">Spec</c2-gantt-task>
+    <c2-gantt-task task-id="b" start="2026-10-08" end="2026-10-14" progress="0.4" dependencies="a">Build</c2-gantt-task>
+    <c2-gantt-task task-id="c" start="2026-10-15" end="2026-10-16" tone="warning" dependencies="b">QA</c2-gantt-task>
+  </c2-gantt>
+</div>
+```

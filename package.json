@@ -42,6 +42,7 @@
     "changelog": "node scripts/generate-changelog.mjs",
     "check:lifecycle": "node scripts/check-component-lifecycle.mjs",
     "check:dogfood": "node scripts/check-dogfooding.mjs",
+    "check:css-contracts": "node scripts/check-css-contracts.mjs",
     "check:style-contracts": "node scripts/check-style-contracts.mjs",
     "test:style-contracts": "playwright test tests/style-contracts",
     "verify:style-contracts": "node scripts/verify-style-contracts.mjs"
@@ -94,6 +95,12 @@
     "build": {
       "dependencies": [
         "./packages/components/kanban:build",
+        "./packages/components/gantt:build",
+        "./packages/components/working-indicator:build",
+        "./packages/components/page-editor:build",
+        "./packages/components/notepad:build",
+        "./packages/components/todo-list:build",
+        "./packages/components/comparison-bar:build",
         "./packages/components/flow:build",
         "./packages/components/week-planner:build",
         "./packages/components/month-planner:build",
@@ -146,7 +153,7 @@
         "./packages/components/switch:build",
         "./packages/components/spinner:build",
         "./packages/components/slider:build",
-        "./packages/components/seperator:build",
+        "./packages/components/separator:build",
         "./packages/components/breadcrumb:build",
         "./packages/components/badge:build",
         "./packages/components/toast:build",
@@ -158,6 +165,7 @@
         "./packages/icons/feather-icons:build",
         "./packages/icons/phosphor-icons:build",
         "./packages/icons/symbols:build",
+        "./packages/icons/task-icons:build",
         "./open-packages/chatbot:build",
         "./packages/components/chat-input:build",
         "./packages/components/chat-message:build",

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-gantt</title>
+    <script type="module" src="/src/gantt.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 40px;
+        max-width: 960px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        color: #71717a;
+      }
+      .narrow {
+        width: 360px;
+      }
+      .pills {
+        --c2-gantt__bar--border-radius: 999px;
+        --c2-gantt__bar--border-mix: 0%;
+        --c2-gantt__bar--background-mix: 22%;
+        --c2-gantt__progress--background-mix: 48%;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h2>Markup, week scale</h2>
+      <c2-gantt aria-label="Docs relaunch" today="2026-10-01" selected="vis">
+        <c2-gantt-task task-id="discovery" label="Discovery">
+          <c2-gantt-task task-id="interviews" start="2026-09-14" end="2026-09-18" progress="1">Stakeholder interviews</c2-gantt-task>
+          <c2-gantt-task task-id="audit" start="2026-09-16" end="2026-09-24" progress="1">Audit current docs</c2-gantt-task>
+          <c2-gantt-task task-id="scope" start="2026-09-25" milestone dependencies="audit">Scope signed off</c2-gantt-task>
+        </c2-gantt-task>
+        <c2-gantt-task task-id="design" label="Design">
+          <c2-gantt-task task-id="ia" start="2026-09-28" end="2026-10-02" progress="0.8" dependencies="scope">Information architecture</c2-gantt-task>
+          <c2-gantt-task task-id="vis" start="2026-10-05" end="2026-10-16" progress="0.35" dependencies="ia">Visual design</c2-gantt-task>
+          <c2-gantt-task task-id="review" start="2026-10-16" milestone dependencies="vis">Design review</c2-gantt-task>
+        </c2-gantt-task>
+        <c2-gantt-task task-id="launch" start="2026-10-23" milestone dependencies="review">Launch</c2-gantt-task>
+      </c2-gantt>
+    </section>
+
+    <section>
+      <h2>Data, day scale, en-US (weeks start on Sunday)</h2>
+      <c2-gantt id="data" scale="day" locale="en-US" aria-label="Sprint"></c2-gantt>
+    </section>
+
+    <section>
+      <h2>Month scale, tones, pill bars</h2>
+      <c2-gantt class="pills" scale="month" aria-label="Roadmap" today="2026-10-01">
+        <c2-gantt-task task-id="p1" start="2026-10-05" end="2026-11-13" progress="0.6" tone="1">SSR audit</c2-gantt-task>
+        <c2-gantt-task task-id="p2" start="2026-11-16" end="2027-01-22" progress="0.1" tone="2" dependencies="p1">Svelte adapter</c2-gantt-task>
+        <c2-gantt-task task-id="p3" start="2026-11-02" end="2026-12-18" progress="0.3" tone="6">Token audit</c2-gantt-task>
+      </c2-gantt>
+    </section>
+
+    <section>
+      <h2>Compact (narrow container)</h2>
+      <c2-gantt class="narrow" aria-label="Sprint" today="2026-10-07">
+        <c2-gantt-task task-id="a" start="2026-10-05" end="2026-10-07" progress="1" tone="success">Spec</c2-gantt-task>
+        <c2-gantt-task task-id="b" start="2026-10-08" end="2026-10-14" progress="0.4" dependencies="a">Build</c2-gantt-task>
+        <c2-gantt-task task-id="c" start="2026-10-15" end="2026-10-16" tone="warning" dependencies="b">QA</c2-gantt-task>
+      </c2-gantt>
+    </section>
+
+    <section>
+      <h2>Empty and loading</h2>
+      <c2-gantt aria-label="Empty plan" tasks="[]"></c2-gantt>
+      <br />
+      <c2-gantt aria-label="Loading plan" loading></c2-gantt>
+    </section>
+
+    <script type="module">
+      document.querySelector('#data').tasks = [
+        { id: 'api', label: 'API contract', start: '2026-10-05', end: '2026-10-07', progress: 1, tone: 'success' },
+        { id: 'ui', label: 'Settings screen', start: '2026-10-07', end: '2026-10-12', progress: 0.5, dependencies: ['api'] },
+        { id: 'qa', label: 'QA pass', start: '2026-10-13', end: '2026-10-14', dependencies: ['ui'] },
+        { id: 'ship', label: 'Ship', start: '2026-10-15', milestone: true, dependencies: ['qa'] },
+      ]
+    </script>
+  </body>
+</html>

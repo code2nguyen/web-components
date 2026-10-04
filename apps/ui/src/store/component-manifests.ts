@@ -1,5 +1,11 @@
 import type { Package, CustomElement } from 'custom-elements-manifest/schema.ts'
 import kanban from '@c2n/kanban/custom-elements.json'
+import gantt from '@c2n/gantt/custom-elements.json'
+import workingIndicator from '@c2n/working-indicator/custom-elements.json'
+import pageEditor from '@c2n/page-editor/custom-elements.json'
+import notepad from '@c2n/notepad/custom-elements.json'
+import todoList from '@c2n/todo-list/custom-elements.json'
+import comparisonBar from '@c2n/comparison-bar/custom-elements.json'
 import flow from '@c2n/flow/custom-elements.json'
 import weekPlanner from '@c2n/week-planner/custom-elements.json'
 import monthPlanner from '@c2n/month-planner/custom-elements.json'
@@ -52,7 +58,7 @@ import textarea from '@c2n/textarea/custom-elements.json'
 import switchManifest from '@c2n/switch/custom-elements.json'
 import spinner from '@c2n/spinner/custom-elements.json'
 import slider from '@c2n/slider/custom-elements.json'
-import seperator from '@c2n/seperator/custom-elements.json'
+import separator from '@c2n/separator/custom-elements.json'
 import breadcrumb from '@c2n/breadcrumb/custom-elements.json'
 import badge from '@c2n/badge/custom-elements.json'
 import toast from '@c2n/toast/custom-elements.json'
@@ -88,6 +94,7 @@ import tooltip from '@c2n/tooltip/custom-elements.json'
 import featherIcons from '@c2n/feather-icons/custom-elements.json'
 import phosphorIcons from '@c2n/phosphor-icons/custom-elements.json'
 import symbols from '@c2n/symbols/custom-elements.json'
+import taskIcons from '@c2n/task-icons/custom-elements.json'
 
 import { normalizeManifest } from '../utils/manifest-utils.ts'
 import type { ComponentManifests } from './manifest-declaration-item.ts'
@@ -95,6 +102,12 @@ import type { ComponentManifests } from './manifest-declaration-item.ts'
 export const componentManifests = (function () {
   const normalizedManifests: ComponentManifests = [
     kanban,
+    gantt,
+    workingIndicator,
+    pageEditor,
+    notepad,
+    todoList,
+    comparisonBar,
     flow,
     weekPlanner,
     monthPlanner,
@@ -147,7 +160,7 @@ export const componentManifests = (function () {
     switchManifest,
     spinner,
     slider,
-    seperator,
+    separator,
     breadcrumb,
     badge,
     toast,
@@ -183,6 +196,7 @@ export const componentManifests = (function () {
     featherIcons,
     phosphorIcons,
     symbols,
+    taskIcons,
   ].reduce((result, item) => {
     const pkg = item as Package
     const tags: string[] = []

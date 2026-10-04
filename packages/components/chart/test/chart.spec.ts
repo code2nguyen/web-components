@@ -13,7 +13,7 @@ test('the chart family resolves first-paint theme probes without scheduling a se
     'c2-line-chart, c2-area-chart, c2-bar-chart, c2-sparkline, c2-pie-chart, c2-gauge-chart, c2-radar-chart, c2-pyramid-chart, c2-scatter-chart, c2-candlestick-chart',
   )
   await expect(charts).toHaveCount(10)
-  await expect.poll(() => charts.evaluateAll((elements) => elements.every((element) => element.hasAttribute('data-chart-ready')))).toBe(true)
+  await expect.poll(() => charts.evaluateAll((elements) => elements.every((element) => element.matches(':state(ready)')))).toBe(true)
   expect(warnings.filter((warning) => warning.includes('c2-') && warning.includes('chart'))).toEqual([])
 
   const color = await page.locator('c2-line-chart').evaluate((element) => {
@@ -26,7 +26,7 @@ test('the chart family resolves first-paint theme probes without scheduling a se
 test('a runtime theme signal invalidates once and refreshes engine options', async ({ page, scenario }) => {
   await scenario('family')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const result = await chart.evaluate(async (element) => {
     const subject = element as unknown as {
       adapter: { setOptions(options: unknown, mode?: string): void }
@@ -112,19 +112,44 @@ test('draws a line chart from series children and reports itself ready', async (
   const chart = page.locator('c2-line-chart')
   await expect(chart).toBeVisible()
   // The engine arrives through a dynamic import, so readiness is an explicit signal rather than a paint.
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
-  await expect(chart).toHaveAttribute('data-chart-engine', 'uplot')
+  await expect(chart).toHaveState('ready')
+  await expect(chart).toHaveState('engine-uplot')
   // A reflected default is not written onto the host (it would fail SSR hydration), so it is read as a property.
   await expect(chart).toHaveJSProperty('animation', 'auto')
   // One canvas, created by the engine inside the plot container.
   expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBe(1)
 })
 
+test('readiness and the engine are custom states: the host gains no attribute, and they clear on disconnect', async ({ page, scenario }) => {
+  await scenario('default')
+  const chart = page.locator('c2-line-chart')
+  const authored = await chart.evaluate((element) => element.getAttributeNames().sort())
+  await expect(chart).toHaveState('ready')
+  await expect(chart).not.toHaveState('engine-echarts')
+  expect(await chart.evaluate((element) => element.getAttributeNames().sort())).toEqual(authored)
+  expect(authored).not.toContain('data-chart-ready')
+  // The uPlot reveal still keys off the engine state.
+  const reveal = await chart.evaluate((element) => getComputedStyle(element.shadowRoot!.querySelector('.u-under')!).animationName)
+  expect(reveal).toBe('c2-chart-plot-reveal')
+
+  const states = await chart.evaluate((element) => {
+    const parent = element.parentNode!
+    element.remove()
+    const detached = [':state(ready)', ':state(engine-uplot)'].map((state) => element.matches(state))
+    parent.append(element)
+    return detached
+  })
+  expect(states).toEqual([false, false])
+  // Reconnected, it draws again and says so the same way.
+  await expect(chart).toHaveState('ready')
+  await expect(chart).toHaveState('engine-uplot')
+})
+
 for (const tag of ['c2-line-chart', 'c2-bar-chart'])
   test(`${tag} names its x ticks after the label field instead of printing the x value`, async ({ page, scenario }) => {
     await scenario('family')
     const chart = page.locator(tag)
-    await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+    await expect(chart).toHaveState('ready')
     type Subject = HTMLElement & { data: unknown; xField: string; labelField: string; formatAxisX(value: number): string }
     // The frame is rebuilt after the update that changes the data or its fields, so read the ticks until it lands.
     const ticks = () => chart.evaluate((element) => [2021, 2021.5, 2022].map((value) => (element as Subject).formatAxisX(value)))
@@ -148,14 +173,14 @@ for (const tag of ['c2-line-chart', 'c2-bar-chart'])
 test('reads a bare number array and infers the x axis', async ({ page, scenario }) => {
   await scenario('sparkline')
   const spark = page.locator('c2-sparkline')
-  await expect(spark).toHaveAttribute('data-chart-ready', 'true')
+  await expect(spark).toHaveState('ready')
   expect(await spark.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBe(1)
 })
 
 test('gives a sparkline its whole box: no axis element, no reserved gutter', async ({ page, scenario }) => {
   await scenario('sparkline')
   const spark = page.locator('c2-sparkline')
-  await expect(spark).toHaveAttribute('data-chart-ready', 'true')
+  await expect(spark).toHaveState('ready')
 
   const plot = await spark.evaluate((element) => {
     const root = element.shadowRoot!
@@ -172,7 +197,7 @@ test('gives a sparkline its whole box: no axis element, no reserved gutter', asy
 test('collects c2-chart-series children and keeps their change event inside the chart', async ({ page, scenario }) => {
   await scenario('two-series')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const escaped = await page.evaluate(() => {
     let seen = 0
@@ -193,7 +218,7 @@ test('collects c2-chart-series children and keeps their change event inside the 
 test('legend toggles a series and fires series-toggle without bubbling', async ({ page, scenario }) => {
   await scenario('two-series')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate(async (element) => {
     element.setAttribute('legend-action', 'toggle')
@@ -219,7 +244,10 @@ test('links independently positioned legend and tooltip elements by id', async (
   const chart = page.locator('c2-line-chart')
   const legend = page.locator('c2-chart-legend')
   const tooltip = page.locator('c2-chart-tooltip')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
+  const tooltipAttributes = await tooltip.evaluate((element) => element.getAttributeNames().sort())
+  expect(tooltipAttributes).not.toContain('hidden')
+  await expect(tooltip).toBeHidden()
 
   expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('.legend-item').length)).toBe(0)
   const labels = await legend.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.item') ?? [])].map((item) => item.textContent?.trim()))
@@ -238,17 +266,29 @@ test('links independently positioned legend and tooltip elements by id', async (
   const box = await chart.locator('.u-over').boundingBox()
   if (!box) throw new Error('the chart plot has no box')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await expect(tooltip).not.toHaveAttribute('hidden', '')
+  await expect(tooltip).toHaveState('open')
+  await expect(tooltip).toBeVisible()
   expect(await tooltip.evaluate((element) => element.shadowRoot?.querySelectorAll('.row').length)).toBe(1)
 
   await page.mouse.move(box.x - 20, box.y - 20)
-  await expect(tooltip).toHaveAttribute('hidden', '')
+  await expect(tooltip).not.toHaveState('open')
+  await expect(tooltip).toBeHidden()
+  // Shown and hidden through a custom state: the host never gains a `hidden` attribute. (A floating tooltip's
+  // `left`/`top` are written while the reader hovers, which is after the page is live.)
+  expect(
+    await tooltip.evaluate((element) =>
+      element
+        .getAttributeNames()
+        .filter((name) => name !== 'style')
+        .sort(),
+    ),
+  ).toEqual(tooltipAttributes)
 })
 
 test('keeps point-hover events available when the built-in tooltip is disabled', async ({ page, scenario }) => {
   await scenario('linked-chrome')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await chart.evaluate(async (element) => {
     element.setAttribute('tooltip', 'none')
     await (element as unknown as { updateComplete: Promise<unknown> }).updateComplete
@@ -283,19 +323,19 @@ test('shows the empty, loading and error states in precedence order', async ({ p
 test('a slotted empty message replaces the built-in one', async ({ page, scenario }) => {
   await scenario('slots')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await expect(page.getByRole('button', { name: 'Export' })).toBeVisible()
 })
 
 test('draws a bar chart over category labels', async ({ page, scenario }) => {
   await scenario('bar')
-  await expect(page.locator('c2-bar-chart')).toHaveAttribute('data-chart-ready', 'true')
+  await expect(page.locator('c2-bar-chart')).toHaveState('ready')
 })
 
 test('reads the bar radius token and gives rounded bars their own path builder', async ({ page, scenario }) => {
   await scenario('rounded-bar')
   const chart = page.locator('c2-bar-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate((element) => {
     const bar = element as unknown as {
@@ -314,7 +354,7 @@ test('reads the bar radius token and gives rounded bars their own path builder',
 test('draws a donut through the ECharts engine', async ({ page, scenario }) => {
   await scenario('pie')
   const pie = page.locator('c2-pie-chart')
-  await expect(pie).toHaveAttribute('data-chart-ready', 'true')
+  await expect(pie).toHaveState('ready')
   expect(await pie.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBeGreaterThan(0)
 })
 
@@ -329,7 +369,7 @@ for (const [scenarioName, tag] of [
   test(`draws the ${scenarioName} through the ECharts engine`, async ({ page, scenario }) => {
     await scenario(scenarioName)
     const chart = page.locator(tag)
-    await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+    await expect(chart).toHaveState('ready')
     expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBeGreaterThan(0)
   })
 }
@@ -337,7 +377,7 @@ for (const [scenarioName, tag] of [
 test('fits the scatter axes to the data and themes the vertical grid lines', async ({ page, scenario }) => {
   await scenario('scatter')
   const scatter = page.locator('c2-scatter-chart')
-  await expect(scatter).toHaveAttribute('data-chart-ready', 'true')
+  await expect(scatter).toHaveState('ready')
   const result = await scatter.evaluate(async (element) => {
     const chart = element as unknown as {
       style: CSSStyleDeclaration
@@ -358,8 +398,8 @@ test('fits the scatter axes to the data and themes the vertical grid lines', asy
 test('builds radar indicators and one profile per declared series', async ({ page, scenario }) => {
   await scenario('radar')
   const radar = page.locator('c2-radar-chart')
-  await expect(radar).toHaveAttribute('data-chart-ready', 'true')
-  await expect(radar).toHaveAttribute('data-chart-engine', 'echarts')
+  await expect(radar).toHaveState('ready')
+  await expect(radar).toHaveState('engine-echarts')
 
   const configuration = await radar.evaluate((element) => {
     const chart = element as unknown as {
@@ -440,7 +480,7 @@ test('supports disabling gauge marks from markup', async ({ page, scenario }) =>
 test('assembles the four normalized OHLC columns into one candlestick series', async ({ page, scenario }) => {
   await scenario('candlestick')
   const chart = page.locator('c2-candlestick-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const projected = await chart.evaluate((element) => {
     const chartElement = element as unknown as { frame: unknown; projectData(frame: unknown): number[][][] }
     return chartElement.projectData(chartElement.frame)
@@ -456,7 +496,7 @@ test('assembles the four normalized OHLC columns into one candlestick series', a
 test('infers one series per numeric field and never plots the x field', async ({ page, scenario }) => {
   await scenario('inferred')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   // `month` is the x field, so the two series are `revenue` and `cost` — not three including the x.
   const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
@@ -474,7 +514,7 @@ test('infers one series per numeric field and never plots the x field', async ({
 test('collects series definitions wrapped by an island host', async ({ page, scenario }) => {
   await scenario('wrapped')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
   expect(labels).toEqual(['Revenue', 'Cost'])
 })
@@ -482,7 +522,7 @@ test('collects series definitions wrapped by an island host', async ({ page, sce
 test('actually paints the series onto the canvas', async ({ page, scenario }) => {
   await scenario('inferred')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   // A canvas can exist and be blank — which is exactly what a bad field name produces, since every value
   // reads as a gap and the axes still render. Count the pixels the engine actually coloured.
@@ -503,7 +543,7 @@ test('actually paints the series onto the canvas', async ({ page, scenario }) =>
 test('draws grouped bars side by side, and labels only whole bands', async ({ page, scenario }) => {
   await scenario('grouped-bars')
   const chart = page.locator('c2-bar-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   // uPlot puts every series on the same x, so without our own grouping the taller red series would cover
   // the shorter blue one entirely and blue would not be on the canvas at all.
@@ -535,7 +575,7 @@ test('draws grouped bars side by side, and labels only whole bands', async ({ pa
 test('draws a second y axis for a series bound to `axis="right"`', async ({ page, scenario }) => {
   await scenario('dual-axis')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   // Two axis elements on the y side: the property was declared and typed long before anything read it, so a
   // dual-axis chart silently drew both series against the left scale.
@@ -560,7 +600,7 @@ test('draws a second y axis for a series bound to `axis="right"`', async ({ page
 test('labels a time axis by the span it covers, not always by date', async ({ page, scenario }) => {
   await scenario('intraday')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   // 75 minutes of samples: a fixed month/day format made every tick read "Jan 1".
   const ticks = await chart.evaluate((element) => {
@@ -575,7 +615,7 @@ test('labels a time axis by the span it covers, not always by date', async ({ pa
 test("lists a pie chart's slices in the legend, and toggles one", async ({ page, scenario }) => {
   await scenario('pie')
   const chart = page.locator('c2-pie-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   // The inherited legend is one entry per series, and a pie has exactly one — so it used to read "Revenue"
   // above a four-slice donut.
@@ -595,7 +635,7 @@ test("lists a pie chart's slices in the legend, and toggles one", async ({ page,
 test('configures pie label content from markup', async ({ page, scenario }) => {
   await scenario('pie')
   const chart = page.locator('c2-pie-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const label = await chart.evaluate((element) => {
     const pie = element as unknown as {
@@ -727,8 +767,8 @@ test('rounds every corner of a level, and merges the corners of a point', () => 
 test('draws pyramid levels as rounded paths in the layout order', async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
-  await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
+  await expect(chart).toHaveState('ready')
+  await expect(chart).toHaveState('engine-echarts')
 
   const read = (style: string) =>
     chart.evaluate((element, nextStyle) => {
@@ -772,7 +812,7 @@ test('draws pyramid levels as rounded paths in the layout order', async ({ page,
 test('draws outside pyramid labels with their own series, spread clear of each other', async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const result = await chart.evaluate((element) => {
     type Item = { children: { type: string; style: { text?: string; y?: number } }[] } | null
@@ -812,7 +852,7 @@ test('draws outside pyramid labels with their own series, spread clear of each o
 test('lays a pyramid on its side or upside down, and moves it across its axis', async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const apexAt = (apex: string, style: string) =>
     chart.evaluate(
@@ -850,7 +890,7 @@ test('lays a pyramid on its side or upside down, and moves it across its axis', 
 test('reports the clicked pyramid level by its data row', async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   // The base level is the widest and the easiest to hit: aim for its middle.
   const target = await chart.evaluate((element) => {
@@ -889,7 +929,7 @@ test('reports the clicked pyramid level by its data row', async ({ page, scenari
 test("lists a pyramid's levels in the legend, and highlights one by default", async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
   expect(labels).toEqual(['Starter', 'Enterprise', 'Team', 'Business'])
@@ -913,7 +953,7 @@ test("lists a pyramid's levels in the legend, and highlights one by default", as
 test('with legend-action="toggle", hiding a pyramid level lays the rest out again', async ({ page, scenario }) => {
   await scenario('pyramid')
   const chart = page.locator('c2-pyramid-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await chart.evaluate((element) => element.setAttribute('legend-action', 'toggle'))
 
   await chart.locator('.legend-item').first().click()
@@ -950,8 +990,8 @@ test("rounds a butterfly chart's shared scale to whole, even steps", () => {
 test('draws a butterfly chart as two mirrored plots on one scale, with the categories in the gutter', async ({ page, scenario }) => {
   await scenario('butterfly')
   const chart = page.locator('c2-butterfly-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
-  await expect(chart).toHaveAttribute('data-chart-engine', 'echarts')
+  await expect(chart).toHaveState('ready')
+  await expect(chart).toHaveState('engine-echarts')
 
   const read = (style: string) =>
     chart.evaluate((element, nextStyle) => {
@@ -1017,7 +1057,7 @@ test('draws a butterfly chart as two mirrored plots on one scale, with the categ
 test('rescales both sides of a butterfly chart when only the data changes', async ({ page, scenario }) => {
   await scenario('butterfly')
   const chart = page.locator('c2-butterfly-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const update = (rows: unknown[]) =>
     chart.evaluate(async (element, next) => {
       const subject = element as unknown as { updateData(rows: unknown[]): void; updateComplete: Promise<boolean> }
@@ -1068,10 +1108,10 @@ test('a butterfly chart asks for two series, and draws only the first two of mor
   await expect
     .poll(() => one.evaluate((element) => element.shadowRoot?.querySelector('.state')?.textContent?.trim()))
     .toBe('A butterfly chart needs two series, one for each side.')
-  await expect(one).not.toHaveAttribute('data-chart-ready', 'true')
+  await expect(one).not.toHaveState('ready')
 
   const three = page.locator('#three')
-  await expect(three).toHaveAttribute('data-chart-ready', 'true')
+  await expect(three).toHaveState('ready')
   const drawn = await three.evaluate((element) => {
     const subject = element as unknown as { buildContext(): unknown; buildOptions(context: unknown): { series: unknown[] }; getLegendItems(): unknown[] }
     return { series: subject.buildOptions(subject.buildContext()).series.length, legend: subject.getLegendItems().length }
@@ -1083,7 +1123,7 @@ test('a butterfly chart asks for two series, and draws only the first two of mor
 test('drives the grid from markup in both directions', async ({ page, scenario }) => {
   await scenario('grid')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const snapshot = () =>
     chart.evaluate((element) => {
@@ -1111,7 +1151,7 @@ test('drives the grid from markup in both directions', async ({ page, scenario }
 test('applies the curve path builder on the very first frame', async ({ page, scenario }) => {
   await scenario('stepped')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const snapshot = () =>
     chart.evaluate((element) => {
@@ -1131,7 +1171,7 @@ test('applies the curve path builder on the very first frame', async ({ page, sc
 test('fills the width of a centring flex frame, even with no legend', async ({ page, scenario }) => {
   await scenario('centred')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   // The plot is absolutely positioned, so nothing inside the host contributes width. Without a declared
   // width the host collapses to its legend — and to zero when there is none, which renders nothing at all.
@@ -1142,14 +1182,14 @@ test('fills the width of a centring flex frame, even with no legend', async ({ p
 test('draws after a zero-width app shell becomes measurable', async ({ page, scenario }) => {
   await scenario('deferred-layout')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   expect(await chart.evaluate((element) => element.shadowRoot?.querySelectorAll('canvas').length)).toBe(1)
 })
 
 test('shows a tooltip listing every series at the hovered position', async ({ page, scenario }) => {
   await scenario('two-series')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 
   const tooltipVisible = () =>
     chart.evaluate((element) => {
@@ -1196,14 +1236,14 @@ test('shows a tooltip listing every series at the hovered position', async ({ pa
 test('shows a legend by default, and the sparkline does not', async ({ page, scenario }) => {
   await scenario('inferred')
   const chart = page.locator('c2-line-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   // No `legend` attribute is set in this scenario: a multi-series chart is unreadable without one.
   const labels = await chart.evaluate((element) => [...(element.shadowRoot?.querySelectorAll('.legend-label') ?? [])].map((node) => node.textContent?.trim()))
   expect(labels).toEqual(['Revenue', 'Cost'])
 
   await scenario('sparkline')
   const spark = page.locator('c2-sparkline')
-  await expect(spark).toHaveAttribute('data-chart-ready', 'true')
+  await expect(spark).toHaveState('ready')
   // A sparkline is defined by what it leaves out.
   expect(await spark.evaluate((element) => element.shadowRoot?.querySelectorAll('.legend-item').length)).toBe(0)
 })
@@ -1220,4 +1260,14 @@ test('reads declared series on the first update, before any slotchange', async (
     return chart.resolvedSeries.map((series) => series.label)
   })
   expect(labels).toEqual(['Declared'])
+})
+
+test('a chart tooltip can be created with createElement, which rejects an element that writes its own attributes', async ({ page, scenario }) => {
+  await scenario('default')
+  const result = await page.evaluate(() => {
+    const tooltip = document.createElement('c2-chart-tooltip')
+    document.body.append(tooltip)
+    return { attributes: tooltip.getAttributeNames(), display: getComputedStyle(tooltip).display }
+  })
+  expect(result).toEqual({ attributes: [], display: 'none' })
 })

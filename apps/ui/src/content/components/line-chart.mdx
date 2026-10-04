@@ -21,7 +21,8 @@ import { Button } from '@c2n/button'
 
 One line per series over a time or numeric x axis. Data is rows plus `c2-chart-series` children — the same
 authoring shape as `c2-table`'s rows and columns — and presentation is ordinary attributes: `curve`,
-`points`, `legend`, `zoom`, the axis bounds.
+`points`, `legend`, `zoom`, the axis bounds. `points="always"` draws a circle at every data point (`auto`, the
+default, shows them only once points are far enough apart; `none` hides them), sized by `--c2-chart__point--radius`.
 
 `c2-line-chart` is the base of the family. [Area chart](/web-components/components/area-chart) extends it
 with a fill, and [bar](/web-components/components/bar-chart),
@@ -46,6 +47,9 @@ npm install @c2n/chart uplot
     width: 100%;
     --c2-chart--height: 240px;
   }
+  .plot--points {
+    --c2-chart__point--radius: 3.5px;
+  }
   .energy-linked,
   .energy-live {
     display: grid;
@@ -69,6 +73,19 @@ npm install @c2n/chart uplot
     data='[{"year":2015,"nuclear":437.43,"wind":21.42,"solar":7.75},{"year":2016,"nuclear":403.2,"wind":21.38,"solar":8.66},{"year":2017,"nuclear":398.36,"wind":24.61,"solar":8.87},{"year":2018,"nuclear":412.94,"wind":28.6,"solar":11.15},{"year":2019,"nuclear":399.01,"wind":34.72,"solar":12.02},{"year":2020,"nuclear":353.83,"wind":40.05,"solar":13.09},{"year":2021,"nuclear":379.36,"wind":37.12,"solar":15.28},{"year":2022,"nuclear":294.73,"wind":38.2,"solar":19.34},{"year":2023,"nuclear":338.2,"wind":50.48,"solar":22.59},{"year":2024,"nuclear":380.45,"wind":45.43,"solar":24.87}]'
   >
     <c2-chart-series field="nuclear" label="Nuclear"></c2-chart-series>
+    <c2-chart-series field="wind" label="Wind"></c2-chart-series>
+    <c2-chart-series field="solar" label="Solar"></c2-chart-series>
+  </c2-line-chart>
+</div>
+
+<div data-label="Point markers">
+  <c2-line-chart
+    class="plot plot--points"
+    x-field="year"
+    label-field="year"
+    points="always"
+    data='[{"year":2015,"wind":21.42,"solar":7.75},{"year":2016,"wind":21.38,"solar":8.66},{"year":2017,"wind":24.61,"solar":8.87},{"year":2018,"wind":28.6,"solar":11.15},{"year":2019,"wind":34.72,"solar":12.02},{"year":2020,"wind":40.05,"solar":13.09},{"year":2021,"wind":37.12,"solar":15.28},{"year":2022,"wind":38.2,"solar":19.34},{"year":2023,"wind":50.48,"solar":22.59},{"year":2024,"wind":45.43,"solar":24.87}]'
+  >
     <c2-chart-series field="wind" label="Wind"></c2-chart-series>
     <c2-chart-series field="solar" label="Solar"></c2-chart-series>
   </c2-line-chart>

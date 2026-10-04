@@ -72,7 +72,7 @@ test('each region outline fills exactly the points inside those circles and no o
 test('draws one engine datum per circle and per region', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const lengths = await chart.evaluate((element) => {
     const subject = element as OverlapElement
     return subject.projectData(undefined, subject.buildContext()).map((series) => series.length)
@@ -84,7 +84,7 @@ test('draws one engine datum per circle and per region', async ({ page, scenario
 test('fires region events instead of point events and describes the region in the tooltip', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const events = await chart.evaluate((element) => {
     const seen: string[] = []
     element.addEventListener('region-hover', (event) => {
@@ -107,7 +107,7 @@ test('fires region events instead of point events and describes the region in th
 test('the pointer reaches a region through the transparent hit area', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await chart.evaluate((element) => {
     ;(window as unknown as { hovered: string[] }).hovered = []
     element.addEventListener('region-hover', (event) => {
@@ -125,7 +125,7 @@ test('the pointer reaches a region through the transparent hit area', async ({ p
 test('a selectable chart selects a region on click and clears it on a second click', async ({ page, scenario }) => {
   await scenario('overlap-selectable')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const box = await chart.locator('.plot').boundingBox()
   if (!box) throw new Error('the plot has no box')
   const changes = await chart.evaluate((element) => {
@@ -147,7 +147,7 @@ test('a selectable chart selects a region on click and clears it on a second cli
 test('the keyboard walks the sets, then the regions from largest to smallest, and Enter selects', async ({ page, scenario }) => {
   await scenario('overlap-selectable')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const plot = chart.locator('.plot')
   await plot.focus()
   await page.keyboard.press('ArrowRight')
@@ -175,7 +175,7 @@ test('the keyboard walks the sets, then the regions from largest to smallest, an
 test("hovering a set's name highlights the whole set and describes it in the tooltip", async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const anchor = await chart.evaluate((element) => {
     const seen: (string | null)[] = []
     element.addEventListener('set-hover', (event) => seen.push((event as CustomEvent<{ set: string } | null>).detail?.set ?? null))
@@ -205,7 +205,7 @@ test("hovering a set's name highlights the whole set and describes it in the too
 test('a selectable chart selects a whole set from its name, and fires set-click', async ({ page, scenario }) => {
   await scenario('overlap-selectable')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const anchor = await chart.evaluate((element) => {
     const seen: unknown[] = []
     element.addEventListener('set-click', (event) => seen.push((event as CustomEvent).detail))
@@ -226,7 +226,7 @@ test('a selectable chart selects a whole set from its name, and fires set-click'
 test('a legend entry highlights its set while hovered, and highlighted does so from the application', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const active = () => chart.evaluate((element) => (element as unknown as { hoveredSet: string | null }).hoveredSet)
   await chart.locator('.legend-item', { hasText: 'Public API' }).hover()
   await expect.poll(active).toBe('api')
@@ -239,7 +239,7 @@ test('a legend entry highlights its set while hovered, and highlighted does so f
 test('a custom renderTooltip receives the hovered region or set', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await chart.evaluate((element) => {
     ;(
       element as unknown as { renderTooltip: (context: { region?: { sets: string[]; total: number }; set?: { label: string; only: number } }) => string }
@@ -255,7 +255,7 @@ test('a custom renderTooltip receives the hovered region or set', async ({ page,
 test('the legend switches a set off and lays the diagram out without it, keeping the last one on', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await chart.evaluate(async (element) => {
     element.setAttribute('legend-action', 'toggle')
     await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
@@ -285,7 +285,7 @@ test('more than three sets shows the error state instead of a diagram', async ({
 test('the uniform layout labels by share and keeps the regions table for assistive technology', async ({ page, scenario }) => {
   await scenario('overlap-uniform')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   await expect(chart.locator('table.overlap-a11y tbody tr')).toHaveCount(7)
   await expect(chart.locator('table.overlap-a11y tbody tr').first()).toContainText('Web app only')
   await expect(chart.locator('.plot')).toHaveAttribute('aria-label', 'Venn diagram of Web app, Mobile app, Public API')
@@ -293,7 +293,7 @@ test('the uniform layout labels by share and keeps the regions table for assisti
 
 test('has no automated accessibility violations', async ({ page, scenario }) => {
   await scenario('overlap')
-  await expect(page.locator('c2-overlap-chart')).toHaveAttribute('data-chart-ready', 'true')
+  await expect(page.locator('c2-overlap-chart')).toHaveState('ready')
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   expect(results.violations).toEqual([])
 })
@@ -301,7 +301,7 @@ test('has no automated accessibility violations', async ({ page, scenario }) => 
 test('while one set is highlighted, the others take the dimmed colour and fill style', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const render = (fillStyle: string) =>
     chart.evaluate(async (element, fillStyle) => {
       element.style.setProperty('--c2-chart__set__dimmed--color', '#010203')
@@ -339,7 +339,7 @@ test('selection="set" selects the whole circle under the pointer, the smallest f
   })
   await scenario('overlap-select-set')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   // Engine data order: web, mobile, web+mobile, api, web+api, mobile+api, web+mobile+api.
   const anchor = (index: number) =>
     chart.evaluate(
@@ -387,7 +387,7 @@ test('by default the sets are named in one legend, and set-labels="around" names
     ]
   })
   const chart = page.locator('#subject')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   // All the names together, in the one legend below the plot.
   await expect(chart.locator('.legend.legend--bottom .legend-item')).toHaveCount(2)
   const names = () =>
@@ -409,7 +409,7 @@ test('by default the sets are named in one legend, and set-labels="around" names
 test('labels="count-percent" shows the count with the share on a second line', async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const texts = await chart.evaluate(async (element) => {
     element.setAttribute('labels', 'count-percent')
     await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
@@ -426,7 +426,7 @@ test('labels="count-percent" shows the count with the share on a second line', a
 test("the other circles' dimmed fill stays outside the highlighted circle", async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const result = await chart.evaluate(async (element) => {
     element.setAttribute('highlighted', 'web')
     await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete
@@ -465,7 +465,7 @@ test("the other circles' dimmed fill stays outside the highlighted circle", asyn
 test("the highlighted circle tints each part it shares with another set in that set's colour", async ({ page, scenario }) => {
   await scenario('overlap')
   const chart = page.locator('c2-overlap-chart')
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
   const result = await chart.evaluate(async (element) => {
     element.setAttribute('highlighted', 'web')
     await (element as unknown as { updateComplete: Promise<boolean> }).updateComplete

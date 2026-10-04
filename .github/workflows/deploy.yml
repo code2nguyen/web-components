@@ -36,6 +36,11 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
+      # Every --c2-* variable apps/ui and apps/examples set or read must be a documented @cssproperty, a theme token
+      # or a variable a component writes itself; reads the committed custom-elements.json, so it needs no build.
+      - name: Check app CSS variables against the component contracts
+        run: npm run check:css-contracts
+
       - name: Build UI app
         shell: 'bash'
         run: npm run ui:build

@@ -3,6 +3,15 @@
   $prefix: c2-flow,
   $theme: (
     height: 480px,
+
+    actions--align: flex-start,
+    actions--offset: 12px,
+    actions--gap: 4px,
+    actions--padding: 4px,
+    actions--background-color: #ffffff,
+    actions--border: 1px solid #e4e4e7,
+    actions--border-radius: 8px,
+    actions--box-shadow: 0 1px 2px rgba(24, 24, 27, 0.06),
     background-color: #fafafa,
     border: 1px solid #e4e4e7,
     border-radius: 8px,
@@ -50,6 +59,16 @@
     edge__failed--color: #dc2626,
     edge__highlighted--width: 2.5px,
     edge--animation-duration: 600ms,
+    arrow--size: 8px,
+    arrow--display: block,
+    edge-label--background-color: #ffffff,
+    edge-label--color: #71717a,
+    edge-label--font-size: 12px,
+    edge-label--font-weight: 500,
+    edge-label--padding: 1px 8px,
+    edge-label--border: 1px solid #e4e4e7,
+    edge-label--border-radius: 999px,
+    marker--display: inline-flex,
 
     success--color: #16a34a,
     error--color: #dc2626,
@@ -70,6 +89,22 @@
     card--offset: 8px,
     card__term--color: #71717a,
     card--transition-duration: 150ms,
+
+    canvas__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
+    connector--size: 12px,
+    connector--background-color: rgb(2, 101, 220),
+    connector--border-color: #ffffff,
+    node__connect-target--border-color: rgb(2, 101, 220),
+    node__connect-target--box-shadow: '0 0 0 3px rgba(2, 101, 220, 0.2)',
+    edge__draft--color: rgb(2, 101, 220),
+    edge__selected--color: rgb(2, 101, 220),
+    edge__selected--width: 2.5px,
+    edge-hit--width: 12px,
+    editor--background-color: #ffffff,
+    editor--color: #18181b,
+    editor--border: 1px solid #bcbcc6,
+    editor--border-radius: 4px,
+    editor__focus--outline: 2px solid rgba(2, 101, 220, 0.4),
   )
 );
 
@@ -80,14 +115,58 @@
   font-family: css.cssVar(font-family);
   // The canvas menu lists every view control at once; c2-menu's default height would scroll its last rows away.
   --c2-menu--max-height: 480px;
-  // Read by the layout, which runs in script.
-  --_rank-gap: #{css.cssVar(rank--gap)};
-  --_node-gap: #{css.cssVar(node--gap)};
-  --_card-offset: #{css.cssVar(card--offset)};
 }
 
 :host([hidden]) {
   display: none;
+}
+
+// ---- actions toolbar: a strip over one edge of the canvas, outside the stage so it never pans or opens the menu -----
+
+.actions {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  pointer-events: none;
+  &[hidden] {
+    display: none;
+  }
+  // The strip spans its edge; the panel inside it sits at the start, centre or end of it.
+  justify-content: css.cssVar(actions--align);
+  slot {
+    display: flex;
+    flex-direction: inherit;
+    align-items: center;
+    gap: css.cssVar(actions--gap);
+    padding: css.cssVar(actions--padding);
+    border: css.cssVar(actions--border);
+    border-radius: css.cssVar(actions--border-radius);
+    background-color: css.cssVar(actions--background-color);
+    box-shadow: css.cssVar(actions--box-shadow);
+    pointer-events: auto;
+  }
+}
+.actions--top,
+.actions--bottom {
+  flex-direction: row;
+  inset-inline: css.cssVar(actions--offset);
+}
+.actions--top {
+  top: css.cssVar(actions--offset);
+}
+.actions--bottom {
+  bottom: css.cssVar(actions--offset);
+}
+.actions--left,
+.actions--right {
+  flex-direction: column;
+  inset-block: css.cssVar(actions--offset);
+}
+.actions--left {
+  left: css.cssVar(actions--offset);
+}
+.actions--right {
+  right: css.cssVar(actions--offset);
 }
 
 .stage {
@@ -141,25 +220,31 @@
     opacity 200ms;
 }
 
-.edge--done {
-  stroke: css.cssVar(edge__done--color);
+// The colour of an edge in a state, shared by its line (`.edge--<state>`) and its arrowhead (`.mark--<state>`). Each
+// state reads its documented variable directly; the selected and draft rules further down come later and win.
+@mixin edge-color($state, $name) {
+  .edge.edge--#{$state} {
+    stroke: css.cssVar($name);
+  }
+  .arrow.mark--#{$state} {
+    background-color: css.cssVar($name);
+  }
 }
 
-.edge--active {
-  stroke: css.cssVar(edge__active--color);
+@include edge-color(done, edge__done--color);
+@include edge-color(active, edge__active--color);
+@include edge-color(failed, edge__failed--color);
+
+.edge.edge--active {
   stroke-dasharray: 6 5;
   animation: c2-flow-dash css.cssVar(edge--animation-duration) linear infinite;
 }
 
-.edge--failed {
-  stroke: css.cssVar(edge__failed--color);
-}
-
-.edge--blocked {
+.edge.edge--blocked {
   stroke-dasharray: 2 4;
 }
 
-.edge--back:not(.edge--active) {
+.edge.edge--back:not(.edge--active) {
   stroke-dasharray: 5 4;
 }
 
@@ -167,8 +252,56 @@
   stroke-width: css.cssVar(edge__highlighted--width);
 }
 
-.edges.has-highlight .edge:not(.is-highlighted) {
+.edges.has-highlight .edge:not(.is-highlighted),
+.edge-marks.has-highlight > :not(.is-highlighted) {
   opacity: 0.35;
+}
+
+// Arrowheads and labels: HTML in the scaled viewport, above the edges and below the nodes.
+.edge-marks {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.arrow {
+  display: css.cssVar(arrow--display);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: css.cssVar(arrow--size);
+  height: css.cssVar(arrow--size);
+  transform-origin: 0 0;
+  // Read by the inline transform: the tip touches the incoming handle of the target rather than hiding under it.
+  --_arrow-offset: calc(-100% - #{css.cssVar(handle--size)} / 2);
+  background-color: css.cssVar(edge--color);
+  clip-path: polygon(0 0, 100% 50%, 0 100%, 22% 50%);
+  transition:
+    background-color 200ms,
+    opacity 200ms;
+}
+
+.edge-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: css.cssVar(edge-label--padding);
+  background-color: css.cssVar(edge-label--background-color);
+  color: css.cssVar(edge-label--color);
+  border: css.cssVar(edge-label--border);
+  border-radius: css.cssVar(edge-label--border-radius);
+  font-size: css.cssVar(edge-label--font-size);
+  font-weight: css.cssVar(edge-label--font-weight);
+  line-height: 1.35;
+  transition: opacity 200ms;
 }
 
 @keyframes c2-flow-dash {
@@ -320,6 +453,10 @@
   margin-top: 1px;
 }
 
+.body > .status {
+  display: css.cssVar(marker--display);
+}
+
 .status svg {
   width: 100%;
   height: 100%;
@@ -333,30 +470,13 @@
   fill: var(--_cutout);
 }
 
-.status--success {
-  --_status: #{css.cssVar(success--color)};
-}
-.status--error {
-  --_status: #{css.cssVar(error--color)};
-}
-.status--warning {
-  --_status: #{css.cssVar(warning--color)};
-}
-.status--running {
-  --_status: #{css.cssVar(running--color)};
-}
-.status--current {
-  --_status: #{css.cssVar(current--color)};
-}
-.status--pending {
-  --_status: #{css.cssVar(pending--color)};
-}
-.status--skipped {
-  --_status: #{css.cssVar(skipped--color)};
-}
-
-.status {
-  color: var(--_status);
+// The status marker of a node and the status line of its hover card (`.card-content.status--<status>`) take the
+// status colour.
+@each $status in (success, error, warning, running, current, pending, skipped) {
+  .status.status--#{$status},
+  .status--#{$status} .card-status {
+    color: css.cssVar(#{$status}--color);
+  }
 }
 
 .spin {
@@ -434,7 +554,6 @@
 .card-status {
   font-size: 12px;
   font-weight: 600;
-  color: var(--_status);
 }
 
 .card-details {
@@ -455,6 +574,168 @@
   font-variant-numeric: tabular-nums;
 }
 
+// Editing (`editable`)
+
+.stage:focus-visible {
+  outline: css.cssVar(canvas__focus--outline);
+  outline-offset: -2px;
+}
+
+.edge.is-selected {
+  stroke: css.cssVar(edge__selected--color);
+}
+.arrow.is-selected {
+  background-color: css.cssVar(edge__selected--color);
+}
+
+.edge.is-selected,
+.edges.has-highlight .edge.is-selected {
+  stroke-width: css.cssVar(edge__selected--width);
+  opacity: 1;
+}
+
+.edge-marks.has-highlight > .is-selected {
+  opacity: 1;
+}
+
+.edge-label.is-selected {
+  border-color: css.cssVar(edge__selected--color);
+}
+
+@include edge-color(draft, edge__draft--color);
+
+.edge.edge--draft,
+.edges.has-highlight .edge--draft {
+  opacity: 1;
+  stroke-width: css.cssVar(edge__highlighted--width);
+  stroke-dasharray: 6 5;
+}
+
+.edge-marks.has-highlight > .mark--draft {
+  opacity: 1;
+}
+
+// In an editable flow a label is part of its edge: a click selects the edge, a double-click edits the label.
+.stage.is-editable .edge-label {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: css.cssVar(edge-hit--width);
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.stage.is-connecting,
+.stage.is-connecting .node,
+.stage.is-connecting .edge-hit {
+  cursor: crosshair;
+}
+
+.node.is-connect-target {
+  border-color: css.cssVar(node__connect-target--border-color);
+  box-shadow: css.cssVar(node__connect-target--box-shadow);
+}
+
+.connector {
+  position: absolute;
+  box-sizing: border-box;
+  width: css.cssVar(connector--size);
+  height: css.cssVar(connector--size);
+  border-radius: 50%;
+  background-color: css.cssVar(connector--background-color);
+  border: 2px solid css.cssVar(connector--border-color);
+  cursor: crosshair;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+}
+
+// A larger target than the dot itself.
+.connector::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+}
+
+.node:hover .connector,
+.node:focus-visible .connector,
+.node.is-selected .connector,
+.node.is-connect-source .connector {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.stage.is-connecting .node:not(.is-connect-source) .connector {
+  opacity: 0;
+}
+
+.direction--lr .connector {
+  top: 50%;
+  right: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
+  transform: translateY(-50%);
+}
+
+.direction--tb .connector {
+  left: 50%;
+  bottom: calc(#{css.cssVar(connector--size)} / -2 - 0.5px);
+  transform: translateX(-50%);
+}
+
+.label-editor {
+  box-sizing: border-box;
+  width: calc(100% + 8px);
+  min-width: 0;
+  margin: -2px -4px;
+  padding: 1px 3px;
+  font: inherit;
+  font-size: css.cssVar(label--font-size);
+  font-weight: css.cssVar(label--font-weight);
+  line-height: 1.3;
+  color: css.cssVar(editor--color);
+  background-color: css.cssVar(editor--background-color);
+  border: css.cssVar(editor--border);
+  border-radius: css.cssVar(editor--border-radius);
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+.label-editor:focus-visible,
+.label-editor:focus {
+  outline: css.cssVar(editor__focus--outline);
+  outline-offset: 0;
+}
+
+// The editor of an edge's label, halfway along the edge.
+.label-editor--edge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 140px;
+  margin: 0;
+  padding: 1px 8px;
+  text-align: center;
+  font-size: css.cssVar(edge-label--font-size);
+  font-weight: css.cssVar(edge-label--font-weight);
+}
+
+// Over a node drawn by the application, the editor covers the whole body.
+.label-editor--overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 css.cssVar(node--padding-left);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -466,7 +747,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .spin,
-  .edge--active {
+  .edge.edge--active {
     animation: none;
   }
   .card {

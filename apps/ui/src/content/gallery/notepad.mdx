@@ -1,0 +1,208 @@
+---
+title: 'Notepad gallery'
+---
+
+import GalleryGrid from '../../components/GalleryGrid.astro'
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import { Notepad } from '@c2n/notepad'
+import { IconButton } from '@c2n/icon-button'
+import { FeatherTrashIcon as FeatherTrash } from '@c2n/feather-icons/icons/trash.js'
+import { FeatherBookmarkIcon as FeatherBookmark } from '@c2n/feather-icons/icons/bookmark.js'
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<style>
+  .spiral-pad { width: 320px; max-width: 100%; }
+</style>
+<c2-notepad class="spiral-pad" label="Notes" value="Thursday sync
+Ship it **behind a flag**
+- [ ] Ask about night paper"><span slot="header">Notes · Oct 1</span></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Legal pad
+<style>
+  .legal-pad {
+    width: 320px;
+    max-width: 100%;
+    --c2-notepad__sheet--background: #fbf1a6;
+    --c2-notepad__rule--color: #8fb2d6;
+    --c2-notepad__rule--spacing: 30px;
+    --c2-notepad__margin--color: #e07a6e;
+    --c2-notepad__margin--inset: 48px;
+    --c2-notepad__writing--color: #1b2433;
+    --c2-notepad__spiral--display: none;
+    --c2-notepad__glue--display: block;
+  }
+</style>
+<c2-notepad class="legal-pad" label="Deposition prep" value="Deposition prep: Monday
+1. Timeline of the March emails
+2. Who signed the second draft?"></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Dot grid journal
+<style>
+  .dot-journal {
+    width: 320px;
+    max-width: 100%;
+    --c2-notepad__sheet--background: #f7f4ec;
+    --c2-notepad__rule--color: transparent;
+    --c2-notepad__dot--color: #b5b0a3;
+    --c2-notepad__margin--color: transparent;
+    --c2-notepad__margin--inset: 8px;
+    --c2-notepad__writing--color: #2a2a2e;
+    --c2-notepad__spiral--display: none;
+  }
+</style>
+<c2-notepad class="dot-journal" label="October goals" value="October goals
+- [x] read two books
+- [ ] run 3× a week
+- [ ] call grandma on Sundays"></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Engineering pad
+<style>
+  .engineering-pad {
+    width: 320px;
+    max-width: 100%;
+    --c2-notepad__sheet--background: #f0f5ee;
+    --c2-notepad__rule--color: #b7d3bd;
+    --c2-notepad__grid--color: #b7d3bd;
+    --c2-notepad__rule--spacing: 24px;
+    --c2-notepad__writing--font-size: 16px;
+    --c2-notepad__margin--color: transparent;
+    --c2-notepad__margin--inset: 8px;
+    --c2-notepad__writing--color: #3a3f45;
+  }
+</style>
+<c2-notepad class="engineering-pad" label="Shelf bracket" value="Shelf bracket
+load ≈ 12 kg, span 80 cm
+2 × M6 into studs @ 40 cm
+check: ==18 mm ply== is enough"></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Sticky note
+<style>
+  .sticky-note {
+    width: 240px;
+    rotate: -2deg;
+    --c2-notepad__sheet--background: #ffe680;
+    --c2-notepad__sheet--border-radius: 0 0 2px 18px;
+    --c2-notepad__sheet--min-height: 220px;
+    --c2-notepad__rule--color: transparent;
+    --c2-notepad__margin--color: transparent;
+    --c2-notepad__margin--inset: 4px;
+    --c2-notepad__writing--color: #3b2f12;
+    --c2-notepad__writing--font-size: 22px;
+    --c2-notepad__rule--spacing: 30px;
+    --c2-notepad__spiral--display: none;
+  }
+</style>
+<c2-notepad class="sticky-note" label="Reminder" value="Dentist Tue 9:30
+bring the **insurance card**!"></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Index card
+<style>
+  .index-card {
+    width: 320px;
+    max-width: 100%;
+    --c2-notepad__sheet--background: #ffffff;
+    --c2-notepad__sheet--border-radius: 2px;
+    --c2-notepad__sheet--min-height: 190px;
+    --c2-notepad__rule--color: #9ec1e8;
+    --c2-notepad__margin--color: transparent;
+    --c2-notepad__margin--inset: 4px;
+    --c2-notepad__header--color: #b25058;
+    --c2-notepad__writing--color: #1f2a44;
+    --c2-notepad__spiral--display: none;
+  }
+</style>
+<c2-notepad class="index-card" label="Recipe" value="2 cans San Marzano, 5 garlic
+olive oil, basil, slow 40 min"><span slot="header">Nonna's tomato sauce · No. 14</span></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Night paper
+<style>
+  .night-paper {
+    width: 320px;
+    max-width: 100%;
+    --c2-notepad__sheet--background: #232a33;
+    --c2-notepad__rule--color: #3b4654;
+    --c2-notepad__margin--color: #6a4651;
+    --c2-notepad__writing--color: #e9e4d4;
+    --c2-notepad__placeholder--color: #7d8796;
+    --c2-notepad__header--color: #7d8796;
+    --c2-notepad__ink-blue--color: #9fb6ff;
+    --c2-notepad__ink-red--color: #ff8f8f;
+    --c2-notepad__ink-green--color: #8fe0a2;
+    --c2-notepad__ink-black--color: #ffffff;
+    --c2-notepad__highlight-yellow--background: rgba(255, 214, 64, 0.35);
+    --c2-notepad__texture--opacity: 0;
+  }
+</style>
+<c2-notepad class="night-paper" label="Night shift" value="02:10 deploy rolled back
+cause: <span data-ink=&quot;red&quot;>migration lock</span> on orders
+follow up with DBA at standup"><span slot="header">Night shift</span></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Tear-off pad
+<style>
+  .tear-pad { width: 320px; max-width: 100%; }
+</style>
+<c2-notepad class="tear-pad" label="To call" tearable value="Plumber: Thu after 4
+Landlord about the heating
+Pick up the dry cleaning"></c2-notepad>
+```
+
+```html tag=MdxCodeBlock,label=Board of notes
+<style>
+  .board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .board-note {
+    width: 200px;
+    max-width: 100%;
+    --c2-notepad__controls--opacity: 0;
+  }
+  .note-action {
+    --c2-icon-button__state-layer--size: 24px;
+    --c2-icon-button--border-radius: 4px;
+    --c2-icon-button__icon--width: 14px;
+    --c2-icon-button__icon--height: 14px;
+    --c2-icon-button__icon--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 55%, var(--c2-theme--color-surface, #ffffff));
+    --c2-icon-button__icon__hover--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-icon-button__hover--background-color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 6%, transparent);
+    --c2-feather-icon--stroke-width: 1.75;
+  }
+</style>
+<div class="board">
+  <c2-notepad class="board-note" pad="sticky" paper-picker label="Reminder" value="Dentist Tue 9:30">
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+  <c2-notepad class="board-note" pad="index-card" paper-picker label="Idea" value="Night paper for the **dark theme**">
+    <c2-icon-button class="note-action" slot="actions" aria-label="Pin note"><c2-feather-bookmark></c2-feather-bookmark></c2-icon-button>
+    <c2-icon-button class="note-action" slot="actions" aria-label="Delete note"><c2-feather-trash></c2-feather-trash></c2-icon-button>
+  </c2-notepad>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Brand inks
+<style>
+  .brand-inks { width: 320px; max-width: 100%; }
+</style>
+<c2-notepad
+  class="brand-inks"
+  label="Brand notes"
+  inks='[{"name":"Ink","value":"#1f2937"},{"name":"Brand","value":"#4f46e5"},{"name":"Alert","value":"#b91c1c"}]'
+  highlights='[{"name":"Marker","value":"rgba(250, 204, 21, 0.5)"},{"name":"Mint","value":"rgba(52, 211, 153, 0.35)"}]'
+  value="Launch checklist
+<span data-ink=&quot;2&quot;>Brand colour</span> on the hero
+<span data-ink=&quot;3&quot;>Legal</span> must sign off ==by Friday==
+<mark data-color=&quot;2&quot;>Ship it</mark>"
+></c2-notepad>
+```
+
+</GalleryGrid>

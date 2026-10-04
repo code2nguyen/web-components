@@ -27,7 +27,7 @@ export function OverviewDashboard() {
     return `${pathname}?${params}`
   }
 
-  if (demoState === 'loading') return <c2-skeleton aria-label="Loading service health" />
+  if (demoState === 'loading') return <c2-skeleton label="Loading service health" />
   if (demoState === 'error')
     return (
       <c2-status-panel

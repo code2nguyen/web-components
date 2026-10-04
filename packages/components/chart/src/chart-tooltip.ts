@@ -10,6 +10,10 @@ import styles from './chart-tooltip.scss?inline'
  * A tooltip linked to a chart by id. It can float beside the hovered point or render inline wherever it is
  * placed in the document.
  *
+ * It is shown only while its chart has a hovered point, and says so through the custom state `:state(open)` rather
+ * than by toggling `hidden` on itself: the host keeps exactly the attributes it was authored with, so a
+ * server-rendered tooltip matches the hydrated one. An authored `hidden` still hides it.
+ *
  * @tag c2-chart-tooltip
  * @slot - Replaces the generated tooltip body. Use `renderTooltip` for data-driven custom content.
  * @csspart bubble - The tooltip surface.
@@ -36,14 +40,13 @@ export class ChartTooltip extends ChartLinkedElement {
   /** Renders the tooltip body. Property only. */
   @property({ attribute: false }) renderTooltip?: (context: ChartTooltipContext) => unknown
 
+  // Visibility is a custom state, never the `hidden` attribute: this element would otherwise write on its own host
+  // as it upgrades, which a hydrating framework reports — and `createElement` rejects outright.
+  private readonly internals = this.attachInternals()
+
   @query('.bubble') private bubble?: HTMLElement
   #context: ChartTooltipContext | null = null
   #handleViewportChange = (): void => this.#position()
-
-  constructor() {
-    super()
-    this.hidden = true
-  }
 
   override connectedCallback(): void {
     super.connectedCallback()
@@ -64,7 +67,7 @@ export class ChartTooltip extends ChartLinkedElement {
     const next = (event as CustomEvent<ChartTooltipContext | null>).detail
     const contentChanged = !sameTooltipContent(this.#context, next)
     this.#context = next
-    this.hidden = !next
+    this.#setOpen(!!next)
     if (contentChanged) this.requestUpdate()
     void this.updateComplete.then(() => this.#position())
   }
@@ -79,7 +82,12 @@ export class ChartTooltip extends ChartLinkedElement {
     chart.removeEventListener('tooltip-change', this.#handleTooltipChange)
     chart.unregisterTooltipPresenter(this)
     this.#context = null
-    this.hidden = true
+    this.#setOpen(false)
+  }
+
+  #setOpen(open: boolean): void {
+    if (open) this.internals.states.add('open')
+    else this.internals.states.delete('open')
   }
 
   protected override updated(changed: PropertyValues): void {

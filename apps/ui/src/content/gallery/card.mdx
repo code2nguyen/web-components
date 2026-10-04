@@ -92,10 +92,16 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     --c2-card--border-bottom-left-radius: 10px;
     --c2-card--border-bottom-right-radius: 10px;
   }
+  .tinted .title {
+    color: color-mix(in srgb, #2563eb 80%, var(--c2-theme--color-on-surface, #18181b));
+  }
+  .tinted .text {
+    color: color-mix(in srgb, #2563eb 65%, var(--c2-theme--color-on-surface, #18181b));
+  }
 </style>
 <c2-card style="width: 240px" class="g tinted">
-  <h3 slot="header" class="title" style="color: #1d4ed8">Heads up</h3>
-  <p class="text" style="color: #1e40af">Your trial ends in 3 days. Add a payment method to keep your workspace.</p>
+  <h3 slot="header" class="title">Heads up</h3>
+  <p class="text">Your trial ends in 3 days. Add a payment method to keep your workspace.</p>
 </c2-card>
 ```
 
@@ -113,21 +119,27 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     color: var(--c2-theme--color-on-surface-variant, #71717a);
   }
   .dark {
-    --c2-card--background: var(--c2-theme--color-inverse-surface, #18181b);
-    --c2-card--color: var(--c2-theme--color-on-inverse-surface, #fafafa);
-    --c2-card--border-top: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-card--border-right: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-card--border-bottom: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
-    --c2-card--border-left: 1px solid color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 93%, var(--c2-theme--color-surface, #ffffff));
+    --c2-card--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-card--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-card--border-top: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-card--border-right: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-card--border-bottom: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-card--border-left: 1px solid var(--c2-theme--color-dark-surface-container, #27272a);
     --c2-card--border-top-left-radius: 12px;
     --c2-card--border-top-right-radius: 12px;
     --c2-card--border-bottom-left-radius: 12px;
     --c2-card--border-bottom-right-radius: 12px;
   }
+  .dark .title {
+    color: var(--c2-theme--color-on-dark-surface, #fafafa);
+  }
+  .dark .text {
+    color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+  }
 </style>
 <c2-card style="width: 240px" class="g dark">
   <h3 slot="header" class="title">Card title</h3>
-  <p class="text" style="color: #a1a1aa">Supporting text that describes what this card is about.</p>
+  <p class="text">Supporting text that describes what this card is about.</p>
 </c2-card>
 ```
 
@@ -146,7 +158,7 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
   }
   .sunset {
     --c2-card--background: linear-gradient(135deg, #f97316 0%, #ec4899 55%, #8b5cf6 100%);
-    --c2-card--color: #ffffff;
+    --c2-card--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-card--border-top: none;
     --c2-card--border-right: none;
     --c2-card--border-bottom: none;
@@ -199,9 +211,12 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
     --c2-card--border-bottom-left-radius: 12px;
     --c2-card--border-bottom-right-radius: 12px;
   }
+  .dropzone strong {
+    color: var(--c2-theme--color-on-surface, #18181b);
+  }
 </style>
 <c2-card style="width: 240px" class="g dropzone" interactive>
-  <p class="text" style="text-align: center"><strong style="color: #18181b">Drop files here</strong><br />or click to browse</p>
+  <p class="text" style="text-align: center"><strong>Drop files here</strong><br />or click to browse</p>
 </c2-card>
 ```
 
@@ -226,6 +241,7 @@ Use a class for content you assign to a slot. When a preset needs to alter the c
   }
   .g .danger {
     --c2-button__container--background-color: #dc2626;
+    --c2-button__container--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-button__container__hover--background-color: #b91c1c;
   }
   .divided {

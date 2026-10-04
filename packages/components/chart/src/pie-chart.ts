@@ -32,6 +32,7 @@ export interface PieChart {
  * @slotcomponent c2-chart-series
  *
  * @cssproperty {border} [--c2-chart__slice--border=2px solid #ffffff] - Border drawn between adjacent slices.
+ * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  */
 @customElement('c2-pie-chart')
 export class PieChart extends EchartsChartBase {

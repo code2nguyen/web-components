@@ -46,12 +46,12 @@ Dark mode then follows the app's own switch because the bridged values flip.
 
 ## Token groups
 
-- Colour roles: `color-primary`, `color-primary-hover`, `color-primary-active`, `color-on-primary`, `color-primary-container`, `color-surface`, `color-surface-container-low`, `color-surface-container`, `color-on-surface`, `color-on-surface-variant`, `color-outline`, `color-outline-variant`, `color-outline-strong`, `color-error`, `color-scrim`, `color-inverse-surface`, `color-on-inverse-surface`.
+- Colour roles: `color-primary`, `color-primary-hover`, `color-primary-active`, `color-on-primary`, `color-primary-container`, `color-surface`, `color-surface-container-low`, `color-surface-container`, `color-on-surface`, `color-on-surface-variant`, `color-outline`, `color-outline-variant`, `color-outline-strong`, `color-error`, `color-scrim`, `color-inverse-surface`, `color-on-inverse-surface`, and the dark-block roles that do not flip with the theme: `color-dark-surface`, `color-dark-surface-container`, `color-on-dark-surface`, `color-on-dark-surface-variant`, `color-dark-outline`. `color-on-fill` is the text on a saturated fill other than the primary (a danger button, a coloured event) and does not flip either.
 - Typography: `font-family` (unset by default: components inherit the page font), `font-size-sm|md`, `font-weight-medium|semibold`.
 - Shape: `radius-sm|md|lg|xl|full`.
 - Borders: `border-width`, `border` (composite: the whole resting border shorthand; falls back to `border-width solid color-outline`).
 - Interaction: `focus-ring` (outline shorthand), `disabled-opacity`, `motion-scale` (multiplies every duration; `0` disables motion).
-- Elevation: `shadow-md`, `shadow-lg`.
+- Elevation: `shadow-sm`, `shadow-md`, `shadow-lg`.
 
 Composite tokens wrap their primitives: `var(--c2-theme--border, var(--c2-theme--border-width, 1px) solid var(--c2-theme--color-outline, #bcbcc6))`, so set the shorthand or just the colour.
 

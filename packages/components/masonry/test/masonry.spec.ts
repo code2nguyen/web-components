@@ -272,6 +272,26 @@ test('restores a committed snapshot on a fresh element at every width range', as
   await expect(page.locator('#restored')).toHaveAttribute('data-change-count', '0')
 })
 
+test('a tile prepended to the DOM is placed first, not appended', async ({ page, scenario }) => {
+  await scenario('small')
+  await page.locator('.width-control').evaluate((element) => ((element as HTMLElement).style.width = '500px'))
+  const order = () =>
+    page.locator('c2-masonry-item').evaluateAll((items) =>
+      items
+        .map((item) => ({ id: item.getAttribute('item-id'), top: item.getBoundingClientRect().top }))
+        .sort((a, b) => a.top - b.top)
+        .map((item) => item.id),
+    )
+  await expect.poll(order).toEqual(['tile-1', 'tile-2', 'tile-3'])
+  await page.locator('c2-masonry').evaluate((host) => {
+    const item = document.createElement('c2-masonry-item')
+    item.setAttribute('item-id', 'newest')
+    item.textContent = 'Newest'
+    host.prepend(item)
+  })
+  await expect.poll(order).toEqual(['newest', 'tile-1', 'tile-2', 'tile-3'])
+})
+
 test('authored child reordering repacks unless an application layout owns order', async ({ page, scenario }) => {
   await scenario('small')
   const control = page.locator('.width-control')

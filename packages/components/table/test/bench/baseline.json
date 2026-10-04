@@ -7,6 +7,12 @@
     "stream100.huge": 34.6,
     "replace.huge": 1.4,
     "scroll.huge": 16.6,
-    "sort.huge": 137.5
-  }
+    "sort.huge": 137.5,
+    "mount.cellslot.huge": 3.9,
+    "scroll.cellslot.huge": 12.7,
+    "mount.rowpart.huge": 4.1,
+    "scroll.rowpart.huge": 8.5,
+    "mount.wrap.small": 13.5
+  },
+  "note": "metrics.*cellslot*, *rowpart* and mount.wrap.small were added on 2026-10-03 from a slower container (about 3-9x the recorded machine on the other cases), so they gate loosely until the baseline is re-recorded on the original machine."
 }

@@ -210,12 +210,14 @@
     border-right: css.cssVar(gutter--border-right);
   }
 
-  .cm-activeLineGutter {
+  // One class more than CodeMirror's base theme (`.ͼ1 .cm-activeLine`, injected after this sheet), or its pale blue
+  // wash would win over the variable and lighten the current line of a dark editor.
+  .cm-gutterElement.cm-activeLineGutter {
     background: transparent;
     color: css.cssVar(gutter__active--color);
   }
 
-  .cm-activeLine {
+  .cm-line.cm-activeLine {
     background: css.cssVar(active-line--background);
   }
 

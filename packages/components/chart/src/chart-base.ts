@@ -127,6 +127,15 @@ export interface ChartBase {
  * default) rather than by its content. Give the host a height — through the variable, a CSS rule, or a
  * flex parent — or the plot area collapses.
  *
+ * **States.** The host never carries an attribute the author did not write. Once the engine has drawn, it matches the
+ * custom states `:state(ready)` and `:state(engine-uplot)` or `:state(engine-echarts)` (`c2-line-chart:state(ready)` in
+ * page CSS or a test selector); both clear again when the chart is disconnected.
+ *
+ * **Mark variables.** The variables documented here apply to every chart. Those that style one kind of mark —
+ * `--c2-chart__line--width`, `--c2-chart__point--radius`, `--c2-chart__area--opacity`,
+ * `--c2-chart__bar--border-radius`, `--c2-chart__grid--width` and `--c2-chart__series__dimmed--opacity` — are
+ * documented on the chart types that draw that mark, and only there.
+ *
  * @slot default - The series definitions: `c2-chart-series` elements. They render nothing themselves.
  * @slot legend - Replaces the built-in legend. The built-in one is still what `legend` positions.
  * @slot tooltip - Replaces the built-in tooltip body. The hovered point is available through the `renderTooltip` property when a function is easier than markup.
@@ -137,7 +146,7 @@ export interface ChartBase {
  *
  * @slotcomponent c2-chart-series
  *
- * @event {CustomEvent<{ engine: string }>} chart-ready - Fired after the engine has loaded and drawn for the first time. The host also gains `data-chart-ready`, which is what a test should wait on.
+ * @event {CustomEvent<{ engine: string }>} chart-ready - Fired after the engine has loaded and drawn for the first time. The host also matches `:state(ready)` from then on, which is what a test should wait on.
  * @event {CustomEvent<{ error: unknown }>} chart-error - Fired when the engine fails to load or to draw. `detail.error` is the underlying failure.
  * @event {CustomEvent<ChartPointEventDetail>} point-click - Fired when a datum is clicked; the chart then highlights the clicked series (a second click on it clears the highlight). Cancelable: `preventDefault()` keeps the highlight as it is. Does not bubble: several components fire point events, so a listener belongs on the element itself.
  * @event {CustomEvent<ChartPointEventDetail | null>} point-hover - Fired as the pointer moves between data points, and with a `null` detail when it leaves the plot. Does not bubble.
@@ -184,29 +193,22 @@ export interface ChartBase {
  * @cssproperty {color} [--c2-chart__series-7--color=#0891b2] - Colour of the seventh series.
  * @cssproperty {color} [--c2-chart__series-8--color=#52525b] - Colour of the eighth series. Series beyond the eighth reuse the palette from the start.
  *
- * @cssproperty {pixel} [--c2-chart__line--width=2px] - Stroke width of a line series.
- * @cssproperty {pixel} [--c2-chart__point--radius=2.5px] - Radius of a data point marker.
- * @cssproperty {opacity} [--c2-chart__area--opacity=0.15] - Opacity of the fill under an area series.
- * @cssproperty {number} [--c2-chart__bar--border-radius=0] - Roundedness of a bar's value end, from 0 (square) to 0.5 (fully rounded).
- *
  * @cssproperty {color} [--c2-chart__axis--color=#71717a] - Colour of the axis lines and tick labels.
  * @cssproperty {font-size} [--c2-chart__axis--font-size=12px] - Font size of the tick labels.
  * @cssproperty {color} [--c2-chart__grid--color=#e4e4e7] - Colour of the grid lines.
- * @cssproperty {pixel} [--c2-chart__grid--width=1px] - Width of the grid lines.
  * @cssproperty {color} [--c2-chart__crosshair--color=#a1a1aa] - Colour of the cursor crosshair.
  * @cssproperty {pixel} [--c2-chart__crosshair--width=1px] - Width of the cursor crosshair.
  *
  * @cssproperty {color} [--c2-chart__surface--color=#ffffff] - Surface colour handed to the engine, for marker borders and label backdrops.
  * @cssproperty {color} [--c2-chart__muted--color=#71717a] - Secondary text colour.
- * @cssproperty {color} [--c2-chart__positive--color=#16a34a] - Colour for a rising value, used by the candlestick and gauge charts.
- * @cssproperty {color} [--c2-chart__negative--color=#dc2626] - Colour for a falling value, used by the candlestick and gauge charts.
+ * @cssproperty {color} [--c2-chart__positive--color=#16a34a] - Colour for a rising value, used by the candlestick chart and as the sparkline's positive tone.
+ * @cssproperty {color} [--c2-chart__negative--color=#dc2626] - Colour for a falling value, used by the candlestick chart and as the sparkline's negative tone.
  *
  * @cssproperty {pixel} [--c2-chart__legend--gap=12px] - Gap between legend entries.
  * @cssproperty {padding} [--c2-chart__legend--padding=8px 0 0] - Padding around the legend.
  * @cssproperty {color} [--c2-chart__legend--color=#71717a] - Legend text colour.
  * @cssproperty {font-size} [--c2-chart__legend--font-size=12px] - Legend font size.
  * @cssproperty {opacity} [--c2-chart__legend__disabled--opacity=0.38] - Opacity of the legend entries that are not highlighted while one is, or, with `legend-action="toggle"`, of an entry whose series is hidden.
- * @cssproperty {opacity} [--c2-chart__series__dimmed--opacity=0.25] - Opacity the other series (or slices) keep while one is highlighted.
  * @cssproperty {pixel} [--c2-chart__legend-marker--size=10px] - Size of the legend colour swatch.
  * @cssproperty {border-radius} [--c2-chart__legend-marker--border-radius=999px] - Corner radius of the legend colour swatch.
  *
@@ -223,6 +225,10 @@ export interface ChartBase {
  */
 export abstract class ChartBase extends LitElement {
   static override styles: CSSResultGroup = unsafeCSS(styles)
+
+  // State is exposed as custom states, never as host attributes: an attribute written on the host after the engine
+  // loads is one the server never rendered, which a hydrating framework reports as a mismatch.
+  protected readonly internals = this.attachInternals()
 
   @query('.plot') protected plotElement!: HTMLElement | null
   @query('.tooltip') private tooltipElement!: HTMLElement | null
@@ -372,6 +378,31 @@ export abstract class ChartBase extends LitElement {
     return ''
   }
 
+  /**
+   * Whether the chart has something to draw before it has data: a map draws its geometry, and a region picker may
+   * never be given rows at all. Such a chart skips the empty state and creates its engine without a frame row.
+   */
+  protected get rendersWithoutData(): boolean {
+    return false
+  }
+
+  /**
+   * Whether everything the engine needs besides data has arrived. A map waits for its geometry to load; until then
+   * the chart neither creates its engine nor shows the empty state.
+   */
+  protected get readyToDraw(): boolean {
+    return true
+  }
+
+  /**
+   * Whether a change must replace the engine options rather than merge them. Merging keeps keys a new option object
+   * leaves out, which is wrong when a change removes them (a map's projection or extent box). A changed series list
+   * always replaces.
+   */
+  protected replacesOptions(_changed: PropertyValues): boolean {
+    return false
+  }
+
   /** Whether changing chart data can change the legend model. Pie charts use row labels as entries. */
   protected get legendDependsOnData(): boolean {
     return false
@@ -440,8 +471,8 @@ export abstract class ChartBase extends LitElement {
     // uPlot registers its own listeners and ECharts leaks without `dispose`, so the instance goes too.
     this.adapter?.destroy()
     this.adapter = undefined
-    this.removeAttribute('data-chart-engine')
-    this.removeAttribute('data-chart-ready')
+    this.internals.states.delete(`engine-${this.engineName}`)
+    this.internals.states.delete('ready')
   }
 
   /**
@@ -482,7 +513,7 @@ export abstract class ChartBase extends LitElement {
       }
     }
     // A shrinking series set cannot be merged into ECharts: the removed series would stay on screen.
-    if (changed.has('series') || changed.has('seriesElements')) this.#optionsMode = 'replace'
+    if (changed.has('series') || changed.has('seriesElements') || this.replacesOptions(changed)) this.#optionsMode = 'replace'
   }
 
   protected override updated(changed: PropertyValues): void {
@@ -677,8 +708,8 @@ export abstract class ChartBase extends LitElement {
 
   /** True once there is something to draw and somewhere to draw it. */
   #canRender(): boolean {
-    if (!this.#visible || this.engineFailed || this.error || this.validationError() || this.loading) return false
-    if (!this.plotElement || !this.frame || this.frame.length === 0) return false
+    if (!this.#visible || this.engineFailed || this.error || this.validationError() || this.loading || !this.readyToDraw) return false
+    if (!this.plotElement || !this.frame || (this.frame.length === 0 && !this.rendersWithoutData)) return false
     const { width, height } = this.buildContext()
     return width > 0 && height > 0
   }
@@ -718,13 +749,14 @@ export abstract class ChartBase extends LitElement {
         hover: (detail) => this.handleEngineHover(detail),
         click: (detail) => this.handleEngineClick(detail),
         rangeChange: (detail) => this.dispatchEvent(new CustomEvent<ChartRangeEventDetail>('range-change', { detail })),
+        viewChange: (detail) => this.handleEngineViewChange(detail),
       })
       this.adapter = adapter
       this.#optionsDirty = false
       this.#dataDirty = false
       this.restoreVisibility(adapter)
-      this.setAttribute('data-chart-engine', this.engineName)
-      this.setAttribute('data-chart-ready', 'true')
+      this.internals.states.add(`engine-${this.engineName}`)
+      this.internals.states.add('ready')
       this.dispatchEvent(new CustomEvent('chart-ready', { detail: { engine: this.engineName } }))
     } catch (error) {
       this.engineFailed = true
@@ -826,8 +858,11 @@ export abstract class ChartBase extends LitElement {
     }
   }
 
+  /** The engine reports a zoom or pan of the view. Only the map chart has one. */
+  protected handleEngineViewChange(_detail: { zoom: number }): void {}
+
   /** The engine reports a hovered datum, or `null` when the pointer leaves. A chart with its own events extends this. */
-  protected handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number } | null): void {
+  protected handleEngineHover(detail: { index: number; seriesIndex: number; px: number; py: number; name?: string; component?: string } | null): void {
     if (!detail || !this.frame) {
       this.#tooltipContext = null
       this.#setHover(null)
@@ -963,7 +998,7 @@ export abstract class ChartBase extends LitElement {
    * The engine reports a clicked datum: `point-click` fires, and unless a listener cancels it the clicked series is
    * highlighted, or the highlight cleared when it already was. A chart with its own events extends this.
    */
-  protected handleEngineClick(detail: { index: number; seriesIndex: number }): void {
+  protected handleEngineClick(detail: { index: number; seriesIndex: number; name?: string; component?: string }): void {
     const point = this.pointAt(detail.index, detail.seriesIndex)
     if (!point) return
     const event = new CustomEvent<ChartPointEventDetail>('point-click', { detail: point, cancelable: true })
@@ -1023,7 +1058,7 @@ export abstract class ChartBase extends LitElement {
           <div class="plot" part="plot"></div>
           <div class="overlay" part="overlay">
             <div class="tooltip" part="tooltip" role="tooltip" popover="manual">${this.renderTooltipBody()}</div>
-            <div class="actions" part="actions"><slot name="actions"></slot></div>
+            <div class="actions" part="actions">${this.renderActionsExtras()}<slot name="actions"></slot></div>
           </div>
           ${this.renderState()}
         </div>
@@ -1060,7 +1095,7 @@ export abstract class ChartBase extends LitElement {
     const error = this.error || this.validationError()
     if (error) return html`<div class="state" part="state"><slot name="error">${error}</slot></div>`
     if (this.loading) return html`<div class="state" part="state"><slot name="loading">Loading…</slot></div>`
-    if (!this.frame || this.frame.length === 0) {
+    if ((!this.frame || this.frame.length === 0) && !this.rendersWithoutData) {
       return html`<div class="state" part="state"><slot name="empty">${this.emptyMessage}</slot></div>`
     }
     return nothing
@@ -1095,6 +1130,11 @@ export abstract class ChartBase extends LitElement {
         ${this.renderLegendExtras()}
       </div>
     `
+  }
+
+  /** Controls drawn before the `actions` slot, such as the map chart's zoom buttons. */
+  protected renderActionsExtras(): unknown {
+    return nothing
   }
 
   /** Content drawn after the series entries in the built-in legend, such as the bubble chart's size key. */

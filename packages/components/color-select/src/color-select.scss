@@ -236,7 +236,7 @@
           --c2-text-field--border-top-right-radius: 0px;
           --c2-text-field--border-bottom-right-radius: 0px;
         }
-        c2-text-field.focus-within + c2-text-field {
+        c2-text-field:focus-within + c2-text-field {
           --c2-text-field--border-left: var(--c2-text-field__focus--border-left, 1px solid #{variables.$color-blue});
         }
       }

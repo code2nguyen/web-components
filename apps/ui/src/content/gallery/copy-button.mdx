@@ -31,10 +31,10 @@ Curated looks for `c2-copy-button`. Open any card in the studio to start from it
     --c2-copy-button__container--padding-left: 12px;
     --c2-copy-button__container--padding-right: 12px;
     --c2-copy-button__container--background-color: #0265dc;
-    --c2-copy-button__container--color: #ffffff;
+    --c2-copy-button__container--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-copy-button__container__hover--background-color: #0255b9;
     --c2-copy-button__container__copied--background-color: #007a4d;
-    --c2-copy-button__container__copied--color: #ffffff;
+    --c2-copy-button__container__copied--color: var(--c2-theme--color-on-fill, #ffffff);
   }
 </style>
 <c2-copy-button class="accent" reveal="always" value="Order #A-4192">Copy order</c2-copy-button>
@@ -90,8 +90,11 @@ The shape it was built for: a block with the button pinned in its corner, copyin
     background: var(--c2-theme--color-inverse-surface, #18181b);
     color: var(--c2-theme--color-outline-variant, #e4e4e7);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    box-sizing: border-box;
+    max-width: 100%;
     font-size: 12.5px;
-    white-space: pre;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
   .dark-block c2-copy-button {
     --c2-copy-button__container--color: var(--c2-theme--color-outline-strong, #a1a1aa);

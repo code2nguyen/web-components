@@ -10,12 +10,1636 @@
       "sink": "style.backgroundColor"
     },
     {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__highlight-green--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing mark background-image and the highlighter swatches",
+      "sink": "styleMap --_highlight-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__highlight-pink--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing mark background-image and the highlighter swatches",
+      "sink": "styleMap --_highlight-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__highlight-yellow--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing mark background-image and the highlighter swatches",
+      "sink": "styleMap --_highlight-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__ink-black--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing span[data-ink] color and the ink swatches",
+      "sink": "styleMap --_ink-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__ink-blue--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing span[data-ink] color and the ink swatches",
+      "sink": "styleMap --_ink-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__ink-green--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing span[data-ink] color and the ink swatches",
+      "sink": "styleMap --_ink-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__ink-red--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": ".writing span[data-ink] color and the ink swatches",
+      "sink": "styleMap --_ink-<position> on .pad and .toolbar"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-blue--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-green--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-orange--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-pink--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-violet--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__highlight-yellow--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.highlighted and .highlight-swatch.highlighted background-color",
+      "sink": "styleMap --_highlight-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-blue--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-graphite--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-green--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-red--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__pen-violet--color",
+      "mode": "inline-style",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": ".task.inked text colour and .pen-swatch.inked background-color",
+      "sink": "styleMap --_pen-<position> on .container"
+    },
+    {
       "tag": "c2-tooltip",
       "name": "--c2-tooltip--offset",
       "mode": "programmatic",
       "source": "packages/components/tooltip/src/tooltip.ts",
       "target": "visible tooltip position relative to target",
       "sink": "computePosition"
+    },
+    {
+      "tag": "c2-line-chart",
+      "name": "--c2-chart__line--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas line stroke width",
+      "sink": "ChartTheme.lineWidth -> uPlot series.width (LineChart.seriesStyle)"
+    },
+    {
+      "tag": "c2-line-chart",
+      "name": "--c2-chart__point--radius",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas point marker size",
+      "sink": "ChartTheme.pointRadius -> uPlot series.points.size (LineChart.seriesStyle)"
+    },
+    {
+      "tag": "c2-area-chart",
+      "name": "--c2-chart__line--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas line stroke width",
+      "sink": "ChartTheme.lineWidth -> uPlot series.width (LineChart.seriesStyle)"
+    },
+    {
+      "tag": "c2-area-chart",
+      "name": "--c2-chart__point--radius",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas point marker size",
+      "sink": "ChartTheme.pointRadius -> uPlot series.points.size (LineChart.seriesStyle)"
+    },
+    {
+      "tag": "c2-sparkline",
+      "name": "--c2-chart__line--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas line stroke width",
+      "sink": "ChartTheme.lineWidth -> uPlot series.width (Sparkline.seriesStyle)"
+    },
+    {
+      "tag": "c2-radar-chart",
+      "name": "--c2-chart__line--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas profile outline width",
+      "sink": "ChartTheme.lineWidth -> ECharts radar series lineStyle.width"
+    },
+    {
+      "tag": "c2-radar-chart",
+      "name": "--c2-chart__point--radius",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas spoke marker size",
+      "sink": "ChartTheme.pointRadius -> ECharts radar series symbolSize"
+    },
+    {
+      "tag": "c2-area-chart",
+      "name": "--c2-chart__area--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/area-chart.ts",
+      "target": "canvas area fill alpha",
+      "sink": "AreaChart.areaOpacity -> uPlot series.fill alpha"
+    },
+    {
+      "tag": "c2-radar-chart",
+      "name": "--c2-chart__area--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/radar-chart.ts",
+      "target": "canvas profile fill opacity",
+      "sink": "RadarChart.areaOpacity -> ECharts radar series areaStyle.opacity"
+    },
+    {
+      "tag": "c2-sparkline",
+      "name": "--c2-chart__area--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/sparkline.ts",
+      "target": "canvas area fill alpha (type=area)",
+      "sink": "Sparkline.areaOpacity -> uPlot series.fill alpha"
+    },
+    {
+      "tag": "c2-bar-chart",
+      "name": "--c2-chart__bar--border-radius",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas bar value-end rounding",
+      "sink": "ChartTheme.barRadius -> barPaths/stackedBarPaths radius (BarChart.seriesStyle)"
+    },
+    {
+      "tag": "c2-butterfly-chart",
+      "name": "--c2-chart__bar--border-radius",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas bar value-end rounding",
+      "sink": "ChartTheme.barRadius -> ECharts bar series itemStyle.borderRadius"
+    },
+    {
+      "tag": "c2-line-chart",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas grid line width",
+      "sink": "ChartTheme.gridWidth -> uPlot axes[].grid.width (UplotChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-line-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas alpha of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> uPlot series.alpha (UplotChartBase.highlightStyle)"
+    },
+    {
+      "tag": "c2-line-chart",
+      "name": "--c2-chart__axis-line--color",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/uplot-chart-base.ts",
+      "target": "canvas axis tick stroke",
+      "sink": "ChartThemeController.resolveColor -> uPlot axes[].ticks.stroke"
+    },
+    {
+      "tag": "c2-area-chart",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas grid line width",
+      "sink": "ChartTheme.gridWidth -> uPlot axes[].grid.width (UplotChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-area-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas alpha of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> uPlot series.alpha (UplotChartBase.highlightStyle)"
+    },
+    {
+      "tag": "c2-area-chart",
+      "name": "--c2-chart__axis-line--color",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/uplot-chart-base.ts",
+      "target": "canvas axis tick stroke",
+      "sink": "ChartThemeController.resolveColor -> uPlot axes[].ticks.stroke"
+    },
+    {
+      "tag": "c2-bar-chart",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas grid line width",
+      "sink": "ChartTheme.gridWidth -> uPlot axes[].grid.width (UplotChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-bar-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas alpha of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> uPlot series.alpha (UplotChartBase.highlightStyle)"
+    },
+    {
+      "tag": "c2-bar-chart",
+      "name": "--c2-chart__axis-line--color",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/uplot-chart-base.ts",
+      "target": "canvas axis tick stroke",
+      "sink": "ChartThemeController.resolveColor -> uPlot axes[].ticks.stroke"
+    },
+    {
+      "tag": "c2-sparkline",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas grid line width",
+      "sink": "ChartTheme.gridWidth -> uPlot axes[].grid.width (UplotChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-sparkline",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas alpha of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> uPlot series.alpha (UplotChartBase.highlightStyle)"
+    },
+    {
+      "tag": "c2-sparkline",
+      "name": "--c2-chart__axis-line--color",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/uplot-chart-base.ts",
+      "target": "canvas axis tick stroke",
+      "sink": "ChartThemeController.resolveColor -> uPlot axes[].ticks.stroke"
+    },
+    {
+      "tag": "c2-bubble-chart",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas split line width",
+      "sink": "ChartTheme.gridWidth -> ECharts xAxis/yAxis splitLine.lineStyle.width (EchartsChartBase.coordinateSystem)"
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas split line width",
+      "sink": "ChartTheme.gridWidth -> ECharts xAxis/yAxis splitLine.lineStyle.width (EchartsChartBase.coordinateSystem)"
+    },
+    {
+      "tag": "c2-butterfly-chart",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas split line width",
+      "sink": "ChartTheme.gridWidth -> ECharts xAxis[].splitLine.lineStyle.width"
+    },
+    {
+      "tag": "c2-candlestick-chart",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas split line width",
+      "sink": "ChartTheme.gridWidth -> ECharts yAxis.splitLine.lineStyle.width"
+    },
+    {
+      "tag": "c2-radar-chart",
+      "name": "--c2-chart__grid--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas web ring width",
+      "sink": "ChartTheme.gridWidth -> ECharts radar.splitLine.lineStyle.width"
+    },
+    {
+      "tag": "c2-bubble-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas opacity of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> dimSeries itemStyle/lineStyle/areaStyle opacity (EchartsChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-butterfly-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas opacity of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> dimSeries itemStyle/lineStyle/areaStyle opacity (EchartsChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-gauge-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas opacity of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> dimSeries itemStyle/lineStyle/areaStyle opacity (EchartsChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-radar-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas opacity of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> dimSeries itemStyle/lineStyle/areaStyle opacity (EchartsChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-scatter-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas opacity of non-highlighted series",
+      "sink": "ChartTheme.dimmedOpacity -> dimSeries itemStyle/lineStyle/areaStyle opacity (EchartsChartBase.buildOptions)"
+    },
+    {
+      "tag": "c2-pie-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas opacity of non-highlighted slices",
+      "sink": "ChartTheme.dimmedOpacity -> ECharts pie data itemStyle.opacity"
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas opacity of non-highlighted levels",
+      "sink": "ChartTheme.dimmedOpacity -> pyramid level itemStyle.opacity"
+    },
+    {
+      "tag": "c2-map-chart",
+      "name": "--c2-chart__series__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/chart-theme.ts",
+      "target": "canvas opacity of non-highlighted layers",
+      "sink": "ChartTheme.dimmedOpacity -> ECharts lines series lineStyle.opacity"
+    },
+    {
+      "tag": "c2-pie-chart",
+      "name": "--c2-chart__slice--border",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/pie-chart.ts",
+      "target": "canvas slice border",
+      "sink": "sliceBorder -> ECharts pie itemStyle.borderColor/borderWidth"
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "name": "--c2-chart__slice--border",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/pyramid-chart.ts",
+      "target": "canvas level border",
+      "sink": "levelBorder -> pyramid custom series path stroke/lineWidth"
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "name": "--c2-chart__level--gap",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/pyramid-chart.ts",
+      "target": "canvas level spacing",
+      "sink": "PyramidChart#readLayout gap -> levelGeometry"
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "name": "--c2-chart__level--border-radius",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/pyramid-chart.ts",
+      "target": "canvas level corner rounding",
+      "sink": "PyramidChart#readLayout radius -> level path corners"
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "name": "--c2-chart__level--min-width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/pyramid-chart.ts",
+      "target": "canvas apex width",
+      "sink": "PyramidChart#readLayout minWidth -> levelGeometry"
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "name": "--c2-chart__level--max-width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/pyramid-chart.ts",
+      "target": "canvas base width",
+      "sink": "PyramidChart#readLayout maxWidth -> levelGeometry"
+    },
+    {
+      "tag": "c2-pyramid-chart",
+      "name": "--c2-chart__level--align",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/pyramid-chart.ts",
+      "target": "canvas pyramid placement across its axis",
+      "sink": "PyramidChart#readLayout align -> levelGeometry"
+    },
+    {
+      "tag": "c2-butterfly-chart",
+      "name": "--c2-chart__gutter--width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/butterfly-chart.ts",
+      "target": "canvas gutter between the two grids",
+      "sink": "ButterflyChart#readLayout gutter -> ECharts grid[].left/right"
+    },
+    {
+      "tag": "c2-butterfly-chart",
+      "name": "--c2-chart__bar--thickness",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/butterfly-chart.ts",
+      "target": "canvas bar thickness",
+      "sink": "ButterflyChart#readLayout thickness -> ECharts bar series barWidth"
+    },
+    {
+      "tag": "c2-sparkline",
+      "name": "--c2-chart__tone-positive--color",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/sparkline.ts",
+      "target": "canvas line stroke when tone is positive",
+      "sink": "ChartThemeController.resolveColor -> uPlot series.stroke (Sparkline.toneColor)"
+    },
+    {
+      "tag": "c2-sparkline",
+      "name": "--c2-chart__tone-negative--color",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/sparkline.ts",
+      "target": "canvas line stroke when tone is negative",
+      "sink": "ChartThemeController.resolveColor -> uPlot series.stroke (Sparkline.toneColor)"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__set--fill-opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas circle fill opacity",
+      "sink": "OverlapChart#readStyle setFillOpacity -> custom series circle fillOpacity"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__set--stroke-width",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas circle outline width",
+      "sink": "OverlapChart#readStyle setStrokeWidth -> custom series outline lineWidth"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__region__hover--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas hovered region wash opacity",
+      "sink": "OverlapChart#readStyle hoverOpacity -> region fillOpacity"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__region__selected--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas selected region wash opacity",
+      "sink": "OverlapChart#readStyle selectedOpacity -> region fillOpacity"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__set__highlight--fill-opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas highlighted circle fill opacity",
+      "sink": "OverlapChart#readStyle highlightFillOpacity -> circle fillOpacity"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__set__dimmed--opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas dimmed circle opacity",
+      "sink": "OverlapChart#readStyle dimmedOpacity -> circle fillOpacity/strokeOpacity"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__set-overlap__highlight--fill-opacity",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas overlap tint opacity",
+      "sink": "OverlapChart#readStyle overlapFillOpacity -> tint path fillOpacity"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__set__dimmed--fill-style",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas dimmed circle fill pattern",
+      "sink": "OverlapChart#readStyle dimmedFillStyle -> patternFill / solid fill"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__region-label--font-size",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas region label font size",
+      "sink": "OverlapChart#readStyle regionFontSize -> region label text fontSize"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__set-label--font-size",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas set label font size",
+      "sink": "OverlapChart#readStyle setFontSize -> set label text fontSize"
+    },
+    {
+      "tag": "c2-overlap-chart",
+      "name": "--c2-chart__set-label--font-weight",
+      "mode": "programmatic",
+      "source": "packages/components/chart/src/overlap-chart.ts",
+      "target": "canvas set label font weight",
+      "sink": "OverlapChart#readStyle setFontWeight -> set label text fontWeight"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--background",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host background",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--background",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--background"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--border-top",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host border-top",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--border-top",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--border-top"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--border-right",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host border-right",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--border-right",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--border-right"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--border-bottom",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host border-bottom",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--border-bottom",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--border-bottom"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--border-left",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host border-left",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--border-left",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--border-left"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--border-top-left-radius",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host border-top-left-radius",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--border-top-left-radius",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--border-top-left-radius"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--border-top-right-radius",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host border-top-right-radius",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--border-top-right-radius",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--border-top-right-radius"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--border-bottom-left-radius",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host border-bottom-left-radius",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--border-bottom-left-radius",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--border-bottom-left-radius"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--border-bottom-right-radius",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host border-bottom-right-radius",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--border-bottom-right-radius",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--border-bottom-right-radius"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--box-shadow",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host box-shadow",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--box-shadow",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--box-shadow"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--padding-top",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host padding-top",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--padding-top",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--padding-top"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--padding-right",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host padding-right",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--padding-right",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--padding-right"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--padding-bottom",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host padding-bottom",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--padding-bottom",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--padding-bottom"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--padding-left",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host padding-left",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--padding-left",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--padding-left"
+    },
+    {
+      "tag": "c2-select",
+      "name": "--c2-select__list--max-height",
+      "mode": "delegated",
+      "source": "packages/components/select/src/select.ts",
+      "target": "internal c2-list :host max-height",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--max-height",
+      "targetHost": "c2-list#list.list inside c2-overlay#menu-overlay",
+      "sink": "select.scss .list sets --c2-list--max-height"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__list--padding",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list :host padding-top",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--padding-top",
+      "targetHost": "c2-list.list inside .panel of c2-overlay",
+      "sink": "autocomplete.scss .list sets --c2-list--padding-top"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__list--padding",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list :host padding-right",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--padding-right",
+      "targetHost": "c2-list.list inside .panel of c2-overlay",
+      "sink": "autocomplete.scss .list sets --c2-list--padding-right"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__list--padding",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list :host padding-bottom",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--padding-bottom",
+      "targetHost": "c2-list.list inside .panel of c2-overlay",
+      "sink": "autocomplete.scss .list sets --c2-list--padding-bottom"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__list--padding",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list :host padding-left",
+      "childTag": "c2-list",
+      "childProperty": "--c2-list--padding-left",
+      "targetHost": "c2-list.list inside .panel of c2-overlay",
+      "sink": "autocomplete.scss .list sets --c2-list--padding-left"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--padding-top",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row padding-top",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--padding-top",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--padding-top"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--padding-right",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row padding-right",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--padding-right",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--padding-right"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--padding-bottom",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row padding-bottom",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--padding-bottom",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--padding-bottom"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--padding-left",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row padding-left",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--padding-left",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--padding-left"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--min-height",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row min-height",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--min-height",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--min-height"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--gap",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row gap",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--gap",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--gap"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--border-radius",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row border-top-left-radius",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--border-top-left-radius",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--border-top-left-radius"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--border-radius",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row border-top-right-radius",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--border-top-right-radius",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--border-top-right-radius"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--border-radius",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row border-bottom-left-radius",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--border-bottom-left-radius",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--border-bottom-left-radius"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option--border-radius",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item row border-bottom-right-radius",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item--border-bottom-right-radius",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item--border-bottom-right-radius"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option__active--background",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item active (selected) row background",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item__selected--background",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item__selected--background"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option__active--background",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item active (selected) row background while hovered",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item__selected__hover--background",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item__selected__hover--background"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__option__active--color",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item active (selected) row color",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item__selected--color",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item__selected--color"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__description--color",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item description slot color",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item__description--color",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item__description--color"
+    },
+    {
+      "tag": "c2-autocomplete",
+      "name": "--c2-autocomplete__description--font-size",
+      "mode": "delegated",
+      "source": "packages/components/autocomplete/src/autocomplete.ts",
+      "target": "c2-list-item description slot font-size",
+      "childTag": "c2-list-item",
+      "childProperty": "--c2-list-item__description--font-size",
+      "targetHost": "c2-list-item rows of c2-list.list (inherit the variables set on .list)",
+      "sink": "autocomplete.scss .list sets --c2-list-item__description--font-size"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-constant",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-constant, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-string",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-string, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-comment",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-comment, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-keyword",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-keyword, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-parameter",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-parameter, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-function",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-function, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-string-expression",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-string-expression, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-punctuation",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-punctuation, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--token-link",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": "token span color of the `css-variables` theme",
+      "sink": "shiki createCssVariablesTheme: style=\"color:var(--c2-code-viewer__theme--token-link, <default>)\" on the token spans"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--background",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": ".c2-code-viewer background (when --c2-code-viewer--background is unset) of the `css-variables` theme",
+      "sink": "shiki <pre> background-color var() moved to --cv-bg on the frame by the pre transformer"
+    },
+    {
+      "tag": "c2-code-viewer",
+      "name": "--c2-code-viewer__theme--foreground",
+      "mode": "inline-style",
+      "source": "packages/components/code-viewer/src/shiki.ts",
+      "target": ".c2-code-viewer color (when --c2-code-viewer--color is unset) and untyped tokens of the `css-variables` theme",
+      "sink": "shiki <pre> color var() moved to --cv-fg on the frame by the pre transformer, and token span color"
+    },
+    {
+      "tag": "c2-page-editor",
+      "name": "--c2-page-editor__syntax-keyword--color",
+      "mode": "inline-style",
+      "source": "packages/components/page-editor/src/highlight.ts",
+      "target": ".code-block token span color (mixed 80% with --c2-page-editor__code-block--color)",
+      "sink": "ProseMirror Decoration.inline style color: var(--_tok-token-keyword), defined on .code-block"
+    },
+    {
+      "tag": "c2-page-editor",
+      "name": "--c2-page-editor__syntax-string--color",
+      "mode": "inline-style",
+      "source": "packages/components/page-editor/src/highlight.ts",
+      "target": ".code-block token span color (mixed 80% with --c2-page-editor__code-block--color)",
+      "sink": "ProseMirror Decoration.inline style color: var(--_tok-token-string), defined on .code-block"
+    },
+    {
+      "tag": "c2-page-editor",
+      "name": "--c2-page-editor__syntax-function--color",
+      "mode": "inline-style",
+      "source": "packages/components/page-editor/src/highlight.ts",
+      "target": ".code-block token span color (mixed 80% with --c2-page-editor__code-block--color)",
+      "sink": "ProseMirror Decoration.inline style color: var(--_tok-token-function), defined on .code-block"
+    },
+    {
+      "tag": "c2-page-editor",
+      "name": "--c2-page-editor__syntax-constant--color",
+      "mode": "inline-style",
+      "source": "packages/components/page-editor/src/highlight.ts",
+      "target": ".code-block token span color (mixed 80% with --c2-page-editor__code-block--color)",
+      "sink": "ProseMirror Decoration.inline style color: var(--_tok-token-constant), defined on .code-block"
+    },
+    {
+      "tag": "c2-page-editor",
+      "name": "--c2-page-editor__syntax-comment--color",
+      "mode": "inline-style",
+      "source": "packages/components/page-editor/src/highlight.ts",
+      "target": ".code-block token span color (mixed 80% with --c2-page-editor__code-block--color)",
+      "sink": "ProseMirror Decoration.inline style color: var(--_tok-token-comment), defined on .code-block"
+    },
+    {
+      "tag": "c2-page-editor",
+      "name": "--c2-page-editor__syntax-parameter--color",
+      "mode": "inline-style",
+      "source": "packages/components/page-editor/src/highlight.ts",
+      "target": ".code-block token span color (mixed 80% with --c2-page-editor__code-block--color)",
+      "sink": "ProseMirror Decoration.inline style color: var(--_tok-token-parameter), defined on .code-block"
+    },
+    {
+      "tag": "c2-page-editor",
+      "name": "--c2-page-editor__syntax-punctuation--color",
+      "mode": "inline-style",
+      "source": "packages/components/page-editor/src/highlight.ts",
+      "target": ".code-block token span color (mixed 80% with --c2-page-editor__code-block--color)",
+      "sink": "ProseMirror Decoration.inline style color: var(--_tok-token-punctuation), defined on .code-block"
+    },
+    {
+      "tag": "c2-page-editor",
+      "name": "--c2-page-editor__syntax-link--color",
+      "mode": "inline-style",
+      "source": "packages/components/page-editor/src/highlight.ts",
+      "target": ".code-block token span color (mixed 80% with --c2-page-editor__code-block--color)",
+      "sink": "ProseMirror Decoration.inline style color: var(--_tok-token-link), defined on .code-block"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-yellow--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch background (and the sheet of paper-color=\"yellow\" through :host --_paper)",
+      "sink": "PAPER_SWATCHES.yellow style --_swatch on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-yellow--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch color (and the sheet of paper-color=\"yellow\" through :host --_ink)",
+      "sink": "PAPER_SWATCHES.yellow style --_swatch-ink on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-green--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch background (and the sheet of paper-color=\"green\" through :host --_paper)",
+      "sink": "PAPER_SWATCHES.green style --_swatch on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-green--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch color (and the sheet of paper-color=\"green\" through :host --_ink)",
+      "sink": "PAPER_SWATCHES.green style --_swatch-ink on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-blue--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch background (and the sheet of paper-color=\"blue\" through :host --_paper)",
+      "sink": "PAPER_SWATCHES.blue style --_swatch on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-blue--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch color (and the sheet of paper-color=\"blue\" through :host --_ink)",
+      "sink": "PAPER_SWATCHES.blue style --_swatch-ink on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-pink--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch background (and the sheet of paper-color=\"pink\" through :host --_paper)",
+      "sink": "PAPER_SWATCHES.pink style --_swatch on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-pink--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch color (and the sheet of paper-color=\"pink\" through :host --_ink)",
+      "sink": "PAPER_SWATCHES.pink style --_swatch-ink on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-night--background",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch background (and the sheet of paper-color=\"night\" through :host --_paper)",
+      "sink": "PAPER_SWATCHES.night style --_swatch on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-notepad",
+      "name": "--c2-notepad__paper-night--color",
+      "mode": "inline-style",
+      "source": "packages/components/notepad/src/notepad.ts",
+      "target": "paper picker .swatch color (and the sheet of paper-color=\"night\" through :host --_ink)",
+      "sink": "PAPER_SWATCHES.night style --_swatch-ink on the .swatch of the paper picker"
+    },
+    {
+      "tag": "c2-flow",
+      "name": "--c2-flow__rank--gap",
+      "mode": "programmatic",
+      "source": "packages/components/flow/src/flow.ts",
+      "target": "distance between node ranks of the auto layout",
+      "sink": "readPixels -> layoutOptions().rankGap -> layout()"
+    },
+    {
+      "tag": "c2-flow",
+      "name": "--c2-flow__node--gap",
+      "mode": "programmatic",
+      "source": "packages/components/flow/src/flow.ts",
+      "target": "distance between nodes of one rank of the auto layout",
+      "sink": "readPixels -> layoutOptions().nodeGap -> layout()"
+    },
+    {
+      "tag": "c2-flow",
+      "name": "--c2-flow__card--offset",
+      "mode": "programmatic",
+      "source": "packages/components/flow/src/flow.ts",
+      "target": "hover card position relative to its node",
+      "sink": "readPixels -> computePosition offset(gap)"
+    },
+    {
+      "tag": "c2-overlay",
+      "name": "--c2-overlay--offset-y",
+      "mode": "programmatic",
+      "source": "packages/components/overlay/src/overlay.ts",
+      "target": "open overlay position along the main axis from its anchor",
+      "sink": "readPixels -> computePosition offset({ mainAxis }) -> style.left/top"
+    },
+    {
+      "tag": "c2-overlay",
+      "name": "--c2-overlay--offset-x",
+      "mode": "programmatic",
+      "source": "packages/components/overlay/src/overlay.ts",
+      "target": "open overlay position along the cross axis",
+      "sink": "readPixels -> computePosition offset({ crossAxis }) -> style.left/top"
+    },
+    {
+      "tag": "c2-overlay",
+      "name": "--c2-overlay--viewport-padding",
+      "mode": "programmatic",
+      "source": "packages/components/overlay/src/overlay.ts",
+      "target": "open overlay inset from the viewport edges and its available size",
+      "sink": "readPixels -> computePosition flip/shift/size padding -> style.left/top and --c2-overlay--available-*"
+    },
+    {
+      "tag": "c2-hover-card",
+      "name": "--c2-hover-card--offset",
+      "mode": "programmatic",
+      "source": "packages/components/hover-card/src/hover-card.ts",
+      "target": ".c2-hover-card position relative to the trigger",
+      "sink": "readPixels -> computePosition offset() -> panel style.left/top"
+    },
+    {
+      "tag": "c2-table",
+      "name": "--c2-table__selection-cell--width",
+      "mode": "inline-style",
+      "source": "packages/components/table/src/table.ts",
+      "target": ".grid grid-template-columns: the checkbox-selection track",
+      "sink": "selection column width -> #gridTemplate -> styleMap --_grid-template on .grid"
+    },
+    {
+      "tag": "c2-split-panel",
+      "name": "--c2-split-panel__divider--size",
+      "mode": "inline-style",
+      "source": "packages/components/split-panel/src/split-panel.ts",
+      "target": ".container grid-template-columns/rows: the divider track",
+      "sink": ".container --_divider (split-panel.scss) -> styleMap gridTemplateColumns/gridTemplateRows on .container"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__ring--size",
+      "mode": "delegated",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": "c2-progress.ring .c2-progress-ring width/height",
+      "childTag": "c2-progress",
+      "childProperty": "--c2-progress--size",
+      "targetHost": "internal c2-progress.ring",
+      "sink": ".ring --_ring-size -> --c2-progress--size"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__ring--stroke-width",
+      "mode": "delegated",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": "c2-progress.ring circle stroke-width",
+      "childTag": "c2-progress",
+      "childProperty": "--c2-progress--height",
+      "targetHost": "internal c2-progress.ring",
+      "sink": ".ring --_ring-stroke -> --c2-progress--height"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__hero-ring--size",
+      "mode": "delegated",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": "c2-progress.ring .c2-progress-ring width/height (progress=\"hero\")",
+      "childTag": "c2-progress",
+      "childProperty": "--c2-progress--size",
+      "targetHost": "internal c2-progress.ring",
+      "sink": ".progress-hero .ring --_ring-size -> --c2-progress--size"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__hero-ring--stroke-width",
+      "mode": "delegated",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": "c2-progress.ring circle stroke-width (progress=\"hero\")",
+      "childTag": "c2-progress",
+      "childProperty": "--c2-progress--height",
+      "targetHost": "internal c2-progress.ring",
+      "sink": ".progress-hero .ring --_ring-stroke -> --c2-progress--height"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__bar--height",
+      "mode": "delegated",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": "c2-progress.bar .c2-progress-track height",
+      "childTag": "c2-progress",
+      "childProperty": "--c2-progress--height",
+      "targetHost": "internal c2-progress.bar",
+      "sink": ".bar --c2-progress--height"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__track--color",
+      "mode": "delegated",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": "c2-progress.ring .c2-progress-ring-track stroke",
+      "childTag": "c2-progress",
+      "childProperty": "--c2-progress__track--background-color",
+      "targetHost": "internal c2-progress.ring",
+      "sink": ".ring --c2-progress__track--background-color"
+    },
+    {
+      "tag": "c2-todo-list",
+      "name": "--c2-todo-list__track--color",
+      "mode": "delegated",
+      "source": "packages/components/todo-list/src/todo-list.ts",
+      "target": "c2-progress.bar .c2-progress-track background-color",
+      "childTag": "c2-progress",
+      "childProperty": "--c2-progress__track--background-color",
+      "targetHost": "internal c2-progress.bar",
+      "sink": ".bar --c2-progress__track--background-color"
+    },
+    {
+      "tag": "c2-button-group",
+      "name": "--c2-button-group__segmented-item--color",
+      "mode": "delegated",
+      "source": "packages/components/button-group/src/button-group.ts",
+      "target": "slotted c2-button .c2-button color (appearance=\"segmented\")",
+      "childTag": "c2-button",
+      "childProperty": "--c2-button__container--color",
+      "targetHost": "slotted c2-button",
+      "sink": ":host([appearance=segmented]) ::slotted(*) --c2-button__container--color"
+    },
+    {
+      "tag": "c2-button-group",
+      "name": "--c2-button-group__segmented-item__hover--background-color",
+      "mode": "delegated",
+      "source": "packages/components/button-group/src/button-group.ts",
+      "target": "slotted c2-button .c2-button:hover background-color (appearance=\"segmented\")",
+      "childTag": "c2-button",
+      "childProperty": "--c2-button__container__hover--background-color",
+      "targetHost": "slotted c2-button",
+      "sink": ":host([appearance=segmented]) ::slotted(*) --c2-button__container__hover--background-color"
+    },
+    {
+      "tag": "c2-button-group",
+      "name": "--c2-button-group__segmented-item__active--background-color",
+      "mode": "delegated",
+      "source": "packages/components/button-group/src/button-group.ts",
+      "target": "slotted c2-button .c2-button:active background-color (appearance=\"segmented\")",
+      "childTag": "c2-button",
+      "childProperty": "--c2-button__container__active--background-color",
+      "targetHost": "slotted c2-button",
+      "sink": ":host([appearance=segmented]) ::slotted(*) --c2-button__container__active--background-color"
+    },
+    {
+      "tag": "c2-button-group",
+      "name": "--c2-button-group__segmented-item__selected--color",
+      "mode": "delegated",
+      "source": "packages/components/button-group/src/button-group.ts",
+      "target": "slotted c2-button[selected] .c2-button color (appearance=\"segmented\")",
+      "childTag": "c2-button",
+      "childProperty": "--c2-button__container__selected--color",
+      "targetHost": "slotted c2-button",
+      "sink": ":host([appearance=segmented]) ::slotted(*) --c2-button__container__selected--color"
+    },
+    {
+      "tag": "c2-button-group",
+      "name": "--c2-button-group__segmented-item__hover--background-color",
+      "mode": "delegated",
+      "source": "packages/components/button-group/src/button-group.ts",
+      "target": "slotted c2-icon-button .c2-icon-button:hover background-color (appearance=\"segmented\")",
+      "childTag": "c2-icon-button",
+      "childProperty": "--c2-icon-button__hover--background-color",
+      "targetHost": "slotted c2-icon-button",
+      "sink": ":host([appearance=segmented]) ::slotted(*) --c2-icon-button__hover--background-color"
+    },
+    {
+      "tag": "c2-button-group",
+      "name": "--c2-button-group--border",
+      "mode": "delegated",
+      "source": "packages/components/button-group/src/button-group.ts",
+      "target": "slotted c2-button .c2-button border",
+      "childTag": "c2-button",
+      "childProperty": "--c2-button__container--border",
+      "targetHost": "slotted c2-button",
+      "sink": "::slotted(*) --c2-button__container--border"
+    },
+    {
+      "tag": "c2-button-group",
+      "name": "--c2-button-group--border",
+      "mode": "delegated",
+      "source": "packages/components/button-group/src/button-group.ts",
+      "target": "slotted c2-icon-button .c2-icon-button border",
+      "childTag": "c2-icon-button",
+      "childProperty": "--c2-icon-button--border",
+      "targetHost": "slotted c2-icon-button",
+      "sink": "::slotted(*) --c2-icon-button--border"
+    },
+    {
+      "tag": "c2-breadcrumb",
+      "name": "--c2-breadcrumb__item--background-color",
+      "mode": "delegated",
+      "source": "packages/components/breadcrumb/src/breadcrumb.ts",
+      "target": "slotted c2-link-button items and the internal ellipsis: .c2-link-button background-color",
+      "childTag": "c2-link-button",
+      "childProperty": "--c2-link-button__container--background-color",
+      "targetHost": "slotted c2-link-button and internal .c2-breadcrumb-ellipsis",
+      "sink": "::slotted(*), .c2-breadcrumb-ellipsis --c2-link-button__container--background-color"
+    },
+    {
+      "tag": "c2-breadcrumb",
+      "name": "--c2-breadcrumb__item__hover--color",
+      "mode": "delegated",
+      "source": "packages/components/breadcrumb/src/breadcrumb.ts",
+      "target": "slotted c2-link-button items and the internal ellipsis: .c2-link-button:hover color",
+      "childTag": "c2-link-button",
+      "childProperty": "--c2-link-button__container__hover--color",
+      "targetHost": "slotted c2-link-button and internal .c2-breadcrumb-ellipsis",
+      "sink": "::slotted(*), .c2-breadcrumb-ellipsis --c2-link-button__container__hover--color"
+    },
+    {
+      "tag": "c2-breadcrumb",
+      "name": "--c2-breadcrumb__item__hover--background-color",
+      "mode": "delegated",
+      "source": "packages/components/breadcrumb/src/breadcrumb.ts",
+      "target": "slotted c2-link-button items and the internal ellipsis: .c2-link-button:hover background-color",
+      "childTag": "c2-link-button",
+      "childProperty": "--c2-link-button__container__hover--background-color",
+      "targetHost": "slotted c2-link-button and internal .c2-breadcrumb-ellipsis",
+      "sink": "::slotted(*), .c2-breadcrumb-ellipsis --c2-link-button__container__hover--background-color"
+    },
+    {
+      "tag": "c2-breadcrumb",
+      "name": "--c2-breadcrumb__item__hover--text-decoration",
+      "mode": "delegated",
+      "source": "packages/components/breadcrumb/src/breadcrumb.ts",
+      "target": "slotted c2-link-button items and the internal ellipsis: .c2-link-button:hover text-decoration",
+      "childTag": "c2-link-button",
+      "childProperty": "--c2-link-button__container__hover--text-decoration",
+      "targetHost": "slotted c2-link-button and internal .c2-breadcrumb-ellipsis",
+      "sink": "::slotted(*), .c2-breadcrumb-ellipsis --c2-link-button__container__hover--text-decoration"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--background",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field background",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--background",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--background"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--border",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field border",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--border-top",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--border-top"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--border",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field border",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--border-right",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--border-right"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--border",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field border",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--border-bottom",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--border-bottom"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--border",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field border",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--border-left",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--border-left"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--border-radius",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field border-radius",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--border-top-left-radius",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--border-top-left-radius"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--border-radius",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field border-radius",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--border-top-right-radius",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--border-top-right-radius"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--border-radius",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field border-radius",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--border-bottom-left-radius",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--border-bottom-left-radius"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--border-radius",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field border-radius",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--border-bottom-right-radius",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--border-bottom-right-radius"
+    },
+    {
+      "tag": "c2-virtual-list",
+      "name": "--c2-virtual-list__search-field--min-height",
+      "mode": "delegated",
+      "source": "packages/components/virtual-list/src/virtual-list.ts",
+      "target": "c2-text-field.search-field .c2-text-field min-height",
+      "childTag": "c2-text-field",
+      "childProperty": "--c2-text-field--min-height",
+      "targetHost": "internal c2-text-field.search-field",
+      "sink": ".search-field --c2-text-field--min-height"
+    },
+    {
+      "tag": "c2-pagination",
+      "name": "--c2-pagination__page-size-list--min-width",
+      "mode": "delegated",
+      "source": "packages/components/pagination/src/pagination.ts",
+      "target": "page-size c2-select .list min-width",
+      "childTag": "c2-select",
+      "childProperty": "--c2-select__list--min-width",
+      "targetHost": "internal c2-select.c2-pagination-page-size-select",
+      "sink": ".c2-pagination-page-size-select --c2-select__list--min-width"
+    },
+    {
+      "tag": "c2-theme-select",
+      "name": "--c2-theme-select__menu--offset",
+      "mode": "delegated",
+      "source": "packages/components/theme-select/src/theme-select.ts",
+      "target": "menu c2-overlay position below the trigger",
+      "childTag": "c2-overlay",
+      "childProperty": "--c2-overlay--offset-y",
+      "targetHost": "internal c2-overlay.c2-theme-select__overlay",
+      "sink": ".c2-theme-select__overlay --c2-overlay--offset-y -> c2-overlay computePosition offset"
     }
   ]
 }

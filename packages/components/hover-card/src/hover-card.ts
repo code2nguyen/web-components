@@ -84,6 +84,8 @@ export class HoverCard extends LitElement {
   private openTimer: ReturnType<typeof setTimeout> | undefined
   private closeTimer: ReturnType<typeof setTimeout> | undefined
   private cleanupPosition: (() => void) | null = null
+  private offsetObserver: MutationObserver | null = null
+  private offsetValue = ''
   private returningFocus = false
 
   override connectedCallback() {
@@ -184,11 +186,23 @@ export class HoverCard extends LitElement {
   private startPositioning(panel: HTMLElement) {
     this.stopPositioning()
     this.cleanupPosition = autoUpdate(this, panel, () => void this.updatePosition(panel))
+    // Floating UI observes layout, but an edit to the offset (an inline style, a class) need not resize either element.
+    const offsetValue = () => getComputedStyle(this).getPropertyValue('--c2-hover-card--offset')
+    this.offsetValue = offsetValue()
+    this.offsetObserver = new MutationObserver(() => {
+      const next = offsetValue()
+      if (next === this.offsetValue) return
+      this.offsetValue = next
+      void this.updatePosition(panel)
+    })
+    this.offsetObserver.observe(this, { attributes: true, attributeFilter: ['style', 'class'] })
   }
 
   private stopPositioning() {
     this.cleanupPosition?.()
     this.cleanupPosition = null
+    this.offsetObserver?.disconnect()
+    this.offsetObserver = null
   }
 
   private async updatePosition(panel: HTMLElement) {

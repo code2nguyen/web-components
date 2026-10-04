@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>c2-comparison-bar</title>
+    <script type="module" src="/src/comparison-bar.ts"></script>
+    <style>
+      body {
+        display: grid;
+        gap: 24px;
+        max-width: 420px;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+      }
+      .order-book {
+        padding: 16px;
+        border-radius: 8px;
+        background: #1e2329;
+        --c2-comparison-bar__start-segment--background-color: #2ebd85;
+        --c2-comparison-bar__start-value--color: #2ebd85;
+        --c2-comparison-bar__end-segment--background-color: #f6465d;
+        --c2-comparison-bar__end-value--color: #f6465d;
+      }
+    </style>
+  </head>
+  <body>
+    <c2-comparison-bar start-value="22.43" end-value="77.57"></c2-comparison-bar>
+    <c2-comparison-bar start-value="2243" end-value="7757" start-label="Bid" end-label="Ask" show-value></c2-comparison-bar>
+    <c2-comparison-bar start-value="45" middle-value="20" end-value="35" start-label="Win" middle-label="Draw" end-label="Loss" show-value></c2-comparison-bar>
+    <c2-comparison-bar start-value="3" end-value="1" precision="0" show-value></c2-comparison-bar>
+    <c2-comparison-bar start-value="0" end-value="10" show-value></c2-comparison-bar>
+    <div class="order-book">
+      <c2-comparison-bar start-value="22.43" end-value="77.57" locale="de-DE" start-label="Bid" end-label="Ask" show-value></c2-comparison-bar>
+    </div>
+    <c2-comparison-bar start-value="12" end-value="8" start-label="Yes" end-label="No">
+      <span slot="start">Yes 12</span>
+      <span slot="end">8 No</span>
+    </c2-comparison-bar>
+  </body>
+</html>

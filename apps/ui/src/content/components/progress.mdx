@@ -1,6 +1,6 @@
 ---
 title: 'Progress'
-description: 'Linear progress bar, indeterminate or filling to a value, with an optional label and count.'
+description: 'Progress bar or ring, indeterminate or filling to a value, with an optional label and count.'
 category: 'Feedback'
 ---
 
@@ -9,7 +9,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 
 import { Progress } from '@c2n/progress'
 
-`c2-progress` is a bar that fills as work completes. Without a `value` its indicator sweeps the track indefinitely; give it a `value` (out of `max`, 100 by default) and it fills from the start edge and animates between values. Text in the default slot labels the bar and doubles as its accessible name, `show-value` prints the percentage on the opposite side, and the `value` slot replaces that text when you are counting steps or megabytes instead. It is a `progressbar` for assistive technology, with `aria-valuenow` when determinate. Track and indicator are two plain boxes, so height, radius, colours and speed are all variables.
+`c2-progress` is a bar that fills as work completes. Without a `value` its indicator sweeps the track indefinitely; give it a `value` (out of `max`, 100 by default) and it fills from the start edge and animates between values. Text in the default slot labels the bar and doubles as its accessible name, `show-value` prints the percentage on the opposite side, and the `value` slot replaces that text when you are counting steps or megabytes instead. It is a `progressbar` for assistive technology, with `aria-valuenow` when determinate. Track and indicator are two plain boxes, so height, radius, colours and speed are all variables. Set `variant="circular"` to draw it as a ring instead, with the value in the middle and the label underneath.
 
 ## Installation
 
@@ -79,6 +79,13 @@ npm install @c2n/progress
     <c2-progress value="45" style="--c2-progress--height: 16px; --c2-progress--border-radius: 6px"></c2-progress>
   </div>
 </div>
+<div data-label="Circular">
+  <c2-progress variant="circular" label="Loading"></c2-progress>
+  <c2-progress variant="circular" value="67" show-value>Readiness</c2-progress>
+  <c2-progress variant="circular" value="3" max="5" style="--c2-progress--size: 48px; --c2-progress--height: 5px">
+    <span slot="value">3/5</span>
+  </c2-progress>
+</div>
 <div data-label="Counting something else">
   <div class="stack">
     <c2-progress value="3" max="5">Onboarding<span slot="value">Step 3 of 5</span></c2-progress>
@@ -101,3 +108,7 @@ Always give a bar a name. Slotted text is announced and also shown above the tra
 Reach for `c2-spinner` instead when the wait has no natural width to fill — a button, a toolbar, a small card — and for `c2-button`'s own `running` state inside an action.
 
 The label row only appears when there is a label or a value to show, so a bare `<c2-progress>` is exactly `--c2-progress--height` tall. `--c2-progress__indicator--background-color` is the fill and `--c2-progress__track--background-color` the groove behind it, `--c2-progress--border-radius` rounds both (set `0` for a square meter), and `--c2-progress--animation-duration` sets the indeterminate cycle as well as half the determinate fill transition.
+
+## Circular
+
+`variant="circular"` draws the same track and indicator as a ring that starts at the top and fills clockwise. `--c2-progress--size` is its diameter and `--c2-progress--height` the thickness of the stroke. `show-value` prints the percentage in the middle (sized by `--c2-progress__ring-value--font-size`, with the `%` sign as the `unit` part), the `value` slot replaces it as on the bar, and the label moves underneath the ring. Without a value the arc spins. `--c2-progress__indicator--stroke-linecap` chooses between rounded (`round`, the default) and square (`butt`) arc ends.

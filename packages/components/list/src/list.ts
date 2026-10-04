@@ -35,6 +35,10 @@ export interface List {
  * Besides rows, the default slot accepts `<hr>` dividers and `<h1>`–`<h6>` group headings; both are styled by the
  * `__divider` and `__heading` tokens and skipped by selection and keyboard.
  *
+ * The list never writes classes or attributes on its host or its rows. A list with no top (bottom) padding matches
+ * `c2-list:state(padding-top-0)` (`:state(padding-bottom-0)`) and hands its corner radius to the first (last) row; a
+ * selected row next to another selected row matches `c2-list-item:state(joined-before)` / `:state(joined-after)`.
+ *
  * @tag c2-list
  *
  * @slot default - The rows: `c2-list-item` elements (or wrappers whose first child is a `c2-list-item`), plus `<hr>` dividers and heading elements.
@@ -136,7 +140,7 @@ export class List extends LitElement {
   }
 
   /**
-   * Mirrors the selection onto the rows: `data`, the roving tabindex, and `joined-before` / `joined-after` on adjacent
+   * Mirrors the selection onto the rows: `data`, the roving tabindex, and `joinedBefore` / `joinedAfter` on adjacent
    * selected rows so `c2-list-item` can square the corners between them and a run of selected rows reads as one block.
    */
   private syncRows() {
@@ -147,8 +151,10 @@ export class List extends LitElement {
 
     items.forEach((item, index) => {
       const selected = this.value.includes(item.value)
-      item.toggleAttribute('joined-before', selected && index > 0 && this.value.includes(items[index - 1].value))
-      item.toggleAttribute('joined-after', selected && index < items.length - 1 && this.value.includes(items[index + 1].value))
+      // Properties, not attributes: this runs on the first render, and an attribute written on a row before a framework
+      // hydrates is one the server never rendered. The row exposes them as `:state(joined-before)` / `:state(joined-after)`.
+      item.joinedBefore = selected && index > 0 && this.value.includes(items[index - 1].value)
+      item.joinedAfter = selected && index < items.length - 1 && this.value.includes(items[index + 1].value)
     })
 
     const enabled = this.enabledItems
@@ -246,11 +252,20 @@ export class List extends LitElement {
     )
   }
 
-  /** Flush lists (no vertical padding) let the first and last rows take the list's corner radius. */
-  private syncPaddingClasses() {
+  /**
+   * Flush lists (no vertical padding) let the first and last rows take the list's corner radius. Exposed as the
+   * custom states `padding-top-0` / `padding-bottom-0`, never as classes: this runs on the first render, and a class
+   * written on the host then differs from the server markup and is wiped by any framework that owns `class`.
+   */
+  private syncPaddingStates() {
     const style = getComputedStyle(this)
-    this.classList.toggle('padding-top-0', style.paddingTop === '0px')
-    this.classList.toggle('padding-bottom-0', style.paddingBottom === '0px')
+    this.toggleState('padding-top-0', style.paddingTop === '0px')
+    this.toggleState('padding-bottom-0', style.paddingBottom === '0px')
+  }
+
+  private toggleState(name: string, on: boolean) {
+    if (on) this.internals.states.add(name)
+    else this.internals.states.delete(name)
   }
 
   protected override willUpdate(changedProperties: PropertyValueMap<this>): void {
@@ -267,14 +282,14 @@ export class List extends LitElement {
     this.internals.role = 'listbox'
     this.internals.ariaMultiSelectable = String(this.multiple)
     this.internals.ariaDisabled = this.disabled ? 'true' : null
-    this.syncPaddingClasses()
+    this.syncPaddingStates()
   }
 
   /**
    * private function used for demo project in some edge case need to refresh component
    */
   _initComponent() {
-    this.syncPaddingClasses()
+    this.syncPaddingStates()
   }
 
   override render() {

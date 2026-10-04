@@ -148,7 +148,10 @@ async function readTarget(page: Page, options: ObservableCase): Promise<string> 
       }
       if (!element.getClientRects().length) return '[non-rendered]'
       const style = getComputedStyle(element, pseudo)
-      if (
+      // A placeholder has no `content`: it is rendered exactly while its control shows it.
+      if (pseudo === '::placeholder') {
+        if (!element.matches(':placeholder-shown')) return '[non-rendered]'
+      } else if (
         pseudo &&
         (style.content === 'none' || style.content === 'normal' || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0)
       )
@@ -227,7 +230,7 @@ async function activateState(page: Page, options: ObservableCase) {
 
 /** Compare the intended rendered target, not the custom-property echo on the host. */
 export async function checkObservableEffect(page: Page, options: ObservableCase): Promise<ObservableResult> {
-  if (options.assertion === 'pseudo-style' && !['::before', '::after'].includes(options.pseudo ?? ''))
+  if (options.assertion === 'pseudo-style' && !['::before', '::after', '::placeholder'].includes(options.pseudo ?? ''))
     throw new Error(`${options.name}: pseudo-style requires a pseudo target`)
   const syntax = options.valueSyntax ?? options.declaration
   if (!syntax) throw new Error(`${options.name}: a value syntax is required before observing an effect`)

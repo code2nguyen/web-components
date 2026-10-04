@@ -20,13 +20,17 @@ declare module 'vue' {
   interface GlobalComponents {
     'c2-week-planner': DefineComponent<
       C2Props<WeekPlanner> & {
+        'snap-minutes'?: unknown
         'alternate-weeks'?: unknown
         'start-hour'?: unknown
         'end-hour'?: unknown
         'week-start'?: unknown
         'aria-label'?: unknown
         onParityChange?: (event: EventOf<WeekPlanner, 'parity-change'>) => void
+        onWeekChange?: (event: EventOf<WeekPlanner, 'week-change'>) => void
         onEventClick?: (event: EventOf<WeekPlanner, 'event-click'>) => void
+        onSlotClick?: (event: EventOf<WeekPlanner, 'slot-click'>) => void
+        onEventChange?: (event: EventOf<WeekPlanner, 'event-change'>) => void
       }
     >
   }
