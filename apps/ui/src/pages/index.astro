@@ -5,10 +5,13 @@ import ComponentGallery from '../components/ComponentGallery.astro'
 import { componentPreviews } from '../data/component-previews'
 import SiteButton from '../components/ui/SiteButton.astro'
 import SiteCard from '../components/ui/SiteCard.astro'
-import { FeatherArrowRightIcon, FeatherLayersIcon, FeatherPackageIcon, FeatherSlidersIcon } from '../components/ui/icons'
+import { FeatherArrowRightIcon, FeatherCpuIcon, FeatherLayersIcon, FeatherSlidersIcon } from '../components/ui/icons'
 
 const base = import.meta.env.BASE_URL
 const componentCount = (await getCollection('components')).length
+// Gallery cards are the fences on each component's gallery page; rounded down so the hero reads "800+", not "841".
+const variantCount = (await getCollection('gallery')).reduce((n, entry) => n + (entry.body?.match(/tag=MdxCodeBlock/g)?.length ?? 0), 0)
+const roundDown = (n: number, step: number) => Math.floor(n / step) * step
 const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.localeCompare(b.data.title))
 ---
 
@@ -16,10 +19,10 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
   <div class="home">
     <section class="hero">
       <p class="eyebrow">c2n web components</p>
-      <h1 class="hero__title">Small, themable UI components that work in any stack.</h1>
+      <h1 class="hero__title">Every building block your AI needs to ship a web app.</h1>
       <p class="hero__lead">
-        {componentCount} components in one npm package, <code>@c2n/components</code>, with an entry per component. Built on Lit, styled through CSS custom
-        properties, and usable from plain HTML, React, Vue, Astro or anything that speaks the DOM.
+        {roundDown(componentCount, 10)}+ components and {roundDown(variantCount, 100)}+ ready-made variants, built with AI and for AI. Your coding agent reads
+        the exact API of every element over MCP, then composes it into real apps. Works in any stack, themed with a few CSS variables.
       </p>
       <div class="hero__actions">
         <SiteButton href={`${base}/components/`} variant="primary">
@@ -30,16 +33,16 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
       </div>
       <ul class="hero__facts">
         <li>
-          <FeatherPackageIcon client:load class="hero__fact-icon" />
-          One package, an entry per component
+          <FeatherLayersIcon client:load class="hero__fact-icon" />
+          {roundDown(componentCount, 10)}+ components, {roundDown(variantCount, 100)}+ variants
+        </li>
+        <li>
+          <FeatherCpuIcon client:load class="hero__fact-icon" />
+          MCP server and agent skill
         </li>
         <li>
           <FeatherSlidersIcon client:load class="hero__fact-icon" />
-          Themed with CSS variables
-        </li>
-        <li>
-          <FeatherLayersIcon client:load class="hero__fact-icon" />
-          Framework agnostic, SSR friendly
+          Any framework, themed with CSS variables
         </li>
       </ul>
     </section>
