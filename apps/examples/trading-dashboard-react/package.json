@@ -12,8 +12,7 @@
     "type-check": {
       "dependencies": [
         "../../../packages/core:build",
-        "../../../packages/umbrella:build",
-        "../../../packages/tools/theme:build"
+        "../../../packages/umbrella:build"
       ],
       "command": "tsc -p tsconfig.lib.json --composite false"
     },
@@ -35,7 +34,6 @@
   },
   "dependencies": {
     "@c2n/components": "*",
-    "@c2n/theme": "*",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

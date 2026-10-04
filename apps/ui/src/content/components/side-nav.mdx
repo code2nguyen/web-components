@@ -15,10 +15,10 @@ import { ListItem } from '@c2n/list-item'
 
 Give any element inside the side nav a `side-nav-toggle` attribute, in the page header or in the drawer itself, and clicking it toggles the drawer, no script needed; with nested side navs the toggle acts on the nearest enclosing one. `opened` reflects the state (so `c2-side-nav:not([opened])` can restyle the collapsed drawer into an icon rail) and `opened-change` reports user-driven changes.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/side-nav'
 ```
 
 ## Usage

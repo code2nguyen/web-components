@@ -13,10 +13,10 @@ import { Masonry } from '@c2n/masonry'
 
 The container responds to its own width, not the viewport: below 600 px it has 1 column; at 600 px it has 6; at 960 px it has 9; and at 1280 px it has 12. Each tile's `cols` is the base width. `cols-xs`, `cols-sm`, `cols-md`, and `cols-lg` override it in their respective ranges. The component keeps one tile order, clamps over-wide spans for rendering, and repacks that same order at every width.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/masonry'
 ```
 
 ## Usage

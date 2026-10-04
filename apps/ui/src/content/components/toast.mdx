@@ -11,10 +11,10 @@ import { Toast } from '@c2n/toast'
 
 `c2-toast` displays a notification. `c2-toast-region` manages multiple notifications: three are visible by default, and additional notifications wait in a FIFO queue. Each toast gets its full duration once it becomes visible, so a burst of messages does not expire before the user can read it.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/toast'
 ```
 
 ## Usage

@@ -12,10 +12,10 @@ import { Separator } from '@c2n/separator'
 
 `c2-switch` toggles a setting on or off. It wraps a native `<input type="checkbox" role="switch">`, so Space toggles it, the form receives `name` and `value` while on, and assistive technology announces a switch. The thumb can be clicked or dragged: it follows the pointer and settles on the side it is released. The whole row is the label: text in the default slot and an optional `description` sit beside the track and clicking them toggles it too. Small icons can ride inside the thumb for either state, and every part of the track, thumb and text is a variable. Use it for settings that apply immediately; use `c2-checkbox` for choices that are submitted later.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/switch'
 ```
 
 ## Usage

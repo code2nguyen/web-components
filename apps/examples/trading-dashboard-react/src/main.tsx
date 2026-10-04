@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 
 // `theme.css` is `tokens.css` + `base.css`: the design tokens (light, dark, and a prefers-color-scheme
 // fallback) plus the mapping of every component variable onto them.
-import '@c2n/theme/theme.css'
+import '@c2n/components/theme.css'
 import './style.css'
 
 // Registering the elements at module scope matters: React sets props on an element as soon as it creates it,

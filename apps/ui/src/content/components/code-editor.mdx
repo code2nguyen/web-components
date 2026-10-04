@@ -30,13 +30,13 @@ The editor sizes itself to its content between `--c2-code-editor--min-height` an
 height set on the element reaches the editor — the label and the supporting text keep theirs — so in a pane or a
 split view give it `height: 100%` (or let a flex parent stretch it) and set the max height to `none`.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/code-editor'
 ```
 
-The engine is installed alongside it — only the grammars the app actually uses:
+Its engine is a set of CodeMirror peer dependencies. Install them next to `@c2n/components`, with only the grammars the app actually uses:
 
 ```bash tag=CodeBlock
 npm install @codemirror/state @codemirror/view @codemirror/commands @codemirror/language \

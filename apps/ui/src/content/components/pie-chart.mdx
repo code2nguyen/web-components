@@ -28,11 +28,13 @@ has no axes to share with the cartesian charts, and ECharts' label placement is 
 ECharts is an optional peer dependency reached through a dynamic `import()` on first paint, so a page that
 only shows lines and sparklines never downloads it.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/pie-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

@@ -16,10 +16,10 @@ import { FeatherSettingsIcon as FeatherSettings } from '@c2n/feather-icons/icons
 
 `c2-list` stacks `c2-list-item` rows and owns their selection: it compares each row's `value` with its own `value` and marks the matching rows selected. A click updates `value` and fires `selection-change` with the values and each row's `data`. `multiple` allows several rows, `required` keeps at least one, `disabled` freezes the whole list. The list is a `listbox` with a roving `tabindex`: Arrow Up/Down, Home and End move between rows, Enter and Space select, and typing a few letters jumps to the matching row. `<hr>` dividers and `<h1>`–`<h6>` headings can sit between rows to group them. Set `--c2-list--max-height` to make a long list scroll. It is also the dropdown inside `c2-select`.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/list'
 ```
 
 ## Usage

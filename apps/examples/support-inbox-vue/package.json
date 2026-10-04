@@ -14,8 +14,7 @@
       "dependencies": [
         "../../../packages/core:build",
         "../../../packages/umbrella:build",
-        "../../../packages/icons/feather-icons:build",
-        "../../../packages/tools/theme:build"
+        "../../../packages/icons/feather-icons:build"
       ],
       "command": "vue-tsc -p tsconfig.lib.json --composite false"
     },
@@ -38,7 +37,6 @@
   "dependencies": {
     "@c2n/components": "*",
     "@c2n/feather-icons": "*",
-    "@c2n/theme": "*",
     "vue": "3.5.42"
   },
   "devDependencies": {

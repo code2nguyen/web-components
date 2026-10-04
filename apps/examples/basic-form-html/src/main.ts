@@ -1,7 +1,7 @@
 // A plain-HTML consumer of the published packages: no framework, no bundler magic beyond Vite's dev server.
 // `theme.css` is `tokens.css` + `base.css` — the design tokens (light, dark and a prefers-color-scheme
 // fallback) plus the mapping of every component variable onto them.
-import '@c2n/theme/theme.css'
+import '@c2n/components/theme.css'
 import './style.css'
 
 import '@c2n/components/card'

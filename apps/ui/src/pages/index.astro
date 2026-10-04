@@ -18,8 +18,8 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
       <p class="eyebrow">c2n web components</p>
       <h1 class="hero__title">Small, themable UI components that work in any stack.</h1>
       <p class="hero__lead">
-        {componentCount} components published as individual npm packages. Built on Lit, styled through CSS custom properties, and usable from plain HTML, React, Vue,
-        Astro or anything that speaks the DOM.
+        {componentCount} components in one npm package, <code>@c2n/components</code>, with an entry per component. Built on Lit, styled through CSS custom
+        properties, and usable from plain HTML, React, Vue, Astro or anything that speaks the DOM.
       </p>
       <div class="hero__actions">
         <SiteButton href={`${base}/components/`} variant="primary">
@@ -31,7 +31,7 @@ const iconSets = (await getCollection('icons')).sort((a, b) => a.data.title.loca
       <ul class="hero__facts">
         <li>
           <FeatherPackageIcon client:load class="hero__fact-icon" />
-          One package per component
+          One package, an entry per component
         </li>
         <li>
           <FeatherSlidersIcon client:load class="hero__fact-icon" />

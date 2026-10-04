@@ -12,10 +12,10 @@ import { TreeItem } from '@c2n/tree/tree-item.js'
 
 `c2-tree` renders a hierarchy and owns its state: `value` holds the selected rows, `expanded-items` the expanded ones, and every `c2-tree-item` takes its depth, expansion, selection and roving `tabindex` from the tree. Nest the rows in markup, or hand the tree an `items` array of `{ value, label, children }` nodes and it renders the same elements for you — both modes produce identical DOM and the same events. `selection` switches between `none`, `single` and `multiple`; `checkbox-selection` adds a checkbox per row whose ticks travel to descendants and parents, leaving a partly-selected branch indeterminate. A branch marked `has-children` with no children yet calls the tree's `loadChildren` the first time it is opened, showing a spinner meanwhile. `children-outline` draws a vertical rule per level of depth, the way a file explorer marks which branch a row belongs to — off by default, and styled with `--c2-tree-item__guide--color` and `--c2-tree-item__guide--width` once on. `expand-on-click` widens the toggle's job to the whole row — and to Enter and Space — which is what a navigation tree wants, where a branch row is a heading with nothing to select. Only expanded rows render their children slot, so a collapsed subtree is not laid out and stays out of the accessibility tree. It is a `tree` with a roving `tabindex`: Arrow Up and Down walk the visible rows, Arrow Right and Left open and close branches or move to a child or parent, Home and End jump to the ends, Enter and Space select, `*` expands the focused row's siblings, and typing a few letters jumps to a row.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/tree'
 ```
 
 ## Usage

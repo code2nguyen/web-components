@@ -1,4 +1,4 @@
-@import '@c2n/theme/theme.css';
+@import '@c2n/components/theme.css';
 
 /* ------------------------------------------------------------------------------------------------------------
  * App tokens. Light on :root, dark under [data-theme='dark'] (written by c2-theme-select and the bootstrap script).

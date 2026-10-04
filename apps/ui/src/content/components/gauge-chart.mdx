@@ -23,11 +23,13 @@ import { Button } from '@c2n/button'
 
 Use a gauge for one decision-grade number with a meaningful lower and upper bound—not as a decorative replacement for every KPI. These examples track Services as a share of Apple revenue using the public [2025 SEC Form 10-K](https://www.sec.gov/Archives/edgar/data/320193/000032019325000079/aapl-20250927.htm).
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/gauge-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

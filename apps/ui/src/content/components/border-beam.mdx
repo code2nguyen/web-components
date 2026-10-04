@@ -11,10 +11,10 @@ import { BorderBeam } from '@c2n/border-beam'
 
 `c2-border-beam` is a pointer-transparent decorative overlay for cards, panels and callouts. Place it inside a container with `position: relative`; a masked gradient follows the real border and inherits its corner radius without drawing a second outline. The default `side="all"` loops around the full perimeter. Set one edge, such as `side="top"`, and the beam travels forward then backward along only that border. Geometry and timing are presentation concerns configured with CSS variables; `side`, `count`, `reverse` and `paused` remain behavioral attributes. Reduced-motion preferences hide the decorative effect automatically.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/border-beam'
 ```
 
 ## Usage

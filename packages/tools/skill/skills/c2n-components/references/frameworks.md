@@ -52,7 +52,7 @@ lookalike such as `rowkey` is forwarded to the real attribute with a warning rat
 
 ```html
 <script type="module">
-  import '@c2n/theme/theme.css'
+  import '@c2n/components/theme.css'
   import '@c2n/components/button'
 </script>
 <c2-button>Save</c2-button>

@@ -24,11 +24,13 @@ exactly that combination, and hovering a region names it and gives its share of 
 and gauge charts, so it shares their tooltip, legend, theme and loading states. The circle positions are solved by
 [`@upsetjs/venn.js`](https://github.com/upsetjs/venn.js), a small dependency installed with the package.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/overlap-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

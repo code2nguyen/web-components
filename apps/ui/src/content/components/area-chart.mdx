@@ -27,11 +27,13 @@ Reach for it when the quantity under the line is the point (volume, sessions, sp
 period) and for a single series or two. Stacked bands are not drawn: several filled series overlap, so past
 two or three the [line chart](/web-components/components/line-chart) reads better.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components uplot
+```typescript tag=CodeBlock
+import '@c2n/components/chart/area-chart'
 ```
+
+This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer dependency it loads on first draw: `npm install uplot`.
 
 ## Usage
 

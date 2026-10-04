@@ -16,11 +16,13 @@ import { FeatherCheckIcon as FeatherCheck } from '@c2n/feather-icons/icons/check
 
 `c2-list-item` is the row that `c2-list` and `c2-select` are built from. On its own it is a self-contained toggle: a click, Enter or Space flips `selected` and fires `selected-change`. Inside a `c2-list` the list takes over: it matches each row's `value` against its own, sets `selected` for you and handles the keyboard, so rows in a list never carry the attribute themselves. The default slot is the content, `description` a second muted line; `prefix-icon` and `suffix-icon` take an inline SVG, a `c2-feather-*` icon or a `c2-mat-icon` and are sized by `--c2-list-item__icon--size`. `href` turns the row into a link. `label` is the short text a select shows in its trigger when the row content is richer than a line of text. Rows expose `role="button"` with `aria-pressed` on their own and `role="option"` with `aria-selected` inside a list, and draw a focus ring for keyboard users.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components @c2n/feather-icons
+```typescript tag=CodeBlock
+import '@c2n/components/list-item'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 ## Usage
 

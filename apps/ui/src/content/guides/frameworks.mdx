@@ -26,7 +26,7 @@ The support-inbox Vue example demonstrates both paths: `thread__message-copy` st
 Two rules hold everywhere:
 
 - **Register the elements at module scope, before the framework renders.** Frameworks decide "attribute or property" by looking for the property on the element, and an element that has not upgraded yet has none — an object handed to `rows` would be stringified into an attribute.
-- **Load the theme once.** `import '@c2n/theme/theme.css'` in the entry module.
+- **Load the theme once.** `import '@c2n/components/theme.css'` in the entry module.
 
 ## Installing
 
@@ -99,7 +99,7 @@ One line declares every tag; nothing is registered by it, so it costs no bundle 
 
 ```tsx tag=CodeBlock
 // src/main.tsx — registration must happen before the first render
-import '@c2n/theme/theme.css'
+import '@c2n/components/theme.css'
 import '@c2n/components/table'
 ```
 
@@ -384,7 +384,7 @@ Import what you render at the top of the module and use the tags. Extend a compo
 
 ```html tag=CodeBlock
 <script type="module">
-  import '@c2n/theme/theme.css'
+  import '@c2n/components/theme.css'
   import '@c2n/components/button'
 </script>
 <c2-button>Save</c2-button>

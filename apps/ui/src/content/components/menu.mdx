@@ -25,11 +25,13 @@ The menu never writes attributes on its own host or its rows, so server-rendered
 
 Keyboard: Enter, Space or ArrowDown on the trigger opens the menu on its first row (ArrowUp on the last). Inside, the arrows move between enabled rows, Home and End jump to the ends, letters jump to a matching row, ArrowRight opens a submenu and ArrowLeft returns from it, and Escape or Tab closes the menu and hands focus back to the trigger.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components @c2n/feather-icons
+```typescript tag=CodeBlock
+import '@c2n/components/menu'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 `c2-menu-item` ships in the same package and is registered with it.
 

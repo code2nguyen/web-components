@@ -6,7 +6,7 @@ Build screens from `@c2n/*` web components with as little code as possible. Thre
 
 - Install `@c2n/theme` next to the component packages you use.
 - Or install `@c2n/components`, which depends on every component package and the theme (icon sets excluded). A project that declares only it imports through it: `@c2n/components/theme.css`, and `@c2n/components/<name>` for each component.
-- Import `@c2n/theme/theme.css` once at the application root (tokens + base theme). If the app already owns a token system, import only `@c2n/theme/base.css` and bridge your tokens onto the `--c2-theme--*` names.
+- Import `@c2n/components/theme.css` once at the application root (tokens + base theme). If the app already owns a token system, import only `@c2n/components/base.css` and bridge your tokens onto the `--c2-theme--*` names.
 - Override the tokens that differ from the defaults on `:root` (light) and under your dark-mode selector. About 35 tokens (`--c2-theme--color-primary`, `--c2-theme--radius-md`, `--c2-theme--font-family`, `--c2-theme--focus-ring`, …) drive every component.
 - Never set component variables globally when a token exists for the job.
 

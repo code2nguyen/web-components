@@ -33,11 +33,13 @@ same data contract and the same `--c2-chart__*` theme namespace, so an app style
 peer dependency reached through a dynamic `import()` on first paint — nothing is bundled into the component,
 and a page that shows no chart downloads no engine.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components uplot
+```typescript tag=CodeBlock
+import '@c2n/components/chart/line-chart'
 ```
+
+This chart draws with [uPlot](https://github.com/leeoniya/uPlot), a peer dependency it loads on first draw: `npm install uplot`.
 
 ## Usage
 

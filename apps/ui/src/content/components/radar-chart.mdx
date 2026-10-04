@@ -18,11 +18,13 @@ Radar charts compare profiles across a shared set of indicators. Each data row d
 `label-field`, while each `c2-chart-series` becomes a polygon drawn across those rows. Use a common `max` when
 the indicators share a scale; omit it to let every indicator receive a padded automatic maximum.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components echarts
+```typescript tag=CodeBlock
+import '@c2n/components/chart/radar-chart'
 ```
+
+This chart draws with [ECharts](https://echarts.apache.org), a peer dependency it loads on first draw: `npm install echarts`.
 
 ## Usage
 

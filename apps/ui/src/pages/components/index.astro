@@ -20,8 +20,8 @@ const headings = groups.map((group) => ({ depth: 2, slug: group.category.toLower
   <DocComponentLayout headings={headings}>
     <h1>Components</h1>
     <p>
-      {components.length} components, each published as its own npm package under the <code>@c2n</code> scope. Every component is themed through CSS custom properties
-      and documented with live, editable examples.
+      {components.length} components, all in one npm package, <code>@c2n/components</code>: each card names the entry to import. Every component is themed
+      through CSS custom properties and documented with live, editable examples.
     </p>
     {
       groups.map((group) => (

@@ -16,10 +16,10 @@ Rows and columns are both readable from markup as JSON and from script as proper
 
 Give the host a height (or `--c2-table--max-height`); the header stays sticky while the rows scroll under it. Tab moves into the header, the arrow keys walk cells, Enter sorts the focused column, Space selects the focused row and shift-click selects a range.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/table'
 ```
 
 The entry also registers `c2-checkbox` and `c2-spinner`, which it renders internally.

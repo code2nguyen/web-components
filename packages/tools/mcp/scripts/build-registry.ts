@@ -504,7 +504,11 @@ const usedBy = new Map<string, number>()
 for (const token of Object.values(themeData.mapping)) usedBy.set(token, (usedBy.get(token) ?? 0) + 1)
 const theme: ThemeEntry = {
   package: '@c2n/theme',
-  install: { npm: 'npm install @c2n/theme', imports: ["import '@c2n/theme/theme.css'", "import '@c2n/theme/tokens.css'", "import '@c2n/theme/base.css'"] },
+  // The theme ships inside @c2n/components, which re-exports its stylesheets.
+  install: {
+    npm: 'npm install @c2n/components',
+    imports: ["import '@c2n/components/theme.css'", "import '@c2n/components/tokens.css'", "import '@c2n/components/base.css'"],
+  },
   tokens: themeData.tokens.map((t) => ({ ...t, usedBy: usedBy.get(t.name) ?? 0 })),
   mapping: themeData.mapping,
   darkMode:

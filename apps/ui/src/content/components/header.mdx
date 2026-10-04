@@ -17,13 +17,13 @@ import { FeatherGithubIcon as FeatherGithub } from '@c2n/feather-icons/icons/git
 
 `c2-header` owns site-shell layout without owning navigation state. Put a `c2-navigation-menu` in the default slot, use a real `c2-link-button` for navigation actions, and add as many end controls as needed to the `actions` slot. The action area handles spacing and alignment; `sticky` pins the shell and `blurred` adds its translucent backdrop treatment.
 
-## Installation
+## Import
 
-Install the header plus the controls used by this composition.
-
-```bash tag=CodeBlock
-npm install @c2n/components @c2n/feather-icons
+```typescript tag=CodeBlock
+import '@c2n/components/header'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 ## Usage
 

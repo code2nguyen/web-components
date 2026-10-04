@@ -13,10 +13,10 @@ import { TextField } from '@c2n/text-field'
 
 `c2-copy-button` puts text on the clipboard. Drop it inside the element you want to copy and that is all the configuration it needs: it copies its parent, and leaves its own label out of the result. Point it at something else with `for` (the `id` of the source), or hand it the exact string with `value`. It reads each source the way that source stores its text — the code of a `c2-code-viewer`, the `value` of an input or `c2-text-field`, the rendered text of anything else — so copying a highlighted snippet gives you the code, not a wall of token spans. By default the button stays out of the way until you hover its source, and `pin` parks it in a corner where it stays put even while the source scrolls.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/copy-button'
 ```
 
 ## Usage

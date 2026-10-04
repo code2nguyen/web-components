@@ -10,10 +10,10 @@ The goal is less code per screen. Three layers do the work: a theme that makes t
 
 ## 1. Load the theme once
 
-Install `@c2n/theme` with the components you use, import it at the application root, and set the tokens that differ from the defaults. Every `c2-*` element then follows your brand without per-component CSS.
+Install `@c2n/components`, which brings in `@c2n/theme`, import the theme at the application root, and set the tokens that differ from the defaults. Every `c2-*` element then follows your brand without per-component CSS.
 
 ```typescript tag=CodeBlock
-import '@c2n/theme/theme.css'
+import '@c2n/components/theme.css'
 import '@c2n/components/button'
 import '@c2n/components/text-field'
 ```
@@ -26,7 +26,7 @@ import '@c2n/components/text-field'
 }
 ```
 
-If the application already has design tokens, load `@c2n/theme/base.css` alone and bridge your tokens onto the `--c2-theme--*` names, as `apps/ui/src/assets/c2-theme.scss` does for this site. Dark mode then follows your own switch. See [Theming](./theming) for the token list.
+If the application already has design tokens, load `@c2n/components/base.css` alone and bridge your tokens onto the `--c2-theme--*` names, as `apps/ui/src/assets/c2-theme.scss` does for this site. Dark mode then follows your own switch. See [Theming](./theming) for the token list.
 
 ## 2. Use the tags directly
 

@@ -15,10 +15,10 @@ status, and `compact` is the table-footer row — a rows-per-page select, the ra
 How many pages there are comes from `total-items` and `page-size`, or from `total-pages` when the item count is
 unknown. The element owns `page` and reflects it, so listening to `page-change` is enough to fetch the next slice.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/pagination'
 ```
 
 Importing `@c2n/components/pagination` also registers `c2-select` and `c2-list-item`, the rows-per-page control of the

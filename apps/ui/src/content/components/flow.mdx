@@ -18,11 +18,13 @@ The flow lays itself out: one column per dependency depth (`direction="LR"`) or 
 
 Right-click the canvas or a node (or long-press it, or press Shift+F10) for the view controls: zoom in, zoom out, fit view, layout direction, auto layout and lock layout. With focus in the flow, Ctrl/⌘ + `+`, Ctrl/⌘ + `-` and Ctrl/⌘ + `0` zoom and fit, and Ctrl/⌘ + scroll zooms around the pointer. Hover or focus a node for a card with its status and details.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components @c2n/feather-icons
+```typescript tag=CodeBlock
+import '@c2n/components/flow'
 ```
+
+The examples use icons from the separate `@c2n/feather-icons` package: `npm install @c2n/feather-icons`.
 
 The entry also registers `c2-context-menu` and `c2-menu`, which it renders internally.
 

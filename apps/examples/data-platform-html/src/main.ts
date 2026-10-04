@@ -1,4 +1,4 @@
-import '@c2n/theme/theme.css'
+import '@c2n/components/theme.css'
 import './style.css'
 
 // C2N Web Components

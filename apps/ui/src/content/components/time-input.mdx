@@ -11,10 +11,10 @@ import { TimeInput } from '@c2n/time-input'
 
 `c2-time-input` wraps the browser's native time control in a consistent, themeable field. Its `value`, `min` and `max` are 24-hour strings (`HH:mm`, or `HH:mm:ss` when `step` is below 60 seconds) whatever the display locale, while form submission, reset, required validation and keyboard editing stay native. The clock button (or Alt+ArrowDown in the field) opens the component's own picker instead of the platform one: a large readout of the chosen time over scroll-snapping hour and minute columns, plus seconds when `step` is below 60 and AM/PM on 12-hour locales (the nearest `lang` decides, as it does for the field). The columns follow `step`, times outside `min`/`max` are dimmed, and every part of it is themed through the `--c2-time-input__picker*` variables. It shares its field styling with `c2-date-input`, so the two sit side by side.
 
-## Installation
+## Import
 
-```bash tag=CodeBlock
-npm install @c2n/components
+```typescript tag=CodeBlock
+import '@c2n/components/time-input'
 ```
 
 ## Usage
