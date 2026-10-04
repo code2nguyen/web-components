@@ -86,11 +86,40 @@ function moduleSpecifier(pkg: PackageJson, packageName: string, modulePath: stri
   return packageName
 }
 
+/** A framework a package may ship runtime bindings for, next to its generated types. */
+export type Framework = 'react' | 'vue'
+export const FRAMEWORKS: readonly Framework[] = ['react', 'vue']
+
+/**
+ * Where a package's own binding for `framework` lives (hooks, composables): `src/<framework>.ts`, built as a Vite lib
+ * entry to `dist/<framework>.js` with its declarations at `types/src/<framework>.d.ts`. The generated
+ * `<package>/<framework>.js` / `.d.ts` re-export it, so `@c2n/table/react` is the hooks and the JSX types in one
+ * import. The binding may import its framework; the package's other entries never import it.
+ */
+export function bindingPaths(framework: Framework): { source: string; module: string; types: string } {
+  return { source: `src/${framework}.ts`, module: `./dist/${framework}.js`, types: `./types/src/${framework}.js` }
+}
+
 export interface DiscoveredPackage {
   name: string
   /** Absolute path of the package in the workspace (symlinks resolved). */
   dir: string
   elements: CustomElement[]
+  /** Frameworks the package ships a binding for (see {@link bindingPaths}). */
+  bindings: Framework[]
+}
+
+function readBindings(name: string, dir: string): Framework[] {
+  return FRAMEWORKS.filter((framework) => {
+    const paths = bindingPaths(framework)
+    if (!existsSync(join(dir, paths.source))) return false
+    for (const built of [paths.module, paths.types.replace(/\.js$/, '.d.ts')]) {
+      if (!existsSync(join(dir, built))) {
+        throw new Error(`[framework-types] ${name} has ${paths.source} but no ${built}: add it to the package's Vite lib entries and build it`)
+      }
+    }
+    return true
+  })
 }
 
 export function readPackages(): DiscoveredPackage[] {
@@ -137,7 +166,8 @@ export function readPackages(): DiscoveredPackage[] {
       }
     }
 
-    if (elements.length > 0) packages.push({ name, dir, elements: elements.sort((a, b) => a.tagName.localeCompare(b.tagName)) })
+    if (elements.length > 0)
+      packages.push({ name, dir, elements: elements.sort((a, b) => a.tagName.localeCompare(b.tagName)), bindings: readBindings(name, dir) })
   }
 
   return packages.sort((a, b) => a.name.localeCompare(b.name))

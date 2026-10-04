@@ -187,3 +187,13 @@ test('focus moves into the editor in tab order and the host delegates focus', as
   await page.locator('c2-code-editor').evaluate((element) => (element as HTMLElement).focus())
   await expect(content(page)).toBeFocused()
 })
+
+test('a value, language and option set while the engine loads reach the editor', async ({ page, scenario }) => {
+  await scenario('late')
+  await expect(page.locator('main')).toHaveAttribute('data-engine', 'ready')
+  await expect(content(page)).toHaveText('{ "loaded": "late" }')
+  await expect(page.locator('.c2tok-property').first()).toBeVisible()
+  await expect(page.locator('.cm-lineNumbers')).toBeVisible()
+  // Applying the late state is not user input.
+  await expect(page.getByRole('status', { name: 'Events' })).toHaveText('0 0')
+})

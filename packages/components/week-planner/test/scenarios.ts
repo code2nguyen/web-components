@@ -43,8 +43,34 @@ if (scenario === 'actions-narrow') subject.style.width = '360px'
 if (scenario === 'actions-only') subject.insertAdjacentHTML('beforeend', '<button slot="actions" type="button">Add event</button>')
 if (scenario === 'heading-slot') subject.insertAdjacentHTML('beforeend', '<span slot="heading">Kids’ <em>schedule</em></span>')
 if (scenario === 'early') subject.events = [{ title: 'Early run', day: 'fri', start: '06:00', end: '07:00' }]
+// Dated and editable scenarios: 2026-09-30 is the Wednesday the specs pin the clock to.
+const dated = /^(dated|editable)/.test(scenario)
+if (dated || scenario === 'dateless-with-dates') {
+  subject.events = [
+    ...subject.events.filter((event) => !event.weeks && event.id !== 'broken'),
+    { id: 'dentist', title: 'Dentist', date: '2026-10-01', start: '14:00', end: '15:00', color: '#0f766e' },
+    { id: 'trip', title: 'Trip', date: '2026-10-07', start: '09:00', end: '10:00' },
+  ]
+}
+if (dated) subject.date = '2026-09-30'
+if (scenario === 'dated-sunday') subject.weekStart = 'sunday'
+if (scenario === 'dated-french') subject.locale = 'fr'
+if (scenario === 'dated-narrow') subject.style.width = '360px'
+if (scenario.startsWith('editable')) subject.editable = true
+if (scenario === 'editable-snap') subject.snapMinutes = 15
+if (scenario === 'editable-dateless') subject.date = ''
 subject.addEventListener('event-click', (event) => (output.value = `click:${event.detail.event.id}`))
 subject.addEventListener('parity-change', (event) => (output.value = `parity:${event.detail.parity}`))
+subject.addEventListener('week-change', (event) => {
+  output.value = `week:${event.detail.start}..${event.detail.end}`
+  output.dataset.bubbles = String(event.bubbles)
+})
+subject.addEventListener('slot-click', ({ detail }) => (output.value = `slot:${detail.day}|${detail.date ?? ''}|${detail.start}-${detail.end}`))
+// Like an app would: the planner reports the change, the page applies it.
+subject.addEventListener('event-change', ({ detail }) => {
+  output.value = `change:${detail.event.id}:${JSON.stringify(detail.changes)}`
+  subject.events = subject.events.map((event) => (event === detail.event ? { ...event, ...detail.changes } : event))
+})
 
 await subject.updateComplete
 main.dataset.ready = 'true'

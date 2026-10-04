@@ -4,6 +4,7 @@
  */
 import type { CssVar } from './manifests.ts'
 import { overrides, type Override } from './overrides.ts'
+import { getToken } from '../../src/tokens.ts'
 
 export type Classification =
   | { kind: 'mapped'; rule: string; token: string; value: string }
@@ -102,6 +103,8 @@ function mapped(rule: string, token: string, value: string): Classification {
 
 function applyOverride(cssVar: CssVar, override: Override): Classification {
   if ('exclude' in override) return { kind: 'excluded', rule: 'R0', reason: override.exclude }
+  // A typo here would still render (the component default is the fallback) but no theme could ever reach it.
+  if (!getToken(t(override.token))) throw new Error(`overrides.ts maps ${cssVar.name} to --c2-theme--${override.token}, which tokens.ts does not define`)
   const orig = cssVar.default ?? ''
   const value = override.value ? override.value.replaceAll('{orig}', orig) : `var(${t(override.token)}, ${orig})`
   return mapped('R0', override.token, value.trim())

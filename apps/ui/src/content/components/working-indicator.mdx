@@ -1,0 +1,68 @@
+---
+title: 'Working Indicator'
+description: 'A live "work in progress" line: animated mark, shimmering label, trailing dots and elapsed time.'
+category: 'Feedback'
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { WorkingIndicator } from '@c2n/working-indicator'
+
+`c2-working-indicator` says that something is running right now, the way an agent shows "✻ Scheming… 12s". It is one line: an animated `indicator` (a cycling glyph, dots, a ring, a pulse or an orbit), a label that animates through its `effect` (`shimmer`, `wave`, `pulse` or `fill`), trailing dots from `ellipsis`, and an optional `elapsed` counter followed by the `meta` slot. Give it several `messages` and it rotates through them. When the work ends, set `state` to `done` or `error`: the animations stop, the indicator becomes a check or a cross, `done-label` replaces the text, and the line stays as a record. `paused` freezes the animations and the counter.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/working-indicator
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/working-indicator
+<style>
+  .agent {
+    --c2-working-indicator__indicator--color: #d97757;
+    --c2-working-indicator__label--color: #d97757;
+    --c2-working-indicator__label--highlight-color: color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b));
+  }
+</style>
+<div data-label="Agent">
+  <c2-working-indicator class="agent" messages='["Scheming","Pondering","Brewing","Reticulating"]' elapsed>
+    <span slot="meta">esc to interrupt</span>
+  </c2-working-indicator>
+</div>
+<div data-label="Indicators">
+  <c2-working-indicator label="Glyph"></c2-working-indicator>
+  <c2-working-indicator indicator="dots" label="Dots"></c2-working-indicator>
+  <c2-working-indicator indicator="ring" label="Ring"></c2-working-indicator>
+  <c2-working-indicator indicator="pulse" label="Pulse"></c2-working-indicator>
+  <c2-working-indicator indicator="orbit" label="Orbit"></c2-working-indicator>
+</div>
+<div data-label="Effects">
+  <c2-working-indicator effect="shimmer" label="Shimmering"></c2-working-indicator>
+  <c2-working-indicator effect="wave" label="Waving"></c2-working-indicator>
+  <c2-working-indicator effect="pulse" label="Pulsing"></c2-working-indicator>
+  <c2-working-indicator effect="fill" label="Filling"></c2-working-indicator>
+</div>
+<div data-label="Ellipsis">
+  <c2-working-indicator ellipsis="fade" label="Fade"></c2-working-indicator>
+  <c2-working-indicator ellipsis="bounce" label="Bounce"></c2-working-indicator>
+  <c2-working-indicator ellipsis="static" label="Static"></c2-working-indicator>
+  <c2-working-indicator ellipsis="none" label="None"></c2-working-indicator>
+</div>
+<div data-label="Progress">
+  <c2-working-indicator indicator="ring" effect="fill" ellipsis="none" label="Uploading 3 files" value="62"></c2-working-indicator>
+</div>
+<div data-label="States">
+  <c2-working-indicator state="paused" label="Paused" elapsed></c2-working-indicator>
+  <c2-working-indicator state="done" label="Scheming" done-label="Schemed for 14s"></c2-working-indicator>
+  <c2-working-indicator state="error" done-label="Build failed"></c2-working-indicator>
+</div>
+```
+
+The element is a polite live region (`role="status"`, busy while running). It announces the `label` and the outcome only: the rotating `messages`, the wave's split letters and the counter are hidden from assistive technology, so a screen reader hears "Working" once and then "Schemed for 14s" rather than a new word every three seconds. With a `value` (out of `max`) it is a `progressbar` instead, and the `fill` effect fills the label to that fraction. Slotted label content replaces `label` and is exposed as written; the `wave` effect needs plain `label` text to split into letters.
+
+Every timing is a variable: `--c2-working-indicator__indicator--animation-duration`, `__label--animation-duration`, `__label--stagger` for the wave, `__ellipsis--animation-duration`, and `__label--rotate-duration`, which sets how long each message stays on screen. The shimmer band, the wave crest and the filled part of the label all use `--c2-working-indicator__label--highlight-color`. Under `prefers-reduced-motion` every animation stops and the messages change without fading.
+
+Set `started` (a millisecond timestamp) when the line is re-rendered mid-task, so the counter keeps measuring from the real start. Swap the built-in mark through the `indicator` slot, and the done/error marks through `done-icon` and `error-icon`.

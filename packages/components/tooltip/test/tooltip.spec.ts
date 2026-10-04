@@ -64,3 +64,16 @@ test('states its semantics without writing host attributes, so server-rendered m
   await expect(tooltip).not.toBeVisible()
   expect(await hostSemantics()).toEqual([])
 })
+
+test('the open tooltip follows its target when the page scrolls', async ({ page, renderScenario }) => {
+  await renderScenario(`<div style="height:400px"></div>${markup}<div style="height:2000px"></div>`)
+  const tooltip = page.locator('c2-tooltip')
+  const target = page.getByRole('button', { name: 'Help' })
+  await target.focus()
+  await expect(tooltip).toBeVisible()
+  const gap = async () => (await tooltip.boundingBox())!.y - (await target.boundingBox())!.y
+  const before = await gap()
+  await page.evaluate(() => window.scrollBy(0, 150))
+  await expect.poll(gap).toBeCloseTo(before, -1)
+  expect((await target.boundingBox())!.y).toBeLessThan(400)
+})

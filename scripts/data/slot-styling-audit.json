@@ -648,6 +648,27 @@
       "reason": "The semantic title region owns the title slot's component-side presentation."
     },
     {
+      "tag": "c2-comparison-bar",
+      "slot": "start",
+      "decision": "part",
+      "parts": ["start-value"],
+      "reason": "The start value region owns the start slot's component-side presentation."
+    },
+    {
+      "tag": "c2-comparison-bar",
+      "slot": "end",
+      "decision": "part",
+      "parts": ["end-value"],
+      "reason": "The end value region owns the end slot's component-side presentation."
+    },
+    {
+      "tag": "c2-comparison-bar",
+      "slot": "middle",
+      "decision": "part",
+      "parts": ["middle-value"],
+      "reason": "The middle value region owns the middle slot's component-side presentation."
+    },
+    {
       "tag": "c2-command",
       "slot": "default",
       "decision": "assigned-content",
@@ -882,6 +903,22 @@
     },
     {
       "tag": "c2-flow",
+      "slot": "actions",
+      "decision": "variables",
+      "variables": [
+        "--c2-flow__actions--align",
+        "--c2-flow__actions--offset",
+        "--c2-flow__actions--gap",
+        "--c2-flow__actions--padding",
+        "--c2-flow__actions--background-color",
+        "--c2-flow__actions--border",
+        "--c2-flow__actions--border-radius",
+        "--c2-flow__actions--box-shadow"
+      ],
+      "reason": "The toolbar panel around the actions slot is drawn, spaced and placed along its edge through the actions variables; the slotted buttons keep their own styles."
+    },
+    {
+      "tag": "c2-flow",
       "slot": "card:{id}",
       "decision": "assigned-content",
       "reason": "The card:{id} slot projects consumer-owned light DOM into the node's hover card; style the assigned node through its own class or public contract."
@@ -891,6 +928,25 @@
       "slot": "node:{id}",
       "decision": "assigned-content",
       "reason": "The node:{id} slot projects consumer-owned light DOM as the node's body; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-gantt",
+      "slot": "duration-header",
+      "decision": "assigned-content",
+      "reason": "Consumer-owned heading text for the duration column; style the assigned node through its own class."
+    },
+    {
+      "tag": "c2-gantt",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty-state region owns the slot's component-side presentation."
+    },
+    {
+      "tag": "c2-gantt",
+      "slot": "list-header",
+      "decision": "assigned-content",
+      "reason": "Consumer-owned heading text for the task list column; style the assigned node through its own class."
     },
     {
       "tag": "c2-gauge-chart",
@@ -985,6 +1041,33 @@
       "slot": "",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-kanban",
+      "slot": "",
+      "decision": "assigned-content",
+      "reason": "The default slot projects the consumer's c2-kanban-column elements; each column is styled through its own variables and parts."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["empty"],
+      "reason": "The empty region owns the empty slot's component-side presentation: border, padding and colours of the hint."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "footer",
+      "decision": "part",
+      "parts": ["footer"],
+      "reason": "The footer region owns the footer slot's placement below the cards; the assigned controls stay consumer-owned."
+    },
+    {
+      "tag": "c2-kanban-column",
+      "slot": "header",
+      "decision": "part",
+      "parts": ["header"],
+      "reason": "The header region owns the header slot's placement and padding, around either the assigned content or the default label and count."
     },
     {
       "tag": "c2-kbd",
@@ -1100,6 +1183,54 @@
       "slot": "suffix-icon",
       "decision": "assigned-content",
       "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-map-chart",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-map-chart",
+      "slot": "default",
+      "decision": "assigned-content",
+      "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-map-chart",
+      "slot": "empty",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the empty slot's component-side presentation."
+    },
+    {
+      "tag": "c2-map-chart",
+      "slot": "error",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the error slot's component-side presentation."
+    },
+    {
+      "tag": "c2-map-chart",
+      "slot": "legend",
+      "decision": "part",
+      "parts": ["legend"],
+      "reason": "The semantic legend region owns the legend slot's component-side presentation."
+    },
+    {
+      "tag": "c2-map-chart",
+      "slot": "loading",
+      "decision": "part",
+      "parts": ["state"],
+      "reason": "The semantic state region owns the loading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-map-chart",
+      "slot": "tooltip",
+      "decision": "part",
+      "parts": ["tooltip"],
+      "reason": "The semantic tooltip region owns the tooltip slot's component-side presentation."
     },
     {
       "tag": "c2-marker",
@@ -1279,6 +1410,38 @@
       "slot": "suffix-icon",
       "decision": "assigned-content",
       "reason": "The suffix-icon slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-notepad",
+      "slot": "actions",
+      "decision": "part",
+      "parts": ["actions"],
+      "reason": "The semantic actions region owns the actions slot's component-side presentation."
+    },
+    {
+      "tag": "c2-notepad",
+      "slot": "header",
+      "decision": "variables",
+      "variables": ["--c2-notepad__header--color", "--c2-notepad__header--font-size"],
+      "reason": "The printed header row colours and sizes the slotted heading through the header variables; layout stays with the assigned node."
+    },
+    {
+      "tag": "c2-notepad",
+      "slot": "margin",
+      "decision": "assigned-content",
+      "reason": "The margin column only positions consumer-owned light DOM; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-notepad",
+      "slot": "toolbar",
+      "decision": "assigned-content",
+      "reason": "Extra toolbar buttons are consumer-owned light DOM appended after the built-in buttons; style them through their own class or public contract."
+    },
+    {
+      "tag": "c2-page-editor",
+      "slot": "header",
+      "decision": "assigned-content",
+      "reason": "The header slot only places consumer-owned light DOM above the page; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-number-input",
@@ -1803,7 +1966,7 @@
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
-      "tag": "c2-seperator",
+      "tag": "c2-separator",
       "slot": "",
       "decision": "assigned-content",
       "reason": "The default slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
@@ -2073,9 +2236,9 @@
     },
     {
       "tag": "c2-table",
-      "slot": "cell:{rowKey}:{field}",
+      "slot": "cell:{line}:{field}",
       "decision": "assigned-content",
-      "reason": "The cell:{rowKey}:{field} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
+      "reason": "The cell:{line}:{field} slot projects consumer-owned light DOM; style the assigned node through its own class or public contract."
     },
     {
       "tag": "c2-table",
@@ -2319,6 +2482,18 @@
       "reason": "The semantic icon region owns the icon slot's component-side presentation."
     },
     {
+      "tag": "c2-todo-list",
+      "slot": "actions",
+      "decision": "assigned-content",
+      "reason": "The actions slot projects consumer-owned header controls; style the assigned node through its own class or public contract."
+    },
+    {
+      "tag": "c2-todo-list",
+      "slot": "empty",
+      "decision": "assigned-content",
+      "reason": "The empty slot projects consumer-owned empty-state content; style the assigned node through its own class or public contract."
+    },
+    {
       "tag": "c2-tooltip",
       "slot": "",
       "decision": "assigned-content",
@@ -2463,6 +2638,41 @@
       "decision": "part",
       "parts": ["heading"],
       "reason": "The semantic heading region owns the heading slot's component-side presentation."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "",
+      "decision": "part",
+      "parts": ["label"],
+      "reason": "The label part owns the default slot's text colour, size and animation; slotted content inherits them."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "done-icon",
+      "decision": "part",
+      "parts": ["indicator"],
+      "reason": "The indicator box owns the done mark's size and colour."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "error-icon",
+      "decision": "part",
+      "parts": ["indicator"],
+      "reason": "The indicator box owns the error mark's size and colour."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "indicator",
+      "decision": "part",
+      "parts": ["indicator"],
+      "reason": "The indicator box owns the custom indicator's size and colour."
+    },
+    {
+      "tag": "c2-working-indicator",
+      "slot": "meta",
+      "decision": "part",
+      "parts": ["meta"],
+      "reason": "The meta container owns the supporting text's colour and size."
     }
   ]
 }

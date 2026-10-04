@@ -66,6 +66,8 @@ export interface ChartTheme {
   axisFontSize: number
   lineWidth: number
   pointRadius: number
+  /** Stroke width of the grid lines, from `--c2-chart__grid--width`. */
+  gridWidth: number
   /** Roundedness of a bar's value end, expressed as a 0–0.5 share of its width. */
   barRadius: number
   /** Opacity the other series keep while one is highlighted from the legend. */
@@ -89,6 +91,7 @@ const FALLBACK: ChartTheme = {
   axisFontSize: 12,
   lineWidth: 2,
   pointRadius: 2.5,
+  gridWidth: 1,
   barRadius: 0,
   dimmedOpacity: 0.25,
 }
@@ -104,6 +107,7 @@ export class ChartThemeController implements ReactiveController {
   #host: ThemeHost
   #onChange: () => void
   #theme?: ChartTheme
+  #colors = new Map<string, string>()
   #resolvedFromFallback = false
   #observer?: MutationObserver
   #media?: MediaQueryList
@@ -123,7 +127,29 @@ export class ChartThemeController implements ReactiveController {
   /** Drops the cached theme and tells the host to rebuild its engine options. */
   invalidate(): void {
     this.#theme = undefined
+    this.#colors.clear()
     this.#onChange()
+  }
+
+  /**
+   * Resolves a colour expression the shared probe block does not carry — a variable only some charts document,
+   * such as `var(--c2-chart__axis-line--color, #e4e4e7)` — to a computed `rgb(…)`, through a scratch probe
+   * appended to the probe block for the read. Cached until the next invalidation, like the theme.
+   */
+  resolveColor(expression: string, fallback: string): string {
+    if (isServer || typeof getComputedStyle !== 'function') return fallback
+    const cached = this.#colors.get(expression)
+    if (cached) return cached
+    const block = this.#host.renderRoot?.querySelector<HTMLElement>('.theme-probe')
+    // Before the first render there is nowhere to probe; the value is not cached, so the next build reads it.
+    if (!block) return fallback
+    const probe = document.createElement('i')
+    probe.style.color = expression
+    block.append(probe)
+    const value = getComputedStyle(probe).color || fallback
+    probe.remove()
+    this.#colors.set(expression, value)
+    return value
   }
 
   hostConnected(): void {
@@ -146,6 +172,7 @@ export class ChartThemeController implements ReactiveController {
     this.#media?.removeEventListener('change', this.#handle)
     // The cached theme is dropped too: the element may reconnect under a different theme.
     this.#theme = undefined
+    this.#colors.clear()
   }
 
   /**
@@ -211,6 +238,7 @@ export class ChartThemeController implements ReactiveController {
       axisFontSize: pixels(axisFontProbe ? getComputedStyle(axisFontProbe).fontSize : '', FALLBACK.axisFontSize),
       lineWidth: scalar('--c2-chart__line--width', FALLBACK.lineWidth),
       pointRadius: scalar('--c2-chart__point--radius', FALLBACK.pointRadius),
+      gridWidth: Math.max(0, scalar('--c2-chart__grid--width', FALLBACK.gridWidth)),
       barRadius: Math.min(0.5, Math.max(0, scalar('--c2-chart__bar--border-radius', FALLBACK.barRadius))),
       dimmedOpacity: Math.min(1, Math.max(0, scalar('--c2-chart__series__dimmed--opacity', FALLBACK.dimmedOpacity))),
     }

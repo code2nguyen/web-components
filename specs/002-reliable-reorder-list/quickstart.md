@@ -65,7 +65,7 @@ Expected outcome:
 
 - Offset/scrolled containers and unequal or changing item heights produce the correct destination.
 - The nearest eligible vertical container scrolls at its edges and stops at boundaries.
-- `autoscrolldisabled` prevents component-driven scrolling.
+- `auto-scroll-disabled` prevents component-driven scrolling.
 - Pointercancel, lost capture, outside release, Escape, mutation, editability loss, removal, and disconnect all restore a clean idle state.
 - Reduced-motion emulation disables nonessential interpolation while pointer/keyboard ordering and necessary auto-scroll remain usable.
 

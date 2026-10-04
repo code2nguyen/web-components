@@ -7,7 +7,6 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 import styles from './text-field.scss?inline'
 import { classMap } from 'lit/directives/class-map.js'
 import { live } from 'lit/directives/live.js'
-import { addClasses } from '@c2n/core/css-helper.js'
 import { redispatchEvent, SlotPresenceController } from '@c2n/core/dom-helper.js'
 
 export type TextFieldType = 'text' | 'email' | 'password' | 'search' | 'tel' | 'url' | 'number'
@@ -30,6 +29,9 @@ export interface TextField {
  * sized by `--c2-text-field__icon--size`, an optional clear button (`clearable`), helper text (`help`), an error
  * message (`error` + `error-text`), a character counter when `maxlength` is set, and a `help-icon` slot beside the
  * field. Pair it with `c2-label` for a caption. Give the host a `width`: the field fills it.
+ *
+ * The host exposes its state as custom states, never as classes: `c2-text-field:state(focus-within)`,
+ * `:state(error)`, `:state(read-only)` and `:state(disabled)` (also set while a disabled fieldset disables it).
  *
  * @tag c2-text-field
  *
@@ -369,8 +371,13 @@ export class TextField extends LitElement {
   }
 
   protected override updated(changed: PropertyValues): void {
-    if (changed.has('disabled') || changed.has('error') || changed.has('readOnly') || changed.has('focused')) {
-      addClasses(this, this.stateClasses)
+    if (changed.has('disabled') || changed.has('disabledByForm') || changed.has('error') || changed.has('readOnly') || changed.has('focused')) {
+      // Never on the host's `class`: a server-rendered host would then differ from the hydrated one. Custom states
+      // are invisible to the DOM and match `c2-text-field:state(focus-within)` in page CSS.
+      for (const [name, on] of Object.entries(this.stateClasses)) {
+        if (on) this.internals.states.add(name)
+        else this.internals.states.delete(name)
+      }
     }
     this.syncFormState()
   }

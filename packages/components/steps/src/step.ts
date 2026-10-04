@@ -1,6 +1,7 @@
 import { LitElement, html, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit'
 import { property } from '@c2n/core/lit-helper.js'
 import { classMap } from 'lit/directives/class-map.js'
+import { styleMap } from 'lit/directives/style-map.js'
 import { customElement } from '@c2n/core/element-helper.js'
 import { SlotPresenceController } from '@c2n/core/dom-helper.js'
 import type { TypedAddEventListener, TypedRemoveEventListener } from '@c2n/core/event-helper.js'
@@ -15,6 +16,12 @@ export type { StepStatus, StepsMarker, StepsOrientation } from './step-types.js'
  * `selection-change`, which is the event to listen for.
  */
 export const STEP_SELECT_EVENT = 'c2-step-select'
+
+/**
+ * Parent/child protocol: a step's `status` changed, whether a run set the property or the attribute. Bubbles to the
+ * parent `c2-steps`, which rolls the change up. Not public API.
+ */
+export const STEP_STATUS_EVENT = 'c2-step-status'
 
 /** Detail of the {@link STEP_SELECT_EVENT} protocol event. */
 export interface StepSelectRequestDetail {
@@ -70,6 +77,15 @@ const STATUS_REOPENS = new Set<StepStatus>(['running', 'current', 'error', 'warn
  *
  * The step never sets its own depth, position, marker mode, orientation or selection: the parent `c2-steps` writes
  * them on every pass, so a step used on its own renders as a single root-level row.
+ *
+ * **States.** The step never writes an attribute on its own host — not even the `status` the list rolls up or the
+ * `collapsed` a reader toggles, neither of which reflects — so server-rendered markup matches the hydrated element.
+ * Page CSS reads the step through custom states instead: its status (`c2-step:state(running)`, `:state(success)`,
+ * `:state(error)`, `:state(warning)`, `:state(current)`, `:state(skipped)`, `:state(pending)`), `:state(collapsed)`,
+ * `:state(has-children)` for a group, `:state(last)` for the last step of its group, `:state(grouped)` when the list
+ * holds any group, the marker mode as `:state(marker-icon)`, `:state(marker-number)` or `:state(marker-none)`, and
+ * the two animations: `:state(entering)` while a step that arrived in a running trace grows into place, and
+ * `:state(settling)` while its marker gives the beat of a changed status.
  *
  * @tag c2-step
  *
@@ -166,8 +182,12 @@ export class Step extends LitElement {
   // server never rendered, and React reports it as a hydration mismatch. An author-set attribute still wins.
   private readonly internals = this.attachInternals()
 
-  /** State of the step. Drives the marker glyph and the accent colour, and reopens a folded group. */
-  @property({ reflect: true }) status: StepStatus = 'pending'
+  /**
+   * State of the step. Drives the marker glyph and the accent colour, and reopens a folded group. Not reflected: the
+   * parent list writes a rolled-up status onto a group that authored none, and a reflected one would be an attribute
+   * the server never rendered. Read it as `:state(<status>)`.
+   */
+  @property() status: StepStatus = 'pending'
 
   /** Primary text, when the `label` slot is empty. */
   @property() label = ''
@@ -189,9 +209,10 @@ export class Step extends LitElement {
 
   /**
    * Whether this group is folded away. A group is expanded by default — every step in the list is a row you can
-   * see — and only the reader, the markup or a reopening status ever changes that.
+   * see — and only the reader, the markup or a reopening status ever changes that. Not reflected; read it as
+   * `:state(collapsed)`.
    */
-  @property({ type: Boolean, reflect: true }) collapsed = false
+  @property({ type: Boolean }) collapsed = false
 
   /** Depth of nesting. Written by the parent `c2-steps`; setting it by hand only changes the indent. */
   @property({ attribute: false }) level = 0
@@ -229,16 +250,26 @@ export class Step extends LitElement {
    */
   @property({ attribute: false }) hasChildren = false
 
+  /**
+   * Whether the step is playing its arrival animation. Written by the parent `c2-steps` on a step that arrived after
+   * the list was already on screen; the step clears it when the animation ends.
+   */
+  @property({ attribute: false }) entering = false
+
   private readonly slotPresence = new SlotPresenceController(this, ['detail', 'trailing', 'toggle'])
 
   override connectedCallback() {
+    // A server-rendered step arrives with its shadow root already attached. The server cannot see the light DOM, so
+    // it drew the step as a leaf; the first client render must match that, and the sub-steps are picked up after.
+    const serverRendered = this.shadowRoot !== null && !this.hasUpdated
     super.connectedCallback()
     this.internals.role = 'listitem'
     // The arrival animation runs on the host, the settling one on the marker inside the shadow root — and an
     // animation event from in there does not cross the boundary, so both ends need a listener.
     this.addEventListener('animationend', this.handleAnimationEnd)
     this.renderRoot.addEventListener('animationend', this.handleAnimationEnd)
-    this.syncHasChildren()
+    if (serverRendered) void this.updateComplete.then(() => this.syncHasChildren())
+    else this.syncHasChildren()
   }
 
   override disconnectedCallback() {
@@ -254,29 +285,54 @@ export class Step extends LitElement {
    */
   private readonly handleAnimationEnd = (event: Event) => {
     const name = (event as AnimationEvent).animationName
-    if (name.includes('step-enter') && event.target === this) this.removeAttribute('entering')
-    if (name.includes('step-settle')) this.removeAttribute('settling')
+    if (name.includes('step-enter') && event.target === this) this.entering = false
+    if (name.includes('step-settle')) this.setState('settling', false)
+  }
+
+  /**
+   * Every piece of state page CSS may want lives in a custom state, never on the host's attributes: an attribute the
+   * step (or its list) writes on itself is one the server never rendered, which a hydrating framework reports.
+   */
+  private setState(name: string, on: boolean) {
+    if (on) this.internals.states.add(name)
+    else this.internals.states.delete(name)
   }
 
   protected override willUpdate(changed: PropertyValues) {
     // Only a real change reopens a stage. The old value is `undefined` on the first pass, where `status` is merely
     // the one the step was born with — the author's, not the run's, so a `collapsed` stage stays folded.
-    if (!changed.has('status') || changed.get('status') === undefined) return
-    if (STATUS_REOPENS.has(this.status)) this.collapsed = false
+    if (changed.has('status') && changed.get('status') !== undefined && STATUS_REOPENS.has(this.status)) this.collapsed = false
+    this.syncStates(changed)
   }
 
   protected override updated(changed: PropertyValues) {
     // The beat is for a status that *changed*. On the first pass `status` is merely the one the step was born
     // with, and a trace drawn complete should sit still rather than pop one marker per row.
-    if (changed.has('status') && changed.get('status') !== undefined) this.toggleAttribute('settling', true)
-    if (changed.has('level')) this.style.setProperty('--level', String(this.level))
-    if (changed.has('last')) this.toggleAttribute('last', this.last)
-    if (changed.has('marker')) this.setAttribute('marker', this.marker)
-    if (changed.has('grouped')) this.toggleAttribute('grouped', this.grouped)
-    if (changed.has('hasChildren')) this.toggleAttribute('has-children', this.hasChildren)
+    if (changed.has('status') && changed.get('status') !== undefined) this.setState('settling', true)
+    // The parent rolls a run's status up; telling it is what used to be the reflected attribute's job.
+    if (changed.has('status')) this.dispatchEvent(new CustomEvent(STEP_STATUS_EVENT, { bubbles: true }))
     if (changed.has('collapsed') && changed.get('collapsed') !== undefined && this.hasChildren) {
       this.dispatchEvent(new CustomEvent<StepToggleEventDetail>('step-toggle', { detail: { collapsed: this.collapsed, path: this.path }, bubbles: true }))
     }
+  }
+
+  /** States are set before render so the first paint already carries them. */
+  private syncStates(changed: PropertyValues) {
+    if (changed.has('status')) {
+      const previous = changed.get('status') as StepStatus | undefined
+      if (previous) this.setState(previous, false)
+      if (this.status) this.setState(this.status, true)
+    }
+    if (changed.has('collapsed')) this.setState('collapsed', this.collapsed)
+    if (changed.has('last')) this.setState('last', this.last)
+    if (changed.has('marker')) {
+      const previous = changed.get('marker') as StepsMarker | undefined
+      if (previous) this.setState(`marker-${previous}`, false)
+      this.setState(`marker-${this.marker}`, true)
+    }
+    if (changed.has('grouped')) this.setState('grouped', this.grouped)
+    if (changed.has('hasChildren')) this.setState('has-children', this.hasChildren)
+    if (changed.has('entering')) this.setState('entering', this.entering)
   }
 
   /** These three collapse when empty, so their rows have to know whether the slot was filled. */
@@ -367,11 +423,13 @@ export class Step extends LitElement {
   override render() {
     const rowClass = classMap({ 'c2-step__row': true, [`is-${this.status}`]: true, 'is-selected': this.interactive && this.selected })
     const frameClass = classMap({ 'c2-step__frame': true, 'is-horizontal': this.orientation === 'horizontal' })
+    // The depth drives the indent. It is set inside the shadow root, never as an inline style on the host.
+    const frameStyle = styleMap({ '--level': String(this.level) })
     // A leaf is a row; a group is a disclosure, which `<details>` gives correct keyboard and expanded-state
     // semantics for free. The slot lives in both branches, or a leaf could never find out it has children.
     // One frame around both, so a step arriving in a running trace has a single box to grow from.
     return html`
-      <div class=${frameClass} part="frame">
+      <div class=${frameClass} part="frame" style=${frameStyle}>
         ${
           this.isDisclosure
             ? html`

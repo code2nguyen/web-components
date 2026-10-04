@@ -1,0 +1,141 @@
+import MdxCodeBlock from '../../components/MdxCodeBlock.astro'
+import GalleryGrid from '../../components/GalleryGrid.astro'
+
+import { Separator } from '@c2n/separator'
+import { Badge } from '@c2n/badge'
+
+## Presets
+
+Curated looks for `c2-separator`. Open any card in the studio to start from it. Everything is a line variable (`thickness`, `color`, `style`, `spacing`, `inset-*`) or a label variable (`__label--*`, `__line-start--flex`).
+
+<GalleryGrid>
+
+```html tag=MdxCodeBlock,label=Default
+<c2-separator style="width: 240px"></c2-separator>
+```
+
+```html tag=MdxCodeBlock,label=Or
+<c2-separator style="width: 240px">or</c2-separator>
+```
+
+```html tag=MdxCodeBlock,label=Dashed
+<style>
+  .dashed {
+    width: 240px;
+    --c2-separator--style: dashed;
+    --c2-separator--color: var(--c2-theme--color-outline, #d4d4d8);
+  }
+</style>
+<c2-separator class="dashed"></c2-separator>
+```
+
+```html tag=MdxCodeBlock,label=Dotted
+<style>
+  .dotted {
+    width: 240px;
+    --c2-separator--style: dotted;
+    --c2-separator--thickness: 2px;
+    --c2-separator--color: var(--c2-theme--color-outline-strong, #a1a1aa);
+  }
+</style>
+<c2-separator class="dotted"></c2-separator>
+```
+
+```html tag=MdxCodeBlock,label=Accent
+<style>
+  .accent {
+    width: 240px;
+    --c2-separator--thickness: 3px;
+    --c2-separator--color: var(--c2-theme--color-primary, #0265dc);
+  }
+</style>
+<c2-separator class="accent"></c2-separator>
+```
+
+```html tag=MdxCodeBlock,label=Section heading
+<style>
+  .heading {
+    width: 240px;
+    --c2-separator__line-start--flex: 0 0 0px;
+    --c2-separator__label--gap: 0px;
+    --c2-separator__label--color: var(--c2-theme--color-on-surface, #18181b);
+    --c2-separator__label--font-weight: 600;
+    --c2-separator__label--font-size: 11px;
+    --c2-separator__label--text-transform: uppercase;
+    --c2-separator__label--letter-spacing: 0.06em;
+  }
+  .heading::part(line) {
+    margin-left: 12px;
+  }
+</style>
+<c2-separator class="heading">Recent files</c2-separator>
+```
+
+```html tag=MdxCodeBlock,label=Leading label
+<style>
+  .leading {
+    width: 240px;
+    --c2-separator__line-start--flex: 0 0 24px;
+    --c2-separator__label--color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+    --c2-separator__label--font-size: 13px;
+    --c2-separator__label--font-weight: 400;
+  }
+</style>
+<c2-separator class="leading">Continue with</c2-separator>
+```
+
+```html tag=MdxCodeBlock,label=Badge label
+<style>
+  .badge-label {
+    width: 240px;
+    --c2-separator__label--gap: 8px;
+  }
+</style>
+<c2-separator class="badge-label"><c2-badge tone="primary">New</c2-badge></c2-separator>
+```
+
+```html tag=MdxCodeBlock,label=Vertical
+<style>
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--c2-theme--color-outline-variant, #e4e4e7);
+    border-radius: 8px;
+    font-size: 13px;
+    color: color-mix(in srgb, var(--c2-theme--color-on-surface, #18181b) 82%, var(--c2-theme--color-surface, #ffffff));
+  }
+</style>
+<div class="toolbar">
+  <span>Bold</span>
+  <span>Italic</span>
+  <c2-separator orientation="vertical" decorative style="--c2-separator--spacing: 2px"></c2-separator>
+  <span>Link</span>
+</div>
+```
+
+```html tag=MdxCodeBlock,label=Dark
+<style>
+  .dark {
+    display: grid;
+    gap: 14px;
+    width: 240px;
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--c2-theme--color-dark-surface, #18181b);
+    color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+    font-size: 13px;
+    --c2-separator--color: color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 19%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-separator__label--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
+  }
+</style>
+<div class="dark">
+  <span>Signed in as ada@example.com</span>
+  <c2-separator></c2-separator>
+  <c2-separator>or</c2-separator>
+</div>
+```
+
+</GalleryGrid>

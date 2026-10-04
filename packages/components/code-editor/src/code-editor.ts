@@ -279,9 +279,31 @@ export class CodeEditor extends LitElement {
   }
 
   private async mount() {
+    const options = this.editorOptions()
     const editor = await createEditor({
+      ...options,
       parent: this.surface,
       root: this.renderRoot as ShadowRoot,
+      onInput: (value) => this.handleEditorInput(value),
+      onBlur: () => this.handleBlur(),
+      onFocus: () => (this.focused = true),
+    })
+    // The element was torn down while the dynamic import was in flight.
+    if (!this.isConnected) {
+      editor?.destroy()
+      return
+    }
+    // `updated()` skips every change while there is no editor, so anything assigned during the import (a value
+    // loaded from async storage, a language picked from saved settings) would otherwise be lost.
+    if (editor) this.applyChangesSince(options, editor)
+    this.editor = editor
+    this.engineState = editor ? 'ready' : 'basic'
+    this.dispatchEvent(new CustomEvent('ready', { detail: { engine: this.engineState === 'ready' ? 'codemirror' : 'basic' } }))
+  }
+
+  /** The state the editor is created from, compared again once the async engine has loaded. */
+  private editorOptions() {
+    return {
       value: this.value,
       language: this.language,
       languageLoader: this.languageLoader,
@@ -293,18 +315,20 @@ export class CodeEditor extends LitElement {
       tabSize: this.tabSize,
       placeholder: this.placeholder,
       label: this.accessibleName,
-      onInput: (value) => this.handleEditorInput(value),
-      onBlur: () => this.handleBlur(),
-      onFocus: () => (this.focused = true),
-    })
-    // The element was torn down while the dynamic import was in flight.
-    if (!this.isConnected) {
-      editor?.destroy()
-      return
     }
-    this.editor = editor
-    this.engineState = editor ? 'ready' : 'basic'
-    this.dispatchEvent(new CustomEvent('ready', { detail: { engine: this.engineState === 'ready' ? 'codemirror' : 'basic' } }))
+  }
+
+  private applyChangesSince(mounted: ReturnType<CodeEditor['editorOptions']>, editor: EditorHandle) {
+    const now = this.editorOptions()
+    if (now.value !== mounted.value) editor.setValue(now.value)
+    if (now.language !== mounted.language || now.languageLoader !== mounted.languageLoader) void editor.setLanguage(now.language, now.languageLoader)
+    if (now.readOnly !== mounted.readOnly || now.editable !== mounted.editable) editor.setEditing(now.readOnly, now.editable)
+    if (now.lineNumbers !== mounted.lineNumbers) editor.setLineNumbers(now.lineNumbers)
+    if (now.lineWrapping !== mounted.lineWrapping) editor.setLineWrapping(now.lineWrapping)
+    if (now.autocomplete !== mounted.autocomplete) editor.setAutocomplete(now.autocomplete)
+    if (now.tabSize !== mounted.tabSize) editor.setTabSize(now.tabSize)
+    if (now.placeholder !== mounted.placeholder) editor.setPlaceholder(now.placeholder)
+    if (now.label !== mounted.label) editor.setLabel(now.label)
   }
 
   protected override updated(changed: PropertyValues) {

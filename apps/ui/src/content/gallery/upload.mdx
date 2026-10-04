@@ -29,12 +29,12 @@ Each example has a simulated upload transport. Choose or drop local files to see
 ```html tag=MdxCodeBlock,label=Image collection,description=Image-only selection with previews in attachment rows,useWhen=The workflow accepts visual assets
 <style>
   .image-upload {
-    --c2-upload__dropzone--background: #f5f3ff;
+    --c2-upload__dropzone--background: color-mix(in srgb, #7c3aed 6%, var(--c2-theme--color-surface, #ffffff));
     --c2-upload__dropzone--border: 1px dashed #8b5cf6;
-    --c2-upload__dropzone__drag--background: #ede9fe;
+    --c2-upload__dropzone__drag--background: color-mix(in srgb, #7c3aed 12%, var(--c2-theme--color-surface, #ffffff));
     --c2-upload__dropzone__drag--border: 1px dashed #6d28d9;
     --c2-upload__icon--color: #7c3aed;
-    --c2-upload__action--color: #7c3aed;
+    --c2-upload__action--color: color-mix(in srgb, #7c3aed 75%, var(--c2-theme--color-on-surface, #18181b));
   }
 </style>
 <c2-upload class="image-upload" data-upload-demo multiple accept="image/*" max-files="8" aria-label="Upload gallery images">
@@ -61,10 +61,10 @@ Each example has a simulated upload transport. Choose or drop local files to see
     --c2-button__container--padding-right: 16px;
     --c2-button__container--border-radius: 999px;
     --c2-button__container--background-color: rgb(2, 101, 220);
-    --c2-button__container--color: #ffffff;
+    --c2-button__container--color: var(--c2-theme--color-on-fill, #ffffff);
     --c2-button__container__hover--background-color: rgb(1, 84, 184);
     --c2-button__container__active--background-color: rgb(1, 70, 154);
-    --c2-upload__icon--color: #ffffff;
+    --c2-upload__icon--color: var(--c2-theme--color-on-fill, #ffffff);
   }
 </style>
 <c2-upload class="import-upload" data-upload-demo variant="compact" accept=".csv" aria-label="Import customer CSV">
@@ -78,14 +78,14 @@ Each example has a simulated upload transport. Choose or drop local files to see
 ```html tag=MdxCodeBlock,label=Dark workspace,description=Upload surface adapted to a permanently dark canvas,useWhen=The control lives in a dark editor or media workspace
 <style>
   .dark-upload {
-    --c2-upload__dropzone--background: #18181b;
-    --c2-upload__dropzone--border: 1px dashed #52525b;
-    --c2-upload__dropzone__hover--background: #27272a;
-    --c2-upload__dropzone__hover--border: 1px dashed #71717a;
+    --c2-upload__dropzone--background: var(--c2-theme--color-dark-surface, #18181b);
+    --c2-upload__dropzone--border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 26%, var(--c2-theme--color-dark-surface, #18181b));
+    --c2-upload__dropzone__hover--background: var(--c2-theme--color-dark-surface-container, #27272a);
+    --c2-upload__dropzone__hover--border: 1px dashed color-mix(in srgb, var(--c2-theme--color-on-dark-surface, #fafafa) 39%, var(--c2-theme--color-dark-surface, #18181b));
     --c2-upload__dropzone__drag--background: #172554;
     --c2-upload__dropzone__drag--border: 1px dashed #60a5fa;
-    --c2-upload__prompt--color: #fafafa;
-    --c2-upload__hint--color: #a1a1aa;
+    --c2-upload__prompt--color: var(--c2-theme--color-on-dark-surface, #fafafa);
+    --c2-upload__hint--color: var(--c2-theme--color-on-dark-surface-variant, #a1a1aa);
     --c2-upload__icon--color: #60a5fa;
     --c2-upload__action--color: #93c5fd;
   }

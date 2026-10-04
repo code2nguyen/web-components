@@ -3,6 +3,209 @@
 All `@c2n/*` packages are versioned together. This file is generated from the commit history by
 `npm run changelog` — do not edit it by hand.
 
+## [0.0.24](https://github.com/code2nguyen/web-components/releases/tag/v0.0.24) — 2026-10-03
+
+### Features
+
+- **theme:** Add color-on-fill for text on a saturated fill ([d015383](https://github.com/code2nguyen/web-components/commit/d015383))
+- **theme:** Add dark-block colour roles that stay dark in both themes ([b6295ad](https://github.com/code2nguyen/web-components/commit/b6295ad))
+
+### Fixes
+
+- **week-planner:** Hydrate with the server's clock ([388ec4f](https://github.com/code2nguyen/web-components/commit/388ec4f))
+- **flow:** Regenerate the React and Vue declarations for actions-placement ([534f4ca](https://github.com/code2nguyen/web-components/commit/534f4ca))
+
+### Docs site & examples
+
+- **ui:** Gallery text on coloured fills takes color-on-fill ([95c76f0](https://github.com/code2nguyen/web-components/commit/95c76f0))
+- **ui:** Dark gallery cards take their colours from the dark-block tokens ([b37d26e](https://github.com/code2nguyen/web-components/commit/b37d26e))
+
+## [0.0.23](https://github.com/code2nguyen/web-components/releases/tag/v0.0.23) — 2026-10-03
+
+### Features
+
+- **flow:** Add an actions toolbar over the canvas, placeable on any edge ([bbf0111](https://github.com/code2nguyen/web-components/commit/bbf0111))
+- **flow:** Arrowheads, edge labels and a variable to hide the status marker ([da4bb53](https://github.com/code2nguyen/web-components/commit/da4bb53))
+
+### Fixes
+
+- **theme:** Theme the code editor's syntax palette, the danger badge and the attachment status ([7057036](https://github.com/code2nguyen/web-components/commit/7057036))
+- **otp-input:** Shrink inside flex and grid parents too ([fece866](https://github.com/code2nguyen/web-components/commit/fece866))
+- **avatar:** Auto-color backgrounds keep white initials readable ([4c5ac36](https://github.com/code2nguyen/web-components/commit/4c5ac36))
+- **code-editor:** Let --c2-code-editor__active-line--background win over CodeMirror ([0bcf2c3](https://github.com/code2nguyen/web-components/commit/0bcf2c3))
+- **steps:** Hydrate a server-rendered step as the leaf the server drew ([facba45](https://github.com/code2nguyen/web-components/commit/facba45))
+- **theme:** Deepen the primary badge's text so it reads on its container ([8bdd18a](https://github.com/code2nguyen/web-components/commit/8bdd18a))
+- **otp-input:** Shrink the cells instead of overflowing a narrow column ([7f7e8c5](https://github.com/code2nguyen/web-components/commit/7f7e8c5))
+- **theme:** Map the remaining neutral component colours to theme tokens ([bf0f962](https://github.com/code2nguyen/web-components/commit/bf0f962))
+- **qr-code:** Expose the placeholder border as --c2-qr-code__placeholder--border ([d690092](https://github.com/code2nguyen/web-components/commit/d690092))
+- **theme:** Map the accordion's frame colour to the outline token ([53bd233](https://github.com/code2nguyen/web-components/commit/53bd233))
+- **theme:** Theme select's pressed trigger and its landing preview follow the theme ([4f5b8e7](https://github.com/code2nguyen/web-components/commit/4f5b8e7))
+- **questionnaire:** Expose the indicator, shortcut and other-field colours so the theme reaches them ([5765b41](https://github.com/code2nguyen/web-components/commit/5765b41))
+- **theme:** Draw the avatar group's separation ring in the surface colour ([64f5f3a](https://github.com/code2nguyen/web-components/commit/64f5f3a))
+- **flow:** Record the actions slot in the slot styling audit ([7b1e849](https://github.com/code2nguyen/web-components/commit/7b1e849))
+- **notepad:** Tighten the controls row and keep it below the perforation ([4ad238c](https://github.com/code2nguyen/web-components/commit/4ad238c))
+- **notepad:** Put the actions slot left of the Paper and Tear off buttons, on their row ([90973f8](https://github.com/code2nguyen/web-components/commit/90973f8))
+
+### Docs site & examples
+
+- **ui:** Every gallery card passes the audit in both themes ([f3c68e2](https://github.com/code2nguyen/web-components/commit/f3c68e2))
+- **ui:** Primary text reads on the site's primary container ([1898b70](https://github.com/code2nguyen/web-components/commit/1898b70))
+- **ui:** Gallery cards pass the contrast audit in both themes ([ff9ca10](https://github.com/code2nguyen/web-components/commit/ff9ca10))
+- **ui:** Readable muted text and the dark chart palette on the docs site ([673f88c](https://github.com/code2nguyen/web-components/commit/673f88c))
+- **ui:** Theme the copy button and details previews ([982c74f](https://github.com/code2nguyen/web-components/commit/982c74f))
+- **ui:** Fit the questionnaire preview in its card ([12148ec](https://github.com/code2nguyen/web-components/commit/12148ec))
+- **ui:** Give the avatar preview room and theme its rings ([3bfb28d](https://github.com/code2nguyen/web-components/commit/3bfb28d))
+- **ui:** Keep the split panel preview's divider visible ([893ee45](https://github.com/code2nguyen/web-components/commit/893ee45))
+- **ui:** Theme the masonry preview and the neutral greys of the other landing previews ([e713cb8](https://github.com/code2nguyen/web-components/commit/e713cb8))
+- **ui:** Theme the border beam preview card and make its beam easier to see ([68e8c8d](https://github.com/code2nguyen/web-components/commit/68e8c8d))
+
+## [0.0.22](https://github.com/code2nguyen/web-components/releases/tag/v0.0.22) — 2026-10-03
+
+### Features
+
+- **notepad:** Actions slot, and controls that can show only on the note in use ([87c3390](https://github.com/code2nguyen/web-components/commit/87c3390))
+- **flow:** Editable mode — add, connect, rename and delete nodes ([80190a0](https://github.com/code2nguyen/web-components/commit/80190a0))
+- **week-planner:** Dated weeks, click to add and drag to reschedule ([72879d3](https://github.com/code2nguyen/web-components/commit/72879d3))
+- **month-planner:** Click a day to add, drag to reschedule ([24d8d2a](https://github.com/code2nguyen/web-components/commit/24d8d2a))
+
+### Fixes
+
+- **notepad:** Add the actions slot to the slot styling audit ([1a383a2](https://github.com/code2nguyen/web-components/commit/1a383a2))
+- **notepad:** On a touch screen, hidden controls show once the page is tapped ([4ebb9e8](https://github.com/code2nguyen/web-components/commit/4ebb9e8))
+
+## [0.0.21](https://github.com/code2nguyen/web-components/releases/tag/v0.0.21) — 2026-10-03
+
+### Breaking changes
+
+- **todo-list:** Take custom backgrounds and palettes, stored by position ([76eefa9](https://github.com/code2nguyen/web-components/commit/76eefa9))
+- **notepad:** Take custom ink and highlighter lists, stored by position ([5011b91](https://github.com/code2nguyen/web-components/commit/5011b91))
+- **separator:** Rename @c2n/seperator to @c2n/separator ([37674f3](https://github.com/code2nguyen/web-components/commit/37674f3))
+
+### Features
+
+- **page-editor:** Add c2-page-editor, a Notion-style editor for long text ([f1d3857](https://github.com/code2nguyen/web-components/commit/f1d3857))
+- **notepad:** Name list colours `{ value, name }`, with an optional name ([bfd8efd](https://github.com/code2nguyen/web-components/commit/bfd8efd))
+- **todo-list:** Draw the ring and hero progress as a circular c2-progress ([7056c63](https://github.com/code2nguyen/web-components/commit/7056c63))
+
+### Fixes
+
+- **masonry:** Place a newly added tile before its authored successor ([04883b3](https://github.com/code2nguyen/web-components/commit/04883b3))
+- **code-editor:** Apply value and options set while the engine loads ([aa3745d](https://github.com/code2nguyen/web-components/commit/aa3745d))
+- **reorder-list:** Keep the drag preview under the pointer inside a containing ancestor ([ba20843](https://github.com/code2nguyen/web-components/commit/ba20843))
+- **notepad:** Size the paper menu to its content on iOS Safari ([164b69d](https://github.com/code2nguyen/web-components/commit/164b69d))
+
+## [0.0.20](https://github.com/code2nguyen/web-components/releases/tag/v0.0.20) — 2026-10-02
+
+### Features
+
+- **notepad:** Add pad presets (notebook, legal pad, sticky note, index card) to the paper picker ([037de7d](https://github.com/code2nguyen/web-components/commit/037de7d))
+- **todo-list:** Edit tasks, list icons, four distinct palettes, and c2-tabs/c2-progress ([8ec21c7](https://github.com/code2nguyen/web-components/commit/8ec21c7))
+- **progress:** Add circular variant ([6994887](https://github.com/code2nguyen/web-components/commit/6994887))
+- **comparison-bar:** Segments touch by default ([e6318aa](https://github.com/code2nguyen/web-components/commit/e6318aa))
+- **comparison-bar:** Support an optional third (middle) value ([95cde3e](https://github.com/code2nguyen/web-components/commit/95cde3e))
+- **notepad:** Paper colours pair a sheet with its ink, in a hover card ([a986953](https://github.com/code2nguyen/web-components/commit/a986953))
+- **comparison-bar:** Add c2-comparison-bar two-segment ratio bar ([8283c07](https://github.com/code2nguyen/web-components/commit/8283c07))
+- **notepad:** Add a paper picker, and a dark washi-tape toolbar under the theme ([ce5a4df](https://github.com/code2nguyen/web-components/commit/ce5a4df))
+- **notepad:** Group the inks and highlighters into one toolbar button each ([d5d2e46](https://github.com/code2nguyen/web-components/commit/d5d2e46))
+- **chart:** Add c2-map-chart, a choropleth and point map on vector outlines ([e84cd3d](https://github.com/code2nguyen/web-components/commit/e84cd3d))
+- **notepad:** Add c2-notepad, a paper notepad with a selection toolbar, checklists and tear-off pages ([1b21b03](https://github.com/code2nguyen/web-components/commit/1b21b03))
+- **butterfly-chart:** Add c2-butterfly-chart, two series back to back ([05302b3](https://github.com/code2nguyen/web-components/commit/05302b3))
+- **button-group:** Add toolbar mode, roving focus and form association ([2566aeb](https://github.com/code2nguyen/web-components/commit/2566aeb))
+- **chart:** Add horizontal, stacked and value-labelled bar charts ([cf1724a](https://github.com/code2nguyen/web-components/commit/cf1724a))
+- **status-panel:** Add media="illustration" and media="none" ([cf20366](https://github.com/code2nguyen/web-components/commit/cf20366))
+- Add a custom 404 page to the docs site ([c49430f](https://github.com/code2nguyen/web-components/commit/c49430f))
+- **changelog:** Show the 10 latest releases and preview new components ([74e4a5e](https://github.com/code2nguyen/web-components/commit/74e4a5e))
+- **changelog:** Generate the changelog from git history and show it on the docs site ([c63e5de](https://github.com/code2nguyen/web-components/commit/c63e5de))
+- **steps:** Horizontal rail always links the steps; text placement around the marker ([22b8f4d](https://github.com/code2nguyen/web-components/commit/22b8f4d))
+- **steps:** Horizontal orientation and selectable steps ([33295e2](https://github.com/code2nguyen/web-components/commit/33295e2))
+- **todo-list:** Add colour palettes to c2-todo-list ([ef3c458](https://github.com/code2nguyen/web-components/commit/ef3c458))
+- **reorder-list, todo-list:** Add opt-in swipe actions to c2-reorder-list and use them in c2-todo-list ([2b27d11](https://github.com/code2nguyen/web-components/commit/2b27d11))
+- **flow:** Add c2-flow: pipeline flow diagram component ([f544fd6](https://github.com/code2nguyen/web-components/commit/f544fd6))
+- **todo-list:** Add c2-todo-list and the @c2n/task-icons set ([71659a1](https://github.com/code2nguyen/web-components/commit/71659a1))
+- **week-planner:** Add c2-week-planner: typical-week schedule with odd/even weeks ([d5ee5ae](https://github.com/code2nguyen/web-components/commit/d5ee5ae))
+- **chart:** Round the pyramid's corners ([0fa6d3f](https://github.com/code2nguyen/web-components/commit/0fa6d3f))
+- **bubble-chart:** Hide the size key unless size-legend is set ([e628cb4](https://github.com/code2nguyen/web-components/commit/e628cb4))
+- **calendar:** Add c2-calendar: inline single-date month calendar ([4d7fd0a](https://github.com/code2nguyen/web-components/commit/4d7fd0a))
+- **overlap-chart:** Name the sets in one legend by default; set-labels="around" opts in ([98419b2](https://github.com/code2nguyen/web-components/commit/98419b2))
+- **chart:** Add c2-pyramid-chart ([e1fcb73](https://github.com/code2nguyen/web-components/commit/e1fcb73))
+- **chart:** Highlight is the default legend action; overlap chart polish ([8f46cce](https://github.com/code2nguyen/web-components/commit/8f46cce))
+- **chart:** Clicking a series in the plot highlights it, on every chart ([0365dc5](https://github.com/code2nguyen/web-components/commit/0365dc5))
+- **chart:** Legend-action="highlight" on every chart; slots verified for all ([0f142f9](https://github.com/code2nguyen/web-components/commit/0f142f9))
+- **overlap-chart:** Selection="set" selects the whole circle under the pointer ([8583e3e](https://github.com/code2nguyen/web-components/commit/8583e3e))
+- **overlap-chart:** Configurable look for the other circles while one set is highlighted ([78ad3fb](https://github.com/code2nguyen/web-components/commit/78ad3fb))
+- **overlap-chart:** Highlight and select a whole set; region/set on tooltip context ([d57a2c8](https://github.com/code2nguyen/web-components/commit/d57a2c8))
+- **chart:** Add c2-bubble-chart, a scatter plot sized by a third measure ([896e7bb](https://github.com/code2nguyen/web-components/commit/896e7bb))
+- **chart:** Add c2-overlap-chart, a Venn diagram of two or three sets ([d0c8c0e](https://github.com/code2nguyen/web-components/commit/d0c8c0e))
+- **marker:** Add c2-marker inline text marker ([54507ee](https://github.com/code2nguyen/web-components/commit/54507ee))
+- **command:** Add c2-command searchable command list ([f8c4de6](https://github.com/code2nguyen/web-components/commit/f8c4de6))
+- **hover-card:** Add c2-hover-card component ([5f65330](https://github.com/code2nguyen/web-components/commit/5f65330))
+- **table:** Group rows by one or more fields ([d2959b0](https://github.com/code2nguyen/web-components/commit/d2959b0))
+- **context-menu:** Add c2-context-menu: right-click / long-press menus, static or per clicked spot ([69cfc0c](https://github.com/code2nguyen/web-components/commit/69cfc0c))
+- **otp-input:** Add c2-otp-input one-time-code field ([1275cd7](https://github.com/code2nguyen/web-components/commit/1275cd7))
+- **slider:** Add range mode with two thumbs ([819fa5d](https://github.com/code2nguyen/web-components/commit/819fa5d))
+
+### Fixes
+
+- **notepad:** Read the caret through composed ranges, so a fast key acts at the real caret in WebKit ([837b0cb](https://github.com/code2nguyen/web-components/commit/837b0cb))
+- **notepad:** Keep the toolbar and the paper card on their anchor while the page scrolls ([9f13221](https://github.com/code2nguyen/web-components/commit/9f13221))
+- **reorder-list:** Hydrate server-rendered items, and style the drop slot and drag preview ([305934f](https://github.com/code2nguyen/web-components/commit/305934f))
+- **notepad:** Mark the selected colour with a ring, not a highlighted square ([2908af9](https://github.com/code2nguyen/web-components/commit/2908af9))
+- **notepad:** Keep the ink colour of selected text ([8414048](https://github.com/code2nguyen/web-components/commit/8414048))
+- **notepad:** Sync the caret before key handling, clear the binding, ring only on keyboard focus ([8e651fb](https://github.com/code2nguyen/web-components/commit/8e651fb))
+- **status-panel:** Show slotted title and description after SSR hydration ([8982b18](https://github.com/code2nguyen/web-components/commit/8982b18))
+- **chart:** Zero-based bar value axis, one tick per band, readable inside labels ([6b093e7](https://github.com/code2nguyen/web-components/commit/6b093e7))
+- **steps:** A selected step only recolours its label; steps gallery two cards per row ([66b343c](https://github.com/code2nguyen/web-components/commit/66b343c))
+- **chart:** Keep every bubble inside the axes; meaningful one-column-per-series example ([8ce849e](https://github.com/code2nguyen/web-components/commit/8ce849e))
+- **steps:** Equal-height horizontal steps; build the docs task demo in the browser ([bcd20c2](https://github.com/code2nguyen/web-components/commit/bcd20c2))
+- **chart:** Keep pyramid labels readable and clear of each other ([56355b6](https://github.com/code2nguyen/web-components/commit/56355b6))
+- **bubble-chart:** Draw bubble labels in the chart text colour so they read in dark mode ([f776921](https://github.com/code2nguyen/web-components/commit/f776921))
+- **chart:** Honour declared series after hydration; tidy overlap labels ([486e180](https://github.com/code2nguyen/web-components/commit/486e180))
+- **mcp:** Keep gallery screenshot names independent of card order ([2350ffa](https://github.com/code2nguyen/web-components/commit/2350ffa))
+- **menu:** Mark the keyboard-focused row by its highlight only; widen the context-menu usage examples ([0188407](https://github.com/code2nguyen/web-components/commit/0188407))
+- **navigation-menu:** Close the open panel when its trigger is clicked again ([208ec16](https://github.com/code2nguyen/web-components/commit/208ec16))
+- **table:** Record the group:{groupKey} slot in the slot styling audit ([1060ae5](https://github.com/code2nguyen/web-components/commit/1060ae5))
+- **chart:** Theme scatter grid lines and fit its axes to the data ([f5d39df](https://github.com/code2nguyen/web-components/commit/f5d39df))
+- **banner:** Keep the icon on the message row in a narrow banner ([2331b07](https://github.com/code2nguyen/web-components/commit/2331b07))
+- **theme:** Map chat message body text to the on-surface token ([39e8d33](https://github.com/code2nguyen/web-components/commit/39e8d33))
+- **date-selector:** Keep the selected fill on a hovered day ([c8fa95e](https://github.com/code2nguyen/web-components/commit/c8fa95e))
+
+### Improvements
+
+- Planners: heading and actions parts, slot styling audit entries ([5dacbb5](https://github.com/code2nguyen/web-components/commit/5dacbb5))
+- Month planner: heading and actions header slots ([4c2868f](https://github.com/code2nguyen/web-components/commit/4c2868f))
+- Week planner: heading and actions header slots ([3ed6611](https://github.com/code2nguyen/web-components/commit/3ed6611))
+- Responsive planners: day strip, compact month, heading, Planning category ([4cbdd72](https://github.com/code2nguyen/web-components/commit/4cbdd72))
+- **calendar, month-planner:** Rename c2-calendar to c2-month-planner ([2826c3f](https://github.com/code2nguyen/web-components/commit/2826c3f))
+- **todo-list:** Give c2-todo-list a paper feel, notes, archive, swipe, reorder and task colours ([3a0bc9e](https://github.com/code2nguyen/web-components/commit/3a0bc9e))
+- Start the week on the locale's first day ([b0ca38b](https://github.com/code2nguyen/web-components/commit/b0ca38b))
+- Translate the calendar and week planner; week number badge on the switch ([7364743](https://github.com/code2nguyen/web-components/commit/7364743))
+- Keep white text on custom-coloured events in dark mode ([a2a9ac1](https://github.com/code2nguyen/web-components/commit/a2a9ac1))
+- Today tints inside the grid lines; week planner's odd/even is opt-in ([f72d579](https://github.com/code2nguyen/web-components/commit/f72d579))
+- Record @c2n/calendar in the umbrella package's lockfile entry ([ba5bb8b](https://github.com/code2nguyen/web-components/commit/ba5bb8b))
+- **stat:** Dim the c2-stat placeholder through --c2-stat__placeholder--opacity ([bb73aed](https://github.com/code2nguyen/web-components/commit/bb73aed))
+- **stat:** Show -- in c2-stat while value is null or undefined ([e6c7d91](https://github.com/code2nguyen/web-components/commit/e6c7d91))
+- **calendar:** Rework c2-calendar into a month planner ([ddeb8d0](https://github.com/code2nguyen/web-components/commit/ddeb8d0))
+- Tint shared zones of a highlighted circle in the other set's colour ([fbe0c3a](https://github.com/code2nguyen/web-components/commit/fbe0c3a))
+- Bring highlighted series forward and fix area chart band picking ([d194af6](https://github.com/code2nguyen/web-components/commit/d194af6))
+
+### Docs site & examples
+
+- **ui:** Render the button-group toolbar example as plain children ([02c107d](https://github.com/code2nguyen/web-components/commit/02c107d))
+- **ui:** Keep table rows in the studio and add a Data tab to the inspector ([373c81d](https://github.com/code2nguyen/web-components/commit/373c81d))
+- **ui:** Keep the space before the full changelog link ([a9cdb64](https://github.com/code2nguyen/web-components/commit/a9cdb64))
+- **ui:** Neutral theme-aware Sign in button in the header preview ([965d04e](https://github.com/code2nguyen/web-components/commit/965d04e))
+- **ui:** Show sidebar counts only in the components section ([f9eae50](https://github.com/code2nguyen/web-components/commit/f9eae50))
+- **ui:** Keep the header preview's Sign in on one line ([a2ef052](https://github.com/code2nguyen/web-components/commit/a2ef052))
+- **ui:** Put the drawer close button on the overview row ([f2937f8](https://github.com/code2nguyen/web-components/commit/f2937f8))
+- **ui:** Keep the search palette to one scrollbar ([212470c](https://github.com/code2nguyen/web-components/commit/212470c))
+- **ui:** Build the ⌘K search palette on c2-command ([0f9e889](https://github.com/code2nguyen/web-components/commit/0f9e889))
+- **ui:** Theme the neutral colours in docs examples for dark mode ([4164e9a](https://github.com/code2nguyen/web-components/commit/4164e9a))
+- **ui:** Tighten menu separators and add icons to the menu examples ([fdd2bb3](https://github.com/code2nguyen/web-components/commit/fdd2bb3))
+- **ui:** Fit the accordion landing preview inside its canvas ([40f377a](https://github.com/code2nguyen/web-components/commit/40f377a))
+- **ui:** Declutter the gauge chart landing preview ([c3020ac](https://github.com/code2nguyen/web-components/commit/c3020ac))
+- **ui:** Theme the steps preview and usage panel for dark mode ([c1c507f](https://github.com/code2nguyen/web-components/commit/c1c507f))
+- **ui:** Add reorder-list preview to the landing gallery ([8ce0b0e](https://github.com/code2nguyen/web-components/commit/8ce0b0e))
+
 ## [0.0.19](https://github.com/code2nguyen/web-components/releases/tag/v0.0.19) — 2026-09-29
 
 ### Features

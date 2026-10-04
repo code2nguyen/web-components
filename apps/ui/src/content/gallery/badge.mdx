@@ -20,7 +20,7 @@ Curated looks for `c2-badge`. Open any card in the studio to start from it. The 
 <style>
   .solid {
     --c2-badge--background: #0265dc;
-    --c2-badge--color: #ffffff;
+    --c2-badge--color: var(--c2-theme--color-on-fill, #ffffff);
   }
 </style>
 <c2-badge class="solid">Pro</c2-badge>
@@ -51,7 +51,13 @@ Curated looks for `c2-badge`. Open any card in the studio to start from it. The 
 ```
 
 ```html tag=MdxCodeBlock,label=Counter
-<c2-badge tone="danger" count="120"></c2-badge>
+<style>
+  .danger-counter {
+    --c2-badge__danger--background: #fee2e2;
+    --c2-badge__danger--color: #b91c1c;
+  }
+</style>
+<c2-badge class="danger-counter" tone="danger" count="120"></c2-badge>
 ```
 
 ```html tag=MdxCodeBlock,label=Dark counter
@@ -118,7 +124,7 @@ Curated looks for `c2-badge`. Open any card in the studio to start from it. The 
     --c2-badge--min-width: 22px;
     --c2-badge--font-weight: 600;
     --c2-badge__primary--background: #0265dc;
-    --c2-badge__primary--color: #ffffff;
+    --c2-badge__primary--color: var(--c2-theme--color-on-fill, #ffffff);
   }
 </style>
 <c2-badge class="square" tone="primary" count="7"></c2-badge>

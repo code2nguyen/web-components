@@ -84,6 +84,16 @@
       </section>
 
       <section>
+        <h2>Circular</h2>
+        <div style="display: flex; gap: 24px">
+          <c2-progress variant="circular" label="Loading"></c2-progress>
+          <c2-progress variant="circular" value="0" show-value>Empty</c2-progress>
+          <c2-progress variant="circular" value="67" show-value>Readiness</c2-progress>
+          <c2-progress variant="circular" value="3" max="5"><span slot="value">3/5</span></c2-progress>
+        </div>
+      </section>
+
+      <section>
         <h2>Live</h2>
         <c2-progress id="live" value="0" show-value>Rendering</c2-progress>
       </section>

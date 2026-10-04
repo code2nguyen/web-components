@@ -57,23 +57,23 @@ test('a step with sub-steps is a disclosure; a leaf is a plain row', async ({ pa
   const group = page.locator('c2-step[label="pagination"]')
   const leaf = page.locator('c2-step[label="goto"]')
 
-  await expect(group).toHaveAttribute('has-children', '')
+  await expect(group).toHaveState('has-children')
   await expect(group.locator('details')).toHaveCount(1)
   // The summary is the row, so it is the button the reader operates.
   await expect(group.locator('summary[part="row"]')).toHaveCount(1)
 
-  await expect(leaf).not.toHaveAttribute('has-children', '')
+  await expect(leaf).not.toHaveState('has-children')
   await expect(leaf.locator('details')).toHaveCount(0)
 })
 
 test('a group takes the status of the worst thing inside it', async ({ page, scenario }) => {
   await scenario()
   // Both children succeeded, so the stage reads as succeeded without authoring a status.
-  await expect(page.locator('c2-step[label="pagination"]')).toHaveAttribute('status', 'success')
+  await expect(page.locator('c2-step[label="pagination"]')).toHaveJSProperty('status', 'success')
 
   await scenario('wrapped')
   // One child failed, through two layers of island wrappers.
-  await expect(page.locator('c2-step[label="Plan"]')).toHaveAttribute('status', 'error')
+  await expect(page.locator('c2-step[label="Plan"]')).toHaveJSProperty('status', 'error')
 })
 
 test('nesting indents the children and numbers them through the tree', async ({ page, scenario }) => {
@@ -126,8 +126,8 @@ test('every step is a visible row, and a finished stage is not folded away', asy
     window.setStatus('install', 'success')
     window.setStatus('compile', 'success')
   })
-  await expect(page.locator('c2-step#build')).toHaveAttribute('status', 'success')
-  await expect(page.locator('c2-step#build')).not.toHaveAttribute('collapsed', '')
+  await expect(page.locator('c2-step#build')).toHaveJSProperty('status', 'success')
+  await expect(page.locator('c2-step#build')).toHaveJSProperty('collapsed', false)
   await expect(page.locator('c2-step#install')).toBeVisible()
 })
 
@@ -136,7 +136,7 @@ test('the reader can fold a stage away, and it stays folded', async ({ page, sce
   const build = page.locator('c2-step#build')
 
   await build.locator('summary[part="row"]').click()
-  await expect(build).toHaveAttribute('collapsed', '')
+  await expect(build).toHaveJSProperty('collapsed', true)
   await expect(page.locator('c2-step#install')).toBeHidden()
 
   // A stage that merely finishes is not something to look at again.
@@ -144,22 +144,22 @@ test('the reader can fold a stage away, and it stays folded', async ({ page, sce
     window.setStatus('install', 'success')
     window.setStatus('compile', 'success')
   })
-  await expect(build).toHaveAttribute('status', 'success')
-  await expect(build).toHaveAttribute('collapsed', '')
+  await expect(build).toHaveJSProperty('status', 'success')
+  await expect(build).toHaveJSProperty('collapsed', true)
 })
 
 test('a folded stage comes back when it starts running or something in it fails', async ({ page, scenario }) => {
   await scenario('run')
   await page.locator('c2-step#build summary[part="row"]').click()
   await page.locator('c2-step#test summary[part="row"]').click()
-  await expect(page.locator('c2-step#build')).toHaveAttribute('collapsed', '')
+  await expect(page.locator('c2-step#build')).toHaveJSProperty('collapsed', true)
 
   await page.evaluate(() => window.setStatus('install', 'running'))
-  await expect(page.locator('c2-step#build')).not.toHaveAttribute('collapsed', '')
+  await expect(page.locator('c2-step#build')).toHaveJSProperty('collapsed', false)
   await expect(page.locator('c2-step#install')).toBeVisible()
 
   await page.evaluate(() => window.setStatus('e2e', 'error'))
-  await expect(page.locator('c2-step#test')).not.toHaveAttribute('collapsed', '')
+  await expect(page.locator('c2-step#test')).toHaveJSProperty('collapsed', false)
   await expect(page.locator('c2-step#e2e')).toBeVisible()
 })
 
@@ -168,7 +168,7 @@ test('`collapsed` in the markup starts a stage folded and nothing unfolds it una
   const build = page.locator('c2-step[label="build"]')
   // A reflected default is not written onto the host (it would fail SSR hydration), so it is read as a property.
   await expect(build).toHaveJSProperty('status', 'pending')
-  await expect(build).toHaveAttribute('collapsed', '')
+  await expect(build).toHaveJSProperty('collapsed', true)
   await expect(page.locator('c2-step[label="install"]')).toBeHidden()
 })
 
@@ -192,12 +192,12 @@ test('a group announces every fold and unfold, bubbling to the list', async ({ p
 test('collapseAll folds every group away and expandAll brings them all back', async ({ page, scenario }) => {
   await scenario('run')
   await page.evaluate(() => document.querySelector('c2-steps')!.collapseAll())
-  await expect(page.locator('c2-step#build')).toHaveAttribute('collapsed', '')
-  await expect(page.locator('c2-step#test')).toHaveAttribute('collapsed', '')
+  await expect(page.locator('c2-step#build')).toHaveJSProperty('collapsed', true)
+  await expect(page.locator('c2-step#test')).toHaveJSProperty('collapsed', true)
   await expect(page.locator('c2-step#install')).toBeHidden()
 
   await page.evaluate(() => document.querySelector('c2-steps')!.expandAll())
-  await expect(page.locator('c2-step#build')).not.toHaveAttribute('collapsed', '')
+  await expect(page.locator('c2-step#build')).toHaveJSProperty('collapsed', false)
   await expect(page.locator('c2-step#install')).toBeVisible()
 })
 
@@ -226,8 +226,8 @@ test('marker="number" numbers the rows and marker="none" drops the column', asyn
 test('current derives the statuses of a wizard and an authored one still wins', async ({ page, scenario }) => {
   await scenario('wizard')
   const status = (label: string) => page.locator(`c2-step[label="${label}"]`)
-  await expect(status('Account')).toHaveAttribute('status', 'success')
-  await expect(status('Plan')).toHaveAttribute('status', 'current')
+  await expect(status('Account')).toHaveJSProperty('status', 'success')
+  await expect(status('Plan')).toHaveJSProperty('status', 'current')
   // `pending` is the default, so deriving it writes no attribute (see `reflected defaults` in CLAUDE.md).
   await expect(status('Payment')).toHaveJSProperty('status', 'pending')
 })
@@ -243,7 +243,7 @@ test('slots replace the label, the detail, the trailing content and the marker',
 test('the steps property renders the same tree as the markup', async ({ page, scenario }) => {
   await scenario('data')
   await expect(page.locator('c2-step')).toHaveCount(5)
-  await expect(page.locator('c2-step[label="pagination"]')).toHaveAttribute('status', 'success')
+  await expect(page.locator('c2-step[label="pagination"]')).toHaveJSProperty('status', 'success')
   await expect(page.locator('c2-step[label="pagination"] summary[part="row"]')).toHaveCount(1)
   await expect(page.locator('c2-step[label="collect"] [part="trailing"]')).toHaveText('1 ms')
 })
@@ -253,10 +253,10 @@ test('updateStep changes one step of a running trace without rebuilding the arra
   const changed = await page.evaluate(() => document.querySelector('c2-steps')!.updateStep('append', { status: 'error', trailing: '9 ms' }))
   expect(changed).toBe(true)
 
-  await expect(page.locator('c2-step[label="append"]')).toHaveAttribute('status', 'error')
+  await expect(page.locator('c2-step[label="append"]')).toHaveJSProperty('status', 'error')
   await expect(page.locator('c2-step[label="append"] [part="trailing"]')).toHaveText('9 ms')
   // The parent rolls the failure up.
-  await expect(page.locator('c2-step[label="pagination"]')).toHaveAttribute('status', 'error')
+  await expect(page.locator('c2-step[label="pagination"]')).toHaveJSProperty('status', 'error')
 
   expect(await page.evaluate(() => document.querySelector('c2-steps')!.updateStep('nope', { status: 'error' }))).toBe(false)
 })
@@ -353,16 +353,16 @@ test('a status the server stamped on a step does not read as one the author wrot
   // `status` reflects, so SSR emits `status="pending"` on every step. Treating that as authored is what stopped
   // the stages rolling up on the docs site while the same markup worked in a plain page.
   await scenario('ssr-pending')
-  await expect(page.locator('c2-step[label="build"]')).toHaveAttribute('status', 'pending')
+  await expect(page.locator('c2-step[label="build"]')).toHaveJSProperty('status', 'pending')
 
   await page.evaluate(() => window.setStatus('bundle', 'running'))
-  await expect(page.locator('c2-step[label="build"]')).toHaveAttribute('status', 'running')
+  await expect(page.locator('c2-step[label="build"]')).toHaveJSProperty('status', 'running')
 
   await page.evaluate(() => window.setStatus('bundle', 'error'))
-  await expect(page.locator('c2-step[label="build"]')).toHaveAttribute('status', 'error')
+  await expect(page.locator('c2-step[label="build"]')).toHaveJSProperty('status', 'error')
 
   // A step the run has taken over is not written again: `compile` keeps the success it was given.
-  await expect(page.locator('c2-step#compile')).toHaveAttribute('status', 'success')
+  await expect(page.locator('c2-step#compile')).toHaveJSProperty('status', 'success')
 })
 
 test('a step finds out it is a group even when no slotchange ever tells it', async ({ page, scenario }) => {
@@ -385,16 +385,16 @@ test('a step finds out it is a group even when no slotchange ever tells it', asy
   })
 
   const group = page.locator('c2-step#late-group')
-  await expect(group).toHaveAttribute('has-children', '')
+  await expect(group).toHaveState('has-children')
   await expect(group.locator('summary[part="row"]')).toHaveCount(1)
-  await expect(group).toHaveAttribute('status', 'running')
+  await expect(group).toHaveJSProperty('status', 'running')
   await expect(page.locator('c2-step#late-child')).toBeVisible()
 })
 
 test('a step arriving in a running trace grows into place, and one drawn with the list does not', async ({ page, scenario }) => {
   await scenario('data')
   // Nothing animates on load: a whole trace fading in at once is a page loading, not an arrival.
-  await expect(page.locator('c2-step[entering]')).toHaveCount(0)
+  await expect(page.locator('c2-step:state(entering)')).toHaveCount(0)
 
   // Appended and read in one call: a round trip back to the test is long enough for the animation to have
   // finished on its own, which is a race rather than a result.
@@ -406,20 +406,20 @@ test('a step arriving in a running trace grows into place, and one drawn with th
     const step = [...list.shadowRoot!.querySelectorAll('c2-step')].find((element) => element.getAttribute('label') === 'upload')!
     await step.updateComplete
     // It grows from a collapsed row rather than appearing at full height.
-    return { entering: step.hasAttribute('entering'), names: step.getAnimations().map((animation) => (animation as CSSAnimation).animationName) }
+    return { entering: step.matches(':state(entering)'), names: step.getAnimations().map((animation) => (animation as CSSAnimation).animationName) }
   })
   expect(arrived.entering).toBe(true)
   expect(arrived.names).toContain('c2-step-enter')
 
   const arrival = page.locator('c2-step[label="upload"]')
 
-  // And it takes the attribute off again once it is in place, so nothing replays it.
-  await expect(arrival).not.toHaveAttribute('entering', '', { timeout: 2000 })
+  // And it takes the state off again once it is in place, so nothing replays it.
+  await expect(arrival).not.toHaveState('entering', { timeout: 2000 })
 })
 
 test('a status that settles gives the marker one beat, and a status drawn from the start does not', async ({ page, scenario }) => {
   await scenario('run')
-  await expect(page.locator('c2-step[settling]')).toHaveCount(0)
+  await expect(page.locator('c2-step:state(settling)')).toHaveCount(0)
 
   // Read in the same call as the change: a round trip is long enough for a 150 ms animation to have finished.
   const names = await page.evaluate(async () => {
@@ -435,9 +435,9 @@ test('a status that settles gives the marker one beat, and a status drawn from t
   expect(names).toContain('c2-step-settle')
 
   const step = page.locator('c2-step#install')
-  await expect(step).toHaveAttribute('settling', '')
+  await expect(step).toHaveState('settling')
 
-  await expect(step).not.toHaveAttribute('settling', '', { timeout: 2000 })
+  await expect(step).not.toHaveState('settling', { timeout: 2000 })
 })
 
 test('--c2-step--enter-duration: 0s turns the arrival animation off', async ({ page, scenario }) => {
@@ -501,4 +501,80 @@ test('one variable moves the detail from beside the label to under it', async ({
   // And the gap that followed the direction is the tight one, not the 8px meant for sitting side by side.
   const gap = stacked.detail.y - (stacked.label.y + stacked.label.height)
   expect(gap).toBeLessThan(5)
+})
+
+test('neither the list nor a step writes an attribute on a host; the state shows as custom states', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-steps marker="number" aria-label="Release">
+      <c2-step id="build" label="build" collapsed>
+        <c2-step id="compile" label="compile" status="success"></c2-step>
+        <c2-step id="link" label="link" status="success"></c2-step>
+      </c2-step>
+      <c2-step id="ship" label="ship"></c2-step>
+    </c2-steps>
+  `)
+  const attributes = () =>
+    page.evaluate(() =>
+      Object.fromEntries(
+        [...document.querySelectorAll('c2-steps, c2-step')].map((element) => [element.id || element.localName, element.getAttributeNames().sort().join(' ')]),
+      ),
+    )
+  const authored = {
+    'c2-steps': 'aria-label marker',
+    build: 'collapsed id label',
+    compile: 'id label status',
+    link: 'id label status',
+    ship: 'id label',
+  }
+  const build = page.locator('c2-step#build')
+  const ship = page.locator('c2-step#ship')
+
+  // The rolled-up status, the group, its fold, the marker mode and the last row all read as states.
+  await expect(build).toHaveState('success')
+  await expect(build).toHaveJSProperty('status', 'success')
+  await expect(build).toHaveState('has-children')
+  await expect(build).toHaveState('collapsed')
+  await expect(build).toHaveState('grouped')
+  await expect(build).toHaveState('marker-number')
+  await expect(build).not.toHaveState('last')
+  await expect(page.locator('c2-step#link')).toHaveState('last')
+  await expect(ship).toHaveState('last')
+  await expect(ship).toHaveState('pending')
+  expect(await attributes()).toEqual(authored)
+
+  // And they still style: number mode rings the marker, the folded group hides its sub-steps, the last row drops its rail.
+  await expect(ship.locator('[part="marker"]')).toHaveCSS('border-top-style', 'solid')
+  await expect(page.locator('c2-step#compile')).toBeHidden()
+  await expect(ship.locator('[part="rail"]')).toHaveCSS('visibility', 'hidden')
+  await expect(build.locator('[part="rail"]').first()).toHaveCSS('visibility', 'visible')
+  // The indent rides on the frame inside the shadow root, not on an inline style on the host.
+  const indent = async (id: string) =>
+    page
+      .locator(`c2-step#${id} [part="row"]`)
+      .first()
+      .evaluate((row) => parseFloat(getComputedStyle(row).paddingInlineStart))
+
+  // A status set on the step, the reader opening the group, and a step arriving: still no attribute anywhere.
+  await ship.evaluate((element) => ((element as HTMLElement & { status: string }).status = 'error'))
+  await expect(ship).toHaveState('error')
+  await expect(ship).not.toHaveState('pending')
+  await build.locator('summary[part="row"]').click()
+  await expect(build).not.toHaveState('collapsed')
+  await expect(page.locator('c2-step#compile')).toBeVisible()
+  expect(await indent('compile')).toBeGreaterThan(await indent('build'))
+  // A failing sub-step rolls up to its group through the property alone.
+  await page.locator('c2-step#link').evaluate((element) => ((element as HTMLElement & { status: string }).status = 'error'))
+  await expect(build).toHaveState('error')
+  expect(await attributes()).toEqual(authored)
+
+  await page.locator('c2-steps').evaluate((list) => {
+    const step = document.createElement('c2-step')
+    step.id = 'notify'
+    step.setAttribute('label', 'notify')
+    list.append(step)
+  })
+  const notify = page.locator('c2-step#notify')
+  await expect(notify).toHaveState('last')
+  await expect(ship).not.toHaveState('last')
+  expect(await attributes()).toEqual({ ...authored, notify: 'id label' })
 })

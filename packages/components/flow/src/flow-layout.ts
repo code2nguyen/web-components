@@ -203,7 +203,8 @@ export function mergeLayout(
   return result
 }
 
-function avoidOverlap(
+/** Pushes `start` along the cross axis until a node of size `sizeOf(id)` there overlaps none of `others`. */
+export function avoidOverlap(
   id: string,
   start: FlowPoint,
   others: string[],

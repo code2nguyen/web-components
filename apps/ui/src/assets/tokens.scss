@@ -13,11 +13,11 @@
   --site-color-surface-container-5: #dedee2;
   --site-color-on-surface: #18181b;
   --site-color-on-surface-variant: #52525b;
-  --site-color-on-surface-muted: #71717a;
+  --site-color-on-surface-muted: #67676f;
 
   --site-color-primary: #2563eb;
   --site-color-on-primary: #ffffff;
-  --site-color-primary-container: #dbeafe;
+  --site-color-primary-container: #eaf2ff;
   --site-color-on-primary-container: #1e3a8a;
   --site-color-primary-soft: rgba(37, 99, 235, 0.08);
 
@@ -54,6 +54,19 @@
 
 @mixin dark-palette {
   color-scheme: dark;
+  // Categorical series of charts and the todo list's pens: @c2n/theme's dark ramp, lighter so it reads on the dark
+  // surface. Light mode keeps the component defaults (the fallbacks in c2-theme.scss).
+  --site-chart-series-1: #5aa3ff;
+  --site-chart-series-2: #fb923c;
+  --site-chart-series-3: #2dd4bf;
+  --site-chart-series-4: #f472b6;
+  --site-chart-series-5: #fbbf24;
+  --site-chart-series-6: #a78bfa;
+  --site-chart-series-7: #22d3ee;
+  --site-chart-series-8: #a1a1aa;
+  --site-chart-positive: #4ade80;
+  --site-chart-negative: #f87171;
+  --site-color-primary-glow: rgba(96, 165, 250, 0.28);
 
   --site-color-surface: #09090b;
   --site-color-surface-container-1: #101012;
@@ -63,11 +76,11 @@
   --site-color-surface-container-5: #2a2a2f;
   --site-color-on-surface: #f4f4f5;
   --site-color-on-surface-variant: #a1a1aa;
-  --site-color-on-surface-muted: #71717a;
+  --site-color-on-surface-muted: #8e8e97;
 
   --site-color-primary: #60a5fa;
   --site-color-on-primary: #0b1a3a;
-  --site-color-primary-container: #1e3a8a;
+  --site-color-primary-container: #172a61;
   --site-color-on-primary-container: #dbeafe;
   --site-color-primary-soft: rgba(96, 165, 250, 0.12);
 

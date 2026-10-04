@@ -43,6 +43,8 @@ const LABEL_OFFSET = 4
  * @tag c2-bar-chart
  *
  * @slotcomponent c2-chart-series
+ *
+ * @cssproperty {number} [--c2-chart__bar--border-radius=0] - Roundedness of a bar's value end, from 0 (square) to 0.5 (fully rounded).
  */
 @customElement('c2-bar-chart')
 export class BarChart extends UplotChartBase {

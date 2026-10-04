@@ -287,8 +287,12 @@ chart.dataSource = source
 
 Every chart reports `chart-ready`, `chart-error`, `point-click`, `point-hover`, `tooltip-change`,
 `legend-change`, `series-highlight` and `series-toggle`. Cartesian charts also emit `range-change` after zooming or brushing.
-Point and range events do not bubble, so attach listeners to the chart itself. Use `data-chart-ready` as the
-stable test signal after the first frame is drawn.
+Point and range events do not bubble, so attach listeners to the chart itself. Use the custom state
+`:state(ready)` (`c2-line-chart:state(ready)`, or `chart.matches(':state(ready)')`) as the stable test signal after
+the first frame is drawn; `:state(engine-uplot)` and `:state(engine-echarts)` name the engine. The host itself never
+gains an attribute, so server-rendered markup matches the hydrated chart. Earlier releases wrote `data-chart-ready`
+and `data-chart-engine` attributes instead. A linked `c2-chart-tooltip` likewise shows itself through
+`:state(open)` while a point is hovered rather than toggling `hidden` on its host; an authored `hidden` still hides it.
 
 Hover a point, or click a series or a legend item below, to see the same semantic event model used by external presenters.
 

@@ -23,6 +23,8 @@ import type { ChartSeries } from '@c2n/chart/chart-series.js'
 import type { ChartTooltip } from '@c2n/chart/chart-tooltip.js'
 import type { GaugeChart } from '@c2n/chart/gauge-chart.js'
 import type { LineChart } from '@c2n/chart/line-chart.js'
+import type { MapChart } from '@c2n/chart/map-chart.js'
+import type { MapLayer } from '@c2n/chart/map-layer.js'
 import type { OverlapChart } from '@c2n/chart/overlap-chart.js'
 import type { PieChart } from '@c2n/chart/pie-chart.js'
 import type { PyramidChart } from '@c2n/chart/pyramid-chart.js'
@@ -142,6 +144,41 @@ declare module 'react' {
         'max-points'?: Attribute
         'lazy-render'?: Attribute
         series?: LineChart['series'] | string
+      }
+      'c2-map-chart': Omit<C2Props<MapChart>, 'domain' | 'thresholds' | 'scaleColors' | 'scaleLabels' | 'value' | 'series'> & {
+        'region-key'?: Attribute
+        'region-field'?: Attribute
+        'value-field'?: Attribute
+        'value-label'?: Attribute
+        'scale-colors'?: Attribute
+        'scale-labels'?: Attribute
+        'max-zoom'?: Attribute
+        'x-field'?: Attribute
+        'label-field'?: Attribute
+        'x-type'?: Attribute
+        'legend-action'?: Attribute
+        'empty-message'?: Attribute
+        'max-points'?: Attribute
+        'lazy-render'?: Attribute
+        domain?: MapChart['domain'] | string
+        thresholds?: MapChart['thresholds'] | string
+        scaleColors?: MapChart['scaleColors'] | string
+        scaleLabels?: MapChart['scaleLabels'] | string
+        value?: MapChart['value'] | string
+        series?: MapChart['series'] | string
+      }
+      'c2-map-layer': Omit<C2Props<MapLayer>, 'data'> & {
+        'lon-field'?: Attribute
+        'lat-field'?: Attribute
+        'region-field'?: Attribute
+        'size-field'?: Attribute
+        'size-label'?: Attribute
+        'label-field'?: Attribute
+        'from-field'?: Attribute
+        'to-field'?: Attribute
+        'width-field'?: Attribute
+        'width-label'?: Attribute
+        data?: MapLayer['data'] | string
       }
       'c2-overlap-chart': Omit<C2Props<OverlapChart>, 'selected' | 'series'> & {
         'sets-field'?: Attribute

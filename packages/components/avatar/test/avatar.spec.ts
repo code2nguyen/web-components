@@ -138,3 +138,33 @@ test('avatar group supports a hard visible limit and total count mode', async ({
   await expect(group.locator('[part="overflow"]')).toHaveAttribute('aria-label', '4 avatars total')
   await accessible(page)
 })
+
+test('avatar group hides an avatar through a custom state, never an attribute on it or on itself', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <c2-avatar-group aria-label="Contributors" style="width:78px;--c2-avatar-group--max-width:78px">
+      <c2-avatar name="Ada Lovelace"></c2-avatar>
+      <c2-avatar name="Grace Hopper"></c2-avatar>
+      <c2-avatar name="Alan Turing"></c2-avatar>
+      <c2-avatar name="Katherine Johnson"></c2-avatar>
+    </c2-avatar-group>
+  `)
+  const group = page.locator('c2-avatar-group')
+  const attributes = () =>
+    page.evaluate(() => [...document.querySelectorAll('c2-avatar-group, c2-avatar')].map((element) => element.getAttributeNames().sort().join(' ')))
+  const authored = ['aria-label style', 'name', 'name', 'name', 'name']
+  const hidden = () => page.locator('c2-avatar').evaluateAll((avatars) => avatars.map((avatar) => avatar.matches(':state(group-hidden)')))
+
+  await expect.poll(() => group.evaluate((element) => (element as HTMLElement & { visible: number }).visible)).toBe(2)
+  expect(await hidden()).toEqual([false, false, true, true])
+  await expect(page.locator('c2-avatar').nth(2)).toBeHidden()
+  await expect(page.locator('c2-avatar').nth(1)).toBeVisible()
+  expect(await attributes()).toEqual(authored)
+
+  await group.evaluate((element) => {
+    element.style.width = '200px'
+    element.style.setProperty('--c2-avatar-group--max-width', '200px')
+  })
+  await expect.poll(hidden).toEqual([false, false, false, false])
+  await expect(page.locator('c2-avatar').nth(2)).toBeVisible()
+  expect(await attributes()).toEqual(authored)
+})

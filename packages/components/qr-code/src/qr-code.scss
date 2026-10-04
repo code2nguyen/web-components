@@ -6,6 +6,7 @@
     background--color: #ffffff,
     container--border-radius: 8px,
     placeholder--color: #71717a,
+    placeholder--border: 1px dashed #bcbcc6,
     placeholder--font-size: 12px,
     center--size: 20%,
     center--background-color: #ffffff,
@@ -57,7 +58,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed #bcbcc6;
+  border: css.cssVar(placeholder--border);
   color: css.cssVar(placeholder--color);
   font-size: css.cssVar(placeholder--font-size);
   text-align: center;

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <rect class="tone" x="3" y="4.5" width="18" height="16.5" rx="2"/>
+  <path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>
+  <circle class="solid" cx="8" cy="14" r="1"/>
+  <circle class="solid" cx="12" cy="14" r="1"/>
+  <circle class="solid" cx="16" cy="14" r="1"/>
+  <circle class="solid" cx="8" cy="17.5" r="1"/>
+  <circle class="solid" cx="12" cy="17.5" r="1"/>
+</svg>

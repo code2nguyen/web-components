@@ -34,4 +34,17 @@
   --c2-theme--focus-ring: 2px solid var(--site-color-primary);
   --c2-theme--shadow-md: var(--site-elevation-2);
   --c2-theme--shadow-lg: var(--site-elevation-3);
+  --c2-theme--color-primary-glow: var(--site-color-primary-glow, rgba(37, 99, 235, 0.2));
+
+  // Categorical series (charts, the todo list's pens): set for dark mode only, light mode keeps the defaults.
+  --c2-theme--chart-series-1: var(--site-chart-series-1, #0265dc);
+  --c2-theme--chart-series-2: var(--site-chart-series-2, #ea580c);
+  --c2-theme--chart-series-3: var(--site-chart-series-3, #0f766e);
+  --c2-theme--chart-series-4: var(--site-chart-series-4, #db2777);
+  --c2-theme--chart-series-5: var(--site-chart-series-5, #a16207);
+  --c2-theme--chart-series-6: var(--site-chart-series-6, #7c3aed);
+  --c2-theme--chart-series-7: var(--site-chart-series-7, #0891b2);
+  --c2-theme--chart-series-8: var(--site-chart-series-8, #52525b);
+  --c2-theme--chart-positive: var(--site-chart-positive, #16a34a);
+  --c2-theme--chart-negative: var(--site-chart-negative, #dc2626);
 }

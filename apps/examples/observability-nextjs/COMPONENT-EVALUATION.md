@@ -166,7 +166,7 @@
 - **Priority:** High
 - **Affected package/tag and exact version:** `@c2n/table@0.0.14`, `c2-table`
 - **Workflow/context:** alert rule and incident row actions with rows/columns assigned after custom-element upgrade.
-- **Expected behavior:** `cell:{rowKey}:{field}` interactive light-DOM slots deterministically attach after controlled property updates.
+- **Expected behavior:** `cell:{line}:{field}` (formerly `cell:{rowKey}:{field}`) interactive light-DOM slots deterministically attach after controlled property updates.
 - **Actual behavior:** action controls were not consistently actionable during the property-driven upgrade/render sequence.
 - **Minimal reproduction steps:** SSR a table with action-slot children, assign rows/columns after `whenDefined`, then keyboard/click the action immediately after hydration.
 - **Evidence:** `features/alerts/AlertsWorkspace.tsx`, `test/alerts.spec.ts`; root feedback.

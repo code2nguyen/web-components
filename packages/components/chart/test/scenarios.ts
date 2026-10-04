@@ -3,7 +3,7 @@
  *
  * Charts load their engine through a dynamic `import()`, so `updateComplete` resolves long before
  * anything is drawn. Every scenario therefore waits for each chart's `chart-ready` before flagging the
- * page, and the specs additionally assert `data-chart-ready` on the element itself.
+ * page, and the specs additionally assert `:state(ready)` on the element itself.
  *
  * The page also counts engine calls, which is what lets the perf spec assert the init/update split
  * without measuring wall-clock time.
@@ -85,7 +85,7 @@ function whenDrawn(elements: Element[]): Promise<unknown> {
     elements.map(
       (element) =>
         new Promise<void>((resolve) => {
-          if (element.hasAttribute('data-chart-ready')) return resolve()
+          if (element.matches(':state(ready)')) return resolve()
           element.addEventListener('chart-ready', () => resolve(), { once: true })
           // An empty, loading or error chart never draws; it is still a finished scenario.
           element.addEventListener('chart-error', () => resolve(), { once: true })

@@ -109,6 +109,10 @@ list.addEventListener('selection-change', (event) => {
 })
 ```
 
+## Styling by state
+
+The list never writes classes or attributes on its own host or on its rows, so server-rendered markup matches the hydrated element. A list with no top or bottom padding (`--c2-list--padding-top: 0`) hands its corner radius to the first or last row, and matches `c2-list:state(padding-top-0)` / `c2-list:state(padding-bottom-0)`; touching selected rows match `c2-list-item:state(joined-before)` / `:state(joined-after)`. Earlier releases toggled `.padding-top-0` / `.padding-bottom-0` classes on the list and `joined-before` / `joined-after` attributes on the rows; replace `c2-list.padding-top-0` with `c2-list:state(padding-top-0)` and `c2-list-item[joined-before]` with `c2-list-item:state(joined-before)`.
+
 ## Keyboard
 
 | Key                   | Action                                                     |

@@ -62,6 +62,12 @@
     date__today__selected--color: #ffffff,
     dot--size: 5px,
     agenda-event__hover--background: #f4f4f5,
+    day__hover--background: #f4f4f5,
+    day__range--background: rgba(2, 101, 220, 0.1),
+    event__dragging--opacity: 0.88,
+    event__dragging--box-shadow: 0 8px 24px rgba(24, 24, 27, 0.08),
+    handle--width: 6px,
+    handle--color: #ffffff,
   )
 );
 
@@ -274,7 +280,7 @@
   text-align: left;
   transition: animation.standard(opacity);
 
-  span {
+  .event-title {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -456,6 +462,108 @@
   white-space: nowrap;
 }
 
+// Editable: every day is a button under the bars, a range being dragged is tinted, and bars can be dragged by their
+// body or resized from their edges.
+.editable {
+  .weeks {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .day {
+    position: relative;
+
+    &:hover {
+      background: css.cssVar(day__hover--background);
+      background-clip: padding-box;
+    }
+
+    &.in-range {
+      background: css.cssVar(day__range--background);
+      background-clip: padding-box;
+    }
+  }
+
+  // On the full grid the day's button is an empty layer over the cell; the date stays the cell's own.
+  .day-select {
+    position: absolute;
+    display: block;
+    inset: 0;
+    width: auto;
+    padding: 0;
+    // A horizontal drag across days selects a range; vertical panning still scrolls the page.
+    touch-action: pan-y;
+
+    > .date-number,
+    > .dots {
+      display: none;
+    }
+
+    &:focus-visible {
+      outline: css.cssVar(focus--outline);
+      outline-offset: -2px;
+    }
+  }
+
+  .event {
+    position: relative;
+    cursor: grab;
+    touch-action: none;
+
+    &.dragging {
+      z-index: 2;
+      box-shadow: css.cssVar(event__dragging--box-shadow);
+      opacity: css.cssVar(event__dragging--opacity);
+    }
+  }
+
+  .handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: css.cssVar(handle--width);
+    cursor: ew-resize;
+
+    // A short grip, shown while the pointer is on the edge.
+    &::after {
+      position: absolute;
+      top: 25%;
+      bottom: 25%;
+      left: calc(50% - 1px);
+      width: 2px;
+      border-radius: 999px;
+      background: var(--event-text-color, #{css.cssVar(handle--color)});
+      content: '';
+      opacity: 0;
+      transition: animation.standard(opacity);
+    }
+
+    &:hover::after {
+      opacity: css.cssVar(event__hover--opacity);
+    }
+  }
+
+  .handle-start {
+    left: 0;
+  }
+
+  .handle-end {
+    right: 0;
+  }
+
+  &.moving,
+  &.moving .event,
+  &.moving .day-select {
+    cursor: grabbing;
+  }
+
+  &.resizing,
+  &.resizing .event,
+  &.resizing .day-select {
+    cursor: ew-resize;
+  }
+}
+
 // The compact layout's pieces, shown by the container query below.
 .day-select,
 .agenda {
@@ -613,8 +721,24 @@
     display: none;
   }
 
-  .day-select {
+  .day-select,
+  .editable .day-select {
+    position: static;
     display: flex;
+    width: 100%;
+    padding: 2px 0 4px;
+
+    > .date-number {
+      display: inline-flex;
+    }
+
+    > .dots {
+      display: flex;
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
   }
 
   .agenda {
@@ -643,6 +767,13 @@
 
     &.outside,
     &.today {
+      background: none;
+    }
+  }
+
+  .editable .day {
+    &:hover,
+    &.in-range {
       background: none;
     }
   }

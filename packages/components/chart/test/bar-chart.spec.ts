@@ -64,7 +64,7 @@ async function paint(chart: Locator, along: 'x' | 'y'): Promise<{ blue: Paint; r
 }
 
 async function ready(chart: Locator) {
-  await expect(chart).toHaveAttribute('data-chart-ready', 'true')
+  await expect(chart).toHaveState('ready')
 }
 
 test('stacks series into one bar per band, the second starting where the first ends', async ({ page, scenario }) => {

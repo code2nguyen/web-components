@@ -1,0 +1,108 @@
+---
+title: 'Map chart'
+description: 'A choropleth and point map on vector outlines, drawn by ECharts: regions shaded by a value, with layers of sized points and flow lines, on the bundled world and US maps or your own GeoJSON, TopoJSON or SVG.'
+category: 'Chart'
+package: '@c2n/chart'
+tag: 'c2-map-chart'
+apiTags: ['c2-map-chart', 'c2-map-layer', 'c2-chart-legend', 'c2-chart-tooltip']
+---
+
+import UsageBlock from '../../components/UsageBlock.astro'
+import CodeBlock from '../../components/CodeBlock.astro'
+
+import { MapChart } from '@c2n/chart/map-chart.js'
+import { MapLayer } from '@c2n/chart/map-layer.js'
+
+The figures in these examples are illustrative, not real company or market data. The outlines are real: Natural Earth's countries and the US Census Bureau's states.
+
+## Installation
+
+```bash tag=CodeBlock
+npm install @c2n/chart echarts
+```
+
+## Usage
+
+```html tag=UsageBlock,package=@c2n/chart
+<style>
+  .map-usage {
+    --c2-chart--height: 380px;
+  }
+</style>
+
+<div data-label="Choropleth">
+  <c2-map-chart class="map-usage" region-field="country" value-field="revenue" value-label="Revenue ($M)" roam="zoom" data='[{"country":"USA","revenue":4820},{"country":"CAN","revenue":910},{"country":"MEX","revenue":640},{"country":"BRA","revenue":1270},{"country":"ARG","revenue":310},{"country":"CHL","revenue":220},{"country":"COL","revenue":260},{"country":"PER","revenue":140},{"country":"GBR","revenue":1730},{"country":"FRA","revenue":1390},{"country":"DEU","revenue":2210},{"country":"ESP","revenue":780},{"country":"ITA","revenue":870},{"country":"NLD","revenue":690},{"country":"SWE","revenue":420},{"country":"NOR","revenue":360},{"country":"POL","revenue":450},{"country":"IRL","revenue":380},{"country":"PRT","revenue":190},{"country":"CHE","revenue":520},{"country":"AUT","revenue":280},{"country":"BEL","revenue":330},{"country":"DNK","revenue":300},{"country":"FIN","revenue":210},{"country":"TUR","revenue":340},{"country":"ZAF","revenue":290},{"country":"NGA","revenue":120},{"country":"EGY","revenue":160},{"country":"KEN","revenue":70},{"country":"MAR","revenue":90},{"country":"SAU","revenue":610},{"country":"ARE","revenue":540},{"country":"ISR","revenue":330},{"country":"IND","revenue":1460},{"country":"CHN","revenue":2950},{"country":"JPN","revenue":1880},{"country":"KOR","revenue":960},{"country":"IDN","revenue":410},{"country":"VNM","revenue":230},{"country":"THA","revenue":270},{"country":"PHL","revenue":150},{"country":"MYS","revenue":200},{"country":"AUS","revenue":1120},{"country":"NZL","revenue":180}]'></c2-map-chart>
+</div>
+
+<div data-label="Diverging classes">
+  <c2-map-chart class="map-usage" map="us-states" region-field="state" value-field="yoy" value-label="Sales, year over year" unit="%" scale="diverging" thresholds="[-10, -5, -2, 2, 5, 10]" data='[{"state":"AL","yoy":-2.9},{"state":"AK","yoy":-7.8},{"state":"AZ","yoy":11.3},{"state":"AR","yoy":-10.0},{"state":"CA","yoy":8.4},{"state":"CO","yoy":-1.8},{"state":"CT","yoy":-10.4},{"state":"DE","yoy":2.2},{"state":"DC","yoy":-11.0},{"state":"FL","yoy":15.2},{"state":"GA","yoy":-10.0},{"state":"HI","yoy":-9.5},{"state":"ID","yoy":-0.1},{"state":"IL","yoy":-4.8},{"state":"IN","yoy":-8.5},{"state":"IA","yoy":-5.7},{"state":"KS","yoy":5.6},{"state":"KY","yoy":14.5},{"state":"LA","yoy":4.2},{"state":"ME","yoy":-0.9},{"state":"MD","yoy":15.3},{"state":"MA","yoy":-10.7},{"state":"MI","yoy":-9.7},{"state":"MN","yoy":-3.9},{"state":"MS","yoy":-8.0},{"state":"MO","yoy":-8.7},{"state":"MT","yoy":-3.4},{"state":"NE","yoy":10.9},{"state":"NV","yoy":-6.9},{"state":"NH","yoy":4.3},{"state":"NJ","yoy":5.9},{"state":"NM","yoy":-1.6},{"state":"NY","yoy":3.1},{"state":"NC","yoy":-10.2},{"state":"ND","yoy":-10.3},{"state":"OH","yoy":-6.2},{"state":"OK","yoy":7.1},{"state":"OR","yoy":-0.0},{"state":"PA","yoy":-1.2},{"state":"RI","yoy":4.4},{"state":"SC","yoy":0.7},{"state":"SD","yoy":-3.6},{"state":"TN","yoy":10.2},{"state":"TX","yoy":12.6},{"state":"UT","yoy":-5.2},{"state":"VT","yoy":4.1},{"state":"VA","yoy":2.7},{"state":"WA","yoy":6.9},{"state":"WV","yoy":8.4},{"state":"WI","yoy":-3.9},{"state":"WY","yoy":15.4}]'></c2-map-chart>
+</div>
+
+<div data-label="Points and lines">
+  <c2-map-chart class="map-usage">
+    <c2-map-layer type="points" label="Active users (k)" size-field="users" size-label="Active users (k)" label-field="city" data='[{"city":"New York","lon":-74,"lat":40.7,"users":412},{"city":"San Francisco","lon":-122.4,"lat":37.8,"users":268},{"city":"Chicago","lon":-87.6,"lat":41.9,"users":121},{"city":"Toronto","lon":-79.4,"lat":43.7,"users":138},{"city":"Mexico City","lon":-99.1,"lat":19.4,"users":96},{"city":"São Paulo","lon":-46.6,"lat":-23.5,"users":184},{"city":"Buenos Aires","lon":-58.4,"lat":-34.6,"users":61},{"city":"Bogotá","lon":-74.1,"lat":4.7,"users":44},{"city":"London","lon":-0.1,"lat":51.5,"users":356},{"city":"Paris","lon":2.35,"lat":48.86,"users":201},{"city":"Berlin","lon":13.4,"lat":52.5,"users":176},{"city":"Madrid","lon":-3.7,"lat":40.4,"users":88},{"city":"Stockholm","lon":18.07,"lat":59.33,"users":52},{"city":"Warsaw","lon":21,"lat":52.2,"users":47},{"city":"Istanbul","lon":29,"lat":41,"users":73},{"city":"Lagos","lon":3.4,"lat":6.5,"users":39},{"city":"Nairobi","lon":36.8,"lat":-1.3,"users":28},{"city":"Cape Town","lon":18.4,"lat":-33.9,"users":31},{"city":"Dubai","lon":55.3,"lat":25.2,"users":94},{"city":"Mumbai","lon":72.9,"lat":19.1,"users":163},{"city":"Bengaluru","lon":77.6,"lat":13,"users":221},{"city":"Singapore","lon":103.8,"lat":1.35,"users":142},{"city":"Jakarta","lon":106.8,"lat":-6.2,"users":77},{"city":"Tokyo","lon":139.7,"lat":35.7,"users":298},{"city":"Seoul","lon":127,"lat":37.6,"users":131},{"city":"Sydney","lon":151.2,"lat":-33.9,"users":118}]'></c2-map-layer>
+    <c2-map-layer type="lines" label="Container routes" width-field="teu" width-label="Weekly TEU (k)" label-field="route" data='[{"route":"Rotterdam → New York","from":[4.48,51.92],"to":[-74,40.7],"teu":38},{"route":"Rotterdam → Santos","from":[4.48,51.92],"to":[-46.3,-23.96],"teu":21},{"route":"Rotterdam → Mumbai","from":[4.48,51.92],"to":[72.9,19.1],"teu":26},{"route":"Singapore → Sydney","from":[103.82,1.35],"to":[151.2,-33.9],"teu":24},{"route":"Singapore → Busan","from":[103.82,1.35],"to":[129,35.1],"teu":31},{"route":"Singapore → Jebel Ali","from":[103.82,1.35],"to":[55.1,25],"teu":29},{"route":"Los Angeles → Yokohama","from":[-118.24,33.74],"to":[139.6,35.4],"teu":27},{"route":"Los Angeles → Callao","from":[-118.24,33.74],"to":[-77.1,-12.05],"teu":10}]'></c2-map-layer>
+  </c2-map-chart>
+</div>
+
+<div data-label="Region picker">
+  <c2-map-chart class="map-usage" extent="europe" selection="multiple" name="shipTo" value="DEU;FRA;NLD;POL" legend="none"></c2-map-chart>
+</div>
+```
+
+`region-field` names each row's region and `value-field` holds the value it is shaded by. Rows join regions on the map's **region key**:
+
+| Map | Default `region-key` | Other keys |
+| --- | --- | --- |
+| `world-110m` (the default, about 105 KB) | `iso_a3`, ISO 3166-1 alpha-3 (`BRA`) | `iso_a2`, `id` (the numeric code, `076`), `name` |
+| `world-50m` (about 750 KB, for zoomed-in maps and small islands) | `iso_a3` | `iso_a2`, `id`, `name` |
+| `us-states` (the 50 states and DC, about 115 KB) | `postal`, the USPS code (`CA`) | `id` (the FIPS code, `06`), `name` |
+
+Each map is a separate module that loads the first time a chart names it. A key that differs only in case still matches (`fra` finds France). Rows that name no region are skipped and reported once by the `unmatched-rows` event, so a typo in the data shows up in the console of whoever listens rather than as a silently blank country. A region without a row keeps `--c2-chart__region--background-color` and appears as **No data** in the colour key. The world maps leave Antarctica out.
+
+## Scales
+
+`scale="sequential"` (the default) shades from `--c2-chart__scale-start--color` to `--c2-chart__scale-end--color` across the data's extent; `domain="[0, 5000]"` pins the ends so several maps can be compared. `scale="diverging"` runs from `--c2-chart__scale-negative--color` through `--c2-chart__scale-mid--color` to the end colour, around a midpoint of `0` with a symmetric range, so the same distance from zero is equally strong on both sides; `domain="[min, mid, max]"` moves it.
+
+`thresholds` turns either scale into stepped classes: `[-10, -5, -2, 2, 5, 10]` makes seven, and a value equal to a break falls in the upper one. Classes are easier to read off a legend than a gradient. `scale-colors` gives one colour per class and `scale-labels` names them, as in the data hall card of the gallery. Colours are mixed in OKLab, so the middle of a ramp is not muddier than its ends.
+
+`unit` is appended to every value in the tooltip and the key (`%`, ` °C`); `format` is the property for anything else.
+
+## Layers
+
+`c2-map-layer` children draw on top of the regions, each with its own `data` and one entry in the legend:
+
+- **`type="points"`** places a circle at `lon-field`/`lat-field` (`lon` and `lat` by default), or at the region named by `region-field`, which uses the centroid of the region's largest shape. `size-field` sizes it by area, between `--c2-chart__marker--min-size` and `--max-size`; larger points are drawn first so the small ones stay hoverable. `labels` writes the `label-field` beside each point.
+- **`type="lines"`** draws from `from-field` to `to-field`, each a region key or a `[lon, lat]` pair. `curve="geodesic"` (the default) follows the shortest path over the globe and is split where it crosses the date line; `arc` draws a gentle curve and `straight` a segment on the drawn map. `width-field` sets the stroke width up to `--c2-chart__flow--max-width`.
+
+`legend-action="toggle"` lets the legend hide a layer; the default highlights it and fades the others, as a click on one of its marks does.
+
+## Projections and extent
+
+`projection` defaults to the map's own: Equal Earth for the world maps, which keeps every country's area true, Albers USA (with Alaska and Hawaii inset) for `us-states`, Mercator for your own GeoJSON. `natural-earth`, `equirectangular` and `mercator` are the alternatives.
+
+`extent` fits the view to part of the map: region keys (`extent="FRA DEU ITA"`), a named area (`europe`, `africa`, `asia`, `middle-east`, `north-america`, `south-america`, `oceania`), or a `[west, south, east, north]` box in degrees. The rest of the map stays drawn around it.
+
+`roam="zoom"` adds zoom buttons and lets a zoomed map be dragged; `roam="pan"` allows dragging only; `roam="both"` adds the mouse wheel and pinch, which then no longer scroll the page, so it suits a map that fills its view. `max-zoom` caps the zoom (8 by default). `zoomIn()`, `zoomOut()` and `resetView()` drive the same view from script, and `view-change` reports the visible area in degrees.
+
+## Selecting regions
+
+`selection="single"` or `"multiple"` makes a click select a region, outlined by `--c2-chart__region__selected--border-color`. The map is then a form control: `value` holds the selected keys (as an attribute, separated by semicolons), a form receives one `name` entry per region, and `selection-change`, `input` and `change` fire after each click. `point-click` fires first and is cancelable: `preventDefault()` keeps the selection as it is, which is how an application limits the selectable regions.
+
+## Your own geometry
+
+`geo` (a property) takes a GeoJSON `FeatureCollection`, an array of features, a TopoJSON topology (its first object is drawn) or SVG markup; `src` loads any of them from a URL. Both win over `map`. A GeoJSON region joins on `id` unless `region-key` names a property.
+
+"Vector map" is not only geography. In an SVG, every shape or group with an `id` is a region (its `data-name` or `<title>` names it in the tooltip); `projection` is then `none` and a point layer's longitude and latitude are x and y in the SVG's own coordinates. Floor plans, seat maps and machine diagrams work the same way as countries.
+
+## Borders and attribution
+
+The world outlines are Natural Earth's 1:110m and 1:50m countries, in the public domain, through [world-atlas](https://github.com/topojson/world-atlas); the states come from the US Census Bureau's cartographic boundaries through [us-atlas](https://github.com/topojson/us-atlas). Natural Earth draws the boundaries in effect on the ground, not any one government's claim. A product that has to show an official view should pass its own outlines through `geo` rather than edit the bundled data.
+
+## Styling
+
+Regions are styled through `--c2-chart__region…` (fill without data, borders, the hovered and selected outlines), the scale through `--c2-chart__scale…`, points through `--c2-chart__marker…`, lines through `--c2-chart__flow…` and the zoom buttons through `--c2-chart__zoom-control…`. Layer colours come from `--c2-chart__series-1…8--color` as on every chart, or each layer's `color`.
+
+## Accessibility
+
+A map is colour on shapes, which a screen reader cannot read. The chart renders the joined rows as a visually hidden table (region and value), and every value in the tooltip and key is text in the chart's text colour, never in the scale colour. The zoom buttons are real buttons with labels. Selecting regions from the keyboard is not supported yet: an application that needs it should offer a list of the same regions next to the map.
