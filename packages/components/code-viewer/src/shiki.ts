@@ -147,7 +147,7 @@ export async function highlight({
     console.log('[probe:cv]', JSON.stringify({ lang, language, loaded: core.getLoadedLanguages(), grammarName: g?.name, line0: t.tokens[0]?.map((x) => [x.content, x.color]) }))
     try {
       const strict = await createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: false }), langs: [bundledLanguages[language as BundledLanguage]], themes: [] })
-      console.log('[probe:cv-strict]', JSON.stringify(strict.codeToTokens(code, { lang: language, theme: 'none' }).tokens[0]?.map((x) => x.content)))
+      console.log('[probe:cv-strict]', JSON.stringify(strict.codeToTokens(code, { lang: language, theme: 'none', includeExplanation: true }).tokens[0]?.map((x) => (x.explanation ?? []).map((e) => [e.content, e.scopes.map((sc) => sc.scopeName).join(' > ')]))).slice(0, 1500))
     } catch (e) {
       console.log('[probe:cv-strict-throw]', String((e as Error)?.stack ?? e).slice(0, 1500))
     }

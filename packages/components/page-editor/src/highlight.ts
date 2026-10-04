@@ -102,6 +102,13 @@ function tokenize(text: string, language: string): Span[] {
   try {
     const { tokens } = core!.codeToTokens(text, { lang: language, theme: THEME })
     console.log('[probe:pe]', JSON.stringify({ language, line0: tokens[0]?.map((x) => [x.content, x.color]) }))
+    {
+      const ex = core!.codeToTokens(text, { lang: language, theme: THEME, includeExplanation: true })
+      console.log('[probe:pe-explain]', JSON.stringify(ex.tokens[0]?.map((x) => [x.content, (x.explanation ?? []).map((e) => [e.content, e.scopes.map((sc) => sc.scopeName).join(' > ')])])).slice(0, 2500))
+      const th = core!.getTheme(THEME) as unknown as { settings?: unknown[]; colors?: unknown; name?: string; fg?: string }
+      console.log('[probe:pe-theme]', JSON.stringify({ name: th.name, fg: th.fg, n: th.settings?.length, first: th.settings?.slice(0, 6) }).slice(0, 2500))
+      console.log('[probe:pe-loaded]', JSON.stringify({ langs: core!.getLoadedLanguages(), themes: core!.getLoadedThemes() }))
+    }
     for (const line of tokens) {
       for (const token of line) {
         if (!token.content.trim()) continue
