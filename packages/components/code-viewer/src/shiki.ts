@@ -54,10 +54,20 @@ const pending = new Map<string, Promise<void>>()
  * One shared highlighter for every `c2-code-viewer`; grammars and themes are loaded on demand.
  *
  * The regex target is explicit: `auto` misreads JavaScriptCore's regex support (Safari, WebKit), and the grammars then
- * match nothing, so every token comes out in the default colour. ES2024 is the `v` flag, which every supported browser has.
+ * match nothing, so every token comes out in the default colour. ES2024 (the `v` flag) where the engine has it, ES2018
+ * (the `u` flag) on an older one.
  */
 function getCore(): Promise<HighlighterCore> {
-  return (corePromise ??= createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: true, target: 'ES2024' }), langs: [], themes: [] }))
+  return (corePromise ??= createHighlighterCore({ engine: createJavaScriptRegexEngine({ forgiving: true, target: regexTarget() }), langs: [], themes: [] }))
+}
+
+function regexTarget(): 'ES2024' | 'ES2018' {
+  try {
+    new RegExp('', 'v')
+    return 'ES2024'
+  } catch {
+    return 'ES2018'
+  }
 }
 
 /** Resolves a language id or alias to what the highlighter knows, falling back to `plaintext`. */

@@ -50,14 +50,23 @@ async function loadLanguage(language: string): Promise<boolean> {
   if (!(language in bundledLanguages)) return false
   corePromise ??= createHighlighterCore({
     // An explicit target: `auto` misreads JavaScriptCore's regex support (Safari, WebKit), and the grammars then match
-    // nothing. ES2024 is the `v` flag, which every supported browser has.
-    engine: createJavaScriptRegexEngine({ forgiving: true, target: 'ES2024' }),
+    // nothing. ES2024 (the `v` flag) where the engine has it, ES2018 (the `u` flag) on an older one.
+    engine: createJavaScriptRegexEngine({ forgiving: true, target: regexTarget() }),
     themes: [createCssVariablesTheme({ name: THEME, variablePrefix: '--_tok-', variableDefaults: {}, fontStyle: true })],
     langs: [],
   })
   core = await corePromise
   await core.loadLanguage(bundledLanguages[language as keyof typeof bundledLanguages])
   return true
+}
+
+function regexTarget(): 'ES2024' | 'ES2018' {
+  try {
+    new RegExp('', 'v')
+    return 'ES2024'
+  } catch {
+    return 'ES2018'
+  }
 }
 
 /** Loads a grammar once; resolves to whether it can be used. */
