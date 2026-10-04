@@ -39,7 +39,9 @@ export function classNameFor(tag: string): string {
  */
 export function importPathFor(pkg: string, id?: string): string {
   const name = pkg.slice('@c2n/'.length)
-  if (id && exported.has(`./${name}/${id}`)) return `${UMBRELLA}/${name}/${id}`
+  // Only a page about one element of a package documented page by page (a chart): `radio` stays `@c2n/components/radio`,
+  // which also registers `c2-radio-group`.
+  if (id && id !== name && exported.has(`./${name}/${id}`)) return `${UMBRELLA}/${name}/${id}`
   return exported.has(`./${name}`) ? `${UMBRELLA}/${name}` : pkg
 }
 
@@ -53,7 +55,15 @@ function moduleOfTag(tag: string): string | undefined {
   const name = tag.replace(/^c2-/, '')
   if (exported.has(`./${name}`)) return `${UMBRELLA}/${name}`
   const own = [...exported].find((subpath) => subpath.endsWith(`/${name}`) && subpath.split('/').length === 3)
-  return own ? `${UMBRELLA}${own.slice(1)}` : undefined
+  if (own) return `${UMBRELLA}${own.slice(1)}`
+  // A tag defined by a module its package does not publish on its own (`c2-avatar-group`, `c2-toast-region`) belongs to
+  // the entry of the longest prefix of its name (`@c2n/components/avatar`), which re-exports every module.
+  const parts = name.split('-')
+  for (let end = parts.length - 1; end > 0; end--) {
+    const prefix = parts.slice(0, end).join('-')
+    if (exported.has(`./${prefix}`)) return `${UMBRELLA}/${prefix}`
+  }
+  return undefined
 }
 
 /** The module that exports the class of `tag`, falling back to the `@c2n/components` barrel, which exports every component class. */
