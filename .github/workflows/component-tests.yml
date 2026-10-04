@@ -32,6 +32,9 @@ jobs:
       # each package's `exports`, which point at the generated `dist/*.d.ts`. Those are git-ignored, so without a
       # build tsc cannot see them and fails on any component that depends on a sibling package.
       - run: npm run build
+      # `@c2n/components` bundles the component packages, and its suite (selected by any component change) loads the
+      # bundle and its merged custom-elements.json, both build output of packages/umbrella.
+      - run: npm run build -w packages/umbrella
       - run: npm run docs:check
       - name: Verify generated component manifests are committed
         run: git diff --exit-code -- ':(glob)packages/components/*/custom-elements.json' ':(glob)open-packages/*/custom-elements.json' ':(glob)packages/icons/*/custom-elements.json'
