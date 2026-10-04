@@ -125,3 +125,19 @@ test('slotted label content replaces the text and is exposed as is', async ({ pa
   expect(await indicator.evaluate((element) => element.shadowRoot!.querySelector('[part="label"]')!.textContent!.trim())).toBe('')
   await accessible(page)
 })
+
+test('in a narrow box the meta text gives way before the label', async ({ page, renderScenario }) => {
+  await renderScenario(`
+    <div style="width: 200px">
+      <c2-working-indicator label="Scheming" elapsed><span slot="meta">esc to interrupt the current task</span></c2-working-indicator>
+    </div>`)
+  const indicator = host(page)
+  const clipped = (selector: string) =>
+    indicator.evaluate((element, part) => {
+      const node = element.shadowRoot!.querySelector(part) as HTMLElement
+      return node.scrollWidth > node.clientWidth
+    }, selector)
+  expect(await clipped('[part="label"]')).toBe(false)
+  expect(await clipped('.meta-text')).toBe(true)
+  expect((await indicator.boundingBox())!.width).toBeLessThanOrEqual(200)
+})

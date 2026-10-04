@@ -5,7 +5,7 @@
  */
 export const componentPreviews: Record<string, string> = {
   'working-indicator': `<div class="preview-row" style="flex-direction:column;align-items:flex-start">
-  <c2-working-indicator messages='["Scheming","Pondering","Brewing"]' elapsed style="--c2-working-indicator__indicator--color:#d97757;--c2-working-indicator__label--color:#d97757;--c2-working-indicator__label--highlight-color:#f4b59b"></c2-working-indicator>
+  <c2-working-indicator messages='["Scheming","Pondering","Brewing"]' elapsed style="--c2-working-indicator__indicator--color:#d97757;--c2-working-indicator__label--color:#d97757;--c2-working-indicator__label--highlight-color:color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b))"></c2-working-indicator>
   <c2-working-indicator indicator="dots" effect="wave" label="Generating"></c2-working-indicator>
   <c2-working-indicator state="done" done-label="Done in 14s"></c2-working-indicator>
 </div>`,

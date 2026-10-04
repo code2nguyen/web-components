@@ -298,7 +298,10 @@
   display: inline-flex;
   align-items: baseline;
   gap: 0.5em;
-  flex: none;
+  // In a narrow box the supporting text gives way long before the label does.
+  flex: 0 1000 auto;
+  min-width: 0;
+  white-space: nowrap;
   color: css.cssVar(meta--color);
   font-size: css.cssVar(meta--font-size);
   font-weight: 400;
@@ -307,6 +310,16 @@
   &[hidden] {
     display: none;
   }
+}
+
+.elapsed {
+  flex: none;
+}
+
+.meta-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .has-separator .meta-text::before {
@@ -318,6 +331,12 @@
 
 .is-paused * {
   animation-play-state: paused !important;
+}
+
+// The glyph's first frame is a faint dot; a paused glyph rests on a full star instead.
+.is-paused .glyph-strip {
+  animation: none;
+  transform: translateY(-40%);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1503,7 +1503,7 @@ export const componentPresets: Record<string, ComponentPresetGroup> = {
         css: {
           '--c2-working-indicator__indicator--color': '#d97757',
           '--c2-working-indicator__label--color': '#d97757',
-          '--c2-working-indicator__label--highlight-color': '#f4b59b',
+          '--c2-working-indicator__label--highlight-color': 'color-mix(in srgb, #d97757 45%, var(--c2-theme--color-on-surface, #18181b))',
         },
       },
       {
