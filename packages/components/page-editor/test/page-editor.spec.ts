@@ -112,15 +112,33 @@ test('Markdown typed at the start of a line becomes a block, and Backspace right
   )
 })
 
+/**
+ * Home moves the browser's caret, and ProseMirror picks a caret move up from an asynchronous `selectionchange`: the
+ * click's own selection can land after Home and put the caret back, and a key pressed before the editor caught up acts
+ * on the old selection. Press Home until the editor's own selection is at the start of its block (pressing it again is
+ * harmless).
+ */
+async function pressHome(page: Page) {
+  const offset = () =>
+    host(page).evaluate((element) => {
+      const { view } = element as unknown as { view: { state: { selection: { $from: { parentOffset: number } } } } }
+      return view.state.selection.$from.parentOffset
+    })
+  await expect(async () => {
+    await page.keyboard.press('Home')
+    await expect.poll(offset, { timeout: 500 }).toBe(0)
+  }).toPass()
+}
+
 test('Backspace at the start of a list item or heading makes it text first', async ({ page, renderScenario }) => {
   await renderScenario(`<c2-page-editor label="Notes" value="## Heading&#10;&#10;- item"></c2-page-editor>`)
   const content = page$(page)
   await content.locator('.item-text').click()
-  await page.keyboard.press('Home')
+  await pressHome(page)
   await page.keyboard.press('Backspace')
   await expect(host(page)).toHaveJSProperty('value', '## Heading\n\nitem')
   await content.locator('h2').click()
-  await page.keyboard.press('Home')
+  await pressHome(page)
   await page.keyboard.press('Backspace')
   await expect(host(page)).toHaveJSProperty('value', 'Heading\n\nitem')
 })
